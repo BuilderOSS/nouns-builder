@@ -19,6 +19,7 @@ export enum TransactionType {
   RELEASE_ESCROW_MILESTONE = 'release-escrow-milestone',
   MIGRATION = 'migration',
   WALLET_CONNECT = 'wallet-connect',
+  ADD_ARTWORK = 'add-artwork',
 }
 
 export interface TransactionTypeProps {
@@ -104,6 +105,12 @@ export const TRANSACTION_TYPES = {
   [TransactionType.REPLACE_ARTWORK]: {
     title: 'Replace Artwork',
     subTitle: 'Create a proposal to replace your artwork',
+    icon: 'brush',
+    iconBackdrop: 'rgba(236, 113, 75, 0.1)',
+  },
+  [TransactionType.ADD_ARTWORK]: {
+    title: 'Add Artwork',
+    subTitle: 'Create a proposal to add new artwork',
     icon: 'brush',
     iconBackdrop: 'rgba(236, 113, 75, 0.1)',
   },
