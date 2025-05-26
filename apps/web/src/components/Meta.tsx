@@ -32,7 +32,9 @@ export const Meta: React.FC<MetaProps> = ({
   const m = {
     title,
     type,
-    description: description ?? 'Unlock the possibilities of collective creation. Start with a vision. Start a DAO. All onchain.',
+    description:
+      description ??
+      'Unlock the possibilities of collective creation. Start with a vision. Start a DAO. All onchain.',
     version: 'next',
     url: `${baseUrl}${slug}`,
     imageUrl: farcaster?.image ?? image ?? `${baseUrl}/social-preview.jpg`,
@@ -48,7 +50,6 @@ export const Meta: React.FC<MetaProps> = ({
     },
   }
 
-
   return (
     <Head>
       <title>{`Nouns Builder | ${title}`}</title>
@@ -56,12 +57,7 @@ export const Meta: React.FC<MetaProps> = ({
       <meta property="og:type" content={type} />
       <meta property="og:url" content={m.url} />
       <meta property="og:image" content={m.imageUrl} />
-      <meta
-        property="og:description"
-        content={
-          m.description
-        }
-      />
+      <meta property="og:description" content={m.description} />
       {PUBLIC_IS_TESTNET && <meta name="robots" content="noindex" />}
 
       <meta name="twitter:card" content="summary_large_image" />
@@ -69,12 +65,7 @@ export const Meta: React.FC<MetaProps> = ({
       <meta name="twitter:creator" content="@nounsbuilder" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:url" content={m.url} />
-      <meta
-        name="twitter:description"
-        content={
-          m.description
-        }
-      />
+      <meta name="twitter:description" content={m.description} />
       <meta name="twitter:image" content={m.imageUrl} />
 
       <meta name="fc:frame" content={`${JSON.stringify(m)}`} />

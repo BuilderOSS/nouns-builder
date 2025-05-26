@@ -1,13 +1,20 @@
 const { createVanillaExtractPlugin } = require('@vanilla-extract/next-plugin')
-const withVanillaExtract = createVanillaExtractPlugin()
 const { withSentryConfig } = require('@sentry/nextjs')
+const createBundleAnalyzerPlugin = require('@next/bundle-analyzer')
 
 const { NEXT_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT } = process.env
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const basicConfig = {
   reactStrictMode: true,
-  transpilePackages: ['ipfs-service', 'analytics', 'blocklist', '@smartinvoicexyz/types', '@farcaster/frame-sdk', '@farcaster/frame-wagmi-connector'],
+  transpilePackages: [
+    'ipfs-service',
+    'analytics',
+    'blocklist',
+    '@smartinvoicexyz/types',
+    '@farcaster/frame-sdk',
+    '@farcaster/frame-wagmi-connector',
+  ],
   env: {
     ETHERSCAN_API_KEY: process.env.ETHERSCAN_API_KEY,
   },
@@ -49,19 +56,20 @@ const nextConfig = {
     ],
   },
   async redirects() {
-    const network =
-      process.env.NEXT_PUBLIC_NETWORK_TYPE === 'testnet' ? 'sepolia' : 'ethereum'
-
     return [
       {
         source: '/why',
         destination: '/about',
         permanent: true,
       },
+    ]
+  },
+
+  async rewrites() {
+    return [
       {
-        source: '/dao/:address(0x[0-9a-fA-F]{40})/:slug*',
-        destination: `/dao/${network}/:address/:slug*`,
-        permanent: true,
+        source: '/.well-known/farcaster.json',
+        destination: '/api/farcaster',
       },
     ]
   },
@@ -106,13 +114,18 @@ const sentryWebpackPluginOptions = {
   urlPrefix: '~/_next',
 }
 
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
+const sentryEnabled = NEXT_PUBLIC_SENTRY_DSN && SENTRY_ORG && SENTRY_PROJECT
+
+const withVanillaExtract = createVanillaExtractPlugin()
+const withVanillaExtractConfig = withVanillaExtract(basicConfig)
+
+const withBundleAnalyzer = createBundleAnalyzerPlugin({
   enabled: process.env.ANALYZE === 'true',
 })
+const withBundleAnalyzerConfig = withBundleAnalyzer(withVanillaExtractConfig)
 
-const sentryEnabled = NEXT_PUBLIC_SENTRY_DSN && SENTRY_ORG && SENTRY_PROJECT
-const enhancedConfig = withBundleAnalyzer(withVanillaExtract(nextConfig))
+const config = sentryEnabled
+  ? withSentryConfig(withBundleAnalyzerConfig, sentryWebpackPluginOptions)
+  : withBundleAnalyzerConfig
 
-module.exports = sentryEnabled
-  ? withSentryConfig(enhancedConfig, sentryWebpackPluginOptions)
-  : enhancedConfig
+module.exports = config

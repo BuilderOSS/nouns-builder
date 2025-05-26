@@ -302,9 +302,13 @@ export const ReviewProposalForm = ({
 
       <AnimatedModal
         open={proposing}
-        close={() => {
-          setProposing(false)
-        }}
+        close={
+          proposing
+            ? undefined
+            : () => {
+                setProposing(false)
+              }
+        }
       >
         <SuccessModalContent
           title={'Proposal submitting'}

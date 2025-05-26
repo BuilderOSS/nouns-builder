@@ -77,55 +77,47 @@ export function useFrame() {
   }, [])
 
   useEffect(() => {
+    // TODO: Load SDK only for mini app clients
     const load = async () => {
       const context = await sdk.context
       setContext(context)
       setIsSDKLoaded(true)
 
-      // Set up event listeners
       sdk.on('frameAdded', ({ notificationDetails }) => {
-        console.log('Frame added', notificationDetails)
         setAdded(true)
         setNotificationDetails(notificationDetails ?? null)
         setLastEvent('Frame added')
       })
 
       sdk.on('frameAddRejected', ({ reason }) => {
-        console.log('Frame add rejected', reason)
         setAdded(false)
         setLastEvent(`Frame add rejected: ${reason}`)
       })
 
       sdk.on('frameRemoved', () => {
-        console.log('Frame removed')
         setAdded(false)
         setLastEvent('Frame removed')
       })
 
       sdk.on('notificationsEnabled', ({ notificationDetails }) => {
-        console.log('Notifications enabled', notificationDetails)
         setNotificationDetails(notificationDetails ?? null)
         setLastEvent('Notifications enabled')
       })
 
       sdk.on('notificationsDisabled', () => {
-        console.log('Notifications disabled')
         setNotificationDetails(null)
         setLastEvent('Notifications disabled')
       })
 
       sdk.on('primaryButtonClicked', () => {
-        console.log('Primary button clicked')
         setLastEvent('Primary button clicked')
       })
 
       // Call ready action
-      console.log('Calling ready')
       sdk.actions.ready({})
     }
 
     if (sdk && !isSDKLoaded) {
-      console.log('Calling load')
       setIsSDKLoaded(true)
       load()
       return () => {
