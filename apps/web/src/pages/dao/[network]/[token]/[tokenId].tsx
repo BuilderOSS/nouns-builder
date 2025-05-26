@@ -120,9 +120,8 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     // reading experience for social embeds. For this, we'll check if the
     // description is markdown and if so, we'll provide a generic description
     if (isMarkdown) {
-      return `${
-        name || 'This DAO'
-      } was created on Nouns Builder. Please click the link to see more.`
+      return `${name || 'This DAO'
+        } was created on Nouns Builder. Please click the link to see more.`
     }
     // remove line breaks and formatting from og description
     const cleanDesc = description.replace(/(\r\n|\n|\r|\t|\v|\f|\\n)/gm, '')
@@ -134,7 +133,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   return (
     <Flex direction="column" pb="x30">
       <Meta
-        title={name || ''}
+        title={name}
         type={`${name}:nft`}
         image={ogImageURL}
         slug={url}
@@ -267,9 +266,8 @@ export const getServerSideProps: GetServerSideProps = async ({
       treasuryAddress,
     }
 
-    const ogImageURL = `${protocol}://${
-      req.headers.host
-    }/api/og/dao?data=${encodeURIComponent(JSON.stringify(daoOgMetadata))}`
+    const ogImageURL = `${protocol}://${req.headers.host
+      }/api/og/dao?data=${encodeURIComponent(JSON.stringify(daoOgMetadata))}`
 
     const { maxAge, swr } = CACHE_TIMES.TOKEN_INFO
     res.setHeader(
