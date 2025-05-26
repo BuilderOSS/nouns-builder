@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import React from 'react'
 
+import { BASE_URL } from 'src/constants/baseUrl'
 import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 import { AddressType, Chain } from 'src/typings'
-import { getBaseUrl } from 'src/utils/baseUrl'
 
 interface MetaProps {
   title: string
@@ -27,8 +27,6 @@ export const Meta: React.FC<MetaProps> = ({
   description,
   farcaster,
 }) => {
-  const baseUrl = getBaseUrl()
-
   const m = {
     title,
     type,
@@ -36,15 +34,15 @@ export const Meta: React.FC<MetaProps> = ({
       description ??
       'Unlock the possibilities of collective creation. Start with a vision. Start a DAO. All onchain.',
     version: 'next',
-    url: `${baseUrl}${slug}`,
-    imageUrl: farcaster?.image ?? image ?? `${baseUrl}/social-preview.jpg`,
+    url: `${BASE_URL}${slug}`,
+    imageUrl: farcaster?.image ?? image ?? `${BASE_URL}/social-preview.jpg`,
     button: {
       title,
       action: {
         type: 'launch_frame',
         name: 'Nouns Builder',
-        url: `${baseUrl}${slug}`,
-        splashImageUrl: `${baseUrl}/noggles-square.png`,
+        url: `${BASE_URL}${slug}`,
+        splashImageUrl: `${BASE_URL}/noggles-square.png`,
         splashBackgroundColor: '#ffffff',
       },
     },

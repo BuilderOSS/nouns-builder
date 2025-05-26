@@ -9,7 +9,7 @@ import { VercelAnalytics } from 'analytics'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
 import NextNProgress from 'nextjs-progressbar'
-import { ReactElement, ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
 

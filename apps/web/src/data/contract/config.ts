@@ -11,19 +11,20 @@ import {
 } from '@rainbow-me/rainbowkit/wallets'
 import { CreateConnectorFn, createConfig } from 'wagmi'
 
+import { BASE_URL } from 'src/constants/baseUrl'
 import { PUBLIC_WALLLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
 
 import { chains, transports } from './chains'
 
 const appName = 'Nouns Builder'
 const appDescription = 'Nouns Builder'
-const appUrl = 'https://nouns.build'
+const appUrl = BASE_URL
 const appIcon = ''
 
 const metadata = {
   name: appName,
   description: appDescription ?? appName,
-  url: appUrl ?? (typeof window !== 'undefined' ? window.location.origin : ''),
+  url: appUrl,
   icons: [...(appIcon ? [appIcon] : [])],
 }
 

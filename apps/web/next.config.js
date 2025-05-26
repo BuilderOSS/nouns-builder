@@ -2,7 +2,21 @@ const { createVanillaExtractPlugin } = require('@vanilla-extract/next-plugin')
 const { withSentryConfig } = require('@sentry/nextjs')
 const createBundleAnalyzerPlugin = require('@next/bundle-analyzer')
 
-const { NEXT_PUBLIC_SENTRY_DSN, SENTRY_ORG, SENTRY_PROJECT } = process.env
+const {
+  NEXT_PUBLIC_SENTRY_DSN,
+  SENTRY_ORG,
+  SENTRY_PROJECT,
+  VERCEL_ENV = 'development',
+  VERCEL_URL,
+  VERCEL_PROJECT_PRODUCTION_URL,
+} = process.env
+
+const protocol = VERCEL_ENV === 'development' ? 'http' : 'https'
+const url = VERCEL_URL ?? 'localhost:3000'
+const productionUrl = VERCEL_PROJECT_PRODUCTION_URL ?? url
+
+const baseUrl =
+  VERCEL_ENV === 'production' ? `${protocol}://${productionUrl}` : `${protocol}://${url}`
 
 /** @type {import('next').NextConfig} */
 const basicConfig = {
@@ -17,6 +31,7 @@ const basicConfig = {
   ],
   env: {
     ETHERSCAN_API_KEY: process.env.ETHERSCAN_API_KEY,
+    BASE_URL: baseUrl,
   },
   images: {
     dangerouslyAllowSVG: true,
@@ -64,7 +79,6 @@ const basicConfig = {
       },
     ]
   },
-
   async rewrites() {
     return [
       {

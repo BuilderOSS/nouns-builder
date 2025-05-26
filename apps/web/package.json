@@ -12,8 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "codegen": "graphql-codegen",
-    "generate-abis": "node ./scripts/generate-abis.js",
-    "dev:mini-app": "node ./scripts/dev-mini-app.js"
+    "generate-abis": "node ./scripts/generate-abis.js"
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^2.7.0",

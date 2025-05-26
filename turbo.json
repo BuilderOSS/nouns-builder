@@ -24,7 +24,8 @@
     "TENDERLY_PROJECT",
     "TENDERLY_ACCESS_KEY",
     "NODE_ENV",
-    "VERCEL_PROJECT_PRODUCTION_URL"
+    "VERCEL_PROJECT_PRODUCTION_URL",
+    "BASE_URL"
   ],
   "tasks": {
     "build": {

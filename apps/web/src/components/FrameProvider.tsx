@@ -1,5 +1,3 @@
-'use client'
-
 import sdk, {
   AddMiniApp,
   type Context,
@@ -141,10 +139,6 @@ export function useFrame() {
 
 export function FrameProvider({ children }: { children: React.ReactNode }) {
   const frameContext = useFrame()
-
-  if (!frameContext.isSDKLoaded) {
-    return <div>Loading...</div>
-  }
 
   return <FrameContext.Provider value={frameContext}>{children}</FrameContext.Provider>
 }
