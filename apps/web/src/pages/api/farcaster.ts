@@ -13,6 +13,16 @@ const TESTNET_ACCOUNT_ASSOCIATION = {
     'MHhjMTgyMmEyNzBlNzMzNTQ5MTAwNzI3ZTkzMmY4N2M3MDVlMzZmZjkzMGNhZDE0M2Y3ODEzMTQzMWFkMDI5YWVkNTIxYTc0MDY0ZDY0Y2RjYzJlYzgyMGQ3NjkyOTY0ZjEwMGMyM2ExOTQ1YTE0ODVmOWYxNDBhNDdiZWI0MmE3MTFj',
 }
 
+const MAINNET_ACCOUNT_ASSOCIATION = {
+  // nouns.build
+  // by dan13ram.eth
+  header:
+    'eyJmaWQiOjM5NzE0MywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDZGRGRBRjE5RjNERjJiMWNCYTE2YTM1MkIzZTJiQzkwQTVEMWU2OTEifQ',
+  payload: 'eyJkb21haW4iOiJub3Vucy5idWlsZCJ9',
+  signature:
+    'MHhkZTg2N2RkMGVjYTI4MzZjZjc0YTczMDNiYTg3NTdiYjRkM2EzYzcxODRmM2I1ZDAyZTNhYWIzM2RmY2U4NjljNDIyYmY3ZDM1MzY5NTc0NjY2YjE0OTYxMjNkYTc3NTlkODBmZWQ3YjM3MTY5NDM0Y2JmYWFiMzNkOWM0YjQ4MjFi',
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.status(405).end()
@@ -34,9 +44,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     primaryCategory: 'social',
   }
 
-  const accountAssociation = PUBLIC_IS_TESTNET ? TESTNET_ACCOUNT_ASSOCIATION : null
+  const accountAssociation = PUBLIC_IS_TESTNET
+    ? TESTNET_ACCOUNT_ASSOCIATION
+    : MAINNET_ACCOUNT_ASSOCIATION
 
-  const farcaster = accountAssociation ? { frame, accountAssociation } : { frame }
+  const isProduction = process.env.VERCEL_ENV === 'production'
+
+  const farcaster =
+    isProduction && accountAssociation ? { frame, accountAssociation } : { frame }
 
   res.setHeader('Content-Type', 'application/json')
   res.status(200).json(farcaster)
