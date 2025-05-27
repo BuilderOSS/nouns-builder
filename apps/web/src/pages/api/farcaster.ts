@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { BASE_URL } from 'src/constants/baseUrl'
+import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -8,9 +9,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return
   }
 
+  const name = PUBLIC_IS_TESTNET ? 'Testnet Nouns Builder' : 'Nouns Builder'
+
   const frame = {
     version: '1',
-    name: 'Nouns Builder',
+    name,
     description:
       'Unlock the possibilities of collective creation. Start with a vision. Start a DAO. All onchain.',
     iconUrl: `${BASE_URL}/builder-avatar-circle.png`,

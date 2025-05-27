@@ -27,6 +27,8 @@ export const Meta: React.FC<MetaProps> = ({
   description,
   farcaster,
 }) => {
+  const name = PUBLIC_IS_TESTNET ? 'Testnet Nouns Builder' : 'Nouns Builder'
+
   const m = {
     title,
     type,
@@ -40,7 +42,7 @@ export const Meta: React.FC<MetaProps> = ({
       title,
       action: {
         type: 'launch_frame',
-        name: 'Nouns Builder',
+        name,
         url: `${BASE_URL}${slug}`,
         splashImageUrl: `${BASE_URL}/noggles-square.png`,
         splashBackgroundColor: '#ffffff',
@@ -50,7 +52,7 @@ export const Meta: React.FC<MetaProps> = ({
 
   return (
     <Head>
-      <title>{`Nouns Builder | ${title}`}</title>
+      <title>{`${name} | ${title}`}</title>
       <meta property="og:title" content={title} />
       <meta property="og:type" content={type} />
       <meta property="og:url" content={m.url} />
