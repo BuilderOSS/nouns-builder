@@ -3,6 +3,18 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { BASE_URL } from 'src/constants/baseUrl'
 import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 
+const TESTNET_ACCOUNT_ASSOCIATION = {
+  // testnet.nouns.build
+  // by dan13ram.eth
+  accountAssociation: {
+    header:
+      'eyJmaWQiOjM5NzE0MywidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDZGRGRBRjE5RjNERjJiMWNCYTE2YTM1MkIzZTJiQzkwQTVEMWU2OTEifQ',
+    payload: 'eyJkb21haW4iOiJ0ZXN0bmV0Lm5vdW5zLmJ1aWxkIn0',
+    signature:
+      'MHhjMTgyMmEyNzBlNzMzNTQ5MTAwNzI3ZTkzMmY4N2M3MDVlMzZmZjkzMGNhZDE0M2Y3ODEzMTQzMWFkMDI5YWVkNTIxYTc0MDY0ZDY0Y2RjYzJlYzgyMGQ3NjkyOTY0ZjEwMGMyM2ExOTQ1YTE0ODVmOWYxNDBhNDdiZWI0MmE3MTFj',
+  },
+}
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.status(405).end()
@@ -24,6 +36,8 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     primaryCategory: 'social',
   }
 
+  const accountAssociation = PUBLIC_IS_TESTNET ? TESTNET_ACCOUNT_ASSOCIATION : null
+
   res.setHeader('Content-Type', 'application/json')
-  res.status(200).json({ frame })
+  res.status(200).json({ frame, accountAssociation })
 }
