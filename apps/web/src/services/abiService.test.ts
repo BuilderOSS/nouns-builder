@@ -138,9 +138,9 @@ describe('abiService', () => {
     })
 
     it('checks redis for existing key in a proxy case', async () => {
-      process.env.PRIVATE_REDIS_CONNECTION_URI = 'something'
+      process.env.REDIS_URL = 'something'
 
-      const connection = new Redis(process.env.PRIVATE_REDIS_CONNECTION_URI)
+      const connection = new Redis(process.env.REDIS_URL)
 
       vi.mocked(connection.get).mockResolvedValue(JSON.stringify({ result: '[]' }))
 
