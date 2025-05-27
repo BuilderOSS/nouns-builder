@@ -134,7 +134,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   return (
     <Flex direction="column" pb="x30">
       <Meta
-        title={name || ''}
+        title={name}
         type={`${name}:nft`}
         image={ogImageURL}
         slug={url}

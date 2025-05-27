@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^2.7.0",
+    "@farcaster/frame-sdk": "^0.0.50",
+    "@farcaster/frame-wagmi-connector": "^0.0.39",
     "@farcaster/hub-nodejs": "^0.13.5",
     "@fontsource/inter": "5.2.5",
     "@fontsource/londrina-solid": "^5.2.5",
@@ -93,6 +95,7 @@
     "eslint": "8.57.1",
     "eslint-config-custom": "workspace:*",
     "jsdom": "^26.1.0",
+    "localtunnel": "^2.0.2",
     "tsconfig": "workspace:*",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",

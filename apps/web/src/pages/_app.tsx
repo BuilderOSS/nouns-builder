@@ -14,6 +14,7 @@ import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
 
 import { Disclaimer } from 'src/components/Disclaimer'
+import { FrameProvider } from 'src/components/FrameProvider'
 import { NetworkController } from 'src/components/NetworkController'
 import { config } from 'src/data/contract/config'
 import 'src/styles/globals.css'
@@ -42,6 +43,7 @@ type AppPropsWithLayout = AppProps & {
 function App({ Component, pageProps, err }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page)
   const fallback = pageProps?.fallback ?? {}
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
@@ -55,7 +57,9 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
               showOnShallow={false}
               options={{ showSpinner: false }}
             />
-            {getLayout(<Component {...pageProps} err={err} />)}
+            <FrameProvider>
+              {getLayout(<Component {...pageProps} err={err} />)}
+            </FrameProvider>
           </SWRConfig>
           <NetworkController.Mainnet>
             <VercelAnalytics />
