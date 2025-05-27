@@ -1,4 +1,5 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit'
+import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
+import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
   coinbaseWallet,
   injectedWallet,
@@ -8,18 +9,27 @@ import {
   safeWallet,
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets'
+import { CreateConnectorFn, createConfig } from 'wagmi'
 
+import { BASE_URL } from 'src/constants/baseUrl'
 import { PUBLIC_WALLLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
 
 import { chains, transports } from './chains'
 
-export const config = getDefaultConfig({
-  ssr: true,
-  appName: 'Nouns Builder',
-  projectId: PUBLIC_WALLLET_CONNECT_PROJECT_ID,
-  chains,
-  transports,
-  wallets: [
+const appName = 'Nouns Builder'
+const appDescription = 'Nouns Builder'
+const appUrl = BASE_URL
+const appIcon = ''
+
+const metadata = {
+  name: appName,
+  description: appDescription ?? appName,
+  url: appUrl,
+  icons: [...(appIcon ? [appIcon] : [])],
+}
+
+const rainbowConnectors = connectorsForWallets(
+  [
     {
       groupName: 'Popular',
       wallets: [
@@ -33,4 +43,24 @@ export const config = getDefaultConfig({
       ],
     },
   ],
+  {
+    projectId: PUBLIC_WALLLET_CONNECT_PROJECT_ID,
+    appName,
+    appDescription,
+    appUrl,
+    appIcon,
+    walletConnectParameters: { metadata },
+  }
+)
+
+const connectors: CreateConnectorFn[] = [
+  ...rainbowConnectors,
+  miniAppConnector as unknown as CreateConnectorFn,
+]
+
+export const config = createConfig({
+  ssr: true,
+  chains,
+  transports,
+  connectors,
 })

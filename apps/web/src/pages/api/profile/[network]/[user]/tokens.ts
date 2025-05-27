@@ -2,11 +2,11 @@ import axios from 'axios'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getAddress } from 'viem'
 
+import { BASE_URL } from 'src/constants/baseUrl'
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
 import { MyDaosResponse } from 'src/data/subgraph/requests/daoQuery'
 import { TokensQueryResponse, tokensQuery } from 'src/data/subgraph/requests/tokensQuery'
 import { NotFoundError } from 'src/services/errors'
-import { getBaseUrl } from 'src/utils/baseUrl'
 
 export interface UserTokensResponse {
   tokens?: TokensQueryResponse
@@ -15,7 +15,6 @@ export interface UserTokensResponse {
 
 export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { user, page, network } = req.query
-  const baseUrl = getBaseUrl()
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
 
@@ -31,7 +30,7 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     const [daos, tokens] = await Promise.all([
-      axios.get<MyDaosResponse>(`${baseUrl}/api/daos/${address}`).then((x) => x.data),
+      axios.get<MyDaosResponse>(`${BASE_URL}/api/daos/${address}`).then((x) => x.data),
       tokensQuery(chain.id, address, page ? parseInt(page as string) : undefined),
     ])
 
