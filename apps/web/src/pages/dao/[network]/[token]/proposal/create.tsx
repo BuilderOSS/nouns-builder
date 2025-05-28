@@ -64,7 +64,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     }
   }, [transactions, transactionType, setTransactionType])
 
-  const { address, isConnected } = useAccount()
+  const { address } = useAccount()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
@@ -109,7 +109,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
-  if (!isConnected)
+  if (!address)
     return (
       <Flex className={notFoundWrap}>Please connect your wallet to access this page</Flex>
     )

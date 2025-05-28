@@ -30,7 +30,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   const { query } = router
 
   const { addresses } = useDaoStore()
-  const { address, isConnected } = useAccount()
+  const { address } = useAccount()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
@@ -52,7 +52,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
-  if (!isConnected)
+  if (!address)
     return (
       <Flex className={notFoundWrap}>Please connect your wallet to access this page</Flex>
     )
