@@ -2,6 +2,7 @@ import { ImageResponse } from '@vercel/og'
 import { getFetchableUrls } from 'ipfs-service/src/gateway'
 import { NextRequest } from 'next/server'
 
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
@@ -97,6 +98,7 @@ export default async function handler(req: NextRequest) {
   if (!rawData) return new Response(undefined, { status: 400 })
 
   const data: ProposalOgMetadata = JSON.parse(rawData)
+  const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === data.chainId)
 
   const [ptRootRegularData, ptRootMediumData, ptRootBoldData] = await Promise.all([
     ptRootRegular,
@@ -160,6 +162,7 @@ export default async function handler(req: NextRequest) {
               height: '52px',
               width: '52px',
               borderRadius: '9999px',
+              marginRight: '10px',
             }}
           >
             {data.daoImage && (
@@ -170,7 +173,6 @@ export default async function handler(req: NextRequest) {
                   height: '52px',
                   width: '52px',
                   borderRadius: '9999px',
-                  marginRight: '10px',
                   objectFit: 'cover',
                   objectPosition: 'center',
                 }}
@@ -180,6 +182,39 @@ export default async function handler(req: NextRequest) {
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.daoName}</p>
           </div>
+          {chain && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                border: '2px solid #f2f2f2',
+                borderRadius: '8px',
+                padding: '0px 10px',
+                marginLeft: '10px',
+                height: '40px',
+              }}
+            >
+              <img
+                style={{
+                  height: 20,
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                  marginRight: '10px',
+                }}
+                src={process.env.BASE_URL + chain.icon}
+                alt={chain.name}
+              />
+              <p
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 500,
+                  padding: '0px',
+                }}
+              >
+                {chain.name}
+              </p>
+            </div>
+          )}
         </div>
         <div
           style={{
