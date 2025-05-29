@@ -1,7 +1,7 @@
 import { Box, BoxProps } from '@zoralabs/zord'
 import { useMemo } from 'react'
 
-import { gradientForAddress } from 'src/utils/gradient'
+import { bgForAddress } from 'src/utils/gradient'
 
 import { avatar, avatarVariants } from './Avatar.css'
 
@@ -20,16 +20,7 @@ export function Avatar({
   src,
   ...props
 }: AvatarProps) {
-  const background = useMemo(() => {
-    if (address && !src) {
-      const gradient = gradientForAddress(address)
-      return `radial-gradient(75.29% 75.29% at 64.96% 24.36%, ${gradient[0]} 15.62%, ${gradient[1]} 39.58%, ${gradient[2]} 72.92%, ${gradient[3]} 90.62%, ${gradient[4]} 100%)`
-    } else if (src) {
-      return `#FFFFFF`
-    } else {
-      return `transparent`
-    }
-  }, [address, src])
+  const background = useMemo(() => bgForAddress(address, src), [address, src])
 
   return (
     <Box

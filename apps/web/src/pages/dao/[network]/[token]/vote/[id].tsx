@@ -249,6 +249,8 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
     },
     daoName: name,
     daoImage: contractImage,
+    tokenAddress,
+    chainId: chain.id,
   }
 
   const propDates = await getPropDates(tokenAddress, chain.id, proposal.proposalId)
