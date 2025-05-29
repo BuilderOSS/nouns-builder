@@ -2,10 +2,11 @@ import { ImageResponse } from '@vercel/og'
 import { getFetchableUrls } from 'ipfs-service/src/gateway'
 import { NextRequest } from 'next/server'
 
-import { FallbackImage } from 'src/components/FallbackImage'
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
+import { CHAIN_ID } from 'src/typings'
+import { bgForAddress } from 'src/utils/gradient'
 
 export const config = {
   runtime: 'edge',
@@ -79,6 +80,8 @@ const ptRootBold = fetch(
 ).then((res) => res.arrayBuffer())
 
 export type ProposalOgMetadata = {
+  chainId: CHAIN_ID
+  tokenAddress: string
   daoName: string
   daoImage: string
   proposal: Pick<
@@ -148,18 +151,32 @@ export default async function handler(req: NextRequest) {
             left: 95,
           }}
         >
-          <FallbackImage
-            alt="user image"
-            srcList={getFetchableUrls(data.daoImage)}
+          <div
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: bgForAddress(data.tokenAddress ?? '', data.daoImage),
               height: '52px',
               width: '52px',
               borderRadius: '9999px',
-              marginRight: '10px',
-              objectFit: 'cover',
-              objectPosition: 'center',
             }}
-          />
+          >
+            {data.daoImage && (
+              <img
+                alt="user image"
+                src={getFetchableUrls(data.daoImage)?.[0]}
+                style={{
+                  height: '52px',
+                  width: '52px',
+                  borderRadius: '9999px',
+                  marginRight: '10px',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+              />
+            )}
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.daoName}</p>
           </div>

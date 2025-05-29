@@ -3,13 +3,14 @@ import { getFetchableUrls } from 'ipfs-service/src/gateway'
 import { NextRequest } from 'next/server'
 import { formatEther } from 'viem'
 
-import { FallbackImage } from 'src/components/FallbackImage'
 import { RPC_URL } from 'src/constants/rpc'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { CHAIN_ID } from 'src/typings'
+import { bgForAddress } from 'src/utils/gradient'
 import { formatCryptoVal } from 'src/utils/numbers'
 
 export type DaoOgMetadata = {
+  tokenAddress: string
   ownerCount: number
   proposalCount: number
   name: string | undefined
@@ -130,18 +131,32 @@ export default async function handler(req: NextRequest) {
           <p style={{ fontSize: '28px', color: '#808080' }}>nouns.build</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <FallbackImage
-            alt="user image"
-            srcList={getFetchableUrls(data.contractImage)}
+          <div
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: bgForAddress(data.tokenAddress ?? '', data.contractImage),
               height: '180px',
               width: '180px',
               borderRadius: '9999px',
-              marginRight: '50px',
-              objectFit: 'cover',
-              objectPosition: 'center',
             }}
-          />
+          >
+            {data.contractImage && (
+              <img
+                alt="user image"
+                src={getFetchableUrls(data.contractImage)?.[0]}
+                style={{
+                  height: '180px',
+                  width: '180px',
+                  borderRadius: '9999px',
+                  marginRight: '50px',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+              />
+            )}
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.name}</p>
             <div style={{ display: 'flex' }}>

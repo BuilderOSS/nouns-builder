@@ -265,6 +265,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       proposalCount,
       chainId: chain.id,
       treasuryAddress,
+      tokenAddress,
     }
 
     const ogImageURL = `${protocol}://${
