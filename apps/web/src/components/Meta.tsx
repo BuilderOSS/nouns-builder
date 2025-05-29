@@ -37,7 +37,7 @@ export const Meta: React.FC<MetaProps> = ({
       'Unlock the possibilities of collective creation. Start with a vision. Start a DAO. All onchain.',
     version: 'next',
     url: `${BASE_URL}${slug}`,
-    imageUrl: farcaster?.image ?? image ?? `${BASE_URL}/social-preview.jpg`,
+    imageUrl: image ?? `${BASE_URL}/social-preview.jpg`,
     button: {
       title,
       action: {
@@ -78,7 +78,7 @@ export const Meta: React.FC<MetaProps> = ({
           <meta property="eth:nft:creator_address" content={farcaster.contractAddress} />
           <meta property="eth:nft:schema" content="erc721" />
           <meta property="eth:nft:chain" content={farcaster.chain.slug} />
-          <meta property="eth:nft:media_url" content={m.imageUrl} />
+          <meta property="eth:nft:media_url" content={farcaster.image} />
         </>
       )}
     </Head>

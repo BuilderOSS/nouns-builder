@@ -3,13 +3,15 @@ import { getFetchableUrls } from 'ipfs-service/src/gateway'
 import { NextRequest } from 'next/server'
 import { formatEther } from 'viem'
 
-import { FallbackImage } from 'src/components/FallbackImage'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
 import { RPC_URL } from 'src/constants/rpc'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { CHAIN_ID } from 'src/typings'
+import { bgForAddress } from 'src/utils/gradient'
 import { formatCryptoVal } from 'src/utils/numbers'
 
 export type DaoOgMetadata = {
+  tokenAddress: string
   ownerCount: number
   proposalCount: number
   name: string | undefined
@@ -65,6 +67,7 @@ export default async function handler(req: NextRequest) {
   if (!rawData) return new Response(undefined, { status: 400 })
 
   const data: DaoOgMetadata = JSON.parse(rawData)
+  const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === data.chainId)
 
   const [ptRootRegularData, ptRootMediumData, ptRootBoldData] = await Promise.all([
     ptRootRegular,
@@ -72,7 +75,7 @@ export default async function handler(req: NextRequest) {
     ptRootBold,
   ])
 
-  const daoDataWithLabel = (label: string, data: string) => {
+  const daoDataWithLabel = (label: string, data: string | React.ReactElement) => {
     return (
       <div
         style={{
@@ -88,7 +91,11 @@ export default async function handler(req: NextRequest) {
         }}
       >
         <p style={{ marginBottom: 10, fontSize: '16px', color: '#808080' }}>{label}</p>
-        <p style={{ fontSize: '28px', fontWeight: 700, marginTop: 0 }}>{data}</p>
+        {typeof data === 'string' ? (
+          <p style={{ fontSize: '28px', fontWeight: 700, marginTop: 0 }}>{data}</p>
+        ) : (
+          data
+        )}
       </div>
     )
   }
@@ -130,20 +137,41 @@ export default async function handler(req: NextRequest) {
           <p style={{ fontSize: '28px', color: '#808080' }}>nouns.build</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <FallbackImage
-            alt="user image"
-            srcList={getFetchableUrls(data.contractImage)}
+          <div
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: bgForAddress(data.tokenAddress ?? '', data.contractImage),
               height: '180px',
               width: '180px',
               borderRadius: '9999px',
-              marginRight: '50px',
-              objectFit: 'cover',
-              objectPosition: 'center',
+              marginRight: '40px',
             }}
-          />
+          >
+            {data.contractImage && (
+              <img
+                alt="user image"
+                src={getFetchableUrls(data.contractImage)?.[0]}
+                style={{
+                  height: '180px',
+                  width: '180px',
+                  borderRadius: '9999px',
+                  objectFit: 'cover',
+                  objectPosition: 'center',
+                }}
+              />
+            )}
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.name}</p>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.name}</p>
+            </div>
             <div style={{ display: 'flex' }}>
               {daoDataWithLabel(
                 'Treasury',
@@ -155,6 +183,38 @@ export default async function handler(req: NextRequest) {
                 data.totalSupply ? data.totalSupply.toString() : '0'
               )}
               {daoDataWithLabel('Proposals', data.proposalCount.toString())}
+
+              {chain
+                ? daoDataWithLabel(
+                    'Chain',
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        marginTop: '-16px',
+                      }}
+                    >
+                      <img
+                        style={{
+                          height: 24,
+                          objectFit: 'cover',
+                          objectPosition: 'center',
+                          marginRight: '10px',
+                        }}
+                        src={process.env.BASE_URL + chain.icon}
+                        alt={chain.name}
+                      />
+                      <p
+                        style={{
+                          fontSize: '28px',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {chain.name}
+                      </p>
+                    </div>
+                  )
+                : null}
             </div>
           </div>
         </div>

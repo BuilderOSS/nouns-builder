@@ -193,6 +193,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
   return {
     props: {
       addresses,
+      chainId: chain.id,
     },
   }
 }
