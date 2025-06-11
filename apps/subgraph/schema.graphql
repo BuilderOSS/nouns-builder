@@ -26,6 +26,7 @@ type DAO @entity {
 type DAOTokenOwner @entity {
   id: ID!
   owner: Bytes!
+  delegate: Bytes!
   dao: DAO!
   daoTokenCount: Int!
   daoTokens: [Token!]! @derivedFrom(field: "ownerInfo")

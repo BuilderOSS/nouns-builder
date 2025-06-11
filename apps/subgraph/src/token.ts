@@ -1,5 +1,5 @@
 import { DAO, DAOTokenOwner, Token } from '../generated/schema'
-import { Transfer as TransferEvent } from '../generated/templates/Token/Token'
+import { Transfer as TransferEvent, DelegateChanged as DelegateChangedEvent } from '../generated/templates/Token/Token'
 import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { setTokenMetadata } from './utils/setTokenMetadata'
 import { Bytes } from '@graphprotocol/graph-ts'
@@ -7,14 +7,32 @@ import { store } from '@graphprotocol/graph-ts'
 
 let ADDRESS_ZERO = Bytes.fromHexString('0x0000000000000000000000000000000000000000')
 
+export function handleDelegateChanged(event: DelegateChangedEvent): void {
+  let tokenOwnerId = `${event.address.toHexString()}:${event.params.delegator.toHexString()}`
+
+  let tokenOwner = DAOTokenOwner.load(tokenOwnerId)
+  if (!tokenOwner) {
+    tokenOwner = new DAOTokenOwner(tokenOwnerId)
+    tokenOwner.daoTokenCount = 0
+    tokenOwner.dao = event.address.toHexString()
+    tokenOwner.owner = event.params.delegator
+  }
+
+  tokenOwner.delegate = event.params.to
+  tokenOwner.save()
+}
+
 export function handleTransfer(event: TransferEvent): void {
   let tokenId = `${event.address.toHexString()}:${event.params.tokenId.toString()}`
   let token = Token.load(tokenId)
   let dao = DAO.load(event.address.toHexString())!
 
+  let tokenContract = TokenContract.bind(event.address)
+  let fromDelegate = tokenContract.delegates(event.params.from)
+  let toDelegate = tokenContract.delegates(event.params.to)
+
   // Handle loading token data on first transfer
   if (!token) {
-    let tokenContract = TokenContract.bind(event.address)
 
     token = new Token(tokenId)
 
@@ -48,6 +66,7 @@ export function handleTransfer(event: TransferEvent): void {
       dao.ownerCount = dao.ownerCount + 1
     } else toOwner.daoTokenCount = toOwner.daoTokenCount + 1
 
+    toOwner.delegate = toDelegate
     toOwner.save()
   } else {
     // Handle burning
@@ -63,6 +82,7 @@ export function handleTransfer(event: TransferEvent): void {
       dao.ownerCount = dao.ownerCount - 1
     } else {
       fromOwner.daoTokenCount = fromOwner.daoTokenCount - 1
+      fromOwner.delegate = fromDelegate
       fromOwner.save()
     }
   }
