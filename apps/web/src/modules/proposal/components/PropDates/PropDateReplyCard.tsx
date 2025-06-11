@@ -19,7 +19,7 @@ export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
         borderWidth="normal"
         borderStyle="solid"
         p="x4"
-        style={{ width: 'fit-content', minWidth: 0 }}
+        style={{ width: '100%', minWidth: 0 }}
       >
         <Flex align="center" gap="x2" mb="x1">
           <Text variant={isMobile ? 'label-sm' : 'label-md'} fontWeight="display">
