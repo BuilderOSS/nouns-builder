@@ -1,10 +1,16 @@
 import { Box, Flex, Text } from '@zoralabs/zord'
+import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
+import remarkGfm from 'remark-gfm'
 
 import { Avatar } from 'src/components/Avatar'
 import { type PropDate } from 'src/data/eas/requests/getPropDates'
 import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores/useLayoutStore'
 import { walletSnippet } from 'src/utils/helpers'
+
+import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 
 export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
   const { ensName, ensAvatar } = useEnsData(reply.attester)
@@ -18,8 +24,9 @@ export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
         borderColor="border"
         borderWidth="normal"
         borderStyle="solid"
-        p="x4"
-        style={{ width: 'fit-content', minWidth: 0 }}
+        pt="x4"
+        px="x4"
+        style={{ width: '100%', minWidth: 0 }}
       >
         <Flex align="center" gap="x2" mb="x1">
           <Text variant={isMobile ? 'label-sm' : 'label-md'} fontWeight="display">
@@ -29,17 +36,14 @@ export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
             • {new Date(reply.timeCreated * 1000).toLocaleDateString()}
           </Text>
         </Flex>
-        <Text
-          variant={isMobile ? 'paragraph-sm' : 'paragraph-md'}
-          textAlign={'left'}
-          style={{
-            fontWeight: 400,
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-          }}
-        >
-          {reply.message}
-        </Text>
+        <Box className={messageStyle}>
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+            remarkPlugins={[remarkGfm]}
+          >
+            {reply.message}
+          </ReactMarkdown>
+        </Box>
       </Box>
     </Flex>
   )

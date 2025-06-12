@@ -6,7 +6,7 @@ import { useBridgeModal } from 'src/hooks/useBridgeModal'
 import { useChainStore } from 'src/stores/useChainStore'
 
 interface ContractButtonProps extends ButtonProps {
-  handleClick: (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+  handleClick?: (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
 }
 
 export const ContractButton = ({
@@ -30,14 +30,23 @@ export const ContractButton = ({
   const handleClickWithValidation = (
     e?: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
+    e?.preventDefault()
+
     if (!userAddress) return openConnectModal?.()
     if (canUserBridge && userBalance?.decimals === 0) return openBridgeModal()
     if (userChain?.id !== appChain.id) return handleSwitchChain()
-    handleClick(e)
+
+    handleClick?.(e)
+
+    // Submit the form manually if all checks pass
+    const form = e?.currentTarget?.form
+    if (form) {
+      form.requestSubmit() // Modern way to trigger a form submission
+    }
   }
 
   return (
-    <Button onClick={handleClickWithValidation} {...rest}>
+    <Button type="button" onClick={handleClickWithValidation} {...rest}>
       {children}
     </Button>
   )

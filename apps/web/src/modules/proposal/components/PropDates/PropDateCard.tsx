@@ -1,5 +1,9 @@
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Box, Button, Flex, Text } from '@zoralabs/zord'
+import ReactMarkdown from 'react-markdown'
+import rehypeRaw from 'rehype-raw'
+import rehypeSanitize from 'rehype-sanitize'
+import remarkGfm from 'remark-gfm'
 
 import { Avatar } from 'src/components/Avatar'
 import { type PropDate } from 'src/data/eas/requests/getPropDates'
@@ -7,6 +11,7 @@ import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores/useLayoutStore'
 import { walletSnippet } from 'src/utils/helpers'
 
+import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 import { PropDateReplyCard } from './PropDateReplyCard'
 
 export const PropDateCard = ({
@@ -82,18 +87,19 @@ export const PropDateCard = ({
       </Flex>
 
       {propDate.message && (
-        <Box borderRadius={'curved'} p={'x4'} backgroundColor={'background2'}>
-          <Text
-            variant={isMobile ? 'paragraph-sm' : 'paragraph-md'}
-            textAlign={'left'}
-            style={{
-              fontWeight: 400,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word',
-            }}
+        <Box
+          borderRadius={'curved'}
+          pt="x4"
+          px="x4"
+          backgroundColor={'background2'}
+          className={messageStyle}
+        >
+          <ReactMarkdown
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+            remarkPlugins={[remarkGfm]}
           >
             {propDate.message}
-          </Text>
+          </ReactMarkdown>
         </Box>
       )}
       {/* Render replies if any */}
