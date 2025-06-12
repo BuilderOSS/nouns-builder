@@ -4,13 +4,14 @@ import Image from 'next/legacy/image'
 import React from 'react'
 import useSWR from 'swr'
 import { Address, formatEther } from 'viem'
-import { useBalance, useReadContracts } from 'wagmi'
+import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
 import { Avatar } from 'src/components/Avatar/Avatar'
 import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
 import SWR_KEYS from 'src/constants/swrKeys'
 import { metadataAbi, tokenAbi } from 'src/data/contract/abis'
 import { SDK } from 'src/data/subgraph/client'
+import { useDaoMembership } from 'src/hooks/useDaoMembership'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { about, daoInfo, daoName, statisticContent } from 'src/styles/About.css'
@@ -24,6 +25,7 @@ import { DaoDescription } from './DaoDescription'
 import { ExternalLinks } from './ExternalLinks'
 import { Founder } from './Founder'
 import { Statistic } from './Statistic'
+import { Membership } from './Membership'
 
 export const About: React.FC = () => {
   const {
@@ -31,6 +33,13 @@ export const About: React.FC = () => {
   } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const { isMobile } = useLayoutStore()
+  const { address } = useAccount()
+
+  const { data: membershipInfo } = useDaoMembership({
+    chainId: chain.id,
+    collectionAddress: token,
+    signerAddress: address,
+  })
 
   const tokenContractParams = {
     abi: tokenAbi,
@@ -133,7 +142,7 @@ export const About: React.FC = () => {
         <Statistic
           title="Chain"
           content={
-            <Flex align={'center'} mt={{ '@initial': 'x1', '@768': 'x3' }}>
+            <Flex align={'center'} mt={{ '@initial': 'x1', '@768': 'x3' }} pr="x2">
               <Box mr="x2">
                 <Image src={chain.icon} alt={chain.name} height={28} width={28} />
               </Box>
@@ -153,7 +162,12 @@ export const About: React.FC = () => {
       >
         <ExternalLinks links={{ website: parsedContractURI?.external_url }} />
       </Box>
-      <Text variant="heading-xs" mt="x16" style={{ fontWeight: 800 }}>
+      {!!membershipInfo && (
+        <Membership {...membershipInfo} totalSupply={Number(totalSupply)} />
+      )}
+      <Text variant="heading-xs"
+        mt={{ '@initial': 'x4', '@768': 'x10' }}
+        style={{ fontWeight: 800 }}>
         Founders
       </Text>
 

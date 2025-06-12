@@ -1,0 +1,9 @@
+query daosForUser($user: Bytes!, $first: Int, $skip: Int) {
+  daos(
+    where: { or: [{ voters_: { voter: $user } }, { owners_: { owner: $user } }] }
+    first: $first
+    skip: $skip
+  ) {
+    ...DAO
+  }
+}

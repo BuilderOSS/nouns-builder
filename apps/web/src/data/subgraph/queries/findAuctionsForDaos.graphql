@@ -1,4 +1,4 @@
-query myDaosPage($daos: [String!], $orderBy: Auction_orderBy, $skip: Int) {
+query findAuctionsForDaos($daos: [String!], $orderBy: Auction_orderBy, $skip: Int) {
   auctions(
     where: { settled: false, dao_in: $daos }
     orderBy: $orderBy
