@@ -89,7 +89,8 @@ export const PropDateCard = ({
       {propDate.message && (
         <Box
           borderRadius={'curved'}
-          p={'x4'}
+          pt="x4"
+          px="x4"
           backgroundColor={'background2'}
           className={messageStyle}
         >
@@ -103,12 +104,7 @@ export const PropDateCard = ({
       )}
       {/* Render replies if any */}
       {replies && replies.length > 0 && (
-        <Box
-          mt="x4"
-          ml="x4"
-          mr="x8"
-          style={{ borderLeft: '4px solid var(--colors-border)' }}
-        >
+        <Box mt="x4" ml="x4" style={{ borderLeft: '4px solid var(--colors-border)' }}>
           {replies.map((reply: PropDate) => (
             <PropDateReplyCard key={reply.txid} reply={reply} />
           ))}
