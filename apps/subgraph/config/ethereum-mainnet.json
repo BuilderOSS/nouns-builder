@@ -1,5 +1,5 @@
 {
-  "network": "ethereum",
+  "network": "mainnet",
   "manager": {
     "address": "0xd310a3041dfcf14def5ccbc508668974b5da7174",
     "startBlock": 15799000
