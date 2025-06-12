@@ -12,12 +12,14 @@ type DAO @entity {
   treasuryAddress: Bytes!
   governorAddress: Bytes!
   ownerCount: Int!
+  voterCount: Int!
   proposalCount: Int!
   totalAuctionSales: BigInt!
   auctionConfig: AuctionConfig!
   currentAuction: Auction
   metadataProperties: [MetadataProperty!]
   owners: [DAOTokenOwner!]! @derivedFrom(field: "dao")
+  voters: [DAOVoter!]! @derivedFrom(field: "dao")
   tokens: [Token!]! @derivedFrom(field: "dao")
   proposals: [Proposal!]! @derivedFrom(field: "dao")
   auctions: [Auction!]! @derivedFrom(field: "dao")
@@ -32,6 +34,14 @@ type DAOTokenOwner @entity {
   daoTokens: [Token!]! @derivedFrom(field: "ownerInfo")
 }
 
+type DAOVoter @entity {
+  id: ID!
+  voter: Bytes!
+  dao: DAO!
+  daoTokenCount: Int!
+  daoTokens: [Token!]! @derivedFrom(field: "voterInfo")
+}
+
 type Token @entity {
   id: ID!
   name: String!
@@ -41,6 +51,7 @@ type Token @entity {
   tokenId: BigInt!
   owner: Bytes!
   ownerInfo: DAOTokenOwner!
+  voterInfo: DAOVoter!
   mintedAt: BigInt!
   dao: DAO!
   auction: Auction @derivedFrom(field: "token")

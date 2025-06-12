@@ -1,4 +1,4 @@
-import { DAO, DAOTokenOwner, Token } from '../generated/schema'
+import { DAO, DAOTokenOwner, DAOVoter, Token } from '../generated/schema'
 import { Transfer as TransferEvent, DelegateChanged as DelegateChangedEvent } from '../generated/templates/Token/Token'
 import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { setTokenMetadata } from './utils/setTokenMetadata'
@@ -8,18 +8,57 @@ import { store } from '@graphprotocol/graph-ts'
 let ADDRESS_ZERO = Bytes.fromHexString('0x0000000000000000000000000000000000000000')
 
 export function handleDelegateChanged(event: DelegateChangedEvent): void {
-  let tokenOwnerId = `${event.address.toHexString()}:${event.params.delegator.toHexString()}`
+  let owner = event.params.delegator
+  let prevDelegate = event.params.from
+  let newDelegate = event.params.to
+
+  let tokenOwnerId = `${event.address.toHexString()}:${owner.toHexString()}`
 
   let tokenOwner = DAOTokenOwner.load(tokenOwnerId)
   if (!tokenOwner) {
     tokenOwner = new DAOTokenOwner(tokenOwnerId)
     tokenOwner.daoTokenCount = 0
     tokenOwner.dao = event.address.toHexString()
-    tokenOwner.owner = event.params.delegator
+    tokenOwner.owner = owner
   }
 
-  tokenOwner.delegate = event.params.to
+  tokenOwner.delegate = newDelegate
   tokenOwner.save()
+
+  let newDelegateVoterId = `${event.address.toHexString()}:${newDelegate.toHexString()}`
+
+  let newDelegateVoter = DAOVoter.load(newDelegateVoterId)
+  if (!newDelegateVoter) {
+    newDelegateVoter = new DAOVoter(newDelegateVoterId)
+    newDelegateVoter.daoTokenCount = 0
+    newDelegateVoter.dao = event.address.toHexString()
+    newDelegateVoter.voter = newDelegate
+  }
+
+  newDelegateVoter.daoTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
+  newDelegateVoter.save()
+
+  let prevDelegateVoterId = `${event.address.toHexString()}:${prevDelegate.toHexString()}`
+  let prevDelegateVoter = DAOVoter.load(prevDelegateVoterId)
+  if (prevDelegateVoter) {
+    let daoTokenCount = prevDelegateVoter.daoTokenCount - tokenOwner.daoTokenCount
+
+    if (daoTokenCount > 0) {
+      prevDelegateVoter.daoTokenCount = daoTokenCount
+      prevDelegateVoter.save()
+    } else {
+      store.remove('DAOVoter', prevDelegateVoterId)
+    }
+  }
+
+  let tokens = tokenOwner.daoTokens.load()
+
+  for (let i = 0; i < tokens.length; i++) {
+    let token = tokens[i]
+    token.voterInfo = newDelegateVoterId
+    token.save()
+  }
+
 }
 
 export function handleTransfer(event: TransferEvent): void {
@@ -33,7 +72,6 @@ export function handleTransfer(event: TransferEvent): void {
 
   // Handle loading token data on first transfer
   if (!token) {
-
     token = new Token(tokenId)
 
     let tokenURI = tokenContract.try_tokenURI(event.params.tokenId)
@@ -51,6 +89,7 @@ export function handleTransfer(event: TransferEvent): void {
 
   token.owner = event.params.to
   token.ownerInfo = `${event.address.toHexString()}:${event.params.to.toHexString()}`
+  token.voterInfo = `${event.address.toHexString()}:${toDelegate.toHexString()}`
 
   token.save()
 
@@ -73,17 +112,47 @@ export function handleTransfer(event: TransferEvent): void {
     dao.totalSupply = dao.totalSupply - 1
   }
 
+  if (toDelegate.notEqual(ADDRESS_ZERO)) {
+    let toVoterId = `${event.address.toHexString()}:${toDelegate.toHexString()}`
+    let toVoter = DAOVoter.load(toVoterId)
+    if (!toVoter) {
+      toVoter = new DAOVoter(toVoterId)
+      toVoter.daoTokenCount = 1
+      toVoter.dao = event.address.toHexString()
+      toVoter.voter = toDelegate
+      dao.voterCount = dao.voterCount + 1
+    } else toVoter.daoTokenCount = toVoter.daoTokenCount + 1
+
+    toVoter.save()
+  }
+
   // Handle loading from owner
   if (event.params.from.notEqual(ADDRESS_ZERO)) {
     let fromOwnerId = `${event.address.toHexString()}:${event.params.from.toHexString()}`
     let fromOwner = DAOTokenOwner.load(fromOwnerId)!
-    if (fromOwner.daoTokenCount === 1) {
-      store.remove('DAOTokenOwner', fromOwnerId)
-      dao.ownerCount = dao.ownerCount - 1
-    } else {
-      fromOwner.daoTokenCount = fromOwner.daoTokenCount - 1
-      fromOwner.delegate = fromDelegate
-      fromOwner.save()
+    if (fromOwner) {
+      if (fromOwner.daoTokenCount === 1) {
+        store.remove('DAOTokenOwner', fromOwnerId)
+        dao.ownerCount = dao.ownerCount - 1
+      } else {
+        fromOwner.daoTokenCount = fromOwner.daoTokenCount - 1
+        fromOwner.delegate = fromDelegate
+        fromOwner.save()
+      }
+    }
+  }
+
+  if (fromDelegate.notEqual(ADDRESS_ZERO)) {
+    let fromVoterId = `${event.address.toHexString()}:${fromDelegate.toHexString()}`
+    let fromVoter = DAOVoter.load(fromVoterId)!
+    if (fromVoter) {
+      if (fromVoter.daoTokenCount === 1) {
+        store.remove('DAOVoter', fromVoterId)
+        dao.voterCount = dao.voterCount - 1
+      } else {
+        fromVoter.daoTokenCount = fromVoter.daoTokenCount - 1
+        fromVoter.save()
+      }
     }
   }
 

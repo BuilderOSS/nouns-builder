@@ -44,6 +44,7 @@ export function handleDAODeployed(event: DAODeployedEvent): void {
   dao.projectURI = metadataContract.projectURI()
   dao.proposalCount = 0
   dao.ownerCount = 0
+  dao.voterCount = 0
   dao.totalAuctionSales = BigInt.fromI32(0)
   dao.auctionConfig = auctionConfig.id
 
