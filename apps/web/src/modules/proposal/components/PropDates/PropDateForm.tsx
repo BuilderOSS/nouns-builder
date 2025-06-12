@@ -1,7 +1,7 @@
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Box, Button, Flex, Select, Text } from '@zoralabs/zord'
-import { Form, Formik } from 'formik'
+import { Field, FieldProps, Form, Formik } from 'formik'
 import { useCallback, useMemo, useState } from 'react'
 import { type Hex, getAddress, zeroHash } from 'viem'
 import { useChainId, useConfig } from 'wagmi'
@@ -9,8 +9,9 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import * as Yup from 'yup'
 
 import { Avatar } from 'src/components/Avatar'
-import SmartInput from 'src/components/Fields/SmartInput'
+import { ContractButton } from 'src/components/ContractButton'
 import { defaultInputLabelStyle } from 'src/components/Fields/styles.css'
+import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import {
@@ -237,21 +238,25 @@ export const PropDateForm = ({
                 </Flex>
               )}
 
-              <SmartInput
-                {...formik.getFieldProps('message')}
-                type={'textarea'}
-                inputLabel={'Message'}
-                formik={formik}
-                id={'message'}
-                helperText={'Your propdate message'}
-                errorMessage={
-                  formik.touched.message && formik.errors.message
-                    ? formik.errors.message
-                    : undefined
-                }
-                placeholder={'Enter your message here...'}
-                disabled={isSubmitting}
-              />
+              <Field name="message" id={'message'}>
+                {({ field }: FieldProps) => {
+                  return (
+                    <MarkdownEditor
+                      disabled={isSubmitting}
+                      value={field.value}
+                      onChange={(value: string) =>
+                        formik?.setFieldValue(field.name, value)
+                      }
+                      inputLabel={'Message'}
+                      errorMessage={
+                        formik.touched.message && formik.errors.message
+                          ? formik.errors.message
+                          : undefined
+                      }
+                    />
+                  )
+                }}
+              </Field>
 
               {errorMessage && !isSubmitting && (
                 <Text color="negative" mt="x2">
@@ -263,14 +268,15 @@ export const PropDateForm = ({
                 <Button variant="ghost" onClick={closeForm} disabled={isSubmitting}>
                   Reset
                 </Button>
-                <Button
+                <ContractButton
                   variant="primary"
                   type="submit"
                   disabled={!formik.isValid || isSubmitting}
                   loading={isSubmitting}
+                  handleClick={() => undefined}
                 >
                   Submit Propdate
-                </Button>
+                </ContractButton>
               </Flex>
             </Flex>
           </Form>
