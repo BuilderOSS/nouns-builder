@@ -25,7 +25,6 @@ const Cancel: React.FC<{
       args={[props.proposalId as Address]}
       buttonText="Cancel Proposal"
       buttonClassName={proposalActionButtonVariants['cancel']}
-      variant="secondary"
       w={'100%'}
       {...props}
     />
