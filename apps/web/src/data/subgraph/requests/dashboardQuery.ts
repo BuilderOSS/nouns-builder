@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+import { isAddress } from 'viem'
 
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
 import { SDK } from 'src/data/subgraph/client'
@@ -6,13 +7,14 @@ import { SDK } from 'src/data/subgraph/client'
 export const dashboardRequest = async (memberAddress: string) => {
   try {
     if (!memberAddress) throw new Error('No user address provided')
+
+    if (!isAddress(memberAddress)) throw new Error('Invalid user address')
+
     const data = await Promise.all(
       PUBLIC_DEFAULT_CHAINS.map((chain) =>
         SDK.connect(chain.id)
-          .dashboard({
-            where: {
-              owner: memberAddress.toLowerCase(),
-            },
+          .daosForDashboard({
+            user: memberAddress.toLowerCase(),
             first: 30,
           })
           .then((x) => ({ ...x, chainId: chain.id }))
@@ -21,7 +23,7 @@ export const dashboardRequest = async (memberAddress: string) => {
 
     return data
       .map((queries) =>
-        queries.daotokenOwners.map(({ dao }) => ({
+        queries.daos.map((dao) => ({
           ...dao,
           name: dao.name || '',
           tokenAddress: dao.tokenAddress,

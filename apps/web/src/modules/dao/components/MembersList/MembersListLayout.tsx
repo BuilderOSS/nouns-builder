@@ -20,7 +20,7 @@ export const MembersPanel = ({
         variant="heading-xs"
         style={{ fontWeight: 800 }}
       >
-        Members
+        Delegates
       </Text>
       <Box
         borderRadius={'phat'}
@@ -41,10 +41,10 @@ const TableHeader = () => {
   return (
     <Flex className={row} mb={{ '@initial': 'x4', '@768': 'x12' }}>
       <Text fontWeight={'label'} className={firstRowItem}>
-        Member
+        Delegate
       </Text>
       <Text fontWeight={'label'} className={rowItem}>
-        Tokens
+        Votes
       </Text>
       <Text fontWeight={'label'} className={rowItem}>
         Vote %

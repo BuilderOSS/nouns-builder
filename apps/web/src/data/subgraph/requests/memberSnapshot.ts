@@ -1,3 +1,5 @@
+import { Address } from 'viem'
+
 import { SDK } from 'src/data/subgraph/client'
 import { applyL1ToL2Alias } from 'src/modules/create-proposal/utils/applyL1ToL2Alias'
 import { CHAIN_ID } from 'src/typings'
@@ -5,8 +7,12 @@ import { CHAIN_ID } from 'src/typings'
 import { DaoTokenOwner_OrderBy, OrderDirection } from '../sdk.generated'
 
 export type DaoMember = {
-  address: string
+  ownerAlias: Address
+  owner: Address
+  delegate: Address
   tokens: number[]
+  tokenCount: number
+  timeJoined: number
 }
 
 export const memberSnapshotRequest = async (
@@ -24,7 +30,7 @@ export const memberSnapshotRequest = async (
 
   if (!data.daotokenOwners) throw new Error('No token owner found')
 
-  const formattedMembers = await Promise.all(
+  const formattedMembers: DaoMember[] = await Promise.all(
     data.daotokenOwners.map(async (member) => {
       let tokenOwner = await applyL1ToL2Alias({
         l1ChainId: chainId,
@@ -32,8 +38,14 @@ export const memberSnapshotRequest = async (
       })
 
       return {
-        address: tokenOwner,
-        tokens: member.daoTokens.map((token) => token.tokenId),
+        ownerAlias: tokenOwner as Address,
+        owner: member.owner as Address,
+        delegate: member.delegate as Address,
+        tokens: member.daoTokens.map((token) => Number(token.tokenId)) as number[],
+        tokenCount: Number(member.daoTokenCount),
+        timeJoined: member.daoTokens
+          .map((daoToken) => Number(daoToken.mintedAt))
+          .sort((a, b) => a - b)[0] as number,
       }
     })
   )

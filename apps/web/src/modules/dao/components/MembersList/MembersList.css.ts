@@ -6,6 +6,9 @@ export const row = style({
   width: '100%',
 })
 
+export const firstRowItem = style({
+  width: '35%',
+})
 export const rowItem = style({
   width: '20%',
   '@media': {
@@ -14,16 +17,8 @@ export const rowItem = style({
     },
   },
 })
-export const firstRowItem = style({
-  width: '37%',
-})
 export const lastRowItem = style({
-  width: '23%',
-  '@media': {
-    'screen and (max-width: 768px)': {
-      width: '40%',
-    },
-  },
+  width: '25%',
 })
 export const cardSkeleton = style({
   width: '100%',

@@ -22,6 +22,7 @@ const SWR_KEYS = {
   MEMBERS: 'members',
   TOKEN_IMAGE: 'token-image',
   DASHBOARD: 'dashboard',
+  DAO_MEMBERSHIP: 'dao-membership',
   METADATA_ATTRIBUTES_MERKLE_ROOT: 'metadata-attributes-merkle-root',
   TOKEN_HOLDERS_MERKLE_ROOT: 'token-holders-merkle-root',
   ENCODED_DAO_METADATA: 'encoded-dao-metadata',

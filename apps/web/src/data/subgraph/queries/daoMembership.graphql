@@ -1,0 +1,23 @@
+query daoMembership($ownerId: ID!, $voterId: ID!) {
+  daotokenOwner(id: $ownerId) {
+    id
+    owner
+    delegate
+    daoTokenCount
+    daoTokens {
+      owner
+      tokenId
+      mintedAt
+    }
+  }
+  daovoter(id: $voterId) {
+    id
+    voter
+    daoTokenCount
+    daoTokens {
+      owner
+      tokenId
+      mintedAt
+    }
+  }
+}

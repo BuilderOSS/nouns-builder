@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import { Address, isAddress } from 'viem'
 import { useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 
@@ -6,11 +5,11 @@ import { useChainStore } from 'src/stores/useChainStore'
 import { CHAIN_ID } from 'src/typings'
 import { walletSnippet } from 'src/utils/helpers'
 
-type EnsData = {
+export type EnsData = {
   ensName?: string
   ensAvatar?: string
   ethAddress?: Address
-  ensNameLoading?: boolean
+  isLoading: boolean
   displayName: string
 }
 
@@ -31,7 +30,7 @@ export const useEnsData = (addressOrName?: string): EnsData => {
     },
   })
 
-  const { data: ensAddress } = useEnsAddress({
+  const { data: ensAddress, isLoading: ensAddressLoading } = useEnsAddress({
     name: inputName,
     chainId,
     query: {
@@ -39,7 +38,7 @@ export const useEnsData = (addressOrName?: string): EnsData => {
     },
   })
 
-  const { data: ensAvatar } = useEnsAvatar({
+  const { data: ensAvatar, isLoading: ensAvatarLoading } = useEnsAvatar({
     name: ensName ?? inputName,
     chainId,
     query: {
@@ -47,21 +46,19 @@ export const useEnsData = (addressOrName?: string): EnsData => {
     },
   })
 
-  const ethAddress = useMemo(() => {
-    return inputAddress ?? ensAddress ?? undefined
-  }, [inputAddress, ensAddress])
+  const ethAddress = (inputAddress?.toLowerCase() ??
+    ensAddress?.toLowerCase() ??
+    undefined) as `0x${string}` | undefined
 
-  const finalEnsName = useMemo(() => {
-    return ensName ?? (ensAddress ? inputName : undefined)
-  }, [ensName, ensAddress, inputName])
+  const finalEnsName = ensName ?? (ensAddress ? inputName : undefined)
 
-  const displayName = useMemo(() => {
-    return finalEnsName ?? (addressOrName ? walletSnippet(addressOrName) : '')
-  }, [finalEnsName, addressOrName])
+  const displayName = finalEnsName ?? (addressOrName ? walletSnippet(addressOrName) : '')
+
+  const isLoading = ensNameLoading || ensAddressLoading || ensAvatarLoading
 
   return {
     ensName: finalEnsName,
-    ensNameLoading,
+    isLoading,
     ensAvatar: ensAvatar ?? undefined,
     ethAddress,
     displayName,

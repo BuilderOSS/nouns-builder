@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
+import { isAddress } from 'viem'
 
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
 import { SDK } from 'src/data/subgraph/client'
@@ -18,14 +19,14 @@ export const myDaosRequest = async (
 
   if (!memberAddress) throw new Error('No user address provided')
 
+  if (!isAddress(memberAddress)) throw new Error('Invalid user address')
+
   try {
     const data = await Promise.all(
       PUBLIC_DEFAULT_CHAINS.map((chain) =>
         SDK.connect(chain.id)
-          .daoTokenOwners({
-            where: {
-              owner: memberAddress,
-            },
+          .daosForUser({
+            user: memberAddress.toLowerCase(),
             first: 30,
           })
           .then((x) => ({ ...x, chainId: chain.id }))
@@ -34,7 +35,7 @@ export const myDaosRequest = async (
 
     return data
       .map((queries) =>
-        queries.daotokenOwners.map(({ dao }) => ({
+        queries.daos.map((dao) => ({
           name: dao.name || '',
           collectionAddress: dao.tokenAddress,
           auctionAddress: dao?.auctionAddress || '',
@@ -44,7 +45,7 @@ export const myDaosRequest = async (
       .flat()
       .sort((a, b) => a.name.localeCompare(b.name))
   } catch (e: any) {
-    console.error(e)
+    console.error('Error fetching my DAOs:', e)
     Sentry.captureException(e)
     await Sentry.flush(2000)
   }

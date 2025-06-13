@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
-import { membersListRequest } from 'src/data/subgraph/requests/daoMembersList'
+import { votersRequest } from 'src/data/subgraph/requests/daoVoters'
 import { CHAIN_ID } from 'src/typings'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!collectionId || !chainId) {
       throw new Error('Invalid query')
     }
-    const membersList = await membersListRequest(
+    const membersList = await votersRequest(
       Number(chainId) as CHAIN_ID,
       (collectionId as string).toLowerCase(),
       typeof Number(page) === 'number' ? Number(page) : undefined,

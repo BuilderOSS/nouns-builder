@@ -1,40 +1,24 @@
 import { Box, Button, Flex } from '@zoralabs/zord'
 import React from 'react'
-import { useAccount, useReadContract } from 'wagmi'
 
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
-import { NULL_ADDRESS } from 'src/constants/addresses'
 import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
-import { tokenAbi } from 'src/data/contract/abis'
-import { useEnsData } from 'src/hooks/useEnsData'
+import { type DaoMembership } from 'src/hooks/useDaoMembership'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalFormTitle } from 'src/styles/Proposals.css'
 import { walletSnippet } from 'src/utils/helpers'
 
-import { useDaoStore } from '../../stores'
-
 interface CurrentDelegateProps {
   toggleIsEditing: () => void
+  membership: DaoMembership
 }
 
-export const CurrentDelegate = ({ toggleIsEditing }: CurrentDelegateProps) => {
-  const { addresses } = useDaoStore()
-  const { address: signerAddress } = useAccount()
+export const CurrentDelegate = ({
+  toggleIsEditing,
+  membership,
+}: CurrentDelegateProps) => {
   const chain = useChainStore((x) => x.chain)
-
-  const { data: delegateAddress } = useReadContract({
-    abi: tokenAbi,
-    address: addresses.token,
-    chainId: chain.id,
-    functionName: 'delegates',
-    args: [signerAddress || NULL_ADDRESS],
-    query: {
-      enabled: !!signerAddress,
-    },
-  })
-
-  const { ensName, ensAvatar } = useEnsData(delegateAddress)
 
   return (
     <Flex direction={'column'} width={'100%'}>
@@ -43,7 +27,7 @@ export const CurrentDelegate = ({ toggleIsEditing }: CurrentDelegateProps) => {
       </Box>
 
       <Box mb={'x8'} color="text3">
-        You can assign your votes to any address by delegating
+        {membership.voteDescription}
       </Box>
 
       <Box mb={'x2'}>Current delegate</Box>
@@ -60,28 +44,33 @@ export const CurrentDelegate = ({ toggleIsEditing }: CurrentDelegateProps) => {
           borderRadius="curved"
         >
           <Box mr={'x2'}>
-            {ensAvatar ? (
-              <img src={ensAvatar} alt="avatar" height={28} width={28} />
+            {membership.delegate.ensAvatar ? (
+              <img
+                src={membership.delegate.ensAvatar}
+                alt="avatar"
+                height={28}
+                width={28}
+              />
             ) : (
-              <Avatar address={delegateAddress} size={'28'} />
+              <Avatar address={membership.delegate.ethAddress} size={'28'} />
             )}
           </Box>
 
-          {ensName ? (
+          {membership.delegate.ensName ? (
             <>
-              <Box mr={'x2'}>{ensName}</Box>
+              <Box mr={'x2'}>{membership.delegate.ensName}</Box>
               <Box color="text4" ml="auto">
-                {walletSnippet(delegateAddress)}
+                {walletSnippet(membership.delegate.ethAddress)}
               </Box>
             </>
           ) : (
-            <Box mr="auto">{walletSnippet(delegateAddress)}</Box>
+            <Box mr="auto">{walletSnippet(membership.delegate.ethAddress)}</Box>
           )}
 
           <Box
             as="a"
             ml={'x3'}
-            href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${delegateAddress}`}
+            href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${membership.delegate.ethAddress}`}
             target="_blank"
           >
             <Icon size="sm" id="external-16" fill="text4" />
@@ -89,7 +78,11 @@ export const CurrentDelegate = ({ toggleIsEditing }: CurrentDelegateProps) => {
         </Flex>
 
         <Box>
-          <Button width={'100%'} onClick={toggleIsEditing} size="lg">
+          <Button
+            width={'100%'}
+            onClick={toggleIsEditing}
+            size="lg"
+          >
             Update delegate
           </Button>
         </Box>

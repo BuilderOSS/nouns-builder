@@ -16,6 +16,7 @@ import {
   getProposals,
 } from 'src/data/subgraph/requests/proposalsQuery'
 import { useVotes } from 'src/hooks'
+import { useDaoMembership } from 'src/hooks/useDaoMembership'
 import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
 import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
@@ -57,6 +58,11 @@ export const Activity: React.FC = () => {
   )
 
   const { handlePageBack, handlePageForward } = usePagination(data?.pageInfo?.hasNextPage)
+  const { data: membership } = useDaoMembership({
+    chainId: chain.id,
+    collectionAddress: query?.token as AddressType,
+    signerAddress: address,
+  })
 
   const { isOwner, isDelegating, hasThreshold, proposalVotesRequired } = useVotes({
     chainId: chain.id,
@@ -257,9 +263,11 @@ export const Activity: React.FC = () => {
         </Flex>
       </Flex>
 
-      <AnimatedModal open={viewCurrentDelegate} size={'auto'} close={close}>
-        <CurrentDelegate toggleIsEditing={edit} />
-      </AnimatedModal>
+      {!!membership && (
+        <AnimatedModal open={viewCurrentDelegate} size={'auto'} close={close}>
+          <CurrentDelegate toggleIsEditing={edit} membership={membership} />
+        </AnimatedModal>
+      )}
 
       <AnimatedModal open={viewDelegateForm} size={'auto'} close={close}>
         <DelegateForm handleBack={view} handleUpdate={update} />

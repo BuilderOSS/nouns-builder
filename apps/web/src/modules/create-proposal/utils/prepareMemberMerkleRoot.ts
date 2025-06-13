@@ -1,5 +1,5 @@
 import { createTree } from 'lanyard'
-import { Address, encodeAbiParameters } from 'viem'
+import { encodeAbiParameters } from 'viem'
 
 import { DaoMember } from 'src/data/subgraph/requests/memberSnapshot'
 
@@ -14,7 +14,7 @@ export const prepareMemberMerkleRoot = async (
             { name: 'owner', type: 'address' },
             { name: 'tokenId', type: 'uint256' },
           ],
-          [member.address as Address, BigInt(tokenId)]
+          [member.ownerAlias, BigInt(tokenId)]
         )
       )
     )

@@ -5,7 +5,7 @@ import { Field, FieldProps, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { toHex } from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { ContractButton } from 'src/components/ContractButton'
@@ -14,7 +14,8 @@ import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { SUCCESS_MESSAGES } from 'src/constants/messages'
-import { governorAbi, tokenAbi } from 'src/data/contract/abis'
+import { governorAbi } from 'src/data/contract/abis'
+import { useVotes } from 'src/hooks/useVotes'
 import { useDaoStore } from 'src/modules/dao'
 import { ErrorResult } from 'src/services/errorResult'
 import { SimulationOutput, SimulationResult } from 'src/services/simulationService'
@@ -72,22 +73,11 @@ export const ReviewProposalForm = ({
   const [proposing, setProposing] = useState<boolean>(false)
   const { clear: clearEscrowForm } = useEscrowFormStore()
 
-  const { data: votes, isLoading } = useReadContract({
-    address: addresses?.token as AddressType,
-    abi: tokenAbi,
-    query: {
-      enabled: !!address,
-    },
-    functionName: 'getVotes',
+  const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
-    args: [address as AddressType],
-  })
-
-  const { data: proposalThreshold, isLoading: thresholdIsLoading } = useReadContract({
-    address: addresses?.governor as AddressType,
-    chainId: chain.id,
-    abi: governorAbi,
-    functionName: 'proposalThreshold',
+    collectionAddress: addresses?.token,
+    governorAddress: addresses?.governor,
+    signerAddress: address,
   })
 
   const onSubmit = React.useCallback(
@@ -96,11 +86,7 @@ export const ReviewProposalForm = ({
       setSimulationError(undefined)
       setSimulations([])
 
-      if (proposalThreshold === undefined) return
-
-      const votesToNumber = votes ? Number(votes) : 0
-      const doesNotHaveEnoughVotes = votesToNumber <= Number(proposalThreshold)
-      if (doesNotHaveEnoughVotes) {
+      if (!hasThreshold) {
         setError(ERROR_CODE.NOT_ENOUGH_VOTES)
         return
       }
@@ -197,22 +183,12 @@ export const ReviewProposalForm = ({
         setError(err.message)
       }
     },
-    [
-      router,
-      addresses,
-      proposalThreshold,
-      votes,
-      clearProposal,
-      clearEscrowForm,
-      chain.id,
-      config,
-    ]
+    [router, addresses, hasThreshold, clearProposal, clearEscrowForm, chain.id, config]
   )
 
-  if (isLoading || thresholdIsLoading) return null
+  if (isLoading) return null
 
-  const tokensNeeded =
-    proposalThreshold !== undefined ? Number(proposalThreshold) + 1 : undefined
+  const tokensNeeded = Number(proposalVotesRequired)
 
   return (
     <Flex direction={'column'} width={'100%'} pb={'x24'}>
@@ -290,7 +266,7 @@ export const ReviewProposalForm = ({
       </Flex>
 
       <Flex mb={'x12'} mt={'x4'} color="text3" alignSelf={'center'}>
-        You must have {Number(tokensNeeded)}{' '}
+        You must have {tokensNeeded}{' '}
         {!!tokensNeeded && tokensNeeded > 1 ? 'votes' : 'vote'} to submit a proposal
       </Flex>
 

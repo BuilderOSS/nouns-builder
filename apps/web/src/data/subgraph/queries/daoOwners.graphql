@@ -1,7 +1,0 @@
-query daoTokenOwners($where: DAOTokenOwner_filter, $first: Int, $skip: Int) {
-  daotokenOwners(where: $where, first: $first, skip: $skip) {
-    dao {
-      ...DAO
-    }
-  }
-}

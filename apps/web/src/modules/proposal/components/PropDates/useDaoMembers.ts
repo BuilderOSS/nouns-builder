@@ -1,5 +1,5 @@
 import useSWR from 'swr'
-import { getAddress } from 'viem'
+import { Address } from 'viem'
 
 import {
   type DaoMember,
@@ -16,5 +16,8 @@ export const useDaoMembers = (chainId: number, token: string) => {
     return []
   }
 
-  return members.map(({ address }) => getAddress(address))
+  return members.reduce(
+    (acc: Address[], member: DaoMember) => [...acc, member.owner, member.delegate],
+    []
+  )
 }
