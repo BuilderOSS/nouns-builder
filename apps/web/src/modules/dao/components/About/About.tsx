@@ -24,8 +24,8 @@ import { MembersList } from '../MembersList'
 import { DaoDescription } from './DaoDescription'
 import { ExternalLinks } from './ExternalLinks'
 import { Founder } from './Founder'
-import { Statistic } from './Statistic'
 import { Membership } from './Membership'
+import { Statistic } from './Statistic'
 
 export const About: React.FC = () => {
   const {
@@ -165,9 +165,11 @@ export const About: React.FC = () => {
       {!!membershipInfo && (
         <Membership {...membershipInfo} totalSupply={Number(totalSupply)} />
       )}
-      <Text variant="heading-xs"
+      <Text
+        variant="heading-xs"
         mt={{ '@initial': 'x4', '@768': 'x10' }}
-        style={{ fontWeight: 800 }}>
+        style={{ fontWeight: 800 }}
+      >
         Founders
       </Text>
 

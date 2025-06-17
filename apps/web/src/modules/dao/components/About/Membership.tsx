@@ -24,9 +24,7 @@ export const Membership: React.FC<DaoMembership & { totalSupply: number }> = (in
   const voteInfo = `${voteCount} Token${voteCount === 1 ? '' : 's'} (${votePercent}%)`
 
   return (
-    <Flex direction="column" gap="x2"
-      mt={{ '@initial': 'x4', '@768': 'x10' }}
-    >
+    <Flex direction="column" gap="x2" mt={{ '@initial': 'x4', '@768': 'x10' }}>
       <Text variant="heading-xs" style={{ fontWeight: 800 }}>
         Membership
       </Text>

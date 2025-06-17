@@ -78,11 +78,7 @@ export const CurrentDelegate = ({
         </Flex>
 
         <Box>
-          <Button
-            width={'100%'}
-            onClick={toggleIsEditing}
-            size="lg"
-          >
+          <Button width={'100%'} onClick={toggleIsEditing} size="lg">
             Update delegate
           </Button>
         </Box>
