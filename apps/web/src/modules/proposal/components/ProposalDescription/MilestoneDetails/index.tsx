@@ -20,6 +20,7 @@ import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { SAFE_APP_URL, SAFE_HOME_URL } from 'src/constants/safe'
 import { DecodedTransaction } from 'src/hooks/useDecodedTransactions'
 import { useEnsData } from 'src/hooks/useEnsData'
+import { useIsGnosisSafe } from 'src/hooks/useIsGnosisSafe'
 import { useVotes } from 'src/hooks/useVotes'
 import { TransactionType } from 'src/modules/create-proposal'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
@@ -35,16 +36,6 @@ const RELEASE_FUNCTION_ABI = [
     name: 'release',
     outputs: [],
     stateMutability: 'nonpayable',
-    type: 'function',
-  },
-]
-
-const GET_OWNERS_FUNCTION_ABI = [
-  {
-    inputs: [],
-    name: 'getOwners',
-    outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
-    stateMutability: 'view',
     type: 'function',
   },
 ]
@@ -117,19 +108,9 @@ export const MilestoneDetails = ({
     chainId: invoiceChain.id,
   })
 
-  const { data: hasOwners, error: getOwnersError } = useReadContract({
-    query: {
-      enabled: !!clientAddress,
-    },
-    address: clientAddress,
-    abi: GET_OWNERS_FUNCTION_ABI,
-    functionName: 'getOwners',
-    chainId: invoiceChain.id,
-  })
-
-  const isClientAGnosisSafe = useMemo(
-    () => !!hasOwners && !getOwnersError,
-    [hasOwners, getOwnersError]
+  const { isGnosisSafe: isClientAGnosisSafe } = useIsGnosisSafe(
+    clientAddress,
+    invoiceChain.id
   )
 
   const currentMilestone = useMemo(
