@@ -1,40 +1,19 @@
 import { CHAIN_ID } from 'src/typings'
 
+const GOLDSKY_PROJECT_ID = 'project_cm33ek8kjx6pz010i2c3w8z25'
+const VERSION = 'latest'
+
+const createSubgraphUrl = (name: string, version = VERSION): string =>
+  `https://api.goldsky.com/api/public/${GOLDSKY_PROJECT_ID}/subgraphs/${name}/${version}/gn`
+
 export const PUBLIC_SUBGRAPH_URL: Map<CHAIN_ID, string> = new Map([
-  [
-    CHAIN_ID.ETHEREUM,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-ethereum-mainnet/latest/gn',
-  ],
-  [
-    CHAIN_ID.OPTIMISM,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-mainnet/latest/gn',
-  ],
-  [
-    CHAIN_ID.OPTIMISM_SEPOLIA,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-sepolia/latest/gn',
-  ],
-  [
-    CHAIN_ID.SEPOLIA,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-ethereum-sepolia/latest/gn',
-  ],
-  [
-    CHAIN_ID.BASE,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-base-mainnet/latest/gn',
-  ],
-  [
-    CHAIN_ID.BASE_SEPOLIA,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-base-sepolia/latest/gn',
-  ],
-  [
-    CHAIN_ID.ZORA,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-mainnet/latest/gn',
-  ],
-  [
-    CHAIN_ID.ZORA_SEPOLIA,
-    'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-sepolia/latest/gn',
-  ],
-  [
-    CHAIN_ID.FOUNDRY,
-    'https://api.thegraph.com/subgraphs/name/neokry/nouns-builder-mainnet',
-  ],
+  [CHAIN_ID.ETHEREUM, createSubgraphUrl('nouns-builder-ethereum-mainnet')],
+  [CHAIN_ID.OPTIMISM, createSubgraphUrl('nouns-builder-optimism-mainnet')],
+  [CHAIN_ID.OPTIMISM_SEPOLIA, createSubgraphUrl('nouns-builder-optimism-sepolia')],
+  [CHAIN_ID.SEPOLIA, createSubgraphUrl('nouns-builder-ethereum-sepolia')],
+  [CHAIN_ID.BASE, createSubgraphUrl('nouns-builder-base-mainnet')],
+  [CHAIN_ID.BASE_SEPOLIA, createSubgraphUrl('nouns-builder-base-sepolia')],
+  [CHAIN_ID.ZORA, createSubgraphUrl('nouns-builder-zora-mainnet')],
+  [CHAIN_ID.ZORA_SEPOLIA, createSubgraphUrl('nouns-builder-zora-sepolia')],
+  [CHAIN_ID.FOUNDRY, ''],
 ])

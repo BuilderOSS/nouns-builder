@@ -1,4 +1,4 @@
-query exploreDaosPage(
+query findAuctions(
   $orderBy: Auction_orderBy
   $orderDirection: OrderDirection
   $where: Auction_filter
