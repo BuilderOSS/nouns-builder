@@ -80,10 +80,17 @@ type Proposal @entity {
   proposalThreshold: BigInt!
   quorumVotes: BigInt!
   queued: Boolean!
+  queuedAt: BigInt
+  queuedTransactionHash: Bytes
   executed: Boolean!
+  executedAt: BigInt
   executionTransactionHash: Bytes
   canceled: Boolean!
+  canceledAt: BigInt
+  cancelTransactionHash: Bytes
   vetoed: Boolean!
+  vetoedAt: BigInt
+  vetoTransactionHash: Bytes
   voteCount: Int!
   snapshotBlockNumber: BigInt!
   transactionHash: Bytes!
@@ -98,6 +105,8 @@ enum ProposalVoteSupport {
 
 type ProposalVote @entity {
   id: ID!
+  transactionHash: Bytes!
+  timestamp: BigInt!
   voter: Bytes!
   support: ProposalVoteSupport!
   weight: Int!
@@ -130,6 +139,7 @@ type Auction @entity {
 
 type AuctionBid @entity {
   id: ID!
+  transactionHash: Bytes!
   amount: BigInt!
   bidder: Bytes!
   auction: Auction!

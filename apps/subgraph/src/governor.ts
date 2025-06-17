@@ -76,12 +76,15 @@ export function handleProposalQueued(event: ProposalQueuedEvent): void {
   proposal.executableFrom = event.params.eta
   proposal.expiresAt = event.params.eta.plus(treasuryContract.gracePeriod())
   proposal.queued = true
+  proposal.queuedAt = event.block.timestamp
+  proposal.queuedTransactionHash = event.transaction.hash
   proposal.save()
 }
 
 export function handleProposalExecuted(event: ProposalExecutedEvent): void {
   let proposal = new Proposal(event.params.proposalId.toHexString())
   proposal.executed = true
+  proposal.executedAt = event.block.timestamp
   proposal.executionTransactionHash = event.transaction.hash
   proposal.queued = false
   proposal.save()
@@ -90,6 +93,8 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
 export function handleProposalCanceled(event: ProposalCanceledEvent): void {
   let proposal = new Proposal(event.params.proposalId.toHexString())
   proposal.canceled = true
+  proposal.canceledAt = event.block.timestamp
+  proposal.cancelTransactionHash = event.transaction.hash
   proposal.queued = false
   proposal.save()
 }
@@ -97,6 +102,8 @@ export function handleProposalCanceled(event: ProposalCanceledEvent): void {
 export function handleProposalVetoed(event: ProposalVetoedEvent): void {
   let proposal = new Proposal(event.params.proposalId.toHexString())
   proposal.vetoed = true
+  proposal.vetoedAt = event.block.timestamp
+  proposal.vetoTransactionHash = event.transaction.hash
   proposal.queued = false
   proposal.save()
 }
@@ -108,6 +115,8 @@ export function handleVoteCast(event: VoteCastEvent): void {
     `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`
   )
 
+  proposalVote.transactionHash = event.transaction.hash
+  proposalVote.timestamp = event.block.timestamp
   proposalVote.voter = event.params.voter
   proposalVote.weight = event.params.weight.toI32()
   proposalVote.reason = event.params.reason.length > 0 ? event.params.reason : null

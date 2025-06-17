@@ -58,6 +58,7 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
     `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`
   )
 
+  bid.transactionHash = event.transaction.hash
   bid.amount = event.params.amount
   bid.bidder = event.params.bidder
   bid.auction = `${tokenAddress}:${event.params.tokenId.toString()}`
