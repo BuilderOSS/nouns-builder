@@ -38,7 +38,7 @@ export type DashboardDaoProps = DaoFragment & {
     reservePrice: string
   }
   proposals: (ProposalFragment & {
-    proposalState: ProposalState
+    state: ProposalState
     votes: {
       voter: string
     }[]
@@ -55,13 +55,13 @@ const fetchDaoProposalState = async (dao: DashboardDaoProps) => {
           proposal.dao.governorAddress,
           proposal.proposalId
         )
-        return { ...proposal, proposalState: proposalState }
+        return { ...proposal, state: proposalState }
       })
     )
     return {
       ...dao,
       proposals: proposals.filter((proposal) =>
-        ACTIVE_PROPOSAL_STATES.includes(proposal.proposalState)
+        ACTIVE_PROPOSAL_STATES.includes(proposal.state)
       ),
     }
   } catch (error: any) {

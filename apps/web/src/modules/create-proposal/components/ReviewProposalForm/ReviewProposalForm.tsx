@@ -276,12 +276,7 @@ export const ReviewProposalForm = ({
         </Flex>
       )}
 
-      <AnimatedModal
-        open={proposing}
-        close={() => {
-          setProposing(false)
-        }}
-      >
+      <AnimatedModal open={proposing}>
         <SuccessModalContent
           title={'Proposal submitting'}
           subtitle={'Your Proposal is being submitted'}

@@ -4,15 +4,13 @@ import { useMemo, useState } from 'react'
 
 import { Icon } from 'src/components/Icon'
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { ProposalFragment } from 'src/data/subgraph/sdk.generated'
 import { AddressType, CHAIN_ID } from 'src/typings'
 
-import { ProposalStatus } from '../proposal/components/ProposalStatus'
+import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
 
-type DaoProposalCardProps = ProposalFragment & {
+type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID
   tokenAddress: AddressType
-  proposalState: ProposalState
   currentChainSlug?: string
   userAddress?: AddressType
   votes: {
@@ -21,17 +19,13 @@ type DaoProposalCardProps = ProposalFragment & {
 }
 
 export const DaoProposalCard = ({
-  title,
-  proposalNumber,
   tokenAddress,
-  proposalState,
-  voteEnd,
-  voteStart,
-  expiresAt,
   currentChainSlug,
   userAddress,
   votes,
+  ...proposal
 }: DaoProposalCardProps) => {
+  const { proposalNumber, title, state } = proposal
   return (
     <Link
       href={`/dao/${currentChainSlug}/${tokenAddress}/vote/${proposalNumber}`}
@@ -70,11 +64,7 @@ export const DaoProposalCard = ({
           <Text fontSize={18} fontWeight="label" mr="x3">
             {title}
           </Text>
-          <NeedsVote
-            userAddress={userAddress}
-            proposalState={proposalState}
-            votes={votes}
-          />
+          <NeedsVote userAddress={userAddress} proposalState={state} votes={votes} />
         </Flex>
         <Flex
           justify={'space-between'}
@@ -83,14 +73,7 @@ export const DaoProposalCard = ({
           mb={{ '@initial': 'x3', '@768': 'x0' }}
         >
           <Box style={{ width: '225px' }}>
-            <ProposalStatus
-              state={proposalState}
-              voteEnd={voteEnd}
-              voteStart={voteStart}
-              expiresAt={expiresAt}
-              flipped
-              showTime
-            />
+            <ProposalStatus {...proposal} flipped showTime />
           </Box>
           <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
             <Text fontSize={18} fontWeight="label" color={'text4'}>

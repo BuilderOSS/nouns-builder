@@ -67,6 +67,7 @@ export type AuctionBid = {
   bidTime: Scalars['BigInt']['output']
   bidder: Scalars['Bytes']['output']
   id: Scalars['ID']['output']
+  transactionHash: Scalars['Bytes']['output']
 }
 
 export type AuctionBid_Filter = {
@@ -129,6 +130,16 @@ export type AuctionBid_Filter = {
   id_not?: InputMaybe<Scalars['ID']['input']>
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
   or?: InputMaybe<Array<InputMaybe<AuctionBid_Filter>>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
 }
 
 export enum AuctionBid_OrderBy {
@@ -144,6 +155,7 @@ export enum AuctionBid_OrderBy {
   BidTime = 'bidTime',
   Bidder = 'bidder',
   Id = 'id',
+  TransactionHash = 'transactionHash',
 }
 
 export type AuctionConfig = {
@@ -378,6 +390,7 @@ export enum Auction_OrderBy {
   HighestBidBidTime = 'highestBid__bidTime',
   HighestBidBidder = 'highestBid__bidder',
   HighestBidId = 'highestBid__id',
+  HighestBidTransactionHash = 'highestBid__transactionHash',
   Id = 'id',
   Settled = 'settled',
   StartTime = 'startTime',
@@ -395,6 +408,7 @@ export enum Auction_OrderBy {
   WinningBidBidTime = 'winningBid__bidTime',
   WinningBidBidder = 'winningBid__bidder',
   WinningBidId = 'winningBid__id',
+  WinningBidTransactionHash = 'winningBid__transactionHash',
 }
 
 export type BlockChangedFilter = {
@@ -1238,12 +1252,15 @@ export type Proposal = {
   abstainVotes: Scalars['Int']['output']
   againstVotes: Scalars['Int']['output']
   calldatas?: Maybe<Scalars['String']['output']>
+  cancelTransactionHash?: Maybe<Scalars['Bytes']['output']>
   canceled: Scalars['Boolean']['output']
+  canceledAt?: Maybe<Scalars['BigInt']['output']>
   dao: Dao
   description?: Maybe<Scalars['String']['output']>
   descriptionHash: Scalars['Bytes']['output']
   executableFrom?: Maybe<Scalars['BigInt']['output']>
   executed: Scalars['Boolean']['output']
+  executedAt?: Maybe<Scalars['BigInt']['output']>
   executionTransactionHash?: Maybe<Scalars['Bytes']['output']>
   expiresAt?: Maybe<Scalars['BigInt']['output']>
   forVotes: Scalars['Int']['output']
@@ -1253,6 +1270,8 @@ export type Proposal = {
   proposalThreshold: Scalars['BigInt']['output']
   proposer: Scalars['Bytes']['output']
   queued: Scalars['Boolean']['output']
+  queuedAt?: Maybe<Scalars['BigInt']['output']>
+  queuedTransactionHash?: Maybe<Scalars['Bytes']['output']>
   quorumVotes: Scalars['BigInt']['output']
   snapshotBlockNumber: Scalars['BigInt']['output']
   targets: Array<Scalars['Bytes']['output']>
@@ -1260,7 +1279,9 @@ export type Proposal = {
   title?: Maybe<Scalars['String']['output']>
   transactionHash: Scalars['Bytes']['output']
   values: Array<Scalars['BigInt']['output']>
+  vetoTransactionHash?: Maybe<Scalars['Bytes']['output']>
   vetoed: Scalars['Boolean']['output']
+  vetoedAt?: Maybe<Scalars['BigInt']['output']>
   voteCount: Scalars['Int']['output']
   voteEnd: Scalars['BigInt']['output']
   voteStart: Scalars['BigInt']['output']
@@ -1281,6 +1302,8 @@ export type ProposalVote = {
   proposal: Proposal
   reason?: Maybe<Scalars['String']['output']>
   support: ProposalVoteSupport
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
   voter: Scalars['Bytes']['output']
   weight: Scalars['Int']['output']
 }
@@ -1349,6 +1372,24 @@ export type ProposalVote_Filter = {
   support_in?: InputMaybe<Array<ProposalVoteSupport>>
   support_not?: InputMaybe<ProposalVoteSupport>
   support_not_in?: InputMaybe<Array<ProposalVoteSupport>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   voter?: InputMaybe<Scalars['Bytes']['input']>
   voter_contains?: InputMaybe<Scalars['Bytes']['input']>
   voter_gt?: InputMaybe<Scalars['Bytes']['input']>
@@ -1375,11 +1416,14 @@ export enum ProposalVote_OrderBy {
   ProposalAbstainVotes = 'proposal__abstainVotes',
   ProposalAgainstVotes = 'proposal__againstVotes',
   ProposalCalldatas = 'proposal__calldatas',
+  ProposalCancelTransactionHash = 'proposal__cancelTransactionHash',
   ProposalCanceled = 'proposal__canceled',
+  ProposalCanceledAt = 'proposal__canceledAt',
   ProposalDescription = 'proposal__description',
   ProposalDescriptionHash = 'proposal__descriptionHash',
   ProposalExecutableFrom = 'proposal__executableFrom',
   ProposalExecuted = 'proposal__executed',
+  ProposalExecutedAt = 'proposal__executedAt',
   ProposalExecutionTransactionHash = 'proposal__executionTransactionHash',
   ProposalExpiresAt = 'proposal__expiresAt',
   ProposalForVotes = 'proposal__forVotes',
@@ -1389,17 +1433,23 @@ export enum ProposalVote_OrderBy {
   ProposalProposalThreshold = 'proposal__proposalThreshold',
   ProposalProposer = 'proposal__proposer',
   ProposalQueued = 'proposal__queued',
+  ProposalQueuedAt = 'proposal__queuedAt',
+  ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
   ProposalQuorumVotes = 'proposal__quorumVotes',
   ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
   ProposalTimeCreated = 'proposal__timeCreated',
   ProposalTitle = 'proposal__title',
   ProposalTransactionHash = 'proposal__transactionHash',
+  ProposalVetoTransactionHash = 'proposal__vetoTransactionHash',
   ProposalVetoed = 'proposal__vetoed',
+  ProposalVetoedAt = 'proposal__vetoedAt',
   ProposalVoteCount = 'proposal__voteCount',
   ProposalVoteEnd = 'proposal__voteEnd',
   ProposalVoteStart = 'proposal__voteStart',
   Reason = 'reason',
   Support = 'support',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
   Voter = 'voter',
   Weight = 'weight',
 }
@@ -1444,7 +1494,25 @@ export type Proposal_Filter = {
   calldatas_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   calldatas_starts_with?: InputMaybe<Scalars['String']['input']>
   calldatas_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  cancelTransactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  cancelTransactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  cancelTransactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   canceled?: InputMaybe<Scalars['Boolean']['input']>
+  canceledAt?: InputMaybe<Scalars['BigInt']['input']>
+  canceledAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  canceledAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  canceledAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  canceledAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  canceledAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  canceledAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  canceledAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   canceled_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   canceled_not?: InputMaybe<Scalars['Boolean']['input']>
   canceled_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
@@ -1508,6 +1576,14 @@ export type Proposal_Filter = {
   executableFrom_not?: InputMaybe<Scalars['BigInt']['input']>
   executableFrom_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   executed?: InputMaybe<Scalars['Boolean']['input']>
+  executedAt?: InputMaybe<Scalars['BigInt']['input']>
+  executedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  executedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  executedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  executedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  executedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  executedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  executedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   executed_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   executed_not?: InputMaybe<Scalars['Boolean']['input']>
   executed_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
@@ -1583,6 +1659,24 @@ export type Proposal_Filter = {
   proposer_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   proposer_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   queued?: InputMaybe<Scalars['Boolean']['input']>
+  queuedAt?: InputMaybe<Scalars['BigInt']['input']>
+  queuedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  queuedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  queuedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  queuedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  queuedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  queuedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  queuedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  queuedTransactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  queuedTransactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  queuedTransactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   queued_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   queued_not?: InputMaybe<Scalars['Boolean']['input']>
   queued_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
@@ -1652,7 +1746,25 @@ export type Proposal_Filter = {
   values_not?: InputMaybe<Array<Scalars['BigInt']['input']>>
   values_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>
   values_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  vetoTransactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  vetoTransactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  vetoTransactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   vetoed?: InputMaybe<Scalars['Boolean']['input']>
+  vetoedAt?: InputMaybe<Scalars['BigInt']['input']>
+  vetoedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  vetoedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  vetoedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  vetoedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  vetoedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  vetoedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  vetoedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   vetoed_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   vetoed_not?: InputMaybe<Scalars['Boolean']['input']>
   vetoed_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
@@ -1687,7 +1799,9 @@ export enum Proposal_OrderBy {
   AbstainVotes = 'abstainVotes',
   AgainstVotes = 'againstVotes',
   Calldatas = 'calldatas',
+  CancelTransactionHash = 'cancelTransactionHash',
   Canceled = 'canceled',
+  CanceledAt = 'canceledAt',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
   DaoContractImage = 'dao__contractImage',
@@ -1709,6 +1823,7 @@ export enum Proposal_OrderBy {
   DescriptionHash = 'descriptionHash',
   ExecutableFrom = 'executableFrom',
   Executed = 'executed',
+  ExecutedAt = 'executedAt',
   ExecutionTransactionHash = 'executionTransactionHash',
   ExpiresAt = 'expiresAt',
   ForVotes = 'forVotes',
@@ -1718,6 +1833,8 @@ export enum Proposal_OrderBy {
   ProposalThreshold = 'proposalThreshold',
   Proposer = 'proposer',
   Queued = 'queued',
+  QueuedAt = 'queuedAt',
+  QueuedTransactionHash = 'queuedTransactionHash',
   QuorumVotes = 'quorumVotes',
   SnapshotBlockNumber = 'snapshotBlockNumber',
   Targets = 'targets',
@@ -1725,7 +1842,9 @@ export enum Proposal_OrderBy {
   Title = 'title',
   TransactionHash = 'transactionHash',
   Values = 'values',
+  VetoTransactionHash = 'vetoTransactionHash',
   Vetoed = 'vetoed',
+  VetoedAt = 'vetoedAt',
   VoteCount = 'voteCount',
   VoteEnd = 'voteEnd',
   VoteStart = 'voteStart',
@@ -2478,6 +2597,7 @@ export type ProposalFragment = {
   voteStart: any
   snapshotBlockNumber: any
   transactionHash: any
+  executedAt?: any | null
   executionTransactionHash?: any | null
   dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
 }
@@ -2736,6 +2856,7 @@ export type DaosForDashboardQuery = {
       values: Array<any>
       snapshotBlockNumber: any
       transactionHash: any
+      executedAt?: any | null
       executionTransactionHash?: any | null
       votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
       dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
@@ -2842,6 +2963,7 @@ export type ProposalQuery = {
     voteStart: any
     snapshotBlockNumber: any
     transactionHash: any
+    executedAt?: any | null
     executionTransactionHash?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
@@ -2884,6 +3006,7 @@ export type ProposalOgMetadataQuery = {
     voteStart: any
     snapshotBlockNumber: any
     transactionHash: any
+    executedAt?: any | null
     executionTransactionHash?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
@@ -2936,6 +3059,7 @@ export type ProposalsQuery = {
     voteStart: any
     snapshotBlockNumber: any
     transactionHash: any
+    executedAt?: any | null
     executionTransactionHash?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
@@ -3093,6 +3217,7 @@ export const ProposalFragmentDoc = gql`
     voteStart
     snapshotBlockNumber
     transactionHash
+    executedAt
     executionTransactionHash
     dao {
       governorAddress

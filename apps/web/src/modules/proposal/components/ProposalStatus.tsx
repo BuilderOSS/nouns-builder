@@ -3,33 +3,42 @@ import dayjs from 'dayjs'
 import React from 'react'
 
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
+import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 
-import { parseBgColor, parseState, parseTime } from './ProposalStatus.helper'
+import { formatTime, parseBgColor, parseState, parseTime } from './ProposalStatus.helper'
 
-type StatusProps = {
-  state: ProposalState
-  voteEnd: number
-  voteStart: number
-  expiresAt?: number
+export type ProposalForStatus = Pick<
+  Proposal,
+  | 'state'
+  | 'voteEnd'
+  | 'voteStart'
+  | 'expiresAt'
+  | 'executedAt'
+  | 'title'
+  | 'proposalNumber'
+  | 'timeCreated'
+>
+
+type StatusProps = ProposalForStatus & {
   className?: string
   flipped?: Boolean
   showTime?: Boolean
 }
 
 export const ProposalStatus: React.FC<StatusProps> = ({
-  state,
-  voteEnd,
-  voteStart,
-  expiresAt,
   className,
   flipped,
   showTime,
+  ...proposal
 }) => {
+  const { state, voteEnd, voteStart, expiresAt, executedAt } = proposal
+
   const now = dayjs.unix(Date.now() / 1000)
 
   const diffEnd = dayjs.unix(voteEnd).diff(now, 'second')
   const diffStart = dayjs.unix(voteStart).diff(now, 'second')
   const diffExpiration = expiresAt ? dayjs.unix(expiresAt).diff(now, 'second') : 0
+  const diffExecution = executedAt ? now.diff(dayjs.unix(executedAt), 'second') : 0
 
   return (
     <Flex
@@ -37,20 +46,18 @@ export const ProposalStatus: React.FC<StatusProps> = ({
       align="center"
       direction={flipped ? { '@768': 'row-reverse' } : {}}
     >
-      {(!!state || state === ProposalState.Pending) && (
-        <Box
-          py={'x1'}
-          px={'x3'}
-          borderRadius={'round'}
-          borderStyle={'solid'}
-          borderWidth={'normal'}
-          mr={flipped ? { '@initial': 'x3', '@768': 'x0' } : 'x3'}
-          ml={flipped ? { '@768': 'x3' } : 'x0'}
-          style={parseBgColor(state)}
-        >
-          <Label size="sm">{parseState(state)}</Label>
-        </Box>
-      )}
+      <Box
+        py={'x1'}
+        px={'x3'}
+        borderRadius={'round'}
+        borderStyle={'solid'}
+        borderWidth={'normal'}
+        mr={flipped ? { '@initial': 'x3', '@768': 'x0' } : 'x3'}
+        ml={flipped ? { '@768': 'x3' } : 'x0'}
+        style={parseBgColor(state)}
+      >
+        <Label size="sm">{parseState(state)}</Label>
+      </Box>
       {state === ProposalState.Pending && showTime && (
         <Paragraph color="text3" data-testid="time-prefix">
           {parseTime(diffStart, 'Starts')}
@@ -64,6 +71,11 @@ export const ProposalStatus: React.FC<StatusProps> = ({
       {state === ProposalState.Queued && showTime && (
         <Paragraph color="text3" data-testid="time-prefix">
           {parseTime(diffExpiration, 'Expires')}
+        </Paragraph>
+      )}
+      {state === ProposalState.Executed && showTime && (
+        <Paragraph color="text3" data-testid="time-prefix">
+          {formatTime(diffExecution, 'ago', false)}
         </Paragraph>
       )}
     </Flex>

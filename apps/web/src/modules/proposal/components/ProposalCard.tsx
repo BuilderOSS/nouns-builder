@@ -4,34 +4,20 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
 
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { useIsMounted } from 'src/hooks/useIsMounted'
 
 import { statusStyle, titleStyle } from './ProposalCard.css'
-import { ProposalStatus } from './ProposalStatus'
+import { ProposalForStatus, ProposalStatus } from './ProposalStatus'
 
-type ProposalCardProps = {
-  proposalId: string
-  title: string
-  proposalNumber: number
-  state: ProposalState
-  timeCreated: number
-  voteEnd: number
-  voteStart: number
-  expiresAt?: number
+type ProposalCardProps = ProposalForStatus & {
   collection?: string
 }
 
 export const ProposalCard: React.FC<ProposalCardProps> = ({
-  title,
-  proposalNumber,
-  state,
-  timeCreated,
-  voteEnd,
-  voteStart,
-  expiresAt,
   collection,
+  ...proposal
 }) => {
+  const { title, proposalNumber, timeCreated } = proposal
   const isMounted = useIsMounted()
   const router = useRouter()
 
@@ -74,15 +60,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
           </Paragraph>
         </Box>
 
-        <ProposalStatus
-          state={state}
-          voteEnd={voteEnd}
-          voteStart={voteStart}
-          expiresAt={expiresAt}
-          className={statusStyle}
-          flipped
-          showTime
-        />
+        <ProposalStatus {...proposal} className={statusStyle} flipped showTime />
         <Flex
           display={{ '@initial': 'flex', '@768': 'none' }}
           justify={'flex-end'}
