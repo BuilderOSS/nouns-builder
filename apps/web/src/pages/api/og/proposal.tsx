@@ -135,11 +135,11 @@ export default async function handler(req: NextRequest) {
         >
           <NogglesLogo
             fill={'white'}
-            width="90"
+            width="120"
             style={{ objectFit: 'contain', paddingRight: '2px' }}
             alt="logo"
           />
-          <p style={{ marginLeft: '10px', fontWeight: 500 }}>Builder</p>
+          <p style={{ marginLeft: '10px', fontWeight: 500, fontSize: '24px' }}>Builder</p>
         </div>
         <div style={{ display: 'flex', position: 'absolute', bottom: 50, right: 95 }}>
           <p style={{ fontSize: '28px', color: '#808080' }}>nouns.build</p>
@@ -226,7 +226,7 @@ export default async function handler(req: NextRequest) {
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p
                 style={{
-                  fontSize: '20px',
+                  fontSize: '24px',
                   fontWeight: 700,
                   marginRight: '12px',
                   color: '#808080',
@@ -241,45 +241,46 @@ export default async function handler(req: NextRequest) {
                   borderRadius: '9999px',
                   padding: '4px 12px',
                   color: proposalStatusColor.color,
+                  fontWeight: 500,
                 }}
               >
                 {parseState(data.proposal.state)}
               </p>
             </div>
-            <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.proposal.title}</p>
+            <p style={{ fontSize: '32px', fontWeight: 700 }}>{data.proposal.title}</p>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <p
                 style={{
-                  fontSize: '20px',
+                  fontSize: '24px',
                   fontWeight: 400,
                   marginRight: '42px',
                 }}
               >
                 For{' '}
-                <span style={{ marginLeft: '6px', color: '#1CB687', fontWeight: 500 }}>
+                <span style={{ marginLeft: '6px', color: '#1CB687', fontWeight: 700 }}>
                   {data.proposal.forVotes}
                 </span>
               </p>
               <p
                 style={{
-                  fontSize: '20px',
+                  fontSize: '24px',
                   fontWeight: 400,
                   marginRight: '42px',
                 }}
               >
                 Against{' '}
-                <span style={{ marginLeft: '6px', color: '#F03232', fontWeight: 500 }}>
+                <span style={{ marginLeft: '6px', color: '#F03232', fontWeight: 700 }}>
                   {data.proposal.againstVotes}
                 </span>
               </p>
               <p
                 style={{
-                  fontSize: '20px',
+                  fontSize: '24px',
                   fontWeight: 400,
                 }}
               >
                 Abstain{' '}
-                <span style={{ marginLeft: '6px', color: '#808080', fontWeight: 500 }}>
+                <span style={{ marginLeft: '6px', color: '#808080', fontWeight: 700 }}>
                   {data.proposal.abstainVotes}
                 </span>
               </p>
@@ -289,6 +290,8 @@ export default async function handler(req: NextRequest) {
       </div>
     ),
     {
+      width: 1200,
+      height: 800,
       fonts: [
         {
           name: 'PT Root UI',
