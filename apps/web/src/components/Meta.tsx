@@ -19,6 +19,13 @@ interface MetaProps {
   }
 }
 
+const trimTitle = (title: string) => {
+  if (title.length > 32) {
+    return title.slice(0, 31) + '…'
+  }
+  return title
+}
+
 export const Meta: React.FC<MetaProps> = ({
   title,
   type,
@@ -28,6 +35,9 @@ export const Meta: React.FC<MetaProps> = ({
   farcaster,
 }) => {
   const name = PUBLIC_IS_TESTNET ? 'Testnet Nouns Builder' : 'Nouns Builder'
+
+  // eslint-disable-next-line no-param-reassign
+  title = trimTitle(title)
 
   const m = {
     title,

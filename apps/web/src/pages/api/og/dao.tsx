@@ -127,11 +127,11 @@ export default async function handler(req: NextRequest) {
         >
           <NogglesLogo
             fill={'white'}
-            width="90"
+            width="120"
             style={{ objectFit: 'contain', paddingRight: '2px' }}
             alt="logo"
           />
-          <p style={{ marginLeft: '10px', fontWeight: 500 }}>Builder</p>
+          <p style={{ marginLeft: '10px', fontWeight: 500, fontSize: '24px' }}>Builder</p>
         </div>
         <div style={{ display: 'flex', position: 'absolute', bottom: 50, right: 95 }}>
           <p style={{ fontSize: '28px', color: '#808080' }}>nouns.build</p>
@@ -170,7 +170,7 @@ export default async function handler(req: NextRequest) {
                 alignItems: 'center',
               }}
             >
-              <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.name}</p>
+              <p style={{ fontSize: '32px', fontWeight: 700 }}>{data.name}</p>
             </div>
             <div style={{ display: 'flex' }}>
               {daoDataWithLabel(
@@ -221,6 +221,8 @@ export default async function handler(req: NextRequest) {
       </div>
     ),
     {
+      width: 1200,
+      height: 800,
       fonts: [
         {
           name: 'PT Root UI',
