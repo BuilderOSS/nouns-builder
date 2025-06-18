@@ -20,6 +20,7 @@ fragment Proposal on Proposal {
   voteStart
   snapshotBlockNumber
   transactionHash
+  executedAt
   executionTransactionHash
   dao {
     governorAddress

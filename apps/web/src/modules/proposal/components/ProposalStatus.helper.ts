@@ -3,32 +3,34 @@ import { theme } from '@zoralabs/zord'
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { fromSeconds } from 'src/utils/helpers'
 
-export function parseTime(timediff: number, prefix: string) {
+export function formatTime(
+  timediff: number,
+  affix: string,
+  isPrefix: boolean
+): string | undefined {
   const timeObj = fromSeconds(timediff)
 
-  if (timeObj.days && timeObj.days > 0) {
-    return timeObj.days > 1
-      ? `${prefix} in ${timeObj.days} days`
-      : `${prefix} in ${timeObj.days} day`
+  const units = [
+    { value: timeObj.days, label: 'day' },
+    { value: timeObj.hours, label: 'hour' },
+    { value: timeObj.minutes, label: 'minute' },
+    { value: timeObj.seconds, label: 'second' },
+  ]
+
+  for (const unit of units) {
+    if (unit.value && unit.value > 0) {
+      const plural = unit.value > 1 ? `${unit.label}s` : unit.label
+      return isPrefix
+        ? `${affix} in ${unit.value} ${plural}`
+        : `${unit.value} ${plural} ${affix}`
+    }
   }
 
-  if (timeObj.hours && timeObj.hours > 0) {
-    return timeObj.hours > 1
-      ? `${prefix} in ${timeObj.hours} hours`
-      : `${prefix} in ${timeObj.hours} hour`
-  }
+  return undefined
+}
 
-  if (timeObj.minutes && timeObj.minutes > 0) {
-    return timeObj.minutes > 1
-      ? `${prefix} in ${timeObj.minutes} minutes`
-      : `${prefix} in ${timeObj.minutes} minute`
-  }
-
-  if (timeObj.seconds && timeObj.seconds > 0) {
-    return timeObj.seconds > 1
-      ? `${prefix} in ${timeObj.seconds} seconds`
-      : `${prefix} in ${timeObj.seconds} second`
-  }
+export function parseTime(timediff: number, prefix: string) {
+  return formatTime(timediff, prefix, true)
 }
 
 export function parseState(state: ProposalState) {

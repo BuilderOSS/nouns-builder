@@ -24,7 +24,6 @@ describe('proposaal card', () => {
   it('should render a proposal card given a succeeded propoasl', async () => {
     render(
       <ProposalCard
-        proposalId="0x6ef37a96a14d1a27f9a1a598a418fbfbbc24d63493a129e2223dd4448791b5b8"
         timeCreated={1668002568}
         title="A proposal title"
         proposalNumber={1}
@@ -43,7 +42,6 @@ describe('proposaal card', () => {
   it('should render a proposal card given an active proposal', async () => {
     render(
       <ProposalCard
-        proposalId="0x6ef37a96a14d1a27f9a1a598a418fbfbbc24d63493a129e2223dd4448791b5b8"
         timeCreated={dayjs(date).unix()}
         title="A proposal title"
         proposalNumber={1}

@@ -226,18 +226,7 @@ export const Activity: React.FC = () => {
             </Flex>
           ) : data?.proposals?.length ? (
             data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard
-                key={index}
-                collection={token}
-                proposalId={proposal.proposalId}
-                proposalNumber={proposal.proposalNumber}
-                title={proposal.title || ''}
-                state={proposal.state}
-                timeCreated={proposal.timeCreated}
-                voteEnd={proposal.voteEnd}
-                voteStart={proposal.voteStart}
-                expiresAt={proposal.expiresAt}
-              />
+              <ProposalCard key={index} collection={token} {...proposal} />
             ))
           ) : (
             <Flex

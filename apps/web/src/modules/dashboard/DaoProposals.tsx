@@ -77,12 +77,11 @@ export const DaoProposals = ({
         {proposals.map((proposal) => (
           <DaoProposalCard
             key={proposal.proposalNumber}
-            {...proposal}
             chainId={chainId}
             currentChainSlug={currentChainSlug}
             tokenAddress={tokenAddress}
-            proposalState={proposal.proposalState}
             userAddress={userAddress}
+            {...proposal}
           />
         ))}
       </Box>
