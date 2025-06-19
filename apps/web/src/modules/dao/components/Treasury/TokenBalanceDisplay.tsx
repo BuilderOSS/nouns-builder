@@ -44,7 +44,7 @@ export const TokenBalanceDisplay: React.FC<{
         borderStyle={'solid'}
         borderRadius={'curved'}
         borderWidth={'normal'}
-        mt={'x4'}
+        mt={'x6'}
         mb={'x8'}
       >
         {!isMobile && (

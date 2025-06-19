@@ -15,6 +15,7 @@ import { sectionWrapperStyle } from 'src/styles/dao.css'
 import { formatCryptoVal, numberFormatter } from 'src/utils/numbers'
 
 import { useDaoStore } from '../../stores'
+import { ContractLink } from '../ContractLink'
 import { NFTBalanceDisplay } from './NFTBalanceDisplay'
 import { TokenBalanceDisplay } from './TokenBalanceDisplay'
 
@@ -71,6 +72,7 @@ export const Treasury = () => {
         <Text fontSize={28} fontWeight={'display'}>
           Treasury
         </Text>
+        <ContractLink address={addresses.treasury} />
       </Flex>
 
       <Grid
