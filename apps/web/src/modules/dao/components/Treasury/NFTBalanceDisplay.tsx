@@ -1,15 +1,15 @@
 import { Box, Flex, Grid, Text } from '@zoralabs/zord'
-import { OwnedNft } from 'alchemy-sdk'
 import { getFetchableUrls } from 'ipfs-service'
 import React from 'react'
 
 import { FallbackImage } from 'src/components/FallbackImage'
 import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
+import { SerializedNft } from 'src/services/alchemyService'
 import { erc721AssetsWrapper } from 'src/styles/Proposals.css'
 import { AddressType, CHAIN_ID } from 'src/typings'
 
 export const NFTBalanceDisplay: React.FC<{
-  nfts: OwnedNft[] | undefined
+  nfts: SerializedNft[] | undefined
   chainId: CHAIN_ID
   owner: AddressType | undefined
 }> = ({ nfts, chainId, owner }) => {
@@ -38,7 +38,10 @@ export const NFTBalanceDisplay: React.FC<{
         align="stretch"
       >
         {nfts.map((nft) => {
-          const urls = getFetchableUrls(nft.image.originalUrl)
+          const fetchableUrls = getFetchableUrls(nft.image.originalUrl)
+          const urls = fetchableUrls
+            ? [nft.image.originalUrl, ...fetchableUrls]
+            : [nft.image.originalUrl]
           const url =
             ETHERSCAN_BASE_URL[chainId] + '/token/' + nft.contract.address + '?a=' + owner
           return (

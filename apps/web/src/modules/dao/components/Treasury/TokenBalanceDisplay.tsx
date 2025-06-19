@@ -61,7 +61,7 @@ export const TokenBalanceDisplay: React.FC<{
             <>
               <Text>
                 {formatCryptoVal(
-                  formatUnits(tokenBalance.balance, tokenBalance.decimals)
+                  formatUnits(BigInt(tokenBalance.balance), tokenBalance.decimals)
                 )}{' '}
                 {tokenBalance.symbol}
               </Text>

@@ -1,15 +1,26 @@
-import { OwnedNft } from 'alchemy-sdk'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
 
 import SWR_KEYS from 'src/constants/swrKeys'
+import { SerializedNft } from 'src/services/alchemyService'
 import { CHAIN_ID } from 'src/typings'
-import { getNFTBalance } from 'src/utils/alchemy'
 
 export type NFTBalanceReturnType = {
-  nfts?: OwnedNft[]
+  nfts?: SerializedNft[]
   isLoading: boolean
   error?: Error | null
+}
+
+const fetchNFTBalance = async (
+  chainId: CHAIN_ID,
+  address: Address
+): Promise<SerializedNft[]> => {
+  const response = await fetch(`/api/nft-balances?chainId=${chainId}&address=${address}`)
+  if (!response.ok) {
+    throw new Error('Failed to fetch NFT balances')
+  }
+  const result = await response.json()
+  return result.data || []
 }
 
 export const useNFTBalance = (
@@ -20,7 +31,7 @@ export const useNFTBalance = (
     !!address && !!chainId && isAddress(address)
       ? [SWR_KEYS.NFT_BALANCES, chainId, address]
       : null,
-    async () => getNFTBalance(chainId as CHAIN_ID, address as `0x${string}`),
+    async () => fetchNFTBalance(chainId as CHAIN_ID, address as Address),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

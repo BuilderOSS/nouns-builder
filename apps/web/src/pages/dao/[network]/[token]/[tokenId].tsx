@@ -2,6 +2,7 @@ import { Flex } from '@zoralabs/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
+import { unstable_serialize } from 'swr'
 import { useAccount } from 'wagmi'
 
 import { Meta } from 'src/components/Meta'
@@ -11,6 +12,7 @@ import { CACHE_TIMES } from 'src/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
 import { CAST_ENABLED } from 'src/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from 'src/constants/messages'
+import SWR_KEYS from 'src/constants/swrKeys'
 import { getEscrowDelegate } from 'src/data/eas/requests/getEscrowDelegate'
 import { SDK } from 'src/data/subgraph/client'
 import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
@@ -30,6 +32,10 @@ import { DaoTopSection } from 'src/modules/dao/components/DaoTopSection'
 import FeedTab from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
+import {
+  getCachedNFTBalance,
+  getEnrichedTokenBalances,
+} from 'src/services/alchemyService'
 import { AddressType, CHAIN_ID, Chain } from 'src/typings'
 import { isPossibleMarkdown } from 'src/utils/helpers'
 
@@ -45,6 +51,7 @@ interface TokenPageProps {
   addresses: DaoContractAddresses
   ogImageURL: string
   chainId: CHAIN_ID
+  fallback?: Record<string, any>
 }
 
 const TokenPage: NextPageWithLayout<TokenPageProps> = ({
@@ -282,6 +289,27 @@ export const getServerSideProps: GetServerSideProps = async ({
       req.headers.host
     }/api/og/dao?data=${encodeURIComponent(JSON.stringify(daoOgMetadata))}`
 
+    // Pre-fetch treasury data for SWR cache hydration
+    const fallback: Record<string, any> = {}
+
+    try {
+      const [tokenBalancesResult, nftBalancesResult] = await Promise.all([
+        getEnrichedTokenBalances(chain.id, treasuryAddress),
+        getCachedNFTBalance(chain.id, treasuryAddress),
+      ])
+
+      // Token balances with safe fallback (already serialized by service)
+      fallback[unstable_serialize([SWR_KEYS.TOKEN_BALANCES, chain.id, treasuryAddress])] =
+        tokenBalancesResult?.data ?? []
+
+      // NFT balances with safe fallback (already sanitized by service)
+      fallback[unstable_serialize([SWR_KEYS.NFT_BALANCES, chain.id, treasuryAddress])] =
+        nftBalancesResult?.data ?? []
+    } catch (error) {
+      console.warn('Failed to pre-fetch treasury balances:', error)
+      // Continue without pre-fetched data - SWR will handle client-side fetching
+    }
+
     const { maxAge, swr } = CACHE_TIMES.TOKEN_INFO
     res.setHeader(
       'Cache-Control',
@@ -298,6 +326,7 @@ export const getServerSideProps: GetServerSideProps = async ({
       addresses,
       ogImageURL,
       chainId: chain.id,
+      fallback,
     }
 
     return {

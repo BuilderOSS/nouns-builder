@@ -1,20 +1,19 @@
 import useSWR from 'swr'
-import { Address, formatUnits, isAddress } from 'viem'
+import { Address, isAddress } from 'viem'
 
 import SWR_KEYS from 'src/constants/swrKeys'
 import { CHAIN_ID } from 'src/typings'
-import {
-  TokenBalance as InnerTokenBalance,
-  TokenMetadata,
-  TokenPrice,
-  getTokenBalances,
-  getTokenMetadatas,
-  getTokenPrices,
-} from 'src/utils/alchemy'
 
-export type TokenBalance = InnerTokenBalance &
-  TokenMetadata &
-  TokenPrice & { valueInUSD: string }
+export type TokenBalance = {
+  address: string
+  balance: string // serialized bigint
+  name: string
+  symbol: string
+  decimals: number
+  logo: string
+  price: string
+  valueInUSD: string
+}
 
 export type TokenBalancesReturnType = {
   balances: undefined | TokenBalance[]
@@ -22,53 +21,18 @@ export type TokenBalancesReturnType = {
   error?: Error | null
 }
 
-const MINIMUM_USD_VALUE = 0.01
-const SYMBOL_REGEX = /^[a-zA-Z0-9]+$/
-
-const getTokenBalancesWithMetadata = async (
+const fetchTokenBalances = async (
   chainId: CHAIN_ID,
   address: Address
-): Promise<TokenBalancesReturnType['balances']> => {
-  const balances = await getTokenBalances(chainId, address)
-  if (!balances) {
-    return []
-  }
-  const metadatas = await getTokenMetadatas(
-    chainId,
-    balances.map((balance) => balance.address)
+): Promise<TokenBalance[]> => {
+  const response = await fetch(
+    `/api/token-balances?chainId=${chainId}&address=${address}`
   )
-  if (!metadatas) {
-    return []
+  if (!response.ok) {
+    throw new Error('Failed to fetch token balances')
   }
-
-  const symbols = metadatas
-    .map((metadata) => metadata.symbol.trim())
-    .filter((symbol) => SYMBOL_REGEX.test(symbol))
-  if (!symbols.length) {
-    return []
-  }
-  const prices = await getTokenPrices(chainId, symbols)
-  if (!prices) {
-    return []
-  }
-
-  const all = prices.map((price) => {
-    const metadata = metadatas.find(
-      (metadata) => metadata.symbol.trim() === price.symbol
-    )!
-    const balance = balances.find(
-      (balance) => balance.address.toLowerCase() === metadata.address.toLowerCase()
-    )!
-    const amount = parseFloat(formatUnits(balance.balance, metadata.decimals))
-    return {
-      ...balance,
-      ...metadata,
-      ...price,
-      valueInUSD: (amount * parseFloat(price.price)).toFixed(2),
-    }
-  })
-
-  return all.filter((balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE)
+  const result = await response.json()
+  return result.data || []
 }
 
 export const useTokenBalances = (
@@ -79,8 +43,7 @@ export const useTokenBalances = (
     !!address && !!chainId && isAddress(address)
       ? [SWR_KEYS.TOKEN_BALANCES, chainId, address]
       : null,
-    async () =>
-      getTokenBalancesWithMetadata(chainId as CHAIN_ID, address as `0x${string}`),
+    async () => fetchTokenBalances(chainId as CHAIN_ID, address as Address),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
