@@ -1,6 +1,6 @@
 import { CHAIN_ID } from 'src/typings'
 
-const ALCHEMY_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
+export const ALCHEMY_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'eth-mainnet',
   [CHAIN_ID.OPTIMISM]: 'opt-mainnet',
   [CHAIN_ID.SEPOLIA]: 'eth-sepolia',
@@ -11,7 +11,7 @@ const ALCHEMY_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ZORA_SEPOLIA]: 'zora-sepolia',
 }
 
-const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
+export const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY
 
 export const getAlchemyRpcUrl = (chainId: CHAIN_ID) => {
   const network = ALCHEMY_NETWORKS[chainId]

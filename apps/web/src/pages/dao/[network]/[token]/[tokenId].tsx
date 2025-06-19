@@ -24,6 +24,7 @@ import {
   DaoContractAddresses,
   SectionHandler,
   SmartContracts,
+  Treasury,
 } from 'src/modules/dao'
 import { DaoTopSection } from 'src/modules/dao/components/DaoTopSection'
 import FeedTab from 'src/modules/dao/components/Feed/Feed'
@@ -87,6 +88,10 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       title: 'About',
       component: [<About key={'about'} />],
     }
+    const treasurySection = {
+      title: 'Treasury',
+      component: [<Treasury key={'treasury'} />],
+    }
     const proposalsSection = {
       title: 'Activity',
       component: [<Activity key={'proposals'} />],
@@ -104,7 +109,12 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       component: [<FeedTab key="feed" collectionAddress={collection} />],
     }
 
-    const publicSections = [aboutSection, proposalsSection, smartContractsSection]
+    const publicSections = [
+      aboutSection,
+      treasurySection,
+      proposalsSection,
+      smartContractsSection,
+    ]
 
     const baseSections = hasThreshold ? [...publicSections, adminSection] : publicSections
     return CAST_ENABLED.includes(collection)

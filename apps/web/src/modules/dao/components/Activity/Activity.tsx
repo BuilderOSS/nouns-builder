@@ -37,7 +37,6 @@ import { useDaoStore } from '../../stores'
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
 import { MobileMenu } from './MobileMenu'
-import { Treasury } from './Treasury'
 
 export const Activity: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
@@ -103,8 +102,6 @@ export const Activity: React.FC = () => {
   return (
     <>
       <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
-        <Treasury />
-
         <Flex width={'100%'} justify={'space-between'} align={'center'}>
           <Text variant="heading-sm" style={{ fontWeight: 800 }}>
             Proposals
