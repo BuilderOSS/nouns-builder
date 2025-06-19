@@ -34,7 +34,7 @@ export const exploreMyDaosRequest = async (
         const daosByChain = userDaos
           .filter((x) => x.chainId === chainId)
           .map((x) => x.collectionAddress)
-        const res = await SDK.connect(chainId).myDaosPage({ daos: daosByChain })
+        const res = await SDK.connect(chainId).findAuctionsForDaos({ daos: daosByChain })
         return res.auctions.map((x) => ({ ...x, chainId }))
       })
     )
@@ -84,7 +84,7 @@ export const exploreDaosRequest = async (
     if (orderBy === Auction_OrderBy.EndTime)
       where.endTime_gt = Math.floor(Date.now() / 1000)
 
-    const data = await SDK.connect(chainId).exploreDaosPage({
+    const data = await SDK.connect(chainId).findAuctions({
       orderBy,
       orderDirection,
       where,

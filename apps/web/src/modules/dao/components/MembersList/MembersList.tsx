@@ -5,7 +5,7 @@ import React, { useMemo } from 'react'
 import useSWR from 'swr'
 
 import Pagination from 'src/components/Pagination'
-import { DaoMember } from 'src/data/subgraph/requests/daoMembersList'
+import { DaoVoter } from 'src/data/subgraph/requests/daoVoters'
 import { usePagination } from 'src/hooks/usePagination'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -15,7 +15,7 @@ import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
 
 type MembersQuery = {
-  membersList: DaoMember[]
+  membersList: DaoVoter[]
 }
 
 export const MembersList = ({
@@ -80,7 +80,7 @@ export const MembersList = ({
       <MembersPanel isMobile={isMobile}>
         {members?.map((member) => (
           <MemberCard
-            key={member.address}
+            key={member.voter}
             member={member}
             totalSupply={totalSupply}
             isMobile={isMobile}

@@ -1,7 +1,9 @@
 import { Box, Flex, Label, Text } from '@zoralabs/zord'
 import { useRouter } from 'next/router'
 
+import { Icon } from 'src/components/Icon'
 import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
+import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useEnsData } from 'src/hooks/useEnsData'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -15,10 +17,20 @@ interface ProposalHeaderProps {
 
 export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
   const router = useRouter()
-  const { title, voteStart, voteEnd, proposer, expiresAt, proposalNumber } = proposal
+  const { title, proposer, proposalNumber, executionTransactionHash } = proposal
 
   const { displayName: proposerDisplayName } = useEnsData(proposer)
   const chain = useChainStore((x) => x.chain)
+
+  const status = (
+    <Flex align={'center'}>
+      <ProposalStatus
+        {...proposal}
+        showTime={proposal.state === ProposalState.Executed}
+      />
+      {!!executionTransactionHash && <Icon fill="text3" id="arrowTopRight" />}
+    </Flex>
+  )
 
   return (
     <Flex direction={'column'} gap={{ '@initial': 'x4', '@768': 'x7' }} mb={'x2'}>
@@ -39,12 +51,17 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
           <Label fontSize={20} color={'text3'} mr={'x2'}>
             Proposal {proposalNumber}
           </Label>
-          <ProposalStatus
-            state={proposal.state}
-            voteEnd={voteEnd}
-            voteStart={voteStart}
-            expiresAt={expiresAt}
-          />
+          {executionTransactionHash ? (
+            <a
+              href={`${ETHERSCAN_BASE_URL[chain.id]}/tx/${executionTransactionHash}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {status}
+            </a>
+          ) : (
+            status
+          )}
         </Flex>
         <Flex
           direction={{ '@initial': 'column', '@768': 'row' }}

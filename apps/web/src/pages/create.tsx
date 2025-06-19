@@ -1,10 +1,10 @@
-import { Box, Flex } from '@zoralabs/zord'
+import { Box, Flex, Text } from '@zoralabs/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useRouter } from 'next/router'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useAccount } from 'wagmi'
 
 import { Meta } from 'src/components/Meta'
+import { useIsGnosisSafe } from 'src/hooks/useIsGnosisSafe'
 import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
 import {
   AllocationForm,
@@ -23,15 +23,10 @@ import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/styles.css'
 import { NextPageWithLayout } from './_app'
 
 const CreatePage: NextPageWithLayout = () => {
-  const router = useRouter()
   const { activeSection } = useFormStore()
-  const { address } = useAccount()
+  const { address, chain } = useAccount()
 
-  useEffect(() => {
-    if (!address) {
-      router.push('/')
-    }
-  }, [address, router])
+  const { isGnosisSafe } = useIsGnosisSafe(address, chain?.id)
 
   /*
 
@@ -89,10 +84,6 @@ const CreatePage: NextPageWithLayout = () => {
     ]
   }, [])
 
-  if (!address) {
-    return null
-  }
-
   return (
     <>
       <Meta title={'Create a DAO'} slug={'/create'} />
@@ -110,7 +101,7 @@ const CreatePage: NextPageWithLayout = () => {
                 'linear-gradient(179.98deg, rgba(0, 0, 0, 0.5) -0.98%, rgba(0, 0, 0, 0) 47.4%, rgba(0, 0, 0, 0.6) 99.98%)',
             }}
           />
-          <CreateNavigation sections={sections} />
+          {!!address && !isGnosisSafe && <CreateNavigation sections={sections} />}
         </Flex>
         <Flex
           className={createWrapperHalf['right']}
@@ -119,39 +110,67 @@ const CreatePage: NextPageWithLayout = () => {
           justify={'center'}
         >
           <Flex direction={'column'} className={formWrapper}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={sections[activeSection]?.title}
-                variants={{
-                  exit: {
-                    y: 10,
-                    opacity: 0,
-                  },
-                  closed: {
-                    y: 10,
-                    opacity: 0,
-                  },
-                  open: {
-                    y: 0,
-                    opacity: 1,
-                    transition: {
-                      when: 'afterChildren',
-                    },
-                  },
-                }}
-                initial="closed"
-                animate="open"
-                exit="exit"
-              >
-                <FormHandler
-                  sectionIndex={activeSection}
-                  form={sections[activeSection]?.form}
-                  title={sections[activeSection]?.title}
-                  heading={sections[activeSection]?.heading}
-                  subHeading={sections[activeSection]?.subHeading}
-                />
-              </motion.div>
-            </AnimatePresence>
+            {!address ? (
+              <Flex direction={'column'} mt={'x6'}>
+                <Text mb={'x4'} style={{ fontSize: '24px', fontWeight: 700 }}>
+                  Wallet Not Connected
+                </Text>
+
+                <Text color="text2">Please connect your wallet to create your DAO.</Text>
+              </Flex>
+            ) : (
+              <>
+                {isGnosisSafe ? (
+                  <Flex direction={'column'} mt={'x6'}>
+                    <Text mb={'x4'} style={{ fontSize: '24px', fontWeight: 700 }}>
+                      DAO Creation Unavailable
+                    </Text>
+
+                    <Text color="text2" style={{ fontWeight: 700 }} mb={'x2'}>
+                      Please use a different wallet to create your DAO.
+                    </Text>
+                    <Text color="text2">
+                      Gnosis Safe doesn’t support the multi-transaction flow required for
+                      DAO creation, which can lead to incomplete setups.
+                    </Text>
+                  </Flex>
+                ) : (
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={sections[activeSection]?.title}
+                      variants={{
+                        exit: {
+                          y: 10,
+                          opacity: 0,
+                        },
+                        closed: {
+                          y: 10,
+                          opacity: 0,
+                        },
+                        open: {
+                          y: 0,
+                          opacity: 1,
+                          transition: {
+                            when: 'afterChildren',
+                          },
+                        },
+                      }}
+                      initial="closed"
+                      animate="open"
+                      exit="exit"
+                    >
+                      <FormHandler
+                        sectionIndex={activeSection}
+                        form={sections[activeSection]?.form}
+                        title={sections[activeSection]?.title}
+                        heading={sections[activeSection]?.heading}
+                        subHeading={sections[activeSection]?.subHeading}
+                      />
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </>
+            )}
           </Flex>
         </Flex>
       </Box>
