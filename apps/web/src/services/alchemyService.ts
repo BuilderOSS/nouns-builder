@@ -324,6 +324,7 @@ export const getCachedTokenPrices = async (
         results.push(tokenPrice)
       }
     } catch (error) {
+      console.error('getCachedTokenPrices error:', error)
       throw new BackendFailedError('Failed to fetch token prices')
     }
   }
