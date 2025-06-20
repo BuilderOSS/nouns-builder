@@ -1,55 +1,21 @@
 import { Box, Flex, Grid, Text, vars } from '@zoralabs/zord'
 import React from 'react'
 
-import CopyButton from 'src/components/CopyButton/CopyButton'
-import { Icon } from 'src/components/Icon'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { useLayoutStore } from 'src/stores'
-import { useChainStore } from 'src/stores/useChainStore'
 import { about } from 'src/styles/About.css'
-import { walletSnippet } from 'src/utils/helpers'
 
 import { useDaoStore } from '../stores'
+import { ContractLink } from './ContractLink'
 
-const ContractLink = ({ title, address }: { title: string; address?: string }) => {
+const ContractDisplay = ({ title, address }: { title: string; address?: string }) => {
   const { isMobile } = useLayoutStore()
-  const { chain } = useChainStore()
 
   return (
     <Grid columns={isMobile ? 1 : '1fr 3fr'} align={'center'}>
       <Text fontWeight={'display'} py={{ '@initial': 'x2', '@768': 'x0' }}>
         {title}
       </Text>
-      <Flex
-        py={{ '@initial': 'x4', '@768': 'x5' }}
-        px={{ '@initial': 'x4', '@768': 'x6' }}
-        justify={'space-between'}
-        align={'center'}
-        borderRadius={'curved'}
-        borderColor={'border'}
-        borderStyle={'solid'}
-        borderWidth={'normal'}
-        style={{ backgroundColor: '#fafafa' }}
-      >
-        <Text fontSize={16}>
-          {isMobile ? walletSnippet(address as string, 8) : address}
-        </Text>
-        <Flex
-          justify={'center'}
-          align={'center'}
-          gap={{ '@initial': 'x2', '@768': 'x4' }}
-        >
-          <a
-            href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${address}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Icon id="arrowTopRight" fill="text4" />
-          </a>
-
-          <CopyButton text={address} variant={'icon'} />
-        </Flex>
-      </Flex>
+      <ContractLink address={address} />
     </Grid>
   )
 }
@@ -84,13 +50,13 @@ export const SmartContracts = () => {
           </Text>
         </Box>
         <Flex direction={'column'} gap={'x4'}>
-          <ContractLink title="NFT" address={addresses.token} />
-          <ContractLink title="Auction House" address={addresses.auction} />
-          <ContractLink title="Governor" address={addresses.governor} />
-          <ContractLink title="Treasury" address={addresses.treasury} />
-          <ContractLink title="Metadata" address={addresses.metadata} />
+          <ContractDisplay title="NFT" address={addresses.token} />
+          <ContractDisplay title="Auction House" address={addresses.auction} />
+          <ContractDisplay title="Governor" address={addresses.governor} />
+          <ContractDisplay title="Treasury" address={addresses.treasury} />
+          <ContractDisplay title="Metadata" address={addresses.metadata} />
           {addresses?.escrowDelegate && (
-            <ContractLink title="Escrow Delegate" address={addresses.escrowDelegate} />
+            <ContractDisplay title="Escrow Delegate" address={addresses.escrowDelegate} />
           )}
         </Flex>
       </Flex>

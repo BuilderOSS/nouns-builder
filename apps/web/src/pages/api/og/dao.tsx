@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server'
 import { formatEther } from 'viem'
 
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { RPC_URL } from 'src/constants/rpc'
+import { RPC_URLS } from 'src/constants/rpc'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { CHAIN_ID } from 'src/typings'
 import { bgForAddress } from 'src/utils/gradient'
@@ -37,12 +37,19 @@ const ptRootBold = fetch(
   new URL('public/fonts/pt-root-ui_bold.ttf', import.meta.url)
 ).then((res) => res.arrayBuffer())
 
-const getTreasuryBalance = async (chainId: CHAIN_ID, address: string) => {
+const getTreasuryBalance = async (
+  chainId: CHAIN_ID,
+  address: string
+): Promise<string> => {
   // Generate a random request ID
   const requestId = Math.floor(Math.random() * 1_000_000)
 
+  const rpcUrl = RPC_URLS[chainId]?.[0]
+
+  if (!rpcUrl) return '0'
+
   // Query balance directly from the RPC (edge runtime compatible)
-  const { result } = await fetch(RPC_URL[chainId], {
+  const { result } = await fetch(rpcUrl, {
     method: 'POST',
     body: JSON.stringify({
       jsonrpc: '2.0',

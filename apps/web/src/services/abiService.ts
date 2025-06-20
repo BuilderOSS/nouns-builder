@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { AbiFunction, Hex, decodeFunctionData, getAbiItem } from 'viem'
-import { Address, getAddress, pad, trim } from 'viem'
+import { Address, getAddress, pad, trim, zeroHash } from 'viem'
 
 import { CHAIN_ID, DecodedArg, DecodedTransactionData, DecodedValue } from 'src/typings'
 
@@ -11,7 +11,8 @@ import { getRedisConnection } from './redisConnection'
 const EIP1967_PROXY_STORAGE_SLOT =
   '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
 
-const getRedisKey = (chain: string, address: string) => `${chain}:${address}`
+const getEtherscanABIRedisKey = (chain: string, address: string) =>
+  `etherscan:abi:${chain}:${address}`
 
 export type ContractABIResult = {
   abi: string
@@ -19,8 +20,6 @@ export type ContractABIResult = {
   fetchedAddress: string
   source: 'fetched' | 'cache'
 }
-
-const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
 export const getContractABIByAddress = async (
   chainId: CHAIN_ID,
@@ -49,7 +48,7 @@ export const getContractABIByAddress = async (
     slot: EIP1967_PROXY_STORAGE_SLOT,
   })
 
-  if (proxyAddress != ZERO_BYTES32) {
+  if (proxyAddress != zeroHash) {
     fetchedAddress = pad(trim(proxyAddress as Address), {
       size: 20,
     }) as typeof fetchedAddress
@@ -59,7 +58,9 @@ export const getContractABIByAddress = async (
 
   const redisConnection = getRedisConnection()
 
-  let cache = await redisConnection?.get(getRedisKey(chainIdStr, fetchedAddress))
+  let cache = await redisConnection?.get(
+    getEtherscanABIRedisKey(chainIdStr, fetchedAddress)
+  )
 
   if (cache) {
     return {
@@ -79,7 +80,10 @@ export const getContractABIByAddress = async (
     const abi = etherscan.data
 
     if (abi.status === '1') {
-      redisConnection?.set(getRedisKey(chainIdStr, fetchedAddress), JSON.stringify(abi))
+      redisConnection?.set(
+        getEtherscanABIRedisKey(chainIdStr, fetchedAddress),
+        JSON.stringify(abi)
+      )
       return {
         abi: abi.result,
         fetchedAddress,

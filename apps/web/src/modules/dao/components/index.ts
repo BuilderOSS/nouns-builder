@@ -1,6 +1,7 @@
 export * from './SectionHandler'
 export * from './SmartContracts'
 export * from './Activity'
+export * from './Treasury'
 export * from './PreAuction'
 export * from './PreAuctionForm'
 export * from './AdminForm'

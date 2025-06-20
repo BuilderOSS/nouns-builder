@@ -1,6 +1,8 @@
 import { Box, BoxProps } from '@zoralabs/zord'
-import { useMemo } from 'react'
+import { getFetchableUrls } from 'ipfs-service'
+import { useEffect, useMemo, useState } from 'react'
 
+import { FallbackImage } from 'src/components/FallbackImage'
 import { bgForAddress } from 'src/utils/gradient'
 
 import { avatar, avatarVariants } from './Avatar.css'
@@ -20,7 +22,18 @@ export function Avatar({
   src,
   ...props
 }: AvatarProps) {
-  const background = useMemo(() => bgForAddress(address, src), [address, src])
+  const [imageHasError, setImageHasError] = useState(false)
+
+  // Pass null as src to bgForAddress when image fails, so it shows gradient
+  const background = useMemo(
+    () => bgForAddress(address, imageHasError ? null : src),
+    [address, src, imageHasError]
+  )
+
+  // Reset error state when src changes
+  useEffect(() => {
+    setImageHasError(false)
+  }, [src])
 
   return (
     <Box
@@ -28,16 +41,17 @@ export function Avatar({
       style={{ background }}
       {...props}
     >
-      {src && (
-        <img
+      {src && !imageHasError && (
+        <FallbackImage
           key={src}
-          src={src}
+          srcList={getFetchableUrls(src)}
           alt={address || 'Avatar image'}
           style={{
             objectFit: 'cover',
           }}
-          width={size}
-          height={size}
+          width={size ? Number(size) : undefined}
+          height={size ? Number(size) : undefined}
+          onImageError={() => setImageHasError(true)}
         />
       )}
     </Box>
