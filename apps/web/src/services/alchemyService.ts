@@ -1,5 +1,5 @@
 import { Alchemy, Network, NftFilters, TokenBalanceType } from 'alchemy-sdk'
-import { Hex, formatUnits, fromHex, zeroHash } from 'viem'
+import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
 import { AddressType, CHAIN_ID } from 'src/typings'
@@ -212,7 +212,19 @@ export const getCachedNFTBalance = async (
   }
 }
 
-export const getCachedTokenMetadatas = async (
+const TRUSTWALLET_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
+  [CHAIN_ID.ETHEREUM]: 'ethereum',
+  [CHAIN_ID.OPTIMISM]: 'optimism',
+  [CHAIN_ID.BASE]: 'base',
+}
+
+const getTokenLogoUrl = (chainId: CHAIN_ID, address: AddressType) => {
+  const network = TRUSTWALLET_NETWORKS[chainId]
+  if (!network) return ''
+  return `https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/${network}/assets/${getAddress(address)}/logo.png`
+}
+
+const getCachedTokenMetadatas = async (
   chainId: CHAIN_ID,
   addresses: AddressType[]
 ): Promise<CachedResult<TokenMetadata[]> | null> => {
@@ -251,12 +263,14 @@ export const getCachedTokenMetadatas = async (
         const metadata = metadatas[i]
         const address = uncachedAddresses[i]
 
+        const logoUrl = !metadata.logo ? getTokenLogoUrl(chainId, address) : metadata.logo
+
         const tokenMetadata: TokenMetadata = {
           address: address as AddressType,
           name: metadata.name ?? '',
           symbol: metadata.symbol ?? '',
           decimals: metadata.decimals ?? 18,
-          logo: metadata.logo ?? '',
+          logo: logoUrl,
         }
 
         // Cache individual metadata (24 hours TTL)
@@ -277,7 +291,7 @@ export const getCachedTokenMetadatas = async (
   }
 }
 
-export const getCachedTokenPrices = async (
+const getCachedTokenPrices = async (
   chainId: CHAIN_ID,
   addresses: AddressType[]
 ): Promise<CachedResult<TokenPrice[]> | null> => {

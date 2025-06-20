@@ -2,6 +2,7 @@ import { Flex, Grid, Text } from '@zoralabs/zord'
 import React from 'react'
 import { formatUnits } from 'viem'
 
+import { Avatar } from 'src/components/Avatar'
 import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useLayoutStore } from 'src/stores'
@@ -93,6 +94,7 @@ export const TokenBalanceDisplay: React.FC = () => {
               tokenBalance.address +
               '?a=' +
               owner
+
             const value = (
               <>
                 <Text>
@@ -103,6 +105,13 @@ export const TokenBalanceDisplay: React.FC = () => {
                 </Text>
                 <Text>${tokenBalance.valueInUSD}</Text>
               </>
+            )
+
+            const name = (
+              <Flex align={'center'} gap="x2">
+                <Avatar address={tokenBalance.address} src={tokenBalance.logo} />
+                <Text>{tokenBalance.name}</Text>
+              </Flex>
             )
             return (
               <Grid
@@ -117,14 +126,14 @@ export const TokenBalanceDisplay: React.FC = () => {
               >
                 {isMobile ? (
                   <Flex direction={'column'} gap="x2" style={{ maxWidth: '420px' }}>
-                    <Text>{tokenBalance.name}</Text>
+                    {name}
                     <Flex align={'center'} width={'100%'} justify={'space-between'}>
                       {value}
                     </Flex>
                   </Flex>
                 ) : (
                   <>
-                    <Text>{tokenBalance.name}</Text>
+                    {name}
                     {value}
                   </>
                 )}
