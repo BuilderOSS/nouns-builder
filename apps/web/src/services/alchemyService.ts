@@ -83,7 +83,7 @@ const parseTokenBalanceData = (
 // Type definitions
 export type TokenBalance = {
   address: AddressType
-  balance: bigint
+  balance: string
 }
 
 export type TokenMetadata = {
@@ -155,7 +155,7 @@ export const getCachedTokenBalances = async (
 
     const result: TokenBalance[] = nonZeroBalances.map((balance) => ({
       address: balance.contractAddress as AddressType,
-      balance: fromHex(balance.tokenBalance! as Hex, 'bigint'),
+      balance: fromHex(balance.tokenBalance! as Hex, 'bigint').toString(),
     }))
 
     // Cache the result (5 minutes TTL)
@@ -380,7 +380,7 @@ export const getEnrichedTokenBalances = async (
       (balance) => balance.address.toLowerCase() === metadata.address.toLowerCase()
     )!
 
-    const amount = parseFloat(formatUnits(balance.balance, metadata.decimals))
+    const amount = parseFloat(formatUnits(BigInt(balance.balance), metadata.decimals))
     const valueInUSD = (amount * parseFloat(price.price)).toFixed(2)
 
     return {
