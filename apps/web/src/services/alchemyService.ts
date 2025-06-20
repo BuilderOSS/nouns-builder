@@ -8,8 +8,8 @@ import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'
 
 // Cache key generation helpers
-const getTokenPriceKey = (chainId: CHAIN_ID, symbol: string) =>
-  `alchemy:token-price:${chainId}:${symbol.toUpperCase()}`
+const getTokenPriceKey = (chainId: CHAIN_ID, address: string) =>
+  `alchemy:token-price:${chainId}:${address.toLowerCase()}`
 
 const getTokenMetadataKey = (chainId: CHAIN_ID, address: string) =>
   `alchemy:token-metadata:${chainId}:${address.toLowerCase()}`
@@ -95,7 +95,7 @@ export type TokenMetadata = {
 }
 
 export type TokenPrice = {
-  symbol: string
+  address: string
   price: string
 }
 
@@ -279,7 +279,7 @@ export const getCachedTokenMetadatas = async (
 
 export const getCachedTokenPrices = async (
   chainId: CHAIN_ID,
-  symbols: string[]
+  addresses: AddressType[]
 ): Promise<CachedResult<TokenPrice[]> | null> => {
   const alchemy = createAlchemyInstance(chainId)
   if (!alchemy) {
@@ -288,40 +288,63 @@ export const getCachedTokenPrices = async (
 
   const redis = getRedisConnection()
   const results: TokenPrice[] = []
-  const uncachedSymbols: string[] = []
+  const uncachedAddresses: AddressType[] = []
   let hasCache = false
 
-  // Check cache for each symbol
-  for (const symbol of symbols) {
-    const cacheKey = getTokenPriceKey(chainId, symbol)
+  // Check cache for each address
+  for (const address of addresses) {
+    const cacheKey = getTokenPriceKey(chainId, address)
     const cached = await redis?.get(cacheKey)
 
     if (cached) {
       results.push(JSON.parse(cached))
       hasCache = true
     } else {
-      uncachedSymbols.push(symbol)
+      uncachedAddresses.push(address)
     }
   }
 
-  // Fetch uncached prices from API
-  if (uncachedSymbols.length > 0) {
+  // Fetch uncached prices from API in batches of 25 (Alchemy API limit)
+  if (uncachedAddresses.length > 0) {
     try {
-      const prices = await alchemy.prices.getTokenPriceBySymbol(uncachedSymbols)
+      const BATCH_SIZE = 25
+      const batches: AddressType[][] = []
 
-      // Process and cache each price
-      for (const price of prices.data) {
-        const tokenPrice: TokenPrice = {
-          symbol: price.symbol,
-          price:
-            price.prices.find((p) => p.currency.toLowerCase() === 'usd')?.value ?? '0',
+      // Split addresses into batches of 25
+      for (let i = 0; i < uncachedAddresses.length; i += BATCH_SIZE) {
+        batches.push(uncachedAddresses.slice(i, i + BATCH_SIZE))
+      }
+
+      // Process each batch
+      for (const batch of batches) {
+        // Create TokenAddressRequest objects for the batch
+        const tokenAddressRequests = batch.map((address) => ({
+          network: ALCHEMY_NETWORKS[chainId] as Network,
+          address: address,
+        }))
+
+        // Call the API with the array of requests
+        const priceResponse =
+          await alchemy.prices.getTokenPriceByAddress(tokenAddressRequests)
+
+        // Process and cache each price
+        for (let i = 0; i < priceResponse.data.length; i++) {
+          const priceResult = priceResponse.data[i]
+          const address = batch[i]
+
+          const tokenPrice: TokenPrice = {
+            address: address,
+            price:
+              priceResult.prices?.find((p) => p.currency.toLowerCase() === 'usd')
+                ?.value ?? '0',
+          }
+
+          // Cache individual price (5 minutes TTL)
+          const cacheKey = getTokenPriceKey(chainId, address)
+          await redis?.setex(cacheKey, 300, JSON.stringify(tokenPrice))
+
+          results.push(tokenPrice)
         }
-
-        // Cache individual price (5 minutes TTL)
-        const cacheKey = getTokenPriceKey(chainId, price.symbol)
-        await redis?.setex(cacheKey, 300, JSON.stringify(tokenPrice))
-
-        results.push(tokenPrice)
       }
     } catch (error) {
       console.error('getCachedTokenPrices error:', error)
@@ -331,12 +354,11 @@ export const getCachedTokenPrices = async (
 
   return {
     data: results,
-    source: hasCache && uncachedSymbols.length === 0 ? 'cache' : 'fetched',
+    source: hasCache && uncachedAddresses.length === 0 ? 'cache' : 'fetched',
   }
 }
 
 const MINIMUM_USD_VALUE = 0.01
-const SYMBOL_REGEX = /^[a-zA-Z0-9]+$/
 
 export const getEnrichedTokenBalances = async (
   chainId: CHAIN_ID,
@@ -357,40 +379,40 @@ export const getEnrichedTokenBalances = async (
     return { data: [], source: 'fetched' }
   }
 
-  // Filter valid symbols for price lookup
-  const validSymbols = metadataResult.data
-    .map((metadata) => metadata.symbol.trim())
-    .filter((symbol) => SYMBOL_REGEX.test(symbol))
-
-  if (validSymbols.length === 0) {
-    return { data: [], source: 'fetched' }
-  }
-
-  // Get prices for valid symbols
-  const pricesResult = await getCachedTokenPrices(chainId, validSymbols)
+  // Get prices for all token addresses
+  const tokenAddresses = balancesResult.data.map((balance) => balance.address)
+  const pricesResult = await getCachedTokenPrices(chainId, tokenAddresses)
   if (!pricesResult || pricesResult.data.length === 0) {
     return { data: [], source: 'fetched' }
   }
 
   // Combine all data
-  const enrichedBalances: EnrichedTokenBalance[] = pricesResult.data.map((price) => {
-    const metadata = metadataResult.data.find(
-      (metadata) => metadata.symbol.trim() === price.symbol
-    )!
-    const balance = balancesResult.data.find(
-      (balance) => balance.address.toLowerCase() === metadata.address.toLowerCase()
-    )!
+  const enrichedBalances: EnrichedTokenBalance[] = balancesResult.data
+    .map((balance) => {
+      const metadata = metadataResult.data.find(
+        (metadata) => metadata.address.toLowerCase() === balance.address.toLowerCase()
+      )
+      const price = pricesResult.data.find(
+        (price) => price.address.toLowerCase() === balance.address.toLowerCase()
+      )
 
-    const amount = parseFloat(formatUnits(BigInt(balance.balance), metadata.decimals))
-    const valueInUSD = (amount * parseFloat(price.price)).toFixed(2)
+      // Skip if metadata or price is missing
+      if (!metadata || !price) {
+        return null
+      }
 
-    return {
-      ...balance,
-      ...metadata,
-      ...price,
-      valueInUSD,
-    }
-  })
+      const amount = parseFloat(formatUnits(BigInt(balance.balance), metadata.decimals))
+      const valueInUSD = (amount * parseFloat(price.price)).toFixed(2)
+
+      return {
+        ...balance,
+        ...metadata,
+        symbol: metadata.symbol, // Keep symbol from metadata for backwards compatibility
+        price: price.price,
+        valueInUSD,
+      }
+    })
+    .filter(Boolean) as EnrichedTokenBalance[]
 
   // Filter by minimum USD value
   const filteredBalances = enrichedBalances.filter(
