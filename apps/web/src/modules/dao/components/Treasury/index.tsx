@@ -6,8 +6,6 @@ import { useBalance } from 'wagmi'
 
 import SWR_KEYS from 'src/constants/swrKeys'
 import { SDK } from 'src/data/subgraph/client'
-import { useNFTBalance } from 'src/hooks/useNFTBalance'
-import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useChainStore } from 'src/stores/useChainStore'
 import { statisticContent } from 'src/styles/About.css'
 import { treasuryWrapper } from 'src/styles/Proposals.css'
@@ -62,9 +60,6 @@ export const Treasury = () => {
   const treasuryBalance = React.useMemo(() => {
     return balance?.value ? formatCryptoVal(formatEther(balance?.value)) : null
   }, [balance])
-
-  const { balances } = useTokenBalances(chain.id, addresses.treasury)
-  const { nfts } = useNFTBalance(chain.id, addresses.treasury)
 
   return (
     <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
@@ -145,12 +140,8 @@ export const Treasury = () => {
           </Text>
         </Flex>
       </Grid>
-      <TokenBalanceDisplay
-        balances={balances}
-        chainId={chain.id}
-        owner={addresses.treasury}
-      />
-      <NFTBalanceDisplay nfts={nfts} chainId={chain.id} owner={addresses.treasury} />
+      <TokenBalanceDisplay />
+      <NFTBalanceDisplay />
     </Flex>
   )
 }
