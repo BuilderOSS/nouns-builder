@@ -166,6 +166,7 @@ export const getCachedTokenBalances = async (
       source: 'fetched',
     }
   } catch (error) {
+    console.error('getCachedTokenBalances error:', error)
     throw new BackendFailedError('Failed to fetch token balances')
   }
 }
@@ -206,6 +207,7 @@ export const getCachedNFTBalance = async (
       source: 'fetched',
     }
   } catch (error) {
+    console.error('getCachedNFTBalance error:', error)
     throw new BackendFailedError('Failed to fetch NFT balances')
   }
 }
@@ -264,6 +266,7 @@ export const getCachedTokenMetadatas = async (
         results.push(tokenMetadata)
       }
     } catch (error) {
+      console.error('getCachedTokenMetadatas error:', error)
       throw new BackendFailedError('Failed to fetch token metadata')
     }
   }
