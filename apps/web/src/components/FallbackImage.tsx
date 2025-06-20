@@ -94,10 +94,7 @@ export const FallbackImage: React.FC<FallbackImageProps> = ({
   onImageError,
   ...props
 }) => {
-  const { src, handleError, hasExhaustedSources, isValidating } = useFallbackSrc(
-    srcList,
-    onImageError
-  )
+  const { src, handleError } = useFallbackSrc(srcList, onImageError)
 
   // Don't render if we don't have a valid src yet
   if (!src) {
@@ -131,10 +128,7 @@ export const FallbackNextLegacyImage: React.FC<FallbackNextLegacyImageProps> = (
   onImageError,
   ...props
 }) => {
-  const { src, handleError, hasExhaustedSources, isValidating } = useFallbackSrc(
-    srcList,
-    onImageError
-  )
+  const { src, handleError } = useFallbackSrc(srcList, onImageError)
 
   // Don't render if we don't have a valid src yet
   if (!src) {
@@ -159,10 +153,7 @@ export const FallbackNextImage: React.FC<FallbackNextImageProps> = ({
   onImageError,
   ...props
 }) => {
-  const { src, handleError, hasExhaustedSources, isValidating } = useFallbackSrc(
-    srcList,
-    onImageError
-  )
+  const { src, handleError } = useFallbackSrc(srcList, onImageError)
 
   // Don't render if we don't have a valid src yet
   if (!src) {

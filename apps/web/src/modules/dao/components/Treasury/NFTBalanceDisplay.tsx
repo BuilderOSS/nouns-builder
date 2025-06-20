@@ -117,7 +117,7 @@ export const NFTBalanceDisplay: React.FC = () => {
                       }}
                     />
                   </Box>
-                  <Flex direction={'column'} gap="x2" flexGrow={1}>
+                  <Flex direction={'column'} gap="x2">
                     <Flex
                       justify={'space-between'}
                       px="x2"

@@ -1,13 +1,13 @@
-import { Alchemy, Network, NftFilters, TokenBalanceType } from 'alchemy-sdk'
+import { Alchemy, Network, NftFilters, OwnedNft, TokenBalanceType } from 'alchemy-sdk'
 import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
+import { BASE_URL } from 'src/constants/baseUrl'
 import { AddressType, CHAIN_ID } from 'src/typings'
 
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'
 
-// Cache key generation helpers
 const getTokenPriceKey = (chainId: CHAIN_ID, address: string) =>
   `alchemy:token-price:${chainId}:${address.toLowerCase()}`
 
@@ -19,6 +19,9 @@ const getTokenBalancesKey = (chainId: CHAIN_ID, address: string) =>
 
 const getNftBalancesKey = (chainId: CHAIN_ID, address: string) =>
   `alchemy:nft-balances:${chainId}:${address.toLowerCase()}`
+
+const getCoinGeckoLogoKey = (chainId: CHAIN_ID, address: string) =>
+  `coingecko:logo:${chainId}:${address.toLowerCase()}`
 
 // Serialized NFT type with only the data we need for frontend display
 export type SerializedNft = {
@@ -36,7 +39,7 @@ export type SerializedNft = {
 }
 
 // Parse Alchemy NFT data into our serialized type
-const parseNftData = (nfts: any[]): SerializedNft[] => {
+const parseNftData = (nfts: OwnedNft[]): SerializedNft[] => {
   return nfts.map((nft) => ({
     contract: {
       address: nft.contract?.address || '',
@@ -212,16 +215,90 @@ export const getCachedNFTBalance = async (
   }
 }
 
+// Trust Wallet network mapping
 const TRUSTWALLET_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'ethereum',
   [CHAIN_ID.OPTIMISM]: 'optimism',
   [CHAIN_ID.BASE]: 'base',
 }
 
-const getTokenLogoUrl = (chainId: CHAIN_ID, address: AddressType) => {
+const getTrustWalletTokenLogo = async (
+  chainId: CHAIN_ID,
+  address: AddressType
+): Promise<string | null> => {
   const network = TRUSTWALLET_NETWORKS[chainId]
   if (!network) return ''
-  return `https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/${network}/assets/${getAddress(address)}/logo.png`
+
+  const logoUrl = `https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/${network}/assets/${getAddress(address)}/logo.png`
+
+  try {
+    const response = await fetch(logoUrl, { method: 'HEAD' })
+
+    const isImage = response.headers.get('Content-Type')?.startsWith('image/')
+    const exists = response.status === 200
+
+    return exists && isImage ? logoUrl : ''
+  } catch (error) {
+    console.error('getTrustWalletTokenLogo error:', error)
+    return ''
+  }
+}
+
+// Coingecko network mapping
+const COINGECKO_PLATFORMS: Partial<Record<CHAIN_ID, string>> = {
+  [CHAIN_ID.ETHEREUM]: 'ethereum',
+  [CHAIN_ID.OPTIMISM]: 'optimistic-ethereum',
+  [CHAIN_ID.BASE]: 'base',
+  [CHAIN_ID.ZORA]: 'zora-network',
+}
+
+// Fetch token logo from Coingecko API
+const getCoinGeckoTokenLogo = async (
+  chainId: CHAIN_ID,
+  address: AddressType
+): Promise<string> => {
+  const platform = COINGECKO_PLATFORMS[chainId]
+  if (!platform) return ''
+
+  const redis = getRedisConnection()
+  const cacheKey = getCoinGeckoLogoKey(chainId, address)
+
+  // Check cache first
+  const cached = await redis?.get(cacheKey)
+  if (cached) {
+    return cached
+  }
+
+  const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY
+
+  let url = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${address.toLowerCase()}`
+
+  if (apiKey) {
+    url = `${url}?x-api-key=${apiKey}`
+  }
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      return ''
+    }
+
+    const data = await response.json()
+    const logoUrl = data?.image?.small || data?.image?.thumb || data?.image?.large || ''
+
+    // Cache the result (24 hours TTL for successful responses)
+    await redis?.setex(cacheKey, 86400, logoUrl)
+
+    return logoUrl
+  } catch (error) {
+    console.error('getCoinGeckoTokenLogo error:', error)
+    return ''
+  }
 }
 
 const getCachedTokenMetadatas = async (
@@ -263,14 +340,23 @@ const getCachedTokenMetadatas = async (
         const metadata = metadatas[i]
         const address = uncachedAddresses[i]
 
-        const logoUrl = !metadata.logo ? getTokenLogoUrl(chainId, address) : metadata.logo
+        let logoUrl = metadata.logo
+        if (!logoUrl) {
+          logoUrl = await getCoinGeckoTokenLogo(chainId, address)
+        }
+        if (!logoUrl) {
+          logoUrl = await getTrustWalletTokenLogo(chainId, address)
+        }
+        if (!logoUrl) {
+          logoUrl = BASE_URL + '/empty-token.svg'
+        }
 
         const tokenMetadata: TokenMetadata = {
           address: address as AddressType,
           name: metadata.name ?? '',
           symbol: metadata.symbol ?? '',
           decimals: metadata.decimals ?? 18,
-          logo: logoUrl,
+          logo: logoUrl ?? '',
         }
 
         // Cache individual metadata (24 hours TTL)
