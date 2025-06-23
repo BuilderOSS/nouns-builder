@@ -1,4 +1,4 @@
-import { Flex, Text } from '@zoralabs/zord'
+import { Flex, FlexProps, Text } from '@zoralabs/zord'
 import React from 'react'
 
 import CopyButton from 'src/components/CopyButton/CopyButton'
@@ -8,14 +8,29 @@ import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { walletSnippet } from 'src/utils/helpers'
 
-export const ContractLink = ({ address }: { address?: string }) => {
+export type ContractLinkProps = {
+  address?: string
+  size?: 'sm' | 'md'
+}
+export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
   const { isMobile } = useLayoutStore()
   const { chain } = useChainStore()
 
+  const { py, px } = React.useMemo(() => {
+    let px: FlexProps['px'] = { '@initial': 'x4', '@768': 'x6' }
+    let py: FlexProps['py'] = { '@initial': 'x4', '@768': 'x5' }
+    if (size === 'sm') {
+      px = { '@initial': 'x2', '@768': 'x3' } as FlexProps['px']
+      py = { '@initial': 'x2', '@768': 'x3' } as FlexProps['py']
+    }
+
+    return { py, px }
+  }, [size])
+
   return (
     <Flex
-      py={{ '@initial': 'x4', '@768': 'x5' }}
-      px={{ '@initial': 'x4', '@768': 'x6' }}
+      py={py}
+      px={px}
       justify={'space-between'}
       align={'center'}
       borderRadius={'curved'}

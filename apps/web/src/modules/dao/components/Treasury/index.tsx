@@ -67,7 +67,7 @@ export const Treasury = () => {
         <Text fontSize={28} fontWeight={'display'}>
           Treasury
         </Text>
-        <ContractLink address={addresses.treasury} />
+        <ContractLink address={addresses.treasury} size={'sm'} />
       </Flex>
 
       <Grid
