@@ -41,7 +41,7 @@ export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
       gap="x2"
     >
       <Text fontSize={16}>
-        {isMobile ? walletSnippet(address as string, 8) : address}
+        {isMobile || size === 'sm' ? walletSnippet(address as string, 8) : address}
       </Text>
       <Flex justify={'center'} align={'center'} gap={{ '@initial': 'x2', '@768': 'x4' }}>
         <a
