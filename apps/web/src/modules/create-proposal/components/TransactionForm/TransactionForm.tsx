@@ -12,6 +12,7 @@ import { NominateEscrowDelegate } from './NominateEscrowDelegate'
 import { PauseAuctions } from './PauseAuctions'
 import { ReplaceArtwork } from './ReplaceArtwork'
 import { ResumeAuctions } from './ResumeAuctions/ResumeAuctions'
+import { SendErc20 } from './SendErc20'
 import { SendEth } from './SendEth'
 
 interface TransactionFormProps {
@@ -22,6 +23,7 @@ export type TransactionFormType = (typeof TRANSACTION_FORM_OPTIONS)[number]
 
 export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.SEND_ETH,
+  TransactionType.SEND_ERC20,
   TransactionType.AIRDROP,
   TransactionType.ESCROW,
   TransactionType.ESCROW_DELEGATE,
@@ -42,6 +44,7 @@ export const TransactionForm = ({ type }: TransactionFormProps) => {
     [TransactionType.ESCROW_DELEGATE]: <NominateEscrowDelegate />,
     [TransactionType.DROPOSAL]: <Droposal />,
     [TransactionType.SEND_ETH]: <SendEth />,
+    [TransactionType.SEND_ERC20]: <SendErc20 />,
     [TransactionType.PAUSE_AUCTIONS]: <PauseAuctions />,
     [TransactionType.FIX_RENDERER_BASE]: <FixRendererBase />,
     [TransactionType.RESUME_AUCTIONS]: <ResumeAuctions />,

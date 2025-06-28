@@ -3,6 +3,7 @@ import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
 import { BASE_URL } from 'src/constants/baseUrl'
+import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 import { AddressType, CHAIN_ID } from 'src/typings'
 
 import { BackendFailedError } from './errors'
@@ -514,10 +515,12 @@ export const getEnrichedTokenBalances = async (
     })
     .filter(Boolean) as EnrichedTokenBalance[]
 
-  // Filter by minimum USD value
-  const filteredBalances = enrichedBalances.filter(
-    (balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE
-  )
+  // Filter by minimum USD value (only on mainnet, show all tokens on testnet)
+  const filteredBalances = PUBLIC_IS_TESTNET
+    ? enrichedBalances
+    : enrichedBalances.filter(
+        (balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE
+      )
 
   // Parse the data to ensure JSON serialization safety
   const parsedBalances = parseTokenBalanceData(filteredBalances)
