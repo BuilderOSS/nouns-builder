@@ -24,6 +24,7 @@ const SWR_KEYS = {
   DASHBOARD: 'dashboard',
   DAO_MEMBERSHIP: 'dao-membership',
   TOKEN_BALANCES: 'token-balances',
+  TOKEN_METADATA: 'token-metadata',
   NFT_BALANCES: 'nft-balances',
   METADATA_ATTRIBUTES_MERKLE_ROOT: 'metadata-attributes-merkle-root',
   TOKEN_HOLDERS_MERKLE_ROOT: 'token-holders-merkle-root',
