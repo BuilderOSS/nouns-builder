@@ -5,6 +5,7 @@ import { IconType } from 'src/components/Icon/icons'
 export enum TransactionType {
   SEND_ETH = 'send-eth',
   SEND_ERC20 = 'send-erc20',
+  SEND_NFT = 'send-nft',
   AIRDROP = 'airdrop',
   DROPOSAL = 'droposal',
   CUSTOM = 'custom',
@@ -44,6 +45,12 @@ export const TRANSACTION_TYPES = {
     subTitle: 'Create a proposal to send ERC20 tokens from the treasury',
     icon: 'erc20',
     iconBackdrop: 'rgba(0, 163, 255, 0.1)',
+  },
+  [TransactionType.SEND_NFT]: {
+    title: 'Send NFTs',
+    subTitle: 'Create a proposal to send NFTs from the treasury',
+    icon: 'nft',
+    iconBackdrop: 'rgba(138, 43, 226, 0.1)',
   },
   [TransactionType.AIRDROP]: {
     title: 'Create an Airdrop',
