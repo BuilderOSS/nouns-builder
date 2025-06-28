@@ -23,6 +23,23 @@ export const statistic = style([
   },
 ])
 
+export const statisticHover = style([
+  atoms({
+    px: { '@initial': 'x3', '@768': 'x4' },
+    py: 'x3',
+  }),
+  {
+    border: `2px solid ${vars.color.border}`,
+    borderRadius: 12,
+    whiteSpace: 'nowrap',
+    width: 'fit-content',
+    cursor: 'pointer',
+    ':hover': {
+      backgroundColor: vars.color.border,
+    },
+  },
+])
+
 export const statisticContent = style([
   {
     fontSize: 20,

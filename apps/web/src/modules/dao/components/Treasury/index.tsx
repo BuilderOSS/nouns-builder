@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Text } from '@zoralabs/zord'
+import { Flex, Grid, Text } from '@zoralabs/zord'
 import React from 'react'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
@@ -9,9 +9,13 @@ import { SDK } from 'src/data/subgraph/client'
 import { useChainStore } from 'src/stores/useChainStore'
 import { statisticContent } from 'src/styles/About.css'
 import { treasuryWrapper } from 'src/styles/Proposals.css'
+import { sectionWrapperStyle } from 'src/styles/dao.css'
 import { formatCryptoVal, numberFormatter } from 'src/utils/numbers'
 
 import { useDaoStore } from '../../stores'
+import { ContractLink } from '../ContractLink'
+import { NFTBalanceDisplay } from './NFTBalanceDisplay'
+import { TokenBalanceDisplay } from './TokenBalanceDisplay'
 
 export const Treasury = () => {
   const { addresses } = useDaoStore()
@@ -54,15 +58,16 @@ export const Treasury = () => {
   }, [balance, ethUsd])
 
   const treasuryBalance = React.useMemo(() => {
-    return balance?.formatted ? formatCryptoVal(balance?.formatted) : null
+    return balance?.value ? formatCryptoVal(formatEther(balance?.value)) : null
   }, [balance])
 
   return (
-    <Box>
+    <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
       <Flex width={'100%'} justify={'space-between'} align={'center'}>
         <Text fontSize={28} fontWeight={'display'}>
           Treasury
         </Text>
+        <ContractLink address={addresses.treasury} size={'sm'} />
       </Flex>
 
       <Grid
@@ -112,7 +117,7 @@ export const Treasury = () => {
             color={'tertiary'}
             mt={{ '@initial': 'x0', '@768': 'x2' }}
           >
-            Treasury Balance
+            ETH Balance
           </Text>
         </Flex>
 
@@ -123,22 +128,20 @@ export const Treasury = () => {
           width={'100%'}
           align={{ '@initial': 'start', '@768': 'center' }}
         >
-          {ethToUsd && (
-            <Text className={statisticContent} fontWeight={'display'}>
-              ${ethToUsd ? ethToUsd : ' '}
-            </Text>
-          )}
+          <Text className={statisticContent} fontWeight={'display'}>
+            ${ethToUsd ? ethToUsd : ' '}
+          </Text>
           <Text
             variant="paragraph-md"
             color={'tertiary'}
             mt={{ '@initial': 'x0', '@768': 'x2' }}
           >
-            Treasury Balance in USD
+            ETH Balance in USD
           </Text>
         </Flex>
       </Grid>
-    </Box>
+      <TokenBalanceDisplay />
+      <NFTBalanceDisplay />
+    </Flex>
   )
 }
-
-export default Treasury
