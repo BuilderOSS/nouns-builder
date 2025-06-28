@@ -1,6 +1,7 @@
 import { Box, Button, Flex, Text } from '@zoralabs/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
+import { getFetchableUrls } from 'ipfs-service'
 import { useEffect, useState } from 'react'
 import { encodeFunctionData, getAddress, isAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
@@ -11,6 +12,7 @@ import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { erc721Abi } from 'src/data/contract/abis/ERC721'
 import { erc1155Abi } from 'src/data/contract/abis/ERC1155'
 import { useNFTBalance } from 'src/hooks/useNFTBalance'
+import { useNftMetadata } from 'src/hooks/useNftMetadata'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import {
   DropdownSelect,
@@ -36,6 +38,9 @@ interface NftMetadata {
   isValid: boolean
   contractAddress: string
   tokenId: string
+  image?: string
+  metadataName?: string
+  metadataDescription?: string
 }
 
 interface SendNftFormProps {
@@ -70,6 +75,10 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         ? selectedNftOption.split(':')[1] || ''
         : ''
 
+  // Get Alchemy NFT metadata for enhanced image/metadata display
+  const { metadata: alchemyMetadata, isLoading: isLoadingAlchemyMetadata } =
+    useNftMetadata(chain.id, currentContractAddress as `0x${string}`, currentTokenId)
+
   // NFT validation using useReadContracts - check both ERC721 and ERC1155
   const { data: nftData, isLoading: isValidatingNft } = useReadContracts({
     contracts: [
@@ -100,6 +109,13 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         args: ['0x80ac58cd'], // ERC721 interface ID
         chainId: chain.id,
       },
+      {
+        address: currentContractAddress as `0x${string}`,
+        abi: erc721Abi,
+        functionName: 'tokenURI',
+        args: [BigInt(currentTokenId || '0')],
+        chainId: chain.id,
+      },
       // ERC1155 checks
       {
         address: currentContractAddress as `0x${string}`,
@@ -113,6 +129,13 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         abi: erc1155Abi,
         functionName: 'supportsInterface',
         args: ['0xd9b67a26'], // ERC1155 interface ID
+        chainId: chain.id,
+      },
+      {
+        address: currentContractAddress as `0x${string}`,
+        abi: erc1155Abi,
+        functionName: 'uri',
+        args: [BigInt(currentTokenId || '0')],
         chainId: chain.id,
       },
     ],
@@ -130,8 +153,10 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         symbolResult,
         ownerOfResult,
         erc721InterfaceResult,
+        tokenURIResult,
         erc1155BalanceResult,
         erc1155InterfaceResult,
+        erc1155URIResult,
       ] = nftData
 
       const isERC721 =
@@ -142,6 +167,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
       // Determine validity based on contract type
       let isValid = false
       let balance = 0n
+      let tokenURI = ''
 
       if (isERC721) {
         // For ERC721, check if treasury owns the token
@@ -149,12 +175,14 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           ownerOfResult.status === 'success' &&
           ownerOfResult.result?.toLowerCase() === treasury?.toLowerCase()
         balance = isValid ? 1n : 0n
+        tokenURI = tokenURIResult.status === 'success' ? tokenURIResult.result : ''
       } else if (isERC1155) {
         // For ERC1155, check balance
         isValid =
           erc1155BalanceResult.status === 'success' && erc1155BalanceResult.result > 0n
         balance =
           erc1155BalanceResult.status === 'success' ? erc1155BalanceResult.result : 0n
+        tokenURI = erc1155URIResult.status === 'success' ? erc1155URIResult.result : ''
       }
 
       if (isValid) {
@@ -171,6 +199,8 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
 
         setNftMetadata(metadata)
         onNftMetadataChange(metadata)
+
+        // Alchemy metadata will be handled separately via useNftMetadata hook
       } else {
         const metadata = {
           name: '',
@@ -211,6 +241,22 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
     treasury,
     chain.id,
   ])
+
+  // Update NFT metadata with Alchemy data when available
+  useEffect(() => {
+    if (alchemyMetadata && nftMetadata && nftMetadata.isValid) {
+      setNftMetadata((prev) =>
+        prev
+          ? {
+              ...prev,
+              image: alchemyMetadata.image || undefined,
+              metadataName: alchemyMetadata.name || undefined,
+              metadataDescription: alchemyMetadata.description || undefined,
+            }
+          : null
+      )
+    }
+  }, [alchemyMetadata, nftMetadata])
 
   // Create dropdown options
   const nftOptions: SelectOption<NftOption>[] = [
@@ -328,26 +374,33 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         )}
 
         {/* NFT validation loading state */}
-        {isValidatingNft && currentContractAddress && currentTokenId && (
-          <Box
-            mt={'x5'}
-            p={'x4'}
-            backgroundColor={'background2'}
-            borderRadius={'curved'}
-            borderWidth={'normal'}
-            borderStyle={'solid'}
-            borderColor={'border'}
-          >
-            <Flex direction={'column'} gap={'x2'}>
-              <Text fontWeight={'label'} fontSize={16}>
-                Validating NFT...
-              </Text>
-              <Text fontSize={14} color={'text3'}>
-                Checking NFT metadata and treasury ownership
-              </Text>
-            </Flex>
-          </Box>
-        )}
+        {(isValidatingNft || isLoadingAlchemyMetadata) &&
+          currentContractAddress &&
+          currentTokenId && (
+            <Box
+              mt={'x5'}
+              p={'x4'}
+              backgroundColor={'background2'}
+              borderRadius={'curved'}
+              borderWidth={'normal'}
+              borderStyle={'solid'}
+              borderColor={'border'}
+            >
+              <Flex direction={'column'} gap={'x2'}>
+                <Text fontWeight={'label'} fontSize={16}>
+                  Validating NFT...
+                </Text>
+                <Text fontSize={14} color={'text3'}>
+                  Checking NFT metadata and treasury ownership
+                </Text>
+                {isLoadingAlchemyMetadata && (
+                  <Text fontSize={12} color={'text4'}>
+                    Loading enhanced metadata...
+                  </Text>
+                )}
+              </Flex>
+            </Box>
+          )}
 
         {/* Valid NFT metadata display */}
         {nftMetadata && nftMetadata.isValid && (
@@ -360,21 +413,61 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
             borderStyle={'solid'}
             borderColor={'border'}
           >
-            <Flex direction={'column'} gap={'x1'}>
-              <Text fontSize={14} fontWeight={'label'}>
-                {nftMetadata.name} ({nftMetadata.symbol})
-              </Text>
-              <Text fontSize={14} color={'text3'}>
-                Token ID: {nftMetadata.tokenId}
-              </Text>
-              <Text fontSize={14} color={'text3'}>
-                Type: {nftMetadata.isERC721 ? 'ERC721' : 'ERC1155'}
-              </Text>
-              {nftMetadata.isERC1155 && (
-                <Text fontSize={14} color={'text3'}>
-                  Treasury Balance: {nftMetadata.balance.toString()}
-                </Text>
+            <Flex direction={'row'} gap={'x4'}>
+              {/* NFT Image */}
+              {nftMetadata.image && (
+                <Box style={{ width: '80px', height: '80px', flexShrink: 0 }}>
+                  <Box aspectRatio={1} backgroundColor={'border'} borderRadius={'curved'}>
+                    <FallbackImage
+                      srcList={(() => {
+                        const fetchableUrls = getFetchableUrls(nftMetadata.image)
+                        return fetchableUrls
+                          ? [nftMetadata.image, ...fetchableUrls]
+                          : [nftMetadata.image]
+                      })()}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: 'inherit',
+                      }}
+                    />
+                  </Box>
+                </Box>
               )}
+
+              {/* NFT Details */}
+              <Flex direction={'column'} gap={'x1'} flex={1}>
+                <Text fontSize={14} fontWeight={'label'}>
+                  {nftMetadata.metadataName || nftMetadata.name} ({nftMetadata.symbol})
+                </Text>
+                <Text fontSize={14} color={'text3'}>
+                  Token ID: {nftMetadata.tokenId}
+                </Text>
+                <Text fontSize={14} color={'text3'}>
+                  Type: {nftMetadata.isERC721 ? 'ERC721' : 'ERC1155'}
+                </Text>
+                {nftMetadata.isERC1155 && (
+                  <Text fontSize={14} color={'text3'}>
+                    Treasury Balance: {nftMetadata.balance.toString()}
+                  </Text>
+                )}
+                {nftMetadata.metadataDescription && (
+                  <Text
+                    fontSize={12}
+                    color={'text4'}
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {nftMetadata.metadataDescription}
+                  </Text>
+                )}
+              </Flex>
             </Flex>
           </Box>
         )}
