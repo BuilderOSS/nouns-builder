@@ -25,6 +25,7 @@ const SWR_KEYS = {
   DAO_MEMBERSHIP: 'dao-membership',
   TOKEN_BALANCES: 'token-balances',
   NFT_BALANCES: 'nft-balances',
+  NFT_METADATA: 'nft-metadata',
   METADATA_ATTRIBUTES_MERKLE_ROOT: 'metadata-attributes-merkle-root',
   TOKEN_HOLDERS_MERKLE_ROOT: 'token-holders-merkle-root',
   ENCODED_DAO_METADATA: 'encoded-dao-metadata',
