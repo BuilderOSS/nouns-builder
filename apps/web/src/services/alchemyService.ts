@@ -302,7 +302,7 @@ const getCoinGeckoTokenLogo = async (
   }
 }
 
-const getCachedTokenMetadatas = async (
+export const getCachedTokenMetadatas = async (
   chainId: CHAIN_ID,
   addresses: AddressType[]
 ): Promise<CachedResult<TokenMetadata[]> | null> => {

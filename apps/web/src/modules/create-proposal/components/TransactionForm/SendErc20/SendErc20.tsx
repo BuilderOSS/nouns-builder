@@ -9,6 +9,7 @@ import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { erc20Abi } from 'src/data/contract/abis/ERC20'
 import { useTokenBalances } from 'src/hooks/useTokenBalances'
+import { useTokenMetadataSingle } from 'src/hooks/useTokenMetadata'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import {
   DropdownSelect,
@@ -43,7 +44,9 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
   const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const [selectedTokenOption, setSelectedTokenOption] = useState<TokenOption>('')
-  const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata | null>(null)
+  const [currentTokenMetadata, setCurrentTokenMetadata] = useState<TokenMetadata | null>(
+    null
+  )
 
   // Get treasury token balances
   const { balances: treasuryTokens, isLoading: isLoadingTreasury } = useTokenBalances(
@@ -59,27 +62,15 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         ? selectedTokenOption
         : ''
 
-  // Token validation and balance check using useReadContracts
+  // Get token metadata using the common hook
+  const { tokenMetadata, isLoading: isLoadingTokenMetadata } = useTokenMetadataSingle(
+    chain.id,
+    currentTokenAddress as `0x${string}`
+  )
+
+  // Token balance check using useReadContracts (only for balance)
   const { data: tokenData, isLoading: isValidatingToken } = useReadContracts({
     contracts: [
-      {
-        address: currentTokenAddress as `0x${string}`,
-        abi: erc20Abi,
-        functionName: 'name',
-        chainId: chain.id,
-      },
-      {
-        address: currentTokenAddress as `0x${string}`,
-        abi: erc20Abi,
-        functionName: 'symbol',
-        chainId: chain.id,
-      },
-      {
-        address: currentTokenAddress as `0x${string}`,
-        abi: erc20Abi,
-        functionName: 'decimals',
-        chainId: chain.id,
-      },
       {
         address: currentTokenAddress as `0x${string}`,
         abi: erc20Abi,
@@ -90,26 +81,26 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
     ],
     allowFailure: false,
     query: {
-      enabled: isAddress(currentTokenAddress) && !!treasury,
+      enabled: isAddress(currentTokenAddress) && !!treasury && !!tokenMetadata,
     },
   })
 
   // Update token metadata when token data changes
   useEffect(() => {
-    if (tokenData && currentTokenAddress) {
-      const [name, symbol, decimals, balance] = tokenData
+    if (tokenMetadata && tokenData && currentTokenAddress) {
+      const balance = tokenData[0] // balance from balanceOf call
 
       const metadata = {
-        name,
-        symbol,
-        decimals,
+        name: tokenMetadata.name,
+        symbol: tokenMetadata.symbol,
+        decimals: tokenMetadata.decimals,
         balance,
         isValid: true,
       }
 
-      setTokenMetadata(metadata)
+      setCurrentTokenMetadata(metadata)
       onTokenMetadataChange(metadata)
-    } else if (currentTokenAddress && !isValidatingToken) {
+    } else if (currentTokenAddress && !isValidatingToken && !isLoadingTokenMetadata) {
       // If we have a token address but no data and not loading, it's invalid
       const metadata = {
         name: '',
@@ -119,13 +110,15 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         isValid: false,
       }
 
-      setTokenMetadata(metadata)
+      setCurrentTokenMetadata(metadata)
       onTokenMetadataChange(metadata)
     }
   }, [
     tokenData,
+    tokenMetadata,
     currentTokenAddress,
     isValidatingToken,
+    isLoadingTokenMetadata,
     onTokenMetadataChange,
     chain.id,
     chain.name,
@@ -159,7 +152,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
   const handleTokenOptionChange = (option: TokenOption) => {
     setSelectedTokenOption(option)
     // Clear existing metadata when changing selection
-    setTokenMetadata(null)
+    setCurrentTokenMetadata(null)
     onTokenMetadataChange(null)
 
     if (option === 'custom') {
@@ -174,8 +167,8 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
     }
   }
 
-  const currentBalance = tokenMetadata
-    ? parseFloat(formatUnits(tokenMetadata.balance, tokenMetadata.decimals))
+  const currentBalance = currentTokenMetadata
+    ? parseFloat(formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals))
     : 0
 
   return (
@@ -209,14 +202,14 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
                   ? formik.errors.tokenAddress
                   : formik.values.tokenAddress &&
                       isAddress(formik.values.tokenAddress) &&
-                      tokenMetadata &&
-                      !tokenMetadata.isValid
+                      currentTokenMetadata &&
+                      !currentTokenMetadata.isValid
                     ? 'Invalid ERC20 token or contract not found'
                     : undefined
               }
             />
 
-            {isValidatingToken && (
+            {(isValidatingToken || isLoadingTokenMetadata) && (
               <Text mt={'x2'} color={'text3'} fontSize={14}>
                 Validating token...
               </Text>
@@ -225,7 +218,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         )}
 
         {/* Token validation loading state */}
-        {isValidatingToken && currentTokenAddress && (
+        {(isValidatingToken || isLoadingTokenMetadata) && currentTokenAddress && (
           <Box
             mt={'x5'}
             p={'x4'}
@@ -247,7 +240,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         )}
 
         {/* Valid token metadata display */}
-        {tokenMetadata && tokenMetadata.isValid && (
+        {currentTokenMetadata && currentTokenMetadata.isValid && (
           <Box
             mt={'x5'}
             p={'x4'}
@@ -259,24 +252,24 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
           >
             <Flex direction={'column'} gap={'x1'}>
               <Text fontSize={14} fontWeight={'label'}>
-                {tokenMetadata.name} ({tokenMetadata.symbol})
+                {currentTokenMetadata.name} ({currentTokenMetadata.symbol})
               </Text>
               <Text fontSize={14} color={'text3'}>
                 Treasury Balance:{' '}
                 {formatCryptoVal(
-                  formatUnits(tokenMetadata.balance, tokenMetadata.decimals)
+                  formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
                 )}{' '}
-                {tokenMetadata.symbol}
+                {currentTokenMetadata.symbol}
               </Text>
               <Text fontSize={12} color={'text4'}>
-                Decimals: {tokenMetadata.decimals}
+                Decimals: {currentTokenMetadata.decimals}
               </Text>
             </Flex>
           </Box>
         )}
 
         {/* Invalid token error state */}
-        {tokenMetadata && !tokenMetadata.isValid && currentTokenAddress && (
+        {currentTokenMetadata && !currentTokenMetadata.isValid && currentTokenAddress && (
           <Box
             mt={'x5'}
             p={'x4'}
@@ -321,13 +314,16 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
             inputLabel={
               <Flex justify={'space-between'} width={'100%'}>
                 <Box fontWeight={'label'}>Amount</Box>
-                {tokenMetadata && (
+                {currentTokenMetadata && (
                   <Box color={'text3'} fontWeight="paragraph">
                     Max:{' '}
                     {formatCryptoVal(
-                      formatUnits(tokenMetadata.balance, tokenMetadata.decimals)
+                      formatUnits(
+                        currentTokenMetadata.balance,
+                        currentTokenMetadata.decimals
+                      )
                     )}{' '}
-                    {tokenMetadata.symbol}
+                    {currentTokenMetadata.symbol}
                   </Box>
                 )}
               </Flex>
@@ -350,7 +346,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
           variant={'outline'}
           borderRadius={'curved'}
           type="submit"
-          disabled={!formik.isValid || !tokenMetadata?.isValid}
+          disabled={!formik.isValid || !currentTokenMetadata?.isValid}
         >
           Add Transaction to Queue
         </Button>

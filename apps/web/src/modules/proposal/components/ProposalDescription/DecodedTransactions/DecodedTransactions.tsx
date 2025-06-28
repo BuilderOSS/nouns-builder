@@ -62,6 +62,7 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
                             key={`${arg.name}-${i}`}
                             arg={arg}
                             target={decoded.target}
+                            functionName={decoded.transaction.functionName}
                           />
                         ))}
                     </Stack>
