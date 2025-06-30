@@ -1,4 +1,4 @@
-import { Alchemy, Network, NftFilters, OwnedNft, TokenBalanceType } from 'alchemy-sdk'
+import { Alchemy, Network, NftFilters, OwnedNft, NftTokenType, TokenBalanceType } from 'alchemy-sdk'
 import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
@@ -29,10 +29,12 @@ const getCoinGeckoLogoKey = (chainId: CHAIN_ID, address: string) =>
 
 // Serialized NFT type with only the data we need for frontend display
 export type SerializedNft = {
+  tokenId: string
+  tokenType: NftTokenType
+  balance: string
   contract: {
     address: string
   }
-  tokenId: string
   name: string | null
   image: {
     originalUrl: string
@@ -57,10 +59,12 @@ export type SerializedNftMetadata = {
 // Parse Alchemy NFT data into our serialized type
 const parseNftData = (nfts: OwnedNft[]): SerializedNft[] => {
   return nfts.map((nft) => ({
+    tokenId: nft.tokenId || '',
+    tokenType: nft.tokenType || NftTokenType.UNKNOWN,
+    balance: nft.balance || '',
     contract: {
       address: nft.contract?.address || '',
     },
-    tokenId: nft.tokenId || '',
     name: nft.name || null,
     image: {
       originalUrl: nft.image?.originalUrl || '',
@@ -534,8 +538,8 @@ export const getEnrichedTokenBalances = async (
   const filteredBalances = PUBLIC_IS_TESTNET
     ? enrichedBalances
     : enrichedBalances.filter(
-        (balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE
-      )
+      (balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE
+    )
 
   // Parse the data to ensure JSON serialization safety
   const parsedBalances = parseTokenBalanceData(filteredBalances)
@@ -543,8 +547,8 @@ export const getEnrichedTokenBalances = async (
   // Determine source based on cache hits
   const source =
     balancesResult.source === 'cache' &&
-    metadataResult.source === 'cache' &&
-    pricesResult.source === 'cache'
+      metadataResult.source === 'cache' &&
+      pricesResult.source === 'cache'
       ? 'cache'
       : 'fetched'
 
