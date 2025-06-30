@@ -19,6 +19,7 @@ import Dash from './assets/dash.svg'
 import Discord from './assets/discord.svg'
 import Dots from './assets/dots.svg'
 import Download from './assets/download.svg'
+import Erc20 from './assets/erc20.svg'
 import Escrow from './assets/escrow.svg'
 import Eth from './assets/eth.svg'
 import External from './assets/external-16.svg'
@@ -30,6 +31,7 @@ import Info16 from './assets/info-16.svg'
 import Migrate from './assets/migrate.svg'
 import Move from './assets/move.svg'
 import NewWindow from './assets/new-window.svg'
+import Nft from './assets/nft.svg'
 import NounsConnect from './assets/nouns-connect.svg'
 import PauseTemplate from './assets/pause-template.svg'
 import Pause from './assets/pause.svg'
@@ -90,6 +92,8 @@ export const icons = {
   'warning-16': Warning16,
   escrow: Escrow,
   handshake: Handshake,
+  erc20: Erc20,
+  nft: Nft,
 }
 
 export type IconType = keyof typeof icons
