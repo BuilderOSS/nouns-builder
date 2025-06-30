@@ -2,13 +2,15 @@ import { Box, Button, Flex, Text } from '@zoralabs/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { getFetchableUrls } from 'ipfs-service'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMemo } from 'react'
 import { encodeFunctionData, getAddress, isAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 import { FallbackImage } from 'src/components/FallbackImage'
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
+import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { erc721Abi } from 'src/data/contract/abis/ERC721'
 import { erc1155Abi } from 'src/data/contract/abis/ERC1155'
 import { useNFTBalance } from 'src/hooks/useNFTBalance'
@@ -31,7 +33,6 @@ type NftOption = 'treasury-nfts' | 'custom' | string
 
 interface NftMetadata {
   name: string
-  symbol: string
   isERC721: boolean
   isERC1155: boolean
   balance: bigint
@@ -52,7 +53,12 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
   const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const [selectedNftOption, setSelectedNftOption] = useState<NftOption>('')
-  const [nftMetadata, setNftMetadata] = useState<NftMetadata | null>(null)
+
+  // Use ref to avoid dependency issues with onNftMetadataChange
+  const onNftMetadataChangeRef = useRef(onNftMetadataChange)
+  useEffect(() => {
+    onNftMetadataChangeRef.current = onNftMetadataChange
+  })
 
   // Get treasury NFT balances
   const { nfts: treasuryNfts, isLoading: isLoadingTreasury } = useNFTBalance(
@@ -61,40 +67,34 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
   )
 
   // Get the current contract address and token ID from formik values
-  const currentContractAddress =
-    selectedNftOption === 'custom'
-      ? formik.values.contractAddress || ''
-      : selectedNftOption !== '' && selectedNftOption !== 'custom'
-        ? selectedNftOption.split(':')[0] || ''
-        : ''
+  const currentContractAddress = useMemo(() => {
+    if (selectedNftOption === 'custom') {
+      return formik.values.contractAddress || ''
+    }
+    if (selectedNftOption !== '' && selectedNftOption !== 'custom') {
+      return selectedNftOption.split(':')[0] || ''
+    }
+    return ''
+  }, [selectedNftOption, formik.values.contractAddress])
 
-  const currentTokenId =
-    selectedNftOption === 'custom'
-      ? formik.values.tokenId || ''
-      : selectedNftOption !== '' && selectedNftOption !== 'custom'
-        ? selectedNftOption.split(':')[1] || ''
-        : ''
+  const currentTokenId = useMemo(() => {
+    if (selectedNftOption === 'custom') {
+      return formik.values.tokenId || ''
+    }
+    if (selectedNftOption !== '' && selectedNftOption !== 'custom') {
+      return selectedNftOption.split(':')[1] || ''
+    }
+    return ''
+  }, [selectedNftOption, formik.values.tokenId])
 
   // Get Alchemy NFT metadata for enhanced image/metadata display
   const { metadata: alchemyMetadata, isLoading: isLoadingAlchemyMetadata } =
     useNftMetadata(chain.id, currentContractAddress as `0x${string}`, currentTokenId)
 
-  // NFT validation using useReadContracts - check both ERC721 and ERC1155
+  // Always query both ownerOf and balanceOf for validation
   const { data: nftData, isLoading: isValidatingNft } = useReadContracts({
     contracts: [
-      // ERC721 checks
-      {
-        address: currentContractAddress as `0x${string}`,
-        abi: erc721Abi,
-        functionName: 'name',
-        chainId: chain.id,
-      },
-      {
-        address: currentContractAddress as `0x${string}`,
-        abi: erc721Abi,
-        functionName: 'symbol',
-        chainId: chain.id,
-      },
+      // ERC721 ownership check
       {
         address: currentContractAddress as `0x${string}`,
         abi: erc721Abi,
@@ -102,40 +102,12 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         args: [BigInt(currentTokenId || '0')],
         chainId: chain.id,
       },
-      {
-        address: currentContractAddress as `0x${string}`,
-        abi: erc721Abi,
-        functionName: 'supportsInterface',
-        args: ['0x80ac58cd'], // ERC721 interface ID
-        chainId: chain.id,
-      },
-      {
-        address: currentContractAddress as `0x${string}`,
-        abi: erc721Abi,
-        functionName: 'tokenURI',
-        args: [BigInt(currentTokenId || '0')],
-        chainId: chain.id,
-      },
-      // ERC1155 checks
+      // ERC1155 balance check
       {
         address: currentContractAddress as `0x${string}`,
         abi: erc1155Abi,
         functionName: 'balanceOf',
         args: [treasury as `0x${string}`, BigInt(currentTokenId || '0')],
-        chainId: chain.id,
-      },
-      {
-        address: currentContractAddress as `0x${string}`,
-        abi: erc1155Abi,
-        functionName: 'supportsInterface',
-        args: ['0xd9b67a26'], // ERC1155 interface ID
-        chainId: chain.id,
-      },
-      {
-        address: currentContractAddress as `0x${string}`,
-        abi: erc1155Abi,
-        functionName: 'uri',
-        args: [BigInt(currentTokenId || '0')],
         chainId: chain.id,
       },
     ],
@@ -145,168 +117,127 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
     },
   })
 
-  // Update NFT metadata when data changes
-  useEffect(() => {
-    if (nftData && currentContractAddress && currentTokenId) {
-      const [
-        nameResult,
-        symbolResult,
-        ownerOfResult,
-        erc721InterfaceResult,
-        tokenURIResult,
-        erc1155BalanceResult,
-        erc1155InterfaceResult,
-        erc1155URIResult,
-      ] = nftData
-
-      const isERC721 =
-        erc721InterfaceResult.status === 'success' && erc721InterfaceResult.result
-      const isERC1155 =
-        erc1155InterfaceResult.status === 'success' && erc1155InterfaceResult.result
-
-      // Determine validity based on contract type
-      let isValid = false
-      let balance = 0n
-      let tokenURI = ''
-
-      if (isERC721) {
-        // For ERC721, check if treasury owns the token
-        isValid =
-          ownerOfResult.status === 'success' &&
-          ownerOfResult.result?.toLowerCase() === treasury?.toLowerCase()
-        balance = isValid ? 1n : 0n
-        tokenURI = tokenURIResult.status === 'success' ? tokenURIResult.result : ''
-      } else if (isERC1155) {
-        // For ERC1155, check balance
-        isValid =
-          erc1155BalanceResult.status === 'success' && erc1155BalanceResult.result > 0n
-        balance =
-          erc1155BalanceResult.status === 'success' ? erc1155BalanceResult.result : 0n
-        tokenURI = erc1155URIResult.status === 'success' ? erc1155URIResult.result : ''
-      }
-
-      if (isValid) {
-        const metadata = {
-          name: nameResult.status === 'success' ? nameResult.result : 'Unknown',
-          symbol: symbolResult.status === 'success' ? symbolResult.result : 'Unknown',
-          isERC721,
-          isERC1155,
-          balance,
-          isValid: true,
-          contractAddress: currentContractAddress,
-          tokenId: currentTokenId,
-        }
-
-        setNftMetadata(metadata)
-        onNftMetadataChange(metadata)
-
-        // Alchemy metadata will be handled separately via useNftMetadata hook
-      } else {
-        const metadata = {
-          name: '',
-          symbol: '',
-          isERC721: false,
-          isERC1155: false,
-          balance: 0n,
-          isValid: false,
-          contractAddress: currentContractAddress,
-          tokenId: currentTokenId,
-        }
-
-        setNftMetadata(metadata)
-        onNftMetadataChange(metadata)
-      }
-    } else if (currentContractAddress && currentTokenId && !isValidatingNft) {
-      // If we have addresses but no data and not loading, it's invalid
-      const metadata = {
-        name: '',
-        symbol: '',
-        isERC721: false,
-        isERC1155: false,
-        balance: 0n,
-        isValid: false,
-        contractAddress: currentContractAddress,
-        tokenId: currentTokenId,
-      }
-
-      setNftMetadata(metadata)
-      onNftMetadataChange(metadata)
+  // Memoize the computed metadata to prevent continuous re-computation
+  const computedMetadata = useMemo((): NftMetadata | null => {
+    if (!currentContractAddress || !currentTokenId || !alchemyMetadata || !nftData) {
+      return null
     }
-  }, [
-    nftData,
-    currentContractAddress,
-    currentTokenId,
-    isValidatingNft,
-    onNftMetadataChange,
-    treasury,
-    chain.id,
-  ])
 
-  // Update NFT metadata with Alchemy data when available
-  useEffect(() => {
-    if (alchemyMetadata && nftMetadata && nftMetadata.isValid) {
-      setNftMetadata((prev) =>
-        prev
-          ? {
-              ...prev,
-              image: alchemyMetadata.image || undefined,
-              metadataName: alchemyMetadata.name || undefined,
-              metadataDescription: alchemyMetadata.description || undefined,
-            }
-          : null
-      )
+    // Use Alchemy data for name and type
+    const name = alchemyMetadata.name || 'Unknown'
+    const tokenType = alchemyMetadata.tokenType
+    const isERC721 = tokenType === 'ERC721'
+    const isERC1155 = tokenType === 'ERC1155'
+
+    // Check contract query results
+    const [ownerOfResult, balanceOfResult] = nftData
+
+    let isValid = false
+    let balance = 0n
+
+    if (isERC721) {
+      // For ERC721, check ownership
+      isValid =
+        ownerOfResult.status === 'success' &&
+        ownerOfResult.result?.toLowerCase() === treasury?.toLowerCase()
+      balance = isValid ? 1n : 0n
+    } else if (isERC1155) {
+      // For ERC1155, check balance
+      isValid =
+        balanceOfResult.status === 'success' && (balanceOfResult.result as bigint) > 0n
+      balance =
+        balanceOfResult.status === 'success' ? (balanceOfResult.result as bigint) : 0n
     }
-  }, [alchemyMetadata, nftMetadata])
+
+    return {
+      name,
+      isERC721,
+      isERC1155,
+      balance,
+      isValid,
+      contractAddress: currentContractAddress,
+      tokenId: currentTokenId,
+      image: alchemyMetadata.image || undefined,
+      metadataName: alchemyMetadata.name || undefined,
+      metadataDescription: alchemyMetadata.description || undefined,
+    }
+  }, [nftData, currentContractAddress, currentTokenId, treasury, alchemyMetadata])
+
+  // Update NFT metadata when computed metadata changes
+  useEffect(() => {
+    onNftMetadataChangeRef.current(computedMetadata)
+  }, [computedMetadata])
 
   // Create dropdown options
-  const nftOptions: SelectOption<NftOption>[] = [
-    {
-      value: '' as NftOption,
-      label: 'Select an NFT...',
-    },
-    ...(treasuryNfts?.map((nft) => {
-      const optionValue = `${nft.contract.address}:${nft.tokenId}` as NftOption
-      return {
-        value: optionValue,
-        label: `${nft.name || 'Unnamed'} #${nft.tokenId}`,
-        icon: nft.image.originalUrl ? (
-          <FallbackImage
-            srcList={[nft.image.originalUrl]}
-            style={{ width: 20, height: 20, borderRadius: '4px' }}
-          />
-        ) : undefined,
-      }
-    }) || []),
-    {
-      value: 'custom' as NftOption,
-      label: 'Custom NFT Contract',
-    },
-  ]
+  const nftOptions: SelectOption<NftOption>[] = useMemo(
+    () => [
+      {
+        value: '' as NftOption,
+        label: 'Select an NFT...',
+      },
+      ...(treasuryNfts?.map((nft) => {
+        const optionValue = `${nft.contract.address}:${nft.tokenId}` as NftOption
+        const fetchableUrls = nft.image.originalUrl
+          ? getFetchableUrls(nft.image.originalUrl)
+          : []
+
+        return {
+          value: optionValue,
+          label: `${nft.name || 'Unnamed'} #${nft.tokenId} (${nft.tokenType})`,
+          icon: nft.image.originalUrl ? (
+            <FallbackImage
+              srcList={fetchableUrls}
+              style={{ width: 20, height: 20, borderRadius: '4px' }}
+            />
+          ) : undefined,
+        }
+      }) || []),
+      {
+        value: 'custom' as NftOption,
+        label: 'Custom NFT Contract',
+      },
+    ],
+    [treasuryNfts]
+  )
 
   // Handle dropdown selection change
-  const handleNftOptionChange = (option: NftOption) => {
-    setSelectedNftOption(option)
-    // Clear existing metadata when changing selection
-    setNftMetadata(null)
-    onNftMetadataChange(null)
+  const handleNftOptionChange = useCallback(
+    (option: NftOption) => {
+      setSelectedNftOption(option)
+      // Clear existing metadata when changing selection
+      onNftMetadataChangeRef.current(null)
 
-    if (option === 'custom') {
-      // Clear the contract address and token ID when switching to custom
-      formik.setFieldValue('contractAddress', '')
-      formik.setFieldValue('tokenId', '')
-    } else if (option !== '' && option !== 'custom') {
-      // Set the contract address and token ID from selection
-      const [contractAddress, tokenId] = option.split(':')
-      formik.setFieldValue('contractAddress', contractAddress || '')
-      formik.setFieldValue('tokenId', tokenId || '')
-    } else {
-      // Clear for placeholder selection
-      formik.setFieldValue('contractAddress', '')
-      formik.setFieldValue('tokenId', '')
-    }
-  }
+      if (option === 'custom') {
+        // Clear the contract address and token ID when switching to custom
+        formik.setFieldValue('contractAddress', '')
+        formik.setFieldValue('tokenId', '')
+      } else if (option !== '' && option !== 'custom') {
+        // Set the contract address and token ID from selection
+        const [contractAddress, tokenId] = option.split(':')
+        formik.setFieldValue('contractAddress', contractAddress || '')
+        formik.setFieldValue('tokenId', tokenId || '')
+      } else {
+        // Clear for placeholder selection
+        formik.setFieldValue('contractAddress', '')
+        formik.setFieldValue('tokenId', '')
+      }
+    },
+    [formik]
+  )
 
-  const maxAmount = nftMetadata?.isERC1155 ? Number(nftMetadata.balance) : 1
+  const maxAmount = useMemo(
+    () => (computedMetadata?.isERC1155 ? Number(computedMetadata.balance) : 1),
+    [computedMetadata]
+  )
+
+  // Memoize the image source list to prevent re-renders
+  const imageSrcList = useMemo(() => {
+    if (!computedMetadata?.image) return []
+    const fetchableUrls = getFetchableUrls(computedMetadata.image)
+    return fetchableUrls
+      ? [computedMetadata.image, ...fetchableUrls]
+      : [computedMetadata.image]
+  }, [computedMetadata?.image])
 
   return (
     <Box
@@ -357,8 +288,8 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
                     : formik.values.contractAddress &&
                         formik.values.tokenId &&
                         isAddress(formik.values.contractAddress) &&
-                        nftMetadata &&
-                        !nftMetadata.isValid
+                        computedMetadata &&
+                        !computedMetadata.isValid
                       ? 'Invalid NFT or token not owned by treasury'
                       : undefined
                 }
@@ -403,8 +334,12 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           )}
 
         {/* Valid NFT metadata display */}
-        {nftMetadata && nftMetadata.isValid && (
+        {computedMetadata && computedMetadata.isValid && (
           <Box
+            as="a"
+            href={`${ETHERSCAN_BASE_URL[chain.id]}/token/${computedMetadata.contractAddress}?a=${treasury}`}
+            target="_blank"
+            rel="noopener noreferrer"
             mt={'x5'}
             p={'x4'}
             backgroundColor={'background2'}
@@ -412,19 +347,21 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
             borderWidth={'normal'}
             borderStyle={'solid'}
             borderColor={'border'}
+            style={{
+              textDecoration: 'none',
+              display: 'block',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer',
+            }}
+            className="hover:bg-background3 hover:border-accent"
           >
             <Flex direction={'row'} gap={'x4'}>
               {/* NFT Image */}
-              {nftMetadata.image && (
+              {computedMetadata.image && (
                 <Box style={{ width: '80px', height: '80px', flexShrink: 0 }}>
                   <Box aspectRatio={1} backgroundColor={'border'} borderRadius={'curved'}>
                     <FallbackImage
-                      srcList={(() => {
-                        const fetchableUrls = getFetchableUrls(nftMetadata.image)
-                        return fetchableUrls
-                          ? [nftMetadata.image, ...fetchableUrls]
-                          : [nftMetadata.image]
-                      })()}
+                      srcList={imageSrcList}
                       style={{
                         width: '100%',
                         height: '100%',
@@ -439,32 +376,17 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
               {/* NFT Details */}
               <Flex direction={'column'} gap={'x1'} flex={1}>
                 <Text fontSize={14} fontWeight={'label'}>
-                  {nftMetadata.metadataName || nftMetadata.name} ({nftMetadata.symbol})
+                  {computedMetadata.metadataName || computedMetadata.name}
                 </Text>
                 <Text fontSize={14} color={'text3'}>
-                  Token ID: {nftMetadata.tokenId}
+                  Token ID: {computedMetadata.tokenId}
                 </Text>
                 <Text fontSize={14} color={'text3'}>
-                  Type: {nftMetadata.isERC721 ? 'ERC721' : 'ERC1155'}
+                  Type: {computedMetadata.isERC721 ? 'ERC721' : 'ERC1155'}
                 </Text>
-                {nftMetadata.isERC1155 && (
+                {computedMetadata.isERC1155 && (
                   <Text fontSize={14} color={'text3'}>
-                    Treasury Balance: {nftMetadata.balance.toString()}
-                  </Text>
-                )}
-                {nftMetadata.metadataDescription && (
-                  <Text
-                    fontSize={12}
-                    color={'text4'}
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {nftMetadata.metadataDescription}
+                    Treasury Balance: {computedMetadata.balance.toString()}
                   </Text>
                 )}
               </Flex>
@@ -473,8 +395,8 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         )}
 
         {/* Invalid NFT error state */}
-        {nftMetadata &&
-          !nftMetadata.isValid &&
+        {computedMetadata &&
+          !computedMetadata.isValid &&
           currentContractAddress &&
           currentTokenId && (
             <Box
@@ -516,7 +438,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
         </Box>
 
         {/* Amount field - only show for ERC1155 */}
-        {nftMetadata?.isERC1155 && (
+        {computedMetadata?.isERC1155 && (
           <Box mt={'x5'}>
             <SmartInput
               {...formik.getFieldProps('amount')}
@@ -524,7 +446,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
                 <Flex justify={'space-between'} width={'100%'}>
                   <Box fontWeight={'label'}>Amount</Box>
                   <Box color={'text3'} fontWeight="paragraph">
-                    Max: {nftMetadata.balance.toString()}
+                    Max: {computedMetadata.balance.toString()}
                   </Box>
                 </Flex>
               }
@@ -547,7 +469,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           variant={'outline'}
           borderRadius={'curved'}
           type="submit"
-          disabled={!formik.isValid || !nftMetadata?.isValid}
+          disabled={!formik.isValid || !computedMetadata?.isValid}
         >
           Add Transaction to Queue
         </Button>
@@ -557,6 +479,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
 }
 
 export const SendNft = () => {
+  const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const [currentNftMetadata, setCurrentNftMetadata] = useState<NftMetadata | null>(null)
@@ -568,77 +491,74 @@ export const SendNft = () => {
     amount: 1,
   }
 
-  const handleSubmit = async (
-    values: SendNftValues,
-    actions: FormikHelpers<SendNftValues>
-  ) => {
-    if (
-      !values.recipientAddress ||
-      !values.contractAddress ||
-      !values.tokenId ||
-      !currentNftMetadata?.isValid
-    )
-      return
+  const handleSubmit = useCallback(
+    async (values: SendNftValues, actions: FormikHelpers<SendNftValues>) => {
+      if (
+        !values.recipientAddress ||
+        !values.contractAddress ||
+        !values.tokenId ||
+        !treasury ||
+        !currentNftMetadata?.isValid
+      )
+        return
 
-    const chainToQuery =
-      chain.id === CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
+      const chainToQuery =
+        chain.id === CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
 
-    const recipient = await getEnsAddress(
-      values.recipientAddress,
-      getProvider(chainToQuery)
-    )
-    const contractAddress = getAddress(values.contractAddress)
-    const tokenId = BigInt(values.tokenId)
+      const recipient = await getEnsAddress(
+        values.recipientAddress,
+        getProvider(chainToQuery)
+      )
+      const contractAddress = getAddress(values.contractAddress)
+      const tokenId = BigInt(values.tokenId)
 
-    let calldata: string
-    let functionSignature: string
+      let calldata: string
+      let functionSignature: string
 
-    if (currentNftMetadata.isERC721) {
-      // Use safeTransferFrom for ERC721
-      calldata = encodeFunctionData({
-        abi: erc721Abi,
-        functionName: 'safeTransferFrom',
-        args: [
-          getAddress(currentNftMetadata.contractAddress),
-          getAddress(recipient),
-          tokenId,
+      if (currentNftMetadata.isERC721) {
+        // Use safeTransferFrom for ERC721
+        calldata = encodeFunctionData({
+          abi: erc721Abi,
+          functionName: 'safeTransferFrom',
+          args: [getAddress(treasury), getAddress(recipient), tokenId],
+        })
+        functionSignature = 'safeTransferFrom(address,address,uint256)'
+      } else {
+        // Use safeTransferFrom for ERC1155
+        calldata = encodeFunctionData({
+          abi: erc1155Abi,
+          functionName: 'safeTransferFrom',
+          args: [
+            getAddress(treasury),
+            getAddress(recipient),
+            tokenId,
+            BigInt(values.amount),
+            '0x', // empty data
+          ],
+        })
+        functionSignature = 'safeTransferFrom(address,address,uint256,uint256,bytes)'
+      }
+
+      const nftType = currentNftMetadata.isERC721 ? 'ERC721' : 'ERC1155'
+      const amountText = currentNftMetadata.isERC1155 ? `${values.amount}x ` : ''
+
+      addTransaction({
+        type: TransactionType.SEND_NFT,
+        summary: `Send ${amountText}${currentNftMetadata.name} #${values.tokenId} (${nftType}) to ${walletSnippet(recipient)}`,
+        transactions: [
+          {
+            functionSignature,
+            target: contractAddress,
+            value: '0',
+            calldata,
+          },
         ],
       })
-      functionSignature = 'safeTransferFrom(address,address,uint256)'
-    } else {
-      // Use safeTransferFrom for ERC1155
-      calldata = encodeFunctionData({
-        abi: erc1155Abi,
-        functionName: 'safeTransferFrom',
-        args: [
-          getAddress(currentNftMetadata.contractAddress),
-          getAddress(recipient),
-          tokenId,
-          BigInt(values.amount),
-          '0x', // empty data
-        ],
-      })
-      functionSignature = 'safeTransferFrom(address,address,uint256,uint256,bytes)'
-    }
 
-    const nftType = currentNftMetadata.isERC721 ? 'ERC721' : 'ERC1155'
-    const amountText = currentNftMetadata.isERC1155 ? `${values.amount}x ` : ''
-
-    addTransaction({
-      type: TransactionType.SEND_NFT,
-      summary: `Send ${amountText}${currentNftMetadata.name} #${values.tokenId} (${nftType}) to ${walletSnippet(recipient)}`,
-      transactions: [
-        {
-          functionSignature,
-          target: contractAddress,
-          value: '0',
-          calldata,
-        },
-      ],
-    })
-
-    actions.resetForm()
-  }
+      actions.resetForm()
+    },
+    [chain.id, currentNftMetadata, addTransaction, treasury]
+  )
 
   return (
     <Box w={'100%'}>

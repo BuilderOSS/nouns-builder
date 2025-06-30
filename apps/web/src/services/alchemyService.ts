@@ -1,4 +1,11 @@
-import { Alchemy, Network, NftFilters, OwnedNft, NftTokenType, TokenBalanceType } from 'alchemy-sdk'
+import {
+  Alchemy,
+  Network,
+  NftFilters,
+  NftTokenType,
+  OwnedNft,
+  TokenBalanceType,
+} from 'alchemy-sdk'
 import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
@@ -50,6 +57,7 @@ export type SerializedNftMetadata = {
     address: string
   }
   tokenId: string
+  tokenType: NftTokenType
   name: string | null
   description: string | null
   image: string | null
@@ -538,8 +546,8 @@ export const getEnrichedTokenBalances = async (
   const filteredBalances = PUBLIC_IS_TESTNET
     ? enrichedBalances
     : enrichedBalances.filter(
-      (balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE
-    )
+        (balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE
+      )
 
   // Parse the data to ensure JSON serialization safety
   const parsedBalances = parseTokenBalanceData(filteredBalances)
@@ -547,8 +555,8 @@ export const getEnrichedTokenBalances = async (
   // Determine source based on cache hits
   const source =
     balancesResult.source === 'cache' &&
-      metadataResult.source === 'cache' &&
-      pricesResult.source === 'cache'
+    metadataResult.source === 'cache' &&
+    pricesResult.source === 'cache'
       ? 'cache'
       : 'fetched'
 
@@ -599,6 +607,7 @@ export const getCachedNftMetadata = async (
         address: metadata.contract?.address || contractAddress,
       },
       tokenId: metadata.tokenId || tokenId,
+      tokenType: metadata.tokenType || NftTokenType.UNKNOWN,
       name: metadata.name || null,
       description: metadata.description || null,
       image: imageUrl,

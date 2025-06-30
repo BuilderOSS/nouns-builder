@@ -1,12 +1,13 @@
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
+t import { Box, Button, Flex, Text } from '@zoralabs/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { encodeFunctionData, formatUnits, getAddress, isAddress, parseUnits } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
+import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { erc20Abi } from 'src/data/contract/abis/ERC20'
 import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useTokenMetadataSingle } from 'src/hooks/useTokenMetadata'
@@ -55,12 +56,15 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
   )
 
   // Get the current token address to validate from formik values
-  const currentTokenAddress =
-    selectedTokenOption === 'custom'
-      ? formik.values.tokenAddress || ''
-      : selectedTokenOption !== '' && selectedTokenOption !== 'custom'
-        ? selectedTokenOption
-        : ''
+  const currentTokenAddress = useMemo(() => {
+    if (selectedTokenOption === 'custom') {
+      return formik.values.tokenAddress || ''
+    }
+    if (selectedTokenOption !== '' && selectedTokenOption !== 'custom') {
+      return selectedTokenOption
+    }
+    return ''
+  }, [selectedTokenOption, formik.values.tokenAddress])
 
   // Get token metadata using the common hook
   const { tokenMetadata, isLoading: isLoadingTokenMetadata } = useTokenMetadataSingle(
@@ -125,51 +129,64 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
   ])
 
   // Create dropdown options
-  const tokenOptions: SelectOption<TokenOption>[] = [
-    {
-      value: '' as TokenOption,
-      label: 'Select a token...',
-    },
-    ...(treasuryTokens?.map((token) => {
-      const formattedBalance = formatUnits(BigInt(token.balance), token.decimals)
-      const formattedValue = formatCryptoVal(formattedBalance)
+  const tokenOptions: SelectOption<TokenOption>[] = useMemo(
+    () => [
+      {
+        value: '' as TokenOption,
+        label: 'Select a token...',
+      },
+      ...(treasuryTokens?.map((token) => {
+        const formattedBalance = formatUnits(BigInt(token.balance), token.decimals)
+        const formattedValue = formatCryptoVal(formattedBalance)
 
-      return {
-        value: token.address as TokenOption,
-        label: `${token.name} (${formattedValue} ${token.symbol})`,
-        icon: token.logo ? (
-          <img src={token.logo} alt={token.symbol} width={20} height={20} />
-        ) : undefined,
-      }
-    }) || []),
-    {
-      value: 'custom' as TokenOption,
-      label: 'Custom Token Address',
-    },
-  ]
+        return {
+          value: token.address as TokenOption,
+          label: `${token.name} (${formattedValue} ${token.symbol})`,
+          icon: token.logo ? (
+            <img src={token.logo} alt={token.symbol} width={20} height={20} />
+          ) : undefined,
+        }
+      }) || []),
+      {
+        value: 'custom' as TokenOption,
+        label: 'Custom Token Address',
+      },
+    ],
+    [treasuryTokens]
+  )
 
   // Handle dropdown selection change
-  const handleTokenOptionChange = (option: TokenOption) => {
-    setSelectedTokenOption(option)
-    // Clear existing metadata when changing selection
-    setCurrentTokenMetadata(null)
-    onTokenMetadataChange(null)
+  const handleTokenOptionChange = useCallback(
+    (option: TokenOption) => {
+      setSelectedTokenOption(option)
+      // Clear existing metadata when changing selection
+      setCurrentTokenMetadata(null)
+      onTokenMetadataChange(null)
 
-    if (option === 'custom') {
-      // Clear the token address when switching to custom
-      formik.setFieldValue('tokenAddress', '')
-    } else if (option !== '' && option !== 'custom') {
-      // Set the token address in formik when selecting from treasury tokens
-      formik.setFieldValue('tokenAddress', option)
-    } else {
-      // Clear the token address for placeholder selection
-      formik.setFieldValue('tokenAddress', '')
-    }
-  }
+      if (option === 'custom') {
+        // Clear the token address when switching to custom
+        formik.setFieldValue('tokenAddress', '')
+      } else if (option !== '' && option !== 'custom') {
+        // Set the token address in formik when selecting from treasury tokens
+        formik.setFieldValue('tokenAddress', option)
+      } else {
+        // Clear the token address for placeholder selection
+        formik.setFieldValue('tokenAddress', '')
+      }
+    },
+    [formik, onTokenMetadataChange]
+  )
 
-  const currentBalance = currentTokenMetadata
-    ? parseFloat(formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals))
-    : 0
+  const currentBalance = useMemo(
+    () =>
+      currentTokenMetadata
+        ? parseFloat(
+          formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
+        )
+        : 0,
+
+    [currentTokenMetadata]
+  )
 
   return (
     <Box
@@ -201,9 +218,9 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
                 formik.touched.tokenAddress && formik.errors.tokenAddress
                   ? formik.errors.tokenAddress
                   : formik.values.tokenAddress &&
-                      isAddress(formik.values.tokenAddress) &&
-                      currentTokenMetadata &&
-                      !currentTokenMetadata.isValid
+                    isAddress(formik.values.tokenAddress) &&
+                    currentTokenMetadata &&
+                    !currentTokenMetadata.isValid
                     ? 'Invalid ERC20 token or contract not found'
                     : undefined
               }
@@ -242,6 +259,10 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         {/* Valid token metadata display */}
         {currentTokenMetadata && currentTokenMetadata.isValid && (
           <Box
+            as="a"
+            href={`${ETHERSCAN_BASE_URL[chain.id]}/token/${currentTokenAddress}?a=${treasury}`}
+            target="_blank"
+            rel="noopener noreferrer"
             mt={'x5'}
             p={'x4'}
             backgroundColor={'background2'}
@@ -249,6 +270,13 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
             borderWidth={'normal'}
             borderStyle={'solid'}
             borderColor={'border'}
+            style={{
+              textDecoration: 'none',
+              display: 'block',
+              transition: 'all 0.2s ease',
+              cursor: 'pointer',
+            }}
+            className="hover:bg-background3 hover:border-accent"
           >
             <Flex direction={'column'} gap={'x1'}>
               <Text fontSize={14} fontWeight={'label'}>
@@ -368,54 +396,60 @@ export const SendErc20 = () => {
     amount: 0,
   }
 
-  const handleSubmit = async (
-    values: SendErc20Values,
-    actions: FormikHelpers<SendErc20Values>
-  ) => {
-    if (
-      !values.amount ||
-      !values.recipientAddress ||
-      !values.tokenAddress ||
-      !currentTokenMetadata?.isValid
-    )
-      return
+  const handleSubmit = useCallback(
+    async (values: SendErc20Values, actions: FormikHelpers<SendErc20Values>) => {
+      if (
+        !values.amount ||
+        !values.recipientAddress ||
+        !values.tokenAddress ||
+        !currentTokenMetadata?.isValid
+      )
+        return
 
-    const chainToQuery =
-      chain.id === CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
+      const chainToQuery =
+        chain.id === CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
 
-    const recipient = await getEnsAddress(
-      values.recipientAddress,
-      getProvider(chainToQuery)
-    )
-    const tokenAddress = getAddress(values.tokenAddress)
-    const amount = parseUnits(values.amount.toString(), currentTokenMetadata.decimals)
+      const recipient = await getEnsAddress(
+        values.recipientAddress,
+        getProvider(chainToQuery)
+      )
+      const tokenAddress = getAddress(values.tokenAddress)
+      const amount = parseUnits(values.amount.toString(), currentTokenMetadata.decimals)
 
-    // Encode ERC20 transfer function call
-    const calldata = encodeFunctionData({
-      abi: erc20Abi,
-      functionName: 'transfer',
-      args: [getAddress(recipient), amount],
-    })
+      // Encode ERC20 transfer function call
+      const calldata = encodeFunctionData({
+        abi: erc20Abi,
+        functionName: 'transfer',
+        args: [getAddress(recipient), amount],
+      })
 
-    addTransaction({
-      type: TransactionType.SEND_ERC20,
-      summary: `Send ${values.amount} ${currentTokenMetadata.symbol} to ${walletSnippet(recipient)}`,
-      transactions: [
-        {
-          functionSignature: 'transfer(address,uint256)',
-          target: tokenAddress,
-          value: '0',
-          calldata,
-        },
-      ],
-    })
+      addTransaction({
+        type: TransactionType.SEND_ERC20,
+        summary: `Send ${values.amount} ${currentTokenMetadata.symbol} to ${walletSnippet(recipient)}`,
+        transactions: [
+          {
+            functionSignature: 'transfer(address,uint256)',
+            target: tokenAddress,
+            value: '0',
+            calldata,
+          },
+        ],
+      })
 
-    actions.resetForm()
-  }
+      actions.resetForm()
+    },
+    [chain.id, currentTokenMetadata, addTransaction]
+  )
 
-  const currentBalance = currentTokenMetadata
-    ? parseFloat(formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals))
-    : 0
+  const currentBalance = useMemo(
+    () =>
+      currentTokenMetadata
+        ? parseFloat(
+          formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
+        )
+        : 0,
+    [currentTokenMetadata]
+  )
 
   return (
     <Box w={'100%'}>
