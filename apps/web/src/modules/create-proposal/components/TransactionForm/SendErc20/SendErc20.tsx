@@ -1,4 +1,4 @@
-t import { Box, Button, Flex, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Text } from '@zoralabs/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -181,8 +181,8 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
     () =>
       currentTokenMetadata
         ? parseFloat(
-          formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
-        )
+            formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
+          )
         : 0,
 
     [currentTokenMetadata]
@@ -218,9 +218,9 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
                 formik.touched.tokenAddress && formik.errors.tokenAddress
                   ? formik.errors.tokenAddress
                   : formik.values.tokenAddress &&
-                    isAddress(formik.values.tokenAddress) &&
-                    currentTokenMetadata &&
-                    !currentTokenMetadata.isValid
+                      isAddress(formik.values.tokenAddress) &&
+                      currentTokenMetadata &&
+                      !currentTokenMetadata.isValid
                     ? 'Invalid ERC20 token or contract not found'
                     : undefined
               }
@@ -445,8 +445,8 @@ export const SendErc20 = () => {
     () =>
       currentTokenMetadata
         ? parseFloat(
-          formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
-        )
+            formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
+          )
         : 0,
     [currentTokenMetadata]
   )

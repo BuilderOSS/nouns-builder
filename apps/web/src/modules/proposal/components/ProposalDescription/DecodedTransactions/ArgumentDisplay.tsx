@@ -11,6 +11,7 @@ import { DecodedArg } from 'src/typings'
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
 import { EscrowArgumentDisplay } from './EscrowArgumentDisplay'
+import { NFTArgumentDisplay } from './NFTArgumentDisplay'
 
 interface ArgumentDisplayProps {
   arg: DecodedArg
@@ -27,14 +28,13 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
 
   if (!arg) return null
 
+  // Check if this is an NFT transfer function
+  if (functionName === 'safeTransferFrom') {
+    return <NFTArgumentDisplay arg={arg} target={target} functionName={functionName} />
+  }
+
   // Check if this is an ERC20 transfer function
-  if (
-    functionName === 'transfer' &&
-    (arg.name === 'amount' ||
-      arg.name === 'value' ||
-      arg.name === '_value' ||
-      arg.name === '_amount')
-  ) {
+  if (functionName === 'transfer') {
     return <ERC20ArgumentDisplay arg={arg} target={target} />
   }
 
