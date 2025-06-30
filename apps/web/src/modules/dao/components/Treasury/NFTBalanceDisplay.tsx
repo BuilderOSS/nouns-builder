@@ -136,6 +136,19 @@ export const NFTBalanceDisplay: React.FC = () => {
                       >
                         {nft.name ?? '‎ '}
                       </Text>
+                      {nft.tokenType === 'ERC1155' && (
+                        <Text
+                          fontSize={12}
+                          color={'secondary'}
+                          px="x1"
+                          borderColor={'border'}
+                          borderStyle={'solid'}
+                          borderRadius={'curved'}
+                          borderWidth={'normal'}
+                        >
+                          {nft.balance}
+                        </Text>
+                      )}
                     </Flex>
                     <Text
                       fontSize={12}

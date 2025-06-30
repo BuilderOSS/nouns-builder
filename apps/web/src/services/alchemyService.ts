@@ -1,4 +1,11 @@
-import { Alchemy, Network, NftFilters, OwnedNft, TokenBalanceType } from 'alchemy-sdk'
+import {
+  Alchemy,
+  Network,
+  NftFilters,
+  NftTokenType,
+  OwnedNft,
+  TokenBalanceType,
+} from 'alchemy-sdk'
 import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
@@ -21,15 +28,20 @@ const getTokenBalancesKey = (chainId: CHAIN_ID, address: string) =>
 const getNftBalancesKey = (chainId: CHAIN_ID, address: string) =>
   `alchemy:nft-balances:${chainId}:${address.toLowerCase()}`
 
+const getNftMetadataKey = (chainId: CHAIN_ID, contractAddress: string, tokenId: string) =>
+  `alchemy:nft-metadata:${chainId}:${contractAddress.toLowerCase()}:${tokenId}`
+
 const getCoinGeckoLogoKey = (chainId: CHAIN_ID, address: string) =>
   `coingecko:logo:${chainId}:${address.toLowerCase()}`
 
 // Serialized NFT type with only the data we need for frontend display
 export type SerializedNft = {
+  tokenId: string
+  tokenType: NftTokenType
+  balance: string
   contract: {
     address: string
   }
-  tokenId: string
   name: string | null
   image: {
     originalUrl: string
@@ -39,13 +51,28 @@ export type SerializedNft = {
   }
 }
 
+// Serialized NFT metadata type for individual NFT metadata
+export type SerializedNftMetadata = {
+  contract: {
+    address: string
+  }
+  tokenId: string
+  tokenType: NftTokenType
+  name: string | null
+  description: string | null
+  image: string | null
+  tokenUri: string | null
+}
+
 // Parse Alchemy NFT data into our serialized type
 const parseNftData = (nfts: OwnedNft[]): SerializedNft[] => {
   return nfts.map((nft) => ({
+    tokenId: nft.tokenId || '',
+    tokenType: nft.tokenType || NftTokenType.UNKNOWN,
+    balance: nft.balance || '',
     contract: {
       address: nft.contract?.address || '',
     },
-    tokenId: nft.tokenId || '',
     name: nft.name || null,
     image: {
       originalUrl: nft.image?.originalUrl || '',
@@ -536,5 +563,66 @@ export const getEnrichedTokenBalances = async (
   return {
     data: parsedBalances,
     source,
+  }
+}
+
+// Get cached NFT metadata for a specific NFT
+export const getCachedNftMetadata = async (
+  chainId: CHAIN_ID,
+  contractAddress: AddressType,
+  tokenId: string
+): Promise<CachedResult<SerializedNftMetadata> | null> => {
+  const alchemy = createAlchemyInstance(chainId)
+  if (!alchemy) {
+    return null
+  }
+
+  const redis = getRedisConnection()
+  const cacheKey = getNftMetadataKey(chainId, contractAddress, tokenId)
+
+  try {
+    // Check cache first
+    const cached = await redis?.get(cacheKey)
+    if (cached) {
+      return {
+        data: JSON.parse(cached),
+        source: 'cache',
+      }
+    }
+
+    // Fetch from Alchemy API
+    const metadata = await alchemy.nft.getNftMetadata(contractAddress, tokenId)
+
+    // Process image URL - handle Zora API replacement
+    let imageUrl = metadata.image?.originalUrl || metadata.image?.cachedUrl || null
+    if (imageUrl && typeof imageUrl === 'string') {
+      if (imageUrl.startsWith('https://api.zora.co')) {
+        imageUrl = imageUrl.replace('https://api.zora.co', 'https://nouns.build/api')
+      }
+    }
+
+    // Create serialized metadata
+    const serializedMetadata: SerializedNftMetadata = {
+      contract: {
+        address: metadata.contract?.address || contractAddress,
+      },
+      tokenId: metadata.tokenId || tokenId,
+      tokenType: metadata.tokenType || NftTokenType.UNKNOWN,
+      name: metadata.name || null,
+      description: metadata.description || null,
+      image: imageUrl,
+      tokenUri: metadata.tokenUri || null,
+    }
+
+    // Cache the result (15 minutes TTL)
+    await redis?.setex(cacheKey, 900, JSON.stringify(serializedMetadata))
+
+    return {
+      data: serializedMetadata,
+      source: 'fetched',
+    }
+  } catch (error) {
+    console.error('getCachedNftMetadata error:', error)
+    throw new BackendFailedError('Failed to fetch NFT metadata')
   }
 }
