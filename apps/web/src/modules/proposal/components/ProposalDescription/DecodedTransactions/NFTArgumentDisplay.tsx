@@ -51,29 +51,46 @@ export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
   const isNftTransfer = functionName === 'safeTransferFrom' && tokenId && nftMetadata
 
   if (isNftTransfer && nftMetadata.image) {
+    const name = arg.name.startsWith('_') ? '_token' : 'token'
+    const typeName = arg.name.startsWith('_') ? '_type' : 'type'
     return (
-      <Box key={arg.name + target}>
-        <Flex key={'nft' + target} align="center" w="100%" gap="x2">
-          <Text style={{ flexShrink: 0 }}>nft:</Text>
-          <Box style={{ width: '24px', height: '24px', flexShrink: 0 }}>
-            <Box aspectRatio={1} backgroundColor="border" borderRadius="curved">
-              <FallbackImage
-                srcList={imageSrcList}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  borderRadius: 'inherit',
-                }}
-              />
+      <>
+        <DecodedValueRenderer name={typeName} value={nftMetadata.tokenType} />
+        <Box key={arg.name + target}>
+          <Flex key={'nft' + target} align="center" w="100%" gap="x2">
+            <Text style={{ flexShrink: 0 }}>{name}:</Text>
+            <Box style={{ width: '24px', height: '24px', flexShrink: 0 }}>
+              <Box aspectRatio={1} backgroundColor="border" borderRadius="curved">
+                <FallbackImage
+                  srcList={imageSrcList}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: 'inherit',
+                  }}
+                />
+              </Box>
             </Box>
-          </Box>
-          <Text>
-            {nftMetadata.name} #{tokenId} ({nftMetadata.tokenType})
-          </Text>
-        </Flex>
-      </Box>
+            <Text>
+              {nftMetadata.name} #{tokenId}
+            </Text>
+          </Flex>
+        </Box>
+      </>
     )
+  }
+  if (
+    arg.name === 'value' ||
+    arg.name === '_value' ||
+    arg.name === 'amount' ||
+    arg.name === '_amount'
+  ) {
+    return <DecodedValueRenderer name="amount" value={arg.value} />
+  }
+
+  if ((arg.name === 'data' || arg.name === '_data') && arg.value === '0x') {
+    return null
   }
 
   // Default rendering for other arguments
