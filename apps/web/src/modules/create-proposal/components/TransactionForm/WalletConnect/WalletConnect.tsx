@@ -9,6 +9,7 @@ import { Icon } from 'src/components/Icon'
 import { useDecodedTransactionSingle } from 'src/hooks/useDecodedTransactions'
 import {
   TransactionType,
+  WCClientData,
   WCParams,
   WCPayload,
   useProposalStore,
@@ -31,7 +32,7 @@ enum ConnectionStatus {
 
 interface WalletConnectFormProps {
   formik: FormikProps<WalletConnectValues>
-  onTransactionReceived: (payload: WCPayload) => void
+  onTransactionReceived: (wcClientData: WCClientData, payload: WCPayload) => void
 }
 
 const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormProps) => {
@@ -39,17 +40,16 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
   const chain = useChainStore((x) => x.chain)
   const [connectionStatus, setConnectionStatus] = useState(ConnectionStatus.DISCONNECTED)
 
-  // WalletConnect V1 hook
   const { txPayload, wcClientData, wcConnect, wcDisconnect, txError } = useWalletConnect()
 
   const wcLink = formik.values.wcLink
 
   // Handle transaction payload updates
   useEffect(() => {
-    if (txPayload) {
-      onTransactionReceived(txPayload)
+    if (wcClientData && txPayload) {
+      onTransactionReceived(wcClientData, txPayload)
     }
-  }, [txPayload, onTransactionReceived])
+  }, [wcClientData, txPayload, onTransactionReceived])
 
   useEffect(() => {
     if (
@@ -64,7 +64,11 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
       }
       setConnectionStatus(ConnectionStatus.CONNECTING)
 
-      wcConnect(params)
+      wcConnect(params).then((success) => {
+        if (!success) {
+          setConnectionStatus(ConnectionStatus.DISCONNECTED)
+        }
+      })
     }
   }, [connectionStatus, treasury, chain.id, wcConnect, wcLink])
 
@@ -74,9 +78,11 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
     formik.resetForm()
   }, [wcDisconnect, formik])
 
-  const handleContinue = useCallback(() => {
-    setConnectionStatus(ConnectionStatus.CONNECTED)
-  }, [])
+  useEffect(() => {
+    if (connectionStatus === ConnectionStatus.CONNECTING && !!wcClientData) {
+      setConnectionStatus(ConnectionStatus.CONNECTED)
+    }
+  }, [connectionStatus, wcClientData])
 
   const renderConnectionStatus = useMemo(() => {
     switch (connectionStatus) {
@@ -88,65 +94,29 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
         )
 
       case ConnectionStatus.CONNECTING:
-        if (!wcClientData) {
-          return (
-            <div className={styles.baseContainer}>
-              <div className={styles.loadingContainer}>
-                <Text fontSize={14} color="text3" textAlign="center" fontWeight="label">
-                  Connecting to WalletConnect...
-                </Text>
-              </div>
-              <Button variant="ghost" onClick={handleDisconnect} mt="x4">
-                Cancel
-              </Button>
-            </div>
-          )
-        } else {
-          return (
-            <div className={styles.baseContainer}>
-              <Text
-                fontSize={14}
-                color="text3"
-                textAlign="center"
-                mb="x4"
-                fontWeight="label"
-              >
-                Connecting to {wcClientData.name}...
+        return (
+          <div className={styles.baseContainer}>
+            <div className={styles.loadingContainer}>
+              <Text fontSize={16} color="text3" textAlign="center" fontWeight="label">
+                Connecting to {wcClientData?.name ?? 'WalletConnect'}...
               </Text>
-              <div className={styles.buttonsContainer}>
-                <Button onClick={handleContinue}>Continue</Button>
-                <Button variant="ghost" onClick={handleDisconnect}>
-                  Cancel
-                </Button>
-              </div>
             </div>
-          )
-        }
-
+            <Button variant="outline" onClick={handleDisconnect} mt="x2" size="sm">
+              Cancel
+            </Button>
+          </div>
+        )
       case ConnectionStatus.CONNECTED:
         return (
           <div className={styles.baseContainer}>
             <Text fontSize={16} fontWeight="label" textAlign="center">
-              {wcClientData?.name}
-            </Text>
-            <Text fontSize={14} color="positive" textAlign="center" mb="x2">
-              CONNECTED
-            </Text>
-            <Text
-              fontSize={12}
-              color="text3"
-              textAlign="center"
-              mb="x4"
-              fontWeight="label"
-            >
-              Keep this connection open. Transactions from the dApp will appear here as
-              proposals.
+              Connected to {wcClientData?.name}
             </Text>
 
             {!txPayload ? (
               <div className={styles.loadingContainer}>
                 <Text fontSize={14} color="text3" textAlign="center">
-                  Waiting for transaction from dApp...
+                  Keep this connection open. Transactions from the dApp will appear here.
                 </Text>
               </div>
             ) : (
@@ -158,19 +128,18 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
               </div>
             )}
 
-            <Button variant="ghost" onClick={handleDisconnect} mt="x4">
+            <Button variant="outline" onClick={handleDisconnect} mt="x2" size="sm">
               Disconnect
             </Button>
           </div>
         )
     }
-  }, [connectionStatus, wcClientData, txPayload, handleContinue, handleDisconnect])
+  }, [connectionStatus, wcClientData, txPayload, handleDisconnect])
 
   return (
     <Box
       data-testid="wallet-connect-form"
       as="fieldset"
-      disabled={formik.isValidating}
       style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
     >
       <Flex as={Form} direction="column">
@@ -184,17 +153,23 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
           helperText="Paste a WalletConnect URI from a dApp to connect and create proposals"
           disabled={connectionStatus === ConnectionStatus.CONNECTED}
           errorMessage={
-            txError ||
-            (formik.touched.wcLink && formik.errors.wcLink
-              ? formik.errors.wcLink
-              : undefined)
+            connectionStatus === ConnectionStatus.CONNECTED
+              ? null
+              : txError ||
+                (formik.touched.wcLink && formik.errors.wcLink
+                  ? formik.errors.wcLink
+                  : undefined)
           }
         />
 
         <div className={styles.walletConnectContainer}>
           <div className={styles.walletConnectLogo}>
             {wcClientData?.icons && wcClientData.icons.length > 0 ? (
-              <img src={wcClientData.icons[0]} alt="WalletConnect App Logo" />
+              <img
+                src={wcClientData.icons[0]}
+                alt="WalletConnect App Logo"
+                style={{ width: 32 }}
+              />
             ) : (
               <Icon id="walletConnect" size="lg" />
             )}
@@ -206,7 +181,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
         {txPayload && <TransactionPreview txPayload={txPayload} />}
 
         <Button
-          mt="x6"
+          mt="x8"
           variant="outline"
           borderRadius="curved"
           type="submit"
@@ -244,6 +219,7 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
 
 export const WalletConnect = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const [currentClientData, setCurrentClientData] = useState<WCClientData | null>(null)
   const [currentTxPayload, setCurrentTxPayload] = useState<WCPayload | null>(null)
 
   // Decode the current transaction for better summary
@@ -255,23 +231,19 @@ export const WalletConnect = () => {
 
   const handleSubmit = useCallback(
     async (_values: WalletConnectValues, actions: FormikHelpers<WalletConnectValues>) => {
-      if (!currentTxPayload) return
+      if (!currentTxPayload || !currentClientData) return
 
       const tx = currentTxPayload.params[0]
       if (!tx) return
 
       // Create a summary based on the transaction data
       let summary = 'WalletConnect transaction'
-      if (currentTxPayload.method === 'personal_sign') {
-        summary = 'Sign message via WalletConnect'
-      } else if (currentTxPayload.method.includes('signTypedData')) {
-        summary = 'Sign typed data via WalletConnect'
-      } else if (currentTxPayload.method === 'eth_sendTransaction') {
+      if (currentTxPayload.method === 'eth_sendTransaction') {
         // Use decoded function name if available, otherwise fall back to basic summary
         if (decoded && !decoded.isNotDecoded) {
-          summary = `Call ${decoded.transaction.functionName} on ${walletSnippet(tx.to)}`
+          summary = `Call ${decoded.transaction.functionName} on ${walletSnippet(tx.to)} via ${currentClientData.name}`
         } else {
-          summary = `Send transaction to ${walletSnippet(tx.to)}`
+          summary = `Send transaction to ${walletSnippet(tx.to)} via ${currentClientData.name}`
         }
       }
 
@@ -282,8 +254,8 @@ export const WalletConnect = () => {
           {
             functionSignature: currentTxPayload.method,
             target: tx.to as `0x${string}`,
-            value: tx.value || '0',
-            calldata: tx.data || '0x',
+            value: tx.value ?? '0',
+            calldata: tx.data ?? ('0x' as `0x${string}`),
           },
         ],
       })
@@ -291,7 +263,15 @@ export const WalletConnect = () => {
       actions.resetForm()
       setCurrentTxPayload(null)
     },
-    [currentTxPayload, addTransaction, decoded]
+    [currentTxPayload, currentClientData, addTransaction, decoded]
+  )
+
+  const onTransactionReceived = useCallback(
+    (wcClientData: WCClientData, txPayload: WCPayload) => {
+      setCurrentClientData(wcClientData)
+      setCurrentTxPayload(txPayload)
+    },
+    []
   )
 
   return (
@@ -307,7 +287,7 @@ export const WalletConnect = () => {
         {(formik) => (
           <WalletConnectForm
             formik={formik}
-            onTransactionReceived={setCurrentTxPayload}
+            onTransactionReceived={onTransactionReceived}
           />
         )}
       </Formik>

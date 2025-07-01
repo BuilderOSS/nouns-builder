@@ -3,7 +3,7 @@ import { Core } from '@walletconnect/core'
 import { SessionTypes, SignClientTypes } from '@walletconnect/types'
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
 import { useCallback, useEffect, useState } from 'react'
-import { zeroHash } from 'viem'
+import { getAddress, zeroHash } from 'viem'
 
 import { BASE_URL } from 'src/constants/baseUrl'
 import { WALLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
@@ -15,6 +15,8 @@ export type WCParams = {
   chainId: CHAIN_ID
   uri: string
 }
+
+export type WCClientData = SignClientTypes.Metadata
 
 export type Tx = {
   data: string
@@ -42,19 +44,17 @@ const WALLET_METADATA = {
 
 const EVMBasedNamespaces = 'eip155'
 
-export const methods: string[] = ['eth_sendTransaction', 'eth_estimateGas']
-
 // see https://docs.walletconnect.com/2.0/specs/sign/error-codes
 const UNSUPPORTED_CHAIN_ERROR_CODE = 5100
 const INVALID_METHOD_ERROR_CODE = 1001
 const USER_REJECTED_REQUEST_CODE = 4001
 const USER_DISCONNECTED_CODE = 6000
 
-export type wcConnectType = (params: WCParams) => Promise<void>
+export type wcConnectType = (params: WCParams) => Promise<boolean>
 export type wcDisconnectType = () => Promise<void>
 
 type useWalletConnectType = {
-  wcClientData?: SignClientTypes.Metadata
+  wcClientData?: WCClientData
   wcConnect: wcConnectType
   wcDisconnect: wcDisconnectType
   txPayload?: WCPayload
@@ -89,7 +89,7 @@ export const useWalletConnect = (): useWalletConnectType => {
 
       const core = new Core({
         projectId: WALLET_CONNECT_PROJECT_ID,
-        logger: process.env.VERCEL_ENV === 'production' ? 'error' : 'debug',
+        logger: process.env.VERCEL_ENV === 'production' ? 'error' : 'trace',
       })
 
       const web3wallet = await Web3Wallet.init({
@@ -112,18 +112,13 @@ export const useWalletConnect = (): useWalletConnectType => {
     if (!web3wallet || !chainId || !treasury) return
 
     web3wallet.on('session_proposal', async (proposal) => {
-      const { id, params } = proposal
-
       try {
-        const account = `${EVMBasedNamespaces}:${Number(chainId)}:${treasury.toLowerCase()}`
-        const chain = `${EVMBasedNamespaces}:${Number(chainId)}`
-
         const namespaces = buildApprovedNamespaces({
-          proposal: params,
+          proposal: proposal.params,
           supportedNamespaces: {
             eip155: {
-              chains: [chain],
-              methods,
+              chains: [`${EVMBasedNamespaces}:${Number(chainId)}`],
+              methods: ['eth_sendTransaction'],
               events: [
                 'chainChanged',
                 'accountsChanged',
@@ -131,13 +126,14 @@ export const useWalletConnect = (): useWalletConnectType => {
                 'disconnect',
                 'connect',
               ],
-
-              accounts: [account],
+              accounts: [
+                `${EVMBasedNamespaces}:${Number(chainId)}:${getAddress(treasury)}`,
+              ],
             },
           },
         })
         const wcSession = await web3wallet.approveSession({
-          id,
+          id: proposal.id,
           namespaces,
         })
 
@@ -145,7 +141,7 @@ export const useWalletConnect = (): useWalletConnectType => {
         setError(undefined)
       } catch (error) {
         console.error('WalletConnect session_proposal error: ', error)
-        setError((error as Error).message)
+        setError('Error connecting to dApp.')
         await web3wallet.rejectSession({
           id: proposal.id,
           reason: getSdkError('USER_REJECTED'),
@@ -196,18 +192,6 @@ export const useWalletConnect = (): useWalletConnectType => {
             })
             break
           }
-          case 'eth_estimateGas': {
-            // notice: we don't require to estimate gas for the individual contract call to build the proposal calldata
-            await web3wallet.respondSessionRequest({
-              topic,
-              response: {
-                id,
-                jsonrpc: '2.0',
-                result: '0x0', // notice: respond zero gas by default
-              },
-            })
-            break
-          }
           default: {
             const errorMsg = 'Tx type not supported'
             setError(errorMsg)
@@ -235,12 +219,40 @@ export const useWalletConnect = (): useWalletConnectType => {
     })
   }, [chainId, web3wallet, treasury])
 
-  const wcConnect = useCallback<wcConnectType>(
-    async ({ uri }: WCParams) => {
-      if (web3wallet) {
-        // Pairing session starts
-        await web3wallet.pair({ uri, activatePairing: true })
+  useEffect(() => {
+    if (web3wallet && chainId && treasury) {
+      const activeSessions = web3wallet.getActiveSessions()
+      const compatibleSession = Object.keys(activeSessions)
+        .map((topic) => activeSessions[topic])
+        .find(
+          (session) =>
+            session.namespaces[EVMBasedNamespaces].accounts[0] ===
+            `${EVMBasedNamespaces}:${chainId}:${getAddress(treasury)}` // Safe Account
+        )
+
+      // restore an active previous session
+      if (compatibleSession) {
+        setWcSession(compatibleSession)
       }
+    }
+  }, [chainId, treasury, web3wallet])
+
+  const wcConnect = useCallback<wcConnectType>(
+    async ({ uri }: WCParams): Promise<boolean> => {
+      setError(undefined)
+      setWcSession(undefined)
+      setTxPayload(undefined)
+      try {
+        if (web3wallet) {
+          // Pairing session starts
+          await web3wallet.pair({ uri, activatePairing: true })
+          return true
+        }
+      } catch (error) {
+        console.error('WalletConnect pairing error: ', error)
+        setError('Error connecting to dApp.')
+      }
+      return false
     },
     [web3wallet]
   )
