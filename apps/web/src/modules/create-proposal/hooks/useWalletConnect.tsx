@@ -1,7 +1,7 @@
-import { WalletKit as Web3Wallet, IWalletKit as Web3WalletType } from '@reown/walletkit'
 import { Core } from '@walletconnect/core'
 import { SessionTypes, SignClientTypes } from '@walletconnect/types'
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
+import { IWeb3Wallet, Web3Wallet } from '@walletconnect/web3wallet'
 import { useCallback, useEffect, useState } from 'react'
 import { getAddress, zeroHash } from 'viem'
 
@@ -73,7 +73,7 @@ const rejectResponse = (id: number, code: number, message: string) => {
 }
 
 export const useWalletConnect = (): useWalletConnectType => {
-  const [web3wallet, setWeb3wallet] = useState<Web3WalletType>()
+  const [web3wallet, setWeb3wallet] = useState<IWeb3Wallet>()
 
   const [wcSession, setWcSession] = useState<SessionTypes.Struct>()
   useState<boolean>(false)
@@ -84,140 +84,135 @@ export const useWalletConnect = (): useWalletConnectType => {
   const treasury = useDaoStore((s) => s.addresses?.treasury)
 
   useEffect(() => {
-    const initializeWalletConnectClient = async () => {
-      if (!chainId) return
+    const createWalletConnectClient = async (): Promise<IWeb3Wallet | undefined> => {
+      if (!chainId || !treasury) return undefined
 
       const core = new Core({
         projectId: WALLET_CONNECT_PROJECT_ID,
-        logger: process.env.VERCEL_ENV === 'production' ? 'error' : 'trace',
+        logger: process.env.VERCEL_ENV === 'production' ? 'error' : 'debug',
       })
 
-      const web3wallet = await Web3Wallet.init({
+      const walletkit = await Web3Wallet.init({
         core,
         metadata: WALLET_METADATA,
       })
 
-      setWeb3wallet(web3wallet)
-    }
-
-    try {
-      initializeWalletConnectClient()
-    } catch (error) {
-      console.error('WalletConnect initialization error: ', error)
-      setWeb3wallet(undefined)
-    }
-  }, [chainId])
-
-  useEffect(() => {
-    if (!web3wallet || !chainId || !treasury) return
-
-    web3wallet.on('session_proposal', async (proposal) => {
-      try {
-        const namespaces = buildApprovedNamespaces({
-          proposal: proposal.params,
-          supportedNamespaces: {
-            eip155: {
-              chains: [`${EVMBasedNamespaces}:${Number(chainId)}`],
-              methods: ['eth_sendTransaction'],
-              events: [
-                'chainChanged',
-                'accountsChanged',
-                'message',
-                'disconnect',
-                'connect',
-              ],
-              accounts: [
-                `${EVMBasedNamespaces}:${Number(chainId)}:${getAddress(treasury)}`,
-              ],
+      walletkit.on('session_proposal', async (proposal) => {
+        try {
+          const namespaces = buildApprovedNamespaces({
+            proposal: proposal.params,
+            supportedNamespaces: {
+              eip155: {
+                chains: [`${EVMBasedNamespaces}:${Number(chainId)}`],
+                methods: ['eth_sendTransaction'],
+                events: [
+                  'chainChanged',
+                  'accountsChanged',
+                  'message',
+                  'disconnect',
+                  'connect',
+                ],
+                accounts: [
+                  `${EVMBasedNamespaces}:${Number(chainId)}:${getAddress(treasury)}`,
+                ],
+              },
             },
-          },
-        })
-        const wcSession = await web3wallet.approveSession({
-          id: proposal.id,
-          namespaces,
-        })
+          })
+          const wcSession = await walletkit.approveSession({
+            id: proposal.id,
+            namespaces,
+          })
 
-        setWcSession(wcSession)
+          setWcSession(wcSession)
+          setError(undefined)
+        } catch (error) {
+          console.error('WalletConnect session_proposal error: ', error)
+          setError('Error connecting to dApp.')
+          await walletkit.rejectSession({
+            id: proposal.id,
+            reason: getSdkError('USER_REJECTED'),
+          })
+        }
+      })
+
+      walletkit.on('session_delete', async () => {
+        setWcSession(undefined)
         setError(undefined)
-      } catch (error) {
-        console.error('WalletConnect session_proposal error: ', error)
-        setError('Error connecting to dApp.')
-        await web3wallet.rejectSession({
-          id: proposal.id,
-          reason: getSdkError('USER_REJECTED'),
-        })
-      }
-    })
+      })
 
-    web3wallet.on('session_delete', async () => {
-      setWcSession(undefined)
-      setError(undefined)
-    })
+      walletkit.on('session_request', async (event) => {
+        const { topic, id } = event
+        const { request, chainId: transactionChainId } = event.params
+        const { method, params } = request
 
-    web3wallet.on('session_request', async (event) => {
-      const { topic, id } = event
-      const { request, chainId: transactionChainId } = event.params
-      const { method, params } = request
+        const isDAOChainId = transactionChainId === `${EVMBasedNamespaces}:${chainId}`
 
-      const isDAOChainId = transactionChainId === `${EVMBasedNamespaces}:${chainId}`
+        if (!isDAOChainId) {
+          const errorMessage = `Transaction rejected: the connected Dapp is not set to the correct chain.`
+          setError(errorMessage)
+          await walletkit.respondSessionRequest({
+            topic,
+            response: rejectResponse(id, UNSUPPORTED_CHAIN_ERROR_CODE, errorMessage),
+          })
+          return
+        }
 
-      // we only accept transactions from the Safe chain
-      if (!isDAOChainId) {
-        const errorMessage = `Transaction rejected: the connected Dapp is not set to the correct chain.`
-        setError(errorMessage)
-        await web3wallet.respondSessionRequest({
-          topic,
-          response: rejectResponse(id, UNSUPPORTED_CHAIN_ERROR_CODE, errorMessage),
-        })
-        return
-      }
-
-      try {
-        setError(undefined)
-        switch (method) {
-          case 'eth_sendTransaction': {
-            setTxPayload({
-              id,
-              jsonrpc: '2.0',
-              method,
-              params,
-            })
-            await web3wallet.respondSessionRequest({
-              topic,
-              response: {
+        try {
+          setError(undefined)
+          switch (method) {
+            case 'eth_sendTransaction': {
+              setTxPayload({
                 id,
                 jsonrpc: '2.0',
-                result: zeroHash,
-              },
-            })
-            break
+                method,
+                params,
+              })
+              await walletkit.respondSessionRequest({
+                topic,
+                response: {
+                  id,
+                  jsonrpc: '2.0',
+                  result: zeroHash,
+                },
+              })
+              break
+            }
+            default: {
+              const errorMsg = 'Tx type not supported'
+              setError(errorMsg)
+              setTxPayload(undefined)
+              await walletkit.respondSessionRequest({
+                topic,
+                response: rejectResponse(id, INVALID_METHOD_ERROR_CODE, errorMsg),
+              })
+              break
+            }
           }
-          default: {
-            const errorMsg = 'Tx type not supported'
-            setError(errorMsg)
-            setTxPayload(undefined)
-            await web3wallet.respondSessionRequest({
-              topic,
-              response: rejectResponse(id, INVALID_METHOD_ERROR_CODE, errorMsg),
-            })
-            break
-          }
+        } catch (error) {
+          const errorMsg = (error as Error)?.message
+          setError(errorMsg)
+          setTxPayload(undefined)
+          const isUserRejection = errorMsg?.includes?.('Transaction was rejected')
+          const code = isUserRejection
+            ? USER_REJECTED_REQUEST_CODE
+            : INVALID_METHOD_ERROR_CODE
+          await walletkit.respondSessionRequest({
+            topic,
+            response: rejectResponse(id, code, errorMsg),
+          })
         }
-      } catch (error) {
-        const errorMsg = (error as Error)?.message
-        setError(errorMsg)
-        setTxPayload(undefined)
-        const isUserRejection = errorMsg?.includes?.('Transaction was rejected')
-        const code = isUserRejection
-          ? USER_REJECTED_REQUEST_CODE
-          : INVALID_METHOD_ERROR_CODE
-        await web3wallet.respondSessionRequest({
-          topic,
-          response: rejectResponse(id, code, errorMsg),
-        })
-      }
-    })
-  }, [chainId, web3wallet, treasury])
+      })
+
+      return walletkit
+    }
+
+    createWalletConnectClient()
+      .then((client) => setWeb3wallet(client))
+      .catch((error) => {
+        console.error('WalletConnect initialization error: ', error)
+        setWeb3wallet(undefined)
+      })
+  }, [chainId, treasury])
 
   useEffect(() => {
     if (web3wallet && chainId && treasury) {
@@ -242,12 +237,10 @@ export const useWalletConnect = (): useWalletConnectType => {
       setError(undefined)
       setWcSession(undefined)
       setTxPayload(undefined)
+      if (!web3wallet) return false
       try {
-        if (web3wallet) {
-          // Pairing session starts
-          await web3wallet.pair({ uri, activatePairing: true })
-          return true
-        }
+        await web3wallet.pair({ uri })
+        return true
       } catch (error) {
         console.error('WalletConnect pairing error: ', error)
         setError('Error connecting to dApp.')

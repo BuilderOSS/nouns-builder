@@ -96,7 +96,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
       case ConnectionStatus.CONNECTING:
         return (
           <div className={styles.baseContainer}>
-            <div className={styles.loadingContainer}>
+            <div className={styles.statusContainer}>
               <Text fontSize={16} color="text3" textAlign="center" fontWeight="label">
                 Connecting to {wcClientData?.name ?? 'WalletConnect'}...
               </Text>
@@ -114,14 +114,20 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
             </Text>
 
             {!txPayload ? (
-              <div className={styles.loadingContainer}>
+              <div className={styles.statusContainer}>
                 <Text fontSize={14} color="text3" textAlign="center">
-                  Keep this connection open. Transactions from the dApp will appear here.
+                  Keep this connection open. Transaction(s) from the dApp will appear
+                  here.
                 </Text>
               </div>
             ) : (
-              <div className={styles.baseContainer}>
-                <Icon id="checkInCircle" size="lg" className={styles.successIcon} />
+              <div className={styles.statusContainer}>
+                <Icon
+                  id="checkInCircle"
+                  size="lg"
+                  className={styles.successIcon}
+                  color="positive"
+                />
                 <Text fontSize={14} color="positive" textAlign="center">
                   Transaction Ready to Submit!
                 </Text>

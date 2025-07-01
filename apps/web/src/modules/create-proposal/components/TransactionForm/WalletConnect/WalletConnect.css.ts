@@ -45,17 +45,13 @@ export const buttonsContainer = style([
 ])
 
 export const successIcon = style([
-  atoms({
-    color: 'positive',
-  }),
   {
     width: '30px',
     height: '30px',
-    marginBottom: '1rem',
   },
 ])
 
-export const loadingContainer = style([
+export const statusContainer = style([
   atoms({
     display: 'flex',
     flexDirection: 'column',
