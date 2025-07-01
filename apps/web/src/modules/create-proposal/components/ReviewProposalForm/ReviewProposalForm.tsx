@@ -162,6 +162,7 @@ export const ReviewProposalForm = ({
               network: router.query?.network,
               token: router.query?.token,
               message: SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS,
+              tab: 'activity',
             },
           })
           .then(() => {

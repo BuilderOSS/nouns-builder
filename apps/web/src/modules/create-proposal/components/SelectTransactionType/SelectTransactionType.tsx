@@ -3,7 +3,6 @@ import React from 'react'
 
 import { TransactionFormType } from '../TransactionForm'
 import AdminNav from './AdminNav'
-import { NounsConnect } from './NounsConnect'
 import TransactionTypeCard from './TransactionTypeCard'
 
 interface SelectTransactionTypeProps {
@@ -35,7 +34,6 @@ export const SelectTransactionType: React.FC<SelectTransactionTypeProps> = ({
         mt={'x4'}
         mb={'x4'}
       />
-      <NounsConnect />
       <AdminNav />
     </Stack>
   )

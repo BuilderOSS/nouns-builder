@@ -32,7 +32,6 @@ import Migrate from './assets/migrate.svg'
 import Move from './assets/move.svg'
 import NewWindow from './assets/new-window.svg'
 import Nft from './assets/nft.svg'
-import NounsConnect from './assets/nouns-connect.svg'
 import PauseTemplate from './assets/pause-template.svg'
 import Pause from './assets/pause.svg'
 import Play from './assets/play.svg'
@@ -43,6 +42,8 @@ import Share from './assets/share.svg'
 import Spanner from './assets/spanner.svg'
 import Trash from './assets/trash.svg'
 import Twitter from './assets/twitter.svg'
+import WalletConnectOutline from './assets/wallet-connect-outline.svg'
+import WalletConnect from './assets/wallet-connect.svg'
 import Warning16 from './assets/warning-16.svg'
 import Warning from './assets/warning.svg'
 
@@ -77,7 +78,8 @@ export const icons = {
   migrate: Migrate,
   move: Move,
   newWindow: NewWindow,
-  nounsConnect: NounsConnect,
+  walletConnect: WalletConnect,
+  walletConnectOutline: WalletConnectOutline,
   pause: Pause,
   pauseTemplate: PauseTemplate,
   play: Play,

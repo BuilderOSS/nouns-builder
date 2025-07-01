@@ -15,6 +15,7 @@ import { ResumeAuctions } from './ResumeAuctions/ResumeAuctions'
 import { SendErc20 } from './SendErc20'
 import { SendEth } from './SendEth'
 import { SendNft } from './SendNft'
+import { WalletConnect } from './WalletConnect'
 
 interface TransactionFormProps {
   type: TransactionFormType
@@ -26,6 +27,7 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.SEND_ETH,
   TransactionType.SEND_ERC20,
   TransactionType.SEND_NFT,
+  TransactionType.WALLET_CONNECT,
   TransactionType.AIRDROP,
   TransactionType.ESCROW,
   TransactionType.ESCROW_DELEGATE,
@@ -48,6 +50,7 @@ export const TransactionForm = ({ type }: TransactionFormProps) => {
     [TransactionType.SEND_ETH]: <SendEth />,
     [TransactionType.SEND_ERC20]: <SendErc20 />,
     [TransactionType.SEND_NFT]: <SendNft />,
+    [TransactionType.WALLET_CONNECT]: <WalletConnect />,
     [TransactionType.PAUSE_AUCTIONS]: <PauseAuctions />,
     [TransactionType.FIX_RENDERER_BASE]: <FixRendererBase />,
     [TransactionType.RESUME_AUCTIONS]: <ResumeAuctions />,

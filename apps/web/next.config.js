@@ -84,6 +84,10 @@ const basicConfig = {
         source: '/.well-known/farcaster.json',
         destination: '/api/farcaster',
       },
+      {
+        source: '/.well-known/walletconnect.txt',
+        destination: '/api/walletconnect',
+      },
     ]
   },
   webpack(config, { dev }) {
