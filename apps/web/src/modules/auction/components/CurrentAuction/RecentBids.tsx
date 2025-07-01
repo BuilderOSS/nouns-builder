@@ -30,7 +30,7 @@ export const RecentBids: React.FC<RecentBidsProps> = ({ bids }) => {
             align="center"
             py="x2"
             justify="space-between"
-            key={`${bidder}_${amount}`}
+            key={`${bidder}_${amount}_${id}`}
             className={recentBid}
           >
             <Bidder address={bidder} />

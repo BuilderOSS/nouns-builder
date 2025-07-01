@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Address, TransactionReceipt, parseEther } from 'viem'
+import { Address, parseEther } from 'viem'
 import { vi } from 'vitest'
 
 import { CHAIN_ID } from 'src/typings'
@@ -16,8 +16,6 @@ vi.mock('axios', () => {
     },
   }
 })
-
-const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = process.env
 
 describe('simulationService', () => {
   beforeEach(() => {
@@ -49,23 +47,6 @@ describe('simulationService', () => {
       input: treasuryAddress,
       value: '0',
     }
-
-    const receipt = {
-      status: 'success', // success status
-      gasUsed: parseEther('0.5'),
-      blockHash: '0x123',
-      blockNumber: 0n,
-      cumulativeGasUsed: 0n,
-      effectiveGasPrice: 0n,
-      from: '0x123',
-      logs: [],
-      logsBloom: '0x123',
-      to: '0x123',
-      transactionHash: '0x123',
-      transactionIndex: 0,
-      type: 'eip1559',
-      contractAddress: '0x123',
-    } as TransactionReceipt
 
     it('fails with mismatched input array lengths', async () => {
       expect(() =>

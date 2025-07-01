@@ -9,6 +9,10 @@ module.exports = {
     '@next/next/no-img-element': 'off',
     'react/no-unescaped-entities': 0,
     'unused-imports/no-unused-imports-ts': 2,
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ], // disable unused vars
     'prettier/prettier': 'warn',
     'no-console': [
       'warn',

@@ -59,7 +59,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   collection,
   token,
   description,
-  tokenId,
+  // tokenId,
   name,
   addresses,
   ogImageURL,
