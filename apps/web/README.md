@@ -43,7 +43,7 @@ The app is mostly organised by function and for the larger areas of concern ther
 
 ### Chain Environment
 
-Nouns Builder currently only supports two networks: `mainnet` and `goerli testnet`. The environment variables indicated below dictate the network that the app interacts with.
+Nouns Builder currently only supports two networks: `mainnet` and `sepolia testnet`. The environment variables indicated below dictate the network that the app interacts with.
 
 You can swap out the environment variables as defined below to run against mainnnet or testnet locally.
 
