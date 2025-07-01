@@ -16,8 +16,9 @@ export const treasuryWrapper = style({
 })
 
 export const erc20AssetsWrapper = style({
-  gridTemplateColumns: '3fr 2fr 1.5fr',
+  gridTemplateColumns: '1fr 1fr 1fr',
   gridGap: '0.5rem',
+  textAlign: 'center',
   '@media': {
     'screen and (max-width: 768px)': {
       gridTemplateColumns: 'repeat(1, 1fr)',
