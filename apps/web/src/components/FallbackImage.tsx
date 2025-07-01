@@ -6,12 +6,19 @@ import React, { useCallback, useEffect, useState } from 'react'
 /*                                Shared Hook                                 */
 /* -------------------------------------------------------------------------- */
 
+export type UseFallbackSrcReturn = {
+  src: string
+  handleError: () => void
+  hasExhaustedSources: boolean
+  isValidating: boolean
+}
+
 const useFallbackSrc = (srcList: string[] = [], onImageError?: () => void) => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [validatedSrc, setValidatedSrc] = useState<string | null>(null)
   const [isValidating, setIsValidating] = useState(false)
   const hasExhaustedSources = currentIndex >= srcList.length
-  const src = validatedSrc || '/ImageError.svg'
+  const src = validatedSrc ? validatedSrc : hasExhaustedSources ? '/ImageError.svg' : ''
 
   const handleError = useCallback(() => {
     if (currentIndex < srcList.length - 1) {
@@ -96,7 +103,6 @@ export const FallbackImage: React.FC<FallbackImageProps> = ({
 }) => {
   const { src, handleError } = useFallbackSrc(srcList, onImageError)
 
-  // Don't render if we don't have a valid src yet
   if (!src) {
     return null
   }
@@ -130,7 +136,6 @@ export const FallbackNextLegacyImage: React.FC<FallbackNextLegacyImageProps> = (
 }) => {
   const { src, handleError } = useFallbackSrc(srcList, onImageError)
 
-  // Don't render if we don't have a valid src yet
   if (!src) {
     return null
   }
@@ -155,7 +160,6 @@ export const FallbackNextImage: React.FC<FallbackNextImageProps> = ({
 }) => {
   const { src, handleError } = useFallbackSrc(srcList, onImageError)
 
-  // Don't render if we don't have a valid src yet
   if (!src) {
     return null
   }

@@ -148,7 +148,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
       as="fieldset"
       style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
     >
-      <Flex as={Form} direction="column">
+      <Flex as={Form} direction="column" gap="x4">
         <SmartInput
           type={TEXT}
           formik={formik}

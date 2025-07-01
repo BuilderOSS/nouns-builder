@@ -89,7 +89,7 @@ export const useWalletConnect = (): useWalletConnectType => {
 
       const core = new Core({
         projectId: WALLET_CONNECT_PROJECT_ID,
-        logger: process.env.VERCEL_ENV === 'production' ? 'error' : 'debug',
+        logger: process.env.VERCEL_ENV === 'production' ? undefined : 'debug',
       })
 
       const walletkit = await Web3Wallet.init({
