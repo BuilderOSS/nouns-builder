@@ -21,6 +21,9 @@ export function numberFormatter(number: number | string) {
         ? parseFloat(number)
         : parseInt(number, 10)
       : number
+
+  if (Number.isNaN(parsed)) return '0'
+
   return new Intl.NumberFormat('en-US', {
     maximumFractionDigits: parsed > 9 ? 5 : 6,
   }).format(parsed)
