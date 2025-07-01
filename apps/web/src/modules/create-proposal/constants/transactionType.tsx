@@ -19,6 +19,7 @@ export enum TransactionType {
   REPLACE_ARTWORK = 'replace-artwork',
   RELEASE_ESCROW_MILESTONE = 'release-escrow-milestone',
   MIGRATION = 'migration',
+  WALLET_CONNECT = 'wallet-connect',
 }
 
 export interface TransactionTypeProps {
@@ -118,5 +119,11 @@ export const TRANSACTION_TYPES = {
     subTitle: 'Migrate from L1 to L2',
     icon: 'migrate',
     iconBackdrop: 'rgba(350,100,0,.1)',
+  },
+  [TransactionType.WALLET_CONNECT]: {
+    title: 'WalletConnect',
+    subTitle: 'Connect to dApps and create transactions via WalletConnect',
+    icon: 'walletConnectOutline',
+    iconBackdrop: 'rgba(59, 130, 246, 0.1)',
   },
 } as TransactionTypesPropsMap
