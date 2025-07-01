@@ -9,7 +9,6 @@ import {
 import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
-import { BASE_URL } from 'src/constants/baseUrl'
 import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 import { AddressType, CHAIN_ID } from 'src/typings'
 
@@ -374,9 +373,6 @@ export const getCachedTokenMetadatas = async (
         }
         if (!logoUrl) {
           logoUrl = await getTrustWalletTokenLogo(chainId, address)
-        }
-        if (!logoUrl) {
-          logoUrl = BASE_URL + '/empty-token.svg'
         }
 
         const tokenMetadata: TokenMetadata = {

@@ -159,7 +159,7 @@ export const gradientForAddress = (address: string): string[] => {
 
 export const bgForAddress = (
   address: string | undefined | null,
-  src: string | undefined | null
+  src: string | undefined | null = null
 ): string => {
   if (address && !src) {
     const gradient = gradientForAddress(address)
