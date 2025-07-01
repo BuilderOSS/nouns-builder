@@ -71,7 +71,7 @@ export const TokenBalanceDisplay: React.FC = () => {
         <Flex
           direction={'column'}
           gap="x8"
-          px={{ '@initial': 'x4', '@768': 'x20' }}
+          px={{ '@initial': 'x4', '@768': 'x28' }}
           py={{ '@initial': 'x4', '@768': 'x8' }}
           borderColor={'border'}
           borderStyle={'solid'}
@@ -81,10 +81,16 @@ export const TokenBalanceDisplay: React.FC = () => {
           mb={'x8'}
         >
           {!isMobile && (
-            <Grid className={erc20AssetsWrapper} align="center" gap="x8">
-              <Text fontWeight="label">Asset</Text>
-              <Text fontWeight="label">Balance</Text>
-              <Text fontWeight="label">Value in USD</Text>
+            <Grid className={erc20AssetsWrapper} align="center" gap="x20">
+              <Text fontWeight="label" textAlign="left">
+                Asset
+              </Text>
+              <Text fontWeight="label" textAlign="center">
+                Balance
+              </Text>
+              <Text fontWeight="label" textAlign="right">
+                Value in USD
+              </Text>
             </Grid>
           )}
           {sortedBalances?.map((tokenBalance) => {
@@ -97,18 +103,18 @@ export const TokenBalanceDisplay: React.FC = () => {
 
             const value = (
               <>
-                <Text>
+                <Text textAlign="center">
                   {formatCryptoVal(
                     formatUnits(BigInt(tokenBalance.balance), tokenBalance.decimals)
                   )}{' '}
                   {tokenBalance.symbol}
                 </Text>
-                <Text>${tokenBalance.valueInUSD}</Text>
+                <Text textAlign="right">${tokenBalance.valueInUSD}</Text>
               </>
             )
 
             const name = (
-              <Flex align={'center'} gap="x2" justify="center">
+              <Flex align={'center'} gap="x2">
                 {tokenBalance.logo ? (
                   <Avatar address={tokenBalance.address} src={tokenBalance.logo} />
                 ) : (
@@ -126,15 +132,10 @@ export const TokenBalanceDisplay: React.FC = () => {
                 key={tokenBalance.name + tokenBalance.address}
                 className={erc20AssetsWrapper}
                 align="center"
-                gap="x8"
+                gap="x20"
               >
                 {isMobile ? (
-                  <Flex
-                    direction={'column'}
-                    gap="x2"
-                    style={{ maxWidth: '420px' }}
-                    justify="center"
-                  >
+                  <Flex direction={'column'} gap="x2" style={{ maxWidth: '420px' }}>
                     {name}
                     <Flex align={'center'} width={'100%'} justify={'space-between'}>
                       {value}
