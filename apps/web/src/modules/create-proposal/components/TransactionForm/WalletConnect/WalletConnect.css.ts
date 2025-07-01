@@ -17,7 +17,7 @@ export const walletConnectContainer = style([
 ])
 
 export const walletConnectLogo = style({
-  marginBottom: '1.5rem',
+  marginBottom: '0.5rem',
   borderRadius: '4px',
   overflow: 'hidden',
 })
@@ -27,6 +27,7 @@ export const baseContainer = style([
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    gap: 'x2',
     width: '100%',
   }),
 ])
@@ -44,17 +45,13 @@ export const buttonsContainer = style([
 ])
 
 export const successIcon = style([
-  atoms({
-    color: 'positive',
-  }),
   {
     width: '30px',
     height: '30px',
-    marginBottom: '1rem',
   },
 ])
 
-export const loadingContainer = style([
+export const statusContainer = style([
   atoms({
     display: 'flex',
     flexDirection: 'column',
@@ -65,6 +62,9 @@ export const loadingContainer = style([
 
 export const transactionPreview = style([
   atoms({
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
     marginTop: 'x5',
     padding: 'x4',
     backgroundColor: 'background1',
@@ -73,18 +73,8 @@ export const transactionPreview = style([
     borderStyle: 'solid',
     borderColor: 'border',
   }),
-  atoms({
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-  }),
   {
     maxWidth: 912,
     margin: '0 auto',
-    '@media': {
-      '(min-width: 768px)': {
-        margin: '0 auto',
-      },
-    },
   },
 ])
