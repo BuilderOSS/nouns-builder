@@ -9,11 +9,11 @@ import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { useNFTBalance } from 'src/hooks/useNFTBalance'
 import { usePagination } from 'src/hooks/usePagination'
 import { useChainStore } from 'src/stores/useChainStore'
-import { erc721AssetsWrapper } from 'src/styles/Proposals.css'
 
 import { useDaoStore } from '../../stores'
+import { erc721AssetsWrapper } from './Treasury.css'
 
-export const NFTBalanceDisplay: React.FC = () => {
+export const NFTBalance: React.FC = () => {
   const { addresses } = useDaoStore()
   const owner = addresses.treasury
   const chain = useChainStore((x) => x.chain)

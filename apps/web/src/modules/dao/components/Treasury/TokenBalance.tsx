@@ -8,12 +8,12 @@ import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { statisticContent } from 'src/styles/About.css'
-import { erc20AssetsWrapper } from 'src/styles/Proposals.css'
 import { formatCryptoVal } from 'src/utils/numbers'
 
 import { useDaoStore } from '../../stores'
+import { erc20AssetsWrapper } from './Treasury.css'
 
-export const TokenBalanceDisplay: React.FC = () => {
+export const TokenBalance: React.FC = () => {
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const owner = addresses.treasury

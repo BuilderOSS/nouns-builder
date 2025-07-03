@@ -1,4 +1,4 @@
-import { Box, BoxProps, Text } from '@zoralabs/zord'
+import { Box, BoxProps } from '@zoralabs/zord'
 import { getFetchableUrls } from 'ipfs-service'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -54,45 +54,6 @@ export function Avatar({
           onImageError={() => setImageHasError(true)}
         />
       )}
-    </Box>
-  )
-}
-
-export type NameAvatarProps = Omit<AvatarProps, 'address' | 'src'> & {
-  name: string
-}
-
-export function NameAvatar({
-  name,
-  className,
-  size,
-  variant,
-  ...props
-}: NameAvatarProps) {
-  const display = useMemo(() => name.slice(0, 1).toUpperCase(), [name])
-
-  return (
-    <Box
-      className={['zora-avatar', avatar({ size, variant }), className]}
-      backgroundColor="background2"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-      {...props}
-    >
-      <Text
-        style={{
-          fontSize: '0.8em',
-          fontWeight: 'bold',
-          textTransform: 'uppercase',
-          textAlign: 'center',
-        }}
-        color="text2"
-      >
-        {display}
-      </Text>
     </Box>
   )
 }

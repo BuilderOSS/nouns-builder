@@ -7,7 +7,7 @@ import { about } from 'src/styles/About.css'
 import { useDaoStore } from '../stores'
 import { ContractLink } from './ContractLink'
 
-const ContractDisplay = ({ title, address }: { title: string; address?: string }) => {
+const Contract = ({ title, address }: { title: string; address?: string }) => {
   const { isMobile } = useLayoutStore()
 
   return (
@@ -50,13 +50,13 @@ export const SmartContracts = () => {
           </Text>
         </Box>
         <Flex direction={'column'} gap={'x4'}>
-          <ContractDisplay title="NFT" address={addresses.token} />
-          <ContractDisplay title="Auction House" address={addresses.auction} />
-          <ContractDisplay title="Governor" address={addresses.governor} />
-          <ContractDisplay title="Treasury" address={addresses.treasury} />
-          <ContractDisplay title="Metadata" address={addresses.metadata} />
+          <Contract title="NFT" address={addresses.token} />
+          <Contract title="Auction House" address={addresses.auction} />
+          <Contract title="Governor" address={addresses.governor} />
+          <Contract title="Treasury" address={addresses.treasury} />
+          <Contract title="Metadata" address={addresses.metadata} />
           {addresses?.escrowDelegate && (
-            <ContractDisplay title="Escrow Delegate" address={addresses.escrowDelegate} />
+            <Contract title="Escrow Delegate" address={addresses.escrowDelegate} />
           )}
         </Flex>
       </Flex>

@@ -32,10 +32,14 @@ const createRpcUrls = () => {
 
       const infura = getInfuraRpcUrl(chainId)
       if (infura) addToUrls(chainId, infura)
+
+      if (urls[chainId]?.length === 0) {
+        throw new Error(`No RPC URLs found for chainId ${chainId}`)
+      }
     }
   }
 
-  return urls
+  return urls as Record<CHAIN_ID, [string, ...string[]]>
 }
 
-export const RPC_URLS = createRpcUrls()
+export const RPC_URLS: Record<CHAIN_ID, [string, ...string[]]> = createRpcUrls()
