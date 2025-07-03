@@ -5,8 +5,7 @@ import { DaoContractAddresses, useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
 import { Chain } from 'src/typings'
 
-import { DefaultLayout } from './DefaultLayout'
-import { LayoutWrapper } from './LayoutWrapper'
+import { getDefaultLayout } from './DefaultLayout'
 
 function DaoLayout({
   children,
@@ -29,13 +28,9 @@ export function getDaoLayout(page: ReactElement) {
   const chain =
     PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId) ?? PUBLIC_DEFAULT_CHAINS[0]
 
-  return (
-    <LayoutWrapper>
-      <DefaultLayout>
-        <DaoLayout addresses={addresses} chain={chain}>
-          {page}
-        </DaoLayout>
-      </DefaultLayout>
-    </LayoutWrapper>
+  return getDefaultLayout(
+    <DaoLayout addresses={addresses} chain={chain}>
+      {page}
+    </DaoLayout>
   )
 }

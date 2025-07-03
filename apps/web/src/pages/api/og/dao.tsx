@@ -2,23 +2,24 @@ import { ImageResponse } from '@vercel/og'
 import { getFetchableUrls } from 'ipfs-service/src/gateway'
 import { NextRequest } from 'next/server'
 import { formatEther } from 'viem'
+import { getBalance } from 'wagmi/actions'
 
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { RPC_URL } from 'src/constants/rpc'
+import { config as wagmiConfig } from 'src/data/contract/server.config'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { CHAIN_ID } from 'src/typings'
 import { bgForAddress } from 'src/utils/gradient'
 import { formatCryptoVal } from 'src/utils/numbers'
 
 export type DaoOgMetadata = {
-  tokenAddress: string
+  tokenAddress: `0x${string}`
   ownerCount: number
   proposalCount: number
   name: string | undefined
   totalSupply: number | undefined
   contractImage: string | undefined
   chainId: CHAIN_ID
-  treasuryAddress: string
+  treasuryAddress: `0x${string}`
 }
 
 export const config = {
@@ -37,23 +38,18 @@ const ptRootBold = fetch(
   new URL('public/fonts/pt-root-ui_bold.ttf', import.meta.url)
 ).then((res) => res.arrayBuffer())
 
-const getTreasuryBalance = async (chainId: CHAIN_ID, address: string) => {
-  // Generate a random request ID
-  const requestId = Math.floor(Math.random() * 1_000_000)
-
-  // Query balance directly from the RPC (edge runtime compatible)
-  const { result } = await fetch(RPC_URL[chainId], {
-    method: 'POST',
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method: 'eth_getBalance',
-      params: [address, 'latest'],
-      id: requestId,
-    }),
-  }).then((x) => x.json())
+const getTreasuryBalance = async (
+  chainId: CHAIN_ID,
+  address: `0x${string}`
+): Promise<string> => {
+  const result = await getBalance(wagmiConfig, {
+    address,
+    chainId,
+    blockTag: 'latest',
+  })
 
   // Convert to ETH value
-  const balanceInWei = BigInt(result)
+  const balanceInWei = BigInt(result.value)
   const balanceInEth = formatEther(balanceInWei)
   const data = formatCryptoVal(balanceInEth)
 

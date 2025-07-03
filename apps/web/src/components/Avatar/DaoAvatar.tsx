@@ -1,11 +1,11 @@
 import { Box, BoxProps } from '@zoralabs/zord'
 import { getFetchableUrls } from 'ipfs-service'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
 import { useDaoFeedCard } from 'src/modules/dao'
 import { CHAIN_ID } from 'src/typings'
-import { gradientForAddress } from 'src/utils/gradient'
+import { bgForAddress } from 'src/utils/gradient'
 
 import { avatarVariants, squareAvatar } from './Avatar.css'
 
@@ -29,21 +29,23 @@ export function DaoAvatar({
   ...props
 }: DaoAvatarProps) {
   const { tokenUri } = useDaoFeedCard({
-    collectionAddress: collectionAddress,
-    auctionAddress: auctionAddress,
+    collectionAddress,
+    auctionAddress,
     chainId,
   })
 
-  const background = useMemo(() => {
-    if (collectionAddress && !src) {
-      const gradient = gradientForAddress(collectionAddress)
-      return `radial-gradient(75.29% 75.29% at 64.96% 24.36%, ${gradient[0]} 15.62%, ${gradient[1]} 39.58%, ${gradient[2]} 72.92%, ${gradient[3]} 90.62%, ${gradient[4]} 100%)`
-    } else if (src) {
-      return `#FFFFFF`
-    } else {
-      return `transparent`
-    }
-  }, [collectionAddress, src])
+  const [imageHasError, setImageHasError] = useState(false)
+
+  // Pass null as src to bgForAddress when image fails, so it shows gradient
+  const background = useMemo(
+    () => bgForAddress(collectionAddress, imageHasError ? null : src),
+    [collectionAddress, src, imageHasError]
+  )
+
+  // Reset error state when src changes
+  useEffect(() => {
+    setImageHasError(false)
+  }, [src])
 
   return tokenUri?.image ? (
     <Box
@@ -73,7 +75,7 @@ export function DaoAvatar({
       borderStyle={'solid'}
       {...props}
     >
-      {src && (
+      {src && !imageHasError && (
         <FallbackNextImage
           key={src}
           srcList={getFetchableUrls(src)}
@@ -83,6 +85,7 @@ export function DaoAvatar({
           }}
           width={size}
           height={size}
+          onImageError={() => setImageHasError(true)}
         />
       )}
     </Box>

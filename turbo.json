@@ -1,19 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local"
-  ],
+  "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
     "PINATA_API_KEY",
     "REDIS_URL",
     "ETHERSCAN_API_KEY",
     "NEXT_PUBLIC_UPLOAD_API",
     "NEXT_PUBLIC_IPFS_UPLOAD_API",
+    "NEXT_PUBLIC_COINGECKO_API_KEY",
     "NEXT_PUBLIC_TENDERLY_RPC_KEY",
     "NEXT_PUBLIC_IPFS_GATEWAY",
     "NEXT_PUBLIC_SENTRY_DSN",
     "NEXT_PUBLIC_NETWORK_TYPE",
     "NEXT_PUBLIC_VERCEL_ENV",
+    "NEXT_PUBLIC_ALCHEMY_API_KEY",
+    "NEXT_PUBLIC_INFURA_API_KEY",
     "SENTRY_DSN",
     "SENTRY_ORG",
     "SENTRY_PROJECT",
@@ -29,41 +30,24 @@
   ],
   "tasks": {
     "build": {
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "public/robots.txt",
-        "public/sitemap.xml"
-      ],
-      "dependsOn": [
-        "^build"
-      ]
+      "outputs": ["dist/**", ".next/**", "public/robots.txt", "public/sitemap.xml"],
+      "dependsOn": ["^build"]
     },
     "test": {
-      "outputs": [
-        "coverage/**"
-      ],
-      "dependsOn": [
-        "^build"
-      ]
+      "outputs": ["coverage/**"],
+      "dependsOn": ["^build"]
     },
     "type-check": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "lint": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "dev": {
       "cache": false,
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     },
     "clean": {
       "cache": false

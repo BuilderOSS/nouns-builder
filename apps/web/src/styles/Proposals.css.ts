@@ -1,20 +1,6 @@
 import { style, styleVariants } from '@vanilla-extract/css'
 import { atoms, vars } from '@zoralabs/zord'
 
-/* TREASURY */
-export const treasuryWrapper = style({
-  gridTemplateColumns: 'repeat(3, 1fr)',
-  gridGap: '0.5rem',
-  '@media': {
-    'screen and (max-width: 1080px)': {
-      gridTemplateColumns: 'repeat(3, 1fr)',
-    },
-    'screen and (max-width: 768px)': {
-      gridTemplateColumns: 'repeat(1, 1fr)',
-    },
-  },
-})
-
 /* PROPOSALS */
 export const proposalFormTitle = style({
   lineHeight: 1,

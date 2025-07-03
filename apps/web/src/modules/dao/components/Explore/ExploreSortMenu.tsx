@@ -9,7 +9,7 @@ interface ExploreSortMenuProps {
   choice: string
 }
 
-const ExploreSortMenu: React.FC<ExploreSortMenuProps> = ({ choice }) => {
+const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
   const router = useRouter()
 
   const selectionToOrderBy = React.useCallback((option: string) => {

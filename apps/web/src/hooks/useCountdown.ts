@@ -24,7 +24,7 @@ export const useCountdown = (
     setNow(dayjs.unix(Date.now() / 1000))
   }, isRunningInterval)
 
-  const end = dayjs.unix(endTime)
+  const end = Number.isNaN(endTime) ? dayjs.unix(0) : dayjs.unix(endTime)
   const countdown = end.diff(now, 'second')
 
   useEffect(() => {

@@ -141,7 +141,7 @@ export const formValuesToTransactionMap: FormValuesTransactionMap = {
   vetoPower: {
     functionSignature: 'burnVetoer',
     getTarget: (addresses) => addresses.governor as AddressType,
-    constructCalldata: (value) =>
+    constructCalldata: (_value) =>
       encodeFunctionData({
         abi: governorAbi,
         functionName: 'burnVetoer',

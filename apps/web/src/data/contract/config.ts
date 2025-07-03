@@ -12,7 +12,7 @@ import {
 import { CreateConnectorFn, createConfig } from 'wagmi'
 
 import { BASE_URL } from 'src/constants/baseUrl'
-import { PUBLIC_WALLLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
+import { WALLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
 
 import { chains, transports } from './chains'
 
@@ -44,7 +44,7 @@ const rainbowConnectors = connectorsForWallets(
     },
   ],
   {
-    projectId: PUBLIC_WALLLET_CONNECT_PROJECT_ID,
+    projectId: WALLET_CONNECT_PROJECT_ID,
     appName,
     appDescription,
     appUrl,

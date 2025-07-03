@@ -8,12 +8,33 @@ const SVG_DEFAULT_SIZE = 1080
 const REQUEST_TIMEOUT = 20000 // 20s
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+
   let images = req.query.images
 
   if (!images || !images.length)
     return res.status(400).json({ error: 'No images provided' })
 
   const { maxAge, swr } = CACHE_TIMES.DAO_FEED
+
+  res.setHeader(
+    'Cache-Control',
+    `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
+  )
+  res.setHeader('Content-Type', 'image/webp')
+
+  // Handle HEAD request - return headers only
+  if (req.method === 'HEAD') {
+    res.status(200).end()
+    return
+  }
 
   if (typeof images === 'string') images = [images]
 
@@ -38,11 +59,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     .webp({ quality: 75 })
     .toBuffer()
 
-  res.setHeader(
-    'Cache-Control',
-    `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
-  )
-  res.setHeader('Content-Type', 'image/webp')
   res.send(compositeRes)
 }
 

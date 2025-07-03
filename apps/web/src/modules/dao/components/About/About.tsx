@@ -1,6 +1,7 @@
 import { Box, Flex, Grid, Text } from '@zoralabs/zord'
 import { getFetchableUrls } from 'ipfs-service'
 import Image from 'next/legacy/image'
+import { useRouter } from 'next/router'
 import React from 'react'
 import useSWR from 'swr'
 import { Address, formatEther } from 'viem'
@@ -92,6 +93,22 @@ export const About: React.FC = () => {
     return balance ? formatCryptoVal(formatEther(balance.value)) : null
   }, [balance])
 
+  const router = useRouter()
+
+  const openTreasuryTab = () => {
+    const current = { ...router.query } // Get existing query params
+    current['tab'] = 'treasury'
+
+    router.push(
+      {
+        pathname: router.pathname,
+        query: current,
+      },
+      undefined,
+      { shallow: true } // Prevent full page reload
+    )
+  }
+
   return (
     <Box className={about}>
       <Flex
@@ -135,7 +152,7 @@ export const About: React.FC = () => {
         <Statistic
           title="Treasury"
           content={`${treasuryBalance} ETH`}
-          address={treasury}
+          onClick={openTreasuryTab}
         />
         <Statistic title="Owners" content={data?.ownerCount} />
         <Statistic title="Total supply" content={Number(totalSupply)} />

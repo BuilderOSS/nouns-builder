@@ -19,7 +19,7 @@ interface NumberInputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const NumberInput = ({
   label,
-  className,
+  // className,
   errorMessage,
   hasError,
   value,

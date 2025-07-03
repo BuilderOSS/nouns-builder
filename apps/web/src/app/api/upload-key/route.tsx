@@ -22,7 +22,7 @@ const keyRestrictions = {
   },
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function POST(_request: NextRequest): Promise<NextResponse> {
   try {
     const options = {
       method: 'POST',

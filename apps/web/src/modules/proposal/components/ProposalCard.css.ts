@@ -5,7 +5,7 @@ export const titleStyle = style([
   {
     order: 2,
     '@media': {
-      [media.min768]: { order: 1, width: '65%' },
+      [media.min768]: { order: 1, flexGrow: 1 },
     },
   },
 ])

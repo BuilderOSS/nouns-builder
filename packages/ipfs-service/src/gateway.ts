@@ -1,5 +1,7 @@
 import { isNormalizeableIPFSUrl, normalizeIPFSUrl } from './url'
 
+const BASE_URL = process.env.BASE_URL || 'https://nouns.build'
+
 export const IPFS_GATEWAYS = [
   'https://nouns-builder.mypinata.cloud',
   'https://ipfs.io',
@@ -37,9 +39,13 @@ export function getFetchableUrls(uri: string | null | undefined): string[] | und
 
   // If it is a http(s) URL
   if (/^https?:\/\//.test(uri)) {
-    const replaced = uri.replace(
+    let replaced = uri.replace(
       'api.zora.co/renderer/stack-images',
       'nouns.build/api/renderer/stack-images',
+    )
+    replaced = replaced.replace(
+      'https://nouns.build/api/renderer/stack-images',
+      BASE_URL + '/api/renderer/stack-images',
     )
     return [replaced]
   }

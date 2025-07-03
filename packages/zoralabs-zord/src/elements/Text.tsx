@@ -66,13 +66,12 @@ export type ParagraphComponentProps<E extends ElementType = typeof BoxDefaultEle
 
 export function Paragraph<E extends ElementType = typeof BoxDefaultElement>({
   size = 'md',
-  variant,
   ...props
 }: ParagraphComponentProps<E>) {
   return (
     <Text
-      variant={`paragraph-${size}`}
       {...(props as any)} // casting to bypass spread type conflict
+      variant={`paragraph-${size}`}
     />
   )
 }
@@ -86,13 +85,12 @@ export type HeadingComponentProps<E extends ElementType = typeof BoxDefaultEleme
 
 export function Heading<E extends ElementType = typeof BoxDefaultElement>({
   size = 'md',
-  variant,
   ...props
 }: HeadingComponentProps<E>) {
   return (
     <Text
-      variant={`heading-${size}`}
       {...(props as any)} // casting to bypass spread type conflict
+      variant={`heading-${size}`}
     />
   )
 }
@@ -106,13 +104,12 @@ export type DisplayComponentProps<E extends ElementType = typeof BoxDefaultEleme
 
 export function Display<E extends ElementType = typeof BoxDefaultElement>({
   size = 'md',
-  variant,
   ...props
 }: DisplayComponentProps<E>) {
   return (
     <Text
-      variant={`display-${size}`}
       {...(props as any)} // casting to bypass spread type conflict
+      variant={`display-${size}`}
     />
   )
 }
@@ -123,13 +120,12 @@ export type EyebrowComponentProps<E extends ElementType = typeof BoxDefaultEleme
   PolymorphicPropsWithRef<EyebrowProps, E>
 
 export function Eyebrow<E extends ElementType = typeof BoxDefaultElement>({
-  variant,
   ...props
 }: EyebrowComponentProps<E>) {
   return (
     <Text
-      variant="eyebrow"
       {...(props as any)} // casting to bypass spread type conflict
+      variant="eyebrow"
     />
   )
 }

@@ -79,7 +79,7 @@ export const BridgeTreasuryForm = ({
           validateOnMount={false}
           validateOnChange={false}
         >
-          {({ errors, touched, isValid, isValidating, dirty, setFieldValue }) => (
+          {({ errors, touched, isValid, isValidating, setFieldValue }) => (
             <Box
               data-testid="airdrop-form"
               as={'fieldset'}

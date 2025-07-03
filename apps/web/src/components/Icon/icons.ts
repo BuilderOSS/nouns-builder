@@ -19,6 +19,7 @@ import Dash from './assets/dash.svg'
 import Discord from './assets/discord.svg'
 import Dots from './assets/dots.svg'
 import Download from './assets/download.svg'
+import Erc20 from './assets/erc20.svg'
 import Escrow from './assets/escrow.svg'
 import Eth from './assets/eth.svg'
 import External from './assets/external-16.svg'
@@ -30,7 +31,7 @@ import Info16 from './assets/info-16.svg'
 import Migrate from './assets/migrate.svg'
 import Move from './assets/move.svg'
 import NewWindow from './assets/new-window.svg'
-import NounsConnect from './assets/nouns-connect.svg'
+import Nft from './assets/nft.svg'
 import PauseTemplate from './assets/pause-template.svg'
 import Pause from './assets/pause.svg'
 import Play from './assets/play.svg'
@@ -41,6 +42,8 @@ import Share from './assets/share.svg'
 import Spanner from './assets/spanner.svg'
 import Trash from './assets/trash.svg'
 import Twitter from './assets/twitter.svg'
+import WalletConnectOutline from './assets/wallet-connect-outline.svg'
+import WalletConnect from './assets/wallet-connect.svg'
 import Warning16 from './assets/warning-16.svg'
 import Warning from './assets/warning.svg'
 
@@ -75,7 +78,8 @@ export const icons = {
   migrate: Migrate,
   move: Move,
   newWindow: NewWindow,
-  nounsConnect: NounsConnect,
+  walletConnect: WalletConnect,
+  walletConnectOutline: WalletConnectOutline,
   pause: Pause,
   pauseTemplate: PauseTemplate,
   play: Play,
@@ -90,6 +94,8 @@ export const icons = {
   'warning-16': Warning16,
   escrow: Escrow,
   handshake: Handshake,
+  erc20: Erc20,
+  nft: Nft,
 }
 
 export type IconType = keyof typeof icons
