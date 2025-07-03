@@ -142,6 +142,21 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
     }
   }, [connectionStatus, wcClientData, txPayload, handleDisconnect])
 
+  const wcClientLogoUrl = useMemo(() => {
+    if (!wcClientData) return null
+    const icon =
+      wcClientData.icons && wcClientData.icons.length > 0 ? wcClientData.icons[0] : null
+    if (!icon) return null
+    if (icon.startsWith('http')) {
+      return icon
+    }
+    const url = wcClientData.url
+    if (icon.startsWith('/') && !!url) {
+      return `${url}${icon}`
+    }
+    return null
+  }, [wcClientData])
+
   return (
     <Box
       data-testid="wallet-connect-form"
@@ -170,11 +185,11 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
 
         <div className={styles.walletConnectContainer}>
           <div className={styles.walletConnectLogo}>
-            {wcClientData?.icons && wcClientData.icons.length > 0 ? (
+            {wcClientLogoUrl ? (
               <img
-                src={wcClientData.icons[0]}
-                alt="WalletConnect App Logo"
-                style={{ width: 32 }}
+                src={wcClientLogoUrl}
+                alt={wcClientData?.name ?? 'WalletConnect'}
+                style={{ height: 32 }}
               />
             ) : (
               <Icon id="walletConnect" size="lg" />

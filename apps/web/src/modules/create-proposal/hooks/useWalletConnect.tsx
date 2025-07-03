@@ -72,6 +72,9 @@ const rejectResponse = (id: number, code: number, message: string) => {
   }
 }
 
+const unique = (value: string, index: number, self: string[]) =>
+  self.indexOf(value) === index
+
 export const useWalletConnect = (): useWalletConnectType => {
   const [web3wallet, setWeb3wallet] = useState<IWeb3Wallet>()
 
@@ -99,22 +102,32 @@ export const useWalletConnect = (): useWalletConnectType => {
 
       walletkit.on('session_proposal', async (proposal) => {
         try {
+          const requiredNamespaces = proposal.params.requiredNamespaces['eip155'] ?? {}
+          const currentChain = `${EVMBasedNamespaces}:${Number(chainId)}`
+          const chains = [currentChain]
+            .concat(requiredNamespaces.chains ?? [])
+            .filter(unique)
+          const methods = ['eth_sendTransaction']
+            .concat(requiredNamespaces.methods ?? [])
+            .filter(unique)
+          const events = [
+            'chainChanged',
+            'accountsChanged',
+            'message',
+            'disconnect',
+            'connect',
+          ]
+            .concat(requiredNamespaces.events ?? [])
+            .filter(unique)
+          const accounts = chains.map((chain) => `${chain}:${getAddress(treasury)}`)
           const namespaces = buildApprovedNamespaces({
             proposal: proposal.params,
             supportedNamespaces: {
               eip155: {
-                chains: [`${EVMBasedNamespaces}:${Number(chainId)}`],
-                methods: ['eth_sendTransaction'],
-                events: [
-                  'chainChanged',
-                  'accountsChanged',
-                  'message',
-                  'disconnect',
-                  'connect',
-                ],
-                accounts: [
-                  `${EVMBasedNamespaces}:${Number(chainId)}:${getAddress(treasury)}`,
-                ],
+                chains,
+                methods,
+                events,
+                accounts,
               },
             },
           })
