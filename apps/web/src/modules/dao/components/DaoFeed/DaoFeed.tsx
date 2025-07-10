@@ -4,7 +4,6 @@ import React, { ReactNode } from 'react'
 import useSWR from 'swr'
 
 import RecentlyCreated from 'src/components/Home/RecentlyCreated'
-import { PUBLIC_FEATURED_DAOS, TestnetChain } from 'src/constants/featuredDaos'
 import SWR_KEYS from 'src/constants/swrKeys'
 import { highestBidsRequest } from 'src/data/subgraph/requests/homepageQuery'
 import { DaoProps } from 'src/pages'
@@ -45,13 +44,8 @@ type DaoFeedProps = {
 
 export const DaoFeed = ({ isDashboard }: DaoFeedProps) => {
   const chain = useChainStore((x) => x.chain)
-  const { data: featuredDaos, error } = useSWR(
-    [SWR_KEYS.FEATURED, chain.id],
-    async () => {
-      return process.env.NEXT_PUBLIC_NETWORK_TYPE === 'mainnet'
-        ? await highestBidsRequest(chain.id)
-        : { data: PUBLIC_FEATURED_DAOS[chain.id as TestnetChain], statusCode: 200 }
-    }
+  const { data: featuredDaos, error } = useSWR([SWR_KEYS.FEATURED, chain.id], async () =>
+    highestBidsRequest(chain.id)
   )
 
   const isLoading = !featuredDaos && !error
