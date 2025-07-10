@@ -27,7 +27,7 @@ export const Footer = () => {
                   variant="paragraph-sm"
                   color="tertiary"
                   as="a"
-                  href="https://builder-docs.vercel.app/reference/intro"
+                  href="https://builder-docs.vercel.app/"
                   rel="noopener noreferrer"
                   target="_blank"
                   mr={{ '@initial': 'x0', '@768': 'x4', '@1024': 'x6' }}
