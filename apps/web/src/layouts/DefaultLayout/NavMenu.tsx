@@ -19,7 +19,7 @@ import { useBridgeModal } from 'src/hooks/useBridgeModal'
 import { useEnsData } from 'src/hooks/useEnsData'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
+import { CHAIN_ID, Chain } from 'src/typings'
 import { formatCryptoVal } from 'src/utils/numbers'
 
 import { ConnectButton } from './ConnectButton'
@@ -33,6 +33,8 @@ import {
   navMenuBurger,
 } from './Nav.styles.css'
 import { ViewProfileButton } from './ViewProfileButton'
+
+const chainSorter = (a: Chain, b: Chain) => a.icon.localeCompare(b.icon)
 
 export const NavMenu = () => {
   const [isOpenMenu, setIsOpenMenu] = React.useState(false)
@@ -166,7 +168,7 @@ export const NavMenu = () => {
             }
           >
             <Stack my="x4" mx="x2">
-              {PUBLIC_DEFAULT_CHAINS.map((chain, i, chains) => (
+              {PUBLIC_DEFAULT_CHAINS.sort(chainSorter).map((chain, i, chains) => (
                 <Flex
                   key={chain.id}
                   className={chainPopUpButton}
@@ -391,7 +393,7 @@ export const NavMenu = () => {
                 </Flex>
               </Link>
               <a
-                href="https://builder-docs.vercel.app/reference/intro"
+                href="https://builder-docs.vercel.app/"
                 target="_blank"
                 rel="noreferrer noopener"
               >
