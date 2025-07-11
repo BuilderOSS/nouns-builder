@@ -37,7 +37,7 @@ const ExplorePage: NextPageWithLayout = () => {
 
   return (
     <Flex direction={'column'} align={'center'} mt={'x5'} minH={'100vh'}>
-      <Meta title={'Explore'} type={'website'} slug={'/explore'} />
+      <Meta title={'Explore'} type={'website'} path={'/explore'} />
       <Explore
         daos={daos}
         hasNextPage={hasNextPage || false}

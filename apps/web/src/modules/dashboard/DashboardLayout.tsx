@@ -1,8 +1,6 @@
 import { Box, Flex, Text } from '@zoralabs/zord'
 import React, { ReactNode } from 'react'
 
-import { Meta } from 'src/components/Meta'
-
 export const DashboardLayout = ({
   auctionCards,
   daoProposals,
@@ -36,7 +34,6 @@ export const DashPage = ({ children }: { children: ReactNode }) => {
       w={'100%'}
       justify="center"
     >
-      <Meta title={'Dashboard'} type={'website'} slug={'/'} />
       <Box w="100%" style={{ maxWidth: 912 }}>
         <Text fontSize={35} fontWeight={'display'} mb={'x12'}>
           Dashboard

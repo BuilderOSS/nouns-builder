@@ -116,11 +116,13 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     : false
   const warn = displayActions && (isBadActor || isPossibleDrain)
 
+  const path = `/dao/${query.network}/${query.token}/vote/${query.id}`
+
   return (
     <Fragment>
       <Meta
         title={`${daoName} - Prop ${proposal.proposalNumber}`}
-        slug={'/vote/'}
+        path={path}
         image={ogImageURL}
         description={`View this proposal from ${daoName}`}
       />
