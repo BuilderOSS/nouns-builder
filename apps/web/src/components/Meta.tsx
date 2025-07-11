@@ -7,7 +7,7 @@ import { AddressType, Chain } from 'src/typings'
 
 interface MetaProps {
   title: string
-  slug: string
+  path: string
   type?: string
   image?: string
   description?: string
@@ -29,12 +29,15 @@ const trimTitle = (title: string) => {
 export const Meta: React.FC<MetaProps> = ({
   title,
   type,
-  slug,
+  path,
   image,
   description,
   farcaster,
 }) => {
   const name = PUBLIC_IS_TESTNET ? 'Testnet Nouns Builder' : 'Nouns Builder'
+
+  // eslint-disable-next-line no-param-reassign
+  path = path.startsWith('/') ? path : '/' + path
 
   // eslint-disable-next-line no-param-reassign
   title = trimTitle(title)
@@ -46,14 +49,14 @@ export const Meta: React.FC<MetaProps> = ({
       description ??
       'Unlock the possibilities of collective creation. Start with a vision. Start a DAO. All onchain.',
     version: 'next',
-    url: `${BASE_URL}${slug}`,
+    url: `${BASE_URL}${path}`,
     imageUrl: image ?? `${BASE_URL}/social-preview.jpg`,
     button: {
       title,
       action: {
         type: 'launch_frame',
         name,
-        url: `${BASE_URL}${slug}`,
+        url: `${BASE_URL}${path}`,
         splashImageUrl: `${BASE_URL}/noggles-square.png`,
         splashBackgroundColor: '#ffffff',
       },
