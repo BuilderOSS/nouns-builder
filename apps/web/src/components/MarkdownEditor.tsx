@@ -32,7 +32,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
 
   const saveImage = async function* (data: ArrayBuffer, blob: Blob) {
     const file = new File([blob], '')
-    const { cid } = await uploadFile(file, { cache: true })
+    const { cid } = await uploadFile(file, { cache: true, type: 'image' })
     yield getFetchableUrls(cid)?.[0] as string
 
     return true

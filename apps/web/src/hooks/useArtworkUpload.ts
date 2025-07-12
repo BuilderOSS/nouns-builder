@@ -19,7 +19,7 @@ export interface ImageProps {
   name: string
   trait: string
   uri: string
-  url?: string
+  url: string
   path?: string
   content?: File
   blob?: Blob | string
@@ -86,6 +86,8 @@ export const useArtworkUpload = ({
 
     return []
   }, [artwork, ipfsUpload, isUploadingToIPFS])
+
+  console.log({ images, ipfsUpload, isUploadingToIPFS })
 
   /* prepare files */
 

@@ -3,6 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "globalEnv": [
     "PINATA_API_KEY",
+    "NEXT_PUBLIC_PINATA_GATEWAY",
     "REDIS_URL",
     "ETHERSCAN_API_KEY",
     "NEXT_PUBLIC_UPLOAD_API",

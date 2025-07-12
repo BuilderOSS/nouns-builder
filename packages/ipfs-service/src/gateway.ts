@@ -1,9 +1,11 @@
 import { isNormalizeableIPFSUrl, normalizeIPFSUrl } from './url'
 
-const BASE_URL = process.env.BASE_URL || 'https://nouns.build'
+export const BASE_URL = process.env.BASE_URL || 'https://nouns.build'
+export const PINATA_GATEWAY =
+  process.env.NEXT_PUBLIC_PINATA_GATEWAY || 'nouns-builder.mypinata.cloud'
 
 export const IPFS_GATEWAYS = [
-  'https://nouns-builder.mypinata.cloud',
+  `https://${PINATA_GATEWAY}`,
   'https://ipfs.io',
   'https://dweb.link',
   'https://w3s.link',

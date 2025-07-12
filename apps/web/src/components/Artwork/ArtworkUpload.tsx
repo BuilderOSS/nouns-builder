@@ -1,4 +1,4 @@
-import { Box, Flex, Stack } from '@zoralabs/zord'
+import { Box, Flex, Stack, Text } from '@zoralabs/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
 
 import {
@@ -55,7 +55,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
       <label className={defaultInputLabelStyle}>{inputLabel}</label>
       {!!helperText && helperText?.length ? (
         <Stack mb={'x8'}>
-          <Box className={defaultHelperTextStyle}>{helperText} </Box>
+          <Text className={defaultHelperTextStyle}>{helperText} </Text>
           <Flex align={'center'}>
             <a href={'/nouns.zip'} download className={defaultFileDownloadStyle}>
               <Icon id="download" mr={'x2'} />
