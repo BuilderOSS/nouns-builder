@@ -8,9 +8,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { type } = JSON.parse(req.body)
       if (!type || !pinataOptions[type as UploadType]) {
-        throw new Error(
-          `Invalid type provided, must be one of: ${Object.keys(pinataOptions).join(', ')}`
-        )
+        return res.status(400).json({
+          text: `Invalid type provided, must be one of: ${Object.keys(pinataOptions).join(', ')}`,
+        })
       }
       const options = pinataOptions[req.body.type as UploadType]
       const data = JSON.stringify({

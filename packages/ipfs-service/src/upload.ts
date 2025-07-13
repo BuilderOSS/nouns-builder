@@ -93,7 +93,7 @@ const uploadWithProgress = async (
   uploadType: UploadType,
   onProgress: ProgressCallback,
 ): Promise<PinataUploadResponse> => {
-  const uploadUrl = await fetch('/api/upload-url', {
+  const uploadUrlResponse = await fetch('/api/upload-url', {
     method: 'POST',
     body: JSON.stringify({
       type: uploadType,
@@ -103,14 +103,14 @@ const uploadWithProgress = async (
     },
   })
 
-  if (!uploadUrl.ok) {
+  if (!uploadUrlResponse.ok) {
     throw new Error('No Signed URL')
   }
-  const uploadUrlResponse = await uploadUrl.json()
+  const uploadUrlData = await uploadUrlResponse.json()
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('POST', uploadUrlResponse.url, true)
+    xhr.open('POST', uploadUrlData.url, true)
 
     // Add event listener to track upload progress
     xhr.upload.onprogress = (event: ProgressEvent) => {
@@ -124,6 +124,22 @@ const uploadWithProgress = async (
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         const jsonResponse = JSON.parse(xhr.responseText)
+
+        try {
+          // ensure cid is pinned if it wasn't already
+          fetch('/api/pin-cid', {
+            method: 'POST',
+            body: JSON.stringify({
+              cid: jsonResponse.data.cid,
+              name: jsonResponse.data.name,
+            }),
+            headers: {
+              accept: 'application/json',
+            },
+          })
+        } catch (error) {
+          console.error('Error pinning CID', error)
+        }
         resolve(jsonResponse.data as PinataUploadResponse)
       } else {
         const jsonResponse = JSON.parse(xhr.responseText)
