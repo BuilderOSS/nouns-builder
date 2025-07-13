@@ -87,8 +87,6 @@ export const useArtworkUpload = ({
     return []
   }, [artwork, ipfsUpload, isUploadingToIPFS])
 
-  console.log({ images, ipfsUpload, isUploadingToIPFS })
-
   /* prepare files */
 
   const [isProcessing, setIsProcessing] = React.useState<boolean | undefined>(undefined)

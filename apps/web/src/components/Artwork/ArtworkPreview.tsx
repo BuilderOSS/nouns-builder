@@ -23,7 +23,6 @@ export const ArtworkPreview: React.FC<ArtworkPreviewProps> = ({
   generateStackedImage,
   images,
 }) => {
-  console.log({ generatedImages, images })
   return (
     <Flex align={'center'} justify={'center'} direction={'column'}>
       <Flex className={artworkPreviewImageWrapper} mb={'x8'}>

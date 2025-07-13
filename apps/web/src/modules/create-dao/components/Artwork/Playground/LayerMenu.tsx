@@ -26,7 +26,6 @@ export const LayerMenu: React.FC<{
       ? Math.floor(Math.random() * images.length)
       : Number(e.target.value)
     const selectedImage = images[imageIndex]
-    console.log({ layers })
 
     const traitIndex = selectedTraits.findIndex(
       (selected: SelectedTraitsProps) => selected.trait === trait

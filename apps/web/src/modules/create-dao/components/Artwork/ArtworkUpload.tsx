@@ -148,8 +148,6 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
       setOrderedLayers={setOrderedLayers}
     />
   )
-  console.log({ images, artwork, orderedLayers })
-
   return (
     <>
       <UploadComponent

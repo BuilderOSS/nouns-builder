@@ -38,8 +38,6 @@ export const useArtworkPreview = ({
   // Build layer structure
   const layers = React.useMemo(() => {
     if (!images || !orderedLayers) return []
-    console.log('images', images)
-    console.log('orderedLayers', orderedLayers)
 
     const imagesByTrait = images.reduce((acc: ImagesByTraitProps[], image) => {
       const trait = image.trait
@@ -64,8 +62,6 @@ export const useArtworkPreview = ({
     }))
   }, [images, orderedLayers])
 
-  console.log('layers', layers)
-
   const selectTraits = React.useCallback(() => {
     if (!layers) return []
 
@@ -84,15 +80,12 @@ export const useArtworkPreview = ({
     })
   }, [selectedTraits, layers])
 
-  console.log('outer selectedTraits', selectedTraits)
-
   const selectImagesToDraw = React.useCallback(() => {
     if (!layers || !layers.length)
       return { imagesToDraw: [], hasLocalFile: false, imageLayerStack: [] }
 
     // Select one random image per trait
     const traits: SelectedTraitsProps[] = selectTraits()
-    console.log('selectedTraits', traits)
     // Generate local/remote URLs for stacking
 
     const stack = traits.map((trait) => {
@@ -102,16 +95,10 @@ export const useArtworkPreview = ({
 
     const imageLayerStack = stack.reverse()
 
-    console.log('imageLayerStack', imageLayerStack)
-
     // Determine if any trait is using a local file
     const hasLocalFile = traits.some(
       (trait) => !!trait.content && trait.content?.webkitRelativePath?.length > 0
     )
-
-    console.log('hasLocalFile', hasLocalFile)
-
-    console.log('imageLayerStack', imageLayerStack)
 
     // Convert image URLs into Image objects for canvas rendering
     const imagesToDraw = imageLayerStack.map((src) => {
@@ -119,8 +106,6 @@ export const useArtworkPreview = ({
       img.src = src
       return img
     })
-
-    console.log('imagesToDraw', imagesToDraw)
 
     return { imagesToDraw, hasLocalFile, imageLayerStack }
   }, [layers, selectTraits])
@@ -141,15 +126,12 @@ export const useArtworkPreview = ({
     async (e?: BaseSyntheticEvent) => {
       try {
         if (e) e.stopPropagation()
-        console.log('generateStackedImage')
         if (!canvas.current || !layers.length) return
 
         const _canvas = canvas.current
         const ctx = _canvas.getContext('2d')
 
         const { imagesToDraw, hasLocalFile, imageLayerStack } = selectImagesToDraw()
-
-        console.log('imagesToDraw', imagesToDraw)
 
         const draw = () => {
           _canvas.width = imagesToDraw[0].naturalWidth
