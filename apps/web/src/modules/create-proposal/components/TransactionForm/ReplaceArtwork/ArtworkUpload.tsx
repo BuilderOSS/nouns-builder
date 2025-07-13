@@ -99,11 +99,10 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     onUploadError: handleUploadError,
   })
 
-  const { generateStackedImage, imagesToDraw, generatedImages, canvas } =
-    useArtworkPreview({
-      images,
-      orderedLayers,
-    })
+  const { generateStackedImage, generatedImages, canvas } = useArtworkPreview({
+    images,
+    orderedLayers,
+  })
 
   const handleUpload = (e: BaseSyntheticEvent) => {
     setUploadArtworkError(undefined)
@@ -131,16 +130,11 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     generate Stacked Image on Init
 
   */
-  const [isReady, setIsReady] = React.useState<boolean>(false)
   React.useEffect(() => {
-    setIsReady(!!setUpArtwork.artwork.length && !isUploadingToIPFS && !!imagesToDraw)
-  }, [setUpArtwork.artwork, isUploadingToIPFS, imagesToDraw])
-
-  React.useEffect(() => {
-    if (isReady && !isUploadingToIPFS) {
+    if (!generatedImages.length && !isUploadingToIPFS) {
       generateStackedImage()
     }
-  }, [isReady, isUploadingToIPFS, generateStackedImage])
+  }, [generatedImages, isUploadingToIPFS, generateStackedImage])
 
   const showPreview = setUpArtwork.artwork.length > 0
 

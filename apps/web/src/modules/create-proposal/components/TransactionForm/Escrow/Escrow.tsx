@@ -111,6 +111,7 @@ export const Escrow: React.FC = () => {
         setIsSubmitting(true)
         const response = await uploadFile(fileToUpload, {
           cache: true,
+          type: 'json',
           onProgress: (progress) => {
             // eslint-disable-next-line no-console
             console.debug(`Upload progress: ${progress}%`)

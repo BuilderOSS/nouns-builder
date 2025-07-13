@@ -1,6 +1,7 @@
-import React, { BaseSyntheticEvent } from 'react'
+import React, { BaseSyntheticEvent, useEffect } from 'react'
 
 import { OrderedTraits } from 'src/components/Artwork/LayerBox'
+import { BASE_URL } from 'src/constants/baseUrl'
 import { RENDERER_BASE } from 'src/constants/rendererBase'
 
 import { ImageProps } from './useArtworkUpload'
@@ -8,6 +9,7 @@ import { ImageProps } from './useArtworkUpload'
 export interface UseArtworkPreviewProps {
   orderedLayers: OrderedTraits
   images?: ImageProps[]
+  selectedTraits?: SelectedTraitsProps[]
 }
 
 export interface ImagesByTraitProps {
@@ -19,161 +21,185 @@ export interface SelectedTraitsProps {
   picker: string
   trait: string
   uri: string
-  content: File
+  url: string
+  content?: File
 }
 
-export const useArtworkPreview = ({ images, orderedLayers }: UseArtworkPreviewProps) => {
+export const useArtworkPreview = ({
+  images,
+  orderedLayers,
+  selectedTraits,
+}: UseArtworkPreviewProps) => {
   const canvas = React.useRef<HTMLCanvasElement | null>(null)
   const [generatedImages, setGeneratedImages] = React.useState<string[]>([])
-  const [hasLocalFile, setHasLocalFile] = React.useState<boolean>(false)
   const [isInit, setIsInit] = React.useState<boolean>(true)
+  const usedBlobUrls = React.useRef<string[]>([])
+  const isMountedRef = React.useRef(false)
 
-  // Group images by trait
-  const imagesByTrait = React.useMemo(() => {
-    if (!images) return []
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+      // Cleanup blob URLs on unmount
+      usedBlobUrls.current.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [])
 
-    return images.reduce((acc: ImagesByTraitProps[], image) => {
-      const trait = image.trait
-      const propertyTrait = orderedLayers.find(
-        (item) => item?.trait?.replace(/\s/g, '') === image?.trait?.replace(/\s/g, '')
-      )
-      const orderedIndex = orderedLayers.indexOf(propertyTrait!)
-      const existingIndex = acc.findIndex((e) => e.trait === trait)
+  const layers = React.useMemo(() => {
+    if (!images || !orderedLayers) return []
 
-      if (existingIndex === -1) {
-        acc[orderedIndex] = { trait, images: [image] }
-      } else {
-        acc[existingIndex].images.push(image)
+    const traitMap = new Map(
+      orderedLayers.map((item, index) => [
+        item.trait.trim().toLowerCase(),
+        { trait: item.trait, index },
+      ])
+    )
+
+    const grouped: { [key: string]: ImagesByTraitProps & { index: number } } = {}
+
+    for (const image of images) {
+      const normalizedTrait = image.trait?.trim().toLowerCase()
+      const traitInfo = traitMap.get(normalizedTrait)
+
+      if (traitInfo) {
+        if (!grouped[normalizedTrait]) {
+          grouped[normalizedTrait] = {
+            trait: traitInfo.trait,
+            images: [image],
+            index: traitInfo.index,
+          }
+        } else {
+          grouped[normalizedTrait].images.push(image)
+        }
       }
+    }
 
-      return acc
-    }, [])
+    return Object.values(grouped)
+      .sort((a, b) => a.index - b.index)
+      .map(({ trait, images }) => ({
+        trait: trait.replace(/^\d+-/, ''),
+        images,
+      }))
   }, [images, orderedLayers])
 
-  // Build layer structure
-  const layers = React.useMemo(() => {
-    return imagesByTrait.map((layer) => ({
-      trait: layer.trait.replace(/^\d+-/, ''),
-      images: layer.images,
-    }))
-  }, [imagesByTrait])
-
-  // Select one random image per trait
-  const selectedTraits: SelectedTraitsProps[] = React.useMemo(() => {
+  const selectTraits = React.useCallback((): SelectedTraitsProps[] => {
     return layers.map((layer) => {
+      const selectedTrait = selectedTraits?.find((trait) => trait.picker === layer.trait)
+      if (selectedTrait) return selectedTrait
+
       const randomIndex = Math.floor(Math.random() * layer.images.length)
       const selectedImage = layer.images[randomIndex]
       return {
         picker: 'random',
         trait: layer.trait,
         uri: selectedImage.uri,
+        url: selectedImage.url,
         content: selectedImage.content as File,
       }
     })
-  }, [layers])
+  }, [selectedTraits, layers])
 
-  // Generate local/remote URLs for stacking
-  const imageLayerStack = React.useMemo(() => {
-    if (!selectedTraits.length) return []
+  const selectImagesToDraw = React.useCallback(() => {
+    if (!layers || !layers.length)
+      return { imagesToDraw: [], hasLocalFile: false, imageLayerStack: [] }
 
-    const stack = selectedTraits.map((trait) => {
-      const isLocal = trait.content?.webkitRelativePath?.length > 0
-      return isLocal ? URL.createObjectURL(trait.content) : trait.uri
+    const traits = selectTraits()
+
+    const stack = traits.map((trait) => {
+      const isLocal = trait.content && trait.content?.webkitRelativePath?.length > 0
+      if (isLocal && trait.content) {
+        const blobUrl = URL.createObjectURL(trait.content)
+        usedBlobUrls.current.push(blobUrl)
+        return blobUrl
+      }
+      return trait.url
     })
 
-    return stack.reverse()
-  }, [selectedTraits])
-
-  // Determine if any trait is using a local file
-  React.useEffect(() => {
-    const usingLocal = selectedTraits.some(
-      (trait) => trait.content?.webkitRelativePath?.length > 0
+    const imageLayerStack = stack.reverse()
+    const hasLocalFile = traits.some(
+      (trait) => !!trait.content && trait.content?.webkitRelativePath?.length > 0
     )
-    setHasLocalFile(usingLocal)
-  }, [selectedTraits])
 
-  // Cleanup blob URLs
-  React.useEffect(() => {
-    return () => {
-      imageLayerStack.forEach((blob) => {
-        if (blob.startsWith('blob:')) URL.revokeObjectURL(blob)
-      })
-    }
-  }, [imageLayerStack])
-
-  // Convert image URLs into Image objects for canvas rendering
-  const imagesToDraw = React.useMemo(() => {
-    return imageLayerStack.map((src) => {
+    const imagesToDraw = imageLayerStack.map((src) => {
       const img = new Image()
+      img.crossOrigin = 'anonymous'
       img.src = src
       return img
     })
-  }, [imageLayerStack])
 
-  // Draw stacked image on canvas
-  const canvasToBlob = React.useCallback(
-    (canvas: HTMLCanvasElement, stack: string[]) => {
-      if (canvas.height > 0) {
-        const data = canvas.toDataURL()
-        setGeneratedImages([data, ...generatedImages])
+    return { imagesToDraw, hasLocalFile, imageLayerStack }
+  }, [layers, selectTraits])
 
-        stack.forEach((blob) => {
-          if (blob.startsWith('blob:')) URL.revokeObjectURL(blob)
-        })
+  const canvasToBlob = React.useCallback((canvas: HTMLCanvasElement, stack: string[]) => {
+    if (canvas.height > 0) {
+      const data = canvas.toDataURL()
+      stack.forEach((blob) => {
+        if (blob.startsWith('blob:')) URL.revokeObjectURL(blob)
+      })
+
+      usedBlobUrls.current = []
+
+      if (isMountedRef.current) {
+        setGeneratedImages((images) => [data, ...images.slice(0, 9)]) // Keep only last 10
       }
-    },
-    [generatedImages]
-  )
+    }
+  }, [])
 
   const generateStackedImage = React.useCallback(
     async (e?: BaseSyntheticEvent) => {
       try {
         if (e) e.stopPropagation()
-        if (!canvas.current || !imagesToDraw.length) return
+        if (!canvas.current || !layers.length) return
 
         const _canvas = canvas.current
         const ctx = _canvas.getContext('2d')
+        if (!ctx) return
+
+        const { imagesToDraw, hasLocalFile, imageLayerStack } = selectImagesToDraw()
 
         const draw = () => {
           _canvas.width = imagesToDraw[0].naturalWidth
           _canvas.height = imagesToDraw[0].naturalHeight
-
           imagesToDraw.forEach((img) => {
-            ctx?.drawImage(img, 0, 0)
+            ctx.drawImage(img, 0, 0)
           })
-
           canvasToBlob(_canvas, imageLayerStack)
         }
 
         if (hasLocalFile) {
-          if (isInit) {
-            imagesToDraw[0].onload = () => {
-              draw()
-              setIsInit(false)
-            }
-          } else {
-            draw()
-          }
+          await Promise.all(
+            imagesToDraw.map(
+              (img) =>
+                new Promise<void>((resolve, reject) => {
+                  img.onload = () => resolve()
+                  img.onerror = () =>
+                    reject(new Error(`Image failed to load: ${img.src}`))
+                })
+            )
+          )
+          draw()
+          if (isInit) setIsInit(false)
         } else {
-          const url = new URL(RENDERER_BASE)
+          const rendererBase = RENDERER_BASE.replace('https://nouns.build', BASE_URL)
+          const url = new URL(rendererBase)
           for (const image of imageLayerStack) {
             url.searchParams.append('images', encodeURI(image))
           }
 
-          const response = await fetch(url.href)
-          const data = await response.json()
-          setGeneratedImages([data])
+          if (isMountedRef.current) {
+            setGeneratedImages((images) => [url.href, ...images.slice(0, 9)]) // Keep only last 10
+          }
         }
       } catch (err) {
         console.error('Error generating image', err)
       }
     },
-    [canvas, imagesToDraw, hasLocalFile, isInit, canvasToBlob, imageLayerStack]
+    [canvas, isInit, canvasToBlob, selectImagesToDraw, layers]
   )
 
   return {
+    layers,
     generateStackedImage,
-    imagesToDraw,
     generatedImages,
     canvas,
   }
