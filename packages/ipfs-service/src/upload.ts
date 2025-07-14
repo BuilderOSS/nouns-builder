@@ -99,7 +99,8 @@ const uploadWithProgress = async (
       type: uploadType,
     }),
     headers: {
-      accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
   })
 
@@ -134,7 +135,8 @@ const uploadWithProgress = async (
               name: jsonResponse.data.name,
             }),
             headers: {
-              accept: 'application/json',
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
             },
           })
         } catch (error) {
@@ -167,13 +169,13 @@ const uploadCache = {
       if (cid) {
         return { cid, uri: `ipfs://${cid}` }
       }
-    } catch {}
+    } catch { }
   },
   put(files: File[], cid: string) {
     const digest = hashFiles(files)
     try {
       localStorage.setItem(`${this.prefix}/${digest}`, cid)
-    } catch {}
+    } catch { }
   },
 }
 
@@ -191,7 +193,7 @@ export function formatFileSize(bytes: number): string {
 export async function uploadFile(
   file: File,
   options?: {
-    type?: UploadType
+    type?: Omit<UploadType, 'json'>
     onProgress?: ProgressCallback
     cache?: boolean
   },
@@ -203,7 +205,8 @@ export async function uploadFile(
     ...options,
   }
 
-  const uploadOptions = pinataOptions[type ?? 'file']
+  const uploadType = (type ?? 'file') as UploadType
+  const uploadOptions = pinataOptions[uploadType]
 
   if (file.size > uploadOptions.max_file_size) {
     throw new Error(
@@ -219,7 +222,7 @@ export async function uploadFile(
   const data = new FormData()
   data.append('file', file)
 
-  const response = (await uploadWithProgress(data, type ?? 'image', (progress) => {
+  const response = (await uploadWithProgress(data, uploadType, (progress) => {
     console.info(`ipfs-service/uploadFile: progress: ${progress}%`)
     // You can also update the UI with the progress here
     if (typeof onProgress === 'function') {
@@ -242,9 +245,9 @@ export async function uploadFile(
 export type FileEntry =
   | File
   | {
-      content: File
-      path: string
-    }
+    content: File
+    path: string
+  }
 
 export async function uploadDirectory(
   fileEntries: FileEntry[],
@@ -319,5 +322,42 @@ export async function uploadDirectory(
   return {
     ...response,
     uri,
+  }
+}
+
+export async function uploadJson(jsonObject: object): Promise<IPFSUploadResponse> {
+  console.info('ipfs-service/uploadJson: json:', jsonObject)
+  if (!jsonObject || typeof jsonObject !== 'object') {
+    throw new Error('Invalid JSON data')
+  }
+
+  const data = JSON.stringify(jsonObject)
+
+  const response = await fetch('/api/pin-json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: data,
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`JSON upload failed: ${errorText}`)
+  }
+
+  const json = await response.json()
+
+  const cid = json.cid
+  if (!cid) {
+    throw new Error('No CID returned from API')
+  }
+
+  console.info('ipfs-service/uploadJson: response:', json)
+
+  return {
+    cid,
+    uri: `ipfs://${cid}`,
   }
 }

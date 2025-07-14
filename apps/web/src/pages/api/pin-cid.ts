@@ -5,7 +5,7 @@ const PINATA_API_KEY = process.env.PINATA_API_KEY
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { cid, name, group_id } = JSON.parse(req.body)
+      const { cid, name, group_id } = req.body
       if (!cid) {
         return res.status(400).json({
           text: 'CID is required',

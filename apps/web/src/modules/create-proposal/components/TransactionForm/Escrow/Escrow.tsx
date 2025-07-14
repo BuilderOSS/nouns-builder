@@ -1,7 +1,7 @@
 import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { Stack } from '@zoralabs/zord'
 import { useCallback } from 'hono/jsx'
-import { uploadFile } from 'ipfs-service'
+import { uploadJson } from 'ipfs-service'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import useSWR from 'swr'
@@ -98,25 +98,13 @@ export const Escrow: React.FC = () => {
         ),
       }
 
-      const jsonDataToUpload = JSON.stringify(ipfsDataToUpload, null, 2)
-      const fileToUpload = new File([jsonDataToUpload], 'escrow-data.json', {
-        type: 'application/json',
-      })
-
       let cid: string, uri: string
 
       try {
         // eslint-disable-next-line no-console
         console.debug('Uploading to IPFS...')
         setIsSubmitting(true)
-        const response = await uploadFile(fileToUpload, {
-          cache: true,
-          type: 'json',
-          onProgress: (progress) => {
-            // eslint-disable-next-line no-console
-            console.debug(`Upload progress: ${progress}%`)
-          },
-        })
+        const response = await uploadJson(ipfsDataToUpload)
         cid = response.cid
         uri = response.uri
         setIsSubmitting(false)
