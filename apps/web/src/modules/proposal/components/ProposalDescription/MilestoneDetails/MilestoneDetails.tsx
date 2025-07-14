@@ -256,8 +256,8 @@ export const MilestoneDetails = ({
                             <Stack direction="column" gap="x1">
                               <Text variant="label-xs" color="tertiary">
                                 {isNext
-                                  ? 'Releases the next milestone'
-                                  : `Releases all milestones up to Milestone ${index + 1}`}
+                                  ? 'Release funds for the next milestone'
+                                  : `Release funds for all milestones up to Milestone ${index + 1}`}
                               </Text>
                               <Button
                                 variant="primary"
