@@ -238,6 +238,23 @@ export const formatDate = (date: Date | string, readable: boolean = false) => {
   }
 }
 
+export const formatDateTime = (date: Date) => {
+  const ye = new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+  }).format(date)
+  const mo = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+  }).format(date)
+  const da = new Intl.DateTimeFormat('en-US', {
+    day: '2-digit',
+  }).format(date)
+  const time = new Intl.DateTimeFormat('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date)
+  return `${mo} ${da}, ${ye} ${time}`
+}
+
 export const yearsAhead = (years: number) => {
   let d = new Date()
   let year = d.getFullYear()

@@ -14,6 +14,7 @@ import {
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DecodedArg } from 'src/typings'
+import { formatDateTime } from 'src/utils/helpers'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 
@@ -94,7 +95,7 @@ export const EscrowArgumentDisplay: React.FC<EscrowArgumentDisplayProps> = ({
         <Flex>_resolver: {resolverAddress}</Flex>
         <Flex>_providerRecipient: {providerRecipientAddress}</Flex>
         <Flex>
-          _safetyValveDate: {new Date(Number(terminationTime) * 1000).toLocaleString()}
+          _safetyValveDate: {formatDateTime(new Date(Number(terminationTime) * 1000))}
         </Flex>
         {escrowType && toLower(escrowType) === toLower(ESCROW_TYPE_V1) && (
           <Flex>_escrowType: updatable</Flex>

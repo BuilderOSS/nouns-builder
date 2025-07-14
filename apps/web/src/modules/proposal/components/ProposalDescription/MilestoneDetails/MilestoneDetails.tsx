@@ -204,8 +204,8 @@ export const MilestoneDetails = ({
         <Accordion
           items={invoiceData?.milestones?.map(
             (milestone: MilestoneMetadata, index: number) => {
-              const isReleased = currentMilestone - 1 >= index
-              const isNext = currentMilestone - 1 === index
+              const isReleased = currentMilestone > index
+              const isNext = currentMilestone === index
               return {
                 title: <Text>{`${index + 1}. ${milestone.title}`}</Text>,
                 description: (
@@ -251,37 +251,31 @@ export const MilestoneDetails = ({
                           )
                         }
 
-                        if (isClientTreasury) {
+                        if (isClientConnected || isClientTreasury) {
                           return (
-                            <Button
-                              variant="primary"
-                              onClick={() => handleReleaseMilestoneAsProposal(index)}
-                              disabled={!hasThreshold}
-                              tooltip={
-                                isNext
+                            <Stack direction="column" gap="x1">
+                              <Text variant="label-xs" color="tertiary">
+                                {isNext
                                   ? 'Releases the next milestone'
-                                  : `Releases all milestones up to ${index + 1}`
-                              }
-                            >
-                              Release Milestone
-                            </Button>
-                          )
-                        }
-
-                        if (isClientConnected) {
-                          return (
-                            <Button
-                              variant="primary"
-                              onClick={() => handleReleaseMilestoneDirect(index)}
-                              disabled={releasing}
-                              tooltip={
-                                isNext
-                                  ? 'Releases the next milestone'
-                                  : `Releases all milestones up to ${index + 1}`
-                              }
-                            >
-                              {releasing ? 'Releasing...' : 'Release Milestone'}
-                            </Button>
+                                  : `Releases all milestones up to Milestone ${index + 1}`}
+                              </Text>
+                              <Button
+                                variant="primary"
+                                onClick={() =>
+                                  isClientConnected
+                                    ? handleReleaseMilestoneDirect(index)
+                                    : handleReleaseMilestoneAsProposal(index)
+                                }
+                                disabled={isClientConnected ? releasing : !hasThreshold}
+                              >
+                                {releasing ? 'Releasing...' : 'Release Milestone'}
+                              </Button>
+                              {!hasThreshold && !isClientConnected && (
+                                <Text variant="label-xs" color="negative">
+                                  You do not have enough votes to create a proposal
+                                </Text>
+                              )}
+                            </Stack>
                           )
                         }
 
