@@ -23,7 +23,7 @@ You can also find the [nouns protocol code here](https://github.com/ourzora/noun
 - `zoralabs-zord`: Shareable ui components
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
-- `ipfs-service`: api to for image uploads to ipfs
+- `ipfs-service`: api for image uploads to ipfs
 
 ## Quickstart
 
@@ -81,6 +81,8 @@ This app has several third party api keys that you need in order to run Builder:
 
 - [Tenderly](https://docs.tenderly.co/simulations-and-forks/simulation-api) as the main rpc node provider and transaction simulator
 - [Etherscan](https://docs.etherscan.io/api-endpoints/contracts) to dynamically fetch abis
+- [Alchemy](https://www.alchemy.com/) for NFT metadata and balances
+- [Redis](https://redis.io/) for caching layer
 
 We ask that you supply your own secrets locally for running in development environment. Non-secret environment variables are already included in the `.env` files in this repo.
 
@@ -105,8 +107,12 @@ TENDERLY_USER=<ACCOUNT_NAME>
 # etherscan 
 ETHERSCAN_API_KEY=<ETHERSCAN_API_KEY>
 
-# optional zora api key
-NEXT_PUBLIC_ZORA_API_KEY=
+# alchemy for NFT/token data
+NEXT_PUBLIC_ALCHEMY_API_KEY=<ALCHEMY_API_KEY>
+
+# redis for caching
+REDIS_URL=<REDIS_URL>
+
 ```
 
 ## Running tests
@@ -135,8 +141,11 @@ The Nouns Builder subgraph is deployed for the following networks:
 - [Ethereum](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-ethereum-mainnet/latest/gn)
 - [Ethereum Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-ethereum-sepolia/latest/gn)
 - [Base](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-base-mainnet/latest/gn)
+- [Base Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-base-sepolia/latest/gn)
 - [Optimism](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-mainnet/latest/gn)
+- [Optimism Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-sepolia/latest/gn)
 - [Zora](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-mainnet/latest/gn)
+- [Zora Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-sepolia/latest/gn)
 
 ## Contributions
 

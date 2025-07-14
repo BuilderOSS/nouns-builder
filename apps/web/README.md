@@ -32,7 +32,7 @@ The app is mostly organised by function and for the larger areas of concern ther
 - `typings` - shared global types
 - `utils` - shared utilities
 - `data` - network requests
-  - `graphql` - generated sdk, queries, fragements, and data transformation helpers
+  - `graphql` - generated sdk, queries, fragments, and data transformation helpers
   - `contract` - generated abis, contract reads, and data transformation helpers
 - `modules`
   - `auction` - a given token auction
@@ -40,19 +40,20 @@ The app is mostly organised by function and for the larger areas of concern ther
   - `create-proposal` - create a proposal flow
   - `dao` - dao entity related components, hooks, stores, etc.
   - `proposal` - proposal entity related components, hooks, stores, etc.
+  - `dashboard` - dashboard components and layout
 
 ### Chain Environment
 
-Nouns Builder currently only supports two networks: `mainnet` and `sepolia testnet`. The environment variables indicated below dictate the network that the app interacts with.
+Nouns Builder supports multiple networks: `Ethereum`, `Base`, `Optimism`, `Zora`, and their respective testnets (`Sepolia`). The environment variables indicated below dictate which networks the app includes.
 
-You can swap out the environment variables as defined below to run against mainnnet or testnet locally.
+You can swap out the environment variables as defined below to run against different network configurations locally.
 
 ```
-# the default network type is defined in .env, to run against testnet
+# to run with all networks including testnets (8 total networks)
 NEXT_PUBLIC_TENDERLY_RPC_KEY=<TENDERLY_RPC_API_KEY>
 NEXT_PUBLIC_NETWORK_TYPE="testnet"
 
-# to run against mainnet locally
+# to run with production networks only (4 networks: Ethereum, Base, Optimism, Zora)
 NEXT_PUBLIC_TENDERLY_RPC_KEY=<TENDERLY_RPC_API_KEY>
 NEXT_PUBLIC_NETWORK_TYPE="mainnet"
 ```
@@ -87,7 +88,7 @@ describe('Block Number', () => {
 
 ### Generating typed graphql queries
 
-We use [graphql-codegen](https://www.the-guild.dev/graphql/codegen) to generate typed queries for [graphql-request](https://github.com/jasonkuhrt/graphql-request) based off of the Zora [api schema](https://api.zora.co/graphql). The codegen config is defined in `codegen.yml`.
+We use [graphql-codegen](https://www.the-guild.dev/graphql/codegen) to generate typed queries for [graphql-request](https://github.com/jasonkuhrt/graphql-request) based off of the Nouns Builder subgraph schemas deployed on Goldsky. The codegen config is defined in `codegen.yml`.
 
 In order to generate a new query:
 
@@ -113,12 +114,12 @@ query daosByMember($addresses: [String!], $chain: Chain!) {
 }
 
 // the generated output as an api
-sdk.daosByMember({ addresses: ['0x123'], chain: Chain.GOERLI })
+sdk.daosByMember({ addresses: ['0x123'], chain: Chain.ETHEREUM })
 ```
 
 > Note: `sdk.generated.ts` is auto-generated and should not be touched
 
-> Note: If you use vscode, it might also be helfpul to install the vscode plugin for graphql to pick up syntax highlighting for `.graphql` files.
+> Note: If you use vscode, it might also be helpful to install the vscode plugin for graphql to pick up syntax highlighting for `.graphql` files.
 
 ### Styling
 
@@ -168,7 +169,7 @@ Add version number to the constants
 export const versions = ['1.1.0', '1.2.0', '1.x.0'] as const
 ```
 
-The upgrade card feature will automatically pick up these upgrades and make them available once the contract versions are upgrade on the builer manager contract.
+The upgrade card feature will automatically pick up these upgrades and make them available once the contract versions are upgraded on the builder manager contract.
 
 ### ESLint & Prettier
 

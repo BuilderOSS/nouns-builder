@@ -16,9 +16,9 @@ There are a few ways to contribute and help improve Nouns Builder. Some ways inc
 
 If you're ready to contribute to the source code, please follow this [README](../README.md) to get up and running locally.
 
-If you're unsure where to begin, we highly recommend starting [a new discussion](https://github.com/ourzora/nouns-builder/discussions).
+If you're unsure where to begin, we highly recommend starting [a new discussion](https://github.com/BuilderOSS/nouns-builder/discussions).
 
-You can also find other contributors in our [public Discord channel](https://discord.com/invite/C6Zmt8aakt). Feel free to also reach out to us on [Twitter](https://twitter.com/nounsbuilder) if you have any questions.
+You can also find other contributors in our [public Discord channel](https://discord.gg/bTygNksyRb). Feel free to also reach out to us on [Twitter](https://twitter.com/nounsbuilder) if you have any questions.
 
 ---
 
@@ -37,4 +37,4 @@ When you submit a pull request, GitHub will automatically lint, build, test your
 
 We have also made the tool's design files public - feel free to view the [Figma file](https://www.figma.com/file/gyRt2DgZobN8HwobPnxLrA/Nouns-Builder-Designs---Public?node-id=3-3856&t=4Zi0my9FefgfEjXa-4).
 
-If you have any suggestions about the designs, feel free to also start [a new discussion](https://github.com/ourzora/nouns-builder/discussions).
+If you have any suggestions about the designs, feel free to also start [a new discussion](https://github.com/BuilderOSS/nouns-builder/discussions).
