@@ -36,7 +36,7 @@ export const CACHE_TIMES = {
     maxAge: ONE_MINUTE,
     swr: ONE_HOUR,
   },
-  CASTR_PROFILE: {
+  PROFILE: {
     maxAge: ONE_DAY,
     swr: ONE_WEEK,
   },

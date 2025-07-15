@@ -83,3 +83,28 @@ export async function getEnsName(
     return address
   }
 }
+
+// In-memory ENS to avatar cache
+const avatarCache = new Map<string, string | null>()
+
+export async function getEnsAvatar(
+  name: string,
+  provider: PublicClient | undefined = defaultProvider
+): Promise<string | null> {
+  if (!name) return null
+
+  // Check cache
+  if (avatarCache.has(name)) {
+    return avatarCache.get(name)!
+  }
+
+  try {
+    const avatar = await provider.getEnsAvatar({ name })
+    const result = avatar ?? null
+    avatarCache.set(name, result)
+    return result
+  } catch (e) {
+    console.error('Error getting avatar:', e)
+    return null
+  }
+}
