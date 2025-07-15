@@ -21,15 +21,20 @@ import { NextPageWithLayout } from 'src/pages/_app'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { artworkSkeleton } from 'src/styles/Artwork.css'
-import { getEnsAddress } from 'src/utils/ens'
+import { getEnsAddress, getEnsName } from 'src/utils/ens'
 import { chainIdToSlug, walletSnippet } from 'src/utils/helpers'
 
 interface ProfileProps {
   userAddress: string
+  userName: string
   ogImageURL: string
 }
 
-const ProfilePage: NextPageWithLayout<ProfileProps> = ({ userAddress, ogImageURL }) => {
+const ProfilePage: NextPageWithLayout<ProfileProps> = ({
+  userAddress,
+  userName,
+  ogImageURL,
+}) => {
   const isMobile = useLayoutStore((x) => x.isMobile)
   const chain = useChainStore((x) => x.chain)
   const { query } = useRouter()
@@ -53,15 +58,15 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({ userAddress, ogImageURL
 
   const { handlePageBack, handlePageForward } = usePagination(tokens?.hasNextPage)
 
-  const pageTitle = `${ensName || walletSnippet(userAddress)} Profile`
-  const pageDescription = `View ${pageTitle}'s profile and DAO tokens on Nouns Builder`
-  const profilePath = `/profile/${chain?.slug}/${userAddress}`
+  const pageTitle = `${userName}'s Profile`
+  const pageDescription = `View ${userName}'s profile and DAO tokens on Nouns Builder`
+  const profilePath = `/profile/${userAddress}`
 
   return (
     <>
       <Meta
         title={pageTitle}
-        type={`${pageTitle}:profile`}
+        type={`${userName}:profile`}
         path={profilePath}
         description={pageDescription}
         image={ogImageURL}
@@ -263,6 +268,10 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       notFound: true,
     }
 
+  const ensName = isAddress(user) ? await getEnsName(user) : user
+
+  const userName = isAddress(ensName) ? walletSnippet(userAddress) : ensName
+
   const daos = await myDaosRequest(userAddress)
   const topDaos = daos?.slice(0, 3) ?? []
 
@@ -281,6 +290,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
   }
 
   return {
-    props: { userAddress, ogImageURL, fallback },
+    props: { userAddress, userName, ogImageURL, fallback },
   }
 }
