@@ -3,8 +3,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "clean": "rm -rf ./generated ./build subgraph.yaml",
-    "build:subgraph": "graph build",
-    "codegen": "graph codegen",
+    "graph:codegen": "graph codegen",
+    "graph:build": "graph build",
+    "build:only": "bash ./scripts/build.sh",
+    "build:subgraph": "pnpm clean && pnpm build:only",
     "deploy:only": "bash ./scripts/deploy.sh",
     "deploy:subgraph": "pnpm clean && pnpm deploy:only",
     "create:local": "graph local http://localhost:8020/ nouns-builder",
