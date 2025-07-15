@@ -3,7 +3,6 @@ import { getFetchableUrls } from 'ipfs-service/src/gateway'
 import { NextRequest } from 'next/server'
 import { isAddress } from 'viem'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
 import { MyDaosResponse } from 'src/data/subgraph/requests/daoQuery'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { getEnsAvatar, getEnsName } from 'src/utils/ens'
@@ -143,7 +142,6 @@ export default async function handler(req: NextRequest) {
             }}
           >
             {daos.slice(0, 6).map((dao) => {
-              const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
               return (
                 <div
                   style={{
@@ -167,9 +165,10 @@ export default async function handler(req: NextRequest) {
                         dao.collectionAddress ?? '',
                         dao.contractImage
                       ),
-                      height: '36px',
-                      width: '36px',
+                      height: '48px',
+                      width: '48px',
                       borderRadius: '9999px',
+                      marginTop: '12px',
                     }}
                   >
                     {dao.contractImage && (
@@ -177,8 +176,8 @@ export default async function handler(req: NextRequest) {
                         alt="user image"
                         src={getFetchableUrls(dao.contractImage)?.[0]}
                         style={{
-                          height: '36px',
-                          width: '36px',
+                          height: '48px',
+                          width: '48px',
                           borderRadius: '9999px',
                           objectFit: 'cover',
                           objectPosition: 'center',
@@ -187,18 +186,6 @@ export default async function handler(req: NextRequest) {
                     )}
                   </div>
                   <p style={{ fontSize: '32px', fontWeight: 700 }}>{dao.name}</p>
-                  {chain && (
-                    <img
-                      style={{
-                        height: 24,
-                        objectFit: 'cover',
-                        objectPosition: 'center',
-                        marginRight: '10px',
-                      }}
-                      src={process.env.BASE_URL + chain.icon}
-                      alt={chain.name}
-                    />
-                  )}
                 </div>
               )
             })}

@@ -264,8 +264,15 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
     }
 
   const daos = await myDaosRequest(userAddress)
+  const topDaos = daos?.slice(0, 3) ?? []
 
-  const data = { daos: daos ?? [] }
+  const data = {
+    daos: topDaos.map((x) => ({
+      collectionAddress: x.collectionAddress,
+      name: x.name,
+      contractImage: x.contractImage,
+    })),
+  }
 
   const ogImageURL = `${protocol}://${req.headers.host}/api/og/profile?address=${userAddress}&data=${encodeURIComponent(JSON.stringify(data))}`
 
