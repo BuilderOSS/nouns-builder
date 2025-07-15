@@ -160,6 +160,11 @@ export const NavMenu = () => {
                       alt={selectedChain.name}
                     />
                   </Box>
+                  <Flex display={{ '@initial': 'none', '@768': 'flex' }}>
+                    <Text fontWeight={'heading'} ml="x2">
+                      {selectedChain.name}
+                    </Text>
+                  </Flex>
                   <Box h="x6" w="x6" ml="x1">
                     <Icon id="chevronDown" fill="tertiary" pointerEvents="none" />
                   </Box>
