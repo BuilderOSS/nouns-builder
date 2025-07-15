@@ -2561,6 +2561,7 @@ export type CurrentAuctionFragment = {
 export type DaoFragment = {
   __typename?: 'DAO'
   name: string
+  contractImage: string
   tokenAddress: any
   auctionAddress: any
   governorAddress: any
@@ -2881,6 +2882,7 @@ export type DaosForUserQuery = {
   daos: Array<{
     __typename?: 'DAO'
     name: string
+    contractImage: string
     tokenAddress: any
     auctionAddress: any
     governorAddress: any
@@ -3171,6 +3173,7 @@ export const CurrentAuctionFragmentDoc = gql`
 export const DaoFragmentDoc = gql`
   fragment DAO on DAO {
     name
+    contractImage
     tokenAddress
     auctionAddress
     governorAddress
