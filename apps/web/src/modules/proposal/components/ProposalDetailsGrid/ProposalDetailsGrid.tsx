@@ -2,9 +2,7 @@ import { Box, Grid } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useCallback } from 'react'
 
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { useChainStore } from 'src/stores/useChainStore'
 import { propDataGrid } from 'src/styles/Proposals.css'
 import { handleGMTOffset } from 'src/utils/helpers'
 
@@ -21,11 +19,9 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
     againstVotes,
     abstainVotes,
     quorumVotes,
-    transactionHash,
     snapshotBlockNumber,
     voteEnd,
   } = proposal
-  const chain = useChainStore((x) => x.chain)
 
   const calculateProgress = useCallback(
     (votes: number) => {
@@ -97,14 +93,17 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
           subtext={`${dayjs.unix(voteEnd).format('h:mm:ss A')} ${handleGMTOffset()}`}
         />
         <a
-          href={`${ETHERSCAN_BASE_URL[chain.id]}/tx/${transactionHash}`}
+          href="https://builder-docs.vercel.app/onboarding/governance/#-voting-power"
           target="_blank"
           rel="noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          style={{ cursor: 'pointer' }}
         >
           <Tile
             title={'Snapshot'}
             subtitle={`#${snapshotBlockNumber}`}
             subtext={'Taken at block'}
+            icon="question"
           />
         </a>
       </Grid>
