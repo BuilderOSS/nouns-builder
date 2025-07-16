@@ -1,4 +1,4 @@
-import { Flex, Grid, Text, atoms } from '@zoralabs/zord'
+import { Flex, Grid, Text, atoms } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 

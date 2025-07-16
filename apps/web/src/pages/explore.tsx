@@ -1,4 +1,4 @@
-import { Flex } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import useSWR from 'swr'

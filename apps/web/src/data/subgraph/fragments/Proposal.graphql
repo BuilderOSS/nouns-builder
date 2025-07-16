@@ -21,7 +21,9 @@ fragment Proposal on Proposal {
   snapshotBlockNumber
   transactionHash
   executedAt
-  executionTransactionHash
+  executionTransactionHash  
+  vetoTransactionHash
+  cancelTransactionHash
   dao {
     governorAddress
     tokenAddress

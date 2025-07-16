@@ -1,4 +1,4 @@
-import { Box, Button, Flex, PopUp, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, PopUp, Text } from '@buildeross/zord'
 import React, { Fragment, memo, useEffect, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { Address, formatEther, parseEther } from 'viem'

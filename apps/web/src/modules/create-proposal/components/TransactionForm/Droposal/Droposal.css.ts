@@ -1,5 +1,5 @@
+import { atoms } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { atoms } from '@zoralabs/zord'
 
 export const previewTextStyle = style({
   whiteSpace: 'pre-wrap',

@@ -1,4 +1,4 @@
-import { Box, Grid } from '@zoralabs/zord'
+import { Box, Grid } from '@buildeross/zord'
 import { FC, ReactNode } from 'react'
 
 import { twoColumnLayout } from './TwoColumnLayout.css'

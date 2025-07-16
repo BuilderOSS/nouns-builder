@@ -1,4 +1,4 @@
-import { Box, Flex, Paragraph, Text } from '@zoralabs/zord'
+import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { useAccount, useConfig, useReadContract } from 'wagmi'

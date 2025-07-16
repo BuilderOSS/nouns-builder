@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useState } from 'react'
 import { Address } from 'viem'
 import { useReadContract } from 'wagmi'

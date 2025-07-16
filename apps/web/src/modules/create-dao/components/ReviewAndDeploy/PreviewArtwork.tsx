@@ -1,4 +1,4 @@
-import { Button } from '@zoralabs/zord'
+import { Button } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
 
 import AnimatedModal from 'src/components/Modal/AnimatedModal'

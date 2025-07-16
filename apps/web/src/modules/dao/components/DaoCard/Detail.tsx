@@ -1,4 +1,4 @@
-import { Flex, Paragraph, Text } from '@zoralabs/zord'
+import { Flex, Paragraph, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { detail } from './DaoCard.css'

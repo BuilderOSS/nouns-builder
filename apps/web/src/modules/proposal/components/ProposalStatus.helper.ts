@@ -1,4 +1,4 @@
-import { theme } from '@zoralabs/zord'
+import { theme } from '@buildeross/zord'
 
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { fromSeconds } from 'src/utils/helpers'

@@ -1,4 +1,5 @@
-import { Box, Button, Paragraph } from '@zoralabs/zord'
+import { Box, Button, Paragraph } from '@buildeross/zord'
+import { useState } from 'react'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
@@ -13,6 +14,7 @@ export const PauseAuctions = () => {
   const { auction } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: paused } = useReadContract({
     abi: auctionAbi,
     address: auction,
@@ -20,22 +22,27 @@ export const PauseAuctions = () => {
     functionName: 'paused',
   })
 
-  const handlePauseAuctionsTransaction = () => {
-    const pause = {
-      target: auction as AddressType,
-      functionSignature: 'pause()',
-      calldata: encodeFunctionData({
-        abi: auctionAbi,
-        functionName: 'pause',
-      }),
-      value: '',
-    }
+  const handlePauseAuctionsTransaction = async () => {
+    setIsSubmitting(true)
+    try {
+      const pause = {
+        target: auction as AddressType,
+        functionSignature: 'pause()',
+        calldata: encodeFunctionData({
+          abi: auctionAbi,
+          functionName: 'pause',
+        }),
+        value: '',
+      }
 
-    addTransaction({
-      type: TransactionType.PAUSE_AUCTIONS,
-      summary: 'Pause auctions',
-      transactions: [pause],
-    })
+      addTransaction({
+        type: TransactionType.PAUSE_AUCTIONS,
+        summary: 'Pause auctions',
+        transactions: [pause],
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -59,9 +66,9 @@ export const PauseAuctions = () => {
         w={'100%'}
         type="button"
         onClick={handlePauseAuctionsTransaction}
-        disabled={paused}
+        disabled={paused || isSubmitting}
       >
-        Add Transaction to Queue
+        {isSubmitting ? 'Adding Transaction to Queue...' : 'Add Transaction to Queue'}
       </Button>
     </Box>
   )

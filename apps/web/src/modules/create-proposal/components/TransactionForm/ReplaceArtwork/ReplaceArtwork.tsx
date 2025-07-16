@@ -1,4 +1,4 @@
-import { Stack, Text } from '@zoralabs/zord'
+import { Stack, Text } from '@buildeross/zord'
 import React, { useEffect, useMemo } from 'react'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'

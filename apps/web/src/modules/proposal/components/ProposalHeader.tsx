@@ -1,4 +1,4 @@
-import { Box, Flex, Label, Text } from '@zoralabs/zord'
+import { Box, Flex, Label, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 
 import { Icon } from 'src/components/Icon'
@@ -15,12 +15,27 @@ interface ProposalHeaderProps {
   proposal: Proposal
 }
 
+const getDisplayTransactionHash = (proposal: Proposal) => {
+  switch (proposal.state) {
+    case ProposalState.Executed:
+      return proposal.executionTransactionHash
+    case ProposalState.Canceled:
+      return proposal.cancelTransactionHash
+    case ProposalState.Vetoed:
+      return proposal.vetoTransactionHash
+    default:
+      return proposal.transactionHash
+  }
+}
+
 export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
   const router = useRouter()
-  const { title, proposer, proposalNumber, executionTransactionHash } = proposal
+  const { title, proposer, proposalNumber } = proposal
 
   const { displayName: proposerDisplayName } = useEnsData(proposer)
   const chain = useChainStore((x) => x.chain)
+
+  const displayTransactionHash = getDisplayTransactionHash(proposal)
 
   const status = (
     <Flex align={'center'}>
@@ -28,7 +43,7 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
         {...proposal}
         showTime={proposal.state === ProposalState.Executed}
       />
-      {!!executionTransactionHash && <Icon fill="text3" id="arrowTopRight" />}
+      {!!displayTransactionHash && <Icon fill="text3" id="arrowTopRight" />}
     </Flex>
   )
 
@@ -51,9 +66,9 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
           <Label fontSize={20} color={'text3'} mr={'x2'}>
             Proposal {proposalNumber}
           </Label>
-          {executionTransactionHash ? (
+          {displayTransactionHash ? (
             <a
-              href={`${ETHERSCAN_BASE_URL[chain.id]}/tx/${executionTransactionHash}`}
+              href={`${ETHERSCAN_BASE_URL[chain.id]}/tx/${displayTransactionHash}`}
               target="_blank"
               rel="noreferrer"
             >

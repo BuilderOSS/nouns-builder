@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -161,6 +161,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
     <Box
       data-testid="wallet-connect-form"
       as="fieldset"
+      disabled={formik.isSubmitting}
       style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
     >
       <Flex as={Form} direction="column" gap="x4">
@@ -206,9 +207,15 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
           variant="outline"
           borderRadius="curved"
           type="submit"
-          disabled={!txPayload || connectionStatus !== ConnectionStatus.CONNECTED}
+          disabled={
+            !txPayload ||
+            connectionStatus !== ConnectionStatus.CONNECTED ||
+            formik.isSubmitting
+          }
         >
-          Add Transaction to Queue
+          {formik.isSubmitting
+            ? 'Adding Transaction to Queue...'
+            : 'Add Transaction to Queue'}
         </Button>
       </Flex>
     </Box>

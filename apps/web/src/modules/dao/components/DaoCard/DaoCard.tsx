@@ -1,6 +1,6 @@
-import { Box, Flex, Paragraph } from '@zoralabs/zord'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box, Flex, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import { getFetchableUrls } from 'ipfs-service'
 import Link from 'next/link'
 import React, { useState } from 'react'
 

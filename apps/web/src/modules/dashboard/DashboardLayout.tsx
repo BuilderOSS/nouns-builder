@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@zoralabs/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 
 export const DashboardLayout = ({
@@ -30,7 +30,7 @@ export const DashPage = ({ children }: { children: ReactNode }) => {
   return (
     <Flex
       minH={'100vh'}
-      pt={{ '@initial': 'x6', '@480': 'x20' }}
+      py={{ '@initial': 'x6', '@480': 'x20' }}
       w={'100%'}
       justify="center"
     >

@@ -1,5 +1,5 @@
-import { Box } from '@zoralabs/zord'
-import { getFetchableUrls } from 'ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box } from '@buildeross/zord'
 import { useMemo } from 'react'
 
 import { Audio } from './Audio'

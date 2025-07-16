@@ -1,6 +1,6 @@
-import { Box, Flex, Stack } from '@zoralabs/zord'
+import { getFetchableUrls, normalizeIPFSUrl, uploadFile } from '@buildeross/ipfs-service'
+import { Box, Flex, Stack } from '@buildeross/zord'
 import { FormikProps } from 'formik'
-import { getFetchableUrls, normalizeIPFSUrl, uploadFile } from 'ipfs-service'
 import React, { ReactElement, useEffect, useState } from 'react'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'

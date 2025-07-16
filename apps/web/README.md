@@ -123,7 +123,7 @@ sdk.daosByMember({ addresses: ['0x123'], chain: Chain.ETHEREUM })
 
 ### Styling
 
-Nouns Builder relies on vanilla extract for styles. We use a combination of Zord and custom styles where needed. You can reference the `Styling with Zord` section in the [Zord README](/packages/zoralabs-zord/README.md) on how best to use Zord.
+Nouns Builder relies on vanilla extract for styles. We use a combination of Zord and custom styles where needed. You can reference the `Styling with Zord` section in the [Zord README](/packages/zord/README.md) on how best to use Zord.
 
 > Note: The `styles` folder contains legacy page style sheets, going forward only any globally applied styles should be further added there.
 

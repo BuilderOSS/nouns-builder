@@ -1,4 +1,4 @@
-import { Box, Flex, PopUp, Text } from '@zoralabs/zord'
+import { Box, Flex, PopUp, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 

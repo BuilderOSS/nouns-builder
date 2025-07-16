@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['custom'],
+  extends: ['@buildeross/eslint-config-custom'],
 }

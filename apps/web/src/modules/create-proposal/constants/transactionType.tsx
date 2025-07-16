@@ -1,4 +1,4 @@
-import { color } from '@zoralabs/zord'
+import { color } from '@buildeross/zord'
 
 import { IconType } from 'src/components/Icon/icons'
 

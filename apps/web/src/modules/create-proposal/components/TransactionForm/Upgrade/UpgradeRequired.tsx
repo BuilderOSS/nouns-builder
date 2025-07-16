@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { VersionType } from 'src/modules/create-proposal/constants'

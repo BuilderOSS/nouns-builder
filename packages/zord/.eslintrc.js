@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['custom'],
+  extends: ['@buildeross/eslint-config-custom'],
   rules: {
     'react/jsx-uses-react': 'error',
   },

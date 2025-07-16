@@ -1,5 +1,5 @@
+import { Button, ButtonProps } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { Button, ButtonProps } from '@zoralabs/zord'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
 import { useBridgeModal } from 'src/hooks/useBridgeModal'

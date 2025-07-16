@@ -1,4 +1,4 @@
-import { Box, Flex, Text, vars } from '@zoralabs/zord'
+import { Box, Flex, Text, vars } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'

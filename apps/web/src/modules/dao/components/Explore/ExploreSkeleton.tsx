@@ -1,4 +1,4 @@
-import { Box, Grid } from '@zoralabs/zord'
+import { Box, Grid } from '@buildeross/zord'
 
 import { exploreGrid, exploreSkeleton } from './Explore.css'
 

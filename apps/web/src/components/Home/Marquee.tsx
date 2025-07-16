@@ -1,4 +1,4 @@
-import { Flex, atoms } from '@zoralabs/zord'
+import { Flex, atoms } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import React from 'react'

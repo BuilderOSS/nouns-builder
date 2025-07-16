@@ -1,4 +1,4 @@
-import { Box, BoxProps } from '@zoralabs/zord'
+import { Box, BoxProps } from '@buildeross/zord'
 
 import { uploadingSpinner } from './Spinner.css'
 

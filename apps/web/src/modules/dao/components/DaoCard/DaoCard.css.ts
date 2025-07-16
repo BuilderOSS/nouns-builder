@@ -1,5 +1,5 @@
+import { atoms, color } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { atoms, color } from '@zoralabs/zord'
 
 export const daoImage = style({
   '::after': {

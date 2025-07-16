@@ -1,4 +1,4 @@
-import { Button, Flex, Heading, Stack, Text } from '@zoralabs/zord'
+import { Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
 
 import AnimatedModal from 'src/components/Modal/AnimatedModal'

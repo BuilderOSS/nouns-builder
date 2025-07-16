@@ -1,4 +1,4 @@
-import { Box, Button, Flex } from '@zoralabs/zord'
+import { Box, Button, Flex } from '@buildeross/zord'
 import { Field, Formik, Form as FormikForm } from 'formik'
 import React, { useState } from 'react'
 import { Address } from 'viem'

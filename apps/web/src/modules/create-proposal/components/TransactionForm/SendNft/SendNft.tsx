@@ -1,7 +1,7 @@
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
-import { getFetchableUrls } from 'ipfs-service'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMemo } from 'react'
 import { encodeFunctionData, getAddress, isAddress } from 'viem'
@@ -243,7 +243,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
     <Box
       data-testid="send-nft-form"
       as={'fieldset'}
-      disabled={formik.isValidating}
+      disabled={formik.isValidating || formik.isSubmitting}
       style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
     >
       <Flex as={Form} direction={'column'}>
@@ -469,9 +469,11 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           variant={'outline'}
           borderRadius={'curved'}
           type="submit"
-          disabled={!formik.isValid || !computedMetadata?.isValid}
+          disabled={!formik.isValid || !computedMetadata?.isValid || formik.isSubmitting}
         >
-          Add Transaction to Queue
+          {formik.isSubmitting
+            ? 'Adding Transaction to Queue...'
+            : 'Add Transaction to Queue'}
         </Button>
       </Flex>
     </Box>

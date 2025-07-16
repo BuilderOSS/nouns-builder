@@ -1,4 +1,4 @@
-import { Button, Flex } from '@zoralabs/zord'
+import { Button, Flex } from '@buildeross/zord'
 import { FieldArray, Form, Formik, FormikProps } from 'formik'
 import sum from 'lodash/sum'
 import React, { useRef, useState } from 'react'

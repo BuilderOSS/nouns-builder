@@ -1,5 +1,5 @@
+import { Button, Flex } from '@buildeross/zord'
 import { CastAddData, Message, SignatureScheme } from '@farcaster/hub-nodejs'
-import { Button, Flex } from '@zoralabs/zord'
 import axios from 'axios'
 import React, { useMemo } from 'react'
 import useSWRInfinite from 'swr/infinite'

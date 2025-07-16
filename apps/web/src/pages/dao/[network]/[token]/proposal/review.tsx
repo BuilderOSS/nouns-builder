@@ -1,4 +1,4 @@
-import { Box, Flex, Stack, Text, atoms } from '@zoralabs/zord'
+import { Box, Flex, Stack, Text, atoms } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'

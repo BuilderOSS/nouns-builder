@@ -1,5 +1,6 @@
 {
   "private": true,
+  "version": "0.0.0",
   "scripts": {
     "anvil": "bash -c 'source .env.local && anvil --fork-url \"$ANVIL_FORK_URL\" --fork-block-number \"$ANVIL_BLOCK_NUMBER\"'",
     "build": "turbo run build",
@@ -11,11 +12,13 @@
     "eslint": "eslint --fix . --ext .ts,.tsx",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "ci": "turbo run lint test"
+    "ci": "turbo run lint test",
+    "syncpack": "syncpack list-mismatches",
+    "syncpack:fix": "syncpack fix-mismatches"
   },
   "devDependencies": {
     "eslint": "8.57.1",
-    "eslint-config-custom": "workspace:*",
+    "@buildeross/eslint-config-custom": "workspace:*",
     "husky": "^8.0.3",
     "prettier": "3.5.3",
     "syncpack": "^13.0.4",

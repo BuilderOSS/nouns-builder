@@ -1,4 +1,4 @@
-import { Button, Flex, Stack, Text, mixins } from '@zoralabs/zord'
+import { Button, Flex, Stack, Text, mixins } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
 

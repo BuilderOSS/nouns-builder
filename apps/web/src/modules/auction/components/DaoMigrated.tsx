@@ -1,4 +1,4 @@
-import { Box, Stack, atoms } from '@zoralabs/zord'
+import { Box, Stack, atoms } from '@buildeross/zord'
 import Link from 'next/link'
 import { useReadContract } from 'wagmi'
 

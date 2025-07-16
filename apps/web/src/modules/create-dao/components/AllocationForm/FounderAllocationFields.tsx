@@ -1,4 +1,4 @@
-import { Button, Flex, Heading, Paragraph, Stack, Text } from '@zoralabs/zord'
+import { Button, Flex, Heading, Paragraph, Stack, Text } from '@buildeross/zord'
 import { FormikErrors, FormikProps, FormikTouched } from 'formik'
 import React from 'react'
 

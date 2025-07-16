@@ -1,4 +1,4 @@
-import { Flex, Text } from '@zoralabs/zord'
+import { Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 

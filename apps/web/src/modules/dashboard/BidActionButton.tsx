@@ -1,5 +1,5 @@
+import { Box, Button } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
-import { Box, Button } from '@zoralabs/zord'
 import React, { useState } from 'react'
 import { Address, parseEther } from 'viem'
 import { useChainId, useConfig } from 'wagmi'

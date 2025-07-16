@@ -1,4 +1,4 @@
-import { Box, Flex, Stack, Text, atoms } from '@zoralabs/zord'
+import { Box, Flex, Stack, Text, atoms } from '@buildeross/zord'
 import React from 'react'
 
 import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'

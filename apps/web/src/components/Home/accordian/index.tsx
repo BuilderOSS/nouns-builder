@@ -1,4 +1,4 @@
-import { Stack } from '@zoralabs/zord'
+import { Stack } from '@buildeross/zord'
 import React, { ReactElement } from 'react'
 
 import AccordionItem from './AccordionItem'

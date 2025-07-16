@@ -8,12 +8,12 @@ importers:
 
   .:
     devDependencies:
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:packages/eslint-config-custom
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:packages/eslint-config-custom
       husky:
         specifier: ^8.0.3
         version: 8.0.3
@@ -48,6 +48,18 @@ importers:
 
   apps/web:
     dependencies:
+      '@buildeross/analytics':
+        specifier: workspace:*
+        version: link:../../packages/analytics
+      '@buildeross/blocklist':
+        specifier: workspace:*
+        version: link:../../packages/blocklist
+      '@buildeross/ipfs-service':
+        specifier: workspace:*
+        version: link:../../packages/ipfs-service
+      '@buildeross/zord':
+        specifier: workspace:*
+        version: link:../../packages/zord
       '@ethereum-attestation-service/eas-sdk':
         specifier: ^2.7.0
         version: 2.7.0(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.15.21)(typescript@5.8.3))(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.23)
@@ -111,24 +123,15 @@ importers:
       '@zoralabs/nouns-protocol':
         specifier: 1.2.0
         version: 1.2.0
-      '@zoralabs/zord':
-        specifier: workspace:*
-        version: link:../../packages/zoralabs-zord
       alchemy-sdk:
         specifier: ^3.6.0
         version: 3.6.0(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
-      analytics:
-        specifier: workspace:*
-        version: link:../../packages/analytics
       axios:
         specifier: ^1.9.0
         version: 1.9.0
       bignumber.js:
         specifier: ^9.3.0
         version: 9.3.0
-      blocklist:
-        specifier: workspace:*
-        version: link:../../packages/blocklist
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -165,9 +168,6 @@ importers:
       ioredis:
         specifier: ^5.6.1
         version: 5.6.1
-      ipfs-service:
-        specifier: workspace:*
-        version: link:../../packages/ipfs-service
       lanyard:
         specifier: ^1.1.2
         version: 1.1.2(encoding@0.1.13)
@@ -235,6 +235,12 @@ importers:
         specifier: ^5.0.4
         version: 5.0.5(@types/react@19.1.5)(react@19.1.0)(use-sync-external-store@1.4.0(react@19.1.0))
     devDependencies:
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config-custom
+      '@buildeross/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@graphql-codegen/cli':
         specifier: ^5.0.6
         version: 5.0.6(@types/node@22.15.21)(bufferutil@4.0.9)(crossws@0.3.5)(encoding@0.1.13)(enquirer@2.4.1)(graphql@16.11.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -292,18 +298,12 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../../packages/eslint-config-custom
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       localtunnel:
         specifier: ^2.0.2
         version: 2.0.2
-      tsconfig:
-        specifier: workspace:*
-        version: link:../../packages/tsconfig
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -319,6 +319,12 @@ importers:
 
   packages/analytics:
     devDependencies:
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@buildeross/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@faker-js/faker':
         specifier: ^7.6.0
         version: 7.6.0
@@ -337,9 +343,6 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
       next:
         specifier: ^15.3.2
         version: 15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -349,30 +352,27 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
 
   packages/blocklist:
     devDependencies:
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@buildeross/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@types/react':
         specifier: ^19.1.4
         version: 19.1.5
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
       react:
         specifier: ^19.1.0
         version: 19.1.0
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -390,7 +390,7 @@ importers:
         version: 5.62.0(eslint@8.57.1)(typescript@5.8.3)
       eslint-config-next:
         specifier: latest
-        version: 15.3.4(eslint@8.57.1)(typescript@5.8.3)
+        version: 15.4.1(eslint@8.57.1)(typescript@5.8.3)
       eslint-config-prettier:
         specifier: 8.3.0
         version: 8.3.0(eslint@8.57.1)
@@ -432,15 +432,15 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
     devDependencies:
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@buildeross/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -450,7 +450,7 @@ importers:
 
   packages/tsconfig: {}
 
-  packages/zoralabs-zord:
+  packages/zord:
     dependencies:
       '@popperjs/core':
         specifier: ^2.11.6
@@ -480,6 +480,12 @@ importers:
         specifier: ^9.0.0
         version: 9.0.1
     devDependencies:
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@buildeross/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@svgr/cli':
         specifier: ^6.5.1
         version: 6.5.1
@@ -501,9 +507,6 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
@@ -513,9 +516,6 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
       tsup:
         specifier: ^6.5.0
         version: 6.7.0(postcss@8.5.3)(ts-node@10.9.2(@types/node@22.15.21)(typescript@5.8.3))(typescript@5.8.3)
@@ -2602,8 +2602,8 @@ packages:
   '@next/env@15.3.2':
     resolution: {integrity: sha512-xURk++7P7qR9JG1jJtLzPzf0qEvqCN0A/T3DXf8IPMKo9/6FfjxtEffRJIIew/bIL4T3C2jLLqBor8B/zVlx6g==}
 
-  '@next/eslint-plugin-next@15.3.4':
-    resolution: {integrity: sha512-lBxYdj7TI8phbJcLSAqDt57nIcobEign5NYIKCiy0hXQhrUbTqLqOaSDi568U6vFg4hJfBdZYsG4iP/uKhCqgg==}
+  '@next/eslint-plugin-next@15.4.1':
+    resolution: {integrity: sha512-lQnHUxN7mMksK7IxgKDIXNMWFOBmksVrjamMEURXiYfo7zgsc30lnU8u4y/MJktSh+nB80ktTQeQbWdQO6c8Ow==}
 
   '@next/swc-darwin-arm64@15.3.2':
     resolution: {integrity: sha512-2DR6kY/OGcokbnCsjHpNeQblqCZ85/1j6njYSkzRdpLn5At7OkSdmk7WyAmB9G0k25+VgqVZ/u356OSoQZ3z0g==}
@@ -6115,8 +6115,8 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  eslint-config-next@15.3.4:
-    resolution: {integrity: sha512-WqeumCq57QcTP2lYlV6BRUySfGiBYEXlQ1L0mQ+u4N4X4ZhUVSSQ52WtjqHv60pJ6dD7jn+YZc0d1/ZSsxccvg==}
+  eslint-config-next@15.4.1:
+    resolution: {integrity: sha512-XIIN+lq8XuSwXUrcv+0uHMDFGJFPxLAw04/a4muFZYygSvStvVa15nY7kh4Il6yOVJyxdMUyVdQ9ApGedaeupw==}
     peerDependencies:
       eslint: ^7.23.0 || ^8.0.0 || ^9.0.0
       typescript: '>=3.3.1'
@@ -13926,7 +13926,7 @@ snapshots:
 
   '@next/env@15.3.2': {}
 
-  '@next/eslint-plugin-next@15.3.4':
+  '@next/eslint-plugin-next@15.4.1':
     dependencies:
       fast-glob: 3.3.1
 
@@ -19011,9 +19011,9 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-config-next@15.3.4(eslint@8.57.1)(typescript@5.8.3):
+  eslint-config-next@15.4.1(eslint@8.57.1)(typescript@5.8.3):
     dependencies:
-      '@next/eslint-plugin-next': 15.3.4
+      '@next/eslint-plugin-next': 15.4.1
       '@rushstack/eslint-patch': 1.11.0
       '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
       '@typescript-eslint/parser': 5.62.0(eslint@8.57.1)(typescript@5.8.3)

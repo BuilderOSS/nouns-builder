@@ -1,4 +1,4 @@
-import { Button, Flex, Text } from '@zoralabs/zord'
+import { Button, Flex, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import { Fragment } from 'react'
 

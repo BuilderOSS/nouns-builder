@@ -1,4 +1,4 @@
-import { Flex } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
 import React, { Fragment } from 'react'
 import { getAddress } from 'viem'
 import { useAccount, useReadContracts } from 'wagmi'

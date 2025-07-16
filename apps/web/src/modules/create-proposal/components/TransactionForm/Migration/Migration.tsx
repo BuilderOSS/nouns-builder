@@ -1,4 +1,4 @@
-import { Stack } from '@zoralabs/zord'
+import { Stack } from '@buildeross/zord'
 import axios from 'axios'
 import useSWR from 'swr'
 import { useReadContract } from 'wagmi'

@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import React, { ReactElement, ReactNode } from 'react'
 
 import { LayoutWrapper } from '../LayoutWrapper'

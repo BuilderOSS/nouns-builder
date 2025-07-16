@@ -1,4 +1,4 @@
-import { Box, Grid } from '@zoralabs/zord'
+import { Box, Grid } from '@buildeross/zord'
 import React from 'react'
 
 import { imageGridWrapperStyle, previewGeneratedImageStyle } from 'src/styles/Artwork.css'

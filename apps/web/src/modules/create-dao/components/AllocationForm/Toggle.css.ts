@@ -1,5 +1,5 @@
+import { atoms } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
-import { atoms } from '@zoralabs/zord'
 
 export const toggleStyle = style([
   atoms({

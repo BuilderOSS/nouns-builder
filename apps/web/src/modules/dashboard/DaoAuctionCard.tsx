@@ -1,6 +1,6 @@
-import { Box, Flex, Text } from '@zoralabs/zord'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import { getFetchableUrls } from 'ipfs-service'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'

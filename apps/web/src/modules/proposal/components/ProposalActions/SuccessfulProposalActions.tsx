@@ -1,4 +1,4 @@
-import { Flex, Text, vars } from '@zoralabs/zord'
+import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { Address } from 'viem'
