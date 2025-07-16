@@ -134,6 +134,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
       <CreateProposalHeading
         title={'Create Proposal'}
         transactionType={transactionType}
+        showDocsLink
       />
       {transactionType ? (
         <TwoColumnLayout
