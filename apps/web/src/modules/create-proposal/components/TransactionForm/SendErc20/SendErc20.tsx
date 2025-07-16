@@ -192,7 +192,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
     <Box
       data-testid="send-erc20-form"
       as={'fieldset'}
-      disabled={formik.isValidating}
+      disabled={formik.isValidating || formik.isSubmitting}
       style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
     >
       <Flex as={Form} direction={'column'}>
@@ -374,9 +374,13 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
           variant={'outline'}
           borderRadius={'curved'}
           type="submit"
-          disabled={!formik.isValid || !currentTokenMetadata?.isValid}
+          disabled={
+            !formik.isValid || !currentTokenMetadata?.isValid || formik.isSubmitting
+          }
         >
-          Add Transaction to Queue
+          {formik.isSubmitting
+            ? 'Adding Transaction to Queue...'
+            : 'Add Transaction to Queue'}
         </Button>
       </Flex>
     </Box>

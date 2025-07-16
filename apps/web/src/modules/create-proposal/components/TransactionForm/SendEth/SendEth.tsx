@@ -72,9 +72,9 @@ export const SendEth = () => {
         >
           {(formik) => (
             <Box
-              data-testid="airdrop-form"
+              data-testid="send-eth-form"
               as={'fieldset'}
-              disabled={formik.isValidating}
+              disabled={formik.isValidating || formik.isSubmitting}
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Flex as={Form} direction={'column'}>
@@ -122,9 +122,11 @@ export const SendEth = () => {
                   variant={'outline'}
                   borderRadius={'curved'}
                   type="submit"
-                  disabled={!formik.isValid}
+                  disabled={!formik.isValid || formik.isSubmitting}
                 >
-                  Add Transaction to Queue
+                  {formik.isSubmitting
+                    ? 'Adding Transaction to Queue...'
+                    : 'Add Transaction to Queue'}
                 </Button>
               </Flex>
             </Box>
