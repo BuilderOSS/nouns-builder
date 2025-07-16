@@ -47,38 +47,64 @@ export function DaoAvatar({
     setImageHasError(false)
   }, [src])
 
-  return tokenUri?.image ? (
-    <Box
-      className={['zora-avatar', squareAvatar({ size, variant }), className]}
-      borderColor={'border'}
-      borderWidth={'thin'}
-      borderStyle={'solid'}
-      {...props}
-    >
-      <FallbackNextImage
-        key={tokenUri?.name}
-        srcList={getFetchableUrls(tokenUri?.image)}
-        alt={collectionAddress || 'Avatar image'}
-        style={{
-          objectFit: 'cover',
-        }}
-        width={size}
-        height={size}
+  if (!tokenUri?.image && !src) {
+    return (
+      <Box
+        className={['zora-avatar', squareAvatar({ size, variant }), className]}
+        style={{ background }}
+        borderColor={'border'}
+        borderWidth={'thin'}
+        borderStyle={'solid'}
+        {...props}
       />
-    </Box>
-  ) : (
+    )
+  }
+
+  if (src) {
+    return (
+      <Box
+        className={['zora-avatar', squareAvatar({ size, variant }), className]}
+        style={{ background }}
+        borderColor={'border'}
+        borderWidth={'thin'}
+        borderStyle={'solid'}
+        {...props}
+      >
+        {!imageHasError && (
+          <FallbackNextImage
+            priority
+            unoptimized
+            fill
+            key={src}
+            srcList={getFetchableUrls(src)}
+            alt={collectionAddress || 'Avatar image'}
+            style={{
+              objectFit: 'cover',
+            }}
+            width={size}
+            height={size}
+            onImageError={() => setImageHasError(true)}
+          />
+        )}
+      </Box>
+    )
+  }
+
+  return (
     <Box
       className={['zora-avatar', squareAvatar({ size, variant }), className]}
-      style={{ background }}
       borderColor={'border'}
       borderWidth={'thin'}
       borderStyle={'solid'}
       {...props}
     >
-      {src && !imageHasError && (
+      {!imageHasError && (
         <FallbackNextImage
-          key={src}
-          srcList={getFetchableUrls(src)}
+          priority
+          unoptimized
+          fill
+          key={tokenUri?.name}
+          srcList={getFetchableUrls(tokenUri?.image)}
           alt={collectionAddress || 'Avatar image'}
           style={{
             objectFit: 'cover',
