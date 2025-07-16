@@ -36,6 +36,7 @@ import PauseTemplate from './assets/pause-template.svg'
 import Pause from './assets/pause.svg'
 import Play from './assets/play.svg'
 import Plus from './assets/plus.svg'
+import Question from './assets/question.svg'
 import Refresh from './assets/refresh.svg'
 import ResumeTemplate from './assets/resume-template.svg'
 import Share from './assets/share.svg'
@@ -96,6 +97,7 @@ export const icons = {
   handshake: Handshake,
   erc20: Erc20,
   nft: Nft,
+  question: Question,
 }
 
 export type IconType = keyof typeof icons

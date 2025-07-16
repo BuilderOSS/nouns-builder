@@ -1,6 +1,8 @@
 import { Flex, Text, TextProps } from '@buildeross/zord'
 import React, { Fragment, ReactNode } from 'react'
 
+import { Icon, IconType } from 'src/components/Icon'
+
 import { proposalTileSubtitleVariants } from './Tile.css'
 
 interface ProposalTileProps {
@@ -9,10 +11,11 @@ interface ProposalTileProps {
   subtext?: string
   children?: ReactNode | TextProps
   variant?: 'for' | 'against' | 'abstain'
+  icon?: IconType
 }
 
 export const Tile: React.FC<ProposalTileProps> = (props) => {
-  const { title, subtitle, subtext, children, variant } = props
+  const { title, subtitle, subtext, children, variant, icon } = props
 
   return (
     <Flex
@@ -25,13 +28,12 @@ export const Tile: React.FC<ProposalTileProps> = (props) => {
       justify={{ '@initial': 'space-between', '@768': 'flex-start' }}
     >
       <Flex w={children ? '100%' : 'auto'} direction={'column'}>
-        <Text
-          fontSize={16}
-          fontWeight={'display'}
-          mb={{ '@initial': 'x2', '@768': 'x4' }}
-        >
-          {title}
-        </Text>
+        <Flex align={'center'} gap={'x2'} mb={{ '@initial': 'x2', '@768': 'x4' }}>
+          <Text fontSize={16} fontWeight={'display'}>
+            {title}
+          </Text>
+          {icon && <Icon id={icon} size="sm" color="text3" fill="transparent" />}
+        </Flex>
         <Text
           className={
             proposalTileSubtitleVariants[

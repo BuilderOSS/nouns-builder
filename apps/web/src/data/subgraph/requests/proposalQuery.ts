@@ -14,15 +14,21 @@ import { CHAIN_ID } from 'src/typings'
 export interface Proposal
   extends Omit<
     ProposalFragment,
+    | 'transactionHash'
+    | 'executionTransactionHash'
+    | 'cancelTransactionHash'
+    | 'vetoTransactionHash'
     | 'executableFrom'
     | 'expiresAt'
     | 'calldatas'
-    | 'executionTransactionHash'
     | 'executedAt'
   > {
   calldatas: string[]
   state: ProposalState
+  transactionHash: string
   executionTransactionHash?: string
+  cancelTransactionHash?: string
+  vetoTransactionHash?: string
   executableFrom?: number
   expiresAt?: number
   executedAt?: number

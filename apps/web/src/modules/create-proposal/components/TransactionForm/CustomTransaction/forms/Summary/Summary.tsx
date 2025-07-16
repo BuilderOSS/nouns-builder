@@ -1,5 +1,5 @@
 import { Button, Flex, Stack } from '@buildeross/zord'
-import React from 'react'
+import React, { useState } from 'react'
 import { encodeFunctionData } from 'viem'
 
 import CopyButton from 'src/components/CopyButton/CopyButton'
@@ -20,6 +20,7 @@ interface SummaryProps {
 export const Summary: React.FC<SummaryProps> = ({ setIsOpen }) => {
   const { customTransaction, composeCustomTransaction, previous } =
     useCustomTransactionStore()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   /*
 
@@ -94,38 +95,43 @@ export const Summary: React.FC<SummaryProps> = ({ setIsOpen }) => {
    */
 
   const handleAddTransaction = React.useCallback(async () => {
-    const address = await getEnsAddress(customTransaction.address)
-    if (!calldata) {
-      if (customTransaction.address && customTransaction.value) {
+    setIsSubmitting(true)
+    try {
+      const address = await getEnsAddress(customTransaction.address)
+      if (!calldata) {
+        if (customTransaction.address && customTransaction.value) {
+          composeCustomTransaction({
+            ...customTransaction,
+            address,
+            function: {
+              name: 'sendEth(address)',
+              inputs: [],
+            },
+            calldata: '0x',
+          })
+        }
+      } else {
+        let override = {}
+        if (!customTransaction.contract) {
+          override = {
+            function: {
+              name: 'call(address,calldata)',
+              inputs: [],
+            },
+          }
+        }
         composeCustomTransaction({
           ...customTransaction,
+          ...override,
           address,
-          function: {
-            name: 'sendEth(address)',
-            inputs: [],
-          },
-          calldata: '0x',
+          calldata: calldata,
         })
       }
-    } else {
-      let override = {}
-      if (!customTransaction.contract) {
-        override = {
-          function: {
-            name: 'call(address,calldata)',
-            inputs: [],
-          },
-        }
-      }
-      composeCustomTransaction({
-        ...customTransaction,
-        ...override,
-        address,
-        calldata: calldata,
-      })
-    }
 
-    setIsOpen && setIsOpen(false)
+      setIsOpen && setIsOpen(false)
+    } finally {
+      setIsSubmitting(false)
+    }
   }, [calldata, composeCustomTransaction, customTransaction, setIsOpen])
 
   const argumentsList = customTransaction.arguments?.filter(
@@ -191,8 +197,9 @@ export const Summary: React.FC<SummaryProps> = ({ setIsOpen }) => {
           className={transactionFormButtonWithPrev}
           type={'button'}
           onClick={() => handleAddTransaction()}
+          disabled={isSubmitting}
         >
-          Add Transaction
+          {isSubmitting ? 'Adding Transaction...' : 'Add Transaction'}
         </Button>
       </Flex>
     </Flex>
