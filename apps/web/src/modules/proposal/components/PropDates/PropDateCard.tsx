@@ -1,5 +1,5 @@
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'

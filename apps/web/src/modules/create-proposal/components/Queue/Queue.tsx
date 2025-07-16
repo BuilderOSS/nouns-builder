@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Stack, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { Icon } from 'src/components/Icon'

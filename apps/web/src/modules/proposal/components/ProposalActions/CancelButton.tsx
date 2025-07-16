@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import React, { useState } from 'react'
 import { Address } from 'viem'
 

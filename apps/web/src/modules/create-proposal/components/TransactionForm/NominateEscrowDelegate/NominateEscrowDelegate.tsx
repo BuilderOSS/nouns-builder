@@ -1,5 +1,5 @@
+import { Box, Button } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
-import { Box, Button } from '@zoralabs/zord'
 import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
 import { Hex, encodeFunctionData, getAddress, zeroHash } from 'viem'

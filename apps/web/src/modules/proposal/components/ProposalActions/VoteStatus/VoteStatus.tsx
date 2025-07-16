@@ -1,4 +1,4 @@
-import { Button, Flex, Text } from '@zoralabs/zord'
+import { Button, Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useEffect, useState } from 'react'
 import { getAddress } from 'viem'
 import { useAccount, useWatchContractEvent } from 'wagmi'

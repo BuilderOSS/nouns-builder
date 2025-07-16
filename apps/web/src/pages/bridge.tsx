@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Stack, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import Head from 'next/head'
 import Image from 'next/image'
 import React from 'react'

@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, PopUp, Text } from '@zoralabs/zord'
+import { Box, Flex, Grid, PopUp, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
 

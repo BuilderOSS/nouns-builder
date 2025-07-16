@@ -1,4 +1,4 @@
-import { Flex } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
 import Head from 'next/head'
 
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'

@@ -1,6 +1,6 @@
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box, Button, Spinner, Stack, Text, atoms } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
-import { Box, Button, Spinner, Stack, Text, atoms } from '@zoralabs/zord'
-import { getFetchableUrls } from 'ipfs-service'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'

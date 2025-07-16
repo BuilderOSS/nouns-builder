@@ -1,5 +1,5 @@
-import { Box, Stack } from '@zoralabs/zord'
-import { isBlocked } from 'blocklist'
+import { isBlocked } from '@buildeross/blocklist'
+import { Box, Stack } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 import { useAccount } from 'wagmi'
 

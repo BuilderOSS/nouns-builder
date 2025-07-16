@@ -1,5 +1,5 @@
+import { atoms, color, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { atoms, color, vars } from '@zoralabs/zord'
 
 import { NAV_BUTTON_ZINDEX } from 'src/constants/zIndex'
 import * as z from 'src/utils/layers'

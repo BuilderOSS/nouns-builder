@@ -2,7 +2,7 @@
   "exclude": [
     "node_modules"
   ],
-  "extends": "tsconfig/nextjs.json",
+  "extends": "@buildeross/tsconfig/nextjs.json",
   "compilerOptions": {
     "strict": true,
     "baseUrl": ".",

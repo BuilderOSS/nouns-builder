@@ -1,5 +1,5 @@
+import { Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { Button, Flex, Text } from '@zoralabs/zord'
 
 import { DaoFeed } from '../dao'
 import { DashPage } from './DashboardLayout'

@@ -1,5 +1,5 @@
+import { atoms } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { atoms } from '@zoralabs/zord'
 
 import * as z from 'src/utils/layers'
 

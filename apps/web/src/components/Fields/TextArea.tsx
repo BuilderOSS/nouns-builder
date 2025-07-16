@@ -1,4 +1,4 @@
-import { Box, Flex } from '@zoralabs/zord'
+import { Box, Flex } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ChangeEventHandler, ReactElement } from 'react'
 

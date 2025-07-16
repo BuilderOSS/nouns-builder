@@ -1,4 +1,4 @@
-import { Atoms, Box, Button, Flex, Stack, Text, theme } from '@zoralabs/zord'
+import { Atoms, Box, Button, Flex, Stack, Text, theme } from '@buildeross/zord'
 import { Field, Formik, Form as FormikForm } from 'formik'
 import React, { Fragment } from 'react'
 import { useSWRConfig } from 'swr'

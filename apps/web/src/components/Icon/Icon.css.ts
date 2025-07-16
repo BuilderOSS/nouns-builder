@@ -1,6 +1,6 @@
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 import { recipe } from '@vanilla-extract/recipes'
-import { atoms, vars } from '@zoralabs/zord'
 
 export const iconVariants = {
   color: {

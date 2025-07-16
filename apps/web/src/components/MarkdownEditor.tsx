@@ -1,5 +1,5 @@
-import { Flex, Stack } from '@zoralabs/zord'
-import { getFetchableUrls, uploadFile } from 'ipfs-service'
+import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
+import { Flex, Stack } from '@buildeross/zord'
 import * as React from 'react'
 import { ReactElement } from 'react'
 import ReactMarkdown from 'react-markdown'

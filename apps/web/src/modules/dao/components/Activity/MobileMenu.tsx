@@ -1,4 +1,4 @@
-import { Button, PopUp, Stack, Text } from '@zoralabs/zord'
+import { Button, PopUp, Stack, Text } from '@buildeross/zord'
 import { ReactNode } from 'react'
 
 interface Props {

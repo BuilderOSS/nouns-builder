@@ -1,4 +1,4 @@
-import { Box, Text } from '@zoralabs/zord'
+import { Box, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 
 import { AvatarProps } from './Avatar'

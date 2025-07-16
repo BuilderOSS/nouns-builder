@@ -1,6 +1,6 @@
+import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
-import { Box, Button, Flex, Select, Text } from '@zoralabs/zord'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import { useCallback, useMemo, useState } from 'react'
 import { type Hex, getAddress, zeroHash } from 'viem'

@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@zoralabs/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'

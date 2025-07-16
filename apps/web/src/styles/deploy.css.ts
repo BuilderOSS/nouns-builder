@@ -1,5 +1,5 @@
+import { atoms } from '@buildeross/zord'
 import { keyframes, style, styleVariants } from '@vanilla-extract/css'
-import { atoms } from '@zoralabs/zord'
 
 import { defaultFormButtonWithPrev } from 'src/components/Fields/styles.css'
 

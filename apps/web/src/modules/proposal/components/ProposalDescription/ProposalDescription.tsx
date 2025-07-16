@@ -1,4 +1,4 @@
-import { Box, Flex, Paragraph, atoms } from '@zoralabs/zord'
+import { Box, Flex, Paragraph, atoms } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'
 import React, { ReactNode, useMemo } from 'react'

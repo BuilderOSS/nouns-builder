@@ -8,7 +8,7 @@ overrides for use with assignInlineVars
 import {
   colorThemeVars,
   vars,
-} from '@zoralabs/zord'
+} from '@buildeross/zord'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 
 const themeValues = colorThemeVars({

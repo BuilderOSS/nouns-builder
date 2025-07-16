@@ -1,4 +1,4 @@
-import { Box, Flex } from '@zoralabs/zord'
+import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
 
 import {

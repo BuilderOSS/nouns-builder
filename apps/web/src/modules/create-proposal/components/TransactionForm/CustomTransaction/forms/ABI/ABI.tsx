@@ -1,4 +1,4 @@
-import { Flex } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
 import React from 'react'
 
 import { useCustomTransactionStore } from 'src/modules/create-proposal'

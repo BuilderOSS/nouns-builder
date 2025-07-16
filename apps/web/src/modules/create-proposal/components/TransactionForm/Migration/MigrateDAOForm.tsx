@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Paragraph, Spinner, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Paragraph, Spinner, Text } from '@buildeross/zord'
 import { useState } from 'react'
 import { useReadContract } from 'wagmi'
 

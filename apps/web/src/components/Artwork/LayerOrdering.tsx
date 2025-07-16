@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import React from 'react'
 
 import { defaultFormHeading } from 'src/components/Fields/styles.css'

@@ -1,5 +1,5 @@
+import { atoms, theme } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
-import { atoms, theme } from '@zoralabs/zord'
 
 export const defaultBackButton = style([
   atoms({ color: 'accent' }),

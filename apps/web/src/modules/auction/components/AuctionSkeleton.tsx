@@ -1,4 +1,4 @@
-import { Box, Flex, Grid } from '@zoralabs/zord'
+import { Box, Flex, Grid } from '@buildeross/zord'
 
 import {
   auctionGrid,

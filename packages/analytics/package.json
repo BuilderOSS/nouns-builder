@@ -1,6 +1,6 @@
 {
-  "name": "analytics",
-  "description": "Shared analytics for Zora apps",
+  "name": "@buildeross/analytics",
+  "description": "Shared analytics for BuilderOSS apps",
   "main": "index.ts",
   "private": true,
   "scripts": {
@@ -17,9 +17,9 @@
     "@types/react": "^19.1.4",
     "@types/uuid": "^9.0.0",
     "@vercel/analytics": "^0.1.5",
-    "tsconfig": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
     "eslint": "8.57.1",
-    "eslint-config-custom": "workspace:*",
+    "@buildeross/eslint-config-custom": "workspace:*",
     "next": "^15.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

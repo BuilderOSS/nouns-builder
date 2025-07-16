@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'

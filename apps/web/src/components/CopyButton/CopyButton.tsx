@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React from 'react'
 

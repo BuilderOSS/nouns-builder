@@ -1,4 +1,4 @@
-import { Flex, Text } from '@zoralabs/zord'
+import { Flex, Text } from '@buildeross/zord'
 import { formatUnits } from 'viem'
 
 import { useTokenMetadataSingle } from 'src/hooks/useTokenMetadata'

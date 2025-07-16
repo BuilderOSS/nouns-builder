@@ -1,5 +1,5 @@
 {
-  "name": "blocklist",
+  "name": "@buildeross/blocklist",
   "version": "0.0.1",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -11,9 +11,9 @@
   },
   "devDependencies": {
     "@types/react": "^19.1.4",
-    "tsconfig": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
     "eslint": "8.57.1",
-    "eslint-config-custom": "workspace:*",
+    "@buildeross/eslint-config-custom": "workspace:*",
     "viem": "^2.30.0",
     "react": "^19.1.0",
     "typescript": "^5.8.3"

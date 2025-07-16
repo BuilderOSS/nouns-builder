@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@zoralabs/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 
 import { MediaPreview } from 'src/components/MediaPreview/MediaPreview'

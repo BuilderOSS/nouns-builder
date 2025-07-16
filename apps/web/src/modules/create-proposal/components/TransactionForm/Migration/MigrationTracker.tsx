@@ -1,4 +1,4 @@
-import { Box, Flex } from '@zoralabs/zord'
+import { Box, Flex } from '@buildeross/zord'
 
 export const MigrationTracker: React.FC<{ checkpoint: number }> = ({ checkpoint }) => {
   const sections = ['Pause Auctions', 'Deploy to L2', 'Bridge Treasury']

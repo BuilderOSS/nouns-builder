@@ -1,5 +1,5 @@
+import { atoms, media } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
-import { atoms, media } from '@zoralabs/zord'
 
 export const proposalTileSubtitle = style([
   atoms({

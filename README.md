@@ -20,7 +20,7 @@ You can also find the [nouns protocol code here](https://github.com/ourzora/noun
 
 - `blocklist`: Package to check for sanctioned wallet addresses
 - `analytics`: Shareable analytics package
-- `zoralabs-zord`: Shareable ui components
+- `zord`: Shareable ui components
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
 - `ipfs-service`: api for image uploads to ipfs

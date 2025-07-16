@@ -1,5 +1,5 @@
-import { Flex } from '@zoralabs/zord'
-import { Grid } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
+import { Grid } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 import useSWR from 'swr'
 

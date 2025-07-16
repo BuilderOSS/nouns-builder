@@ -1,4 +1,4 @@
-import { Box, ButtonProps } from '@zoralabs/zord'
+import { Box, ButtonProps } from '@buildeross/zord'
 import React, { useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { ContractFunctionName } from 'viem'

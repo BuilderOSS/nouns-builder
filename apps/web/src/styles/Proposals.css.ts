@@ -1,5 +1,5 @@
+import { atoms, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
-import { atoms, vars } from '@zoralabs/zord'
 
 /* PROPOSALS */
 export const proposalFormTitle = style({

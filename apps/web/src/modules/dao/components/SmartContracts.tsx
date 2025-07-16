@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Text, vars } from '@zoralabs/zord'
+import { Box, Flex, Grid, Text, vars } from '@buildeross/zord'
 import React from 'react'
 
 import { useLayoutStore } from 'src/stores'

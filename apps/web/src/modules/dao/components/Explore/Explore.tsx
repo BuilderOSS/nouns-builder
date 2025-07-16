@@ -1,4 +1,4 @@
-import { Grid, Text } from '@zoralabs/zord'
+import { Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import { formatEther } from 'viem'

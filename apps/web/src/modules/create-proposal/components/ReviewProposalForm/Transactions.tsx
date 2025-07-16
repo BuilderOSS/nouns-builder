@@ -1,4 +1,4 @@
-import { Flex, Stack } from '@zoralabs/zord'
+import { Flex, Stack } from '@buildeross/zord'
 import { Field } from 'formik'
 import { useRouter } from 'next/router'
 import React from 'react'

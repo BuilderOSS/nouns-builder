@@ -1,5 +1,5 @@
+import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { ImageResponse } from '@vercel/og'
-import { getFetchableUrls } from 'ipfs-service/src/gateway'
 import { NextRequest } from 'next/server'
 import { formatEther } from 'viem'
 import { getBalance } from 'wagmi/actions'

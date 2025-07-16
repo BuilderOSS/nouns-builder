@@ -1,4 +1,4 @@
-import { Box, Button, Flex } from '@zoralabs/zord'
+import { Box, Button, Flex } from '@buildeross/zord'
 import React from 'react'
 
 import { Avatar } from 'src/components/Avatar'

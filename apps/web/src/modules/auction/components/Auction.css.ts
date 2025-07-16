@@ -1,5 +1,5 @@
+import { atoms, media, theme, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
-import { atoms, media, theme, vars } from '@zoralabs/zord'
 
 import { skeletonAnimation } from 'src/styles/animations.css'
 

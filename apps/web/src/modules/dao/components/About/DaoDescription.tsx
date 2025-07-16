@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import HTMLReactParser from 'html-react-parser'
 import React, { useEffect, useMemo, useRef } from 'react'
 import ReactMarkdown from 'react-markdown'

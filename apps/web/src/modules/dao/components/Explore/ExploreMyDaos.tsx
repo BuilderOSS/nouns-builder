@@ -1,4 +1,4 @@
-import { Grid } from '@zoralabs/zord'
+import { Grid } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
 import { formatEther } from 'viem'

@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text, atoms } from '@zoralabs/zord'
+import { Box, Button, Flex, Text, atoms } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React, { useState } from 'react'

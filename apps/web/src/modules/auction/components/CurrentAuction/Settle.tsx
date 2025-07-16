@@ -1,4 +1,4 @@
-import { Button, Flex } from '@zoralabs/zord'
+import { Button, Flex } from '@buildeross/zord'
 import React, { useState } from 'react'
 import {
   useAccount,

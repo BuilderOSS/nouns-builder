@@ -1,5 +1,5 @@
-import { Box, Button, Flex, Text } from '@zoralabs/zord'
-import { getFetchableUrls } from 'ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'

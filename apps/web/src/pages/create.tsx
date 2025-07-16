@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@zoralabs/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
 import { useAccount } from 'wagmi'

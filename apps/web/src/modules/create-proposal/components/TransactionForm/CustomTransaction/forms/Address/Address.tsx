@@ -1,4 +1,4 @@
-import { Flex } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import React, { useEffect } from 'react'
 import { isAddress } from 'viem'

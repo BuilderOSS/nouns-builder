@@ -1,5 +1,5 @@
+import { atoms, vars } from '@buildeross/zord'
 import { globalStyle, style } from '@vanilla-extract/css'
-import { atoms, vars } from '@zoralabs/zord'
 
 export const legalContainer = style([
   atoms({ m: 'auto' }),

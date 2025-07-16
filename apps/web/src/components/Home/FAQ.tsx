@@ -1,4 +1,4 @@
-import { Box, Flex, Stack, Text } from '@zoralabs/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 
 import { Icon } from 'src/components/Icon'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'

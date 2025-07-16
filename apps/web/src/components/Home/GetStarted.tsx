@@ -1,5 +1,5 @@
+import { Button } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { Button } from '@zoralabs/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useAccount, useSwitchChain } from 'wagmi'

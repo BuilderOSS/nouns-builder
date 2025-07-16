@@ -4,7 +4,7 @@
 
 Adding to your project boils down to:
 
-1. Add Zord stylesheet from `@zoralabs/zord/index.css`
+1. Add Zord stylesheet from `@buildeross/zord/index.css`
 2. Set up webfonts
 3. Add Zord ThemeProvider and theme
 
@@ -14,8 +14,8 @@ Adding to your project boils down to:
 // pages/_app.tsx
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/600.css'
-import { ThemeProvider, lightTheme } from '@zoralabs/zord'
-import '@zoralabs/zord/index.css'
+import { ThemeProvider, lightTheme } from '@buildeross/zord'
+import '@buildeross/zord/index.css'
 import type { AppProps } from 'next/app'
 
 export default function MyApp({ Component, pageProps }: AppProps) {
@@ -487,7 +487,7 @@ There are a few ways of applying responsive styles:
 
 ```
 // ComponentName.css.ts
-import { atoms, media } from '@zoralabs/zord'
+import { atoms, media } from '@buildeross/zord'
 
 export const marginTop = atoms({
   mt: { '@initial': 'x32', '@768': 'x64' },

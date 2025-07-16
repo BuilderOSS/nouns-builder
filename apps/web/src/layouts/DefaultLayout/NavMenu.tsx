@@ -1,4 +1,4 @@
-import { Box, Flex, PopUp, Stack, Text } from '@zoralabs/zord'
+import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
 import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'

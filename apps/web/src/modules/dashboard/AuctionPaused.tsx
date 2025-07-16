@@ -1,4 +1,4 @@
-import { Box, Flex, Text, atoms } from '@zoralabs/zord'
+import { Box, Flex, Text, atoms } from '@buildeross/zord'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'

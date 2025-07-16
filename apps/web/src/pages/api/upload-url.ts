@@ -1,4 +1,4 @@
-import { UploadType, pinataOptions } from 'ipfs-service'
+import { UploadType, pinataOptions } from '@buildeross/ipfs-service'
 import { NextApiRequest, NextApiResponse } from 'next'
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY

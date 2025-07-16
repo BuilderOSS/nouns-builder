@@ -1,4 +1,4 @@
-import { Flex, Stack, Text } from '@zoralabs/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
