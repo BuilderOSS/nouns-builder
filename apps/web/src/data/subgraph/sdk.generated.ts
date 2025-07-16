@@ -1875,6 +1875,8 @@ export type Query = {
   proposalVote?: Maybe<ProposalVote>
   proposalVotes: Array<ProposalVote>
   proposals: Array<Proposal>
+  snapshot?: Maybe<Snapshot>
+  snapshots: Array<Snapshot>
   token?: Maybe<Token>
   tokens: Array<Token>
 }
@@ -2043,6 +2045,22 @@ export type QueryProposalsArgs = {
   where?: InputMaybe<Proposal_Filter>
 }
 
+export type QuerySnapshotArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QuerySnapshotsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<Snapshot_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<Snapshot_Filter>
+}
+
 export type QueryTokenArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
@@ -2057,6 +2075,129 @@ export type QueryTokensArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<Token_Filter>
+}
+
+export type Snapshot = {
+  __typename?: 'Snapshot'
+  blockNumber: Scalars['BigInt']['output']
+  dao: Dao
+  id: Scalars['ID']['output']
+  ownerCount: Scalars['Int']['output']
+  proposalCount: Scalars['Int']['output']
+  timestamp: Scalars['BigInt']['output']
+  totalSupply: Scalars['Int']['output']
+  voterCount: Scalars['Int']['output']
+}
+
+export type Snapshot_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<Snapshot_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<Snapshot_Filter>>>
+  ownerCount?: InputMaybe<Scalars['Int']['input']>
+  ownerCount_gt?: InputMaybe<Scalars['Int']['input']>
+  ownerCount_gte?: InputMaybe<Scalars['Int']['input']>
+  ownerCount_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  ownerCount_lt?: InputMaybe<Scalars['Int']['input']>
+  ownerCount_lte?: InputMaybe<Scalars['Int']['input']>
+  ownerCount_not?: InputMaybe<Scalars['Int']['input']>
+  ownerCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  proposalCount?: InputMaybe<Scalars['Int']['input']>
+  proposalCount_gt?: InputMaybe<Scalars['Int']['input']>
+  proposalCount_gte?: InputMaybe<Scalars['Int']['input']>
+  proposalCount_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  proposalCount_lt?: InputMaybe<Scalars['Int']['input']>
+  proposalCount_lte?: InputMaybe<Scalars['Int']['input']>
+  proposalCount_not?: InputMaybe<Scalars['Int']['input']>
+  proposalCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalSupply?: InputMaybe<Scalars['Int']['input']>
+  totalSupply_gt?: InputMaybe<Scalars['Int']['input']>
+  totalSupply_gte?: InputMaybe<Scalars['Int']['input']>
+  totalSupply_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  totalSupply_lt?: InputMaybe<Scalars['Int']['input']>
+  totalSupply_lte?: InputMaybe<Scalars['Int']['input']>
+  totalSupply_not?: InputMaybe<Scalars['Int']['input']>
+  totalSupply_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  voterCount?: InputMaybe<Scalars['Int']['input']>
+  voterCount_gt?: InputMaybe<Scalars['Int']['input']>
+  voterCount_gte?: InputMaybe<Scalars['Int']['input']>
+  voterCount_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  voterCount_lt?: InputMaybe<Scalars['Int']['input']>
+  voterCount_lte?: InputMaybe<Scalars['Int']['input']>
+  voterCount_not?: InputMaybe<Scalars['Int']['input']>
+  voterCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+}
+
+export enum Snapshot_OrderBy {
+  BlockNumber = 'blockNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  OwnerCount = 'ownerCount',
+  ProposalCount = 'proposalCount',
+  Timestamp = 'timestamp',
+  TotalSupply = 'totalSupply',
+  VoterCount = 'voterCount',
 }
 
 export type Subscription = {
@@ -2083,6 +2224,8 @@ export type Subscription = {
   proposalVote?: Maybe<ProposalVote>
   proposalVotes: Array<ProposalVote>
   proposals: Array<Proposal>
+  snapshot?: Maybe<Snapshot>
+  snapshots: Array<Snapshot>
   token?: Maybe<Token>
   tokens: Array<Token>
 }
@@ -2249,6 +2392,22 @@ export type SubscriptionProposalsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<Proposal_Filter>
+}
+
+export type SubscriptionSnapshotArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type SubscriptionSnapshotsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<Snapshot_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<Snapshot_Filter>
 }
 
 export type SubscriptionTokenArgs = {
@@ -2600,6 +2759,8 @@ export type ProposalFragment = {
   transactionHash: any
   executedAt?: any | null
   executionTransactionHash?: any | null
+  vetoTransactionHash?: any | null
+  cancelTransactionHash?: any | null
   dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
 }
 
@@ -2859,6 +3020,8 @@ export type DaosForDashboardQuery = {
       transactionHash: any
       executedAt?: any | null
       executionTransactionHash?: any | null
+      vetoTransactionHash?: any | null
+      cancelTransactionHash?: any | null
       votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
       dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
     }>
@@ -2967,6 +3130,8 @@ export type ProposalQuery = {
     transactionHash: any
     executedAt?: any | null
     executionTransactionHash?: any | null
+    vetoTransactionHash?: any | null
+    cancelTransactionHash?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -3010,6 +3175,8 @@ export type ProposalOgMetadataQuery = {
     transactionHash: any
     executedAt?: any | null
     executionTransactionHash?: any | null
+    vetoTransactionHash?: any | null
+    cancelTransactionHash?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -3063,6 +3230,8 @@ export type ProposalsQuery = {
     transactionHash: any
     executedAt?: any | null
     executionTransactionHash?: any | null
+    vetoTransactionHash?: any | null
+    cancelTransactionHash?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -3222,6 +3391,8 @@ export const ProposalFragmentDoc = gql`
     transactionHash
     executedAt
     executionTransactionHash
+    vetoTransactionHash
+    cancelTransactionHash
     dao {
       governorAddress
       tokenAddress
