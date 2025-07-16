@@ -1,5 +1,5 @@
 {
-  "name": "@zoralabs/zord",
+  "name": "@buildeross/zord",
   "version": "2.1.0",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -41,9 +41,9 @@
     "@types/react-dom": "^19.1.5",
     "@types/uuid": "^9.0.0",
     "@vanilla-extract/esbuild-plugin": "^2.2.0",
-    "tsconfig": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
     "eslint": "8.57.1",
-    "eslint-config-custom": "workspace:*",
+    "@buildeross/eslint-config-custom": "workspace:*",
     "lodash-es": "^4.17.21",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

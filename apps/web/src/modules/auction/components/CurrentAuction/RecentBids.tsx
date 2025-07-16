@@ -1,4 +1,4 @@
-import { Box, Flex, Stack, Text } from '@zoralabs/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import dynamic from 'next/dynamic'
 import React from 'react'
 

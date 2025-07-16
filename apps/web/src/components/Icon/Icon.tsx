@@ -1,4 +1,4 @@
-import { Atoms, Flex, FlexProps, theme } from '@zoralabs/zord'
+import { Atoms, Flex, FlexProps, theme } from '@buildeross/zord'
 import React from 'react'
 
 import { icon } from './Icon.css'

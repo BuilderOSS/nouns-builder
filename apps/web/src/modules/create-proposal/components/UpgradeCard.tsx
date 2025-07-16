@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Label, Paragraph, Text, atoms } from '@zoralabs/zord'
+import { Box, Button, Flex, Label, Paragraph, Text, atoms } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { ReactElement } from 'react'

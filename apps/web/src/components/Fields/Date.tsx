@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import flatpickr from 'flatpickr'
 import { FormikErrors, FormikProps } from 'formik'
 import React, { ReactElement } from 'react'

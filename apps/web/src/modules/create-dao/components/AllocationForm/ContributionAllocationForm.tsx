@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Stack, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 
 import Date from 'src/components/Fields/Date'

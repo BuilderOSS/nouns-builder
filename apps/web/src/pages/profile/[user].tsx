@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Text } from '@zoralabs/zord'
+import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'

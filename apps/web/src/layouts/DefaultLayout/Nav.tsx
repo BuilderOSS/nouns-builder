@@ -1,4 +1,4 @@
-import { Box, Flex, Label, Stack, atoms } from '@zoralabs/zord'
+import { Box, Flex, Label, Stack, atoms } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 

@@ -1,4 +1,4 @@
-import { Flex, color } from '@zoralabs/zord'
+import { Flex, color } from '@buildeross/zord'
 
 import { Icon } from 'src/components/Icon'
 

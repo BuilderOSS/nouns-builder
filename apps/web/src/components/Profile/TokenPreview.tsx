@@ -1,4 +1,4 @@
-import { Box, Text } from '@zoralabs/zord'
+import { Box, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { useState } from 'react'
 

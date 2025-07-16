@@ -1,5 +1,5 @@
+import { atoms, media, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { atoms, media, vars } from '@zoralabs/zord'
 
 export const about = style([
   atoms({

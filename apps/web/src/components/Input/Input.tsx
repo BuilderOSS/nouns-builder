@@ -1,4 +1,10 @@
-import { Box, Flex, InputComponentProps, Text, Input as ZordInput } from '@zoralabs/zord'
+import {
+  Box,
+  Flex,
+  InputComponentProps,
+  Text,
+  Input as ZordInput,
+} from '@buildeross/zord'
 import { Field } from 'formik'
 import type { FC, ReactNode } from 'react'
 

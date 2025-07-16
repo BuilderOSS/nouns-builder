@@ -1,4 +1,4 @@
-import { Flex } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
 import React from 'react'
 
 import { Icon } from 'src/components/Icon'

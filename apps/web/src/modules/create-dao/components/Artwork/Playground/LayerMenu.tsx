@@ -1,4 +1,4 @@
-import { Box, Flex, Stack, atoms } from '@zoralabs/zord'
+import { Box, Flex, Stack, atoms } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
 
 import { Icon } from 'src/components/Icon'

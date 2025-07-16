@@ -1,4 +1,4 @@
-import { Flex, Grid, Text } from '@zoralabs/zord'
+import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
 import { formatEther } from 'viem'

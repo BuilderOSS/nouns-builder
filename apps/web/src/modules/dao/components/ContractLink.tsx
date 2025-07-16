@@ -1,4 +1,4 @@
-import { Flex, FlexProps, Text } from '@zoralabs/zord'
+import { Flex, FlexProps, Text } from '@buildeross/zord'
 import React from 'react'
 
 import CopyButton from 'src/components/CopyButton/CopyButton'

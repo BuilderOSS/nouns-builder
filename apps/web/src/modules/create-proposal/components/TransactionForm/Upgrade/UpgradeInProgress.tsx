@@ -1,4 +1,4 @@
-import { Box, Paragraph, atoms } from '@zoralabs/zord'
+import { Box, Paragraph, atoms } from '@buildeross/zord'
 import Link from 'next/link'
 
 import { Icon } from 'src/components/Icon'

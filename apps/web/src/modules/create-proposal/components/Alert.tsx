@@ -1,4 +1,4 @@
-import { Stack, Text } from '@zoralabs/zord'
+import { Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 export const Alert = () => {

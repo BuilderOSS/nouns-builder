@@ -1,5 +1,5 @@
+import { atoms, media } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { atoms, media } from '@zoralabs/zord'
 
 export const emptyTile = style({
   borderRadius: 12,

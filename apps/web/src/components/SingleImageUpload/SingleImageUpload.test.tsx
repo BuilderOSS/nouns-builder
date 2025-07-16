@@ -2,14 +2,16 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Formik } from 'formik'
 import React from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import SingleImageUpload from './SingleImageUpload'
 
 const mockUploadFn = vi.fn()
 
-vi.mock('ipfs-service', async () => {
-  const mod = await vi.importActual<typeof import('ipfs-service')>('ipfs-service')
+vi.mock('@buildeross/ipfs-service', async () => {
+  const mod = await vi.importActual<typeof import('@buildeross/ipfs-service')>(
+    '@buildeross/ipfs-service'
+  )
   return {
     ...mod,
     uploadFile: () => mockUploadFn(),

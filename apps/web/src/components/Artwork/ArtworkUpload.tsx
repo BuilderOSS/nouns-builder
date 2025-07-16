@@ -1,4 +1,4 @@
-import { Box, Flex, Stack, Text } from '@zoralabs/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
 
 import {

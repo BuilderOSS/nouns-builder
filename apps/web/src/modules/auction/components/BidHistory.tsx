@@ -1,4 +1,4 @@
-import { Button, Flex } from '@zoralabs/zord'
+import { Button, Flex } from '@buildeross/zord'
 import dynamic from 'next/dynamic'
 import { ReactNode } from 'react'
 

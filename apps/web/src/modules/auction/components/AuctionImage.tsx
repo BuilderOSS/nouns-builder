@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import Image from 'next/legacy/image'
 import React from 'react'
 

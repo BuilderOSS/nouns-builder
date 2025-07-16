@@ -1,4 +1,4 @@
-import { Stack } from '@zoralabs/zord'
+import { Stack } from '@buildeross/zord'
 import React from 'react'
 import { useAccount } from 'wagmi'
 

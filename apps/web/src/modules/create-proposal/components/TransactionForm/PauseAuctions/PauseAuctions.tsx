@@ -1,4 +1,4 @@
-import { Box, Button, Paragraph } from '@zoralabs/zord'
+import { Box, Button, Paragraph } from '@buildeross/zord'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 

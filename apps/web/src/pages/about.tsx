@@ -1,4 +1,4 @@
-import { Box, Stack } from '@zoralabs/zord'
+import { Box, Stack } from '@buildeross/zord'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'

@@ -1,4 +1,4 @@
-import { normalizeIPFSUrl } from 'ipfs-service'
+import { normalizeIPFSUrl } from '@buildeross/ipfs-service'
 
 import { IPFSUpload } from 'src/hooks'
 

@@ -1,4 +1,4 @@
-import { Flex, Stack, Text } from '@zoralabs/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useReadContract } from 'wagmi'

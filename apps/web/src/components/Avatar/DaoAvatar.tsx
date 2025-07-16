@@ -1,5 +1,5 @@
-import { Box, BoxProps } from '@zoralabs/zord'
-import { getFetchableUrls } from 'ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box, BoxProps } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'

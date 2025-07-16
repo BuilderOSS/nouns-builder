@@ -1,4 +1,4 @@
-import { Box, Flex, Label, Paragraph } from '@zoralabs/zord'
+import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
 

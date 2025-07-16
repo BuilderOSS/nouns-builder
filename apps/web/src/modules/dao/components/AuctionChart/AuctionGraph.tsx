@@ -1,5 +1,5 @@
-import { Box, Text } from '@zoralabs/zord'
-import { color } from '@zoralabs/zord'
+import { Box, Text } from '@buildeross/zord'
+import { color } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { formatEther } from 'viem'
 

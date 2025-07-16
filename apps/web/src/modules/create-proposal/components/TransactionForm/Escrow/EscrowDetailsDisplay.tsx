@@ -1,4 +1,4 @@
-import { Box, Stack, Text } from '@zoralabs/zord'
+import { Box, Stack, Text } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import { useBalance } from 'wagmi'
 

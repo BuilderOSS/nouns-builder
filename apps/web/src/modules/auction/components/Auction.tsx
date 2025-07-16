@@ -1,4 +1,4 @@
-import { Flex, Grid } from '@zoralabs/zord'
+import { Flex, Grid } from '@buildeross/zord'
 import axios from 'axios'
 import React, { Fragment, ReactNode } from 'react'
 import useSWR from 'swr'

@@ -1,4 +1,4 @@
-import { Box, Flex, Label, Text } from '@zoralabs/zord'
+import { Box, Flex, Label, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 
 import { Icon } from 'src/components/Icon'

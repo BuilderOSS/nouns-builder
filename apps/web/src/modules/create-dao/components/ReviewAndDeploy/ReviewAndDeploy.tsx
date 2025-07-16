@@ -1,5 +1,5 @@
-import { Box, Flex, atoms } from '@zoralabs/zord'
-import { getFetchableUrls } from 'ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Box, Flex, atoms } from '@buildeross/zord'
 import React, { useState } from 'react'
 import {
   decodeEventLog,

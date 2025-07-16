@@ -1,4 +1,4 @@
-import { getFetchableUrls } from 'ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { NextApiRequest, NextApiResponse } from 'next'
 import sharp from 'sharp'
 

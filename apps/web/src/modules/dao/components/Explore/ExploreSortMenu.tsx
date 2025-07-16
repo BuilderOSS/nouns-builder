@@ -1,4 +1,4 @@
-import { Flex, Select } from '@zoralabs/zord'
+import { Flex, Select } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
 

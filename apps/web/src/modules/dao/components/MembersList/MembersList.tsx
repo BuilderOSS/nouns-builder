@@ -1,4 +1,4 @@
-import { Button, Flex, Text } from '@zoralabs/zord'
+import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'

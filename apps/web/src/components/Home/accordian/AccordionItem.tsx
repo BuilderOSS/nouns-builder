@@ -1,4 +1,4 @@
-import { Flex, Stack, Text, atoms } from '@zoralabs/zord'
+import { Flex, Stack, Text, atoms } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
 

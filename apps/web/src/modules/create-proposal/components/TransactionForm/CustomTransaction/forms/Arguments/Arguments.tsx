@@ -1,4 +1,4 @@
-import { Flex } from '@zoralabs/zord'
+import { Flex } from '@buildeross/zord'
 import isEqual from 'lodash/isEqual'
 import React from 'react'
 import { encodeAbiParameters, isAddress, isHex } from 'viem'

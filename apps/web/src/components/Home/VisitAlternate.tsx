@@ -1,4 +1,4 @@
-import { Flex, Text, atoms } from '@zoralabs/zord'
+import { Flex, Text, atoms } from '@buildeross/zord'
 
 import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 import { useLayoutStore } from 'src/stores'

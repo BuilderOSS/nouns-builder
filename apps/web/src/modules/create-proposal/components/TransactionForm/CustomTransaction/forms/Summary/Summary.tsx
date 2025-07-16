@@ -1,4 +1,4 @@
-import { Button, Flex, Stack } from '@zoralabs/zord'
+import { Button, Flex, Stack } from '@buildeross/zord'
 import React from 'react'
 import { encodeFunctionData } from 'viem'
 

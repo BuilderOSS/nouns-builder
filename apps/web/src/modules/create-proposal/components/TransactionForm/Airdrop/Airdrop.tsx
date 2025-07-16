@@ -1,4 +1,4 @@
-import { Stack, Text } from '@zoralabs/zord'
+import { Stack, Text } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import gte from 'lodash/gte'
 import React from 'react'

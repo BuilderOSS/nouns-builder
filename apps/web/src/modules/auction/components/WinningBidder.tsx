@@ -1,4 +1,4 @@
-import { Box, Flex } from '@zoralabs/zord'
+import { Box, Flex } from '@buildeross/zord'
 
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'

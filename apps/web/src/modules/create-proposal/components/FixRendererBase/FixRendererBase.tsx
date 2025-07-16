@@ -1,4 +1,4 @@
-import { Flex, Text } from '@zoralabs/zord'
+import { Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import React from 'react'

@@ -1,4 +1,4 @@
-import { Box, Flex, PopUp, Text } from '@zoralabs/zord'
+import { Box, Flex, PopUp, Text } from '@buildeross/zord'
 import { useState } from 'react'
 
 import { Avatar } from 'src/components/Avatar'

@@ -1,4 +1,4 @@
-import { Flex, Stack, Text } from '@zoralabs/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 
 import { DecodedValue } from 'src/typings'
 

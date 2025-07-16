@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 
 import { exploreSkeleton } from '../Explore/Explore.css'
 import { GridContainer } from './DaoFeed'

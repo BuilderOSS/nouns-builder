@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Heading, Spinner, Stack, Text } from '@zoralabs/zord'
+import { Box, Button, Flex, Heading, Spinner, Stack, Text } from '@buildeross/zord'
 
 import { formatCryptoVal } from 'src/utils/numbers'
 

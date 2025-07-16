@@ -1,4 +1,4 @@
-import { Flex, Stack } from '@zoralabs/zord'
+import { Flex, Stack } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { Hex, formatEther } from 'viem'
 

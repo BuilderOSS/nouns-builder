@@ -1,4 +1,8 @@
-import { IPFSUploadResponse, getFetchableUrls, uploadDirectory } from 'ipfs-service'
+import {
+  IPFSUploadResponse,
+  getFetchableUrls,
+  uploadDirectory,
+} from '@buildeross/ipfs-service'
 import React from 'react'
 
 import { ArtworkType } from 'src/modules/create-dao/components/Artwork/ArtworkForm.schema'

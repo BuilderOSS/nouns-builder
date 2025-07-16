@@ -1,6 +1,6 @@
-import { Box, Flex, Stack, Text } from '@zoralabs/zord'
+import { normalizeIPFSUrl, pinataOptions, uploadFile } from '@buildeross/ipfs-service'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
-import { normalizeIPFSUrl, pinataOptions, uploadFile } from 'ipfs-service'
 import React, { ReactElement, useEffect, useState } from 'react'
 
 import { Spinner } from 'src/components/Spinner'

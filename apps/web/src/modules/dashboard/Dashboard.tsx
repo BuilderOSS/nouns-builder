@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@zoralabs/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'

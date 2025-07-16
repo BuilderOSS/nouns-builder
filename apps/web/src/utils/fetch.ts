@@ -1,5 +1,5 @@
 // 10s
-import { getFetchableUrls } from 'ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
 
 const REQUEST_TIMEOUT = 10000 // 10s
 

@@ -1,5 +1,5 @@
+import { Box, Flex } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
-import { Box, Flex } from '@zoralabs/zord'
 import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
 import { useRouter } from 'next/router'

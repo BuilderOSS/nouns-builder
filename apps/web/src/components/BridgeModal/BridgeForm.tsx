@@ -1,5 +1,5 @@
+import { Box, Button, Flex, Heading, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { Box, Button, Flex, Heading, Text } from '@zoralabs/zord'
 import { Formik } from 'formik'
 import Image from 'next/image'
 import Link from 'next/link'

@@ -1,4 +1,4 @@
-import { Atoms, Flex, Stack } from '@zoralabs/zord'
+import { Atoms, Flex, Stack } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React from 'react'
 

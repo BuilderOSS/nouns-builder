@@ -1,4 +1,4 @@
-import { Box, Flex, Stack } from '@zoralabs/zord'
+import { Box, Flex, Stack } from '@buildeross/zord'
 import { Formik, FormikValues } from 'formik'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'

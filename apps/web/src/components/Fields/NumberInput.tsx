@@ -1,4 +1,4 @@
-import { Box } from '@zoralabs/zord'
+import { Box } from '@buildeross/zord'
 import React, { InputHTMLAttributes, WheelEvent } from 'react'
 
 import {

@@ -1,5 +1,5 @@
+import { media } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { media } from '@zoralabs/zord'
 
 export const titleStyle = style([
   {

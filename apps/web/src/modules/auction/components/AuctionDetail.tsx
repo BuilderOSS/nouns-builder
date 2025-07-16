@@ -1,4 +1,4 @@
-import { Box, Flex } from '@zoralabs/zord'
+import { Box, Flex } from '@buildeross/zord'
 import { ReactNode } from 'react'
 
 import { auctionTextVariants } from './Auction.css'

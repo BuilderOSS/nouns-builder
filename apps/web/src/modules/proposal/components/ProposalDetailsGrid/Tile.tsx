@@ -1,4 +1,4 @@
-import { Flex, Text, TextProps } from '@zoralabs/zord'
+import { Flex, Text, TextProps } from '@buildeross/zord'
 import React, { Fragment, ReactNode } from 'react'
 
 import { proposalTileSubtitleVariants } from './Tile.css'

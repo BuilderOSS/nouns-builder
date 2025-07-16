@@ -1,4 +1,4 @@
-import { Box, Text } from '@zoralabs/zord'
+import { Box, Text } from '@buildeross/zord'
 
 import { useLayoutStore } from 'src/stores'
 

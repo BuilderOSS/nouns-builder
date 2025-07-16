@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from '@zoralabs/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 
 import { statistic, statisticContent, statisticHover } from 'src/styles/About.css'
 

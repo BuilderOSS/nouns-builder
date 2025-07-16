@@ -1,4 +1,4 @@
-import { Button, Flex, Stack } from '@zoralabs/zord'
+import { Button, Flex, Stack } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import React, { BaseSyntheticEvent } from 'react'
 

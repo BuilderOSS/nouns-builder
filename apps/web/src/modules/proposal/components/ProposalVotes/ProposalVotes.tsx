@@ -1,4 +1,4 @@
-import { Flex, Text } from '@zoralabs/zord'
+import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import useSWR from 'swr'
 

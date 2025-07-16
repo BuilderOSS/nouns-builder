@@ -1,5 +1,5 @@
+import { color } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { color } from '@zoralabs/zord'
 
 export const link = style({
   color: color.text1,

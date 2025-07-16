@@ -1,4 +1,4 @@
-import { Box, Flex } from '@zoralabs/zord'
+import { Box, Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { memo } from 'react'
 
