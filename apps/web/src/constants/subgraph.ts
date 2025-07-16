@@ -1,7 +1,7 @@
 import { CHAIN_ID } from 'src/typings'
 
 const GOLDSKY_PROJECT_ID = 'project_cm33ek8kjx6pz010i2c3w8z25'
-const VERSION = process.env.VERCEL_ENV === 'production' ? 'latest' : '0.1.1'
+const VERSION = process.env.VERCEL_ENV !== 'production' ? '0.1.2' : 'latest'
 
 const createSubgraphUrl = (name: string, version = VERSION): string =>
   `https://api.goldsky.com/api/public/${GOLDSKY_PROJECT_ID}/subgraphs/${name}/${version}/gn`

@@ -10,29 +10,108 @@ export type IPFSUploadResponse = {
   uri: string
 }
 
-type ProgressCallback = (progress: number) => void
+export type PinataUploadResponse = {
+  cid: string
+}
 
-function uploadFileWithProgress(
+export type ProgressCallback = (progress: number) => void
+
+export type UploadType = 'file' | 'image' | 'media' | 'directory' | 'json'
+
+export type PinataOptions = {
+  max_file_size: number
+  allow_mime_types: string[]
+}
+
+export const pinataOptions: Record<UploadType, PinataOptions> = {
+  file: {
+    max_file_size: 10 * 1024 * 1024,
+    allow_mime_types: [
+      // Image types
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+      // Video types
+      'video/mp4',
+      'video/webm',
+      'video/quicktime',
+      // Audio types
+      'audio/mpeg',
+      'audio/ogg',
+      'audio/wav',
+      // Documents and data
+      'application/pdf',
+      'application/json',
+      // Plain text only (not html/js)
+      'text/plain',
+    ],
+  },
+  json: {
+    max_file_size: 10 * 1024,
+    allow_mime_types: ['application/json'],
+  },
+  image: {
+    max_file_size: 1 * 1024 * 1024,
+    allow_mime_types: [
+      // Image types
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+    ],
+  },
+  media: {
+    max_file_size: 50 * 1024 * 1024,
+    allow_mime_types: [
+      // Image types
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+      // Video types
+      'video/mp4',
+      'video/webm',
+      'video/quicktime',
+      // Audio types
+      'audio/mpeg',
+      'audio/ogg',
+      'audio/wav',
+    ],
+  },
+  directory: {
+    max_file_size: 200 * 1024 * 1024,
+    allow_mime_types: ['directory'],
+  },
+}
+
+const uploadWithProgress = async (
   data: FormData,
-  onProgress: (progress: number) => void
-): Promise<void> {
-  return new Promise(async (resolve, reject) => {
+  uploadType: UploadType,
+  onProgress: ProgressCallback,
+): Promise<PinataUploadResponse> => {
+  const uploadUrlResponse = await fetch('/api/upload-url', {
+    method: 'POST',
+    body: JSON.stringify({
+      type: uploadType,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+  })
+
+  if (!uploadUrlResponse.ok) {
+    throw new Error('No Signed URL')
+  }
+  const uploadUrlData = await uploadUrlResponse.json()
+
+  return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-
-    const uploadKey = await fetch('/api/upload-key', {
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-      },
-    })
-
-    if (!uploadKey.ok) {
-      reject('No KEY')
-    }
-    const { JWT: jwt } = await uploadKey.json()
-
-    xhr.open('POST', 'https://api.pinata.cloud/pinning/pinFileToIPFS', true)
-    xhr.setRequestHeader('Authorization', `Bearer ${jwt}`)
+    xhr.open('POST', uploadUrlData.url, true)
 
     // Add event listener to track upload progress
     xhr.upload.onprogress = (event: ProgressEvent) => {
@@ -46,15 +125,33 @@ function uploadFileWithProgress(
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         const jsonResponse = JSON.parse(xhr.responseText)
-        resolve(jsonResponse)
+
+        try {
+          // ensure cid is pinned if it wasn't already
+          fetch('/api/pin-cid', {
+            method: 'POST',
+            body: JSON.stringify({
+              cid: jsonResponse.data.cid,
+              name: jsonResponse.data.name,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+            },
+          })
+        } catch (error) {
+          console.error('Error pinning CID', error)
+        }
+        resolve(jsonResponse.data as PinataUploadResponse)
       } else {
-        reject(new Error(`Upload failed with status: ${xhr.status}`))
+        const jsonResponse = JSON.parse(xhr.responseText)
+        reject(new Error(`Upload failed with: ${jsonResponse.error.message}`))
       }
     }
 
     // Handle errors
-    xhr.onerror = () => {
-      reject(new Error('An error occurred during the upload.'))
+    xhr.onerror = (error) => {
+      reject(new Error(`Error uploading file: ${error}`))
     }
 
     // Send the FormData
@@ -63,35 +160,58 @@ function uploadFileWithProgress(
 }
 
 const uploadCache = {
-  prefix: 'ZORA/IPFSUploadCache',
+  prefix: 'BUILDER/IPFSUploadCache',
   get(files: File[]): IPFSUploadResponse | undefined {
     const digest = hashFiles(files)
     try {
       const cid = localStorage.getItem(`${this.prefix}/${digest}`)
-      console.log('ipfs-service/uploadCache', cid ? 'HIT' : 'MISS', digest, cid)
+      console.info('ipfs-service/uploadCache', cid ? 'HIT' : 'MISS', digest, cid)
       if (cid) {
         return { cid, uri: `ipfs://${cid}` }
       }
-    } catch {}
+    } catch { }
   },
   put(files: File[], cid: string) {
     const digest = hashFiles(files)
     try {
       localStorage.setItem(`${this.prefix}/${digest}`, cid)
-    } catch {}
+    } catch { }
   },
+}
+
+export function formatFileSize(bytes: number): string {
+  if (bytes >= 1024 * 1024 * 1024) {
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)}GB`
+  } else if (bytes >= 1024 * 1024) {
+    return `${(bytes / (1024 * 1024)).toFixed(1)}MB`
+  } else if (bytes >= 1024) {
+    return `${(bytes / 1024).toFixed(1)}KB`
+  }
+  return `${bytes}B`
 }
 
 export async function uploadFile(
   file: File,
   options?: {
-    onProgress?: (progress: number) => void
+    type?: Omit<UploadType, 'json'>
+    onProgress?: ProgressCallback
     cache?: boolean
-  }
+  },
 ): Promise<IPFSUploadResponse> {
-  const { onProgress, cache } = {
+  console.info('ipfs-service/uploadFile: file:', file)
+
+  const { onProgress, cache, type } = {
     ...defaultOptions,
     ...options,
+  }
+
+  const uploadType = (type ?? 'file') as UploadType
+  const uploadOptions = pinataOptions[uploadType]
+
+  if (file.size > uploadOptions.max_file_size) {
+    throw new Error(
+      `File size exceeds limit of ${formatFileSize(uploadOptions.max_file_size)}`,
+    )
   }
 
   if (cache) {
@@ -102,25 +222,22 @@ export async function uploadFile(
   const data = new FormData()
   data.append('file', file)
 
-  const response = (await uploadFileWithProgress(data, (progress) => {
-    console.log(`Upload progress: ${progress}%`)
+  const response = (await uploadWithProgress(data, uploadType, (progress) => {
+    console.info(`ipfs-service/uploadFile: progress: ${progress}%`)
     // You can also update the UI with the progress here
     if (typeof onProgress === 'function') {
       onProgress(progress)
     }
   })) as any
 
-  console.log({ response })
+  const uri = `ipfs://${response.cid}`
 
-  const cid = response.IpfsHash.toString()
-  const uri = `ipfs://${cid}`
+  console.info('ipfs-service/uploadFile: response:', response)
 
-  console.info('ipfs-service/upload', { cid, uri })
-
-  uploadCache.put([file], cid)
+  uploadCache.put([file], response.cid)
 
   return {
-    cid,
+    ...response,
     uri,
   }
 }
@@ -128,27 +245,36 @@ export async function uploadFile(
 export type FileEntry =
   | File
   | {
-      content: File
-      path: string
-    }
+    content: File
+    path: string
+  }
 
 export async function uploadDirectory(
   fileEntries: FileEntry[],
   options?: {
     onProgress?: (progress: number) => void
     cache?: boolean
-  }
+  },
 ): Promise<IPFSUploadResponse> {
+  console.info('ipfs-service/uploadDirectory: files:', fileEntries)
+  let totalSize = 0
   const entries = fileEntries.map((entry) => {
     if (entry instanceof File) {
+      totalSize += entry.size
       return {
         content: entry,
         path: entry.name,
       }
     }
-
+    totalSize += entry.content.size
     return entry
   })
+
+  if (totalSize > pinataOptions.directory.max_file_size) {
+    throw new Error(
+      `Directory size exceeds limit of ${formatFileSize(pinataOptions.directory.max_file_size)}`,
+    )
+  }
 
   const files = entries.map((entry) => entry.content)
 
@@ -164,41 +290,74 @@ export async function uploadDirectory(
 
   const data = new FormData()
   entries.forEach((file) => {
-    console.log({ file })
     data.append('file', file.content, `builder/${file.path}`)
   })
   data.append(
     'pinataOptions',
     JSON.stringify({
       cidVersion: 1,
-    })
+    }),
   )
   data.append(
     'pinataMetadata',
     JSON.stringify({
       name: 'builder',
-    })
+    }),
   )
 
-  const response = (await uploadFileWithProgress(data, (progress) => {
-    console.log(`Upload progress: ${progress}%`)
+  const response = (await uploadWithProgress(data, 'directory', (progress) => {
+    console.info(`ipfs-service/uploadDirectory: progress: ${progress}%`)
     // You can also update the UI with the progress here
     if (typeof onProgress === 'function') {
       onProgress(progress)
     }
   })) as any
 
-  console.log({ response })
+  const uri = `ipfs://${response.cid}`
 
-  const cid = response.IpfsHash.toString()
-  const uri = `ipfs://${cid}`
+  console.info('ipfs-service/uploadDirectory: response:', response)
 
-  console.info('ipfs-service/uploadDirectory', { cid })
-
-  uploadCache.put(files, cid)
+  uploadCache.put(files, response.cid)
 
   return {
+    ...response,
     uri,
+  }
+}
+
+export async function uploadJson(jsonObject: object): Promise<IPFSUploadResponse> {
+  console.info('ipfs-service/uploadJson: json:', jsonObject)
+  if (!jsonObject || typeof jsonObject !== 'object') {
+    throw new Error('Invalid JSON data')
+  }
+
+  const data = JSON.stringify(jsonObject)
+
+  const response = await fetch('/api/pin-json', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: data,
+  })
+
+  if (!response.ok) {
+    const errorText = await response.text()
+    throw new Error(`JSON upload failed: ${errorText}`)
+  }
+
+  const json = await response.json()
+
+  const cid = json.cid
+  if (!cid) {
+    throw new Error('No CID returned from API')
+  }
+
+  console.info('ipfs-service/uploadJson: response:', json)
+
+  return {
     cid,
+    uri: `ipfs://${cid}`,
   }
 }

@@ -54,7 +54,7 @@ const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
       try {
         setIsUploading(true)
 
-        const { cid } = await uploadFile(_input[0], { cache: true })
+        const { cid } = await uploadFile(_input[0], { cache: true, type: 'image' })
 
         formik.setFieldValue(id, normalizeIPFSUrl(cid))
         setIsUploading(false)

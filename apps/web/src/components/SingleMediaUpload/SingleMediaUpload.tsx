@@ -1,6 +1,6 @@
 import { Box, Flex, Stack, Text } from '@zoralabs/zord'
 import { FormikProps } from 'formik'
-import { normalizeIPFSUrl, uploadFile } from 'ipfs-service'
+import { normalizeIPFSUrl, pinataOptions, uploadFile } from 'ipfs-service'
 import React, { ReactElement, useEffect, useState } from 'react'
 
 import { Spinner } from 'src/components/Spinner'
@@ -29,18 +29,6 @@ const SingleMediaUpload: React.FC<SingleImageUploadProps> = ({
   onUploadSettled,
   value,
 }) => {
-  const acceptableMIME = [
-    'image/jpeg',
-    'image/png',
-    'image/svg+xml',
-    'image/webp',
-    'image/gif',
-    'video/mp4',
-    'video/quicktime',
-    'audio/mpeg',
-    'audio/wav',
-  ]
-
   const [isMounted, setIsMounted] = useState(false)
   const [uploadMediaError, setUploadMediaError] = React.useState<any>()
   const [isUploading, setIsUploading] = React.useState<boolean>(false)
@@ -61,6 +49,8 @@ const SingleMediaUpload: React.FC<SingleImageUploadProps> = ({
       const input = _input[0]
 
       setUploadMediaError(false)
+
+      const acceptableMIME = pinataOptions['media'].allow_mime_types
 
       if (input?.type?.length && !acceptableMIME.includes(input.type)) {
         setUploadMediaError({

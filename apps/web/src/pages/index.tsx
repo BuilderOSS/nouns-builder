@@ -27,6 +27,7 @@ const HomePage: NextPageWithLayout = () => {
     return (
       <LayoutWrapper>
         <DefaultLayout>
+          <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
           <Dashboard />
         </DefaultLayout>
       </LayoutWrapper>
@@ -35,7 +36,7 @@ const HomePage: NextPageWithLayout = () => {
   return (
     <LayoutWrapper>
       <HomeLayout>
-        <Meta title={'Nouns your ideas'} type={'website'} slug={'/'} />
+        <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
         <Stack align={'center'}>
           <Marquee />
           <GetStarted />

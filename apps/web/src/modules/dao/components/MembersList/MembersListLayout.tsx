@@ -7,21 +7,26 @@ export const MembersPanel = ({
   children,
   isMobile,
   tableRuler = true,
+  exportButton,
 }: {
   children: ReactNode
   isMobile: boolean
   tableRuler?: boolean
+  exportButton?: ReactNode
 }) => {
   return (
     <>
-      <Text
+      <Flex
+        justify="space-between"
+        align="center"
         mb={{ '@initial': 'x4', '@768': 'x6' }}
         mt={{ '@initial': 'x4', '@768': 'x10' }}
-        variant="heading-xs"
-        style={{ fontWeight: 800 }}
       >
-        Delegates
-      </Text>
+        <Text variant="heading-xs" style={{ fontWeight: 800 }}>
+          Delegates
+        </Text>
+        {exportButton}
+      </Flex>
       <Box
         borderRadius={'phat'}
         borderStyle={'solid'}

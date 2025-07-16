@@ -1,4 +1,4 @@
-import { Flex, Text } from '@zoralabs/zord'
+import { Button, Flex, Text } from '@zoralabs/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
@@ -53,10 +53,55 @@ export const MembersList = ({
     return currentPage < totalPages
   }, [ownerCount, query.page])
 
+  const exportDelegatesToCSV = async () => {
+    try {
+      const response = await axios.get<{
+        delegates: Array<{
+          address: string
+          tokenCount: number
+          tokenIds: string
+          dateJoined: string
+        }>
+      }>(`/api/membersList/${token}/export?chainId=${chain.id}`)
+
+      const delegates = response.data.delegates
+
+      const csvContent = [
+        ['Address', 'Token Count', 'Token IDs', 'Date Joined'].join(','),
+        ...delegates.map((delegate) =>
+          [
+            delegate.address,
+            delegate.tokenCount,
+            delegate.tokenIds,
+            delegate.dateJoined,
+          ].join(',')
+        ),
+      ].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `delegates.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } catch (error) {
+      console.error('Failed to export delegates:', error)
+    }
+  }
+
+  const exportButton = (
+    <Button variant="secondary" size="sm" onClick={exportDelegatesToCSV}>
+      Export CSV
+    </Button>
+  )
+
   if (isValidating) {
     const isInitialPageLoad = !query.page && !members
     return (
-      <MembersPanel isMobile={isMobile}>
+      <MembersPanel isMobile={isMobile} exportButton={exportButton}>
         {Array.from({ length: isInitialPageLoad ? 5 : 10 }).map((_, i) => (
           <MemberCardSkeleton isMobile={isMobile} key={`memberCardSkeleton-${i}`} />
         ))}
@@ -65,7 +110,7 @@ export const MembersList = ({
   }
   if (error)
     return (
-      <MembersPanel isMobile={isMobile} tableRuler={false}>
+      <MembersPanel isMobile={isMobile} tableRuler={false} exportButton={exportButton}>
         <Flex minH={'x24'} justify={'center'} align={'center'} direction={'column'}>
           <Text fontSize={20} color={'text3'} fontWeight={'display'} mb={'x3'}>
             Error
@@ -77,7 +122,7 @@ export const MembersList = ({
 
   return (
     <>
-      <MembersPanel isMobile={isMobile}>
+      <MembersPanel isMobile={isMobile} exportButton={exportButton}>
         {members?.map((member) => (
           <MemberCard
             key={member.voter}

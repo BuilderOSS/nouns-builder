@@ -86,11 +86,13 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     )
   }
 
-  const activeTab = query?.tab ? (query.tab as string) : 'Activity'
+  const activeTab = query?.tab ? (query.tab as string) : 'activity'
+
+  const path = `/dao/${query.network}/${query.token}/${query.tokenId}?tab=${activeTab}`
 
   return (
     <Flex direction="column" pb="x30">
-      <Meta title={'dao page'} slug={'/'} />
+      <Meta title={'dao page'} path={path} />
 
       <PreAuction chain={chain} collectionAddress={collectionAddress} />
 

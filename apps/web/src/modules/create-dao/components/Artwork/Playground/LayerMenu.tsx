@@ -3,6 +3,7 @@ import React, { BaseSyntheticEvent } from 'react'
 
 import { Icon } from 'src/components/Icon'
 import { ImageProps } from 'src/hooks'
+import { SelectedTraitsProps } from 'src/hooks/useArtworkPreview'
 import {
   layerSelectStyle,
   selectTraitNameStyle,
@@ -14,44 +15,30 @@ interface layerProps {
   images: ImageProps[]
 }
 
-interface selectedTraits {
-  picker: string
-  trait: string
-  uri: string
-  content: File
-}
-
 export const LayerMenu: React.FC<{
   layers: layerProps[]
-  selectedTraits: selectedTraits[]
-  setSelectedTraits: (selectedTraits: selectedTraits[]) => void
+  selectedTraits: SelectedTraitsProps[]
+  setSelectedTraits: (selectedTraits: SelectedTraitsProps[]) => void
 }> = ({ layers, selectedTraits, setSelectedTraits }) => {
-  const handleChange = (
-    e: BaseSyntheticEvent,
-    images: { uri: string; trait: string; content: File }[],
-    trait: string
-  ) => {
-    const uri =
-      e.target.value === 'random'
-        ? images[Math.floor(Math.random() * images.length)].uri
-        : e.target.value
+  const handleChange = (e: BaseSyntheticEvent, images: ImageProps[], trait: string) => {
+    const isRandom = Number.isNaN(Number(e.target.value))
+    const imageIndex = isRandom
+      ? Math.floor(Math.random() * images.length)
+      : Number(e.target.value)
+    const selectedImage = images[imageIndex]
 
-    const content =
-      e.target.value === 'random'
-        ? images[Math.floor(Math.random() * images.length)].content
-        : images.filter((item) => item.uri === e.target.value)[0].content
-
-    const index = selectedTraits.findIndex(
-      (selected: selectedTraits) => selected.trait === trait
+    const traitIndex = selectedTraits.findIndex(
+      (selected: SelectedTraitsProps) => selected.trait === trait
     )
+    const picker = isRandom ? 'random' : trait
 
-    if (index === -1) {
-      setSelectedTraits([...selectedTraits, { picker: trait, trait, uri, content }])
+    if (traitIndex === -1) {
+      setSelectedTraits([...selectedTraits, { picker, ...selectedImage }])
     } else {
       setSelectedTraits([
-        ...selectedTraits.slice(0, index),
-        { picker: trait, trait, uri, content },
-        ...selectedTraits.slice(index + 1),
+        ...selectedTraits.slice(0, traitIndex),
+        { picker, ...selectedImage },
+        ...selectedTraits.slice(traitIndex + 1),
       ])
     }
   }
@@ -96,8 +83,8 @@ export const LayerMenu: React.FC<{
                 <option key="random-property" value="random">
                   Random
                 </option>
-                {images.map((image: any) => (
-                  <option key={image.name} value={image.uri}>
+                {images.map((image: ImageProps, index: number) => (
+                  <option key={image.name} value={index}>
                     {image.name}
                   </option>
                 ))}

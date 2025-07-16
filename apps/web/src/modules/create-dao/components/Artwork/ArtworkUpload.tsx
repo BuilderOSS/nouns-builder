@@ -7,7 +7,6 @@ import React, {
   ReactElement,
   useCallback,
   useEffect,
-  useState,
 } from 'react'
 
 import { ArtworkPreview, ArtworkUpload as UploadComponent } from 'src/components/Artwork'
@@ -109,11 +108,10 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     onUploadError: handleUploadError,
   })
 
-  const { generateStackedImage, imagesToDraw, generatedImages, canvas } =
-    useArtworkPreview({
-      images,
-      orderedLayers,
-    })
+  const { generateStackedImage, generatedImages, canvas } = useArtworkPreview({
+    images,
+    orderedLayers,
+  })
 
   const handleUpload = (e: BaseSyntheticEvent) => {
     setUploadArtworkError(undefined)
@@ -134,20 +132,11 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filesArray, fileInfo, uploadArtworkError])
 
-  // Generate stacked image on init
-  const [isReady, setIsReady] = useState(false)
-
   useEffect(() => {
-    const ready =
-      !!setUpArtwork?.artwork?.length && !isUploadingToIPFS && !!imagesToDraw?.length
-    setIsReady(ready)
-  }, [setUpArtwork?.artwork, isUploadingToIPFS, imagesToDraw])
-
-  useEffect(() => {
-    if (isReady && !isUploadingToIPFS) {
+    if (!generatedImages.length && !isUploadingToIPFS) {
       generateStackedImage()
     }
-  }, [isReady, isUploadingToIPFS, generateStackedImage])
+  }, [generateStackedImage, generatedImages, isUploadingToIPFS])
 
   const showPreview = setUpArtwork?.artwork?.length > 0
 
@@ -159,7 +148,6 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
       setOrderedLayers={setOrderedLayers}
     />
   )
-
   return (
     <>
       <UploadComponent

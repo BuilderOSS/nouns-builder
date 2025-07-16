@@ -36,12 +36,10 @@ import { isPossibleMarkdown } from 'src/utils/helpers'
 export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
 
 interface TokenPageProps {
-  url: string
   collection: AddressType
   token: TokenWithDao
   name: string
   description: string
-  tokenId: string
   addresses: DaoContractAddresses
   ogImageURL: string
   chainId: CHAIN_ID
@@ -49,11 +47,9 @@ interface TokenPageProps {
 }
 
 const TokenPage: NextPageWithLayout<TokenPageProps> = ({
-  url,
   collection,
   token,
   description,
-  // tokenId,
   name,
   addresses,
   ogImageURL,
@@ -140,7 +136,9 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     return cleanDesc.length > 111 ? `${cleanDesc.slice(0, 111)}...` : cleanDesc
   }, [description, name])
 
-  const activeTab = query?.tab ? (query.tab as string) : 'About'
+  const activeTab = query?.tab ? (query.tab as string) : 'about'
+
+  const path = `/dao/${query.network}/${query.token}/${query.tokenId}?tab=${activeTab}`
 
   return (
     <Flex direction="column" pb="x30">
@@ -148,7 +146,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         title={name}
         type={`${name}:nft`}
         image={ogImageURL}
-        slug={url}
+        path={path}
         description={ogDescription}
         farcaster={{
           name,
@@ -214,12 +212,7 @@ const getLatestTokenIdRedirect = async (
   }
 }
 
-export const getServerSideProps: GetServerSideProps = async ({
-  params,
-  res,
-  req,
-  resolvedUrl,
-}) => {
+export const getServerSideProps: GetServerSideProps = async ({ params, res, req }) => {
   const collection = params?.token as AddressType
   const tokenId = params?.tokenId as string
   const network = params?.network as string
@@ -290,12 +283,10 @@ export const getServerSideProps: GetServerSideProps = async ({
     )
 
     const props: TokenPageProps = {
-      url: resolvedUrl,
       collection,
       name,
       token,
       description: description || '',
-      tokenId,
       addresses,
       ogImageURL,
       chainId: chain.id,

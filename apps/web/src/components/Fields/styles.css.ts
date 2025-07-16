@@ -254,6 +254,7 @@ export const defaultHelperTextStyle = style({
   color: '#808080',
   boxSizing: 'border-box',
   padding: '10px 0',
+  whiteSpace: 'pre-line',
 })
 
 export const numberInputStyle = style({

@@ -7,6 +7,7 @@ import { CHAIN_ID } from 'src/typings'
 
 export type MyDaosResponse = Array<{
   name: string
+  contractImage: string
   collectionAddress: string
   auctionAddress: string
   chainId: CHAIN_ID
@@ -37,6 +38,7 @@ export const myDaosRequest = async (
       .map((queries) =>
         queries.daos.map((dao) => ({
           name: dao.name || '',
+          contractImage: dao.contractImage || '',
           collectionAddress: dao.tokenAddress,
           auctionAddress: dao?.auctionAddress || '',
           chainId: queries.chainId,
