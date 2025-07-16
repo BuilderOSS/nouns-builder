@@ -26,17 +26,13 @@ export const Tile: React.FC<ProposalTileProps> = (props) => {
       borderStyle={'solid'}
       borderRadius={'curved'}
       justify={{ '@initial': 'space-between', '@768': 'flex-start' }}
-      position={'relative'}
     >
       <Flex w={children ? '100%' : 'auto'} direction={'column'}>
-        <Flex justify={'space-between'} align={'center'}>
-          <Flex align={'center'} gap={'x2'} mb={{ '@initial': 'x2', '@768': 'x4' }}>
-            <Text fontSize={16} fontWeight={'display'}>
-              {title}
-            </Text>
-            {icon && <Icon id={icon} size="sm" color="text3" fill="transparent" />}
-          </Flex>
-          {children && <Fragment>{children as ReactNode}</Fragment>}
+        <Flex align={'center'} gap={'x2'} mb={{ '@initial': 'x2', '@768': 'x4' }}>
+          <Text fontSize={16} fontWeight={'display'}>
+            {title}
+          </Text>
+          {icon && <Icon id={icon} size="sm" color="text3" fill="transparent" />}
         </Flex>
         <Text
           className={
@@ -47,6 +43,7 @@ export const Tile: React.FC<ProposalTileProps> = (props) => {
         >
           {subtitle}
         </Text>
+        {children && <Fragment>{children as ReactNode}</Fragment>}
       </Flex>
       {subtext && (
         <Text color={'tertiary'} pt={'x1'}>
