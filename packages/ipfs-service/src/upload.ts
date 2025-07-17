@@ -132,7 +132,6 @@ const uploadWithProgress = async (
             method: 'POST',
             body: JSON.stringify({
               cid: jsonResponse.data.cid,
-              name: jsonResponse.data.name,
             }),
             headers: {
               'Content-Type': 'application/json',
@@ -221,6 +220,7 @@ export async function uploadFile(
 
   const data = new FormData()
   data.append('file', file)
+  data.append('network', "public")
 
   const response = (await uploadWithProgress(data, uploadType, (progress) => {
     console.info(`ipfs-service/uploadFile: progress: ${progress}%`)
@@ -304,6 +304,7 @@ export async function uploadDirectory(
       name: 'builder',
     }),
   )
+  data.append('network', "public")
 
   const response = (await uploadWithProgress(data, 'directory', (progress) => {
     console.info(`ipfs-service/uploadDirectory: progress: ${progress}%`)

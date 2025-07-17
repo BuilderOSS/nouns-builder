@@ -11,11 +11,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           text: 'CID is required',
         })
       }
+      if (name.length > 32) {
+        return res.status(400).json({
+          text: 'Name is too long',
+        })
+      }
       const data = JSON.stringify({
         cid,
         name,
         group_id,
       })
+
       const pinResponse = await fetch(
         'https://api.pinata.cloud/v3/files/public/pin_by_cid',
         {

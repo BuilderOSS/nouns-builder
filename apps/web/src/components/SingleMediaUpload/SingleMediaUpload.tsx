@@ -67,6 +67,7 @@ const SingleMediaUpload: React.FC<SingleImageUploadProps> = ({
 
         const { cid } = await uploadFile(_input[0], {
           cache: true,
+          type: 'media',
           onProgress: setProgress,
         })
 
