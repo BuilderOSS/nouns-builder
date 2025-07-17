@@ -2,9 +2,15 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
 
-import { OrderedTraits } from 'src/components/Artwork/LayerBox'
-
 import { ImageProps } from './useArtworkUpload'
+
+export interface Trait {
+  trait: string
+  properties: string[]
+  ipfs?: {}[]
+}
+
+export type OrderedTraits = Array<Trait>
 
 export interface UseArtworkPreviewProps {
   orderedLayers: OrderedTraits

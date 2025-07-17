@@ -5,7 +5,6 @@ import useSWR from 'swr'
 import { formatEther } from 'viem'
 
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { useChainStore } from 'src/stores/useChainStore'
 
 export type DecodedTransactionSuccess = {
   target: string
@@ -113,15 +112,14 @@ export const decodeTransactions = async (
 }
 
 export const useDecodedTransactions = (
+  chainId: CHAIN_ID,
   proposal: Proposal
 ): DecodedTransaction[] | undefined => {
-  const chain = useChainStore((x) => x.chain)
-
   const { targets, calldatas, values } = proposal
 
   const { data: decodedTransactions } = useSWR(
     targets && calldatas && values
-      ? [SWR_KEYS.PROPOSALS_TRANSACTIONS, chain.id, targets, calldatas, values]
+      ? [SWR_KEYS.PROPOSALS_TRANSACTIONS, chainId, targets, calldatas, values]
       : null,
     async ([_key, chainId, targets, calldatas, values]) =>
       decodeTransactions(chainId, targets, calldatas, values),
@@ -132,15 +130,14 @@ export const useDecodedTransactions = (
 }
 
 export const useDecodedTransactionSingle = (
+  chainId: CHAIN_ID,
   target: string,
   calldata: string,
   value: string
 ): DecodedTransaction | undefined => {
-  const chain = useChainStore((x) => x.chain)
-
   const { data: decodedTransaction } = useSWR(
     target && calldata && value
-      ? [SWR_KEYS.DECODED_TRANSACTION, chain.id, target, calldata, value]
+      ? [SWR_KEYS.DECODED_TRANSACTION, chainId, target, calldata, value]
       : null,
     async ([_key, chainId, target, calldata, value]) => {
       const decoded = await decodeTransactions(chainId, [target], [calldata], [value])

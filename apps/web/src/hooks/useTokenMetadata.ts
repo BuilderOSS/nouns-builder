@@ -3,7 +3,13 @@ import { CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
 
-import { TokenMetadata } from 'src/services/alchemyService'
+export type TokenMetadata = {
+  address: Address
+  name: string
+  symbol: string
+  decimals: number
+  logo: string
+}
 
 export type TokenMetadataReturnType = {
   metadata?: TokenMetadata[]

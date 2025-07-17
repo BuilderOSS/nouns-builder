@@ -6,7 +6,8 @@ import {
   type DaoMembershipResponse,
   daoMembershipRequest,
 } from 'src/data/subgraph/requests/daoMembership'
-import { type EnsData, useEnsData } from 'src/hooks'
+
+import { type EnsData, useEnsData } from './useEnsData'
 
 export type DaoMembership = Omit<DaoMembershipResponse, 'member' | 'delegate'> & {
   member: EnsData

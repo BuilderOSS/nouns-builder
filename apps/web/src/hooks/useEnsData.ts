@@ -1,8 +1,6 @@
-import { CHAIN_ID } from '@buildeross/types'
 import { Address, isAddress } from 'viem'
 import { useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 
-import { useChainStore } from 'src/stores/useChainStore'
 import { walletSnippet } from 'src/utils/helpers'
 
 export type EnsData = {
@@ -18,13 +16,9 @@ export const useEnsData = (addressOrName?: string): EnsData => {
   const inputAddress = isAddressValid ? (addressOrName as Address) : undefined
   const inputName = isAddressValid ? undefined : (addressOrName as string)
 
-  const chain = useChainStore((x) => x.chain)
-
-  const chainId = chain.id == CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
-
   const { data: ensName, isLoading: ensNameLoading } = useEnsName({
     address: inputAddress,
-    chainId,
+    chainId: 1,
     query: {
       enabled: !!inputAddress,
     },
@@ -32,7 +26,7 @@ export const useEnsData = (addressOrName?: string): EnsData => {
 
   const { data: ensAddress, isLoading: ensAddressLoading } = useEnsAddress({
     name: inputName,
-    chainId,
+    chainId: 1,
     query: {
       enabled: !!inputName,
     },
@@ -40,7 +34,7 @@ export const useEnsData = (addressOrName?: string): EnsData => {
 
   const { data: ensAvatar, isLoading: ensAvatarLoading } = useEnsAvatar({
     name: ensName ?? inputName,
-    chainId,
+    chainId: 1,
     query: {
       enabled: !!ensName || !!inputName,
     },

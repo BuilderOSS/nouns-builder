@@ -223,11 +223,12 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
 }
 
 const useDecodedTxPayload = (txPayload: WCPayload | null) => {
+  const chain = useChainStore((state) => state.chain)
   const target = txPayload?.params[0].to ?? ''
   const calldata = txPayload?.params[0].data ?? '0x'
   const value = txPayload?.params[0].value ?? '0'
 
-  return useDecodedTransactionSingle(target, calldata, value)
+  return useDecodedTransactionSingle(chain.id, target, calldata, value)
 }
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {

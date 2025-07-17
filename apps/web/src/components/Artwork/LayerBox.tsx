@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import React from 'react'
 
 import { Icon } from 'src/components/Icon'
-import { ImageProps } from 'src/hooks'
+import { ImageProps, OrderedTraits } from 'src/hooks'
 import {
   artworkSettingsBox,
   artworkSettingsBoxDropping,
@@ -13,14 +13,6 @@ import {
   artworkSettingsPropertyCount,
   artworkSettingsPropertyName,
 } from 'src/styles/Artwork.css'
-
-interface Trait {
-  trait: string
-  properties: string[]
-  ipfs?: {}[]
-}
-
-export type OrderedTraits = Array<Trait>
 
 export const getLayerName = (idx: number, layers?: OrderedTraits): string => {
   if (idx === 0) {

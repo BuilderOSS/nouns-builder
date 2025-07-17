@@ -5,8 +5,12 @@ import {
 } from '@buildeross/ipfs-service'
 import React from 'react'
 
-import { ArtworkType } from 'src/modules/create-dao/components/Artwork/ArtworkForm.schema'
 import { sanitizeFileName } from 'src/utils/sanitize'
+
+export interface ArtworkType {
+  trait: string
+  properties: string[]
+}
 
 export interface IPFSUpload {
   name: string

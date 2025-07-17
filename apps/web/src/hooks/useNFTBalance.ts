@@ -3,7 +3,23 @@ import { CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
 
-import { SerializedNft } from 'src/services/alchemyService'
+import { NftTokenType } from './useNftMetadata'
+
+export type SerializedNft = {
+  tokenId: string
+  tokenType: NftTokenType
+  balance: string
+  contract: {
+    address: string
+  }
+  name: string | null
+  image: {
+    originalUrl: string
+  }
+  collection: {
+    name: string | null
+  }
+}
 
 export type NFTBalanceReturnType = {
   nfts?: SerializedNft[]

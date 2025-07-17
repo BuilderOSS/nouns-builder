@@ -1,9 +1,6 @@
 import * as Yup from 'yup'
 
-export interface ArtworkType {
-  trait: string
-  properties: string[]
-}
+import { ArtworkType } from 'src/hooks/useArtworkUpload'
 
 export interface ArtworkFormValues {
   projectDescription: string

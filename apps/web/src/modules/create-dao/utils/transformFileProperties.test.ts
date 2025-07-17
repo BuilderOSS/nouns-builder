@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { IPFSUpload } from 'src/hooks'
+import { IPFSUpload, OrderedTraits } from 'src/hooks'
 
-import { OrderedTraits } from '../../../components/Artwork/LayerBox'
 import { transformFileProperties } from './transformFileProperties'
 
 export const mockTraits = ['backgrounds', 'bodies', 'heads', 'glasses', 'shirt']
