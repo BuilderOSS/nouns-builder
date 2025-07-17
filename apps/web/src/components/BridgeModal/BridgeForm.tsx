@@ -10,7 +10,7 @@ import { sendTransaction, waitForTransactionReceipt } from 'wagmi/actions'
 
 import Input from 'src/components/Input/Input'
 import { L2ChainType, PUBLIC_L1_BRIDGE_ADDRESS } from 'src/constants/addresses'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { useBridgeModal } from 'src/hooks/useBridgeModal'
 import { useIsContract } from 'src/hooks/useIsContract'
 import { useChainStore } from 'src/stores/useChainStore'

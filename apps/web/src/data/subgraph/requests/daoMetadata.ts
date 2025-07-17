@@ -1,7 +1,7 @@
 import { encodeFunctionData } from 'viem'
 
+import { L1_CHAINS } from 'src/constants/chains'
 import { metadataAbi } from 'src/data/contract/abis'
-import { L1_CHAINS } from 'src/data/contract/chains'
 import { AddressType, CHAIN_ID } from 'src/typings'
 
 import { SDK } from '../client'

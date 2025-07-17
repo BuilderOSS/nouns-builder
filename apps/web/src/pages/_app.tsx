@@ -16,9 +16,9 @@ import { WagmiProvider } from 'wagmi'
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { NetworkController } from 'src/components/NetworkController'
-import { config } from 'src/data/contract/config'
 import 'src/styles/globals.css'
 import 'src/styles/styles.css'
+import { config } from 'src/utils/wagmi/config'
 
 const queryClient = new QueryClient({
   defaultOptions: {

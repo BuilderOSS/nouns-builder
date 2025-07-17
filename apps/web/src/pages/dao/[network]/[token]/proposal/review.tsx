@@ -6,7 +6,7 @@ import { useAccount } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
 import { CACHE_TIMES } from 'src/constants/cacheTimes'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import getDAOAddresses from 'src/data/contract/requests/getDAOAddresses'
 import { useVotes } from 'src/hooks'
 import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'

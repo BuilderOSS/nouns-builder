@@ -4,12 +4,12 @@ import { NextRequest } from 'next/server'
 import { formatEther } from 'viem'
 import { getBalance } from 'wagmi/actions'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { config as wagmiConfig } from 'src/data/contract/server.config'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { CHAIN_ID } from 'src/typings'
 import { bgForAddress } from 'src/utils/gradient'
 import { formatCryptoVal } from 'src/utils/numbers'
+import { config as wagmiConfig } from 'src/utils/wagmi/server.config'
 
 export type DaoOgMetadata = {
   tokenAddress: `0x${string}`

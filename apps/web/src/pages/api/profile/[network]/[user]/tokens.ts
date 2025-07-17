@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getAddress } from 'viem'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { MyDaosResponse, myDaosRequest } from 'src/data/subgraph/requests/daoQuery'
 import { TokensQueryResponse, tokensQuery } from 'src/data/subgraph/requests/tokensQuery'
 import { NotFoundError } from 'src/services/errors'

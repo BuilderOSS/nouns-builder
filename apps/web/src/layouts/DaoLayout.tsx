@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from 'react'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { DaoContractAddresses, useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
 import { Chain } from 'src/typings'

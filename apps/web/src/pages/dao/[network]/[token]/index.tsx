@@ -8,10 +8,9 @@ import { readContract } from 'wagmi/actions'
 
 import { Meta } from 'src/components/Meta'
 import { CACHE_TIMES } from 'src/constants/cacheTimes'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { auctionAbi } from 'src/data/contract/abis'
 import getDAOAddresses from 'src/data/contract/requests/getDAOAddresses'
-import { config } from 'src/data/contract/server.config'
 import { SDK } from 'src/data/subgraph/client'
 import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
@@ -28,6 +27,7 @@ import {
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
 import { AddressType, CHAIN_ID } from 'src/typings'
+import { config } from 'src/utils/wagmi/server.config'
 
 interface DaoPageProps {
   chainId: CHAIN_ID

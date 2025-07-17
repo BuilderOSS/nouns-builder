@@ -6,7 +6,7 @@ import React from 'react'
 
 import { Avatar } from 'src/components/Avatar'
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { PUBLIC_ALL_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_ALL_CHAINS } from 'src/constants/chains'
 import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
 import { AddressType } from 'src/typings'
 

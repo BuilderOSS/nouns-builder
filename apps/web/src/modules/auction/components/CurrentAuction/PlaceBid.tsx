@@ -8,7 +8,7 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import { ContractButton } from 'src/components/ContractButton'
 import { Icon } from 'src/components/Icon/Icon'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
+import { PUBLIC_IS_TESTNET } from 'src/constants/chains'
 import SWR_KEYS from 'src/constants/swrKeys'
 import { auctionAbi } from 'src/data/contract/abis'
 import { averageWinningBid } from 'src/data/subgraph/requests/averageWinningBid'

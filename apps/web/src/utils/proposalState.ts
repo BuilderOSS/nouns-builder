@@ -1,4 +1,4 @@
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
+import { ProposalState } from 'src/typings'
 import { parseBlockchainDate } from 'src/utils/parseBlockchainDate'
 
 export const isProposalOpen = (state: ProposalState): boolean => {

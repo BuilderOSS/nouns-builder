@@ -5,7 +5,7 @@ import React from 'react'
 import { useAccount, useBalance } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
-import { PUBLIC_ALL_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_ALL_CHAINS } from 'src/constants/chains'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 import { CHAIN_ID } from 'src/typings'
 

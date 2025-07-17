@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { Chain } from 'src/typings'
 
 export interface ChainStoreProps {
@@ -24,3 +24,8 @@ export const useChainStore = create(
     }
   )
 )
+
+export const getChainFromLocalStorage = (): Chain => {
+  const rawChain = localStorage.getItem(CHAIN_STORE_IDENTIFIER)
+  return rawChain ? JSON.parse(rawChain)?.state?.chain : PUBLIC_DEFAULT_CHAINS[0]
+}

@@ -9,7 +9,7 @@ import {
 import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
 
 import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
+import { PUBLIC_IS_TESTNET } from 'src/constants/chains'
 import { AddressType, CHAIN_ID } from 'src/typings'
 
 import { BackendFailedError } from './errors'

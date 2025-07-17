@@ -1,8 +1,9 @@
 import { PublicClient, createPublicClient, http } from 'viem'
 import { foundry } from 'wagmi/chains'
 
-import { chains, transports } from 'src/data/contract/chains'
 import { CHAIN_ID } from 'src/typings'
+
+import { chains, transports } from './wagmi/chains'
 
 let providerMap: Map<CHAIN_ID, PublicClient>
 

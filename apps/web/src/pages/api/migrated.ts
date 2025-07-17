@@ -2,11 +2,11 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { readContract } from 'wagmi/actions'
 
 import { L2_MIGRATION_DEPLOYER, NULL_ADDRESS } from 'src/constants/addresses'
+import { L2_CHAINS } from 'src/constants/chains'
 import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
-import { L2_CHAINS } from 'src/data/contract/chains'
-import { config } from 'src/data/contract/server.config'
 import { AddressType, CHAIN_ID } from 'src/typings'
 import { unpackOptionalArray } from 'src/utils/helpers'
+import { config } from 'src/utils/wagmi/server.config'
 
 export interface L2MigratedResponse {
   migrated:

@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { BASE_URL } from 'src/constants/baseUrl'
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
+import { PUBLIC_IS_TESTNET } from 'src/constants/chains'
 
 const TESTNET_ACCOUNT_ASSOCIATION = {
   // testnet.nouns.build

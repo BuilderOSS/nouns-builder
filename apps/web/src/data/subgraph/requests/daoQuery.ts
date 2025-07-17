@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/nextjs'
 import { isAddress } from 'viem'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { SDK } from 'src/data/subgraph/client'
 import { CHAIN_ID } from 'src/typings'
 

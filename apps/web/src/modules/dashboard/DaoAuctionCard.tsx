@@ -8,7 +8,7 @@ import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { PUBLIC_ALL_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_ALL_CHAINS } from 'src/constants/chains'
 import { auctionAbi } from 'src/data/contract/abis'
 import { useCountdown, useIsMounted } from 'src/hooks'
 import { AddressType } from 'src/typings'

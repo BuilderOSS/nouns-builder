@@ -1,7 +1,7 @@
 import { readContract, readContracts } from 'wagmi/actions'
 
-import { config } from 'src/data/contract/server.config'
 import { AddressType, CHAIN_ID } from 'src/typings'
+import { config } from 'src/utils/wagmi/server.config'
 
 import { metadataAbi } from '../abis'
 

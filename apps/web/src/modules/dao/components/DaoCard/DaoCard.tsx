@@ -5,7 +5,7 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
+import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { useCountdown } from 'src/hooks/useCountdown'
 import { useIsMounted } from 'src/hooks/useIsMounted'
 import { CHAIN_ID } from 'src/typings'
