@@ -21,7 +21,7 @@ import { RENDERER_BASE } from 'src/constants/rendererBase'
 import { managerAbi } from 'src/data/contract/abis'
 import { managerV2Abi } from 'src/data/contract/abis/ManagerV2'
 import { L2_CHAINS } from 'src/data/contract/chains'
-import { formatAuctionDuration, formatFounderAllocation } from 'src/modules/create-dao'
+import { formatFounderAllocation } from 'src/modules/create-dao'
 import { useChainStore } from 'src/stores/useChainStore'
 import {
   deployCheckboxHelperText,
@@ -30,6 +30,7 @@ import {
   deployContractButtonStyle,
 } from 'src/styles/deploy.css'
 import type { AddressType } from 'src/typings'
+import { formatDuration } from 'src/utils/formatDuration'
 import { toSeconds } from 'src/utils/helpers'
 import { sanitizeStringForJSON } from 'src/utils/sanitize'
 
@@ -274,7 +275,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
             <ReviewSection subHeading="Auction Settings">
               <ReviewItem
                 label="Auction Duration"
-                value={formatAuctionDuration(auctionSettings.auctionDuration)}
+                value={formatDuration(auctionSettings.auctionDuration)}
               />
               <ReviewItem
                 label="Auction Reserve Price"

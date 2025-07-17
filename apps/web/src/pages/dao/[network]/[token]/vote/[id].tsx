@@ -28,7 +28,6 @@ import {
   ProposalDescription,
   ProposalDetailsGrid,
   ProposalHeader,
-  isProposalOpen,
 } from 'src/modules/proposal'
 import { PropDates } from 'src/modules/proposal/components/PropDates'
 import { ProposalVotes } from 'src/modules/proposal/components/ProposalVotes'
@@ -38,6 +37,7 @@ import { decodeTransaction } from 'src/services/abiService'
 import { useChainStore } from 'src/stores/useChainStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import type { AddressType } from 'src/typings'
+import { isProposalOpen } from 'src/utils/proposalState'
 
 export interface VotePageProps {
   proposalId: string

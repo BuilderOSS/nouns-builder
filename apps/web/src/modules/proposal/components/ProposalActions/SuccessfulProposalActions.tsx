@@ -12,9 +12,8 @@ import { Proposal, getProposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 import { BytesType } from 'src/typings'
+import { isProposalExecutable, isProposalSuccessful } from 'src/utils/proposalState'
 
-import { isProposalSuccessful } from '../../utils'
-import { isProposalExecutable } from '../../utils/isProposalExecutable'
 import { GovernorContractButton } from '../GovernorContractButton'
 
 interface SuccessfulProposalActionsProps {
