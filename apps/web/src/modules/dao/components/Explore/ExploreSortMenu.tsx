@@ -2,8 +2,13 @@ import { Flex, Select } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
 
-import { SORT_KEY } from 'src/constants/sortKey'
 import { Auction_OrderBy } from 'src/data/subgraph/sdk.generated'
+
+const SORT_KEY = {
+  [Auction_OrderBy.StartTime]: 'Created',
+  [Auction_OrderBy.HighestBidAmount]: 'Price',
+  [Auction_OrderBy.EndTime]: 'Ending',
+}
 
 interface ExploreSortMenuProps {
   choice: string

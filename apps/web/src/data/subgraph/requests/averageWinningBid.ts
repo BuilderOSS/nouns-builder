@@ -1,6 +1,5 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
-
-import { CHAIN_ID } from 'src/typings'
 
 import { SDK } from '../client'
 

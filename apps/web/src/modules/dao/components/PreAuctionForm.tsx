@@ -1,3 +1,4 @@
+import { AddressType } from '@buildeross/types'
 import { Box, Flex, Stack } from '@buildeross/zord'
 import { Formik, FormikValues } from 'formik'
 import isEqual from 'lodash/isEqual'
@@ -13,8 +14,8 @@ import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { NULL_ADDRESS } from 'src/constants/addresses'
 import { auctionAbi } from 'src/data/contract/abis'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { AddressType } from 'src/typings'
 import { getEnsAddress } from 'src/utils/ens'
 import {
   compareAndReturn,
@@ -23,7 +24,6 @@ import {
   unpackOptionalArray,
 } from 'src/utils/helpers'
 
-import { useDaoStore } from '../stores'
 import { Section } from './AdminForm/Section'
 import { PreAuctionFormValues, preAuctionValidationSchema } from './PreAuctionForm.schema'
 

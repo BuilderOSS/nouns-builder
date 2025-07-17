@@ -1,8 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 import { readContracts } from 'wagmi/actions'
 
 import { metadataAbi } from 'src/data/contract/abis'
-import { CHAIN_ID } from 'src/typings'
 import { config } from 'src/utils/wagmi/server.config'
 
 export const getMetadataAttributes = async (

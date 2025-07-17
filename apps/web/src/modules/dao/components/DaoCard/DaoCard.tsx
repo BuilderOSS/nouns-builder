@@ -1,4 +1,5 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
@@ -8,7 +9,6 @@ import { FallbackNextImage } from 'src/components/FallbackImage'
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { useCountdown } from 'src/hooks/useCountdown'
 import { useIsMounted } from 'src/hooks/useIsMounted'
-import { CHAIN_ID } from 'src/typings'
 import { BigNumberish } from 'src/utils/numbers'
 import { formatCryptoVal } from 'src/utils/numbers'
 

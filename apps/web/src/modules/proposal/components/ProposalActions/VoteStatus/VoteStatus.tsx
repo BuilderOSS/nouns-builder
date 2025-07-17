@@ -9,7 +9,7 @@ import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,
 } from 'src/data/subgraph/sdk.generated'
-import { useDaoStore } from 'src/modules/dao'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 
 import Pending from './Pending'

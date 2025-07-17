@@ -1,4 +1,4 @@
-import { CHAIN_ID } from 'src/typings'
+import { CHAIN_ID } from '@buildeross/types'
 
 export const SAFE_APP_URL: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'https://app.safe.global/apps/open?safe=eth',

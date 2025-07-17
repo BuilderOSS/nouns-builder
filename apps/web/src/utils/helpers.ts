@@ -1,8 +1,8 @@
+import { Duration } from '@buildeross/types'
 import isEqual from 'lodash/isEqual'
 import { isAddress } from 'viem'
 
 import { PUBLIC_ALL_CHAINS } from 'src/constants/chains'
-import { Duration } from 'src/typings'
 
 /**
  *

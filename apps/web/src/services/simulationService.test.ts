@@ -1,8 +1,7 @@
+import { CHAIN_ID } from '@buildeross/types'
 import axios from 'axios'
 import { Address, parseEther } from 'viem'
 import { vi } from 'vitest'
-
-import { CHAIN_ID } from 'src/typings'
 
 import { InvalidRequestError } from './errors'
 import { SimulationOutput, SimulationRequestBody, simulate } from './simulationService'

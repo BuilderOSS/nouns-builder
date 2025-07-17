@@ -1,3 +1,4 @@
+import { AddressType } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useState } from 'react'
 import {
@@ -11,9 +12,8 @@ import { waitForTransactionReceipt } from 'wagmi/actions'
 
 import { ContractButton } from 'src/components/ContractButton'
 import { auctionAbi } from 'src/data/contract/abis'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { AddressType } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import { auctionActionButtonVariants } from '../Auction.css'
 

@@ -1,4 +1,4 @@
-import { CHAIN_ID } from 'src/typings'
+import { CHAIN_ID } from '@buildeross/types'
 
 export const ALCHEMY_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'eth-mainnet',

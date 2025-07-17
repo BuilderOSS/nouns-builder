@@ -1,7 +1,7 @@
+import { Duration } from '@buildeross/types'
 import * as Yup from 'yup'
 
 import { TokenAllocation, auctionSettingsValidationSchema } from 'src/modules/create-dao'
-import { Duration } from 'src/typings'
 import {
   addressValidationSchema,
   durationValidationSchema,

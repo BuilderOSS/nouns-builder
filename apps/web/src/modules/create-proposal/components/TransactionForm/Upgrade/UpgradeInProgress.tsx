@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { Icon } from 'src/components/Icon'
 import { VersionType } from 'src/modules/create-proposal/constants'
 import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 export interface UpgradeInProgressProps {
   contractVersion: VersionType

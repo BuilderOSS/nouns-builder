@@ -1,3 +1,4 @@
+import { CHAIN_ID, Chain } from '@buildeross/types'
 import {
   base,
   baseSepolia,
@@ -8,8 +9,6 @@ import {
   zora,
   zoraSepolia,
 } from 'wagmi/chains'
-
-import { CHAIN_ID, Chain } from 'src/typings'
 
 type Chains = [Chain, ...Chain[]]
 

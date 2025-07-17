@@ -1,8 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 
 import { getProposalState } from 'src/data/contract/requests/getProposalState'
 import { SDK } from 'src/data/subgraph/client'
-import { CHAIN_ID } from 'src/typings'
 
 import { Proposal } from './proposalQuery'
 

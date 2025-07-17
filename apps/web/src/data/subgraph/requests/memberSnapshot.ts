@@ -1,8 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 
 import { SDK } from 'src/data/subgraph/client'
 import { applyL1ToL2Alias } from 'src/modules/create-proposal/utils/applyL1ToL2Alias'
-import { CHAIN_ID } from 'src/typings'
 
 import { DaoTokenOwner_OrderBy, OrderDirection } from '../sdk.generated'
 

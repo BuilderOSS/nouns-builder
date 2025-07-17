@@ -1,6 +1,5 @@
+import { AddressType } from '@buildeross/types'
 import { create } from 'zustand'
-
-import { AddressType } from 'src/typings'
 
 export interface DaoContractAddresses {
   token?: AddressType

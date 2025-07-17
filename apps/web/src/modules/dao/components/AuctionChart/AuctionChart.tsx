@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 import useSWR from 'swr'
 
 import { AuctionHistoryQuery } from 'src/data/subgraph/sdk.generated'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import { AuctionGraph } from './AuctionGraph'
 import { AuctionGraphLayout, DisplayPanel, SkeletonPanel } from './Layouts'

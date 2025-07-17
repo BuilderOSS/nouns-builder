@@ -7,10 +7,10 @@ import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { statisticContent } from 'src/styles/About.css'
 import { formatCryptoVal } from 'src/utils/numbers'
 
-import { useDaoStore } from '../../stores'
 import { erc20AssetsWrapper } from './Treasury.css'
 
 export const TokenBalance: React.FC = () => {

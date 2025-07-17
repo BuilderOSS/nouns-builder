@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers } from 'formik'
@@ -9,9 +10,8 @@ import { L1_CROSS_DOMAIN_MESSENGER, L2_MIGRATION_DEPLOYER } from 'src/constants/
 import { messengerABI } from 'src/data/contract/abis/L1CrossDomainMessenger'
 import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import bridgeTreasuryFormSchema, {
   BridgeTreasuryValues,

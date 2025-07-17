@@ -1,11 +1,11 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { DecodedArg } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 
 import { FallbackImage } from 'src/components/FallbackImage'
 import { useNftMetadata } from 'src/hooks/useNftMetadata'
 import { useChainStore } from 'src/stores/useChainStore'
-import { DecodedArg } from 'src/typings'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 

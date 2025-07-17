@@ -1,7 +1,6 @@
+import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { formatEther } from 'viem'
-
-import { CHAIN_ID } from 'src/typings'
 
 import { SDK } from '../client'
 import { AuctionBidFragment } from '../sdk.generated'

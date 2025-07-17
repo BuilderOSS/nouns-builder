@@ -1,3 +1,4 @@
+import { AddressType } from '@buildeross/types'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -29,11 +30,10 @@ import {
   useProposalStore,
 } from 'src/modules/create-proposal'
 import { useRendererBaseFix } from 'src/modules/create-proposal/hooks'
-import { useDaoStore } from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { notFoundWrap } from 'src/styles/404.css'
-import { AddressType } from 'src/typings'
 
 const CreateProposalPage: NextPageWithLayout = () => {
   const router = useRouter()

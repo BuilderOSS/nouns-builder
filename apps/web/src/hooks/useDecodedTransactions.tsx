@@ -1,3 +1,4 @@
+import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
 import axios from 'axios'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
@@ -5,7 +6,6 @@ import { formatEther } from 'viem'
 import SWR_KEYS from 'src/constants/swrKeys'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID, DecodedTransactionData } from 'src/typings'
 
 export type DecodedTransactionSuccess = {
   target: string

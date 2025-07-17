@@ -1,9 +1,9 @@
+import { CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
 
 import SWR_KEYS from 'src/constants/swrKeys'
 import { TokenMetadata } from 'src/services/alchemyService'
-import { CHAIN_ID } from 'src/typings'
 
 export type TokenMetadataReturnType = {
   metadata?: TokenMetadata[]

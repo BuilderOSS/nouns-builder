@@ -13,9 +13,9 @@ import {
   getEscrowBundler,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
-import { useDaoStore } from 'src/modules/dao/stores'
 import { useInvoiceData } from 'src/modules/proposal/components/ProposalDescription/MilestoneDetails/useInvoiceData'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 
 import { PropDateCard } from './PropDateCard'

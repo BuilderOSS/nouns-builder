@@ -7,9 +7,9 @@ import SmartInput from 'src/components/Fields/SmartInput'
 import { Icon } from 'src/components/Icon'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { tokenAbi } from 'src/data/contract/abis'
-import { useDaoStore } from 'src/modules/dao'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import { GovernorContractButton } from '../GovernorContractButton'
 

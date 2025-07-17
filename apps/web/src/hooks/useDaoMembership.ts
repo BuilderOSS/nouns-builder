@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 
 import SWR_KEYS from 'src/constants/swrKeys'
@@ -6,7 +7,6 @@ import {
   daoMembershipRequest,
 } from 'src/data/subgraph/requests/daoMembership'
 import { type EnsData, useEnsData } from 'src/hooks'
-import { AddressType, CHAIN_ID } from 'src/typings'
 
 export type DaoMembership = Omit<DaoMembershipResponse, 'member' | 'delegate'> & {
   member: EnsData

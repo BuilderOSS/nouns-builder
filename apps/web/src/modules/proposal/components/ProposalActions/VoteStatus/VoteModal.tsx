@@ -1,3 +1,4 @@
+import { BytesType } from '@buildeross/types'
 import { Atoms, Box, Button, Flex, Stack, Text, theme } from '@buildeross/zord'
 import { Field, Formik, Form as FormikForm } from 'formik'
 import React, { Fragment } from 'react'
@@ -14,8 +15,8 @@ import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import SWR_KEYS from 'src/constants/swrKeys'
 import { governorAbi } from 'src/data/contract/abis'
 import { getProposal } from 'src/data/subgraph/requests/proposalQuery'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import {
   proposalFormTitle,
   voteModalFieldset,
@@ -24,7 +25,6 @@ import {
   voteModalRadioInput,
   voteModalReason,
 } from 'src/styles/Proposals.css'
-import { BytesType } from 'src/typings'
 
 enum Choice {
   AGAINST = '0',

@@ -13,8 +13,8 @@ import { NUMBER, TEXT, TEXTAREA } from 'src/components/Fields/types'
 import Accordion from 'src/components/Home/accordian'
 import { Icon } from 'src/components/Icon'
 import SingleMediaUpload from 'src/components/SingleMediaUpload/SingleMediaUpload'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import EscrowDetailsDisplay from './EscrowDetailsDisplay'
 import {

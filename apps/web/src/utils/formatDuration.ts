@@ -1,4 +1,4 @@
-import { Duration } from 'src/typings'
+import { Duration } from '@buildeross/types'
 
 export const formatDuration = (duration: Duration): string => {
   const days = `${duration.days || '0'} ${Number(duration.days) === 1 ? 'day' : 'days'}`

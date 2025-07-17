@@ -1,8 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { Address } from 'viem'
 
 import { SDK } from 'src/data/subgraph/client'
-import { CHAIN_ID } from 'src/typings'
 
 import { DaoVoter_OrderBy, OrderDirection } from '../sdk.generated'
 

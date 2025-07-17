@@ -1,7 +1,7 @@
+import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 
 import { SDK } from 'src/data/subgraph/client'
-import { CHAIN_ID } from 'src/typings'
 
 import { Auction_OrderBy, OrderDirection } from '../sdk.generated'
 

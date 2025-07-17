@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID, Chain } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
@@ -21,7 +22,6 @@ import {
   About,
   Activity,
   AdminForm,
-  DaoContractAddresses,
   SectionHandler,
   SmartContracts,
   Treasury,
@@ -30,7 +30,7 @@ import { DaoTopSection } from 'src/modules/dao/components/DaoTopSection'
 import FeedTab from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
-import { AddressType, CHAIN_ID, Chain } from 'src/typings'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 import { isPossibleMarkdown } from 'src/utils/helpers'
 
 export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>

@@ -1,9 +1,9 @@
+import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { isAddress } from 'viem'
 
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { SDK } from 'src/data/subgraph/client'
-import { CHAIN_ID } from 'src/typings'
 
 export type MyDaosResponse = Array<{
   name: string

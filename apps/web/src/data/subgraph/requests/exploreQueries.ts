@@ -1,8 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'
 
 import { SDK } from 'src/data/subgraph/client'
-import { CHAIN_ID } from 'src/typings'
 
 import {
   Auction_Filter,

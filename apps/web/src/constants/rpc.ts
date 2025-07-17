@@ -1,6 +1,5 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { foundry } from 'wagmi/chains'
-
-import { CHAIN_ID } from 'src/typings'
 
 import { getAlchemyRpcUrl } from './alchemy'
 import { getInfuraRpcUrl } from './infura'

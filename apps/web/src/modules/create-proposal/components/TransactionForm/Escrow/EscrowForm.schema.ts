@@ -1,7 +1,7 @@
+import { AddressType } from '@buildeross/types'
 import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
 
-import { AddressType } from 'src/typings'
 import { addressValidationSchemaWithError } from 'src/utils/yup'
 
 export interface MilestoneFormValues {

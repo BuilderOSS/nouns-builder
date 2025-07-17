@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import intersection from 'lodash/intersection'
 import isNil from 'lodash/isNil'
 import isUndefined from 'lodash/isUndefined'
@@ -20,8 +21,7 @@ import {
   TransactionType,
   VersionType,
 } from 'src/modules/create-proposal'
-import { DaoContractAddresses } from 'src/modules/dao'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
 interface AvailableUpgrade {
   shouldUpgrade: boolean

@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Hex, getAddress, isAddress, isHex } from 'viem'
 
 import { PROPDATE_SCHEMA_UID } from 'src/constants/eas'
@@ -8,7 +9,6 @@ import {
   isChainIdSupportedByEAS,
 } from 'src/data/eas/helpers'
 import { AttestationFragment } from 'src/data/eas/sdk.generated'
-import { CHAIN_ID } from 'src/typings'
 import { fetchFromURI } from 'src/utils/fetch'
 
 export interface PropdateMessage {

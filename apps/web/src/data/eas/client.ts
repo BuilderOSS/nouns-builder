@@ -1,7 +1,7 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { GraphQLClient } from 'graphql-request'
 
 import { EAS_GRAPHQL_URL } from 'src/constants/eas'
-import { CHAIN_ID } from 'src/typings'
 
 import { getSdk } from './sdk.generated'
 

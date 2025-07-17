@@ -9,8 +9,8 @@ import { DaoVoter } from 'src/data/subgraph/requests/daoVoters'
 import { usePagination } from 'src/hooks/usePagination'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
-import { useDaoStore } from '../../stores'
 import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
 

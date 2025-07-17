@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import useSWRImmutable from 'swr/immutable'
 import { encodeAbiParameters, parseAbiParameters } from 'viem'
 import { useReadContracts } from 'wagmi'
@@ -15,8 +16,7 @@ import {
   tokenAbi,
   treasuryAbi,
 } from 'src/data/contract/abis'
-import { DaoContractAddresses } from 'src/modules/dao'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 import { unpackOptionalArray } from 'src/utils/helpers'
 
 import { applyL1ToL2Alias } from '../utils/applyL1ToL2Alias'

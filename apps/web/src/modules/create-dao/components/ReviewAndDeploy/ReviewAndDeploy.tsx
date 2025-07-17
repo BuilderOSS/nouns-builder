@@ -1,4 +1,5 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import type { AddressType } from '@buildeross/types'
 import { Box, Flex, atoms } from '@buildeross/zord'
 import React, { useState } from 'react'
 import {
@@ -29,7 +30,6 @@ import {
   deployCheckboxWrapperStyle,
   deployContractButtonStyle,
 } from 'src/styles/deploy.css'
-import type { AddressType } from 'src/typings'
 import { formatDuration } from 'src/utils/formatDuration'
 import { toSeconds } from 'src/utils/helpers'
 import { sanitizeStringForJSON } from 'src/utils/sanitize'

@@ -1,7 +1,7 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { GraphQLClient } from 'graphql-request'
 
 import { PUBLIC_SUBGRAPH_URL } from 'src/constants/subgraph'
-import { CHAIN_ID } from 'src/typings'
 
 import { getSdk } from './sdk.generated'
 

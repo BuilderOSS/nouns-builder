@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import _ from 'lodash'
 import { useMemo } from 'react'
@@ -11,7 +12,6 @@ import {
   decodeEscrowDataV1,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
-import { AddressType, CHAIN_ID } from 'src/typings'
 import { fetchFromURI } from 'src/utils/fetch'
 import { getProvider } from 'src/utils/provider'
 

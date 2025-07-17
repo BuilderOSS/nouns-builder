@@ -1,3 +1,4 @@
+import type { AddressType } from '@buildeross/types'
 import { Box, Flex } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -22,7 +23,7 @@ import {
 import type { Proposal_Filter } from 'src/data/subgraph/sdk.generated'
 import { decodeTransactions } from 'src/hooks/useDecodedTransactions'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import { type DaoContractAddresses, SectionHandler, useDaoStore } from 'src/modules/dao'
+import { SectionHandler } from 'src/modules/dao'
 import {
   ProposalActions,
   ProposalDescription,
@@ -35,8 +36,8 @@ import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
 import { decodeTransaction } from 'src/services/abiService'
 import { useChainStore } from 'src/stores/useChainStore'
+import { type DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
-import type { AddressType } from 'src/typings'
 import { isProposalOpen } from 'src/utils/proposalState'
 
 export interface VotePageProps {

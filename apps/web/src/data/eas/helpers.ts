@@ -1,5 +1,6 @@
+import { CHAIN_ID } from '@buildeross/types'
+
 import { EAS_GRAPHQL_URL } from 'src/constants/eas'
-import { CHAIN_ID } from 'src/typings'
 
 // NOTE: Zora is not supported by EAS yet
 export const isChainIdSupportedByEAS = (chainId: CHAIN_ID): boolean => {

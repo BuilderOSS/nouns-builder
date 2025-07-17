@@ -1,7 +1,6 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
-
-import { CHAIN_ID } from 'src/typings'
 
 export type IsGnosisSafeReturnType = {
   isGnosisSafe: boolean

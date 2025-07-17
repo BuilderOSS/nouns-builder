@@ -1,4 +1,5 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { AddressType } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
@@ -11,7 +12,6 @@ import { FallbackNextImage } from 'src/components/FallbackImage'
 import { PUBLIC_ALL_CHAINS } from 'src/constants/chains'
 import { auctionAbi } from 'src/data/contract/abis'
 import { useCountdown, useIsMounted } from 'src/hooks'
-import { AddressType } from 'src/typings'
 
 import { chainIdToSlug } from '../../utils/helpers'
 import { overflowEllipsis } from '../auction/components/Auction.css'

@@ -1,12 +1,12 @@
+import { AddressType } from '@buildeross/types'
 import { encodeFunctionData, parseEther } from 'viem'
 
 import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from 'src/data/contract/abis'
-import { AddressType } from 'src/typings'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 import { toSeconds } from 'src/utils/helpers'
 import { sanitizeStringForJSON } from 'src/utils/sanitize'
 
-import { AdminFormValues } from '../components/AdminForm'
-import { DaoContractAddresses } from '../stores'
+import { AdminFormValues } from './AdminForm.schema'
 
 type FormValuesTransactionMap = {
   [K in keyof AdminFormValues]: {
@@ -130,7 +130,7 @@ export const formValuesToTransactionMap: FormValuesTransactionMap = {
         abi: tokenAbi,
         functionName: 'updateFounders',
         args: [
-          value.map((x) => ({
+          value.map((x: any) => ({
             wallet: x.founderAddress as AddressType,
             ownershipPct: BigInt(x.allocationPercentage),
             vestExpiry: BigInt(x.endDate),

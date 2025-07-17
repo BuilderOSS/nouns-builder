@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { IPFSUpload } from 'src/hooks'
-import { DaoContractAddresses } from 'src/modules/dao'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
 import { OrderedTraits } from '../../../components/Artwork/LayerBox'
 import {

@@ -1,7 +1,7 @@
+import { Duration } from '@buildeross/types'
 import * as Yup from 'yup'
 
 import { auctionReservePriceValidationSchema } from 'src/modules/create-dao'
-import { Duration } from 'src/typings'
 import { addressValidationOptionalSchema, durationValidationSchema } from 'src/utils/yup'
 
 export interface PreAuctionFormValues {

@@ -1,6 +1,6 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { readContract, readContracts } from 'wagmi/actions'
 
-import { AddressType, CHAIN_ID } from 'src/typings'
 import { config } from 'src/utils/wagmi/server.config'
 
 import { metadataAbi } from '../abis'

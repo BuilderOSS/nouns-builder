@@ -1,8 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address, isAddress } from 'viem'
 import { useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
 import { walletSnippet } from 'src/utils/helpers'
 
 export type EnsData = {

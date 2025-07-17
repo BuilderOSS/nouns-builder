@@ -1,4 +1,4 @@
-import { ProposalState } from 'src/typings'
+import { ProposalState } from '@buildeross/types'
 
 import {
   isProposalExecutable,

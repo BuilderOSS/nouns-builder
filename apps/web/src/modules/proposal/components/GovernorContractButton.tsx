@@ -14,8 +14,8 @@ import { ContractButton } from 'src/components/ContractButton'
 import SWR_KEYS from 'src/constants/swrKeys'
 import { governorAbi } from 'src/data/contract/abis'
 import { getProposal } from 'src/data/subgraph/requests/proposalQuery'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import { uploadingSpinnerWhite } from './GovernorContractButton.css'
 

@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
@@ -18,22 +19,21 @@ import {
 import { useVotes } from 'src/hooks'
 import { useDaoMembership } from 'src/hooks/useDaoMembership'
 import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
+import { useDelegate } from 'src/hooks/useDelegate'
 import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import {
   createProposalBtn,
   delegateBtn,
   selectDelegateBtn,
 } from 'src/styles/Proposals.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { AddressType, CHAIN_ID } from 'src/typings'
 import { walletSnippet } from 'src/utils/helpers'
 
-import { useDelegate } from '../../hooks'
-import { useDaoStore } from '../../stores'
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
 import { MobileMenu } from './MobileMenu'

@@ -1,9 +1,9 @@
+import { ProposalState } from '@buildeross/types'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
 
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { ProposalState } from 'src/typings'
 
 import { formatTime, parseBgColor, parseState, parseTime } from './ProposalStatus.helper'
 

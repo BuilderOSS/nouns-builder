@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
@@ -16,9 +17,8 @@ import {
   DropdownSelect,
   SelectOption,
 } from 'src/modules/create-proposal/components/DropdownSelect'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { getEnsAddress } from 'src/utils/ens'
 import { walletSnippet } from 'src/utils/helpers'
 import { formatCryptoVal } from 'src/utils/numbers'

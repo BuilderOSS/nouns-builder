@@ -15,8 +15,8 @@ import {
 } from 'src/constants/eas'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { Transaction, useProposalStore } from 'src/modules/create-proposal/stores'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { getEnsAddress } from 'src/utils/ens'
 import { addressValidationSchemaWithError } from 'src/utils/yup'
 

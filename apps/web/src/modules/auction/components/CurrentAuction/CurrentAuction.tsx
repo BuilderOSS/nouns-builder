@@ -1,3 +1,4 @@
+import { AddressType, Chain } from '@buildeross/types'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import React, { Fragment, useState } from 'react'
@@ -7,7 +8,6 @@ import { useReadContract } from 'wagmi'
 import { auctionAbi } from 'src/data/contract/abis'
 import { AuctionBidFragment } from 'src/data/subgraph/sdk.generated'
 import { useTimeout } from 'src/hooks/useTimeout'
-import { AddressType, Chain } from 'src/typings'
 
 import { AuctionDetails } from '../AuctionDetails'
 import { BidAmount } from '../BidAmount'

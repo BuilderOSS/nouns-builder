@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import isUndefined from 'lodash/isUndefined'
 import pickBy from 'lodash/pickBy'
 import useSWR from 'swr'
@@ -15,8 +16,7 @@ import {
   Transaction,
   TransactionType,
 } from 'src/modules/create-proposal'
-import { DaoContractAddresses } from 'src/modules/dao'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
 interface RendererBaseFix {
   shouldFix: boolean

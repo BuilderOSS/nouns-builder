@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Core } from '@walletconnect/core'
 import { SessionTypes, SignClientTypes } from '@walletconnect/types'
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
@@ -7,9 +8,8 @@ import { getAddress, zeroHash } from 'viem'
 
 import { BASE_URL } from 'src/constants/baseUrl'
 import { WALLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 export type WCParams = {
   chainId: CHAIN_ID

@@ -1,7 +1,7 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 
 import { SDK } from 'src/data/subgraph/client'
-import { CHAIN_ID } from 'src/typings'
 
 export type DaoMembershipResponse = {
   member: Address

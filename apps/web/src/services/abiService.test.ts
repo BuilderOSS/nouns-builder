@@ -1,9 +1,9 @@
+import { CHAIN_ID } from '@buildeross/types'
 import axios from 'axios'
 import Redis from 'ioredis'
 import { Hex } from 'viem'
 import { describe, expect, it, vi } from 'vitest'
 
-import { CHAIN_ID } from 'src/typings'
 import { getProvider } from 'src/utils/provider'
 
 import { getContractABIByAddress } from './abiService'

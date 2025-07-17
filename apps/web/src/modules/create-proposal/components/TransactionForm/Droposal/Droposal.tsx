@@ -1,3 +1,4 @@
+import { AddressType } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import { encodeFunctionData, parseEther } from 'viem'
@@ -7,7 +8,6 @@ import { zoraNFTCreatorAbi } from 'src/data/contract/abis/ZoraNFTCreator'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
-import { AddressType } from 'src/typings'
 import { getEnsAddress } from 'src/utils/ens'
 
 import { DroposalForm } from './DroposalForm'

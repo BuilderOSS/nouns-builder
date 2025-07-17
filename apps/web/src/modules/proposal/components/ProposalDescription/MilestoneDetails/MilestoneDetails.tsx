@@ -1,4 +1,5 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Spinner, Stack, Text, atoms } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import Link from 'next/link'
@@ -18,9 +19,8 @@ import { useIsGnosisSafe } from 'src/hooks/useIsGnosisSafe'
 import { useVotes } from 'src/hooks/useVotes'
 import { TransactionType } from 'src/modules/create-proposal'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import { useInvoiceData } from './useInvoiceData'
 

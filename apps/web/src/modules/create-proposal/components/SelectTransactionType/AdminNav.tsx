@@ -5,8 +5,8 @@ import { useReadContract } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
 import { auctionAbi } from 'src/data/contract/abis'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { unpackOptionalArray } from 'src/utils/helpers'
 
 const AdminNav = () => {

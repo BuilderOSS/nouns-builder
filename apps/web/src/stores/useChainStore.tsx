@@ -1,8 +1,8 @@
+import { Chain } from '@buildeross/types'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
-import { Chain } from 'src/typings'
 
 export interface ChainStoreProps {
   chain: Chain

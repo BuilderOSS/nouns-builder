@@ -7,8 +7,8 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import { ContractButton } from 'src/components/ContractButton'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { metadataAbi, tokenAbi } from 'src/data/contract/abis'
-import { DaoContractAddresses, useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 import {
   deployPendingButtonStyle,
   infoSectionLabelStyle,

@@ -1,4 +1,4 @@
-import { CHAIN_ID } from 'src/typings'
+import { CHAIN_ID } from '@buildeross/types'
 
 const INFURA_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'mainnet',

@@ -1,6 +1,5 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Hex } from 'viem'
-
-import { CHAIN_ID } from 'src/typings'
 
 export const EAS_CONTRACT_ADDRESS: Partial<Record<CHAIN_ID, `0x${string}`>> = {
   [CHAIN_ID.ETHEREUM]: '0xA1207F3BBa224E2c9c3c6D5aF63D0eb1582Ce587',

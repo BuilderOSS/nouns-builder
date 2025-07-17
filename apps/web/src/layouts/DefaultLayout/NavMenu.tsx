@@ -1,3 +1,4 @@
+import { CHAIN_ID, Chain } from '@buildeross/types'
 import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
 import axios from 'axios'
 import Image from 'next/image'
@@ -19,7 +20,6 @@ import { useBridgeModal } from 'src/hooks/useBridgeModal'
 import { useEnsData } from 'src/hooks/useEnsData'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID, Chain } from 'src/typings'
 import { formatCryptoVal } from 'src/utils/numbers'
 
 import { ConnectButton } from './ConnectButton'

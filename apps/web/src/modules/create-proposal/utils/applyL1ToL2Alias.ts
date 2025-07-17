@@ -1,8 +1,8 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getBytecode, readContract } from 'wagmi/actions'
 
 import { L2_MIGRATION_DEPLOYER } from 'src/constants/addresses'
 import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
-import { AddressType, CHAIN_ID } from 'src/typings'
 import { config } from 'src/utils/wagmi/server.config'
 
 // We are calling a pure function so we can default to any network with an L2 migration deployer

@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Hex, getAddress, isAddress } from 'viem'
 
 import { ESCROW_DELEGATE_SCHEMA_UID } from 'src/constants/eas'
@@ -7,7 +8,6 @@ import {
   getDecodedValue,
   isChainIdSupportedByEAS,
 } from 'src/data/eas/helpers'
-import { CHAIN_ID } from 'src/typings'
 
 const SMART_INVOICE_MULTISIG = `0xD609883e5eb442d364Aa57369224bE839A38C6f9`
 const BUILDER_DAO_TREASURY = `0xcf325a4c78912216249b818521b0798a0f904c10`

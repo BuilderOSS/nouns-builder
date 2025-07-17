@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useRouter } from 'next/router'
 import { useSWRConfig } from 'swr'
 import { useConfig, useWatchContractEvent } from 'wagmi'
@@ -7,8 +8,7 @@ import SWR_KEYS from 'src/constants/swrKeys'
 import { auctionAbi } from 'src/data/contract/abis'
 import { getBids } from 'src/data/subgraph/requests/getBids'
 import { awaitSubgraphSync } from 'src/data/subgraph/requests/sync'
-import { useDaoStore } from 'src/modules/dao'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 export const useAuctionEvents = ({
   chainId,

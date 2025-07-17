@@ -1,4 +1,4 @@
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 
 export type L2ChainType =
   | CHAIN_ID.OPTIMISM

@@ -1,7 +1,6 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { PublicClient, createPublicClient, http } from 'viem'
 import { foundry } from 'wagmi/chains'
-
-import { CHAIN_ID } from 'src/typings'
 
 import { chains, transports } from './wagmi/chains'
 

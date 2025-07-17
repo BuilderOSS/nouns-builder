@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -15,7 +16,6 @@ import {
   DaoFragment,
   ProposalFragment,
 } from 'src/data/subgraph/sdk.generated'
-import { AddressType, CHAIN_ID } from 'src/typings'
 
 import { DaoFeed } from '../dao'
 import { DaoAuctionCard } from './DaoAuctionCard'

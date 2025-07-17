@@ -1,3 +1,4 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Flex, Text, atoms, theme } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -17,16 +18,14 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import {
   Activity,
-  DaoContractAddresses,
   PreAuction,
   PreAuctionForm,
   SectionHandler,
   SmartContracts,
-  useDaoStore,
 } from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 import { config } from 'src/utils/wagmi/server.config'
 
 interface DaoPageProps {

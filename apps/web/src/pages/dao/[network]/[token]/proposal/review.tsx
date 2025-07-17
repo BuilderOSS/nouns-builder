@@ -1,3 +1,4 @@
+import { AddressType } from '@buildeross/types'
 import { Box, Flex, Stack, Text, atoms } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -16,12 +17,11 @@ import {
   ReviewProposalForm,
   useProposalStore,
 } from 'src/modules/create-proposal'
-import { useDaoStore } from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { notFoundWrap } from 'src/styles/404.css'
-import { AddressType } from 'src/typings'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
   const { isMobile } = useLayoutStore()

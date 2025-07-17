@@ -1,10 +1,10 @@
 import React from 'react'
 
+import { useDaoAuction } from 'src/hooks/useDaoAuction'
 import { DaoCard } from 'src/modules/dao'
 import { DaoProps } from 'src/pages'
 import { useChainStore } from 'src/stores/useChainStore'
 
-import { useDaoFeedCard } from '../../hooks'
 import { DaoFeedCardSkeleton } from './DaoFeedSkeleton'
 
 interface DaoCardProps {
@@ -13,7 +13,7 @@ interface DaoCardProps {
 
 export const DaoFeedCard: React.FC<DaoCardProps> = ({ dao }) => {
   const chain = useChainStore((x) => x.chain)
-  const { highestBid, tokenId, tokenUri, endTime } = useDaoFeedCard({
+  const { highestBid, tokenId, tokenUri, endTime } = useDaoAuction({
     collectionAddress: dao.tokenAddress,
     auctionAddress: dao.auctionAddress,
     chainId: chain.id,

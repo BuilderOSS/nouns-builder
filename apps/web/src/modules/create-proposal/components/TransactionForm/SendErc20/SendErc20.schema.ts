@@ -1,6 +1,6 @@
+import type { AddressType } from '@buildeross/types'
 import * as yup from 'yup'
 
-import type { AddressType } from 'src/typings'
 import { addressValidationSchemaWithError } from 'src/utils/yup'
 
 export interface SendErc20Values {

@@ -1,4 +1,4 @@
-import { CHAIN_ID } from 'src/typings'
+import { CHAIN_ID } from '@buildeross/types'
 
 // URLs should not include a trailing forward slash
 export const ETHERSCAN_BASE_URL: Record<CHAIN_ID, string> = {

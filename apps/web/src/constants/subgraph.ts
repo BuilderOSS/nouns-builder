@@ -1,6 +1,7 @@
-import { CHAIN_ID } from 'src/typings'
+import { CHAIN_ID } from '@buildeross/types'
 
-const GOLDSKY_PROJECT_ID = 'project_cm33ek8kjx6pz010i2c3w8z25'
+const GOLDSKY_PROJECT_ID =
+  process.env.NEXT_PUBLIC_GOLDSKY_PROJECT_ID || 'project_cm33ek8kjx6pz010i2c3w8z25'
 const VERSION = process.env.VERCEL_ENV !== 'production' ? '0.1.2' : 'latest'
 
 const createSubgraphUrl = (name: string, version = VERSION): string =>

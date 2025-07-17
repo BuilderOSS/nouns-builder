@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 
 import {
@@ -9,7 +10,6 @@ import {
   ProposalFragment,
   ProposalVoteFragment as ProposalVote,
 } from 'src/data/subgraph/sdk.generated'
-import { CHAIN_ID } from 'src/typings'
 
 export interface Proposal
   extends Omit<

@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import bs58 from 'bs58'
 import {
   Address,
@@ -9,8 +10,6 @@ import {
 } from 'viem'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-
-import { CHAIN_ID } from 'src/typings'
 
 import { EscrowFormState, EscrowFormValues } from './EscrowForm.schema'
 

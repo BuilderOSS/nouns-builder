@@ -1,8 +1,8 @@
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { readContract } from 'wagmi/actions'
 
 import { NULL_ADDRESS, PUBLIC_MANAGER_ADDRESS } from 'src/constants/addresses'
 import { getEscrowDelegate } from 'src/data/eas/requests/getEscrowDelegate'
-import { AddressType, CHAIN_ID } from 'src/typings'
 import { unpackOptionalArray } from 'src/utils/helpers'
 import { config } from 'src/utils/wagmi/server.config'
 

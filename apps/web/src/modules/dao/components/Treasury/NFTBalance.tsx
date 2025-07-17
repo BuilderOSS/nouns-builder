@@ -9,8 +9,8 @@ import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { useNFTBalance } from 'src/hooks/useNFTBalance'
 import { usePagination } from 'src/hooks/usePagination'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
-import { useDaoStore } from '../../stores'
 import { erc721AssetsWrapper } from './Treasury.css'
 
 export const NFTBalance: React.FC = () => {

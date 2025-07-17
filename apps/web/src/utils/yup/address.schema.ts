@@ -1,7 +1,7 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 import * as Yup from 'yup'
 
-import { CHAIN_ID } from 'src/typings'
 import { isValidAddress } from 'src/utils/ens'
 import { getProvider } from 'src/utils/provider'
 

@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Box, Stack, atoms } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -14,9 +15,8 @@ import {
   ProposalsResponse,
   getProposals,
 } from 'src/data/subgraph/requests/proposalsQuery'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 export const AuctionPaused = () => {
   const { query, isReady } = useRouter()

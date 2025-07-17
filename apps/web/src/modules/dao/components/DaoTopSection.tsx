@@ -1,3 +1,4 @@
+import { Chain } from '@buildeross/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
 
@@ -5,7 +6,6 @@ import { Auction } from 'src/modules/auction'
 import { ViewSwitcher } from 'src/modules/auction/components/ViewSwitcher'
 import { AuctionChart } from 'src/modules/dao/components/AuctionChart/AuctionChart'
 import { TokenWithDao } from 'src/pages/dao/[network]/[token]/[tokenId]'
-import { Chain } from 'src/typings'
 
 type TopSectionProps = {
   chain: Chain

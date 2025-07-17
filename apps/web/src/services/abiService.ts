@@ -1,8 +1,12 @@
+import {
+  CHAIN_ID,
+  DecodedArg,
+  DecodedTransactionData,
+  DecodedValue,
+} from '@buildeross/types'
 import axios from 'axios'
 import { AbiFunction, Hex, decodeFunctionData, getAbiItem } from 'viem'
 import { Address, getAddress, pad, trim, zeroHash } from 'viem'
-
-import { CHAIN_ID, DecodedArg, DecodedTransactionData, DecodedValue } from 'src/typings'
 
 import { getProvider } from '../utils/provider'
 import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors'

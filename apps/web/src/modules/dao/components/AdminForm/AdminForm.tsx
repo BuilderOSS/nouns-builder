@@ -1,3 +1,4 @@
+import { AddressType } from '@buildeross/types'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -22,17 +23,16 @@ import {
   TransactionType,
   useProposalStore,
 } from 'src/modules/create-proposal'
-import { formValuesToTransactionMap } from 'src/modules/dao/utils/adminFormFieldToTransaction'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { AddressType } from 'src/typings'
 import { getEnsAddress } from 'src/utils/ens'
 import { compareAndReturn, fromSeconds, unpackOptionalArray } from 'src/utils/helpers'
 
-import { useDaoStore } from '../../stores'
 import { AdminFormValues, adminValidationSchema } from './AdminForm.schema'
 import { AdminFounderAllocationFields } from './AdminFounderAllocationFields'
 import { Section } from './Section'
+import { formValuesToTransactionMap } from './utils'
 
 interface AdminFormProps {
   collectionAddress: string

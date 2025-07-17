@@ -1,4 +1,4 @@
-import { CHAIN_ID } from 'src/typings'
+import { CHAIN_ID } from '@buildeross/types'
 
 import { SDK } from '../client'
 import { OrderDirection, TokenFragment, Token_OrderBy } from '../sdk.generated'
