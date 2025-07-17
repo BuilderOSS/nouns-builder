@@ -13,8 +13,8 @@ export default async function handler(
   }
 
   try {
-    const { simulations, success, totalGasUsed } = await simulate(req.body)
-    return res.status(200).json({ simulations, success, totalGasUsed })
+    const result = await simulate(req.body)
+    return res.status(200).json(result)
   } catch (error) {
     console.error(error)
 
