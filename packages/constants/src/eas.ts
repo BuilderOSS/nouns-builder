@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { Hex } from 'viem'
 
 export const EAS_CONTRACT_ADDRESS: Partial<Record<CHAIN_ID, `0x${string}`>> = {
   [CHAIN_ID.ETHEREUM]: '0xA1207F3BBa224E2c9c3c6D5aF63D0eb1582Ce587',
@@ -32,13 +31,13 @@ export const ESCROW_DELEGATE_SCHEMA_UID = `0x1289c5f988998891af7416d83820c40ba1c
 export const ESCROW_DELEGATE_SCHEMA = `address daoMultiSig`
 
 export type AttestationParams = {
-  schema: Hex
+  schema: `0x${string}`
   data: {
-    recipient: Hex
+    recipient: `0x${string}`
     expirationTime: bigint
     revocable: boolean
-    refUID: Hex
-    data: Hex
+    refUID: `0x${string}`
+    data: `0x${string}`
     value: bigint
   }
 }

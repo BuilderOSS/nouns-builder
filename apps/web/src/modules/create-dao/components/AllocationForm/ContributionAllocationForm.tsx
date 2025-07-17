@@ -1,9 +1,12 @@
+import {
+  PUBLIC_BUILDER_ADDRESS,
+  PUBLIC_NOUNS_ADDRESS,
+} from '@buildeross/constants/addresses'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 
 import Date from 'src/components/Fields/Date'
 import SmartInput from 'src/components/Fields/SmartInput'
-import { PUBLIC_BUILDER_ADDRESS, PUBLIC_NOUNS_ADDRESS } from 'src/constants/addresses'
 import { useEnsData } from 'src/hooks/useEnsData'
 import { useChainStore } from 'src/stores/useChainStore'
 import { yearsAhead } from 'src/utils/helpers'

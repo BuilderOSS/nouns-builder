@@ -1,3 +1,4 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Paragraph } from '@buildeross/zord'
@@ -6,7 +7,6 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { useCountdown } from 'src/hooks/useCountdown'
 import { useIsMounted } from 'src/hooks/useIsMounted'
 import { BigNumberish } from 'src/utils/numbers'

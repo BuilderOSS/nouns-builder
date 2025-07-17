@@ -1,7 +1,7 @@
+import { NAV_BUTTON_ZINDEX } from '@buildeross/constants/zIndex'
 import { atoms, color, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
-import { NAV_BUTTON_ZINDEX } from 'src/constants/zIndex'
 import * as z from 'src/utils/layers'
 
 export const NavContainer = style([

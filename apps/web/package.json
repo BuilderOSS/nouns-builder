@@ -39,6 +39,7 @@
     "@buildeross/zord": "workspace:*",
     "alchemy-sdk": "^3.6.0",
     "@buildeross/analytics": "workspace:*",
+    "@buildeross/constants": "workspace:*",
     "@buildeross/types": "workspace:*",
     "axios": "^1.9.0",
     "bignumber.js": "^9.3.0",

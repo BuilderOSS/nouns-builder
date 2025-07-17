@@ -1,10 +1,10 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import axios from 'axios'
 import useSWR from 'swr'
 import { useReadContract } from 'wagmi'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { auctionAbi } from 'src/data/contract/abis'
 import { L2MigratedResponse } from 'src/pages/api/migrated'
 import { useChainStore } from 'src/stores/useChainStore'

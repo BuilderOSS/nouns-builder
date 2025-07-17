@@ -1,3 +1,4 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
@@ -8,7 +9,6 @@ import { useReadContracts } from 'wagmi'
 
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { erc20Abi } from 'src/data/contract/abis/ERC20'
 import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useTokenMetadataSingle } from 'src/hooks/useTokenMetadata'

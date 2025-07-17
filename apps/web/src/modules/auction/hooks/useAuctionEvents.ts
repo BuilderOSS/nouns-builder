@@ -1,10 +1,10 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useRouter } from 'next/router'
 import { useSWRConfig } from 'swr'
 import { useConfig, useWatchContractEvent } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { auctionAbi } from 'src/data/contract/abis'
 import { getBids } from 'src/data/subgraph/requests/getBids'
 import { awaitSubgraphSync } from 'src/data/subgraph/requests/sync'

@@ -1,8 +1,8 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { TokenMetadata } from 'src/services/alchemyService'
 
 export type TokenMetadataReturnType = {

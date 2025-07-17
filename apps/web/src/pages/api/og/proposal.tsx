@@ -1,9 +1,9 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'

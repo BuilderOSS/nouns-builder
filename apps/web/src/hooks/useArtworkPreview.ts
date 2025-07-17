@@ -1,8 +1,8 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
 
 import { OrderedTraits } from 'src/components/Artwork/LayerBox'
-import { BASE_URL } from 'src/constants/baseUrl'
-import { RENDERER_BASE } from 'src/constants/rendererBase'
 
 import { ImageProps } from './useArtworkUpload'
 

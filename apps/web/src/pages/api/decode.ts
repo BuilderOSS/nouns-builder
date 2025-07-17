@@ -1,9 +1,9 @@
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { isHex } from 'viem'
 
-import { CACHE_TIMES } from 'src/constants/cacheTimes'
 import { decodeTransaction } from 'src/services/abiService'
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'
 

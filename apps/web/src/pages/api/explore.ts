@@ -1,7 +1,7 @@
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-import { CACHE_TIMES } from 'src/constants/cacheTimes'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { exploreDaosRequest } from 'src/data/subgraph/requests/exploreQueries'
 import { Auction_OrderBy } from 'src/data/subgraph/sdk.generated'
 

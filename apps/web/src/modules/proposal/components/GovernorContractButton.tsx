@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { Box, ButtonProps } from '@buildeross/zord'
 import React, { useState } from 'react'
 import { useSWRConfig } from 'swr'
@@ -11,7 +12,6 @@ import {
 import { waitForTransactionReceipt } from 'wagmi/actions'
 
 import { ContractButton } from 'src/components/ContractButton'
-import SWR_KEYS from 'src/constants/swrKeys'
 import { governorAbi } from 'src/data/contract/abis'
 import { getProposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useChainStore } from 'src/stores/useChainStore'

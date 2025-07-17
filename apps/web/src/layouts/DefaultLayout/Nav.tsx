@@ -1,10 +1,10 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { Box, Flex, Label, Stack, atoms } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 
 import { BridgeModal } from 'src/components/BridgeModal/BridgeModal'
 import { NetworkController } from 'src/components/NetworkController'
-import { PUBLIC_IS_TESTNET } from 'src/constants/chains'
 import { useBridgeModal } from 'src/hooks/useBridgeModal'
 import { useScrollDirection } from 'src/hooks/useScrollDirection'
 

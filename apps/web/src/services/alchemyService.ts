@@ -1,3 +1,5 @@
+import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from '@buildeross/constants/alchemy'
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import {
   Alchemy,
@@ -8,9 +10,6 @@ import {
   TokenBalanceType,
 } from 'alchemy-sdk'
 import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
-
-import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from 'src/constants/alchemy'
-import { PUBLIC_IS_TESTNET } from 'src/constants/chains'
 
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'

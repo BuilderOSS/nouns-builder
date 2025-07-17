@@ -20,6 +20,9 @@ interface CustomInputProps extends InputComponentProps<typeof ZordInput> {
   placeholder?: string | number
   autoComplete?: 'off'
   error?: string
+  min?: number | string
+  max?: number | string
+  step?: number | string
 }
 
 const Input: FC<CustomInputProps> = ({
@@ -30,6 +33,9 @@ const Input: FC<CustomInputProps> = ({
   placeholder,
   autoComplete,
   error,
+  min,
+  max,
+  step,
   ...props
 }) => {
   return (
@@ -53,6 +59,9 @@ const Input: FC<CustomInputProps> = ({
             placeholder={placeholder}
             autoComplete={autoComplete}
             data-error={typeof error !== 'undefined'}
+            min={min}
+            max={max}
+            step={step}
             {...props}
           />
           <Flex

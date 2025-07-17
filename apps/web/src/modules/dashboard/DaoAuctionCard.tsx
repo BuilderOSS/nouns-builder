@@ -1,3 +1,4 @@
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
@@ -9,7 +10,6 @@ import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { PUBLIC_ALL_CHAINS } from 'src/constants/chains'
 import { auctionAbi } from 'src/data/contract/abis'
 import { useCountdown, useIsMounted } from 'src/hooks'
 

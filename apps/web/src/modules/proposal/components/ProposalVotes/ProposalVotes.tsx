@@ -1,8 +1,8 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import useSWR from 'swr'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { SDK } from 'src/data/subgraph/client'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { OrderDirection, Snapshot_OrderBy } from 'src/data/subgraph/sdk.generated'

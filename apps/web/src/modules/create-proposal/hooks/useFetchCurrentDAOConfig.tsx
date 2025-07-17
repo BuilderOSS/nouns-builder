@@ -1,14 +1,14 @@
+import {
+  L2_MIGRATION_DEPLOYER,
+  MERKLE_METADATA_RENDERER,
+  NULL_ADDRESS,
+} from '@buildeross/constants/addresses'
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import useSWRImmutable from 'swr/immutable'
 import { encodeAbiParameters, parseAbiParameters } from 'viem'
 import { useReadContracts } from 'wagmi'
 
-import {
-  L2_MIGRATION_DEPLOYER,
-  MERKLE_METADATA_RENDERER,
-  NULL_ADDRESS,
-} from 'src/constants/addresses'
-import { RENDERER_BASE } from 'src/constants/rendererBase'
 import {
   auctionAbi,
   governorAbi,

@@ -1,9 +1,9 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Flex, FlexProps, Text } from '@buildeross/zord'
 import React from 'react'
 
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { Icon } from 'src/components/Icon'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { walletSnippet } from 'src/utils/helpers'

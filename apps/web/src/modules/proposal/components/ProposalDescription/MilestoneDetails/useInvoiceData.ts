@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import _ from 'lodash'
@@ -5,7 +6,6 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 import { Hex, decodeEventLog, formatEther, isHex } from 'viem'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { DecodedTransaction } from 'src/hooks/useDecodedTransactions'
 import {
   decodeEscrowData,

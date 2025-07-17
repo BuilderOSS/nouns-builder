@@ -1,8 +1,7 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
-
-import SWR_KEYS from 'src/constants/swrKeys'
 
 export type TokenBalance = {
   address: string

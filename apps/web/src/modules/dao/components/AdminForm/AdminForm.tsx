@@ -1,3 +1,4 @@
+import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { AddressType } from '@buildeross/types'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
@@ -15,7 +16,6 @@ import StickySave from 'src/components/Fields/StickySave'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import SingleImageUpload from 'src/components/SingleImageUpload/SingleImageUpload'
-import { NULL_ADDRESS } from 'src/constants/addresses'
 import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from 'src/data/contract/abis'
 import { TokenAllocation } from 'src/modules/create-dao'
 import {

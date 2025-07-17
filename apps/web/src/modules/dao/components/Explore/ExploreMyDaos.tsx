@@ -1,10 +1,10 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { Grid } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useAccount } from 'wagmi'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { exploreMyDaosRequest } from 'src/data/subgraph/requests/exploreQueries'
 
 import { DaoCard } from '../DaoCard'

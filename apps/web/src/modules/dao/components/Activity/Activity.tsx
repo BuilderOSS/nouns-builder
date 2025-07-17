@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
@@ -11,7 +12,6 @@ import { Countdown } from 'src/components/Countdown'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import Pagination from 'src/components/Pagination'
-import SWR_KEYS from 'src/constants/swrKeys'
 import {
   ProposalsResponse,
   getProposals,

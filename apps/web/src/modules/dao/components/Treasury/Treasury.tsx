@@ -1,10 +1,10 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useBalance } from 'wagmi'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { SDK } from 'src/data/subgraph/client'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'

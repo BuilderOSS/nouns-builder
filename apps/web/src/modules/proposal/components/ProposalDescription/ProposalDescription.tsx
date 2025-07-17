@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { Box, Flex, Paragraph, atoms } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'
@@ -8,7 +9,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import useSWR from 'swr'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import { SDK } from 'src/data/subgraph/client'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'

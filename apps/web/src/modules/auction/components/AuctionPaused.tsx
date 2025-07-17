@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Stack, atoms } from '@buildeross/zord'
 import Link from 'next/link'
@@ -8,7 +9,6 @@ import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
-import SWR_KEYS from 'src/constants/swrKeys'
 import { auctionAbi } from 'src/data/contract/abis'
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import {

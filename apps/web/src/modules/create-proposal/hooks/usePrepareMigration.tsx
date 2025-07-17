@@ -1,11 +1,14 @@
+import {
+  L1_CROSS_DOMAIN_MESSENGER,
+  L2_MIGRATION_DEPLOYER,
+} from '@buildeross/constants/addresses'
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType, BytesType, CHAIN_ID } from '@buildeross/types'
 import axios from 'axios'
 import useSWRImmutable from 'swr/immutable'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
-import { L1_CROSS_DOMAIN_MESSENGER, L2_MIGRATION_DEPLOYER } from 'src/constants/addresses'
-import SWR_KEYS from 'src/constants/swrKeys'
 import { auctionAbi, merklePropertyMetadataAbi } from 'src/data/contract/abis'
 import { messengerABI } from 'src/data/contract/abis/L1CrossDomainMessenger'
 import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'

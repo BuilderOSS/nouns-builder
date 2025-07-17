@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
@@ -5,7 +6,6 @@ import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
 import { DisplayPanel } from 'src/components/DisplayPanel'
-import SWR_KEYS from 'src/constants/swrKeys'
 import {
   ProposalState,
   getProposalState,

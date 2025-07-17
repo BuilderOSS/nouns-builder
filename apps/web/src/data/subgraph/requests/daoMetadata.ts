@@ -1,7 +1,7 @@
+import { L1_CHAINS } from '@buildeross/constants/chains'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { encodeFunctionData } from 'viem'
 
-import { L1_CHAINS } from 'src/constants/chains'
 import { metadataAbi } from 'src/data/contract/abis'
 
 import { SDK } from '../client'

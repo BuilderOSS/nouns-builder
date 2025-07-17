@@ -15,6 +15,8 @@ export interface SelectProps extends FlexComponentProps<'select'> {
   variant?: 'sm' | 'lg'
   disabled?: boolean
   value?: string | number
+  children?: React.ReactNode
+  id?: string
 }
 
 export const Select = ({
@@ -23,6 +25,7 @@ export const Select = ({
   variant = 'sm',
   children,
   disabled,
+  id,
   ...props
 }: SelectProps) => {
   const large = variant === 'lg'
@@ -49,6 +52,7 @@ export const Select = ({
           className={[inputFieldBaseInput, className]}
           style={{ appearance: 'none' }}
           disabled={!!disabled}
+          id={id}
           {...props}
         >
           {children}

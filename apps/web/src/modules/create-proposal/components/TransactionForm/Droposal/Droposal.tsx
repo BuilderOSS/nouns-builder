@@ -1,9 +1,9 @@
+import { PUBLIC_ZORA_NFT_CREATOR } from '@buildeross/constants/addresses'
 import { AddressType } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import { encodeFunctionData, parseEther } from 'viem'
 
-import { PUBLIC_ZORA_NFT_CREATOR } from 'src/constants/addresses'
 import { zoraNFTCreatorAbi } from 'src/data/contract/abis/ZoraNFTCreator'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'

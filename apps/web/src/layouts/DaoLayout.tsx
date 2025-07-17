@@ -1,7 +1,7 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { Chain } from '@buildeross/types'
 import { ReactElement, ReactNode } from 'react'
 
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/chains'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 

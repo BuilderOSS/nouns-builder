@@ -1,7 +1,7 @@
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { bytesToHexString, fromFarcasterTime } from '@farcaster/hub-nodejs'
 import { NextApiRequest, NextApiResponse } from 'next'
 
-import { CACHE_TIMES } from 'src/constants/cacheTimes'
 import { getDAOfeed } from 'src/data/farcaster/queries/daoDiscussion'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {

@@ -1,9 +1,9 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex } from '@buildeross/zord'
 import React from 'react'
 
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { type DaoMembership } from 'src/hooks/useDaoMembership'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalFormTitle } from 'src/styles/Proposals.css'

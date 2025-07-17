@@ -1,7 +1,7 @@
+import { ESCROW_DELEGATE_SCHEMA_UID } from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import { Hex, getAddress, isAddress } from 'viem'
 
-import { ESCROW_DELEGATE_SCHEMA_UID } from 'src/constants/eas'
 import { SDK } from 'src/data/eas/client'
 import {
   DecodedData,

@@ -1,9 +1,9 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatUnits } from 'viem'
 
 import { Avatar, NameAvatar } from 'src/components/Avatar'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'

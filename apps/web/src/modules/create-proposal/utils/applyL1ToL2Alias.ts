@@ -1,7 +1,7 @@
+import { L2_MIGRATION_DEPLOYER } from '@buildeross/constants/addresses'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getBytecode, readContract } from 'wagmi/actions'
 
-import { L2_MIGRATION_DEPLOYER } from 'src/constants/addresses'
 import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
 import { config } from 'src/utils/wagmi/server.config'
 

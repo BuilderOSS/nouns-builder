@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType } from '@buildeross/types'
 import { Stack, Text } from '@buildeross/zord'
 import React, { useEffect, useMemo } from 'react'
@@ -6,7 +7,6 @@ import { encodeFunctionData } from 'viem'
 
 import { getLayerName } from 'src/components/Artwork/LayerBox'
 import { defaultHelperTextStyle } from 'src/components/Fields/styles.css'
-import SWR_KEYS from 'src/constants/swrKeys'
 import { metadataAbi } from 'src/data/contract/abis'
 import { getPropertyItemsCount } from 'src/data/contract/requests/getPropertyItemsCount'
 import { transformFileProperties } from 'src/modules/create-dao'

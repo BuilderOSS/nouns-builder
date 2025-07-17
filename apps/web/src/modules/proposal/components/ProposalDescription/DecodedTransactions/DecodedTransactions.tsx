@@ -1,7 +1,7 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Flex, Stack, Text, atoms } from '@buildeross/zord'
 import React from 'react'
 
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { DecodedTransaction } from 'src/hooks/useDecodedTransactions'
 import { useChainStore } from 'src/stores/useChainStore'
 import { walletSnippet } from 'src/utils/helpers'

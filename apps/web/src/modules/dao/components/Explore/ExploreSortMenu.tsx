@@ -52,7 +52,6 @@ const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
           // @ts-ignore-next-line
           router.query.sortKey ? (SORT_KEY[router?.query.sortKey] as string) : 'Created'
         }
-        fontSize={16}
         onChange={(e) => handleSortChange(e)}
       >
         {Object.values(SORT_KEY).map((value) => (

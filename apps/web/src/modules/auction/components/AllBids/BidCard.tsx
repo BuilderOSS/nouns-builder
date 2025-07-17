@@ -1,9 +1,9 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
 import { AuctionBidFragment } from 'src/data/subgraph/sdk.generated'
 import { useEnsData } from 'src/hooks/useEnsData'
 import { useChainStore } from 'src/stores/useChainStore'

@@ -1,3 +1,5 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Spinner, Stack, Text, atoms } from '@buildeross/zord'
@@ -11,8 +13,6 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 
 import Accordion from 'src/components/Home/accordian'
 import { Icon } from 'src/components/Icon'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
-import { SAFE_APP_URL, SAFE_HOME_URL } from 'src/constants/safe'
 import { DecodedTransaction } from 'src/hooks/useDecodedTransactions'
 import { useEnsData } from 'src/hooks/useEnsData'
 import { useIsGnosisSafe } from 'src/hooks/useIsGnosisSafe'

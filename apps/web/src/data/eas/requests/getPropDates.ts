@@ -1,7 +1,7 @@
+import { PROPDATE_SCHEMA_UID } from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import { Hex, getAddress, isAddress, isHex } from 'viem'
 
-import { PROPDATE_SCHEMA_UID } from 'src/constants/eas'
 import { SDK } from 'src/data/eas/client'
 import {
   DecodedData,

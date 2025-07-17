@@ -1,7 +1,7 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 
-import SWR_KEYS from 'src/constants/swrKeys'
 import {
   type DaoMembershipResponse,
   daoMembershipRequest,

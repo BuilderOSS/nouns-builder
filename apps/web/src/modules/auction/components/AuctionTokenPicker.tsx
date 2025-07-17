@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
@@ -6,7 +7,6 @@ import useSWR from 'swr'
 
 import { Icon } from 'src/components/Icon'
 import { OptionalLink } from 'src/components/OptionalLink'
-import SWR_KEYS from 'src/constants/swrKeys'
 import { SDK } from 'src/data/subgraph/client'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'

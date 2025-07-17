@@ -1,3 +1,5 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { WALLET_CONNECT_PROJECT_ID } from '@buildeross/constants/walletconnect'
 import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
@@ -10,9 +12,6 @@ import {
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets'
 import { CreateConnectorFn, createConfig } from 'wagmi'
-
-import { BASE_URL } from 'src/constants/baseUrl'
-import { WALLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
 
 import { chains, transports } from './chains'
 

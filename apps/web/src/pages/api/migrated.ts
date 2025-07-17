@@ -1,9 +1,9 @@
+import { L2_MIGRATION_DEPLOYER, NULL_ADDRESS } from '@buildeross/constants/addresses'
+import { L2_CHAINS } from '@buildeross/constants/chains'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { readContract } from 'wagmi/actions'
 
-import { L2_MIGRATION_DEPLOYER, NULL_ADDRESS } from 'src/constants/addresses'
-import { L2_CHAINS } from 'src/constants/chains'
 import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
 import { unpackOptionalArray } from 'src/utils/helpers'
 import { config } from 'src/utils/wagmi/server.config'

@@ -1,3 +1,4 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import Image from 'next/legacy/image'
@@ -9,7 +10,6 @@ import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
 import { Avatar } from 'src/components/Avatar/Avatar'
 import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
-import SWR_KEYS from 'src/constants/swrKeys'
 import { metadataAbi, tokenAbi } from 'src/data/contract/abis'
 import { SDK } from 'src/data/subgraph/client'
 import { useDaoMembership } from 'src/hooks/useDaoMembership'

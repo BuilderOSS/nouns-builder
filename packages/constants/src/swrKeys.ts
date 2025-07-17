@@ -1,4 +1,4 @@
-const SWR_KEYS = {
+export const SWR_KEYS = {
   AUCTION_BIDS: 'auction-bids',
   ARTWORK_PROPERTY_ITEMS_COUNT: 'artwork-property-items-count',
   SNAPSHOT_SUPPLY: 'snapshot-supply',
