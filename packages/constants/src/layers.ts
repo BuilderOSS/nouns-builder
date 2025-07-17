@@ -1,5 +1,6 @@
 // z-indexes
 
+export const NAV_BUTTON_LAYER = 101
 export const MODAL_CONTENT_LAYER = 70
 export const MODAL_BACKDROP_LAYER = 60
 export const NAV_CONTENT_LAYER = 50
