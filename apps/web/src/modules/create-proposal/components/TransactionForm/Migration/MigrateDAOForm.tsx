@@ -1,4 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Paragraph, Spinner, Text } from '@buildeross/zord'
 import { useState } from 'react'
 import { useReadContract } from 'wagmi'
@@ -13,7 +14,6 @@ import { usePrepareMigration } from 'src/modules/create-proposal/hooks/usePrepar
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { unpackOptionalArray } from 'src/utils/helpers'
 
 import { DropdownSelect } from '../../DropdownSelect'
 

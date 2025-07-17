@@ -1,10 +1,9 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { getProvider } from '@buildeross/utils/provider'
 import axios from 'axios'
 import Redis from 'ioredis'
 import { Hex } from 'viem'
 import { describe, expect, it, vi } from 'vitest'
-
-import { getProvider } from 'src/utils/provider'
 
 import { getContractABIByAddress } from './abiService'
 import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors'

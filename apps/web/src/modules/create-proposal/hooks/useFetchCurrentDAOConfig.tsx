@@ -5,6 +5,7 @@ import {
 } from '@buildeross/constants/addresses'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import useSWRImmutable from 'swr/immutable'
 import { encodeAbiParameters, parseAbiParameters } from 'viem'
 import { useReadContracts } from 'wagmi'
@@ -17,7 +18,6 @@ import {
   treasuryAbi,
 } from 'src/data/contract/abis'
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
-import { unpackOptionalArray } from 'src/utils/helpers'
 
 import { applyL1ToL2Alias } from '../utils/applyL1ToL2Alias'
 

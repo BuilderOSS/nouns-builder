@@ -1,8 +1,7 @@
 import { AddressType } from '@buildeross/types'
+import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
-
-import { addressValidationSchemaWithError } from 'src/utils/yup'
 
 export interface MilestoneFormValues {
   amount: number

@@ -1,5 +1,7 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
+import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import Link from 'next/link'
@@ -21,8 +23,6 @@ import { NextPageWithLayout } from 'src/pages/_app'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { artworkSkeleton } from 'src/styles/Artwork.css'
-import { getEnsAddress, getEnsName } from 'src/utils/ens'
-import { chainIdToSlug, walletSnippet } from 'src/utils/helpers'
 
 interface ProfileProps {
   userAddress: string

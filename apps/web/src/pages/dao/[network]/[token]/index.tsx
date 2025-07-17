@@ -1,6 +1,7 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { Flex, Text, atoms, theme } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -26,7 +27,6 @@ import {
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
-import { config } from 'src/utils/wagmi/server.config'
 
 interface DaoPageProps {
   chainId: CHAIN_ID
@@ -147,7 +147,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       })
       .then((x) => (x.tokens.length > 0 ? x.tokens[0].tokenId : undefined))
 
-    const owner = await readContract(config, {
+    const owner = await readContract(serverConfig, {
       abi: auctionAbi,
       address: addresses.auction as AddressType,
       functionName: 'owner',

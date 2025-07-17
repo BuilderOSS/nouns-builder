@@ -1,15 +1,15 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
+import { bgForAddress } from '@buildeross/utils/gradient'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
 import { formatEther } from 'viem'
 import { getBalance } from 'wagmi/actions'
 
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
-import { bgForAddress } from 'src/utils/gradient'
-import { formatCryptoVal } from 'src/utils/numbers'
-import { config as wagmiConfig } from 'src/utils/wagmi/server.config'
 
 export type DaoOgMetadata = {
   tokenAddress: `0x${string}`
@@ -42,7 +42,7 @@ const getTreasuryBalance = async (
   chainId: CHAIN_ID,
   address: `0x${string}`
 ): Promise<string> => {
-  const result = await getBalance(wagmiConfig, {
+  const result = await getBalance(serverConfig, {
     address,
     chainId,
     blockTag: 'latest',

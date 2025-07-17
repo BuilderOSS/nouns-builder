@@ -1,3 +1,4 @@
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Flex, Grid, Text, atoms } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
@@ -9,7 +10,6 @@ import {
 } from 'src/data/subgraph/sdk.generated'
 import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores'
-import { walletSnippet } from 'src/utils/helpers'
 
 const variants = {
   inital: {

@@ -1,0 +1,64 @@
+{
+  "name": "@buildeross/utils",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./wagmi": {
+      "types": "./dist/wagmi/index.d.ts",
+      "import": "./dist/wagmi/index.mjs",
+      "require": "./dist/wagmi/index.js"
+    },
+    "./yup": {
+      "types": "./dist/yup/index.d.ts",
+      "import": "./dist/yup/index.mjs",
+      "require": "./dist/yup/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --fix",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
+    "bignumber.js": "^9.3.0",
+    "lodash": "^4.17.21",
+    "tinycolor2": "^1.4.2"
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@types/lodash": "^4.17.17",
+    "@types/node": "^22.15.21",
+    "@types/tinycolor2": "^1.4.6",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "peerDependencies": {
+    "viem": "^2.30.0",
+    "wagmi": "^2.15.4",
+    "yup": "^1.6.1",
+    "@farcaster/frame-wagmi-connector": "^0.0.39",
+    "@rainbow-me/rainbowkit": "^2.2.5"
+  }
+}

@@ -1,7 +1,7 @@
+import { addressValidationSchema } from '@buildeross/utils/yup'
 import * as Yup from 'yup'
 
 import { TEXT } from 'src/components/Fields/types'
-import { addressValidationSchema } from 'src/utils/yup'
 
 export const contractAddressFields = [
   {

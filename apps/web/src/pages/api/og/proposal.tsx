@@ -1,13 +1,13 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
+import { bgForAddress } from '@buildeross/utils/gradient'
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
 
 import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
-import { bgForAddress } from 'src/utils/gradient'
 
 export const config = {
   runtime: 'edge',

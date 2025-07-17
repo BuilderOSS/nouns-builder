@@ -1,4 +1,7 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { getEnsAddress } from '@buildeross/utils/ens'
+import { walletSnippet } from '@buildeross/utils/helpers'
+import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers } from 'formik'
@@ -10,9 +13,6 @@ import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { getEnsAddress } from 'src/utils/ens'
-import { walletSnippet } from 'src/utils/helpers'
-import { getProvider } from 'src/utils/provider'
 
 import sendEthSchema, { SendEthValues } from './SendEth.schema'
 

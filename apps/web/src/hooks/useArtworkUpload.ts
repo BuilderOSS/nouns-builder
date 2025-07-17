@@ -3,9 +3,8 @@ import {
   getFetchableUrls,
   uploadDirectory,
 } from '@buildeross/ipfs-service'
+import { sanitizeFileName } from '@buildeross/utils/sanitize'
 import React from 'react'
-
-import { sanitizeFileName } from 'src/utils/sanitize'
 
 export interface ArtworkType {
   trait: string

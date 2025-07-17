@@ -1,7 +1,6 @@
+import { getProvider } from './provider'
 import { CHAIN_ID } from '@buildeross/types'
 import { Address, PublicClient, isAddress } from 'viem'
-
-import { getProvider } from './provider'
 
 const defaultProvider = getProvider(CHAIN_ID.ETHEREUM)
 
@@ -16,7 +15,7 @@ export type IsValidAddressResult = {
 export async function isValidAddress(
   input: string,
   provider: PublicClient | undefined = defaultProvider,
-  errorMessage = 'Must be a valid Ethereum address or resolvable ENS name'
+  errorMessage = 'Must be a valid Ethereum address or resolvable ENS name',
 ): Promise<IsValidAddressResult> {
   try {
     if (isAddress(input)) return { data: true }
@@ -36,7 +35,7 @@ const ensAddressCache = new Map<string, string>()
 
 export async function getEnsAddress(
   nameOrAddress: string,
-  provider: PublicClient | undefined = defaultProvider
+  provider: PublicClient | undefined = defaultProvider,
 ): Promise<Address> {
   if (!nameOrAddress) return nameOrAddress as Address
 
@@ -63,7 +62,7 @@ const ensNameCache = new Map<Address, string | null>()
 
 export async function getEnsName(
   address: Address,
-  provider: PublicClient | undefined = defaultProvider
+  provider: PublicClient | undefined = defaultProvider,
 ): Promise<string> {
   if (!address) return address
 
@@ -88,7 +87,7 @@ const avatarCache = new Map<string, string | null>()
 
 export async function getEnsAvatar(
   name: string,
-  provider: PublicClient | undefined = defaultProvider
+  provider: PublicClient | undefined = defaultProvider,
 ): Promise<string | null> {
   if (!name) return null
 

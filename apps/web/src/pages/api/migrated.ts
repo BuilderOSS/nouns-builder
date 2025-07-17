@@ -1,12 +1,12 @@
 import { L2_MIGRATION_DEPLOYER, NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { readContract } from 'wagmi/actions'
 
 import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
-import { unpackOptionalArray } from 'src/utils/helpers'
-import { config } from 'src/utils/wagmi/server.config'
 
 export interface L2MigratedResponse {
   migrated:
@@ -25,7 +25,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const deployer = L2_MIGRATION_DEPLOYER[chainId]
 
       if (deployer === NULL_ADDRESS) return []
-      return readContract(config, {
+      return readContract(serverConfig, {
         address: deployer,
         chainId: chainId,
         abi: L2DeployerABI,

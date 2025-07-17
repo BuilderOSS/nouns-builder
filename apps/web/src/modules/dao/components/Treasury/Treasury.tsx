@@ -1,4 +1,5 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { formatCryptoVal, numberFormatter } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
@@ -10,7 +11,6 @@ import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { statisticContent } from 'src/styles/About.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { formatCryptoVal, numberFormatter } from 'src/utils/numbers'
 
 import { ContractLink } from '../ContractLink'
 import { NFTBalance } from './NFTBalance'

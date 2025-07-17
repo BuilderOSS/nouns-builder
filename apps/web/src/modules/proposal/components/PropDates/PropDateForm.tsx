@@ -6,6 +6,7 @@ import {
   easAbi,
 } from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
@@ -25,7 +26,6 @@ import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { MessageType, type PropDate } from 'src/data/eas/requests/getPropDates'
 import { useEnsData } from 'src/hooks'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { walletSnippet } from 'src/utils/helpers'
 
 const propDateValidationSchema = Yup.object().shape({
   milestoneId: Yup.number(),

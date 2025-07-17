@@ -1,10 +1,10 @@
 import { DecodedArg } from '@buildeross/types'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Text } from '@buildeross/zord'
 import { formatUnits } from 'viem'
 
 import { useTokenMetadataSingle } from 'src/hooks/useTokenMetadata'
 import { useChainStore } from 'src/stores/useChainStore'
-import { formatCryptoVal } from 'src/utils/numbers'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 

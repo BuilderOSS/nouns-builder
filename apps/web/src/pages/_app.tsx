@@ -1,4 +1,5 @@
 import { VercelAnalytics } from '@buildeross/analytics'
+import { clientConfig } from '@buildeross/utils/wagmi/clientConfig'
 import '@buildeross/zord/index.css'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/600.css'
@@ -18,7 +19,6 @@ import { FrameProvider } from 'src/components/FrameProvider'
 import { NetworkController } from 'src/components/NetworkController'
 import 'src/styles/globals.css'
 import 'src/styles/styles.css'
-import { config } from 'src/utils/wagmi/config'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,7 +45,7 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
   const fallback = pageProps?.fallback ?? {}
 
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={clientConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
           <SWRConfig value={{ fallback }}>

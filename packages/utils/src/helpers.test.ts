@@ -1,6 +1,5 @@
-import { assert } from 'vitest'
-
 import { formatDate, unpackOptionalArray } from './helpers'
+import { assert } from 'vitest'
 
 it('should format the date as a readable string', () => {
   const result = formatDate(new Date(2022, 11, 5), true)

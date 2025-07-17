@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
 import { Duration } from '@buildeross/types'
 import isEqual from 'lodash/isEqual'
 import { isAddress } from 'viem'
@@ -124,11 +124,11 @@ export const flatten = (object: object) => {
       if (!isEmpty(o)) {
         return [].concat(
           ...Object?.keys(o).map((k) =>
-            typeof o[k] === 'object' ? _flatten(o[k]) : { [k]: o[k] }
-          )
+            typeof o[k] === 'object' ? _flatten(o[k]) : { [k]: o[k] },
+          ),
         )
       }
-    })(object)
+    })(object),
   )
 }
 
@@ -211,7 +211,8 @@ export const compareAndReturn = (initialValues: {}, values: {}) => {
 
   return updates.filter(
     (object, index) =>
-      index === updates.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(object))
+      index ===
+      updates.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(object)),
   )
 }
 
@@ -279,7 +280,7 @@ export const handleGMTOffset = () => {
  */
 export function unpackOptionalArray<T = []>(
   array: T | undefined,
-  expectedLength: number
+  expectedLength: number,
 ): T | undefined[] {
   if (!array) {
     return Array(expectedLength).fill(undefined)
@@ -301,5 +302,5 @@ export function maxChar(str: string, maxLength: number) {
   return str.slice(0, maxLength) + '...'
 }
 
-export const chainIdToSlug = (chainId: number) =>
+export const chainIdToSlug = (chainId: number): string | undefined =>
   PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)?.slug

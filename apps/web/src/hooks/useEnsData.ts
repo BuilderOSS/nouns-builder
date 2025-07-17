@@ -1,7 +1,6 @@
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Address, isAddress } from 'viem'
 import { useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
-
-import { walletSnippet } from 'src/utils/helpers'
 
 export type EnsData = {
   ensName?: string

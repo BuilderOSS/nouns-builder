@@ -1,6 +1,5 @@
 import { Duration } from '@buildeross/types'
-
-import { toSeconds } from 'src/utils/helpers'
+import { toSeconds } from '@buildeross/utils/helpers'
 
 export const calculateMaxAllocation = (
   allocation: string | number,

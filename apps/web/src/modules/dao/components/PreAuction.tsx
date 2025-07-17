@@ -1,4 +1,5 @@
 import { Chain } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, atoms } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -9,7 +10,6 @@ import { waitForTransactionReceipt } from 'wagmi/actions'
 
 import { auctionAbi } from 'src/data/contract/abis'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { unpackOptionalArray } from 'src/utils/helpers'
 
 import {
   preAuctionButtonVariants,

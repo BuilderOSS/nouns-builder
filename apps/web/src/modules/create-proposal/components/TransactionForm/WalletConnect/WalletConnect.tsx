@@ -1,4 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
@@ -19,7 +20,6 @@ import {
 import { DecodedTransactionDisplay } from 'src/modules/proposal/components/ProposalDescription/DecodedTransactions/DecodedTransactions'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { walletSnippet } from 'src/utils/helpers'
 
 import * as styles from './WalletConnect.css'
 import walletConnectSchema, { WalletConnectValues } from './WalletConnect.schema'

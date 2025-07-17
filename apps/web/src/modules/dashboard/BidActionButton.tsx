@@ -1,4 +1,5 @@
 import { AddressType } from '@buildeross/types'
+import { maxChar } from '@buildeross/utils/helpers'
 import { Box, Button } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import React, { useState } from 'react'
@@ -8,7 +9,6 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 
 import { ContractButton } from 'src/components/ContractButton'
 import { auctionAbi } from 'src/data/contract/abis'
-import { maxChar } from 'src/utils/helpers'
 
 import { useMinBidIncrement } from '../auction'
 import { Settle } from '../auction/components/CurrentAuction/Settle'

@@ -1,9 +1,9 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatEther } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { auctionAbi, tokenAbi } from 'src/data/contract/abis'
-import { unpackOptionalArray } from 'src/utils/helpers'
 
 export type UseDaoAuctionProps = {
   collectionAddress: string

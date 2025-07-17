@@ -1,5 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
@@ -32,7 +33,6 @@ import {
   selectDelegateBtn,
 } from 'src/styles/Proposals.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { walletSnippet } from 'src/utils/helpers'
 
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'

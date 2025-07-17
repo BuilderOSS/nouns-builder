@@ -1,3 +1,4 @@
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
@@ -8,7 +9,6 @@ import { Avatar } from 'src/components/Avatar'
 import { type PropDate } from 'src/data/eas/requests/getPropDates'
 import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores/useLayoutStore'
-import { walletSnippet } from 'src/utils/helpers'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 

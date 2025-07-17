@@ -1,4 +1,5 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex } from '@buildeross/zord'
 import React from 'react'
 
@@ -7,7 +8,6 @@ import { Icon } from 'src/components/Icon'
 import { type DaoMembership } from 'src/hooks/useDaoMembership'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalFormTitle } from 'src/styles/Proposals.css'
-import { walletSnippet } from 'src/utils/helpers'
 
 interface CurrentDelegateProps {
   toggleIsEditing: () => void

@@ -3,6 +3,7 @@ import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { AddressType, CHAIN_ID, Chain } from '@buildeross/types'
+import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
@@ -31,7 +32,6 @@ import FeedTab from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
-import { isPossibleMarkdown } from 'src/utils/helpers'
 
 export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
 

@@ -4,11 +4,10 @@ import {
   DecodedTransactionData,
   DecodedValue,
 } from '@buildeross/types'
+import { getProvider } from '@buildeross/utils/provider'
 import axios from 'axios'
 import { AbiFunction, Hex, decodeFunctionData, getAbiItem } from 'viem'
 import { Address, getAddress, pad, trim, zeroHash } from 'viem'
-
-import { getProvider } from 'src/utils/provider'
 
 import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors'
 import { getRedisConnection } from './redisConnection'

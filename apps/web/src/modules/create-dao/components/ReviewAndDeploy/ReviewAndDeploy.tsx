@@ -4,6 +4,9 @@ import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import type { AddressType } from '@buildeross/types'
+import { formatDuration } from '@buildeross/utils/formatDuration'
+import { toSeconds } from '@buildeross/utils/helpers'
+import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { Box, Flex, atoms } from '@buildeross/zord'
 import React, { useState } from 'react'
 import {
@@ -30,9 +33,6 @@ import {
   deployCheckboxWrapperStyle,
   deployContractButtonStyle,
 } from 'src/styles/deploy.css'
-import { formatDuration } from 'src/utils/formatDuration'
-import { toSeconds } from 'src/utils/helpers'
-import { sanitizeStringForJSON } from 'src/utils/sanitize'
 
 import { useFormStore } from '../../stores'
 import { PreviewArtwork } from './PreviewArtwork'

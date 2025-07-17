@@ -1,5 +1,9 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { BytesType } from '@buildeross/types'
+import {
+  isProposalExecutable,
+  isProposalSuccessful,
+} from '@buildeross/utils/proposalState'
 import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
 import { useSWRConfig } from 'swr'
@@ -12,7 +16,6 @@ import { ProposalState } from 'src/data/contract/requests/getProposalState'
 import { Proposal, getProposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
-import { isProposalExecutable, isProposalSuccessful } from 'src/utils/proposalState'
 
 import { GovernorContractButton } from '../GovernorContractButton'
 

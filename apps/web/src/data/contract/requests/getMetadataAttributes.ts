@@ -1,9 +1,9 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { Address } from 'viem'
 import { readContracts } from 'wagmi/actions'
 
 import { metadataAbi } from 'src/data/contract/abis'
-import { config } from 'src/utils/wagmi/server.config'
 
 export const getMetadataAttributes = async (
   metadata: Address,
@@ -22,7 +22,7 @@ export const getMetadataAttributes = async (
   }
 
   const lengthResult = (
-    await readContracts(config, {
+    await readContracts(serverConfig, {
       contracts: lengthRequests,
       allowFailure: false,
     })
@@ -51,7 +51,7 @@ export const getMetadataAttributes = async (
   for (let i = 0; i < attributeRequests.length; i += batchSize) {
     const batch = attributeRequests.slice(i, i + batchSize)
     const batchResult = (
-      await readContracts(config, {
+      await readContracts(serverConfig, {
         contracts: batch,
         allowFailure: false,
       })

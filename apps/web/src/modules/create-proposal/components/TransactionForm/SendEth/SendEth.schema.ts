@@ -1,7 +1,6 @@
 import type { AddressType } from '@buildeross/types'
+import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import * as yup from 'yup'
-
-import { addressValidationSchemaWithError } from 'src/utils/yup'
 
 export interface SendEthValues {
   recipientAddress?: string | AddressType

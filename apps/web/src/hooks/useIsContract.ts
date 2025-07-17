@@ -1,7 +1,6 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { getProvider } from '@buildeross/utils/provider'
 import useSWRImmutable from 'swr/immutable'
-
-import { getProvider } from 'src/utils/provider'
 
 export const useIsContract = ({
   address,

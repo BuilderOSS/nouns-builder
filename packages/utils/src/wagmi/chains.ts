@@ -1,5 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
-import { RPC_URLS } from '@buildeross/constants/rpc'
+import { PUBLIC_ALL_CHAINS, RPC_URLS } from '@buildeross/constants'
 import { CHAIN_ID, Chain } from '@buildeross/types'
 import { Transport, http } from 'viem'
 import { fallback } from 'wagmi'
@@ -24,5 +23,5 @@ export const transports: Record<CHAIN_ID, Transport> = chains.reduce(
       [chain.id]: fallback(list),
     }
   },
-  {} as Record<CHAIN_ID, Transport>
+  {} as Record<CHAIN_ID, Transport>,
 )

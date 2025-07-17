@@ -1,3 +1,4 @@
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
@@ -15,7 +16,6 @@ import {
   infoSectionValueVariants,
   successHeadingStyle,
 } from 'src/styles/deploy.css'
-import { walletSnippet } from 'src/utils/helpers'
 
 import { useFormStore } from '../../stores'
 import { Properties, transformFileProperties } from '../../utils'

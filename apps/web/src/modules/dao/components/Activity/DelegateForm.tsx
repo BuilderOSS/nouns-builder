@@ -1,3 +1,4 @@
+import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex } from '@buildeross/zord'
 import { Field, Formik, Form as FormikForm } from 'formik'
 import React, { useState } from 'react'
@@ -12,7 +13,6 @@ import { tokenAbi } from 'src/data/contract/abis'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { proposalFormTitle } from 'src/styles/Proposals.css'
-import { getEnsAddress } from 'src/utils/ens'
 
 import { delegateValidationSchema } from './DelegateForm.schema'
 

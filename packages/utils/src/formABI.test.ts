@@ -1,11 +1,10 @@
-import { describe, expect, vi } from 'vitest'
-
 import {
   FIELD_SEPERATOR_CHAR,
   matchInputFromName,
   matchTypeParameters,
   normalizePathName,
 } from './formABI'
+import { describe, expect, vi } from 'vitest'
 
 beforeEach(() => {
   vi.resetModules()
@@ -40,9 +39,12 @@ describe('formABI utilities', () => {
         ],
         { name: 'this', type: 'bytes32' },
       ],
-    ])('matchInputFromName(%s, %o) -> %o', (name, inputs, expected) => {
-      expect(matchInputFromName(name, inputs)).toEqual(expected)
-    })
+    ])(
+      'matchInputFromName(%s, %o) -> %o',
+      (name: string, inputs: any[], expected: any) => {
+        expect(matchInputFromName(name, inputs)).toEqual(expected)
+      },
+    )
   })
 
   describe('normalizePathName', () => {
@@ -56,9 +58,12 @@ describe('formABI utilities', () => {
       ],
       ['', [], ''],
       ['', undefined, ''],
-    ])('normalizePathName(%s, %o) -> %s', (name, path, expected) => {
-      expect(normalizePathName(name, path)).toEqual(expected)
-    })
+    ])(
+      'normalizePathName(%s, %o) -> %s',
+      (name: string, path: string[] | undefined, expected: string) => {
+        expect(normalizePathName(name, path)).toEqual(expected)
+      },
+    )
   })
 
   describe('matchTypeParameters', () => {
@@ -88,7 +93,7 @@ describe('formABI utilities', () => {
         { type: 'uint16', argumentTypePrefix: 'uint', size: '16', isArray: false },
       ],
       ['', { type: '', argumentTypePrefix: undefined, size: undefined, isArray: false }],
-    ])('matchTypeParameters(%s) -> %o', (type, result) => {
+    ])('matchTypeParameters(%s) -> %o', (type: string, result: any) => {
       expect(matchTypeParameters(type)).toEqual(result)
     })
   })

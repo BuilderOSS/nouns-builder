@@ -1,5 +1,5 @@
-import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { WALLET_CONNECT_PROJECT_ID } from '@buildeross/constants/walletconnect'
+import { chains, transports } from './chains'
+import { BASE_URL, WALLET_CONNECT_PROJECT_ID } from '@buildeross/constants'
 import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
@@ -12,8 +12,6 @@ import {
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets'
 import { CreateConnectorFn, createConfig } from 'wagmi'
-
-import { chains, transports } from './chains'
 
 const appName = 'Nouns Builder'
 const appDescription = 'Nouns Builder'
@@ -49,7 +47,7 @@ const rainbowConnectors = connectorsForWallets(
     appUrl,
     appIcon,
     walletConnectParameters: { metadata },
-  }
+  },
 )
 
 const connectors: CreateConnectorFn[] = [
@@ -57,7 +55,7 @@ const connectors: CreateConnectorFn[] = [
   miniAppConnector as unknown as CreateConnectorFn,
 ]
 
-export const config = createConfig({
+export const clientConfig = createConfig({
   ssr: true,
   chains,
   transports,

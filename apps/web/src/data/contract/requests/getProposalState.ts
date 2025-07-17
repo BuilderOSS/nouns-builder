@@ -1,7 +1,6 @@
 import { AddressType, BytesType, CHAIN_ID, ProposalState } from '@buildeross/types'
+import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { readContract } from 'wagmi/actions'
-
-import { config } from 'src/utils/wagmi/server.config'
 
 import { governorAbi } from '../abis'
 
@@ -13,7 +12,7 @@ export const getProposalState = async (
   proposalId: BytesType
 ) => {
   const baseParams = { address: governorAddress, abi: governorAbi, chainId }
-  return (await readContract(config, {
+  return (await readContract(serverConfig, {
     ...baseParams,
     functionName: 'state',
     args: [proposalId],

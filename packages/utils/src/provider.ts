@@ -1,8 +1,7 @@
+import { chains, transports } from './wagmi/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import { PublicClient, createPublicClient, http } from 'viem'
 import { foundry } from 'wagmi/chains'
-
-import { chains, transports } from './wagmi/chains'
 
 let providerMap: Map<CHAIN_ID, PublicClient>
 
@@ -17,7 +16,7 @@ export function getProvider(chainId: CHAIN_ID): PublicClient {
         createPublicClient({
           chain: foundry,
           transport: http(foundry.rpcUrls.default.http[0]),
-        })
+        }),
       )
     } else {
       providerMap.set(
@@ -25,7 +24,7 @@ export function getProvider(chainId: CHAIN_ID): PublicClient {
         createPublicClient({
           chain: chains.find((x) => x.id === chainId),
           transport: transports[chainId],
-        })
+        }),
       )
     }
   }

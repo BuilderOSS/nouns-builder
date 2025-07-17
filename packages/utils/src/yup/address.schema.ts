@@ -1,14 +1,13 @@
+import { isValidAddress } from '../ens'
+import { getProvider } from '../provider'
 import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 import * as Yup from 'yup'
 
-import { isValidAddress } from 'src/utils/ens'
-import { getProvider } from 'src/utils/provider'
-
 const validateAddress = async (
   value: string | undefined,
   ctx: Yup.TestContext<any>,
-  errorMessage?: string
+  errorMessage?: string,
 ): Promise<boolean | Yup.ValidationError> => {
   if (!value) return false
 
@@ -16,7 +15,7 @@ const validateAddress = async (
     const { data: isValid, error } = await isValidAddress(
       value as Address,
       getProvider(CHAIN_ID.ETHEREUM),
-      errorMessage
+      errorMessage,
     )
 
     if (!isValid || error) {
@@ -37,7 +36,7 @@ export const addressValidationSchema = Yup.string()
 
 export const addressValidationSchemaWithError = (
   invalidErrorMessage: string,
-  requiredErrorMessage: string
+  requiredErrorMessage: string,
 ) =>
   Yup.string()
     .required(requiredErrorMessage)
@@ -51,5 +50,5 @@ export const addressValidationOptionalSchema = Yup.string().test(
   function (value) {
     if (!value) return true
     return validateAddress(value, this)
-  }
+  },
 )

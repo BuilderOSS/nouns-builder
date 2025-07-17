@@ -2,6 +2,7 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import type { AddressType } from '@buildeross/types'
+import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { Box, Flex } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -38,7 +39,6 @@ import { decodeTransaction } from 'src/services/abiService'
 import { useChainStore } from 'src/stores/useChainStore'
 import { type DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
-import { isProposalOpen } from 'src/utils/proposalState'
 
 export interface VotePageProps {
   proposalId: string

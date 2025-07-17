@@ -1,12 +1,12 @@
+import { encodePageNumToEndCursor } from './encodePageNumToEndCursor'
 import { assert } from 'vitest'
 import { describe } from 'vitest'
 
-import { encodePageNumToEndCursor } from './encodePageNumToEndCursor'
-
 const decode = (cursor: string) => {
   let decoded = ''
-  for (const char of Buffer.from(cursor, 'base64')) {
-    decoded += String.fromCharCode(char)
+  const buffer = Buffer.from(cursor, 'base64')
+  for (let i = 0; i < buffer.length; i++) {
+    decoded += String.fromCharCode(buffer[i])
   }
   return decoded
 }

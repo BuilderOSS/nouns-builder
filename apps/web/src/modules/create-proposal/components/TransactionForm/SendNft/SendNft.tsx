@@ -1,6 +1,9 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
+import { getEnsAddress } from '@buildeross/utils/ens'
+import { walletSnippet } from '@buildeross/utils/helpers'
+import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
@@ -23,9 +26,6 @@ import {
 } from 'src/modules/create-proposal/components/DropdownSelect'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { getEnsAddress } from 'src/utils/ens'
-import { walletSnippet } from 'src/utils/helpers'
-import { getProvider } from 'src/utils/provider'
 
 import sendNftSchema, { SendNftValues } from './SendNft.schema'
 

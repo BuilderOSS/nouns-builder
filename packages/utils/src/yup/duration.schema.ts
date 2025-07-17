@@ -1,10 +1,9 @@
+import { toSeconds } from '../helpers'
 import * as Yup from 'yup'
-
-import { toSeconds } from 'src/utils/helpers'
 
 export const durationValidationSchema = (
   min?: { value: number; description: string },
-  max?: { value: number; description: string }
+  max?: { value: number; description: string },
 ) =>
   Yup.object()
     .shape({

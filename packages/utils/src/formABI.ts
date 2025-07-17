@@ -2,12 +2,12 @@ export const FIELD_SEPERATOR_CHAR = '$'
 
 export const RAW_DATA_KEY = '$rawData'
 
-export function matchInputFromName(name: any, inputs: any): any {
+export function matchInputFromName(name: string, inputs: any[]): any {
   if (name.includes(FIELD_SEPERATOR_CHAR)) {
     const [first, ...rest] = name.split(FIELD_SEPERATOR_CHAR)
     return matchInputFromName(
       rest.join(FIELD_SEPERATOR_CHAR),
-      inputs.find((input: any) => input.name == first).components
+      inputs.find((input: any) => input.name == first).components,
     )
   }
   return inputs.find((input: any) => input.name === name)!

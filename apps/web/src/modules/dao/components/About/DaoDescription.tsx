@@ -1,3 +1,4 @@
+import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import HTMLReactParser from 'html-react-parser'
 import React, { useEffect, useMemo, useRef } from 'react'
@@ -7,7 +8,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 
 import { daoDescription as plainDesciption } from 'src/styles/About.css'
-import { isPossibleMarkdown } from 'src/utils/helpers'
 
 import { UNEXPANDED_BOX_HEIGHT, daoDescription, fadingEffect } from './mdRender.css'
 

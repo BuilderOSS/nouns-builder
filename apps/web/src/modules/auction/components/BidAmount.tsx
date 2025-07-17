@@ -1,4 +1,4 @@
-import { formatCryptoVal } from 'src/utils/numbers'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 
 import { AuctionDetail } from './AuctionDetail'
 

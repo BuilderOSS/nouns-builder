@@ -5,6 +5,8 @@ import {
   ESCROW_DELEGATE_SCHEMA_UID,
   easAbi,
 } from '@buildeross/constants/eas'
+import { getEnsAddress } from '@buildeross/utils/ens'
+import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { Box, Button } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { Form, Formik } from 'formik'
@@ -17,8 +19,6 @@ import { TransactionType } from 'src/modules/create-proposal/constants'
 import { Transaction, useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { getEnsAddress } from 'src/utils/ens'
-import { addressValidationSchemaWithError } from 'src/utils/yup'
 
 interface EscrowDelegateFormValues {
   escrowDelegate: string

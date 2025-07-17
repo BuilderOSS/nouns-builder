@@ -1,4 +1,5 @@
 import { AddressType } from '@buildeross/types'
+import { toSeconds } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useState } from 'react'
 import { encodeFunctionData } from 'viem'
@@ -11,7 +12,6 @@ import { useProposalStore } from 'src/modules/create-proposal'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { toSeconds } from 'src/utils/helpers'
 
 import { checkboxStyleVariants } from '../ReplaceArtwork/ReplaceArtworkForm.css'
 

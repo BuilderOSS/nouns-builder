@@ -1,5 +1,6 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
@@ -14,7 +15,6 @@ import { metadataAbi, tokenAbi } from 'src/data/contract/abis'
 import { Queue, TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { unpackOptionalArray } from 'src/utils/helpers'
 
 interface ProposalNavigationProps {
   transactionType?: TransactionType
