@@ -6,7 +6,7 @@ const PINATA_API_KEY = process.env.PINATA_API_KEY
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
-      const { type } = JSON.parse(req.body)
+      const { type } = req.body
       if (!type || !pinataOptions[type as UploadType]) {
         return res.status(400).json({
           text: `Invalid type provided, must be one of: ${Object.keys(pinataOptions).join(', ')}`,
