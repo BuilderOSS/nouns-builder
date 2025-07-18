@@ -17,12 +17,12 @@
     "syncpack:fix": "syncpack fix-mismatches"
   },
   "devDependencies": {
-    "eslint": "8.57.1",
     "@buildeross/eslint-config-custom": "workspace:*",
+    "eslint": "8.57.1",
     "husky": "^8.0.3",
     "prettier": "3.5.3",
     "syncpack": "^13.0.4",
-    "turbo": "2.5.3"
+    "turbo": "2.5.5"
   },
   "packageManager": "pnpm@10.11.0",
   "name": "nouns-builder"
