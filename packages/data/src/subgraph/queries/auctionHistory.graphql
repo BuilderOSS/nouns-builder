@@ -1,0 +1,23 @@
+query auctionHistory(
+  $startTime: BigInt!
+  $daoId: ID!
+  $orderBy: Auction_orderBy
+  $orderDirection: OrderDirection
+  $first: Int
+) {
+  dao(id: $daoId) {
+    auctions(
+      where: { endTime_gt: $startTime, settled: true }
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      first: $first
+    ) {
+      id
+      endTime
+      winningBid {
+        amount
+      }
+      settled
+    }
+  }
+}

@@ -1,0 +1,7 @@
+fragment Auction on Auction {
+  dao {
+    name
+    auctionAddress
+    tokenAddress
+  }
+}

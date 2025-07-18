@@ -1,0 +1,7 @@
+query auctionBids($id: ID!) {
+  auction(id: $id) {
+    bids(orderBy: bidTime, orderDirection: desc) {
+      ...AuctionBid
+    }
+  }
+}

@@ -1,0 +1,11 @@
+fragment Token on Token {
+  tokenId
+  tokenContract
+  name
+  dao {
+    description
+  }
+  image
+  owner
+  mintedAt
+}

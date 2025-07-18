@@ -1,0 +1,14 @@
+query proposals($where: Proposal_filter, $first: Int!, $skip: Int) {
+  proposals(
+    where: $where
+    first: $first
+    skip: $skip
+    orderBy: timeCreated
+    orderDirection: desc
+  ) {
+    ...Proposal
+    votes {
+      ...ProposalVote
+    }
+  }
+}

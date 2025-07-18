@@ -1,0 +1,23 @@
+query daoVoters(
+  $where: DAOVoter_filter
+  $first: Int
+  $skip: Int
+  $orderBy: DAOVoter_orderBy
+  $orderDirection: OrderDirection
+) {
+  daovoters(
+    where: $where
+    first: $first
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    id
+    voter
+    daoTokenCount
+    daoTokens(first: $first) {
+      tokenId
+      mintedAt
+    }
+  }
+}

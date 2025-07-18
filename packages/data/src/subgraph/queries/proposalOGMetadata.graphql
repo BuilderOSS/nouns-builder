@@ -1,0 +1,17 @@
+query proposalOGMetadata($where: Proposal_filter!, $first: Int!) {
+  proposals(where: $where, first: $first) {
+    ...Proposal
+    votes {
+      ...ProposalVote
+    }
+    dao {
+      name
+      contractImage
+      tokenAddress
+      metadataAddress
+      auctionAddress
+      treasuryAddress
+      governorAddress
+    }
+  }
+}

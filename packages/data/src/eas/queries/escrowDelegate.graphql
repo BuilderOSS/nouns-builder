@@ -1,0 +1,11 @@
+query escrowDelegates($schemaId: String!, $recipient: String!, $attesters: [String!]!) {
+  attestations(
+    where: {
+      schemaId: { equals: $schemaId }
+      recipient: { equals: $recipient }
+      attester: { in: $attesters }
+    }
+  ) {
+    ...Attestation
+  }
+}

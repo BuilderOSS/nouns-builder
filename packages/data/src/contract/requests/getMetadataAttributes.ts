@@ -1,14 +1,13 @@
+import { metadataAbi } from '../abis'
 import { CHAIN_ID } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils'
 import { Address } from 'viem'
 import { readContracts } from 'wagmi/actions'
 
-import { metadataAbi } from 'src/data/contract/abis'
-
 export const getMetadataAttributes = async (
   metadata: Address,
   finalTokenId: bigint,
-  chainId: CHAIN_ID
+  chainId: CHAIN_ID,
 ) => {
   let lengthRequests = []
   for (let currentTokenId = 0n; currentTokenId <= finalTokenId; currentTokenId++) {

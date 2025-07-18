@@ -1,0 +1,5 @@
+query totalAuctionSales($tokenAddress: ID!) {
+  dao(id: $tokenAddress) {
+    totalAuctionSales
+  }
+}

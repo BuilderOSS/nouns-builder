@@ -1,0 +1,5 @@
+fragment AuctionBid on AuctionBid {
+  id
+  amount
+  bidder
+}

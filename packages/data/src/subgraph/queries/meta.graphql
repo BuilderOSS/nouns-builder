@@ -1,0 +1,8 @@
+query syncStatus {
+  _meta {
+    block {
+      number
+    }
+    hasIndexingErrors
+  }
+}

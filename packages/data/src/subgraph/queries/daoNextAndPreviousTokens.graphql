@@ -1,0 +1,26 @@
+query daoNextAndPreviousTokens($tokenAddress: String!, $tokenId: BigInt!) {
+  prev: tokens(
+    where: { dao: $tokenAddress, tokenId_lt: $tokenId }
+    orderBy: tokenId
+    orderDirection: desc
+    first: 1
+  ) {
+    tokenId
+  }
+  next: tokens(
+    where: { dao: $tokenAddress, tokenId_gt: $tokenId }
+    orderBy: tokenId
+    orderDirection: asc
+    first: 1
+  ) {
+    tokenId
+  }
+  latest: tokens(
+    where: { dao: $tokenAddress }
+    orderBy: tokenId
+    orderDirection: desc
+    first: 1
+  ) {
+    tokenId
+  }
+}

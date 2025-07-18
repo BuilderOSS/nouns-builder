@@ -1,0 +1,7 @@
+query propdates($schemaId: String!, $recipient: String!) {
+  attestations(
+    where: { schemaId: { equals: $schemaId }, recipient: { equals: $recipient } }
+  ) {
+    ...Attestation
+  }
+}

@@ -1,0 +1,6 @@
+fragment ProposalVote on ProposalVote {
+  voter
+  support
+  weight
+  reason
+}

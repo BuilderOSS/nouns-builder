@@ -1,9 +1,8 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { SDK } from '../client'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { isAddress } from 'viem'
-
-import { SDK } from 'src/data/subgraph/client'
 
 export type MyDaosResponse = Array<{
   name: string
@@ -14,7 +13,7 @@ export type MyDaosResponse = Array<{
 }>
 
 export const myDaosRequest = async (
-  memberAddress: string
+  memberAddress: string,
 ): Promise<MyDaosResponse> => {
   let daos: MyDaosResponse = []
 
@@ -30,8 +29,8 @@ export const myDaosRequest = async (
             user: memberAddress.toLowerCase(),
             first: 30,
           })
-          .then((x) => ({ ...x, chainId: chain.id }))
-      )
+          .then((x) => ({ ...x, chainId: chain.id })),
+      ),
     )
 
     return data
@@ -42,7 +41,7 @@ export const myDaosRequest = async (
           collectionAddress: dao.tokenAddress,
           auctionAddress: dao?.auctionAddress || '',
           chainId: queries.chainId,
-        }))
+        })),
       )
       .flat()
       .sort((a, b) => a.name.localeCompare(b.name))

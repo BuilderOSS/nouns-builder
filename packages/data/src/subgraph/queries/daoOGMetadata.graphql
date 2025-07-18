@@ -1,0 +1,15 @@
+query daoOGMetadata($tokenAddress: ID!) {
+  dao(id: $tokenAddress) {
+    name
+    description
+    contractImage
+    totalSupply
+    ownerCount
+    proposalCount
+    tokenAddress
+    metadataAddress
+    auctionAddress
+    treasuryAddress
+    governorAddress
+  }
+}

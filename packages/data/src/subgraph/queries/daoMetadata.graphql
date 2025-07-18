@@ -1,0 +1,14 @@
+query daoMetadata($tokenAddress: ID!, $first: Int!) {
+  dao(id: $tokenAddress) {
+    metadataProperties(orderBy: createdAt) {
+      ipfsBaseUri
+      ipfsExtension
+      names
+      items(orderBy: index, first: $first) {
+        name
+        propertyId
+        isNewProperty
+      }
+    }
+  }
+}

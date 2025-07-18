@@ -1,0 +1,16 @@
+fragment ExploreDao on Auction {
+  dao {
+    name
+    tokenAddress
+  }
+  endTime
+  highestBid {
+    amount
+    bidder
+  }
+  token {
+    name
+    image
+    tokenId
+  }
+}

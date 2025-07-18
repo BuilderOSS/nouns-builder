@@ -1,0 +1,5 @@
+query activeDaos($first: Int!, $where: DAO_filter!) {
+  daos(first: $first, where: $where) {
+    id
+  }
+}

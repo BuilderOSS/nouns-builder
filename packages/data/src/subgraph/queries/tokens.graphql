@@ -1,0 +1,17 @@
+query tokens(
+  $where: Token_filter
+  $orderBy: Token_orderBy
+  $orderDirection: OrderDirection
+  $first: Int
+  $skip: Int
+) {
+  tokens(
+    where: $where
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    first: $first
+    skip: $skip
+  ) {
+    ...Token
+  }
+}

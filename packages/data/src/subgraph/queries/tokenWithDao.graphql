@@ -1,0 +1,24 @@
+query tokenWithDao($id: ID!) {
+  token(id: $id) {
+    ...Token
+    auction {
+      winningBid {
+        amount
+        bidder
+      }
+    }
+    dao {
+      name
+      description
+      contractImage
+      totalSupply
+      ownerCount
+      proposalCount
+      tokenAddress
+      metadataAddress
+      auctionAddress
+      treasuryAddress
+      governorAddress
+    }
+  }
+}
