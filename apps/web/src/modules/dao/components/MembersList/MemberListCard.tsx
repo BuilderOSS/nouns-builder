@@ -1,10 +1,10 @@
+import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
 
 import { Avatar } from 'src/components/Avatar'
-import { DaoVoter } from 'src/data/subgraph/requests/daoVoters'
 import { useEnsData } from 'src/hooks'
 
 import { firstRowItem, lastRowItem, rowItem } from './MembersList.css'

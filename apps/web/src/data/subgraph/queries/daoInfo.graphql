@@ -1,6 +1,0 @@
-query daoInfo($tokenAddress: ID!) {
-  dao(id: $tokenAddress) {
-    totalSupply
-    ownerCount
-  }
-}

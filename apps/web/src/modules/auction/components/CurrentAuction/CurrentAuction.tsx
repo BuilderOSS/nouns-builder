@@ -1,3 +1,5 @@
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain } from '@buildeross/types'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
@@ -5,8 +7,6 @@ import React, { Fragment, useState } from 'react'
 import { formatEther } from 'viem'
 import { useReadContract } from 'wagmi'
 
-import { auctionAbi } from 'src/data/contract/abis'
-import { AuctionBidFragment } from 'src/data/subgraph/sdk.generated'
 import { useTimeout } from 'src/hooks/useTimeout'
 
 import { AuctionDetails } from '../AuctionDetails'

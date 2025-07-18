@@ -1,4 +1,5 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { ProposalsResponse, getProposals } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Button, Flex, Text } from '@buildeross/zord'
@@ -13,10 +14,6 @@ import { Countdown } from 'src/components/Countdown'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import Pagination from 'src/components/Pagination'
-import {
-  ProposalsResponse,
-  getProposals,
-} from 'src/data/subgraph/requests/proposalsQuery'
 import { useVotes } from 'src/hooks'
 import { useDaoMembership } from 'src/hooks/useDaoMembership'
 import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'

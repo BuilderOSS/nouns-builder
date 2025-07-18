@@ -1,3 +1,4 @@
+import { auctionAbi, governorAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Paragraph, Text } from '@buildeross/zord'
@@ -7,7 +8,6 @@ import { useReadContract } from 'wagmi'
 
 import { defaultHelperTextStyle } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon/Icon'
-import { auctionAbi, governorAbi } from 'src/data/contract/abis'
 import { useProposalStore } from 'src/modules/create-proposal'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useChainStore } from 'src/stores/useChainStore'

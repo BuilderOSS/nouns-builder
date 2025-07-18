@@ -1,3 +1,4 @@
+import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -9,7 +10,6 @@ import React from 'react'
 import { Address, encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
-import { auctionAbi, tokenAbi } from 'src/data/contract/abis'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

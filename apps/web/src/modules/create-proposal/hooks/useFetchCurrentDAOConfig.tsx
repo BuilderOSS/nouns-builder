@@ -4,19 +4,19 @@ import {
   NULL_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import useSWRImmutable from 'swr/immutable'
-import { encodeAbiParameters, parseAbiParameters } from 'viem'
-import { useReadContracts } from 'wagmi'
-
 import {
   auctionAbi,
   governorAbi,
   metadataAbi,
   tokenAbi,
   treasuryAbi,
-} from 'src/data/contract/abis'
+} from '@buildeross/sdk/contract'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import useSWRImmutable from 'swr/immutable'
+import { encodeAbiParameters, parseAbiParameters } from 'viem'
+import { useReadContracts } from 'wagmi'
+
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
 import { applyL1ToL2Alias } from '../utils/applyL1ToL2Alias'

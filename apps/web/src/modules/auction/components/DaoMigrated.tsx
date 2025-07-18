@@ -1,11 +1,11 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Stack, atoms } from '@buildeross/zord'
 import Link from 'next/link'
 import { useReadContract } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
-import { auctionAbi } from 'src/data/contract/abis'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

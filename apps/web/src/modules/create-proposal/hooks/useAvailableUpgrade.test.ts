@@ -15,9 +15,9 @@ vi.mock('wagmi', async () => {
   }
 })
 
-vi.mock('src/data/subgraph/sdk.generated', async () => {
-  const mod = await vi.importActual<typeof import('src/data/subgraph/sdk.generated')>(
-    'src/data/subgraph/sdk.generated'
+vi.mock('@buildeross/sdk/subgraph', async () => {
+  const mod = await vi.importActual<typeof import('@buildeross/sdk/subgraph')>(
+    '@buildeross/sdk/subgraph'
   )
   return {
     ...mod,

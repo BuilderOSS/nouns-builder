@@ -1,4 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { type PropDate, getPropDates } from '@buildeross/sdk/eas'
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { useMemo, useState } from 'react'
@@ -6,8 +8,6 @@ import useSWR from 'swr'
 import { getAddress, zeroHash } from 'viem'
 
 import { Icon } from 'src/components/Icon'
-import { type PropDate, getPropDates } from 'src/data/eas/requests/getPropDates'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useDecodedTransactions } from 'src/hooks/useDecodedTransactions'
 import {
   getEscrowBundler,

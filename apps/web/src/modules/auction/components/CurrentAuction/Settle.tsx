@@ -1,3 +1,4 @@
+import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useState } from 'react'
@@ -11,7 +12,6 @@ import {
 import { waitForTransactionReceipt } from 'wagmi/actions'
 
 import { ContractButton } from 'src/components/ContractButton'
-import { auctionAbi } from 'src/data/contract/abis'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

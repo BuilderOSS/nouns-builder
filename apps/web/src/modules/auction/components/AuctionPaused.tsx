@@ -1,4 +1,7 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { ProposalState } from '@buildeross/sdk/contract'
+import { ProposalsResponse, getProposals } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Stack, atoms } from '@buildeross/zord'
 import Link from 'next/link'
@@ -9,12 +12,6 @@ import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
-import { auctionAbi } from 'src/data/contract/abis'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import {
-  ProposalsResponse,
-  getProposals,
-} from 'src/data/subgraph/requests/proposalsQuery'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

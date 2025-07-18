@@ -1,10 +1,10 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { getProposal } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
 import { useSWRConfig } from 'swr'
 
 import { Countdown } from 'src/components/Countdown'
-import { getProposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useTimeout } from 'src/hooks/useTimeout'
 import { useChainStore } from 'src/stores/useChainStore'
 

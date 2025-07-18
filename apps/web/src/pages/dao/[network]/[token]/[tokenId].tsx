@@ -2,6 +2,10 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
+import { getEscrowDelegate } from '@buildeross/sdk/eas'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import { TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID, Chain } from '@buildeross/types'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
@@ -13,10 +17,6 @@ import { useAccount } from 'wagmi'
 import { Meta } from 'src/components/Meta'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import { getEscrowDelegate } from 'src/data/eas/requests/getEscrowDelegate'
-import { SDK } from 'src/data/subgraph/client'
-import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
-import { TokenWithDaoQuery } from 'src/data/subgraph/sdk.generated'
 import { useVotes } from 'src/hooks'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
@@ -191,7 +191,7 @@ const getLatestTokenIdRedirect = async (
   chain: Chain,
   network: string
 ): Promise<GetServerSidePropsResult<TokenPageProps>> => {
-  const latestTokenId = await SDK.connect(chain.id)
+  const latestTokenId = await SubgraphSDK.connect(chain.id)
     .tokens({
       where: {
         dao: collectionAddress.toLowerCase(),
@@ -224,7 +224,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
     const env = process.env.VERCEL_ENV || 'development'
     const protocol = env === 'development' ? 'http' : 'https'
 
-    const token = await SDK.connect(chain.id)
+    const token = await SubgraphSDK.connect(chain.id)
       .tokenWithDao({
         id: `${collection.toLowerCase()}:${tokenId}`,
       })

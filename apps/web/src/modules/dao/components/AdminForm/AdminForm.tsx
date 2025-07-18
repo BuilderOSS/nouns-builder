@@ -1,4 +1,5 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
+import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
@@ -22,7 +23,6 @@ import StickySave from 'src/components/Fields/StickySave'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import SingleImageUpload from 'src/components/SingleImageUpload/SingleImageUpload'
-import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from 'src/data/contract/abis'
 import { TokenAllocation } from 'src/modules/create-dao'
 import {
   BuilderTransaction,

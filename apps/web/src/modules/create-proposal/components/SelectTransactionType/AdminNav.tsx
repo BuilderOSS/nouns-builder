@@ -1,3 +1,4 @@
+import { auctionAbi } from '@buildeross/sdk/contract'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
@@ -5,7 +6,6 @@ import React from 'react'
 import { useReadContract } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
-import { auctionAbi } from 'src/data/contract/abis'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

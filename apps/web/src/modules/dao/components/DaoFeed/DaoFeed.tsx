@@ -1,11 +1,11 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { highestBidsRequest } from '@buildeross/sdk/subgraph'
 import { Flex } from '@buildeross/zord'
 import { Grid } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 import useSWR from 'swr'
 
 import RecentlyCreated from 'src/components/Home/RecentlyCreated'
-import { highestBidsRequest } from 'src/data/subgraph/requests/homepageQuery'
 import { DaoProps } from 'src/pages'
 import { useChainStore } from 'src/stores/useChainStore'
 

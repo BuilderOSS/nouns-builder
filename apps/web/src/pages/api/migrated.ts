@@ -1,12 +1,11 @@
 import { L2_MIGRATION_DEPLOYER, NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
+import { l2DeployerAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { readContract } from 'wagmi/actions'
-
-import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
 
 export interface L2MigratedResponse {
   migrated:
@@ -28,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return readContract(serverConfig, {
         address: deployer,
         chainId: chainId,
-        abi: L2DeployerABI,
+        abi: l2DeployerAbi,
         functionName: 'crossDomainDeployerToMigration',
         args: [l1Treasury as AddressType],
       })

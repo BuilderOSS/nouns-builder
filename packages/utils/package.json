@@ -40,7 +40,6 @@
     "@buildeross/types": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
     "bignumber.js": "^9.3.0",
-    "lodash": "^4.17.21",
     "tinycolor2": "^1.4.2"
   },
   "devDependencies": {
@@ -57,8 +56,6 @@
   "peerDependencies": {
     "viem": "^2.30.0",
     "wagmi": "^2.15.4",
-    "yup": "^1.6.1",
-    "@farcaster/frame-wagmi-connector": "^0.0.39",
-    "@rainbow-me/rainbowkit": "^2.2.5"
+    "yup": "^1.6.1"
   }
 }

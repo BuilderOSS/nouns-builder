@@ -1,3 +1,7 @@
+import { governorAbi } from '@buildeross/sdk/contract'
+import { ProposalState } from '@buildeross/sdk/contract'
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { ProposalVoteFragment as ProposalVote } from '@buildeross/sdk/subgraph'
 import { AddressType } from '@buildeross/types'
 import { isProposalOpen, isProposalSuccessful } from '@buildeross/utils/proposalState'
 import { Flex } from '@buildeross/zord'
@@ -5,10 +9,6 @@ import React, { Fragment } from 'react'
 import { getAddress } from 'viem'
 import { useAccount, useReadContracts } from 'wagmi'
 
-import { governorAbi } from 'src/data/contract/abis'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { ProposalVoteFragment as ProposalVote } from 'src/data/subgraph/sdk.generated'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

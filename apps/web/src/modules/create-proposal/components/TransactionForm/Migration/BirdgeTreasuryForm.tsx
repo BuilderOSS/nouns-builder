@@ -2,6 +2,7 @@ import {
   L1_CROSS_DOMAIN_MESSENGER,
   L2_MIGRATION_DEPLOYER,
 } from '@buildeross/constants/addresses'
+import { l2DeployerAbi, messengerAbi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
@@ -10,8 +11,6 @@ import { encodeFunctionData } from 'viem'
 import { useBalance } from 'wagmi'
 
 import Input from 'src/components/Input/Input'
-import { messengerABI } from 'src/data/contract/abis/L1CrossDomainMessenger'
-import { L2DeployerABI } from 'src/data/contract/abis/L2MigrationDeployer'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
@@ -45,7 +44,7 @@ export const BridgeTreasuryForm = ({
     const value = values.amount.toString()
 
     const depositParams = encodeFunctionData({
-      abi: L2DeployerABI,
+      abi: l2DeployerAbi,
       functionName: 'depositToTreasury',
     })
 
@@ -58,7 +57,7 @@ export const BridgeTreasuryForm = ({
           target: L1_CROSS_DOMAIN_MESSENGER[migratedToChainId],
           value,
           calldata: encodeFunctionData({
-            abi: messengerABI,
+            abi: messengerAbi,
             functionName: 'sendMessage',
             args: [L2_MIGRATION_DEPLOYER[migratedToChainId], depositParams, 0],
           }),

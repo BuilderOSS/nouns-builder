@@ -1,3 +1,4 @@
+import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
@@ -7,7 +8,6 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 
 import { ContractButton } from 'src/components/ContractButton'
 import CopyButton from 'src/components/CopyButton/CopyButton'
-import { metadataAbi, tokenAbi } from 'src/data/contract/abis'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 import {

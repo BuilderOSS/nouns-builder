@@ -1,10 +1,9 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
 import axios from 'axios'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
-
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 
 export type DecodedTransactionSuccess = {
   target: string

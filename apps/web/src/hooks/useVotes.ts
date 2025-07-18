@@ -1,8 +1,7 @@
+import { governorAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import isNil from 'lodash/isNil'
 import { useReadContracts } from 'wagmi'
-
-import { governorAbi, tokenAbi } from 'src/data/contract/abis'
 
 export const useVotes = ({
   chainId,

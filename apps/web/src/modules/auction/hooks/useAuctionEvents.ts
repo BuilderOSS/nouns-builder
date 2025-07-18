@@ -1,13 +1,13 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { getBids } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useRouter } from 'next/router'
 import { useSWRConfig } from 'swr'
 import { useConfig, useWatchContractEvent } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
-import { auctionAbi } from 'src/data/contract/abis'
-import { getBids } from 'src/data/subgraph/requests/getBids'
-import { awaitSubgraphSync } from 'src/data/subgraph/requests/sync'
 import { useDaoStore } from 'src/stores/useDaoStore'
 
 export const useAuctionEvents = ({

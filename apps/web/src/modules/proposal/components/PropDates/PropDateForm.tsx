@@ -5,6 +5,7 @@ import {
   PROPDATE_SCHEMA_UID,
   easAbi,
 } from '@buildeross/constants/eas'
+import { MessageType, type PropDate } from '@buildeross/sdk/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
@@ -23,7 +24,6 @@ import { defaultInputLabelStyle } from 'src/components/Fields/styles.css'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import { MessageType, type PropDate } from 'src/data/eas/requests/getPropDates'
 import { useEnsData } from 'src/hooks'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

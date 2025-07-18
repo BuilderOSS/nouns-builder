@@ -1,8 +1,7 @@
+import { Auction_OrderBy } from '@buildeross/sdk/subgraph'
 import { Flex, Select } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
-
-import { Auction_OrderBy } from 'src/data/subgraph/sdk.generated'
 
 const SORT_KEY = {
   [Auction_OrderBy.StartTime]: 'Created',

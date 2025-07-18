@@ -1,7 +1,7 @@
+import { ProposalVoteSupport as Support } from '@buildeross/sdk/subgraph'
 import { screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { ProposalVoteSupport as Support } from 'src/data/subgraph/sdk.generated'
 import { render } from 'src/test/utils'
 
 import Vote from './Vote'

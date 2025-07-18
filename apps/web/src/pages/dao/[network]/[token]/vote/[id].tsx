@@ -1,6 +1,12 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
+import { getEscrowDelegate } from '@buildeross/sdk/eas'
+import { getPropDates } from '@buildeross/sdk/eas'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { formatAndFetchState, getProposal } from '@buildeross/sdk/subgraph'
+import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import type { AddressType } from '@buildeross/types'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { Box, Flex } from '@buildeross/zord'
@@ -13,15 +19,6 @@ import { useBalance } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
 import { Meta } from 'src/components/Meta'
-import { isChainIdSupportedByEAS } from 'src/data/eas/helpers'
-import { getEscrowDelegate } from 'src/data/eas/requests/getEscrowDelegate'
-import { getPropDates } from 'src/data/eas/requests/getPropDates'
-import { SDK } from 'src/data/subgraph/client'
-import {
-  formatAndFetchState,
-  getProposal,
-} from 'src/data/subgraph/requests/proposalQuery'
-import type { Proposal_Filter } from 'src/data/subgraph/sdk.generated'
 import { decodeTransactions } from 'src/hooks/useDecodedTransactions'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { SectionHandler } from 'src/modules/dao'
@@ -198,7 +195,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
         dao: collection.toLowerCase(),
       }
 
-  const data = await SDK.connect(chain.id)
+  const data = await SubgraphSDK.connect(chain.id)
     .proposalOGMetadata({
       where,
       first: 1,

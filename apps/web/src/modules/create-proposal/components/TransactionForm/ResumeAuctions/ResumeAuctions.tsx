@@ -1,10 +1,10 @@
+import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Box, Button, Paragraph } from '@buildeross/zord'
 import { useState } from 'react'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
-import { auctionAbi } from 'src/data/contract/abis'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'

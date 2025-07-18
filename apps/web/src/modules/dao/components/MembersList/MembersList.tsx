@@ -1,3 +1,4 @@
+import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
@@ -5,7 +6,6 @@ import React, { useMemo } from 'react'
 import useSWR from 'swr'
 
 import Pagination from 'src/components/Pagination'
-import { DaoVoter } from 'src/data/subgraph/requests/daoVoters'
 import { usePagination } from 'src/hooks/usePagination'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'

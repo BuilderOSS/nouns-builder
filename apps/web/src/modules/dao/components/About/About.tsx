@@ -1,5 +1,7 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { parseContractURI } from '@buildeross/utils/parseContractURI'
@@ -13,8 +15,6 @@ import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
 import { Avatar } from 'src/components/Avatar/Avatar'
 import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
-import { metadataAbi, tokenAbi } from 'src/data/contract/abis'
-import { SDK } from 'src/data/subgraph/client'
 import { useDaoMembership } from 'src/hooks/useDaoMembership'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -77,7 +77,7 @@ export const About: React.FC = () => {
   const { data } = useSWR(
     chain && token ? [SWR_KEYS.DAO_INFO, chain.id, token] : null,
     async ([_key, chainId, token]) => {
-      const res = await SDK.connect(chainId)
+      const res = await SubgraphSDK.connect(chainId)
         .daoInfo({
           tokenAddress: token.toLowerCase(),
         })

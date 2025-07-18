@@ -1,11 +1,10 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import useSWR from 'swr'
-
 import {
   type DaoMembershipResponse,
   daoMembershipRequest,
-} from 'src/data/subgraph/requests/daoMembership'
+} from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import useSWR from 'swr'
 
 import { type EnsData, useEnsData } from './useEnsData'
 

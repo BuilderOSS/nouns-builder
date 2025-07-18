@@ -1,4 +1,5 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
@@ -7,7 +8,6 @@ import useSWR from 'swr'
 
 import { Icon } from 'src/components/Icon'
 import { OptionalLink } from 'src/components/OptionalLink'
-import { SDK } from 'src/data/subgraph/client'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 
@@ -36,7 +36,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
       ? [SWR_KEYS.DAO_NEXT_AND_PREVIOUS_TOKENS, chainId, collection, tokenId]
       : null,
     () =>
-      SDK.connect(chainId)
+      SubgraphSDK.connect(chainId)
         .daoNextAndPreviousTokens({ tokenId, tokenAddress: collection.toLowerCase() })
         .then((x) => ({
           next: x.next.length > 0 ? parseInt(x.next[0].tokenId) : undefined,

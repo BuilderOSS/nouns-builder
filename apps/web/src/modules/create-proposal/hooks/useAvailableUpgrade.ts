@@ -1,5 +1,9 @@
 import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { auctionAbi, managerAbi } from '@buildeross/sdk/contract'
+import { ProposalState } from '@buildeross/sdk/contract'
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { getProposals } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import intersection from 'lodash/intersection'
 import isNil from 'lodash/isNil'
@@ -10,10 +14,6 @@ import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 import { useReadContracts } from 'wagmi'
 
-import { auctionAbi, managerAbi } from 'src/data/contract/abis'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { getProposals } from 'src/data/subgraph/requests/proposalsQuery'
 import {
   BuilderTransaction,
   CONTRACT_VERSION_DETAILS,

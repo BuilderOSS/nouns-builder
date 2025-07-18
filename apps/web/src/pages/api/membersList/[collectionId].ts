@@ -1,7 +1,6 @@
+import { votersRequest } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-
-import { votersRequest } from 'src/data/subgraph/requests/daoVoters'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { collectionId, chainId, page, limit } = req.query

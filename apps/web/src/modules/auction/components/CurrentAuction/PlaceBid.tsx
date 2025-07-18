@@ -1,5 +1,8 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { averageWinningBid } from '@buildeross/sdk/subgraph'
+import { getBids } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -13,9 +16,6 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import { ContractButton } from 'src/components/ContractButton'
 import { Icon } from 'src/components/Icon/Icon'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { auctionAbi } from 'src/data/contract/abis'
-import { averageWinningBid } from 'src/data/subgraph/requests/averageWinningBid'
-import { getBids } from 'src/data/subgraph/requests/getBids'
 import { useDaoStore } from 'src/stores/useDaoStore'
 
 import { useMinBidIncrement } from '../../hooks'

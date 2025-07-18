@@ -1,9 +1,9 @@
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { handleGMTOffset } from '@buildeross/utils/helpers'
 import { Box, Grid } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useCallback } from 'react'
 
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { propDataGrid } from 'src/styles/Proposals.css'
 
 import { Tile } from './Tile'

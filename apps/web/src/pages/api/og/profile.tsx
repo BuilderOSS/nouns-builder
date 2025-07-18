@@ -1,11 +1,11 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { getEnsAvatar, getEnsName } from '@buildeross/utils/ens'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
 import { isAddress } from 'viem'
 
-import { MyDaosResponse } from 'src/data/subgraph/requests/daoQuery'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 
 const walletSnippet = (_addr: string) =>

@@ -3,6 +3,7 @@ import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
 import type { AddressType } from '@buildeross/types'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
@@ -23,8 +24,6 @@ import { ContractButton } from 'src/components/ContractButton'
 import { FallbackImage } from 'src/components/FallbackImage'
 import { defaultBackButton } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon'
-import { managerAbi } from 'src/data/contract/abis'
-import { managerV2Abi } from 'src/data/contract/abis/ManagerV2'
 import { formatFounderAllocation } from 'src/modules/create-dao'
 import { useChainStore } from 'src/stores/useChainStore'
 import {
@@ -180,7 +179,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
         const data = await simulateContract(config, {
           address: PUBLIC_MANAGER_ADDRESS[chain.id],
           chainId: chain.id,
-          abi: managerV2Abi,
+          abi: managerAbi,
           functionName: 'deploy',
           args: [
             founderParams,
@@ -198,7 +197,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
         const data = await simulateContract(config, {
           address: PUBLIC_MANAGER_ADDRESS[chain.id],
           chainId: chain.id,
-          abi: managerAbi,
+          abi: managerV1Abi,
           functionName: 'deploy',
           args: [founderParams, tokenParams, auctionParams, govParams],
         })
