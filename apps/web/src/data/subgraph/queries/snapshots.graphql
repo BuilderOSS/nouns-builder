@@ -1,0 +1,17 @@
+query snapshots(
+  $where: Snapshot_filter
+  $orderBy: Snapshot_orderBy
+  $orderDirection: OrderDirection
+  $first: Int
+  $skip: Int
+) {
+  snapshots(
+    where: $where
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+    first: $first
+    skip: $skip
+  ) {
+    ...Snapshot
+  }
+}

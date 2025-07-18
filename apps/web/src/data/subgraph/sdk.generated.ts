@@ -2772,6 +2772,18 @@ export type ProposalVoteFragment = {
   reason?: string | null
 }
 
+export type SnapshotFragment = {
+  __typename?: 'Snapshot'
+  id: string
+  ownerCount: number
+  voterCount: number
+  proposalCount: number
+  totalSupply: number
+  timestamp: any
+  blockNumber: any
+  dao: { __typename?: 'DAO'; name: string; id: string }
+}
+
 export type TokenFragment = {
   __typename?: 'Token'
   tokenId: any
@@ -3243,6 +3255,29 @@ export type ProposalsQuery = {
   }>
 }
 
+export type SnapshotsQueryVariables = Exact<{
+  where?: InputMaybe<Snapshot_Filter>
+  orderBy?: InputMaybe<Snapshot_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+}>
+
+export type SnapshotsQuery = {
+  __typename?: 'Query'
+  snapshots: Array<{
+    __typename?: 'Snapshot'
+    id: string
+    ownerCount: number
+    voterCount: number
+    proposalCount: number
+    totalSupply: number
+    timestamp: any
+    blockNumber: any
+    dao: { __typename?: 'DAO'; name: string; id: string }
+  }>
+}
+
 export type TokenWithDaoQueryVariables = Exact<{
   id: Scalars['ID']['input']
 }>
@@ -3405,6 +3440,21 @@ export const ProposalVoteFragmentDoc = gql`
     support
     weight
     reason
+  }
+`
+export const SnapshotFragmentDoc = gql`
+  fragment Snapshot on Snapshot {
+    dao {
+      name
+      id
+    }
+    id
+    ownerCount
+    voterCount
+    proposalCount
+    totalSupply
+    timestamp
+    blockNumber
   }
 `
 export const TokenFragmentDoc = gql`
@@ -3758,6 +3808,26 @@ export const ProposalsDocument = gql`
   }
   ${ProposalFragmentDoc}
   ${ProposalVoteFragmentDoc}
+`
+export const SnapshotsDocument = gql`
+  query snapshots(
+    $where: Snapshot_filter
+    $orderBy: Snapshot_orderBy
+    $orderDirection: OrderDirection
+    $first: Int
+    $skip: Int
+  ) {
+    snapshots(
+      where: $where
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+      first: $first
+      skip: $skip
+    ) {
+      ...Snapshot
+    }
+  }
+  ${SnapshotFragmentDoc}
 `
 export const TokenWithDaoDocument = gql`
   query tokenWithDao($id: ID!) {
@@ -4116,6 +4186,21 @@ export function getSdk(
             ...wrappedRequestHeaders,
           }),
         'proposals',
+        'query',
+        variables
+      )
+    },
+    snapshots(
+      variables?: SnapshotsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders
+    ): Promise<SnapshotsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SnapshotsQuery>(SnapshotsDocument, variables, {
+            ...requestHeaders,
+            ...wrappedRequestHeaders,
+          }),
+        'snapshots',
         'query',
         variables
       )

@@ -1,0 +1,13 @@
+fragment Snapshot on Snapshot {
+  dao {
+    name
+    id
+  }
+  id
+  ownerCount
+  voterCount
+  proposalCount
+  totalSupply
+  timestamp
+  blockNumber
+}

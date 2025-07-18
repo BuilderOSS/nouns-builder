@@ -5,7 +5,7 @@ import useSWR from 'swr'
 import SWR_KEYS from 'src/constants/swrKeys'
 import { SDK } from 'src/data/subgraph/client'
 import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
+import { OrderDirection, Snapshot_OrderBy } from 'src/data/subgraph/sdk.generated'
 import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
@@ -27,28 +27,28 @@ export const ProposalVotes: React.FC<ProposalVotesProps> = ({ proposal }) => {
 
   const hasVotes = proposal.votes?.length || 0 > 0
 
-  const { data: tokenAtTimestamp } = useSWR(
+  const { data: snapshot } = useSWR(
     addresses.token
-      ? [SWR_KEYS.AUCTION_SETTLED, chain.id, addresses.token, proposal.timeCreated]
+      ? [SWR_KEYS.SNAPSHOT_SUPPLY, chain.id, addresses.token, proposal.timeCreated]
       : null,
     () =>
       SDK.connect(chain.id)
-        .tokens({
+        .snapshots({
           where: {
-            tokenContract: addresses.token?.toLowerCase(),
-            mintedAt_lt: proposal.timeCreated,
+            dao: addresses.token?.toLowerCase(),
+            timestamp_lte: proposal.timeCreated,
           },
-          orderBy: Token_OrderBy.TokenId,
+          orderBy: Snapshot_OrderBy.Timestamp,
           orderDirection: OrderDirection.Desc,
           first: 1,
         })
-        .then((x) => x.tokens[0])
+        .then((x) => x.snapshots[0])
   )
 
   const maxVotes = useMemo(() => {
-    if (!tokenAtTimestamp) return 0
-    return parseInt(tokenAtTimestamp?.tokenId) + 1 // + 1 for tokenId 0
-  }, [tokenAtTimestamp])
+    if (!snapshot) return 0
+    return snapshot.totalSupply
+  }, [snapshot])
 
   return (
     <Flex className={propPageWrapper}>

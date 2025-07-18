@@ -1,14 +1,13 @@
 #!/bin/bash
 
-# Simple script to deploy a subgraph with mustache and goldsky
+# Simple script to build a subgraph with mustache for templated subgraph.yaml
 
 # Input arguments
 NETWORK=$1
-VERSION=$2
 
 # Validation
-if [ -z "$NETWORK" ] || [ -z "$VERSION" ]; then
-  echo "Usage: $0 <network> <version>"
+if [ -z "$NETWORK" ]; then
+  echo "Usage: $0 <network>"
   exit 1
 fi
 
@@ -38,13 +37,3 @@ if [ $? -ne 0 ]; then
   echo "Error running 'pnpm build:subgraph'"
   exit 1
 fi
-
-# Deploy subgraph
-DEPLOY_NAME="nouns-builder-${NETWORK}/${VERSION}"
-goldsky subgraph deploy "$DEPLOY_NAME" --path .
-if [ $? -ne 0 ]; then
-  echo "Error deploying subgraph to Goldsky"
-  exit 1
-fi
-
-echo "✅ Subgraph deployed successfully as '$DEPLOY_NAME'"
