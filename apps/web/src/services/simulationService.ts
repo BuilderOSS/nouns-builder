@@ -31,6 +31,7 @@ export type SimulationResult = {
   simulations: SimulationOutput[]
   success: boolean
   totalGasUsed: string
+  error: string | null
 }
 
 const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = process.env
@@ -116,17 +117,20 @@ export async function simulate({
   const simulationSucceeded = simulations.every((s) => s.status)
   const totalGasUsed = simulations.reduce((total, s) => total + (s.gas_used ?? 0), 0)
 
-  if (!simulationSucceeded) {
-    await Promise.all(simulations.filter((s) => !s.status).map(shareSimulation))
+  const haveSimulationToShare = simulations.some((s) => !!s.id)
+
+  if (!simulationSucceeded && haveSimulationToShare) {
+    await Promise.all(simulations.filter((s) => !s.status && s.id).map(shareSimulation))
   }
 
   return {
     simulations: simulations.map((s, i) => ({
       ...s,
       index: i,
-      url: getSimulationUrl(s),
+      url: s.id ? getSimulationUrl(s) : '',
     })),
     success: simulationSucceeded,
     totalGasUsed: totalGasUsed.toString(),
+    error: haveSimulationToShare ? null : 'Internal Server Error',
   }
 }

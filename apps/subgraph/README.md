@@ -17,13 +17,13 @@
 
 The Nouns Builder subgraph supports the following networks:
 
-- `ethereum`
+- `ethereum-mainnet`
 - `ethereum-sepolia`
-- `base`
-- `optimism`
-- `zora`
+- `base-mainnet`
 - `base-sepolia`
+- `optimism-mainnet`
 - `optimism-sepolia`
+- `zora-mainnet`
 - `zora-sepolia`
 
 ### Step 1 - Install Dependencies
@@ -59,12 +59,19 @@ Run the following commands (these scripts are defined in `package.json`):
 
 ```bash
 # FROM: ./apps/subgraph
-pnpm prepare:<desired network>
-pnpm codegen
-pnpm build:subgraph
+
+# Build for a specific network using the build script
+pnpm build:only <network>
+
+# OR use the combined command that cleans and builds
+pnpm build:subgraph <network>
 ```
 
-This will generate types, build the subgraph, and create a local `subgraph.yaml` file.
+The build script will:
+
+1. Generate `subgraph.yaml` from the mustache template using the network config
+2. Run `pnpm graph:codegen` to generate types
+3. Run `pnpm graph:build` to build the subgraph
 
 ### Step 5 - Deploy the Subgraph to Production
 
@@ -76,17 +83,25 @@ This will generate types, build the subgraph, and create a local `subgraph.yaml`
 - Increase the `specVersion` at the top of `subgraph.yaml.mustache` for each new version.
 - Use the **--tag** flag to alias `latest` with the current `specVersion`.
 
-*If you are making breaking changes, make sure to notify clients first and provide a migration path.
+If you are making breaking changes, make sure to notify clients first and provide a migration path.
 
 **Always remember to tag!**
 
 ```bash
 # FROM: ./apps/subgraph
-# Example with specVersion 0.0.6
 
-goldsky subgraph deploy nouns-builder-<network>/0.0.6 --path .
-goldsky subgraph tag create nouns-builder-<network>/0.0.6 --tag latest
-# API endpoint format: api.goldsky.com/api/public/<project name>/subgraphs/nouns-builder-ethereum-sepolia/latest/gn
+# Deploy using the deploy script (recommended)
+pnpm deploy:only <network> <version>
+
+# OR use the combined command that cleans and deploys
+pnpm deploy:subgraph <network> <version>
+
+# Then manually tag the deployment
+goldsky subgraph tag create nouns-builder-<network>/<version> --tag latest
+
+# Example:
+pnpm deploy:only ethereum-mainnet 0.0.6
+goldsky subgraph tag create nouns-builder-ethereum-mainnet/0.0.6 --tag latest
 ```
 
 ### Step 6 - Query the Subgraph
@@ -108,10 +123,8 @@ The subgraph is currently deployed to the following networks:
 
 ## (DEPRECATED) Local Development with Docker Compose (TODO: fix - pnpm create:local step not working)
 
-- Generate the subgraph.yml file with `pnpm prepare:<desired network>`
-- Generate types with `pnpm codegen`
-- Build the subgraph with `pnpm build`
-- Run the local graph node with `pnpm local:node`
+- Build the subgraph with `pnpm build:only <network>`
+- Run the local graph node with `pnpm local-node`
 - For Mac users on Apple Silicon, use a local image of `graphprotocol/graph-node` (see [instructions here](https://github.com/graphprotocol/graph-node/tree/master/docker)).
 - Create the local subgraph with `pnpm create:local`
-- Deploy changes to the local subgraph with `pnpm deploy-local`
+- Deploy changes to the local subgraph with `pnpm deploy:local`

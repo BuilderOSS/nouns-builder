@@ -131,6 +131,7 @@ describe('simulationService', () => {
         simulations: expectedSimulations,
         success: true,
         totalGasUsed: parseEther('0.01').toString(),
+        error: null,
       })
     })
 
@@ -167,6 +168,7 @@ describe('simulationService', () => {
         simulations: expectedSimulations,
         success: false,
         totalGasUsed: parseEther('0.01').toString(),
+        error: null,
       })
     })
   })

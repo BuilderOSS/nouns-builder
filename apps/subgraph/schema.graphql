@@ -57,6 +57,17 @@ type Token @entity {
   auction: Auction @derivedFrom(field: "token")
 }
 
+type Snapshot @entity {
+  id: ID!
+  dao: DAO!
+  blockNumber: BigInt!
+  timestamp: BigInt!
+  totalSupply: Int!
+  ownerCount: Int!
+  voterCount: Int!
+  proposalCount: Int!
+}
+
 type Proposal @entity {
   id: ID!
   proposalId: Bytes!

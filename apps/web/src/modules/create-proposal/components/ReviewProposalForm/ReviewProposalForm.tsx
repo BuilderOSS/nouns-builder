@@ -10,6 +10,7 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 
 import { ContractButton } from 'src/components/ContractButton'
 import TextInput from 'src/components/Fields/TextInput'
+import { Icon } from 'src/components/Icon'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
@@ -25,6 +26,7 @@ import { AddressType, CHAIN_ID } from 'src/typings'
 import { BuilderTransaction, useProposalStore } from '../../stores'
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
 import { useEscrowFormStore } from '../TransactionForm/Escrow/EscrowUtils'
+import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'
 import { Transactions } from './Transactions'
 import { ERROR_CODE, FormValues, validationSchema } from './fields'
 
@@ -69,8 +71,9 @@ export const ReviewProposalForm = ({
   const [error, setError] = useState<string | undefined>()
   const [simulationError, setSimulationError] = useState<string | undefined>()
   const [simulating, setSimulating] = useState<boolean>(false)
-  const [simulations, setSimulations] = useState<Array<SimulationOutput>>([])
+  const [failedSimulations, setFailedSimulations] = useState<Array<SimulationOutput>>([])
   const [proposing, setProposing] = useState<boolean>(false)
+  const [skipSimulation, setSkipSimulation] = useState<boolean>(false)
   const { clear: clearEscrowForm } = useEscrowFormStore()
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
@@ -84,7 +87,8 @@ export const ReviewProposalForm = ({
     async (values: FormValues) => {
       setError(undefined)
       setSimulationError(undefined)
-      setSimulations([])
+      setFailedSimulations([])
+      setSkipSimulation(false)
 
       if (!hasThreshold) {
         setError(ERROR_CODE.NOT_ENOUGH_VOTES)
@@ -97,7 +101,7 @@ export const ReviewProposalForm = ({
         calldata,
       } = prepareProposalTransactions(values.transactions)
 
-      if (!!CHAINS_TO_SIMULATE.find((x) => x === chain.id)) {
+      if (!!CHAINS_TO_SIMULATE.find((x) => x === chain.id) && !skipSimulation) {
         let simulationResult
 
         try {
@@ -112,6 +116,9 @@ export const ReviewProposalForm = ({
               targets,
             })
             .then((res) => res.data)
+
+          // eslint-disable-next-line no-console
+          console.info({ simulationResult })
         } catch (err) {
           if (axios.isAxiosError(err)) {
             const data = err.response?.data as ErrorResult
@@ -125,11 +132,15 @@ export const ReviewProposalForm = ({
         } finally {
           setSimulating(false)
         }
-        const simulationFailed = simulationResult?.success === false
-        if (simulationFailed) {
+        if (simulationResult?.error) {
+          logError(simulationResult.error)
+          setSimulationError('Error simulating transactions: ' + simulationResult.error)
+          return
+        }
+        if (simulationResult?.success === false) {
           const failed =
             simulationResult?.simulations.filter(({ status }) => status === false) || []
-          setSimulations(failed)
+          setFailedSimulations(failed)
           return
         }
       }
@@ -184,7 +195,16 @@ export const ReviewProposalForm = ({
         setError(err.message)
       }
     },
-    [router, addresses, hasThreshold, clearProposal, clearEscrowForm, chain.id, config]
+    [
+      router,
+      addresses,
+      hasThreshold,
+      clearProposal,
+      clearEscrowForm,
+      chain.id,
+      config,
+      skipSimulation,
+    ]
   )
 
   if (isLoading) return null
@@ -207,7 +227,7 @@ export const ReviewProposalForm = ({
               <Transactions
                 disabled={disabledForm}
                 transactions={transactions}
-                simulations={simulations}
+                simulations={failedSimulations}
                 simulationError={simulationError}
               />
 
@@ -235,6 +255,25 @@ export const ReviewProposalForm = ({
                   />
                 )}
               </Field>
+
+              {(!!simulationError || failedSimulations.length > 0) && (
+                <Flex mt={'x4'} align={'center'} justify={'center'} gap={'x2'} pb={'x4'}>
+                  <Flex
+                    align={'center'}
+                    justify={'center'}
+                    className={
+                      checkboxStyleVariants[skipSimulation ? 'confirmed' : 'default']
+                    }
+                    onClick={() => setSkipSimulation((s) => !s)}
+                  >
+                    {skipSimulation && <Icon fill="background1" id="check" />}
+                  </Flex>
+
+                  <Flex className={checkboxHelperText}>
+                    I understand the risks and want to submit without simulation.
+                  </Flex>
+                </Flex>
+              )}
 
               <ContractButton
                 mt={'x3'}
