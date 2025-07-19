@@ -1,6 +1,5 @@
+import * as z from '@buildeross/constants/layers'
 import { style, styleVariants } from '@vanilla-extract/css'
-
-import * as z from 'src/utils/layers'
 
 export const animatedModal = style({
   position: 'fixed',

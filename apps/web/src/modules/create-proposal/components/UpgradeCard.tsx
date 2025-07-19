@@ -1,9 +1,8 @@
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { Box, Button, Flex, Label, Paragraph, Text, atoms } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { ReactElement } from 'react'
-
-import { RENDERER_BASE } from 'src/constants/rendererBase'
 
 import { btn, card, content, image } from './UpgradeCard.css'
 

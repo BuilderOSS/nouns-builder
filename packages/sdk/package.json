@@ -1,0 +1,75 @@
+{
+  "name": "@buildeross/sdk",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./contract": {
+      "types": "./dist/contract/index.d.ts",
+      "import": "./dist/contract/index.mjs",
+      "require": "./dist/contract/index.js"
+    },
+    "./subgraph": {
+      "types": "./dist/subgraph/index.d.ts",
+      "import": "./dist/subgraph/index.mjs",
+      "require": "./dist/subgraph/index.js"
+    },
+    "./eas": {
+      "types": "./dist/eas/index.d.ts",
+      "import": "./dist/eas/index.mjs",
+      "require": "./dist/eas/index.js"
+    },
+    "./farcaster": {
+      "types": "./dist/farcaster/index.d.ts",
+      "import": "./dist/farcaster/index.mjs",
+      "require": "./dist/farcaster/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --fix",
+    "codegen": "graphql-codegen",
+    "clean": "rm -rf dist",
+    "generate-abis": "node ./scripts/generate-abis.js"
+  },
+  "dependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/utils": "workspace:*",
+    "@farcaster/hub-nodejs": "^0.13.5",
+    "@sentry/nextjs": "^9.22.0",
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.1.2",
+    "graphql-tag": "^2.12.6"
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@graphql-codegen/cli": "^5.0.6",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-operations": "^4.6.1",
+    "@types/node": "^22.15.21",
+    "@wagmi/cli": "^2.3.2",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "viem": "^2.30.0",
+    "wagmi": "^2.15.4"
+  }
+}

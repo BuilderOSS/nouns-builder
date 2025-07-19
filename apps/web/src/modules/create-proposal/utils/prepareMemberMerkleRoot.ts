@@ -1,7 +1,6 @@
+import { DaoMember } from '@buildeross/sdk/subgraph'
 import { createTree } from 'lanyard'
 import { encodeAbiParameters } from 'viem'
-
-import { DaoMember } from 'src/data/subgraph/requests/memberSnapshot'
 
 export const prepareMemberMerkleRoot = async (
   members: DaoMember[]

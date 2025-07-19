@@ -1,6 +1,5 @@
+import { DecodedValue } from '@buildeross/types'
 import { Flex, Stack, Text } from '@buildeross/zord'
-
-import { DecodedValue } from 'src/typings'
 
 interface DecodedValueRendererProps {
   name: string

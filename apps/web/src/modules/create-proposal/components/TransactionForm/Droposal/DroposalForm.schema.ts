@@ -1,6 +1,5 @@
+import { addressValidationSchema } from '@buildeross/utils/yup'
 import * as yup from 'yup'
-
-import { addressValidationSchema } from 'src/utils/yup'
 
 export interface DroposalFormValues {
   name: string

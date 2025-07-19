@@ -4,6 +4,7 @@
   ],
   "extends": "@buildeross/tsconfig/nextjs.json",
   "compilerOptions": {
+    "moduleResolution": "bundler",
     "strict": true,
     "baseUrl": ".",
     "jsx": "preserve",

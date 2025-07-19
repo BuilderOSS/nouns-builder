@@ -1,6 +1,5 @@
+import { addressValidationSchema } from '@buildeross/utils/yup'
 import * as Yup from 'yup'
-
-import { addressValidationSchema } from 'src/utils/yup'
 
 export const allocationSchema = Yup.object({
   founderAddress: addressValidationSchema,

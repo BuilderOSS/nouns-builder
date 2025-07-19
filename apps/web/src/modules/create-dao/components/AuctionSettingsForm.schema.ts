@@ -1,6 +1,5 @@
+import { Duration } from '@buildeross/types'
 import * as Yup from 'yup'
-
-import { Duration } from 'src/typings'
 
 export interface AuctionSettingsFormValues {
   auctionDuration: Duration

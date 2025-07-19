@@ -2,9 +2,9 @@ import { Box, Flex, Grid, Text, vars } from '@buildeross/zord'
 import React from 'react'
 
 import { useLayoutStore } from 'src/stores'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { about } from 'src/styles/About.css'
 
-import { useDaoStore } from '../stores'
 import { ContractLink } from './ContractLink'
 
 const Contract = ({ title, address }: { title: string; address?: string }) => {

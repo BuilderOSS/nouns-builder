@@ -1,8 +1,7 @@
+import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { Button, Flex } from '@buildeross/zord'
 import dynamic from 'next/dynamic'
 import { ReactNode } from 'react'
-
-import { AuctionBidFragment } from 'src/data/subgraph/sdk.generated'
 
 import { AllBids } from './AllBids'
 

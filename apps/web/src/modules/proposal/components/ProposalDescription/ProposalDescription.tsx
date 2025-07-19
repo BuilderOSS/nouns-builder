@@ -1,3 +1,9 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Paragraph, atoms } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'
@@ -8,12 +14,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import useSWR from 'swr'
 
-import SWR_KEYS from 'src/constants/swrKeys'
-import { SDK } from 'src/data/subgraph/client'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
-import { useDecodedTransactions } from 'src/hooks/useDecodedTransactions'
-import { useEnsData } from 'src/hooks/useEnsData'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,
@@ -48,7 +48,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   const { displayName } = useEnsData(proposer)
   const chain = useChainStore((x) => x.chain)
 
-  const decodedTransactions = useDecodedTransactions(proposal)
+  const decodedTransactions = useDecodedTransactions(chain.id, proposal)
 
   const decodedEscrowTxn = useMemo(
     () =>
@@ -65,7 +65,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
       ? [SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposer]
       : null,
     async ([_key, chainId, collection, proposer]) => {
-      const data = await SDK.connect(chainId).tokens({
+      const data = await SubgraphSDK.connect(chainId).tokens({
         where: { owner: proposer.toLowerCase(), tokenContract: collection.toLowerCase() },
         first: 1,
         orderBy: Token_OrderBy.MintedAt,

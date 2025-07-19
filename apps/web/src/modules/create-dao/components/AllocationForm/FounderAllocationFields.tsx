@@ -1,3 +1,4 @@
+import { Duration } from '@buildeross/types'
 import { Button, Flex, Heading, Paragraph, Stack, Text } from '@buildeross/zord'
 import { FormikErrors, FormikProps, FormikTouched } from 'formik'
 import React from 'react'
@@ -9,7 +10,6 @@ import {
   FounderAllocationFormValues,
   calculateMaxAllocation,
 } from 'src/modules/create-dao'
-import { Duration } from 'src/typings'
 
 import { TokenAllocation } from '../AllocationForm'
 

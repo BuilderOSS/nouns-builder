@@ -1,7 +1,6 @@
+import { Duration } from '@buildeross/types'
+import { durationValidationSchema } from '@buildeross/utils/yup'
 import * as Yup from 'yup'
-
-import { Duration } from 'src/typings'
-import { durationValidationSchema } from 'src/utils/yup'
 
 export interface AuctionSettingsFormValues {
   auctionDuration: Duration

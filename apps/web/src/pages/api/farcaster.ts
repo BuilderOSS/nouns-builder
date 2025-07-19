@@ -1,7 +1,6 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-import { BASE_URL } from 'src/constants/baseUrl'
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 
 const TESTNET_ACCOUNT_ASSOCIATION = {
   // testnet.nouns.build

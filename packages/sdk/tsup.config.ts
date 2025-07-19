@@ -1,0 +1,19 @@
+import { defineConfig } from 'tsup'
+
+export default defineConfig({
+  entry: ['src/*.ts', 'src/contract/*.ts', 'src/subgraph/*.ts', 'src/eas/*.ts', 'src/farcaster/*.ts', '!src/*.test.ts'],
+  format: ['cjs', 'esm'],
+  dts: true,
+  clean: true,
+  external: [
+    'viem',
+    'wagmi',
+    'wagmi/actions',
+    'graphql',
+    'graphql-request',
+    'graphql-tag',
+    '@farcaster/hub-nodejs',
+    '@sentry/nextjs',
+    'axios'
+  ],
+})

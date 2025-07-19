@@ -1,8 +1,5 @@
+import { ArtworkType, IPFSUpload, OrderedTraits } from '@buildeross/hooks'
 import { create } from 'zustand'
-
-import { OrderedTraits } from 'src/components/Artwork/LayerBox'
-import { IPFSUpload } from 'src/hooks'
-import { ArtworkType } from 'src/modules/create-dao/components'
 
 export interface ArtworkFormValues {
   artwork: Array<ArtworkType>

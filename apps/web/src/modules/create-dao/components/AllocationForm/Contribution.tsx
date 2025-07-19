@@ -1,7 +1,6 @@
+import { formatDate } from '@buildeross/utils/helpers'
 import { Flex, Text } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-
-import { formatDate } from 'src/utils/helpers'
 
 export const Contribution = ({
   address,

@@ -1,9 +1,13 @@
+import { Auction_OrderBy } from '@buildeross/sdk/subgraph'
 import { Flex, Select } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
 
-import { SORT_KEY } from 'src/constants/sortKey'
-import { Auction_OrderBy } from 'src/data/subgraph/sdk.generated'
+const SORT_KEY = {
+  [Auction_OrderBy.StartTime]: 'Created',
+  [Auction_OrderBy.HighestBidAmount]: 'Price',
+  [Auction_OrderBy.EndTime]: 'Ending',
+}
 
 interface ExploreSortMenuProps {
   choice: string
@@ -47,7 +51,6 @@ const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
           // @ts-ignore-next-line
           router.query.sortKey ? (SORT_KEY[router?.query.sortKey] as string) : 'Created'
         }
-        fontSize={16}
         onChange={(e) => handleSortChange(e)}
       >
         {Object.values(SORT_KEY).map((value) => (

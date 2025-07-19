@@ -1,3 +1,5 @@
+import { CHAIN_ID } from '@buildeross/types'
+import { getEnsAddress } from '@buildeross/utils/ens'
 import { Button, Flex } from '@buildeross/zord'
 import { FieldArray, Form, Formik, FormikProps } from 'formik'
 import sum from 'lodash/sum'
@@ -11,8 +13,6 @@ import {
 } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
-import { getEnsAddress } from 'src/utils/ens'
 
 import { useFormStore } from '../../stores'
 import { validationSchemaFounderAllocation } from './AllocationForm.schema'

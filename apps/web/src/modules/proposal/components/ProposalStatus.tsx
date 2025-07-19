@@ -1,9 +1,8 @@
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { ProposalState } from '@buildeross/types'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 
 import { formatTime, parseBgColor, parseState, parseTime } from './ProposalStatus.helper'
 

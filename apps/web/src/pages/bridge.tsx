@@ -1,3 +1,5 @@
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -5,9 +7,7 @@ import React from 'react'
 import { useAccount, useBalance } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
-import { PUBLIC_ALL_CHAINS } from 'src/constants/defaultChains'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
-import { CHAIN_ID } from 'src/typings'
 
 import { NextPageWithLayout } from './_app'
 

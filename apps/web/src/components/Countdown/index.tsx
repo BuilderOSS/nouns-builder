@@ -1,4 +1,4 @@
-import { useCountdown, useIsMounted } from 'src/hooks'
+import { useCountdown, useIsMounted } from '@buildeross/hooks'
 
 interface CountdownProps
   extends React.DetailedHTMLProps<

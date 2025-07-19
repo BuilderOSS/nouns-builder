@@ -1,3 +1,6 @@
+import { getEnsAddress } from '@buildeross/utils/ens'
+import { isEmpty } from '@buildeross/utils/helpers'
+import { addressValidationSchema } from '@buildeross/utils/yup'
 import { Button, Flex, atoms } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
@@ -11,9 +14,6 @@ import {
   defaultFormButtonWithPrev,
 } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon'
-import { getEnsAddress } from 'src/utils/ens'
-import { isEmpty } from 'src/utils/helpers'
-import { addressValidationSchema } from 'src/utils/yup'
 
 import { useFormStore } from '../stores'
 

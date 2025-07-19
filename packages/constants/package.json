@@ -1,0 +1,40 @@
+{
+  "name": "@buildeross/constants",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --fix",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@buildeross/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@types/node": "^22.15.21",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "wagmi": "^2.15.4"
+  }
+}

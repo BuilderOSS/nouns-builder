@@ -1,3 +1,14 @@
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
+import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
+import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
+import { useVotes } from '@buildeross/hooks'
+import { getEscrowDelegate } from '@buildeross/sdk/eas'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import { TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID, Chain } from '@buildeross/types'
+import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
@@ -7,21 +18,11 @@ import { useAccount } from 'wagmi'
 import { Meta } from 'src/components/Meta'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import { CACHE_TIMES } from 'src/constants/cacheTimes'
-import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { CAST_ENABLED } from 'src/constants/farcasterEnabled'
-import { SUCCESS_MESSAGES } from 'src/constants/messages'
-import { getEscrowDelegate } from 'src/data/eas/requests/getEscrowDelegate'
-import { SDK } from 'src/data/subgraph/client'
-import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
-import { TokenWithDaoQuery } from 'src/data/subgraph/sdk.generated'
-import { useVotes } from 'src/hooks'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   About,
   Activity,
   AdminForm,
-  DaoContractAddresses,
   SectionHandler,
   SmartContracts,
   Treasury,
@@ -30,8 +31,7 @@ import { DaoTopSection } from 'src/modules/dao/components/DaoTopSection'
 import FeedTab from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
-import { AddressType, CHAIN_ID, Chain } from 'src/typings'
-import { isPossibleMarkdown } from 'src/utils/helpers'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
 export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
 
@@ -191,7 +191,7 @@ const getLatestTokenIdRedirect = async (
   chain: Chain,
   network: string
 ): Promise<GetServerSidePropsResult<TokenPageProps>> => {
-  const latestTokenId = await SDK.connect(chain.id)
+  const latestTokenId = await SubgraphSDK.connect(chain.id)
     .tokens({
       where: {
         dao: collectionAddress.toLowerCase(),
@@ -224,7 +224,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
     const env = process.env.VERCEL_ENV || 'development'
     const protocol = env === 'development' ? 'http' : 'https'
 
-    const token = await SDK.connect(chain.id)
+    const token = await SubgraphSDK.connect(chain.id)
       .tokenWithDao({
         id: `${collection.toLowerCase()}:${tokenId}`,
       })

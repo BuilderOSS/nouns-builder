@@ -1,8 +1,5 @@
+import { IPFSUpload, OrderedTraits } from '@buildeross/hooks'
 import { normalizeIPFSUrl } from '@buildeross/ipfs-service'
-
-import { IPFSUpload } from 'src/hooks'
-
-import { OrderedTraits } from '../../../components/Artwork/LayerBox'
 
 export type PropertyItem = {
   propertyId: bigint

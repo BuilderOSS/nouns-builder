@@ -1,9 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { act, render, screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
-
-import { CHAIN_ID } from 'src/typings'
 
 import { DaoCard } from './DaoCard'
 

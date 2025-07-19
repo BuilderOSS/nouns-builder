@@ -1,10 +1,10 @@
+import { ProposalState } from '@buildeross/sdk/contract'
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { render } from 'src/test/utils'
 
 import { SuccessfulProposalActions } from './SuccessfulProposalActions'

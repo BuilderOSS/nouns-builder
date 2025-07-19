@@ -1,7 +1,6 @@
+import { AddressType } from '@buildeross/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-import { AddressType } from 'src/typings'
 
 import { TransactionType } from '../constants'
 
