@@ -1,3 +1,4 @@
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Box, Flex, atoms } from '@buildeross/zord'
 import { FormikProps } from 'formik'
@@ -6,7 +7,6 @@ import React, { ChangeEventHandler, ReactElement, WheelEvent } from 'react'
 
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
-import { useEnsData } from 'src/hooks/useEnsData'
 
 import {
   defaultFieldsetStyle,

@@ -1,4 +1,6 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
+import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { erc721Abi, erc1155Abi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
@@ -16,8 +18,6 @@ import { useReadContracts } from 'wagmi'
 import { FallbackImage } from 'src/components/FallbackImage'
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
-import { useNFTBalance } from 'src/hooks/useNFTBalance'
-import { useNftMetadata } from 'src/hooks/useNftMetadata'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import {
   DropdownSelect,

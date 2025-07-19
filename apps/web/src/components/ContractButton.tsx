@@ -1,8 +1,8 @@
+import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { Button, ButtonProps } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
-import { useBridgeModal } from 'src/hooks/useBridgeModal'
 import { useChainStore } from 'src/stores/useChainStore'
 
 interface ContractButtonProps extends ButtonProps {

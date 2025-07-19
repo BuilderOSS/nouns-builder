@@ -1,4 +1,5 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { fetchFromURI } from '@buildeross/utils/fetch'
 import { getProvider } from '@buildeross/utils/provider'
@@ -8,7 +9,6 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 import { Hex, decodeEventLog, formatEther, isHex } from 'viem'
 
-import { DecodedTransaction } from 'src/hooks/useDecodedTransactions'
 import {
   decodeEscrowData,
   decodeEscrowDataV1,

@@ -5,6 +5,7 @@ import {
   PROPDATE_SCHEMA_UID,
   easAbi,
 } from '@buildeross/constants/eas'
+import { useEnsData } from '@buildeross/hooks'
 import { MessageType, type PropDate } from '@buildeross/sdk/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -24,7 +25,6 @@ import { defaultInputLabelStyle } from 'src/components/Fields/styles.css'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import { useEnsData } from 'src/hooks'
 import { useDaoStore } from 'src/stores/useDaoStore'
 
 const propDateValidationSchema = Yup.object().shape({

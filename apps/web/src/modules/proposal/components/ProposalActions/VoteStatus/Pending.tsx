@@ -1,11 +1,11 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
 import { useSWRConfig } from 'swr'
 
 import { Countdown } from 'src/components/Countdown'
-import { useTimeout } from 'src/hooks/useTimeout'
 import { useChainStore } from 'src/stores/useChainStore'
 
 interface PendingProps {

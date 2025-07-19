@@ -1,5 +1,7 @@
 import { L2ChainType, PUBLIC_L1_BRIDGE_ADDRESS } from '@buildeross/constants/addresses'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
+import { useIsContract } from '@buildeross/hooks/useIsContract'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Heading, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
@@ -12,8 +14,6 @@ import { useAccount, useBalance, useConfig, useSwitchChain } from 'wagmi'
 import { sendTransaction, waitForTransactionReceipt } from 'wagmi/actions'
 
 import Input from 'src/components/Input/Input'
-import { useBridgeModal } from 'src/hooks/useBridgeModal'
-import { useIsContract } from 'src/hooks/useIsContract'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { Icon } from '../Icon'

@@ -1,3 +1,4 @@
+import { useDaoAuction } from '@buildeross/hooks/useDaoAuction'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
 import { bgForAddress } from '@buildeross/utils/gradient'
@@ -5,7 +6,6 @@ import { Box, BoxProps } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { useDaoAuction } from 'src/hooks/useDaoAuction'
 
 import { avatarVariants, squareAvatar } from './Avatar.css'
 

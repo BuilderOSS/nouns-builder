@@ -1,4 +1,4 @@
-import { governorAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { governorAbi, tokenAbi } from '@buildeross/sdk'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useReadContract } from 'wagmi'
 

@@ -3,7 +3,7 @@ import {
   getFetchableUrls,
   uploadDirectory,
 } from '@buildeross/ipfs-service'
-import { sanitizeFileName } from '@buildeross/utils/sanitize'
+import { sanitizeFileName } from '@buildeross/utils'
 import React from 'react'
 
 export interface ArtworkType {
@@ -80,8 +80,8 @@ export const useArtworkUpload = ({
           url: encodeURI(
             fetchableUrl +
               `/${sanitizeFileName(
-                upload.webkitRelativePath.split('/').slice(1).join('/')
-              )}` || ''
+                upload.webkitRelativePath.split('/').slice(1).join('/'),
+              )}` || '',
           ),
           path: upload.webkitRelativePath,
           content: upload?.content,
@@ -261,7 +261,7 @@ export const useArtworkUpload = ({
         content: file,
         path: sanitizeFileName(file.webkitRelativePath.split('/').slice(1).join('/')),
       })),
-      { cache: false }
+      { cache: false },
     )
 
     return files.map((file) => ({

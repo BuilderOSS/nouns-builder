@@ -1,12 +1,8 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
-import {
-  type DaoMembershipResponse,
-  daoMembershipRequest,
-} from '@buildeross/sdk/subgraph'
+import { type EnsData, useEnsData } from './useEnsData'
+import { SWR_KEYS } from '@buildeross/constants'
+import { type DaoMembershipResponse, daoMembershipRequest } from '@buildeross/sdk'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
-
-import { type EnsData, useEnsData } from './useEnsData'
 
 export type DaoMembership = Omit<DaoMembershipResponse, 'member' | 'delegate'> & {
   member: EnsData
@@ -16,7 +12,7 @@ export type DaoMembership = Omit<DaoMembershipResponse, 'member' | 'delegate'> &
 
 const describeVotePower = (
   membership: DaoMembershipResponse,
-  delegateName: string
+  delegateName: string,
 ): string => {
   const { tokenCount, voteCount, voteDistribution, member } = membership
 
@@ -69,12 +65,12 @@ export const useDaoMembership = ({
       daoMembershipRequest(
         chainId,
         collectionAddress as `0x${string}`,
-        signerAddress as `0x${string}`
+        signerAddress as `0x${string}`,
       ),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   )
 
   const memberData = useEnsData(data?.member)

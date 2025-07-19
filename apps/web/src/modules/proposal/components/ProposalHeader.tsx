@@ -1,11 +1,11 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Label, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 
 import { Icon } from 'src/components/Icon'
-import { useEnsData } from 'src/hooks/useEnsData'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { ProposalNavigation } from './ProposalNavigation'

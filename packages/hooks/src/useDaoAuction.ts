@@ -1,6 +1,6 @@
-import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { auctionAbi, tokenAbi } from '@buildeross/sdk'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import { unpackOptionalArray } from '@buildeross/utils'
 import { formatEther } from 'viem'
 import { useReadContract } from 'wagmi'
 
@@ -55,7 +55,7 @@ export const useDaoAuction = ({
 
   const [tokenId, highestBid, highestBidder, startTime, endTime] = unpackOptionalArray(
     auction,
-    6
+    6,
   )
 
   const { data: token } = useReadContract({

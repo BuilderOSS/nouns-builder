@@ -1,8 +1,6 @@
-import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import React, { BaseSyntheticEvent, useEffect } from 'react'
-
 import { ImageProps } from './useArtworkUpload'
+import { BASE_URL, RENDERER_BASE } from '@buildeross/constants'
+import React, { BaseSyntheticEvent, useEffect } from 'react'
 
 export interface Trait {
   trait: string
@@ -58,7 +56,7 @@ export const useArtworkPreview = ({
       orderedLayers.map((item, index) => [
         item.trait.trim().toLowerCase(),
         { trait: item.trait, index },
-      ])
+      ]),
     )
 
     const grouped: { [key: string]: ImagesByTraitProps & { index: number } } = {}
@@ -123,7 +121,7 @@ export const useArtworkPreview = ({
 
     const imageLayerStack = stack.reverse()
     const hasLocalFile = traits.some(
-      (trait) => !!trait.content && trait.content?.webkitRelativePath?.length > 0
+      (trait) => !!trait.content && trait.content?.webkitRelativePath?.length > 0,
     )
 
     const imagesToDraw = imageLayerStack.map((src) => {
@@ -180,8 +178,8 @@ export const useArtworkPreview = ({
                   img.onload = () => resolve()
                   img.onerror = () =>
                     reject(new Error(`Image failed to load: ${img.src}`))
-                })
-            )
+                }),
+            ),
           )
           draw()
           if (isInit) setIsInit(false)
@@ -200,7 +198,7 @@ export const useArtworkPreview = ({
         console.error('Error generating image', err)
       }
     },
-    [canvas, isInit, canvasToBlob, selectImagesToDraw, layers]
+    [canvas, isInit, canvasToBlob, selectImagesToDraw, layers],
   )
 
   return {

@@ -1,5 +1,7 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { useVotes } from '@buildeross/hooks'
+import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Box, Flex, Stack, Text, atoms } from '@buildeross/zord'
@@ -9,8 +11,6 @@ import React from 'react'
 import { useAccount } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
-import { useVotes } from 'src/hooks'
-import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   CreateProposalHeading,

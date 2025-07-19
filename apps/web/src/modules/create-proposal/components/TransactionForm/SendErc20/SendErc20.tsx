@@ -1,4 +1,6 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
+import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -14,8 +16,6 @@ import { useReadContracts } from 'wagmi'
 
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
-import { useTokenBalances } from 'src/hooks/useTokenBalances'
-import { useTokenMetadataSingle } from 'src/hooks/useTokenMetadata'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import {
   DropdownSelect,

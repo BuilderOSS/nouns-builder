@@ -1,4 +1,5 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { useCountdown, useIsMounted } from '@buildeross/hooks'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
@@ -12,7 +13,6 @@ import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { useCountdown, useIsMounted } from 'src/hooks'
 
 import { overflowEllipsis } from '../auction/components/Auction.css'
 import { AuctionPaused } from './AuctionPaused'

@@ -1,4 +1,5 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
@@ -15,7 +16,6 @@ import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
 import { Avatar } from 'src/components/Avatar/Avatar'
 import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
-import { useDaoMembership } from 'src/hooks/useDaoMembership'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'

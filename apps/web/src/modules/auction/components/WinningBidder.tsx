@@ -1,10 +1,10 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { Box, Flex } from '@buildeross/zord'
 
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
-import { useEnsData } from 'src/hooks/useEnsData'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { AuctionDetail } from './AuctionDetail'

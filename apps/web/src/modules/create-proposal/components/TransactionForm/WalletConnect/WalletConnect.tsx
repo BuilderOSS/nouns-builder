@@ -1,3 +1,4 @@
+import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
@@ -8,7 +9,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import SmartInput from 'src/components/Fields/SmartInput'
 import { TEXT } from 'src/components/Fields/types'
 import { Icon } from 'src/components/Icon'
-import { useDecodedTransactionSingle } from 'src/hooks/useDecodedTransactions'
 import {
   TransactionType,
   WCClientData,

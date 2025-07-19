@@ -14,7 +14,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "ci": "turbo run lint test",
     "syncpack": "syncpack list-mismatches",
-    "syncpack:fix": "syncpack fix-mismatches"
+    "syncpack:fix": "syncpack fix-mismatches --help"
   },
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",

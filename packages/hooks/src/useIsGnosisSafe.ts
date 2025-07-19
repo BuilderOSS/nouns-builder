@@ -20,7 +20,7 @@ const GET_OWNERS_FUNCTION_ABI = [
 
 export const useIsGnosisSafe = (
   address?: Address,
-  chainId?: CHAIN_ID
+  chainId?: CHAIN_ID,
 ): IsGnosisSafeReturnType => {
   const { data, error, isLoading } = useReadContract({
     query: {

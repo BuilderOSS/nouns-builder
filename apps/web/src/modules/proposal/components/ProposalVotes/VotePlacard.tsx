@@ -1,3 +1,4 @@
+import { useEnsData } from '@buildeross/hooks'
 import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Flex, Grid, Text, atoms } from '@buildeross/zord'
@@ -5,7 +6,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 
 import { Avatar } from 'src/components/Avatar'
-import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores'
 
 const variants = {

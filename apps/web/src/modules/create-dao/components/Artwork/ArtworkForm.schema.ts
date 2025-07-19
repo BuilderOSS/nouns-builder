@@ -1,6 +1,5 @@
+import { ArtworkType } from '@buildeross/hooks/useArtworkUpload'
 import * as Yup from 'yup'
-
-import { ArtworkType } from 'src/hooks/useArtworkUpload'
 
 export interface ArtworkFormValues {
   projectDescription: string

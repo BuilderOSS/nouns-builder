@@ -1,4 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
@@ -12,8 +14,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import useSWR from 'swr'
 
-import { useDecodedTransactions } from 'src/hooks/useDecodedTransactions'
-import { useEnsData } from 'src/hooks/useEnsData'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,

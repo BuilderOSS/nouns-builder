@@ -1,6 +1,5 @@
+import { IPFSUpload, OrderedTraits } from '@buildeross/hooks'
 import { describe, expect, it } from 'vitest'
-
-import { IPFSUpload, OrderedTraits } from 'src/hooks'
 
 import { transformFileProperties } from './transformFileProperties'
 

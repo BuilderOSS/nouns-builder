@@ -1,3 +1,4 @@
+import { useEnsData } from '@buildeross/hooks'
 import { type PropDate } from '@buildeross/sdk/eas'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
@@ -7,7 +8,6 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 
 import { Avatar } from 'src/components/Avatar'
-import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores/useLayoutStore'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'

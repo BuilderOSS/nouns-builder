@@ -1,8 +1,8 @@
+import { ImageProps, OrderedTraits } from '@buildeross/hooks'
 import { Box } from '@buildeross/zord'
 import React from 'react'
 
 import { defaultFormHeading } from 'src/components/Fields/styles.css'
-import { ImageProps, OrderedTraits } from 'src/hooks'
 
 import { DragAndDropProps, LayerBox } from './LayerBox'
 

@@ -2,6 +2,8 @@ import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { L1_CHAINS } from '@buildeross/constants/chains'
+import { useVotes } from '@buildeross/hooks'
+import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
@@ -13,8 +15,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
-import { useVotes } from 'src/hooks'
-import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   CreateProposalHeading,

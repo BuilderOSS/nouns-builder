@@ -1,4 +1,5 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { type PropDate, getPropDates } from '@buildeross/sdk/eas'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
@@ -8,7 +9,6 @@ import useSWR from 'swr'
 import { getAddress, zeroHash } from 'viem'
 
 import { Icon } from 'src/components/Icon'
-import { useDecodedTransactions } from 'src/hooks/useDecodedTransactions'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,

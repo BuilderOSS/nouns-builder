@@ -1,7 +1,7 @@
+import { IPFSUpload, OrderedTraits } from '@buildeross/hooks'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { IPFSUpload, OrderedTraits } from 'src/hooks'
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
 import {

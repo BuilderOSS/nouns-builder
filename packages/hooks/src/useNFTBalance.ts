@@ -1,9 +1,8 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { NftTokenType } from './useNftMetadata'
+import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
-
-import { NftTokenType } from './useNftMetadata'
 
 export type SerializedNft = {
   tokenId: string
@@ -29,7 +28,7 @@ export type NFTBalanceReturnType = {
 
 const fetchNFTBalance = async (
   chainId: CHAIN_ID,
-  address: Address
+  address: Address,
 ): Promise<SerializedNft[]> => {
   const response = await fetch(`/api/nft-balances?chainId=${chainId}&address=${address}`)
   if (!response.ok) {
@@ -41,7 +40,7 @@ const fetchNFTBalance = async (
 
 export const useNFTBalance = (
   chainId?: CHAIN_ID,
-  address?: Address
+  address?: Address,
 ): NFTBalanceReturnType => {
   const { data, error, isLoading } = useSWR(
     !!address && !!chainId && isAddress(address)
@@ -51,7 +50,7 @@ export const useNFTBalance = (
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    }
+    },
   )
 
   return {

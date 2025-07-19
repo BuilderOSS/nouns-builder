@@ -1,6 +1,7 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { decodeTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import { getEscrowDelegate } from '@buildeross/sdk/eas'
 import { getPropDates } from '@buildeross/sdk/eas'
@@ -19,7 +20,6 @@ import { useBalance } from 'wagmi'
 
 import { Icon } from 'src/components/Icon'
 import { Meta } from 'src/components/Meta'
-import { decodeTransactions } from 'src/hooks/useDecodedTransactions'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { SectionHandler } from 'src/modules/dao'
 import {

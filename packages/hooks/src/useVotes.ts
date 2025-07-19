@@ -1,6 +1,5 @@
-import { governorAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { governorAbi, tokenAbi } from '@buildeross/sdk'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import isNil from 'lodash/isNil'
 import { useReadContracts } from 'wagmi'
 
 export const useVotes = ({
@@ -43,7 +42,7 @@ export const useVotes = ({
     ] as const,
   })
 
-  if (!data || isLoading || data.some(isNil)) {
+  if (!data || isLoading || data.some((d) => d === undefined || d === null)) {
     return {
       isLoading,
       isOwner: false,

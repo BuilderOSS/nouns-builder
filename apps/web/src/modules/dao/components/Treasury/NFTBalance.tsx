@@ -1,4 +1,6 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
+import { usePagination } from '@buildeross/hooks/usePagination'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
@@ -6,8 +8,6 @@ import React from 'react'
 
 import { FallbackImage } from 'src/components/FallbackImage'
 import Pagination from 'src/components/Pagination'
-import { useNFTBalance } from 'src/hooks/useNFTBalance'
-import { usePagination } from 'src/hooks/usePagination'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

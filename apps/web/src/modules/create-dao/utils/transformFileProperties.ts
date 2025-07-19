@@ -1,6 +1,5 @@
+import { IPFSUpload, OrderedTraits } from '@buildeross/hooks'
 import { normalizeIPFSUrl } from '@buildeross/ipfs-service'
-
-import { IPFSUpload, OrderedTraits } from 'src/hooks'
 
 export type PropertyItem = {
   propertyId: bigint

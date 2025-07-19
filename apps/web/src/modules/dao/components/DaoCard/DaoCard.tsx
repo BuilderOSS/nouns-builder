@@ -1,4 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { useCountdown } from '@buildeross/hooks/useCountdown'
+import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
 import { BigNumberish } from '@buildeross/utils/numbers'
@@ -9,8 +11,6 @@ import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { useCountdown } from 'src/hooks/useCountdown'
-import { useIsMounted } from 'src/hooks/useIsMounted'
 
 import { auction, daoImage, name, title } from './DaoCard.css'
 import { Detail } from './Detail'

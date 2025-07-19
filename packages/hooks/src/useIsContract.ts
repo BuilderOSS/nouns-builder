@@ -1,5 +1,5 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { getProvider } from '@buildeross/utils/provider'
+import { getProvider } from '@buildeross/utils'
 import useSWRImmutable from 'swr/immutable'
 
 export const useIsContract = ({
@@ -14,6 +14,6 @@ export const useIsContract = ({
     async ([address, chainId]) => {
       const provider = getProvider(chainId)
       return await provider.getCode({ address }).then((x) => x !== '0x')
-    }
+    },
   )
 }

@@ -38,6 +38,7 @@
     "@buildeross/analytics": "workspace:*",
     "@buildeross/blocklist": "workspace:*",
     "@buildeross/constants": "workspace:*",
+    "@buildeross/hooks": "workspace:*",
     "@buildeross/sdk": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/utils": "workspace:*",

@@ -1,11 +1,11 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatUnits } from 'viem'
 
 import { Avatar, NameAvatar } from 'src/components/Avatar'
-import { useTokenBalances } from 'src/hooks/useTokenBalances'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
