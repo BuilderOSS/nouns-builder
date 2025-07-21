@@ -37,7 +37,7 @@
   "devDependencies": {
     "@svgr/cli": "^6.5.1",
     "@types/lodash-es": "^4.17.6",
-    "@types/react": "^19.1.4",
+    "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@types/uuid": "^9.0.0",
     "@vanilla-extract/esbuild-plugin": "^2.2.0",

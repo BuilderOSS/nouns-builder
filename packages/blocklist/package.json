@@ -10,7 +10,7 @@
     "update": "./update_sdnlist.sh"
   },
   "devDependencies": {
-    "@types/react": "^19.1.4",
+    "@types/react": "^19.1.5",
     "@buildeross/tsconfig": "workspace:*",
     "eslint": "8.57.1",
     "@buildeross/eslint-config-custom": "workspace:*",
