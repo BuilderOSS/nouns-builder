@@ -24,6 +24,6 @@
     "syncpack": "^13.0.4",
     "turbo": "2.5.5"
   },
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.13.1",
   "name": "nouns-builder"
 }
