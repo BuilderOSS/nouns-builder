@@ -8,6 +8,8 @@ Modern design system and component library for BuilderOSS applications, built wi
 pnpm install @buildeross/zord
 ```
 
+> **Note**: This package was previously part of @zoralabs/zord@2.2.0. As of @buildeross/zord@0.1.0, it has been restructured and renamed under the @buildeross scope.
+
 ## Features
 
 - **Type-Safe Styling**: Built with Vanilla Extract for compile-time CSS generation
