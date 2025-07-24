@@ -2,10 +2,9 @@ import { AuctionHistoryQuery } from '@buildeross/sdk/subgraph'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import useSWR from 'swr'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import useSWR from 'swr'
 
 import { AuctionGraph } from './AuctionGraph'
 import { AuctionGraphLayout, DisplayPanel, SkeletonPanel } from './Layouts'

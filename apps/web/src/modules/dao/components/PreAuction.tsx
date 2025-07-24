@@ -1,15 +1,14 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { Chain } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, atoms } from '@buildeross/zord'
+import { atoms, Box, Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { useAccount, useConfig, useSimulateContract, useWriteContract } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 import { waitForTransactionReceipt } from 'wagmi/actions'
-
-import { useDaoStore } from 'src/stores/useDaoStore'
 
 import {
   preAuctionButtonVariants,

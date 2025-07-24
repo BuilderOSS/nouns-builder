@@ -1,18 +1,17 @@
 import {
-  RAW_DATA_KEY,
   matchInputFromName,
   matchTypeParameters,
   normalizePathName,
+  RAW_DATA_KEY,
 } from '@buildeross/utils/formABI'
 import { camelToTitle } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import isEqual from 'lodash/isEqual'
 import React from 'react'
-import { encodeAbiParameters, isAddress, isHex } from 'viem'
-import * as Yup from 'yup'
-
 import { TEXT, TEXTAREA } from 'src/components/Fields/types'
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
+import { encodeAbiParameters, isAddress, isHex } from 'viem'
+import * as Yup from 'yup'
 
 import { CustomTransactionForm } from '../CustomTransactionForm'
 

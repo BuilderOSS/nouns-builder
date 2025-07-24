@@ -1,8 +1,7 @@
 import { ImageProps } from '@buildeross/hooks'
 import { SelectedTraitsProps } from '@buildeross/hooks/useArtworkPreview'
-import { Box, Flex, Stack, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex, Stack } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
-
 import { Icon } from 'src/components/Icon'
 import {
   layerSelectStyle,

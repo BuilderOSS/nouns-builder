@@ -11,7 +11,7 @@ import {
   safeWallet,
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets'
-import { CreateConnectorFn, createConfig } from 'wagmi'
+import { createConfig, CreateConnectorFn } from 'wagmi'
 
 const appName = 'Nouns Builder'
 const appDescription = 'Nouns Builder'

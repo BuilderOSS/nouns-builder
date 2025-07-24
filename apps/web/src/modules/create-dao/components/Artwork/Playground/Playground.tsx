@@ -5,7 +5,6 @@ import {
 import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { Button, Flex } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
-
 import {
   previewGridWrapperStyle,
   previewHeadingStyle,

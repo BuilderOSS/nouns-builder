@@ -1,5 +1,4 @@
 import { Box, Text } from '@buildeross/zord'
-
 import { useLayoutStore } from 'src/stores'
 
 import { VoterParticipationVariants } from './VoterParticipation.css'

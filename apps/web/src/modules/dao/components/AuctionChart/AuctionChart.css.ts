@@ -1,5 +1,4 @@
 import { style, styleVariants } from '@vanilla-extract/css'
-
 import { skeletonAnimation } from 'src/styles/animations.css'
 
 const tabBase = style({

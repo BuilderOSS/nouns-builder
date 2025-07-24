@@ -4,11 +4,10 @@ import { AddressType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
-import { encodeFunctionData, parseEther } from 'viem'
-
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { encodeFunctionData, parseEther } from 'viem'
 
 import { DroposalForm } from './DroposalForm'
 import { DroposalFormValues } from './DroposalForm.schema'

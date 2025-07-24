@@ -1,7 +1,6 @@
 import { AddressType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React from 'react'
-
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
 
 import { CustomTransactionForm } from '../CustomTransactionForm'

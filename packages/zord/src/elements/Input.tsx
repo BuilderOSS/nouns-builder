@@ -1,10 +1,11 @@
-import { Box, BoxProps } from './Box'
-import { input, inputVariants } from './Input.css'
 import React, { ElementType, forwardRef } from 'react'
 import type {
   PolymorphicForwardRefExoticComponent,
   PolymorphicPropsWithRef,
 } from 'react-polymorphic-types'
+
+import { Box, BoxProps } from './Box'
+import { input, inputVariants } from './Input.css'
 
 export interface InputProps extends BoxProps {
   size?: keyof (typeof inputVariants)['sizeVariant']

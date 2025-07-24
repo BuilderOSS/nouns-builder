@@ -1,16 +1,15 @@
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
-  RAW_DATA_KEY,
   matchTypeParameters,
   normalizePathName,
+  RAW_DATA_KEY,
 } from '@buildeross/utils/formABI'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { encodeFunctionData } from 'viem'
-
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
+import { encodeFunctionData } from 'viem'
 
 import {
   defaultBackButtonVariants,

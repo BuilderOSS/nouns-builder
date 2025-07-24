@@ -2,7 +2,6 @@ import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import { Form, Formik, FormikValues } from 'formik'
 import React, { ReactElement } from 'react'
-
 import FieldSwitch from 'src/components/Fields/FieldSwitch'
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
 

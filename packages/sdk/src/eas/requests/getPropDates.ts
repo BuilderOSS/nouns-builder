@@ -1,10 +1,11 @@
-import { SDK } from '../client'
-import { DecodedData, getDecodedValue, isChainIdSupportedByEAS } from '../helpers'
-import { AttestationFragment } from '../sdk.generated'
 import { PROPDATE_SCHEMA_UID } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { fetchFromURI } from '@buildeross/utils'
-import { Hex, getAddress, isAddress, isHex } from 'viem'
+import { getAddress, Hex, isAddress, isHex } from 'viem'
+
+import { SDK } from '../client'
+import { DecodedData, getDecodedValue, isChainIdSupportedByEAS } from '../helpers'
+import { AttestationFragment } from '../sdk.generated'
 
 export interface PropdateMessage {
   content: string

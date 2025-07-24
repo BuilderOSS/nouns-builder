@@ -1,7 +1,8 @@
-import { getSdk } from './sdk.generated'
 import { PUBLIC_SUBGRAPH_URL } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { GraphQLClient } from 'graphql-request'
+
+import { getSdk } from './sdk.generated'
 
 const globalForClient = global as unknown as {
   subgraphClient: Map<CHAIN_ID, GraphQLClient>

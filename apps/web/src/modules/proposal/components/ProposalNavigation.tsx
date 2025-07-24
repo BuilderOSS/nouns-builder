@@ -5,8 +5,6 @@ import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { useReadContracts } from 'wagmi'
-
 import { Avatar } from 'src/components/Avatar/Avatar'
 import { FallbackNextImage } from 'src/components/FallbackImage'
 import { Icon } from 'src/components/Icon'
@@ -15,6 +13,7 @@ import { OptionalLink } from 'src/components/OptionalLink'
 import { Queue, TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { useReadContracts } from 'wagmi'
 
 interface ProposalNavigationProps {
   transactionType?: TransactionType

@@ -1,6 +1,5 @@
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-
 import { VersionType } from 'src/modules/create-proposal/constants'
 import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
 import { useProposalStore } from 'src/modules/create-proposal/stores'

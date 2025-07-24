@@ -1,8 +1,7 @@
 import { IPFSUpload, OrderedTraits } from '@buildeross/hooks'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-
-import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
 import {
   ArtworkFormValues,

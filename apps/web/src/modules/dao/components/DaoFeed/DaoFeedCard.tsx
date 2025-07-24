@@ -1,6 +1,5 @@
 import { useDaoAuction } from '@buildeross/hooks/useDaoAuction'
 import React from 'react'
-
 import { DaoCard } from 'src/modules/dao'
 import { DaoProps } from 'src/pages'
 import { useChainStore } from 'src/stores/useChainStore'

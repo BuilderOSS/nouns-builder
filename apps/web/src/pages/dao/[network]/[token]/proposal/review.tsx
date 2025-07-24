@@ -4,12 +4,10 @@ import { useVotes } from '@buildeross/hooks'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
-import { Box, Flex, Stack, Text, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useAccount } from 'wagmi'
-
 import { Icon } from 'src/components/Icon'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
@@ -22,6 +20,7 @@ import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { notFoundWrap } from 'src/styles/404.css'
+import { useAccount } from 'wagmi'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
   const { isMobile } = useLayoutStore()

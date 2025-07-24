@@ -9,9 +9,6 @@ import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import useSWR, { unstable_serialize } from 'swr'
-import { isAddress } from 'viem'
-
 import { Avatar } from 'src/components/Avatar'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { Meta } from 'src/components/Meta'
@@ -22,6 +19,8 @@ import { NextPageWithLayout } from 'src/pages/_app'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { artworkSkeleton } from 'src/styles/Artwork.css'
+import useSWR, { unstable_serialize } from 'swr'
+import { isAddress } from 'viem'
 
 interface ProfileProps {
   userAddress: string

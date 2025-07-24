@@ -6,7 +6,6 @@ import { CHAIN_ID } from '@buildeross/types'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
-
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 
 export const config = {

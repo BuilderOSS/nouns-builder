@@ -1,9 +1,10 @@
+import { ProposalState } from '@buildeross/types'
+
 import {
   isProposalExecutable,
   isProposalOpen,
   isProposalSuccessful,
 } from './proposalState'
-import { ProposalState } from '@buildeross/types'
 
 describe('isProposalOpen', () => {
   it('should return true if proposal is open', () => {

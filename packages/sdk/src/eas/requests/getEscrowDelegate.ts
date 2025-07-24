@@ -1,8 +1,9 @@
-import { SDK } from '../client'
-import { DecodedData, getDecodedValue, isChainIdSupportedByEAS } from '../helpers'
 import { ESCROW_DELEGATE_SCHEMA_UID } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
-import { Hex, getAddress, isAddress } from 'viem'
+import { getAddress, Hex, isAddress } from 'viem'
+
+import { SDK } from '../client'
+import { DecodedData, getDecodedValue, isChainIdSupportedByEAS } from '../helpers'
 
 const SMART_INVOICE_MULTISIG = `0xD609883e5eb442d364Aa57369224bE839A38C6f9`
 const BUILDER_DAO_TREASURY = `0xcf325a4c78912216249b818521b0798a0f904c10`

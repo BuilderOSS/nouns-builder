@@ -1,7 +1,8 @@
-import { SDK } from '../client'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import * as Sentry from '@sentry/nextjs'
 import { isAddress } from 'viem'
+
+import { SDK } from '../client'
 
 export const dashboardRequest = async (memberAddress: string) => {
   try {

@@ -6,10 +6,9 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
+import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { formatEther } from 'viem'
 import { getBalance } from 'wagmi/actions'
-
-import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 
 export type DaoOgMetadata = {
   tokenAddress: `0x${string}`

@@ -1,5 +1,4 @@
 import { Box, Button, Paragraph } from '@buildeross/zord'
-
 import { useRendererBaseFix } from 'src/modules/create-proposal/hooks/useRendererBaseFix'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'

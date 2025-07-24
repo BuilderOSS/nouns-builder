@@ -1,7 +1,8 @@
-import { chains, transports } from './wagmi/chains'
 import { CHAIN_ID } from '@buildeross/types'
-import { PublicClient, createPublicClient, http } from 'viem'
+import { createPublicClient, http, PublicClient } from 'viem'
 import { foundry } from 'wagmi/chains'
+
+import { chains, transports } from './wagmi/chains'
 
 let providerMap: Map<CHAIN_ID, PublicClient>
 

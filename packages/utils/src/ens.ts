@@ -1,6 +1,7 @@
-import { getProvider } from './provider'
 import { CHAIN_ID } from '@buildeross/types'
-import { Address, PublicClient, isAddress } from 'viem'
+import { Address, isAddress, PublicClient } from 'viem'
+
+import { getProvider } from './provider'
 
 const defaultProvider = getProvider(CHAIN_ID.ETHEREUM)
 

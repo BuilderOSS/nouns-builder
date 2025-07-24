@@ -13,9 +13,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
 import { useRouter } from 'next/router'
 import React, { BaseSyntheticEvent } from 'react'
-import { Address, encodeFunctionData, formatEther } from 'viem'
-import { useReadContracts } from 'wagmi'
-
 import DaysHoursMinsSecs from 'src/components/Fields/DaysHoursMinsSecs'
 import Radio from 'src/components/Fields/Radio'
 import SmartInput from 'src/components/Fields/SmartInput'
@@ -32,6 +29,8 @@ import {
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
+import { Address, encodeFunctionData, formatEther } from 'viem'
+import { useReadContracts } from 'wagmi'
 
 import { AdminFormValues, adminValidationSchema } from './AdminForm.schema'
 import { AdminFounderAllocationFields } from './AdminFounderAllocationFields'

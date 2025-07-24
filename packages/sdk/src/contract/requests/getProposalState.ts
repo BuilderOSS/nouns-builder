@@ -1,7 +1,8 @@
-import { governorAbi } from '../abis'
 import { AddressType, BytesType, CHAIN_ID, ProposalState } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils'
 import { readContract } from 'wagmi/actions'
+
+import { governorAbi } from '../abis'
 
 export { ProposalState }
 

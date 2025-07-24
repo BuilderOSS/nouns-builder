@@ -1,7 +1,8 @@
-import { SDK } from '../client'
-import { Auction_OrderBy, OrderDirection } from '../sdk.generated'
 import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
+
+import { SDK } from '../client'
+import { Auction_OrderBy, OrderDirection } from '../sdk.generated'
 
 export const auctionHistoryRequest = async (
   chainId: CHAIN_ID,

@@ -1,12 +1,15 @@
 {
   "name": "@buildeross/ipfs-service",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "lint": "eslint *.ts*",
-    "test": "vitest run"
+  "description": "IPFS client and utilities for BuilderOSS apps",
+  "version": "0.1.0",
+  "dependencies": {
+    "@brokerloop/ttlcache": "^3.2.3",
+    "ipfs-core-types": "^0.13.0",
+    "ipfs-http-client": "^59.0.0",
+    "it-last": "^2.0.0",
+    "multiformats": "^13.3.6",
+    "sha.js": "^2.4.12",
+    "url-join": "^5.0.0"
   },
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
@@ -16,13 +19,19 @@
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
   },
-  "dependencies": {
-    "@brokerloop/ttlcache": "^3.2.3",
-    "ipfs-core-types": "^0.13.0",
-    "ipfs-http-client": "^59.0.0",
-    "it-last": "^2.0.0",
-    "multiformats": "^13.3.6",
-    "sha.js": "^2.4.12",
-    "url-join": "^5.0.0"
-  }
+  "license": "MIT",
+  "main": "./index.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/ipfs-service"
+  },
+  "scripts": {
+    "lint": "eslint *.ts* --fix",
+    "test": "vitest run"
+  },
+  "types": "./index.ts"
 }

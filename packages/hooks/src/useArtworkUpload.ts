@@ -1,6 +1,6 @@
 import {
-  IPFSUploadResponse,
   getFetchableUrls,
+  IPFSUploadResponse,
   uploadDirectory,
 } from '@buildeross/ipfs-service'
 import { sanitizeFileName } from '@buildeross/utils'

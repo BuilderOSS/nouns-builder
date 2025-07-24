@@ -1,18 +1,17 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex } from '@buildeross/zord'
-import { Field, Formik, Form as FormikForm } from 'formik'
+import { Field, Form as FormikForm, Formik } from 'formik'
 import React, { useState } from 'react'
-import { Address } from 'viem'
-import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
 import { ContractButton } from 'src/components/ContractButton'
 import SmartInput from 'src/components/Fields/SmartInput'
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { proposalFormTitle } from 'src/styles/Proposals.css'
+import { Address } from 'viem'
+import { useConfig } from 'wagmi'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { delegateValidationSchema } from './DelegateForm.schema'
 

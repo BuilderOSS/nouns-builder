@@ -1,6 +1,5 @@
-import * as Yup from 'yup'
-
 import { SELECT } from 'src/components/Fields/types'
+import * as Yup from 'yup'
 
 export const transactionFunctionFields = [
   {

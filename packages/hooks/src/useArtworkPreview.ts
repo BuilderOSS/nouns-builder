@@ -1,6 +1,7 @@
-import { ImageProps } from './useArtworkUpload'
 import { BASE_URL, RENDERER_BASE } from '@buildeross/constants'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
+
+import { ImageProps } from './useArtworkUpload'
 
 export interface Trait {
   trait: string

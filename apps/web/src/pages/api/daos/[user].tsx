@@ -1,8 +1,7 @@
 import { myDaosRequest } from '@buildeross/sdk/subgraph'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getAddress } from 'viem'
-
 import { NotFoundError } from 'src/services/errors'
+import { getAddress } from 'viem'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { user } = req.query

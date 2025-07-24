@@ -1,24 +1,24 @@
-import { VercelAnalytics } from '@buildeross/analytics'
 import '@buildeross/zord/index.css'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/600.css'
 import '@fontsource/londrina-solid'
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import '@rainbow-me/rainbowkit/styles.css'
+import 'src/styles/globals.css'
+import 'src/styles/styles.css'
+
+import { VercelAnalytics } from '@buildeross/analytics'
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
 import NextNProgress from 'nextjs-progressbar'
 import type { ReactElement, ReactNode } from 'react'
-import { SWRConfig } from 'swr'
-import { WagmiProvider } from 'wagmi'
-
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { NetworkController } from 'src/components/NetworkController'
-import 'src/styles/globals.css'
-import 'src/styles/styles.css'
 import { clientConfig } from 'src/utils/clientConfig'
+import { SWRConfig } from 'swr'
+import { WagmiProvider } from 'wagmi'
 
 const queryClient = new QueryClient({
   defaultOptions: {

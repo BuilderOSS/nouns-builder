@@ -3,9 +3,6 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
 import { ContractButton } from 'src/components/ContractButton'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -16,6 +13,8 @@ import {
   infoSectionValueVariants,
   successHeadingStyle,
 } from 'src/styles/deploy.css'
+import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
 import { Properties, transformFileProperties } from '../../utils'

@@ -1,6 +1,6 @@
 import { PUBLIC_ALL_CHAINS, RPC_URLS } from '@buildeross/constants'
-import { CHAIN_ID, Chain } from '@buildeross/types'
-import { Transport, http } from 'viem'
+import { Chain, CHAIN_ID } from '@buildeross/types'
+import { http, Transport } from 'viem'
 import { fallback } from 'wagmi'
 
 export const chains = PUBLIC_ALL_CHAINS

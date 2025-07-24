@@ -9,10 +9,9 @@ import dayjs from 'dayjs'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
+import { FallbackNextImage } from 'src/components/FallbackImage'
 import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
-
-import { FallbackNextImage } from 'src/components/FallbackImage'
 
 import { overflowEllipsis } from '../auction/components/Auction.css'
 import { AuctionPaused } from './AuctionPaused'

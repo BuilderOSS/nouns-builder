@@ -1,8 +1,9 @@
-import { ProposalState, getProposalState } from '../../contract/requests/getProposalState'
-import { SDK } from '../client'
-import { ProposalFragment, ProposalVoteFragment as ProposalVote } from '../sdk.generated'
 import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
+
+import { getProposalState, ProposalState } from '../../contract/requests/getProposalState'
+import { SDK } from '../client'
+import { ProposalFragment, ProposalVoteFragment as ProposalVote } from '../sdk.generated'
 
 export type Proposal = Omit<
   ProposalFragment,

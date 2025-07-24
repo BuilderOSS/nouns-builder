@@ -4,9 +4,8 @@ import { getEnsAvatar, getEnsName } from '@buildeross/utils/ens'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
-import { isAddress } from 'viem'
-
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
+import { isAddress } from 'viem'
 
 const walletSnippet = (_addr: string) =>
   _addr.substring(0, 5) + '...' + _addr.substring(_addr.length - 5, _addr.length)

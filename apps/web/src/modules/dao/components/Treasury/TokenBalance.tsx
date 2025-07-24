@@ -3,13 +3,12 @@ import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
-import { formatUnits } from 'viem'
-
 import { Avatar, NameAvatar } from 'src/components/Avatar'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { statisticContent } from 'src/styles/About.css'
+import { formatUnits } from 'viem'
 
 import { erc20AssetsWrapper } from './Treasury.css'
 

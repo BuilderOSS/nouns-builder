@@ -1,6 +1,7 @@
-import { SDK } from '../client'
 import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
+
+import { SDK } from '../client'
 
 export type DaoMembershipResponse = {
   member: Address

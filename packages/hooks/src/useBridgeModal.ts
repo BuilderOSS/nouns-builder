@@ -1,7 +1,8 @@
-import { omit } from './helpers'
-import { useIsContract } from './useIsContract'
 import { useRouter } from 'next/router'
 import { useAccount } from 'wagmi'
+
+import { omit } from './helpers'
+import { useIsContract } from './useIsContract'
 
 export const useBridgeModal = () => {
   const router = useRouter()

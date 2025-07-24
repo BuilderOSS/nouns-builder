@@ -4,11 +4,10 @@ import { getBids } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useRouter } from 'next/router'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { useSWRConfig } from 'swr'
 import { useConfig, useWatchContractEvent } from 'wagmi'
 import { readContract } from 'wagmi/actions'
-
-import { useDaoStore } from 'src/stores/useDaoStore'
 
 export const useAuctionEvents = ({
   chainId,

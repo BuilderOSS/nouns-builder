@@ -1,7 +1,6 @@
 import { DecodedArg } from '@buildeross/types'
 import { toLower } from 'lodash'
 import React from 'react'
-
 import {
   getEscrowBundler,
   getEscrowBundlerV1,

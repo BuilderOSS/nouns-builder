@@ -8,13 +8,10 @@ import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
-import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
+import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useMemo } from 'react'
-import { encodeFunctionData, getAddress, isAddress } from 'viem'
-import { useReadContracts } from 'wagmi'
-
 import { FallbackImage } from 'src/components/FallbackImage'
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
@@ -25,6 +22,8 @@ import {
 } from 'src/modules/create-proposal/components/DropdownSelect'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { encodeFunctionData, getAddress, isAddress } from 'viem'
+import { useReadContracts } from 'wagmi'
 
 import sendNftSchema, { SendNftValues } from './SendNft.schema'
 

@@ -2,20 +2,19 @@ import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransac
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
-import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
+import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
 import SmartInput from 'src/components/Fields/SmartInput'
 import { TEXT } from 'src/components/Fields/types'
 import { Icon } from 'src/components/Icon'
 import {
   TransactionType,
+  useProposalStore,
+  useWalletConnect,
   WCClientData,
   WCParams,
   WCPayload,
-  useProposalStore,
-  useWalletConnect,
 } from 'src/modules/create-proposal'
 import { DecodedTransactionDisplay } from 'src/modules/proposal/components/ProposalDescription/DecodedTransactions/DecodedTransactions'
 import { useChainStore } from 'src/stores/useChainStore'

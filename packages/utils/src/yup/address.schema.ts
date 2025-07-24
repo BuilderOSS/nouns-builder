@@ -1,8 +1,9 @@
-import { isValidAddress } from '../ens'
-import { getProvider } from '../provider'
 import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 import * as Yup from 'yup'
+
+import { isValidAddress } from '../ens'
+import { getProvider } from '../provider'
 
 const validateAddress = async (
   value: string | undefined,

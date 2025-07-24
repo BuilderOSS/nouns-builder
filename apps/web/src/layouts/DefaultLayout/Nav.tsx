@@ -1,16 +1,15 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
-import { Box, Flex, Label, Stack, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex, Label, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-
 import { BridgeModal } from 'src/components/BridgeModal/BridgeModal'
 import { NetworkController } from 'src/components/NetworkController'
 
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'
-import { NavContainer, NavWrapper, navMenuItem } from './Nav.styles.css'
+import { NavContainer, navMenuItem, NavWrapper } from './Nav.styles.css'
 import { NavMenu } from './NavMenu'
 
 export const Nav = () => {

@@ -4,12 +4,11 @@ import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
-import useSWR from 'swr'
-
 import Pagination from 'src/components/Pagination'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import useSWR from 'swr'
 
 import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'

@@ -1,6 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-
 import { getEnrichedTokenBalances } from 'src/services/alchemyService'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

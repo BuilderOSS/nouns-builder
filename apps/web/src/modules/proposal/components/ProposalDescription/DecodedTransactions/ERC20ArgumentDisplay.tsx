@@ -2,9 +2,8 @@ import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Text } from '@buildeross/zord'
-import { formatUnits } from 'viem'
-
 import { useChainStore } from 'src/stores/useChainStore'
+import { formatUnits } from 'viem'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 

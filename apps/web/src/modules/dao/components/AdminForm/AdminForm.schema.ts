@@ -4,9 +4,8 @@ import {
   durationValidationSchema,
   urlValidationSchema,
 } from '@buildeross/utils/yup'
+import { auctionSettingsValidationSchema, TokenAllocation } from 'src/modules/create-dao'
 import * as Yup from 'yup'
-
-import { TokenAllocation, auctionSettingsValidationSchema } from 'src/modules/create-dao'
 
 export interface AdminFormValues {
   daoAvatar: string

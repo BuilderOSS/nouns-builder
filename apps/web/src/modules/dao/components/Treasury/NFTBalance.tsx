@@ -5,7 +5,6 @@ import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { FallbackImage } from 'src/components/FallbackImage'
 import Pagination from 'src/components/Pagination'
 import { useChainStore } from 'src/stores/useChainStore'

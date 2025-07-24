@@ -1,13 +1,12 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { Box, Stack, atoms } from '@buildeross/zord'
+import { atoms, Box, Stack } from '@buildeross/zord'
 import Link from 'next/link'
-import { useReadContract } from 'wagmi'
-
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { useReadContract } from 'wagmi'
 
 export const DaoMigrated = ({
   l2ChainId,

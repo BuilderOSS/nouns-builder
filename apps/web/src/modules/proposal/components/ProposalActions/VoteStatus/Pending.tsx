@@ -3,10 +3,9 @@ import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
-import { useSWRConfig } from 'swr'
-
 import { Countdown } from 'src/components/Countdown'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useSWRConfig } from 'swr'
 
 interface PendingProps {
   voteStart: number

@@ -1,10 +1,9 @@
 import { Box, Stack, Text } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
-import { useBalance } from 'wagmi'
-
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { useBalance } from 'wagmi'
 
 import { link } from './EscrowDetailsDisplay.css'
 import { EscrowFormValues } from './EscrowForm.schema'

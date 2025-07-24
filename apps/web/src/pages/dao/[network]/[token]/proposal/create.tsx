@@ -12,9 +12,6 @@ import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useEffect, useMemo, useState } from 'react'
-import { isAddressEqual } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
-
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   CreateProposalHeading,
@@ -34,6 +31,8 @@ import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { notFoundWrap } from 'src/styles/404.css'
+import { isAddressEqual } from 'viem'
+import { useAccount, useReadContract } from 'wagmi'
 
 const CreateProposalPage: NextPageWithLayout = () => {
   const router = useRouter()

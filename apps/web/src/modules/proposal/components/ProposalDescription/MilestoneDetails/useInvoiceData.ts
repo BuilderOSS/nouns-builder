@@ -6,14 +6,13 @@ import { getProvider } from '@buildeross/utils/provider'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import _ from 'lodash'
 import { useMemo } from 'react'
-import useSWR from 'swr'
-import { Hex, decodeEventLog, formatEther, isHex } from 'viem'
-
 import {
   decodeEscrowData,
   decodeEscrowDataV1,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
+import useSWR from 'swr'
+import { decodeEventLog, formatEther, Hex, isHex } from 'viem'
 
 type InvoiceData = {
   invoiceAddress: Hex | undefined

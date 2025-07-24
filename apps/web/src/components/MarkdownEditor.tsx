@@ -1,14 +1,14 @@
+import 'react-mde/lib/styles/css/react-mde-all.css'
+import 'src/components/Fields/styles.css'
+
 import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
 import { Flex, Stack } from '@buildeross/zord'
 import * as React from 'react'
 import { ReactElement } from 'react'
 import ReactMarkdown from 'react-markdown'
 import ReactMde from 'react-mde'
-import 'react-mde/lib/styles/css/react-mde-all.css'
 import remarkGfm from 'remark-gfm'
-
 import { Error } from 'src/components/Fields/Error'
-import 'src/components/Fields/styles.css'
 import { defaultInputLabelStyle } from 'src/components/Fields/styles.css'
 
 interface MarkdownEditorProps {

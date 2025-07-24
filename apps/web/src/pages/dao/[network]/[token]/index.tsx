@@ -6,17 +6,13 @@ import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
-import { Flex, Text, atoms, theme } from '@buildeross/zord'
+import { atoms, Flex, Text, theme } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { isAddress } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
-import { readContract } from 'wagmi/actions'
-
 import { Meta } from 'src/components/Meta'
-import { getDaoLayout } from 'src/layouts/DaoLayout'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
+import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   Activity,
   PreAuction,
@@ -27,6 +23,9 @@ import {
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
+import { isAddress } from 'viem'
+import { useAccount, useReadContract } from 'wagmi'
+import { readContract } from 'wagmi/actions'
 
 interface DaoPageProps {
   chainId: CHAIN_ID

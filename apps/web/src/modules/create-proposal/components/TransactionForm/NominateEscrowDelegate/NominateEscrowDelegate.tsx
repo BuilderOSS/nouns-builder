@@ -1,9 +1,9 @@
 import {
   AttestationParams,
   EAS_CONTRACT_ADDRESS,
+  easAbi,
   ESCROW_DELEGATE_SCHEMA,
   ESCROW_DELEGATE_SCHEMA_UID,
-  easAbi,
 } from '@buildeross/constants/eas'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
@@ -11,14 +11,13 @@ import { Box, Button } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
-import { Hex, encodeFunctionData, getAddress, zeroHash } from 'viem'
-import * as yup from 'yup'
-
 import SmartInput from 'src/components/Fields/SmartInput'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { Transaction, useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { encodeFunctionData, getAddress, Hex, zeroHash } from 'viem'
+import * as yup from 'yup'
 
 interface EscrowDelegateFormValues {
   escrowDelegate: string

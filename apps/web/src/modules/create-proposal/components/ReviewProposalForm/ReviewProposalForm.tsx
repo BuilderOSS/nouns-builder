@@ -8,10 +8,6 @@ import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { toHex } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
 import { ContractButton } from 'src/components/ContractButton'
 import TextInput from 'src/components/Fields/TextInput'
 import { Icon } from 'src/components/Icon'
@@ -22,13 +18,16 @@ import { ErrorResult } from 'src/services/errorResult'
 import { SimulationOutput, SimulationResult } from 'src/services/simulationService'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { toHex } from 'viem'
+import { useAccount, useConfig } from 'wagmi'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { BuilderTransaction, useProposalStore } from '../../stores'
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
 import { useEscrowFormStore } from '../TransactionForm/Escrow/EscrowUtils'
+import { ERROR_CODE, FormValues, validationSchema } from './fields'
 import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'
 import { Transactions } from './Transactions'
-import { ERROR_CODE, FormValues, validationSchema } from './fields'
 
 const CHAINS_TO_SIMULATE = [
   CHAIN_ID.ETHEREUM,

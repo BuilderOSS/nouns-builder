@@ -1,13 +1,12 @@
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import React, { useEffect } from 'react'
-import { isAddress } from 'viem'
-
 import {
   initCustomTransaction,
   useCustomTransactionStore,
 } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
+import { isAddress } from 'viem'
 
 import { CustomTransactionForm } from '../CustomTransactionForm'
 import { contractAddressFields, validateContractAddress } from './fields'

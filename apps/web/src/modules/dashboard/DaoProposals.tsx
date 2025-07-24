@@ -6,7 +6,6 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { Avatar } from 'src/components/Avatar'
 import { FallbackNextImage } from 'src/components/FallbackImage'
 

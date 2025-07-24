@@ -1,7 +1,6 @@
 import { Chain } from '@buildeross/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
-
 import { Auction } from 'src/modules/auction'
 import { ViewSwitcher } from 'src/modules/auction/components/ViewSwitcher'
 import { AuctionChart } from 'src/modules/dao/components/AuctionChart/AuctionChart'

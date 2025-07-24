@@ -1,7 +1,6 @@
-import { Button, Flex, Stack, Text, mixins } from '@buildeross/zord'
+import { Button, Flex, mixins, Stack, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'
 

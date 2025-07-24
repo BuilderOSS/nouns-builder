@@ -2,7 +2,6 @@ import { Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
 

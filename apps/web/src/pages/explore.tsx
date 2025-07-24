@@ -3,12 +3,11 @@ import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
-import useSWR from 'swr'
-
 import { Meta } from 'src/components/Meta'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 import { Explore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import useSWR from 'swr'
 
 import { NextPageWithLayout } from './_app'
 

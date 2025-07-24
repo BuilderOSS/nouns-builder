@@ -3,7 +3,6 @@ import { type DaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex } from '@buildeross/zord'
 import React from 'react'
-
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'

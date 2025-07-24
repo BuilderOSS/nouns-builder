@@ -4,11 +4,10 @@ import { maxChar } from '@buildeross/utils/helpers'
 import { Box, Button } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import React, { useState } from 'react'
+import { ContractButton } from 'src/components/ContractButton'
 import { Address, parseEther } from 'viem'
 import { useChainId, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
-import { ContractButton } from 'src/components/ContractButton'
 
 import { useMinBidIncrement } from '../auction'
 import { Settle } from '../auction/components/CurrentAuction/Settle'

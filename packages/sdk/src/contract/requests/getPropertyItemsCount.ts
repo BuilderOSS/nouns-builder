@@ -1,7 +1,8 @@
-import { metadataAbi } from '../abis'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils'
 import { readContract, readContracts } from 'wagmi/actions'
+
+import { metadataAbi } from '../abis'
 
 export const getPropertyItemsCount = async (
   chainId: CHAIN_ID,

@@ -4,7 +4,6 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import React, { ReactElement } from 'react'
-
 import {
   sectionHandler,
   sectionNavigation,

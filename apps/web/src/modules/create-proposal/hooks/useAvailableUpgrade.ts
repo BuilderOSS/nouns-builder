@@ -10,10 +10,6 @@ import isNil from 'lodash/isNil'
 import isUndefined from 'lodash/isUndefined'
 import lt from 'lodash/lt'
 import pickBy from 'lodash/pickBy'
-import useSWR from 'swr'
-import { encodeFunctionData } from 'viem'
-import { useReadContracts } from 'wagmi'
-
 import {
   BuilderTransaction,
   CONTRACT_VERSION_DETAILS,
@@ -22,6 +18,9 @@ import {
   VersionType,
 } from 'src/modules/create-proposal'
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import useSWR from 'swr'
+import { encodeFunctionData } from 'viem'
+import { useReadContracts } from 'wagmi'
 
 interface AvailableUpgrade {
   shouldUpgrade: boolean

@@ -1,8 +1,9 @@
+import { CHAIN_ID } from '@buildeross/types'
+import { Address } from 'viem'
+
 import { SDK } from '../client'
 import { DaoTokenOwner_OrderBy, OrderDirection } from '../sdk.generated'
 import { applyL1ToL2Alias } from './applyL1ToL2Alias'
-import { CHAIN_ID } from '@buildeross/types'
-import { Address } from 'viem'
 
 export type DaoMember = {
   ownerAlias: Address

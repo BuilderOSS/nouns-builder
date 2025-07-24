@@ -1,9 +1,25 @@
 {
   "name": "@buildeross/utils",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "description": "Shared utilities and helper functions for BuilderOSS apps",
+  "version": "0.1.0",
+  "dependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "bignumber.js": "^9.3.0",
+    "tinycolor2": "^1.4.2"
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@types/lodash": "^4.17.17",
+    "@types/node": "^22.15.21",
+    "@types/tinycolor2": "^1.4.6",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -26,36 +42,29 @@
       "require": "./dist/*.js"
     }
   },
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint src --fix",
-    "clean": "rm -rf dist",
-    "test": "vitest run",
-    "test:watch": "vitest"
-  },
-  "dependencies": {
-    "@buildeross/constants": "workspace:*",
-    "@buildeross/types": "workspace:*",
-    "@buildeross/ipfs-service": "workspace:*",
-    "bignumber.js": "^9.3.0",
-    "tinycolor2": "^1.4.2"
-  },
-  "devDependencies": {
-    "@buildeross/eslint-config-custom": "workspace:*",
-    "@buildeross/tsconfig": "workspace:*",
-    "@types/lodash": "^4.17.17",
-    "@types/node": "^22.15.21",
-    "@types/tinycolor2": "^1.4.6",
-    "eslint": "8.57.1",
-    "tsup": "^8.3.5",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
-  },
+  "license": "MIT",
+  "main": "./dist/index.js",
   "peerDependencies": {
     "viem": "^2.30.0",
     "wagmi": "^2.15.4",
     "yup": "^1.6.1"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/utils"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint src --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
 }

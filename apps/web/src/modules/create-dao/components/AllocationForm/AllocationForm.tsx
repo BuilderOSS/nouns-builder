@@ -4,15 +4,14 @@ import { Button, Flex } from '@buildeross/zord'
 import { FieldArray, Form, Formik, FormikProps } from 'formik'
 import sum from 'lodash/sum'
 import React, { useRef, useState } from 'react'
-import { useAccount } from 'wagmi'
-import { useShallow } from 'zustand/shallow'
-
 import {
   defaultBackButton,
   defaultFormButtonWithPrev,
 } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useAccount } from 'wagmi'
+import { useShallow } from 'zustand/shallow'
 
 import { useFormStore } from '../../stores'
 import { validationSchemaFounderAllocation } from './AllocationForm.schema'

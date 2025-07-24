@@ -1,3 +1,6 @@
+import { CHAIN_ID } from '@buildeross/types'
+import * as Sentry from '@sentry/nextjs'
+
 import { SDK } from '../client'
 import {
   Auction_Filter,
@@ -5,9 +8,7 @@ import {
   ExploreDaoFragment,
   OrderDirection,
 } from '../sdk.generated'
-import { MyDaosResponse, myDaosRequest } from './daoQuery'
-import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
+import { myDaosRequest, MyDaosResponse } from './daoQuery'
 
 export type ExploreDaoWithChainId = ExploreDaoFragment & { chainId: CHAIN_ID }
 

@@ -4,7 +4,6 @@ import { Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
-
 import { Avatar } from 'src/components/Avatar'
 
 import { firstRowItem, lastRowItem, rowItem } from './MembersList.css'

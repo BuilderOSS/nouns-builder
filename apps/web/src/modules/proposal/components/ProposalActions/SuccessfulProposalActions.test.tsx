@@ -3,9 +3,8 @@ import { Proposal } from '@buildeross/sdk/subgraph'
 import { screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import React from 'react'
-import { describe, expect, it, vi } from 'vitest'
-
 import { render } from 'src/test/utils'
+import { describe, expect, it, vi } from 'vitest'
 
 import { SuccessfulProposalActions } from './SuccessfulProposalActions'
 

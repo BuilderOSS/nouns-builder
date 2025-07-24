@@ -7,16 +7,15 @@ import { getProposals } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import isUndefined from 'lodash/isUndefined'
 import pickBy from 'lodash/pickBy'
-import useSWR from 'swr'
-import { encodeFunctionData } from 'viem'
-import { useReadContract } from 'wagmi'
-
 import {
   BuilderTransaction,
   Transaction,
   TransactionType,
 } from 'src/modules/create-proposal'
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import useSWR from 'swr'
+import { encodeFunctionData } from 'viem'
+import { useReadContract } from 'wagmi'
 
 interface RendererBaseFix {
   shouldFix: boolean

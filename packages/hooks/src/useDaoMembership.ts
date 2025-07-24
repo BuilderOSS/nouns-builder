@@ -1,8 +1,9 @@
-import { type EnsData, useEnsData } from './useEnsData'
 import { SWR_KEYS } from '@buildeross/constants'
-import { type DaoMembershipResponse, daoMembershipRequest } from '@buildeross/sdk'
+import { daoMembershipRequest, type DaoMembershipResponse } from '@buildeross/sdk'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
+
+import { type EnsData, useEnsData } from './useEnsData'
 
 export type DaoMembership = Omit<DaoMembershipResponse, 'member' | 'delegate'> & {
   member: EnsData

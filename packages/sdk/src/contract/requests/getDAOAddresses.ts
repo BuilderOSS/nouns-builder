@@ -1,9 +1,10 @@
-import { getEscrowDelegate } from '../../eas/requests/getEscrowDelegate'
-import { managerAbi } from '../abis'
 import { NULL_ADDRESS, PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { serverConfig, unpackOptionalArray } from '@buildeross/utils'
 import { readContract } from 'wagmi/actions'
+
+import { getEscrowDelegate } from '../../eas/requests/getEscrowDelegate'
+import { managerAbi } from '../abis'
 
 const getDAOAddresses = async (chainId: CHAIN_ID, tokenAddress: AddressType) => {
   const addresses = await readContract(serverConfig, {

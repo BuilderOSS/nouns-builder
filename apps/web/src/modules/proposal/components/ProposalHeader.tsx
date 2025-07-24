@@ -4,7 +4,6 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Label, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
-
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 

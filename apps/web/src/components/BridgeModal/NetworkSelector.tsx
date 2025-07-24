@@ -1,5 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { CHAIN_ID, Chain } from '@buildeross/types'
+import { Chain, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'

@@ -1,8 +1,9 @@
+import { CHAIN_ID } from '@buildeross/types'
+import * as Sentry from '@sentry/nextjs'
+
 import { getProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
 import { Proposal } from './proposalQuery'
-import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
 
 export interface ProposalsResponse {
   proposals: Proposal[]

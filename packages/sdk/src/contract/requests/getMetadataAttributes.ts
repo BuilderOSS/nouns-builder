@@ -1,8 +1,9 @@
-import { metadataAbi } from '../abis'
 import { CHAIN_ID } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils'
 import { Address } from 'viem'
 import { readContracts } from 'wagmi/actions'
+
+import { metadataAbi } from '../abis'
 
 export const getMetadataAttributes = async (
   metadata: Address,

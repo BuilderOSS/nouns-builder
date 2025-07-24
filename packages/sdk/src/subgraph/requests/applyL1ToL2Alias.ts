@@ -1,8 +1,9 @@
-import { l2DeployerAbi } from '../../contract/abis/L2MigrationDeployer'
 import { L2_MIGRATION_DEPLOYER } from '@buildeross/constants'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils'
 import { getBytecode, readContract } from 'wagmi/actions'
+
+import { l2DeployerAbi } from '../../contract/abis/L2MigrationDeployer'
 
 // We are calling a pure function so we can default to any network with an L2 migration deployer
 const DEFAULT_L2_CHAIN_ID = CHAIN_ID.BASE

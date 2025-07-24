@@ -1,5 +1,5 @@
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import { Box, Button, Flex, Label, Paragraph, Text, atoms } from '@buildeross/zord'
+import { atoms, Box, Button, Flex, Label, Paragraph, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { ReactElement } from 'react'

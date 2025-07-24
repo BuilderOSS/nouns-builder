@@ -7,11 +7,10 @@ import { Stack, Text } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import gte from 'lodash/gte'
 import React from 'react'
-import { Address, encodeFunctionData } from 'viem'
-import { useReadContract } from 'wagmi'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { Address, encodeFunctionData } from 'viem'
+import { useReadContract } from 'wagmi'
 
 import { TransactionType } from '../../../constants'
 import { useAvailableUpgrade } from '../../../hooks'

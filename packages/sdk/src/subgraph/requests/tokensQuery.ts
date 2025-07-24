@@ -1,6 +1,7 @@
-import { SDK } from '../client'
-import { OrderDirection, TokenFragment, Token_OrderBy } from '../sdk.generated'
 import { CHAIN_ID } from '@buildeross/types'
+
+import { SDK } from '../client'
+import { OrderDirection, Token_OrderBy, TokenFragment } from '../sdk.generated'
 
 export interface TokensQueryResponse {
   tokens: TokenFragment[]

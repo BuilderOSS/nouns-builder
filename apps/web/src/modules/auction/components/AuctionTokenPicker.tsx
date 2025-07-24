@@ -4,12 +4,11 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import React from 'react'
-import useSWR from 'swr'
-
 import { Icon } from 'src/components/Icon'
 import { OptionalLink } from 'src/components/OptionalLink'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import useSWR from 'swr'
 
 import { auctionDateNavButton, auctionTextVariants } from './Auction.css'
 

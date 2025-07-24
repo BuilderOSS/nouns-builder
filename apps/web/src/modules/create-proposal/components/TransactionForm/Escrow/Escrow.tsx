@@ -9,20 +9,19 @@ import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexy
 import { useCallback } from 'hono/jsx'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import useSWR from 'swr'
-import { encodeFunctionData, formatEther } from 'viem'
-
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import useSWR from 'swr'
+import { encodeFunctionData, formatEther } from 'viem'
 
 import EscrowForm from './EscrowForm'
 import { EscrowFormValues } from './EscrowForm.schema'
 import {
-  ESCROW_TYPE,
   deployEscrowAbi,
   encodeEscrowData,
+  ESCROW_TYPE,
   getEscrowBundler,
 } from './EscrowUtils'
 

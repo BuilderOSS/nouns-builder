@@ -6,11 +6,10 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { Button, Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useEffect, useState } from 'react'
-import { getAddress } from 'viem'
-import { useAccount, useWatchContractEvent } from 'wagmi'
-
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
+import { getAddress } from 'viem'
+import { useAccount, useWatchContractEvent } from 'wagmi'
 
 import Pending from './Pending'
 import Vote from './Vote'

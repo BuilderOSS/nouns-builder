@@ -3,7 +3,6 @@ import * as Sentry from '@sentry/nextjs'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent, ChangeEventHandler, ReactElement } from 'react'
-
 import { ArtworkPreview, ArtworkUpload as UploadComponent } from 'src/components/Artwork'
 import { LayerOrdering } from 'src/components/Artwork/LayerOrdering'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'

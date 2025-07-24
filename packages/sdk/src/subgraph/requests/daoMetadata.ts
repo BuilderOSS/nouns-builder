@@ -1,8 +1,9 @@
-import { metadataAbi } from '../../contract/abis'
-import { SDK } from '../client'
 import { L1_CHAINS } from '@buildeross/constants'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { encodeFunctionData } from 'viem'
+
+import { metadataAbi } from '../../contract/abis'
+import { SDK } from '../client'
 
 export const encodedDaoMetadataRequest = async (
   chain: CHAIN_ID,

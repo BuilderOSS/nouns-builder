@@ -4,7 +4,7 @@ import { Address, parseEther } from 'viem'
 import { vi } from 'vitest'
 
 import { InvalidRequestError } from './errors'
-import { SimulationOutput, SimulationRequestBody, simulate } from './simulationService'
+import { simulate, SimulationOutput, SimulationRequestBody } from './simulationService'
 
 vi.mock('axios', () => {
   return {

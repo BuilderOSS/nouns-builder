@@ -2,19 +2,18 @@ import { DecodedArg } from '@buildeross/types'
 import { formatDateTime } from '@buildeross/utils/helpers'
 import { Flex, Stack } from '@buildeross/zord'
 import { toLower } from 'lodash'
-import { Hex, formatEther } from 'viem'
-
 import {
-  ESCROW_TYPE,
-  ESCROW_TYPE_V1,
   decodeEscrowData,
   decodeEscrowDataV1,
+  ESCROW_TYPE,
+  ESCROW_TYPE_V1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useChainStore } from 'src/stores/useChainStore'
+import { formatEther, Hex } from 'viem'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 

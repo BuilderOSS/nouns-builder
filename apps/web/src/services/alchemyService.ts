@@ -9,7 +9,7 @@ import {
   OwnedNft,
   TokenBalanceType,
 } from 'alchemy-sdk'
-import { Hex, formatUnits, fromHex, getAddress, zeroHash } from 'viem'
+import { formatUnits, fromHex, getAddress, Hex, zeroHash } from 'viem'
 
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'

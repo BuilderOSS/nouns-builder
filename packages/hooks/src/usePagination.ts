@@ -1,6 +1,7 @@
-import { omit } from './helpers'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
+
+import { omit } from './helpers'
 
 export const usePagination = (hasNext?: boolean) => {
   const { query, pathname } = useRouter()

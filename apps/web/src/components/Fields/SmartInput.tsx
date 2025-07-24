@@ -1,10 +1,9 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { isEmpty } from '@buildeross/utils/helpers'
-import { Box, Flex, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
 import React, { ChangeEventHandler, ReactElement, WheelEvent } from 'react'
-
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
 

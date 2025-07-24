@@ -1,4 +1,5 @@
 // SDK exported from main index with alias
+export { SDK as SubgraphSDK } from './client'
 export * from './requests/auctionHistory'
 export * from './requests/averageWinningBid'
 export * from './requests/daoMembership'
@@ -14,21 +15,19 @@ export * from './requests/proposalQuery'
 export * from './requests/proposalsQuery'
 export * from './requests/sync'
 export * from './requests/tokensQuery'
-export { SDK as SubgraphSDK } from './client'
-
 export {
   Auction_OrderBy,
-  type AuctionFragment,
   type AuctionBidFragment,
+  type AuctionFragment,
   type AuctionHistoryQuery,
   type CurrentAuctionFragment,
   type DaoFragment,
+  OrderDirection,
+  type Proposal_Filter,
   type ProposalFragment,
   type ProposalVoteFragment,
   ProposalVoteSupport,
-  OrderDirection,
-  Token_OrderBy,
   Snapshot_OrderBy,
-  type Proposal_Filter,
+  Token_OrderBy,
   type TokenWithDaoQuery,
 } from './sdk.generated'

@@ -1,5 +1,6 @@
-import { parseBlockchainDate } from './parseBlockchainDate'
 import { ProposalState } from '@buildeross/types'
+
+import { parseBlockchainDate } from './parseBlockchainDate'
 
 export const isProposalOpen = (state: ProposalState): boolean => {
   if (

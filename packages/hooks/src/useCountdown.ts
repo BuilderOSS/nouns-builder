@@ -1,6 +1,7 @@
-import { useInterval } from './useInterval'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
+
+import { useInterval } from './useInterval'
 
 interface Countdown {
   isEnded: boolean

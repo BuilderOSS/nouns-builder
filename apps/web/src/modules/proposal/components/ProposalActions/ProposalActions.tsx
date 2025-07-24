@@ -6,11 +6,10 @@ import { AddressType } from '@buildeross/types'
 import { isProposalOpen, isProposalSuccessful } from '@buildeross/utils/proposalState'
 import { Flex } from '@buildeross/zord'
 import React, { Fragment } from 'react'
-import { getAddress } from 'viem'
-import { useAccount, useReadContracts } from 'wagmi'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { getAddress } from 'viem'
+import { useAccount, useReadContracts } from 'wagmi'
 
 import { CancelButton } from './CancelButton'
 import { ConnectWalletAction } from './ConnectWalletAction'

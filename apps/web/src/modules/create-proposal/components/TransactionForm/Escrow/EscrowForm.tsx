@@ -1,12 +1,9 @@
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
-import { FieldArray, Form, Formik } from 'formik'
 import type { FormikHelpers } from 'formik'
+import { FieldArray, Form, Formik } from 'formik'
 import { useFormikContext } from 'formik'
 import { truncate } from 'lodash'
 import React, { useCallback, useState } from 'react'
-import { formatEther } from 'viem'
-import { useBalance } from 'wagmi'
-
 import DatePicker from 'src/components/Fields/Date'
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT, TEXTAREA } from 'src/components/Fields/types'
@@ -15,6 +12,8 @@ import { Icon } from 'src/components/Icon'
 import SingleMediaUpload from 'src/components/SingleMediaUpload/SingleMediaUpload'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { formatEther } from 'viem'
+import { useBalance } from 'wagmi'
 
 import EscrowDetailsDisplay from './EscrowDetailsDisplay'
 import {

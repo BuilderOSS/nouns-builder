@@ -1,8 +1,9 @@
+import { CHAIN_ID } from '@buildeross/types'
+import { foundry } from 'wagmi/chains'
+
 import { getAlchemyRpcUrl } from './alchemy'
 import { getInfuraRpcUrl } from './infura'
 import { getTenderlyRpcUrl } from './tenderly'
-import { CHAIN_ID } from '@buildeross/types'
-import { foundry } from 'wagmi/chains'
 
 const createRpcUrls = () => {
   const urls: Partial<Record<CHAIN_ID, string[]>> = {}

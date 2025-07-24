@@ -6,10 +6,9 @@ import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-
 import { daoDescription as plainDesciption } from 'src/styles/About.css'
 
-import { UNEXPANDED_BOX_HEIGHT, daoDescription, fadingEffect } from './mdRender.css'
+import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
 
 export const DaoDescription = ({ description }: { description?: string }) => {
   const [isOverHeight, setIsOverHeight] = React.useState(false)

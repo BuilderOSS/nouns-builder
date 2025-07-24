@@ -3,7 +3,6 @@ import { handleGMTOffset } from '@buildeross/utils/helpers'
 import { Box, Grid } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useCallback } from 'react'
-
 import { propDataGrid } from 'src/styles/Proposals.css'
 
 import { Tile } from './Tile'

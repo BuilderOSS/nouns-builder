@@ -1,7 +1,6 @@
 import { ArtworkUploadError, ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
-
 import {
   defaultFileDownloadStyle,
   defaultHelperTextStyle,

@@ -7,14 +7,12 @@ import { getEscrowDelegate } from '@buildeross/sdk/eas'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID, Chain } from '@buildeross/types'
+import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
-import { useAccount } from 'wagmi'
-
 import { Meta } from 'src/components/Meta'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
@@ -32,6 +30,7 @@ import FeedTab from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { useAccount } from 'wagmi'
 
 export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
 

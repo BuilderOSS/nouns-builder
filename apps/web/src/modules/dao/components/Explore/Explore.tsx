@@ -2,10 +2,9 @@ import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
 import { Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
-import { formatEther } from 'viem'
-
 import Pagination from 'src/components/Pagination'
 import { useChainStore } from 'src/stores/useChainStore'
+import { formatEther } from 'viem'
 
 import { DaoCard } from '../DaoCard'
 import { exploreGrid } from './Explore.css'

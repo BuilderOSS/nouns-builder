@@ -3,7 +3,6 @@ import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { DecodedArg } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-
 import { FallbackImage } from 'src/components/FallbackImage'
 import { useChainStore } from 'src/stores/useChainStore'
 

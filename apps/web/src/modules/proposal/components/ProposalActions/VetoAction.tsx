@@ -1,15 +1,14 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { Address } from 'viem'
-import { useReadContract } from 'wagmi'
-
 import SmartInput from 'src/components/Fields/SmartInput'
 import { Icon } from 'src/components/Icon'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { Address } from 'viem'
+import { useReadContract } from 'wagmi'
 
 import { GovernorContractButton } from '../GovernorContractButton'
 

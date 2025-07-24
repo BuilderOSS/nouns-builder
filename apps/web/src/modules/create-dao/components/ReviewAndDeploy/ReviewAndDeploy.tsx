@@ -8,18 +8,8 @@ import type { AddressType } from '@buildeross/types'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
-import { Box, Flex, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex } from '@buildeross/zord'
 import React, { useState } from 'react'
-import {
-  decodeEventLog,
-  encodeAbiParameters,
-  getAddress,
-  parseAbiParameters,
-  parseEther,
-} from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
 import { ContractButton } from 'src/components/ContractButton'
 import { FallbackImage } from 'src/components/FallbackImage'
 import { defaultBackButton } from 'src/components/Fields/styles.css'
@@ -32,6 +22,15 @@ import {
   deployCheckboxWrapperStyle,
   deployContractButtonStyle,
 } from 'src/styles/deploy.css'
+import {
+  decodeEventLog,
+  encodeAbiParameters,
+  getAddress,
+  parseAbiParameters,
+  parseEther,
+} from 'viem'
+import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
 import { PreviewArtwork } from './PreviewArtwork'

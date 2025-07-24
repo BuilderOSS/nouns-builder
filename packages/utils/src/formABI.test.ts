@@ -1,10 +1,11 @@
+import { describe, expect, vi } from 'vitest'
+
 import {
   FIELD_SEPERATOR_CHAR,
   matchInputFromName,
   matchTypeParameters,
   normalizePathName,
 } from './formABI'
-import { describe, expect, vi } from 'vitest'
 
 beforeEach(() => {
   vi.resetModules()

@@ -1,8 +1,6 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
 import { Stack } from '@buildeross/zord'
 import React from 'react'
-import { useAccount } from 'wagmi'
-
 import Everything from 'src/components/Home/Everything'
 import FAQ from 'src/components/Home/FAQ'
 import GetStarted from 'src/components/Home/GetStarted'
@@ -15,6 +13,7 @@ import { HomeLayout } from 'src/layouts/HomeLayout'
 import { LayoutWrapper } from 'src/layouts/LayoutWrapper'
 import { DaoFeed } from 'src/modules/dao'
 import Dashboard from 'src/modules/dashboard/Dashboard'
+import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 

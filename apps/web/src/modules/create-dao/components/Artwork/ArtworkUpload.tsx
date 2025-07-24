@@ -9,7 +9,6 @@ import React, {
   useCallback,
   useEffect,
 } from 'react'
-
 import { ArtworkPreview, ArtworkUpload as UploadComponent } from 'src/components/Artwork'
 import { LayerOrdering } from 'src/components/Artwork/LayerOrdering'
 import { artworkPreviewPanel } from 'src/components/Fields/styles.css'

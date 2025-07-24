@@ -1,8 +1,7 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { isAddress } from 'viem'
-
 import { getCachedNftMetadata } from 'src/services/alchemyService'
+import { isAddress } from 'viem'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {

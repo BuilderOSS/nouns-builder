@@ -1,5 +1,6 @@
-import { toSeconds } from '../helpers'
 import * as Yup from 'yup'
+
+import { toSeconds } from '../helpers'
 
 export const durationValidationSchema = (
   min?: { value: number; description: string },

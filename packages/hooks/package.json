@@ -1,31 +1,10 @@
 {
   "name": "@buildeross/hooks",
-  "version": "0.0.0",
-  "private": true,
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    },
-    "./*": {
-      "types": "./dist/*.d.ts",
-      "import": "./dist/*.mjs",
-      "require": "./dist/*.js"
-    }
-  },
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "type-check": "tsc --noEmit",
-    "lint": "eslint src --fix",
-    "clean": "rm -rf dist"
-  },
+  "description": "Shared React hooks for BuilderOSS apps",
+  "version": "0.1.0",
   "dependencies": {
-    "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/constants": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/sdk": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/utils": "workspace:*",
@@ -41,12 +20,42 @@
     "tsup": "^8.3.5",
     "typescript": "^5.8.3"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
+  },
+  "license": "MIT",
+  "main": "./dist/index.js",
   "peerDependencies": {
+    "next": "^15.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "viem": "^2.30.0",
     "swr": "^2.3.3",
-    "next": "^15.3.2",
+    "viem": "^2.30.0",
     "wagmi": "^2.15.4"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/hooks"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint src --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
 }

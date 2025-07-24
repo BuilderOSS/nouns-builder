@@ -8,12 +8,9 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
-import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
+import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { encodeFunctionData, formatUnits, getAddress, isAddress, parseUnits } from 'viem'
-import { useReadContracts } from 'wagmi'
-
 import SmartInput from 'src/components/Fields/SmartInput'
 import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
@@ -23,6 +20,8 @@ import {
 } from 'src/modules/create-proposal/components/DropdownSelect'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { encodeFunctionData, formatUnits, getAddress, isAddress, parseUnits } from 'viem'
+import { useReadContracts } from 'wagmi'
 
 import sendErc20Schema, { SendErc20Values } from './SendErc20.schema'
 

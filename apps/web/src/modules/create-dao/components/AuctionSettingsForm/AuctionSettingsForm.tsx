@@ -3,8 +3,6 @@ import { Button, Flex, Stack } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent } from 'react'
-import { useAccount } from 'wagmi'
-
 import DaysHoursMinsSecs from 'src/components/Fields/DaysHoursMinsSecs'
 import SmartInput from 'src/components/Fields/SmartInput'
 import {
@@ -15,6 +13,7 @@ import {
 } from 'src/components/Fields/styles.css'
 import { NUMBER } from 'src/components/Fields/types'
 import { Icon } from 'src/components/Icon'
+import { useAccount } from 'wagmi'
 
 import { useFormStore } from '../../stores'
 import {

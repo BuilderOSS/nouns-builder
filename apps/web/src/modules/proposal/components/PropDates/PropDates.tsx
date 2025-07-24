@@ -1,13 +1,10 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
-import { type PropDate, getPropDates } from '@buildeross/sdk/eas'
+import { getPropDates, type PropDate } from '@buildeross/sdk/eas'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { useMemo, useState } from 'react'
-import useSWR from 'swr'
-import { getAddress, zeroHash } from 'viem'
-
 import { Icon } from 'src/components/Icon'
 import {
   getEscrowBundler,
@@ -17,6 +14,8 @@ import { useInvoiceData } from 'src/modules/proposal/components/ProposalDescript
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
+import useSWR from 'swr'
+import { getAddress, zeroHash } from 'viem'
 
 import { PropDateCard } from './PropDateCard'
 import { PropDateForm } from './PropDateForm'

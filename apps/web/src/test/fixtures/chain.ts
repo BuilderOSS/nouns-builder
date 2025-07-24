@@ -1,4 +1,4 @@
-import { CHAIN_ID, Chain } from '@buildeross/types'
+import { Chain, CHAIN_ID } from '@buildeross/types'
 import { foundry } from 'wagmi/chains'
 
 export const FOUNDRY_CHAIN: Chain = {

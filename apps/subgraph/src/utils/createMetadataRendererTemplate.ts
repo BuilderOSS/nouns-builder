@@ -1,17 +1,18 @@
+import { Address, Bytes, DataSourceContext } from '@graphprotocol/graph-ts'
+
 import {
   MetadataRendererBase as MetadataRendererBaseTemplate,
   MetadataRendererV1 as MetadataRendererV1Template,
 } from '../../generated/templates'
 import { MetadataRendererBase as MetadataRendererBaseContract } from '../../generated/templates/MetadataRendererBase/MetadataRendererBase'
-import { Address, Bytes, DataSourceContext } from '@graphprotocol/graph-ts'
 
 export function createMetadataRendererTemplate(
   rendererContract: MetadataRendererBaseContract,
   rendererAddress: Address,
-  ctx: DataSourceContext
+  ctx: DataSourceContext,
 ): void {
   let isBaseRenderer = rendererContract.try_supportsInterface(
-    Bytes.fromHexString('0x2b983814')
+    Bytes.fromHexString('0x2b983814'),
   )
 
   if (isBaseRenderer.reverted) {

@@ -1,8 +1,9 @@
-import { NftTokenType } from './useNftMetadata'
 import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
+
+import { NftTokenType } from './useNftMetadata'
 
 export type SerializedNft = {
   tokenId: string

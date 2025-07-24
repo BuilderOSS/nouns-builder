@@ -4,7 +4,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
-import { Box, Flex, Paragraph, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'
 import React, { ReactNode, useMemo } from 'react'
@@ -12,14 +12,13 @@ import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-import useSWR from 'swr'
-
 import {
   getEscrowBundler,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useChainStore } from 'src/stores/useChainStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
+import useSWR from 'swr'
 
 import { DecodedTransactions } from './DecodedTransactions'
 import { MilestoneDetails } from './MilestoneDetails'

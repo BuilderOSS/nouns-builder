@@ -1,13 +1,12 @@
 import {
   Box,
   Flex,
+  Input as ZordInput,
   InputComponentProps,
   Text,
-  Input as ZordInput,
 } from '@buildeross/zord'
 import { Field } from 'formik'
 import type { FC, ReactNode } from 'react'
-
 import { Error } from 'src/components/Fields/Error'
 
 import { input } from './Input.css'

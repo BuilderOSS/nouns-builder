@@ -1,6 +1,7 @@
-import { encodePageNumToEndCursor } from './encodePageNumToEndCursor'
 import { assert } from 'vitest'
 import { describe } from 'vitest'
+
+import { encodePageNumToEndCursor } from './encodePageNumToEndCursor'
 
 const decode = (cursor: string) => {
   let decoded = ''

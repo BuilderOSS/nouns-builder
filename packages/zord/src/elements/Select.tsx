@@ -1,8 +1,9 @@
+import { ClassValue } from 'clsx'
+import React from 'react'
+
 import { Flex, FlexComponentProps } from '../elements/Flex'
 import { Icon } from '../elements/Icon'
 import { inputContainer, inputField, inputFieldBaseInput } from './InputField.css'
-import { ClassValue } from 'clsx'
-import React from 'react'
 
 export interface SelectProps extends FlexComponentProps<'select'> {
   autoFocus?: boolean

@@ -4,11 +4,10 @@ import { Proposal } from '@buildeross/sdk/subgraph'
 import { OrderDirection, Snapshot_OrderBy } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import useSWR from 'swr'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
+import useSWR from 'swr'
 
 import { VotePlacard } from './VotePlacard'
 import { VoterParticipation } from './VoterParticipation'

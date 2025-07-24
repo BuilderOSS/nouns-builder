@@ -3,7 +3,6 @@ import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import dynamic from 'next/dynamic'
 import React from 'react'
-
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 

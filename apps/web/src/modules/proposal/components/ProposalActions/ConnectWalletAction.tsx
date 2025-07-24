@@ -1,6 +1,5 @@
 import { Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 
 export const ConnectWalletAction = () => {
