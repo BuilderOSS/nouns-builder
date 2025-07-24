@@ -1,9 +1,7 @@
 {
   "name": "@buildeross/eslint-config-custom",
-  "version": "0.0.0",
-  "private": true,
-  "main": "index.js",
-  "license": "MIT",
+  "description": "Shared ESLint configuration for BuilderOSS apps",
+  "version": "0.1.0",
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
@@ -12,12 +10,17 @@
     "eslint-config-turbo": "latest",
     "eslint-plugin-prettier": "^5.2.6",
     "eslint-plugin-react": "7.28.0",
+    "eslint-plugin-simple-import-sort": "^12.1.0",
     "eslint-plugin-unused-imports": "^2.0.0"
   },
+  "license": "MIT",
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
   },
-  "devDependencies": {
-    "@trivago/prettier-plugin-sort-imports": "^4.1.1"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/eslint-config-custom"
   }
 }

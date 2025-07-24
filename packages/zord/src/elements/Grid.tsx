@@ -1,11 +1,12 @@
-import { Atoms, atoms } from '../atoms'
-import { Box, BoxDefaultElement, BoxProps } from './Box'
 import React, { ElementType, ForwardedRef, forwardRef } from 'react'
 import type {
   PolymorphicForwardRefExoticComponent,
-  PolymorphicPropsWithRef,
   PolymorphicPropsWithoutRef,
+  PolymorphicPropsWithRef,
 } from 'react-polymorphic-types'
+
+import { Atoms, atoms } from '../atoms'
+import { Box, BoxDefaultElement, BoxProps } from './Box'
 
 function gridShorthand(
   template?: GridProps['columns'] | GridProps['rows'],

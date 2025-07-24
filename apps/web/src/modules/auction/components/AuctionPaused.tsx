@@ -1,22 +1,18 @@
-import { Box, Stack, atoms } from '@buildeross/zord'
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { ProposalState } from '@buildeross/sdk/contract'
+import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
+import { atoms, Box, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useMemo } from 'react'
+import { Icon } from 'src/components/Icon'
+import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
-
-import { Icon } from 'src/components/Icon'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { auctionAbi } from 'src/data/contract/abis'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import {
-  ProposalsResponse,
-  getProposals,
-} from 'src/data/subgraph/requests/proposalsQuery'
-import { useDaoStore } from 'src/modules/dao'
-import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
 
 export const AuctionPaused = () => {
   const { query, isReady } = useRouter()

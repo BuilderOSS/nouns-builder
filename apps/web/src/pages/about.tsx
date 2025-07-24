@@ -3,7 +3,6 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { ContractButton } from 'src/components/ContractButton'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 

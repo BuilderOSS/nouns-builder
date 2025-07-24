@@ -1,6 +1,7 @@
-import { atoms } from '../atoms'
 import { style } from '@vanilla-extract/css'
 import { recipe } from '@vanilla-extract/recipes'
+
+import { atoms } from '../atoms'
 
 export const textVariants = {
   italic: {

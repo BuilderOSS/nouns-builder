@@ -1,17 +1,16 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { formatCryptoVal, numberFormatter } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
+import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import { statisticContent } from 'src/styles/About.css'
+import { sectionWrapperStyle } from 'src/styles/dao.css'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useBalance } from 'wagmi'
 
-import SWR_KEYS from 'src/constants/swrKeys'
-import { SDK } from 'src/data/subgraph/client'
-import { useChainStore } from 'src/stores/useChainStore'
-import { statisticContent } from 'src/styles/About.css'
-import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { formatCryptoVal, numberFormatter } from 'src/utils/numbers'
-
-import { useDaoStore } from '../../stores'
 import { ContractLink } from '../ContractLink'
 import { NFTBalance } from './NFTBalance'
 import { TokenBalance } from './TokenBalance'
@@ -39,7 +38,7 @@ export const Treasury = () => {
       ? [SWR_KEYS.TREASURY_SALES, chain.id, addresses.token]
       : null,
     ([_key, chainId, tokenAddress]) =>
-      SDK.connect(chainId)
+      SubgraphSDK.connect(chainId)
         .totalAuctionSales({ tokenAddress: tokenAddress.toLowerCase() })
         .then((x) =>
           x.dao?.totalAuctionSales ? formatEther(x.dao.totalAuctionSales) : 0

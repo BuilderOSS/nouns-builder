@@ -1,7 +1,6 @@
+import * as z from '@buildeross/constants/layers'
 import { atoms } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-
-import * as z from 'src/utils/layers'
 
 export const NavContainer = style([atoms({ m: 'auto', maxW: '100%' })])
 

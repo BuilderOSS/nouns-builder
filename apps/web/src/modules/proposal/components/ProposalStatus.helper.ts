@@ -1,7 +1,6 @@
+import { ProposalState } from '@buildeross/sdk/contract'
+import { fromSeconds } from '@buildeross/utils/helpers'
 import { theme } from '@buildeross/zord'
-
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { fromSeconds } from 'src/utils/helpers'
 
 export function formatTime(
   timediff: number,

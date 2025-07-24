@@ -1,22 +1,21 @@
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { metadataAbi } from '@buildeross/sdk/contract'
+import { ProposalState } from '@buildeross/sdk/contract'
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { getProposals } from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import isUndefined from 'lodash/isUndefined'
 import pickBy from 'lodash/pickBy'
-import useSWR from 'swr'
-import { encodeFunctionData } from 'viem'
-import { useReadContract } from 'wagmi'
-
-import { RENDERER_BASE } from 'src/constants/rendererBase'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { metadataAbi } from 'src/data/contract/abis'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { getProposals } from 'src/data/subgraph/requests/proposalsQuery'
 import {
   BuilderTransaction,
   Transaction,
   TransactionType,
 } from 'src/modules/create-proposal'
-import { DaoContractAddresses } from 'src/modules/dao'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import useSWR from 'swr'
+import { encodeFunctionData } from 'viem'
+import { useReadContract } from 'wagmi'
 
 interface RendererBaseFix {
   shouldFix: boolean

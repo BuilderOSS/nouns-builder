@@ -1,5 +1,6 @@
-import { vars } from './theme'
 import { createSprinkles, defineProperties } from '@vanilla-extract/sprinkles'
+
+import { vars } from './theme'
 
 // TODO: This is to be fixed, we would rather define the breakpoints as an array of numbers and generate this object
 const conditions = {

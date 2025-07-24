@@ -1,20 +1,21 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { ProposalState } from '@buildeross/sdk/contract'
+import { getProposal, Proposal } from '@buildeross/sdk/subgraph'
+import { BytesType } from '@buildeross/types'
+import {
+  isProposalExecutable,
+  isProposalSuccessful,
+} from '@buildeross/utils/proposalState'
 import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
-import { useSWRConfig } from 'swr'
-import { Address } from 'viem'
-
 import { Countdown } from 'src/components/Countdown'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { Proposal, getProposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
-import { BytesType } from 'src/typings'
+import { useSWRConfig } from 'swr'
+import { Address } from 'viem'
 
-import { isProposalSuccessful } from '../../utils'
-import { isProposalExecutable } from '../../utils/isProposalExecutable'
 import { GovernorContractButton } from '../GovernorContractButton'
 
 interface SuccessfulProposalActionsProps {

@@ -1,15 +1,14 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { WALLET_CONNECT_PROJECT_ID } from '@buildeross/constants/walletconnect'
+import { CHAIN_ID } from '@buildeross/types'
 import { Core } from '@walletconnect/core'
 import { SessionTypes, SignClientTypes } from '@walletconnect/types'
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
 import { IWeb3Wallet, Web3Wallet } from '@walletconnect/web3wallet'
 import { useCallback, useEffect, useState } from 'react'
-import { getAddress, zeroHash } from 'viem'
-
-import { BASE_URL } from 'src/constants/baseUrl'
-import { WALLET_CONNECT_PROJECT_ID } from 'src/constants/walletconnect'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import { getAddress, zeroHash } from 'viem'
 
 export type WCParams = {
   chainId: CHAIN_ID

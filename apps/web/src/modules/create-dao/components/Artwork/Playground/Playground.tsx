@@ -1,8 +1,10 @@
+import {
+  SelectedTraitsProps,
+  useArtworkPreview,
+} from '@buildeross/hooks/useArtworkPreview'
+import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { Button, Flex } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
-
-import { SelectedTraitsProps, useArtworkPreview } from 'src/hooks/useArtworkPreview'
-import { ImageProps } from 'src/hooks/useArtworkUpload'
 import {
   previewGridWrapperStyle,
   previewHeadingStyle,

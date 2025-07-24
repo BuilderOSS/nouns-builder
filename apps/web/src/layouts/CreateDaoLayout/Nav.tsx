@@ -1,13 +1,12 @@
-import { Box, Flex, Label, atoms } from '@buildeross/zord'
+import { useIsMounted } from '@buildeross/hooks/useIsMounted'
+import { atoms, Box, Flex, Label } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-
 import { NetworkController } from 'src/components/NetworkController'
-import { useIsMounted } from 'src/hooks/useIsMounted'
 
-import { NavMenu } from '../DefaultLayout/NavMenu'
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'
+import { NavMenu } from '../DefaultLayout/NavMenu'
 import { NavContainer, NavWrapper } from './Nav.styles.css'
 
 export const Nav = () => {

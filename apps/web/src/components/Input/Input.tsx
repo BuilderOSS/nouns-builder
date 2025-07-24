@@ -1,13 +1,12 @@
 import {
   Box,
   Flex,
+  Input as ZordInput,
   InputComponentProps,
   Text,
-  Input as ZordInput,
 } from '@buildeross/zord'
 import { Field } from 'formik'
 import type { FC, ReactNode } from 'react'
-
 import { Error } from 'src/components/Fields/Error'
 
 import { input } from './Input.css'
@@ -20,6 +19,9 @@ interface CustomInputProps extends InputComponentProps<typeof ZordInput> {
   placeholder?: string | number
   autoComplete?: 'off'
   error?: string
+  min?: number | string
+  max?: number | string
+  step?: number | string
 }
 
 const Input: FC<CustomInputProps> = ({
@@ -30,6 +32,9 @@ const Input: FC<CustomInputProps> = ({
   placeholder,
   autoComplete,
   error,
+  min,
+  max,
+  step,
   ...props
 }) => {
   return (
@@ -53,6 +58,9 @@ const Input: FC<CustomInputProps> = ({
             placeholder={placeholder}
             autoComplete={autoComplete}
             data-error={typeof error !== 'undefined'}
+            min={min}
+            max={max}
+            step={step}
             {...props}
           />
           <Flex

@@ -1,10 +1,9 @@
+import { type DaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { Box, Flex, Grid, PopUp, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
-
 import { Avatar } from 'src/components/Avatar/Avatar'
 import { Icon } from 'src/components/Icon'
-import { type DaoMembership } from 'src/hooks/useDaoMembership'
 import { useLayoutStore } from 'src/stores'
 
 export const Membership: React.FC<DaoMembership & { totalSupply: number }> = (info) => {

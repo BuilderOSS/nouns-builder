@@ -1,10 +1,8 @@
+import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
-import { useAccount } from 'wagmi'
-
 import { Meta } from 'src/components/Meta'
-import { useIsGnosisSafe } from 'src/hooks/useIsGnosisSafe'
 import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
 import {
   AllocationForm,
@@ -15,10 +13,11 @@ import {
   FormHandler,
   GeneralForm,
   ReviewAndDeploy,
-  VetoForm,
   useFormStore,
+  VetoForm,
 } from 'src/modules/create-dao'
 import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/styles.css'
+import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 

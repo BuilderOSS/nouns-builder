@@ -1,2 +1,2 @@
-export * from './useMinBidIncrement'
 export * from './useAuctionEvents'
+export * from './useMinBidIncrement'

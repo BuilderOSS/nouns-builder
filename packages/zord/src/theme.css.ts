@@ -1,12 +1,14 @@
-import { border, ease, radii, size, space, typography } from './tokens'
-import { colorTheme } from './utils'
+import '@vanilla-extract/private'
+
 import {
   createTheme,
   createThemeContract,
   globalStyle,
   style,
 } from '@vanilla-extract/css'
-import '@vanilla-extract/private'
+
+import { border, ease, radii, size, space, typography } from './tokens'
+import { colorTheme } from './utils'
 
 export const theme = createThemeContract({
   fonts: {

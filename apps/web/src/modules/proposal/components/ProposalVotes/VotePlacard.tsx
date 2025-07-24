@@ -1,15 +1,11 @@
-import { Flex, Grid, Text, atoms } from '@buildeross/zord'
+import { useEnsData } from '@buildeross/hooks'
+import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
+import { walletSnippet } from '@buildeross/utils/helpers'
+import { atoms, Flex, Grid, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
-
 import { Avatar } from 'src/components/Avatar'
-import {
-  ProposalVoteFragment,
-  ProposalVoteSupport,
-} from 'src/data/subgraph/sdk.generated'
-import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores'
-import { walletSnippet } from 'src/utils/helpers'
 
 const variants = {
   inital: {

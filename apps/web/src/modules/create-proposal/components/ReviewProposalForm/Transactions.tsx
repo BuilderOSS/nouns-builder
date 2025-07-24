@@ -2,7 +2,6 @@ import { Flex, Stack } from '@buildeross/zord'
 import { Field } from 'formik'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { defaultInputLabelStyle } from 'src/components/Fields/styles.css'
 import { SimulationOutput } from 'src/services/simulationService'
 

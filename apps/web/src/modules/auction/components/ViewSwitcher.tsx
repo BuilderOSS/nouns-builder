@@ -1,6 +1,5 @@
 import { Button, Flex } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-
 import { buttonTab } from 'src/modules/dao/components/AuctionChart/AuctionChart.css'
 import { TopSectionView } from 'src/modules/dao/components/DaoTopSection'
 

@@ -1,1 +1,1 @@
-export { useBlocklist, isBlocked } from './src/blocklist'
+export { isBlocked, useBlocklist } from './src/blocklist'

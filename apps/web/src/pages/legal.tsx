@@ -1,7 +1,6 @@
 import { Box, Heading, Label, Paragraph, Text } from '@buildeross/zord'
 import Head from 'next/head'
 import React from 'react'
-
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 import { legalContainer } from 'src/styles/legal.css'
 

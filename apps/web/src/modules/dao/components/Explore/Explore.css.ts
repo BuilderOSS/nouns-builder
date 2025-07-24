@@ -1,6 +1,5 @@
 import { atoms } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-
 import { skeletonAnimation } from 'src/styles/animations.css'
 
 export const exploreSkeleton = style({

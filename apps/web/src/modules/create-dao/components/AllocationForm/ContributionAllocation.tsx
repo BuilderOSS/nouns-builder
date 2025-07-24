@@ -1,11 +1,13 @@
+import {
+  PUBLIC_BUILDER_ADDRESS,
+  PUBLIC_NOUNS_ADDRESS,
+} from '@buildeross/constants/addresses'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { getEnsAddress } from '@buildeross/utils/ens'
 import { Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
-
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { PUBLIC_BUILDER_ADDRESS, PUBLIC_NOUNS_ADDRESS } from 'src/constants/addresses'
-import { useEnsData } from 'src/hooks/useEnsData'
 import { useChainStore } from 'src/stores/useChainStore'
-import { getEnsAddress } from 'src/utils/ens'
 
 import { useFormStore } from '../../stores'
 import { TokenAllocation } from '../AllocationForm'

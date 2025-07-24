@@ -1,5 +1,4 @@
 import React from 'react'
-
 import { Meta } from 'src/components/Meta'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'
 import { LayoutWrapper } from 'src/layouts/LayoutWrapper'

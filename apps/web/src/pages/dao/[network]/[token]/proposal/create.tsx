@@ -1,19 +1,17 @@
+import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { L1_CHAINS } from '@buildeross/constants/chains'
+import { useVotes } from '@buildeross/hooks'
+import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { getDAOAddresses } from '@buildeross/sdk/contract'
+import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
+import { AddressType } from '@buildeross/types'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useEffect, useMemo, useState } from 'react'
-import { isAddressEqual } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
-
-import { ALLOWED_MIGRATION_DAOS } from 'src/constants/addresses'
-import { CACHE_TIMES } from 'src/constants/cacheTimes'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { auctionAbi } from 'src/data/contract/abis'
-import { L1_CHAINS } from 'src/data/contract/chains'
-import getDAOAddresses from 'src/data/contract/requests/getDAOAddresses'
-import { isChainIdSupportedByEAS } from 'src/data/eas/helpers'
-import { useVotes } from 'src/hooks'
-import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   CreateProposalHeading,
@@ -29,11 +27,12 @@ import {
   useProposalStore,
 } from 'src/modules/create-proposal'
 import { useRendererBaseFix } from 'src/modules/create-proposal/hooks'
-import { useDaoStore } from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { notFoundWrap } from 'src/styles/404.css'
-import { AddressType } from 'src/typings'
+import { isAddressEqual } from 'viem'
+import { useAccount, useReadContract } from 'wagmi'
 
 const CreateProposalPage: NextPageWithLayout = () => {
   const router = useRouter()

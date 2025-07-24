@@ -1,6 +1,5 @@
-import { Flex, Text, atoms } from '@buildeross/zord'
-
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
+import { atoms, Flex, Text } from '@buildeross/zord'
 import { useLayoutStore } from 'src/stores'
 
 import { Icon } from '../Icon'

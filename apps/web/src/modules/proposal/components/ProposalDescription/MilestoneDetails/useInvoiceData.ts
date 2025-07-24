@@ -1,19 +1,18 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { fetchFromURI } from '@buildeross/utils/fetch'
+import { getProvider } from '@buildeross/utils/provider'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import _ from 'lodash'
 import { useMemo } from 'react'
-import useSWR from 'swr'
-import { Hex, decodeEventLog, formatEther, isHex } from 'viem'
-
-import SWR_KEYS from 'src/constants/swrKeys'
-import { DecodedTransaction } from 'src/hooks/useDecodedTransactions'
 import {
   decodeEscrowData,
   decodeEscrowDataV1,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
-import { AddressType, CHAIN_ID } from 'src/typings'
-import { fetchFromURI } from 'src/utils/fetch'
-import { getProvider } from 'src/utils/provider'
+import useSWR from 'swr'
+import { decodeEventLog, formatEther, Hex, isHex } from 'viem'
 
 type InvoiceData = {
   invoiceAddress: Hex | undefined

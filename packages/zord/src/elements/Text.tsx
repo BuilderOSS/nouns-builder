@@ -1,12 +1,13 @@
-import { Atoms, atoms } from '../atoms'
-import { Box, BoxDefaultElement, BoxProps } from './Box'
-import { text, textVariants } from './Text.css'
 import { ElementType, ForwardedRef, forwardRef } from 'react'
 import type {
   PolymorphicForwardRefExoticComponent,
-  PolymorphicPropsWithRef,
   PolymorphicPropsWithoutRef,
+  PolymorphicPropsWithRef,
 } from 'react-polymorphic-types'
+
+import { Atoms, atoms } from '../atoms'
+import { Box, BoxDefaultElement, BoxProps } from './Box'
+import { text, textVariants } from './Text.css'
 
 export { textVariants }
 

@@ -1,11 +1,10 @@
+import { useDaoAuction } from '@buildeross/hooks/useDaoAuction'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { CHAIN_ID } from '@buildeross/types'
+import { bgForAddress } from '@buildeross/utils/gradient'
 import { Box, BoxProps } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
-
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { useDaoFeedCard } from 'src/modules/dao'
-import { CHAIN_ID } from 'src/typings'
-import { bgForAddress } from 'src/utils/gradient'
 
 import { avatarVariants, squareAvatar } from './Avatar.css'
 
@@ -28,7 +27,7 @@ export function DaoAvatar({
   chainId,
   ...props
 }: DaoAvatarProps) {
-  const { tokenUri } = useDaoFeedCard({
+  const { tokenUri } = useDaoAuction({
     collectionAddress,
     auctionAddress,
     chainId,

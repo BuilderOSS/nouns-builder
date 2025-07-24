@@ -1,12 +1,11 @@
-import { Box, Button, Flex, Text, atoms } from '@buildeross/zord'
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
+import { atoms, Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React, { useState } from 'react'
-
 import { Icon } from 'src/components/Icon'
 import { NetworkController } from 'src/components/NetworkController'
 import { Uploading } from 'src/components/Uploading'
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
 
 import { ArtworkUpload } from './ArtworkUpload'
