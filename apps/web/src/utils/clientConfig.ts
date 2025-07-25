@@ -1,5 +1,5 @@
-import { chains, transports } from './chains'
 import { BASE_URL, WALLET_CONNECT_PROJECT_ID } from '@buildeross/constants'
+import { chains, transports } from '@buildeross/utils/wagmi'
 import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-connector'
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
@@ -47,7 +47,7 @@ const rainbowConnectors = connectorsForWallets(
     appUrl,
     appIcon,
     walletConnectParameters: { metadata },
-  },
+  }
 )
 
 const connectors: CreateConnectorFn[] = [
