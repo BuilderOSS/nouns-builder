@@ -1,5 +1,0 @@
-query activeAuctions($first: Int!, $where: Auction_filter!) {
-  auctions(orderBy: endTime, orderDirection: desc, first: $first, where: $where) {
-    ...Auction
-  }
-}
