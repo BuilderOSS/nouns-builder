@@ -1,4 +1,4 @@
-export const L2DeployerABI = [
+export const l2DeployerAbi = [
   {
     inputs: [
       {

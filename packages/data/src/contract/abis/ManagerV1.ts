@@ -1,4 +1,4 @@
-export const managerV2Abi = [
+export const managerV1Abi = [
   {
     inputs: [
       {
@@ -24,11 +24,6 @@ export const managerV2Abi = [
       {
         internalType: 'address',
         name: '_governorImpl',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: '_builderRewardsRecipient',
         type: 'address',
       },
     ],
@@ -108,11 +103,6 @@ export const managerV2Abi = [
   },
   {
     inputs: [],
-    name: 'ONLY_TOKEN_OWNER',
-    type: 'error',
-  },
-  {
-    inputs: [],
     name: 'ONLY_UUPS',
     type: 'error',
   },
@@ -169,25 +159,6 @@ export const managerV2Abi = [
       },
     ],
     name: 'Initialized',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'renderer',
-        type: 'address',
-      },
-    ],
-    name: 'MetadataRendererUpdated',
     type: 'event',
   },
   {
@@ -320,19 +291,6 @@ export const managerV2Abi = [
   },
   {
     inputs: [],
-    name: 'builderRewardsRecipient',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
     name: 'cancelOwnershipTransfer',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -382,16 +340,6 @@ export const managerV2Abi = [
             name: 'initStrings',
             type: 'bytes',
           },
-          {
-            internalType: 'address',
-            name: 'metadataRenderer',
-            type: 'address',
-          },
-          {
-            internalType: 'uint256',
-            name: 'reservedUntilTokenId',
-            type: 'uint256',
-          },
         ],
         internalType: 'struct IManager.TokenParams',
         name: '_tokenParams',
@@ -408,16 +356,6 @@ export const managerV2Abi = [
             internalType: 'uint256',
             name: 'duration',
             type: 'uint256',
-          },
-          {
-            internalType: 'address',
-            name: 'founderRewardRecipent',
-            type: 'address',
-          },
-          {
-            internalType: 'uint16',
-            name: 'founderRewardBps',
-            type: 'uint16',
           },
         ],
         internalType: 'struct IManager.AuctionParams',
@@ -761,35 +699,6 @@ export const managerV2Abi = [
     ],
     name: 'safeTransferOwnership',
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '_token',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: '_newRendererImpl',
-        type: 'address',
-      },
-      {
-        internalType: 'bytes',
-        name: '_setupRenderer',
-        type: 'bytes',
-      },
-    ],
-    name: 'setMetadataRenderer',
-    outputs: [
-      {
-        internalType: 'address',
-        name: 'metadata',
-        type: 'address',
-      },
-    ],
     stateMutability: 'nonpayable',
     type: 'function',
   },

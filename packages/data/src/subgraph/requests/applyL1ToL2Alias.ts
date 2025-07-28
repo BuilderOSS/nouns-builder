@@ -1,4 +1,4 @@
-import { L2DeployerABI } from '../../contract/abis/L2MigrationDeployer'
+import { l2DeployerAbi } from '../../contract/abis/L2MigrationDeployer'
 import { L2_MIGRATION_DEPLOYER } from '@buildeross/constants'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils'
@@ -19,7 +19,7 @@ export const applyL1ToL2Alias = async ({
   const bytecode = await getBytecode(serverConfig, { chainId: l1ChainId, address })
   if (bytecode) {
     return await readContract(serverConfig, {
-      abi: L2DeployerABI,
+      abi: l2DeployerAbi,
       address: L2_MIGRATION_DEPLOYER[l2ChainId],
       chainId: l2ChainId,
       functionName: 'applyL1ToL2Alias',

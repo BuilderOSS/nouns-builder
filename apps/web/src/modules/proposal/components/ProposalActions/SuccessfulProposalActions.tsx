@@ -1,4 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { ProposalState } from '@buildeross/data/contract'
+import { Proposal, getProposal } from '@buildeross/data/subgraph'
 import { BytesType } from '@buildeross/types'
 import {
   isProposalExecutable,
@@ -12,8 +14,6 @@ import { Address } from 'viem'
 import { Countdown } from 'src/components/Countdown'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
-import { Proposal, getProposal } from 'src/data/subgraph/requests/proposalQuery'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 

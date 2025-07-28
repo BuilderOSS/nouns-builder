@@ -26,6 +26,11 @@ export const managerAbi = [
         name: '_governorImpl',
         type: 'address',
       },
+      {
+        internalType: 'address',
+        name: '_builderRewardsRecipient',
+        type: 'address',
+      },
     ],
     stateMutability: 'payable',
     type: 'constructor',
@@ -103,6 +108,11 @@ export const managerAbi = [
   },
   {
     inputs: [],
+    name: 'ONLY_TOKEN_OWNER',
+    type: 'error',
+  },
+  {
+    inputs: [],
     name: 'ONLY_UUPS',
     type: 'error',
   },
@@ -159,6 +169,25 @@ export const managerAbi = [
       },
     ],
     name: 'Initialized',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'sender',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        internalType: 'address',
+        name: 'renderer',
+        type: 'address',
+      },
+    ],
+    name: 'MetadataRendererUpdated',
     type: 'event',
   },
   {
@@ -291,6 +320,19 @@ export const managerAbi = [
   },
   {
     inputs: [],
+    name: 'builderRewardsRecipient',
+    outputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'cancelOwnershipTransfer',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -340,6 +382,16 @@ export const managerAbi = [
             name: 'initStrings',
             type: 'bytes',
           },
+          {
+            internalType: 'address',
+            name: 'metadataRenderer',
+            type: 'address',
+          },
+          {
+            internalType: 'uint256',
+            name: 'reservedUntilTokenId',
+            type: 'uint256',
+          },
         ],
         internalType: 'struct IManager.TokenParams',
         name: '_tokenParams',
@@ -356,6 +408,16 @@ export const managerAbi = [
             internalType: 'uint256',
             name: 'duration',
             type: 'uint256',
+          },
+          {
+            internalType: 'address',
+            name: 'founderRewardRecipent',
+            type: 'address',
+          },
+          {
+            internalType: 'uint16',
+            name: 'founderRewardBps',
+            type: 'uint16',
           },
         ],
         internalType: 'struct IManager.AuctionParams',
@@ -699,6 +761,35 @@ export const managerAbi = [
     ],
     name: 'safeTransferOwnership',
     outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '_token',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: '_newRendererImpl',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: '_setupRenderer',
+        type: 'bytes',
+      },
+    ],
+    name: 'setMetadataRenderer',
+    outputs: [
+      {
+        internalType: 'address',
+        name: 'metadata',
+        type: 'address',
+      },
+    ],
     stateMutability: 'nonpayable',
     type: 'function',
   },

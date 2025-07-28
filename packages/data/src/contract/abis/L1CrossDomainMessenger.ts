@@ -1,4 +1,4 @@
-export const messengerABI = [
+export const messengerAbi = [
   {
     inputs: [
       {

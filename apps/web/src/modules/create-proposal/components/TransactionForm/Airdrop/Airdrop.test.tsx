@@ -17,9 +17,9 @@ vi.mock('src/stores/useChainStore', () => ({
   useChainStore: vi.fn(),
 }))
 
-vi.mock('src/data/subgraph/sdk.generated', async () => {
-  const mod = await vi.importActual<typeof import('src/data/subgraph/sdk.generated')>(
-    'src/data/subgraph/sdk.generated'
+vi.mock('@buildeross/data/subgraph', async () => {
+  const mod = await vi.importActual<typeof import('@buildeross/data/subgraph')>(
+    '@buildeross/data/subgraph'
   )
   return {
     ...mod,
