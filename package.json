@@ -28,7 +28,7 @@
     "prepare": "husky install",
     "release": "pnpm build && changeset publish",
     "syncpack": "syncpack list-mismatches",
-    "syncpack:fix": "syncpack fix-mismatches",
+    "syncpack:fix": "syncpack fix-mismatches && syncpack format",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
     "version-packages": "changeset version"
