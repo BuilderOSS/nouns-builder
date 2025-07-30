@@ -22,43 +22,31 @@ pnpm install @buildeross/sdk
 
 The SDK provides three main entry points for different functionality:
 
-### SubgraphSDK - GraphQL Data Access
-Primary entry point for querying blockchain data via GraphQL subgraphs.
+### Subgraph Functions - GraphQL Data Access
+Direct function imports for querying blockchain data via GraphQL subgraphs using the internal SDK client.
 
 ```typescript
-import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 
-// Query DAO information
-const dao = await SubgraphSDK.daoQuery({
-  chainId: CHAIN_ID.BASE,
-  collectionAddress: '0x...'
-})
-
-// Get proposals with filtering
-const proposals = await SubgraphSDK.proposalsQuery({
-  chainId: CHAIN_ID.BASE,
-  collectionAddress: '0x...',
-  filter: { state: 'ACTIVE' }
-})
+// Get encoded DAO metadata for L1 chains
+const metadata = await encodedDaoMetadataRequest(
+  CHAIN_ID.MAINNET, // Only L1 chains supported
+  '0x...' // tokenAddress
+)
 ```
 
-### EasSDK - Attestation Services
-Entry point for Ethereum Attestation Service operations.
+### EAS Functions - Attestation Services
+Direct function imports for Ethereum Attestation Service operations.
 
 ```typescript
-import { EasSDK } from '@buildeross/sdk/eas'
+import { getEscrowDelegate } from '@buildeross/sdk/eas'
 
 // Get delegation attestations
-const delegate = await EasSDK.getEscrowDelegate({
-  recipient: '0x...',
-  chainId: CHAIN_ID.BASE
-})
-
-// Get proposal dates from attestations
-const dates = await EasSDK.getPropDates({
-  proposalId: '1',
-  chainId: CHAIN_ID.BASE
-})
+const delegate = await getEscrowDelegate(
+  '0x...', // tokenAddress
+  '0x...', // treasuryAddress
+  CHAIN_ID.BASE
+)
 ```
 
 ## Usage
@@ -105,61 +93,26 @@ function AuctionInfo() {
 ### Subgraph Queries
 
 ```typescript
-import { 
-  daoQuery,
-  proposalsQuery,
-  auctionHistory,
-  SubgraphSDK 
-} from '@buildeross/sdk/subgraph'
+import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 
-// Fetch DAO information
-const dao = await daoQuery({
-  chainId: CHAIN_ID.BASE,
-  collectionAddress: '0x...'
-})
-
-// Get proposals with filtering and pagination
-const proposals = await proposalsQuery({
-  chainId: CHAIN_ID.BASE,
-  collectionAddress: '0x...',
-  pagination: {
-    limit: 10,
-    offset: 0
-  },
-  filter: {
-    state: 'ACTIVE'
-  }
-})
-
-// Fetch auction history
-const history = await auctionHistory({
-  chainId: CHAIN_ID.BASE,
-  collectionAddress: '0x...',
-  startTime: Date.now() - 86400000, // Last 24 hours
-  endTime: Date.now()
-})
+// Get encoded DAO metadata (L1 chains only)
+const metadata = await encodedDaoMetadataRequest(
+  CHAIN_ID.MAINNET, // Only L1 chains supported
+  '0x...' // tokenAddress
+)
 ```
 
 ### EAS (Ethereum Attestation Service)
 
 ```typescript
-import { 
-  getEscrowDelegate,
-  getPropDates,
-  EasSDK 
-} from '@buildeross/sdk/eas'
+import { getEscrowDelegate } from '@buildeross/sdk/eas'
 
 // Get escrow delegation attestations
-const delegate = await getEscrowDelegate({
-  recipient: '0x...',
-  chainId: CHAIN_ID.BASE
-})
-
-// Get proposal dates from attestations
-const propDates = await getPropDates({
-  proposalId: '1',
-  chainId: CHAIN_ID.BASE
-})
+const delegate = await getEscrowDelegate(
+  '0x...', // tokenAddress  
+  '0x...', // treasuryAddress
+  CHAIN_ID.BASE
+)
 ```
 
 ### Farcaster Integration
@@ -186,13 +139,13 @@ The SDK supports targeted imports to reduce bundle size:
 ```typescript
 // Import specific modules
 import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
-import { daoQuery, proposalsQuery } from '@buildeross/sdk/subgraph'
+import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 import { getEscrowDelegate } from '@buildeross/sdk/eas'
 
 // Or import everything
 import { 
   auctionAbi, 
-  daoQuery, 
+  encodedDaoMetadataRequest, 
   getEscrowDelegate 
 } from '@buildeross/sdk'
 ```
@@ -383,18 +336,18 @@ The SDK supports all Builder protocol chains:
 The SDK includes comprehensive error handling:
 
 ```typescript
-import { daoQuery } from '@buildeross/sdk/subgraph'
+import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 
 try {
-  const dao = await daoQuery({
-    chainId: CHAIN_ID.BASE,
-    collectionAddress: '0x...'
-  })
+  const metadata = await encodedDaoMetadataRequest(
+    CHAIN_ID.MAINNET,
+    '0x...'
+  )
 } catch (error) {
-  if (error.message.includes('not found')) {
-    // Handle DAO not found
-  } else if (error.message.includes('network')) {
-    // Handle network error
+  if (error.message.includes('Only L1 Chains are supported')) {
+    // Handle unsupported chain
+  } else if (error.message.includes('No metadata found')) {
+    // Handle no metadata
   }
 }
 ```
