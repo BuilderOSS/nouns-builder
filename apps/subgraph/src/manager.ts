@@ -1,3 +1,5 @@
+import { BigInt, DataSourceContext } from '@graphprotocol/graph-ts'
+
 import {
   DAODeployed as DAODeployedEvent,
   MetadataRendererUpdated as MetadataRendererUpdatedEvent,
@@ -13,7 +15,6 @@ import { MetadataRendererBase as MetadataRendererBaseContract } from '../generat
 import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { createMetadataRendererTemplate } from './utils/createMetadataRendererTemplate'
 import { setTokenMetadata } from './utils/setTokenMetadata'
-import { BigInt, DataSourceContext } from '@graphprotocol/graph-ts'
 
 export function handleDAODeployed(event: DAODeployedEvent): void {
   let tokenContract = TokenContract.bind(event.params.token)

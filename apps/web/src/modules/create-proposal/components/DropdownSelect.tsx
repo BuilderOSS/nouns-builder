@@ -1,7 +1,6 @@
 import { Box, Flex } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement, ReactNode, useState } from 'react'
-
 import {
   defaultDropdownSelectOptionStyle,
   defaultFieldsetStyle,

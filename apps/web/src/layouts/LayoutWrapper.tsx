@@ -1,10 +1,9 @@
 import { isBlocked } from '@buildeross/blocklist'
 import { Box, Stack } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-import { useAccount } from 'wagmi'
-
 import { Skull } from 'src/components/Skull'
 import { useLayoutStore } from 'src/stores'
+import { useAccount } from 'wagmi'
 
 import { DefaultLayout } from './DefaultLayout'
 

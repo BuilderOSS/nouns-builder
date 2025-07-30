@@ -1,7 +1,8 @@
-import { atoms } from '../atoms'
-import { vars } from '../theme'
 import { keyframes, style } from '@vanilla-extract/css'
 import { recipe } from '@vanilla-extract/recipes'
+
+import { atoms } from '../atoms'
+import { vars } from '../theme'
 
 export const rotateKeyframes = keyframes({
   from: {

@@ -1,0 +1,15 @@
+# Source files (keep built index.ts for runtime)
+src/
+*.test.*
+*.spec.*
+
+# Config files
+tsconfig.json
+
+# Development
+node_modules/
+.env*
+*.log
+
+# Documentation
+README.md

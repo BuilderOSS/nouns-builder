@@ -1,9 +1,8 @@
+import { AddressType } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'
-
 import CopyButton from 'src/components/CopyButton/CopyButton'
-import { AddressType } from 'src/typings'
 
 export const DaoCopyAddress = ({
   image,

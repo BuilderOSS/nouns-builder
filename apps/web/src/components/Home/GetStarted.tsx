@@ -2,10 +2,9 @@ import { Button } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useAccount, useSwitchChain } from 'wagmi'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { marqueeButton } from 'src/styles/home.css'
+import { useAccount, useSwitchChain } from 'wagmi'
 
 const GetStarted = () => {
   const { address, chain: wagmiChain } = useAccount()

@@ -1,19 +1,5 @@
 {
   "name": "nouns-builder-subgraph",
-  "license": "UNLICENSED",
-  "scripts": {
-    "clean": "rm -rf ./generated ./build subgraph.yaml",
-    "graph:codegen": "graph codegen",
-    "graph:build": "graph build",
-    "build:only": "bash ./scripts/build.sh",
-    "build:subgraph": "pnpm clean && pnpm build:only",
-    "deploy:only": "bash ./scripts/deploy.sh",
-    "deploy:subgraph": "pnpm clean && pnpm deploy:only",
-    "create:local": "graph local http://localhost:8020/ nouns-builder",
-    "local-node": "docker compose up",
-    "remove:local": "graph remove --node http://localhost:8020/ nouns-builder",
-    "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 nouns-builder"
-  },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.87.0",
     "@graphprotocol/graph-ts": "^0.35.1",
@@ -22,5 +8,21 @@
   "devDependencies": {
     "matchstick-as": "0.5.0",
     "mustache": "^4.2.0"
+  },
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build:only": "bash ./scripts/build.sh",
+    "build:subgraph": "pnpm clean && pnpm build:only",
+    "clean": "rm -rf ./generated ./build subgraph.yaml",
+    "create:local": "graph local http://localhost:8020/ nouns-builder",
+    "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 nouns-builder",
+    "deploy:only": "bash ./scripts/deploy.sh",
+    "deploy:subgraph": "pnpm clean && pnpm deploy:only",
+    "graph:build": "graph build",
+    "graph:codegen": "graph codegen",
+    "lint": "eslint src --fix",
+    "local-node": "docker compose up",
+    "remove:local": "graph remove --node http://localhost:8020/ nouns-builder"
   }
 }

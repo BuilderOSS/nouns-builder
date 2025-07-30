@@ -1,9 +1,8 @@
 import { renderHook, waitFor } from '@testing-library/react'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { expect, vi } from 'vitest'
 import { useReadContracts } from 'wagmi'
-
-import { DaoContractAddresses } from 'src/modules/dao'
-import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 
 import { useAvailableUpgrade } from './useAvailableUpgrade'
 
@@ -15,9 +14,9 @@ vi.mock('wagmi', async () => {
   }
 })
 
-vi.mock('src/data/subgraph/sdk.generated', async () => {
-  const mod = await vi.importActual<typeof import('src/data/subgraph/sdk.generated')>(
-    'src/data/subgraph/sdk.generated'
+vi.mock('@buildeross/sdk/subgraph', async () => {
+  const mod = await vi.importActual<typeof import('@buildeross/sdk/subgraph')>(
+    '@buildeross/sdk/subgraph'
   )
   return {
     ...mod,

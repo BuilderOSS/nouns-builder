@@ -1,6 +1,5 @@
 import { atoms } from '@buildeross/zord'
 import { keyframes, style, styleVariants } from '@vanilla-extract/css'
-
 import { defaultFormButtonWithPrev } from 'src/components/Fields/styles.css'
 
 export const infoSectionStyle = style({

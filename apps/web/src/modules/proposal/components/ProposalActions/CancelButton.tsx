@@ -1,11 +1,10 @@
 import { Box } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { Address } from 'viem'
-
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { useLayoutStore } from 'src/stores'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
+import { Address } from 'viem'
 
 import { GovernorContractButton } from '../GovernorContractButton'
 

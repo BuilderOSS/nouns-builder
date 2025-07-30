@@ -1,9 +1,8 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { describe, expect } from 'vitest'
-
 import { useChainStore } from 'src/stores/useChainStore'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { render } from 'src/test/utils'
+import { describe, expect } from 'vitest'
 
 import AirdropForm from './AirdropForm'
 

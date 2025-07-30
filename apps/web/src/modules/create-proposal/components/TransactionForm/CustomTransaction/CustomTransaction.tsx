@@ -1,8 +1,7 @@
+import { AddressType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
-
-import { AddressType } from 'src/typings'
 
 import { TransactionType } from '../../../constants'
 import { useCustomTransactionStore, useProposalStore } from '../../../stores'

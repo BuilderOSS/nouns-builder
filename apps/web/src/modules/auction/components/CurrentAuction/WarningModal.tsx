@@ -1,6 +1,5 @@
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Heading, Spinner, Stack, Text } from '@buildeross/zord'
-
-import { formatCryptoVal } from 'src/utils/numbers'
 
 export interface WarningModalProps {
   daoName: string

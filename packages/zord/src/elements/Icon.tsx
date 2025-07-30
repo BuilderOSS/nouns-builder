@@ -1,7 +1,8 @@
+import React, { useMemo } from 'react'
+
 import { Flex, FlexProps } from '../elements/Flex'
 import * as iconComponents from '../icons'
 import { icon, iconVariants } from './Icon.css'
-import React, { useMemo } from 'react'
 
 export type IconType = keyof typeof iconComponents
 

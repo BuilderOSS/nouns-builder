@@ -1,10 +1,9 @@
+import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-
-import { useIsMounted } from 'src/hooks/useIsMounted'
 
 import { statusStyle, titleStyle } from './ProposalCard.css'
 import { ProposalForStatus, ProposalStatus } from './ProposalStatus'

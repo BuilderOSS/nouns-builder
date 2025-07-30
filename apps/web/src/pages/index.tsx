@@ -1,7 +1,6 @@
+import { AuctionFragment } from '@buildeross/sdk/subgraph'
 import { Stack } from '@buildeross/zord'
 import React from 'react'
-import { useAccount } from 'wagmi'
-
 import Everything from 'src/components/Home/Everything'
 import FAQ from 'src/components/Home/FAQ'
 import GetStarted from 'src/components/Home/GetStarted'
@@ -9,12 +8,12 @@ import Marquee from 'src/components/Home/Marquee'
 import Twitter from 'src/components/Home/Twitter'
 import VisitAlternate from 'src/components/Home/VisitAlternate'
 import { Meta } from 'src/components/Meta'
-import { AuctionFragment } from 'src/data/subgraph/sdk.generated'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'
 import { HomeLayout } from 'src/layouts/HomeLayout'
 import { LayoutWrapper } from 'src/layouts/LayoutWrapper'
 import { DaoFeed } from 'src/modules/dao'
 import Dashboard from 'src/modules/dashboard/Dashboard'
+import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 

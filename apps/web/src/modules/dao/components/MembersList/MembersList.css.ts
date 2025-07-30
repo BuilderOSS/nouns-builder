@@ -1,5 +1,4 @@
 import { style } from '@vanilla-extract/css'
-
 import { skeletonAnimation } from 'src/styles/animations.css'
 
 export const row = style({

@@ -1,13 +1,14 @@
-import { Atoms, atoms } from '../atoms'
-import { Box, BoxDefaultElement, BoxProps } from './Box'
-import { flexChildren } from './Flex.css'
 import clsx from 'clsx'
 import React, { forwardRef } from 'react'
 import type {
   PolymorphicForwardRefExoticComponent,
-  PolymorphicPropsWithRef,
   PolymorphicPropsWithoutRef,
+  PolymorphicPropsWithRef,
 } from 'react-polymorphic-types'
+
+import { Atoms, atoms } from '../atoms'
+import { Box, BoxDefaultElement, BoxProps } from './Box'
+import { flexChildren } from './Flex.css'
 
 export interface FlexProps extends BoxProps {
   alignSelf?: Atoms['alignSelf']

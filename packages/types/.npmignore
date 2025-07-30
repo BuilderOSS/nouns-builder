@@ -1,0 +1,16 @@
+# Source files
+src/
+*.test.*
+*.spec.*
+
+# Config files
+tsconfig.json
+tsup.config.ts
+
+# Development
+node_modules/
+.env*
+*.log
+
+# Documentation
+README.md

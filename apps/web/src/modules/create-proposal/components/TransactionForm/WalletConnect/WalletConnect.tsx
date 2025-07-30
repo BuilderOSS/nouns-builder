@@ -1,25 +1,24 @@
+import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
+import { CHAIN_ID } from '@buildeross/types'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
-import { Form, Formik } from 'formik'
 import type { FormikHelpers, FormikProps } from 'formik'
+import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-
 import SmartInput from 'src/components/Fields/SmartInput'
 import { TEXT } from 'src/components/Fields/types'
 import { Icon } from 'src/components/Icon'
-import { useDecodedTransactionSingle } from 'src/hooks/useDecodedTransactions'
 import {
   TransactionType,
+  useProposalStore,
+  useWalletConnect,
   WCClientData,
   WCParams,
   WCPayload,
-  useProposalStore,
-  useWalletConnect,
 } from 'src/modules/create-proposal'
-import { useDaoStore } from 'src/modules/dao'
 import { DecodedTransactionDisplay } from 'src/modules/proposal/components/ProposalDescription/DecodedTransactions/DecodedTransactions'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
-import { walletSnippet } from 'src/utils/helpers'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import * as styles from './WalletConnect.css'
 import walletConnectSchema, { WalletConnectValues } from './WalletConnect.schema'
@@ -223,11 +222,12 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
 }
 
 const useDecodedTxPayload = (txPayload: WCPayload | null) => {
+  const chain = useChainStore((state) => state.chain)
   const target = txPayload?.params[0].to ?? ''
   const calldata = txPayload?.params[0].data ?? '0x'
   const value = txPayload?.params[0].value ?? '0'
 
-  return useDecodedTransactionSingle(target, calldata, value)
+  return useDecodedTransactionSingle(chain.id, target, calldata, value)
 }
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {

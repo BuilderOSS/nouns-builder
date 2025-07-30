@@ -1,39 +1,35 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useVotes } from '@buildeross/hooks'
+import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
+import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useDelegate } from '@buildeross/hooks/useDelegate'
+import { usePagination } from '@buildeross/hooks/usePagination'
+import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
-import useSWR from 'swr'
-import { useAccount } from 'wagmi'
-
 import { ContractButton } from 'src/components/ContractButton'
 import { Countdown } from 'src/components/Countdown'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import Pagination from 'src/components/Pagination'
-import SWR_KEYS from 'src/constants/swrKeys'
-import {
-  ProposalsResponse,
-  getProposals,
-} from 'src/data/subgraph/requests/proposalsQuery'
-import { useVotes } from 'src/hooks'
-import { useDaoMembership } from 'src/hooks/useDaoMembership'
-import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
-import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import { sectionWrapperStyle } from 'src/styles/dao.css'
 import {
   createProposalBtn,
   delegateBtn,
   selectDelegateBtn,
 } from 'src/styles/Proposals.css'
-import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { AddressType, CHAIN_ID } from 'src/typings'
-import { walletSnippet } from 'src/utils/helpers'
+import useSWR from 'swr'
+import { useAccount } from 'wagmi'
 
-import { useDelegate } from '../../hooks'
-import { useDaoStore } from '../../stores'
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
 import { MobileMenu } from './MobileMenu'

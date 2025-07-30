@@ -1,4 +1,10 @@
-import { Box, Flex, Paragraph, atoms } from '@buildeross/zord'
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'
 import React, { ReactNode, useMemo } from 'react'
@@ -6,20 +12,13 @@ import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
-import useSWR from 'swr'
-
-import SWR_KEYS from 'src/constants/swrKeys'
-import { SDK } from 'src/data/subgraph/client'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
-import { useDecodedTransactions } from 'src/hooks/useDecodedTransactions'
-import { useEnsData } from 'src/hooks/useEnsData'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useChainStore } from 'src/stores/useChainStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
+import useSWR from 'swr'
 
 import { DecodedTransactions } from './DecodedTransactions'
 import { MilestoneDetails } from './MilestoneDetails'
@@ -48,7 +47,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   const { displayName } = useEnsData(proposer)
   const chain = useChainStore((x) => x.chain)
 
-  const decodedTransactions = useDecodedTransactions(proposal)
+  const decodedTransactions = useDecodedTransactions(chain.id, proposal)
 
   const decodedEscrowTxn = useMemo(
     () =>
@@ -65,7 +64,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
       ? [SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposer]
       : null,
     async ([_key, chainId, collection, proposer]) => {
-      const data = await SDK.connect(chainId).tokens({
+      const data = await SubgraphSDK.connect(chainId).tokens({
         where: { owner: proposer.toLowerCase(), tokenContract: collection.toLowerCase() },
         first: 1,
         orderBy: Token_OrderBy.MintedAt,

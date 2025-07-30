@@ -1,9 +1,8 @@
-import { Box, Flex, Text, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { Icon, icons } from 'src/components/Icon'
 
 import { DashboardDaoProps } from './Dashboard'

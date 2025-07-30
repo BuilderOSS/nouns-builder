@@ -1,10 +1,9 @@
+import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { Flex } from '@buildeross/zord'
-
 import {
   artworkPreviewGenerateButton,
   artworkPreviewImageWrapper,
 } from 'src/components/Fields/styles.css'
-import { ImageProps } from 'src/hooks/useArtworkUpload'
 import { Playground } from 'src/modules/create-dao'
 
 import { Icon } from '../Icon'

@@ -1,14 +1,13 @@
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { AddressType } from '@buildeross/types'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { Avatar } from 'src/components/Avatar'
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { PUBLIC_ALL_CHAINS } from 'src/constants/defaultChains'
-import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
-import { AddressType } from 'src/typings'
 
 import { DaoProposalCard } from './DaoProposalCard'
 import { DashboardDaoProps } from './Dashboard'

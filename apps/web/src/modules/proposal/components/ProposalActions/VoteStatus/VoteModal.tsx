@@ -1,21 +1,17 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { governorAbi } from '@buildeross/sdk/contract'
+import { getProposal } from '@buildeross/sdk/subgraph'
+import { BytesType } from '@buildeross/types'
 import { Atoms, Box, Button, Flex, Stack, Text, theme } from '@buildeross/zord'
-import { Field, Formik, Form as FormikForm } from 'formik'
+import { Field, Form as FormikForm, Formik } from 'formik'
 import React, { Fragment } from 'react'
-import { useSWRConfig } from 'swr'
-import { Hex } from 'viem'
-import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
 import { ContractButton } from 'src/components/ContractButton'
 import { Icon } from 'src/components/Icon'
 import { IconType } from 'src/components/Icon/icons'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { governorAbi } from 'src/data/contract/abis'
-import { getProposal } from 'src/data/subgraph/requests/proposalQuery'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import {
   proposalFormTitle,
   voteModalFieldset,
@@ -24,7 +20,10 @@ import {
   voteModalRadioInput,
   voteModalReason,
 } from 'src/styles/Proposals.css'
-import { BytesType } from 'src/typings'
+import { useSWRConfig } from 'swr'
+import { Hex } from 'viem'
+import { useConfig } from 'wagmi'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 enum Choice {
   AGAINST = '0',

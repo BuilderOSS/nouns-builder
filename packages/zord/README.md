@@ -1,22 +1,41 @@
-# Zord Documentation
+# @buildeross/zord
 
-## Getting Started
+Modern design system and component library for BuilderOSS applications, built with Vanilla Extract for type-safe styling, atomic design principles, and comprehensive theming support.
 
-Adding to your project boils down to:
+## Installation
 
-1. Add Zord stylesheet from `@buildeross/zord/index.css`
-2. Set up webfonts
-3. Add Zord ThemeProvider and theme
+```bash
+pnpm install @buildeross/zord
+```
 
-### Usage with Next.js
+> **Note**: This package was previously part of @zoralabs/zord@2.2.0. As of @buildeross/zord@0.1.0, it has been restructured and renamed under the @buildeross scope.
+
+## Features
+
+- **Type-Safe Styling**: Built with Vanilla Extract for compile-time CSS generation
+- **Atomic Design**: Pre-defined utility classes (atoms) for consistent styling
+- **Theming System**: Comprehensive theme contracts with light/dark mode support
+- **Polymorphic Components**: Flexible components that can render as different HTML elements
+- **Responsive Design**: Built-in responsive utilities with mobile-first approach
+- **Accessibility**: Components built with accessibility best practices
+- **Tree Shaking**: Only import the components and styles you need
+- **Design Tokens**: Consistent spacing, typography, colors, and more
+
+## Quick Start
+
+### 1. Add Styles and Fonts
 
 ```tsx
-// pages/_app.tsx
+// pages/_app.tsx or app/layout.tsx
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/600.css'
-import { ThemeProvider, lightTheme } from '@buildeross/zord'
 import '@buildeross/zord/index.css'
-import type { AppProps } from 'next/app'
+```
+
+### 2. Wrap Your App with ThemeProvider
+
+```tsx
+import { ThemeProvider, lightTheme } from '@buildeross/zord'
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -27,573 +46,678 @@ export default function MyApp({ Component, pageProps }: AppProps) {
 }
 ```
 
-## Themes
+### 3. Start Using Components
 
-Theming with Zord is done by defining an object known as a "_Theme Contract_", a common interface of consistent design tokens defined in a central theme file and then used throughout a site's components.
+```tsx
+import { Box, Text, Button, Stack, Flex } from '@buildeross/zord'
 
-```ts
+function MyComponent() {
+  return (
+    <Box p="x6" backgroundColor="background1" borderRadius="normal">
+      <Stack gap="x4">
+        <Text size="lg" weight="heading">Welcome to Zord</Text>
+        <Text color="text2">A modern design system</Text>
+        <Button variant="primary">Get Started</Button>
+      </Stack>
+    </Box>
+  )
+}
+```
+
+## Core Components
+
+### Box - The Foundation
+
+Box is the foundational component that all other components are built on. It's polymorphic and accepts all atomic styling props.
+
+```tsx
+import { Box } from '@buildeross/zord'
+
+// Basic usage
+<Box p="x4" backgroundColor="background1" borderRadius="normal">
+  Content goes here
+</Box>
+
+// Polymorphic - render as different elements
+<Box as="section" p="x8">Section content</Box>
+<Box as="article" mb="x6">Article content</Box>
+
+// With responsive styles
+<Box 
+  p={{ '@initial': 'x4', '@768': 'x8' }}
+  width={{ '@initial': '100%', '@1024': '50%' }}
+>
+  Responsive content
+</Box>
+```
+
+### Layout Components
+
+#### Stack - Vertical Layout
+
+```tsx
+import { Stack } from '@buildeross/zord'
+
+<Stack gap="x4" align="center">
+  <Text>Item 1</Text>
+  <Text>Item 2</Text>
+  <Text>Item 3</Text>
+</Stack>
+```
+
+#### Flex - Flexible Layout
+
+```tsx
+import { Flex } from '@buildeross/zord'
+
+<Flex justify="space-between" align="center" gap="x3">
+  <Text>Left content</Text>
+  <Button>Right action</Button>
+</Flex>
+```
+
+#### Grid - Grid Layout
+
+```tsx
+import { Grid } from '@buildeross/zord'
+
+<Grid columns={{ '@initial': 1, '@768': 2, '@1024': 3 }} gap="x6">
+  <Box>Grid item 1</Box>
+  <Box>Grid item 2</Box>
+  <Box>Grid item 3</Box>
+</Grid>
+```
+
+### Typography Components
+
+#### Text - General Text
+
+```tsx
+import { Text } from '@buildeross/zord'
+
+<Text size="lg" weight="heading" color="text1">
+  Main heading
+</Text>
+
+<Text size="md" color="text2" lineHeight="1.5">
+  Body text content
+</Text>
+```
+
+#### Specialized Text Components
+
+```tsx
+import { Heading, Paragraph, Label, Eyebrow } from '@buildeross/zord'
+
+<Heading size="xl">Page Title</Heading>
+<Eyebrow>Category</Eyebrow>
+<Paragraph size="md">Body content goes here</Paragraph>
+<Label size="sm">Form label</Label>
+```
+
+### Interactive Components
+
+#### Button
+
+```tsx
+import { Button } from '@buildeross/zord'
+
+<Button variant="primary" size="md">
+  Primary Action
+</Button>
+
+<Button variant="secondary" size="sm" disabled>
+  Secondary Action
+</Button>
+
+<Button variant="ghost" size="lg">
+  Ghost Button
+</Button>
+```
+
+#### Input Components
+
+```tsx
+import { Input, InputField, Select } from '@buildeross/zord'
+
+<Input 
+  placeholder="Enter text"
+  variant="default"
+  size="md"
+/>
+
+<InputField
+  label="Email Address"
+  placeholder="you@example.com"
+  type="email"
+  required
+/>
+
+<Select
+  options={[
+    { value: 'option1', label: 'Option 1' },
+    { value: 'option2', label: 'Option 2' }
+  ]}
+  placeholder="Select an option"
+/>
+```
+
+### Utility Components
+
+#### Icon
+
+```tsx
+import { Icon, ChevronDown, Spinner } from '@buildeross/zord'
+
+<Icon size="md" color="text1">
+  <ChevronDown />
+</Icon>
+
+<Spinner size="lg" />
+```
+
+#### PopUp (Tooltip/Dropdown)
+
+```tsx
+import { PopUp } from '@buildeross/zord'
+
+<PopUp
+  trigger={<Button>Hover me</Button>}
+  content="This is a tooltip"
+  placement="top"
+/>
+```
+
+## Theming System
+
+### Theme Contract
+
+Zord uses a theme contract system that ensures consistency across all themes:
+
+```tsx
 export const theme = createThemeContract({
-  fonts: {
-    heading: '',
-    body: '',
-    mono: '',
-  },
-  fontSizing: {
-    fontSize: {
-      0: '',
-      12: '',
-      14: '',
-      16: '',
-      18: '',
-      20: '',
-      28: '',
-      30: '',
-      35: '',
-      40: '',
-      48: '',
-      50: '',
-      65: '',
-      80: '',
-      unset: '',
-    },
-    lineHeight: {
-      0: '',
-      14: '',
-      20: '',
-      24: '',
-      25: '',
-      30: '',
-      34: '',
-      40: '',
-      50: '',
-      55: '',
-      65: '',
-      70: '',
-      85: '',
-      95: '',
-      unset: '',
-    },
-    fontWeight: {
-      display: '',
-      heading: '',
-      label: '',
-      paragraph: '',
-    },
-  },
-  radii: {
-    tiny: '',
-    small: '',
-    normal: '',
-    curved: '',
-    phat: '',
-    round: '',
-  },
-  size: {
-    x0: '',
-    x1: '',
-    x2: '',
-    x3: '',
-    x4: '',
-    x5: '',
-    x6: '',
-    x7: '',
-    x8: '',
-    x9: '',
-    x10: '',
-    x11: '',
-    x12: '',
-    x13: '',
-    x14: '',
-    x15: '',
-    x16: '',
-    x17: '',
-    x18: '',
-    x19: '',
-    x20: '',
-    x21: '',
-    x22: '',
-    x23: '',
-    x24: '',
-    x25: '',
-    x26: '',
-    x27: '',
-    x28: '',
-    x29: '',
-    x30: '',
-    x32: '',
-    x64: '',
-    auto: '',
-    '100vw': '',
-    '100vh': '',
-    '100%': '',
-    unset: '',
+  colors: {
+    background1: '',
+    background2: '',
+    text1: '',
+    text2: '',
+    primary: '',
+    secondary: '',
+    // ... more colors
   },
   space: {
     x0: '',
     x1: '',
     x2: '',
-    x3: '',
-    x4: '',
-    x5: '',
-    x6: '',
-    x7: '',
-    x8: '',
-    x9: '',
-    x10: '',
-    x11: '',
-    x12: '',
-    x13: '',
-    x14: '',
-    x15: '',
-    x16: '',
-    x17: '',
-    x18: '',
-    x19: '',
-    x20: '',
-    x21: '',
-    x22: '',
-    x23: '',
-    x24: '',
-    x25: '',
-    x26: '',
-    x27: '',
-    x28: '',
-    x29: '',
-    x30: '',
-    x32: '',
-    x64: '',
-    auto: '',
+    // ... spacing scale
   },
-  ease: {
-    in: '',
-    out: '',
-    inOut: '',
-  },
-  border: {
-    width: {
-      none: '',
-      thin: '',
-      normal: '',
-      thick: '',
-    },
-    style: {
-      solid: '',
-      dashed: '',
-      dotted: '',
-    },
-  },
-  colors: {
-    backdrop: '',
-    border: '',
-    borderOnImage: '',
-    background1: '',
-    background2: '',
-    text1: '',
-    text2: '',
-    text3: '',
-    text4: '',
-    icon1: '',
-    icon2: '',
-    primary: '',
-    secondary: '',
-    tertiary: '',
-    quaternary: '',
-    transparent: '',
-    accent: '',
-    accentHover: '',
-    accentActive: '',
-    accentDisabled: '',
-    onAccent: '',
-    onAccentDisabled: '',
-    positive: '',
-    positiveHover: '',
-    positiveActive: '',
-    positiveDisabled: '',
-    onPositive: '',
-    onPositiveDisabled: '',
-    warning: '',
-    warningHover: '',
-    warningActive: '',
-    warningDisabled: '',
-    onWarning: '',
-    onWarningDisabled: '',
-    negative: '',
-    negativeHover: '',
-    negativeActive: '',
-    negativeDisabled: '',
-    onNegative: '',
-    onNegativeDisabled: '',
-    ghost: '',
-    ghostHover: '',
-    ghostActive: '',
-    ghostDisabled: '',
-    onGhost: '',
-    onGhostDisabled: '',
-    neutral: '',
-    neutralHover: '',
-    neutralActive: '',
-    neutralDisabled: '',
-    onNeutral: '',
-    onNeutralDisabled: '',
-  },
-  shadows: {
-    small: '',
-    medium: '',
-  },
-})
-```
-
-Multiple implementations of a ThemeContract can exist on a single site, and the themes can be swapped in + out to enable, for example, dark and light theme variations, or themes designed to assist users who are visually impaired.
-
-Each theme maps 1-1 with the ThemeContract:
-
-```ts
-import { border, colorTheme, ease, radii, size, space, typography } from './tokens'
-
-export const lightTheme = createTheme(theme, {
   fonts: {
-    heading: typography.fonts.body,
-    body: typography.fonts.body,
-    mono: typography.fonts.mono,
+    body: '',
+    heading: '',
+    mono: '',
   },
-  fontSizing: {
-    fontSize: typography.fontSize,
-    lineHeight: typography.lineHeight,
-    fontWeight: typography.fontWeight,
-  },
-  colors,
-  shadows,
-  radii,
-  size,
-  space,
-  ease,
-  border,
+  // ... more design tokens
 })
 ```
 
-Themes are most commonly used to define theme colors, but can also be used to specify typefaces, spacing conventions, borders, animation standards, and more.
+### Using Themes
 
-Zora's standard theme defines colors, typography, borders + radii, shadows, container sizing, animation easing, and spacing increments:
+```tsx
+import { ThemeProvider, lightTheme, darkTheme } from '@buildeross/zord'
 
-```ts
-export const [baseTheme, vars] = createTheme({
-  color: theme.colors,
-  fonts: theme.fonts,
-  fontSize: theme.fontSizing.fontSize,
-  lineHeight: theme.fontSizing.lineHeight,
-  fontWeight: theme.fontSizing.fontWeight,
-  radii: theme.radii,
-  shadows: theme.shadows,
-  size: theme.size,
-  space: theme.space,
-  ease: theme.ease,
-  border: theme.border,
+// Light theme
+<ThemeProvider theme={lightTheme}>
+  <App />
+</ThemeProvider>
+
+// Dark theme
+<ThemeProvider theme={darkTheme}>
+  <App />
+</ThemeProvider>
+
+// Custom theme
+const customTheme = createTheme(theme, {
+  colors: {
+    primary: '#ff6b6b',
+    secondary: '#4ecdc4',
+    // ... custom colors
+  }
 })
+
+<ThemeProvider theme={customTheme}>
+  <App />
+</ThemeProvider>
 ```
 
-TODO: How can we easily let people customize themes?
+### Theme Switching
 
-- colors
-- spacing
-- breakpoints
+```tsx
+import { useState } from 'react'
+import { ThemeProvider, lightTheme, darkTheme } from '@buildeross/zord'
 
-## Styling with Zord
+function App() {
+  const [isDark, setIsDark] = useState(false)
+  const theme = isDark ? darkTheme : lightTheme
 
-Zord uses a heavily-adapted styling implementation based on the Vanilla Extract styling framework. At Zora, we've found that this system allows us to develop front-end code rapidly using design primitives that can be customized using a large set of pre-defined CSS properties that adhere to Zora's theme specifications. At its core, Zord makes extensive use of Vanilla Extract's [Sprinkles](https://vanilla-extract.style/documentation/packages/sprinkles/) package to statically generate CSS classes that can be re-used without continually adding to an app's CSS footprint. The Zord implementation renames Sprinkles as Atoms.
-
-## Basic styles
-
-```
-// Container.css.ts
-import { atoms } from '../atoms'
-import { style } from '@vanilla-extract/css'
-
-export const container = style({
-  width: '100%',
-  height: '200px',
-  backgroundColor: '#DEDEDE'
-})
+  return (
+    <ThemeProvider theme={theme}>
+      <Button onClick={() => setIsDark(!isDark)}>
+        Switch to {isDark ? 'Light' : 'Dark'} Theme
+      </Button>
+      {/* Rest of your app */}
+    </ThemeProvider>
+  )
+}
 ```
 
-The most familiar way of styling a component is using the style() function in an external CSS file. `style` writes to a .css file on build, and `container` is exported as a className that can be applied elements in markup: `<div className={styles.container}>`
+## Atomic Styling (Atoms)
 
-## Atoms
+Zord's atomic system allows you to apply styles directly as props or use the atoms function for custom styling.
 
-At the heart of Zord are a broad set of atoms, a selection of the most commonly-used CSS properties. Atoms enable a developer to take advantage of the filesize efficiencies gained by pre-defined classes while applying styles to components in a number of ways:
+### Using Atoms as Props
 
-- in a separate stylesheet
-- as props
-- directly into a className attribute using the atoms() function (handy for applying styles to non-Zord components!)
-
-**_Separate Stylesheets:_**
-
-```
-// Box.css.ts
-import { atoms } from '../atoms'
-import { style } from '@vanilla-extract/css'
-
-export const box = atoms({
-  width: '100%',
-  height: 'x10'
-})
-```
-
-```
-// Box.tsx
-import * as styles from 'Box.css.ts'
-<Box className={styles.box} />
-```
-
-You can also add atomic styles to style declarations alongside styles that aren't included in the atomic presets:
-
-```
-// Box.css.ts
-export const box = style([
-  {
-    boxSizing: 'border-box',
-    backgroundImage: url("zora-is-nice.gif")
-  },
-  atoms({
-   width: '100%',
-   height: 'x10'
-  }),
-])
-```
-
-So in the above example, the styles defined within `atoms()` will apply the pre-generated static styles, and not add to the size of the stylesheet.
-
-**_Atoms as props:_**
-
-```
-// Box.tsx
+```tsx
 <Box
-  width='100%'
-  height='x10'
+  p="x6"                    // padding
+  m="x4"                    // margin
+  backgroundColor="primary" // background color
+  borderRadius="normal"     // border radius
+  width="100%"             // width
+  height="x20"             // height
 />
 ```
 
-**_In className attributes (handy for adding atomic styles to non-Zord-based components):_**
+### Responsive Atoms
 
+```tsx
+<Box
+  p={{
+    '@initial': 'x4',  // mobile
+    '@768': 'x6',      // tablet
+    '@1024': 'x8'      // desktop
+  }}
+  width={{
+    '@initial': '100%',
+    '@1024': '50%'
+  }}
+/>
 ```
-// GenericContainer.tsx
-<div className={atoms({
-  width: '100%',
-  height: 'x10'
-})} />
+
+### Using Atoms in Stylesheets
+
+```tsx
+// Component.css.ts
+import { atoms, style } from '@buildeross/zord'
+
+export const customBox = style([
+  {
+    // Custom CSS properties
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+  },
+  atoms({
+    // Atomic properties
+    p: 'x6',
+    backgroundColor: 'background1',
+    borderRadius: 'normal'
+  })
+])
+
+// Component.tsx
+<Box className={customBox}>Content</Box>
 ```
 
-## Spacing
+## Spacing System
 
-You'll notice that the Box component above specifies height as `height='x10'`.
+Zord uses a consistent 4px-based spacing system:
 
-Zora implements a spacing system based on 4px increments:
+```tsx
+// Spacing tokens
+x0: 0px
+x1: 4px
+x2: 8px
+x3: 12px
+x4: 16px
+x5: 20px
+x6: 24px
+// ... continues up to x64
 
+// Usage in components
+<Box p="x4" m="x2">       // 16px padding, 8px margin
+<Stack gap="x6">          // 24px gap between items
+<Flex px="x8" py="x4">    // 32px horizontal, 16px vertical padding
 ```
-export const space = {
-  n2: '-8px',
-  n1: '-4px',
-  x0: '0px',
-  x1: '4px',
-  x2: '8px',
-  x3: '12px',
-  x4: '16px',
-  x5: '20px'
-  ... (+ many more)
+
+## Responsive Design
+
+Zord uses a mobile-first responsive approach with these breakpoints:
+
+```tsx
+const breakpoints = {
+  '@initial': 0,      // mobile first
+  '@480': '480px',    // small mobile
+  '@576': '576px',    // large mobile
+  '@768': '768px',    // tablet
+  '@1024': '1024px',  // desktop
+  '@1440': '1440px'   // large desktop
 }
 ```
 
-These spacing increments can be applied to the following atomic properties:
+### Responsive Usage
 
-```
-padding (p, paddingTop, paddingBottom, paddingLeft, paddingRight, pt, pb, pl, pr, px, py)
-margin (m, marginTop, marginBottom, marginLeft, marginRight, mt, mb, ml, mr, m, mx, my)
-gap
-top
-left
-bottom
-right
-inset
-```
+```tsx
+// In components
+<Box
+  width={{ '@initial': '100%', '@768': '50%', '@1024': '33.333%' }}
+  p={{ '@initial': 'x4', '@768': 'x6', '@1024': 'x8' }}
+>
+  Responsive content
+</Box>
 
-## Shorthands
-
-Zord has a small set of shorthand convenience properties that may look familiar if you've used other popular styling systems. They can be especially useful for defining multiple properties at once, eg. `py='x4'` sets both paddingTop and paddingBottom to 16px.
-
-```
-  shorthands: {
-    minW: ['minWidth'],
-    minH: ['minHeight'],
-    maxW: ['maxWidth'],
-    maxH: ['maxWidth'],
-    margin: ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'],
-    m: ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'],
-    mx: ['marginLeft', 'marginRight'],
-    my: ['marginTop', 'marginBottom'],
-    mt: ['marginTop'],
-    mb: ['marginBottom'],
-    ml: ['marginLeft'],
-    mr: ['marginRight'],
-    pos: ['position'],
-    padding: ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'],
-    p: ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'],
-    px: ['paddingLeft', 'paddingRight'],
-    py: ['paddingTop', 'paddingBottom'],
-    pt: ['paddingTop'],
-    pb: ['paddingBottom'],
-    pl: ['paddingLeft'],
-    pr: ['paddingRight'],
-    w: ['width'],
-    h: ['height'],
-    t: ['top'],
-    l: ['left'],
-    b: ['bottom'],
-    r: ['right'],
-    size: ['width', 'height'],
-  },
-```
-
-## Responsive Styling
-
-Media queries are defined using the following breakpoints:
-
-```
-const conditions = {
-  '@initial': {},
-  '@480': { '@media': '(min-width: 480px)' },
-  '@576': { '@media': '(min-width: 576px)' },
-  '@768': { '@media': '(min-width: 768px)' },
-  '@1024': { '@media': '(min-width: 1024px)' },
-  '@1440': { '@media': '(min-width: 1440px)' },
-} as const
-```
-
-There are a few ways of applying responsive styles:
-
-**_In Props_**
-
-```
-// Stack.tsx
- <Stack
-   px="x4"
-   py={{
-     '@initial': 'x4',
-     '@1024': 'x12',
-   }}
-   align="center"
- >
-```
-
-**_In Stylesheets_**
-
-```
-// ComponentName.css.ts
-import { atoms, media } from '@buildeross/zord'
-
-export const marginTop = atoms({
-  mt: { '@initial': 'x32', '@768': 'x64' },
+// In stylesheets
+export const responsiveStyle = atoms({
+  display: { '@initial': 'block', '@768': 'flex' },
+  flexDirection: { '@768': 'row', '@1024': 'column' }
 })
-
-export const paddingX = atoms({
-  px: { '@initial': 'x5', '@768': 'x8' },
-})
-
-export const filterGridHeader = style([
-  {
-    background: 'rgba(255, 255, 255, 0.92)',
-    backdropFilter: 'blur(10px)',
-    '@media': {
-      [media.min1024]: {
-        zIndex: HEADER_LAYER,
-      },
-    },
-  },
-  atoms({
-    position: { '@initial': 'relative', '@768': 'sticky' },
-    top: 'x16',
-  }),
-])
-
 ```
 
-Note the different methods used to apply media queries inside the normal `style({})` block vs. inside of the `atoms({})` block.
+## Advanced Styling
 
-## Selectors
+### Mixins
 
-[Vanilla Extract' Styling API](https://github.com/seek-oss/vanilla-extract#styling-api) requires that special selectors like ':hover' and '&[data-state="checked"]&:hover&:not([disabled])' must be nested inside of a `selectors:{}` object, and there are rules about targeting with which you should familiarize yourself.
+Zord includes helpful mixins for common patterns:
 
-```ts
-export const link = style([
-  {
-    outline: 'none',
-    textDecoration: 'none',
-    selectors: {
-      // <-- Nested selectors object
-      '&:focus, &:hover': {
-        '@media': {
-          [media.min768]: {
-            backgroundColor: vars.color.background2,
-          },
-        },
-      },
-    },
-  },
-  atoms({
-    color: 'primary',
-  }),
+```tsx
+import { mixins } from '@buildeross/zord'
+
+// Center content
+<Box className={mixins({ center: true })}>
+  Centered content
+</Box>
+
+// In stylesheets
+export const centeredBox = style([
+  mixins({ center: true }),
+  atoms({ p: 'x6' })
 ])
 ```
 
-## Box Component
+### Selectors and Pseudo-Classes
 
-The functionality above is all encapsulated into the Box component, a polymorphic component that defaults to a `<div>` element but can take on the form of other elements by specifying an `as`. This allows us to build any kind of component with Box and inherit all of the useful styling behavior for free.
+```tsx
+// Component.css.ts
+import { style } from '@buildeross/zord'
 
-Let's have a look at an example.
-
+export const interactiveBox = style({
+  transition: 'all 0.2s ease',
+  selectors: {
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 8px 12px rgba(0, 0, 0, 0.15)'
+    },
+    '&:focus': {
+      outline: '2px solid blue',
+      outlineOffset: '2px'
+    }
+  }
+})
 ```
-// UserCard.tsx
 
-export interface UserCardProps extends BoxProps {
-  user: User
-  as?: React.ElementType
+### Custom CSS Properties
+
+```tsx
+// For styles not covered by atoms
+const customStyle = style({
+  background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
+  backdropFilter: 'blur(10px)',
+  clipPath: 'polygon(0 0, 100% 0, 95% 100%, 0% 100%)'
+})
+
+<Box className={customStyle}>
+  Custom styled content
+</Box>
+```
+
+## Color System
+
+Zord provides a comprehensive color system with semantic naming:
+
+```tsx
+// Background colors
+backgroundColor="background1"  // Primary background
+backgroundColor="background2"  // Secondary background
+
+// Text colors
+color="text1"     // Primary text
+color="text2"     // Secondary text
+color="text3"     // Tertiary text
+
+// Semantic colors
+color="primary"   // Brand primary
+color="secondary" // Brand secondary
+color="accent"    // Accent color
+color="positive"  // Success/positive
+color="negative"  // Error/negative
+color="warning"   // Warning/caution
+
+// Interactive states
+backgroundColor="primaryHover"    // Hover states
+backgroundColor="primaryActive"   // Active states
+backgroundColor="primaryDisabled" // Disabled states
+```
+
+## Typography Scale
+
+Consistent typography with semantic sizing:
+
+```tsx
+// Font sizes
+fontSize="12"    // 12px
+fontSize="14"    // 14px
+fontSize="16"    // 16px (base)
+fontSize="18"    // 18px
+fontSize="20"    // 20px
+// ... up to fontSize="80"
+
+// Semantic text components
+<Heading size="xl">Main Title</Heading>     // Large heading
+<Heading size="lg">Section Title</Heading>  // Medium heading
+<Heading size="md">Subsection</Heading>     // Small heading
+
+<Paragraph size="lg">Lead paragraph</Paragraph>
+<Paragraph size="md">Body text</Paragraph>
+<Paragraph size="sm">Small text</Paragraph>
+
+<Label size="md">Form labels</Label>
+<Eyebrow size="sm">Category labels</Eyebrow>
+```
+
+## Best Practices
+
+### Component Composition
+
+```tsx
+// Good: Compose components for reusability
+function UserCard({ user }) {
+  return (
+    <Box p="x6" backgroundColor="background1" borderRadius="normal">
+      <Stack gap="x4">
+        <Flex align="center" gap="x3">
+          <Box size="x12" borderRadius="round" backgroundColor="background2" />
+          <Stack gap="x1">
+            <Text weight="heading">{user.name}</Text>
+            <Text size="sm" color="text2">{user.email}</Text>
+          </Stack>
+        </Flex>
+        <Text color="text2">{user.bio}</Text>
+      </Stack>
+    </Box>
+  )
 }
+```
 
-export function UserCard({
-  user,
-  className,
-  as,
-}: UserCardProps) {
- return (
-  <Box as={as} className={['zora-usercard', styles.card, className]}>
-   <Heading as="h3" size="lg">{user.name}</Heading>
-   <Paragraph size="md">{user.bio}</Paragraph>
+### Semantic HTML
+
+```tsx
+// Use appropriate semantic elements
+<Box as="main" p="x8">
+  <Box as="section" mb="x12">
+    <Heading as="h1" size="xl">Page Title</Heading>
   </Box>
- )
-}
+  
+  <Box as="article">
+    <Heading as="h2" size="lg">Article Title</Heading>
+    <Paragraph>Article content...</Paragraph>
+  </Box>
+</Box>
 ```
 
-There are a few things going on here.
+### Accessibility
 
-First, let's have a look at `<Heading>`, a general-purpose component. Heading has a number of size variants. By separating the style implementation from the semantic element used, we have full control over how semantic HTML is applied in different contexts. Here, we implement the heading `as='h3'`, but in other contexts we might want a heading with `size="lg"` to be implemented `as="h1"`.
+```tsx
+// Include proper accessibility attributes
+<Button
+  aria-label="Close dialog"
+  onClick={handleClose}
+>
+  <Icon><CloseIcon /></Icon>
+</Button>
 
-UserCard accepts `as` props and is wrapped by a `Box` that implements it: `as={as}`. So UserCard can take context-specific semantic HTML based on usage: `<UserCard as="div" user={user} />` in the default case, `<UserCard as="li" user={user} />` for use inside of an `<ul>`, and so on.
-
-One more thing to point out: className takes an array: `className={['zora-usercard', styles.card, className]}`. Under the hood, Box is using _clsx_, a super-lightweight package for constructing className strings conditionally. It's similar to the popular _classNames_ package. Any component inheriting BoxProps from Box can receive styles as an array without the need to explicitly use `clsx()`.
-
-## Text Component
-
-In the `<UserCard>` code block above, we discussed `<Header>` briefly. It's worth going into more detail. Under the hood, `<Header>` is based on a generic `<Text>` component, which inherits its behaviour from `<Box>`. `<Text>` has a large number of variants with custom fontSize, fontWeight, lineHeight. Rather than exposing this large set of variants as a single complex `<Text>` component, Zord creates a number of convenient text components to reflect these presets:
-
+<Input
+  aria-describedby="email-help"
+  placeholder="Enter email"
+/>
+<Text id="email-help" size="sm" color="text2">
+  We'll never share your email
+</Text>
 ```
-<Display>
-<Heading>
-<Paragraph>
-<Eyebrow>
-<MenuText>
-<Label>
+
+## Development
+
+### Prerequisites
+
+- Node.js 18+
+- pnpm 8+
+
+### Setup
+
+```bash
+# Install dependencies
+pnpm install
+
+# Build the package
+pnpm build
+
+# Development build with watch
+pnpm dev
+
+# Build icons from SVGs
+pnpm build-icons
+
+# Run linting
+pnpm lint
 ```
 
-These text components can generally receive one or more size props: `xs | sm | md | lg | xl`
+### Scripts
 
-## Mixins
+- `pnpm build` - Build the package for production
+- `pnpm dev` - Build in watch mode for development
+- `pnpm build-icons` - Generate React components from SVG icons
+- `pnpm dev:types` - Generate TypeScript declarations
+- `pnpm lint` - Run ESLint with auto-fix
+- `pnpm clean` - Remove build artifacts and dependencies
 
--- todo
+## Dependencies
+
+### Runtime Dependencies
+- `@vanilla-extract/css` - CSS-in-TypeScript styling
+- `@vanilla-extract/recipes` - Component variants
+- `@vanilla-extract/sprinkles` - Atomic CSS utilities
+- `@popperjs/core` - Positioning for tooltips and dropdowns
+- `react-popper` - React wrapper for Popper.js
+- `clsx` - Conditional className utility
+- `react-polymorphic-types` - TypeScript utilities for polymorphic components
+
+### Peer Dependencies
+- `react` ^19.1.0
+- `react-dom` ^19.1.0
+
+### Development Dependencies
+- `@svgr/cli` - SVG to React component conversion
+- Vanilla Extract build plugins
+- TypeScript and ESLint configurations
+
+## Design Tokens
+
+### Colors
+- Semantic color system with light/dark theme support
+- Consistent naming conventions
+- Interactive state variants (hover, active, disabled)
+
+### Spacing
+- 4px-based spacing scale (x0 to x64)
+- Consistent margins, padding, and gaps
+- Responsive spacing support
+
+### Typography
+- Inter font family by default
+- Consistent font sizes and line heights
+- Semantic text components
+
+### Borders & Radii
+- Consistent border styles and widths
+- Border radius scale (tiny, small, normal, curved, phat, round)
+
+### Shadows
+- Subtle shadow system
+- Consistent elevation levels
+
+## Browser Support
+
+Zord supports modern browsers with CSS Grid and CSS Custom Properties support:
+
+- Chrome 88+
+- Firefox 87+
+- Safari 14+
+- Edge 88+
+
+## Migration Guide
+
+### From CSS Modules
+
+```tsx
+// Before (CSS Modules)
+import styles from './Component.module.css'
+<div className={styles.container}>Content</div>
+
+// After (Zord)
+import { Box } from '@buildeross/zord'
+<Box p="x6" backgroundColor="background1">Content</Box>
+```
+
+### From Styled Components
+
+```tsx
+// Before (Styled Components)
+const Container = styled.div`
+  padding: 24px;
+  background-color: white;
+  border-radius: 8px;
+`
+
+// After (Zord)
+import { Box } from '@buildeross/zord'
+<Box p="x6" backgroundColor="background1" borderRadius="normal">
+  Content
+</Box>
+```
+
+## Performance
+
+- **Zero Runtime**: All styles are generated at build time
+- **Atomic CSS**: Minimal CSS bundle size through reusable atomic classes
+- **Tree Shaking**: Only import components and styles you use
+- **Static Extraction**: CSS is extracted to separate files for optimal loading
+
+## License
+
+MIT License - see LICENSE file for details.

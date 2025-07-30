@@ -1,6 +1,5 @@
 import { Flex } from '@buildeross/zord'
 import Head from 'next/head'
-
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 
 import { notFoundWrap } from '../styles/404.css'

@@ -1,9 +1,8 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { Chain, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'
-
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { CHAIN_ID, Chain } from 'src/typings'
 
 import { Icon } from '../Icon'
 import { chainPopUpButton } from './BridgeForm.styles.css'

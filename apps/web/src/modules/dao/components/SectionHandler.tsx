@@ -1,16 +1,15 @@
+import { slugify } from '@buildeross/utils/slugify'
+import { unslugify } from '@buildeross/utils/unslugify'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import React, { ReactElement } from 'react'
-
 import {
   sectionHandler,
   sectionNavigation,
   sectionNavigationWrapper,
   sectionTabVariants,
 } from 'src/styles/SectionNavigation.css'
-import { slugify } from 'src/utils/slugify'
-import { unslugify } from 'src/utils/unslugify'
 
 interface SectionHandlerProps {
   sections: {

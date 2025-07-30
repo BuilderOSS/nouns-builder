@@ -1,9 +1,8 @@
 import { Box, Button, Flex } from '@buildeross/zord'
-import { Form, Formik } from 'formik'
 import type { FormikHelpers } from 'formik'
-import { useCallback } from 'react'
+import { Form, Formik } from 'formik'
 import type { FC } from 'react'
-
+import { useCallback } from 'react'
 import SmartInput from 'src/components/Fields/SmartInput'
 import { TEXT } from 'src/components/Fields/types'
 import Input from 'src/components/Input/Input'

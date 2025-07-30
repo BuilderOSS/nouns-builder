@@ -1,5 +1,4 @@
-export { PopUp } from './PopUp'
 export type { PopUpProps } from './PopUp'
-
-export { ThemeProvider, themeClass } from './ThemeProvider'
+export { PopUp } from './PopUp'
 export type { ThemeProviderProps } from './ThemeProvider'
+export { themeClass, ThemeProvider } from './ThemeProvider'

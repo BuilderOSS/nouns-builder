@@ -1,6 +1,5 @@
-import { Flex, Stack, Text, atoms } from '@buildeross/zord'
+import { atoms, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-
 import { Icon } from 'src/components/Icon'
 import { ProposalNavigation } from 'src/modules/proposal'
 

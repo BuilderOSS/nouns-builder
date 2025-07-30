@@ -1,7 +1,6 @@
+import { auctionHistoryRequest } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-
-import { auctionHistoryRequest } from 'src/data/subgraph/requests/auctionHistory'
-import { CHAIN_ID } from 'src/typings'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { token, chainId, startTime } = req.query

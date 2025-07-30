@@ -1,10 +1,6 @@
+import { type DaoMember, memberSnapshotRequest } from '@buildeross/sdk/subgraph'
 import useSWR from 'swr'
 import { Address } from 'viem'
-
-import {
-  type DaoMember,
-  memberSnapshotRequest,
-} from 'src/data/subgraph/requests/memberSnapshot'
 
 export const useDaoMembers = (chainId: number, token: string) => {
   const { data: members } = useSWR<DaoMember[], Error>(

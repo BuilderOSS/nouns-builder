@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
-
 import { ContractABIResult, getContractABIByAddress } from 'src/services/abiService'
 import { ErrorResult } from 'src/services/errorResult'
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'

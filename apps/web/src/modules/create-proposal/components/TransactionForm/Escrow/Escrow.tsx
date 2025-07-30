@@ -1,28 +1,27 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { uploadJson } from '@buildeross/ipfs-service'
+import { ProposalsResponse } from '@buildeross/sdk/subgraph'
+import { getProposals } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
+import { getEnsAddress } from '@buildeross/utils/ens'
 import { Stack } from '@buildeross/zord'
 import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { useCallback } from 'hono/jsx'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
-import useSWR from 'swr'
-import { encodeFunctionData, formatEther } from 'viem'
-
-import SWR_KEYS from 'src/constants/swrKeys'
-import { ProposalsResponse } from 'src/data/subgraph/requests/proposalsQuery'
-import { getProposals } from 'src/data/subgraph/requests/proposalsQuery'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID } from 'src/typings'
-import { getEnsAddress } from 'src/utils/ens'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import useSWR from 'swr'
+import { encodeFunctionData, formatEther } from 'viem'
 
 import EscrowForm from './EscrowForm'
 import { EscrowFormValues } from './EscrowForm.schema'
 import {
-  ESCROW_TYPE,
   deployEscrowAbi,
   encodeEscrowData,
+  ESCROW_TYPE,
   getEscrowBundler,
 } from './EscrowUtils'
 

@@ -1,6 +1,7 @@
+import { style } from '@vanilla-extract/css'
+
 import { atoms } from '../atoms'
 import { vars } from '../theme'
-import { style } from '@vanilla-extract/css'
 
 export const inputField = style([{ gap: vars.space.x1 }])
 

@@ -1,8 +1,6 @@
+import * as z from '@buildeross/constants/layers'
 import { atoms, color, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-
-import { NAV_BUTTON_ZINDEX } from 'src/constants/zIndex'
-import * as z from 'src/utils/layers'
 
 export const NavContainer = style([
   atoms({ m: 'auto', backgroundColor: 'background1', pos: 'fixed', w: '100vw' }),
@@ -27,7 +25,7 @@ export const NavWrapper = style([
 export const navButton = style({
   selectors: {
     '&[data-active="true"]': {
-      zIndex: NAV_BUTTON_ZINDEX,
+      zIndex: z.NAV_BUTTON_LAYER,
     },
   },
 })
@@ -42,7 +40,7 @@ export const activeNavAvatar = style([
   }),
   {
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    zIndex: NAV_BUTTON_ZINDEX + 1,
+    zIndex: z.NAV_BUTTON_LAYER + 1,
   },
 ])
 

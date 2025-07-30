@@ -1,0 +1,82 @@
+{
+  "name": "@buildeross/sdk",
+  "description": "SDK for interacting with Nouns Builder contracts and subgraphs",
+  "version": "0.1.1",
+  "dependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/utils": "workspace:*",
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.1.2",
+    "graphql-tag": "^2.12.6"
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@graphql-codegen/cli": "^5.0.6",
+    "@graphql-codegen/typescript": "^4.1.6",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
+    "@graphql-codegen/typescript-operations": "^4.6.1",
+    "@types/node": "^22.15.21",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./contract": {
+      "types": "./dist/contract/index.d.ts",
+      "import": "./dist/contract/index.mjs",
+      "require": "./dist/contract/index.js"
+    },
+    "./subgraph": {
+      "types": "./dist/subgraph/index.d.ts",
+      "import": "./dist/subgraph/index.mjs",
+      "require": "./dist/subgraph/index.js"
+    },
+    "./eas": {
+      "types": "./dist/eas/index.d.ts",
+      "import": "./dist/eas/index.mjs",
+      "require": "./dist/eas/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "peerDependencies": {
+    "@sentry/nextjs": "^9.22.0",
+    "viem": "^2.30.0",
+    "wagmi": "^2.15.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/sdk"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "codegen": "graphql-codegen",
+    "dev": "tsup --watch",
+    "generate-abis": "node ./scripts/generate-abis.js",
+    "lint": "eslint src --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
+}

@@ -1,9 +1,8 @@
 import { Flex, Text } from '@buildeross/zord'
 import { ConnectButton as RKConnectButton } from '@rainbow-me/rainbowkit'
 import React from 'react'
-import { useAccount, useSwitchChain } from 'wagmi'
-
 import { useChainStore } from 'src/stores/useChainStore'
+import { useAccount, useSwitchChain } from 'wagmi'
 
 import { connectButtonWrapper } from './Nav.styles.css'
 

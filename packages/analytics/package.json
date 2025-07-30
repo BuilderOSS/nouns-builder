@@ -1,28 +1,37 @@
 {
   "name": "@buildeross/analytics",
   "description": "Shared analytics for BuilderOSS apps",
-  "main": "index.ts",
-  "private": true,
-  "scripts": {
-    "lint": "pnpm type-check && TIMING=1 eslint *.ts",
-    "type-check": "tsc --pretty --noEmit"
-  },
-  "peerDependencies": {
-    "next": "^15.3.2",
-    "react": "^19.1.0"
-  },
+  "version": "0.1.1",
   "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
     "@faker-js/faker": "^7.6.0",
     "@testing-library/react": "^16.3.0",
-    "@types/react": "^19.1.4",
+    "@types/react": "^19.1.5",
     "@types/uuid": "^9.0.0",
     "@vercel/analytics": "^0.1.5",
-    "@buildeross/tsconfig": "workspace:*",
     "eslint": "8.57.1",
-    "@buildeross/eslint-config-custom": "workspace:*",
     "next": "^15.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "typescript": "^5.8.3"
+  },
+  "license": "MIT",
+  "main": "index.ts",
+  "peerDependencies": {
+    "next": "^15.3.2",
+    "react": "^19.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/analytics"
+  },
+  "scripts": {
+    "lint": "pnpm type-check && TIMING=1 eslint *.ts",
+    "type-check": "tsc --pretty --noEmit"
   }
 }

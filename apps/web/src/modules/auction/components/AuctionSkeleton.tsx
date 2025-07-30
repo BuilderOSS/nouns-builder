@@ -3,8 +3,8 @@ import { Box, Flex, Grid } from '@buildeross/zord'
 import {
   auctionGrid,
   auctionSkeleton,
-  auctionWrapVariants,
   auctionWrapper,
+  auctionWrapVariants,
   tokenImage,
 } from './Auction.css'
 

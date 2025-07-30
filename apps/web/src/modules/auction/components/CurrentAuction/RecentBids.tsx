@@ -1,10 +1,9 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import dynamic from 'next/dynamic'
 import React from 'react'
-
 import { Icon } from 'src/components/Icon'
-import { ETHERSCAN_BASE_URL } from 'src/constants/etherscan'
-import { AuctionBidFragment } from 'src/data/subgraph/sdk.generated'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { AllBids } from '../AllBids'

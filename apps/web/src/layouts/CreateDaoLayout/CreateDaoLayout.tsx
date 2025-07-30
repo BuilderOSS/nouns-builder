@@ -1,6 +1,5 @@
 import { Box } from '@buildeross/zord'
 import React, { ReactElement, ReactNode } from 'react'
-
 import { Uploading } from 'src/components/Uploading'
 import { useFormStore } from 'src/modules/create-dao'
 

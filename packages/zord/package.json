@@ -1,28 +1,7 @@
 {
   "name": "@buildeross/zord",
-  "version": "2.1.0",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "sideEffects": [
-    "./dist/index.css"
-  ],
-  "license": "MIT",
-  "files": [
-    "dist/**"
-  ],
-  "exports": {
-    ".": "./dist/index.js",
-    "./index.css": "./dist/index.css"
-  },
-  "scripts": {
-    "build": "tsup",
-    "build-icons": "svgr --out-dir src/icons --icon --replace-attr-values '#000=currentColor' --typescript icons ",
-    "dev": "tsup --watch",
-    "dev:types": "tsc --emitDeclarationOnly --declaration --declarationMap",
-    "lint": "eslint src --fix",
-    "clean": "rm -rf .turbo node_modules dist"
-  },
+  "description": "Design system and UI components for BuilderOSS apps",
+  "version": "0.1.1",
   "dependencies": {
     "@popperjs/core": "^2.11.6",
     "@vanilla-extract/css": "^1.17.2",
@@ -35,23 +14,53 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
     "@svgr/cli": "^6.5.1",
     "@types/lodash-es": "^4.17.6",
-    "@types/react": "^19.1.4",
+    "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@types/uuid": "^9.0.0",
     "@vanilla-extract/esbuild-plugin": "^2.2.0",
-    "@buildeross/tsconfig": "workspace:*",
     "eslint": "8.57.1",
-    "@buildeross/eslint-config-custom": "workspace:*",
     "lodash-es": "^4.17.21",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tsup": "^6.5.0",
+    "tsup": "^8.3.5",
     "typescript": "^5.8.3"
   },
+  "exports": {
+    ".": "./dist/index.js",
+    "./index.css": "./dist/index.css"
+  },
+  "files": [
+    "dist/**"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "peerDependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/zord"
+  },
+  "scripts": {
+    "build": "tsup",
+    "build-icons": "svgr --out-dir src/icons --icon --replace-attr-values '#000=currentColor' --typescript icons ",
+    "clean": "rm -rf .turbo node_modules dist",
+    "dev": "tsup --watch",
+    "dev:types": "tsc --emitDeclarationOnly --declaration --declarationMap",
+    "lint": "eslint src --fix"
+  },
+  "sideEffects": [
+    "./dist/index.css"
+  ],
+  "types": "./dist/index.d.ts"
 }

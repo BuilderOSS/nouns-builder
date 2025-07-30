@@ -1,8 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-
 import { ErrorResult } from 'src/services/errorResult'
 import { InvalidRequestError } from 'src/services/errors'
-import { SimulationResult, simulate } from 'src/services/simulationService'
+import { simulate, SimulationResult } from 'src/services/simulationService'
 
 export default async function handler(
   req: NextApiRequest,

@@ -1,15 +1,14 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { vi } from 'vitest'
-
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { BUILDER_DAO } from 'src/test/fixtures/dao'
 import { render } from 'src/test/utils'
+import { vi } from 'vitest'
 
 import { Airdrop } from './Airdrop'
 
-vi.mock('src/modules/dao', () => ({
+vi.mock('src/stores/useDaoStore', () => ({
   useDaoStore: vi.fn(),
 }))
 
@@ -17,9 +16,9 @@ vi.mock('src/stores/useChainStore', () => ({
   useChainStore: vi.fn(),
 }))
 
-vi.mock('src/data/subgraph/sdk.generated', async () => {
-  const mod = await vi.importActual<typeof import('src/data/subgraph/sdk.generated')>(
-    'src/data/subgraph/sdk.generated'
+vi.mock('@buildeross/sdk/subgraph', async () => {
+  const mod = await vi.importActual<typeof import('@buildeross/sdk/subgraph')>(
+    '@buildeross/sdk/subgraph'
   )
   return {
     ...mod,

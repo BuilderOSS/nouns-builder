@@ -1,3 +1,5 @@
+import { Address, BigInt, Bytes, dataSource, log } from '@graphprotocol/graph-ts'
+
 import { DAO, Proposal, ProposalVote } from '../generated/schema'
 import {
   ProposalCanceled as ProposalCanceledEvent,
@@ -8,7 +10,6 @@ import {
   VoteCast as VoteCastEvent,
 } from '../generated/templates/Governor/Governor'
 import { Treasury as TreasuryContract } from '../generated/templates/Governor/Treasury'
-import { Address, BigInt, Bytes, dataSource, log } from '@graphprotocol/graph-ts'
 
 export function handleProposalCreated(event: ProposalCreatedEvent): void {
   let proposal = new Proposal(event.params.proposalId.toHexString())
@@ -112,7 +113,7 @@ export function handleVoteCast(event: VoteCastEvent): void {
   let proposalId = event.params.proposalId.toHexString()
   let proposal = Proposal.load(proposalId)!
   let proposalVote = new ProposalVote(
-    `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`
+    `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`,
   )
 
   proposalVote.transactionHash = event.transaction.hash

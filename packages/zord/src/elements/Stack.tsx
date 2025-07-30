@@ -1,10 +1,11 @@
-import { Flex, FlexProps } from '../elements/Flex'
-import { BoxDefaultElement } from './Box'
 import React, { ElementType, forwardRef } from 'react'
 import type {
   PolymorphicForwardRefExoticComponent,
   PolymorphicPropsWithRef,
 } from 'react-polymorphic-types'
+
+import { Flex, FlexProps } from '../elements/Flex'
+import { BoxDefaultElement } from './Box'
 
 export interface StackProps extends FlexProps {}
 

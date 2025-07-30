@@ -1,3 +1,5 @@
+import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts'
+
 import { DAO, MetadataItem, MetadataProperty, Token } from '../generated/schema'
 import {
   BatchMetadataUpdate as BatchMetadataUpdateEvent,
@@ -12,7 +14,6 @@ import {
 } from '../generated/templates/MetadataRendererV1/MetadataRendererV1'
 import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { setTokenMetadata } from './utils/setTokenMetadata'
-import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts'
 
 export function handleContractImageUpdated(event: ContractImageUpdatedEvent): void {
   let context = dataSource.context()
@@ -120,7 +121,7 @@ export function handleAddProperties(event: AddPropertiesFunctionCall): void {
 }
 
 export function handleDeleteAndRecreateProperties(
-  event: DeleteAndRecreatePropertiesFunctionCall
+  event: DeleteAndRecreatePropertiesFunctionCall,
 ): void {
   let context = dataSource.context()
 

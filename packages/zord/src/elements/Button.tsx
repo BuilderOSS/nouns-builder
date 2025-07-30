@@ -1,3 +1,10 @@
+import { ElementType, ForwardedRef, forwardRef, useMemo } from 'react'
+import {
+  PolymorphicForwardRefExoticComponent,
+  PolymorphicPropsWithoutRef,
+  PolymorphicPropsWithRef,
+} from 'react-polymorphic-types'
+
 import { Flex, FlexProps, Icon, IconProps } from '../elements'
 import {
   baseButton,
@@ -10,12 +17,6 @@ import {
   buttonVariants,
 } from './Button.css'
 import { iconVariants } from './Icon.css'
-import { ElementType, ForwardedRef, forwardRef, useMemo } from 'react'
-import {
-  PolymorphicForwardRefExoticComponent,
-  PolymorphicPropsWithRef,
-  PolymorphicPropsWithoutRef,
-} from 'react-polymorphic-types'
 
 export interface ButtonProps extends FlexProps {
   disabled?: boolean

@@ -1,6 +1,5 @@
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
-
 import { Spinner } from 'src/components/Spinner'
 
 import { uploadNotificationWrapper } from './Uploading.css'
