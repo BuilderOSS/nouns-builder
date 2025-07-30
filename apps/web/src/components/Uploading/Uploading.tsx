@@ -4,7 +4,13 @@ import { Spinner } from 'src/components/Spinner'
 
 import { uploadNotificationWrapper } from './Uploading.css'
 
-export const Uploading = ({ isUploadingToIPFS }: { isUploadingToIPFS: boolean }) => {
+export const Uploading = ({
+  isUploadingToIPFS,
+  ipfsUploadProgress,
+}: {
+  isUploadingToIPFS: boolean
+  ipfsUploadProgress: number
+}) => {
   return (
     <>
       {isUploadingToIPFS && (
@@ -21,7 +27,11 @@ export const Uploading = ({ isUploadingToIPFS }: { isUploadingToIPFS: boolean })
           style={{ zIndex: 100 }}
         >
           <Flex align={'center'} justify={'center'}>
-            <Box fontSize={14}>Uploading Artwork to IPFS</Box>
+            {ipfsUploadProgress === 0 ? (
+              <Box fontSize={14}>Uploading Artwork to IPFS</Box>
+            ) : (
+              <Box fontSize={14}>Uploading Artwork to IPFS: {ipfsUploadProgress}%</Box>
+            )}
 
             <Spinner mx={'x4'} />
           </Flex>

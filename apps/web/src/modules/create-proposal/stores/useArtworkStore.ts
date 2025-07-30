@@ -15,6 +15,8 @@ export interface ArtworkStore {
   setOrderedLayers: (orderedLayers: OrderedTraits) => void
   isUploadingToIPFS: boolean
   setIsUploadingToIPFS: (bool: boolean) => void
+  ipfsUploadProgress: number
+  setIpfsUploadProgress: (progress: number) => void
   resetForm: () => void
 }
 
@@ -26,6 +28,7 @@ const initialState = {
   ipfsUpload: [],
   orderedLayers: [],
   isUploadingToIPFS: false,
+  ipfsUploadProgress: 0,
 }
 
 export const useArtworkStore = create<ArtworkStore>((set) => ({
@@ -38,5 +41,6 @@ export const useArtworkStore = create<ArtworkStore>((set) => ({
     })
   },
   setIsUploadingToIPFS: (isUploadingToIPFS: boolean) => set({ isUploadingToIPFS }),
+  setIpfsUploadProgress: (progress: number) => set({ ipfsUploadProgress: progress }),
   resetForm: () => set({ ...initialState }),
 }))

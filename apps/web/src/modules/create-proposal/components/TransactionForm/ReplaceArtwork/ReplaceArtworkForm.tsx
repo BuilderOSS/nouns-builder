@@ -32,7 +32,8 @@ export const ReplaceArtworkForm: React.FC<ReplaceArtworkFormProps> = ({
   propertiesCount,
   handleSubmit,
 }) => {
-  const { isUploadingToIPFS, ipfsUpload, setUpArtwork } = useArtworkStore()
+  const { isUploadingToIPFS, ipfsUploadProgress, ipfsUpload, setUpArtwork } =
+    useArtworkStore()
   const [hasConfirmed, setHasConfirmed] = useState(PUBLIC_IS_TESTNET ? true : false)
 
   const initialValues = {
@@ -62,7 +63,10 @@ export const ReplaceArtworkForm: React.FC<ReplaceArtworkFormProps> = ({
           Base layer etc.
         </Box>
       </Box>
-      <Uploading isUploadingToIPFS={isUploadingToIPFS} />
+      <Uploading
+        isUploadingToIPFS={isUploadingToIPFS}
+        ipfsUploadProgress={ipfsUploadProgress}
+      />
       <Formik<ArtworkFormValues>
         initialValues={initialValues}
         enableReinitialize

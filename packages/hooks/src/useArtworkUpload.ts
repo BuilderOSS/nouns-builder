@@ -46,6 +46,7 @@ export interface UseArtworkUploadProps {
   onUploadStart: () => void
   onUploadSuccess: (ipfs: IPFSUpload[]) => void
   onUploadError: (error: Error) => void
+  onUploadProgress: (progress: number) => void
 }
 
 export const useArtworkUpload = ({
@@ -55,6 +56,7 @@ export const useArtworkUpload = ({
   onUploadStart,
   onUploadSuccess,
   onUploadError,
+  onUploadProgress,
 }: UseArtworkUploadProps) => {
   const [uploadArtworkError, setUploadArtworkError] = React.useState<
     ArtworkUploadError | undefined
@@ -65,30 +67,35 @@ export const useArtworkUpload = ({
   const images = React.useMemo(() => {
     if (isUploadingToIPFS) return
 
-    if (Array.isArray(ipfsUpload) && artwork.length) {
-      return ipfsUpload.reduce((acc: ImageProps[] = [], upload) => {
-        const index = artwork?.map((e: any) => e.trait).indexOf(upload.trait)
-        const childIndex = artwork[index]?.properties.indexOf(upload.name)
-        const childName = artwork[index]?.properties[childIndex]
-        const fetchableUrl = getFetchableUrls(upload?.ipfs?.uri)?.[0] ?? ''
+    try {
+      if (Array.isArray(ipfsUpload) && artwork.length) {
+        return ipfsUpload.reduce((acc: ImageProps[] = [], upload) => {
+          const index = artwork?.map((e: any) => e.trait).indexOf(upload.trait)
+          const childIndex = artwork[index]?.properties.indexOf(upload.name)
+          const childName = artwork[index]?.properties[childIndex]
+          const fetchableUrl = getFetchableUrls(upload?.ipfs?.uri)?.[0] ?? ''
 
-        acc.push({
-          trait: artwork[index]?.trait,
-          name: childName,
-          cid: upload?.ipfs?.cid || '',
-          uri: upload?.ipfs?.uri || '',
-          url: encodeURI(
-            fetchableUrl +
-              `/${sanitizeFileName(
-                upload.webkitRelativePath.split('/').slice(1).join('/'),
-              )}` || '',
-          ),
-          path: upload.webkitRelativePath,
-          content: upload?.content,
-          blob: upload?.blob,
-        })
-        return acc
-      }, [])
+          acc.push({
+            trait: artwork[index]?.trait,
+            name: childName,
+            cid: upload?.ipfs?.cid || '',
+            uri: upload?.ipfs?.uri || '',
+            url: encodeURI(
+              fetchableUrl +
+                `/${sanitizeFileName(
+                  upload?.webkitRelativePath?.split('/').slice(1).join('/') ?? '',
+                )}`,
+            ),
+            path: upload?.webkitRelativePath,
+            content: upload?.content,
+            blob: upload?.blob,
+          })
+          return acc
+        }, [])
+      }
+    } catch (err) {
+      console.error('Error parsing ipfs upload', err)
+      return []
     }
 
     return []
@@ -115,6 +122,21 @@ export const useArtworkUpload = ({
 
     const reduced = filesArray.reduce((acc: any = [], cv, index) => {
       const paths = cv.webkitRelativePath.split('/')
+
+      if (paths.length !== 3 || !paths) {
+        if (paths.length > 3) {
+          setUploadArtworkError({
+            directory: `file or folder naming incorrect. must not include back slashes.`,
+          })
+          return
+        }
+
+        setUploadArtworkError({
+          directory: `folder structure is incorrect. download the nouns example folder to compare.`,
+        })
+        return
+      }
+
       const collection = paths[0]
       const currentTrait = sanitizeFileName(paths[1])
       const currentProperty = sanitizeFileName(paths[2])
@@ -151,20 +173,6 @@ export const useArtworkUpload = ({
       ) {
         setUploadArtworkError({
           directory: `file or folder naming incorrect. must not include forward slashes or periods.`,
-        })
-        return
-      }
-
-      if (paths.length !== 3 || !paths) {
-        if (paths.length > 3) {
-          setUploadArtworkError({
-            directory: `file or folder naming incorrect. must not include back slashes.`,
-          })
-          return
-        }
-
-        setUploadArtworkError({
-          directory: `folder structure is incorrect. download the nouns example folder to compare.`,
         })
         return
       }
@@ -261,7 +269,7 @@ export const useArtworkUpload = ({
         content: file,
         path: sanitizeFileName(file.webkitRelativePath.split('/').slice(1).join('/')),
       })),
-      { cache: false },
+      { cache: false, onProgress: onUploadProgress },
     )
 
     return files.map((file) => ({
