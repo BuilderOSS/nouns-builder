@@ -21,8 +21,9 @@ import { DashConnect } from './DashConnect'
 import { AuctionCardSkeleton, DAOCardSkeleton, ProposalCardSkeleton } from './Skeletons'
 
 const ACTIVE_PROPOSAL_STATES = [
-  ProposalState.Active,
   ProposalState.Pending,
+  ProposalState.Active,
+  ProposalState.Succeeded,
   ProposalState.Queued,
 ]
 
