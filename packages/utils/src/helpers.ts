@@ -286,10 +286,17 @@ export const yearsAhead = (years: number) => {
 
 export const handleGMTOffset = () => {
   const now = new Date()
-  const timezoneOffset = now.getTimezoneOffset()
-  const offsetHours = -timezoneOffset / 60
+  const timezoneOffset = now.getTimezoneOffset() // in minutes
+  const totalMinutes = -timezoneOffset // flip sign because offset is opposite of GMT
 
-  return `GMT ${offsetHours >= 0 ? '+' : ''}${offsetHours}:00`
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = Math.abs(totalMinutes % 60)
+
+  const sign = hours >= 0 ? '+' : '-'
+  const absHours = Math.abs(hours).toString().padStart(2, '0')
+  const paddedMinutes = minutes.toString().padStart(2, '0')
+
+  return `GMT ${sign}${absHours}:${paddedMinutes}`
 }
 
 /**
