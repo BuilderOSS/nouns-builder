@@ -35,12 +35,15 @@ export const ContractButton = ({
     if (canUserBridge && userBalance?.decimals === 0) return openBridgeModal()
     if (userChain?.id !== appChain.id) return handleSwitchChain()
 
-    handleClick?.(e)
 
-    // Submit the form manually if all checks pass
-    const form = e?.currentTarget?.form
-    if (form) {
-      form.requestSubmit() // Modern way to trigger a form submission
+    if (handleClick) {
+      handleClick(e)
+    } else {
+      // Submit the form manually if all checks pass
+      const form = e?.currentTarget?.form
+      if (form) {
+        form.requestSubmit() // Modern way to trigger a form submission
+      }
     }
   }
 

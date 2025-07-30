@@ -4,7 +4,7 @@ import { getProposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'
 import { Atoms, Box, Button, Flex, Stack, Text, theme } from '@buildeross/zord'
 import { Field, Form as FormikForm, Formik } from 'formik'
-import React, { Fragment } from 'react'
+import React, { Fragment, useCallback } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { Icon } from 'src/components/Icon'
 import { IconType } from 'src/components/Icon/icons'
@@ -56,7 +56,7 @@ const VoteModal: React.FC<{
 
   const config = useConfig()
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = useCallback(async (values: FormValues) => {
     if (!addresses.governor) return
 
     const governorContractParams = {
@@ -90,7 +90,7 @@ const VoteModal: React.FC<{
     )
 
     setIsCastVoteSuccess(true)
-  }
+  }, [addresses.governor, chain.id, proposalId, votesAvailable])
 
   const voteOptions = [
     {
