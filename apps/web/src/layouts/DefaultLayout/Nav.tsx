@@ -58,11 +58,7 @@ export const Nav = () => {
             <Link href={'/explore'}>
               <Label className={navMenuItem}>Explore</Label>
             </Link>
-            <a
-              href="https://builder-docs.vercel.app/"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
+            <a href="https://docs.nouns.build/" target="_blank" rel="noreferrer noopener">
               <Label className={navMenuItem}>Docs</Label>
             </a>
             <NetworkController.Mainnet>

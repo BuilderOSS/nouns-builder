@@ -92,7 +92,7 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
           subtext={`${dayjs.unix(voteEnd).format('h:mm:ss A')} ${handleGMTOffset()}`}
         />
         <a
-          href="https://builder-docs.vercel.app/onboarding/governance/#-voting-power"
+          href="https://docs.nouns.build/onboarding/governance/#-voting-power"
           target="_blank"
           rel="noreferrer"
           onClick={(e) => e.stopPropagation()}

@@ -5,9 +5,8 @@ This is Nouns Builder front-end website and subgraph mono-repo. You can find Nou
 - [Mainnet](//nouns.build)
 - [Sepolia testnet](//testnet.nouns.build)
 
-For an introduction to Nouns Builder and its concept, you can find further [documentation here](https://builder-docs.vercel.app/).
+For an introduction to Nouns Builder and its concept, you can find further [documentation here](https://docs.nouns.build)
 You can also find the [nouns protocol code here](https://github.com/ourzora/nouns-protocol).
-
 
 ### Apps and packages in this repository include:
 
@@ -25,23 +24,26 @@ You can also find the [nouns protocol code here](https://github.com/ourzora/noun
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
 - `ipfs-service`: api for image uploads to ipfs
 
-## @buildeross/* Package Ecosystem
+## @buildeross/\* Package Ecosystem
 
 This monorepo contains a comprehensive set of packages under the `@buildeross` namespace, designed to support Web3 application development:
 
 ### Core Libraries
 
 **[@buildeross/zord](https://npmjs.com/package/@buildeross/zord)**
+
 - Modern design system and component library with Vanilla Extract
 - Type-safe styling, theming support, and accessibility features
 - The main UI foundation for BuilderOSS applications
 
 **[@buildeross/sdk](https://npmjs.com/package/@buildeross/sdk)**
+
 - Comprehensive SDK for blockchain and GraphQL interactions
 - Contract ABIs, subgraph queries, and EAS (Ethereum Attestation Service) integration
 - Generated TypeScript types for type-safe API interactions
 
 **[@buildeross/hooks](https://npmjs.com/package/@buildeross/hooks)**
+
 - Collection of React hooks for Web3 and UI functionality
 - Includes hooks for NFT data, token balances, voting, and more
 - Reusable logic across different applications
@@ -49,16 +51,19 @@ This monorepo contains a comprehensive set of packages under the `@buildeross` n
 ### Utilities & Configuration
 
 **[@buildeross/utils](https://npmjs.com/package/@buildeross/utils)**
+
 - Shared utility functions for Web3 development
 - Helpers for ENS, blockchain data parsing, and Wagmi integration
 - Form validation schemas with Yup
 
 **[@buildeross/constants](https://npmjs.com/package/@buildeross/constants)**
+
 - Centralized configuration and constants
 - Chain configurations, API endpoints, and application settings
 - Shared across all applications in the ecosystem
 
 **[@buildeross/types](https://npmjs.com/package/@buildeross/types)**
+
 - Shared TypeScript type definitions
 - Chain types, proposal states, and common interfaces
 - Ensures type consistency across the monorepo
@@ -66,23 +71,28 @@ This monorepo contains a comprehensive set of packages under the `@buildeross` n
 ### Specialized Services
 
 **[@buildeross/analytics](https://npmjs.com/package/@buildeross/analytics)**
+
 - Analytics integrations for Google Analytics, Segment, and Vercel
 - Consistent tracking across BuilderOSS applications
 
 **[@buildeross/blocklist](https://npmjs.com/package/@buildeross/blocklist)**
+
 - Blockchain address blocklist functionality
 - OFAC sanctions list integration for compliance
 
 **[@buildeross/ipfs-service](https://npmjs.com/package/@buildeross/ipfs-service)**
+
 - IPFS integration for decentralized file storage
 - Image upload utilities and gateway management
 
 ### Development Tools
 
 **[@buildeross/eslint-config-custom](https://npmjs.com/package/@buildeross/eslint-config-custom)**
+
 - Shared ESLint configuration with Next.js and Prettier integration
 
 **[@buildeross/tsconfig](https://npmjs.com/package/@buildeross/tsconfig)**
+
 - TypeScript configurations for different project types
 - Base, Next.js, and React library configurations
 
@@ -190,7 +200,7 @@ TENDERLY_ACCESS_KEY=<API_KEY>
 TENDERLY_PROJECT=<PROJECT_NAME>
 TENDERLY_USER=<ACCOUNT_NAME>
 
-# etherscan 
+# etherscan
 ETHERSCAN_API_KEY=<ETHERSCAN_API_KEY>
 
 # alchemy for NFT/token data
