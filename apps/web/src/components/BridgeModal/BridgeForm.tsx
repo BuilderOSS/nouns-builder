@@ -226,7 +226,7 @@ export const BridgeForm = () => {
                   rel="noopener noreferrer"
                   target="_blank"
                   style={{ textDecoration: 'underline' }}
-                  href="https://builder-docs.vercel.app/"
+                  href="https://docs.nouns.build/"
                 >
                   bridging
                 </Box>

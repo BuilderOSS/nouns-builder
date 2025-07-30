@@ -397,7 +397,7 @@ export const NavMenu = () => {
                 </Flex>
               </Link>
               <a
-                href="https://builder-docs.vercel.app/"
+                href="https://docs.nouns.build/"
                 target="_blank"
                 rel="noreferrer noopener"
               >
