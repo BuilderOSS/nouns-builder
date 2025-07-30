@@ -16,6 +16,7 @@ import { useConfig } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
 import { useAuctionEvents } from '../hooks'
+import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
 import { auctionGrid, auctionWrapper } from './Auction.css'
 import { AuctionDetails } from './AuctionDetails'
 import { AuctionImage } from './AuctionImage'
@@ -24,6 +25,7 @@ import { AuctionTokenPicker } from './AuctionTokenPicker'
 import { BidAmount } from './BidAmount'
 import { ActionsWrapper, BidHistory } from './BidHistory'
 import { CurrentAuction } from './CurrentAuction'
+import { Settle } from './CurrentAuction/Settle'
 import { DaoMigrated } from './DaoMigrated'
 import { WinningBidder } from './WinningBidder'
 
@@ -71,6 +73,12 @@ export const Auction: React.FC<AuctionControllerProps> = ({
     { revalidateOnFocus: true }
   )
 
+  const { latest } = useNextAndPreviousTokens({
+    chainId: chain.id,
+    collection,
+    tokenId: queriedTokenId,
+  })
+
   const [currentTokenId, highestBid, highestBidder, _, endTime, settled] =
     unpackOptionalArray(auction, 6)
 
@@ -78,6 +86,9 @@ export const Auction: React.FC<AuctionControllerProps> = ({
     !settled &&
     currentTokenId !== undefined &&
     currentTokenId.toString() == queriedTokenId
+
+  const isLatestButNotActive =
+    !isTokenActiveAuction && latest?.toString() === queriedTokenId
 
   useAuctionEvents({
     chainId: chain.id,
@@ -131,7 +142,10 @@ export const Auction: React.FC<AuctionControllerProps> = ({
               <WinningBidder owner={tokenOwner ?? undefined} />
             </AuctionDetails>
             <ActionsWrapper>
-              <BidHistory bids={bids || []} />
+              {isLatestButNotActive && <Settle isEnding={false} owner={tokenOwner} />}
+              {(!isLatestButNotActive || (!!bids && bids.length > 0)) && (
+                <BidHistory bids={bids || []} />
+              )}
             </ActionsWrapper>
             {migratedRes?.migrated ? (
               <DaoMigrated
