@@ -53,6 +53,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     setIpfsUpload,
     isUploadingToIPFS,
     setIsUploadingToIPFS,
+    setIpfsUploadProgress,
     orderedLayers,
     setOrderedLayers,
   } = useArtworkStore()
@@ -72,10 +73,11 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
 
   const handleUploadError = React.useCallback(
     async (err: Error) => {
+      console.error('Error uploading to IPFS', err)
       setIpfsUpload([])
       setIsUploadingToIPFS(false)
       Sentry.captureException(err)
-      await Sentry.flush(2000)
+      Sentry.flush(2000).catch(() => {})
       return
     },
     [setIpfsUpload, setIsUploadingToIPFS]
@@ -96,6 +98,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     onUploadStart: handleUploadStart,
     onUploadSuccess: handleUploadSuccess,
     onUploadError: handleUploadError,
+    onUploadProgress: setIpfsUploadProgress,
   })
 
   const { generateStackedImage, generatedImages, canvas } = useArtworkPreview({
@@ -114,15 +117,17 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     add artwork traits and properties to store
 
   */
-  React.useMemo(() => {
+  React.useEffect(() => {
     if (!fileInfo || !filesArray || !fileInfo.traits || !formik || uploadArtworkError)
       return
 
     setSetUpArtwork({
+      ...formik.values,
       artwork: fileInfo.traits,
       filesLength: fileInfo.filesLength,
     })
-  }, [filesArray, fileInfo, uploadArtworkError, formik, setSetUpArtwork])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filesArray, fileInfo, uploadArtworkError])
 
   /*
 

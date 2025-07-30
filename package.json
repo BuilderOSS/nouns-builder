@@ -17,6 +17,7 @@
   "private": true,
   "scripts": {
     "anvil": "bash -c 'source .env.local && anvil --fork-url \"$ANVIL_FORK_URL\" --fork-block-number \"$ANVIL_BLOCK_NUMBER\"'",
+    "build:packages": "turbo run build --filter=@buildeross/*",
     "build": "turbo run build",
     "changeset": "changeset",
     "ci": "turbo run lint test",
@@ -28,7 +29,7 @@
     "prepare": "husky install",
     "release": "pnpm build && changeset publish",
     "syncpack": "syncpack list-mismatches",
-    "syncpack:fix": "syncpack fix-mismatches",
+    "syncpack:fix": "syncpack fix-mismatches && syncpack format",
     "test": "turbo run test",
     "type-check": "turbo run type-check",
     "version-packages": "changeset version"

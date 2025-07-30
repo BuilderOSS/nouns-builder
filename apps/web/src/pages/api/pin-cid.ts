@@ -2,6 +2,12 @@ import { NextApiRequest, NextApiResponse } from 'next'
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY
 
+type PinCidOptions = {
+  cid: string
+  name?: string
+  group_id?: string
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
@@ -11,16 +17,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           text: 'CID is required',
         })
       }
-      if (name.length > 32) {
+      if (!!name && name.length > 32) {
         return res.status(400).json({
           text: 'Name is too long',
         })
       }
-      const data = JSON.stringify({
-        cid,
-        name,
-        group_id,
-      })
+      const options: PinCidOptions = { cid }
+      if (name) {
+        options.name = name
+      }
+      if (group_id) {
+        options.group_id = group_id
+      }
+
+      const data = JSON.stringify(options)
 
       const pinResponse = await fetch(
         'https://api.pinata.cloud/v3/files/public/pin_by_cid',

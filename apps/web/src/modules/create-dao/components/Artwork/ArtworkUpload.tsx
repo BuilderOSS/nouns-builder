@@ -62,6 +62,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     setIpfsUpload,
     isUploadingToIPFS,
     setIsUploadingToIPFS,
+    setIpfsUploadProgress,
     orderedLayers,
     setOrderedLayers,
   } = useFormStore()
@@ -105,6 +106,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     onUploadStart: handleUploadStart,
     onUploadSuccess: handleUploadSuccess,
     onUploadError: handleUploadError,
+    onUploadProgress: setIpfsUploadProgress,
   })
 
   const { generateStackedImage, generatedImages, canvas } = useArtworkPreview({
