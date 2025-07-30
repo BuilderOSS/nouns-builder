@@ -1,5 +1,4 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
-import * as Sentry from '@sentry/nextjs'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
@@ -38,8 +37,11 @@ export const dashboardRequest = async (memberAddress: string) => {
       .sort((a, b) => a.name.localeCompare(b.name))
   } catch (e: any) {
     console.error(e)
-    Sentry.captureException(e)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(e)
+      await sentry.flush(2000)
+    } catch (_) {}
     throw new Error(
       e?.message
         ? `Goldsky Request Error: ${e.message}`

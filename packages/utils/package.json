@@ -42,6 +42,11 @@
       "require": "./dist/*.js"
     }
   },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
   "license": "MIT",
   "main": "./dist/index.js",
   "peerDependencies": {

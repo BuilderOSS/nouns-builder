@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
 
 import { SDK } from '../client'
 
@@ -23,8 +22,11 @@ export const getSyncStatus = async (chainId: CHAIN_ID): Promise<SubgraphStatus> 
       })
   } catch (error) {
     console.error('Failed to get subgraph status:', error)
-    Sentry.captureException(error)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(error)
+      await sentry.flush(2000)
+    } catch (_) {}
     return { syncedBlockNumber: 0, hasIndexingErrors: false }
   }
 }

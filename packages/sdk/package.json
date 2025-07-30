@@ -6,8 +6,6 @@
     "@buildeross/constants": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/utils": "workspace:*",
-    "@farcaster/hub-nodejs": "^0.13.5",
-    "@sentry/nextjs": "^9.22.0",
     "graphql": "^16.11.0",
     "graphql-request": "^7.1.2",
     "graphql-tag": "^2.12.6"
@@ -20,7 +18,6 @@
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@graphql-codegen/typescript-operations": "^4.6.1",
     "@types/node": "^22.15.21",
-    "@wagmi/cli": "^2.3.2",
     "eslint": "8.57.1",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3"
@@ -46,11 +43,6 @@
       "import": "./dist/eas/index.mjs",
       "require": "./dist/eas/index.js"
     },
-    "./farcaster": {
-      "types": "./dist/farcaster/index.d.ts",
-      "import": "./dist/farcaster/index.mjs",
-      "require": "./dist/farcaster/index.js"
-    },
     "./*": {
       "types": "./dist/*.d.ts",
       "import": "./dist/*.mjs",
@@ -60,9 +52,15 @@
   "license": "MIT",
   "main": "./dist/index.js",
   "peerDependencies": {
+    "@sentry/nextjs": "^9.22.0",
     "viem": "^2.30.0",
     "wagmi": "^2.15.4"
   },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
   "publishConfig": {
     "access": "public"
   },

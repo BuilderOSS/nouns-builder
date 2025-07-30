@@ -4,29 +4,39 @@ import { GraphQLClient } from 'graphql-request'
 
 import { getSdk } from './sdk.generated'
 
-const globalForClient = global as unknown as {
-  subgraphClient: Map<CHAIN_ID, GraphQLClient>
-}
+type ClientCache = Map<CHAIN_ID, GraphQLClient>
 
 export class SDK {
-  static connect(chainId: CHAIN_ID) {
-    if (!globalForClient.subgraphClient) globalForClient.subgraphClient = new Map()
+  private static clientCache: ClientCache = new Map()
 
+  static connect(chainId: CHAIN_ID, options?: { useCache?: boolean }) {
+    const useCache = options?.useCache ?? true
     const subgraphUrl = PUBLIC_SUBGRAPH_URL.get(chainId)
 
-    if (!subgraphUrl) throw new Error('No subgraph url for chain id')
+    if (!subgraphUrl) {
+      throw new Error(`No subgraph URL found for chain ID ${chainId}`)
+    }
 
-    const client = globalForClient.subgraphClient.has(chainId)
-      ? globalForClient.subgraphClient.get(chainId)!
-      : new GraphQLClient(subgraphUrl, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+    // Return from cache if enabled
+    if (useCache && this.clientCache.has(chainId)) {
+      return getSdk(this.clientCache.get(chainId)!)
+    }
 
-    if (process.env.NODE_ENV !== 'production')
-      globalForClient.subgraphClient.set(chainId, client)
+    const client = new GraphQLClient(subgraphUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (useCache) {
+      this.clientCache.set(chainId, client)
+    }
 
     return getSdk(client)
+  }
+
+  /** Optional: Clear internal cache, useful for tests or reinitialization */
+  static clearCache() {
+    this.clientCache.clear()
   }
 }

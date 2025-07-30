@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
 import { formatEther } from 'viem'
 
 import { SDK } from '../client'
@@ -17,8 +16,11 @@ export const getBids = async (chainId: CHAIN_ID, collection: string, tokenId: st
       )
   } catch (error) {
     console.error(error)
-    Sentry.captureException(error)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(error)
+      await sentry.flush(2000)
+    } catch (_) {}
     return undefined
   }
 }

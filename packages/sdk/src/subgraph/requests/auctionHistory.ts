@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
 
 import { SDK } from '../client'
 import { Auction_OrderBy, OrderDirection } from '../sdk.generated'
@@ -21,7 +20,10 @@ export const auctionHistoryRequest = async (
     return data
   } catch (error) {
     console.error(error)
-    Sentry.captureException(error)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(error)
+      await sentry.flush(2000)
+    } catch (_) {}
   }
 }

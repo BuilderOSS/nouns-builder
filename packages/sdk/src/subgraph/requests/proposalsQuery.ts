@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
 
 import { getProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
@@ -58,8 +57,11 @@ export const getProposals = async (
       },
     }
   } catch (e) {
-    Sentry.captureException(e)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(e)
+      await sentry.flush(2000)
+    } catch (_) {}
     return {
       proposals: [],
     }

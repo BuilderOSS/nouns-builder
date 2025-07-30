@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
 
 import { SDK } from '../client'
 import {
@@ -39,8 +38,11 @@ export const exploreMyDaosRequest = async (
     return { daos: auctions, hasNextPage: false }
   } catch (error) {
     console.error(error)
-    Sentry.captureException(error)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(error)
+      await sentry.flush(2000)
+    } catch (_) {}
     return undefined
   }
 }
@@ -95,8 +97,11 @@ export const exploreDaosRequest = async (
     }
   } catch (error) {
     console.error(error)
-    Sentry.captureException(error)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(error)
+      await sentry.flush(2000)
+    } catch (_) {}
     return undefined
   }
 }

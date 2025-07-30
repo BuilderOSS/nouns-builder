@@ -30,36 +30,15 @@ import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 
 // Query DAO information
 const dao = await SubgraphSDK.daoQuery({
-  chainId: CHAIN_ID.ETHEREUM,
+  chainId: CHAIN_ID.BASE,
   collectionAddress: '0x...'
 })
 
 // Get proposals with filtering
 const proposals = await SubgraphSDK.proposalsQuery({
-  chainId: CHAIN_ID.ETHEREUM,
+  chainId: CHAIN_ID.BASE,
   collectionAddress: '0x...',
   filter: { state: 'ACTIVE' }
-})
-```
-
-### ContractSDK - Blockchain Interactions
-Entry point for direct contract interactions and utilities.
-
-```typescript
-import { ContractSDK } from '@buildeross/sdk/contract'
-
-// Get complete DAO addresses
-const addresses = await ContractSDK.getDAOAddresses({
-  managerAddress: '0x...',
-  tokenAddress: '0x...',
-  chainId: CHAIN_ID.ETHEREUM
-})
-
-// Check proposal state
-const state = await ContractSDK.getProposalState({
-  proposalId: '1',
-  governorAddress: '0x...',
-  chainId: CHAIN_ID.ETHEREUM
 })
 ```
 
@@ -72,13 +51,13 @@ import { EasSDK } from '@buildeross/sdk/eas'
 // Get delegation attestations
 const delegate = await EasSDK.getEscrowDelegate({
   recipient: '0x...',
-  chainId: CHAIN_ID.ETHEREUM
+  chainId: CHAIN_ID.BASE
 })
 
 // Get proposal dates from attestations
 const dates = await EasSDK.getPropDates({
   proposalId: '1',
-  chainId: CHAIN_ID.ETHEREUM
+  chainId: CHAIN_ID.BASE
 })
 ```
 
@@ -91,24 +70,22 @@ import {
   auctionAbi, 
   tokenAbi, 
   governorAbi,
-  getDAOAddresses,
-  getProposalState,
-  ContractSDK 
+  getDAOAddresses
 } from '@buildeross/sdk/contract'
 
-// Get DAO addresses from manager
-const addresses = await getDAOAddresses({
-  managerAddress: '0x...',
-  tokenAddress: '0x...',
-  chainId: CHAIN_ID.ETHEREUM
-})
+
+// Get DAO addresses
+const addresses = await getDAOAddresses(
+  CHAIN_ID.BASE,
+  '0x...'
+)
 
 // Check proposal state
-const state = await getProposalState({
-  proposalId: '1',
-  governorAddress: addresses.governor,
-  chainId: CHAIN_ID.ETHEREUM
-})
+const state = await getProposalState(
+  CHAIN_ID.BASE,
+  '0x...',
+  '0x...'
+)
 
 // Use with wagmi
 import { useReadContract } from 'wagmi'
@@ -118,7 +95,7 @@ function AuctionInfo() {
     address: auctionAddress,
     abi: auctionAbi,
     functionName: 'auction',
-    chainId: CHAIN_ID.ETHEREUM
+    chainId: CHAIN_ID.BASE
   })
 
   return <div>Current bid: {auction?.highestBid}</div>
@@ -137,13 +114,13 @@ import {
 
 // Fetch DAO information
 const dao = await daoQuery({
-  chainId: CHAIN_ID.ETHEREUM,
+  chainId: CHAIN_ID.BASE,
   collectionAddress: '0x...'
 })
 
 // Get proposals with filtering and pagination
 const proposals = await proposalsQuery({
-  chainId: CHAIN_ID.ETHEREUM,
+  chainId: CHAIN_ID.BASE,
   collectionAddress: '0x...',
   pagination: {
     limit: 10,
@@ -156,7 +133,7 @@ const proposals = await proposalsQuery({
 
 // Fetch auction history
 const history = await auctionHistory({
-  chainId: CHAIN_ID.ETHEREUM,
+  chainId: CHAIN_ID.BASE,
   collectionAddress: '0x...',
   startTime: Date.now() - 86400000, // Last 24 hours
   endTime: Date.now()
@@ -175,13 +152,13 @@ import {
 // Get escrow delegation attestations
 const delegate = await getEscrowDelegate({
   recipient: '0x...',
-  chainId: CHAIN_ID.ETHEREUM
+  chainId: CHAIN_ID.BASE
 })
 
 // Get proposal dates from attestations
 const propDates = await getPropDates({
   proposalId: '1',
-  chainId: CHAIN_ID.ETHEREUM
+  chainId: CHAIN_ID.BASE
 })
 ```
 
@@ -282,7 +259,7 @@ import { getDAOAddresses } from '@buildeross/sdk/contract'
 const addresses = await getDAOAddresses({
   managerAddress: '0x...',
   tokenAddress: '0x...',
-  chainId: CHAIN_ID.ETHEREUM
+  chainId: CHAIN_ID.BASE
 })
 // Returns: { token, auction, treasury, governor, metadata }
 ```
@@ -294,7 +271,7 @@ import { getMetadataAttributes } from '@buildeross/sdk/contract'
 const attributes = await getMetadataAttributes({
   contractAddress: '0x...',
   tokenId: '1',
-  chainId: CHAIN_ID.ETHEREUM
+  chainId: CHAIN_ID.BASE
 })
 ```
 
@@ -305,7 +282,7 @@ import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
 const state = await getProposalState({
   proposalId: '1',
   governorAddress: '0x...',
-  chainId: CHAIN_ID.ETHEREUM
+  chainId: CHAIN_ID.BASE
 })
 
 if (state === ProposalState.Active) {
@@ -395,7 +372,7 @@ pnpm generate-abis
 
 The SDK supports all Builder protocol chains:
 
-- **Ethereum Mainnet** (`CHAIN_ID.ETHEREUM`)
+- **Ethereum Mainnet** (`CHAIN_ID.BASE`)
 - **Base** (`CHAIN_ID.BASE`) 
 - **Optimism** (`CHAIN_ID.OPTIMISM`)
 - **Zora** (`CHAIN_ID.ZORA`)
@@ -410,7 +387,7 @@ import { daoQuery } from '@buildeross/sdk/subgraph'
 
 try {
   const dao = await daoQuery({
-    chainId: CHAIN_ID.ETHEREUM,
+    chainId: CHAIN_ID.BASE,
     collectionAddress: '0x...'
   })
 } catch (error) {

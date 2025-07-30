@@ -1,6 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
-import * as Sentry from '@sentry/nextjs'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
@@ -46,8 +45,11 @@ export const myDaosRequest = async (memberAddress: string): Promise<MyDaosRespon
       .sort((a, b) => a.name.localeCompare(b.name))
   } catch (e: any) {
     console.error('Error fetching my DAOs:', e)
-    Sentry.captureException(e)
-    await Sentry.flush(2000)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(e)
+      await sentry.flush(2000)
+    } catch (_) {}
   }
 
   return daos

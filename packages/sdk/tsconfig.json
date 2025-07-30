@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "module": "es2020"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

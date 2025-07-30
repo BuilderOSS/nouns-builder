@@ -1,0 +1,20 @@
+# Source files
+src/
+*.test.*
+*.spec.*
+
+# Config files
+tsconfig.json
+tsup.config.ts
+svgo.config.js
+
+# Development
+node_modules/
+.env*
+*.log
+
+# Icons (source SVGs already bundled)
+icons/
+
+# Documentation
+README.md
