@@ -56,41 +56,44 @@ const VoteModal: React.FC<{
 
   const config = useConfig()
 
-  const handleSubmit = useCallback(async (values: FormValues) => {
-    if (!addresses.governor) return
+  const handleSubmit = useCallback(
+    async (values: FormValues) => {
+      if (!addresses.governor) return
 
-    const governorContractParams = {
-      address: addresses.governor,
-      abi: governorAbi,
-      chainId: chain.id,
-    }
+      const governorContractParams = {
+        address: addresses.governor,
+        abi: governorAbi,
+        chainId: chain.id,
+      }
 
-    let txHash: Hex
-    if (values.reason.length > 0) {
-      const data = await simulateContract(config, {
-        ...governorContractParams,
-        functionName: 'castVoteWithReason',
-        args: [proposalId as BytesType, BigInt(values.choice as Choice), values.reason],
-      })
-      txHash = await writeContract(config, data.request)
-    } else {
-      const data = await simulateContract(config, {
-        ...governorContractParams,
-        functionName: 'castVote',
-        args: [proposalId as BytesType, BigInt(values.choice!)],
-      })
-      txHash = await writeContract(config, data.request)
-    }
+      let txHash: Hex
+      if (values.reason.length > 0) {
+        const data = await simulateContract(config, {
+          ...governorContractParams,
+          functionName: 'castVoteWithReason',
+          args: [proposalId as BytesType, BigInt(values.choice as Choice), values.reason],
+        })
+        txHash = await writeContract(config, data.request)
+      } else {
+        const data = await simulateContract(config, {
+          ...governorContractParams,
+          functionName: 'castVote',
+          args: [proposalId as BytesType, BigInt(values.choice!)],
+        })
+        txHash = await writeContract(config, data.request)
+      }
 
-    await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+      await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
 
-    await mutate(
-      [SWR_KEYS.PROPOSAL, chain.id, proposalId],
-      getProposal(chain.id, proposalId)
-    )
+      await mutate(
+        [SWR_KEYS.PROPOSAL, chain.id, proposalId],
+        getProposal(chain.id, proposalId)
+      )
 
-    setIsCastVoteSuccess(true)
-  }, [addresses.governor, chain.id, proposalId, votesAvailable])
+      setIsCastVoteSuccess(true)
+    },
+    [addresses.governor, chain.id, proposalId, config, mutate]
+  )
 
   const voteOptions = [
     {

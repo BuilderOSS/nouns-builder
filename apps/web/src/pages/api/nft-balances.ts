@@ -1,3 +1,4 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedNFTBalance } from 'src/services/alchemyService'
@@ -25,9 +26,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    const options = {
+      filterSpam: PUBLIC_IS_TESTNET ? false : true,
+      useCache: true,
+    }
     const result = await getCachedNFTBalance(
       chainIdNum as CHAIN_ID,
-      address as AddressType
+      address as AddressType,
+      options
     )
 
     // Handle null result (unsupported chain or missing API key)

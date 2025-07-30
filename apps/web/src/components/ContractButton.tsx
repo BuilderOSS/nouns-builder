@@ -35,7 +35,6 @@ export const ContractButton = ({
     if (canUserBridge && userBalance?.decimals === 0) return openBridgeModal()
     if (userChain?.id !== appChain.id) return handleSwitchChain()
 
-
     if (handleClick) {
       handleClick(e)
     } else {

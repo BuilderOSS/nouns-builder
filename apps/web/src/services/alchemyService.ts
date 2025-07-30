@@ -14,23 +14,25 @@ import { formatUnits, fromHex, getAddress, Hex, zeroHash } from 'viem'
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'
 
+const chainTypeTag = PUBLIC_IS_TESTNET ? 'testnet' : 'mainnet'
+
 const getTokenPriceKey = (chainId: CHAIN_ID, address: string) =>
-  `alchemy:token-price:${chainId}:${address.toLowerCase()}`
+  `alchemy:token-price:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
 
 const getTokenMetadataKey = (chainId: CHAIN_ID, address: string) =>
-  `alchemy:token-metadata:${chainId}:${address.toLowerCase()}`
+  `alchemy:token-metadata:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
 
 const getTokenBalancesKey = (chainId: CHAIN_ID, address: string) =>
-  `alchemy:token-balances:${chainId}:${address.toLowerCase()}`
+  `alchemy:token-balances:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
 
 const getNftBalancesKey = (chainId: CHAIN_ID, address: string) =>
-  `alchemy:nft-balances:${chainId}:${address.toLowerCase()}`
+  `alchemy:nft-balances:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
 
 const getNftMetadataKey = (chainId: CHAIN_ID, contractAddress: string, tokenId: string) =>
-  `alchemy:nft-metadata:${chainId}:${contractAddress.toLowerCase()}:${tokenId}`
+  `alchemy:nft-metadata:${chainTypeTag}:${chainId}:${contractAddress.toLowerCase()}:${tokenId}`
 
 const getCoinGeckoLogoKey = (chainId: CHAIN_ID, address: string) =>
-  `coingecko:logo:${chainId}:${address.toLowerCase()}`
+  `coingecko:logo:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
 
 // Serialized NFT type with only the data we need for frontend display
 export type SerializedNft = {
@@ -151,24 +153,33 @@ const createAlchemyInstance = (chainId: CHAIN_ID): Alchemy | null => {
   })
 }
 
+export type TokenBalanceOptions = {
+  useCache?: boolean
+}
+
 export const getCachedTokenBalances = async (
   chainId: CHAIN_ID,
-  address: AddressType
+  address: AddressType,
+  options?: TokenBalanceOptions
 ): Promise<CachedResult<TokenBalance[]> | null> => {
   const alchemy = createAlchemyInstance(chainId)
   if (!alchemy) {
     return null
   }
 
+  const useCache = options?.useCache ?? true
+
   const cacheKey = getTokenBalancesKey(chainId, address)
   const redis = getRedisConnection()
 
-  // Check cache first
-  const cached = await redis?.get(cacheKey)
-  if (cached) {
-    return {
-      data: JSON.parse(cached),
-      source: 'cache',
+  if (useCache) {
+    // Check cache first
+    const cached = await redis?.get(cacheKey)
+    if (cached) {
+      return {
+        data: JSON.parse(cached),
+        source: 'cache',
+      }
     }
   }
 
@@ -200,35 +211,48 @@ export const getCachedTokenBalances = async (
   }
 }
 
+export type NFTBalanceOptions = {
+  filterSpam?: boolean
+  useCache?: boolean
+}
+
 export const getCachedNFTBalance = async (
   chainId: CHAIN_ID,
-  address: AddressType
+  address: AddressType,
+  options?: NFTBalanceOptions
 ): Promise<CachedResult<SerializedNft[]> | null> => {
   const alchemy = createAlchemyInstance(chainId)
   if (!alchemy) {
     return null
   }
 
+  const useCache = options?.useCache ?? true
+  const filterSpam = options?.filterSpam ?? true
+
   const cacheKey = getNftBalancesKey(chainId, address)
   const redis = getRedisConnection()
 
-  // Check cache first
-  const cached = await redis?.get(cacheKey)
-  if (cached) {
-    return {
-      data: JSON.parse(cached),
-      source: 'cache',
+  if (useCache) {
+    // Check cache first
+    const cached = await redis?.get(cacheKey)
+    if (cached) {
+      return {
+        data: JSON.parse(cached),
+        source: 'cache',
+      }
     }
   }
 
   try {
     // Fetch from Alchemy API
     const nfts = await alchemy.nft.getNftsForOwner(address, {
-      excludeFilters: [NftFilters.SPAM],
+      excludeFilters: filterSpam ? [NftFilters.SPAM] : [],
     })
 
     // Parse and cache the result (15 minutes TTL)
     const parsedNfts = parseNftData(nfts.ownedNfts)
+
+    // Cache the result (15 minutes TTL)
     await redis?.setex(cacheKey, 900, JSON.stringify(parsedNfts))
 
     return {
