@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/ipfs-service",
   "description": "IPFS client and utilities for BuilderOSS apps",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {
     "@brokerloop/ttlcache": "^3.2.3",
     "ipfs-core-types": "^0.13.0",

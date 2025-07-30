@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/tsconfig",
   "description": "Shared TypeScript configuration for BuilderOSS apps",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "files": [
     "base.json",
     "nextjs.json",

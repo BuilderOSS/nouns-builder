@@ -1,6 +1,5 @@
 {
   "name": "nouns-builder-subgraph",
-  "private": true,
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.87.0",
     "@graphprotocol/graph-ts": "^0.35.1",
@@ -11,6 +10,7 @@
     "mustache": "^4.2.0"
   },
   "license": "MIT",
+  "private": true,
   "scripts": {
     "build:only": "bash ./scripts/build.sh",
     "build:subgraph": "pnpm clean && pnpm build:only",

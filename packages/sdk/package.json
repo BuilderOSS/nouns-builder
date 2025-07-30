@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/sdk",
   "description": "SDK for interacting with Nouns Builder contracts and subgraphs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "dependencies": {
     "@buildeross/constants": "workspace:*",
     "@buildeross/types": "workspace:*",
@@ -49,6 +49,11 @@
       "require": "./dist/*.js"
     }
   },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
   "license": "MIT",
   "main": "./dist/index.js",
   "peerDependencies": {
@@ -56,11 +61,6 @@
     "viem": "^2.30.0",
     "wagmi": "^2.15.4"
   },
-  "files": [
-    "dist/**/*",
-    "!dist/**/*.test.*",
-    "!dist/**/*.spec.*"
-  ],
   "publishConfig": {
     "access": "public"
   },

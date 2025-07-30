@@ -1,6 +1,6 @@
 {
   "name": "nouns-builder",
-  "private": true,
+  "version": "0.0.0",
   "dependencies": {
     "@buildeross/analytics": "workspace:*",
     "@buildeross/blocklist": "workspace:*",
@@ -94,6 +94,7 @@
     "vitest": "^3.1.4"
   },
   "license": "MIT",
+  "private": true,
   "scripts": {
     "analyze": "ANALYZE=true next build",
     "build": "next build",
