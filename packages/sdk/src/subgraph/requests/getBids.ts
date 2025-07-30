@@ -19,7 +19,7 @@ export const getBids = async (chainId: CHAIN_ID, collection: string, tokenId: st
     try {
       const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
       sentry.captureException(error)
-      await sentry.flush(2000)
+      sentry.flush(2000).catch(() => {})
     } catch (_) {}
     return undefined
   }

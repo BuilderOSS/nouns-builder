@@ -40,7 +40,7 @@ export const dashboardRequest = async (memberAddress: string) => {
     try {
       const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
       sentry.captureException(e)
-      await sentry.flush(2000)
+      sentry.flush(2000).catch(() => {})
     } catch (_) {}
     throw new Error(
       e?.message

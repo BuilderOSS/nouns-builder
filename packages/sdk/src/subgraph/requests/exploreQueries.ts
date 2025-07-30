@@ -41,7 +41,7 @@ export const exploreMyDaosRequest = async (
     try {
       const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
       sentry.captureException(error)
-      await sentry.flush(2000)
+      sentry.flush(2000).catch(() => {})
     } catch (_) {}
     return undefined
   }
@@ -100,7 +100,7 @@ export const exploreDaosRequest = async (
     try {
       const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
       sentry.captureException(error)
-      await sentry.flush(2000)
+      sentry.flush(2000).catch(() => {})
     } catch (_) {}
     return undefined
   }
