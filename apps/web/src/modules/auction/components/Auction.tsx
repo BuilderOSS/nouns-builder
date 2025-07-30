@@ -16,7 +16,6 @@ import { useConfig } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
 import { useAuctionEvents } from '../hooks'
-import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
 import { auctionGrid, auctionWrapper } from './Auction.css'
 import { AuctionDetails } from './AuctionDetails'
 import { AuctionImage } from './AuctionImage'
@@ -73,12 +72,6 @@ export const Auction: React.FC<AuctionControllerProps> = ({
     { revalidateOnFocus: true }
   )
 
-  const { latest } = useNextAndPreviousTokens({
-    chainId: chain.id,
-    collection,
-    tokenId: queriedTokenId,
-  })
-
   const [currentTokenId, highestBid, highestBidder, _, endTime, settled] =
     unpackOptionalArray(auction, 6)
 
@@ -88,7 +81,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
     currentTokenId.toString() == queriedTokenId
 
   const isLatestButNotActive =
-    !isTokenActiveAuction && latest?.toString() === queriedTokenId
+    !isTokenActiveAuction && Number(queriedTokenId) > Number(currentTokenId)
 
   useAuctionEvents({
     chainId: chain.id,
