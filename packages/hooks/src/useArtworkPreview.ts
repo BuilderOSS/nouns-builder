@@ -1,13 +1,7 @@
 import { BASE_URL, RENDERER_BASE } from '@buildeross/constants'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
 
-import { ImageProps } from './useArtworkUpload'
-
-export interface Trait {
-  trait: string
-  properties: string[]
-  ipfs?: {}[]
-}
+import { ImageProps, Trait } from './useArtworkUpload'
 
 export type OrderedTraits = Array<Trait>
 
@@ -29,6 +23,8 @@ export interface SelectedTraitsProps {
   url: string
   content?: File
 }
+
+const MAX_GENERATED_IMAGES = 20
 
 export const useArtworkPreview = ({
   images,
@@ -145,7 +141,10 @@ export const useArtworkPreview = ({
       usedBlobUrls.current = []
 
       if (isMountedRef.current) {
-        setGeneratedImages((images) => [data, ...images.slice(0, 9)]) // Keep only last 10
+        setGeneratedImages((images) => [
+          data,
+          ...images.slice(0, MAX_GENERATED_IMAGES - 1),
+        ]) // Keep only last MAX_GENERATED_IMAGES
       }
     }
   }, [])
@@ -154,7 +153,8 @@ export const useArtworkPreview = ({
     async (e?: BaseSyntheticEvent) => {
       try {
         if (e) e.stopPropagation()
-        if (!canvas.current || !layers.length) return
+        if (!canvas.current) throw new Error('No canvas')
+        if (!layers.length) throw new Error('No layers')
 
         const _canvas = canvas.current
         const ctx = _canvas.getContext('2d')
@@ -192,7 +192,10 @@ export const useArtworkPreview = ({
           }
 
           if (isMountedRef.current) {
-            setGeneratedImages((images) => [url.href, ...images.slice(0, 9)]) // Keep only last 10
+            setGeneratedImages((images) => [
+              url.href,
+              ...images.slice(0, MAX_GENERATED_IMAGES - 1),
+            ]) // Keep only last MAX_GENERATED_IMAGES
           }
         }
       } catch (err) {

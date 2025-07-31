@@ -49,6 +49,30 @@ export interface UseArtworkUploadProps {
   onUploadProgress: (progress: number) => void
 }
 
+export interface Trait {
+  trait: string
+  properties: string[]
+  ipfs?: {}[]
+}
+
+export interface FileInfo {
+  filesLength: number
+  fileType: string
+  collectionName: string
+  traits: Trait[]
+  fileArray: File[]
+}
+
+export interface UseArtworkUploadReturn {
+  images: ImageProps[] | undefined
+  setFiles: (files: FileList | null) => void
+  fileInfo: FileInfo | undefined
+  filesArray: File[] | null
+  uploadArtworkError: ArtworkUploadError | undefined
+  setUploadArtworkError: (error: ArtworkUploadError | undefined) => void
+  ipfsUploadError: string | undefined
+}
+
 export const useArtworkUpload = ({
   artwork,
   ipfsUpload,
@@ -57,11 +81,11 @@ export const useArtworkUpload = ({
   onUploadSuccess,
   onUploadError,
   onUploadProgress,
-}: UseArtworkUploadProps) => {
+}: UseArtworkUploadProps): UseArtworkUploadReturn => {
   const [uploadArtworkError, setUploadArtworkError] = React.useState<
     ArtworkUploadError | undefined
   >()
-  const [ipfsUploadError, setIpfsUploadError] = React.useState<boolean>(false)
+  const [ipfsUploadError, setIpfsUploadError] = React.useState<string | undefined>()
 
   /*   assign ipfs upload to property  */
   const images = React.useMemo(() => {
@@ -132,7 +156,7 @@ export const useArtworkUpload = ({
         }
 
         setUploadArtworkError({
-          directory: `folder structure is incorrect. download the nouns example folder to compare.`,
+          directory: `folder structure is incorrect. download the demo folder to compare.`,
         })
         return
       }
@@ -293,13 +317,14 @@ export const useArtworkUpload = ({
       const files = filesArray.filter((file) => file.name !== '.DS_Store')
 
       try {
+        setIpfsUploadError(undefined)
         onUploadStart()
         const ipfs = await uploadToIPFS(files)
         // eslint-disable-next-line no-console
         console.debug('Uploaded to IPFS', ipfs)
         onUploadSuccess(ipfs)
-      } catch (err) {
-        setIpfsUploadError(true)
+      } catch (err: unknown) {
+        setIpfsUploadError((err as Error).message)
         console.error('Error uploading to IPFS', err)
         onUploadError(err as Error)
         return
