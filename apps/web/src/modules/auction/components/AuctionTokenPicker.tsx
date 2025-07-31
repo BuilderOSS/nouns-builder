@@ -13,6 +13,7 @@ import { auctionDateNavButton, auctionTextVariants } from './Auction.css'
 interface AuctionTokenPickerProps {
   collection: string
   tokenId: number
+  currentTokenId?: number
   mintDate?: number
   name?: string
 }
@@ -22,6 +23,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   tokenId,
   mintDate,
   name,
+  currentTokenId,
 }: AuctionTokenPickerProps) => {
   const { id: chainId } = useChainStore((x) => x.chain)
   const { query } = useRouter()
@@ -32,6 +34,15 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
 
   const hasPreviousToken = data?.prev !== undefined
   const hasNextToken = data?.next !== undefined
+  const hasLatestToken = data?.latest !== undefined
+  const latestTokenId =
+    hasLatestToken && currentTokenId !== undefined && data?.latest !== currentTokenId
+      ? currentTokenId
+      : data?.latest
+  const latestText =
+    hasLatestToken && currentTokenId !== undefined && data?.latest !== currentTokenId
+      ? `Current Auction`
+      : `Latest Auction`
 
   return (
     <Flex direction={'column'}>
@@ -69,23 +80,23 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         </OptionalLink>
 
         <OptionalLink
-          enabled={hasNextToken}
-          href={`/dao/${query.network}/${collection}/${data?.latest}`}
+          enabled={hasLatestToken}
+          href={`/dao/${query.network}/${collection}/${latestTokenId}`}
           passHref
           legacyBehavior
         >
           <Flex
-            as={hasNextToken ? 'a' : undefined}
+            as={hasLatestToken ? 'a' : undefined}
             align={'center'}
             justify={'center'}
             className={auctionDateNavButton}
           >
             <Text
               mx={'x3'}
-              style={hasNextToken ? {} : disabledStyle}
+              style={hasLatestToken ? {} : disabledStyle}
               fontWeight={'display'}
             >
-              {isMobile ? 'Latest' : 'Latest Auction'}
+              {isMobile ? latestText.split(' ')[0] : latestText}
             </Text>
           </Flex>
         </OptionalLink>
