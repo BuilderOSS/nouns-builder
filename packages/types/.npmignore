@@ -6,6 +6,7 @@ src/
 # Config files
 tsconfig.json
 tsup.config.ts
+.eslintrc.js
 
 # Development
 node_modules/

@@ -100,7 +100,7 @@ const uploadWithProgress = async (
     }),
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
   })
 
@@ -135,7 +135,7 @@ const uploadWithProgress = async (
             }),
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
+              Accept: 'application/json',
             },
           })
         } catch (error) {
@@ -168,13 +168,13 @@ const uploadCache = {
       if (cid) {
         return { cid, uri: `ipfs://${cid}` }
       }
-    } catch { }
+    } catch {}
   },
   put(files: File[], cid: string) {
     const digest = hashFiles(files)
     try {
       localStorage.setItem(`${this.prefix}/${digest}`, cid)
-    } catch { }
+    } catch {}
   },
 }
 
@@ -220,15 +220,15 @@ export async function uploadFile(
 
   const data = new FormData()
   data.append('file', file)
-  data.append('network', "public")
+  data.append('network', 'public')
 
-  const response = (await uploadWithProgress(data, uploadType, (progress) => {
+  const response = await uploadWithProgress(data, uploadType, (progress) => {
     console.info(`ipfs-service/uploadFile: progress: ${progress}%`)
     // You can also update the UI with the progress here
     if (typeof onProgress === 'function') {
       onProgress(progress)
     }
-  })) as any
+  })
 
   const uri = `ipfs://${response.cid}`
 
@@ -245,9 +245,9 @@ export async function uploadFile(
 export type FileEntry =
   | File
   | {
-    content: File
-    path: string
-  }
+      content: File
+      path: string
+    }
 
 export async function uploadDirectory(
   fileEntries: FileEntry[],
@@ -304,15 +304,15 @@ export async function uploadDirectory(
       name: 'builder',
     }),
   )
-  data.append('network', "public")
+  data.append('network', 'public')
 
-  const response = (await uploadWithProgress(data, 'directory', (progress) => {
+  const response = await uploadWithProgress(data, 'directory', (progress) => {
     console.info(`ipfs-service/uploadDirectory: progress: ${progress}%`)
     // You can also update the UI with the progress here
     if (typeof onProgress === 'function') {
       onProgress(progress)
     }
-  })) as any
+  })
 
   const uri = `ipfs://${response.cid}`
 
@@ -338,7 +338,7 @@ export async function uploadJson(jsonObject: object): Promise<IPFSUploadResponse
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     },
     body: data,
   })

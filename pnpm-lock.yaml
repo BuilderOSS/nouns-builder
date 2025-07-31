@@ -356,6 +356,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -368,6 +371,9 @@ importers:
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.15.21
       '@types/react':
         specifier: ^19.1.5
         version: 19.1.5
@@ -377,6 +383,9 @@ importers:
       react:
         specifier: ^19.1.0
         version: 19.1.0
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -542,6 +551,9 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -6740,8 +6752,8 @@ packages:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f:
-    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f}
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5:
+    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5}
     version: 1.9.7
 
   form-data@2.5.3:
@@ -17423,7 +17435,7 @@ snapshots:
       '@openzeppelin/contracts-upgradeable': 4.9.6
       '@types/node': 18.19.103
       ds-test: https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0
-      forge-std: https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f
+      forge-std: https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5
       micro-onchain-metadata-utils: 0.1.1
       sol-uriencode: 0.2.0
 
@@ -19946,7 +19958,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/60acb7aaadcce2d68e52986a0a66fe79f07d138f: {}
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5: {}
 
   form-data@2.5.3:
     dependencies:

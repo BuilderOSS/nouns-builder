@@ -9,6 +9,7 @@ tsconfig.json
 tsup.config.ts
 wagmi.config.ts
 codegen.yml
+.eslintrc.js
 
 # Development
 node_modules/
