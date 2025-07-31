@@ -28,7 +28,7 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
   /*  init layers and drag and drop  */
   const [dragAndDrop, setDragAndDrop] = React.useState<DragAndDropProps | null>(null)
   React.useEffect(() => {
-    if (!orderedLayers.length) {
+    if (!!artwork.length && orderedLayers.length !== artwork.length) {
       setOrderedLayers(artwork)
     }
   }, [artwork, orderedLayers, setOrderedLayers])

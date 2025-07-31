@@ -2,7 +2,12 @@ import { IPFSUpload, useArtworkPreview, useArtworkUpload } from '@buildeross/hoo
 import * as Sentry from '@sentry/nextjs'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
-import React, { BaseSyntheticEvent, ChangeEventHandler, ReactElement } from 'react'
+import React, {
+  BaseSyntheticEvent,
+  ChangeEventHandler,
+  ReactElement,
+  useCallback,
+} from 'react'
 import { ArtworkPreview, ArtworkUpload as UploadComponent } from 'src/components/Artwork'
 import { LayerOrdering } from 'src/components/Artwork/LayerOrdering'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
@@ -67,8 +72,9 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     (ipfs: IPFSUpload[]) => {
       setIpfsUpload(ipfs)
       setIsUploadingToIPFS(false)
+      setIpfsUploadProgress(0)
     },
-    [setIpfsUpload, setIsUploadingToIPFS]
+    [setIpfsUpload, setIsUploadingToIPFS, setIpfsUploadProgress]
   )
 
   const handleUploadError = React.useCallback(
@@ -76,11 +82,12 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
       console.error('Error uploading to IPFS', err)
       setIpfsUpload([])
       setIsUploadingToIPFS(false)
+      setIpfsUploadProgress(0)
       Sentry.captureException(err)
       Sentry.flush(2000).catch(() => {})
       return
     },
-    [setIpfsUpload, setIsUploadingToIPFS]
+    [setIpfsUpload, setIsUploadingToIPFS, setIpfsUploadProgress]
   )
 
   const {
@@ -106,17 +113,16 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     orderedLayers,
   })
 
-  const handleUpload = (e: BaseSyntheticEvent) => {
-    setUploadArtworkError(undefined)
-    setFiles(e.currentTarget.files)
-    setOrderedLayers([])
-  }
+  const handleUpload = useCallback(
+    (e: BaseSyntheticEvent) => {
+      setUploadArtworkError(undefined)
+      setOrderedLayers([])
+      setFiles(e.currentTarget.files)
+    },
+    [setUploadArtworkError, setOrderedLayers, setFiles]
+  )
 
-  /*
-
-    add artwork traits and properties to store
-
-  */
+  // Set up artwork traits into store
   React.useEffect(() => {
     if (!fileInfo || !filesArray || !fileInfo.traits || !formik || uploadArtworkError)
       return
@@ -129,18 +135,16 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filesArray, fileInfo, uploadArtworkError])
 
-  /*
+  const showPreview = React.useMemo(
+    () => fileInfo && !isUploadingToIPFS && !ipfsUploadError && !uploadArtworkError,
+    [isUploadingToIPFS, ipfsUploadError, uploadArtworkError, fileInfo]
+  )
 
-    generate Stacked Image on Init
-
-  */
   React.useEffect(() => {
-    if (!generatedImages.length && !isUploadingToIPFS) {
-      generateStackedImage()
-    }
-  }, [generatedImages, isUploadingToIPFS, generateStackedImage])
+    if (isUploadingToIPFS || !fileInfo) return
 
-  const showPreview = setUpArtwork.artwork.length > 0
+    generateStackedImage()
+  }, [generateStackedImage, isUploadingToIPFS, fileInfo])
 
   const layerOrdering = (
     <LayerOrdering
@@ -158,7 +162,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
         fileCount={setUpArtwork.filesLength}
         traitCount={setUpArtwork.artwork.length}
         helperText={helperText}
-        errorMessage={errorMessage}
+        formError={errorMessage}
         onUpload={handleUpload}
         ipfsUploadError={ipfsUploadError}
         uploadArtworkError={uploadArtworkError}
@@ -179,6 +183,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
             generateStackedImage={generateStackedImage}
             images={images}
             generatedImages={generatedImages}
+            orderedLayers={orderedLayers}
           />
         </motion.div>
       )}

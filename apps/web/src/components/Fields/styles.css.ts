@@ -246,6 +246,7 @@ export const defaultUploadButtonStyle = style({
   borderRadius: '10px',
   width: '100%',
   justifyContent: 'space-between',
+  cursor: 'pointer',
 })
 
 export const defaultHelperTextStyle = style({

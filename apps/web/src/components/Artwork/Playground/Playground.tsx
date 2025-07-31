@@ -1,4 +1,5 @@
 import {
+  OrderedTraits,
   SelectedTraitsProps,
   useArtworkPreview,
 } from '@buildeross/hooks/useArtworkPreview'
@@ -13,17 +14,15 @@ import {
   previewWrapperInnerStyle,
 } from 'src/styles/Artwork.css'
 
-import { useFormStore } from '../../../stores'
 import { ImageGrid } from './ImageGrid'
 import { LayerMenu } from './LayerMenu'
 
 export interface PlaygroundProps {
   images: ImageProps[]
+  orderedLayers: OrderedTraits
 }
 
-export const Playground: React.FC<PlaygroundProps> = ({ images }) => {
-  const { orderedLayers } = useFormStore()
-
+export const Playground: React.FC<PlaygroundProps> = ({ images, orderedLayers }) => {
   const [selectedTraits, setSelectedTraits] = React.useState<SelectedTraitsProps[]>([])
 
   const { layers, canvas, generateStackedImage, generatedImages } = useArtworkPreview({
