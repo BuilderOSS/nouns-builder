@@ -1,5 +1,6 @@
-import { isCID, isNormalizeableIPFSUrl, normalizeIPFSUrl } from './url'
 import { describe, expect, it } from 'vitest'
+
+import { isCID, isNormalizeableIPFSUrl, normalizeIPFSUrl } from './url'
 
 const VALID_CID = 'bafkreidgvpkjawlxz6sffxzwgooowe5yt7i6wsyg236mfoks77nywkptdq'
 
@@ -73,7 +74,7 @@ describe('normalizeIPFSUrl', () => {
   it('handles directory gateway urls', () => {
     const directoryCIDWithPath = `https://my.gateway.com/ipfs/${VALID_CID}/filename.txt`
     expect(normalizeIPFSUrl(directoryCIDWithPath)).toBe(
-      `ipfs://${VALID_CID}/filename.txt`
+      `ipfs://${VALID_CID}/filename.txt`,
     )
   })
   it('supports query strings and fragments', () => {

@@ -75,13 +75,15 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   const [currentTokenId, highestBid, highestBidder, _, endTime, settled] =
     unpackOptionalArray(auction, 6)
 
+  const hasEnded = endTime && endTime < Date.now() / 1000
+
   const isTokenActiveAuction =
     !settled &&
     currentTokenId !== undefined &&
     currentTokenId.toString() == queriedTokenId
 
   const isLatestButNotActive =
-    !isTokenActiveAuction && Number(queriedTokenId) > Number(currentTokenId)
+    !isTokenActiveAuction && Number(queriedTokenId) > Number(currentTokenId) && hasEnded
 
   useAuctionEvents({
     chainId: chain.id,
@@ -113,6 +115,11 @@ export const Auction: React.FC<AuctionControllerProps> = ({
           name={name}
           collection={collection}
           tokenId={Number(queriedTokenId)}
+          currentTokenId={
+            currentTokenId && !hasEnded && !isTokenActiveAuction
+              ? Number(currentTokenId)
+              : undefined
+          }
         />
 
         {isTokenActiveAuction && !!auction && (

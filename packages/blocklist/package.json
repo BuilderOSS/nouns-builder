@@ -5,14 +5,28 @@
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
+    "@types/node": "^22.15.21",
     "@types/react": "^19.1.5",
     "eslint": "8.57.1",
     "react": "^19.1.0",
+    "tsup": "^8.3.5",
     "typescript": "^5.8.3",
     "viem": "^2.30.0"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
   "license": "MIT",
-  "main": "./index.ts",
+  "main": "./dist/index.js",
   "peerDependencies": {
     "viem": "^2.30.0"
   },
@@ -25,8 +39,12 @@
     "directory": "packages/blocklist"
   },
   "scripts": {
-    "lint": "TIMING=1 eslint *.ts --fix",
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint src --fix",
+    "type-check": "tsc --noEmit",
     "update": "./update_sdnlist.sh"
   },
-  "types": "./index.ts"
+  "types": "./dist/index.d.ts"
 }

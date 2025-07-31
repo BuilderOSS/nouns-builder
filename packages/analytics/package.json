@@ -14,10 +14,23 @@
     "next": "^15.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "tsup": "^8.3.5",
     "typescript": "^5.8.3"
   },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
   "license": "MIT",
-  "main": "index.ts",
+  "main": "./dist/index.js",
   "peerDependencies": {
     "next": "^15.3.2",
     "react": "^19.1.0"
@@ -31,7 +44,11 @@
     "directory": "packages/analytics"
   },
   "scripts": {
-    "lint": "pnpm type-check && TIMING=1 eslint *.ts",
-    "type-check": "tsc --pretty --noEmit"
-  }
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint src --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
 }

@@ -1,7 +1,8 @@
-import sdnlistDev from '../sdnlist.dev.json'
-import sdnlist from '../sdnlist.json'
 import { useMemo } from 'react'
 import { getAddress } from 'viem'
+
+import sdnlistDev from '../sdnlist.dev.json'
+import sdnlist from '../sdnlist.json'
 
 const environment = process.env.NODE_ENV || 'development'
 
