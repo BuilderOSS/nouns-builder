@@ -1,26 +1,25 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { MyDaosResponse } from '@buildeross/sdk/subgraph'
+import { Chain, CHAIN_ID } from '@buildeross/types'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
 import axios from 'axios'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-import useSWR from 'swr'
-import { useAccount, useBalance, useDisconnect } from 'wagmi'
-
 import { Avatar } from 'src/components/Avatar'
 import { DaoAvatar } from 'src/components/Avatar/DaoAvatar'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { Icon } from 'src/components/Icon'
 import { NetworkController } from 'src/components/NetworkController'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { MyDaosResponse } from 'src/data/subgraph/requests/daoQuery'
-import { useBridgeModal } from 'src/hooks/useBridgeModal'
-import { useEnsData } from 'src/hooks/useEnsData'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
-import { CHAIN_ID, Chain } from 'src/typings'
-import { formatCryptoVal } from 'src/utils/numbers'
+import useSWR from 'swr'
+import { useAccount, useBalance, useDisconnect } from 'wagmi'
 
 import { ConnectButton } from './ConnectButton'
 import { CreateDaoButton } from './CreateDaoButton'
@@ -398,7 +397,7 @@ export const NavMenu = () => {
                 </Flex>
               </Link>
               <a
-                href="https://builder-docs.vercel.app/"
+                href="https://docs.nouns.build/"
                 target="_blank"
                 rel="noreferrer noopener"
               >

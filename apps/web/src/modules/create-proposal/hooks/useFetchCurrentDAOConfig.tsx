@@ -1,23 +1,22 @@
-import useSWRImmutable from 'swr/immutable'
-import { encodeAbiParameters, parseAbiParameters } from 'viem'
-import { useReadContracts } from 'wagmi'
-
 import {
   L2_MIGRATION_DEPLOYER,
   MERKLE_METADATA_RENDERER,
   NULL_ADDRESS,
-} from 'src/constants/addresses'
-import { RENDERER_BASE } from 'src/constants/rendererBase'
+} from '@buildeross/constants/addresses'
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import {
   auctionAbi,
   governorAbi,
   metadataAbi,
   tokenAbi,
   treasuryAbi,
-} from 'src/data/contract/abis'
-import { DaoContractAddresses } from 'src/modules/dao'
-import { AddressType, CHAIN_ID } from 'src/typings'
-import { unpackOptionalArray } from 'src/utils/helpers'
+} from '@buildeross/sdk/contract'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import useSWRImmutable from 'swr/immutable'
+import { encodeAbiParameters, parseAbiParameters } from 'viem'
+import { useReadContracts } from 'wagmi'
 
 import { applyL1ToL2Alias } from '../utils/applyL1ToL2Alias'
 

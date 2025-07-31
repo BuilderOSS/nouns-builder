@@ -1,8 +1,12 @@
-import { DAO, DAOTokenOwner, DAOVoter, Token, Snapshot } from '../generated/schema'
-import { Transfer as TransferEvent, DelegateChanged as DelegateChangedEvent } from '../generated/templates/Token/Token'
+import { Bytes, ethereum, store } from '@graphprotocol/graph-ts'
+
+import { DAO, DAOTokenOwner, DAOVoter, Snapshot, Token } from '../generated/schema'
+import {
+  DelegateChanged as DelegateChangedEvent,
+  Transfer as TransferEvent,
+} from '../generated/templates/Token/Token'
 import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { setTokenMetadata } from './utils/setTokenMetadata'
-import { Bytes, ethereum, store } from '@graphprotocol/graph-ts'
 
 let ADDRESS_ZERO = Bytes.fromHexString('0x0000000000000000000000000000000000000000')
 
@@ -34,7 +38,8 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
     newDelegateVoter.voter = newDelegate
   }
 
-  newDelegateVoter.daoTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
+  newDelegateVoter.daoTokenCount =
+    newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
   newDelegateVoter.save()
 
   let prevDelegateVoterId = `${event.address.toHexString()}:${prevDelegate.toHexString()}`
@@ -160,8 +165,6 @@ export function handleTransfer(event: TransferEvent): void {
   saveSnapshot(event)
 }
 
-
-
 function saveSnapshot(event: ethereum.Event): void {
   if (!event) {
     return
@@ -180,6 +183,5 @@ function saveSnapshot(event: ethereum.Event): void {
   snapshot.ownerCount = dao.ownerCount
   snapshot.voterCount = dao.voterCount
   snapshot.proposalCount = dao.proposalCount
-  snapshot.save();
+  snapshot.save()
 }
-

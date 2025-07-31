@@ -1,29 +1,37 @@
 {
-  "private": true,
+  "name": "nouns-builder",
   "version": "0.0.0",
-  "scripts": {
-    "anvil": "bash -c 'source .env.local && anvil --fork-url \"$ANVIL_FORK_URL\" --fork-block-number \"$ANVIL_BLOCK_NUMBER\"'",
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "test": "turbo run test",
-    "prepare": "husky install",
-    "type-check": "turbo run type-check",
-    "lint": "turbo run lint",
-    "eslint": "eslint --fix . --ext .ts,.tsx",
-    "clean": "turbo run clean && rm -rf node_modules",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "ci": "turbo run lint test",
-    "syncpack": "syncpack list-mismatches",
-    "syncpack:fix": "syncpack fix-mismatches"
+  "dependencies": {
+    "wagmi": "^2.15.4"
   },
   "devDependencies": {
-    "eslint": "8.57.1",
     "@buildeross/eslint-config-custom": "workspace:*",
+    "@changesets/cli": "^2.29.5",
+    "eslint": "8.57.1",
     "husky": "^8.0.3",
     "prettier": "3.5.3",
     "syncpack": "^13.0.4",
-    "turbo": "2.5.3"
+    "turbo": "2.5.5"
   },
-  "packageManager": "pnpm@10.11.0",
-  "name": "nouns-builder"
+  "packageManager": "pnpm@10.13.1",
+  "private": true,
+  "scripts": {
+    "anvil": "bash -c 'source .env.local && anvil --fork-url \"$ANVIL_FORK_URL\" --fork-block-number \"$ANVIL_BLOCK_NUMBER\"'",
+    "build:packages": "turbo run build --filter=@buildeross/*",
+    "build": "turbo run build",
+    "changeset": "changeset",
+    "ci": "turbo run lint test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "dev": "turbo run dev",
+    "eslint": "eslint --fix . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "lint": "turbo run lint",
+    "prepare": "husky install",
+    "release": "pnpm build && changeset publish",
+    "syncpack": "syncpack list-mismatches",
+    "syncpack:fix": "syncpack fix-mismatches && syncpack format",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check",
+    "version-packages": "changeset version"
+  }
 }

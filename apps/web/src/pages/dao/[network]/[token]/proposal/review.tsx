@@ -1,27 +1,26 @@
-import { Box, Flex, Stack, Text, atoms } from '@buildeross/zord'
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { useVotes } from '@buildeross/hooks'
+import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { getDAOAddresses } from '@buildeross/sdk/contract'
+import { AddressType } from '@buildeross/types'
+import { atoms, Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useAccount } from 'wagmi'
-
 import { Icon } from 'src/components/Icon'
-import { CACHE_TIMES } from 'src/constants/cacheTimes'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import getDAOAddresses from 'src/data/contract/requests/getDAOAddresses'
-import { useVotes } from 'src/hooks'
-import { useDelayedGovernance } from 'src/hooks/useDelayedGovernance'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   CreateProposalHeading,
   ReviewProposalForm,
   useProposalStore,
 } from 'src/modules/create-proposal'
-import { useDaoStore } from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { notFoundWrap } from 'src/styles/404.css'
-import { AddressType } from 'src/typings'
+import { useAccount } from 'wagmi'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
   const { isMobile } = useLayoutStore()

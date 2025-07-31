@@ -1,14 +1,13 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { OrderDirection, Snapshot_OrderBy } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import useSWR from 'swr'
-
-import SWR_KEYS from 'src/constants/swrKeys'
-import { SDK } from 'src/data/subgraph/client'
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
-import { OrderDirection, Snapshot_OrderBy } from 'src/data/subgraph/sdk.generated'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
+import useSWR from 'swr'
 
 import { VotePlacard } from './VotePlacard'
 import { VoterParticipation } from './VoterParticipation'
@@ -32,7 +31,7 @@ export const ProposalVotes: React.FC<ProposalVotesProps> = ({ proposal }) => {
       ? [SWR_KEYS.SNAPSHOT_SUPPLY, chain.id, addresses.token, proposal.timeCreated]
       : null,
     () =>
-      SDK.connect(chain.id)
+      SubgraphSDK.connect(chain.id)
         .snapshots({
           where: {
             dao: addresses.token?.toLowerCase(),

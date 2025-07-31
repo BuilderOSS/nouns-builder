@@ -1,0 +1,18 @@
+# Source files (keep built index.ts for runtime)
+src/
+*.test.*
+*.spec.*
+
+# Config files
+tsconfig.json
+tsup.config.ts
+.eslintrc.js
+
+# Development files
+node_modules/
+.env*
+*.log
+update_sdnlist.sh
+
+# Documentation
+README.md

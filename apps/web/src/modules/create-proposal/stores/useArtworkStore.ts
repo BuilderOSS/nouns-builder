@@ -1,8 +1,5 @@
+import { ArtworkType, IPFSUpload, OrderedTraits } from '@buildeross/hooks'
 import { create } from 'zustand'
-
-import { OrderedTraits } from 'src/components/Artwork/LayerBox'
-import { IPFSUpload } from 'src/hooks'
-import { ArtworkType } from 'src/modules/create-dao/components'
 
 export interface ArtworkFormValues {
   artwork: Array<ArtworkType>
@@ -18,6 +15,8 @@ export interface ArtworkStore {
   setOrderedLayers: (orderedLayers: OrderedTraits) => void
   isUploadingToIPFS: boolean
   setIsUploadingToIPFS: (bool: boolean) => void
+  ipfsUploadProgress: number
+  setIpfsUploadProgress: (progress: number) => void
   resetForm: () => void
 }
 
@@ -29,6 +28,7 @@ const initialState = {
   ipfsUpload: [],
   orderedLayers: [],
   isUploadingToIPFS: false,
+  ipfsUploadProgress: 0,
 }
 
 export const useArtworkStore = create<ArtworkStore>((set) => ({
@@ -41,5 +41,6 @@ export const useArtworkStore = create<ArtworkStore>((set) => ({
     })
   },
   setIsUploadingToIPFS: (isUploadingToIPFS: boolean) => set({ isUploadingToIPFS }),
+  setIpfsUploadProgress: (progress: number) => set({ ipfsUploadProgress: progress }),
   resetForm: () => set({ ...initialState }),
 }))

@@ -1,15 +1,11 @@
-import { Flex, Grid, Text, atoms } from '@buildeross/zord'
+import { useEnsData } from '@buildeross/hooks'
+import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
+import { walletSnippet } from '@buildeross/utils/helpers'
+import { atoms, Flex, Grid, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useMemo, useState } from 'react'
-
+import { useMemo } from 'react'
 import { Avatar } from 'src/components/Avatar'
-import {
-  ProposalVoteFragment,
-  ProposalVoteSupport,
-} from 'src/data/subgraph/sdk.generated'
-import { useEnsData } from 'src/hooks'
 import { useLayoutStore } from 'src/stores'
-import { walletSnippet } from 'src/utils/helpers'
 
 const variants = {
   inital: {
@@ -34,7 +30,6 @@ export interface VotePlacardProps {
 
 export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) => {
   const { ensName, ensAvatar } = useEnsData(vote.voter)
-  const [open, setOpen] = useState(true)
   const { isMobile } = useLayoutStore()
 
   const supportStyle = useMemo(() => {
@@ -62,11 +57,9 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
   return (
     <Grid
       as="button"
-      onClick={() => (vote.reason ? setOpen((x) => !x) : null)}
       columns={7}
       gap={isMobile ? 'x1' : 'x0'}
       backgroundColor="background1"
-      cursor={vote.reason ? 'pointer' : 'auto'}
       align={'center'}
       mb="x2"
       px={isMobile ? 'x2' : 'x6'}
@@ -77,6 +70,10 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
       borderColor="border"
       borderRadius="curved"
       w="100%"
+      style={{
+        cursor: 'auto',
+        userSelect: 'text',
+      }}
     >
       <Text
         fontSize={isMobile ? 12 : 14}
@@ -116,7 +113,7 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
       </Flex>
 
       <AnimatePresence initial={false}>
-        {open && vote.reason && (
+        {vote.reason && (
           <motion.div
             variants={variants}
             initial={'inital'}

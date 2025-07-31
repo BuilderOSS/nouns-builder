@@ -1,6 +1,7 @@
-import * as styles from './mixins.css'
 import clsx from 'clsx'
 import { filter, get, mapValues, values } from 'lodash-es'
+
+import * as styles from './mixins.css'
 
 export type Mixins = typeof styles
 

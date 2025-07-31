@@ -1,9 +1,10 @@
-import { Atoms } from '../atoms.css'
-import { Box, Button, Icon } from '../elements'
-import { container } from './PopUp.css'
 import { Placement } from '@popperjs/core'
 import React, { useEffect, useState } from 'react'
 import { usePopper } from 'react-popper'
+
+import { Atoms } from '../atoms.css'
+import { Box, Button, Icon } from '../elements'
+import { container } from './PopUp.css'
 
 export interface PopUpProps {
   trigger?: React.ReactNode

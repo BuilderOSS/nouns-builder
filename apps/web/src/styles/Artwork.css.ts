@@ -123,12 +123,12 @@ export const selectTraitNameStyle = style([
 export const selectTraitNameWrapper = style({
   maxHeight: 400,
   overflow: 'hidden',
-  overflowY: 'scroll',
+  overflowY: 'auto',
 })
 
 export const previewGeneratedImageStyle = style({
-  height: 182,
-  width: 182,
+  height: 175,
+  width: 175,
   borderRadius: '16px',
   overflow: 'hidden',
   '@media': {
@@ -167,8 +167,8 @@ export const previewWrapperInnerStyle = style({
 })
 
 export const previewGridWrapperStyle = style({
-  // width: 640,
-  overflowY: 'scroll',
+  overflowY: 'auto',
+  width: '100%',
   maxHeight: 'calc(100vh - 400px)',
   '@media': {
     'screen and (max-width: 768px)': {

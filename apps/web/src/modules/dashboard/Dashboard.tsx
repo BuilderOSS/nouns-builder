@@ -1,32 +1,29 @@
-import { Box, Flex, Text } from '@buildeross/zord'
-import React, { useMemo, useState } from 'react'
-import useSWR from 'swr'
-import { useAccount } from 'wagmi'
-
-import { DisplayPanel } from 'src/components/DisplayPanel'
-import SWR_KEYS from 'src/constants/swrKeys'
-import {
-  ProposalState,
-  getProposalState,
-} from 'src/data/contract/requests/getProposalState'
-import { dashboardRequest } from 'src/data/subgraph/requests/dashboardQuery'
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
+import { dashboardRequest } from '@buildeross/sdk/subgraph'
 import {
   CurrentAuctionFragment,
   DaoFragment,
   ProposalFragment,
-} from 'src/data/subgraph/sdk.generated'
-import { AddressType, CHAIN_ID } from 'src/typings'
+} from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { Box, Flex, Text } from '@buildeross/zord'
+import React, { useMemo, useState } from 'react'
+import { DisplayPanel } from 'src/components/DisplayPanel'
+import useSWR from 'swr'
+import { useAccount } from 'wagmi'
 
 import { DaoFeed } from '../dao'
 import { DaoAuctionCard } from './DaoAuctionCard'
 import { DaoProposals } from './DaoProposals'
+import { DashboardLayout, DashPage } from './DashboardLayout'
 import { DashConnect } from './DashConnect'
-import { DashPage, DashboardLayout } from './DashboardLayout'
 import { AuctionCardSkeleton, DAOCardSkeleton, ProposalCardSkeleton } from './Skeletons'
 
 const ACTIVE_PROPOSAL_STATES = [
-  ProposalState.Active,
   ProposalState.Pending,
+  ProposalState.Active,
+  ProposalState.Succeeded,
   ProposalState.Queued,
 ]
 

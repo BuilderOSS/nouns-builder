@@ -1,30 +1,52 @@
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
 
-import { Spinner } from 'src/components/Spinner'
+import {
+  contentWrapper,
+  customSpinner,
+  percentageText,
+  progressText,
+  progressUnderline,
+  spinnerContainer,
+  uploadNotificationWrapper,
+} from './Uploading.css'
 
-import { uploadNotificationWrapper } from './Uploading.css'
+export const Uploading = ({
+  isUploadingToIPFS,
+  ipfsUploadProgress,
+}: {
+  isUploadingToIPFS: boolean
+  ipfsUploadProgress: number
+}) => {
+  const shouldShow = isUploadingToIPFS
+  const progress = Math.floor(ipfsUploadProgress)
 
-export const Uploading = ({ isUploadingToIPFS }: { isUploadingToIPFS: boolean }) => {
   return (
     <>
-      {isUploadingToIPFS && (
+      {shouldShow && (
         <Flex
           position={'fixed'}
           pl={'x8'}
           pt={'x4'}
           bottom={'x5'}
           width={'100%'}
-          className={uploadNotificationWrapper}
           align={'flex-end'}
           justify={'flex-end'}
           right={'x8'}
           style={{ zIndex: 100 }}
         >
-          <Flex align={'center'} justify={'center'}>
-            <Box fontSize={14}>Uploading Artwork to IPFS</Box>
+          <Flex align={'center'} justify={'center'} className={uploadNotificationWrapper}>
+            <Box className={progressUnderline} style={{ width: `${progress}%` }} />
+            <Flex align={'center'} justify={'center'} className={contentWrapper}>
+              <Box fontSize={14} className={progressText}>
+                Uploading Artwork to IPFS
+              </Box>
 
-            <Spinner mx={'x4'} />
+              <Box mx={'x4'} className={spinnerContainer}>
+                <Box className={customSpinner} />
+                <Box className={percentageText}>{progress}</Box>
+              </Box>
+            </Flex>
           </Flex>
         </Flex>
       )}

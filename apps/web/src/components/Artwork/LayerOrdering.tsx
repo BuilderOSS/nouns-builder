@@ -1,10 +1,9 @@
+import { ImageProps, OrderedTraits } from '@buildeross/hooks'
 import { Box } from '@buildeross/zord'
 import React from 'react'
-
 import { defaultFormHeading } from 'src/components/Fields/styles.css'
-import { ImageProps } from 'src/hooks'
 
-import { DragAndDropProps, LayerBox, OrderedTraits } from './LayerBox'
+import { DragAndDropProps, LayerBox } from './LayerBox'
 
 export interface ArtworkType {
   trait: string
@@ -29,7 +28,7 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
   /*  init layers and drag and drop  */
   const [dragAndDrop, setDragAndDrop] = React.useState<DragAndDropProps | null>(null)
   React.useEffect(() => {
-    if (!orderedLayers.length) {
+    if (!!artwork.length && orderedLayers.length !== artwork.length) {
       setOrderedLayers(artwork)
     }
   }, [artwork, orderedLayers, setOrderedLayers])

@@ -1,6 +1,5 @@
 import { Flex } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-
 import {
   confirmRemoveHeadingStyle,
   confirmRemoveHelper,

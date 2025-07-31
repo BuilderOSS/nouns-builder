@@ -1,20 +1,21 @@
+import { OrderedTraits } from '@buildeross/hooks/useArtworkPreview'
+import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { Flex } from '@buildeross/zord'
-
 import {
   artworkPreviewGenerateButton,
   artworkPreviewImageWrapper,
 } from 'src/components/Fields/styles.css'
-import { ImageProps } from 'src/hooks/useArtworkUpload'
-import { Playground } from 'src/modules/create-dao'
 
 import { Icon } from '../Icon'
 import AnimatedModal from '../Modal/AnimatedModal'
+import { Playground } from './Playground'
 
 export interface ArtworkPreviewProps {
   canvas: React.MutableRefObject<HTMLCanvasElement | null>
   generatedImages: any[]
   generateStackedImage: () => Promise<void>
   images: ImageProps[] | undefined
+  orderedLayers: OrderedTraits
 }
 
 export const ArtworkPreview: React.FC<ArtworkPreviewProps> = ({
@@ -22,11 +23,14 @@ export const ArtworkPreview: React.FC<ArtworkPreviewProps> = ({
   generatedImages,
   generateStackedImage,
   images,
+  orderedLayers,
 }) => {
   return (
     <Flex align={'center'} justify={'center'} direction={'column'}>
       <Flex className={artworkPreviewImageWrapper} mb={'x8'}>
-        <img height={'100%'} width={'100%'} src={generatedImages[0]} alt="preview" />
+        {generatedImages[0] && (
+          <img height={'100%'} width={'100%'} src={generatedImages[0]} alt="preview" />
+        )}
         <canvas ref={canvas} style={{ display: 'none' }} />
       </Flex>
       <Flex
@@ -41,12 +45,12 @@ export const ArtworkPreview: React.FC<ArtworkPreviewProps> = ({
         <Flex>Generate Randomized Preview</Flex>
       </Flex>
       <Flex></Flex>
-      {images && (
+      {images && orderedLayers && (
         <AnimatedModal
           size={'large'}
           trigger={<Flex>See more in Advanced Preview Playground</Flex>}
         >
-          <Playground images={images} />
+          <Playground images={images} orderedLayers={orderedLayers} />
         </AnimatedModal>
       )}
     </Flex>

@@ -1,6 +1,6 @@
+export * from './ABI/ABI'
 export * from './Address/Address'
 export * from './Arguments/Arguments'
 export * from './Function/Function'
 export * from './Summary/Summary'
-export * from './ABI/ABI'
 export * from './Value/Value'

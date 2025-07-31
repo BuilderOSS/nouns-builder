@@ -1,17 +1,16 @@
+import { auctionAbi, governorAbi } from '@buildeross/sdk/contract'
+import { AddressType } from '@buildeross/types'
+import { toSeconds } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { encodeFunctionData } from 'viem'
-import { useReadContract } from 'wagmi'
-
 import { defaultHelperTextStyle } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon/Icon'
-import { auctionAbi, governorAbi } from 'src/data/contract/abis'
 import { useProposalStore } from 'src/modules/create-proposal'
 import { TransactionType } from 'src/modules/create-proposal/constants'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { AddressType } from 'src/typings'
-import { toSeconds } from 'src/utils/helpers'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import { encodeFunctionData } from 'viem'
+import { useReadContract } from 'wagmi'
 
 import { checkboxStyleVariants } from '../ReplaceArtwork/ReplaceArtworkForm.css'
 

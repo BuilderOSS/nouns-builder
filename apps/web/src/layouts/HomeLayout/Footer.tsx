@@ -1,7 +1,6 @@
 import { Box, Flex, Grid, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-
 import { Icon } from 'src/components/Icon'
 
 import {
@@ -48,7 +47,7 @@ export const Footer = () => {
           </Link>
         </Stack>
         <Stack gap={'x4'} className={footerRightWrapper}>
-          <a href={'https://builder-docs.vercel.app/'} target="_blank" rel="noreferrer">
+          <a href={'https://docs.nouns.build/'} target="_blank" rel="noreferrer">
             <Box color={'onAccent'} fontSize={16} className={homeFooterLinks}>
               Documentation
             </Box>

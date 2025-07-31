@@ -1,6 +1,5 @@
+import { AddressType } from '@buildeross/types'
 import { parseEther } from 'viem'
-
-import { AddressType } from 'src/typings'
 
 import { BuilderTransaction } from '../stores/useProposalStore'
 

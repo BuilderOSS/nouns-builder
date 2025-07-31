@@ -1,7 +1,6 @@
+import { BytesType, CHAIN_ID } from '@buildeross/types'
 import axios from 'axios'
 import { Address, isAddress } from 'viem'
-
-import { BytesType, CHAIN_ID } from 'src/typings'
 
 import { InvalidRequestError } from './errors'
 

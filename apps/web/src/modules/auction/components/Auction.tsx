@@ -1,20 +1,19 @@
+import { L1_CHAINS } from '@buildeross/constants/chains'
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { getBids } from '@buildeross/sdk/subgraph'
+import { AddressType, Chain } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Grid } from '@buildeross/zord'
 import axios from 'axios'
 import React, { Fragment, ReactNode } from 'react'
+import { L2MigratedResponse } from 'src/pages/api/migrated'
+import { TokenWithDao } from 'src/pages/dao/[network]/[token]/[tokenId]'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useConfig } from 'wagmi'
 import { readContract } from 'wagmi/actions'
-
-import SWR_KEYS from 'src/constants/swrKeys'
-import { auctionAbi } from 'src/data/contract/abis'
-import { L1_CHAINS } from 'src/data/contract/chains'
-import { getBids } from 'src/data/subgraph/requests/getBids'
-import { useDaoStore } from 'src/modules/dao'
-import { L2MigratedResponse } from 'src/pages/api/migrated'
-import { TokenWithDao } from 'src/pages/dao/[network]/[token]/[tokenId]'
-import { AddressType, Chain } from 'src/typings'
-import { unpackOptionalArray } from 'src/utils/helpers'
 
 import { useAuctionEvents } from '../hooks'
 import { auctionGrid, auctionWrapper } from './Auction.css'
@@ -25,6 +24,7 @@ import { AuctionTokenPicker } from './AuctionTokenPicker'
 import { BidAmount } from './BidAmount'
 import { ActionsWrapper, BidHistory } from './BidHistory'
 import { CurrentAuction } from './CurrentAuction'
+import { Settle } from './CurrentAuction/Settle'
 import { DaoMigrated } from './DaoMigrated'
 import { WinningBidder } from './WinningBidder'
 
@@ -75,10 +75,15 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   const [currentTokenId, highestBid, highestBidder, _, endTime, settled] =
     unpackOptionalArray(auction, 6)
 
+  const hasEnded = endTime && endTime < Date.now() / 1000
+
   const isTokenActiveAuction =
     !settled &&
     currentTokenId !== undefined &&
     currentTokenId.toString() == queriedTokenId
+
+  const isLatestButNotActive =
+    !isTokenActiveAuction && Number(queriedTokenId) > Number(currentTokenId) && hasEnded
 
   useAuctionEvents({
     chainId: chain.id,
@@ -110,6 +115,11 @@ export const Auction: React.FC<AuctionControllerProps> = ({
           name={name}
           collection={collection}
           tokenId={Number(queriedTokenId)}
+          currentTokenId={
+            currentTokenId && !hasEnded && !isTokenActiveAuction
+              ? Number(currentTokenId)
+              : undefined
+          }
         />
 
         {isTokenActiveAuction && !!auction && (
@@ -132,7 +142,10 @@ export const Auction: React.FC<AuctionControllerProps> = ({
               <WinningBidder owner={tokenOwner ?? undefined} />
             </AuctionDetails>
             <ActionsWrapper>
-              <BidHistory bids={bids || []} />
+              {isLatestButNotActive && <Settle isEnding={false} owner={tokenOwner} />}
+              {(!isLatestButNotActive || (!!bids && bids.length > 0)) && (
+                <BidHistory bids={bids || []} />
+              )}
             </ActionsWrapper>
             {migratedRes?.migrated ? (
               <DaoMigrated

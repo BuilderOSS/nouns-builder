@@ -1,16 +1,17 @@
-import { Box, BoxProps } from '../elements'
-import { BoxDefaultElement } from '../elements/Box'
-import {
-  baseTheme as defaultBaseTheme,
-  root as defaultRoot,
-  lightTheme,
-} from '../theme.css'
 import clsx, { ClassValue } from 'clsx'
 import React, { ElementType, forwardRef } from 'react'
 import {
   PolymorphicForwardRefExoticComponent,
   PolymorphicPropsWithoutRef,
 } from 'react-polymorphic-types'
+
+import { Box, BoxProps } from '../elements'
+import { BoxDefaultElement } from '../elements/Box'
+import {
+  baseTheme as defaultBaseTheme,
+  lightTheme,
+  root as defaultRoot,
+} from '../theme.css'
 
 export interface ThemeProviderProps extends BoxProps {
   theme?: ClassValue

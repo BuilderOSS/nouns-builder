@@ -1,7 +1,6 @@
+import { memberSnapshotRequest } from '@buildeross/sdk/subgraph'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'viem'
-
-import { memberSnapshotRequest } from 'src/data/subgraph/requests/memberSnapshot'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

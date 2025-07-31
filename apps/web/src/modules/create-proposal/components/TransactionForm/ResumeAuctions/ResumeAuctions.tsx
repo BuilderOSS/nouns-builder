@@ -1,14 +1,13 @@
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { AddressType } from '@buildeross/types'
 import { Box, Button, Paragraph } from '@buildeross/zord'
 import { useState } from 'react'
-import { encodeFunctionData } from 'viem'
-import { useReadContract } from 'wagmi'
-
-import { auctionAbi } from 'src/data/contract/abis'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
-import { AddressType } from 'src/typings'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import { encodeFunctionData } from 'viem'
+import { useReadContract } from 'wagmi'
 
 export const ResumeAuctions = () => {
   const { auction } = useDaoStore((state) => state.addresses)

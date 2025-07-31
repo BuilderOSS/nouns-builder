@@ -1,6 +1,5 @@
 import { Box, Flex } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-
 import {
   infoSectionLabelStyle,
   infoSectionStyle,

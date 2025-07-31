@@ -1,6 +1,5 @@
-import { Flex, Stack, Text, atoms } from '@buildeross/zord'
+import { atoms, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-
 import { Icon } from 'src/components/Icon'
 import { ProposalNavigation } from 'src/modules/proposal'
 
@@ -39,7 +38,7 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
         </Text>
         {showDocsLink && (
           <a
-            href="https://builder-docs.vercel.app/onboarding/builder-proposal/"
+            href="https://docs.nouns.build/onboarding/builder-proposal/"
             target="_blank"
             rel="noreferrer noopener"
           >

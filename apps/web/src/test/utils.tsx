@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RenderOptions, act, render, renderHook, waitFor } from '@testing-library/react'
+import { act, render, renderHook, RenderOptions, waitFor } from '@testing-library/react'
 import * as React from 'react'
 import { SWRConfig } from 'swr'
 import { expect } from 'vitest'
-import { WagmiProvider, useConnect, useDisconnect } from 'wagmi'
+import { useConnect, useDisconnect, WagmiProvider } from 'wagmi'
 
 import { config } from './wagmi'
 

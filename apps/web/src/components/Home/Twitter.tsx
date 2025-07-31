@@ -1,4 +1,4 @@
-import { Stack, Text, atoms, mixins } from '@buildeross/zord'
+import { atoms, mixins, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 const Twitter = () => (

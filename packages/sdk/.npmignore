@@ -1,0 +1,24 @@
+# Source files
+src/
+scripts/
+*.test.*
+*.spec.*
+
+# Config files
+tsconfig.json
+tsup.config.ts
+wagmi.config.ts
+codegen.yml
+.eslintrc.js
+
+# Development
+node_modules/
+.env*
+*.log
+
+# Generated files that are too large
+dist/generated-*.d.ts
+dist/generated-*.d.mts
+
+# Documentation
+README.md

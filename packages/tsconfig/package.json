@@ -1,14 +1,20 @@
 {
   "name": "@buildeross/tsconfig",
-  "version": "0.0.0",
-  "license": "MIT",
-  "main": "index.js",
+  "description": "Shared TypeScript configuration for BuilderOSS apps",
+  "version": "0.1.1",
   "files": [
-    "base.json",    
+    "base.json",
     "nextjs.json",
     "react-library.json"
   ],
+  "license": "MIT",
+  "main": "index.js",
   "publishConfig": {
     "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/tsconfig"
   }
 }

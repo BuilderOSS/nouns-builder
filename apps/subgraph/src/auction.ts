@@ -1,3 +1,5 @@
+import { dataSource } from '@graphprotocol/graph-ts'
+
 import { Auction, AuctionBid, AuctionConfig, DAO } from '../generated/schema'
 import {
   AuctionBid as AuctionBidEvent,
@@ -8,7 +10,6 @@ import {
   ReservePriceUpdated as ReservePriceUpdatedEvent,
   TimeBufferUpdated as TimeBufferUpdatedEvent,
 } from '../generated/templates/Auction/Auction'
-import { dataSource } from '@graphprotocol/graph-ts'
 
 export function handleAuctionCreated(event: AuctionCreatedEvent): void {
   let context = dataSource.context()
@@ -55,7 +56,7 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   let tokenAddress = context.getString('tokenAddress')
 
   let bid = new AuctionBid(
-    `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`
+    `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`,
   )
 
   bid.transactionHash = event.transaction.hash
@@ -105,7 +106,7 @@ export function handleTimeBufferUpdated(event: TimeBufferUpdatedEvent): void {
 }
 
 export function handleMinBidIncrementPercentageUpdated(
-  event: MinBidIncrementPercentageUpdatedEvent
+  event: MinBidIncrementPercentageUpdatedEvent,
 ): void {
   let context = dataSource.context()
 

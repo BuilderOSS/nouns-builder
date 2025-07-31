@@ -2,11 +2,10 @@ import { Button, Flex } from '@buildeross/zord'
 import { CastAddData, Message, SignatureScheme } from '@farcaster/hub-nodejs'
 import axios from 'axios'
 import React, { useMemo } from 'react'
-import useSWRInfinite from 'swr/infinite'
-
 import { DisplayPanel } from 'src/components/DisplayPanel'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
+import useSWRInfinite from 'swr/infinite'
 
 import { CardSkeleton } from './CardSkeleton'
 import { CastCard } from './CastCard'

@@ -1,6 +1,5 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import React, { ReactNode } from 'react'
-
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
 
 interface NetworkControllerProps {
   children: ReactNode

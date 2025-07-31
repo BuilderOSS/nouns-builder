@@ -1,26 +1,25 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { parseContractURI } from '@buildeross/utils/parseContractURI'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import Image from 'next/legacy/image'
 import { useRouter } from 'next/router'
 import React from 'react'
+import { Avatar } from 'src/components/Avatar/Avatar'
+import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
+import { useLayoutStore } from 'src/stores'
+import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import { about, daoInfo, daoName, statisticContent } from 'src/styles/About.css'
 import useSWR from 'swr'
 import { Address, formatEther } from 'viem'
 import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
-import { Avatar } from 'src/components/Avatar/Avatar'
-import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { metadataAbi, tokenAbi } from 'src/data/contract/abis'
-import { SDK } from 'src/data/subgraph/client'
-import { useDaoMembership } from 'src/hooks/useDaoMembership'
-import { useLayoutStore } from 'src/stores'
-import { useChainStore } from 'src/stores/useChainStore'
-import { about, daoInfo, daoName, statisticContent } from 'src/styles/About.css'
-import { unpackOptionalArray } from 'src/utils/helpers'
-import { formatCryptoVal } from 'src/utils/numbers'
-
-import { useDaoStore } from '../../stores'
-import { parseContractURI } from '../../utils'
 import { MembersList } from '../MembersList'
 import { DaoDescription } from './DaoDescription'
 import { ExternalLinks } from './ExternalLinks'
@@ -77,7 +76,7 @@ export const About: React.FC = () => {
   const { data } = useSWR(
     chain && token ? [SWR_KEYS.DAO_INFO, chain.id, token] : null,
     async ([_key, chainId, token]) => {
-      const res = await SDK.connect(chainId)
+      const res = await SubgraphSDK.connect(chainId)
         .daoInfo({
           tokenAddress: token.toLowerCase(),
         })

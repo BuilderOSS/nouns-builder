@@ -1,0 +1,12 @@
+# Config files
+tsconfig.json
+tsup.config.ts
+.eslintrc.js
+
+# Development
+node_modules/
+.env*
+*.log
+
+# Documentation
+README.md

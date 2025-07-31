@@ -1,7 +1,6 @@
-import { Flex, Stack, Text, atoms } from '@buildeross/zord'
+import { atoms, Flex, Stack, Text } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
-
 import { Icon } from 'src/components/Icon'
 
 import { accordionItem, accordionName } from '../../../styles/home.css'

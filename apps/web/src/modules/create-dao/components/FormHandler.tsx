@@ -1,7 +1,6 @@
-import { Box, Flex, Heading, Text, atoms } from '@buildeross/zord'
+import { atoms, Box, Flex, Heading, Text } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React from 'react'
-
 import { Icon } from 'src/components/Icon'
 
 import { CreateFormSection } from '../types'
@@ -23,7 +22,7 @@ export const FormHandler = ({
         <Text variant={'eyebrow'}>Create A dao</Text>
         {sectionIndex === 0 ? (
           <a
-            href="https://builder-docs.vercel.app/guides/builder-deployment"
+            href="https://docs.nouns.build/guides/builder-deployment"
             target="_blank"
             rel="noreferrer noopener"
           >

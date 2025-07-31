@@ -1,5 +1,4 @@
 import { Flex } from '@buildeross/zord'
-
 import { Meta } from 'src/components/Meta'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 import { ExploreMyDaos } from 'src/modules/dao'

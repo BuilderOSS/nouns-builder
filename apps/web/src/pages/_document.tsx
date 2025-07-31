@@ -1,4 +1,4 @@
-import { ThemeProvider, lightTheme } from '@buildeross/zord'
+import { lightTheme, ThemeProvider } from '@buildeross/zord'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
 export default class MyDocument extends Document {

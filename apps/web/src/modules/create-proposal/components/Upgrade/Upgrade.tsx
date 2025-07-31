@@ -3,10 +3,9 @@ import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import React from 'react'
-
 import { useChainStore } from 'src/stores/useChainStore'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 
-import { DaoContractAddresses } from '../../../dao'
 import { useAvailableUpgrade } from '../../hooks'
 import { useProposalStore } from '../../stores'
 import { FixRendererBase } from '../FixRendererBase'

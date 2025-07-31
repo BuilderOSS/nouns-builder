@@ -1,9 +1,8 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
+import { AddressType, Chain } from '@buildeross/types'
 import Head from 'next/head'
 import React from 'react'
-
-import { BASE_URL } from 'src/constants/baseUrl'
-import { PUBLIC_IS_TESTNET } from 'src/constants/defaultChains'
-import { AddressType, Chain } from 'src/typings'
 
 interface MetaProps {
   title: string

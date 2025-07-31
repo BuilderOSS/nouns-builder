@@ -1,31 +1,30 @@
+import {
+  AttestationParams,
+  EAS_CONTRACT_ADDRESS,
+  easAbi,
+  PROPDATE_SCHEMA,
+  PROPDATE_SCHEMA_UID,
+} from '@buildeross/constants/eas'
+import { useEnsData } from '@buildeross/hooks'
+import { MessageType, type PropDate } from '@buildeross/sdk/eas'
+import { CHAIN_ID } from '@buildeross/types'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import { useCallback, useMemo, useState } from 'react'
-import { type Hex, getAddress, zeroHash } from 'viem'
-import { useChainId, useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-import * as Yup from 'yup'
-
 import { Avatar } from 'src/components/Avatar'
 import { ContractButton } from 'src/components/ContractButton'
 import { defaultInputLabelStyle } from 'src/components/Fields/styles.css'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
-import {
-  AttestationParams,
-  EAS_CONTRACT_ADDRESS,
-  PROPDATE_SCHEMA,
-  PROPDATE_SCHEMA_UID,
-  easAbi,
-} from 'src/constants/eas'
-import { MessageType, type PropDate } from 'src/data/eas/requests/getPropDates'
-import { useEnsData } from 'src/hooks'
-import { useDaoStore } from 'src/modules/dao/stores'
-import { CHAIN_ID } from 'src/typings'
-import { walletSnippet } from 'src/utils/helpers'
+import { useDaoStore } from 'src/stores/useDaoStore'
+import { getAddress, type Hex, zeroHash } from 'viem'
+import { useChainId, useConfig } from 'wagmi'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import * as Yup from 'yup'
 
 const propDateValidationSchema = Yup.object().shape({
   milestoneId: Yup.number(),

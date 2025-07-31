@@ -1,9 +1,8 @@
+import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { Button, ButtonProps } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useAccount, useBalance, useSwitchChain } from 'wagmi'
-
-import { useBridgeModal } from 'src/hooks/useBridgeModal'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
 interface ContractButtonProps extends ButtonProps {
   handleClick?: (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
@@ -36,12 +35,14 @@ export const ContractButton = ({
     if (canUserBridge && userBalance?.decimals === 0) return openBridgeModal()
     if (userChain?.id !== appChain.id) return handleSwitchChain()
 
-    handleClick?.(e)
-
-    // Submit the form manually if all checks pass
-    const form = e?.currentTarget?.form
-    if (form) {
-      form.requestSubmit() // Modern way to trigger a form submission
+    if (handleClick) {
+      handleClick(e)
+    } else {
+      // Submit the form manually if all checks pass
+      const form = e?.currentTarget?.form
+      if (form) {
+        form.requestSubmit() // Modern way to trigger a form submission
+      }
     }
   }
 

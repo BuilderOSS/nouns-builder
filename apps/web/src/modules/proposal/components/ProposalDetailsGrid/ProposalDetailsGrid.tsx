@@ -1,10 +1,9 @@
+import { Proposal } from '@buildeross/sdk/subgraph'
+import { handleGMTOffset } from '@buildeross/utils/helpers'
 import { Box, Grid } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useCallback } from 'react'
-
-import { Proposal } from 'src/data/subgraph/requests/proposalQuery'
 import { propDataGrid } from 'src/styles/Proposals.css'
-import { handleGMTOffset } from 'src/utils/helpers'
 
 import { Tile } from './Tile'
 import { voteProgress, voteProgressVariants } from './Tile.css'
@@ -93,7 +92,7 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
           subtext={`${dayjs.unix(voteEnd).format('h:mm:ss A')} ${handleGMTOffset()}`}
         />
         <a
-          href="https://builder-docs.vercel.app/onboarding/governance/#-voting-power"
+          href="https://docs.nouns.build/onboarding/governance/#-voting-power"
           target="_blank"
           rel="noreferrer"
           onClick={(e) => e.stopPropagation()}

@@ -1,33 +1,31 @@
-import { Flex, Text, atoms, theme } from '@buildeross/zord'
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { auctionAbi } from '@buildeross/sdk/contract'
+import { getDAOAddresses } from '@buildeross/sdk/contract'
+import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
+import { atoms, Flex, Text, theme } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { isAddress } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
-import { readContract } from 'wagmi/actions'
-
 import { Meta } from 'src/components/Meta'
-import { CACHE_TIMES } from 'src/constants/cacheTimes'
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { auctionAbi } from 'src/data/contract/abis'
-import getDAOAddresses from 'src/data/contract/requests/getDAOAddresses'
-import { config } from 'src/data/contract/server.config'
-import { SDK } from 'src/data/subgraph/client'
-import { OrderDirection, Token_OrderBy } from 'src/data/subgraph/sdk.generated'
-import { getDaoLayout } from 'src/layouts/DaoLayout'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
+import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   Activity,
-  DaoContractAddresses,
   PreAuction,
   PreAuctionForm,
   SectionHandler,
   SmartContracts,
-  useDaoStore,
 } from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
-import { AddressType, CHAIN_ID } from 'src/typings'
+import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
+import { isAddress } from 'viem'
+import { useAccount, useReadContract } from 'wagmi'
+import { readContract } from 'wagmi/actions'
 
 interface DaoPageProps {
   chainId: CHAIN_ID
@@ -137,7 +135,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       }
     }
 
-    const latestTokenId = await SDK.connect(chain.id)
+    const latestTokenId = await SubgraphSDK.connect(chain.id)
       .tokens({
         where: {
           dao: collectionAddress.toLowerCase(),
@@ -148,7 +146,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       })
       .then((x) => (x.tokens.length > 0 ? x.tokens[0].tokenId : undefined))
 
-    const owner = await readContract(config, {
+    const owner = await readContract(serverConfig, {
       abi: auctionAbi,
       address: addresses.auction as AddressType,
       functionName: 'owner',

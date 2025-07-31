@@ -1,7 +1,8 @@
-import { Token } from '../../generated/schema'
 import { Bytes, JSONValueKind } from '@graphprotocol/graph-ts'
 import { json } from '@graphprotocol/graph-ts'
 import { decode } from 'as-base64'
+
+import { Token } from '../../generated/schema'
 
 export function setTokenMetadata(token: Token, tokenURI: string): void {
   let split = tokenURI.split(',')

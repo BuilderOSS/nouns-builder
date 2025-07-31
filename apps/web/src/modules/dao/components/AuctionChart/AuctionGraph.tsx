@@ -1,9 +1,8 @@
 import { Box, Text } from '@buildeross/zord'
 import { color } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { formatEther } from 'viem'
-
 import { useLayoutStore } from 'src/stores'
+import { formatEther } from 'viem'
 
 import { AuctionHistory, StartTimes } from './AuctionChart'
 import { graphOnLoadStyles, svgBox } from './AuctionChart.css'

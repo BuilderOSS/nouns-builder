@@ -1,6 +1,5 @@
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-
 import { everythingHeading, marqueeItemButton, marqueeItems } from 'src/styles/home.css'
 
 const Everything = () => {

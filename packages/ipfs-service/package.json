@@ -1,26 +1,54 @@
 {
   "name": "@buildeross/ipfs-service",
-  "main": "./index.ts",
-  "types": "./index.ts",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "lint": "eslint *.ts*",
-    "test": "vitest run"
-  },
-  "devDependencies": {
-    "@buildeross/tsconfig": "workspace:*",
-    "eslint": "8.57.1",
-    "@buildeross/eslint-config-custom": "workspace:*",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.4"
-  },
+  "description": "IPFS client and utilities for BuilderOSS apps",
+  "version": "0.1.1",
   "dependencies": {
     "@brokerloop/ttlcache": "^3.2.3",
     "ipfs-core-types": "^0.13.0",
     "ipfs-http-client": "^59.0.0",
     "it-last": "^2.0.0",
     "multiformats": "^13.3.6",
+    "sha.js": "^2.4.12",
     "url-join": "^5.0.0"
-  }
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@types/sha.js": "^2.4.4",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "main": "./dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/ipfs-service"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint src --fix",
+    "test": "vitest run",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
 }

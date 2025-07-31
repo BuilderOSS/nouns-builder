@@ -1,6 +1,6 @@
+import { ArtworkUploadError, ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
-
 import {
   defaultFileDownloadStyle,
   defaultHelperTextStyle,
@@ -14,17 +14,16 @@ import {
   uploadSuccessBox,
 } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon'
-import { ArtworkUploadError, ImageProps } from 'src/hooks/useArtworkUpload'
 
 interface ArtworkUploadProps {
   inputLabel: string | ReactElement
   helperText?: string
-  errorMessage?: any
+  formError?: any
   fileCount: number | string
   traitCount: number
   onUpload: (e: BaseSyntheticEvent) => void
   uploadArtworkError: ArtworkUploadError | undefined
-  ipfsUploadError: boolean
+  ipfsUploadError: string | undefined
   images: ImageProps[] | undefined
   fileType?: string
   layerOrdering: React.ReactNode
@@ -33,7 +32,7 @@ interface ArtworkUploadProps {
 export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
   inputLabel,
   helperText,
-  errorMessage,
+  formError,
   fileCount,
   traitCount,
   onUpload,
@@ -64,7 +63,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
           </Flex>
         </Stack>
       ) : null}
-      <div className={errorMessage ? dropAreaErrorStyle : dropAreaStyle}>
+      <div className={formError ? dropAreaErrorStyle : dropAreaStyle}>
         <Box
           as={'label'}
           h={'x16'}
@@ -92,9 +91,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
       </div>
       {((uploadArtworkError || ipfsUploadError) && (
         <Box py={'x4'} className={uploadErrorBox}>
-          {ipfsUploadError && (
-            <Box>There was an issue uploading your files to ipfs. Please try again.</Box>
-          )}
+          {ipfsUploadError && <Box>{ipfsUploadError}</Box>}
 
           <Box as={'ul'} m={'x0'}>
             {uploadArtworkError?.maxTraits && <li>{uploadArtworkError.maxTraits}</li>}

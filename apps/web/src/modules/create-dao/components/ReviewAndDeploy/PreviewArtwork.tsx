@@ -1,14 +1,13 @@
+import { flatten } from '@buildeross/utils/helpers'
 import { Button } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
-
+import { Playground } from 'src/components/Artwork/Playground'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { flatten } from 'src/utils/helpers'
 
 import { useFormStore } from '../../stores'
-import { Playground } from '../Artwork'
 
 export const PreviewArtwork: React.FC = () => {
-  const { ipfsUpload } = useFormStore()
+  const { ipfsUpload, orderedLayers } = useFormStore()
 
   const images = React.useMemo(() => {
     if (!ipfsUpload) return
@@ -49,13 +48,13 @@ export const PreviewArtwork: React.FC = () => {
       >
         Preview Artwork
       </Button>
-      {images && (
+      {images && orderedLayers && (
         <AnimatedModal
           open={isOpenModal}
           close={() => setIsOpenModal(false)}
           size={'large'}
         >
-          <Playground images={images} />
+          <Playground images={images} orderedLayers={orderedLayers} />
         </AnimatedModal>
       )}
     </>

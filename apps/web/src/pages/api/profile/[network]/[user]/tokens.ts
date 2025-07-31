@@ -1,10 +1,13 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import {
+  myDaosRequest,
+  MyDaosResponse,
+  tokensQuery,
+  TokensQueryResponse,
+} from '@buildeross/sdk/subgraph'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getAddress } from 'viem'
-
-import { PUBLIC_DEFAULT_CHAINS } from 'src/constants/defaultChains'
-import { MyDaosResponse, myDaosRequest } from 'src/data/subgraph/requests/daoQuery'
-import { TokensQueryResponse, tokensQuery } from 'src/data/subgraph/requests/tokensQuery'
 import { NotFoundError } from 'src/services/errors'
+import { getAddress } from 'viem'
 
 export interface UserTokensResponse {
   tokens?: TokensQueryResponse

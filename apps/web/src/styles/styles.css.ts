@@ -248,7 +248,7 @@ export const createWrapperLeft = style({
 })
 
 export const createWrapperRight = style({
-  overflow: 'scroll',
+  overflow: 'auto',
   '@media': {
     '(max-width: 768px)': {
       overflow: 'initial',

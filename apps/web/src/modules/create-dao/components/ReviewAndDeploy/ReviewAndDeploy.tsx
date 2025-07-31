@@ -1,6 +1,27 @@
+import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
+import { NULL_ADDRESS } from '@buildeross/constants/addresses'
+import { L2_CHAINS } from '@buildeross/constants/chains'
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
-import { Box, Flex, atoms } from '@buildeross/zord'
+import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
+import type { AddressType } from '@buildeross/types'
+import { formatDuration } from '@buildeross/utils/formatDuration'
+import { toSeconds } from '@buildeross/utils/helpers'
+import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
+import { atoms, Box, Flex } from '@buildeross/zord'
 import React, { useState } from 'react'
+import { ContractButton } from 'src/components/ContractButton'
+import { FallbackImage } from 'src/components/FallbackImage'
+import { defaultBackButton } from 'src/components/Fields/styles.css'
+import { Icon } from 'src/components/Icon'
+import { formatFounderAllocation } from 'src/modules/create-dao'
+import { useChainStore } from 'src/stores/useChainStore'
+import {
+  deployCheckboxHelperText,
+  deployCheckboxStyleVariants,
+  deployCheckboxWrapperStyle,
+  deployContractButtonStyle,
+} from 'src/styles/deploy.css'
 import {
   decodeEventLog,
   encodeAbiParameters,
@@ -10,28 +31,6 @@ import {
 } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
-import { ContractButton } from 'src/components/ContractButton'
-import { FallbackImage } from 'src/components/FallbackImage'
-import { defaultBackButton } from 'src/components/Fields/styles.css'
-import { Icon } from 'src/components/Icon'
-import { PUBLIC_MANAGER_ADDRESS } from 'src/constants/addresses'
-import { NULL_ADDRESS } from 'src/constants/addresses'
-import { RENDERER_BASE } from 'src/constants/rendererBase'
-import { managerAbi } from 'src/data/contract/abis'
-import { managerV2Abi } from 'src/data/contract/abis/ManagerV2'
-import { L2_CHAINS } from 'src/data/contract/chains'
-import { formatAuctionDuration, formatFounderAllocation } from 'src/modules/create-dao'
-import { useChainStore } from 'src/stores/useChainStore'
-import {
-  deployCheckboxHelperText,
-  deployCheckboxStyleVariants,
-  deployCheckboxWrapperStyle,
-  deployContractButtonStyle,
-} from 'src/styles/deploy.css'
-import type { AddressType } from 'src/typings'
-import { toSeconds } from 'src/utils/helpers'
-import { sanitizeStringForJSON } from 'src/utils/sanitize'
 
 import { useFormStore } from '../../stores'
 import { PreviewArtwork } from './PreviewArtwork'
@@ -179,7 +178,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
         const data = await simulateContract(config, {
           address: PUBLIC_MANAGER_ADDRESS[chain.id],
           chainId: chain.id,
-          abi: managerV2Abi,
+          abi: managerAbi,
           functionName: 'deploy',
           args: [
             founderParams,
@@ -197,7 +196,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
         const data = await simulateContract(config, {
           address: PUBLIC_MANAGER_ADDRESS[chain.id],
           chainId: chain.id,
-          abi: managerAbi,
+          abi: managerV1Abi,
           functionName: 'deploy',
           args: [founderParams, tokenParams, auctionParams, govParams],
         })
@@ -274,7 +273,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
             <ReviewSection subHeading="Auction Settings">
               <ReviewItem
                 label="Auction Duration"
-                value={formatAuctionDuration(auctionSettings.auctionDuration)}
+                value={formatDuration(auctionSettings.auctionDuration)}
               />
               <ReviewItem
                 label="Auction Reserve Price"
@@ -380,9 +379,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
                   <Flex className={deployCheckboxHelperText}>
                     I have read the{' '}
                     <a
-                      href={
-                        'https://builder-docs.vercel.app/guides/builder-protocol-rewards/'
-                      }
+                      href={'https://docs.nouns.build/guides/builder-protocol-rewards/'}
                       target="_blank"
                       className={atoms({ color: 'accent' })}
                       rel="noreferrer"

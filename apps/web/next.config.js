@@ -26,9 +26,13 @@ const basicConfig = {
     'analytics',
     'blocklist',
     '@smartinvoicexyz/types',
+    '@rainbow-me/rainbowkit',
     '@farcaster/frame-sdk',
     '@farcaster/frame-wagmi-connector',
   ],
+  experimental: {
+    optimizePackageImports: ['@rainbow-me/rainbowkit', '@buildeross/zord'],
+  },
   env: {
     BASE_URL: baseUrl,
   },

@@ -1,12 +1,11 @@
+import { DecodedArg } from '@buildeross/types'
 import { toLower } from 'lodash'
 import React from 'react'
-
 import {
   getEscrowBundler,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useChainStore } from 'src/stores/useChainStore'
-import { DecodedArg } from 'src/typings'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'

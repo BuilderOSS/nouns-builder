@@ -1,10 +1,8 @@
+import { IPFSUpload, OrderedTraits } from '@buildeross/hooks'
+import { DaoContractAddresses } from 'src/stores/useDaoStore'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { IPFSUpload } from 'src/hooks'
-import { DaoContractAddresses } from 'src/modules/dao'
-
-import { OrderedTraits } from '../../../components/Artwork/LayerBox'
 import {
   ArtworkFormValues,
   AuctionSettingsFormValues,
@@ -39,6 +37,8 @@ export interface FormStoreState {
   setOrderedLayers: (orderedLayers: OrderedTraits) => void
   isUploadingToIPFS: boolean
   setIsUploadingToIPFS: (bool: boolean) => void
+  ipfsUploadProgress: number
+  setIpfsUploadProgress: (ipfsUploadProgress: number) => void
   resetForm: () => void
 }
 
@@ -87,6 +87,7 @@ const initialState = {
   },
   ipfsUpload: [],
   orderedLayers: [],
+  ipfsUploadProgress: 0,
   isUploadingToIPFS: false,
   deployedDao: {
     token: undefined,
@@ -125,6 +126,7 @@ export const useFormStore = create(
           orderedLayers,
         })
       },
+      setIpfsUploadProgress: (ipfsUploadProgress: number) => set({ ipfsUploadProgress }),
       setIsUploadingToIPFS: (isUploadingToIPFS: boolean) => set({ isUploadingToIPFS }),
       setDeployedDao: (deployedDao: DaoContractAddresses) => {
         set({

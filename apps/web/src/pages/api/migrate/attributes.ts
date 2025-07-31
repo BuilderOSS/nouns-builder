@@ -1,7 +1,6 @@
+import { getMetadataAttributes } from '@buildeross/sdk/contract'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { Address } from 'viem'
-
-import { getMetadataAttributes } from 'src/data/contract/requests/getMetadataAttributes'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {

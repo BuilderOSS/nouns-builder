@@ -2,20 +2,18 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import React from 'react'
-import useSWR from 'swr'
-
 import { Icon } from 'src/components/Icon'
 import { OptionalLink } from 'src/components/OptionalLink'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { SDK } from 'src/data/subgraph/client'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 
+import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
 import { auctionDateNavButton, auctionTextVariants } from './Auction.css'
 
 interface AuctionTokenPickerProps {
   collection: string
   tokenId: number
+  currentTokenId?: number
   mintDate?: number
   name?: string
 }
@@ -25,28 +23,26 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   tokenId,
   mintDate,
   name,
+  currentTokenId,
 }: AuctionTokenPickerProps) => {
   const { id: chainId } = useChainStore((x) => x.chain)
-  const { query, isReady } = useRouter()
+  const { query } = useRouter()
   const { isMobile } = useLayoutStore()
   const disabledStyle = { opacity: 0.2 }
 
-  const { data } = useSWR(
-    isReady
-      ? [SWR_KEYS.DAO_NEXT_AND_PREVIOUS_TOKENS, chainId, collection, tokenId]
-      : null,
-    () =>
-      SDK.connect(chainId)
-        .daoNextAndPreviousTokens({ tokenId, tokenAddress: collection.toLowerCase() })
-        .then((x) => ({
-          next: x.next.length > 0 ? parseInt(x.next[0].tokenId) : undefined,
-          prev: x.prev.length > 0 ? parseInt(x.prev[0].tokenId) : undefined,
-          latest: x.latest.length > 0 ? parseInt(x.latest[0].tokenId) : undefined,
-        }))
-  )
+  const data = useNextAndPreviousTokens({ chainId, collection, tokenId })
 
   const hasPreviousToken = data?.prev !== undefined
   const hasNextToken = data?.next !== undefined
+  const hasLatestToken = data?.latest !== undefined
+  const latestTokenId =
+    hasLatestToken && currentTokenId !== undefined && data?.latest !== currentTokenId
+      ? currentTokenId
+      : data?.latest
+  const latestText =
+    hasLatestToken && currentTokenId !== undefined && data?.latest !== currentTokenId
+      ? `Current Auction`
+      : `Latest Auction`
 
   return (
     <Flex direction={'column'}>
@@ -84,23 +80,23 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         </OptionalLink>
 
         <OptionalLink
-          enabled={hasNextToken}
-          href={`/dao/${query.network}/${collection}/${data?.latest}`}
+          enabled={hasLatestToken}
+          href={`/dao/${query.network}/${collection}/${latestTokenId}`}
           passHref
           legacyBehavior
         >
           <Flex
-            as={hasNextToken ? 'a' : undefined}
+            as={hasLatestToken ? 'a' : undefined}
             align={'center'}
             justify={'center'}
             className={auctionDateNavButton}
           >
             <Text
               mx={'x3'}
-              style={hasNextToken ? {} : disabledStyle}
+              style={hasLatestToken ? {} : disabledStyle}
               fontWeight={'display'}
             >
-              {isMobile ? 'Latest' : 'Latest Auction'}
+              {isMobile ? latestText.split(' ')[0] : latestText}
             </Text>
           </Flex>
         </OptionalLink>

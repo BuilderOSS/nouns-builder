@@ -1,6 +1,5 @@
 import { atoms, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-
 import { skeletonAnimation } from 'src/styles/animations.css'
 
 export const outerAuctionCard = style([

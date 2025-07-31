@@ -1,8 +1,9 @@
+import { ClassValue } from 'clsx'
+import React from 'react'
+
 import { Flex, FlexComponentProps } from '../elements/Flex'
 import { Icon } from '../elements/Icon'
 import { inputContainer, inputField, inputFieldBaseInput } from './InputField.css'
-import { ClassValue } from 'clsx'
-import React from 'react'
 
 export interface SelectProps extends FlexComponentProps<'select'> {
   autoFocus?: boolean
@@ -15,6 +16,8 @@ export interface SelectProps extends FlexComponentProps<'select'> {
   variant?: 'sm' | 'lg'
   disabled?: boolean
   value?: string | number
+  children?: React.ReactNode
+  id?: string
 }
 
 export const Select = ({
@@ -23,6 +26,7 @@ export const Select = ({
   variant = 'sm',
   children,
   disabled,
+  id,
   ...props
 }: SelectProps) => {
   const large = variant === 'lg'
@@ -49,6 +53,7 @@ export const Select = ({
           className={[inputFieldBaseInput, className]}
           style={{ appearance: 'none' }}
           disabled={!!disabled}
+          id={id}
           {...props}
         >
           {children}

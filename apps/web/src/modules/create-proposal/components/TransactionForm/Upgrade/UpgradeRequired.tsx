@@ -1,11 +1,10 @@
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-
 import { VersionType } from 'src/modules/create-proposal/constants'
 import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useDaoStore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 
 import { Alert } from '../../Alert'
 import { UpgradeCard } from '../../UpgradeCard'

@@ -1,7 +1,6 @@
+import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
-
-import { AuctionBidFragment } from 'src/data/subgraph/sdk.generated'
 
 import { BidCard } from './BidCard'
 

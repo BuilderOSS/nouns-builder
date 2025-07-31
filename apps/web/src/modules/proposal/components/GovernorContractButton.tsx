@@ -1,21 +1,20 @@
+import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { governorAbi } from '@buildeross/sdk/contract'
+import { getProposal } from '@buildeross/sdk/subgraph'
 import { Box, ButtonProps } from '@buildeross/zord'
 import React, { useState } from 'react'
+import { ContractButton } from 'src/components/ContractButton'
+import { useChainStore } from 'src/stores/useChainStore'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { useSWRConfig } from 'swr'
 import { ContractFunctionName } from 'viem'
 import {
-  UseSimulateContractParameters,
   useConfig,
   useSimulateContract,
+  UseSimulateContractParameters,
   useWriteContract,
 } from 'wagmi'
 import { waitForTransactionReceipt } from 'wagmi/actions'
-
-import { ContractButton } from 'src/components/ContractButton'
-import SWR_KEYS from 'src/constants/swrKeys'
-import { governorAbi } from 'src/data/contract/abis'
-import { getProposal } from 'src/data/subgraph/requests/proposalQuery'
-import { useDaoStore } from 'src/modules/dao'
-import { useChainStore } from 'src/stores/useChainStore'
 
 import { uploadingSpinnerWhite } from './GovernorContractButton.css'
 

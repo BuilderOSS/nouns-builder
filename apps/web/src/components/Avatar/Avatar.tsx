@@ -1,9 +1,8 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { bgForAddress } from '@buildeross/utils/gradient'
 import { Box, BoxProps } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
-
 import { FallbackImage } from 'src/components/FallbackImage'
-import { bgForAddress } from 'src/utils/gradient'
 
 import { avatar, avatarVariants } from './Avatar.css'
 

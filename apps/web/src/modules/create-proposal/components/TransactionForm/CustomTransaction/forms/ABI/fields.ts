@@ -1,6 +1,5 @@
-import * as Yup from 'yup'
-
 import { TEXTAREA } from 'src/components/Fields/types'
+import * as Yup from 'yup'
 
 export const fields = [
   {

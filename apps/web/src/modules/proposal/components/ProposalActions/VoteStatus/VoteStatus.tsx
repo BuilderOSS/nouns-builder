@@ -1,16 +1,15 @@
-import { Button, Flex, Text } from '@buildeross/zord'
-import React, { Fragment, useEffect, useState } from 'react'
-import { getAddress } from 'viem'
-import { useAccount, useWatchContractEvent } from 'wagmi'
-
-import { governorAbi } from 'src/data/contract/abis'
-import { ProposalState } from 'src/data/contract/requests/getProposalState'
+import { governorAbi } from '@buildeross/sdk/contract'
+import { ProposalState } from '@buildeross/sdk/contract'
 import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,
-} from 'src/data/subgraph/sdk.generated'
-import { useDaoStore } from 'src/modules/dao'
+} from '@buildeross/sdk/subgraph'
+import { Button, Flex, Text } from '@buildeross/zord'
+import React, { Fragment, useEffect, useState } from 'react'
+import { useDaoStore } from 'src/stores/useDaoStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
+import { getAddress } from 'viem'
+import { useAccount, useWatchContractEvent } from 'wagmi'
 
 import Pending from './Pending'
 import Vote from './Vote'
