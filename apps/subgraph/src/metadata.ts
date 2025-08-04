@@ -118,6 +118,8 @@ export function handleAddProperties(event: AddPropertiesFunctionCall): void {
   properties.push(property.id)
   dao.metadataProperties = properties
   dao.save()
+
+  refetchAllTokenMetadata()
 }
 
 export function handleDeleteAndRecreateProperties(
@@ -165,4 +167,30 @@ export function handleDeleteAndRecreateProperties(
   properties.push(property.id)
   dao.metadataProperties = properties
   dao.save()
+
+  refetchAllTokenMetadata()
+}
+
+function refetchAllTokenMetadata(): void {
+  let context = dataSource.context()
+
+  let tokenAddress = context.getString('tokenAddress')
+
+  let dao = DAO.load(tokenAddress)
+  if (!dao) return
+
+  let tokenCount = dao.tokenCount
+  let tokenContract = TokenContract.bind(Address.fromString(tokenAddress))
+
+  for (let i = 0; i < tokenCount; i++) {
+    let tokenId = `${tokenAddress}:${i.toString()}`
+    let token = Token.load(tokenId)
+    if (!token) continue
+
+    let tokenURI = tokenContract.try_tokenURI(BigInt.fromI32(i))
+    if (!tokenURI.reverted) {
+      setTokenMetadata(token, tokenURI.value)
+    }
+    token.save()
+  }
 }
