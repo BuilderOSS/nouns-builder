@@ -4,13 +4,24 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
-interface ContractButtonProps extends ButtonProps {
-  handleClick?: (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+type SubmitTypeButtonProps = ButtonProps & {
+  type?: 'submit'
+  handleClick?: never
 }
+
+type ButtonTypeButtonProps = ButtonProps & {
+  type?: 'button'
+  handleClick:
+    | ((e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>)
+    | (() => void | Promise<void>)
+}
+
+type ContractButtonProps = ButtonTypeButtonProps | SubmitTypeButtonProps
 
 export const ContractButton = ({
   children,
   handleClick,
+  type = 'button',
   ...rest
 }: ContractButtonProps) => {
   const { address: userAddress, chain: userChain } = useAccount()
@@ -47,7 +58,7 @@ export const ContractButton = ({
   }
 
   return (
-    <Button type="button" onClick={handleClickWithValidation} {...rest}>
+    <Button type={type} onClick={handleClickWithValidation} {...rest}>
       {children}
     </Button>
   )

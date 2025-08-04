@@ -29,7 +29,7 @@ type GovernorContractButtonProps = Pick<
   buttonText: string
   buttonClassName?: string
   onSuccess: () => void
-} & ButtonProps
+} & Omit<ButtonProps, 'type'>
 
 export function GovernorContractButton({
   functionName,
