@@ -272,7 +272,6 @@ export const PropDateForm = ({
                   type="submit"
                   disabled={!formik.isValid || isSubmitting}
                   loading={isSubmitting}
-                  handleClick={() => undefined}
                 >
                   Submit Propdate
                 </ContractButton>
