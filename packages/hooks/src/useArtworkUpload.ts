@@ -73,8 +73,6 @@ export interface UseArtworkUploadReturn {
   ipfsUploadError: string | undefined
 }
 
-const IPFS_UPLOAD_BATCH_SIZE = 150
-
 export const useArtworkUpload = ({
   artwork,
   ipfsUpload,
@@ -287,37 +285,18 @@ export const useArtworkUpload = ({
     }
   }, [isProcessing, fileInfo])
 
-  /* upload Files to ipfs via zora ipfs service */
-
-  const uploadToIPFS: (files: File[]) => Promise<IPFSUpload[]> = async (files) => {
-    const batches: File[][] = []
-
-    for (let i = 0; i < files.length; i += IPFS_UPLOAD_BATCH_SIZE) {
-      batches.push(files.slice(i, i + IPFS_UPLOAD_BATCH_SIZE))
-    }
-
-    const results: IPFSUpload[] = []
-
-    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-      const batch = batches[batchIndex]
-      const batchWeight = batch.length / files.length
-      const baseProgress = batchIndex / batches.length
-
-      const batchProgressHandler = (progress: number) => {
-        const currentBatchProgress = (progress / 100) * batchWeight
-        const totalProgress = baseProgress + currentBatchProgress
-        onUploadProgress(Math.min(totalProgress * 100, 100))
-      }
-
+  /* upload Files to ipfs via ipfs service */
+  const uploadToIPFS: (files: File[]) => Promise<IPFSUpload[]> = React.useCallback(
+    async (files: File[]) => {
       const ipfsUploadResponse = await uploadDirectory(
-        batch.map((file) => ({
+        files.map((file) => ({
           content: file,
           path: sanitizeFileName(file.webkitRelativePath.split('/').slice(1).join('/')),
         })),
-        { cache: true, onProgress: batchProgressHandler },
+        { cache: true, onProgress: onUploadProgress },
       )
 
-      const batchResults = batch.map((file) => ({
+      const results = files.map((file) => ({
         name: sanitizeFileName(file.webkitRelativePath.split('/')[2]),
         property: file.webkitRelativePath.split('/')[2],
         collection: file.webkitRelativePath.split('/')[0],
@@ -330,11 +309,11 @@ export const useArtworkUpload = ({
         ipfs: ipfsUploadResponse,
       }))
 
-      results.push(...batchResults)
-    }
-
-    return results
-  }
+      return results
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
 
   React.useEffect(() => {
     if (!filesArray || !!uploadArtworkError) return
@@ -359,7 +338,7 @@ export const useArtworkUpload = ({
 
     handleUpload(filesArray)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filesArray, uploadArtworkError])
+  }, [filesArray, uploadArtworkError, uploadToIPFS])
 
   return {
     images,
