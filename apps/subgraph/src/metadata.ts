@@ -185,9 +185,7 @@ function refetchAllTokenMetadata(): void {
 
   for (let i = 0; i < tokens.length; i++) {
     let token = tokens[i]
-    if (!token) continue
-
-    let tokenURI = tokenContract.try_tokenURI(BigInt.fromI32(i))
+    let tokenURI = tokenContract.try_tokenURI(token.tokenId)
     if (!tokenURI.reverted) {
       setTokenMetadata(token, tokenURI.value)
     }
