@@ -1,7 +1,7 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
@@ -62,7 +62,7 @@ export const Settle = ({
 
   const [settling, setSettling] = useState(false)
 
-  const handleSettle = async () => {
+  const handleSettle = useCallback(async () => {
     if (!!error || !data) return
 
     setSettling(true)
@@ -74,7 +74,7 @@ export const Settle = ({
     } catch (error) {
       setSettling(false)
     }
-  }
+  }, [error, data, writeContractAsync, config, chain.id, setSettling])
 
   if (isEnding && !settling) {
     return (
@@ -108,6 +108,7 @@ export const Settle = ({
   return (
     <Flex direction="column" align="center" width={'100%'}>
       <ContractButton
+        disabled={!!error || !data}
         handleClick={handleSettle}
         className={
           compact
