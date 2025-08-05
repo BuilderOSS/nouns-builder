@@ -45,11 +45,10 @@ export const ContractButton = ({
 
       if (handleClick) {
         handleClick(e)
+      } else if (e?.currentTarget?.form?.requestSubmit) {
+        e?.currentTarget?.form?.requestSubmit()
       } else {
-        const form = e?.currentTarget?.form
-        if (form) {
-          form.requestSubmit() // Modern way to trigger a form submission
-        }
+        console.error('ContractButton: no onClick handler')
       }
     },
     [
