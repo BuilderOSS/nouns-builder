@@ -179,12 +179,12 @@ function refetchAllTokenMetadata(): void {
   let dao = DAO.load(tokenAddress)
   if (!dao) return
 
-  let tokenCount = dao.tokenCount
   let tokenContract = TokenContract.bind(Address.fromString(tokenAddress))
 
-  for (let i = 0; i < tokenCount; i++) {
-    let tokenId = `${tokenAddress}:${i.toString()}`
-    let token = Token.load(tokenId)
+  let tokens = dao.tokens.load()
+
+  for (let i = 0; i < tokens.length; i++) {
+    let token = tokens[i]
     if (!token) continue
 
     let tokenURI = tokenContract.try_tokenURI(BigInt.fromI32(i))
