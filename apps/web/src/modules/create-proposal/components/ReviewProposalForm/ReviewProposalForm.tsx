@@ -281,7 +281,6 @@ export const ReviewProposalForm = ({
                 loading={simulating}
                 disabled={simulating || proposing}
                 h={'x15'}
-                handleClick={() => formik.submitForm()}
               >
                 <Box>{'Submit Proposal'}</Box>
                 {!!votes && (

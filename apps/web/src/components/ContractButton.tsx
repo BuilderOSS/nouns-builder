@@ -1,16 +1,28 @@
 import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { Button, ButtonProps } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { useCallback } from 'react'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
-interface ContractButtonProps extends ButtonProps {
-  handleClick?: (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+type SubmitTypeButtonProps = ButtonProps & {
+  type?: 'submit'
+  handleClick?: never
 }
+
+type ButtonTypeButtonProps = ButtonProps & {
+  type?: 'button'
+  handleClick:
+    | ((e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>)
+    | (() => void | Promise<void>)
+}
+
+type ContractButtonProps = ButtonTypeButtonProps | SubmitTypeButtonProps
 
 export const ContractButton = ({
   children,
   handleClick,
+  type = 'button',
   ...rest
 }: ContractButtonProps) => {
   const { address: userAddress, chain: userChain } = useAccount()
@@ -23,31 +35,38 @@ export const ContractButton = ({
 
   const { openConnectModal } = useConnectModal()
   const { switchChain } = useSwitchChain()
+  const handleClickWithValidation = useCallback(
+    (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e?.preventDefault()
 
-  const handleSwitchChain = () => switchChain?.({ chainId: appChain.id })
+      if (!userAddress) return openConnectModal?.()
+      if (canUserBridge && userBalance?.decimals === 0) return openBridgeModal()
+      if (userChain?.id !== appChain.id) return switchChain?.({ chainId: appChain.id })
 
-  const handleClickWithValidation = (
-    e?: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e?.preventDefault()
-
-    if (!userAddress) return openConnectModal?.()
-    if (canUserBridge && userBalance?.decimals === 0) return openBridgeModal()
-    if (userChain?.id !== appChain.id) return handleSwitchChain()
-
-    if (handleClick) {
-      handleClick(e)
-    } else {
-      // Submit the form manually if all checks pass
-      const form = e?.currentTarget?.form
-      if (form) {
-        form.requestSubmit() // Modern way to trigger a form submission
+      if (handleClick) {
+        handleClick(e)
+      } else {
+        const form = e?.currentTarget?.form
+        if (form) {
+          form.requestSubmit() // Modern way to trigger a form submission
+        }
       }
-    }
-  }
+    },
+    [
+      userAddress,
+      userChain,
+      switchChain,
+      appChain.id,
+      canUserBridge,
+      userBalance,
+      openConnectModal,
+      openBridgeModal,
+      handleClick,
+    ]
+  )
 
   return (
-    <Button type="button" onClick={handleClickWithValidation} {...rest}>
+    <Button type={type} onClick={handleClickWithValidation} {...rest}>
       {children}
     </Button>
   )

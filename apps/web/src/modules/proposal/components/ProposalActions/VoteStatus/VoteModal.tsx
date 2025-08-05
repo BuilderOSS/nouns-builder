@@ -247,7 +247,6 @@ const VoteModal: React.FC<{
                     <ContractButton
                       loading={isSubmitting}
                       handleClick={submitForm}
-                      type="submit"
                       w="100%"
                       size="lg"
                       mt="x8"
