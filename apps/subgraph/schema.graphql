@@ -13,6 +13,7 @@ type DAO @entity {
   governorAddress: Bytes!
   ownerCount: Int!
   voterCount: Int!
+  tokenCount: Int!
   proposalCount: Int!
   totalAuctionSales: BigInt!
   auctionConfig: AuctionConfig!
@@ -65,6 +66,7 @@ type Snapshot @entity {
   totalSupply: Int!
   ownerCount: Int!
   voterCount: Int!
+  tokenCount: Int!
   proposalCount: Int!
 }
 
