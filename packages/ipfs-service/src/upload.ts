@@ -355,7 +355,7 @@ export async function uploadDirectory(
 
   const response = await uploadWithProgress(data, 'directory', {
     onProgress: progressCallback,
-    // useLegacy: true,
+    useLegacy: true,
   })
 
   const uri = `ipfs://${response.cid}`
