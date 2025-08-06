@@ -9,6 +9,7 @@ import {
   WebsiteURIUpdated as URIUpdatedEvent,
 } from '../generated/templates/MetadataRendererBase/MetadataRendererBase'
 import {
+  PropertyAdded as PropertyAddedEvent,
   AddPropertiesCall as AddPropertiesFunctionCall,
   DeleteAndRecreatePropertiesCall as DeleteAndRecreatePropertiesFunctionCall,
 } from '../generated/templates/MetadataRendererV1/MetadataRendererV1'
@@ -168,6 +169,12 @@ export function handleDeleteAndRecreateProperties(
   dao.metadataProperties = properties
   dao.save()
 
+  refetchAllTokenMetadata()
+}
+
+// TODO: This is a hack or workaround to refetch all token metadata after a property is added when callHandlers are disabled.
+//       This should be removed if callHandlers work for zora-sepolia and zora-mainnet. Currently, the subgraph doesn't sync and it fails to deploy on Goldsky.
+export function handlePropertyAdded(_event: PropertyAddedEvent): void {
   refetchAllTokenMetadata()
 }
 

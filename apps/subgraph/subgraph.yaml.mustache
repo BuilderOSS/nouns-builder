@@ -114,6 +114,10 @@ templates:
           handler: handleDescriptionUpdated
         - event: WebsiteURIUpdated(string,string)
           handler: handleWebsiteURIUpdated
+      {{!#callHandlers}}
+        - event: PropertyAdded(uint256,string)
+          handler: handlePropertyAdded
+      {{!/callHandlers}}
       {{#callHandlers}}
       callHandlers:
         - function: addProperties(string[],(uint256,string,bool)[],(string,string))
