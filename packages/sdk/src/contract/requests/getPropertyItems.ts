@@ -31,10 +31,17 @@ export const getPropertyItems = async (
       }
     })
 
-  const propertyItemsCountBN = (await readContracts(serverConfig, {
+  const propertyItemsCountBN = await readContracts(serverConfig, {
     allowFailure: false,
     contracts,
-  })) as bigint[]
+  })
+
+  if (
+    !Array.isArray(propertyItemsCountBN) ||
+    !propertyItemsCountBN.every((x) => typeof x === 'bigint')
+  ) {
+    throw new Error('Invalid response from contract: expected array of bigints')
+  }
 
   const propertyItemsCount = propertyItemsCountBN.map((x) => Number(x))
 
@@ -77,6 +84,15 @@ export type Property = {
   items: Item[]
 }
 
+const isValidIpfsData = (data: any): data is [string, string] => {
+  return (
+    Array.isArray(data) &&
+    data.length === 2 &&
+    typeof data[0] === 'string' &&
+    typeof data[1] === 'string'
+  )
+}
+
 const getProperties = async (
   chainId: CHAIN_ID,
   metadataAddress: AddressType,
@@ -110,7 +126,7 @@ const getProperties = async (
 
   const allReferenceSlots = Array.from(allReferenceSlotsSet)
 
-  const ipfsDatas = (await readContracts(serverConfig, {
+  const ipfsDatas = await readContracts(serverConfig, {
     allowFailure: false,
     contracts: allReferenceSlots.map((referenceSlot) => {
       return {
@@ -121,13 +137,18 @@ const getProperties = async (
         args: [referenceSlot],
       }
     }),
-  })) as unknown as Array<[string, string]>
+  })
+
+  // Validate the response structure
+  if (!Array.isArray(ipfsDatas) || !ipfsDatas.every((data) => isValidIpfsData(data))) {
+    throw new Error('Invalid IPFS data response from contract')
+  }
 
   const ipfsDataMap = ipfsDatas.reduce(
     (acc, data, index) => {
       const group = {
-        baseUri: data?.[0],
-        extension: data?.[1],
+        baseUri: data[0],
+        extension: data[1],
       }
       acc[allReferenceSlots[index]] = group
       return acc
@@ -137,9 +158,13 @@ const getProperties = async (
 
   const finalProperties = properties.map((property) => {
     const items = property.items.map((item) => {
+      const ipfsData = ipfsDataMap[item.referenceSlot]
+      if (!ipfsData) {
+        throw new Error(`Missing IPFS data for reference slot ${item.referenceSlot}`)
+      }
       return {
         name: item.name,
-        uri: `${ipfsDataMap[item.referenceSlot].baseUri}${property.name}/${item.name}${ipfsDataMap[item.referenceSlot].extension}`,
+        uri: `${ipfsDataMap[item.referenceSlot].baseUri}${encodeURIComponent(property.name)}/${encodeURIComponent(item.name)}${ipfsDataMap[item.referenceSlot].extension}`,
       }
     })
     return {
@@ -169,6 +194,7 @@ const getPropertyName = async (
 async function decodeStringFromStorage(
   chainId: CHAIN_ID,
   contractAddress: `0x${string}`,
+  slot: `0x${string}`,
   rawValue: `0x${string}`,
 ): Promise<string> {
   if (!rawValue || rawValue === '0x') return ''
@@ -186,7 +212,7 @@ async function decodeStringFromStorage(
     return hexToString(`0x${hexBody}`)
   } else {
     // Dynamic string (stored in separate slot)
-    const dataSlot = keccak256(toHex(value))
+    const dataSlot = keccak256(slot)
     const lengthHex = await publicClient.getStorageAt({
       address: contractAddress,
       slot: dataSlot,
@@ -256,7 +282,12 @@ export async function getItemFromStorage(
   })
 
   const name = namePointer
-    ? await decodeStringFromStorage(chainId, contractAddress, namePointer)
+    ? await decodeStringFromStorage(
+        chainId,
+        contractAddress,
+        toHex(nameSlot, { size: 32 }),
+        namePointer,
+      )
     : ''
 
   return {

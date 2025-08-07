@@ -149,10 +149,15 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     generateStackedImage()
   }, [generateStackedImage, isUploadingToIPFS, fileInfo])
 
+  useEffect(() => {
+    if (!artwork || artwork.length === 0 || artwork.length === orderedLayers.length)
+      return
+    setOrderedLayers(artwork)
+  }, [artwork, orderedLayers, setOrderedLayers])
+
   const layerOrdering = (
     <LayerOrdering
       images={images}
-      artwork={artwork}
       orderedLayers={orderedLayers}
       setOrderedLayers={setOrderedLayers}
     />

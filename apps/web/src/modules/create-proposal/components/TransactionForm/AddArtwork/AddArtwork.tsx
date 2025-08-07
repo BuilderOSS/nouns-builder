@@ -1,9 +1,9 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { metadataAbi } from '@buildeross/sdk/contract'
-import { getPropertyItemsCount } from '@buildeross/sdk/contract'
+import { getPropertyItems } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { transformFileProperties } from 'src/modules/create-dao'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
@@ -29,7 +29,7 @@ export const AddArtwork = () => {
     addresses.metadata && chain.id ? SWR_KEYS.ARTWORK_PROPERTY_ITEMS_COUNT : undefined,
     () => {
       if (!addresses.metadata) return
-      return getPropertyItemsCount(chain.id, addresses?.metadata)
+      return getPropertyItems(chain.id, addresses?.metadata)
     }
   )
 
@@ -37,7 +37,7 @@ export const AddArtwork = () => {
     resetForm()
   }, [resetForm])
 
-  const { propertiesCount, propertyItemsCount } = data || {}
+  const { propertiesCount, propertyItemsCount, properties } = data || {}
 
   const isPropertyCountValid = useMemo(() => {
     if (!propertiesCount) return false
@@ -45,34 +45,48 @@ export const AddArtwork = () => {
   }, [propertiesCount, orderedLayers])
 
   const invalidPropertyIndex = useMemo(() => {
-    if (!propertyItemsCount || propertyItemsCount.length < 1) return -1
+    if (!propertiesCount || !propertyItemsCount || propertyItemsCount.length < 1)
+      return -1
     return contractOrderedLayers.findIndex((x, i) => {
+      if (i > propertiesCount - 1) return false
       if (i >= propertyItemsCount.length) return true
       return x.properties.length < propertyItemsCount[i]
     })
-  }, [propertyItemsCount, contractOrderedLayers])
+  }, [propertyItemsCount, contractOrderedLayers, propertiesCount])
 
-  const isValid =
-    isPropertyCountValid &&
-    invalidPropertyIndex < 0 &&
-    !isUploadingToIPFS &&
-    ipfsUpload.length !== 0
+  const isValid = useMemo(
+    () =>
+      isPropertyCountValid &&
+      invalidPropertyIndex < 0 &&
+      !isUploadingToIPFS &&
+      ipfsUpload.length !== 0,
+    [isPropertyCountValid, invalidPropertyIndex, isUploadingToIPFS, ipfsUpload]
+  )
 
-  const transactions = React.useMemo(() => {
+  const existingProperties = useMemo(() => {
+    if (!properties) return []
+    return properties.map((x) => x.name)
+  }, [properties])
+
+  const transactions = useMemo(() => {
     if (!orderedLayers || !ipfsUpload) return
 
-    return transformFileProperties(orderedLayers, ipfsUpload, 500)
-  }, [orderedLayers, ipfsUpload])
+    const transformed = transformFileProperties(orderedLayers, ipfsUpload, 500)
 
-  const handleAddArtworkTransaction = () => {
+    return transformed.map((x) => {
+      return {
+        ...x,
+        names: x.names.filter((name) => !existingProperties.includes(name)),
+      }
+    })
+  }, [orderedLayers, ipfsUpload, existingProperties])
+
+  const handleAddArtworkTransaction = useCallback(() => {
     if (!transactions || !isValid) return
 
     const formattedTransactions = transactions.map((transaction) => {
-      const functionSignature =
-        'addProperties(string[], (uint256,string,bool)[], (string,string))'
-
       return {
-        functionSignature,
+        functionSignature: 'addProperties',
         target: addresses?.metadata as AddressType,
         value: '',
         calldata: encodeFunctionData({
@@ -90,7 +104,7 @@ export const AddArtwork = () => {
     })
 
     resetForm()
-  }
+  }, [addresses?.metadata, addTransaction, isValid, resetForm, transactions])
 
   return (
     <Stack>
@@ -98,6 +112,7 @@ export const AddArtwork = () => {
         disabled={!isValid}
         isPropertyCountValid={isPropertyCountValid}
         propertiesCount={propertiesCount || 0}
+        properties={properties || []}
         handleSubmit={handleAddArtworkTransaction}
       />
     </Stack>

@@ -1,3 +1,5 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
+import { type Property } from '@buildeross/sdk/contract'
 import { atoms, Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
@@ -19,12 +21,14 @@ export interface InvalidProperty {
 export interface AddArtworkFormProps {
   disabled: boolean
   isPropertyCountValid: boolean
+  properties: Property[]
   propertiesCount: number
   invalidProperty?: InvalidProperty
   handleSubmit: (values: ArtworkFormValues) => void
 }
 
 export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
+  properties,
   disabled,
   isPropertyCountValid,
   propertiesCount,
@@ -32,7 +36,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
 }) => {
   const { isUploadingToIPFS, ipfsUploadProgress, ipfsUpload, setUpArtwork } =
     useArtworkStore()
-  const [hasConfirmed, setHasConfirmed] = useState(false)
+  const [hasConfirmed, setHasConfirmed] = useState(PUBLIC_IS_TESTNET ? true : false)
 
   const initialValues = {
     artwork: setUpArtwork?.artwork || [],
@@ -77,6 +81,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
               {...formik.getFieldProps('artwork')}
               inputLabel={'Artwork'}
               formik={formik}
+              existingProperties={properties}
               id={'artwork'}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
