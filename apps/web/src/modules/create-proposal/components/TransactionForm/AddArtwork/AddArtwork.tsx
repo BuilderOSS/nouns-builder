@@ -70,15 +70,7 @@ export const AddArtwork = () => {
 
   const transactions = useMemo(() => {
     if (!orderedLayers || !ipfsUpload) return
-
-    const transformed = transformFileProperties(orderedLayers, ipfsUpload, 500)
-
-    return transformed.map((x) => {
-      return {
-        ...x,
-        names: x.names.filter((name) => !existingProperties.includes(name)),
-      }
-    })
+    return transformFileProperties(orderedLayers, ipfsUpload, 500, existingProperties)
   }, [orderedLayers, ipfsUpload, existingProperties])
 
   const handleAddArtworkTransaction = useCallback(() => {

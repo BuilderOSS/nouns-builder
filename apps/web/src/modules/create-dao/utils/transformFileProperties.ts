@@ -35,13 +35,15 @@ function uploadsToPropertyItems(
 export function transformFileProperties(
   orderedLayers: OrderedTraits,
   ipfsUpload: IPFSUpload[],
-  maxFilesPerTransaction = 500
+  maxFilesPerTransaction = 500,
+  existingTraits: string[] = []
 ): Properties[] {
   if (!orderedLayers.length || !ipfsUpload.length) {
     return []
   }
 
   const traits = orderedLayers.map((name) => name.trait).reverse() // this reverse is import for order sent to contract
+  const newTraits = traits.filter((trait) => !existingTraits.includes(trait))
 
   const uploadsByTrait: { trait: string; uploads: IPFSUpload[] }[] = traits.map(
     (trait) => {
@@ -64,21 +66,29 @@ export function transformFileProperties(
   const transactions: Properties[] = []
   let currentTransaction: Properties | undefined = { names: [], items: [], data }
   for (var { trait, uploads } of uploadsByTrait) {
+    const isNewTrait = newTraits.includes(trait)
+
     let availableSpaceInCurrentTransaction =
       maxFilesPerTransaction - currentTransaction.items.length
 
     // Check if the whole trait can fit within the current transaction
     if (uploads.length <= availableSpaceInCurrentTransaction) {
+      const propertyId = isNewTrait
+        ? currentTransaction.names.length
+        : traits.indexOf(trait)
+
       currentTransaction.items = [
         ...currentTransaction.items,
-        ...uploadsToPropertyItems(uploads, currentTransaction.names.length, true),
+        ...uploadsToPropertyItems(uploads, propertyId, isNewTrait),
       ]
 
-      currentTransaction.names = [...currentTransaction.names, trait]
+      if (isNewTrait) {
+        currentTransaction.names = [...currentTransaction.names, trait]
+      }
     } else {
       // We need to split the trait up across multiple transactions
       let remainingUploads = [...uploads]
-      let isNewProperty = true
+      let isNewProperty = isNewTrait
 
       while (remainingUploads.length > 0) {
         // If isNewProperty = false, we index based on the whole list of properties

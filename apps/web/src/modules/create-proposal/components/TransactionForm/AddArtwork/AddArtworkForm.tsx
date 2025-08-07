@@ -50,17 +50,22 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
       <Text fontWeight={'display'}>Requirements for Add Artwork proposal:</Text>
       <Box as="ul" color="text3" mt="x6">
         <Box as="li" mb="x3">
-          The total number of new traits must be equal to or greater than the number of
+          New traits must be added as a new top-level layer.
+        </Box>
+        <Box as="li" mb="x3">
+          Do not re-upload previously added variants to avoid duplicates.
+        </Box>
+        <Box as="li" mb="x3">
+          When adding new variants to an existing trait, the folder name must match the
+          original exactly (including spelling and casing).
+        </Box>
+        <Box as="li" mb="x3">
+          The total number of new traits should be equal to or greater than the number of
           old traits.
         </Box>
-        <Box as="li" mb="x3">
-          All trait folders should be included in the same order as the original upload
-          even if they contain no new artwork.
+        <Box as="li">
+          You only need to include folders for traits that have new variants.
         </Box>
-        <Box as="li" mb="x3">
-          Previously uploaded variants should be removed to avoid duplicates.
-        </Box>
-        <Box as="li">New traits must be added to the end of the folder hierarchy.</Box>
       </Box>
       <Uploading
         isUploadingToIPFS={isUploadingToIPFS}
