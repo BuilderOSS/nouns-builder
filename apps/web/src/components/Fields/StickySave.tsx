@@ -1,7 +1,7 @@
 import { usePrevious } from '@buildeross/hooks'
 import { Flex } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Icon } from 'src/components/Icon'
 import {
   adminStickySaveButton,
@@ -59,13 +59,13 @@ const StickySave: React.FC<StickySaveProps> = ({
     setHasConfirmed(!hasConfirmed)
   }
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!hasConfirmed) {
       setShowConfirmBanner(true)
     } else {
       onSave()
     }
-  }
+  }, [hasConfirmed, onSave])
 
   return (
     <AnimatePresence>

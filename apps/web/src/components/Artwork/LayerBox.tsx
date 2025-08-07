@@ -63,7 +63,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
     },
     open: {
       height: 'auto',
-      overflow: 'scroll',
+      overflow: 'auto',
     },
   }
 

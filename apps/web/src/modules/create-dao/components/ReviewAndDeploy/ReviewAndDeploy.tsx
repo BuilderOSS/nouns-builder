@@ -9,7 +9,7 @@ import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex } from '@buildeross/zord'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { FallbackImage } from 'src/components/FallbackImage'
 import { defaultBackButton } from 'src/components/Fields/styles.css'
@@ -88,62 +88,90 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     vetoerAddress,
   } = useFormStore()
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setActiveSection(activeSection - 1)
-  }
+  }, [setActiveSection, activeSection])
 
-  const founderParams = [...founderAllocation, ...contributionAllocation].map(
-    ({ founderAddress, allocationPercentage: allocation, endDate }) => ({
-      wallet: founderAddress as AddressType,
-      ownershipPct: allocation ? BigInt(allocation) : BigInt(0),
-      vestExpiry: BigInt(Math.floor(new Date(endDate).getTime() / 1000)),
-    })
+  const founderParams = useMemo(
+    () =>
+      [...founderAllocation, ...contributionAllocation].map(
+        ({ founderAddress, allocationPercentage: allocation, endDate }) => ({
+          wallet: founderAddress as AddressType,
+          ownershipPct: allocation ? BigInt(allocation) : BigInt(0),
+          vestExpiry: BigInt(Math.floor(new Date(endDate).getTime() / 1000)),
+        })
+      ),
+    [founderAllocation, contributionAllocation]
   )
 
-  const tokenParamsHex = encodeAbiParameters(
-    parseAbiParameters(
-      'string name, string symbol, string description, string daoImage, string daoWebsite, string baseRenderer'
-    ),
+  const tokenParamsHex = useMemo(
+    () =>
+      encodeAbiParameters(
+        parseAbiParameters(
+          'string name, string symbol, string description, string daoImage, string daoWebsite, string baseRenderer'
+        ),
+        [
+          sanitizeStringForJSON(general?.daoName),
+          general?.daoSymbol.replace('$', ''),
+          sanitizeStringForJSON(setUpArtwork?.projectDescription),
+          general?.daoAvatar || '',
+          sanitizeStringForJSON(general?.daoWebsite || ''),
+          RENDERER_BASE,
+        ]
+      ),
     [
-      sanitizeStringForJSON(general?.daoName),
-      general?.daoSymbol.replace('$', ''),
-      sanitizeStringForJSON(setUpArtwork?.projectDescription),
-      general?.daoAvatar || '',
-      sanitizeStringForJSON(general?.daoWebsite || ''),
-      RENDERER_BASE,
+      general?.daoName,
+      general?.daoSymbol,
+      general?.daoAvatar,
+      general?.daoWebsite,
+      setUpArtwork?.projectDescription,
     ]
   )
 
-  const tokenParams = { initStrings: tokenParamsHex as AddressType }
+  const tokenParams = useMemo(
+    () => ({ initStrings: tokenParamsHex as AddressType }),
+    [tokenParamsHex]
+  )
 
-  const auctionParams = {
-    reservePrice: auctionSettings.auctionReservePrice
-      ? parseEther(auctionSettings.auctionReservePrice.toString())
-      : parseEther('0'),
-    duration: auctionSettings?.auctionDuration
-      ? BigInt(toSeconds(auctionSettings?.auctionDuration))
-      : BigInt('86400'),
-    founderRewardRecipent: NULL_ADDRESS,
-    founderRewardBps: 0,
-  }
+  const auctionParams = useMemo(
+    () => ({
+      reservePrice: parseEther('0'),
+      duration: auctionSettings?.auctionDuration
+        ? BigInt(toSeconds(auctionSettings?.auctionDuration))
+        : BigInt('86400'),
+      founderRewardRecipent: NULL_ADDRESS,
+      founderRewardBps: 0,
+    }),
+    [auctionSettings?.auctionDuration]
+  )
 
-  const govParams = {
-    timelockDelay: BigInt(toSeconds({ days: 2 }).toString()),
-    votingDelay: BigInt(toSeconds(auctionSettings.votingDelay)),
-    votingPeriod: BigInt(toSeconds(auctionSettings.votingPeriod)),
-    proposalThresholdBps: auctionSettings?.proposalThreshold
-      ? BigInt(Number((Number(auctionSettings?.proposalThreshold) * 100).toFixed(2)))
-      : BigInt('0'),
-    quorumThresholdBps: auctionSettings?.quorumThreshold
-      ? BigInt(Number((Number(auctionSettings?.quorumThreshold) * 100).toFixed(2)))
-      : BigInt('0'),
-    vetoer:
-      vetoPower === true
-        ? getAddress(vetoerAddress as AddressType)
-        : getAddress(NULL_ADDRESS),
-  }
+  const govParams = useMemo(
+    () => ({
+      timelockDelay: BigInt(toSeconds({ days: 2 }).toString()),
+      votingDelay: BigInt(toSeconds(auctionSettings.votingDelay)),
+      votingPeriod: BigInt(toSeconds(auctionSettings.votingPeriod)),
+      proposalThresholdBps: auctionSettings?.proposalThreshold
+        ? BigInt(Number((Number(auctionSettings?.proposalThreshold) * 100).toFixed(2)))
+        : BigInt('0'),
+      quorumThresholdBps: auctionSettings?.quorumThreshold
+        ? BigInt(Number((Number(auctionSettings?.quorumThreshold) * 100).toFixed(2)))
+        : BigInt('0'),
+      vetoer:
+        vetoPower === true
+          ? getAddress(vetoerAddress as AddressType)
+          : getAddress(NULL_ADDRESS),
+    }),
+    [
+      auctionSettings?.votingPeriod,
+      auctionSettings?.votingDelay,
+      auctionSettings?.proposalThreshold,
+      auctionSettings?.quorumThreshold,
+      vetoPower,
+      vetoerAddress,
+    ]
+  )
 
-  const handleDeploy = async () => {
+  const handleDeploy = useCallback(async () => {
     setDeploymentError(undefined)
 
     if (
@@ -242,7 +270,41 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     setDeployedDao(deployedAddresses)
     setIsPendingTransaction(false)
     setFulfilledSections(title)
-  }
+  }, [
+    founderAllocation,
+    contributionAllocation,
+    address,
+    founderParams,
+    ipfsUpload.length,
+    config,
+    chain.id,
+    version,
+    tokenParams,
+    auctionParams,
+    govParams,
+    setDeployedDao,
+    setFulfilledSections,
+    title,
+  ])
+
+  const isDisabled = useMemo(
+    () =>
+      !address ||
+      !hasConfirmedTerms ||
+      !hasConfirmedChain ||
+      (isL2 && !hasConfirmedRewards) ||
+      isPendingTransaction ||
+      isVersionLoading,
+    [
+      address,
+      hasConfirmedTerms,
+      hasConfirmedChain,
+      isL2,
+      hasConfirmedRewards,
+      isPendingTransaction,
+      isVersionLoading,
+    ]
+  )
 
   return (
     <Box>
@@ -414,14 +476,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
               <ContractButton
                 handleClick={handleDeploy}
                 w={'100%'}
-                disabled={
-                  !address ||
-                  !hasConfirmedTerms ||
-                  !hasConfirmedChain ||
-                  (isL2 && !hasConfirmedRewards) ||
-                  isPendingTransaction ||
-                  isVersionLoading
-                }
+                disabled={isDisabled}
                 className={
                   deployContractButtonStyle[isPendingTransaction ? 'pending' : 'default']
                 }
