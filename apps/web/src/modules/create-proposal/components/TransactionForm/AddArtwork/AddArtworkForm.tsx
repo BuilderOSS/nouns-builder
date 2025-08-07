@@ -33,7 +33,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
   const { isUploadingToIPFS, ipfsUploadProgress, ipfsUpload, setUpArtwork } =
     useArtworkStore()
   const [hasConfirmed, setHasConfirmed] = useState(
-    process.env.NEXT_PUBLIC_CHAIN_ID === '5' ? true : false
+    false
   )
 
   const initialValues = {
@@ -56,7 +56,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
           even if they contain no new artwork.
         </Box>
         <Box as="li" mb="x3">
-          Previously uploaded variants should be removed to avoid dulicates.
+          Previously uploaded variants should be removed to avoid duplicates.
         </Box>
         <Box as="li">New traits must be added to the end of the folder hierarchy.</Box>
       </Box>

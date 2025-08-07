@@ -47,6 +47,7 @@ export const AddArtwork = () => {
   const invalidPropertyIndex = useMemo(() => {
     if (!propertyItemsCount || propertyItemsCount.length < 1) return -1
     return contractOrderedLayers.findIndex((x, i) => {
+      if (i >= propertyItemsCount.length) return true
       return x.properties.length < propertyItemsCount[i]
     })
   }, [propertyItemsCount, contractOrderedLayers])
@@ -63,7 +64,7 @@ export const AddArtwork = () => {
     return transformFileProperties(orderedLayers, ipfsUpload, 500)
   }, [orderedLayers, ipfsUpload])
 
-  const handleReplaceArtworkTransaction = () => {
+  const handleAddArtworkTransaction = () => {
     if (!transactions || !isValid) return
 
     const formattedTransactions = transactions.map((transaction) => {
@@ -97,7 +98,7 @@ export const AddArtwork = () => {
         disabled={!isValid}
         isPropertyCountValid={isPropertyCountValid}
         propertiesCount={propertiesCount || 0}
-        handleSubmit={handleReplaceArtworkTransaction}
+        handleSubmit={handleAddArtworkTransaction}
       />
     </Stack>
   )
