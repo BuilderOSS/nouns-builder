@@ -43,6 +43,16 @@ interface LayerBoxProps {
   setOrderedLayers: (orderedLayers: OrderedTraits) => void
   index: number
 }
+const propertiesVariants = {
+  initial: {
+    height: 0,
+    overflow: 'hidden',
+  },
+  open: {
+    height: 'auto',
+    overflow: 'auto',
+  },
+}
 
 export const LayerBox: React.FC<LayerBoxProps> = ({
   trait,
@@ -56,22 +66,8 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
 }) => {
   /*  toggle property animation  */
   const [isOpen, setIsOpen] = React.useState(false)
-  const propertiesVariants = {
-    initial: {
-      height: 0,
-      overflow: 'hidden',
-    },
-    open: {
-      height: 'auto',
-      overflow: 'auto',
-    },
-  }
 
-  /*
-
-      Handle Drag and Drop to Reorder Properties
-
-   */
+  /* Handle Drag and Drop to Reorder Properties */
   const onDragStart = React.useCallback(
     (e: any) => {
       const initialPosition = Number(e.currentTarget.dataset.position)

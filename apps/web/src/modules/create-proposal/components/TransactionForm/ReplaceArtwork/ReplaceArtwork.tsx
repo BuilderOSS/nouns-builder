@@ -1,6 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { metadataAbi } from '@buildeross/sdk/contract'
-import { getPropertyItemsCount } from '@buildeross/sdk/contract'
+import { getPropertyItems } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Stack, Text } from '@buildeross/zord'
 import React, { useEffect, useMemo } from 'react'
@@ -42,7 +42,7 @@ export const ReplaceArtwork = () => {
       : null,
     () => {
       if (!addresses.metadata) return
-      return getPropertyItemsCount(chain.id, addresses?.metadata)
+      return getPropertyItems(chain.id, addresses?.metadata)
     }
   )
 
