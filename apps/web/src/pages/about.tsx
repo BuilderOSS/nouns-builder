@@ -2,7 +2,7 @@ import { Box, Stack } from '@buildeross/zord'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 
@@ -11,6 +11,10 @@ import { NextPageWithLayout } from './_app'
 
 const AboutPage: NextPageWithLayout = () => {
   const router = useRouter()
+
+  const handleCreateClick = useCallback(() => {
+    router.push('/create')
+  }, [router])
 
   return (
     <>
@@ -65,9 +69,7 @@ const AboutPage: NextPageWithLayout = () => {
             style={{ background: '#000', color: '#fff' }}
             className={whyCreateButton}
             mb={'x12'}
-            handleClick={() => {
-              router.push('/create')
-            }}
+            handleClick={handleCreateClick}
           >
             Create a DAO
           </ContractButton>
