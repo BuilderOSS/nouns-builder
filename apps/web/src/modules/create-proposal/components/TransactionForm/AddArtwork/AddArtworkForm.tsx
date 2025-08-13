@@ -18,12 +18,20 @@ export interface InvalidProperty {
   currentLayerName: string
   nextName: string
 }
+
+export interface InvalidPropertyOrder {
+  trait: string
+  layerName: string
+  invalidLayerName: string
+}
+
 export interface AddArtworkFormProps {
   disabled: boolean
   isPropertyCountValid: boolean
   properties: Property[]
   propertiesCount: number
   invalidProperty?: InvalidProperty
+  invalidPropertyOrder?: InvalidPropertyOrder
   handleSubmit: (values: ArtworkFormValues) => void
 }
 
@@ -31,6 +39,8 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
   properties,
   disabled,
   isPropertyCountValid,
+  invalidProperty,
+  invalidPropertyOrder,
   propertiesCount,
   handleSubmit,
 }) => {
@@ -80,77 +90,93 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
         validationSchema={validationSchemaArtwork}
         onSubmit={handleSubmit}
       >
-        {(formik) => (
-          <Flex as={Form} direction={'column'} mt="x8">
-            <ArtworkUpload
-              {...formik.getFieldProps('artwork')}
-              inputLabel={'Artwork'}
-              formik={formik}
-              existingProperties={properties}
-              id={'artwork'}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              helperText={
-                'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG and SVG'
-              }
-              errorMessage={
-                formik.touched.artwork && formik.errors?.artwork
-                  ? formik.errors?.artwork
-                  : undefined
-              }
-            />
+        {(formik) => {
+          return (
+            <Flex as={Form} direction={'column'} mt="x8">
+              <ArtworkUpload
+                {...formik.getFieldProps('artwork')}
+                inputLabel={'Artwork'}
+                formik={formik}
+                existingProperties={properties}
+                id={'artwork'}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                helperText={
+                  'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG and SVG'
+                }
+                errorMessage={
+                  formik.touched.artwork && formik.errors?.artwork
+                    ? formik.errors?.artwork
+                    : undefined
+                }
+              />
 
-            {showPropertyErrors && !isPropertyCountValid && (
-              <Text
-                w="100%"
-                textAlign={'center'}
-                color={'negative'}
-              >{`Current total number of traits is ${propertiesCount}. The new folder of traits must have a minimum total of ${propertiesCount}`}</Text>
-            )}
+              {showPropertyErrors && !isPropertyCountValid && (
+                <Text
+                  w="100%"
+                  textAlign={'center'}
+                  color={'negative'}
+                >{`Current total number of traits is ${propertiesCount}. The new folder of traits must have a minimum total of ${propertiesCount}`}</Text>
+              )}
+              {showPropertyErrors && invalidProperty && (
+                <Text
+                  w="100%"
+                  textAlign={'center'}
+                  color={'negative'}
+                >{`${invalidProperty.currentLayerName} currently has ${invalidProperty.currentVariantCount} trait variants. New trait for ${invalidProperty.currentLayerName} "${invalidProperty.nextName}" should also have minimum ${invalidProperty.currentVariantCount} trait variants.`}</Text>
+              )}
+              {showPropertyErrors && invalidPropertyOrder && (
+                <Text
+                  w="100%"
+                  textAlign={'center'}
+                  color={'negative'}
+                >{`The trait "${invalidPropertyOrder.trait}" in ${invalidPropertyOrder.invalidLayerName} is not in the correct position. It should be in ${invalidPropertyOrder.layerName}.`}</Text>
+              )}
 
-            <NetworkController.Mainnet>
-              <Flex align={'center'} justify={'center'} gap={'x4'} mt="x4">
-                <Flex
-                  align={'center'}
-                  justify={'center'}
-                  className={
-                    checkboxStyleVariants[hasConfirmed ? 'confirmed' : 'default']
-                  }
-                  onClick={() => setHasConfirmed((bool) => !bool)}
-                >
-                  {hasConfirmed && <Icon fill="background1" id="check" />}
-                </Flex>
-
-                <Flex className={checkboxHelperText}>
-                  I confirm I have tested an artwork replacement proposal on{' '}
-                  <a
-                    href={'https://testnet.nouns.build'}
-                    target="_blank"
-                    className={atoms({ color: 'accent' })}
-                    rel="noreferrer"
+              <NetworkController.Mainnet>
+                <Flex align={'center'} justify={'center'} gap={'x4'} mt="x4">
+                  <Flex
+                    align={'center'}
+                    justify={'center'}
+                    className={
+                      checkboxStyleVariants[hasConfirmed ? 'confirmed' : 'default']
+                    }
+                    onClick={() => setHasConfirmed((bool) => !bool)}
                   >
-                    testnet
-                  </a>
-                </Flex>
-              </Flex>
-            </NetworkController.Mainnet>
+                    {hasConfirmed && <Icon fill="background1" id="check" />}
+                  </Flex>
 
-            <Button
-              mt={'x9'}
-              variant={'outline'}
-              borderRadius={'curved'}
-              type="submit"
-              disabled={
-                disabled ||
-                !hasConfirmed ||
-                !isEmpty(formik.errors) ||
-                formik.isSubmitting
-              }
-            >
-              Add Transaction to Queue
-            </Button>
-          </Flex>
-        )}
+                  <Flex className={checkboxHelperText}>
+                    I confirm I have tested an artwork replacement proposal on{' '}
+                    <a
+                      href={'https://testnet.nouns.build'}
+                      target="_blank"
+                      className={atoms({ color: 'accent' })}
+                      rel="noreferrer"
+                    >
+                      testnet
+                    </a>
+                  </Flex>
+                </Flex>
+              </NetworkController.Mainnet>
+
+              <Button
+                mt={'x9'}
+                variant={'outline'}
+                borderRadius={'curved'}
+                type="submit"
+                disabled={
+                  disabled ||
+                  !hasConfirmed ||
+                  !isEmpty(formik.errors) ||
+                  formik.isSubmitting
+                }
+              >
+                Add Transaction to Queue
+              </Button>
+            </Flex>
+          )
+        }}
       </Formik>
     </Box>
   )
