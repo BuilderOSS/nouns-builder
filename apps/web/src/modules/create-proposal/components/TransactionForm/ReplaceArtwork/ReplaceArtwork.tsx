@@ -3,7 +3,7 @@ import { metadataAbi } from '@buildeross/sdk/contract'
 import { getPropertyItems } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Stack, Text } from '@buildeross/zord'
-import React, { useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { getLayerName } from 'src/components/Artwork/LayerBox'
 import { defaultHelperTextStyle } from 'src/components/Fields/styles.css'
 import { transformFileProperties } from 'src/modules/create-dao'
@@ -34,7 +34,10 @@ export const ReplaceArtwork = () => {
     contractVersion: REPLACE_ARTWORK_CONTRACT_VERSION,
   })
 
-  const contractOrderedLayers = [...orderedLayers].reverse() // traits in the contract are reversed
+  const contractOrderedLayers = useMemo(
+    () => [...orderedLayers].reverse(), // traits in the contract are reversed
+    [orderedLayers]
+  )
 
   const { data } = useSWR(
     addresses.metadata
@@ -63,26 +66,42 @@ export const ReplaceArtwork = () => {
     return orderedLayers.length >= propertiesCount
   }, [propertiesCount, orderedLayers])
 
-  const invalidPropertyIndex = useMemo(() => {
-    if (!propertyItemsCount || propertyItemsCount.length < 1) return -1
-    return contractOrderedLayers.findIndex((x, i) => {
+  const invalidProperty = useMemo(() => {
+    if (!propertyItemsCount || propertyItemsCount.length < 1) return
+    const invalidPropertyIndex = contractOrderedLayers.findIndex((x, i) => {
+      if (i >= propertyItemsCount.length) return true
       return x.properties.length < propertyItemsCount[i]
     })
-  }, [propertyItemsCount, contractOrderedLayers])
+    if (invalidPropertyIndex === -1) return
+    const invalidPropertyOrderedLayersIndex =
+      orderedLayers.length - invalidPropertyIndex - 1
+    const currentVariantCount =
+      invalidPropertyIndex < propertyItemsCount.length
+        ? propertyItemsCount[invalidPropertyIndex]
+        : 0
+    return {
+      currentLayerName: getLayerName(invalidPropertyOrderedLayersIndex, orderedLayers),
+      nextName: contractOrderedLayers[invalidPropertyIndex].trait,
+      currentVariantCount: currentVariantCount,
+    }
+  }, [orderedLayers, propertyItemsCount, contractOrderedLayers])
 
-  const isValid =
-    isPropertyCountValid &&
-    invalidPropertyIndex < 0 &&
-    !isUploadingToIPFS &&
-    ipfsUpload.length !== 0
+  const isValid = useMemo(
+    () =>
+      isPropertyCountValid &&
+      !invalidProperty &&
+      !isUploadingToIPFS &&
+      ipfsUpload.length !== 0,
+    [isPropertyCountValid, invalidProperty, isUploadingToIPFS, ipfsUpload]
+  )
 
-  const transactions = React.useMemo(() => {
+  const transactions = useMemo(() => {
     if (!orderedLayers || !ipfsUpload) return
 
     return transformFileProperties(orderedLayers, ipfsUpload, 500)
   }, [orderedLayers, ipfsUpload])
 
-  const handleReplaceArtworkTransaction = () => {
+  const handleReplaceArtworkTransaction = useCallback(() => {
     if (!transactions || !isValid) return
 
     const formattedTransactions = transactions.map((transaction, i) => {
@@ -107,11 +126,7 @@ export const ReplaceArtwork = () => {
     })
 
     resetForm()
-  }
-
-  const hasInvalidProperty = invalidPropertyIndex >= 0 && propertyItemsCount
-  const invalidPropertyOrderedLayersIndex =
-    orderedLayers.length - invalidPropertyIndex - 1
+  }, [addTransaction, resetForm, transactions, isValid, addresses?.metadata])
 
   return (
     <Stack>
@@ -130,18 +145,7 @@ export const ReplaceArtwork = () => {
       <ReplaceArtworkForm
         disabled={!isValid || upgradeRequired || upgradeInProgress}
         isPropertyCountValid={isPropertyCountValid}
-        invalidProperty={
-          hasInvalidProperty
-            ? {
-                currentLayerName: getLayerName(
-                  invalidPropertyOrderedLayersIndex,
-                  orderedLayers
-                ),
-                nextName: contractOrderedLayers[invalidPropertyIndex].trait,
-                currentVariantCount: propertyItemsCount[invalidPropertyIndex],
-              }
-            : undefined
-        }
+        invalidProperty={invalidProperty}
         propertiesCount={propertiesCount || 0}
         handleSubmit={handleReplaceArtworkTransaction}
       />

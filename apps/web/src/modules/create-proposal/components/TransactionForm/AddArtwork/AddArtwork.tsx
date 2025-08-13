@@ -4,6 +4,7 @@ import { getPropertyItems } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo } from 'react'
+import { getLayerName } from 'src/components/Artwork/LayerBox'
 import { transformFileProperties } from 'src/modules/create-dao'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
@@ -44,23 +45,63 @@ export const AddArtwork = () => {
     return orderedLayers.length >= propertiesCount
   }, [propertiesCount, orderedLayers])
 
-  const invalidPropertyIndex = useMemo(() => {
-    if (!propertiesCount || !propertyItemsCount || propertyItemsCount.length < 1)
-      return -1
-    return contractOrderedLayers.findIndex((x, i) => {
+  const invalidProperty = useMemo(() => {
+    if (!propertiesCount || !propertyItemsCount || propertyItemsCount.length < 1) return
+    const invalidPropertyIndex = contractOrderedLayers.findIndex((x, i) => {
       if (i > propertiesCount - 1) return false
       if (i >= propertyItemsCount.length) return true
       return x.properties.length < propertyItemsCount[i]
     })
-  }, [propertyItemsCount, contractOrderedLayers, propertiesCount])
+    if (invalidPropertyIndex === -1) return
+    const invalidPropertyOrderedLayersIndex =
+      orderedLayers.length - invalidPropertyIndex - 1
+    const currentVariantCount =
+      invalidPropertyIndex < propertyItemsCount.length
+        ? propertyItemsCount[invalidPropertyIndex]
+        : 0
+    return {
+      currentLayerName: getLayerName(invalidPropertyOrderedLayersIndex, orderedLayers),
+      nextName: contractOrderedLayers[invalidPropertyIndex].trait,
+      currentVariantCount: currentVariantCount,
+    }
+  }, [propertyItemsCount, contractOrderedLayers, orderedLayers, propertiesCount])
+
+  const invalidPropertyOrder = useMemo(() => {
+    if (!orderedLayers || !properties) return
+    if (orderedLayers.length !== properties.length) return // this is handled by isPropertyCountValid
+    const mismatchIndex = contractOrderedLayers.findIndex((x, i) => {
+      if (i > properties.length - 1) return false
+      return x.trait !== properties[i].name
+    })
+    if (mismatchIndex === -1) return
+    const correctIndex = properties.findIndex((x) => {
+      return x.name === contractOrderedLayers[mismatchIndex].trait
+    })
+    if (correctIndex === -1) return
+    const correctIndexInOrderedLayers = orderedLayers.length - correctIndex - 1
+    const mismatchIndexInOrderedLayers = orderedLayers.length - mismatchIndex - 1
+
+    return {
+      invalidLayerName: getLayerName(mismatchIndexInOrderedLayers, orderedLayers),
+      layerName: getLayerName(correctIndexInOrderedLayers, orderedLayers),
+      trait: contractOrderedLayers[mismatchIndex].trait,
+    }
+  }, [orderedLayers, contractOrderedLayers, properties])
 
   const isValid = useMemo(
     () =>
       isPropertyCountValid &&
-      invalidPropertyIndex < 0 &&
+      !invalidProperty &&
+      !invalidPropertyOrder &&
       !isUploadingToIPFS &&
       ipfsUpload.length !== 0,
-    [isPropertyCountValid, invalidPropertyIndex, isUploadingToIPFS, ipfsUpload]
+    [
+      isPropertyCountValid,
+      invalidProperty,
+      invalidPropertyOrder,
+      isUploadingToIPFS,
+      ipfsUpload,
+    ]
   )
 
   const existingProperties = useMemo(() => {
@@ -105,6 +146,8 @@ export const AddArtwork = () => {
         isPropertyCountValid={isPropertyCountValid}
         propertiesCount={propertiesCount || 0}
         properties={properties || []}
+        invalidProperty={invalidProperty}
+        invalidPropertyOrder={invalidPropertyOrder}
         handleSubmit={handleAddArtworkTransaction}
       />
     </Stack>
