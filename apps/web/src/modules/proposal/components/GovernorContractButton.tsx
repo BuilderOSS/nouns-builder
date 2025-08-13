@@ -2,7 +2,7 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { Box, ButtonProps } from '@buildeross/zord'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
@@ -59,7 +59,7 @@ export function GovernorContractButton({
 
   const { writeContractAsync } = useWriteContract()
 
-  const handleClick = async () => {
+  const handleClick = useCallback(async () => {
     if (!writeContractAsync || !data) return
 
     try {
@@ -77,7 +77,7 @@ export function GovernorContractButton({
       setIsPending(false)
       console.error('Error interacting with governor contract:', err)
     }
-  }
+  }, [writeContractAsync, data, config, chain.id, mutate, proposalId, onSuccess])
 
   return (
     <ContractButton

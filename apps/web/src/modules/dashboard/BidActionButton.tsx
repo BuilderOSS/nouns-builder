@@ -3,7 +3,7 @@ import { AddressType } from '@buildeross/types'
 import { maxChar } from '@buildeross/utils/helpers'
 import { Box, Button } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { Address, parseEther } from 'viem'
 import { useChainId, useConfig } from 'wagmi'
@@ -39,13 +39,16 @@ export const BidActionButton = ({
   const [bidAmount, setBidAmount] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const isMinBid = Number(bidAmount) >= minBidAmount
+  const isMinBid = useMemo(
+    () => Number(bidAmount) >= minBidAmount,
+    [bidAmount, minBidAmount]
+  )
 
   const isValidBid = bidAmount && isMinBid
 
   const isValidChain = wagmiChainId === chainId
 
-  const handleCreateBid = async () => {
+  const handleCreateBid = useCallback(async () => {
     if (!isMinBid || !bidAmount || isLoading) return
 
     try {
@@ -69,7 +72,15 @@ export const BidActionButton = ({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [
+    isMinBid,
+    bidAmount,
+    isLoading,
+    config,
+    auctionAddress,
+    currentAuction?.token?.tokenId,
+    chainId,
+  ])
 
   if (isEnded || isOver) {
     return (
@@ -117,9 +128,7 @@ export const BidActionButton = ({
         borderRadius={'curved'}
         disabled={!isValidBid || !isValidChain}
         loading={isLoading}
-        handleClick={() => {
-          handleCreateBid()
-        }}
+        handleClick={handleCreateBid}
         position={'relative'}
         className={bidButton}
       >

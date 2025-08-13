@@ -8,7 +8,7 @@ import { NetworkController } from 'src/components/NetworkController'
 import { Uploading } from 'src/components/Uploading'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
 
-import { ArtworkUpload } from './ArtworkUpload'
+import { ArtworkUpload } from '../../ArtworkUpload'
 import { checkboxHelperText, checkboxStyleVariants } from './ReplaceArtworkForm.css'
 import { ArtworkFormValues, validationSchemaArtwork } from './ReplaceArtworkForm.schema'
 

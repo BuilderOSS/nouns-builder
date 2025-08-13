@@ -9,11 +9,12 @@ import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex } from '@buildeross/zord'
-import React, { useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { FallbackImage } from 'src/components/FallbackImage'
 import { defaultBackButton } from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon'
+import { NetworkController } from 'src/components/NetworkController'
 import { formatFounderAllocation } from 'src/modules/create-dao'
 import { useChainStore } from 'src/stores/useChainStore'
 import {
@@ -42,6 +43,15 @@ interface ReviewAndDeploy {
   title: string
 }
 
+const FAST_DAO_TIMINGS = {
+  AUCTION_DURATION: { minutes: 5 },
+  TIMELOCK_DELAY: { minutes: 5 },
+  VOTING_DELAY: { minutes: 5 },
+  VOTING_PERIOD: { minutes: 10 },
+} as const
+
+const DEFAULT_TIMELOCK_DELAY = { days: 2 }
+
 const DEPLOYMENT_ERROR = {
   MISSING_IPFS_ARTWORK: `Oops! It looks like your artwork wasn't correctly uploaded to ipfs. Please go back to the artwork step to re-upload your artwork before proceeding.`,
   MISMATCHING_SIGNER:
@@ -55,6 +65,7 @@ const DEPLOYMENT_ERROR = {
 }
 
 export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
+  const [enableFastDAO, setEnableFastDAO] = useState<boolean>(false)
   const [isPendingTransaction, setIsPendingTransaction] = useState<boolean>(false)
   const [hasConfirmedTerms, setHasConfirmedTerms] = useState<boolean>(false)
   const [hasConfirmedChain, setHasConfirmedChain] = useState<boolean>(false)
@@ -88,62 +99,106 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     vetoerAddress,
   } = useFormStore()
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setActiveSection(activeSection - 1)
-  }
+  }, [setActiveSection, activeSection])
 
-  const founderParams = [...founderAllocation, ...contributionAllocation].map(
-    ({ founderAddress, allocationPercentage: allocation, endDate }) => ({
-      wallet: founderAddress as AddressType,
-      ownershipPct: allocation ? BigInt(allocation) : BigInt(0),
-      vestExpiry: BigInt(Math.floor(new Date(endDate).getTime() / 1000)),
-    })
+  const founderParams = useMemo(
+    () =>
+      [...founderAllocation, ...contributionAllocation].map(
+        ({ founderAddress, allocationPercentage: allocation, endDate }) => ({
+          wallet: founderAddress as AddressType,
+          ownershipPct: allocation ? BigInt(allocation) : BigInt(0),
+          vestExpiry: BigInt(Math.floor(new Date(endDate).getTime() / 1000)),
+        })
+      ),
+    [founderAllocation, contributionAllocation]
   )
 
-  const tokenParamsHex = encodeAbiParameters(
-    parseAbiParameters(
-      'string name, string symbol, string description, string daoImage, string daoWebsite, string baseRenderer'
-    ),
+  const tokenParamsHex = useMemo(
+    () =>
+      encodeAbiParameters(
+        parseAbiParameters(
+          'string name, string symbol, string description, string daoImage, string daoWebsite, string baseRenderer'
+        ),
+        [
+          sanitizeStringForJSON(general?.daoName),
+          general?.daoSymbol.replace('$', ''),
+          sanitizeStringForJSON(setUpArtwork?.projectDescription),
+          general?.daoAvatar || '',
+          sanitizeStringForJSON(general?.daoWebsite || ''),
+          RENDERER_BASE,
+        ]
+      ),
     [
-      sanitizeStringForJSON(general?.daoName),
-      general?.daoSymbol.replace('$', ''),
-      sanitizeStringForJSON(setUpArtwork?.projectDescription),
-      general?.daoAvatar || '',
-      sanitizeStringForJSON(general?.daoWebsite || ''),
-      RENDERER_BASE,
+      general?.daoName,
+      general?.daoSymbol,
+      general?.daoAvatar,
+      general?.daoWebsite,
+      setUpArtwork?.projectDescription,
     ]
   )
 
-  const tokenParams = { initStrings: tokenParamsHex as AddressType }
+  const tokenParams = useMemo(
+    () => ({ initStrings: tokenParamsHex as AddressType }),
+    [tokenParamsHex]
+  )
 
-  const auctionParams = {
-    reservePrice: auctionSettings.auctionReservePrice
-      ? parseEther(auctionSettings.auctionReservePrice.toString())
-      : parseEther('0'),
-    duration: auctionSettings?.auctionDuration
-      ? BigInt(toSeconds(auctionSettings?.auctionDuration))
-      : BigInt('86400'),
-    founderRewardRecipent: NULL_ADDRESS,
-    founderRewardBps: 0,
-  }
+  const auctionParams = useMemo(
+    () => ({
+      reservePrice:
+        auctionSettings.auctionReservePrice && !enableFastDAO
+          ? parseEther(auctionSettings.auctionReservePrice.toString())
+          : parseEther('0'),
+      duration: enableFastDAO
+        ? BigInt(toSeconds(FAST_DAO_TIMINGS.AUCTION_DURATION))
+        : auctionSettings?.auctionDuration
+          ? BigInt(toSeconds(auctionSettings?.auctionDuration))
+          : BigInt('86400'),
+      founderRewardRecipent: NULL_ADDRESS,
+      founderRewardBps: 0,
+    }),
+    [
+      auctionSettings?.auctionDuration,
+      auctionSettings?.auctionReservePrice,
+      enableFastDAO,
+    ]
+  )
 
-  const govParams = {
-    timelockDelay: BigInt(toSeconds({ days: 2 }).toString()),
-    votingDelay: BigInt(toSeconds(auctionSettings.votingDelay)),
-    votingPeriod: BigInt(toSeconds(auctionSettings.votingPeriod)),
-    proposalThresholdBps: auctionSettings?.proposalThreshold
-      ? BigInt(Number((Number(auctionSettings?.proposalThreshold) * 100).toFixed(2)))
-      : BigInt('0'),
-    quorumThresholdBps: auctionSettings?.quorumThreshold
-      ? BigInt(Number((Number(auctionSettings?.quorumThreshold) * 100).toFixed(2)))
-      : BigInt('0'),
-    vetoer:
-      vetoPower === true
-        ? getAddress(vetoerAddress as AddressType)
-        : getAddress(NULL_ADDRESS),
-  }
+  const govParams = useMemo(
+    () => ({
+      timelockDelay: enableFastDAO
+        ? BigInt(toSeconds(FAST_DAO_TIMINGS.TIMELOCK_DELAY))
+        : BigInt(toSeconds(DEFAULT_TIMELOCK_DELAY)),
+      votingDelay: enableFastDAO
+        ? BigInt(toSeconds(FAST_DAO_TIMINGS.VOTING_DELAY))
+        : BigInt(toSeconds(auctionSettings.votingDelay)),
+      votingPeriod: enableFastDAO
+        ? BigInt(toSeconds(FAST_DAO_TIMINGS.VOTING_PERIOD))
+        : BigInt(toSeconds(auctionSettings.votingPeriod)),
+      proposalThresholdBps: auctionSettings?.proposalThreshold
+        ? BigInt(Number((Number(auctionSettings?.proposalThreshold) * 100).toFixed(2)))
+        : BigInt('0'),
+      quorumThresholdBps: auctionSettings?.quorumThreshold
+        ? BigInt(Number((Number(auctionSettings?.quorumThreshold) * 100).toFixed(2)))
+        : BigInt('0'),
+      vetoer:
+        vetoPower === true
+          ? getAddress(vetoerAddress as AddressType)
+          : getAddress(NULL_ADDRESS),
+    }),
+    [
+      auctionSettings?.votingPeriod,
+      auctionSettings?.votingDelay,
+      auctionSettings?.proposalThreshold,
+      auctionSettings?.quorumThreshold,
+      vetoPower,
+      vetoerAddress,
+      enableFastDAO,
+    ]
+  )
 
-  const handleDeploy = async () => {
+  const handleDeploy = useCallback(async () => {
     setDeploymentError(undefined)
 
     if (
@@ -155,13 +210,13 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
       return
     }
 
-    if (founderParams[0].wallet !== address) {
-      setDeploymentError(DEPLOYMENT_ERROR.MISMATCHING_SIGNER)
+    if (founderParams.length === 0) {
+      setDeploymentError(DEPLOYMENT_ERROR.NO_FOUNDER)
       return
     }
 
-    if (founderParams.length === 0) {
-      setDeploymentError(DEPLOYMENT_ERROR.NO_FOUNDER)
+    if (!address || getAddress(founderParams[0].wallet) !== getAddress(address)) {
+      setDeploymentError(DEPLOYMENT_ERROR.MISMATCHING_SIGNER)
       return
     }
 
@@ -242,7 +297,41 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     setDeployedDao(deployedAddresses)
     setIsPendingTransaction(false)
     setFulfilledSections(title)
-  }
+  }, [
+    founderAllocation,
+    contributionAllocation,
+    address,
+    founderParams,
+    ipfsUpload.length,
+    config,
+    chain.id,
+    version,
+    tokenParams,
+    auctionParams,
+    govParams,
+    setDeployedDao,
+    setFulfilledSections,
+    title,
+  ])
+
+  const isDisabled = useMemo(
+    () =>
+      !address ||
+      !hasConfirmedTerms ||
+      !hasConfirmedChain ||
+      (isL2 && !hasConfirmedRewards) ||
+      isPendingTransaction ||
+      isVersionLoading,
+    [
+      address,
+      hasConfirmedTerms,
+      hasConfirmedChain,
+      isL2,
+      hasConfirmedRewards,
+      isPendingTransaction,
+      isVersionLoading,
+    ]
+  )
 
   return (
     <Box>
@@ -273,11 +362,17 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
             <ReviewSection subHeading="Auction Settings">
               <ReviewItem
                 label="Auction Duration"
-                value={formatDuration(auctionSettings.auctionDuration)}
+                value={
+                  enableFastDAO
+                    ? formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)
+                    : formatDuration(auctionSettings.auctionDuration)
+                }
               />
               <ReviewItem
                 label="Auction Reserve Price"
-                value={`${auctionSettings.auctionReservePrice} ETH`}
+                value={
+                  enableFastDAO ? '0 ETH' : `${auctionSettings.auctionReservePrice} ETH`
+                }
               />
               <ReviewItem
                 label="Proposal Threshold"
@@ -286,6 +381,33 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
               <ReviewItem
                 label="Quorum Threshold"
                 value={`${auctionSettings.quorumThreshold} %`}
+              />
+            </ReviewSection>
+
+            <ReviewSection subHeading="Governance Settings">
+              <ReviewItem
+                label="Voting Delay"
+                value={
+                  enableFastDAO
+                    ? formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)
+                    : formatDuration(auctionSettings.votingDelay)
+                }
+              />
+              <ReviewItem
+                label="Voting Period"
+                value={
+                  enableFastDAO
+                    ? formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)
+                    : formatDuration(auctionSettings.votingPeriod)
+                }
+              />
+              <ReviewItem
+                label="Timelock Delay"
+                value={
+                  enableFastDAO
+                    ? formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)
+                    : formatDuration(DEFAULT_TIMELOCK_DELAY)
+                }
               />
             </ReviewSection>
 
@@ -392,6 +514,33 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
               </Flex>
             )}
 
+            <NetworkController.Testnet>
+              <Flex mt="x4">
+                <Flex align={'center'} justify={'center'} gap={'x4'}>
+                  <Flex
+                    align={'center'}
+                    justify={'center'}
+                    className={
+                      deployCheckboxStyleVariants[enableFastDAO ? 'confirmed' : 'default']
+                    }
+                    onClick={() => setEnableFastDAO((bool) => !bool)}
+                  >
+                    {enableFastDAO && <Icon fill="background1" id="check" />}
+                  </Flex>
+
+                  <Flex className={deployCheckboxHelperText}>
+                    <strong>Enable Fast DAO (testnet only):</strong> ultra-short timings
+                    for testing - {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)}{' '}
+                    auction (0 ETH reserve),{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock,{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period.{' '}
+                    <strong>Not for production.</strong>
+                  </Flex>
+                </Flex>
+              </Flex>
+            </NetworkController.Testnet>
+
             {deploymentError && (
               <Flex mt={'x4'} color="negative">
                 {deploymentError}
@@ -414,14 +563,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
               <ContractButton
                 handleClick={handleDeploy}
                 w={'100%'}
-                disabled={
-                  !address ||
-                  !hasConfirmedTerms ||
-                  !hasConfirmedChain ||
-                  (isL2 && !hasConfirmedRewards) ||
-                  isPendingTransaction ||
-                  isVersionLoading
-                }
+                disabled={isDisabled}
                 className={
                   deployContractButtonStyle[isPendingTransaction ? 'pending' : 'default']
                 }

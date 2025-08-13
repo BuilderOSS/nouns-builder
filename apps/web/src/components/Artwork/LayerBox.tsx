@@ -43,6 +43,16 @@ interface LayerBoxProps {
   setOrderedLayers: (orderedLayers: OrderedTraits) => void
   index: number
 }
+const propertiesVariants = {
+  initial: {
+    height: 0,
+    overflow: 'hidden',
+  },
+  open: {
+    height: 'auto',
+    overflow: 'auto',
+  },
+}
 
 export const LayerBox: React.FC<LayerBoxProps> = ({
   trait,
@@ -56,68 +66,60 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
 }) => {
   /*  toggle property animation  */
   const [isOpen, setIsOpen] = React.useState(false)
-  const propertiesVariants = {
-    initial: {
-      height: 0,
-      overflow: 'hidden',
-    },
-    open: {
-      height: 'auto',
-      overflow: 'scroll',
-    },
-  }
 
-  /*
-
-      Handle Drag and Drop to Reorder Properties
-
-   */
-  const onDragStart = (e: any) => {
-    const initialPosition = Number(e.currentTarget.dataset.position)
-    setDragAndDrop({
-      ...dragAndDrop,
-
-      draggedFrom: initialPosition,
-      isDragging: true,
-      originalOrder: orderedLayers,
-    })
-
-    /*  firefox compatibility */
-    e.dataTransfer.setData('text/html', '')
-  }
-
-  const onDragOver = (e: any) => {
-    e.preventDefault()
-
-    let updatedOrder = orderedLayers
-
-    const draggedFrom = dragAndDrop?.draggedFrom
-    if (!draggedFrom && draggedFrom !== 0) return
-
-    const draggedTo = Number(e.currentTarget.dataset.position)
-
-    const itemDragged = updatedOrder[draggedFrom]
-
-    const remainingItems = updatedOrder.filter(
-      (item) => updatedOrder.indexOf(item) !== draggedFrom
-    )
-
-    updatedOrder = [
-      ...remainingItems.slice(0, draggedTo),
-      itemDragged,
-      ...remainingItems.slice(draggedTo),
-    ]
-
-    if (draggedTo !== dragAndDrop?.draggedTo) {
+  /* Handle Drag and Drop to Reorder Properties */
+  const onDragStart = React.useCallback(
+    (e: any) => {
+      const initialPosition = Number(e.currentTarget.dataset.position)
       setDragAndDrop({
         ...dragAndDrop,
-        updatedOrder,
-        draggedTo,
-      })
-    }
-  }
 
-  const onDrop = () => {
+        draggedFrom: initialPosition,
+        isDragging: true,
+        originalOrder: orderedLayers,
+      })
+
+      /*  firefox compatibility */
+      e.dataTransfer.setData('text/html', '')
+    },
+    [dragAndDrop, orderedLayers, setDragAndDrop]
+  )
+
+  const onDragOver = React.useCallback(
+    (e: any) => {
+      e.preventDefault()
+
+      let updatedOrder = orderedLayers
+
+      const draggedFrom = dragAndDrop?.draggedFrom
+      if (!draggedFrom && draggedFrom !== 0) return
+
+      const draggedTo = Number(e.currentTarget.dataset.position)
+
+      const itemDragged = updatedOrder[draggedFrom]
+
+      const remainingItems = updatedOrder.filter(
+        (item) => updatedOrder.indexOf(item) !== draggedFrom
+      )
+
+      updatedOrder = [
+        ...remainingItems.slice(0, draggedTo),
+        itemDragged,
+        ...remainingItems.slice(draggedTo),
+      ]
+
+      if (draggedTo !== dragAndDrop?.draggedTo) {
+        setDragAndDrop({
+          ...dragAndDrop,
+          updatedOrder,
+          draggedTo,
+        })
+      }
+    },
+    [dragAndDrop, orderedLayers, setDragAndDrop]
+  )
+
+  const onDrop = React.useCallback(() => {
     if (!dragAndDrop?.updatedOrder) return
     setOrderedLayers(dragAndDrop.updatedOrder)
 
@@ -127,7 +129,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
       draggedTo: null,
       isDragging: false,
     })
-  }
+  }, [dragAndDrop, setOrderedLayers, setDragAndDrop])
 
   /*  listen for if section is being dropped in drop area */
   const isDropping = React.useMemo(() => {
@@ -140,6 +142,10 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
       setIsOpen(false)
     }
   }, [dragAndDrop])
+
+  const handleToggle = React.useCallback(() => {
+    setIsOpen((bool) => !bool)
+  }, [])
 
   return (
     <Flex
@@ -159,7 +165,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
         justify={isDropping ? 'center' : 'space-between'}
         align={'center'}
         className={isDropping ? artworkSettingsNameDropping : artworkSettingsName}
-        onClick={() => setIsOpen((bool) => !bool)}
+        onClick={handleToggle}
       >
         <Flex align={'center'}>
           <Box mr={'x2'}>

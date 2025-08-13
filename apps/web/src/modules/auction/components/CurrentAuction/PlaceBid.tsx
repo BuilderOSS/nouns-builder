@@ -1,5 +1,4 @@
-import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { BASE_URL, SWR_KEYS } from '@buildeross/constants'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid } from '@buildeross/sdk/subgraph'
 import { getBids } from '@buildeross/sdk/subgraph'
@@ -7,7 +6,7 @@ import { AddressType, Chain } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, PopUp, Text } from '@buildeross/zord'
-import React, { Fragment, memo, useEffect, useState } from 'react'
+import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { Icon } from 'src/components/Icon/Icon'
 import AnimatedModal from 'src/components/Modal/AnimatedModal'
@@ -72,28 +71,24 @@ export const PlaceBid = ({
     () => averageWinningBid(chain.id, addresses.token as Address)
   )
 
-  const isMinBid = Number(bidAmount) >= minBidAmount
+  const isMinBid = useMemo(
+    () => Number(bidAmount) >= minBidAmount,
+    [bidAmount, minBidAmount]
+  )
   const formattedMinBid = formatCryptoVal(minBidAmount)
   const minBidAmountInWei = parseEther(formattedMinBid)
 
   // Warn users if they are bidding more than 5x the average winning bid or min bid amount
-  const valueToCalculateWarning = averageBid || minBidAmountInWei
-  const minAmountForWarning = valueToCalculateWarning * 5n
+  const valueToCalculateWarning = useMemo(
+    () => averageBid || minBidAmountInWei,
+    [averageBid, minBidAmountInWei]
+  )
+  const minAmountForWarning = useMemo(
+    () => valueToCalculateWarning * 5n,
+    [valueToCalculateWarning]
+  )
 
-  const handleCreateBid = async () => {
-    if (!isMinBid || !bidAmount || creatingBid) return
-
-    const amountInWei = parseEther(bidAmount)
-
-    if (amountInWei && minAmountForWarning && amountInWei > minAmountForWarning) {
-      setShowWarning(true)
-      return
-    }
-
-    await createBidTransaction()
-  }
-
-  const createBidTransaction = async () => {
+  const createBidTransaction = useCallback(async () => {
     if (!isMinBid || !bidAmount) return
 
     try {
@@ -138,7 +133,30 @@ export const PlaceBid = ({
       setCreatingBid(false)
       setShowWarning(false)
     }
-  }
+  }, [
+    isMinBid,
+    bidAmount,
+    referral,
+    config,
+    addresses.auction,
+    addresses.token,
+    tokenId,
+    chain.id,
+    mutate,
+  ])
+
+  const handleCreateBid = useCallback(async () => {
+    if (!isMinBid || !bidAmount || creatingBid) return
+
+    const amountInWei = parseEther(bidAmount)
+
+    if (amountInWei && minAmountForWarning && amountInWei > minAmountForWarning) {
+      setShowWarning(true)
+      return
+    }
+
+    await createBidTransaction()
+  }, [isMinBid, bidAmount, creatingBid, minAmountForWarning, createBidTransaction])
 
   useEffect(() => {
     document.body.style.overflow = !!showWarning ? 'hidden' : 'unset'
@@ -148,6 +166,21 @@ export const PlaceBid = ({
   const isValidChain = wagmiChain?.id === chain.id
   const [showTooltip, setShowTooltip] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  const handleShareClick = useCallback(async () => {
+    const baseUrl = `${BASE_URL}/dao/${chain.name.toLowerCase()}/${addresses.token}`
+    if (address === undefined) {
+      await navigator.clipboard.writeText(baseUrl)
+      return
+    }
+    const params = new URLSearchParams({
+      referral: address.toString(),
+    })
+    const fullUrl = `${baseUrl}?${params}`
+
+    await navigator.clipboard.writeText(fullUrl)
+    setCopied(true)
+  }, [chain.name, addresses.token, address])
 
   return (
     <Flex
@@ -215,25 +248,7 @@ export const PlaceBid = ({
                     size="lg"
                     ml="x2"
                     mt={{ '@initial': 'x2', '@768': 'x0' }}
-                    handleClick={async () => {
-                      const network = PUBLIC_IS_TESTNET
-                        ? 'https://testnet.nouns.build'
-                        : 'https://nouns.build'
-                      const baseUrl = `${network}/dao/${chain.name.toLowerCase()}/${
-                        addresses.token
-                      }`
-                      if (address === undefined) {
-                        await navigator.clipboard.writeText(baseUrl)
-                        return
-                      }
-                      const params = new URLSearchParams({
-                        referral: address.toString(),
-                      })
-                      const fullUrl = `${baseUrl}?${params}`
-
-                      await navigator.clipboard.writeText(fullUrl)
-                      setCopied(true)
-                    }}
+                    handleClick={handleShareClick}
                   >
                     <Icon size="md" id="share" />
                   </ContractButton>

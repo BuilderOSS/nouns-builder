@@ -16,7 +16,7 @@ export const infoSectionValueWrapperStyle = style({
   width: '100%',
   fontSize: 18,
   lineHeight: '24px',
-  overflow: 'scroll',
+  overflow: 'auto',
   '@media': {
     '(max-width: 1200px)': {
       fontSize: '16px',
