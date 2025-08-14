@@ -103,15 +103,19 @@ export const ReplaceArtworkForm: React.FC<ReplaceArtworkFormProps> = ({
             {showPropertyErrors && !isPropertyCountValid && (
               <Text
                 w="100%"
-                textAlign={'center'}
+                textAlign={'left'}
                 color={'negative'}
+                mt="x4"
+                mb="x2"
               >{`Current total number of traits is ${propertiesCount}. The new folder of traits must have a minimum total of ${propertiesCount}`}</Text>
             )}
             {showPropertyErrors && invalidProperty && (
               <Text
                 w="100%"
-                textAlign={'center'}
+                textAlign={'left'}
                 color={'negative'}
+                mt="x2"
+                mb="x4"
               >{`${invalidProperty.currentLayerName} currently has ${invalidProperty.currentVariantCount} trait variants. New trait for ${invalidProperty.currentLayerName} "${invalidProperty.nextName}" should also have minimum ${invalidProperty.currentVariantCount} trait variants.`}</Text>
             )}
 

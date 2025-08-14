@@ -32,6 +32,8 @@ export interface AddArtworkFormProps {
   propertiesCount: number
   invalidProperty?: InvalidProperty
   invalidPropertyOrder?: InvalidPropertyOrder
+  fileExtensionMismatch?: string | null
+  dimensionMismatch?: string | null
   handleSubmit: (values: ArtworkFormValues) => void
 }
 
@@ -41,6 +43,8 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
   isPropertyCountValid,
   invalidProperty,
   invalidPropertyOrder,
+  fileExtensionMismatch,
+  dimensionMismatch,
   propertiesCount,
   handleSubmit,
 }) => {
@@ -116,23 +120,39 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
               {showPropertyErrors && !isPropertyCountValid && (
                 <Text
                   w="100%"
-                  textAlign={'center'}
+                  textAlign={'left'}
                   color={'negative'}
+                  mt="x4"
+                  mb="x2"
                 >{`Current total number of traits is ${propertiesCount}. The new folder of traits must have a minimum total of ${propertiesCount}`}</Text>
               )}
               {showPropertyErrors && invalidProperty && (
                 <Text
                   w="100%"
-                  textAlign={'center'}
+                  textAlign={'left'}
                   color={'negative'}
+                  mt="x2"
+                  mb="x2"
                 >{`${invalidProperty.currentLayerName} currently has ${invalidProperty.currentVariantCount} trait variants. New trait for ${invalidProperty.currentLayerName} "${invalidProperty.nextName}" should also have minimum ${invalidProperty.currentVariantCount} trait variants.`}</Text>
               )}
               {showPropertyErrors && invalidPropertyOrder && (
                 <Text
                   w="100%"
-                  textAlign={'center'}
+                  textAlign={'left'}
                   color={'negative'}
+                  mt="x2"
+                  mb="x2"
                 >{`The trait "${invalidPropertyOrder.trait}" in ${invalidPropertyOrder.invalidLayerName} is not in the correct position. It should be in ${invalidPropertyOrder.layerName}.`}</Text>
+              )}
+              {showPropertyErrors && fileExtensionMismatch && (
+                <Text w="100%" textAlign={'left'} color={'negative'} mt="x4" mb="x2">
+                  {fileExtensionMismatch}
+                </Text>
+              )}
+              {showPropertyErrors && dimensionMismatch && (
+                <Text w="100%" textAlign={'left'} color={'negative'} mt="x2" mb="x4">
+                  {dimensionMismatch}
+                </Text>
               )}
 
               {!isTestnetDAO && (
