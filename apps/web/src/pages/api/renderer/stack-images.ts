@@ -245,6 +245,24 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   // Handle HEAD request - return headers only
   if (req.method === 'HEAD') {
+    if (typeof images === 'string') images = [images]
+
+    try {
+      // Get first image to detect format for content type
+      const firstImageData = await getImageData(images[0])
+      const format = detectImageFormat(firstImageData)
+
+      let contentType = 'image/webp' // default for static images
+      if (format === 'gif') {
+        contentType = 'image/gif'
+      }
+
+      res.setHeader('Content-Type', contentType)
+    } catch (err) {
+      // Fallback to default content type if image detection fails
+      res.setHeader('Content-Type', 'image/webp')
+    }
+
     res.status(200).end()
     return
   }
