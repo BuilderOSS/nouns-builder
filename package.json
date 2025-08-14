@@ -17,8 +17,8 @@
   "private": true,
   "scripts": {
     "anvil": "bash -c 'source .env.local && anvil --fork-url \"$ANVIL_FORK_URL\" --fork-block-number \"$ANVIL_BLOCK_NUMBER\"'",
-    "build:packages": "turbo run build --filter=@buildeross/*",
     "build": "turbo run build",
+    "build:packages": "turbo run build --filter=@buildeross/*",
     "changeset": "changeset",
     "ci": "turbo run lint test",
     "clean": "turbo run clean && rm -rf node_modules",
