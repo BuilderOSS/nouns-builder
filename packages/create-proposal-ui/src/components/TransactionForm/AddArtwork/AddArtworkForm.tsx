@@ -64,23 +64,33 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
   return (
     <Box w={'100%'}>
       <Text fontWeight={'display'}>Requirements for Add Artwork proposal:</Text>
-      <Box as="ul" color="text3" mt="x6">
-        <Box as="li" mb="x3">
-          New traits must be added as a new top-level layer.
+      <Box color="text3" mt="x6">
+        <Box mb="x3">
+          <Text fontWeight={'label'}>Adding new traits:</Text> New traits must be added as
+          a new top-level layer in your folder structure.
         </Box>
-        <Box as="li" mb="x3">
-          Do not re-upload previously added variants to avoid duplicates.
-        </Box>
-        <Box as="li" mb="x3">
-          When adding new variants to an existing trait, the folder name must match the
+        <Box mb="x3">
+          <Text fontWeight={'label'}>Adding variants to existing traits:</Text> When
+          adding new variants to an existing trait, the folder name must match the
           original exactly (including spelling and casing).
         </Box>
-        <Box as="li" mb="x3">
-          The total number of new traits should be equal to or greater than the number of
-          old traits.
+        <Box mb="x3">
+          <Text fontWeight={'label'}>File consistency:</Text> All uploaded artwork must
+          use the same file type (PNG, SVG, or GIF) and dimensions as existing artwork in
+          the collection.
         </Box>
-        <Box as="li">
-          You only need to include folders for traits that have new variants.
+        <Box mb="x3">
+          <Text fontWeight={'label'}>Avoid duplicates:</Text> Do not re-upload previously
+          added variants to avoid duplicates.
+        </Box>
+        <Box mb="x3">
+          <Text fontWeight={'label'}>Minimum requirements:</Text> The total number of
+          traits should be equal to or greater than the number of existing traits.
+        </Box>
+        <Box>
+          <Text fontWeight={'label'}>Selective uploads:</Text> You can add both new traits
+          AND new variants to existing traits in the same proposal. Only include folders
+          for traits that have new content.
         </Box>
       </Box>
       <Uploading
@@ -108,7 +118,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 helperText={
-                  'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG and SVG'
+                  'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\n\nYou can mix new traits with new variants for existing traits in the same upload.\n\nMaximum directory size: 200MB\nSupported image types: PNG, SVG, and GIF'
                 }
                 errorMessage={
                   formik.touched.artwork && formik.errors?.artwork
