@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/analytics",
   "description": "Shared analytics for BuilderOSS apps",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
