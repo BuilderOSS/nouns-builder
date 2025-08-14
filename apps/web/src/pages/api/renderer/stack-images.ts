@@ -99,6 +99,21 @@ const composeImages = async (
         // Find the maximum number of frames needed
         const maxFrames = Math.max(...framesCounts)
 
+        // Check for reasonable frame count to prevent memory issues
+        if (maxFrames > 1000) {
+          throw new Error('Frame count exceeds maximum allowed (1000 frames)')
+        }
+
+        // Estimate memory usage and validate
+        const estimatedMemoryMB =
+          (maxFrames * imageData.length * SVG_DEFAULT_SIZE * SVG_DEFAULT_SIZE * 4) /
+          (1024 * 1024)
+        if (estimatedMemoryMB > 500) {
+          throw new Error(
+            `Estimated memory usage (${estimatedMemoryMB.toFixed(0)}MB) exceeds limit`
+          )
+        }
+
         // Use Sharp to properly composite each frame with correct colors
         const compositedFrames: Buffer[] = []
 

@@ -180,7 +180,7 @@ export const useArtworkUpload = ({
           return
         }
 
-        if (filesArray[index - 1 > 0 ? index - 1 : 0].type !== cv.type) {
+        if (index > 0 && filesArray[index - 1].type !== cv.type) {
           setUploadArtworkError({
             mime: `All file types must be the same.`,
           })

@@ -199,7 +199,7 @@ export const useArtworkPreview = ({
         const rendererBase = RENDERER_BASE.replace('https://nouns.build', BASE_URL)
         const url = new URL(rendererBase)
         layers.forEach((layer) => {
-          url.searchParams.append('images', encodeURI(layer.url))
+          url.searchParams.append('images', encodeURIComponent(layer.url))
         })
 
         return {

@@ -16,22 +16,24 @@ export const ImageGrid: React.FC<{ generatedImages: LayeredImageData[] }> = ({
               <img src={imageData.url} alt="" height={'100%'} width={'100%'} />
             ) : (
               <Flex position="relative" height={'100%'} width={'100%'}>
-                {imageData.layers?.map((layer, layerIndex) => (
-                  <img
-                    key={layerIndex}
-                    src={layer.url}
-                    alt={layer.trait}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      zIndex: layerIndex,
-                    }}
-                  />
-                ))}
+                {imageData.layers && imageData.layers.length > 0
+                  ? imageData.layers.map((layer, layerIndex) => (
+                      <img
+                        key={layerIndex}
+                        src={layer.url}
+                        alt={layer.trait}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          zIndex: layerIndex,
+                        }}
+                      />
+                    ))
+                  : null}
               </Flex>
             )}
           </Box>
