@@ -1,3 +1,4 @@
+import { LayeredImageData } from '@buildeross/hooks/useArtworkPreview'
 import { ImageProps, OrderedTraits } from '@buildeross/types'
 import { Flex, Icon } from '@buildeross/zord'
 
@@ -6,8 +7,8 @@ import { Playground } from '../Playground'
 import { artworkPreviewGenerateButton, artworkPreviewImageWrapper } from './Artwork.css'
 
 export interface ArtworkPreviewProps {
-  canvas: React.RefObject<HTMLCanvasElement | null>
-  generatedImages: any[]
+  canvas: React.MutableRefObject<HTMLCanvasElement | null>
+  generatedImages: LayeredImageData[]
   generateStackedImage: () => Promise<void>
   images: ImageProps[] | undefined
   orderedLayers: OrderedTraits
@@ -23,9 +24,34 @@ export const ArtworkPreview: React.FC<ArtworkPreviewProps> = ({
   return (
     <Flex align={'center'} justify={'center'} direction={'column'}>
       <Flex className={artworkPreviewImageWrapper} mb={'x8'}>
-        {generatedImages[0] && (
-          <img height={'100%'} width={'100%'} src={generatedImages[0]} alt="preview" />
-        )}
+        {generatedImages[0] &&
+          (generatedImages[0].type === 'single' ? (
+            <img
+              height={'100%'}
+              width={'100%'}
+              src={generatedImages[0].url}
+              alt="preview"
+            />
+          ) : (
+            <Flex position="relative" height={'100%'} width={'100%'}>
+              {generatedImages[0].layers?.map((layer, index) => (
+                <img
+                  key={index}
+                  src={layer.url}
+                  alt={layer.trait}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    zIndex: index,
+                  }}
+                />
+              ))}
+            </Flex>
+          ))}
         <canvas ref={canvas} style={{ display: 'none' }} />
       </Flex>
       <Flex

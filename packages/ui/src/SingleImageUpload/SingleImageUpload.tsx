@@ -25,7 +25,13 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
   helperText,
   value,
 }) => {
-  const acceptableMIME = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp']
+  const acceptableMIME = [
+    'image/jpeg',
+    'image/png',
+    'image/svg+xml',
+    'image/webp',
+    'image/gif',
+  ]
 
   const [isMounted, setIsMounted] = useState(false)
   const [uploadArtworkError, setUploadArtworkError] = React.useState<any>()
