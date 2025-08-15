@@ -10,7 +10,7 @@ import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { formatEther, getAddress } from 'viem'
+import { formatEther, getAddress, parseEther } from 'viem'
 import { useBalance } from 'wagmi'
 
 import sendEthSchema, { SendEthValues } from './SendEth.schema'
@@ -38,11 +38,11 @@ export const SendEth = () => {
       chain.id === CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
 
     const target = await getEnsAddress(values.recipientAddress, getProvider(chainToQuery))
-    const value = values.amount.toString()
+    const value = parseEther(values.amount.toString()).toString()
 
     addTransaction({
       type: TransactionType.SEND_ETH,
-      summary: `Send ${value} ETH to ${walletSnippet(target)}`,
+      summary: `Send ${values.amount.toString()} ETH to ${walletSnippet(target)}`,
       transactions: [
         {
           functionSignature: 'sendEth(address)',
