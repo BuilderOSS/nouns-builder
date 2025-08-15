@@ -11,7 +11,7 @@ import Input from 'src/components/Input/Input'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { encodeFunctionData } from 'viem'
+import { encodeFunctionData, parseEther } from 'viem'
 import { useBalance } from 'wagmi'
 
 import bridgeTreasuryFormSchema, {
@@ -40,7 +40,7 @@ export const BridgeTreasuryForm = ({
   ) => {
     if (!values.amount || !migratedToChainId) return
 
-    const value = values.amount.toString()
+    const value = parseEther(values.amount.toString()).toString()
 
     const depositParams = encodeFunctionData({
       abi: l2DeployerAbi,
@@ -49,7 +49,7 @@ export const BridgeTreasuryForm = ({
 
     addTransaction({
       type: TransactionType.MIGRATION,
-      summary: `Bridge ${value} ETH to L2 DAO`,
+      summary: `Bridge ${values.amount.toString()} ETH to L2 DAO`,
       transactions: [
         {
           functionSignature: 'depositToTreasury()',

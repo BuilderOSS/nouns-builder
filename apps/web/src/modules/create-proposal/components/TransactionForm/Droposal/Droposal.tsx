@@ -80,7 +80,7 @@ export const Droposal: React.FC = () => {
           imageUri,
         ],
       }),
-      value: '',
+      value: '0',
     }
 
     addTransaction({

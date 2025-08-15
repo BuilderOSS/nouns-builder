@@ -1,5 +1,5 @@
 import { AddressType } from '@buildeross/types'
-import { parseEther } from 'viem'
+import { hexToBigInt } from 'viem'
 
 import { BuilderTransaction } from '../stores/useProposalStore'
 
@@ -19,7 +19,10 @@ export const prepareProposalTransactions = (
   const values = flattenedTransactions.map((txn) => {
     const value = !txn.value ? '0' : txn.value
 
-    return parseEther(value.toString())
+    if (value.startsWith('0x')) {
+      return hexToBigInt(value as `0x${string}`)
+    }
+    return BigInt(value)
   })
 
   return { calldata, targets, values }

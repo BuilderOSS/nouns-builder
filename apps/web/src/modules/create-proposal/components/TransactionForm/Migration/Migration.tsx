@@ -9,7 +9,7 @@ import { useDaoStore } from 'src/stores/useDaoStore'
 import useSWR from 'swr'
 import { useReadContract } from 'wagmi'
 
-import { BridgeTreasuryForm } from './BirdgeTreasuryForm'
+import { BridgeTreasuryForm } from './BridgeTreasuryForm'
 import { MigrateDAOForm } from './MigrateDAOForm'
 import { MigrationTracker } from './MigrationTracker'
 import { PauseAuctionsForm } from './PauseAuctionsForm'
