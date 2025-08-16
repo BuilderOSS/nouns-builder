@@ -9,9 +9,9 @@ import {
   WebsiteURIUpdated as URIUpdatedEvent,
 } from '../generated/templates/MetadataRendererBase/MetadataRendererBase'
 import {
-  PropertyAdded as PropertyAddedEvent,
   AddPropertiesCall as AddPropertiesFunctionCall,
   DeleteAndRecreatePropertiesCall as DeleteAndRecreatePropertiesFunctionCall,
+  PropertyAdded as PropertyAddedEvent,
 } from '../generated/templates/MetadataRendererV1/MetadataRendererV1'
 import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { setTokenMetadata } from './utils/setTokenMetadata'

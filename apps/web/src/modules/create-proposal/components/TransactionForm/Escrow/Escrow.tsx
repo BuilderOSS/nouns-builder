@@ -14,7 +14,7 @@ import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import useSWR from 'swr'
-import { encodeFunctionData, formatEther } from 'viem'
+import { encodeFunctionData, formatEther, parseEther } from 'viem'
 
 import EscrowForm from './EscrowForm'
 import { EscrowFormValues } from './EscrowForm.schema'
@@ -126,8 +126,10 @@ export const Escrow: React.FC = () => {
 
       // create bundler transaction data
       const escrowData = encodeEscrowData(values, treasury, cid, chain.id)
-      const milestoneAmounts = values.milestones.map((x) => x.amount * 10 ** 18)
-      const fundAmount = milestoneAmounts.reduce((acc, x) => acc + x, 0)
+      const milestoneAmounts = values.milestones.map((x) =>
+        parseEther(x.amount.toString())
+      )
+      const fundAmount = milestoneAmounts.reduce((acc, x) => acc + x, 0n)
 
       const escrow = {
         target: getEscrowBundler(chain.id),
@@ -143,15 +145,13 @@ export const Escrow: React.FC = () => {
             fundAmount,
           ],
         }),
-        value: formatEther(BigInt(fundAmount)),
+        value: fundAmount.toString(),
       }
 
       try {
         addTransaction({
           type: TransactionType.ESCROW,
-          summary: `Create and fund new Escrow with ${formatEther(
-            BigInt(fundAmount)
-          )} ETH`,
+          summary: `Create and fund new Escrow with ${formatEther(fundAmount)} ETH`,
           transactions: [escrow],
         })
       } catch (err) {
