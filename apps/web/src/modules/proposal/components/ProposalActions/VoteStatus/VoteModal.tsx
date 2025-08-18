@@ -153,102 +153,109 @@ const VoteModal: React.FC<{
             </Flex>
 
             <Formik initialValues={initialValues} onSubmit={handleSubmit}>
-              {({ values, isSubmitting, setFieldValue }) => (
-                <fieldset disabled={isSubmitting} className={voteModalFieldset}>
-                  <Stack role="group" mt="x6" gap="x3">
-                    {voteOptions.map(({ text, value, icon }) => {
-                      const active = values.choice === value
-                      return (
-                        <label key={text}>
-                          <Flex
-                            backgroundColor="background2"
-                            position="relative"
-                            w="100%"
-                            borderRadius="curved"
-                            align="center"
-                            justify="center"
-                            borderColor="transparent"
-                            p="x4"
-                            h="x16"
-                            className={voteModalOption}
-                            data-is-active-negative={
-                              value === Choice.AGAINST && values.choice === value
-                            }
-                            data-is-active-positive={
-                              value === Choice.FOR && values.choice === value
-                            }
-                            data-is-active-neutral={
-                              value === Choice.ABSTAIN && values.choice === value
-                            }
-                          >
-                            <Field
-                              type="radio"
-                              name="choice"
-                              value={value}
-                              className={voteModalRadioInput}
-                              position="absolute"
-                              top={0}
-                              left={0}
-                            />
-                            <Text className={voteModalOptionText} variant="paragraph-md">
-                              {text}
-                            </Text>
-                            <Box position="absolute" top="x4" right="x4">
-                              <Icon
-                                id={icon.id as IconType}
-                                borderRadius="round"
-                                p={'x1'}
-                                style={{
-                                  backgroundColor: active
-                                    ? icon.activeBackground
-                                    : theme.colors.background1,
-                                }}
-                                fill={active ? 'onAccent' : (icon.fill as Atoms['color'])}
+              {({ values, isSubmitting, setFieldValue, submitForm }) => (
+                <form onSubmit={submitForm} style={{ width: '100%' }}>
+                  <fieldset disabled={isSubmitting} className={voteModalFieldset}>
+                    <Stack role="group" mt="x6" gap="x3">
+                      {voteOptions.map(({ text, value, icon }) => {
+                        const active = values.choice === value
+                        return (
+                          <label key={text}>
+                            <Flex
+                              backgroundColor="background2"
+                              position="relative"
+                              w="100%"
+                              borderRadius="curved"
+                              align="center"
+                              justify="center"
+                              borderColor="transparent"
+                              p="x4"
+                              h="x16"
+                              className={voteModalOption}
+                              data-is-active-negative={
+                                value === Choice.AGAINST && values.choice === value
+                              }
+                              data-is-active-positive={
+                                value === Choice.FOR && values.choice === value
+                              }
+                              data-is-active-neutral={
+                                value === Choice.ABSTAIN && values.choice === value
+                              }
+                            >
+                              <Field
+                                type="radio"
+                                name="choice"
+                                value={value}
+                                className={voteModalRadioInput}
+                                position="absolute"
+                                top={0}
+                                left={0}
                               />
-                            </Box>
-                          </Flex>
-                        </label>
-                      )
-                    })}
-                  </Stack>
+                              <Text
+                                className={voteModalOptionText}
+                                variant="paragraph-md"
+                              >
+                                {text}
+                              </Text>
+                              <Box position="absolute" top="x4" right="x4">
+                                <Icon
+                                  id={icon.id as IconType}
+                                  borderRadius="round"
+                                  p={'x1'}
+                                  style={{
+                                    backgroundColor: active
+                                      ? icon.activeBackground
+                                      : theme.colors.background1,
+                                  }}
+                                  fill={
+                                    active ? 'onAccent' : (icon.fill as Atoms['color'])
+                                  }
+                                />
+                              </Box>
+                            </Flex>
+                          </label>
+                        )
+                      })}
+                    </Stack>
 
-                  <Box mt="x5">
-                    <Text variant="paragraph-md" className={voteModalOptionText}>
-                      Reason
-                    </Text>
+                    <Box mt="x5">
+                      <Text variant="paragraph-md" className={voteModalOptionText}>
+                        Reason
+                      </Text>
 
-                    <Box
-                      as="textarea"
-                      name="reason"
+                      <Box
+                        as="textarea"
+                        name="reason"
+                        borderRadius="curved"
+                        p="x4"
+                        mt="x2"
+                        backgroundColor="background2"
+                        height="x32"
+                        width="100%"
+                        value={values.reason}
+                        className={voteModalReason}
+                        onChange={(e: React.FormEvent<HTMLTextAreaElement>) =>
+                          setFieldValue('reason', e.currentTarget.value)
+                        }
+                      />
+
+                      <Text color="tertiary" mt="x2" variant="paragraph-md">
+                        Optional
+                      </Text>
+                    </Box>
+
+                    <ContractButton
+                      loading={isSubmitting}
+                      type="submit"
+                      w="100%"
+                      size="lg"
+                      mt="x8"
                       borderRadius="curved"
-                      p="x4"
-                      mt="x2"
-                      backgroundColor="background2"
-                      height="x32"
-                      width="100%"
-                      value={values.reason}
-                      className={voteModalReason}
-                      onChange={(e: React.FormEvent<HTMLTextAreaElement>) =>
-                        setFieldValue('reason', e.currentTarget.value)
-                      }
-                    />
-
-                    <Text color="tertiary" mt="x2" variant="paragraph-md">
-                      Optional
-                    </Text>
-                  </Box>
-
-                  <ContractButton
-                    loading={isSubmitting}
-                    type="submit"
-                    w="100%"
-                    size="lg"
-                    mt="x8"
-                    borderRadius="curved"
-                  >
-                    Submit vote
-                  </ContractButton>
-                </fieldset>
+                    >
+                      Submit vote
+                    </ContractButton>
+                  </fieldset>
+                </form>
               )}
             </Formik>
           </Box>
