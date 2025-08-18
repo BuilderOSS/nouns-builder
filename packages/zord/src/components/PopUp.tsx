@@ -17,6 +17,7 @@ export interface PopUpProps {
   placement?: Placement
   padding?: Atoms['padding']
   triggerClassName?: string // Add className to the trigger element, specifically
+  triggerRef?: HTMLElement | null // External element to position relative to
   onOpenChange?: (state: boolean) => void
 }
 
@@ -30,13 +31,14 @@ export function PopUp({
   offsetX = 0,
   offsetY = 8,
   triggerClassName,
+  triggerRef,
   onOpenChange,
   wrapperClassName,
 }: PopUpProps) {
   const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null)
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null)
   const [openState, setOpenState] = useState(open)
-  const { styles, attributes } = usePopper(triggerElement, popperElement, {
+  const { styles, attributes } = usePopper(triggerRef || triggerElement, popperElement, {
     placement,
     modifiers: [
       {
@@ -71,23 +73,25 @@ export function PopUp({
 
   return (
     <>
-      <Box
-        onClick={() => setOpenState(!openState)}
-        ref={setTriggerElement}
-        className={[triggerClassName]}
-      >
-        {trigger || (
-          <Button
-            variant="ghost"
-            size="sm"
-            borderRadius="round"
-            p="x3"
-            style={{ minWidth: 0, height: 'auto' }}
-          >
-            <Icon id="Ellipsis" size="md" />
-          </Button>
-        )}
-      </Box>
+      {!triggerRef && (
+        <Box
+          onClick={() => setOpenState(!openState)}
+          ref={setTriggerElement}
+          className={[triggerClassName]}
+        >
+          {trigger || (
+            <Button
+              variant="ghost"
+              size="sm"
+              borderRadius="round"
+              p="x3"
+              style={{ minWidth: 0, height: 'auto' }}
+            >
+              <Icon id="Ellipsis" size="md" />
+            </Button>
+          )}
+        </Box>
+      )}
       {openState && (
         <>
           <Box
