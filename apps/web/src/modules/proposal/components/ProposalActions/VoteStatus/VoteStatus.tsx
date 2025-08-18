@@ -4,8 +4,9 @@ import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
-import { Button, Flex, Text } from '@buildeross/zord'
+import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useEffect, useState } from 'react'
+import { ContractButton } from 'src/components/ContractButton'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 import { getAddress } from 'viem'
@@ -129,14 +130,13 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
             pb={{ '@initial': 'x2', '@768': 'x0' }}
             align={'center'}
           >
-            <Button
-              onClick={() => setShowVoteModal(true)}
+            <ContractButton
+              handleClick={() => setShowVoteModal(true)}
               className={proposalActionButtonVariants['vote']}
               w={{ '@initial': '100%', '@768': 'auto' }}
-              //pr={{ '@initial': 'x2', '@768': 'x0' }}
             >
               {votesAvailable === 1 ? 'Submit Vote' : 'Submit Votes'}
-            </Button>
+            </ContractButton>
           </Flex>
           <Text color={'text3'} pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }}>
             You have{' '}
