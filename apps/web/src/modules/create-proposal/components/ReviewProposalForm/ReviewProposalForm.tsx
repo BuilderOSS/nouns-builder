@@ -275,6 +275,7 @@ export const ReviewProposalForm = ({
               )}
 
               <ContractButton
+                type="submit"
                 mt={'x3'}
                 width={'100%'}
                 borderRadius={'curved'}
