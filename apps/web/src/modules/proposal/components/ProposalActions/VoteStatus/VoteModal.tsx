@@ -4,7 +4,7 @@ import { getProposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'
 import { Atoms, Box, Button, Flex, Stack, Text, theme } from '@buildeross/zord'
 import { Field, Formik } from 'formik'
-import React, { Fragment, useCallback } from 'react'
+import React, { Fragment, useCallback, useMemo } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { Icon } from 'src/components/Icon'
 import { IconType } from 'src/components/Icon/icons'
@@ -43,75 +43,94 @@ const VoteModal: React.FC<{
   showVoteModal: boolean
   setShowVoteModal: (show: boolean) => void
 }> = ({ title, proposalId, votesAvailable, showVoteModal, setShowVoteModal }) => {
-  const { addresses } = useDaoStore()
+  const addresses = useDaoStore((state) => state.addresses)
   const { mutate } = useSWRConfig()
-  const chain = useChainStore((x) => x.chain)
+  const chain = useChainStore((state) => state.chain)
 
   const [isCastVoteSuccess, setIsCastVoteSuccess] = React.useState<boolean>(false)
 
-  const initialValues: FormValues = {
-    choice: undefined,
-    reason: '',
-  }
+  const initialValues: FormValues = useMemo(
+    () => ({
+      choice: undefined,
+      reason: '',
+    }),
+    []
+  )
 
   const config = useConfig()
 
+  const governorAddress = addresses.governor
+  const chainId = chain.id
+
   const handleSubmit = useCallback(
     async (values: FormValues) => {
-      if (!addresses.governor) return
+      if (!governorAddress) return
 
-      const governorContractParams = {
-        address: addresses.governor,
-        abi: governorAbi,
-        chainId: chain.id,
+      try {
+        const governorContractParams = {
+          address: governorAddress,
+          abi: governorAbi,
+          chainId,
+        }
+
+        let txHash: Hex
+        if (values.reason.length > 0) {
+          const data = await simulateContract(config, {
+            ...governorContractParams,
+            functionName: 'castVoteWithReason',
+            args: [
+              proposalId as BytesType,
+              BigInt(values.choice as Choice),
+              values.reason,
+            ],
+          })
+          txHash = await writeContract(config, data.request)
+        } else {
+          const data = await simulateContract(config, {
+            ...governorContractParams,
+            functionName: 'castVote',
+            args: [proposalId as BytesType, BigInt(values.choice!)],
+          })
+          txHash = await writeContract(config, data.request)
+        }
+
+        await waitForTransactionReceipt(config, { hash: txHash, chainId })
+
+        await mutate(
+          [SWR_KEYS.PROPOSAL, chainId, proposalId],
+          getProposal(chainId, proposalId)
+        )
+
+        setIsCastVoteSuccess(true)
+      } catch (err) {
+        console.error('Error casting vote:', err)
       }
-
-      let txHash: Hex
-      if (values.reason.length > 0) {
-        const data = await simulateContract(config, {
-          ...governorContractParams,
-          functionName: 'castVoteWithReason',
-          args: [proposalId as BytesType, BigInt(values.choice as Choice), values.reason],
-        })
-        txHash = await writeContract(config, data.request)
-      } else {
-        const data = await simulateContract(config, {
-          ...governorContractParams,
-          functionName: 'castVote',
-          args: [proposalId as BytesType, BigInt(values.choice!)],
-        })
-        txHash = await writeContract(config, data.request)
-      }
-
-      await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
-
-      await mutate(
-        [SWR_KEYS.PROPOSAL, chain.id, proposalId],
-        getProposal(chain.id, proposalId)
-      )
-
-      setIsCastVoteSuccess(true)
     },
-    [addresses.governor, chain.id, proposalId, config, mutate]
+    [governorAddress, chainId, proposalId, config, mutate]
   )
 
-  const voteOptions = [
-    {
-      text: `Cast ${votesAvailable} ${votesAvailable > 1 ? 'votes' : 'vote'} for`,
-      value: Choice.FOR,
-      icon: { id: 'check', fill: 'positive', activeBackground: '#1A8967' },
-    },
-    {
-      text: `Cast ${votesAvailable} ${votesAvailable > 1 ? 'votes' : 'vote'} against`,
-      value: Choice.AGAINST,
-      icon: { id: 'cross', fill: 'negative', activeBackground: '#CD2D2D' },
-    },
-    {
-      text: 'Abstain from voting',
-      value: Choice.ABSTAIN,
-      icon: { id: 'dash', fill: 'neutral', activeBackground: '#C4C4C4' },
-    },
-  ]
+  const voteOptions = useMemo(
+    () => [
+      {
+        text: `Cast ${votesAvailable} ${votesAvailable > 1 ? 'votes' : 'vote'} for`,
+        value: Choice.FOR,
+        icon: { id: 'check', fill: 'positive', activeBackground: '#1A8967' },
+      },
+      {
+        text: `Cast ${votesAvailable} ${votesAvailable > 1 ? 'votes' : 'vote'} against`,
+        value: Choice.AGAINST,
+        icon: { id: 'cross', fill: 'negative', activeBackground: '#CD2D2D' },
+      },
+      {
+        text: 'Abstain from voting',
+        value: Choice.ABSTAIN,
+        icon: { id: 'dash', fill: 'neutral', activeBackground: '#C4C4C4' },
+      },
+    ],
+    [votesAvailable]
+  )
+
+  const handleModalClose = useCallback(() => setShowVoteModal(false), [setShowVoteModal])
 
   return (
     <Fragment>
@@ -119,7 +138,7 @@ const VoteModal: React.FC<{
       <AnimatedModal
         open={showVoteModal}
         size={isCastVoteSuccess ? 'small' : 'medium'}
-        close={() => setShowVoteModal(false)}
+        close={handleModalClose}
       >
         {isCastVoteSuccess ? (
           <SuccessModalContent
@@ -140,7 +159,7 @@ const VoteModal: React.FC<{
               </Box>
               <Button
                 variant="ghost"
-                onClick={() => setShowVoteModal(false)}
+                onClick={handleModalClose}
                 p={'x0'}
                 size="xs"
                 style={{
