@@ -6,8 +6,7 @@ import { Atoms } from '../atoms.css'
 import { Box, Button, Icon } from '../elements'
 import { container } from './PopUp.css'
 
-export interface PopUpProps {
-  trigger?: React.ReactNode
+interface BasePopUpProps {
   children?: React.ReactNode
   wrapperClassName?: string
   close?: boolean
@@ -17,9 +16,20 @@ export interface PopUpProps {
   placement?: Placement
   padding?: Atoms['padding']
   triggerClassName?: string // Add className to the trigger element, specifically
-  triggerRef?: HTMLElement | null // External element to position relative to
   onOpenChange?: (state: boolean) => void
 }
+
+export type PopUpProps = BasePopUpProps &
+  (
+    | {
+        trigger?: React.ReactNode
+        triggerRef?: never
+      }
+    | {
+        trigger?: never
+        triggerRef: HTMLElement | null // External element to position relative to
+      }
+  )
 
 export function PopUp({
   trigger,
@@ -73,7 +83,7 @@ export function PopUp({
 
   return (
     <>
-      {!triggerRef && (
+      {triggerRef === undefined && (
         <Box
           onClick={() => setOpenState(!openState)}
           ref={setTriggerElement}
