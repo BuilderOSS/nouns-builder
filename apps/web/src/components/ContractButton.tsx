@@ -6,26 +6,17 @@ import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
-// When type is explicitly 'submit', handleClick should not be provided
-type SubmitTypeButtonProps = ButtonProps & {
-  type: 'submit'
-  handleClick?: never
-}
-
-// When type is 'button' or undefined (defaults to 'button'), handleClick is required
-type ButtonTypeButtonProps = ButtonProps & {
-  type?: 'button' | undefined
+export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type' | 'ref'> & {
   handleClick:
     | ((e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>)
     | (() => void | Promise<void>)
 }
 
-type ContractButtonProps = SubmitTypeButtonProps | ButtonTypeButtonProps
-
 export const ContractButton = ({
   children,
   handleClick,
-  type = 'button',
+  disabled = false,
+  loading = false,
   ...rest
 }: ContractButtonProps) => {
   const { address: userAddress, chain: userChain } = useAccount()
@@ -48,8 +39,6 @@ export const ContractButton = ({
       const clickHandler = () => {
         if (handleClick) {
           handleClick(e)
-        } else if (e?.currentTarget?.form?.requestSubmit) {
-          e?.currentTarget?.form?.requestSubmit()
         } else {
           console.error('ContractButton: no onClick handler')
         }
@@ -94,7 +83,15 @@ export const ContractButton = ({
 
   return (
     <>
-      <Button ref={buttonRef} type={type} onClick={handleClickWithValidation} {...rest}>
+      {/* type must be explicitly 'button' to prevent default form submission */}
+      <Button
+        ref={buttonRef}
+        type="button"
+        onClick={handleClickWithValidation}
+        disabled={disabled || loading}
+        loading={loading}
+        {...rest}
+      >
         {children}
       </Button>
       <PopUp

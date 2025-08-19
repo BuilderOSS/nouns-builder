@@ -275,12 +275,12 @@ export const ReviewProposalForm = ({
               )}
 
               <ContractButton
-                type="submit"
                 mt={'x3'}
                 width={'100%'}
                 borderRadius={'curved'}
                 loading={simulating}
                 disabled={simulating || proposing}
+                handleClick={formik.handleSubmit}
                 h={'x15'}
               >
                 <Box>{'Submit Proposal'}</Box>
