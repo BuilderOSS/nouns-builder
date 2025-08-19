@@ -7,9 +7,8 @@ import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
 export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type' | 'ref'> & {
-  handleClick:
-    | ((e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>)
-    | (() => void | Promise<void>)
+  // Accept an optional click event; callers may also pass a 0-arg handler.
+  handleClick: (e?: any) => void | Promise<void>
 }
 
 export const ContractButton = ({

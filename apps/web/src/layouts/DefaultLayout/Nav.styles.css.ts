@@ -107,7 +107,7 @@ export const disconnectButton = style([
   {
     transition:
       'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
-    background: 'ghost',
+    background: color.ghost,
     selectors: {
       '&:hover': {
         background: `rgba(240, 50, 50, 0.1) !important`,

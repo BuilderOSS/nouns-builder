@@ -97,7 +97,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
         }
       >
         <Stack my="x4" mx="x2">
-          {PUBLIC_DEFAULT_CHAINS.sort(chainSorter).map((chain, i, chains) => (
+          {[...PUBLIC_DEFAULT_CHAINS].sort(chainSorter).map((chain, i, chains) => (
             <Flex
               key={chain.id}
               className={chainPopUpButton}

@@ -1,6 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { MOBILE_PROFILE_MENU_LAYER, NAV_LAYER } from '@buildeross/constants/layers'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { MyDaosResponse } from '@buildeross/sdk/subgraph'
@@ -56,7 +56,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const { canUserBridge, openBridgeModal } = useBridgeModal()
 
   const userBalance = balance?.formatted
-    ? `${Number(formatCryptoVal(balance?.formatted)).toFixed(2)} ETH`
+    ? `${formatCryptoVal(balance?.formatted)} ETH`
     : undefined
 
   const { data: userDaos } = useSWR(
@@ -246,7 +246,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             as={'a'}
             href="https://nouns.build"
             target="_blank"
-            rel="canonical"
+            rel="noopener noreferrer canonical"
             id={'close-modal'}
             align={'center'}
             justify={'center'}
@@ -264,7 +264,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             as={'a'}
             href="https://testnet.nouns.build"
             target="_blank"
-            rel="nofollow"
+            rel="noopener noreferrer nofollow"
             id={'close-modal'}
             align={'center'}
             justify={'center'}
@@ -288,7 +288,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           as={'a'}
           href="https://nouns.build"
           target="_blank"
-          rel="canonical"
+          rel="noopener noreferrer canonical"
           id={'close-modal'}
           align={'center'}
           justify={'center'}
@@ -307,7 +307,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           as={'a'}
           href="https://testnet.nouns.build"
           target="_blank"
-          rel="nofollow"
+          rel="noopener noreferrer nofollow"
           id={'close-modal'}
           align={'center'}
           justify={'center'}

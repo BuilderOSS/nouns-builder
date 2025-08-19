@@ -26,7 +26,7 @@ export const NavMenu = () => {
     router.events.on('routeChangeStart', handleRouteChange)
 
     const hasHydrated = useChainStore.persist.hasHydrated()
-    let hydrationUnsubscribe: () => void | undefined
+    let hydrationUnsubscribe: (() => void) | undefined
 
     if (hasHydrated) setIsChainInitilized(true)
     else {
