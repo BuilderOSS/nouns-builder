@@ -100,26 +100,30 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     return sections
   }, [proposal, chain.id, query?.token])
 
+  const { displayActions, displayWarning } = React.useMemo(() => {
+    if (!proposal) return { displayActions: false, displayWarning: false }
+    const displayActions = isProposalOpen(proposal.state)
+    const isBadActor = BAD_ACTORS.some((baddie) =>
+      isAddressEqual(proposal.proposer, baddie as AddressType)
+    )
+    const isPossibleDrain = balance?.value
+      ? checkDrain(proposal.values, balance?.value)
+      : false
+
+    const displayWarning = displayActions && (isBadActor || isPossibleDrain)
+
+    return { displayActions, displayWarning }
+  }, [proposal, balance])
+
   if (!proposal) {
     return null
   }
-
-  const displayActions = isProposalOpen(proposal.state)
-  const isBadActor = BAD_ACTORS.some((baddie) =>
-    isAddressEqual(proposal.proposer, baddie as AddressType)
-  )
-  const isPossibleDrain = balance?.value
-    ? checkDrain(proposal.values, balance?.value)
-    : false
-  const warn = displayActions && (isBadActor || isPossibleDrain)
-
-  const path = `/dao/${query.network}/${query.token}/vote/${query.id}`
 
   return (
     <Fragment>
       <Meta
         title={`${daoName} - Prop ${proposal.proposalNumber}`}
-        path={path}
+        path={`/dao/${query.network}/${query.token}/vote/${query.id}`}
         image={ogImageURL}
         description={`View this proposal from ${daoName}`}
       />
@@ -128,7 +132,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
         <Flex className={propPageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
           <ProposalHeader proposal={proposal} />
           <>
-            {warn && (
+            {displayWarning && (
               <Flex
                 w="100%"
                 backgroundColor="warning"
@@ -155,8 +159,8 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
       <Box mt="x12" pb="x30">
         <SectionHandler
           sections={sections}
-          activeTab={query?.tab ? (query.tab as string) : 'Details'}
-          basePath={`/dao/${chain.slug}/${query?.token}/vote/${query?.id}`}
+          activeTab={query.tab ? (query.tab as string) : 'Details'}
+          basePath={`/dao/${query.network}/${query.token}/vote/${query.id}`}
         />
       </Box>
     </Fragment>

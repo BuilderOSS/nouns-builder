@@ -1,6 +1,20 @@
 import * as z from '@buildeross/constants/layers'
-import { atoms, color, vars } from '@buildeross/zord'
-import { style } from '@vanilla-extract/css'
+import { atoms, color } from '@buildeross/zord'
+import { keyframes, style } from '@vanilla-extract/css'
+
+const slideIn = keyframes({
+  '0%': { transform: 'translateY(-100%)' },
+  '100%': { transform: 'translateY(0)' },
+})
+
+export const mobileMenuSlideIn = style([
+  {
+    animation: `${slideIn} 0.3s ease-out`,
+  },
+  atoms({
+    shadow: 'medium',
+  }),
+])
 
 export const NavContainer = style([
   atoms({ m: 'auto', backgroundColor: 'background1', pos: 'fixed', w: '100vw' }),
@@ -76,9 +90,11 @@ export const navMenuBurger = style([
     borderRadius: 'round',
   }),
   {
+    transition:
+      'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
     selectors: {
       '&:hover': {
-        background: vars.color.ghostHover,
+        background: color.ghostHover,
       },
     },
   },
@@ -86,17 +102,17 @@ export const navMenuBurger = style([
 
 export const disconnectButton = style([
   atoms({
-    cursor: 'pointer',
-    py: 'x2',
-    fontWeight: 'label',
-    fontSize: 16,
-    borderRadius: 'curved',
-    borderColor: 'transparent',
+    borderColor: 'negative',
   }),
   {
-    backgroundColor: 'rgba(240, 50, 50, 0.1)',
-    lineHeight: '24px',
-    color: 'red',
+    transition:
+      'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
+    background: color.ghost,
+    selectors: {
+      '&:hover': {
+        background: `rgba(240, 50, 50, 0.1) !important`,
+      },
+    },
   },
 ])
 
@@ -121,9 +137,42 @@ export const footerContent = style({
 
 export const myDaosWrapper = style([
   atoms({
-    overflowY: 'scroll',
+    overflowY: 'auto',
     maxHeight: 'x64',
   }),
+])
+
+export const daoButton = style({
+  background: color.ghost,
+  transition:
+    'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
+  selectors: {
+    '&:hover': {
+      background: color.background2,
+    },
+  },
+})
+
+export const navLogo = style({
+  zIndex: z.NAV_LAYER,
+  position: 'relative',
+})
+
+export const profileRow = style([
+  atoms({
+    cursor: 'pointer',
+    p: 'x2',
+    borderRadius: 'normal',
+  }),
+  {
+    transition:
+      'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
+    selectors: {
+      '&:hover': {
+        background: color.background2,
+      },
+    },
+  },
 ])
 
 export const footerLogo = style({
@@ -145,10 +194,12 @@ export const footerLogoTextRight = style({
 })
 
 export const chainPopUpButton = style({
-  backgroundColor: 'white',
+  transition:
+    'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
+  background: 'white',
   selectors: {
     '&:hover': {
-      backgroundColor: vars.color.background2,
+      background: color.background2,
     },
   },
 })

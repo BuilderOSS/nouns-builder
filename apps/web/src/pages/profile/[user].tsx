@@ -105,7 +105,6 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                 variant={isMobile ? 'heading-sm' : 'heading-md'}
                 position={'relative'}
                 mt={{ '@768': 'x4' }}
-                style={{ zIndex: 100 }}
               >
                 {ensName || walletSnippet(userAddress)}
               </Text>

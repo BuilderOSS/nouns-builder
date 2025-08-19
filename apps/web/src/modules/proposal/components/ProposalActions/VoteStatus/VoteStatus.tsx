@@ -5,7 +5,7 @@ import {
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
@@ -64,7 +64,14 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
     }
   }, [userAddress, signerVote, proposalId])
 
-  const shouldListen = !signerVote && !!userAddress && state === ProposalState.Active
+  const shouldListen = useMemo(
+    () => !signerVote && !!userAddress && state === ProposalState.Active,
+    [userAddress, signerVote, state]
+  )
+
+  const handleOpenVoteModal = useCallback(() => {
+    setShowVoteModal(true)
+  }, [setShowVoteModal])
 
   useWatchContractEvent({
     address: shouldListen ? governor : undefined,
@@ -131,7 +138,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
             align={'center'}
           >
             <ContractButton
-              handleClick={() => setShowVoteModal(true)}
+              handleClick={handleOpenVoteModal}
               className={proposalActionButtonVariants['vote']}
               w={{ '@initial': '100%', '@768': 'auto' }}
             >
