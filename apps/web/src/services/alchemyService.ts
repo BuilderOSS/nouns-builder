@@ -505,7 +505,7 @@ const getCachedTokenPrices = async (
   }
 }
 
-const MINIMUM_USD_VALUE = 1
+const MINIMUM_USD_VALUE = 5
 
 export const getEnrichedTokenBalances = async (
   chainId: CHAIN_ID,
