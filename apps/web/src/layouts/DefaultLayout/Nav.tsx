@@ -9,7 +9,7 @@ import { NetworkController } from 'src/components/NetworkController'
 
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'
-import { NavContainer, navMenuItem, NavWrapper } from './Nav.styles.css'
+import { NavContainer, navLogo, navMenuItem, NavWrapper } from './Nav.styles.css'
 import { NavMenu } from './NavMenu'
 
 export const Nav = () => {
@@ -32,7 +32,7 @@ export const Nav = () => {
       <Flex align={'center'} className={NavWrapper} justify={'space-between'}>
         <Flex align={'center'}>
           <Link href={'/'} passHref>
-            <Stack>
+            <Stack className={navLogo}>
               <NogglesLogo
                 fill={'black'}
                 className={atoms({ width: 'x23', cursor: 'pointer' })}
