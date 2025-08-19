@@ -6,8 +6,7 @@ import { Atoms } from '../atoms.css'
 import { Box, Button, Icon } from '../elements'
 import { container } from './PopUp.css'
 
-export interface PopUpProps {
-  trigger?: React.ReactNode
+interface BasePopUpProps {
   children?: React.ReactNode
   wrapperClassName?: string
   close?: boolean
@@ -20,6 +19,18 @@ export interface PopUpProps {
   onOpenChange?: (state: boolean) => void
 }
 
+export type PopUpProps = BasePopUpProps &
+  (
+    | {
+        trigger?: React.ReactNode
+        triggerRef?: never
+      }
+    | {
+        trigger?: never
+        triggerRef: HTMLElement | null // External element to position relative to
+      }
+  )
+
 export function PopUp({
   trigger,
   children,
@@ -30,13 +41,14 @@ export function PopUp({
   offsetX = 0,
   offsetY = 8,
   triggerClassName,
+  triggerRef,
   onOpenChange,
   wrapperClassName,
 }: PopUpProps) {
   const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null)
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null)
   const [openState, setOpenState] = useState(open)
-  const { styles, attributes } = usePopper(triggerElement, popperElement, {
+  const { styles, attributes } = usePopper(triggerRef || triggerElement, popperElement, {
     placement,
     modifiers: [
       {
@@ -71,23 +83,25 @@ export function PopUp({
 
   return (
     <>
-      <Box
-        onClick={() => setOpenState(!openState)}
-        ref={setTriggerElement}
-        className={[triggerClassName]}
-      >
-        {trigger || (
-          <Button
-            variant="ghost"
-            size="sm"
-            borderRadius="round"
-            p="x3"
-            style={{ minWidth: 0, height: 'auto' }}
-          >
-            <Icon id="Ellipsis" size="md" />
-          </Button>
-        )}
-      </Box>
+      {triggerRef === undefined && (
+        <Box
+          onClick={() => setOpenState(!openState)}
+          ref={setTriggerElement}
+          className={[triggerClassName]}
+        >
+          {trigger || (
+            <Button
+              variant="ghost"
+              size="sm"
+              borderRadius="round"
+              p="x3"
+              style={{ minWidth: 0, height: 'auto' }}
+            >
+              <Icon id="Ellipsis" size="md" />
+            </Button>
+          )}
+        </Box>
+      )}
       {openState && (
         <>
           <Box

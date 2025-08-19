@@ -70,7 +70,7 @@ export const DelegateForm = ({ handleBack, handleUpdate }: DelegateFormProps) =>
         onSubmit={submitCallback}
         validationSchema={delegateValidationSchema}
       >
-        {({ isValid, dirty }) => (
+        {({ isValid, dirty, handleSubmit }) => (
           <FormikForm>
             <Field name="address">
               {({ field, form, meta }: any) => (
@@ -101,10 +101,10 @@ export const DelegateForm = ({ handleBack, handleUpdate }: DelegateFormProps) =>
                 </Button>
                 <ContractButton
                   ml="x4"
-                  type="submit"
                   style={{ flex: 'auto' }}
                   disabled={!dirty || !isValid}
                   size="lg"
+                  handleClick={handleSubmit}
                 >
                   Update delegate
                 </ContractButton>

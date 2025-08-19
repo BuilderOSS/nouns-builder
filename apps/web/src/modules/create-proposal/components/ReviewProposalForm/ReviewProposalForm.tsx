@@ -280,6 +280,7 @@ export const ReviewProposalForm = ({
                 borderRadius={'curved'}
                 loading={simulating}
                 disabled={simulating || proposing}
+                handleClick={formik.handleSubmit}
                 h={'x15'}
               >
                 <Box>{'Submit Proposal'}</Box>

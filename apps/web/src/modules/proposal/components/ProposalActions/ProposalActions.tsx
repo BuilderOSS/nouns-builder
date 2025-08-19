@@ -1,11 +1,8 @@
 import { governorAbi } from '@buildeross/sdk/contract'
-import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
-import { ProposalVoteFragment as ProposalVote } from '@buildeross/sdk/subgraph'
 import { AddressType } from '@buildeross/types'
-import { isProposalOpen, isProposalSuccessful } from '@buildeross/utils/proposalState'
 import { Flex } from '@buildeross/zord'
-import React, { Fragment } from 'react'
+import React, { Fragment, useMemo } from 'react'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { getAddress } from 'viem'
@@ -28,12 +25,9 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
 }) => {
   const { address: userAddress } = useAccount()
   const addresses = useDaoStore((state) => state.addresses)
-  const chain = useChainStore((x) => x.chain)
+  const chain = useChainStore((state) => state.chain)
 
-  const { proposer, title, voteStart, proposalId, proposalNumber, timeCreated, state } =
-    proposal
-
-  const { data } = useReadContracts({
+  const { data, isLoading } = useReadContracts({
     query: {
       enabled: !!userAddress,
     },
@@ -44,7 +38,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         address: addresses?.governor as AddressType,
         chainId: chain.id,
         functionName: 'getVotes',
-        args: [userAddress as AddressType, BigInt(timeCreated)],
+        args: [userAddress as AddressType, BigInt(proposal.timeCreated)],
       },
       {
         abi: governorAbi,
@@ -55,33 +49,35 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     ] as const,
   })
 
-  const shouldShowActions =
-    state === ProposalState.Active || state === ProposalState.Pending || userAddress
+  const { votesAvailable, isVetoer, isProposer, signerVote } = useMemo(() => {
+    const [votes, vetoer] = data ?? [undefined, undefined]
 
-  if (shouldShowActions && !userAddress) return <ConnectWalletAction />
-  if (!shouldShowActions || !data) return null
+    const votesAvailable = !!votes ? Number(votes) : 0
 
-  const [votes, vetoer] = data
+    const isVetoer =
+      !!userAddress && !!vetoer && getAddress(vetoer) === getAddress(userAddress)
 
-  const votesAvailable = !!votes ? Number(votes) : 0
+    const isProposer =
+      !!userAddress && getAddress(proposal.proposer) == getAddress(userAddress)
 
-  const signerVote: ProposalVote | undefined = userAddress
-    ? proposal.votes?.find((vote) => getAddress(vote.voter) === getAddress(userAddress))
-    : undefined
+    const signerVote = !!userAddress
+      ? proposal.votes?.find((vote) => getAddress(vote.voter) === getAddress(userAddress))
+      : undefined
 
-  const proposalOpen = isProposalOpen(state)
-  const isProposer = !!userAddress && getAddress(proposer) == getAddress(userAddress)
+    return {
+      votesAvailable,
+      isVetoer,
+      isProposer,
+      signerVote,
+    }
+  }, [data, userAddress, proposal.votes, proposal.proposer])
 
-  const isVetoer = userAddress ? userAddress === vetoer : false
-
-  const showCancel = proposalOpen && isProposer
-  const showVeto = proposalOpen && isVetoer
-
-  const displaySucceededActions = isProposalSuccessful(proposal.state)
+  if (!userAddress) return <ConnectWalletAction />
+  if (isLoading) return null
 
   return (
     <Fragment>
-      {displaySucceededActions && <SuccessfulProposalActions proposal={proposal} />}
+      <SuccessfulProposalActions proposal={proposal} />
 
       <Flex
         direction={{ '@initial': 'column', '@768': 'row' }}
@@ -98,17 +94,22 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         <VoteStatus
           signerVote={signerVote}
           votesAvailable={votesAvailable}
-          proposalId={proposalId}
-          voteStart={voteStart}
-          state={state}
+          proposalId={proposal.proposalId}
+          voteStart={proposal.voteStart}
+          state={proposal.state}
           daoName={daoName}
-          title={title || ''}
+          title={proposal.title || ''}
         />
 
-        {showCancel && <CancelButton proposalId={proposalId} />}
+        {isProposer && <CancelButton proposalId={proposal.proposalId} />}
       </Flex>
 
-      {showVeto && <VetoAction proposalId={proposalId} proposalNumber={proposalNumber} />}
+      {isVetoer && (
+        <VetoAction
+          proposalId={proposal.proposalId}
+          proposalNumber={proposal.proposalNumber}
+        />
+      )}
     </Fragment>
   )
 }
