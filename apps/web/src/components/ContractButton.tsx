@@ -1,8 +1,8 @@
-import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { Box, Button, ButtonProps, Flex, PopUp, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useCallback, useRef, useState } from 'react'
 import { Icon } from 'src/components/Icon'
+import { useBridgeModal } from 'src/hooks'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 

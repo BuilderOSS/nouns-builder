@@ -1,8 +1,7 @@
+import { useIsContract } from '@buildeross/hooks'
+import { omit } from 'lodash'
 import { useRouter } from 'next/router'
 import { useAccount } from 'wagmi'
-
-import { omit } from './helpers'
-import { useIsContract } from './useIsContract'
 
 export const useBridgeModal = () => {
   const router = useRouter()
@@ -20,7 +19,7 @@ export const useBridgeModal = () => {
         },
       },
       undefined,
-      { shallow: true },
+      { shallow: true }
     )
   }
 
@@ -31,7 +30,7 @@ export const useBridgeModal = () => {
         query: omit(router.query, ['bridge']),
       },
       undefined,
-      { shallow: true },
+      { shallow: true }
     )
   }
 
