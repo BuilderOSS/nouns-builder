@@ -10,7 +10,7 @@ export type UseDaoAuctionProps = {
   chainId: CHAIN_ID
 }
 
-export type TokenMetadata = {
+export type AuctionTokenMetadata = {
   name: string
   description: string
   image: string
@@ -18,14 +18,14 @@ export type TokenMetadata = {
 
 export type UseDaoAuctionReturnType = {
   highestBid?: string
-  tokenUri?: TokenMetadata | null
+  tokenUri?: AuctionTokenMetadata | null
   highestBidder?: `0x${string}`
   endTime: number
   startTime?: number
   tokenId?: bigint
 }
 
-const decode = (token?: string): TokenMetadata | null => {
+const decode = (token?: string): AuctionTokenMetadata | null => {
   if (!token) return null
 
   const decoded = Buffer.from(token?.substring(29, token?.length) as string, 'base64')
@@ -65,7 +65,7 @@ export const useDaoAuction = ({
     functionName: 'tokenURI',
     args: [tokenId!],
     query: {
-      enabled: !!tokenId,
+      enabled: typeof tokenId === 'bigint',
     },
   })
 

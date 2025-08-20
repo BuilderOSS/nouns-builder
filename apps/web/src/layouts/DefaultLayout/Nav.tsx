@@ -1,11 +1,11 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { atoms, Box, Flex, Label, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 import { BridgeModal } from 'src/components/BridgeModal/BridgeModal'
 import { NetworkController } from 'src/components/NetworkController'
+import { useBridgeModal } from 'src/hooks'
 
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'

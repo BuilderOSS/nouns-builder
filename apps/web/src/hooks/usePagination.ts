@@ -1,7 +1,6 @@
+import omit from 'lodash/omit'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-
-import { omit } from './helpers'
 
 export const usePagination = (hasNext?: boolean) => {
   const { query, pathname } = useRouter()
@@ -37,7 +36,7 @@ export const usePagination = (hasNext?: boolean) => {
       return {
         pathname,
         query: {
-          page: query.page,
+          ...query,
         },
       }
 

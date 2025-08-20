@@ -68,7 +68,6 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
 
   dao.save()
   proposal.save()
-
 }
 
 export function handleProposalQueued(event: ProposalQueuedEvent): void {
