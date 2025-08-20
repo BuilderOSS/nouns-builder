@@ -56,16 +56,16 @@ export function handleDAODeployed(event: DAODeployedEvent): void {
   tokenCtx.setString('metadataAddress', event.params.metadata.toHexString())
   TokenTemplate.createWithContext(event.params.token, tokenCtx)
 
-  let govCtx = new DataSourceContext()
-  govCtx.setString('tokenAddress', event.params.token.toHexString())
-  govCtx.setString('treasuryAddress', event.params.treasury.toHexString())
-  GovernorTemplate.createWithContext(event.params.governor, govCtx)
+  let governorCtx = new DataSourceContext()
+  governorCtx.setString('tokenAddress', event.params.token.toHexString())
+  governorCtx.setString('treasuryAddress', event.params.treasury.toHexString())
+  GovernorTemplate.createWithContext(event.params.governor, governorCtx)
 
-  let ctx = new DataSourceContext()
-  ctx.setString('tokenAddress', event.params.token.toHexString())
+  let metadataCtx = new DataSourceContext()
+  metadataCtx.setString('tokenAddress', event.params.token.toHexString())
 
-  createMetadataRendererTemplate(metadataContract, event.params.metadata, ctx)
-  AuctionTemplate.createWithContext(event.params.auction, ctx)
+  createMetadataRendererTemplate(metadataContract, event.params.metadata, metadataCtx)
+  AuctionTemplate.createWithContext(event.params.auction, metadataCtx)
 }
 
 export function handleMetadataRendererUpdated(event: MetadataRendererUpdatedEvent): void {
@@ -107,7 +107,7 @@ export function handleMetadataRendererUpdated(event: MetadataRendererUpdatedEven
   }
 
   // Create new metadata renderer template
-  let ctx = new DataSourceContext()
-  ctx.setString('tokenAddress', tokenAddress.value.toHexString())
-  createMetadataRendererTemplate(metadataContract, event.params.renderer, ctx)
+  let metadataCtx = new DataSourceContext()
+  metadataCtx.setString('tokenAddress', tokenAddress.value.toHexString())
+  createMetadataRendererTemplate(metadataContract, event.params.renderer, metadataCtx)
 }

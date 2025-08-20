@@ -4,5 +4,5 @@
     "address": "0x0ca90a96ac58f19b1f69f67103245c9263bc4bfc",
     "startBlock": 5074430
   },
-  "callHandlers": true
+  "callHandlers": false
 }
