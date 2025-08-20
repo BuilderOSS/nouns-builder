@@ -65,7 +65,7 @@ export const useDaoAuction = ({
     functionName: 'tokenURI',
     args: [tokenId!],
     query: {
-      enabled: !!tokenId,
+      enabled: typeof tokenId === 'bigint',
     },
   })
 

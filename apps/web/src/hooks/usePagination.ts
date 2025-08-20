@@ -1,4 +1,4 @@
-import { omit } from 'lodash'
+import omit from 'lodash/omit'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
 
@@ -36,7 +36,7 @@ export const usePagination = (hasNext?: boolean) => {
       return {
         pathname,
         query: {
-          page: query.page,
+          ...query,
         },
       }
 

@@ -122,8 +122,7 @@ export function handleAddProperties(event: AddPropertiesFunctionCall): void {
 
   property.save()
 
-  let properties: string[] =
-    dao.metadataProperties == null ? [] : dao.metadataProperties!
+  let properties: string[] = dao.metadataProperties == null ? [] : dao.metadataProperties!
 
   properties.push(property.id)
   dao.metadataProperties = properties
