@@ -18,21 +18,27 @@ import { setTokenMetadata } from './utils/setTokenMetadata'
 
 export function handleContractImageUpdated(event: ContractImageUpdatedEvent): void {
   let context = dataSource.context()
-  let dao = DAO.load(context.getString('tokenAddress'))!
+  let dao = DAO.load(context.getString('tokenAddress'))
+  if (dao == null) return
+
   dao.contractImage = event.params.newImage
   dao.save()
 }
 
 export function handleWebsiteURIUpdated(event: URIUpdatedEvent): void {
   let context = dataSource.context()
-  let dao = DAO.load(context.getString('tokenAddress'))!
+  let dao = DAO.load(context.getString('tokenAddress'))
+  if (dao == null) return
+
   dao.projectURI = event.params.newURI
   dao.save()
 }
 
 export function handleDescriptionUpdated(event: DescriptionUpdatedEvent): void {
   let context = dataSource.context()
-  let dao = DAO.load(context.getString('tokenAddress'))!
+  let dao = DAO.load(context.getString('tokenAddress'))
+  if (dao == null) return
+
   dao.description = event.params.newDescription
   dao.save()
 }
@@ -71,7 +77,7 @@ export function handleBatchMetadataUpdate(event: BatchMetadataUpdateEvent): void
   ) {
     let tokenId = `${tokenAddress}:${i.toString()}`
     let token = Token.load(tokenId)
-    if (!token) continue
+    if (token == null) continue
 
     let tokenURI = tokenContract.try_tokenURI(i)
     if (!tokenURI.reverted) {
@@ -85,11 +91,14 @@ export function handleBatchMetadataUpdate(event: BatchMetadataUpdateEvent): void
   }
 }
 
+// NOTE: function call handlers are disabled for now because they are not working for all networks
 export function handleAddProperties(event: AddPropertiesFunctionCall): void {
   let context = dataSource.context()
 
   let inputs = event.inputs
-  let dao = DAO.load(context.getString('tokenAddress'))!
+  let dao = DAO.load(context.getString('tokenAddress'))
+  if (dao == null) return
+
   let id = dao.id + '-' + event.transaction.hash.toHexString()
 
   let property = new MetadataProperty(id)
@@ -114,7 +123,7 @@ export function handleAddProperties(event: AddPropertiesFunctionCall): void {
   property.save()
 
   let properties: string[] =
-    dao.metadataProperties === null ? [] : dao.metadataProperties!
+    dao.metadataProperties == null ? [] : dao.metadataProperties!
 
   properties.push(property.id)
   dao.metadataProperties = properties
@@ -123,13 +132,16 @@ export function handleAddProperties(event: AddPropertiesFunctionCall): void {
   refetchAllTokenMetadata()
 }
 
+// NOTE: function call handlers are disabled for now because they are not working for all networks
 export function handleDeleteAndRecreateProperties(
   event: DeleteAndRecreatePropertiesFunctionCall,
 ): void {
   let context = dataSource.context()
 
   let inputs = event.inputs
-  let dao = DAO.load(context.getString('tokenAddress'))!
+  let dao = DAO.load(context.getString('tokenAddress'))
+  if (dao == null) return
+
   let id = dao.id + '-' + event.transaction.hash.toHexString()
 
   let property = new MetadataProperty(id)
@@ -154,10 +166,12 @@ export function handleDeleteAndRecreateProperties(
   property.save()
 
   // Mark old properties as deleted
-  if (dao.metadataProperties !== null) {
+  if (dao.metadataProperties) {
     let currentProperties = dao.metadataProperties!
     for (let i = 0; i < currentProperties.length; i++) {
-      let property = MetadataProperty.load(currentProperties[i])!
+      let property = MetadataProperty.load(currentProperties[i])
+      if (property == null) continue
+
       property.deleted = true
       property.save()
     }
@@ -172,8 +186,8 @@ export function handleDeleteAndRecreateProperties(
   refetchAllTokenMetadata()
 }
 
-// TODO: This is a hack or workaround to refetch all token metadata after a property is added when callHandlers are disabled.
-//       This should be removed if callHandlers work for zora-sepolia and zora-mainnet. Currently, the subgraph doesn't sync and it fails to deploy on Goldsky.
+// TODO: This is a workaround to refetch all token metadata after a property is added when callHandlers are disabled.
+//       This should be fixed such that it works similar to callHandlers
 export function handlePropertyAdded(_event: PropertyAddedEvent): void {
   refetchAllTokenMetadata()
 }
