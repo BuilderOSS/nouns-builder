@@ -367,10 +367,10 @@ export const adminStickySaveButton = style({
   },
 })
 
-export const confirmFormWrapper = {
+export const confirmFormWrapper = style({
   width: 540,
   margin: '0 auto',
-}
+})
 
 export const deployCheckboxStyle = style({
   minHeight: 26,

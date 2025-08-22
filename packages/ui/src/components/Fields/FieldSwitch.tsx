@@ -50,10 +50,13 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
     const { value } = e.target
     if (!formik) return
 
-    formik.setFieldValue(
-      field.name,
-      field.type === FIELD_TYPES.NUMBER ? parseFloat(value) : value,
-    )
+    const next =
+      field.type === FIELD_TYPES.NUMBER ? (value === '' ? '' : Number(value)) : value
+
+    // Avoid writing NaN into form state
+    if (field.type === FIELD_TYPES.NUMBER && Number.isNaN(next)) return
+
+    formik.setFieldValue(field.name, next)
   }
 
   switch (field.type) {

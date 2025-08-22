@@ -70,7 +70,7 @@ const MilestoneForm: React.FC<{
 
       <SmartInput
         {...formik.getFieldProps(`milestones.${index}.description`)}
-        type={FIELD_TYPES.TEXTAREA}
+        type={FIELD_TYPES.TEXT}
         formik={formik}
         id={`milestones.${index}.description`}
         value={formik.values?.milestones[index]?.description}

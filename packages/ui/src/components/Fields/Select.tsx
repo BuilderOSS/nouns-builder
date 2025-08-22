@@ -12,22 +12,28 @@ const FormSelect: React.FC<{
   inputLabel: string | ReactElement
   formik: FormikProps<any>
 }> = ({ value, inputLabel, options, id, formik }) => {
-  const optionsArray: any[] = options?.filter(
-    (options: { name: string }) => options.name === id,
-  )[0]?.options
+  const optionsArray: any[] =
+    options?.find((opt: { name: string }) => opt.name === id)?.options ?? []
 
   const handleChange = (e: any) => {
-    const method = optionsArray.filter((option) => option.name === e.target.value)[0]
+    if (!optionsArray.length) return
+    const method = optionsArray.find((option) => option.name === e.target.value)
+    if (!method) return
     formik.setFieldValue(id, { name: method.name, inputs: method.inputs })
   }
 
   return (
     <Flex direction={'column'}>
-      <label>{inputLabel}</label>
-      <select className={defaultSelectStyle} onChange={(e) => handleChange(e)}>
+      <label htmlFor={id}>{inputLabel}</label>
+      <select
+        id={id}
+        className={defaultSelectStyle}
+        value={value?.name ?? ''}
+        onChange={handleChange}
+      >
         <option></option>
         {optionsArray?.map((option: any) => (
-          <option selected={value?.name === option.name} key={option.name}>
+          <option value={option.name} key={option.name}>
             {option.name}
           </option>
         ))}

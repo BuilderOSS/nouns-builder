@@ -13,12 +13,12 @@ import {
   inputStyleVariants,
   permaInputPlaceHolderStyle,
 } from './styles.css'
-import { FieldType } from './types'
+import { FIELD_TYPES } from './types'
 
 interface SmartInputProps {
   id: string
   value: string | number
-  type: FieldType
+  type: typeof FIELD_TYPES.TEXT | typeof FIELD_TYPES.NUMBER
   inputLabel?: string | ReactElement
   onChange: ChangeEventHandler
   onBlur: ChangeEventHandler
