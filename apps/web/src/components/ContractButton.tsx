@@ -1,9 +1,14 @@
+import { L2_CHAINS, TESTNET_CHAINS } from '@buildeross/constants'
 import { Box, Button, ButtonProps, Flex, PopUp, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useCallback, useRef, useState } from 'react'
+import Link from 'next/link'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
+
+const INSUFFICIENT_BALANCE_ERROR =
+  'Insufficient balance. Add ETH to your wallet (via bridging or exchange) to complete the transaction.'
 
 export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type' | 'ref'> & {
   // Accept an optional click event; callers may also pass a 0-arg handler.
@@ -24,6 +29,12 @@ export const ContractButton = ({
     chainId: appChain.id,
   })
 
+  const shouldShowBridgeLink = useMemo(() => {
+    const isL2 = L2_CHAINS.includes(appChain.id)
+    const isTestnet = TESTNET_CHAINS.some((chain) => chain.id === appChain.id)
+    return isL2 && !isTestnet && userBalance?.value === 0n
+  }, [appChain.id, userBalance?.value])
+
   const { openConnectModal } = useConnectModal()
   const { switchChain } = useSwitchChain()
   const [buttonError, setButtonError] = useState<string | null>(null)
@@ -43,7 +54,7 @@ export const ContractButton = ({
 
       if (!userAddress) return openConnectModal?.()
       if (userBalance?.value === 0n) {
-        setButtonError('Insufficient balance')
+        setButtonError(INSUFFICIENT_BALANCE_ERROR)
         return
       }
       if (userChain?.id !== appChain.id) {
@@ -103,7 +114,17 @@ export const ContractButton = ({
             <Icon id="warning" size="md" fill="negative" />
             <Box>
               <Text variant="paragraph-sm" color="text2">
-                {buttonError}
+                {buttonError === INSUFFICIENT_BALANCE_ERROR && shouldShowBridgeLink ? (
+                  <>
+                    Insufficient balance. Add ETH to your wallet via{' '}
+                    <Link href="/bridge" style={{ textDecoration: 'underline' }}>
+                      bridging
+                    </Link>{' '}
+                    or exchange to complete the transaction.
+                  </>
+                ) : (
+                  buttonError
+                )}
               </Text>
             </Box>
           </Flex>
