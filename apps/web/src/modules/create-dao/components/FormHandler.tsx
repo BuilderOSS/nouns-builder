@@ -1,7 +1,7 @@
 import { atoms, Box, Flex, Heading, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 
 import { CreateFormSection } from '../types'
 

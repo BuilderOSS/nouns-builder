@@ -4,10 +4,10 @@ import { SmartInput } from '@buildeross/ui'
 import { FIELD_TYPES } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Icon } from 'src/components/Icon'
 import {
   TransactionType,
   useProposalStore,

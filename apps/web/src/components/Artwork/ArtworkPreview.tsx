@@ -2,8 +2,8 @@ import { OrderedTraits } from '@buildeross/hooks/useArtworkPreview'
 import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { AnimatedModal } from '@buildeross/ui'
 import { Flex } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 
-import { Icon } from '../Icon'
 import { artworkPreviewGenerateButton, artworkPreviewImageWrapper } from './Artwork.css'
 import { Playground } from './Playground'
 

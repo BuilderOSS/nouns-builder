@@ -4,9 +4,9 @@ import {
   defaultInputLabelStyle,
 } from '@buildeross/ui'
 import { Box, Flex } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement, ReactNode, useState } from 'react'
-import { Icon } from 'src/components/Icon'
 
 export interface SelectOption<T> {
   value: T

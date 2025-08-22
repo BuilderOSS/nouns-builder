@@ -1,6 +1,6 @@
 import { defaultFileDownloadStyle } from '@buildeross/ui'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
-import { Icon } from 'src/components/Icon'
+import { Icon } from '@buildeross/zord'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'
 
 import Accordion from './accordian'

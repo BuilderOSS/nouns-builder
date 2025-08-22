@@ -12,8 +12,8 @@ import {
   uploadSuccessBox,
 } from '@buildeross/ui'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
-import { Icon } from 'src/components/Icon'
 
 interface ArtworkUploadProps {
   inputLabel: string | ReactElement

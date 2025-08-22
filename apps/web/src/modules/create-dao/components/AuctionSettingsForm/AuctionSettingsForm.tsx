@@ -9,10 +9,10 @@ import {
 import { FIELD_TYPES } from '@buildeross/ui'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent } from 'react'
-import { Icon } from 'src/components/Icon'
 import { useAccount } from 'wagmi'
 
 import { useFormStore } from '../../stores'

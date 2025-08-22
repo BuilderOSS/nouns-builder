@@ -1,6 +1,6 @@
 import { atoms, Box, Paragraph } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import Link from 'next/link'
-import { Icon } from 'src/components/Icon'
 import { VersionType } from 'src/modules/create-proposal/constants'
 import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
 import { useChainStore } from 'src/stores/useChainStore'

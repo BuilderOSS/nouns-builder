@@ -4,8 +4,8 @@ import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { Avatar } from '@buildeross/ui'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 
 export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {

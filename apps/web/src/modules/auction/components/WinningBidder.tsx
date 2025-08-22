@@ -3,7 +3,7 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { Avatar } from '@buildeross/ui'
 import { Box, Flex } from '@buildeross/zord'
-import { Icon } from 'src/components/Icon'
+import { Icon } from '@buildeross/zord'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { AuctionDetail } from './AuctionDetail'
