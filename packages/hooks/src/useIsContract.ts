@@ -13,7 +13,9 @@ export const useIsContract = ({
     address ? [address, chainId] : null,
     async ([address, chainId]) => {
       const provider = getProvider(chainId)
-      return await provider.getCode({ address }).then((x) => x !== '0x')
+      const code = await provider.getCode({ address })
+      const isEOA = !code || code === '0x'
+      return !isEOA
     },
   )
 }
