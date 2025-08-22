@@ -39,6 +39,7 @@
   ],
   "license": "MIT",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "peerDependencies": {
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

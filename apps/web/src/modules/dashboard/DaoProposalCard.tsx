@@ -1,9 +1,8 @@
 import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { Box, Flex, PopUp, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import { Icon } from 'src/components/Icon'
 
 import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
 

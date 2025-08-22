@@ -1,6 +1,13 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
+import {
+  DaysHoursMinsSecs,
+  FIELD_TYPES,
+  Radio,
+  SmartInput,
+  StickySave,
+} from '@buildeross/ui'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   compareAndReturn,
@@ -13,11 +20,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
 import { useRouter } from 'next/router'
 import React, { BaseSyntheticEvent } from 'react'
-import DaysHoursMinsSecs from 'src/components/Fields/DaysHoursMinsSecs'
-import Radio from 'src/components/Fields/Radio'
-import SmartInput from 'src/components/Fields/SmartInput'
-import StickySave from 'src/components/Fields/StickySave'
-import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import SingleImageUpload from 'src/components/SingleImageUpload/SingleImageUpload'
 import { TokenAllocation } from 'src/modules/create-dao'
@@ -336,7 +338,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                     <SmartInput
                       {...formik.getFieldProps('daoWebsite')}
                       inputLabel={'Dao Website'}
-                      type={TEXT}
+                      type={FIELD_TYPES.TEXT}
                       formik={formik}
                       id={'daoWebsite'}
                       onChange={({ target }: BaseSyntheticEvent) => {
@@ -350,7 +352,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                     <SmartInput
                       {...formik.getFieldProps('rendererBase')}
                       inputLabel={'Renderer Base Url'}
-                      type={TEXT}
+                      type={FIELD_TYPES.TEXT}
                       formik={formik}
                       id={'rendererBase'}
                       onChange={({ target }: BaseSyntheticEvent) => {
@@ -379,7 +381,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                     <SmartInput
                       {...formik.getFieldProps('auctionReservePrice')}
                       inputLabel={'Auction Reserve Price'}
-                      type={NUMBER}
+                      type={FIELD_TYPES.NUMBER}
                       formik={formik}
                       id={'auctionReservePrice'}
                       onChange={({ target }: BaseSyntheticEvent) => {
@@ -398,7 +400,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                     <SmartInput
                       {...formik.getFieldProps('proposalThreshold')}
                       inputLabel={'Proposal Threshold'}
-                      type={NUMBER}
+                      type={FIELD_TYPES.NUMBER}
                       formik={formik}
                       id={'proposalThreshold'}
                       onChange={({ target }: BaseSyntheticEvent) => {
@@ -419,7 +421,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                     <SmartInput
                       {...formik.getFieldProps('quorumThreshold')}
                       inputLabel={'Quorum Threshold'}
-                      type={NUMBER}
+                      type={FIELD_TYPES.NUMBER}
                       formik={formik}
                       id={'quorumThreshold'}
                       onChange={({ target }: BaseSyntheticEvent) => {
@@ -480,7 +482,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                           <SmartInput
                             {...formik.getFieldProps('vetoer')}
                             inputLabel="Vetoer"
-                            type={TEXT}
+                            type={FIELD_TYPES.TEXT}
                             id="vetoer"
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -515,6 +517,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                 </Stack>
 
                 <StickySave
+                  chainId={chain.id}
                   confirmText={`Create proposal for ${changes} ${
                     !!changes && changes > 1 ? 'changes' : 'change'
                   } to the contract parameters.`}

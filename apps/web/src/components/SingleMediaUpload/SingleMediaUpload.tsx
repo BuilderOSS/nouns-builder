@@ -1,8 +1,7 @@
 import { normalizeIPFSUrl, pinataOptions, uploadFile } from '@buildeross/ipfs-service'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ReactElement, useEffect, useState } from 'react'
-import { Spinner } from 'src/components/Spinner'
 import { defaultInputLabelStyle } from 'src/modules/create-proposal/components/TransactionForm/CustomTransaction/CustomTransaction.css'
 
 import {

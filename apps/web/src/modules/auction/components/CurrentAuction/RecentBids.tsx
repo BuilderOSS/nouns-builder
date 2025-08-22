@@ -1,16 +1,11 @@
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
-import dynamic from 'next/dynamic'
+import { AnimatedModal } from '@buildeross/ui'
+import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 
 import { AllBids } from '../AllBids'
 import { allRecentBidsButton, recentBid } from '../Auction.css'
 import { Bidder } from './Bidder'
-
-const AnimatedModal = dynamic(() => import('src/components/Modal/AnimatedModal'), {
-  ssr: false,
-})
 
 interface RecentBidsProps {
   bids: AuctionBidFragment[]

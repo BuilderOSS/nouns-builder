@@ -32,6 +32,7 @@
   ],
   "license": "MIT",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "peerDependencies": {
     "wagmi": "^2.15.4"
   },

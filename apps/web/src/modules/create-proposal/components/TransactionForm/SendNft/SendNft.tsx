@@ -4,17 +4,15 @@ import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { erc721Abi, erc1155Abi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { FallbackImage } from 'src/components/FallbackImage'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import {
   DropdownSelect,
@@ -257,7 +255,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           <>
             <Box mt={'x5'}>
               <SmartInput
-                type={TEXT}
+                type={FIELD_TYPES.TEXT}
                 formik={formik}
                 {...formik.getFieldProps('contractAddress')}
                 id="contractAddress"
@@ -274,7 +272,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
 
             <Box mt={'x5'}>
               <SmartInput
-                type={TEXT}
+                type={FIELD_TYPES.TEXT}
                 formik={formik}
                 {...formik.getFieldProps('tokenId')}
                 id="tokenId"
@@ -420,7 +418,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
 
         <Box mt={'x5'}>
           <SmartInput
-            type={TEXT}
+            type={FIELD_TYPES.TEXT}
             formik={formik}
             {...formik.getFieldProps('recipientAddress')}
             id="recipientAddress"
@@ -449,7 +447,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
                 </Flex>
               }
               id="amount"
-              type={NUMBER}
+              type={FIELD_TYPES.NUMBER}
               placeholder={'1'}
               min={1}
               max={maxAmount}

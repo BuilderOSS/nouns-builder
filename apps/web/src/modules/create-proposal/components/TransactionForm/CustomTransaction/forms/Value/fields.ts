@@ -1,11 +1,11 @@
-import { NUMBER } from 'src/components/Fields/types'
+import { FIELD_TYPES } from '@buildeross/ui'
 import * as Yup from 'yup'
 
 export const transactionValueFields = [
   {
     name: 'transactionValue',
     inputLabel: 'Value',
-    type: NUMBER,
+    type: FIELD_TYPES.NUMBER,
     perma: 'ETH',
     helperText: 'Optional',
     step: 'any',

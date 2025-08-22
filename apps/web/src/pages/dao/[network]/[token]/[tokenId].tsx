@@ -4,18 +4,20 @@ import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { useVotes } from '@buildeross/hooks'
 import { getEscrowDelegate } from '@buildeross/sdk/eas'
-import { SubgraphSDK } from '@buildeross/sdk/subgraph'
-import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
-import { TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
+import {
+  OrderDirection,
+  SubgraphSDK,
+  Token_OrderBy,
+  TokenWithDaoQuery,
+} from '@buildeross/sdk/subgraph'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Meta } from 'src/components/Meta'
-import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   About,

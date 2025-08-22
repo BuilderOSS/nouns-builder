@@ -1,0 +1,84 @@
+{
+  "name": "@buildeross/ui",
+  "description": "Comprehensive UI components library for BuilderOSS apps",
+  "version": "0.1.0",
+  "dependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/hooks": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
+    "@buildeross/sdk": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/utils": "workspace:*",
+    "@buildeross/zord": "workspace:*",
+    "@vanilla-extract/css": "^1.17.2",
+    "@vanilla-extract/recipes": "^0.5.7",
+    "flatpickr": "^4.6.13",
+    "react-dropzone": "^14.2.3",
+    "react-portal": "^4.3.0",
+    "swr": "^2.3.3",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "@types/react-portal": "^4.0.7",
+    "@types/uuid": "^9.0.0",
+    "@vanilla-extract/esbuild-plugin": "^2.3.16",
+    "eslint": "8.57.1",
+    "formik": "^2.4.6",
+    "framer-motion": "^12.12.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./styles": {
+      "types": "./dist/styles.d.ts",
+      "import": "./dist/styles.mjs",
+      "require": "./dist/styles.js"
+    },
+    "./index.css": "./dist/index.css"
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "peerDependencies": {
+    "formik": "^2.4.6",
+    "framer-motion": "^12.12.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "viem": "^2.30.0",
+    "wagmi": "^2.15.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/ui"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf .turbo dist",
+    "dev": "tsup --watch",
+    "dev:types": "tsc --emitDeclarationOnly --declaration --declarationMap",
+    "lint": "eslint src --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
+}

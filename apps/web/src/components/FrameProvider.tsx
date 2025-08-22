@@ -3,8 +3,7 @@ import sdk, {
   type Context,
   type FrameNotificationDetails,
 } from '@farcaster/frame-sdk'
-import { useCallback, useEffect, useState } from 'react'
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 interface FrameContextType {
   isSDKLoaded: boolean

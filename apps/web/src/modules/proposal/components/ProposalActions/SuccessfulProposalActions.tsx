@@ -2,15 +2,13 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { getProposal, Proposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'
+import { AnimatedModal, Countdown, SuccessModalContent } from '@buildeross/ui'
 import {
   isProposalExecutable,
   isProposalSuccessful,
 } from '@buildeross/utils/proposalState'
 import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
-import { Countdown } from 'src/components/Countdown'
-import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { useChainStore } from 'src/stores/useChainStore'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 import { useSWRConfig } from 'swr'

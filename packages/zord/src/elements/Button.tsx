@@ -5,7 +5,7 @@ import {
   PolymorphicPropsWithRef,
 } from 'react-polymorphic-types'
 
-import { Flex, FlexProps, Icon, IconProps } from '../elements'
+import { Flex, FlexProps, Icon, IconProps, Spinner } from '../elements'
 import {
   baseButton,
   buttonLoading,
@@ -100,7 +100,7 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
       {...props}
     >
       {loading ? (
-        <Icon id="Spinner" size={size === 'lg' ? 'lg' : 'md'} />
+        <Spinner />
       ) : (
         <>
           {iconAlign === 'left' && iconElement}

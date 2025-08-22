@@ -5,13 +5,13 @@ import {
   ESCROW_DELEGATE_SCHEMA,
   ESCROW_DELEGATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
+import { SmartInput } from '@buildeross/ui'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { Box, Button } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { Transaction, useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'

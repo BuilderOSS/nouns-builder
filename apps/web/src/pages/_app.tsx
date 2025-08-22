@@ -1,10 +1,12 @@
 import '@buildeross/zord/index.css'
+import '@buildeross/ui/index.css'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/600.css'
 import '@fontsource/londrina-solid'
 import '@rainbow-me/rainbowkit/styles.css'
 import 'src/styles/globals.css'
 import 'src/styles/styles.css'
+import 'flatpickr/dist/themes/light.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'

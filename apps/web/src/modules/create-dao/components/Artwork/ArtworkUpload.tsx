@@ -10,8 +10,8 @@ import React, {
   useEffect,
 } from 'react'
 import { ArtworkPreview, ArtworkUpload as UploadComponent } from 'src/components/Artwork'
+import { artworkPreviewPanel } from 'src/components/Artwork/Artwork.css'
 import { LayerOrdering } from 'src/components/Artwork/LayerOrdering'
-import { artworkPreviewPanel } from 'src/components/Fields/styles.css'
 
 import { useFormStore } from '../../stores'
 

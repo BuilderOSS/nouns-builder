@@ -4,6 +4,8 @@ export default defineConfig({
   entry: ['index.ts'],
   format: ['cjs', 'esm'],
   dts: true,
+  sourcemap: true,
   clean: true,
-  external: ['ipfs-http-client', 'ipfs-core-types'],
+  treeshake: true,
+  external: ['ipfs-http-client', 'ipfs-core-types', 'multiformats'],
 })

@@ -1,8 +1,6 @@
-import { Box } from '@buildeross/zord'
+import { Box, Icon } from '@buildeross/zord'
 import NextImage from 'next/image'
 import { useCallback, useRef, useState } from 'react'
-
-import { Icon } from '../Icon'
 
 export interface AudioProps {
   src: string

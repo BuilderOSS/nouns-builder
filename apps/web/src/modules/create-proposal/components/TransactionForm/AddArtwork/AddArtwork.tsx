@@ -1,6 +1,5 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
-import { metadataAbi } from '@buildeross/sdk/contract'
-import { getPropertyItems } from '@buildeross/sdk/contract'
+import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo } from 'react'

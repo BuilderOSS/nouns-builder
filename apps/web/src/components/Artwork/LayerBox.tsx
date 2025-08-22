@@ -1,8 +1,7 @@
 import { ImageProps, OrderedTraits } from '@buildeross/hooks'
-import { Box, Flex } from '@buildeross/zord'
+import { Box, Flex, Icon } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 import {
   artworkSettingsBox,
   artworkSettingsBoxDropping,

@@ -3,11 +3,13 @@ import {
   L2_MIGRATION_DEPLOYER,
 } from '@buildeross/constants/addresses'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
-import { auctionAbi, merklePropertyMetadataAbi } from '@buildeross/sdk/contract'
-import { messengerAbi } from '@buildeross/sdk/contract'
-import { l2DeployerAbi } from '@buildeross/sdk/contract'
-import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
-import { DaoMember } from '@buildeross/sdk/subgraph'
+import {
+  auctionAbi,
+  l2DeployerAbi,
+  merklePropertyMetadataAbi,
+  messengerAbi,
+} from '@buildeross/sdk/contract'
+import { DaoMember, encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 import { AddressType, BytesType, CHAIN_ID } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import axios from 'axios'

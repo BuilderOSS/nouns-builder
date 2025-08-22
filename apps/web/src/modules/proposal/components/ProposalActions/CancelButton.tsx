@@ -1,7 +1,6 @@
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui'
 import { Box } from '@buildeross/zord'
 import React, { useState } from 'react'
-import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { useLayoutStore } from 'src/stores'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 import { Address } from 'viem'

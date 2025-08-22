@@ -4,8 +4,8 @@ export default defineConfig({
   entry: ['src/*.ts', 'src/contract/*.ts', 'src/subgraph/*.ts', 'src/eas/*.ts', '!src/*.test.ts'],
   format: ['cjs', 'esm'],
   dts: true,
+  sourcemap: true,
   clean: true,
-  splitting: true,
   treeshake: true,
   minify: 'terser',
   external: [

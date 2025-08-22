@@ -1,40 +1,29 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
+import { Atoms } from '../atoms'
 import { Flex, FlexProps } from '../elements/Flex'
-import * as iconComponents from '../icons'
-import { icon, iconVariants } from './Icon.css'
+import { icons, IconType } from '../icons'
+import { theme } from '../theme'
+import { icon } from './Icon.css'
 
-export type IconType = keyof typeof iconComponents
-
-export const icons = Object.keys(iconComponents) as IconType[]
-export interface IconProps extends FlexProps {
-  id?: IconType
-  flip?: boolean
-  size?: keyof (typeof iconVariants)['size']
+export type IconProps = FlexProps & {
+  id: IconType
+  fill?: Atoms['color']
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-export function Icon({ id, size, flip, ...props }: IconProps) {
-  const IconComponent = useMemo(() => {
-    if (id && id in iconComponents) return iconComponents[id]
-    return () => null
-  }, [id])
-
-  const iconClass = useMemo(() => {
-    return {
-      size: size && `zord-icon-${size}`,
-      unique: `zord-icon-${id?.toLowerCase()}`,
-    }
-  }, [id, size])
+export const Icon = ({ id, fill, size = 'md', ...props }: IconProps) => {
+  const IconSVG = useMemo(() => icons[id], [id])
 
   return (
-    <Flex
-      {...props}
-      className={['zord-icon', iconClass.size, iconClass.unique, props.className]}
-    >
-      <IconComponent
-        fill="currentColor"
-        className={icon({ rotate: id === 'Spinner', size, flip })}
+    <Flex {...props}>
+      <IconSVG
+        fill={fill ? theme.colors[fill] : 'currentColor'}
+        className={icon({ size })}
       />
     </Flex>
   )
 }
+
+export { icons }
+export type { IconType }

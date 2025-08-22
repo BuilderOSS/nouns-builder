@@ -1,5 +1,4 @@
-import { governorAbi } from '@buildeross/sdk/contract'
-import { ProposalState } from '@buildeross/sdk/contract'
+import { governorAbi, ProposalState } from '@buildeross/sdk/contract'
 import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,

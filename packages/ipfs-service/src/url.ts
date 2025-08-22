@@ -1,4 +1,4 @@
-import { CID } from 'multiformats/cid'
+import { CID } from 'multiformats'
 
 export type IPFSUrl = `ipfs://${string}`
 

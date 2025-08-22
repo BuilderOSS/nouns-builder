@@ -1,9 +1,8 @@
 import { useEnsData } from '@buildeross/hooks'
 import { AddressType } from '@buildeross/types'
-import { Box, Flex, PopUp, Text } from '@buildeross/zord'
+import { Avatar } from '@buildeross/ui'
+import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { Avatar } from 'src/components/Avatar'
-import { Icon } from 'src/components/Icon'
 
 interface FounderProps {
   wallet: AddressType

@@ -1,9 +1,12 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { SubgraphSDK } from '@buildeross/sdk/subgraph'
-import { Proposal } from '@buildeross/sdk/subgraph'
-import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import {
+  OrderDirection,
+  Proposal,
+  SubgraphSDK,
+  Token_OrderBy,
+} from '@buildeross/sdk/subgraph'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'

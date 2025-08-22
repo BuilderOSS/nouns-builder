@@ -6,7 +6,7 @@
     "@popperjs/core": "^2.11.6",
     "@vanilla-extract/css": "^1.17.2",
     "@vanilla-extract/private": "^1.0.3",
-    "@vanilla-extract/recipes": "^0.5.5",
+    "@vanilla-extract/recipes": "^0.5.7",
     "@vanilla-extract/sprinkles": "^1.5.0",
     "clsx": "^1.2.1",
     "react-polymorphic-types": "^2.0.0",
@@ -21,7 +21,8 @@
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@types/uuid": "^9.0.0",
-    "@vanilla-extract/esbuild-plugin": "^2.2.0",
+    "@vanilla-extract/esbuild-plugin": "^2.3.16",
+    "esbuild-plugin-svgr": "^3.1.1",
     "eslint": "8.57.1",
     "lodash-es": "^4.17.21",
     "react": "^19.1.0",
@@ -30,7 +31,11 @@
     "typescript": "^5.8.3"
   },
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
     "./index.css": "./dist/index.css"
   },
   "files": [
@@ -54,7 +59,7 @@
   "scripts": {
     "build": "tsup",
     "build-icons": "svgr --out-dir src/icons --icon --replace-attr-values '#000=currentColor' --typescript icons ",
-    "clean": "rm -rf .turbo node_modules dist",
+    "clean": "rm -rf .turbo dist",
     "dev": "tsup --watch",
     "dev:types": "tsc --emitDeclarationOnly --declaration --declarationMap",
     "lint": "eslint src --fix"

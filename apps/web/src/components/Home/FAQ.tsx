@@ -1,8 +1,7 @@
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
-import { Icon } from 'src/components/Icon'
+import { defaultFileDownloadStyle } from '@buildeross/ui/styles'
+import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'
 
-import { defaultFileDownloadStyle } from '../Fields/styles.css'
 import Accordion from './accordian'
 
 const FAQ = () => {

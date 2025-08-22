@@ -1,10 +1,9 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
+import { Avatar } from '@buildeross/ui'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
-import { Avatar } from 'src/components/Avatar'
-import { Icon } from 'src/components/Icon'
 
 export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
   const { displayName, ensAvatar } = useEnsData(bid?.bidder)
