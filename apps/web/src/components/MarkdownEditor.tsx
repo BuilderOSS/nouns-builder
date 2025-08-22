@@ -1,15 +1,15 @@
 import 'react-mde/lib/styles/css/react-mde-all.css'
-import 'src/components/Fields/styles.css'
+import '@buildeross/ui/styles'
 
 import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
+import { FieldError } from '@buildeross/ui'
+import { defaultInputLabelStyle } from '@buildeross/ui'
 import { Flex, Stack } from '@buildeross/zord'
-import * as React from 'react'
+import React from 'react'
 import { ReactElement } from 'react'
 import ReactMarkdown from 'react-markdown'
 import ReactMde from 'react-mde'
 import remarkGfm from 'remark-gfm'
-import { Error } from 'src/components/Fields/Error'
-import { defaultInputLabelStyle } from 'src/components/Fields/styles.css'
 
 interface MarkdownEditorProps {
   onChange: (value: string) => void
@@ -64,7 +64,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           accept: 'image/*',
         }}
       />
-      {!!errorMessage && <Error message={errorMessage} />}
+      {!!errorMessage && <FieldError message={errorMessage} />}
     </Stack>
   )
 }

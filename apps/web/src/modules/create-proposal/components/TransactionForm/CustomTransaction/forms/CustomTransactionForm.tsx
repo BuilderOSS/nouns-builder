@@ -1,15 +1,15 @@
+import { FieldSwitch, FieldType } from '@buildeross/ui'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import { Form, Formik, FormikValues } from 'formik'
 import React, { ReactElement } from 'react'
-import FieldSwitch from 'src/components/Fields/FieldSwitch'
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
 
 import { backButton, transactionFormButtonWithPrev } from './CustomTransactionForm.css'
 
 interface FormField {
   name: string
-  type: string
+  type: FieldType
   inputLabel: string | ReactElement
   helperText?: string
 }

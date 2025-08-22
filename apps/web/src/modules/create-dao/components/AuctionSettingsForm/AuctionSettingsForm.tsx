@@ -1,18 +1,18 @@
-import { isEmpty } from '@buildeross/utils/helpers'
-import { Button, Flex, Stack } from '@buildeross/zord'
-import { Form, Formik } from 'formik'
-import { motion } from 'framer-motion'
-import React, { BaseSyntheticEvent } from 'react'
-import DaysHoursMinsSecs from 'src/components/Fields/DaysHoursMinsSecs'
-import SmartInput from 'src/components/Fields/SmartInput'
+import { DaysHoursMinsSecs } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui'
 import {
   defaultBackButton,
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
   defaultFormButtonWithPrev,
-} from 'src/components/Fields/styles.css'
-import { NUMBER } from 'src/components/Fields/types'
-import { Icon } from 'src/components/Icon'
+} from '@buildeross/ui'
+import { FIELD_TYPES } from '@buildeross/ui'
+import { isEmpty } from '@buildeross/utils/helpers'
+import { Button, Flex, Stack } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
+import { Form, Formik } from 'formik'
+import { motion } from 'framer-motion'
+import React, { BaseSyntheticEvent } from 'react'
 import { useAccount } from 'wagmi'
 
 import { useFormStore } from '../../stores'
@@ -123,7 +123,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               <SmartInput
                 {...formik.getFieldProps('auctionReservePrice')}
                 inputLabel={'Auction Reserve Price'}
-                type={NUMBER}
+                type={FIELD_TYPES.NUMBER}
                 formik={formik}
                 id={'auctionReservePrice'}
                 onChange={({ target }: BaseSyntheticEvent) => {
@@ -163,7 +163,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               <SmartInput
                 {...formik.getFieldProps('proposalThreshold')}
                 inputLabel={'Proposal Threshold'}
-                type={NUMBER}
+                type={FIELD_TYPES.NUMBER}
                 formik={formik}
                 id={'proposalThreshold'}
                 onChange={({ target }: BaseSyntheticEvent) => {
@@ -185,7 +185,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               <SmartInput
                 {...formik.getFieldProps('quorumThreshold')}
                 inputLabel={'Quorum Threshold'}
-                type={NUMBER}
+                type={FIELD_TYPES.NUMBER}
                 formik={formik}
                 id={'quorumThreshold'}
                 onChange={({ target }: BaseSyntheticEvent) => {

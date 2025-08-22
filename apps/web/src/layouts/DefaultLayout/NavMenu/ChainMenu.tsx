@@ -1,10 +1,10 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { Chain, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { chainPopUpButton, navButton } from '../Nav.styles.css'

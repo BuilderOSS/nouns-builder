@@ -8,6 +8,7 @@
     "@buildeross/hooks": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/sdk": "workspace:*",
+    "@buildeross/ui": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/utils": "workspace:*",
     "@buildeross/zord": "workspace:*",

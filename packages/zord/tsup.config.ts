@@ -1,5 +1,6 @@
 import { vanillaExtractPlugin } from '@vanilla-extract/esbuild-plugin'
 import { defineConfig } from 'tsup'
+import svgr from 'esbuild-plugin-svgr'
 
 export default defineConfig((options) => ({
   entry: ['src/index.ts'],
@@ -7,6 +8,9 @@ export default defineConfig((options) => ({
   platform: 'browser',
   external: ['react'],
   esbuildPlugins: [
+    svgr({
+      dimensions: false,
+    }),
     vanillaExtractPlugin({
       identifiers: 'short',
     }),

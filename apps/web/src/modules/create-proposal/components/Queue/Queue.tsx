@@ -1,7 +1,7 @@
+import { AnimatedModal } from '@buildeross/ui'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
-import AnimatedModal from 'src/components/Modal/AnimatedModal'
 import { TransactionCard, useProposalStore } from 'src/modules/create-proposal'
 
 import { TransactionType } from '../../constants'

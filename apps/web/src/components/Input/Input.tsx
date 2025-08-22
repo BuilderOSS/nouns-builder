@@ -1,3 +1,4 @@
+import { FieldError } from '@buildeross/ui'
 import {
   Box,
   Flex,
@@ -7,7 +8,6 @@ import {
 } from '@buildeross/zord'
 import { Field } from 'formik'
 import type { FC, ReactNode } from 'react'
-import { Error } from 'src/components/Fields/Error'
 
 import { input } from './Input.css'
 
@@ -82,7 +82,7 @@ const Input: FC<CustomInputProps> = ({
         </Box>
       </Box>
 
-      {error ? <Error message={error} /> : null}
+      {error ? <FieldError message={error} /> : null}
     </>
   )
 }

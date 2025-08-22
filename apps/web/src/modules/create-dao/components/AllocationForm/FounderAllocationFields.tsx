@@ -1,10 +1,10 @@
 import { Duration } from '@buildeross/types'
+import { DatePicker } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui'
 import { Button, Flex, Heading, Paragraph, Stack, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import { FormikErrors, FormikProps, FormikTouched } from 'formik'
 import React from 'react'
-import DatePicker from 'src/components/Fields/Date'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { Icon } from 'src/components/Icon'
 import {
   calculateMaxAllocation,
   FounderAllocationFormValues,

@@ -1,10 +1,10 @@
+import { SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES } from '@buildeross/ui'
 import { Box, Button, Flex } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Form, Formik } from 'formik'
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { TEXT } from 'src/components/Fields/types'
 import Input from 'src/components/Input/Input'
 
 import airdropFormSchema, { AirdropFormValues } from './AirdropForm.schema'
@@ -49,7 +49,7 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
           >
             <Flex as={Form} direction={'column'}>
               <SmartInput
-                type={TEXT}
+                type={FIELD_TYPES.TEXT}
                 formik={formik}
                 {...formik.getFieldProps('recipientAddress')}
                 id="recipientAddress"

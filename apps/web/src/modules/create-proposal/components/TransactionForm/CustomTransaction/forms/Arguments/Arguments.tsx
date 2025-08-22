@@ -1,3 +1,4 @@
+import { FIELD_TYPES } from '@buildeross/ui'
 import {
   matchInputFromName,
   matchTypeParameters,
@@ -8,7 +9,6 @@ import { camelToTitle } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import isEqual from 'lodash/isEqual'
 import React from 'react'
-import { TEXT, TEXTAREA } from 'src/components/Fields/types'
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
 import { encodeAbiParameters, isAddress, isHex } from 'viem'
 import * as Yup from 'yup'
@@ -43,7 +43,7 @@ export const Arguments = () => {
             placeholder: camelToTitle(input.name),
             name,
             path: path,
-            type: TEXT,
+            type: FIELD_TYPES.TEXT,
           })
         }
       })
@@ -58,7 +58,7 @@ export const Arguments = () => {
           inputLabel: 'Raw Calldata',
           helperText: 'Call data as hex (Leave blank to just send value)',
           name: RAW_DATA_KEY,
-          type: TEXTAREA,
+          type: FIELD_TYPES.TEXTAREA,
         },
       ]
     }

@@ -1,9 +1,9 @@
 import { getFetchableUrls, normalizeIPFSUrl, uploadFile } from '@buildeross/ipfs-service'
 import { Box, Flex, Stack } from '@buildeross/zord'
+import { Spinner } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ReactElement, useEffect, useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackImage'
-import { Spinner } from 'src/components/Spinner'
 
 import {
   defaultUploadStyle,

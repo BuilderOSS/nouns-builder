@@ -1,10 +1,10 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks'
 import { AddressType } from '@buildeross/types'
+import { Avatar } from '@buildeross/ui'
 import { Box, Flex, PopUp, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import { useState } from 'react'
-import { Avatar } from 'src/components/Avatar'
-import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 
 interface FounderProps {

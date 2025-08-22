@@ -5,9 +5,12 @@ import { ReactNode } from 'react'
 
 import { AllBids } from './AllBids'
 
-const AnimatedModal = dynamic(() => import('src/components/Modal/AnimatedModal'), {
-  ssr: false,
-})
+const AnimatedModal = dynamic(
+  () => import('@buildeross/ui').then((mod) => ({ default: mod.AnimatedModal })),
+  {
+    ssr: false,
+  }
+)
 
 export const BidHistory = ({ bids }: { bids: AuctionBidFragment[] }) => {
   return (

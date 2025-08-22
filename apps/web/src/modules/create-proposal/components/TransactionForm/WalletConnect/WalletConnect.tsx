@@ -1,13 +1,13 @@
 import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
 import { CHAIN_ID } from '@buildeross/types'
+import { SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { TEXT } from 'src/components/Fields/types'
-import { Icon } from 'src/components/Icon'
 import {
   TransactionType,
   useProposalStore,
@@ -165,7 +165,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
     >
       <Flex as={Form} direction="column" gap="x4">
         <SmartInput
-          type={TEXT}
+          type={FIELD_TYPES.TEXT}
           formik={formik}
           {...formik.getFieldProps('wcLink')}
           id="wcLink"

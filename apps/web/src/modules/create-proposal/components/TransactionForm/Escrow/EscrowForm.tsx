@@ -1,14 +1,14 @@
+import { DatePicker } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES } from '@buildeross/ui'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Icon } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
 import { useFormikContext } from 'formik'
 import { truncate } from 'lodash'
 import React, { useCallback, useState } from 'react'
-import DatePicker from 'src/components/Fields/Date'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { NUMBER, TEXT, TEXTAREA } from 'src/components/Fields/types'
 import Accordion from 'src/components/Home/accordian'
-import { Icon } from 'src/components/Icon'
 import SingleMediaUpload from 'src/components/SingleMediaUpload/SingleMediaUpload'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
@@ -50,7 +50,7 @@ const MilestoneForm: React.FC<{
         {...formik.getFieldProps(`milestones.${index}.amount`)}
         inputLabel="Amount"
         id={`milestones.${index}.amount`}
-        type={NUMBER}
+        type={FIELD_TYPES.NUMBER}
         placeholder={'1.0 ETH'}
         errorMessage={
           (formik.touched?.milestones as any)?.[index]?.amount &&
@@ -70,7 +70,7 @@ const MilestoneForm: React.FC<{
 
       <SmartInput
         {...formik.getFieldProps(`milestones.${index}.description`)}
-        type={TEXTAREA}
+        type={FIELD_TYPES.TEXT}
         formik={formik}
         id={`milestones.${index}.description`}
         value={formik.values?.milestones[index]?.description}
@@ -197,7 +197,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                 <Stack gap={'x5'}>
                   <EscrowDetailsDisplay />
                   <SmartInput
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     {...formik.getFieldProps('recipientAddress')}
                     id="recipientAddress"
@@ -212,7 +212,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                     helperText={`The wallet address that will receive funds when milestones are completed.`}
                   />
                   <SmartInput
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     {...formik.getFieldProps('clientAddress')}
                     id="clientAddress"
