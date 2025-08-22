@@ -1,4 +1,4 @@
-import { Error } from '@buildeross/ui'
+import { FieldError } from '@buildeross/ui'
 import {
   Box,
   Flex,
@@ -82,7 +82,7 @@ const Input: FC<CustomInputProps> = ({
         </Box>
       </Box>
 
-      {error ? <Error message={error} /> : null}
+      {error ? <FieldError message={error} /> : null}
     </>
   )
 }

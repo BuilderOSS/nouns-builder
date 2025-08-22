@@ -2,7 +2,7 @@ import { Box } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ChangeEventHandler, ReactElement } from 'react'
 
-import { Error } from './Error'
+import { FieldError } from './FieldError'
 import {
   defaultFieldsetStyle,
   defaultInputLabelStyle,
@@ -43,7 +43,7 @@ const TextInput: React.FC<TextInputProps> = ({
         placeholder={placeholder || ''}
         disabled={disabled}
       />
-      {!!errorMessage && <Error message={errorMessage} />}
+      {!!errorMessage && <FieldError message={errorMessage} />}
     </Box>
   )
 }

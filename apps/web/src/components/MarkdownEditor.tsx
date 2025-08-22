@@ -2,10 +2,10 @@ import 'react-mde/lib/styles/css/react-mde-all.css'
 import '@buildeross/ui/styles'
 
 import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
-import { Error } from '@buildeross/ui'
+import { FieldError } from '@buildeross/ui'
 import { defaultInputLabelStyle } from '@buildeross/ui'
 import { Flex, Stack } from '@buildeross/zord'
-import * as React from 'react'
+import React from 'react'
 import { ReactElement } from 'react'
 import ReactMarkdown from 'react-markdown'
 import ReactMde from 'react-mde'
@@ -64,7 +64,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           accept: 'image/*',
         }}
       />
-      {!!errorMessage && <Error message={errorMessage} />}
+      {!!errorMessage && <FieldError message={errorMessage} />}
     </Stack>
   )
 }
