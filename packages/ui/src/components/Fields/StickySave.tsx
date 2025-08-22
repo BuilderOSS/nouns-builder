@@ -1,19 +1,17 @@
 import { usePrevious } from '@buildeross/hooks'
-import { Flex } from '@buildeross/zord'
+import { CHAIN_ID } from '@buildeross/types'
+import { Flex, Icon } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { useCallback, useEffect } from 'react'
-import { Icon } from 'src/components/Icon'
+
+import { ContractButton } from '../ContractButton'
 import {
   adminStickySaveButton,
   adminStickySaveWrapper,
   confirmFormWrapper,
-} from 'src/styles/Admin.css'
-import {
   deployCheckboxHelperText,
   deployCheckboxStyleVariants,
-} from 'src/styles/deploy.css'
-
-import { ContractButton } from '../ContractButton'
+} from './styles.css'
 
 interface StickySaveProps {
   confirmText: string
@@ -21,6 +19,7 @@ interface StickySaveProps {
   saveButtonText: string
   isSubmitting: boolean
   onSave: () => void
+  chainId: CHAIN_ID
 }
 
 const confirmAnimation = {
@@ -38,6 +37,7 @@ const StickySave: React.FC<StickySaveProps> = ({
   disabled,
   isSubmitting,
   onSave,
+  chainId,
 }) => {
   const [hasConfirmed, setHasConfirmed] = React.useState<boolean>(false)
   const [showConfirmBanner, setShowConfirmBanner] = React.useState<boolean>(false)
@@ -117,6 +117,7 @@ const StickySave: React.FC<StickySaveProps> = ({
               loading={isSubmitting}
               disabled={disabled || isSubmitting}
               handleClick={handleSave}
+              chainId={chainId}
             >
               {hasConfirmed ? 'Confirm' : saveButtonText}
             </ContractButton>

@@ -1,10 +1,10 @@
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { CopyButton } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import CopyButton from 'src/components/CopyButton/CopyButton'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 import {
@@ -153,6 +153,32 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     setIsSmallDesktop(window.innerWidth <= 1200 && window.innerWidth >= 768)
   }
 
+  //const { addresses } = useDaoStore()
+  //const copy: any = {
+  //  token: addresses?.token,
+  //  auction: addresses?.auction,
+  //  treasury: addresses?.treasury,
+  //  governor: addresses?.governor,
+  //  metadata: addresses?.metadata,
+  //}
+  //
+  //const copyAll = Object.keys(copy).reduce(
+  //  (acc, key) => {
+  //    return `${acc}${key}: ${copy[key as string]}\n`
+  //  },
+  //  title ? `${title}:\n` : `all addresses:\n`
+  //)
+
+  const copyAllText = React.useMemo(() => {
+    return `${general?.daoName ? `${general.daoName}:\n` : `all addresses:\n`}
+    token: ${token}
+    auction: ${auction}
+    treasury: ${treasury}
+    governor: ${governor}
+    metadata: ${metadata}
+    `
+  }, [general?.daoName, token, auction, treasury, governor, metadata])
+
   return (
     <Flex direction={'column'}>
       <Box mb={'x1'} className={successHeadingStyle}>
@@ -163,7 +189,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
           Copy all addresses
         </Box>
         <Box cursor={'pointer'}>
-          <CopyButton title={general?.daoName} all={true} />
+          <CopyButton text={copyAllText} />
         </Box>
       </Flex>
       <Flex direction={'column'} style={{ boxSizing: 'border-box', width: '100%' }}>

@@ -1,10 +1,9 @@
 import { Box, Grid } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ChangeEventHandler, ReactElement } from 'react'
-import { useLayoutStore } from 'src/stores/useLayoutStore'
 
-import { NumberInput } from './NumberInput'
-import { defaultInputLabelStyle } from './styles.css'
+import NumberInput from './NumberInput'
+import { defaultInputLabelStyle, mobileResponsiveGrid } from './styles.css'
 
 interface TimeBufferProps {
   id: string
@@ -23,8 +22,6 @@ const MinsSecs: React.FC<TimeBufferProps> = ({
   errorMessage,
   value,
 }) => {
-  const { isMobile } = useLayoutStore()
-
   const handleChange = (e: any, type: string) => {
     if (!formik) return
     const value = e.target.value
@@ -42,7 +39,7 @@ const MinsSecs: React.FC<TimeBufferProps> = ({
   return (
     <Box mb={'x3'}>
       <label className={defaultInputLabelStyle}>{inputLabel}</label>
-      <Grid columns={isMobile ? '1fr' : '1fr 1fr'} gap={'x5'} mb={'x8'}>
+      <Grid gap={'x5'} mb={'x8'} className={mobileResponsiveGrid}>
         <NumberInput
           errorMessage={errorMessage?.minutes}
           hasError={minutesHasError}

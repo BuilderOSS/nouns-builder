@@ -1,5 +1,4 @@
 import { Box } from '@buildeross/zord'
-import React from 'react'
 
 interface ErrorProps {
   message: string

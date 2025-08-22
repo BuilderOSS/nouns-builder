@@ -4,9 +4,9 @@ import { CHAIN_ID } from '@buildeross/types'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { Box, BoxProps } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
-import { FallbackNextImage } from 'src/components/FallbackImage'
 
 import { avatarVariants, squareAvatar } from './Avatar.css'
+import { FallbackImage } from './FallbackImage'
 
 export interface DaoAvatarProps extends Omit<BoxProps, 'size'> {
   collectionAddress: string
@@ -38,7 +38,7 @@ export function DaoAvatar({
   // Pass null as src to bgForAddress when image fails, so it shows gradient
   const background = useMemo(
     () => bgForAddress(collectionAddress, imageHasError ? null : src),
-    [collectionAddress, src, imageHasError]
+    [collectionAddress, src, imageHasError],
   )
 
   // Reset error state when src changes
@@ -70,18 +70,17 @@ export function DaoAvatar({
         {...props}
       >
         {!imageHasError && (
-          <FallbackNextImage
-            priority
-            unoptimized
-            fill
+          <FallbackImage
             key={src}
             srcList={getFetchableUrls(src)}
             alt={collectionAddress || 'Avatar image'}
             style={{
               objectFit: 'cover',
+              width: '100%',
+              height: '100%',
             }}
-            width={size}
-            height={size}
+            width={size ? Number(size) : undefined}
+            height={size ? Number(size) : undefined}
             onImageError={() => setImageHasError(true)}
           />
         )}
@@ -98,18 +97,17 @@ export function DaoAvatar({
       {...props}
     >
       {!imageHasError && (
-        <FallbackNextImage
-          priority
-          unoptimized
-          fill
+        <FallbackImage
           key={tokenUri?.name}
           srcList={getFetchableUrls(tokenUri?.image)}
           alt={collectionAddress || 'Avatar image'}
           style={{
             objectFit: 'cover',
+            width: '100%',
+            height: '100%',
           }}
-          width={size}
-          height={size}
+          width={size ? Number(size) : undefined}
+          height={size ? Number(size) : undefined}
           onImageError={() => setImageHasError(true)}
         />
       )}

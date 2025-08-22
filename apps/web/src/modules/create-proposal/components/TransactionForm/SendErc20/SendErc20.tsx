@@ -3,6 +3,8 @@ import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
+import { SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES } from '@buildeross/ui'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -11,8 +13,6 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import {
   DropdownSelect,
@@ -206,7 +206,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         {selectedTokenOption === 'custom' && (
           <Box mt={'x5'}>
             <SmartInput
-              type={TEXT}
+              type={FIELD_TYPES.TEXT}
               formik={formik}
               {...formik.getFieldProps('tokenAddress')}
               id="tokenAddress"
@@ -320,7 +320,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
 
         <Box mt={'x5'}>
           <SmartInput
-            type={TEXT}
+            type={FIELD_TYPES.TEXT}
             formik={formik}
             {...formik.getFieldProps('recipientAddress')}
             id="recipientAddress"
@@ -356,7 +356,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
               </Flex>
             }
             id={`amount`}
-            type={NUMBER}
+            type={FIELD_TYPES.NUMBER}
             placeholder={'100'}
             min={0}
             max={currentBalance}

@@ -1,11 +1,7 @@
 import { Flex } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-import {
-  confirmRemoveHeadingStyle,
-  confirmRemoveHelper,
-} from 'src/components/Fields/styles.css'
-import { Icon } from 'src/components/Icon'
-import { Spinner } from 'src/components/Spinner'
+
+import { confirmRemoveHeadingStyle, confirmRemoveHelper } from '../Fields/styles.css'
 
 type SuccessModalContentProps = {
   title: string
@@ -14,6 +10,10 @@ type SuccessModalContentProps = {
   actions?: ReactNode
   success?: boolean
   pending?: boolean
+  // Custom icon renderer to avoid hard dependency on Icon component
+  renderSuccessIcon?: () => ReactNode
+  // Custom spinner renderer to avoid dependency on specific Spinner implementation
+  renderSpinner?: () => ReactNode
 }
 
 const SuccessModalContent: React.FC<SuccessModalContentProps> = ({
@@ -23,6 +23,8 @@ const SuccessModalContent: React.FC<SuccessModalContentProps> = ({
   actions,
   success,
   pending,
+  renderSuccessIcon,
+  renderSpinner,
 }) => {
   return (
     <Flex direction={'column'} align={'center'}>
@@ -36,11 +38,15 @@ const SuccessModalContent: React.FC<SuccessModalContentProps> = ({
           borderRadius={'round'}
           backgroundColor={'positive'}
         >
-          <Icon id="check" fill="onAccent" />
+          {renderSuccessIcon ? renderSuccessIcon() : '✓'}
         </Flex>
       )}
 
-      {pending && <Spinner mb={'x4'} mx={'x4'} />}
+      {pending && (
+        <Flex mb={'x4'} mx={'x4'}>
+          {renderSpinner ? renderSpinner() : '⏳'}
+        </Flex>
+      )}
 
       <Flex className={confirmRemoveHeadingStyle} mb={'x2'}>
         {title}

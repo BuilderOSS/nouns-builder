@@ -1,11 +1,8 @@
-import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { isEmpty } from '@buildeross/utils/helpers'
-import { atoms, Box, Flex } from '@buildeross/zord'
+import { atoms, Box } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
 import React, { ChangeEventHandler, ReactElement, WheelEvent } from 'react'
-import { Avatar } from 'src/components/Avatar'
-import { Icon } from 'src/components/Icon'
 
 import {
   defaultFieldsetStyle,
@@ -16,11 +13,12 @@ import {
   inputStyleVariants,
   permaInputPlaceHolderStyle,
 } from './styles.css'
+import { FieldType } from './types'
 
 interface SmartInputProps {
   id: string
   value: string | number
-  type: string
+  type: FieldType
   inputLabel?: string | ReactElement
   onChange: ChangeEventHandler
   onBlur: ChangeEventHandler
@@ -37,6 +35,12 @@ interface SmartInputProps {
   disabled?: boolean
   disableWheelEvent?: boolean
   isAddress?: boolean
+  // ENS data from external hook - allows parent to pass resolved data
+  ensName?: string
+  ensAvatar?: string
+  ethAddress?: string
+  // Custom validation check icon renderer
+  renderValidationIcon?: () => React.ReactNode
 }
 
 const SmartInput: React.FC<SmartInputProps> = ({
@@ -53,20 +57,16 @@ const SmartInput: React.FC<SmartInputProps> = ({
   max,
   perma,
   placeholder,
-  step = 0.0001, // temp until protocol supports 0 ETH reserve price
+  step = 0.0001,
   submitCallback,
   disabled = false,
   disableWheelEvent = type === 'number',
   isAddress,
+  ensName,
+  renderValidationIcon,
 }) => {
-  const { ensName, ensAvatar, ethAddress } = useEnsData(
-    isAddress ? (value as string | undefined) : undefined
-  )
-
   /*
-
-  add autocomplete to refs (autocomplete not supported ref in types)
-
+    add autocomplete to refs (autocomplete not supported ref in types)
   */
   const input = React.useRef<HTMLInputElement>(null)
   React.useEffect(() => {
@@ -76,10 +76,8 @@ const SmartInput: React.FC<SmartInputProps> = ({
   }, [input])
 
   /*
-
     handlers: blur, focus
-
-    */
+  */
   const [isFocus, setIsFocus] = React.useState<boolean>(false)
   const handleBlur = () => {
     setIsFocus(false)
@@ -143,20 +141,14 @@ const SmartInput: React.FC<SmartInputProps> = ({
             : undefined
         }
       />
-      {isAddress && !!value.toString().length && !errorMessage && (
-        <Flex
-          align={'center'}
-          justify={'center'}
-          position={'absolute'}
-          className={inputCheckIcon['default']}
-        >
-          {ensAvatar && ethAddress ? (
-            <Avatar address={ethAddress} src={ensAvatar} size="32" />
-          ) : (
-            <Icon fill="background1" id="check" />
-          )}
-        </Flex>
-      )}
+      {isAddress &&
+        !!value.toString().length &&
+        !errorMessage &&
+        renderValidationIcon && (
+          <Box position={'absolute'} className={inputCheckIcon['default']}>
+            {renderValidationIcon()}
+          </Box>
+        )}
       {(typeof value === 'number' || value) && perma ? (
         <Box position={'absolute'} className={permaInputPlaceHolderStyle}>
           {perma}

@@ -1,3 +1,6 @@
+import { Radio } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui'
+import { defaultBackButton, defaultFormButtonWithPrev } from '@buildeross/ui'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { addressValidationSchema } from '@buildeross/utils/yup'
@@ -5,12 +8,6 @@ import { atoms, Button, Flex } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent } from 'react'
-import Radio from 'src/components/Fields/Radio'
-import SmartInput from 'src/components/Fields/SmartInput'
-import {
-  defaultBackButton,
-  defaultFormButtonWithPrev,
-} from 'src/components/Fields/styles.css'
 import { Icon } from 'src/components/Icon'
 import * as Yup from 'yup'
 

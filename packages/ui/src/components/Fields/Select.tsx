@@ -5,7 +5,7 @@ import React, { ReactElement } from 'react'
 import { defaultSelectStyle } from './styles.css'
 
 //TODO:: this is very specific logic to selecting from contract.interface.fragments, this component could be abstracted
-const Select: React.FC<{
+const FormSelect: React.FC<{
   value: any
   options: any
   id: string
@@ -13,7 +13,7 @@ const Select: React.FC<{
   formik: FormikProps<any>
 }> = ({ value, inputLabel, options, id, formik }) => {
   const optionsArray: any[] = options?.filter(
-    (options: { name: string }) => options.name === id
+    (options: { name: string }) => options.name === id,
   )[0]?.options
 
   const handleChange = (e: any) => {
@@ -36,4 +36,4 @@ const Select: React.FC<{
   )
 }
 
-export default Select
+export default FormSelect

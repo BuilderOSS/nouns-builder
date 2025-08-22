@@ -10,9 +10,12 @@ import { AllBids } from '../AllBids'
 import { allRecentBidsButton, recentBid } from '../Auction.css'
 import { Bidder } from './Bidder'
 
-const AnimatedModal = dynamic(() => import('src/components/Modal/AnimatedModal'), {
-  ssr: false,
-})
+const AnimatedModal = dynamic(
+  () => import('@buildeross/ui').then((mod) => ({ default: mod.AnimatedModal })),
+  {
+    ssr: false,
+  }
+)
 
 interface RecentBidsProps {
   bids: AuctionBidFragment[]

@@ -1,11 +1,11 @@
-import { Box, Flex } from '@buildeross/zord'
-import { AnimatePresence, motion } from 'framer-motion'
-import React, { ReactElement, ReactNode, useState } from 'react'
 import {
   defaultDropdownSelectOptionStyle,
   defaultFieldsetStyle,
   defaultInputLabelStyle,
-} from 'src/components/Fields/styles.css'
+} from '@buildeross/ui'
+import { Box, Flex } from '@buildeross/zord'
+import { AnimatePresence, motion } from 'framer-motion'
+import React, { ReactElement, ReactNode, useState } from 'react'
 import { Icon } from 'src/components/Icon'
 
 export interface SelectOption<T> {

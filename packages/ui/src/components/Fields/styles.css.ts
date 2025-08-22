@@ -183,59 +183,6 @@ export const uploadSuccessBox = style({
   boxSizing: 'border-box',
 })
 
-export const artworkPreviewPanel = style([
-  atoms({
-    position: 'fixed',
-    left: 'x0',
-    top: 'x0',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }),
-  {
-    minHeight: '100vh',
-    width: '50vw',
-    borderRight: '2px solid #F2F2F2',
-    background: '#fff',
-    '@media': {
-      'screen and (max-width: 768px)': {
-        width: '100%',
-        height: 'auto',
-        position: 'relative',
-        border: 0,
-        minHeight: 'auto',
-        padding: '20px 0',
-      },
-    },
-  },
-])
-
-export const artworkPreviewImageWrapper = style({
-  width: 448,
-  height: 448,
-  background: '#f2f2f2',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  '@media': {
-    'screen and (max-width: 1000px)': {
-      width: (448 * 3) / 4,
-      height: (448 * 3) / 4,
-    },
-    'screen and (max-width: 768px)': {
-      width: '100%',
-      height: '100%',
-    },
-  },
-})
-
-export const artworkPreviewGenerateButton = style({
-  selectors: {
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-})
-
 export const defaultUploadButtonStyle = style({
   display: 'flex',
   flexDirection: 'row-reverse',
@@ -393,4 +340,89 @@ const pointer = {
 export const radioStyles = styleVariants({
   default: [pointer],
   active: [pointer, { border: '2px solid #000' }],
+})
+
+export const adminStickySaveWrapper = style({
+  borderTop: '2px solid #F2F2F2',
+  background: '#fff',
+  zIndex: 1,
+  '@media': {
+    '(max-width: 768px)': {
+      paddingLeft: 20,
+      paddingRight: 20,
+    },
+  },
+})
+
+export const adminStickySaveButton = style({
+  display: 'flex',
+  height: 64,
+  width: 566,
+  fontFamily: 'Inter, sans-serif!important',
+  borderRadius: '12px',
+  '@media': {
+    '(max-width: 768px)': {
+      width: '100%',
+    },
+  },
+})
+
+export const confirmFormWrapper = {
+  width: 540,
+  margin: '0 auto',
+}
+
+export const deployCheckboxStyle = style({
+  minHeight: 26,
+  height: 26,
+  width: 26,
+  minWidth: 26,
+  border: `1px solid #000`,
+  borderRadius: '5px',
+  selectors: {
+    '&:hover': { cursor: 'pointer', background: '#000' },
+  },
+})
+
+export const deployCheckboxStyleVariants = styleVariants({
+  default: [deployCheckboxStyle],
+  confirmed: [deployCheckboxStyle, { background: '#000' }],
+})
+
+export const deployCheckboxHelperText = style([
+  atoms({
+    display: 'inline',
+  }),
+  {
+    lineHeight: '24px',
+    color: '#808080',
+  },
+])
+
+// Responsive grid styles for time inputs
+export const mobileResponsiveGrid = style({
+  gridTemplateColumns: '1fr 1fr',
+  '@media': {
+    '(max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+})
+
+export const mobileTwoColumnGrid = style({
+  gridTemplateColumns: '1fr 1fr 1fr 1fr',
+  '@media': {
+    '(max-width: 768px)': {
+      gridTemplateColumns: '1fr 1fr',
+    },
+  },
+})
+
+export const mobileThreeColumnGrid = style({
+  gridTemplateColumns: '1fr 1fr 1fr',
+  '@media': {
+    '(max-width: 768px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
 })

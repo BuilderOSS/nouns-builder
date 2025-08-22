@@ -1,27 +1,18 @@
 import { FormikProps } from 'formik'
 import React, { BaseSyntheticEvent, ReactElement, ReactNode } from 'react'
 
-import Date from './Date'
+import Date from './DatePicker'
 import DaysHoursMins from './DaysHoursMins'
 import DaysHoursMinsSecs from './DaysHoursMinsSecs'
 import MinsSecs from './MinsSecs'
 import Select from './Select'
 import SmartInput from './SmartInput'
 import TextArea from './TextArea'
-import {
-  DATE,
-  DAYS_HOURS_MINS,
-  DAYS_HOURS_MINS_SECS,
-  MINS_SECS,
-  NUMBER,
-  SELECT,
-  TEXT,
-  TEXTAREA,
-} from './types'
+import { FIELD_TYPES, FieldType } from './types'
 
 interface FieldSwitchProps {
   field: {
-    type: string
+    type: FieldType
     name: string
     inputLabel: string | ReactElement
     helperText?: string
@@ -59,11 +50,14 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
     const { value } = e.target
     if (!formik) return
 
-    formik.setFieldValue(field.name, field.type === NUMBER ? parseFloat(value) : value)
+    formik.setFieldValue(
+      field.name,
+      field.type === FIELD_TYPES.NUMBER ? parseFloat(value) : value,
+    )
   }
 
   switch (field.type) {
-    case DATE:
+    case FIELD_TYPES.DATE:
       return (
         <Date
           {...formik.getFieldProps(field.name)}
@@ -81,7 +75,7 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
           disabled={field.disabled}
         />
       )
-    case DAYS_HOURS_MINS:
+    case FIELD_TYPES.DAYS_HOURS_MINS:
       return (
         <DaysHoursMins
           {...formik.getFieldProps(field.name)}
@@ -98,7 +92,7 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
           placeholder={field.placeholder}
         />
       )
-    case DAYS_HOURS_MINS_SECS:
+    case FIELD_TYPES.DAYS_HOURS_MINS_SECS:
       return (
         <DaysHoursMinsSecs
           {...formik.getFieldProps(field.name)}
@@ -115,7 +109,7 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
           placeholder={field.placeholder}
         />
       )
-    case SELECT:
+    case FIELD_TYPES.SELECT:
       return (
         <Select
           options={options}
@@ -125,8 +119,8 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
           id={field.name}
         />
       )
-    case TEXT:
-    case NUMBER:
+    case FIELD_TYPES.TEXT:
+    case FIELD_TYPES.NUMBER:
       return (
         <SmartInput
           {...formik.getFieldProps(field.name)}
@@ -155,7 +149,7 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
         />
       )
 
-    case TEXTAREA:
+    case FIELD_TYPES.TEXTAREA:
       return (
         <TextArea
           {...formik.getFieldProps(field.name)}
@@ -175,7 +169,7 @@ const FieldSwitch: React.FC<FieldSwitchProps> = ({
           minHeight={field.minHeight}
         />
       )
-    case MINS_SECS:
+    case FIELD_TYPES.MINS_SECS:
       return (
         <MinsSecs
           {...formik.getFieldProps(field.name)}

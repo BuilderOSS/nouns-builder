@@ -1,5 +1,5 @@
 import { Box } from '@buildeross/zord'
-import React, { InputHTMLAttributes, WheelEvent } from 'react'
+import { InputHTMLAttributes, WheelEvent } from 'react'
 
 import {
   defaultFieldsetStyle,
@@ -59,4 +59,4 @@ const NumberInput = ({
   )
 }
 
-export { NumberInput }
+export default NumberInput

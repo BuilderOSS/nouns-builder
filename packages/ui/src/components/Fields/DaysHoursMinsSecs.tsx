@@ -1,10 +1,9 @@
 import { Flex, Grid } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ChangeEventHandler, ReactElement } from 'react'
-import { useLayoutStore } from 'src/stores/useLayoutStore'
 
-import { NumberInput } from './NumberInput'
-import { defaultInputLabelStyle } from './styles.css'
+import NumberInput from './NumberInput'
+import { defaultInputLabelStyle, mobileTwoColumnGrid } from './styles.css'
 
 interface DaysHoursMinsProps {
   id: string
@@ -17,20 +16,22 @@ interface DaysHoursMinsProps {
   placeholder?: string[]
 }
 
-const DaysHoursMins: React.FC<DaysHoursMinsProps> = ({
+const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   inputLabel,
   formik,
   id,
   errorMessage,
+  placeholder,
   value,
 }) => {
-  const { isMobile } = useLayoutStore()
-  const { days, hours, minutes } = value
+  const { days, hours, minutes, seconds } = value
   const handleChange = (e: any, type: string) => {
     if (!formik) return
     const value = e.target.value
     formik.setFieldValue(`${id}.${type}`, parseInt(value))
   }
+
+  const valueHasError = typeof errorMessage === 'string'
 
   const daysHasError = React.useMemo(() => {
     return errorMessage?.days?.length > 0
@@ -44,14 +45,18 @@ const DaysHoursMins: React.FC<DaysHoursMinsProps> = ({
     return errorMessage?.minutes?.length > 0
   }, [errorMessage])
 
+  const secondsHasError = React.useMemo(() => {
+    return errorMessage?.seconds?.length > 0
+  }, [errorMessage])
+
   return (
-    <Flex direction={'column'} mb={'x3'}>
+    <Flex direction={'column'} mb={'x8'}>
       <label className={defaultInputLabelStyle}>{inputLabel}</label>
-      <Grid columns={isMobile ? '1fr' : '1fr 1fr 1fr'} gap={'x5'} mb={'x8'}>
+      <Grid gap={'x5'} mb={'x3'} className={mobileTwoColumnGrid}>
         <NumberInput
           label={'[Days]'}
-          placeholder={'1'}
-          hasError={daysHasError}
+          placeholder={placeholder?.[0] || '3'}
+          hasError={valueHasError || daysHasError}
           errorMessage={errorMessage?.days}
           onChange={(e) => handleChange(e, 'days')}
           value={days}
@@ -61,8 +66,8 @@ const DaysHoursMins: React.FC<DaysHoursMinsProps> = ({
 
         <NumberInput
           label={'[Hours]'}
-          placeholder={'0'}
-          hasError={hoursHasError}
+          placeholder={placeholder?.[1] || '0'}
+          hasError={valueHasError || hoursHasError}
           errorMessage={errorMessage?.hours}
           onChange={(e) => handleChange(e, 'hours')}
           value={hours}
@@ -72,17 +77,30 @@ const DaysHoursMins: React.FC<DaysHoursMinsProps> = ({
 
         <NumberInput
           label={'[Minutes]'}
-          placeholder={'0'}
+          placeholder={placeholder?.[2] || '0'}
           errorMessage={errorMessage?.minutes}
-          hasError={minutesHasError}
+          hasError={valueHasError || minutesHasError}
           onChange={(e) => handleChange(e, 'minutes')}
           value={minutes}
           step={1}
           min={0}
         />
+
+        <NumberInput
+          label={'[Seconds]'}
+          placeholder={placeholder?.[3] || '0'}
+          errorMessage={errorMessage?.seconds}
+          hasError={valueHasError || secondsHasError}
+          onChange={(e) => handleChange(e, 'seconds')}
+          value={seconds}
+          step={1}
+          min={0}
+        />
       </Grid>
+
+      {valueHasError && <Flex color="negative">{errorMessage}</Flex>}
     </Flex>
   )
 }
 
-export default DaysHoursMins
+export default DaysHoursMinsSecs

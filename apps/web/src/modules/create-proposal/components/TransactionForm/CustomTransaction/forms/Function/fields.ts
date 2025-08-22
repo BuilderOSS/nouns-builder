@@ -1,11 +1,11 @@
-import { SELECT } from 'src/components/Fields/types'
+import { FIELD_TYPES } from '@buildeross/ui'
 import * as Yup from 'yup'
 
 export const transactionFunctionFields = [
   {
     name: 'transactionFunction',
     inputLabel: 'Function',
-    type: SELECT,
+    type: FIELD_TYPES.SELECT,
     helperText: 'Optional',
   },
 ]

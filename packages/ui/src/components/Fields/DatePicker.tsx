@@ -1,3 +1,5 @@
+import 'flatpickr/dist/themes/light.css'
+
 import { Box } from '@buildeross/zord'
 import flatpickr from 'flatpickr'
 import { FormikErrors, FormikProps } from 'formik'
@@ -12,9 +14,7 @@ import {
   defaultInputStyle,
 } from './styles.css'
 
-require('flatpickr/dist/themes/light.css')
-
-interface DateProps {
+export interface DatePickerProps {
   inputLabel: string | ReactElement
   formik: FormikProps<any>
   id: string
@@ -30,7 +30,7 @@ interface DateProps {
   disabled?: boolean
 }
 
-const Date: React.FC<DateProps> = ({
+const DatePicker: React.FC<DatePickerProps> = ({
   inputLabel,
   formik,
   id,
@@ -110,4 +110,4 @@ const Date: React.FC<DateProps> = ({
   )
 }
 
-export default Date
+export default DatePicker
