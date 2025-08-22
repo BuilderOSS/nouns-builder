@@ -12,7 +12,7 @@ import {
 
 type Chains = [Chain, ...Chain[]]
 
-const MAINNET_CHAINS: Chains = [
+export const MAINNET_CHAINS: Chains = [
   { ...mainnet, id: CHAIN_ID.ETHEREUM, slug: 'ethereum', icon: '/chains/ethereum.svg' },
   { ...zora, id: CHAIN_ID.ZORA, slug: 'zora', icon: '/chains/zora.png' },
   { ...base, id: CHAIN_ID.BASE, slug: 'base', icon: '/chains/base.svg' },
@@ -24,7 +24,7 @@ const MAINNET_CHAINS: Chains = [
   },
 ]
 
-const TESTNET_CHAINS: Chains = [
+export const TESTNET_CHAINS: Chains = [
   { ...sepolia, id: CHAIN_ID.SEPOLIA, slug: 'sepolia', icon: '/chains/ethereum.svg' },
   {
     ...optimismSepolia,
