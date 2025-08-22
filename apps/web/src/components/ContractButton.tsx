@@ -2,7 +2,6 @@ import { Box, Button, ButtonProps, Flex, PopUp, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useCallback, useRef, useState } from 'react'
 import { Icon } from 'src/components/Icon'
-import { useBridgeModal } from 'src/hooks'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
@@ -20,7 +19,6 @@ export const ContractButton = ({
 }: ContractButtonProps) => {
   const { address: userAddress, chain: userChain } = useAccount()
   const appChain = useChainStore((x) => x.chain)
-  const { canUserBridge, openBridgeModal } = useBridgeModal()
   const { data: userBalance } = useBalance({
     address: userAddress,
     chainId: appChain.id,
@@ -44,7 +42,10 @@ export const ContractButton = ({
       }
 
       if (!userAddress) return openConnectModal?.()
-      if (canUserBridge && userBalance?.decimals === 0) return openBridgeModal()
+      if (userBalance?.value === 0n) {
+        setButtonError('Insufficient balance')
+        return
+      }
       if (userChain?.id !== appChain.id) {
         return switchChain?.(
           { chainId: appChain.id },
@@ -72,10 +73,8 @@ export const ContractButton = ({
       switchChain,
       appChain.id,
       appChain.name,
-      canUserBridge,
       userBalance,
       openConnectModal,
-      openBridgeModal,
       handleClick,
     ]
   )

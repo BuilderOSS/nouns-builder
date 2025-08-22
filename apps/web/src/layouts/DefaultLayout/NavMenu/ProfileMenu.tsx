@@ -13,7 +13,6 @@ import { DaoAvatar } from 'src/components/Avatar/DaoAvatar'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { Icon } from 'src/components/Icon'
 import { NetworkController } from 'src/components/NetworkController'
-import { useBridgeModal } from 'src/hooks'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import useSWR from 'swr'
@@ -53,7 +52,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     chainId: selectedChain.id,
   })
   const { disconnect } = useDisconnect()
-  const { canUserBridge, openBridgeModal } = useBridgeModal()
 
   const userBalance = balance?.formatted
     ? `${formatCryptoVal(balance?.formatted)} ETH`
@@ -222,23 +220,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           </Flex>
         </a>
         <NetworkController.Mainnet>
-          {canUserBridge ? (
-            <Box as="span" onClick={openBridgeModal}>
-              <Flex align="center" justify={'center'} py={'x2'}>
-                <Text cursor={'pointer'} fontWeight={'display'}>
-                  Bridge
-                </Text>
-              </Flex>
-            </Box>
-          ) : (
-            <Link href={'/bridge'}>
-              <Flex align="center" justify={'center'} py={'x2'}>
-                <Text cursor={'pointer'} fontWeight={'display'}>
-                  Bridge
-                </Text>
-              </Flex>
-            </Link>
-          )}
+          <Link href={'/bridge'}>
+            <Flex align="center" justify={'center'} py={'x2'}>
+              <Text cursor={'pointer'} fontWeight={'display'}>
+                Bridge
+              </Text>
+            </Flex>
+          </Link>
         </NetworkController.Mainnet>
 
         <NetworkController.Testnet>
