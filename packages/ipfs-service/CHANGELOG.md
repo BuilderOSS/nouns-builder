@@ -1,5 +1,11 @@
 # @buildeross/ipfs-service
 
+## 0.1.3
+
+### Patch Changes
+
+- removed bridge modal
+
 ## 0.1.2
 
 ### Patch Changes
