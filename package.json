@@ -27,7 +27,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "lint": "turbo run lint",
     "prepare": "husky install",
-    "release": "pnpm build && changeset publish",
+    "release": "pnpm build:packages && changeset publish",
     "syncpack": "syncpack list-mismatches",
     "syncpack:fix": "syncpack fix-mismatches && syncpack format",
     "test": "turbo run test",
