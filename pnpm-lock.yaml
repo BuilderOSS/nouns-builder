@@ -471,9 +471,6 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
-      next:
-        specifier: ^15.3.2
-        version: 15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -6752,9 +6749,9 @@ packages:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5:
-    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5}
-    version: 1.9.7
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb:
+    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb}
+    version: 1.10.0
 
   form-data@2.5.3:
     resolution: {integrity: sha512-XHIrMD0NpDrNM/Ckf7XJiBbLl57KEhT3+i3yY+eWm+cqYZJQTZrKo8Y8AWKnuV5GT4scfuUGt9LzNoIx3dU1nQ==}
@@ -17435,7 +17432,7 @@ snapshots:
       '@openzeppelin/contracts-upgradeable': 4.9.6
       '@types/node': 18.19.103
       ds-test: https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0
-      forge-std: https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5
+      forge-std: https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb
       micro-onchain-metadata-utils: 0.1.1
       sol-uriencode: 0.2.0
 
@@ -19958,7 +19955,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/349b909dd7d38adaed1ecd5c2070cb9289d991e5: {}
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb: {}
 
   form-data@2.5.3:
     dependencies:

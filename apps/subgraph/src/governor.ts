@@ -12,11 +12,15 @@ import {
 import { Treasury as TreasuryContract } from '../generated/templates/Governor/Treasury'
 
 export function handleProposalCreated(event: ProposalCreatedEvent): void {
-  let proposal = new Proposal(event.params.proposalId.toHexString())
   let context = dataSource.context()
-  let dao = DAO.load(context.getString('tokenAddress'))!
+  let dao = DAO.load(context.getString('tokenAddress'))
+  if (dao == null) return
 
   let newProposalCount = dao.proposalCount + 1
+
+  dao.proposalCount = newProposalCount
+
+  let proposal = new Proposal(event.params.proposalId.toHexString())
 
   proposal.proposalId = event.params.proposalId
   proposal.proposalNumber = newProposalCount
@@ -31,7 +35,7 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   // Loop through and build the calldatas string (bytes array was hitting index limits that strings do not have)
   let calldatas: string = ''
   for (let i = 0; i < event.params.calldatas.length; i++) {
-    if (i === 0) calldatas = event.params.calldatas[i].toHexString()
+    if (i == 0) calldatas = event.params.calldatas[i].toHexString()
     else calldatas = calldatas + ':' + event.params.calldatas[i].toHexString()
   }
   proposal.calldatas = calldatas.length > 1 ? calldatas : null
@@ -57,15 +61,13 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   proposal.canceled = event.params.proposal.canceled
   proposal.vetoed = event.params.proposal.vetoed
   proposal.queued = false
-  proposal.dao = context.getString('tokenAddress')
+  proposal.dao = dao.id
   proposal.voteCount = 0
   proposal.snapshotBlockNumber = event.block.number
   proposal.transactionHash = event.transaction.hash
 
-  proposal.save()
-
-  dao.proposalCount = newProposalCount
   dao.save()
+  proposal.save()
 }
 
 export function handleProposalQueued(event: ProposalQueuedEvent): void {
@@ -73,7 +75,9 @@ export function handleProposalQueued(event: ProposalQueuedEvent): void {
   let treasuryAddress = context.getString('treasuryAddress')
   let treasuryContract = TreasuryContract.bind(Address.fromString(treasuryAddress))
 
-  let proposal = new Proposal(event.params.proposalId.toHexString())
+  let proposal = Proposal.load(event.params.proposalId.toHexString())
+  if (proposal == null) return
+
   proposal.executableFrom = event.params.eta
   proposal.expiresAt = event.params.eta.plus(treasuryContract.gracePeriod())
   proposal.queued = true
@@ -83,7 +87,9 @@ export function handleProposalQueued(event: ProposalQueuedEvent): void {
 }
 
 export function handleProposalExecuted(event: ProposalExecutedEvent): void {
-  let proposal = new Proposal(event.params.proposalId.toHexString())
+  let proposal = Proposal.load(event.params.proposalId.toHexString())
+  if (proposal == null) return
+
   proposal.executed = true
   proposal.executedAt = event.block.timestamp
   proposal.executionTransactionHash = event.transaction.hash
@@ -92,7 +98,9 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
 }
 
 export function handleProposalCanceled(event: ProposalCanceledEvent): void {
-  let proposal = new Proposal(event.params.proposalId.toHexString())
+  let proposal = Proposal.load(event.params.proposalId.toHexString())
+  if (proposal == null) return
+
   proposal.canceled = true
   proposal.canceledAt = event.block.timestamp
   proposal.cancelTransactionHash = event.transaction.hash
@@ -101,7 +109,9 @@ export function handleProposalCanceled(event: ProposalCanceledEvent): void {
 }
 
 export function handleProposalVetoed(event: ProposalVetoedEvent): void {
-  let proposal = new Proposal(event.params.proposalId.toHexString())
+  let proposal = Proposal.load(event.params.proposalId.toHexString())
+  if (proposal == null) return
+
   proposal.vetoed = true
   proposal.vetoedAt = event.block.timestamp
   proposal.vetoTransactionHash = event.transaction.hash
@@ -111,7 +121,9 @@ export function handleProposalVetoed(event: ProposalVetoedEvent): void {
 
 export function handleVoteCast(event: VoteCastEvent): void {
   let proposalId = event.params.proposalId.toHexString()
-  let proposal = Proposal.load(proposalId)!
+  let proposal = Proposal.load(proposalId)
+  if (proposal == null) return
+
   let proposalVote = new ProposalVote(
     `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`,
   )

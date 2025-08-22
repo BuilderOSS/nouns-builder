@@ -69,7 +69,10 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
 export function handleTransfer(event: TransferEvent): void {
   let tokenId = `${event.address.toHexString()}:${event.params.tokenId.toString()}`
   let token = Token.load(tokenId)
-  let dao = DAO.load(event.address.toHexString())!
+  let dao = DAO.load(event.address.toHexString())
+  if (dao == null) {
+    return
+  }
 
   let tokenContract = TokenContract.bind(event.address)
   let fromDelegate = tokenContract.delegates(event.params.from)
@@ -136,9 +139,9 @@ export function handleTransfer(event: TransferEvent): void {
   // Handle loading from owner
   if (event.params.from.notEqual(ADDRESS_ZERO)) {
     let fromOwnerId = `${event.address.toHexString()}:${event.params.from.toHexString()}`
-    let fromOwner = DAOTokenOwner.load(fromOwnerId)!
+    let fromOwner = DAOTokenOwner.load(fromOwnerId)
     if (fromOwner) {
-      if (fromOwner.daoTokenCount === 1) {
+      if (fromOwner.daoTokenCount == 1) {
         store.remove('DAOTokenOwner', fromOwnerId)
         dao.ownerCount = dao.ownerCount - 1
       } else {
@@ -151,9 +154,9 @@ export function handleTransfer(event: TransferEvent): void {
 
   if (fromDelegate.notEqual(ADDRESS_ZERO)) {
     let fromVoterId = `${event.address.toHexString()}:${fromDelegate.toHexString()}`
-    let fromVoter = DAOVoter.load(fromVoterId)!
+    let fromVoter = DAOVoter.load(fromVoterId)
     if (fromVoter) {
-      if (fromVoter.daoTokenCount === 1) {
+      if (fromVoter.daoTokenCount == 1) {
         store.remove('DAOVoter', fromVoterId)
         dao.voterCount = dao.voterCount - 1
       } else {
@@ -180,7 +183,9 @@ function saveSnapshot(event: ethereum.Event): void {
     snapshot.timestamp = event.block.timestamp
   }
 
-  let dao = DAO.load(event.address.toHexString())!
+  let dao = DAO.load(event.address.toHexString())
+  if (!dao) return
+
   snapshot.totalSupply = dao.totalSupply
   snapshot.ownerCount = dao.ownerCount
   snapshot.voterCount = dao.voterCount

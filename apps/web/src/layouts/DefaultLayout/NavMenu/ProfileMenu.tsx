@@ -1,7 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { MOBILE_PROFILE_MENU_LAYER, NAV_LAYER } from '@buildeross/constants/layers'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { useBridgeModal } from '@buildeross/hooks/useBridgeModal'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -53,7 +52,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     chainId: selectedChain.id,
   })
   const { disconnect } = useDisconnect()
-  const { canUserBridge, openBridgeModal } = useBridgeModal()
 
   const userBalance = balance?.formatted
     ? `${formatCryptoVal(balance?.formatted)} ETH`
@@ -222,23 +220,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           </Flex>
         </a>
         <NetworkController.Mainnet>
-          {canUserBridge ? (
-            <Box as="span" onClick={openBridgeModal}>
-              <Flex align="center" justify={'center'} py={'x2'}>
-                <Text cursor={'pointer'} fontWeight={'display'}>
-                  Bridge
-                </Text>
-              </Flex>
-            </Box>
-          ) : (
-            <Link href={'/bridge'}>
-              <Flex align="center" justify={'center'} py={'x2'}>
-                <Text cursor={'pointer'} fontWeight={'display'}>
-                  Bridge
-                </Text>
-              </Flex>
-            </Link>
-          )}
+          <Link href={'/bridge'}>
+            <Flex align="center" justify={'center'} py={'x2'}>
+              <Text cursor={'pointer'} fontWeight={'display'}>
+                Bridge
+              </Text>
+            </Flex>
+          </Link>
         </NetworkController.Mainnet>
 
         <NetworkController.Testnet>

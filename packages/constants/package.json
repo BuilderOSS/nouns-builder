@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/constants",
   "description": "Shared constants and configuration for BuilderOSS apps",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "dependencies": {
     "@buildeross/types": "workspace:*"
   },
