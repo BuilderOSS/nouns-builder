@@ -226,7 +226,8 @@ export const BridgeForm = () => {
                   rel="noopener noreferrer"
                   target="_blank"
                   style={{ textDecoration: 'underline' }}
-                  href="https://docs.nouns.build/"
+                  href="https://docs.nouns.build/onboarding/builder-bridging/"
+                  aria-label="Learn more about bridging (opens in a new tab)"
                 >
                   bridging
                 </Box>

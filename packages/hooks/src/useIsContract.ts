@@ -9,12 +9,13 @@ export const useIsContract = ({
   address?: AddressType
   chainId?: CHAIN_ID
 }) => {
-  return useSWRImmutable(
-    address ? [address, chainId] : null,
-    async ([address, chainId]) => {
+  return useSWRImmutable<boolean>(
+    address && chainId ? [address, chainId] : null,
+    async ([address, chainId]: [AddressType, CHAIN_ID]) => {
       const provider = getProvider(chainId)
       const code = await provider.getCode({ address })
-      const isEOA = !code || code === '0x'
+      const isEOA =
+        !code || code === '0x' || (typeof code === 'string' && /^0x0*$/i.test(code))
       return !isEOA
     },
   )
