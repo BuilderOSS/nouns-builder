@@ -1,4 +1,3 @@
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -6,11 +5,9 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import { Avatar } from 'src/components/Avatar'
 import { Icon } from 'src/components/Icon'
-import { useChainStore } from 'src/stores/useChainStore'
 
 export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
   const { displayName, ensAvatar } = useEnsData(bid?.bidder)
-  const chain = useChainStore((x) => x.chain)
 
   return (
     <Flex direction={'column'} my="x4" align="center" style={{ height: 35 }}>
@@ -24,7 +21,7 @@ export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
         <Flex direction="row" align="center">
           <Flex
             as="a"
-            href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${bid.bidder}`}
+            href={`/profile/${bid.bidder}`}
             target="_blank"
             rel="noopener noreferrer"
           >
