@@ -109,6 +109,24 @@ export const TokenSelectionForm: React.FC = () => {
   const chain = useChainStore((x) => x.chain)
   const [selectedTokenOption, setSelectedTokenOption] = useState<TokenOption>('')
 
+  useEffect(() => {
+    const addr = normalizeAddr(formik.values.tokenAddress)
+    if (!addr) {
+      setSelectedTokenOption('')
+      return
+    }
+
+    if (addr === NULL_ADDRESS) {
+      setSelectedTokenOption('eth')
+      return
+    }
+
+    if (isAddress(addr)) {
+      setSelectedTokenOption(addr)
+      return
+    }
+  }, [formik.values.tokenAddress])
+
   // Get treasury token balances
   const { balances: treasuryTokens, isLoading: isLoadingTreasury } = useTokenBalances(
     chain.id,
@@ -226,7 +244,7 @@ export const TokenSelectionForm: React.FC = () => {
         const formattedValue = formatCryptoVal(formattedBalance)
 
         return {
-          value: token.address as TokenOption,
+          value: normalizeAddr(token.address) as TokenOption,
           label: `${token.name} (${formattedValue} ${token.symbol})`,
           icon: token.logo ? (
             <img src={token.logo} alt={token.symbol} width={20} height={20} />

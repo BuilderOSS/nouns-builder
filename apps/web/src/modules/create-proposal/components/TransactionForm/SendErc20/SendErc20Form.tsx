@@ -97,6 +97,19 @@ export const SendErc20Form = ({ formik }: SendErc20FormProps) => {
   const chain = useChainStore((x) => x.chain)
   const [selectedTokenOption, setSelectedTokenOption] = useState<TokenOption>('')
 
+  useEffect(() => {
+    const addr = normalizeAddr(formik.values.tokenAddress)
+    if (!addr) {
+      setSelectedTokenOption('')
+      return
+    }
+
+    if (isAddress(addr)) {
+      setSelectedTokenOption(addr)
+      return
+    }
+  }, [formik.values.tokenAddress])
+
   // Get treasury token balances
   const { balances: treasuryTokens, isLoading: isLoadingTreasury } = useTokenBalances(
     chain.id,

@@ -9,7 +9,7 @@ import {
   toHex,
 } from 'viem'
 
-import { EscrowFormValues } from './EscrowForm.schema'
+import { EscrowFormValues, NULL_ADDRESS } from './EscrowForm.schema'
 
 const SMART_INVOICE_ARBITRATION_PROVIDER =
   '0x18542245cA523DFF96AF766047fE9423E0BED3C0' as Address
@@ -157,6 +157,11 @@ function encodeEscrowData(
 ) {
   const wrappedTokenAddress = getWrappedTokenAddress(chainId)
   const selectedTokenAddress = values.tokenAddress as Address
+  const tokenAddress =
+    selectedTokenAddress.toLowerCase() === NULL_ADDRESS
+      ? wrappedTokenAddress
+      : selectedTokenAddress
+
   const terminationTime = new Date(values.safetyValveDate).getTime() / 1000
   const ipfsBytesCid = convertIpfsCidV0ToByte32(ipfsCID)
   const factory = getEscrowFactory(chainId)
@@ -180,7 +185,7 @@ function encodeEscrowData(
       values.clientAddress,
       ESCROW_RESOLVER_TYPE,
       SMART_INVOICE_ARBITRATION_PROVIDER,
-      selectedTokenAddress,
+      tokenAddress,
       terminationTime,
       ipfsBytesCid,
       wrappedTokenAddress,
