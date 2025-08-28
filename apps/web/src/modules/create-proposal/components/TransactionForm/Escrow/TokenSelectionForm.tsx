@@ -18,7 +18,11 @@ import { useDaoStore } from 'src/stores/useDaoStore'
 import { formatEther, formatUnits, getAddress, isAddress } from 'viem'
 import { useBalance, useReadContract } from 'wagmi'
 
-import { EscrowFormValues, NULL_ADDRESS, TokenMetadata } from './EscrowForm.schema'
+import {
+  EscrowFormValues,
+  NULL_ADDRESS,
+  TokenMetadataFormValidated,
+} from './EscrowForm.schema'
 
 type TokenOption = '' | 'eth' | AddressType | 'custom'
 
@@ -27,7 +31,7 @@ const normalizeAddr = (a?: AddressType | string | null): string =>
 
 const SEP = '\x1F'
 
-const toFingerprint = (m?: TokenMetadata | null) =>
+const toFingerprint = (m?: TokenMetadataFormValidated | null) =>
   !m
     ? 'null'
     : [
@@ -54,7 +58,7 @@ const computeTokenMetadata = ({
   tokenBalance?: bigint
   currentTokenAddress?: AddressType
   isLoading: boolean
-}): TokenMetadata | null => {
+}): TokenMetadataFormValidated | null => {
   // ETH branch: address is the zero/null address; validity does not depend on balance existing
   if (selectedTokenOption === 'eth') {
     return {
@@ -158,26 +162,30 @@ export const TokenSelectionForm: React.FC = () => {
     [currentTokenAddress, selectedTokenOption, isLoadingTokenMetadata]
   )
 
-  const fullTokenMetadata: TokenMetadata | null = useMemo(() => {
-    return computeTokenMetadata({
+  const fullTokenMetadata: TokenMetadataFormValidated | null = useMemo(
+    () =>
+      computeTokenMetadata({
+        selectedTokenOption,
+        treasuryBalance: treasuryBalance?.value,
+        tokenMetadata: tokenMetadata,
+        tokenBalance,
+        currentTokenAddress: currentTokenAddress,
+        isLoading: isValidatingToken,
+      }),
+    [
       selectedTokenOption,
-      treasuryBalance: treasuryBalance?.value,
-      tokenMetadata: tokenMetadata,
+      treasuryBalance?.value, // only depend on the bigint value
+      tokenMetadata,
       tokenBalance,
-      currentTokenAddress: currentTokenAddress,
-      isLoading: isValidatingToken,
-    })
-  }, [
-    selectedTokenOption,
-    treasuryBalance?.value, // only depend on the bigint value
-    tokenMetadata,
-    tokenBalance,
-    currentTokenAddress,
-    isValidatingToken,
-  ])
+      currentTokenAddress,
+      isValidatingToken,
+    ]
+  )
 
   // pull what we need once per render
-  const currentMeta = formik.values.tokenMetadata as TokenMetadata | undefined
+  const currentMeta = formik.values.tokenMetadata as
+    | TokenMetadataFormValidated
+    | undefined
   const nextMeta = fullTokenMetadata ?? undefined
   const currentFp = toFingerprint(currentMeta)
   const nextFp = toFingerprint(nextMeta)

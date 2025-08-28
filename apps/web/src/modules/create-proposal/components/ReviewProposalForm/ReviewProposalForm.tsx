@@ -196,7 +196,7 @@ export const ReviewProposalForm = ({
 
   if (isLoading) return null
 
-  const tokensNeeded = Number(proposalVotesRequired)
+  const tokensNeeded = Number(proposalVotesRequired ?? 0n)
 
   return (
     <Flex direction={'column'} width={'100%'} pb={'x24'}>
@@ -293,8 +293,8 @@ export const ReviewProposalForm = ({
       </Flex>
 
       <Flex mb={'x12'} mt={'x4'} color="text3" alignSelf={'center'}>
-        You must have {tokensNeeded}{' '}
-        {!!tokensNeeded && tokensNeeded > 1 ? 'votes' : 'vote'} to submit a proposal
+        You must have {tokensNeeded} {tokensNeeded > 1 ? 'votes' : 'vote'} to submit a
+        proposal
       </Flex>
 
       {!!error && (

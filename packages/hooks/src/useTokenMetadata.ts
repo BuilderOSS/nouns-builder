@@ -1,5 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
+import { useMemo } from 'react'
 import useSWR from 'swr'
 import { Address, isAddress } from 'viem'
 
@@ -37,13 +38,17 @@ export const useTokenMetadata = (
   chainId?: CHAIN_ID,
   addresses?: Address[],
 ): TokenMetadataReturnType => {
-  const validAddresses = (addresses?.filter((addr) => isAddress(addr)) || []).map(
-    (addr) => addr.toLowerCase() as Address,
+  const validAddresses = useMemo(
+    () =>
+      (addresses?.filter((addr) => isAddress(addr)) || [])
+        .map((addr) => addr.toLowerCase() as Address)
+        .sort(),
+    [addresses],
   )
 
   const { data, error, isLoading } = useSWR(
     !!chainId && validAddresses.length > 0
-      ? [SWR_KEYS.TOKEN_METADATA, chainId, validAddresses.sort().join(',')]
+      ? [SWR_KEYS.TOKEN_METADATA, chainId, validAddresses.join(',')]
       : null,
     async () => fetchTokenMetadata(chainId as CHAIN_ID, validAddresses),
     {

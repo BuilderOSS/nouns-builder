@@ -1,5 +1,6 @@
 import { AddressType } from '@buildeross/types'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
+import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
 
 export const NULL_ADDRESS: AddressType =
@@ -8,14 +9,14 @@ export const NULL_ADDRESS: AddressType =
 export interface MilestoneFormValues {
   amount: number
   title: string
-  endDate: number & string & Date
+  endDate: number | string | Date
   mediaUrl: string | undefined
   mediaType: string | undefined
   mediaFileName: string
   description: string
 }
 
-export interface TokenMetadata {
+export interface TokenMetadataFormValidated {
   name: string
   symbol: string
   decimals: number
@@ -30,11 +31,11 @@ export interface EscrowFormValues {
   safetyValveDate: Date | number | string
   milestones: Array<MilestoneFormValues>
   tokenAddress?: AddressType
-  tokenMetadata?: TokenMetadata
+  tokenMetadata?: TokenMetadataFormValidated
 }
 
 export interface EscrowFormProps {
-  onSubmit: (values: EscrowFormValues) => void
+  onSubmit: (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => void
   isSubmitting: boolean
 }
 export const MilestoneSchema = yup.object({
@@ -72,6 +73,18 @@ const bigintSchema = yup
   })
   .test('is-bigint', '${path} must be a BigInt', (value) => typeof value === 'bigint')
 
+export const TokenMetadataSchema = yup.object({
+  name: yup.string().required('Token name is required.'),
+  symbol: yup.string().required('Token symbol is required.'),
+  decimals: yup.number().required('Token decimals is required.'),
+  balance: bigintSchema.required('Token balance is required.'),
+  isValid: yup.boolean().required('Token is valid is required.'),
+  address: addressValidationSchemaWithError(
+    'Token address is invalid.',
+    'Token address is required.'
+  ),
+})
+
 export const EscrowFormSchema = yup
   .object({
     clientAddress: addressValidationSchemaWithError(
@@ -93,19 +106,7 @@ export const EscrowFormSchema = yup
       'Token address is invalid.',
       'Token address is required.'
     ).optional(),
-    tokenMetadata: yup
-      .object({
-        name: yup.string().required('Token name is required.'),
-        symbol: yup.string().required('Token symbol is required.'),
-        decimals: yup.number().required('Token decimals is required.'),
-        balance: bigintSchema.required('Token balance is required.'),
-        isValid: yup.boolean().required('Token is valid is required.'),
-        address: addressValidationSchemaWithError(
-          'Token address is invalid.',
-          'Token address is required.'
-        ),
-      })
-      .optional(),
+    tokenMetadata: TokenMetadataSchema.optional(),
     safetyValveDate: yup
       .date()
       .required('Safety valve date is required.')

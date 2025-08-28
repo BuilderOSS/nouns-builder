@@ -19,6 +19,8 @@ export const ESCROW_TYPE = toHex(toBytes('updatable-v2', { size: 32 }))
 export const ESCROW_TYPE_V1 = toHex(toBytes('updatable', { size: 32 }))
 
 export const INITIAL_ESCROW_FORM_STATE: EscrowFormValues = {
+  tokenAddress: undefined,
+  tokenMetadata: undefined,
   clientAddress: '',
   recipientAddress: '',
   milestones: [

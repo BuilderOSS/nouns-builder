@@ -50,6 +50,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
   formik,
   errorMessage,
   helperText,
+  min,
   max,
   perma,
   placeholder,
@@ -59,9 +60,9 @@ const SmartInput: React.FC<SmartInputProps> = ({
   disableWheelEvent = type === 'number',
   isAddress,
 }) => {
-  const { ensName, ensAvatar, ethAddress } = useEnsData(
-    isAddress ? (value as string | undefined) : undefined
-  )
+  const addrForEns: string | undefined =
+    isAddress && typeof value === 'string' && value.length > 0 ? value : undefined
+  const { ensName, ensAvatar, ethAddress } = useEnsData(addrForEns)
 
   /*
 
@@ -131,8 +132,8 @@ const SmartInput: React.FC<SmartInputProps> = ({
         className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']} ${
           isAddress ? atoms({ pr: 'x13' }) : ''
         }`}
-        min={0}
-        max={max}
+        min={type === 'number' && typeof min === 'number' ? min : undefined}
+        max={type === 'number' && typeof max === 'number' ? max : undefined}
         step={step}
         placeholder={perma || placeholder || ''}
         ref={input}

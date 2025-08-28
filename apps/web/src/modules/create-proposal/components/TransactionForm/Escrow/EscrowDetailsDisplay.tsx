@@ -5,8 +5,8 @@ import { link } from './EscrowDetailsDisplay.css'
 
 export const EscrowDetailsDisplay: React.FC<{
   escrowAmountError?: string
-  totalEscrowAmount?: string
-}> = ({ totalEscrowAmount, escrowAmountError }) => {
+  totalEscrowAmountWithSymbol?: string
+}> = ({ totalEscrowAmountWithSymbol, escrowAmountError }) => {
   const isMobile = useLayoutStore((x) => x.isMobile)
 
   return (
@@ -25,13 +25,13 @@ export const EscrowDetailsDisplay: React.FC<{
             {escrowAmountError}
           </Text>
         )}
-        {totalEscrowAmount && (
+        {totalEscrowAmountWithSymbol && (
           <Box>
             <Text fontSize={12} color="text4" style={{ fontWeight: 'bold' }}>
               Total Escrow Amount
             </Text>
             <Text variant="heading-sm" style={{ fontWeight: 'bold' }}>
-              {totalEscrowAmount}
+              {totalEscrowAmountWithSymbol}
             </Text>
           </Box>
         )}

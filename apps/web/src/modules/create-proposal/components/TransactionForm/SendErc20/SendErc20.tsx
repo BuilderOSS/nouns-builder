@@ -1,13 +1,13 @@
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants'
 import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { erc20Abi } from '@buildeross/sdk/contract'
-import { CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { getProvider } from '@buildeross/utils/provider'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -21,11 +21,15 @@ import {
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { encodeFunctionData, formatUnits, getAddress, isAddress, parseUnits } from 'viem'
-import { useReadContracts } from 'wagmi'
+import { useReadContract } from 'wagmi'
 
-import sendErc20Schema, { SendErc20Values } from './SendErc20.schema'
+import {
+  sendErc20Schema,
+  SendErc20Values,
+  TokenMetadataFormValidated,
+} from './SendErc20.schema'
 
-type TokenOption = 'treasury-tokens' | 'custom' | string
+type TokenOption = '' | 'custom' | AddressType
 
 interface TokenMetadata {
   name: string
@@ -33,20 +37,73 @@ interface TokenMetadata {
   decimals: number
   balance: bigint
   isValid: boolean
+  address: AddressType
 }
 
 interface SendErc20FormProps {
   formik: FormikProps<SendErc20Values>
-  onTokenMetadataChange: (metadata: TokenMetadata | null) => void
 }
 
-const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) => {
+const normalizeAddr = (a?: AddressType | string | null): string =>
+  a ? String(a).trim().toLowerCase() : ''
+
+const SEP = '\x1F'
+
+const toFingerprint = (m?: TokenMetadata | null) =>
+  !m
+    ? 'null'
+    : [
+        m.name ?? '',
+        m.symbol ?? '',
+        String(m.decimals ?? ''),
+        (m.balance ?? 0n).toString(),
+        String(m.isValid ?? false),
+        normalizeAddr(m.address),
+      ].join(SEP)
+
+const computeTokenMetadata = ({
+  tokenMetadata,
+  tokenBalance,
+  currentTokenAddress,
+  isLoading,
+}: {
+  tokenMetadata?: { name: string; symbol: string; decimals: number; address: string }
+  tokenBalance?: bigint
+  currentTokenAddress?: AddressType
+  isLoading: boolean
+}): TokenMetadata | null => {
+  if (isLoading || !currentTokenAddress) {
+    return null
+  }
+
+  const addr = normalizeAddr(currentTokenAddress)
+  const tokenAddress = normalizeAddr(tokenMetadata?.address)
+
+  if (tokenMetadata && tokenAddress === addr && !!tokenMetadata.symbol) {
+    return {
+      name: tokenMetadata.name,
+      symbol: tokenMetadata.symbol,
+      decimals: tokenMetadata.decimals,
+      balance: tokenBalance ?? 0n,
+      isValid: true,
+      address: addr as AddressType,
+    }
+  }
+
+  return {
+    name: '',
+    symbol: '',
+    decimals: 0,
+    balance: 0n,
+    isValid: false,
+    address: addr as AddressType,
+  }
+}
+
+const SendErc20Form = ({ formik }: SendErc20FormProps) => {
   const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const [selectedTokenOption, setSelectedTokenOption] = useState<TokenOption>('')
-  const [currentTokenMetadata, setCurrentTokenMetadata] = useState<TokenMetadata | null>(
-    null
-  )
 
   // Get treasury token balances
   const { balances: treasuryTokens, isLoading: isLoadingTreasury } = useTokenBalances(
@@ -55,77 +112,77 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
   )
 
   // Get the current token address to validate from formik values
-  const currentTokenAddress = useMemo(() => {
+  const currentTokenAddress: AddressType | undefined = useMemo(() => {
     if (selectedTokenOption === 'custom') {
-      return formik.values.tokenAddress || ''
+      return formik.values.tokenAddress && isAddress(formik.values.tokenAddress.trim())
+        ? getAddress(formik.values.tokenAddress.trim())
+        : undefined
     }
-    if (selectedTokenOption !== '' && selectedTokenOption !== 'custom') {
-      return selectedTokenOption
+    if (selectedTokenOption !== '') {
+      return isAddress(selectedTokenOption) ? getAddress(selectedTokenOption) : undefined
     }
-    return ''
+    return undefined
   }, [selectedTokenOption, formik.values.tokenAddress])
 
   // Get token metadata using the common hook
   const { tokenMetadata, isLoading: isLoadingTokenMetadata } = useTokenMetadataSingle(
     chain.id,
-    currentTokenAddress as `0x${string}`
+    currentTokenAddress
   )
 
-  // Token balance check using useReadContracts (only for balance)
-  const { data: tokenData, isLoading: isLoadingTokenBalance } = useReadContracts({
-    contracts: [
-      {
-        address: currentTokenAddress as `0x${string}`,
-        abi: erc20Abi,
-        functionName: 'balanceOf',
-        args: [treasury as `0x${string}`],
-        chainId: chain.id,
-      },
-    ],
-    allowFailure: false,
+  // Token balance check using useReadContract (only for ERC20 tokens)
+  const { data: tokenBalance } = useReadContract({
+    address: currentTokenAddress,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [treasury as `0x${string}`],
+    chainId: chain.id,
     query: {
-      enabled: isAddress(currentTokenAddress) && !!treasury && !!tokenMetadata,
+      enabled: !!currentTokenAddress && !!treasury && !!tokenMetadata,
     },
   })
 
-  // Update token metadata when token data changes
+  const isValidatingToken = useMemo(
+    () => !!currentTokenAddress && isLoadingTokenMetadata,
+    [currentTokenAddress, isLoadingTokenMetadata]
+  )
+
+  const fullTokenMetadata: TokenMetadata | null = useMemo(
+    () =>
+      computeTokenMetadata({
+        tokenMetadata: tokenMetadata,
+        tokenBalance,
+        currentTokenAddress: currentTokenAddress,
+        isLoading: isValidatingToken,
+      }),
+    [tokenMetadata, tokenBalance, currentTokenAddress, isValidatingToken]
+  )
+
+  // pull what we need once per render
+  const currentMeta = formik.values.tokenMetadata as
+    | TokenMetadataFormValidated
+    | undefined
+  const nextMeta = fullTokenMetadata ?? undefined
+  const currentFp = toFingerprint(currentMeta)
+  const nextFp = toFingerprint(nextMeta)
+  const setFieldValue = formik.setFieldValue
+
+  // Update Formik only when the metadata meaningfully changes
   useEffect(() => {
-    if (tokenMetadata && tokenData && currentTokenAddress) {
-      const balance = tokenData[0] // balance from balanceOf call
+    // nothing to set and nothing stored → no-op
+    if (nextFp === 'null' && currentFp === 'null') return
 
-      const metadata = {
-        name: tokenMetadata.name,
-        symbol: tokenMetadata.symbol,
-        decimals: tokenMetadata.decimals,
-        balance,
-        isValid: true,
-      }
-
-      setCurrentTokenMetadata(metadata)
-      onTokenMetadataChange(metadata)
-    } else if (currentTokenAddress && !isLoadingTokenBalance && !isLoadingTokenMetadata) {
-      // If we have a token address but no data and not loading, it's invalid
-      const metadata = {
-        name: '',
-        symbol: '',
-        decimals: 0,
-        balance: 0n,
-        isValid: false,
-      }
-
-      setCurrentTokenMetadata(metadata)
-      onTokenMetadataChange(metadata)
+    // clear when next is null (use undefined for the field)
+    if (nextFp === 'null') {
+      setFieldValue('tokenMetadata', undefined)
+      return
     }
-  }, [
-    tokenData,
-    tokenMetadata,
-    currentTokenAddress,
-    isLoadingTokenBalance,
-    isLoadingTokenMetadata,
-    onTokenMetadataChange,
-    chain.id,
-    chain.name,
-  ])
+
+    // set when fingerprints differ (covers bigint, address case, etc.)
+    if (currentFp !== nextFp) {
+      setFieldValue('tokenMetadata', nextMeta)
+    }
+  }, [currentFp, nextFp, nextMeta, setFieldValue])
 
   // Create dropdown options
   const tokenOptions: SelectOption<TokenOption>[] = useMemo(
@@ -158,14 +215,11 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
   const handleTokenOptionChange = useCallback(
     (option: TokenOption) => {
       setSelectedTokenOption(option)
-      // Clear existing metadata when changing selection
-      setCurrentTokenMetadata(null)
-      onTokenMetadataChange(null)
 
       if (option === 'custom') {
-        // Clear the token address when switching to custom
+        // Clear the token address for custom input
         formik.setFieldValue('tokenAddress', '')
-      } else if (option !== '' && option !== 'custom') {
+      } else if (typeof option === 'string' && isAddress(option)) {
         // Set the token address in formik when selecting from treasury tokens
         formik.setFieldValue('tokenAddress', option)
       } else {
@@ -173,19 +227,35 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         formik.setFieldValue('tokenAddress', '')
       }
     },
-    [formik, onTokenMetadataChange]
+    [formik]
   )
 
   const currentBalance = useMemo(
     () =>
-      currentTokenMetadata
-        ? parseFloat(
-            formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
-          )
+      fullTokenMetadata
+        ? parseFloat(formatUnits(fullTokenMetadata.balance, fullTokenMetadata.decimals))
         : 0,
-
-    [currentTokenMetadata]
+    [fullTokenMetadata]
   )
+
+  const amountExceedsBalanceError = useMemo(() => {
+    if (!formik.values.amount || !fullTokenMetadata?.isValid) {
+      return undefined
+    }
+    const exceedsBalance =
+      formik.values.amount >
+      parseFloat(formatUnits(fullTokenMetadata.balance, fullTokenMetadata.decimals))
+
+    const balanceString = `${formatCryptoVal(
+      formatUnits(fullTokenMetadata.balance, fullTokenMetadata.decimals)
+    )} ${fullTokenMetadata.symbol}`
+
+    if (exceedsBalance) {
+      return `Amount exceeds treasury balance of ${balanceString}`
+    }
+
+    return undefined
+  }, [fullTokenMetadata, formik.values.amount])
 
   return (
     <Box
@@ -194,7 +264,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
       disabled={formik.isValidating || formik.isSubmitting}
       style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
     >
-      <Flex as={Form} direction={'column'}>
+      <Stack as={Form} gap={'x5'}>
         <DropdownSelect
           value={selectedTokenOption}
           onChange={handleTokenOptionChange}
@@ -204,39 +274,30 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         />
 
         {selectedTokenOption === 'custom' && (
-          <Box mt={'x5'}>
-            <SmartInput
-              type={TEXT}
-              formik={formik}
-              {...formik.getFieldProps('tokenAddress')}
-              id="tokenAddress"
-              inputLabel="Custom Token Address"
-              placeholder="0x..."
-              isAddress={true}
-              errorMessage={
-                formik.touched.tokenAddress && formik.errors.tokenAddress
-                  ? formik.errors.tokenAddress
-                  : formik.values.tokenAddress &&
-                      isAddress(formik.values.tokenAddress) &&
-                      currentTokenMetadata &&
-                      !currentTokenMetadata.isValid
-                    ? 'Invalid ERC20 token or contract not found'
-                    : undefined
-              }
-            />
-
-            {(isLoadingTokenBalance || isLoadingTokenMetadata) && (
-              <Text mt={'x2'} color={'text3'} fontSize={14}>
-                Validating token...
-              </Text>
-            )}
-          </Box>
+          <SmartInput
+            type={TEXT}
+            formik={formik}
+            {...formik.getFieldProps('tokenAddress')}
+            id="tokenAddress"
+            inputLabel="Custom Token Address"
+            placeholder="0x..."
+            isAddress={true}
+            errorMessage={
+              formik.touched.tokenAddress && formik.errors.tokenAddress
+                ? formik.errors.tokenAddress
+                : formik.values.tokenAddress &&
+                    isAddress(formik.values.tokenAddress.trim()) &&
+                    !isValidatingToken &&
+                    fullTokenMetadata?.isValid === false
+                  ? 'Invalid ERC20 token or contract not found'
+                  : undefined
+            }
+          />
         )}
 
         {/* Token validation loading state */}
-        {(isLoadingTokenBalance || isLoadingTokenMetadata) && currentTokenAddress && (
+        {isValidatingToken && currentTokenAddress && (
           <Box
-            mt={'x5'}
             p={'x4'}
             backgroundColor={'background2'}
             borderRadius={'curved'}
@@ -256,13 +317,12 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         )}
 
         {/* Valid token metadata display */}
-        {currentTokenMetadata && currentTokenMetadata.isValid && (
+        {fullTokenMetadata && fullTokenMetadata.isValid && (
           <Box
             as="a"
-            href={`${ETHERSCAN_BASE_URL[chain.id]}/token/${currentTokenAddress}?a=${treasury}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            mt={'x5'}
+            href={`${ETHERSCAN_BASE_URL[chain.id]}/token/${fullTokenMetadata.address}?a=${treasury}`}
+            target={'_blank'}
+            rel={'noopener noreferrer'}
             p={'x4'}
             backgroundColor={'background2'}
             borderRadius={'curved'}
@@ -275,113 +335,104 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
               transition: 'all 0.2s ease',
               cursor: 'pointer',
             }}
-            className="hover:bg-background3 hover:border-accent"
           >
             <Flex direction={'column'} gap={'x1'}>
               <Text fontSize={14} fontWeight={'label'}>
-                {currentTokenMetadata.name} ({currentTokenMetadata.symbol})
+                {fullTokenMetadata.name} ({fullTokenMetadata.symbol})
               </Text>
               <Text fontSize={14} color={'text3'}>
                 Treasury Balance:{' '}
                 {formatCryptoVal(
-                  formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
+                  formatUnits(fullTokenMetadata.balance, fullTokenMetadata.decimals)
                 )}{' '}
-                {currentTokenMetadata.symbol}
+                {fullTokenMetadata.symbol}
               </Text>
               <Text fontSize={12} color={'text4'}>
-                Decimals: {currentTokenMetadata.decimals}
+                Decimals: {fullTokenMetadata.decimals}
               </Text>
             </Flex>
           </Box>
         )}
 
         {/* Invalid token error state */}
-        {currentTokenMetadata && !currentTokenMetadata.isValid && currentTokenAddress && (
-          <Box
-            mt={'x5'}
-            p={'x4'}
-            backgroundColor={'background2'}
-            borderRadius={'curved'}
-            borderWidth={'normal'}
-            borderStyle={'solid'}
-            borderColor={'negative'}
-          >
-            <Flex direction={'column'} gap={'x2'}>
-              <Text fontWeight={'label'} fontSize={16} color={'negative'}>
-                Invalid Token
-              </Text>
-              <Text fontSize={14} color={'text3'}>
-                This address is not a valid ERC20 token or the contract could not be
-                found.
-              </Text>
-            </Flex>
-          </Box>
-        )}
-
-        <Box mt={'x5'}>
-          <SmartInput
-            type={TEXT}
-            formik={formik}
-            {...formik.getFieldProps('recipientAddress')}
-            id="recipientAddress"
-            inputLabel={'Recipient Wallet Address/ENS'}
-            placeholder={'0x...'}
-            isAddress={true}
-            errorMessage={
-              formik.touched.recipientAddress && formik.errors.recipientAddress
-                ? formik.errors.recipientAddress
-                : undefined
-            }
-          />
-        </Box>
-
-        <Box mt={'x5'}>
-          <SmartInput
-            {...formik.getFieldProps(`amount`)}
-            inputLabel={
-              <Flex justify={'space-between'} width={'100%'}>
-                <Box fontWeight={'label'}>Amount</Box>
-                {currentTokenMetadata && (
-                  <Box color={'text3'} fontWeight="paragraph">
-                    Max:{' '}
-                    {formatCryptoVal(
-                      formatUnits(
-                        currentTokenMetadata.balance,
-                        currentTokenMetadata.decimals
-                      )
-                    )}{' '}
-                    {currentTokenMetadata.symbol}
-                  </Box>
-                )}
+        {fullTokenMetadata &&
+          fullTokenMetadata.isValid === false &&
+          currentTokenAddress &&
+          isAddress(currentTokenAddress) && (
+            <Box
+              p={'x4'}
+              backgroundColor={'background2'}
+              borderRadius={'curved'}
+              borderWidth={'normal'}
+              borderStyle={'solid'}
+              borderColor={'negative'}
+            >
+              <Flex direction={'column'} gap={'x2'}>
+                <Text fontWeight={'label'} fontSize={16} color={'negative'}>
+                  Invalid Token
+                </Text>
+                <Text fontSize={14} color={'text3'}>
+                  This address is not a valid ERC20 token or the contract could not be
+                  found.
+                </Text>
               </Flex>
-            }
-            id={`amount`}
-            type={NUMBER}
-            placeholder={'100'}
-            min={0}
-            max={currentBalance}
-            errorMessage={
-              formik.touched.amount && formik.errors.amount
-                ? formik.errors.amount
-                : undefined
-            }
-          />
-        </Box>
+            </Box>
+          )}
+
+        <SmartInput
+          type={TEXT}
+          formik={formik}
+          {...formik.getFieldProps('recipientAddress')}
+          id="recipientAddress"
+          inputLabel={'Recipient Wallet Address/ENS'}
+          placeholder={'0x...'}
+          isAddress={true}
+          errorMessage={
+            formik.touched.recipientAddress && formik.errors.recipientAddress
+              ? formik.errors.recipientAddress
+              : undefined
+          }
+        />
+
+        <SmartInput
+          {...formik.getFieldProps(`amount`)}
+          inputLabel={
+            <Flex justify={'space-between'} width={'100%'}>
+              <Box fontWeight={'label'}>Amount</Box>
+              {fullTokenMetadata && (
+                <Box color={'text3'} fontWeight="paragraph">
+                  Max:{' '}
+                  {formatCryptoVal(
+                    formatUnits(fullTokenMetadata.balance, fullTokenMetadata.decimals)
+                  )}{' '}
+                  {fullTokenMetadata.symbol}
+                </Box>
+              )}
+            </Flex>
+          }
+          id={`amount`}
+          type={NUMBER}
+          placeholder={'100'}
+          min={0}
+          max={currentBalance}
+          errorMessage={
+            !formik.touched.amount
+              ? undefined
+              : formik.errors.amount || amountExceedsBalanceError
+          }
+        />
 
         <Button
-          mt={'x9'}
           variant={'outline'}
           borderRadius={'curved'}
           type="submit"
-          disabled={
-            !formik.isValid || !currentTokenMetadata?.isValid || formik.isSubmitting
-          }
+          disabled={!formik.isValid || !fullTokenMetadata?.isValid || formik.isSubmitting}
         >
           {formik.isSubmitting
             ? 'Adding Transaction to Queue...'
             : 'Add Transaction to Queue'}
         </Button>
-      </Flex>
+      </Stack>
     </Box>
   )
 }
@@ -389,11 +440,9 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
 export const SendErc20 = () => {
   const chain = useChainStore((x) => x.chain)
   const addTransaction = useProposalStore((state) => state.addTransaction)
-  const [currentTokenMetadata, setCurrentTokenMetadata] = useState<TokenMetadata | null>(
-    null
-  )
 
   const initialValues: SendErc20Values = {
+    tokenMetadata: undefined,
     tokenAddress: '',
     recipientAddress: '',
     amount: 0,
@@ -405,7 +454,7 @@ export const SendErc20 = () => {
         !values.amount ||
         !values.recipientAddress ||
         !values.tokenAddress ||
-        !currentTokenMetadata?.isValid
+        !values.tokenMetadata?.isValid
       )
         return
 
@@ -417,7 +466,7 @@ export const SendErc20 = () => {
         getProvider(chainToQuery)
       )
       const tokenAddress = getAddress(values.tokenAddress)
-      const amount = parseUnits(values.amount.toString(), currentTokenMetadata.decimals)
+      const amount = parseUnits(values.amount.toString(), values.tokenMetadata.decimals)
 
       // Encode ERC20 transfer function call
       const calldata = encodeFunctionData({
@@ -428,7 +477,7 @@ export const SendErc20 = () => {
 
       addTransaction({
         type: TransactionType.SEND_ERC20,
-        summary: `Send ${values.amount} ${currentTokenMetadata.symbol} to ${walletSnippet(recipient)}`,
+        summary: `Send ${values.amount} ${values.tokenMetadata.symbol} to ${walletSnippet(recipient)}`,
         transactions: [
           {
             functionSignature: 'transfer(address,uint256)',
@@ -441,35 +490,20 @@ export const SendErc20 = () => {
 
       actions.resetForm()
     },
-    [chain.id, currentTokenMetadata, addTransaction]
-  )
-
-  const currentBalance = useMemo(
-    () =>
-      currentTokenMetadata
-        ? parseFloat(
-            formatUnits(currentTokenMetadata.balance, currentTokenMetadata.decimals)
-          )
-        : 0,
-    [currentTokenMetadata]
+    [chain.id, addTransaction]
   )
 
   return (
     <Box w={'100%'}>
       <Formik
         initialValues={initialValues}
-        validationSchema={sendErc20Schema(currentBalance)}
+        validationSchema={sendErc20Schema()}
         onSubmit={handleSubmit}
         validateOnBlur
         validateOnMount={false}
         validateOnChange={false}
       >
-        {(formik) => (
-          <SendErc20Form
-            formik={formik}
-            onTokenMetadataChange={setCurrentTokenMetadata}
-          />
-        )}
+        {(formik) => <SendErc20Form formik={formik} />}
       </Formik>
     </Box>
   )

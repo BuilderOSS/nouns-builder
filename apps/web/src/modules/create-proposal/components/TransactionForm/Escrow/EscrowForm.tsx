@@ -37,7 +37,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
       push({
         amount: 0.5,
         title: 'Milestone ' + newMilestoneIndex,
-        endDate: new Date(Date.parse(previousMilestone?.endDate) + 864000000)
+        endDate: new Date(new Date(previousMilestone.endDate).getTime() + 864000000)
           .toISOString()
           .slice(0, 10) as never, // adds 10 days to previous milestone
         mediaUrl: '',
@@ -73,11 +73,11 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
             .reduce((acc, x) => acc + x, 0n)
 
           const totalAmountString = isValid
-            ? `${formatCryptoVal(formatUnits(totalInUnits, decimals))} ${symbol}.`
+            ? `${formatCryptoVal(formatUnits(totalInUnits, decimals))} ${symbol}`
             : undefined
 
           const balanceString = isValid
-            ? `${formatCryptoVal(formatUnits(balance, decimals))} ${symbol}.`
+            ? `${formatCryptoVal(formatUnits(balance, decimals))} ${symbol}`
             : undefined
 
           const escrowAmountError =
@@ -85,10 +85,12 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
               ? `Escrow amount exceeds treasury balance of ${balanceString}.`
               : undefined
 
-          const allErrors = {
-            ...formik.errors,
-            escrowAmount: escrowAmountError,
-          }
+          const allErrors = escrowAmountError
+            ? {
+                ...formik.errors,
+                escrowAmount: escrowAmountError,
+              }
+            : formik.errors
 
           return (
             <Box
@@ -101,7 +103,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                 <Stack gap={'x5'}>
                   <EscrowDetailsDisplay
                     escrowAmountError={escrowAmountError}
-                    totalEscrowAmount={totalAmountString}
+                    totalEscrowAmountWithSymbol={totalAmountString}
                   />
                   <TokenSelectionForm />
                   <SmartInput
@@ -166,7 +168,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                                     index={index}
                                     setIsMediaUploading={setIsMediaUploading}
                                     removeMilestone={() =>
-                                      formik.values.milestones.length != 1 &&
+                                      formik.values.milestones.length !== 1 &&
                                       remove(index)
                                     }
                                   />
@@ -206,7 +208,8 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                       isMediaUploading ||
                       formik.values?.milestones?.length === 0 ||
                       !formik.values.tokenMetadata?.isValid ||
-                      !formik.values.tokenAddress
+                      !formik.values.tokenAddress ||
+                      !!escrowAmountError
                     }
                   >
                     {isSubmitting

@@ -8,6 +8,7 @@ import { getEnsAddress } from '@buildeross/utils/ens'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Stack } from '@buildeross/zord'
 import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
+import { FormikHelpers } from 'formik'
 import { useCallback } from 'hono/jsx'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -50,7 +51,7 @@ export const Escrow: React.FC = () => {
   const lastProposalId = data?.proposals?.[0]?.proposalNumber ?? 0
 
   const handleEscrowTransaction = useCallback(
-    async (values: EscrowFormValues) => {
+    async (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => {
       if (!treasury || !values.tokenAddress || !values.tokenMetadata) {
         return
       }
@@ -202,10 +203,12 @@ export const Escrow: React.FC = () => {
           summary: `Create and fund new Escrow with ${formattedAmount} ${tokenSymbol}`,
           transactions,
         })
+        actions.resetForm()
       } catch (err) {
         console.error('Error Adding Transaction', err)
+      } finally {
+        setIsSubmitting(false)
       }
-      setIsSubmitting(false)
     },
     [addTransaction, chain.id, lastProposalId, treasury]
   )
