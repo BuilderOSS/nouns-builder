@@ -85,65 +85,56 @@ export const TokenMetadataSchema = yup.object({
   ),
 })
 
-export const EscrowFormSchema = yup
-  .object({
-    clientAddress: addressValidationSchemaWithError(
-      'Delegate address is invalid.',
-      'Delegate address is required.'
-    ),
-    recipientAddress: addressValidationSchemaWithError(
-      'Recipient address is invalid.',
-      'Recipient address is required.'
-    ).test(
-      'not-same-as-client',
-      'Recipient address must be different from the delegate address.',
+export const EscrowFormSchema = yup.object({
+  clientAddress: addressValidationSchemaWithError(
+    'Delegate address is invalid.',
+    'Delegate address is required.'
+  ),
+  recipientAddress: addressValidationSchemaWithError(
+    'Recipient address is invalid.',
+    'Recipient address is required.'
+  ).test(
+    'not-same-as-client',
+    'Recipient address must be different from the delegate address.',
+    function (value) {
+      if (!this?.parent?.clientAddress) return true
+      return value?.toLowerCase() !== this?.parent?.clientAddress?.toLowerCase()
+    }
+  ),
+  tokenAddress: addressValidationSchemaWithError(
+    'Token address is invalid.',
+    'Token address is required.'
+  ).optional(),
+  tokenMetadata: TokenMetadataSchema.optional(),
+  safetyValveDate: yup
+    .date()
+    .required('Safety valve date is required.')
+    .min(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      'Safety valve date must be at least 30 days from today or the last milestone whichever is later.'
+    )
+    .test(
+      'after-last-milestone',
+      'Safety valve date must be at least 30 days after the last milestone date.',
       function (value) {
-        if (!this?.parent?.clientAddress) return true
-        return value?.toLowerCase() !== this?.parent?.clientAddress?.toLowerCase()
+        const milestones = (this.parent.milestones || []) as MilestoneFormValues[]
+        if (milestones.length === 0) return true
+
+        // Get the last milestone's end date
+        const lastMilestoneDate = new Date(
+          Math.max(...milestones.map((m) => new Date(m.endDate).getTime()))
+        )
+
+        // Add 30 days to last milestone date
+        const minSafetyValveDate = lastMilestoneDate.getTime() + 30 * 24 * 60 * 60 * 1000
+
+        const safetyValveDate = new Date(value as any).getTime()
+
+        return safetyValveDate >= minSafetyValveDate
       }
     ),
-    tokenAddress: addressValidationSchemaWithError(
-      'Token address is invalid.',
-      'Token address is required.'
-    ).optional(),
-    tokenMetadata: TokenMetadataSchema.optional(),
-    safetyValveDate: yup
-      .date()
-      .required('Safety valve date is required.')
-      .min(
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        'Safety valve date must be at least 30 days from today or the last milestone whichever is later.'
-      )
-      .test(
-        'after-last-milestone',
-        'Safety valve date must be at least 30 days after the last milestone date.',
-        function (value) {
-          const milestones = (this.parent.milestones || []) as MilestoneFormValues[]
-          if (milestones.length === 0) return true
-
-          // Get the last milestone's end date
-          const lastMilestoneDate = new Date(
-            Math.max(...milestones.map((m) => new Date(m.endDate).getTime()))
-          )
-
-          // Add 30 days to last milestone date
-          const minSafetyValveDate =
-            lastMilestoneDate.getTime() + 30 * 24 * 60 * 60 * 1000
-
-          const safetyValveDate = new Date(value as any).getTime()
-
-          return safetyValveDate >= minSafetyValveDate
-        }
-      ),
-    milestones: yup
-      .array()
-      .of(MilestoneSchema)
-      .min(1, 'At least one milestone is required.'),
-  })
-  .test(
-    'addresses-not-same',
-    'Delegate and recipient addresses must be different.',
-    function (values) {
-      return values.clientAddress !== values.recipientAddress
-    }
-  )
+  milestones: yup
+    .array()
+    .of(MilestoneSchema)
+    .min(1, 'At least one milestone is required.'),
+})

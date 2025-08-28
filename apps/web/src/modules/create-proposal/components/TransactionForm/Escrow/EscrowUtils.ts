@@ -29,7 +29,7 @@ export const INITIAL_ESCROW_FORM_STATE: EscrowFormValues = {
       title: 'Milestone 1',
       endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10)
         .toISOString()
-        .split('T')[0] as never,
+        .split('T')[0],
       mediaUrl: '',
       mediaType: undefined,
       mediaFileName: '',
