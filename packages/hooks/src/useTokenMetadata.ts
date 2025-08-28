@@ -1,7 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { useMemo } from 'react'
-import useSWR from 'swr'
+import useSWRImmutable from 'swr/immutable'
 import { Address, isAddress } from 'viem'
 
 export type TokenMetadata = {
@@ -46,7 +46,7 @@ export const useTokenMetadata = (
     [addresses],
   )
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWRImmutable(
     !!chainId && validAddresses.length > 0
       ? [SWR_KEYS.TOKEN_METADATA, chainId, validAddresses.join(',')]
       : null,

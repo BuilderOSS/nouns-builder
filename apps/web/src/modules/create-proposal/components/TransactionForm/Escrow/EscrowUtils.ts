@@ -194,7 +194,7 @@ function encodeEscrowData(
   return encodedParams
 }
 
-type DecodedEscrowData = Partial<{
+export type DecodedEscrowData = Partial<{
   clientAddress: Address
   resolverType: number
   resolverAddress: Address
@@ -207,6 +207,7 @@ type DecodedEscrowData = Partial<{
   clientRecipientAddress?: Address
   escrowType?: Hex
 }>
+
 const decodeEscrowData = (data: Hex): DecodedEscrowData => {
   try {
     const decodedAbiData = decodeAbiParameters(
