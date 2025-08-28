@@ -12,6 +12,7 @@ import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
+import { ContractButton } from 'src/components/ContractButton'
 import Accordion from 'src/components/Home/accordian'
 import { Icon } from 'src/components/Icon'
 import { TransactionType } from 'src/modules/create-proposal'
@@ -165,14 +166,14 @@ export const MilestoneDetails = ({
     [router, addTransaction, invoiceData?.title, invoiceAddress, currentMilestone]
   )
 
-  const [releasing, setReleasing] = useState(false)
+  const [isReleasing, setIsReleasing] = useState(false)
 
   const handleReleaseMilestoneDirect = useCallback(
     async (milestone: number) => {
       if (!invoiceAddress) return
 
       try {
-        setReleasing(true)
+        setIsReleasing(true)
         const data = await simulateContract(config, {
           address: invoiceAddress,
           abi: RELEASE_FUNCTION_ABI,
@@ -188,7 +189,7 @@ export const MilestoneDetails = ({
       } catch (error) {
         console.error('Error releasing milestone:', error)
       } finally {
-        setReleasing(false)
+        setIsReleasing(false)
       }
     },
     [config, chain.id, invoiceAddress]
@@ -264,17 +265,18 @@ export const MilestoneDetails = ({
                                   ? 'Release funds for the next milestone'
                                   : `Release funds for all milestones up to Milestone ${index + 1}`}
                               </Text>
-                              <Button
+                              <ContractButton
                                 variant="primary"
-                                onClick={() =>
+                                handleClick={() =>
                                   isClientConnected
                                     ? handleReleaseMilestoneDirect(index)
                                     : handleReleaseMilestoneAsProposal(index)
                                 }
-                                disabled={isClientConnected ? releasing : !hasThreshold}
+                                disabled={isClientConnected ? isReleasing : !hasThreshold}
+                                loading={isReleasing}
                               >
-                                {releasing ? 'Releasing...' : 'Release Milestone'}
-                              </Button>
+                                Release Milestone
+                              </ContractButton>
                               {!hasThreshold && !isClientConnected && (
                                 <Text variant="label-xs" color="negative">
                                   You do not have enough votes to create a proposal
