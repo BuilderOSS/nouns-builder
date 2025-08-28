@@ -23,6 +23,13 @@ export const delegateBtn = style({
   },
 })
 
+export const currentDelegateBtn = style({
+  backgroundColor: '#FFF !important',
+  ':hover': {
+    backgroundColor: '#F9F9F9 !important',
+  },
+})
+
 export const createProposalBtn = style({
   fontFamily: 'ptRoot !important',
   height: '40px !important',

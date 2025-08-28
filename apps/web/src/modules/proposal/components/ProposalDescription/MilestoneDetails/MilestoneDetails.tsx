@@ -3,6 +3,7 @@ import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
+import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
@@ -11,13 +12,14 @@ import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
+import { ContractButton } from 'src/components/ContractButton'
 import Accordion from 'src/components/Home/accordian'
 import { Icon } from 'src/components/Icon'
 import { TransactionType } from 'src/modules/create-proposal'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { encodeFunctionData, Hex } from 'viem'
+import { encodeFunctionData, formatUnits, Hex } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -58,14 +60,14 @@ export const MilestoneDetails = ({
   executionTransactionHash,
 }: MilestoneDetailsProps) => {
   const router = useRouter()
-  const { chain: invoiceChain } = useChainStore()
+  const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { addTransaction } = useProposalStore()
   const { address } = useAccount()
   const config = useConfig()
 
   const { hasThreshold } = useVotes({
-    chainId: invoiceChain.id,
+    chainId: chain.id,
     governorAddress: addresses?.governor,
     signerAddress: address,
     collectionAddress: addresses?.token,
@@ -74,13 +76,16 @@ export const MilestoneDetails = ({
   const {
     invoiceAddress,
     clientAddress,
+    tokenAddress,
     milestoneAmounts,
     invoiceData,
     isLoadingInvoice,
-  } = useInvoiceData(invoiceChain.id, decodedTransaction, executionTransactionHash)
+  } = useInvoiceData(chain.id, decodedTransaction, executionTransactionHash)
+
+  const { tokenMetadata } = useTokenMetadataSingle(chain.id, tokenAddress)
 
   const invoiceUrl = !!invoiceAddress
-    ? createSmartInvoiceUrl(invoiceChain.id, invoiceAddress)
+    ? createSmartInvoiceUrl(chain.id, invoiceAddress)
     : undefined
 
   const { data: currentMilestoneData, isLoading: isLoadingMilestone } = useReadContract({
@@ -98,13 +103,10 @@ export const MilestoneDetails = ({
       },
     ],
     functionName: 'milestone',
-    chainId: invoiceChain.id,
+    chainId: chain.id,
   })
 
-  const { isGnosisSafe: isClientAGnosisSafe } = useIsGnosisSafe(
-    clientAddress,
-    invoiceChain.id
-  )
+  const { isGnosisSafe: isClientAGnosisSafe } = useIsGnosisSafe(clientAddress, chain.id)
 
   const currentMilestone = useMemo(
     () => Number(currentMilestoneData ?? 0),
@@ -164,14 +166,14 @@ export const MilestoneDetails = ({
     [router, addTransaction, invoiceData?.title, invoiceAddress, currentMilestone]
   )
 
-  const [releasing, setReleasing] = useState(false)
+  const [isReleasing, setIsReleasing] = useState(false)
 
   const handleReleaseMilestoneDirect = useCallback(
     async (milestone: number) => {
       if (!invoiceAddress) return
 
       try {
-        setReleasing(true)
+        setIsReleasing(true)
         const data = await simulateContract(config, {
           address: invoiceAddress,
           abi: RELEASE_FUNCTION_ABI,
@@ -182,15 +184,15 @@ export const MilestoneDetails = ({
         const txHash = await writeContract(config, data.request)
         await waitForTransactionReceipt(config, {
           hash: txHash,
-          chainId: invoiceChain.id,
+          chainId: chain.id,
         })
       } catch (error) {
         console.error('Error releasing milestone:', error)
       } finally {
-        setReleasing(false)
+        setIsReleasing(false)
       }
     },
-    [config, invoiceChain.id, invoiceAddress]
+    [config, chain.id, invoiceAddress]
   )
 
   const isLoading = !invoiceData && (isLoadingInvoice || isLoadingMilestone)
@@ -205,13 +207,18 @@ export const MilestoneDetails = ({
             (milestone: MilestoneMetadata, index: number) => {
               const isReleased = currentMilestone > index
               const isNext = currentMilestone === index
+              const amount = milestoneAmounts?.[index] ?? 0n
+              const decimals = tokenMetadata?.decimals ?? 18
+              const amountDisplay = tokenMetadata?.symbol
+                ? `${formatUnits(amount, decimals)} ${tokenMetadata.symbol}`
+                : amount.toString()
               return {
                 title: <Text>{`${index + 1}. ${milestone.title}`}</Text>,
                 description: (
                   <Stack gap="x5">
                     <Stack direction="row" align="center" justify="space-between">
                       <Text variant="label-xs" color="tertiary">
-                        {`Amount: ${milestoneAmounts?.[index]} ETH`}
+                        {`Amount: ${amountDisplay}`}
                       </Text>
                       <Text variant="label-xs" color="tertiary">
                         {`Due by: ${new Date(
@@ -258,17 +265,18 @@ export const MilestoneDetails = ({
                                   ? 'Release funds for the next milestone'
                                   : `Release funds for all milestones up to Milestone ${index + 1}`}
                               </Text>
-                              <Button
+                              <ContractButton
                                 variant="primary"
-                                onClick={() =>
+                                handleClick={() =>
                                   isClientConnected
                                     ? handleReleaseMilestoneDirect(index)
                                     : handleReleaseMilestoneAsProposal(index)
                                 }
-                                disabled={isClientConnected ? releasing : !hasThreshold}
+                                disabled={isClientConnected ? isReleasing : !hasThreshold}
+                                loading={isReleasing}
                               >
-                                {releasing ? 'Releasing...' : 'Release Milestone'}
-                              </Button>
+                                Release Milestone
+                              </ContractButton>
                               {!hasThreshold && !isClientConnected && (
                                 <Text variant="label-xs" color="negative">
                                   You do not have enough votes to create a proposal
@@ -296,8 +304,8 @@ export const MilestoneDetails = ({
             <a
               href={
                 isClientAGnosisSafe
-                  ? createSafeUrl(invoiceChain.id, clientAddress)
-                  : `${ETHERSCAN_BASE_URL[invoiceChain.id]}/address/${clientAddress}`
+                  ? createSafeUrl(chain.id, clientAddress)
+                  : `${ETHERSCAN_BASE_URL[chain.id]}/address/${clientAddress}`
               }
               rel="noreferrer"
               target="_blank"
@@ -321,7 +329,7 @@ export const MilestoneDetails = ({
               {isClientAGnosisSafe ? (
                 <>
                   <a
-                    href={createSafeAppUrl(invoiceChain.id, clientAddress, invoiceUrl)}
+                    href={createSafeAppUrl(chain.id, clientAddress, invoiceUrl)}
                     rel="noreferrer"
                     target="_blank"
                   >
@@ -333,7 +341,7 @@ export const MilestoneDetails = ({
                   {!isClientConnected && (
                     <a
                       href={createSafeAppUrl(
-                        invoiceChain.id,
+                        chain.id,
                         clientAddress,
                         window.location.href
                       )}

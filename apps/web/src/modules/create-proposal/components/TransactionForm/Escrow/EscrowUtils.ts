@@ -8,10 +8,8 @@ import {
   toBytes,
   toHex,
 } from 'viem'
-import { create } from 'zustand'
-import { createJSONStorage, persist } from 'zustand/middleware'
 
-import { EscrowFormState, EscrowFormValues } from './EscrowForm.schema'
+import { EscrowFormValues, NULL_ADDRESS } from './EscrowForm.schema'
 
 const SMART_INVOICE_ARBITRATION_PROVIDER =
   '0x18542245cA523DFF96AF766047fE9423E0BED3C0' as Address
@@ -19,6 +17,29 @@ const ESCROW_RESOLVER_TYPE = 0
 const ESCROW_REQUIRE_VERIFICATION = true
 export const ESCROW_TYPE = toHex(toBytes('updatable-v2', { size: 32 }))
 export const ESCROW_TYPE_V1 = toHex(toBytes('updatable', { size: 32 }))
+
+export const INITIAL_ESCROW_FORM_STATE: EscrowFormValues = {
+  tokenAddress: undefined,
+  tokenMetadata: undefined,
+  clientAddress: '',
+  recipientAddress: '',
+  milestones: [
+    {
+      amount: 0.5,
+      title: 'Milestone 1',
+      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10)
+        .toISOString()
+        .split('T')[0],
+      mediaUrl: '',
+      mediaType: undefined,
+      mediaFileName: '',
+      description: 'About Milestone 1',
+    },
+  ],
+  safetyValveDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    .toISOString()
+    .split('T')[0],
+}
 
 export function convertIpfsCidV0ToByte32(cid: string) {
   return `0x${Buffer.from(bs58.decode(cid).slice(2)).toString('hex')}`
@@ -135,6 +156,12 @@ function encodeEscrowData(
   chainId: string | number
 ) {
   const wrappedTokenAddress = getWrappedTokenAddress(chainId)
+  const selectedTokenAddress = values.tokenAddress as Address
+  const tokenAddress =
+    selectedTokenAddress.toLowerCase() === NULL_ADDRESS
+      ? wrappedTokenAddress
+      : selectedTokenAddress
+
   const terminationTime = new Date(values.safetyValveDate).getTime() / 1000
   const ipfsBytesCid = convertIpfsCidV0ToByte32(ipfsCID)
   const factory = getEscrowFactory(chainId)
@@ -158,7 +185,7 @@ function encodeEscrowData(
       values.clientAddress,
       ESCROW_RESOLVER_TYPE,
       SMART_INVOICE_ARBITRATION_PROVIDER,
-      wrappedTokenAddress,
+      tokenAddress,
       terminationTime,
       ipfsBytesCid,
       wrappedTokenAddress,
@@ -172,7 +199,7 @@ function encodeEscrowData(
   return encodedParams
 }
 
-type DecodedEscrowData = Partial<{
+export type DecodedEscrowData = Partial<{
   clientAddress: Address
   resolverType: number
   resolverAddress: Address
@@ -185,6 +212,7 @@ type DecodedEscrowData = Partial<{
   clientRecipientAddress?: Address
   escrowType?: Hex
 }>
+
 const decodeEscrowData = (data: Hex): DecodedEscrowData => {
   try {
     const decodedAbiData = decodeAbiParameters(
@@ -299,45 +327,6 @@ const deployEscrowAbi = [
   },
 ]
 
-const initialState: EscrowFormValues = {
-  clientAddress: '',
-  recipientAddress: '',
-  milestones: [
-    {
-      amount: 0.5,
-      title: 'Milestone 1',
-      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10)
-        .toISOString()
-        .split('T')[0] as never,
-      mediaUrl: '',
-      mediaType: undefined,
-      mediaFileName: '',
-      description: 'About Milestone 1',
-    },
-  ],
-  safetyValveDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-    .toISOString()
-    .split('T')[0],
-}
-
-const useEscrowFormStore = create(
-  persist<EscrowFormState>(
-    (set) => ({
-      formValues: initialState,
-      setFormValues: (values) => set({ formValues: values }),
-      resetForm: () => set({ formValues: initialState }),
-      clear: () => {
-        set({ formValues: initialState })
-        localStorage.removeItem('escrow-form-storage')
-      },
-    }),
-    {
-      name: 'escrow-form-storage',
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
-)
-
 export {
   decodeEscrowData,
   decodeEscrowDataV1,
@@ -345,5 +334,5 @@ export {
   encodeEscrowData,
   getEscrowBundler,
   getEscrowBundlerV1,
-  useEscrowFormStore,
+  getWrappedTokenAddress,
 }

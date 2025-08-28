@@ -1,10 +1,8 @@
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import dynamic from 'next/dynamic'
 import React from 'react'
 import { Icon } from 'src/components/Icon'
-import { useChainStore } from 'src/stores/useChainStore'
 
 import { AllBids } from '../AllBids'
 import { allRecentBidsButton, recentBid } from '../Auction.css'
@@ -19,8 +17,6 @@ interface RecentBidsProps {
 }
 
 export const RecentBids: React.FC<RecentBidsProps> = ({ bids }) => {
-  const chain = useChainStore((x) => x.chain)
-
   return bids.length ? (
     <Box mt="x3">
       <Stack>
@@ -37,7 +33,7 @@ export const RecentBids: React.FC<RecentBidsProps> = ({ bids }) => {
             <Flex
               align="center"
               as="a"
-              href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${bidder}`}
+              href={`/profile/${bidder}`}
               target="_blank"
               rel="noopener noreferrer"
             >

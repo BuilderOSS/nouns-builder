@@ -1,6 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { Box, Flex, Text } from '@buildeross/zord'
-import Link from 'next/link'
 import React from 'react'
 import { Avatar } from 'src/components/Avatar'
 
@@ -19,9 +18,9 @@ export const Bidder: React.FC<BidderProps> = ({ address }) => {
         <Avatar address={address} src={ensAvatar} size="32" />
       </Box>
       <Text className={recentBidder} variant="paragraph-md">
-        <Link href={`/profile/${address}`} passHref>
-          <a>{displayName}</a>
-        </Link>
+        <a href={`/profile/${address}`} target="_blank" rel="noopener noreferrer">
+          {displayName}
+        </a>
       </Text>
     </Flex>
   )

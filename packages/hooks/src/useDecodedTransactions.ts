@@ -22,9 +22,9 @@ export type DecodedTransaction = DecodedTransactionSuccess | DecodedTransactionF
 export const formatSendEth = (value: string) => {
   const amount = formatEther(BigInt(value))
   return {
-    functionName: 'Transfer',
+    functionName: 'transfer',
     args: {
-      ['Transfer']: { name: `value`, value: `${amount} ETH`, type: `uint256` },
+      ['transfer']: { name: `value`, value: `${amount} ETH`, type: `uint256` },
     },
     functionSig: '',
   }
@@ -69,9 +69,9 @@ const decodeTx = async (
   decodeFunc: DecodeFunc = apiDecodeTx,
 ): Promise<DecodedTransactionData> => {
   /* if calldata is '0x' */
-  const isTransfer = calldata === '0x'
+  const isEthTransfer = calldata === '0x'
 
-  if (isTransfer) {
+  if (isEthTransfer) {
     return formatSendEth(value)
   }
 

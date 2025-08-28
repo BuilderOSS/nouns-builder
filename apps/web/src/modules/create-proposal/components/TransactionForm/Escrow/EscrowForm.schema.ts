@@ -3,14 +3,26 @@ import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
 
+export const NULL_ADDRESS: AddressType =
+  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase() as AddressType
+
 export interface MilestoneFormValues {
   amount: number
   title: string
-  endDate: number & string & Date
+  endDate: number | string | Date
   mediaUrl: string | undefined
   mediaType: string | undefined
   mediaFileName: string
   description: string
+}
+
+export interface TokenMetadataFormValidated {
+  name: string
+  symbol: string
+  decimals: number
+  balance: bigint
+  isValid: boolean
+  address: AddressType
 }
 
 export interface EscrowFormValues {
@@ -18,20 +30,14 @@ export interface EscrowFormValues {
   recipientAddress: string | AddressType
   safetyValveDate: Date | number | string
   milestones: Array<MilestoneFormValues>
-}
-
-export interface EscrowFormState {
-  formValues: EscrowFormValues
-  setFormValues: (values: EscrowFormValues) => void
-  resetForm: () => void
-  clear: () => void
+  tokenAddress?: AddressType
+  tokenMetadata?: TokenMetadataFormValidated
 }
 
 export interface EscrowFormProps {
   onSubmit: (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => void
   isSubmitting: boolean
 }
-
 export const MilestoneSchema = yup.object({
   amount: yup
     .number()
@@ -58,60 +64,77 @@ export const MilestoneSchema = yup.object({
   description: yup.string(),
 })
 
-export const EscrowFormSchema = yup
-  .object({
-    clientAddress: addressValidationSchemaWithError(
-      'Delegate address is invalid.',
-      'Delegate address is required.'
-    ),
-    recipientAddress: addressValidationSchemaWithError(
-      'Recipient address is invalid.',
-      'Recipient address is required.'
-    ).test(
-      'not-same-as-client',
-      'Recipient address must be different from the delegate address.',
+const bigintSchema = yup
+  .mixed()
+  .transform((value) => {
+    if (typeof value === 'string' && /^\d+$/.test(value)) return BigInt(value)
+    if (typeof value === 'number' && Number.isInteger(value)) return BigInt(value)
+    return value
+  })
+  .test('is-bigint', '${path} must be a BigInt', (value) => typeof value === 'bigint')
+
+export const TokenMetadataSchema = yup.object({
+  name: yup.string().required('Token name is required.'),
+  symbol: yup.string().required('Token symbol is required.'),
+  decimals: yup.number().required('Token decimals is required.'),
+  balance: bigintSchema.required('Token balance is required.'),
+  isValid: yup.boolean().required('Token is valid is required.'),
+  address: addressValidationSchemaWithError(
+    'Token address is invalid.',
+    'Token address is required.'
+  ),
+})
+
+export const EscrowFormSchema = yup.object({
+  clientAddress: addressValidationSchemaWithError(
+    'Delegate address is invalid.',
+    'Delegate address is required.'
+  ),
+  recipientAddress: addressValidationSchemaWithError(
+    'Recipient address is invalid.',
+    'Recipient address is required.'
+  ).test(
+    'not-same-as-client',
+    'Recipient address must be different from the delegate address.',
+    function (value) {
+      if (!this?.parent?.clientAddress) return true
+      return value?.toLowerCase() !== this?.parent?.clientAddress?.toLowerCase()
+    }
+  ),
+  tokenAddress: addressValidationSchemaWithError(
+    'Token address is invalid.',
+    'Token address is required.'
+  ).optional(),
+  tokenMetadata: TokenMetadataSchema.optional(),
+  safetyValveDate: yup
+    .date()
+    .required('Safety valve date is required.')
+    .min(
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      'Safety valve date must be at least 30 days from today or the last milestone whichever is later.'
+    )
+    .test(
+      'after-last-milestone',
+      'Safety valve date must be at least 30 days after the last milestone date.',
       function (value) {
-        if (!this?.parent?.clientAddress) return true
-        return value?.toLowerCase() !== this?.parent?.clientAddress?.toLowerCase()
+        const milestones = (this.parent.milestones || []) as MilestoneFormValues[]
+        if (milestones.length === 0) return true
+
+        // Get the last milestone's end date
+        const lastMilestoneDate = new Date(
+          Math.max(...milestones.map((m) => new Date(m.endDate).getTime()))
+        )
+
+        // Add 30 days to last milestone date
+        const minSafetyValveDate = lastMilestoneDate.getTime() + 30 * 24 * 60 * 60 * 1000
+
+        const safetyValveDate = new Date(value as any).getTime()
+
+        return safetyValveDate >= minSafetyValveDate
       }
     ),
-    safetyValveDate: yup
-      .date()
-      .required('Safety valve date is required.')
-      .min(
-        new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        'Safety valve date must be at least 30 days from today or the last milestone whichever is later.'
-      )
-      .test(
-        'after-last-milestone',
-        'Safety valve date must be at least 30 days after the last milestone date.',
-        function (value) {
-          const milestones = (this.parent.milestones || []) as MilestoneFormValues[]
-          if (milestones.length === 0) return true
-
-          // Get the last milestone's end date
-          const lastMilestoneDate = new Date(
-            Math.max(...milestones.map((m) => new Date(m.endDate).getTime()))
-          )
-
-          // Add 30 days to last milestone date
-          const minSafetyValveDate =
-            lastMilestoneDate.getTime() + 30 * 24 * 60 * 60 * 1000
-
-          const safetyValveDate = new Date(value as any).getTime()
-
-          return safetyValveDate >= minSafetyValveDate
-        }
-      ),
-    milestones: yup
-      .array()
-      .of(MilestoneSchema)
-      .min(1, 'At least one milestone is required.'),
-  })
-  .test(
-    'addresses-not-same',
-    'Delegate and recipient addresses must be different.',
-    function (values) {
-      return values.clientAddress !== values.recipientAddress
-    }
-  )
+  milestones: yup
+    .array()
+    .of(MilestoneSchema)
+    .min(1, 'At least one milestone is required.'),
+})

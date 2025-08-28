@@ -1,12 +1,10 @@
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { type DaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex } from '@buildeross/zord'
 import React from 'react'
 import { Avatar } from 'src/components/Avatar'
-import { Icon } from 'src/components/Icon'
-import { useChainStore } from 'src/stores/useChainStore'
-import { proposalFormTitle } from 'src/styles/Proposals.css'
+import CopyButton from 'src/components/CopyButton/CopyButton'
+import { currentDelegateBtn, proposalFormTitle } from 'src/styles/Proposals.css'
 
 interface CurrentDelegateProps {
   toggleIsEditing: () => void
@@ -17,8 +15,6 @@ export const CurrentDelegate = ({
   toggleIsEditing,
   membership,
 }: CurrentDelegateProps) => {
-  const chain = useChainStore((x) => x.chain)
-
   return (
     <Flex direction={'column'} width={'100%'}>
       <Box className={proposalFormTitle} fontSize={28} mb={'x4'}>
@@ -31,16 +27,28 @@ export const CurrentDelegate = ({
 
       <Box mb={'x2'}>Current delegate</Box>
 
-      <Box>
+      <Flex
+        align={'center'}
+        height={'x16'}
+        mb={'x6'}
+        borderColor="border"
+        borderWidth="normal"
+        borderStyle="solid"
+        borderRadius="curved"
+        gap={'x4'}
+        pr={'x4'}
+      >
         <Flex
+          as="a"
+          target="_blank"
+          rel="noreferrer noopener"
+          href={`/profile/${membership.delegate.ethAddress}`}
           align={'center'}
-          height={'x16'}
-          mb={'x6'}
           px={'x6'}
-          borderColor="border"
-          borderWidth="normal"
-          borderStyle="solid"
-          borderRadius="curved"
+          height="100%"
+          flex={1}
+          className={currentDelegateBtn}
+          style={{ cursor: 'pointer' }}
         >
           <Box mr={'x2'}>
             {membership.delegate.ensAvatar ? (
@@ -65,22 +73,14 @@ export const CurrentDelegate = ({
           ) : (
             <Box mr="auto">{walletSnippet(membership.delegate.ethAddress)}</Box>
           )}
-
-          <Box
-            as="a"
-            ml={'x3'}
-            href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${membership.delegate.ethAddress}`}
-            target="_blank"
-          >
-            <Icon size="sm" id="external-16" fill="text4" />
-          </Box>
         </Flex>
+        <CopyButton text={membership.delegate.ethAddress} />
+      </Flex>
 
-        <Box>
-          <Button width={'100%'} onClick={toggleIsEditing} size="lg">
-            Update delegate
-          </Button>
-        </Box>
+      <Box>
+        <Button width={'100%'} onClick={toggleIsEditing} size="lg">
+          Update delegate
+        </Button>
       </Box>
     </Flex>
   )

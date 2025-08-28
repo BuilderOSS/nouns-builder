@@ -15,13 +15,15 @@ import { NFTArgumentDisplay } from './NFTArgumentDisplay'
 interface ArgumentDisplayProps {
   arg: DecodedArg
   target: string
-  functionName?: string
+  functionName: string
+  allArguments: Record<string, DecodedArg>
 }
 
 export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   arg,
   target,
   functionName,
+  allArguments,
 }) => {
   const chain = useChainStore((x) => x.chain)
 
@@ -32,8 +34,8 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
     return <NFTArgumentDisplay arg={arg} target={target} functionName={functionName} />
   }
 
-  // Check if this is an ERC20 transfer function
-  if (functionName === 'transfer') {
+  // Check if this is an ERC20 transfer/approve function
+  if (functionName === 'transfer' || functionName === 'approve') {
     return <ERC20ArgumentDisplay arg={arg} target={target} />
   }
 
@@ -50,7 +52,7 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
       arg.name === '_escrowType')
 
   if (isEscrowArgument) {
-    return <EscrowArgumentDisplay arg={arg} target={target} />
+    return <EscrowArgumentDisplay arg={arg} target={target} allArguments={allArguments} />
   }
 
   // Default rendering for other arguments

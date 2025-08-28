@@ -12,12 +12,13 @@ import {
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import useSWR from 'swr'
-import { decodeEventLog, formatEther, Hex, isHex } from 'viem'
+import { decodeEventLog, Hex, isHex } from 'viem'
 
 type InvoiceData = {
   invoiceAddress: Hex | undefined
   clientAddress: Hex | undefined
-  milestoneAmounts: string[] | undefined
+  tokenAddress: Hex | undefined
+  milestoneAmounts: bigint[] | undefined
   invoiceData: InvoiceMetadata | undefined
   isLoadingInvoice: boolean
 }
@@ -67,7 +68,7 @@ export const useInvoiceData = (
   decodedTransaction?: DecodedTransaction,
   executionTransactionHash?: string
 ): InvoiceData => {
-  const { invoiceCid, clientAddress, milestoneAmounts } = useMemo(() => {
+  const { invoiceCid, clientAddress, milestoneAmounts, tokenAddress } = useMemo(() => {
     if (!decodedTransaction || decodedTransaction.isNotDecoded) return {}
 
     const isEscrowV1 =
@@ -75,17 +76,18 @@ export const useInvoiceData = (
 
     const decodedTxnArgs = decodedTransaction.transaction?.args
 
-    const { ipfsCid, clientAddress } = isEscrowV1
+    const { ipfsCid, clientAddress, tokenAddress } = isEscrowV1
       ? decodeEscrowDataV1(decodedTxnArgs?._escrowData?.value as Hex)
       : decodeEscrowData(decodedTxnArgs?._escrowData?.value as Hex)
 
     return {
       invoiceCid: ipfsCid,
       clientAddress: clientAddress as AddressType,
+      tokenAddress: tokenAddress as AddressType,
       milestoneAmounts: decodedTxnArgs['_milestoneAmounts']['value']
         .toString()
         .split(',')
-        .map((x: string) => formatEther(BigInt(x))),
+        .map((x: string) => BigInt(x)),
     }
   }, [decodedTransaction, chainId])
 
@@ -136,6 +138,7 @@ export const useInvoiceData = (
 
   return {
     invoiceAddress,
+    tokenAddress,
     clientAddress,
     milestoneAmounts,
     invoiceData,

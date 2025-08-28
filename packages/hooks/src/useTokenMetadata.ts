@@ -1,6 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
-import useSWR from 'swr'
+import { useMemo } from 'react'
+import useSWRImmutable from 'swr/immutable'
 import { Address, isAddress } from 'viem'
 
 export type TokenMetadata = {
@@ -37,13 +38,17 @@ export const useTokenMetadata = (
   chainId?: CHAIN_ID,
   addresses?: Address[],
 ): TokenMetadataReturnType => {
-  const validAddresses = (addresses?.filter((addr) => isAddress(addr)) || []).map(
-    (addr) => addr.toLowerCase() as Address,
+  const validAddresses = useMemo(
+    () =>
+      (addresses?.filter((addr) => isAddress(addr)) || [])
+        .map((addr) => addr.toLowerCase() as Address)
+        .sort(),
+    [addresses],
   )
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWRImmutable(
     !!chainId && validAddresses.length > 0
-      ? [SWR_KEYS.TOKEN_METADATA, chainId, validAddresses.sort().join(',')]
+      ? [SWR_KEYS.TOKEN_METADATA, chainId, validAddresses.join(',')]
       : null,
     async () => fetchTokenMetadata(chainId as CHAIN_ID, validAddresses),
     {
@@ -63,11 +68,12 @@ export const useTokenMetadata = (
 export const useTokenMetadataSingle = (
   chainId?: CHAIN_ID,
   address?: Address,
-): TokenMetadataReturnType & { tokenMetadata?: TokenMetadata } => {
+): Omit<TokenMetadataReturnType, 'metadata'> & { tokenMetadata?: TokenMetadata } => {
   const result = useTokenMetadata(chainId, address ? [address] : undefined)
 
   return {
-    ...result,
+    isLoading: result.isLoading,
+    error: result.error,
     tokenMetadata: result.metadata?.[0],
   }
 }
