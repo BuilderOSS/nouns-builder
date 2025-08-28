@@ -1,11 +1,14 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { uploadJson } from '@buildeross/ipfs-service'
+import { erc20Abi } from '@buildeross/sdk'
 import { ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { getProposals } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Stack } from '@buildeross/zord'
 import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
+import { FormikHelpers } from 'formik'
 import { useCallback } from 'hono/jsx'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
@@ -14,10 +17,10 @@ import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import useSWR from 'swr'
-import { encodeFunctionData, formatEther, parseEther } from 'viem'
+import { Address, encodeFunctionData, formatUnits, parseUnits } from 'viem'
 
 import EscrowForm from './EscrowForm'
-import { EscrowFormValues } from './EscrowForm.schema'
+import { EscrowFormValues, NULL_ADDRESS } from './EscrowForm.schema'
 import {
   deployEscrowAbi,
   encodeEscrowData,
@@ -48,10 +51,18 @@ export const Escrow: React.FC = () => {
   const lastProposalId = data?.proposals?.[0]?.proposalNumber ?? 0
 
   const handleEscrowTransaction = useCallback(
-    async (values: EscrowFormValues) => {
-      if (!treasury) {
+    async (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => {
+      if (!treasury || !values.tokenAddress || !values.tokenMetadata) {
         return
       }
+
+      // Determine if this is ETH or ERC20
+      const isEthEscrow = values.tokenAddress.toLowerCase() === NULL_ADDRESS.toLowerCase()
+
+      // Use token metadata for decimals and symbol
+      const tokenDecimals = values.tokenMetadata.decimals
+      const tokenSymbol = values.tokenMetadata.symbol
+
       const newProposalId = lastProposalId + 1
       const escrowTitle = `Proposal #${newProposalId}`
       const escrowDescription = `${window?.location.href.replace(
@@ -127,37 +138,77 @@ export const Escrow: React.FC = () => {
       // create bundler transaction data
       const escrowData = encodeEscrowData(values, treasury, cid, chain.id)
       const milestoneAmounts = values.milestones.map((x) =>
-        parseEther(x.amount.toString())
+        parseUnits(x.amount.toString(), tokenDecimals)
       )
       const fundAmount = milestoneAmounts.reduce((acc, x) => acc + x, 0n)
 
-      const escrow = {
-        target: getEscrowBundler(chain.id),
-        functionSignature: 'deployEscrow()',
+      const totalAmount = formatUnits(fundAmount, tokenDecimals)
+      const formattedAmount = formatCryptoVal(totalAmount)
+
+      const escrowBundlerAddress = getEscrowBundler(chain.id)
+
+      const deployEscrowTransaction = {
+        target: escrowBundlerAddress as Address,
+        functionSignature: 'deployEscrow(address,uint256[],bytes,bytes32,uint256)',
         calldata: encodeFunctionData({
           abi: deployEscrowAbi,
           functionName: 'deployEscrow',
           args: [
-            values.recipientAddress,
+            values.recipientAddress as Address,
             milestoneAmounts,
             escrowData,
             ESCROW_TYPE,
             fundAmount,
           ],
         }),
-        value: fundAmount.toString(),
+        value: isEthEscrow ? fundAmount.toString() : '0', // ETH value for native ETH, 0 for ERC20
       }
+
+      const transactions = []
+
+      // For ERC20 tokens, add approval transaction first
+      if (!isEthEscrow) {
+        // Approve 0 first to avoid issues with tokens such as USDT that require approved amount to be 0 before calling approve
+        const approveZeroTransaction = {
+          target: values.tokenAddress as Address,
+          functionSignature: 'approve(address,uint256)',
+          calldata: encodeFunctionData({
+            abi: erc20Abi,
+            functionName: 'approve',
+            args: [escrowBundlerAddress, 0n],
+          }),
+          value: '0',
+        }
+        transactions.push(approveZeroTransaction)
+
+        const approveTransaction = {
+          target: values.tokenAddress as Address,
+          functionSignature: 'approve(address,uint256)',
+          calldata: encodeFunctionData({
+            abi: erc20Abi,
+            functionName: 'approve',
+            args: [escrowBundlerAddress, fundAmount],
+          }),
+          value: '0',
+        }
+        transactions.push(approveTransaction)
+      }
+
+      // Add the deploy escrow transaction
+      transactions.push(deployEscrowTransaction)
 
       try {
         addTransaction({
           type: TransactionType.ESCROW,
-          summary: `Create and fund new Escrow with ${formatEther(fundAmount)} ETH`,
-          transactions: [escrow],
+          summary: `Create and fund new Escrow with ${formattedAmount} ${tokenSymbol}`,
+          transactions,
         })
+        actions.resetForm()
       } catch (err) {
         console.error('Error Adding Transaction', err)
+      } finally {
+        setIsSubmitting(false)
       }
-      setIsSubmitting(false)
     },
     [addTransaction, chain.id, lastProposalId, treasury]
   )
