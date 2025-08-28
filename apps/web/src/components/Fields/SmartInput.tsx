@@ -19,7 +19,7 @@ import {
 
 interface SmartInputProps {
   id: string
-  value: string | number
+  value?: string | number
   type: string
   inputLabel?: string | ReactElement
   onChange: ChangeEventHandler
@@ -41,7 +41,7 @@ interface SmartInputProps {
 
 const SmartInput: React.FC<SmartInputProps> = ({
   id,
-  value,
+  value = '',
   type,
   inputLabel,
   onChange,

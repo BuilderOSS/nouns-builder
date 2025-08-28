@@ -63,11 +63,12 @@ export const useTokenMetadata = (
 export const useTokenMetadataSingle = (
   chainId?: CHAIN_ID,
   address?: Address,
-): TokenMetadataReturnType & { tokenMetadata?: TokenMetadata } => {
+): Omit<TokenMetadataReturnType, 'metadata'> & { tokenMetadata?: TokenMetadata } => {
   const result = useTokenMetadata(chainId, address ? [address] : undefined)
 
   return {
-    ...result,
+    isLoading: result.isLoading,
+    error: result.error,
     tokenMetadata: result.metadata?.[0],
   }
 }

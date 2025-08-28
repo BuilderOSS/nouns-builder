@@ -72,7 +72,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
   )
 
   // Token balance check using useReadContracts (only for balance)
-  const { data: tokenData, isLoading: isValidatingToken } = useReadContracts({
+  const { data: tokenData, isLoading: isLoadingTokenBalance } = useReadContracts({
     contracts: [
       {
         address: currentTokenAddress as `0x${string}`,
@@ -103,7 +103,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
 
       setCurrentTokenMetadata(metadata)
       onTokenMetadataChange(metadata)
-    } else if (currentTokenAddress && !isValidatingToken && !isLoadingTokenMetadata) {
+    } else if (currentTokenAddress && !isLoadingTokenBalance && !isLoadingTokenMetadata) {
       // If we have a token address but no data and not loading, it's invalid
       const metadata = {
         name: '',
@@ -120,7 +120,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
     tokenData,
     tokenMetadata,
     currentTokenAddress,
-    isValidatingToken,
+    isLoadingTokenBalance,
     isLoadingTokenMetadata,
     onTokenMetadataChange,
     chain.id,
@@ -225,7 +225,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
               }
             />
 
-            {(isValidatingToken || isLoadingTokenMetadata) && (
+            {(isLoadingTokenBalance || isLoadingTokenMetadata) && (
               <Text mt={'x2'} color={'text3'} fontSize={14}>
                 Validating token...
               </Text>
@@ -234,7 +234,7 @@ const SendErc20Form = ({ formik, onTokenMetadataChange }: SendErc20FormProps) =>
         )}
 
         {/* Token validation loading state */}
-        {(isValidatingToken || isLoadingTokenMetadata) && currentTokenAddress && (
+        {(isLoadingTokenBalance || isLoadingTokenMetadata) && currentTokenAddress && (
           <Box
             mt={'x5'}
             p={'x4'}

@@ -24,7 +24,6 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 
 import { BuilderTransaction, useProposalStore } from '../../stores'
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
-import { useEscrowFormStore } from '../TransactionForm/Escrow/EscrowUtils'
 import { ERROR_CODE, FormValues, validationSchema } from './fields'
 import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'
 import { Transactions } from './Transactions'
@@ -73,7 +72,6 @@ export const ReviewProposalForm = ({
   const [failedSimulations, setFailedSimulations] = useState<Array<SimulationOutput>>([])
   const [proposing, setProposing] = useState<boolean>(false)
   const [skipSimulation, setSkipSimulation] = useState<boolean>(false)
-  const { clear: clearEscrowForm } = useEscrowFormStore()
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
@@ -178,7 +176,6 @@ export const ReviewProposalForm = ({
           .then(() => {
             setProposing(false)
             clearProposal()
-            clearEscrowForm()
           })
       } catch (err: any) {
         setProposing(false)
@@ -194,16 +191,7 @@ export const ReviewProposalForm = ({
         setError(err.message)
       }
     },
-    [
-      router,
-      addresses,
-      hasThreshold,
-      clearProposal,
-      clearEscrowForm,
-      chain.id,
-      config,
-      skipSimulation,
-    ]
+    [router, addresses, hasThreshold, clearProposal, chain.id, config, skipSimulation]
   )
 
   if (isLoading) return null
