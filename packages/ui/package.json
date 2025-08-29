@@ -24,19 +24,26 @@
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@types/react-portal": "^4.0.7",
     "@types/uuid": "^9.0.0",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
+    "@vanilla-extract/vite-plugin": "^5.0.2",
+    "@vitejs/plugin-react": "^4.5.0",
     "eslint": "8.57.1",
     "formik": "^2.4.6",
     "framer-motion": "^12.12.1",
+    "jsdom": "^26.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tsup": "^8.3.5",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
   },
   "exports": {
     ".": {
@@ -81,6 +88,8 @@
     "dev": "tsup --watch",
     "dev:types": "tsc --emitDeclarationOnly --declaration --declarationMap",
     "lint": "eslint src --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts"
