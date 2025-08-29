@@ -5,10 +5,7 @@
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
-    "@faker-js/faker": "^7.6.0",
-    "@testing-library/react": "^16.3.0",
     "@types/react": "^19.1.5",
-    "@types/uuid": "^9.0.0",
     "@vercel/analytics": "^0.1.5",
     "eslint": "8.57.1",
     "next": "^15.3.2",

@@ -10,8 +10,7 @@
     "@vanilla-extract/sprinkles": "^1.5.0",
     "clsx": "^1.2.1",
     "react-polymorphic-types": "^2.0.0",
-    "react-popper": "^2.3.0",
-    "uuid": "^9.0.0"
+    "react-popper": "^2.3.0"
   },
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
@@ -20,7 +19,6 @@
     "@types/lodash-es": "^4.17.6",
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
-    "@types/uuid": "^9.0.0",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
     "esbuild-plugin-svgr": "^3.1.1",
     "eslint": "8.57.1",

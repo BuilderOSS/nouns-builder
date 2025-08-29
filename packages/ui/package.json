@@ -13,13 +13,10 @@
     "@vanilla-extract/css": "^1.17.2",
     "@vanilla-extract/recipes": "^0.5.7",
     "flatpickr": "^4.6.13",
-    "react-dropzone": "^14.2.3",
     "react-markdown": "^10.1.0",
     "react-mde": "^11.5.0",
     "react-portal": "^4.3.0",
-    "remark-gfm": "^4.0.1",
-    "swr": "^2.3.3",
-    "uuid": "^9.0.0"
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
@@ -31,7 +28,6 @@
     "@types/react": "^19.1.5",
     "@types/react-dom": "^19.1.5",
     "@types/react-portal": "^4.0.7",
-    "@types/uuid": "^9.0.0",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
     "@vanilla-extract/vite-plugin": "^5.0.2",
     "@vitejs/plugin-react": "^4.5.0",
