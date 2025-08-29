@@ -16,7 +16,7 @@ export type DaoMember = {
 
 export const memberSnapshotRequest = async (
   chainId: CHAIN_ID,
-  collectionAddress: string,
+  collectionAddress: string
 ): Promise<DaoMember[]> => {
   const data = await SDK.connect(chainId).daoMembersList({
     where: {
@@ -46,7 +46,7 @@ export const memberSnapshotRequest = async (
           .map((daoToken) => Number(daoToken.mintedAt))
           .sort((a, b) => a - b)[0] as number,
       }
-    }),
+    })
   )
 
   return formattedMembers

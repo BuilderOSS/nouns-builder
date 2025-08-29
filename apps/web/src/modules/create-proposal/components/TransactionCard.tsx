@@ -1,6 +1,5 @@
-import { atoms, Box, Flex, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Icon, Text } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-import { Icon } from 'src/components/Icon'
 
 import { BuilderTransaction } from '../stores'
 import { TransactionTypeIcon } from './TransactionTypeIcon'

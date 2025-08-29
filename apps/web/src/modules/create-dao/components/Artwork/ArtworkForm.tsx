@@ -1,9 +1,8 @@
-import { Button, Flex } from '@buildeross/zord'
+import { MarkdownEditor } from '@buildeross/ui'
+import { Button, Flex, Icon } from '@buildeross/zord'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
-import { MarkdownEditor } from 'src/components/MarkdownEditor'
 
 import { useFormStore } from '../../stores'
 import { ArtworkFormValues, validationSchemaArtwork } from './ArtworkForm.schema'

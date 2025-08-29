@@ -55,7 +55,9 @@ function MyComponent() {
   return (
     <Box p="x6" backgroundColor="background1" borderRadius="normal">
       <Stack gap="x4">
-        <Text size="lg" weight="heading">Welcome to Zord</Text>
+        <Text size="lg" weight="heading">
+          Welcome to Zord
+        </Text>
         <Text color="text2">A modern design system</Text>
         <Button variant="primary">Get Started</Button>
       </Stack>
@@ -83,7 +85,7 @@ import { Box } from '@buildeross/zord'
 <Box as="article" mb="x6">Article content</Box>
 
 // With responsive styles
-<Box 
+<Box
   p={{ '@initial': 'x4', '@768': 'x8' }}
   width={{ '@initial': '100%', '@1024': '50%' }}
 >
@@ -97,8 +99,7 @@ import { Box } from '@buildeross/zord'
 
 ```tsx
 import { Stack } from '@buildeross/zord'
-
-<Stack gap="x4" align="center">
+;<Stack gap="x4" align="center">
   <Text>Item 1</Text>
   <Text>Item 2</Text>
   <Text>Item 3</Text>
@@ -109,8 +110,7 @@ import { Stack } from '@buildeross/zord'
 
 ```tsx
 import { Flex } from '@buildeross/zord'
-
-<Flex justify="space-between" align="center" gap="x3">
+;<Flex justify="space-between" align="center" gap="x3">
   <Text>Left content</Text>
   <Button>Right action</Button>
 </Flex>
@@ -120,8 +120,7 @@ import { Flex } from '@buildeross/zord'
 
 ```tsx
 import { Grid } from '@buildeross/zord'
-
-<Grid columns={{ '@initial': 1, '@768': 2, '@1024': 3 }} gap="x6">
+;<Grid columns={{ '@initial': 1, '@768': 2, '@1024': 3 }} gap="x6">
   <Box>Grid item 1</Box>
   <Box>Grid item 2</Box>
   <Box>Grid item 3</Box>
@@ -180,7 +179,7 @@ import { Button } from '@buildeross/zord'
 ```tsx
 import { Input, InputField, Select } from '@buildeross/zord'
 
-<Input 
+<Input
   placeholder="Enter text"
   variant="default"
   size="md"
@@ -220,12 +219,7 @@ import { Icon, ChevronDown, Spinner } from '@buildeross/zord'
 
 ```tsx
 import { PopUp } from '@buildeross/zord'
-
-<PopUp
-  trigger={<Button>Hover me</Button>}
-  content="This is a tooltip"
-  placement="top"
-/>
+;<PopUp trigger={<Button>Hover me</Button>} content="This is a tooltip" placement="top" />
 ```
 
 ## Theming System
@@ -318,12 +312,12 @@ Zord's atomic system allows you to apply styles directly as props or use the ato
 
 ```tsx
 <Box
-  p="x6"                    // padding
-  m="x4"                    // margin
+  p="x6" // padding
+  m="x4" // margin
   backgroundColor="primary" // background color
-  borderRadius="normal"     // border radius
-  width="100%"             // width
-  height="x20"             // height
+  borderRadius="normal" // border radius
+  width="100%" // width
+  height="x20" // height
 />
 ```
 
@@ -332,13 +326,13 @@ Zord's atomic system allows you to apply styles directly as props or use the ato
 ```tsx
 <Box
   p={{
-    '@initial': 'x4',  // mobile
-    '@768': 'x6',      // tablet
-    '@1024': 'x8'      // desktop
+    '@initial': 'x4', // mobile
+    '@768': 'x6', // tablet
+    '@1024': 'x8', // desktop
   }}
   width={{
     '@initial': '100%',
-    '@1024': '50%'
+    '@1024': '50%',
   }}
 />
 ```
@@ -393,12 +387,12 @@ Zord uses a mobile-first responsive approach with these breakpoints:
 
 ```tsx
 const breakpoints = {
-  '@initial': 0,      // mobile first
-  '@480': '480px',    // small mobile
-  '@576': '576px',    // large mobile
-  '@768': '768px',    // tablet
-  '@1024': '1024px',  // desktop
-  '@1440': '1440px'   // large desktop
+  '@initial': 0, // mobile first
+  '@480': '480px', // small mobile
+  '@576': '576px', // large mobile
+  '@768': '768px', // tablet
+  '@1024': '1024px', // desktop
+  '@1440': '1440px', // large desktop
 }
 ```
 
@@ -406,7 +400,7 @@ const breakpoints = {
 
 ```tsx
 // In components
-<Box
+;<Box
   width={{ '@initial': '100%', '@768': '50%', '@1024': '33.333%' }}
   p={{ '@initial': 'x4', '@768': 'x6', '@1024': 'x8' }}
 >
@@ -416,7 +410,7 @@ const breakpoints = {
 // In stylesheets
 export const responsiveStyle = atoms({
   display: { '@initial': 'block', '@768': 'flex' },
-  flexDirection: { '@768': 'row', '@1024': 'column' }
+  flexDirection: { '@768': 'row', '@1024': 'column' },
 })
 ```
 
@@ -430,15 +424,10 @@ Zord includes helpful mixins for common patterns:
 import { mixins } from '@buildeross/zord'
 
 // Center content
-<Box className={mixins({ center: true })}>
-  Centered content
-</Box>
+;<Box className={mixins({ center: true })}>Centered content</Box>
 
 // In stylesheets
-export const centeredBox = style([
-  mixins({ center: true }),
-  atoms({ p: 'x6' })
-])
+export const centeredBox = style([mixins({ center: true }), atoms({ p: 'x6' })])
 ```
 
 ### Selectors and Pseudo-Classes
@@ -452,13 +441,13 @@ export const interactiveBox = style({
   selectors: {
     '&:hover': {
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 12px rgba(0, 0, 0, 0.15)'
+      boxShadow: '0 8px 12px rgba(0, 0, 0, 0.15)',
     },
     '&:focus': {
       outline: '2px solid blue',
-      outlineOffset: '2px'
-    }
-  }
+      outlineOffset: '2px',
+    },
+  },
 })
 ```
 
@@ -483,26 +472,26 @@ Zord provides a comprehensive color system with semantic naming:
 
 ```tsx
 // Background colors
-backgroundColor="background1"  // Primary background
-backgroundColor="background2"  // Secondary background
+backgroundColor = 'background1' // Primary background
+backgroundColor = 'background2' // Secondary background
 
 // Text colors
-color="text1"     // Primary text
-color="text2"     // Secondary text
-color="text3"     // Tertiary text
+color = 'text1' // Primary text
+color = 'text2' // Secondary text
+color = 'text3' // Tertiary text
 
 // Semantic colors
-color="primary"   // Brand primary
-color="secondary" // Brand secondary
-color="accent"    // Accent color
-color="positive"  // Success/positive
-color="negative"  // Error/negative
-color="warning"   // Warning/caution
+color = 'primary' // Brand primary
+color = 'secondary' // Brand secondary
+color = 'accent' // Accent color
+color = 'positive' // Success/positive
+color = 'negative' // Error/negative
+color = 'warning' // Warning/caution
 
 // Interactive states
-backgroundColor="primaryHover"    // Hover states
-backgroundColor="primaryActive"   // Active states
-backgroundColor="primaryDisabled" // Disabled states
+backgroundColor = 'primaryHover' // Hover states
+backgroundColor = 'primaryActive' // Active states
+backgroundColor = 'primaryDisabled' // Disabled states
 ```
 
 ## Typography Scale
@@ -545,7 +534,9 @@ function UserCard({ user }) {
           <Box size="x12" borderRadius="round" backgroundColor="background2" />
           <Stack gap="x1">
             <Text weight="heading">{user.name}</Text>
-            <Text size="sm" color="text2">{user.email}</Text>
+            <Text size="sm" color="text2">
+              {user.email}
+            </Text>
           </Stack>
         </Flex>
         <Text color="text2">{user.bio}</Text>
@@ -561,11 +552,15 @@ function UserCard({ user }) {
 // Use appropriate semantic elements
 <Box as="main" p="x8">
   <Box as="section" mb="x12">
-    <Heading as="h1" size="xl">Page Title</Heading>
+    <Heading as="h1" size="xl">
+      Page Title
+    </Heading>
   </Box>
-  
+
   <Box as="article">
-    <Heading as="h2" size="lg">Article Title</Heading>
+    <Heading as="h2" size="lg">
+      Article Title
+    </Heading>
     <Paragraph>Article content...</Paragraph>
   </Box>
 </Box>
@@ -629,6 +624,7 @@ pnpm lint
 ## Dependencies
 
 ### Runtime Dependencies
+
 - `@vanilla-extract/css` - CSS-in-TypeScript styling
 - `@vanilla-extract/recipes` - Component variants
 - `@vanilla-extract/sprinkles` - Atomic CSS utilities
@@ -638,10 +634,12 @@ pnpm lint
 - `react-polymorphic-types` - TypeScript utilities for polymorphic components
 
 ### Peer Dependencies
+
 - `react` ^19.1.0
 - `react-dom` ^19.1.0
 
 ### Development Dependencies
+
 - `@svgr/cli` - SVG to React component conversion
 - Vanilla Extract build plugins
 - TypeScript and ESLint configurations
@@ -649,25 +647,30 @@ pnpm lint
 ## Design Tokens
 
 ### Colors
+
 - Semantic color system with light/dark theme support
 - Consistent naming conventions
 - Interactive state variants (hover, active, disabled)
 
 ### Spacing
+
 - 4px-based spacing scale (x0 to x64)
 - Consistent margins, padding, and gaps
 - Responsive spacing support
 
 ### Typography
+
 - Inter font family by default
 - Consistent font sizes and line heights
 - Semantic text components
 
 ### Borders & Radii
+
 - Consistent border styles and widths
 - Border radius scale (tiny, small, normal, curved, phat, round)
 
 ### Shadows
+
 - Subtle shadow system
 - Consistent elevation levels
 
@@ -687,11 +690,13 @@ Zord supports modern browsers with CSS Grid and CSS Custom Properties support:
 ```tsx
 // Before (CSS Modules)
 import styles from './Component.module.css'
-<div className={styles.container}>Content</div>
+;<div className={styles.container}>Content</div>
 
 // After (Zord)
 import { Box } from '@buildeross/zord'
-<Box p="x6" backgroundColor="background1">Content</Box>
+;<Box p="x6" backgroundColor="background1">
+  Content
+</Box>
 ```
 
 ### From Styled Components
@@ -706,7 +711,7 @@ const Container = styled.div`
 
 // After (Zord)
 import { Box } from '@buildeross/zord'
-<Box p="x6" backgroundColor="background1" borderRadius="normal">
+;<Box p="x6" backgroundColor="background1" borderRadius="normal">
   Content
 </Box>
 ```

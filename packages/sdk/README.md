@@ -23,6 +23,7 @@ pnpm install @buildeross/sdk
 The SDK provides three main entry points for different functionality:
 
 ### Subgraph Functions - GraphQL Data Access
+
 Direct function imports for querying blockchain data via GraphQL subgraphs using the internal SDK client.
 
 ```typescript
@@ -36,6 +37,7 @@ const metadata = await encodedDaoMetadataRequest(
 ```
 
 ### EAS Functions - Attestation Services
+
 Direct function imports for Ethereum Attestation Service operations.
 
 ```typescript
@@ -54,9 +56,9 @@ const delegate = await getEscrowDelegate(
 ### Contract Interactions
 
 ```typescript
-import { 
-  auctionAbi, 
-  tokenAbi, 
+import {
+  auctionAbi,
+  tokenAbi,
   governorAbi,
   getDAOAddresses
 } from '@buildeross/sdk/contract'
@@ -109,7 +111,7 @@ import { getEscrowDelegate } from '@buildeross/sdk/eas'
 
 // Get escrow delegation attestations
 const delegate = await getEscrowDelegate(
-  '0x...', // tokenAddress  
+  '0x...', // tokenAddress
   '0x...', // treasuryAddress
   CHAIN_ID.BASE
 )
@@ -122,13 +124,13 @@ import { FarcasterSDK } from '@buildeross/sdk/farcaster'
 
 // Get Farcaster profile data
 const profile = await FarcasterSDK.getProfile({
-  fid: 123
+  fid: 123,
 })
 
 // Get casts related to a DAO
 const casts = await FarcasterSDK.getCasts({
   daoAddress: '0x...',
-  limit: 10
+  limit: 10,
 })
 ```
 
@@ -143,11 +145,7 @@ import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 import { getEscrowDelegate } from '@buildeross/sdk/eas'
 
 // Or import everything
-import { 
-  auctionAbi, 
-  encodedDaoMetadataRequest, 
-  getEscrowDelegate 
-} from '@buildeross/sdk'
+import { auctionAbi, encodedDaoMetadataRequest, getEscrowDelegate } from '@buildeross/sdk'
 ```
 
 ## Contract ABIs
@@ -155,6 +153,7 @@ import {
 The SDK includes ABIs for all Builder protocol contracts:
 
 ### Core Contracts
+
 - `auctionAbi` - Auction house contract
 - `tokenAbi` - DAO token (ERC721) contract
 - `governorAbi` - Governance contract
@@ -163,42 +162,50 @@ The SDK includes ABIs for all Builder protocol contracts:
 - `metadataAbi` - Metadata renderer contract
 
 ### Utility Contracts
+
 - `erc20Abi` - Standard ERC20 token interface
 - `erc721Abi` - Standard ERC721 NFT interface
 - `erc1155Abi` - Standard ERC1155 multi-token interface
 
 ### L2 Migration Contracts
+
 - `l1CrossDomainMessengerAbi` - L1 cross-domain messenger
 - `l2MigrationDeployerAbi` - L2 migration deployer
 - `merklePropertyMetadataAbi` - Merkle property metadata
 
 ### External Integrations
+
 - `zoraNftCreatorAbi` - Zora NFT creator contract
 
 ## GraphQL Operations
 
 ### DAO Queries
+
 - `daoQuery` - Complete DAO information
 - `daoMetadata` - DAO metadata and settings
 - `daoMembership` - User membership status
 - `daoVoters` - DAO voting participants
 
-### Auction Queries  
+### Auction Queries
+
 - `auctionHistory` - Historical auction data
 - `activeAuctions` - Currently active auctions
 - `getBids` - Auction bid history
 - `averageWinningBid` - Auction statistics
 
 ### Proposal Queries
+
 - `proposalQuery` - Single proposal details
 - `proposalsQuery` - Multiple proposals with filtering
 - `proposalOGMetadata` - Proposal social metadata
 
 ### Token Queries
+
 - `tokensQuery` - Token ownership and metadata
 - `tokenWithDao` - Token with associated DAO data
 
 ### Utility Queries
+
 - `exploreQueries` - Discover DAOs and content
 - `dashboardQuery` - User dashboard data
 - `homepageQuery` - Homepage featured content
@@ -206,36 +213,39 @@ The SDK includes ABIs for all Builder protocol contracts:
 ## Contract Utilities
 
 ### DAO Address Resolution
+
 ```typescript
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 
 const addresses = await getDAOAddresses({
   managerAddress: '0x...',
   tokenAddress: '0x...',
-  chainId: CHAIN_ID.BASE
+  chainId: CHAIN_ID.BASE,
 })
 // Returns: { token, auction, treasury, governor, metadata }
 ```
 
 ### Metadata Parsing
+
 ```typescript
 import { getMetadataAttributes } from '@buildeross/sdk/contract'
 
 const attributes = await getMetadataAttributes({
   contractAddress: '0x...',
   tokenId: '1',
-  chainId: CHAIN_ID.BASE
+  chainId: CHAIN_ID.BASE,
 })
 ```
 
 ### Proposal State Checking
+
 ```typescript
 import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
 
 const state = await getProposalState({
   proposalId: '1',
   governorAddress: '0x...',
-  chainId: CHAIN_ID.BASE
+  chainId: CHAIN_ID.BASE,
 })
 
 if (state === ProposalState.Active) {
@@ -288,6 +298,7 @@ pnpm lint
 ## Dependencies
 
 ### Runtime Dependencies
+
 - `@buildeross/constants` - Shared constants and addresses
 - `@buildeross/types` - TypeScript type definitions
 - `@buildeross/utils` - Utility functions
@@ -297,10 +308,12 @@ pnpm lint
 - `graphql-tag` - GraphQL query parsing
 
 ### Peer Dependencies
+
 - `viem` ^2.30.0 - Ethereum library
 - `wagmi` ^2.15.4 - React hooks for Ethereum
 
 ### Development Dependencies
+
 - `@graphql-codegen/*` - GraphQL code generation
 - `@wagmi/cli` - Wagmi CLI tools for ABI generation
 - TypeScript and ESLint configurations
@@ -310,13 +323,17 @@ pnpm lint
 The SDK uses automated code generation for type safety:
 
 ### GraphQL Types
+
 Auto-generated from subgraph schemas:
+
 ```bash
 pnpm codegen
 ```
 
 ### Contract ABIs
+
 Auto-generated from contract sources:
+
 ```bash
 pnpm generate-abis
 ```
@@ -326,7 +343,7 @@ pnpm generate-abis
 The SDK supports all Builder protocol chains:
 
 - **Ethereum Mainnet** (`CHAIN_ID.BASE`)
-- **Base** (`CHAIN_ID.BASE`) 
+- **Base** (`CHAIN_ID.BASE`)
 - **Optimism** (`CHAIN_ID.OPTIMISM`)
 - **Zora** (`CHAIN_ID.ZORA`)
 - **Testnets**: Sepolia, Base Sepolia, Optimism Sepolia, Zora Sepolia
@@ -339,10 +356,7 @@ The SDK includes comprehensive error handling:
 import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 
 try {
-  const metadata = await encodedDaoMetadataRequest(
-    CHAIN_ID.MAINNET,
-    '0x...'
-  )
+  const metadata = await encodedDaoMetadataRequest(CHAIN_ID.MAINNET, '0x...')
 } catch (error) {
   if (error.message.includes('Only L1 Chains are supported')) {
     // Handle unsupported chain
@@ -360,12 +374,12 @@ The SDK exports comprehensive TypeScript types:
 // Contract types
 import type { AuctionAbi, TokenAbi, GovernorAbi } from '@buildeross/sdk/contract'
 
-// GraphQL types  
-import type { 
+// GraphQL types
+import type {
   DaoFragment,
   ProposalFragment,
   AuctionFragment,
-  ProposalVoteSupport 
+  ProposalVoteSupport,
 } from '@buildeross/sdk/subgraph'
 
 // EAS types

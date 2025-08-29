@@ -21,10 +21,10 @@ pnpm install @buildeross/constants
 ### Contract Addresses
 
 ```typescript
-import { 
-  PUBLIC_MANAGER_ADDRESS, 
+import {
+  PUBLIC_MANAGER_ADDRESS,
   PUBLIC_BUILDER_ADDRESS,
-  PUBLIC_ZORA_NFT_CREATOR 
+  PUBLIC_ZORA_NFT_CREATOR,
 } from '@buildeross/constants'
 
 // Get manager address for specific chain
@@ -37,11 +37,11 @@ const builderAddress = PUBLIC_BUILDER_ADDRESS[CHAIN_ID.ETHEREUM]
 ### Chain Configuration
 
 ```typescript
-import { 
-  PUBLIC_DEFAULT_CHAINS, 
+import {
+  PUBLIC_DEFAULT_CHAINS,
   PUBLIC_ALL_CHAINS,
   L1_CHAINS,
-  L2_CHAINS 
+  L2_CHAINS,
 } from '@buildeross/constants'
 
 // Use default chains based on environment
@@ -64,10 +64,10 @@ const proposalCache = CACHE_TIMES.DAO_PROPOSAL
 ### API Configuration
 
 ```typescript
-import { 
+import {
   PUBLIC_SUBGRAPH_URL,
   PUBLIC_ALCHEMY_API_URL,
-  PUBLIC_ETHERSCAN_API_URL 
+  PUBLIC_ETHERSCAN_API_URL,
 } from '@buildeross/constants'
 
 // Access configured API endpoints
@@ -111,14 +111,17 @@ pnpm lint
 ## Dependencies
 
 ### Dependencies
+
 - `@buildeross/types`: Shared TypeScript types
 
 ### Peer Dependencies
+
 - `wagmi`: ^2.15.4 (for chain configurations)
 
 ## Exported Constants
 
 ### Contract Addresses
+
 - `PUBLIC_MANAGER_ADDRESS` - DAO manager contract addresses
 - `PUBLIC_L1_BRIDGE_ADDRESS` - Layer 1 bridge contract addresses
 - `PUBLIC_BUILDER_ADDRESS` - Builder treasury addresses
@@ -132,6 +135,7 @@ pnpm lint
 - `ALLOWED_MIGRATION_DAOS` - Whitelisted DAO addresses for migration
 
 ### Chain Configuration
+
 - `PUBLIC_DEFAULT_CHAINS` - Default chains based on environment
 - `PUBLIC_ALL_CHAINS` - All supported chains (mainnet + testnet)
 - `PUBLIC_IS_TESTNET` - Environment flag for testnet mode
@@ -139,6 +143,7 @@ pnpm lint
 - `L2_CHAINS` - Layer 2 chain IDs
 
 ### Cache Settings
+
 - `CACHE_TIMES` - Optimized cache durations for different data types
   - `DAO_INFO` - DAO metadata caching
   - `DAO_PROPOSAL` - Proposal data caching
@@ -152,6 +157,7 @@ pnpm lint
   - `RENDERER` - Metadata renderer caching
 
 ### API & Service Configuration
+
 - `PUBLIC_SUBGRAPH_URL` - GraphQL subgraph endpoints
 - `PUBLIC_ALCHEMY_API_KEY` - Alchemy API configuration
 - `PUBLIC_ETHERSCAN_API_KEY` - Etherscan API configuration

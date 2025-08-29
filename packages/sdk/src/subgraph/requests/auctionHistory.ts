@@ -6,7 +6,7 @@ import { Auction_OrderBy, OrderDirection } from '../sdk.generated'
 export const auctionHistoryRequest = async (
   chainId: CHAIN_ID,
   collectionAddress: string,
-  startTime: number,
+  startTime: number
 ) => {
   try {
     const data = await SDK.connect(chainId).auctionHistory({

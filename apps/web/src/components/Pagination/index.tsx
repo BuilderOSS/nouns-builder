@@ -1,7 +1,6 @@
-import { atoms, Flex } from '@buildeross/zord'
+import { atoms, Flex, Icon } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 
 type PaginationProps = {
   isFirst: boolean

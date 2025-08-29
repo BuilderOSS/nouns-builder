@@ -107,8 +107,8 @@ export const useArtworkUpload = ({
             url: encodeURI(
               fetchableUrl +
                 `/${sanitizeFileName(
-                  upload?.webkitRelativePath?.split('/').slice(1).join('/') ?? '',
-                )}`,
+                  upload?.webkitRelativePath?.split('/').slice(1).join('/') ?? ''
+                )}`
             ),
             path: upload?.webkitRelativePath,
             content: upload?.content,
@@ -293,7 +293,7 @@ export const useArtworkUpload = ({
           content: file,
           path: sanitizeFileName(file.webkitRelativePath.split('/').slice(1).join('/')),
         })),
-        { cache: true, onProgress: onUploadProgress },
+        { cache: true, onProgress: onUploadProgress }
       )
 
       const results = files.map((file) => ({
@@ -312,7 +312,7 @@ export const useArtworkUpload = ({
       return results
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    []
   )
 
   React.useEffect(() => {

@@ -3887,24 +3887,24 @@ export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
   operationName: string,
   operationType?: string,
-  variables?: any,
+  variables?: any
 ) => Promise<T>
 
 const defaultWrapper: SdkFunctionWrapper = (
   action,
   _operationName,
   _operationType,
-  _variables,
+  _variables
 ) => action()
 
 export function getSdk(
   client: GraphQLClient,
-  withWrapper: SdkFunctionWrapper = defaultWrapper,
+  withWrapper: SdkFunctionWrapper = defaultWrapper
 ) {
   return {
     activeAuctions(
       variables: ActiveAuctionsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<ActiveAuctionsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -3914,12 +3914,12 @@ export function getSdk(
           }),
         'activeAuctions',
         'query',
-        variables,
+        variables
       )
     },
     activeDaos(
       variables: ActiveDaosQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<ActiveDaosQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -3929,12 +3929,12 @@ export function getSdk(
           }),
         'activeDaos',
         'query',
-        variables,
+        variables
       )
     },
     auctionBids(
       variables: AuctionBidsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<AuctionBidsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -3944,12 +3944,12 @@ export function getSdk(
           }),
         'auctionBids',
         'query',
-        variables,
+        variables
       )
     },
     auctionHistory(
       variables: AuctionHistoryQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<AuctionHistoryQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -3959,12 +3959,12 @@ export function getSdk(
           }),
         'auctionHistory',
         'query',
-        variables,
+        variables
       )
     },
     daoInfo(
       variables: DaoInfoQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaoInfoQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -3974,12 +3974,12 @@ export function getSdk(
           }),
         'daoInfo',
         'query',
-        variables,
+        variables
       )
     },
     daoMembersList(
       variables?: DaoMembersListQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaoMembersListQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -3989,12 +3989,12 @@ export function getSdk(
           }),
         'daoMembersList',
         'query',
-        variables,
+        variables
       )
     },
     daoMembership(
       variables: DaoMembershipQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaoMembershipQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4004,12 +4004,12 @@ export function getSdk(
           }),
         'daoMembership',
         'query',
-        variables,
+        variables
       )
     },
     daoMetadata(
       variables: DaoMetadataQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaoMetadataQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4019,28 +4019,28 @@ export function getSdk(
           }),
         'daoMetadata',
         'query',
-        variables,
+        variables
       )
     },
     daoNextAndPreviousTokens(
       variables: DaoNextAndPreviousTokensQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaoNextAndPreviousTokensQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
           client.request<DaoNextAndPreviousTokensQuery>(
             DaoNextAndPreviousTokensDocument,
             variables,
-            { ...requestHeaders, ...wrappedRequestHeaders },
+            { ...requestHeaders, ...wrappedRequestHeaders }
           ),
         'daoNextAndPreviousTokens',
         'query',
-        variables,
+        variables
       )
     },
     daoOGMetadata(
       variables: DaoOgMetadataQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaoOgMetadataQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4050,12 +4050,12 @@ export function getSdk(
           }),
         'daoOGMetadata',
         'query',
-        variables,
+        variables
       )
     },
     daoVoters(
       variables?: DaoVotersQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaoVotersQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4065,12 +4065,12 @@ export function getSdk(
           }),
         'daoVoters',
         'query',
-        variables,
+        variables
       )
     },
     daosForDashboard(
       variables: DaosForDashboardQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaosForDashboardQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4080,12 +4080,12 @@ export function getSdk(
           }),
         'daosForDashboard',
         'query',
-        variables,
+        variables
       )
     },
     daosForUser(
       variables: DaosForUserQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<DaosForUserQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4095,12 +4095,12 @@ export function getSdk(
           }),
         'daosForUser',
         'query',
-        variables,
+        variables
       )
     },
     findAuctions(
       variables?: FindAuctionsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<FindAuctionsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4110,28 +4110,28 @@ export function getSdk(
           }),
         'findAuctions',
         'query',
-        variables,
+        variables
       )
     },
     findAuctionsForDaos(
       variables?: FindAuctionsForDaosQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<FindAuctionsForDaosQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
           client.request<FindAuctionsForDaosQuery>(
             FindAuctionsForDaosDocument,
             variables,
-            { ...requestHeaders, ...wrappedRequestHeaders },
+            { ...requestHeaders, ...wrappedRequestHeaders }
           ),
         'findAuctionsForDaos',
         'query',
-        variables,
+        variables
       )
     },
     syncStatus(
       variables?: SyncStatusQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<SyncStatusQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4141,12 +4141,12 @@ export function getSdk(
           }),
         'syncStatus',
         'query',
-        variables,
+        variables
       )
     },
     proposal(
       variables: ProposalQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<ProposalQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4156,12 +4156,12 @@ export function getSdk(
           }),
         'proposal',
         'query',
-        variables,
+        variables
       )
     },
     proposalOGMetadata(
       variables: ProposalOgMetadataQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<ProposalOgMetadataQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4171,12 +4171,12 @@ export function getSdk(
           }),
         'proposalOGMetadata',
         'query',
-        variables,
+        variables
       )
     },
     proposals(
       variables: ProposalsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<ProposalsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4186,12 +4186,12 @@ export function getSdk(
           }),
         'proposals',
         'query',
-        variables,
+        variables
       )
     },
     snapshots(
       variables?: SnapshotsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<SnapshotsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4201,12 +4201,12 @@ export function getSdk(
           }),
         'snapshots',
         'query',
-        variables,
+        variables
       )
     },
     tokenWithDao(
       variables: TokenWithDaoQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<TokenWithDaoQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4216,12 +4216,12 @@ export function getSdk(
           }),
         'tokenWithDao',
         'query',
-        variables,
+        variables
       )
     },
     tokens(
       variables?: TokensQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<TokensQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4231,12 +4231,12 @@ export function getSdk(
           }),
         'tokens',
         'query',
-        variables,
+        variables
       )
     },
     totalAuctionSales(
       variables: TotalAuctionSalesQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<TotalAuctionSalesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -4246,7 +4246,7 @@ export function getSdk(
           }),
         'totalAuctionSales',
         'query',
-        variables,
+        variables
       )
     },
   }

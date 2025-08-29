@@ -11,9 +11,7 @@
     "noUnusedLocals": false,
     "skipLibCheck": true,
     "noUnusedParameters": false,
-    "types": [
-      "vitest/globals"
-    ],
+    "types": ["@testing-library/jest-dom", "vitest/globals"],
     "plugins": [
       {
         "name": "next"

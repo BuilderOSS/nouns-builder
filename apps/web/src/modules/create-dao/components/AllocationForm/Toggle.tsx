@@ -1,6 +1,5 @@
-import { Flex } from '@buildeross/zord'
+import { Flex, Icon } from '@buildeross/zord'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 
 import { allocationToggle, allocationToggleButtonVariants } from './Toggle.css'
 

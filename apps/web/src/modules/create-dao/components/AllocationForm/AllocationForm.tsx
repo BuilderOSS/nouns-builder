@@ -1,14 +1,10 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { defaultBackButton, defaultFormButtonWithPrev } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
-import { Button, Flex } from '@buildeross/zord'
+import { Button, Flex, Icon } from '@buildeross/zord'
 import { FieldArray, Form, Formik, FormikProps } from 'formik'
 import sum from 'lodash/sum'
 import React, { useRef, useState } from 'react'
-import {
-  defaultBackButton,
-  defaultFormButtonWithPrev,
-} from 'src/components/Fields/styles.css'
-import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount } from 'wagmi'
 import { useShallow } from 'zustand/shallow'

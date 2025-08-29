@@ -1,7 +1,7 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { Avatar } from '@buildeross/ui'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
-import { Avatar } from 'src/components/Avatar'
 
 import { recentBidder } from '../Auction.css'
 

@@ -11,7 +11,7 @@ export interface TokensQueryResponse {
 export const tokensQuery = async (
   chain: CHAIN_ID,
   owner: string,
-  page?: number,
+  page?: number
 ): Promise<TokensQueryResponse> => {
   const limit = 12
   const res = await SDK.connect(chain).tokens({

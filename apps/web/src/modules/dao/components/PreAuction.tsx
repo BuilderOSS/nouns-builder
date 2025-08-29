@@ -7,8 +7,7 @@ import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { useAccount, useConfig, useSimulateContract, useWriteContract } from 'wagmi'
-import { readContract } from 'wagmi/actions'
-import { waitForTransactionReceipt } from 'wagmi/actions'
+import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
 
 import {
   preAuctionButtonVariants,

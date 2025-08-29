@@ -2,10 +2,9 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { getPropDates, type PropDate } from '@buildeross/sdk/eas'
 import { Proposal } from '@buildeross/sdk/subgraph'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { useMemo, useState } from 'react'
-import { Icon } from 'src/components/Icon'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,

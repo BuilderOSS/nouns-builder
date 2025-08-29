@@ -88,12 +88,12 @@ formatDuration(duration) // "3 days, 2 hours, 30 minutes"
 ### Data Helpers
 
 ```typescript
-import { 
-  isEmpty, 
-  flatten, 
-  isEqual, 
+import {
+  isEmpty,
+  flatten,
+  isEqual,
   compareAndReturn,
-  unpackOptionalArray 
+  unpackOptionalArray,
 } from '@buildeross/utils'
 
 // Check if object is empty
@@ -158,7 +158,9 @@ import { generateGradient, createGradientFromAddress } from '@buildeross/utils'
 const gradient = generateGradient(['#ff0000', '#00ff00', '#0000ff'])
 
 // Create gradient from wallet address
-const addressGradient = createGradientFromAddress('0x742d35Cc6634C0532925a3b8D2C31883a29B8f8D')
+const addressGradient = createGradientFromAddress(
+  '0x742d35Cc6634C0532925a3b8D2C31883a29B8f8D'
+)
 ```
 
 ## Modular Imports
@@ -191,13 +193,13 @@ import { addressSchema } from '@buildeross/utils/yup'
 
 const schema = yup.object().shape({
   recipient: addressSchema,
-  token: addressSchema
+  token: addressSchema,
 })
 
 // Validates Ethereum addresses
 schema.validate({
   recipient: '0x742d35Cc6634C0532925a3b8D2C31883a29B8f8D',
-  token: '0x...'
+  token: '0x...',
 })
 ```
 
@@ -207,12 +209,12 @@ schema.validate({
 import { durationSchema } from '@buildeross/utils/yup'
 
 const schema = yup.object().shape({
-  votingPeriod: durationSchema
+  votingPeriod: durationSchema,
 })
 
 // Validates duration objects
 schema.validate({
-  votingPeriod: { days: 3, hours: 0, minutes: 0, seconds: 0 }
+  votingPeriod: { days: 3, hours: 0, minutes: 0, seconds: 0 },
 })
 ```
 
@@ -223,13 +225,13 @@ import { urlSchema } from '@buildeross/utils/yup'
 
 const schema = yup.object().shape({
   website: urlSchema,
-  image: urlSchema
+  image: urlSchema,
 })
 
 // Validates URLs and IPFS URIs
 schema.validate({
   website: 'https://nouns.build',
-  image: 'ipfs://QmHash...'
+  image: 'ipfs://QmHash...',
 })
 ```
 
@@ -246,7 +248,7 @@ const config = createConfig({
   transports: {
     [mainnet.id]: http(),
     [base.id]: http(),
-  }
+  },
 })
 
 // Server-side configuration
@@ -326,6 +328,7 @@ pnpm lint
 ## Dependencies
 
 ### Runtime Dependencies
+
 - `@buildeross/constants` - Shared constants
 - `@buildeross/types` - TypeScript type definitions
 - `@buildeross/ipfs-service` - IPFS utilities
@@ -333,17 +336,20 @@ pnpm lint
 - `tinycolor2` - Color manipulation
 
 ### Peer Dependencies
+
 - `viem` ^2.30.0 - Ethereum library
 - `wagmi` ^2.15.4 - React hooks for Ethereum
 - `yup` ^1.6.1 - Schema validation
 
 ### Development Dependencies
+
 - `vitest` - Testing framework
 - TypeScript and ESLint configurations
 
 ## Utility Categories
 
 ### String Processing
+
 - `slugify` - Convert strings to URL-friendly slugs
 - `unslugify` - Convert slugs back to readable text
 - `sanitize` - Sanitize HTML content
@@ -352,17 +358,20 @@ pnpm lint
 - `isPossibleMarkdown` - Detect markdown syntax
 
 ### Number & Value Formatting
+
 - `formatCryptoVal` - Format crypto values with precision
 - `numberFormatter` - General number formatting
 - `BigNumberish` - Type for various number formats
 
 ### Address & Blockchain
+
 - `walletSnippet` - Create address snippets
 - `parseBlockchainDate` - Parse blockchain timestamps
 - `parseContractURI` - Parse contract metadata URIs
 - `chainIdToSlug` - Convert chain ID to URL slug
 
 ### Duration & Time
+
 - `toSeconds` - Convert duration to seconds
 - `fromSeconds` - Convert seconds to duration
 - `formatDuration` - Format duration for display
@@ -372,6 +381,7 @@ pnpm lint
 - `handleGMTOffset` - Handle timezone offsets
 
 ### Data Manipulation
+
 - `isEmpty` - Check if object is empty
 - `flatten` - Flatten nested objects
 - `isEqual` - Deep equality comparison
@@ -380,11 +390,13 @@ pnpm lint
 - `resolvedPromise` - Convert function to promise
 
 ### Validation & Schemas
+
 - `addressSchema` - Ethereum address validation
 - `durationSchema` - Duration object validation
 - `urlSchema` - URL and IPFS URI validation
 
 ### Encoding & Parsing
+
 - `encodePageNumToEndCursor` - Pagination cursor encoding
 - `formABI` - ABI formatting utilities
 - `fetch` - Enhanced fetch utilities

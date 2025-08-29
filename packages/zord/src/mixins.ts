@@ -16,9 +16,9 @@ export function mixins(mixinsProp: Partial<MixinsProp>) {
         mapValues(
           mixinsProp,
           (value, key) =>
-            value && (value === true ? get(styles, [key]) : get(styles, [key, value])),
-        ),
-      ),
-    ),
+            value && (value === true ? get(styles, [key]) : get(styles, [key, value]))
+        )
+      )
+    )
   )
 }

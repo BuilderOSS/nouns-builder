@@ -44,7 +44,7 @@ describe('formABI utilities', () => {
       'matchInputFromName(%s, %o) -> %o',
       (name: string, inputs: any[], expected: any) => {
         expect(matchInputFromName(name, inputs)).toEqual(expected)
-      },
+      }
     )
   })
 
@@ -63,7 +63,7 @@ describe('formABI utilities', () => {
       'normalizePathName(%s, %o) -> %s',
       (name: string, path: string[] | undefined, expected: string) => {
         expect(normalizePathName(name, path)).toEqual(expected)
-      },
+      }
     )
   })
 

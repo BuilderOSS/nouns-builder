@@ -2845,24 +2845,24 @@ export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
   operationName: string,
   operationType?: string,
-  variables?: any,
+  variables?: any
 ) => Promise<T>
 
 const defaultWrapper: SdkFunctionWrapper = (
   action,
   _operationName,
   _operationType,
-  _variables,
+  _variables
 ) => action()
 
 export function getSdk(
   client: GraphQLClient,
-  withWrapper: SdkFunctionWrapper = defaultWrapper,
+  withWrapper: SdkFunctionWrapper = defaultWrapper
 ) {
   return {
     escrowDelegates(
       variables: EscrowDelegatesQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<EscrowDelegatesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -2872,12 +2872,12 @@ export function getSdk(
           }),
         'escrowDelegates',
         'query',
-        variables,
+        variables
       )
     },
     propdates(
       variables: PropdatesQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
+      requestHeaders?: GraphQLClientRequestHeaders
     ): Promise<PropdatesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
@@ -2887,7 +2887,7 @@ export function getSdk(
           }),
         'propdates',
         'query',
-        variables,
+        variables
       )
     },
   }

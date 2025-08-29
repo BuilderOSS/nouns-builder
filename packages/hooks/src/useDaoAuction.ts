@@ -55,7 +55,7 @@ export const useDaoAuction = ({
 
   const [tokenId, highestBid, highestBidder, startTime, endTime] = unpackOptionalArray(
     auction,
-    6,
+    6
   )
 
   const { data: token } = useReadContract({

@@ -32,10 +32,10 @@ export type NftMetadataReturnType = {
 const fetchNftMetadata = async (
   chainId: CHAIN_ID,
   contractAddress: Address,
-  tokenId: string,
+  tokenId: string
 ): Promise<SerializedNftMetadata | null> => {
   const response = await fetch(
-    `/api/nft-metadata?chainId=${chainId}&contractAddress=${contractAddress}&tokenId=${tokenId}`,
+    `/api/nft-metadata?chainId=${chainId}&contractAddress=${contractAddress}&tokenId=${tokenId}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch NFT metadata')
@@ -47,7 +47,7 @@ const fetchNftMetadata = async (
 export const useNftMetadata = (
   chainId?: CHAIN_ID,
   contractAddress?: Address,
-  tokenId?: string,
+  tokenId?: string
 ): NftMetadataReturnType => {
   const { data, error, isLoading } = useSWR(
     !!contractAddress &&
@@ -61,12 +61,12 @@ export const useNftMetadata = (
       fetchNftMetadata(
         chainId as CHAIN_ID,
         contractAddress as Address,
-        tokenId as string,
+        tokenId as string
       ),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    },
+    }
   )
 
   return {

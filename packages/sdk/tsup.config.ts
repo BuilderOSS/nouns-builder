@@ -1,11 +1,17 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/*.ts', 'src/contract/*.ts', 'src/subgraph/*.ts', 'src/eas/*.ts', '!src/*.test.ts'],
+  entry: [
+    'src/*.ts',
+    'src/contract/*.ts',
+    'src/subgraph/*.ts',
+    'src/eas/*.ts',
+    '!src/*.test.ts',
+  ],
   format: ['cjs', 'esm'],
   dts: true,
+  sourcemap: true,
   clean: true,
-  splitting: true,
   treeshake: true,
   minify: 'terser',
   external: [
@@ -18,6 +24,6 @@ export default defineConfig({
     'graphql-tag',
     '@farcaster/hub-nodejs',
     '@sentry/nextjs',
-    'axios'
+    'axios',
   ],
 })

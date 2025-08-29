@@ -4,7 +4,7 @@ import { toSeconds } from '../helpers'
 
 export const durationValidationSchema = (
   min?: { value: number; description: string },
-  max?: { value: number; description: string },
+  max?: { value: number; description: string }
 ) =>
   Yup.object()
     .shape({

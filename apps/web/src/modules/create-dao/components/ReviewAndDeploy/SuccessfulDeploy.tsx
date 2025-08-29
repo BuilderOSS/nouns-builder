@@ -1,12 +1,13 @@
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { CopyButton } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import CopyButton from 'src/components/CopyButton/CopyButton'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
+import { useLayoutStore } from 'src/stores/useLayoutStore'
 import {
   deployPendingButtonStyle,
   infoSectionLabelStyle,
@@ -25,9 +26,9 @@ interface DeployedDaoProps extends DaoContractAddresses {
 
 const DEPLOYMENT_ERROR = {
   MISMATCHING_SIGNER:
-    'Oops, it looks like the owner of the token contract differs from your signer address. Please ensure that this transaction is handled by the same address.',
+    'Oops! It looks like the owner of the token contract differs from your signer address. Please ensure that this transaction is handled by the same address.',
   GENERIC:
-    'Oops! Looks like there was a problem. Please ensure that your input data is correct',
+    'Oops! It looks like there was a problem. Please ensure that your input data is correct',
 }
 
 export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
@@ -43,6 +44,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   const { general, ipfsUpload, orderedLayers, setFulfilledSections, resetForm } =
     useFormStore()
   const chain = useChainStore((x) => x.chain)
+  const { isMobile } = useLayoutStore()
   const { addresses, setAddresses } = useDaoStore()
   const [isPendingTransaction, setIsPendingTransaction] = useState<boolean>(false)
   const [deploymentError, setDeploymentError] = useState<string | undefined>()
@@ -63,19 +65,12 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   }, [setAddresses, token, metadata, auction, treasury, governor])
 
   /*
-
    Initialize Contracts
    - token contract
    - metadataRenderer contract
-
  */
 
-  /*
-
-    add properties with metadataRenderer
-
-  */
-
+  /* add properties with metadataRenderer */
   const transactions: Properties[] = React.useMemo(() => {
     if (!orderedLayers || !ipfsUpload) return []
 
@@ -135,23 +130,15 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     resetForm,
   ])
 
-  /*
-
-    handle smaller screen size
-
-   */
-  /* add mobile flag to layout store  */
-  const [isSmallDesktop, setIsSmallDesktop] = React.useState<boolean>(false)
-  React.useEffect(() => {
-    if (!!window) {
-      window.addEventListener('resize', handleResize)
-      setIsSmallDesktop(window.innerWidth <= 1200 && window.innerWidth >= 768)
-    }
-  }, [])
-
-  const handleResize = () => {
-    setIsSmallDesktop(window.innerWidth <= 1200 && window.innerWidth >= 768)
-  }
+  const copyAllText = React.useMemo(() => {
+    return `${general?.daoName ? `${general.daoName}:\n` : `all addresses:\n`}
+    token: ${token}
+    auction: ${auction}
+    treasury: ${treasury}
+    governor: ${governor}
+    metadata: ${metadata}
+    `
+  }, [general?.daoName, token, auction, treasury, governor, metadata])
 
   return (
     <Flex direction={'column'}>
@@ -163,7 +150,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
           Copy all addresses
         </Box>
         <Box cursor={'pointer'}>
-          <CopyButton title={general?.daoName} all={true} />
+          <CopyButton text={copyAllText} />
         </Box>
       </Flex>
       <Flex direction={'column'} style={{ boxSizing: 'border-box', width: '100%' }}>
@@ -174,7 +161,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
             fontSize={18}
             className={infoSectionValueVariants['default']}
           >
-            {isSmallDesktop ? walletSnippet(token) : token}
+            {isMobile ? walletSnippet(token) : token}
             <CopyButton text={token as string} />
           </Flex>
         </Flex>
@@ -186,7 +173,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
             className={infoSectionValueVariants['default']}
             mr={'x10'}
           >
-            {isSmallDesktop ? walletSnippet(auction) : auction}
+            {isMobile ? walletSnippet(auction) : auction}
             <CopyButton text={auction as string} />
           </Flex>
         </Flex>
@@ -197,7 +184,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
             fontSize={18}
             className={infoSectionValueVariants['default']}
           >
-            {isSmallDesktop ? walletSnippet(treasury) : treasury}
+            {isMobile ? walletSnippet(treasury) : treasury}
             <CopyButton text={treasury as string} />
           </Flex>
         </Flex>
@@ -208,7 +195,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
             fontSize={18}
             className={infoSectionValueVariants['default']}
           >
-            {isSmallDesktop ? walletSnippet(governor) : governor}
+            {isMobile ? walletSnippet(governor) : governor}
             <CopyButton text={governor as string} />
           </Flex>
         </Flex>
@@ -219,7 +206,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
             fontSize={18}
             className={infoSectionValueVariants['default']}
           >
-            {isSmallDesktop ? walletSnippet(metadata) : metadata}
+            {isMobile ? walletSnippet(metadata) : metadata}
             <CopyButton text={metadata as string} />
           </Flex>
         </Flex>
@@ -227,8 +214,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
 
       {deploymentError && (
         <Text variant={'paragraph-md'} color="negative">
-          Oops, it looks like the owner of the token contract differs from your signer
-          address. Please ensure that this transaction is handled by the same address.
+          {deploymentError}
         </Text>
       )}
 

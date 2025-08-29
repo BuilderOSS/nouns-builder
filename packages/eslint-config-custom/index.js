@@ -9,6 +9,7 @@ module.exports = {
     '@next/next/no-img-element': 'off',
     'react/no-unescaped-entities': 0,
     'unused-imports/no-unused-imports-ts': 2,
+    'import/no-duplicates': 'error',
     '@typescript-eslint/no-unused-vars': [
       'warn',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },

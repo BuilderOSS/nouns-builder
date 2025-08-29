@@ -1,5 +1,4 @@
-import { Box, Text } from '@buildeross/zord'
-import { color } from '@buildeross/zord'
+import { Box, color, Text } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useLayoutStore } from 'src/stores'
 import { formatEther } from 'viem'

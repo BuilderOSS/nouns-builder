@@ -1,7 +1,6 @@
-import { Box, Flex, Grid, Stack } from '@buildeross/zord'
+import { Box, Flex, Grid, Icon, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 
 import {
   footerHeading,

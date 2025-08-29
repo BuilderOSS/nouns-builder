@@ -3,6 +3,7 @@ import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { Avatar, FallbackImage } from '@buildeross/ui'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { parseContractURI } from '@buildeross/utils/parseContractURI'
@@ -10,8 +11,6 @@ import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import Image from 'next/legacy/image'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { Avatar } from 'src/components/Avatar/Avatar'
-import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
@@ -118,11 +117,12 @@ export const About: React.FC = () => {
         <Flex align="center" justify="flex-start" w="100%">
           {daoImage ? (
             <Box mr="x4">
-              <FallbackNextLegacyImage
+              <FallbackImage
                 srcList={getFetchableUrls(daoImage)}
-                layout="fixed"
-                objectFit="contain"
-                style={{ borderRadius: '100%' }}
+                style={{
+                  borderRadius: '100%',
+                  objectFit: 'contain',
+                }}
                 alt=""
                 height={52}
                 width={52}
