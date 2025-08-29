@@ -1,3 +1,2 @@
-export { default as AnimatedModal } from './AnimatedModal'
-export * from './Modal.css'
+export { AnimatedModal } from './AnimatedModal'
 export { SuccessModalContent } from './SuccessModalContent'

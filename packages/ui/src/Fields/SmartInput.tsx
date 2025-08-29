@@ -154,7 +154,6 @@ const SmartInput: React.FC<SmartInputProps> = ({
           )}
         </Flex>
       )}
-      1
       {(typeof value === 'number' || value) && perma ? (
         <Box position={'absolute'} className={permaInputPlaceHolderStyle}>
           {perma}

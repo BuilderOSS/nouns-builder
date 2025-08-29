@@ -5,7 +5,7 @@ import { Portal } from 'react-portal'
 
 import { animatedModal, animatedModalContent, animatedModalTrigger } from './Modal.css'
 
-interface AnimatedModalProps {
+export interface AnimatedModalProps {
   children: ReactElement
   open?: boolean
   close?: any
@@ -13,7 +13,7 @@ interface AnimatedModalProps {
   trigger?: ReactElement<any>
 }
 
-const AnimatedModal: React.FC<AnimatedModalProps> = ({
+export const AnimatedModal: React.FC<AnimatedModalProps> = ({
   children,
   open,
   close,
@@ -103,4 +103,3 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({
     </>
   )
 }
-export default AnimatedModal

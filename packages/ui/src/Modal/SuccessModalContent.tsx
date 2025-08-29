@@ -1,4 +1,4 @@
-import { Flex } from '@buildeross/zord'
+import { Flex, Icon, Spinner } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 
 import { confirmRemoveHeadingStyle, confirmRemoveHelper } from '../Fields/styles.css'
@@ -38,13 +38,13 @@ const SuccessModalContent: React.FC<SuccessModalContentProps> = ({
           borderRadius={'round'}
           backgroundColor={'positive'}
         >
-          {renderSuccessIcon ? renderSuccessIcon() : '✓'}
+          {renderSuccessIcon ? renderSuccessIcon() : <Icon id="check" fill="onAccent" />}
         </Flex>
       )}
 
       {pending && (
         <Flex mb={'x4'} mx={'x4'}>
-          {renderSpinner ? renderSpinner() : '⏳'}
+          {renderSpinner ? renderSpinner() : <Spinner mb={'x4'} mx={'x4'} />}
         </Flex>
       )}
 

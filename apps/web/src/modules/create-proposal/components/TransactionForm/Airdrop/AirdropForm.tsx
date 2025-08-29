@@ -47,9 +47,9 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
           >
             <Flex as={Form} direction={'column'}>
               <SmartInput
+                {...formik.getFieldProps('recipientAddress')}
                 type={FIELD_TYPES.TEXT}
                 formik={formik}
-                {...formik.getFieldProps('recipientAddress')}
                 id="recipientAddress"
                 inputLabel={'Recipient Wallet Address/ENS'}
                 placeholder={'0x...'}
