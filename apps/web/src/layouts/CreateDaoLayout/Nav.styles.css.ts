@@ -2,7 +2,12 @@ import * as z from '@buildeross/constants/layers'
 import { atoms } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
-export const NavContainer = style([atoms({ m: 'auto', maxW: '100%' })])
+export const NavContainer = style([
+  atoms({ m: 'auto', maxW: '100%' }),
+  {
+    zIndex: z.NAV_LAYER,
+  },
+])
 
 export const NavWrapper = style([
   atoms({
@@ -28,4 +33,9 @@ export const uploadNotificationWrapper = style({
       paddingBottom: 5,
     },
   },
+})
+
+export const navLogo = style({
+  zIndex: z.NAV_LAYER,
+  position: 'relative',
 })

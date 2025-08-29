@@ -1,13 +1,13 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { NetworkController } from '@buildeross/ui'
-import { atoms, Box, Flex, Label } from '@buildeross/zord'
+import { atoms, Box, Flex, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'
 import { NavMenu } from '../DefaultLayout/NavMenu'
-import { NavContainer, NavWrapper } from './Nav.styles.css'
+import { NavContainer, navLogo, NavWrapper } from './Nav.styles.css'
 
 export const Nav = () => {
   const isMounted = useIsMounted()
@@ -19,29 +19,21 @@ export const Nav = () => {
       <Flex align={'center'} className={NavWrapper} justify={'space-between'}>
         <Flex align={'center'}>
           <Link href={'/'} passHref>
-            <Flex direction={'row'} align="center">
-              <NetworkController.Mainnet>
-                <NogglesLogo
-                  fill={'white'}
-                  className={atoms({ width: 'x23', cursor: 'pointer' })}
-                />
-              </NetworkController.Mainnet>
-
+            <Stack className={navLogo}>
+              <NogglesLogo
+                fill={'black'}
+                className={atoms({ width: 'x23', cursor: 'pointer' })}
+              />
               <NetworkController.Testnet>
-                <NogglesLogo
-                  fill={'white'}
-                  className={atoms({ width: 'x23', cursor: 'pointer' })}
+                <TestnetLogo
+                  className={atoms({
+                    width: 'x23',
+                    cursor: 'pointer',
+                    mt: 'x1',
+                  })}
                 />
               </NetworkController.Testnet>
-
-              <Box ml={'x3'} display={{ '@initial': 'none', '@768': 'block' }}>
-                <Label color={'onAccent'}>Builder</Label>
-
-                <NetworkController.Testnet>
-                  <TestnetLogo />
-                </NetworkController.Testnet>
-              </Box>
-            </Flex>
+            </Stack>
           </Link>
         </Flex>
 
