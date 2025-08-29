@@ -13,8 +13,5 @@ export default defineConfig({
       identifiers: 'short',
     }),
   ],
-  external: [
-    'react',
-    'react-dom',
-  ],
+  external: ['react', 'react-dom'],
 })

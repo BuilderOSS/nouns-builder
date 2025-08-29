@@ -8,14 +8,14 @@ export default defineConfig({
   clean: true,
   treeshake: true,
   external: [
-    'viem', 
-    'wagmi', 
-    'wagmi/chains', 
-    'yup', 
+    'viem',
+    'wagmi',
+    'wagmi/chains',
+    'yup',
     'lodash',
     'tinycolor2',
     '@farcaster/frame-wagmi-connector',
     '@rainbow-me/rainbowkit',
-    '@rainbow-me/rainbowkit/wallets'
+    '@rainbow-me/rainbowkit/wallets',
   ],
 })

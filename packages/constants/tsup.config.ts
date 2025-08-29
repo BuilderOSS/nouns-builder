@@ -9,4 +9,3 @@ export default defineConfig({
   treeshake: true,
   external: ['wagmi', 'wagmi/chains'],
 })
-

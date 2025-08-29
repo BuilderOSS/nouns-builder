@@ -57,22 +57,26 @@ Add linting scripts to your `package.json`:
 ## Configuration Details
 
 ### Extended Configurations
+
 - `next` - Next.js specific rules
 - `turbo` - Turborepo optimizations
 - `prettier` - Prettier integration
 - `plugin:prettier/recommended` - Prettier plugin recommendations
 
 ### Active Plugins
+
 - `@typescript-eslint` - TypeScript-specific linting
 - `unused-imports` - Automatic unused import removal
 
 ### Key Rules
 
 #### TypeScript
+
 - `@typescript-eslint/no-unused-vars`: Warns on unused vars (allows underscore prefix)
 - Unused imports automatically removed
 
 #### React/Next.js
+
 - `@next/next/no-html-link-for-pages`: Disabled for flexibility
 - `react/jsx-key`: Disabled (handled by TypeScript)
 - `react/display-name`: Disabled for functional components
@@ -80,6 +84,7 @@ Add linting scripts to your `package.json`:
 - `react/no-unescaped-entities`: Disabled
 
 #### Code Quality
+
 - `prettier/prettier`: Warns on formatting issues
 - `no-console`: Warns on console usage (allows error/warn)
 

@@ -11,6 +11,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
+    deps: {
+      // https://github.com/vanilla-extract-css/vanilla-extract/issues/666#issuecomment-1112736262
+      fallbackCJS: true,
+    },
   },
   resolve: {
     alias: {
