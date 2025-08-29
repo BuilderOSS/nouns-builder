@@ -2,7 +2,12 @@ import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { AnimatedModal, SuccessModalContent, TextInput } from '@buildeross/ui'
+import {
+  AnimatedModal,
+  MarkdownEditor,
+  SuccessModalContent,
+  TextInput,
+} from '@buildeross/ui'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'
@@ -10,7 +15,6 @@ import { Field, FieldProps, Formik } from 'formik'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import { ErrorResult } from 'src/services/errorResult'
 import { SimulationOutput, SimulationResult } from 'src/services/simulationService'
 import { useChainStore } from 'src/stores/useChainStore'

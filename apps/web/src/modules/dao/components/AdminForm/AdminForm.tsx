@@ -4,6 +4,7 @@ import { AddressType } from '@buildeross/types'
 import {
   DaysHoursMinsSecs,
   FIELD_TYPES,
+  MarkdownEditor,
   Radio,
   SingleImageUpload,
   SmartInput,
@@ -21,7 +22,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
 import { useRouter } from 'next/router'
 import React, { BaseSyntheticEvent } from 'react'
-import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import { TokenAllocation } from 'src/modules/create-dao'
 import {
   BuilderTransaction,

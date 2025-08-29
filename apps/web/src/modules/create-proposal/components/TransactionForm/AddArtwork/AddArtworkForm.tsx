@@ -1,11 +1,10 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { type Property } from '@buildeross/sdk/contract'
+import { NetworkController, Uploading } from '@buildeross/ui'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React, { useState } from 'react'
-import { NetworkController } from 'src/components/NetworkController'
-import { Uploading } from 'src/components/Uploading'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
 
 import { ArtworkUpload } from '../../ArtworkUpload'

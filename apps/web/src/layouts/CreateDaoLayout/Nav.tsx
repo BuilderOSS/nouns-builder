@@ -1,8 +1,8 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
+import { NetworkController } from '@buildeross/ui'
 import { atoms, Box, Flex, Label } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-import { NetworkController } from 'src/components/NetworkController'
 
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'

@@ -1,8 +1,8 @@
-export interface VideoProps {
+export interface VideoPreviewProps {
   src: string
 }
 
-export const Video: React.FC<VideoProps> = ({ src }) => {
+export const VideoPreview: React.FC<VideoPreviewProps> = ({ src }) => {
   return (
     <video
       src={src}

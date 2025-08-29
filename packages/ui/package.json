@@ -14,7 +14,10 @@
     "@vanilla-extract/recipes": "^0.5.7",
     "flatpickr": "^4.6.13",
     "react-dropzone": "^14.2.3",
+    "react-markdown": "^10.1.0",
+    "react-mde": "^11.5.0",
     "react-portal": "^4.3.0",
+    "remark-gfm": "^4.0.1",
     "swr": "^2.3.3",
     "uuid": "^9.0.0"
   },

@@ -1,13 +1,12 @@
 import { Box, Icon } from '@buildeross/zord'
-import NextImage from 'next/image'
 import { useCallback, useRef, useState } from 'react'
 
-export interface AudioProps {
+export interface AudioPreviewProps {
   src: string
   cover?: string
 }
 
-export const Audio: React.FC<AudioProps> = ({ src, cover }) => {
+export const AudioPreview: React.FC<AudioPreviewProps> = ({ src, cover }) => {
   const [playing, setPlaying] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -22,11 +21,10 @@ export const Audio: React.FC<AudioProps> = ({ src, cover }) => {
       {!cover ? (
         <Box backgroundColor="background2" w="100%" h="100%" borderRadius={'curved'} />
       ) : (
-        <NextImage
+        <img
           src={cover}
           width={400}
           height={400}
-          unoptimized
           alt="Preview"
           style={{
             objectFit: 'cover',

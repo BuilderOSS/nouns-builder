@@ -1,12 +1,13 @@
 import { Box, Flex, Icon } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
+
 import {
   animatedPanel,
   animatedPanelInner,
   panelCloseButton,
   panelProposalWrapper,
-} from 'src/styles/Proposals.css'
+} from './Panel.css'
 
 const Panel: React.FC<{
   isOpen: boolean

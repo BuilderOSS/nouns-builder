@@ -1,9 +1,9 @@
 import { Stack } from '@buildeross/zord'
 import React, { ReactElement } from 'react'
 
-import AccordionItem from './AccordionItem'
+import { AccordionItem } from './AccordionItem'
 
-const Accordion: React.FC<{
+export const Accordion: React.FC<{
   items: { title: string | ReactElement; description: ReactElement }[]
 }> = ({ items }) => {
   return (
@@ -14,5 +14,3 @@ const Accordion: React.FC<{
     </Stack>
   )
 }
-
-export default Accordion

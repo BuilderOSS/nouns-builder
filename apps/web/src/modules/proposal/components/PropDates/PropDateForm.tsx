@@ -8,7 +8,12 @@ import {
 import { useEnsData } from '@buildeross/hooks'
 import { MessageType, type PropDate } from '@buildeross/sdk/eas'
 import { CHAIN_ID } from '@buildeross/types'
-import { AnimatedModal, Avatar, SuccessModalContent } from '@buildeross/ui'
+import {
+  AnimatedModal,
+  Avatar,
+  MarkdownEditor,
+  SuccessModalContent,
+} from '@buildeross/ui'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
@@ -17,7 +22,6 @@ import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { MarkdownEditor } from 'src/components/MarkdownEditor'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { getAddress, type Hex, zeroHash } from 'viem'
 import { useChainId, useConfig } from 'wagmi'

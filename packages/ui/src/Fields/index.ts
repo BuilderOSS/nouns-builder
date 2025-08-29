@@ -1,7 +1,7 @@
 export { default as DatePicker } from './DatePicker'
 export { default as DaysHoursMins } from './DaysHoursMins'
 export { default as DaysHoursMinsSecs } from './DaysHoursMinsSecs'
-export { FieldError } from './FieldError'
+export { default as FieldError } from './FieldError'
 export { default as FieldSwitch } from './FieldSwitch'
 export { default as MinsSecs } from './MinsSecs'
 export { default as NumberInput } from './NumberInput'

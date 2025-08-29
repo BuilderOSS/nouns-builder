@@ -1,10 +1,9 @@
-import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui'
+import { Accordion, DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { FieldArray, Form, Formik } from 'formik'
 import { truncate } from 'lodash'
 import { useCallback, useState } from 'react'
-import Accordion from 'src/components/Home/accordian'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { formatUnits, parseUnits } from 'viem'
 

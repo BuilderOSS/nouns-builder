@@ -1,8 +1,7 @@
+import { Accordion } from '@buildeross/ui'
 import { defaultFileDownloadStyle } from '@buildeross/ui/styles'
 import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'
-
-import Accordion from './accordian'
 
 const FAQ = () => {
   const items = [

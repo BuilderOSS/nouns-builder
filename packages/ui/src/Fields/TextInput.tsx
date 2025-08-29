@@ -2,7 +2,7 @@ import { Box } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ChangeEventHandler, ReactElement } from 'react'
 
-import { FieldError } from './FieldError'
+import FieldError from './FieldError'
 import {
   defaultFieldsetStyle,
   defaultInputLabelStyle,

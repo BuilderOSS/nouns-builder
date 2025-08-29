@@ -2,9 +2,9 @@ import { atoms, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
 
-import { accordionItem, accordionName } from '../../../styles/home.css'
+import { accordionItem, accordionName } from './Accordion.css'
 
-const AccordionItem: React.FC<{
+export const AccordionItem: React.FC<{
   title: string | ReactElement
   description: ReactElement
 }> = ({ title, description }) => {
@@ -59,5 +59,3 @@ const AccordionItem: React.FC<{
     </Stack>
   )
 }
-
-export default AccordionItem

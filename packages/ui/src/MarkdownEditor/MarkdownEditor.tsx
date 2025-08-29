@@ -1,13 +1,14 @@
 import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
-import { FieldError } from '@buildeross/ui'
-import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { Flex, Stack } from '@buildeross/zord'
 import React, { ReactElement } from 'react'
 import ReactMarkdown from 'react-markdown'
 import ReactMde from 'react-mde'
 import remarkGfm from 'remark-gfm'
 
-interface MarkdownEditorProps {
+import { FieldError } from '../Fields'
+import { defaultInputLabelStyle } from '../styles'
+
+export type MarkdownEditorProps = {
   onChange: (value: string) => void
   value: string
   inputLabel: string | ReactElement

@@ -64,7 +64,7 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
     type = 'button',
     ...props
   }: PolymorphicPropsWithoutRef<ButtonProps, E>,
-  ref: ForwardedRef<E>,
+  ref: ForwardedRef<E>
 ) {
   const Element: ElementType = as || ButtonDefaultElement
 

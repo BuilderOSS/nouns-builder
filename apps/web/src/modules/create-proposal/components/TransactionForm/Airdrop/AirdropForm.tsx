@@ -1,10 +1,9 @@
-import { FIELD_TYPES, SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES, Input, SmartInput } from '@buildeross/ui'
 import { Box, Button, Flex } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Form, Formik } from 'formik'
 import type { FC } from 'react'
 import { useCallback } from 'react'
-import Input from 'src/components/Input/Input'
 
 import airdropFormSchema, { AirdropFormValues } from './AirdropForm.schema'
 

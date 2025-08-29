@@ -1,9 +1,9 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
+import { NetworkController } from '@buildeross/ui'
 import { atoms, Flex, Label, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-import { NetworkController } from 'src/components/NetworkController'
 
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'

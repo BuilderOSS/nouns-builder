@@ -4,8 +4,10 @@ interface FieldErrorProps {
   message: string
 }
 
-export const FieldError = ({ message }: FieldErrorProps) => (
+const FieldError = ({ message }: FieldErrorProps) => (
   <Box mt={'x4'} color={'negative'}>
     {message}
   </Box>
 )
+
+export default FieldError

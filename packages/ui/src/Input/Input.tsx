@@ -1,4 +1,3 @@
-import { FieldError } from '@buildeross/ui'
 import {
   Box,
   Flex,
@@ -9,9 +8,10 @@ import {
 import { Field } from 'formik'
 import type { FC, ReactNode } from 'react'
 
+import { FieldError } from '../Fields'
 import { input } from './Input.css'
 
-interface CustomInputProps extends InputComponentProps<typeof ZordInput> {
+export type CustomInputProps = InputComponentProps<typeof ZordInput> & {
   label?: string | ReactNode
   secondaryLabel?: string | ReactNode
   name?: string
@@ -24,7 +24,7 @@ interface CustomInputProps extends InputComponentProps<typeof ZordInput> {
   step?: number | string
 }
 
-const Input: FC<CustomInputProps> = ({
+export const Input: FC<CustomInputProps> = ({
   name,
   label,
   secondaryLabel,
@@ -86,5 +86,3 @@ const Input: FC<CustomInputProps> = ({
     </>
   )
 }
-
-export default Input
