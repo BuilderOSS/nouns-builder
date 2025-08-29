@@ -74,7 +74,7 @@ describe('normalizeIPFSUrl', () => {
   it('handles directory gateway urls', () => {
     const directoryCIDWithPath = `https://my.gateway.com/ipfs/${VALID_CID}/filename.txt`
     expect(normalizeIPFSUrl(directoryCIDWithPath)).toBe(
-      `ipfs://${VALID_CID}/filename.txt`,
+      `ipfs://${VALID_CID}/filename.txt`
     )
   })
   it('supports query strings and fragments', () => {

@@ -20,7 +20,7 @@ const getDAOAddresses = async (chainId: CHAIN_ID, tokenAddress: AddressType) => 
   const escrowDelegate = await getEscrowDelegate(
     tokenAddress,
     treasury as AddressType,
-    chainId,
+    chainId
   )
 
   const hasMissingAddresses = Object.values(addresses).includes(NULL_ADDRESS)

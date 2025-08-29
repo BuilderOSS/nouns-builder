@@ -1,6 +1,7 @@
 import { Box, Grid } from '@buildeross/zord'
 import React from 'react'
-import { imageGridWrapperStyle, previewGeneratedImageStyle } from 'src/styles/Artwork.css'
+
+import { imageGridWrapperStyle, previewGeneratedImageStyle } from '../Artwork/Artwork.css'
 
 export const ImageGrid: React.FC<{ generatedImages: string[] }> = ({
   generatedImages,

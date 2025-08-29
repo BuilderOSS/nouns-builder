@@ -11,7 +11,7 @@ export const averageWinningBid = async (chainId: CHAIN_ID, tokenAddress: Address
   })
 
   const nonZeroAuctions = history.dao?.auctions.filter(
-    (x) => x.winningBid?.amount && BigInt(x.winningBid?.amount) > 0n,
+    (x) => x.winningBid?.amount && BigInt(x.winningBid?.amount) > 0n
   )
 
   if (!nonZeroAuctions?.length) return BigInt(0)

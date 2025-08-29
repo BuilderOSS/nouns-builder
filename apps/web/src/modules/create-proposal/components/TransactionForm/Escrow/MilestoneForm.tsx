@@ -1,8 +1,7 @@
-import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui'
+import { DatePicker, FIELD_TYPES, SingleMediaUpload, SmartInput } from '@buildeross/ui'
 import { Button, Flex, Icon, Stack } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React, { useCallback } from 'react'
-import SingleMediaUpload from 'src/components/SingleMediaUpload/SingleMediaUpload'
 
 import { EscrowFormValues } from './EscrowForm.schema'
 

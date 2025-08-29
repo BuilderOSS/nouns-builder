@@ -65,7 +65,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist .turbo",
     "dev": "tsup --watch",
     "lint": "eslint src --fix",
     "test": "vitest run",

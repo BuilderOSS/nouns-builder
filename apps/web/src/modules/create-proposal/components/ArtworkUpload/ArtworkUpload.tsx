@@ -7,6 +7,11 @@ import {
 } from '@buildeross/hooks'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { type Property } from '@buildeross/sdk/contract'
+import {
+  ArtworkPreview,
+  ArtworkUpload as UploadComponent,
+  LayerOrdering,
+} from '@buildeross/ui'
 import * as Sentry from '@sentry/nextjs'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
@@ -18,11 +23,8 @@ import React, {
   useEffect,
   useMemo,
 } from 'react'
-import { ArtworkPreview, ArtworkUpload as UploadComponent } from 'src/components/Artwork'
-import { LayerOrdering } from 'src/components/Artwork/LayerOrdering'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
-
-import { artworkPreviewPanel } from './ArtworkUpload.css'
+import { artworkPreviewPanel } from 'src/styles/Artwork.css'
 
 const previewVariants = {
   closed: {

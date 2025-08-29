@@ -34,7 +34,7 @@ export interface PropDate {
 
 const getPropdateMessage = async (
   messageType: number,
-  message: string,
+  message: string
 ): Promise<PropdateMessage> => {
   try {
     switch (messageType) {
@@ -54,7 +54,7 @@ const getPropdateMessage = async (
   } catch (error) {
     console.error(
       'Error parsing propdate message:',
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     )
     return { content: message } as PropdateMessage
   }
@@ -63,7 +63,7 @@ const getPropdateMessage = async (
 export async function getPropDates(
   tokenAddress: string,
   chainId: CHAIN_ID,
-  propId: string,
+  propId: string
 ): Promise<PropDate[]> {
   // Input validation
   if (!isAddress(tokenAddress)) {
@@ -97,7 +97,7 @@ export async function getPropDates(
       async (attestation: AttestationFragment): Promise<PropDate> => {
         const decodedData = JSON.parse(attestation.decodedDataJson) as DecodedData[]
         const messageType = Number(
-          getDecodedValue(decodedData, 'messageType') ?? 0,
+          getDecodedValue(decodedData, 'messageType') ?? 0
         ) as MessageType
         const message = getDecodedValue(decodedData, 'message') as string
         const parsedMessage = await getPropdateMessage(messageType, message)
@@ -114,7 +114,7 @@ export async function getPropDates(
           txid: attestation.txid as Hex,
         }
         return propdate
-      },
+      }
     )
 
     const propdates = await Promise.all(propdatePromises)
@@ -125,7 +125,7 @@ export async function getPropDates(
   } catch (error) {
     console.error(
       'Error fetching attestations:',
-      error instanceof Error ? error.message : String(error),
+      error instanceof Error ? error.message : String(error)
     )
     return []
   }

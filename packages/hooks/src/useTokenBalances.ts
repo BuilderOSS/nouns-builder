@@ -22,10 +22,10 @@ export type TokenBalancesReturnType = {
 
 const fetchTokenBalances = async (
   chainId: CHAIN_ID,
-  address: Address,
+  address: Address
 ): Promise<TokenBalance[]> => {
   const response = await fetch(
-    `/api/token-balances?chainId=${chainId}&address=${address}`,
+    `/api/token-balances?chainId=${chainId}&address=${address}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch token balances')
@@ -36,7 +36,7 @@ const fetchTokenBalances = async (
 
 export const useTokenBalances = (
   chainId?: CHAIN_ID,
-  address?: Address,
+  address?: Address
 ): TokenBalancesReturnType => {
   const { data, error, isLoading } = useSWR(
     !!address && !!chainId && isAddress(address)
@@ -46,7 +46,7 @@ export const useTokenBalances = (
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    },
+    }
   )
 
   return {

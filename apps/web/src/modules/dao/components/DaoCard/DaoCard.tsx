@@ -8,7 +8,7 @@ import { Box, Flex, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { FallbackNextImage } from 'src/components/FallbackImage'
+import { FallbackNextImage } from 'src/components/FallbackNextImage'
 
 import { auction, daoImage, name, title } from './DaoCard.css'
 import { Detail } from './Detail'

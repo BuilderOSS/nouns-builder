@@ -1,1 +1,1 @@
-export * from './components/Fields/styles.css'
+export * from './Fields/styles.css'

@@ -7,7 +7,7 @@ import { SDK } from '../client'
 
 export const encodedDaoMetadataRequest = async (
   chain: CHAIN_ID,
-  tokenAddress: AddressType,
+  tokenAddress: AddressType
 ) => {
   if (!L1_CHAINS.find((x) => x === chain)) throw new Error('Only L1 Chains are supported')
 
@@ -26,6 +26,6 @@ export const encodedDaoMetadataRequest = async (
         property.items,
         { baseUri: property.ipfsBaseUri, extension: property.ipfsExtension },
       ],
-    }),
+    })
   )
 }

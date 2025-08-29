@@ -6,14 +6,14 @@ import {
 import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
 import { Button, Flex } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
+
 import {
   previewGridWrapperStyle,
   previewHeadingStyle,
   previewLayerSelectorWrapperStyle,
   previewModalWrapperStyle,
   previewWrapperInnerStyle,
-} from 'src/styles/Artwork.css'
-
+} from '../Artwork/Artwork.css'
 import { ImageGrid } from './ImageGrid'
 import { LayerMenu } from './LayerMenu'
 

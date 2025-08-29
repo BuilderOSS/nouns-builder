@@ -5,6 +5,7 @@ import {
   DaysHoursMinsSecs,
   FIELD_TYPES,
   Radio,
+  SingleImageUpload,
   SmartInput,
   StickySave,
 } from '@buildeross/ui'
@@ -21,7 +22,6 @@ import isEqual from 'lodash/isEqual'
 import { useRouter } from 'next/router'
 import React, { BaseSyntheticEvent } from 'react'
 import { MarkdownEditor } from 'src/components/MarkdownEditor'
-import SingleImageUpload from 'src/components/SingleImageUpload/SingleImageUpload'
 import { TokenAllocation } from 'src/modules/create-dao'
 import {
   BuilderTransaction,

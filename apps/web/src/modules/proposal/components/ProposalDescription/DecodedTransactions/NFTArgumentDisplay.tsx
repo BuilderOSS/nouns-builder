@@ -1,9 +1,9 @@
 import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { DecodedArg } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import { FallbackImage } from 'src/components/FallbackImage'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'

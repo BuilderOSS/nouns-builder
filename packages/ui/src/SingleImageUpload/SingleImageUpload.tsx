@@ -2,15 +2,15 @@ import { getFetchableUrls, normalizeIPFSUrl, uploadFile } from '@buildeross/ipfs
 import { Box, Flex, Spinner, Stack } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ReactElement, useEffect, useState } from 'react'
-import { FallbackNextImage } from 'src/components/FallbackImage'
 
+import { FallbackImage } from '../FallbackImage'
 import {
   defaultUploadStyle,
   singleImageUploadWrapper,
   uploadErrorBox,
 } from './SingleImageUpload.css'
 
-interface SingleImageUploadProps {
+export type SingleImageUploadProps = {
   formik: FormikProps<any>
   id: string
   inputLabel: string | ReactElement
@@ -18,7 +18,7 @@ interface SingleImageUploadProps {
   value: string
 }
 
-const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
+export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
   id,
   formik,
   inputLabel,
@@ -84,12 +84,13 @@ const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
           {isUploading && <Spinner alignSelf={'center'} m={'x0'} />}
 
           {!isUploading && isMounted && !!value && (
-            <FallbackNextImage
+            <FallbackImage
               srcList={getFetchableUrls(value)}
-              fill
               alt="Avatar"
               style={{
                 objectFit: 'contain',
+                width: '100%',
+                height: '100%',
               }}
             />
           )}

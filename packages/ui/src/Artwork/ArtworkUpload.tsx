@@ -1,4 +1,7 @@
 import { ArtworkUploadError, ImageProps } from '@buildeross/hooks/useArtworkUpload'
+import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import React, { BaseSyntheticEvent, ReactElement } from 'react'
+
 import {
   defaultFileDownloadStyle,
   defaultHelperTextStyle,
@@ -10,9 +13,7 @@ import {
   noneSelectedStyle,
   uploadErrorBox,
   uploadSuccessBox,
-} from '@buildeross/ui/styles'
-import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
-import React, { BaseSyntheticEvent, ReactElement } from 'react'
+} from '../styles'
 
 interface ArtworkUploadProps {
   inputLabel: string | ReactElement

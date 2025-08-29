@@ -4,6 +4,7 @@ import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
 import type { AddressType } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui'
 import { defaultBackButton } from '@buildeross/ui/styles'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
@@ -11,7 +12,6 @@ import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { FallbackImage } from 'src/components/FallbackImage'
 import { NetworkController } from 'src/components/NetworkController'
 import { formatFounderAllocation } from 'src/modules/create-dao'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -57,9 +57,9 @@ const DEPLOYMENT_ERROR = {
   NO_FOUNDER:
     'Oops! It looks like you have no founders set. Please go back to the allocation step and add at least one founder address.',
   GENERIC:
-    'Oops! Looks like there was a problem handling the dao deployment. Please ensure that input data from all the previous steps is correct',
+    'Oops! It looks like there was a problem handling the dao deployment. Please ensure that input data from all the previous steps is correct',
   INVALID_ALLOCATION_PERCENTAGE:
-    'Oops! Looks like there are undefined founder allocation values. Please go back to the allocation step to ensure that valid allocation values are set.',
+    'Oops! It looks like there are undefined founder allocation values. Please go back to the allocation step to ensure that valid allocation values are set.',
 }
 
 export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {

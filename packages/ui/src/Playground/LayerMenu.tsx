@@ -2,11 +2,12 @@ import { ImageProps } from '@buildeross/hooks'
 import { SelectedTraitsProps } from '@buildeross/hooks/useArtworkPreview'
 import { atoms, Box, Flex, Icon, Stack } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, useCallback } from 'react'
+
 import {
   layerSelectStyle,
   selectTraitNameStyle,
   selectTraitNameWrapper,
-} from 'src/styles/Artwork.css'
+} from '../Artwork/Artwork.css'
 
 interface LayerProps {
   trait: string

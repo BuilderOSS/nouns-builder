@@ -7,7 +7,7 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { FallbackNextImage } from 'src/components/FallbackImage'
+import { FallbackNextImage } from 'src/components/FallbackNextImage'
 
 import { DaoProposalCard } from './DaoProposalCard'
 import { DashboardDaoProps } from './Dashboard'

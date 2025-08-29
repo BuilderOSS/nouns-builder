@@ -65,7 +65,7 @@ export const useDelegate = (initialState: State): [state: State, actions: any] =
   const edit = useCallback(() => dispatch({ type: ActionType.EDIT }), [])
   const update = useCallback(
     (address: string) => dispatch({ type: ActionType.UPDATE, payload: address }),
-    [],
+    []
   )
   const close = useCallback(() => dispatch({ type: ActionType.CLOSE }), [])
 

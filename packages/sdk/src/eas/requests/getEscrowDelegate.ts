@@ -12,7 +12,7 @@ const BUILDER_DAO_OPS_MULTISIG = `0x58eAEfBEd9EEFbC564E302D0AfAE0B113E42eAb3`
 export async function getEscrowDelegate(
   tokenAddress: string,
   treasuryAddress: string,
-  chainId: CHAIN_ID,
+  chainId: CHAIN_ID
 ): Promise<Hex | null> {
   // Input validation
   if (!isAddress(tokenAddress)) {
@@ -61,7 +61,7 @@ export async function getEscrowDelegate(
     try {
       // Get the first attestation from priority
       const decodedData = JSON.parse(
-        sortedAttestations[0].decodedDataJson,
+        sortedAttestations[0].decodedDataJson
       ) as DecodedData[]
 
       const escrowDelegateAddress = getDecodedValue(decodedData, 'daoMultiSig') as Hex

@@ -15,7 +15,7 @@ export const getProposals = async (
   chainId: CHAIN_ID,
   token: string,
   limit: number = 100,
-  page?: number,
+  page?: number
 ): Promise<ProposalsResponse> => {
   try {
     const data = await SDK.connect(chainId).proposals({
@@ -37,7 +37,7 @@ export const getProposals = async (
             state: await getProposalState(
               chainId,
               proposal.dao.governorAddress,
-              proposal.proposalId,
+              proposal.proposalId
             ),
           }
 
@@ -50,7 +50,7 @@ export const getProposals = async (
             }
           }
           return baseProposal
-        }),
+        })
       ),
       pageInfo: {
         hasNextPage: data.proposals.reverse()[0].proposalNumber !== 1,

@@ -2,6 +2,7 @@ import { ImageProps, OrderedTraits } from '@buildeross/hooks'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React from 'react'
+
 import {
   artworkSettingsBox,
   artworkSettingsBoxDropping,
@@ -10,7 +11,7 @@ import {
   artworkSettingsNameDropping,
   artworkSettingsPropertyCount,
   artworkSettingsPropertyName,
-} from 'src/styles/Artwork.css'
+} from './Artwork.css'
 
 export const getLayerName = (idx: number, layers?: OrderedTraits): string => {
   if (idx === 0) {

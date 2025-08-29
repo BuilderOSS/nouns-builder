@@ -17,6 +17,6 @@ export const useIsContract = ({
       const isEOA =
         !code || code === '0x' || (typeof code === 'string' && /^0x0*$/i.test(code))
       return !isEOA
-    },
+    }
   )
 }

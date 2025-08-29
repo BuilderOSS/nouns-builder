@@ -13,7 +13,7 @@ export type GetPropertyItemsResponse = {
 
 export const getPropertyItems = async (
   chainId: CHAIN_ID,
-  metadataAddress: AddressType,
+  metadataAddress: AddressType
 ): Promise<GetPropertyItemsResponse> => {
   const baseParams = { address: metadataAddress, abi: metadataAbi, chainId: chainId }
   const propertiesCount = await readContract(serverConfig, {
@@ -49,7 +49,7 @@ export const getPropertyItems = async (
     chainId,
     metadataAddress,
     propertiesCount,
-    propertyItemsCount,
+    propertyItemsCount
   )
 
   return {
@@ -97,7 +97,7 @@ const getProperties = async (
   chainId: CHAIN_ID,
   metadataAddress: AddressType,
   propertiesCount: number,
-  propertyItemsCount: number[],
+  propertyItemsCount: number[]
 ): Promise<Property[]> => {
   const propertiesPromise = Array(propertiesCount)
     .fill(0)
@@ -109,7 +109,7 @@ const getProperties = async (
             .fill(0)
             .map(async (_, j) => {
               return await getItemFromStorage(chainId, metadataAddress, i, j)
-            }),
+            })
         ),
       }
     })
@@ -153,7 +153,7 @@ const getProperties = async (
       acc[allReferenceSlots[index]] = group
       return acc
     },
-    {} as Record<number, IPFSGroup>,
+    {} as Record<number, IPFSGroup>
   )
 
   const finalProperties = properties.map((property) => {
@@ -179,7 +179,7 @@ const getProperties = async (
 const getPropertyName = async (
   chainId: CHAIN_ID,
   metadataAddress: AddressType,
-  propertyIndex: number,
+  propertyIndex: number
 ) => {
   const baseParams = { address: metadataAddress, abi: metadataAbi, chainId: chainId }
   const property = await readContract(serverConfig, {
@@ -195,7 +195,7 @@ async function decodeStringFromStorage(
   chainId: CHAIN_ID,
   contractAddress: `0x${string}`,
   slot: `0x${string}`,
-  rawValue: `0x${string}`,
+  rawValue: `0x${string}`
 ): Promise<string> {
   if (!rawValue || rawValue === '0x') return ''
 
@@ -242,14 +242,14 @@ export async function getItemFromStorage(
   chainId: CHAIN_ID,
   contractAddress: `0x${string}`,
   propertyIndex: number,
-  itemIndex: number,
+  itemIndex: number
 ): Promise<{ referenceSlot: number; name: string }> {
   const publicClient = getProvider(chainId)
 
   // Step 1: keccak256(slot of 'properties' = 6)
   const propertiesBaseSlot = 6n
   const baseSlot = keccak256(
-    encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [propertiesBaseSlot]),
+    encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [propertiesBaseSlot])
   )
 
   const baseSlotBN = hexToBigInt(baseSlot)
@@ -258,7 +258,7 @@ export async function getItemFromStorage(
 
   // Step 2: keccak256(itemsSlot) gives base of dynamic array
   const itemsBase = keccak256(
-    encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [itemsSlot]),
+    encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [itemsSlot])
   )
 
   const itemsBaseBN = hexToBigInt(itemsBase)
@@ -286,7 +286,7 @@ export async function getItemFromStorage(
         chainId,
         contractAddress,
         toHex(nameSlot, { size: 32 }),
-        namePointer,
+        namePointer
       )
     : ''
 

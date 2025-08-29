@@ -1,9 +1,14 @@
-import { DatePicker, FIELD_TYPES, SmartInput, TextArea } from '@buildeross/ui'
+import {
+  DatePicker,
+  FIELD_TYPES,
+  SingleMediaUpload,
+  SmartInput,
+  TextArea,
+} from '@buildeross/ui'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
-import SingleMediaUpload from 'src/components/SingleMediaUpload/SingleMediaUpload'
 import { DropdownSelect } from 'src/modules/create-proposal'
 import { useLayoutStore } from 'src/stores'
 import { useDaoStore } from 'src/stores/useDaoStore'

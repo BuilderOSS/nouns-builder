@@ -4,7 +4,7 @@ import { Box, Button, ButtonProps, Flex, Icon, PopUp, Text } from '@buildeross/z
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
-const INSUFFICIENT_BALANCE_ERROR =
+export const INSUFFICIENT_BALANCE_ERROR =
   'Insufficient balance. Please add ETH to your wallet to complete the transaction.'
 
 export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type' | 'ref'> & {
@@ -76,10 +76,10 @@ export const ContractButton = ({
               setButtonError(
                 'Failed to switch network. Please switch to ' +
                   chainName +
-                  ' manually in your wallet.',
+                  ' manually in your wallet.'
               )
             },
-          },
+          }
         )
       }
 
@@ -94,7 +94,7 @@ export const ContractButton = ({
       userBalance,
       handleClick,
       onConnectWallet,
-    ],
+    ]
   )
 
   return (

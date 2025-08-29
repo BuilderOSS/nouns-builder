@@ -12,7 +12,7 @@ export const getBids = async (chainId: CHAIN_ID, collection: string, tokenId: st
         x.auction?.bids?.map((bid: AuctionBidFragment) => ({
           ...bid,
           amount: formatEther(bid.amount),
-        })),
+        }))
       )
   } catch (error) {
     console.error(error)

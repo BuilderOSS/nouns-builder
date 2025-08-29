@@ -2,15 +2,15 @@ import { normalizeIPFSUrl, pinataOptions, uploadFile } from '@buildeross/ipfs-se
 import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ReactElement, useEffect, useState } from 'react'
-import { defaultInputLabelStyle } from 'src/modules/create-proposal/components/TransactionForm/CustomTransaction/CustomTransaction.css'
 
+import { defaultInputLabelStyle } from '../styles'
 import {
   defaultUploadStyle,
   singleMediaUploadWrapper,
   uploadErrorBox,
 } from './SingleMediaUpload.css'
 
-interface SingleImageUploadProps {
+export type SingleMediaUploadProps = {
   formik: FormikProps<any>
   id: string
   inputLabel: string | ReactElement
@@ -19,7 +19,7 @@ interface SingleImageUploadProps {
   onUploadSettled?: () => void
 }
 
-const SingleMediaUpload: React.FC<SingleImageUploadProps> = ({
+export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   id,
   formik,
   inputLabel,
@@ -158,5 +158,3 @@ const SingleMediaUpload: React.FC<SingleImageUploadProps> = ({
     </Flex>
   )
 }
-
-export default SingleMediaUpload

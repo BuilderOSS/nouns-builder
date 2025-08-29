@@ -1,5 +1,3 @@
-import 'react-mde/lib/styles/css/react-mde-all.css'
-
 import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
 import { FieldError } from '@buildeross/ui'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'

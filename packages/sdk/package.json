@@ -72,7 +72,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist .turbo",
     "codegen": "graphql-codegen",
     "dev": "tsup --watch",
     "generate-abis": "node ./scripts/generate-abis.js",

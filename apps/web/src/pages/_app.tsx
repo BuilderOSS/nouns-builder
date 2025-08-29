@@ -7,6 +7,7 @@ import '@rainbow-me/rainbowkit/styles.css'
 import 'src/styles/globals.css'
 import 'src/styles/styles.css'
 import 'flatpickr/dist/themes/light.css'
+import 'react-mde/lib/styles/css/react-mde-all.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'

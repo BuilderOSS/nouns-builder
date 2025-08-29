@@ -17,7 +17,7 @@ export interface DecodedData {
 
 export const getDecodedValue = (
   decoded: DecodedData[],
-  name: string,
+  name: string
 ): string | undefined => {
   return decoded.find((d) => d.name === name)?.value.value
 }

@@ -118,7 +118,7 @@ export const gradientForAddress = (address: string): string[] => {
   let startSaturation = bScaleRange(bytes[7], 72, 85)
   let endSaturation = Math.max(
     Math.max(startSaturation + 30, 90),
-    bScaleRange(bytes[10], 60, 92),
+    bScaleRange(bytes[10], 60, 92)
   )
   startSaturation = startSaturation * 0.5 + startLightness * 0.5
   endSaturation = endSaturation * 0.5 + endLightness * 0.5
@@ -159,7 +159,7 @@ export const gradientForAddress = (address: string): string[] => {
 
 export const bgForAddress = (
   address: string | undefined | null,
-  src: string | undefined | null = null,
+  src: string | undefined | null = null
 ): string => {
   if (address && !src) {
     const gradient = gradientForAddress(address)

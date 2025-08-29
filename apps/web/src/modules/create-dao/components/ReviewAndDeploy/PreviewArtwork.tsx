@@ -1,8 +1,7 @@
-import { AnimatedModal } from '@buildeross/ui'
+import { AnimatedModal, Playground } from '@buildeross/ui'
 import { flatten } from '@buildeross/utils/helpers'
 import { Button } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
-import { Playground } from 'src/components/Artwork/Playground'
 
 import { useFormStore } from '../../stores'
 

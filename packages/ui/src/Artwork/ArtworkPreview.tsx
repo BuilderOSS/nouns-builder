@@ -1,13 +1,13 @@
 import { OrderedTraits } from '@buildeross/hooks/useArtworkPreview'
 import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
-import { AnimatedModal } from '@buildeross/ui'
 import { Flex, Icon } from '@buildeross/zord'
 
+import { AnimatedModal } from '../Modal'
+import { Playground } from '../Playground'
 import { artworkPreviewGenerateButton, artworkPreviewImageWrapper } from './Artwork.css'
-import { Playground } from './Playground'
 
 export interface ArtworkPreviewProps {
-  canvas: React.MutableRefObject<HTMLCanvasElement | null>
+  canvas: React.RefObject<HTMLCanvasElement | null>
   generatedImages: any[]
   generateStackedImage: () => Promise<void>
   images: ImageProps[] | undefined

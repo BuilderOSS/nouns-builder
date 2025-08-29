@@ -5,8 +5,8 @@ import { bgForAddress } from '@buildeross/utils/gradient'
 import { Box, BoxProps } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
 
+import { FallbackImage } from '../FallbackImage'
 import { avatarVariants, squareAvatar } from './Avatar.css'
-import { FallbackImage } from './FallbackImage'
 
 export interface DaoAvatarProps extends Omit<BoxProps, 'size'> {
   collectionAddress: string
@@ -38,7 +38,7 @@ export function DaoAvatar({
   // Pass null as src to bgForAddress when image fails, so it shows gradient
   const background = useMemo(
     () => bgForAddress(collectionAddress, imageHasError ? null : src),
-    [collectionAddress, src, imageHasError],
+    [collectionAddress, src, imageHasError]
   )
 
   // Reset error state when src changes
