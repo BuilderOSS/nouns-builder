@@ -42,9 +42,18 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
       onSetActiveDropdown(undefined)
       const selected = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)
       if (selected) setChain(selected)
-      switchChain({ chainId })
+      if (address) {
+        switchChain(
+          { chainId },
+          {
+            onError(error) {
+              console.error(`Failed to switch chain:`, error)
+            },
+          }
+        )
+      }
     },
-    [onSetActiveDropdown, setChain, hasNetwork, switchChain]
+    [onSetActiveDropdown, setChain, hasNetwork, switchChain, address]
   )
 
   const isSelectedChain = useCallback(
