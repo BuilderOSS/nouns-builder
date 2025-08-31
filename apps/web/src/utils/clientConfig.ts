@@ -4,12 +4,13 @@ import { farcasterFrame as miniAppConnector } from '@farcaster/frame-wagmi-conne
 import { connectorsForWallets } from '@rainbow-me/rainbowkit'
 import {
   coinbaseWallet,
+  injectedWallet,
   ledgerWallet,
   rainbowWallet,
   safeWallet,
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets'
-import { createConfig, CreateConnectorFn, injected } from 'wagmi'
+import { createConfig, CreateConnectorFn } from 'wagmi'
 
 const appName = 'Nouns Builder'
 const appDescription = 'Nouns Builder'
@@ -28,6 +29,7 @@ const rainbowConnectors = connectorsForWallets(
     {
       groupName: 'Popular',
       wallets: [
+        injectedWallet,
         rainbowWallet,
         coinbaseWallet,
         walletConnectWallet,
@@ -48,7 +50,6 @@ const rainbowConnectors = connectorsForWallets(
 
 const connectors: CreateConnectorFn[] = [
   ...rainbowConnectors,
-  injected(),
   miniAppConnector as unknown as CreateConnectorFn,
 ]
 
