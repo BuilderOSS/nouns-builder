@@ -90,6 +90,7 @@ export const navMenuBurger = style([
     borderRadius: 'round',
   }),
   {
+    zIndex: z.NAV_BUTTON_LAYER + 1,
     transition:
       'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
     selectors: {
@@ -200,6 +201,18 @@ export const chainPopUpButton = style({
   selectors: {
     '&:hover': {
       background: color.background2,
+    },
+  },
+})
+
+export const wrongNetworkButton = style({
+  transition:
+    'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
+  background: `rgba(240, 50, 50, 0.1)`,
+  color: color.negative,
+  selectors: {
+    '&:hover': {
+      background: `rgba(240, 50, 50, 0.3)`,
     },
   },
 })
