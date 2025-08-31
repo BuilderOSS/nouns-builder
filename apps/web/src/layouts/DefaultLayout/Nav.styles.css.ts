@@ -203,3 +203,15 @@ export const chainPopUpButton = style({
     },
   },
 })
+
+export const wrongNetworkButton = style({
+  transition:
+    'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
+  background: `rgba(240, 50, 50, 0.1)`,
+  color: color.negative,
+  selectors: {
+    '&:hover': {
+      background: `rgba(240, 50, 50, 0.3)`,
+    },
+  },
+})

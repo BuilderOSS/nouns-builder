@@ -51,7 +51,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     address: address!,
     chainId: selectedChain.id,
   })
-  const { disconnect } = useDisconnect()
+  const { disconnectAsync } = useDisconnect()
 
   const userBalance = balance?.formatted
     ? `${formatCryptoVal(balance?.formatted)} ETH`
@@ -85,6 +85,12 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
       document.body.style.overflow = 'unset'
     }
   }, [isMobile, activeDropdown])
+
+  const onDisconnect = React.useCallback(() => {
+    disconnectAsync().catch((e) => {
+      console.error(`Failed to disconnect: ${e}`)
+    })
+  }, [disconnectAsync])
 
   const renderUserContent = (isMobileFullscreen = false) => (
     <>
@@ -179,7 +185,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         className={disconnectButton}
         variant={'outline'}
         color="negative"
-        onClick={() => disconnect()}
+        onClick={onDisconnect}
         id={'close-modal'}
       >
         Disconnect
