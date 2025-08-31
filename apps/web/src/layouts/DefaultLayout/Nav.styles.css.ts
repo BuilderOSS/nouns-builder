@@ -90,6 +90,7 @@ export const navMenuBurger = style([
     borderRadius: 'round',
   }),
   {
+    zIndex: z.NAV_BUTTON_LAYER + 1,
     transition:
       'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
     selectors: {

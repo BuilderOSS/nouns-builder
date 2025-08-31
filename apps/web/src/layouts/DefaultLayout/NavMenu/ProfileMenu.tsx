@@ -1,5 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { MOBILE_PROFILE_MENU_LAYER, NAV_LAYER } from '@buildeross/constants/layers'
+import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constants/layers'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { MyDaosResponse } from '@buildeross/sdk/subgraph'
@@ -332,7 +332,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           borderStyle="solid"
           style={{
             position: 'relative',
-            zIndex: NAV_LAYER,
+            zIndex: NAV_BUTTON_LAYER + 1,
             borderRadius: '50%',
             borderColor: 'rgba(0, 0, 0, 0.5)',
           }}
