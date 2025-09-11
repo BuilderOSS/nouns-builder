@@ -6,7 +6,6 @@ import {
   coinbaseWallet,
   injectedWallet,
   ledgerWallet,
-  metaMaskWallet,
   rainbowWallet,
   safeWallet,
   walletConnectWallet,
@@ -30,11 +29,10 @@ const rainbowConnectors = connectorsForWallets(
     {
       groupName: 'Popular',
       wallets: [
-        metaMaskWallet,
+        injectedWallet,
         rainbowWallet,
         coinbaseWallet,
         walletConnectWallet,
-        injectedWallet,
         ledgerWallet,
         safeWallet,
       ],

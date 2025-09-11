@@ -1,4 +1,4 @@
-import { L2_CHAINS, TESTNET_CHAINS } from '@buildeross/constants'
+import { L2_CHAINS, PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { Box, Button, ButtonProps, Flex, PopUp, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import Link from 'next/link'
@@ -8,7 +8,7 @@ import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
 const INSUFFICIENT_BALANCE_ERROR =
-  'Insufficient balance. Add ETH to your wallet (via bridging or exchange) to complete the transaction.'
+  'Insufficient balance. Please add ETH to your wallet to complete the transaction.'
 
 export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type' | 'ref'> & {
   // Accept an optional click event; callers may also pass a 0-arg handler.
@@ -30,9 +30,9 @@ export const ContractButton = ({
   })
 
   const shouldShowBridgeLink = useMemo(() => {
+    if (PUBLIC_IS_TESTNET) return false
     const isL2 = L2_CHAINS.includes(appChain.id)
-    const isTestnet = TESTNET_CHAINS.some((chain) => chain.id === appChain.id)
-    return isL2 && !isTestnet && userBalance?.value === 0n
+    return isL2 && userBalance?.value === 0n
   }, [appChain.id, userBalance?.value])
 
   const { openConnectModal } = useConnectModal()
@@ -116,7 +116,7 @@ export const ContractButton = ({
               <Text variant="paragraph-sm" color="text2">
                 {buttonError === INSUFFICIENT_BALANCE_ERROR && shouldShowBridgeLink ? (
                   <>
-                    Insufficient balance. Add ETH to your wallet via{' '}
+                    Insufficient balance. Please add ETH to your wallet via{' '}
                     <Link href="/bridge" style={{ textDecoration: 'underline' }}>
                       bridging
                     </Link>{' '}

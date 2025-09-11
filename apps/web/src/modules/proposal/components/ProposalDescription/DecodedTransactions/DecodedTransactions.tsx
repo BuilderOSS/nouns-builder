@@ -41,22 +41,22 @@ export const DecodedTransactionDisplay: React.FC<DecodedTransaction> = ({
         </Box>
         <Flex pl={'x2'}>
           {`.${decoded.transaction.functionName}(`}
-          {!decoded.transaction.args && `)`}
+          {Object.keys(decoded.transaction.args).length === 0 ? `)` : null}
         </Flex>
 
         <Stack pl={'x4'} gap={'x1'}>
-          {!!decoded.transaction.args &&
-            Object?.values(decoded.transaction.args).map((arg, i) => (
-              <ArgumentDisplay
-                key={`${arg.name}-${i}`}
-                arg={arg}
-                target={decoded.target}
-                functionName={decoded.transaction.functionName}
-              />
-            ))}
+          {Object.values(decoded.transaction.args).map((arg, i) => (
+            <ArgumentDisplay
+              key={`${arg.name}-${i}`}
+              arg={arg}
+              target={decoded.target}
+              functionName={decoded.transaction.functionName}
+              allArguments={decoded.transaction.args}
+            />
+          ))}
         </Stack>
 
-        {!!decoded.transaction.args && `)`}
+        {Object.keys(decoded.transaction.args).length > 0 ? `)` : null}
       </Stack>
     </Stack>
   )
