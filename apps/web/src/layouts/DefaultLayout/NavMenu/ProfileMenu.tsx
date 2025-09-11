@@ -13,10 +13,11 @@ import { DaoAvatar } from 'src/components/Avatar/DaoAvatar'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { Icon } from 'src/components/Icon'
 import { NetworkController } from 'src/components/NetworkController'
+import { useWalletDisconnect } from 'src/hooks/useWalletDisconnect'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import useSWR from 'swr'
-import { useAccount, useBalance, useDisconnect } from 'wagmi'
+import { useAccount, useBalance } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
 import {
@@ -42,7 +43,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onOpenMenu,
   onSetActiveDropdown,
 }) => {
-  const { address, connector } = useAccount()
+  const { address } = useAccount()
   const isMobile = useLayoutStore((x) => x.isMobile)
   const { chain: selectedChain } = useChainStore()
   const { displayName, ensAvatar } = useEnsData(address || '')
@@ -50,7 +51,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     address: address!,
     chainId: selectedChain.id,
   })
-  const { disconnectAsync } = useDisconnect()
 
   const userBalance = balance?.formatted
     ? `${formatCryptoVal(balance?.formatted)} ETH`
@@ -85,47 +85,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     }
   }, [isMobile, activeDropdown])
 
-  const onDisconnect = React.useCallback(async () => {
-    // 1) Try wagmi disconnect first
-    try {
-      await disconnectAsync()
-    } catch (e) {
-      console.warn('wagmi disconnect failed:', e)
-    }
-
-    // 2) If WalletConnect is/was active, explicitly kill its session
-    try {
-      if (connector?.id === 'walletConnect' && connector.getProvider) {
-        const provider: any = await connector.getProvider()
-        // WC v2 providers usually expose disconnect()/destroy()
-        await provider?.disconnect?.()
-        provider?.destroy?.()
-      }
-    } catch (e) {
-      console.warn('walletconnect provider cleanup failed:', e)
-    }
-
-    // 3) Targeted storage cleanup (no global nuke)
-    try {
-      const PREFIXES = ['wagmi', 'wc@', '@appkit', 'rainbowkit']
-      for (const key of Object.keys(localStorage)) {
-        if (PREFIXES.some((p) => key.startsWith(p))) {
-          localStorage.removeItem(key)
-        }
-      }
-    } catch (e) {
-      console.warn('targeted storage cleanup failed:', e)
-    }
-
-    // 4) Refresh UI
-    window.location.reload()
-  }, [disconnectAsync, connector])
-
-  React.useEffect(() => {
-    if (connector && !connector.getChainId) {
-      onDisconnect()
-    }
-  }, [connector, onDisconnect])
+  const onDisconnect = useWalletDisconnect()
 
   const renderUserContent = (isMobileFullscreen = false) => (
     <>

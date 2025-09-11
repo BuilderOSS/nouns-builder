@@ -3,7 +3,7 @@ import { Chain, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useSwitchChain } from 'wagmi'
@@ -17,15 +17,14 @@ interface ChainMenuProps {
   activeDropdown: MenuType | undefined
   onOpenMenu: (open: boolean, menuType: MenuType) => void
   onSetActiveDropdown: (menu: MenuType | undefined) => void
-  isChainInitilized: boolean
 }
 
 export const ChainMenu: React.FC<ChainMenuProps> = ({
   activeDropdown,
   onOpenMenu,
   onSetActiveDropdown,
-  isChainInitilized,
 }) => {
+  const [isChainInitialized, setIsChainInitialized] = React.useState(false)
   const router = useRouter()
   const { address, chain: wagmiChain } = useAccount()
   const { switchChain } = useSwitchChain()
@@ -62,11 +61,43 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
   )
 
   const isWrongNetwork = useMemo(
-    () => !!address && wagmiChain?.id !== selectedChain?.id,
-    [address, wagmiChain?.id, selectedChain?.id]
+    () => hasNetwork && !!address && wagmiChain?.id !== selectedChain?.id,
+    [address, wagmiChain?.id, selectedChain?.id, hasNetwork]
   )
 
-  if (!isChainInitilized) {
+  useEffect(() => {
+    const handleRouteChangeStart = () => {
+      onSetActiveDropdown(undefined)
+      setIsChainInitialized(false)
+    }
+
+    const handleRouteChangeComplete = () => {
+      const chain = useChainStore.getState().chain
+      if (chain && address) {
+        switchChain({ chainId: chain.id })
+      }
+      setIsChainInitialized(true)
+    }
+
+    router.events.on('routeChangeStart', handleRouteChangeStart)
+
+    const hasHydrated = useChainStore.persist.hasHydrated()
+    let hydrationUnsubscribe: (() => void) | undefined
+
+    if (hasHydrated) handleRouteChangeComplete()
+    else {
+      hydrationUnsubscribe = useChainStore.persist.onFinishHydration(
+        handleRouteChangeComplete
+      )
+    }
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart)
+      hydrationUnsubscribe?.()
+    }
+  }, [router, onSetActiveDropdown, switchChain, address])
+
+  if (!isChainInitialized) {
     return null
   }
 
