@@ -63,7 +63,6 @@ export const NavMenu = () => {
         isChainInitilized={isChainInitilized}
       />
       <ProfileMenu
-        address={address as `0x${string}` | undefined}
         activeDropdown={activeDropdown}
         onOpenMenu={onOpenMenu}
         onSetActiveDropdown={setActiveDropdown}
