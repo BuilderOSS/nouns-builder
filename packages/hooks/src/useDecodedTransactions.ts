@@ -27,6 +27,7 @@ export const formatSendEth = (value: string) => {
       ['transfer']: { name: `value`, value: `${amount} ETH`, type: `uint256` },
     },
     functionSig: '',
+    encodedData: '0x',
   }
 }
 
@@ -54,9 +55,15 @@ const apiDecodeTx: DecodeFunc = async (
     }),
   })
 
+  if (!decodeRes.ok) {
+    throw new Error('Decode failed')
+  }
+
   const data = await decodeRes.json()
 
   if (data?.statusCode) throw new Error('Decode failed')
+
+  if (data?.error) throw new Error('Decode failed')
 
   return data
 }

@@ -16,7 +16,34 @@ export const DecodedTransactionDisplay: React.FC<DecodedTransaction> = ({
 }) => {
   const chain = useChainStore((x) => x.chain)
 
-  if (decoded.isNotDecoded) return <>{decoded.transaction.toString()}</>
+  if (decoded.isNotDecoded || !decoded.transaction.args) {
+    const calldata = decoded.isNotDecoded
+      ? decoded.transaction
+      : decoded.transaction.encodedData
+    return (
+      <Stack gap={'x1'}>
+        <Box
+          color={'secondary'}
+          fontWeight={'heading'}
+          className={atoms({ textDecoration: 'underline' })}
+        >
+          <a
+            href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${decoded?.target}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Text display={{ '@initial': 'flex', '@768': 'none' }}>
+              {walletSnippet(decoded?.target)}
+            </Text>
+            <Text display={{ '@initial': 'none', '@768': 'flex' }}>
+              {decoded?.target}
+            </Text>
+          </a>
+        </Box>
+        <Flex pl={'x2'}>{calldata}</Flex>
+      </Stack>
+    )
+  }
 
   return (
     <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
