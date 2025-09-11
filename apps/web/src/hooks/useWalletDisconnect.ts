@@ -4,12 +4,7 @@ import * as React from 'react'
 import { useAccount, useConfig, useDisconnect } from 'wagmi'
 
 export function useWalletDisconnect(): () => void {
-  const [hydrated, setHydrated] = React.useState(false)
-  React.useEffect(() => {
-    setHydrated(true)
-  }, [])
-
-  const { connector, address } = useAccount()
+  const { connector } = useAccount()
   const { disconnectAsync } = useDisconnect()
   const config = useConfig()
 
@@ -22,9 +17,6 @@ export function useWalletDisconnect(): () => void {
     }))
   }, [config])
 
-  // Run at most once per (address + connectorId)
-  const validatedKeyRef = React.useRef<string | null>(null)
-
   const cleanupStorage = React.useCallback(() => {
     try {
       const PREFIXES = ['wagmi', 'wc@', '@appkit', 'rainbowkit']
@@ -32,7 +24,7 @@ export function useWalletDisconnect(): () => void {
         if (PREFIXES.some((p) => key.startsWith(p))) localStorage.removeItem(key)
       }
     } catch (e) {
-      console.warn('targeted storage cleanup failed:', e)
+      console.warn('useWalletDisconnect: targeted storage cleanup failed:', e)
     }
   }, [])
 
@@ -41,7 +33,7 @@ export function useWalletDisconnect(): () => void {
     try {
       await disconnectAsync()
     } catch (e) {
-      console.warn('wagmi disconnect failed:', e)
+      console.warn('useWalletDisconnect: wagmi disconnect failed:', e)
     }
 
     // 2) WalletConnect: kill session if present
@@ -52,7 +44,7 @@ export function useWalletDisconnect(): () => void {
         provider?.destroy?.()
       }
     } catch (e) {
-      console.warn('walletconnect provider cleanup failed:', e)
+      console.warn('useWalletDisconnect: walletconnect provider cleanup failed:', e)
     }
 
     // 3) targeted localStorage cleanup
@@ -80,64 +72,6 @@ export function useWalletDisconnect(): () => void {
   const disconnect = React.useCallback(() => {
     void runOnce(disconnectCore)
   }, [runOnce, disconnectCore])
-
-  // Auto-validator: check provider quickly; if bad, disconnect + remount
-  React.useEffect(() => {
-    if (!hydrated || !address) return
-
-    const key = `${address}:${connector?.id ?? 'none'}`
-    if (validatedKeyRef.current === key) return
-    validatedKeyRef.current = key
-
-    let cancelled = false
-    const deadline = Date.now() + 2500
-    const step = 250
-    const perAttempt = 700
-
-    const tryGetChainId = async (prov: any) => {
-      const timeout = new Promise((_, rej) =>
-        setTimeout(() => rej(new Error('timeout')), perAttempt)
-      )
-      const res = await Promise.race([
-        prov?.request?.({ method: 'eth_chainId' }),
-        timeout,
-      ])
-      const n =
-        typeof res === 'string'
-          ? parseInt(res, 16)
-          : typeof res === 'number'
-            ? res
-            : undefined
-      return Number.isFinite(n) && n! > 0 ? n! : undefined
-    }
-
-    const run = async () => {
-      try {
-        const prov: any = await connector?.getProvider?.()
-        if (!prov || !prov.request) throw new Error('no-provider')
-
-        // immediate try
-        const first = await tryGetChainId(prov).catch(() => undefined)
-        if (first || cancelled) return
-
-        // short, bounded polling
-        while (!cancelled && Date.now() < deadline) {
-          await new Promise((r) => setTimeout(r, step))
-          const id = await tryGetChainId(prov).catch(() => undefined)
-          if (id) return
-        }
-
-        if (!cancelled) await disconnectCore() // no reload
-      } catch {
-        if (!cancelled) await disconnectCore()
-      }
-    }
-
-    run()
-    return () => {
-      cancelled = true
-    }
-  }, [hydrated, address, connector, disconnectCore])
 
   return disconnect
 }
