@@ -1,5 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { MOBILE_PROFILE_MENU_LAYER, NAV_LAYER } from '@buildeross/constants/layers'
+import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constants/layers'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { MyDaosResponse } from '@buildeross/sdk/subgraph'
@@ -47,7 +47,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     address: address!,
     chainId: selectedChain.id,
   })
-  const { disconnect } = useDisconnect()
+  const { disconnectAsync } = useDisconnect()
 
   const userBalance = balance?.formatted
     ? `${formatCryptoVal(balance?.formatted)} ETH`
@@ -81,6 +81,12 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
       document.body.style.overflow = 'unset'
     }
   }, [isMobile, activeDropdown])
+
+  const onDisconnect = React.useCallback(() => {
+    disconnectAsync().catch((e) => {
+      console.error(`Failed to disconnect: ${e}`)
+    })
+  }, [disconnectAsync])
 
   const renderUserContent = (isMobileFullscreen = false) => (
     <>
@@ -175,7 +181,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         className={disconnectButton}
         variant={'outline'}
         color="negative"
-        onClick={() => disconnect()}
+        onClick={onDisconnect}
         id={'close-modal'}
       >
         Disconnect
@@ -322,7 +328,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           borderStyle="solid"
           style={{
             position: 'relative',
-            zIndex: NAV_LAYER,
+            zIndex: NAV_BUTTON_LAYER + 1,
             borderRadius: '50%',
             borderColor: 'rgba(0, 0, 0, 0.5)',
           }}

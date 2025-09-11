@@ -49,7 +49,7 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
 
   dao.currentAuction = null
   if (auction.highestBid) {
-    let bid = AuctionBid.load(auction.highestBid)
+    let bid = AuctionBid.load(auction.highestBid!)
     if (bid) {
       dao.totalAuctionSales = dao.totalAuctionSales.plus(bid.amount)
     }

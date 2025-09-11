@@ -3,10 +3,11 @@ import { Chain, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { useChainStore } from 'src/stores/useChainStore'
+import { useAccount, useSwitchChain } from 'wagmi'
 
-import { chainPopUpButton, navButton } from '../Nav.styles.css'
+import { chainPopUpButton, navButton, wrongNetworkButton } from '../Nav.styles.css'
 import { MenuType } from './types'
 
 const chainSorter = (a: Chain, b: Chain) => a.icon.localeCompare(b.icon)
@@ -25,11 +26,14 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
   isChainInitilized,
 }) => {
   const router = useRouter()
+  const { address, chain: wagmiChain } = useAccount()
+  const { switchChain } = useSwitchChain()
+
   const { chain: selectedChain, setChain } = useChainStore()
 
-  const hasNetwork = React.useMemo(() => !!router.query?.network, [router.query])
+  const hasNetwork = useMemo(() => !!router.query?.network, [router.query])
 
-  const onChainChange = React.useCallback(
+  const onChainChange = useCallback(
     (chainId: number) => {
       if (hasNetwork) {
         return
@@ -37,11 +41,29 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
       onSetActiveDropdown(undefined)
       const selected = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)
       if (selected) setChain(selected)
+      if (address) {
+        switchChain(
+          { chainId },
+          {
+            onError(error) {
+              console.error(`Failed to switch chain:`, error)
+            },
+          }
+        )
+      }
     },
-    [onSetActiveDropdown, setChain, hasNetwork]
+    [onSetActiveDropdown, setChain, hasNetwork, switchChain, address]
   )
 
-  const isSelectedChain = (chainId: CHAIN_ID) => selectedChain.id === chainId
+  const isSelectedChain = useCallback(
+    (chainId: CHAIN_ID) => selectedChain?.id === chainId,
+    [selectedChain?.id]
+  )
+
+  const isWrongNetwork = useMemo(
+    () => !!address && wagmiChain?.id !== selectedChain?.id,
+    [address, wagmiChain?.id, selectedChain?.id]
+  )
 
   if (!isChainInitilized) {
     return null
@@ -64,6 +86,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
           <Flex
             borderColor="border"
             borderStyle="solid"
+            borderWidth="normal"
             backgroundColor="background1"
             borderRadius="curved"
             cursor={'pointer'}
@@ -72,6 +95,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
             height={'x10'}
             px="x2"
             className={chainPopUpButton}
+            style={isWrongNetwork ? { borderColor: '#F03232' } : undefined}
           >
             <Flex align={'center'}>
               <Box h="x6" w="x6">
@@ -88,14 +112,34 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
                   {selectedChain.name}
                 </Text>
               </Flex>
-              <Box h="x6" w="x6" ml="x1">
-                <Icon id="chevronDown" fill="tertiary" pointerEvents="none" />
+              <Box h="x6" w="x6" ml="x2">
+                <Icon
+                  id={isWrongNetwork ? 'warning' : 'chevronDown'}
+                  fill={isWrongNetwork ? 'negativeHover' : 'tertiary'}
+                  pointerEvents="none"
+                />
               </Box>
             </Flex>
           </Flex>
         }
       >
         <Stack my="x4" mx="x2">
+          {isWrongNetwork && (
+            <Flex
+              className={wrongNetworkButton}
+              fontWeight={'label'}
+              borderRadius="normal"
+              onClick={() => switchChain({ chainId: selectedChain.id })}
+              cursor={'pointer'}
+              height={'x10'}
+              px="x4"
+              mb="x2"
+              align={'center'}
+              justify={'center'}
+            >
+              Wrong Network
+            </Flex>
+          )}
           {[...PUBLIC_DEFAULT_CHAINS].sort(chainSorter).map((chain, i, chains) => (
             <Flex
               key={chain.id}
