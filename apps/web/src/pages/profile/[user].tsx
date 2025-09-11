@@ -1,5 +1,4 @@
-import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { useEnsData } from '@buildeross/hooks'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
@@ -144,7 +143,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   {daos.map((dao, index) => (
                     <>
                       <Link
-                        href={`https://nouns.build/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
+                        href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
                         style={{ textDecoration: 'none', color: 'inherit' }}
                         className="profile-dao-links"
                       >
