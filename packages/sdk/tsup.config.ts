@@ -10,9 +10,7 @@ export default defineConfig({
   ],
   format: ['cjs', 'esm'],
   dts: true,
-  sourcemap: true,
   clean: true,
-  treeshake: true,
   minify: 'terser',
   external: [
     'viem',

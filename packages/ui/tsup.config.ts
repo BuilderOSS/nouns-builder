@@ -5,9 +5,7 @@ export default defineConfig({
   entry: ['src/index.ts', 'src/styles.ts'],
   format: ['cjs', 'esm'],
   dts: true,
-  sourcemap: true,
   clean: true,
-  treeshake: true,
   esbuildPlugins: [
     vanillaExtractPlugin({
       identifiers: 'short',
