@@ -12,7 +12,7 @@ import React from 'react'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import useSWR from 'swr'
-import { useBalance, useDisconnect } from 'wagmi'
+import { useAccount, useBalance, useDisconnect } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
 import {
@@ -28,18 +28,17 @@ import {
 import { MenuType } from './types'
 
 interface ProfileMenuProps {
-  address?: `0x${string}`
   activeDropdown: MenuType | undefined
   onOpenMenu: (open: boolean, menuType: MenuType) => void
   onSetActiveDropdown: (menu: MenuType | undefined) => void
 }
 
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({
-  address,
   activeDropdown,
   onOpenMenu,
   onSetActiveDropdown,
 }) => {
+  const { address, connector } = useAccount()
   const isMobile = useLayoutStore((x) => x.isMobile)
   const { chain: selectedChain } = useChainStore()
   const { displayName, ensAvatar } = useEnsData(address || '')
@@ -82,11 +81,47 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     }
   }, [isMobile, activeDropdown])
 
-  const onDisconnect = React.useCallback(() => {
-    disconnectAsync().catch((e) => {
-      console.error(`Failed to disconnect: ${e}`)
-    })
-  }, [disconnectAsync])
+  const onDisconnect = React.useCallback(async () => {
+    // 1) Try wagmi disconnect first
+    try {
+      await disconnectAsync()
+    } catch (e) {
+      console.warn('wagmi disconnect failed:', e)
+    }
+
+    // 2) If WalletConnect is/was active, explicitly kill its session
+    try {
+      if (connector?.id === 'walletConnect' && connector.getProvider) {
+        const provider: any = await connector.getProvider()
+        // WC v2 providers usually expose disconnect()/destroy()
+        await provider?.disconnect?.()
+        provider?.destroy?.()
+      }
+    } catch (e) {
+      console.warn('walletconnect provider cleanup failed:', e)
+    }
+
+    // 3) Targeted storage cleanup (no global nuke)
+    try {
+      const PREFIXES = ['wagmi', 'wc@', '@appkit', 'rainbowkit']
+      for (const key of Object.keys(localStorage)) {
+        if (PREFIXES.some((p) => key.startsWith(p))) {
+          localStorage.removeItem(key)
+        }
+      }
+    } catch (e) {
+      console.warn('targeted storage cleanup failed:', e)
+    }
+
+    // 4) Refresh UI
+    window.location.reload()
+  }, [disconnectAsync, connector])
+
+  React.useEffect(() => {
+    if (connector && !connector.getChainId) {
+      onDisconnect()
+    }
+  }, [connector, onDisconnect])
 
   const renderUserContent = (isMobileFullscreen = false) => (
     <>
