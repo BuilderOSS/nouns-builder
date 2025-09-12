@@ -17,4 +17,5 @@ export type DecodedTransactionData = {
   args: Record<string, DecodedArg>
   functionName: string
   functionSig: string
+  encodedData: string
 }

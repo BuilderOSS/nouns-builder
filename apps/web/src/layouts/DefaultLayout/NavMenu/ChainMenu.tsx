@@ -3,8 +3,9 @@ import { Chain, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { Icon } from 'src/components/Icon'
+import { useWalletDisconnect } from 'src/hooks/useWalletDisconnect'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useSwitchChain } from 'wagmi'
 
@@ -17,22 +18,37 @@ interface ChainMenuProps {
   activeDropdown: MenuType | undefined
   onOpenMenu: (open: boolean, menuType: MenuType) => void
   onSetActiveDropdown: (menu: MenuType | undefined) => void
-  isChainInitilized: boolean
 }
 
 export const ChainMenu: React.FC<ChainMenuProps> = ({
   activeDropdown,
   onOpenMenu,
   onSetActiveDropdown,
-  isChainInitilized,
 }) => {
+  const [isChainInitialized, setIsChainInitialized] = React.useState(false)
   const router = useRouter()
-  const { address, chain: wagmiChain } = useAccount()
+  const { address, chain: wagmiChain, connector } = useAccount()
   const { switchChain } = useSwitchChain()
+  const onDisconnect = useWalletDisconnect()
 
   const { chain: selectedChain, setChain } = useChainStore()
 
   const hasNetwork = useMemo(() => !!router.query?.network, [router.query])
+
+  const onSwitchChain = useCallback(
+    (chainId: number) => {
+      if (!connector?.getChainId) return onDisconnect()
+      switchChain(
+        { chainId },
+        {
+          onError(error) {
+            console.error(`Failed to switch chain:`, error)
+          },
+        }
+      )
+    },
+    [switchChain, onDisconnect, connector]
+  )
 
   const onChainChange = useCallback(
     (chainId: number) => {
@@ -43,17 +59,10 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
       const selected = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)
       if (selected) setChain(selected)
       if (address) {
-        switchChain(
-          { chainId },
-          {
-            onError(error) {
-              console.error(`Failed to switch chain:`, error)
-            },
-          }
-        )
+        onSwitchChain(chainId)
       }
     },
-    [onSetActiveDropdown, setChain, hasNetwork, switchChain, address]
+    [onSetActiveDropdown, setChain, hasNetwork, onSwitchChain, address]
   )
 
   const isSelectedChain = useCallback(
@@ -62,11 +71,43 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
   )
 
   const isWrongNetwork = useMemo(
-    () => !!address && wagmiChain?.id !== selectedChain?.id,
-    [address, wagmiChain?.id, selectedChain?.id]
+    () => hasNetwork && !!address && wagmiChain?.id !== selectedChain?.id,
+    [address, wagmiChain?.id, selectedChain?.id, hasNetwork]
   )
 
-  if (!isChainInitilized) {
+  useEffect(() => {
+    const handleRouteChangeStart = () => {
+      onSetActiveDropdown(undefined)
+      setIsChainInitialized(false)
+    }
+
+    const handleRouteChangeComplete = () => {
+      const chain = useChainStore.getState().chain
+      if (chain && address) {
+        switchChain({ chainId: chain.id })
+      }
+      setIsChainInitialized(true)
+    }
+
+    router.events.on('routeChangeStart', handleRouteChangeStart)
+
+    const hasHydrated = useChainStore.persist.hasHydrated()
+    let hydrationUnsubscribe: (() => void) | undefined
+
+    if (hasHydrated) handleRouteChangeComplete()
+    else {
+      hydrationUnsubscribe = useChainStore.persist.onFinishHydration(
+        handleRouteChangeComplete
+      )
+    }
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart)
+      hydrationUnsubscribe?.()
+    }
+  }, [router, onSetActiveDropdown, switchChain, address])
+
+  if (!isChainInitialized) {
     return null
   }
 
@@ -114,23 +155,19 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
                 </Text>
               </Flex>
               <Box h="x6" w="x6" ml="x2">
-                <Icon
-                  id={isWrongNetwork ? 'warning' : 'chevronDown'}
-                  fill={isWrongNetwork ? 'negativeHover' : 'tertiary'}
-                  pointerEvents="none"
-                />
+                <Icon id={'chevronDown'} fill={'tertiary'} pointerEvents="none" />
               </Box>
             </Flex>
           </Flex>
         }
       >
         <Stack my="x4" mx="x2">
-          {isWrongNetwork && (
+          {isWrongNetwork && selectedChain && (
             <Flex
               className={wrongNetworkButton}
               fontWeight={'label'}
               borderRadius="normal"
-              onClick={() => switchChain({ chainId: selectedChain.id })}
+              onClick={() => onSwitchChain(selectedChain.id)}
               cursor={'pointer'}
               height={'x10'}
               px="x4"
@@ -138,7 +175,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
               align={'center'}
               justify={'center'}
             >
-              Wrong Network
+              {`Switch to ${selectedChain.name}`}
             </Flex>
           )}
           {[...PUBLIC_DEFAULT_CHAINS].sort(chainSorter).map((chain, i, chains) => (

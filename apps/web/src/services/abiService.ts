@@ -162,5 +162,6 @@ export const decodeTransaction = async (
     args: argMapping,
     functionName: decodeResult.functionName,
     functionSig,
+    encodedData: calldata,
   }
 }

@@ -13,10 +13,11 @@ import { DaoAvatar } from 'src/components/Avatar/DaoAvatar'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { Icon } from 'src/components/Icon'
 import { NetworkController } from 'src/components/NetworkController'
+import { useWalletDisconnect } from 'src/hooks/useWalletDisconnect'
 import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import useSWR from 'swr'
-import { useBalance, useDisconnect } from 'wagmi'
+import { useAccount, useBalance } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
 import {
@@ -32,18 +33,17 @@ import {
 import { MenuType } from './types'
 
 interface ProfileMenuProps {
-  address?: `0x${string}`
   activeDropdown: MenuType | undefined
   onOpenMenu: (open: boolean, menuType: MenuType) => void
   onSetActiveDropdown: (menu: MenuType | undefined) => void
 }
 
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({
-  address,
   activeDropdown,
   onOpenMenu,
   onSetActiveDropdown,
 }) => {
+  const { address } = useAccount()
   const isMobile = useLayoutStore((x) => x.isMobile)
   const { chain: selectedChain } = useChainStore()
   const { displayName, ensAvatar } = useEnsData(address || '')
@@ -51,7 +51,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     address: address!,
     chainId: selectedChain.id,
   })
-  const { disconnectAsync } = useDisconnect()
 
   const userBalance = balance?.formatted
     ? `${formatCryptoVal(balance?.formatted)} ETH`
@@ -86,11 +85,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     }
   }, [isMobile, activeDropdown])
 
-  const onDisconnect = React.useCallback(() => {
-    disconnectAsync().catch((e) => {
-      console.error(`Failed to disconnect: ${e}`)
-    })
-  }, [disconnectAsync])
+  const onDisconnect = useWalletDisconnect()
 
   const renderUserContent = (isMobileFullscreen = false) => (
     <>
