@@ -3,7 +3,7 @@ import { getAddress, Hex, isAddress } from 'viem'
 
 import { getProvider } from './provider'
 
-let isContractMap: Map<Hex, boolean>
+let isContractMap: Map<string, boolean>
 
 const readIsContract = async (chainId: CHAIN_ID, address: Hex): Promise<boolean> => {
   if (!isAddress(address)) return false
@@ -22,8 +22,10 @@ export const getCachedIsContract = async (
   // eslint-disable-next-line no-param-reassign
   address = getAddress(address)
   if (!isContractMap) isContractMap = new Map()
-  if (!isContractMap.has(address)) {
-    isContractMap.set(address, await readIsContract(chainId, address))
+
+  const key = `${chainId}:${address}`
+  if (!isContractMap.has(key)) {
+    isContractMap.set(key, await readIsContract(chainId, address))
   }
-  return isContractMap.get(address)!
+  return isContractMap.get(key)!
 }
