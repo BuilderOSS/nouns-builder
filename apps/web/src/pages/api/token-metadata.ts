@@ -1,7 +1,7 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { getCachedIsContract } from '@buildeross/utils'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedTokenMetadatas } from 'src/services/alchemyService'
-import { isAddress } from 'viem'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -25,11 +25,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ? addresses
     : (addresses as string).split(',').map((addr) => addr.trim())
 
-  // Validate all addresses
-  for (const addr of addressList) {
-    if (!isAddress(addr)) {
-      return res.status(400).json({ error: `Invalid address: ${addr}` })
-    }
+  const isContractList = await Promise.all(
+    addressList.map((addr) =>
+      getCachedIsContract(chainIdNum as CHAIN_ID, addr as AddressType)
+    )
+  )
+
+  const isAnyNotContract = isContractList.some((isContract) => !isContract)
+
+  if (isAnyNotContract) {
+    return res.status(400).json({ error: 'Invalid address or not a contract' })
   }
 
   try {
