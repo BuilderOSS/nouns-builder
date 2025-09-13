@@ -25,11 +25,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ? addresses
     : (addresses as string).split(',').map((addr) => addr.trim())
 
-  const isContractList = await Promise.all(
-    addressList.map((addr) =>
-      getCachedIsContract(chainIdNum as CHAIN_ID, addr as AddressType)
+  let isContractList: boolean[]
+
+  try {
+    isContractList = await Promise.all(
+      addressList.map((addr) =>
+        getCachedIsContract(chainIdNum as CHAIN_ID, addr as AddressType)
+      )
     )
-  )
+  } catch (error) {
+    console.error('Contract check API error:', error)
+    return res.status(500).json({ error: 'Internal server error' })
+  }
 
   const isAnyNotContract = isContractList.some((isContract) => !isContract)
 
