@@ -1,6 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { Proposal } from '@buildeross/sdk'
 import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
+import { formatCryptoVal } from '@buildeross/utils'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 
@@ -20,11 +21,11 @@ export type DecodedTransaction = DecodedTransactionSuccess | DecodedTransactionF
 
 /* format in shape defined in ethers actor */
 export const formatSendEth = (value: string) => {
-  const amount = formatEther(BigInt(value))
+  const amount = formatCryptoVal(formatEther(BigInt(value)))
   return {
-    functionName: 'transfer',
+    functionName: 'send',
     args: {
-      ['transfer']: { name: `value`, value: `${amount} ETH`, type: `uint256` },
+      ['send']: { name: `value`, value: `${amount} ETH`, type: `uint256` },
     },
     functionSig: '',
   }
