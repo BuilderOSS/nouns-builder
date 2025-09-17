@@ -11,5 +11,14 @@ export default defineConfig({
       identifiers: 'short',
     }),
   ],
-  external: ['react', 'react-dom'],
+  external: [
+    'flatpickr',
+    'formik',
+    'framer-motion',
+    'react',
+    'react-dom',
+    'react-mde',
+    'viem',
+    'wagmi',
+  ],
 })

@@ -7,14 +7,11 @@ import {
   SubgraphSDK,
   Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
+import { MarkdownDisplay } from '@buildeross/ui'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'
 import React, { ReactNode, useMemo } from 'react'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
-import remarkGfm from 'remark-gfm'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,
@@ -94,12 +91,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           <Paragraph overflow={'auto'}>
             {description && (
               <Box className={proposalDescription}>
-                <ReactMarkdown
-                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                  remarkPlugins={[remarkGfm]}
-                >
-                  {description}
-                </ReactMarkdown>
+                <MarkdownDisplay>{description}</MarkdownDisplay>
               </Box>
             )}
           </Paragraph>

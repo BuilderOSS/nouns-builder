@@ -1,11 +1,8 @@
+import { MarkdownDisplay } from '@buildeross/ui'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import HTMLReactParser from 'html-react-parser'
 import React, { useEffect, useMemo, useRef } from 'react'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
-import remarkGfm from 'remark-gfm'
 import { daoDescription as plainDesciption } from 'src/styles/About.css'
 
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
@@ -50,12 +47,6 @@ export const DaoDescription = ({ description }: { description?: string }) => {
       </Box>
     )
 
-  const getFadingEffect = () => {
-    if (isExpanded) return ''
-    if (isOverHeight) return fadingEffect
-    return ''
-  }
-
   return (
     <Flex direction="column" align="flex-end">
       <Box
@@ -68,18 +59,13 @@ export const DaoDescription = ({ description }: { description?: string }) => {
         borderColor={'border'}
         ref={textRef}
         width="100%"
-        className={getFadingEffect()}
+        className={!isExpanded && isOverHeight ? fadingEffect : ''}
         style={{
           maxHeight: isExpanded ? '100%' : UNEXPANDED_BOX_HEIGHT,
         }}
       >
         <Box className={daoDescription}>
-          <ReactMarkdown
-            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-            remarkPlugins={[remarkGfm]}
-          >
-            {correctedDescription}
-          </ReactMarkdown>
+          <MarkdownDisplay>{correctedDescription}</MarkdownDisplay>
         </Box>
       </Box>
       {isOverHeight && (

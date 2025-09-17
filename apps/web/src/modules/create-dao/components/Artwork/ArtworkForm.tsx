@@ -59,7 +59,7 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
               return (
                 <MarkdownEditor
                   value={field.value}
-                  onChange={(value: string) => formik?.setFieldValue(field.name, value)}
+                  onChange={(value: string) => formik.setFieldValue(field.name, value)}
                   inputLabel={'DAO Description'}
                   errorMessage={
                     formik.touched?.projectDescription &&

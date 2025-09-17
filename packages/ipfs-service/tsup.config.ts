@@ -5,5 +5,5 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['ipfs-http-client', 'ipfs-core-types', 'multiformats'],
+  external: ['ipfs-http-client', 'ipfs-core-types'],
 })

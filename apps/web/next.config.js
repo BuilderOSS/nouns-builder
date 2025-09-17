@@ -36,7 +36,6 @@ const basicConfig = {
     '@rainbow-me/rainbowkit',
     '@farcaster/frame-sdk',
     '@farcaster/frame-wagmi-connector',
-    'multiformats',
   ],
   experimental: {
     optimizePackageImports: ['@rainbow-me/rainbowkit', '@buildeross/zord'],

@@ -1,13 +1,9 @@
 import { useEnsData } from '@buildeross/hooks'
 import { type PropDate } from '@buildeross/sdk/eas'
-import { Avatar } from '@buildeross/ui'
+import { Avatar, MarkdownDisplay } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
-import remarkGfm from 'remark-gfm'
 import { useLayoutStore } from 'src/stores/useLayoutStore'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
@@ -93,12 +89,7 @@ export const PropDateCard = ({
           backgroundColor={'background2'}
           className={messageStyle}
         >
-          <ReactMarkdown
-            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-            remarkPlugins={[remarkGfm]}
-          >
-            {propDate.message}
-          </ReactMarkdown>
+          <MarkdownDisplay>{propDate.message}</MarkdownDisplay>
         </Box>
       )}
       {/* Render replies if any */}
