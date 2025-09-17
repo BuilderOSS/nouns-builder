@@ -24,7 +24,8 @@ import React, {
   useMemo,
 } from 'react'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
-import { artworkPreviewPanel } from 'src/styles/Artwork.css'
+
+import { artworkPreviewPanel } from './ArtworkUpload.css'
 
 const previewVariants = {
   closed: {

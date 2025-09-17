@@ -136,7 +136,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
       {transactionType ? (
         <TwoColumnLayout
           leftColumn={
-            <Stack>
+            <Stack gap="x4">
               <DropdownSelect
                 value={transactionType}
                 options={options}
