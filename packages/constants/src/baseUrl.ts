@@ -1,1 +1,1 @@
-export const BASE_URL = process.env.BASE_URL ?? 'https://nouns.build';
+export const BASE_URL = process.env.BASE_URL ?? 'https://nouns.build'

@@ -1,4 +1,4 @@
-import { usePrevious } from '@buildeross/hooks'
+import { usePrevious } from '@buildeross/hooks/usePrevious'
 import { CHAIN_ID } from '@buildeross/types'
 import { Flex, Icon } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'

@@ -5,5 +5,13 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['react', 'react-dom'],
+  external: [
+    '@buildeross/constants',
+    '@buildeross/ipfs-service',
+    '@buildeross/sdk',
+    '@buildeross/types',
+    '@buildeross/utils',
+    'react',
+    'react-dom',
+  ],
 })

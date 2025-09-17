@@ -1,27 +1,16 @@
 import { BASE_URL, RENDERER_BASE } from '@buildeross/constants'
+import {
+  ImageProps,
+  ImagesByTraitProps,
+  OrderedTraits,
+  SelectedTraitsProps,
+} from '@buildeross/types'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
-
-import { ImageProps, Trait } from './useArtworkUpload'
-
-export type OrderedTraits = Array<Trait>
 
 export interface UseArtworkPreviewProps {
   orderedLayers: OrderedTraits
   images?: ImageProps[]
   selectedTraits?: SelectedTraitsProps[]
-}
-
-export interface ImagesByTraitProps {
-  trait: string
-  images: ImageProps[]
-}
-
-export interface SelectedTraitsProps {
-  picker: string
-  trait: string
-  uri: string
-  url: string
-  content?: File
 }
 
 const MAX_GENERATED_IMAGES = 20

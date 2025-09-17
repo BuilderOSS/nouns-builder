@@ -1,4 +1,4 @@
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import { FormikProps } from 'formik'

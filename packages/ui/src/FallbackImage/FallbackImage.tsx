@@ -1,4 +1,4 @@
-import { useFallbackSrc } from '@buildeross/hooks'
+import { useFallbackSrc } from '@buildeross/hooks/useFallbackSrc'
 import React, { forwardRef } from 'react'
 
 type FallbackImageProps = Omit<

@@ -1,4 +1,4 @@
-import { ImageProps, OrderedTraits } from '@buildeross/hooks'
+import { ImageProps, OrderedTraits } from '@buildeross/types'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React from 'react'

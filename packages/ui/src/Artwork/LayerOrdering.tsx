@@ -1,4 +1,4 @@
-import { ImageProps, OrderedTraits } from '@buildeross/hooks'
+import { ImageProps, OrderedTraits } from '@buildeross/types'
 import { Box } from '@buildeross/zord'
 import React from 'react'
 

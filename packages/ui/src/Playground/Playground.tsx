@@ -1,9 +1,5 @@
-import {
-  OrderedTraits,
-  SelectedTraitsProps,
-  useArtworkPreview,
-} from '@buildeross/hooks/useArtworkPreview'
-import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
+import { useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
+import { ImageProps, OrderedTraits, SelectedTraitsProps } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
 

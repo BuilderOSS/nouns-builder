@@ -8,10 +8,8 @@
     "@types/node": "^22.15.21",
     "@types/react": "^19.1.5",
     "eslint": "8.57.1",
-    "react": "^19.1.0",
     "tsup": "^8.3.5",
-    "typescript": "^5.8.3",
-    "viem": "^2.30.0"
+    "typescript": "^5.8.3"
   },
   "exports": {
     ".": {
@@ -29,6 +27,8 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "viem": "^2.30.0"
   },
   "publishConfig": {

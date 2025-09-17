@@ -13,6 +13,9 @@ export default defineConfig({
   clean: true,
   minify: 'terser',
   external: [
+    '@buildeross/constants',
+    '@buildeross/types',
+    '@buildeross/utils',
     'viem',
     'wagmi',
     'wagmi/actions',

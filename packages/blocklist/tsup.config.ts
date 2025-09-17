@@ -5,5 +5,5 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['viem'],
+  external: ['viem', 'react', 'react-dom'],
 })

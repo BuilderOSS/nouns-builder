@@ -2,7 +2,7 @@
   "name": "@buildeross/eslint-config-custom",
   "description": "Shared ESLint configuration for BuilderOSS apps",
   "version": "0.1.3",
-  "dependencies": {
+  "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.53.0",
     "@typescript-eslint/parser": "^5.53.0",
     "eslint-config-next": "latest",

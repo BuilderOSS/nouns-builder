@@ -12,6 +12,13 @@ export default defineConfig({
     }),
   ],
   external: [
+    '@buildeross/constants',
+    '@buildeross/hooks',
+    '@buildeross/ipfs-service',
+    '@buildeross/sdk',
+    '@buildeross/types',
+    '@buildeross/utils',
+    '@buildeross/zord',
     'flatpickr',
     'formik',
     'framer-motion',

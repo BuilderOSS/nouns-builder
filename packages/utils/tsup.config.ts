@@ -6,6 +6,9 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: [
+    '@buildeross/constants',
+    '@buildeross/ipfs-service',
+    '@buildeross/types',
     'viem',
     'wagmi',
     'wagmi/chains',

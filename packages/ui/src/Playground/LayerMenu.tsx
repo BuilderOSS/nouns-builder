@@ -1,5 +1,4 @@
-import { ImageProps } from '@buildeross/hooks'
-import { SelectedTraitsProps } from '@buildeross/hooks/useArtworkPreview'
+import { ImageProps, SelectedTraitsProps } from '@buildeross/types'
 import { atoms, Box, Flex, Icon, Stack } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, useCallback } from 'react'
 
