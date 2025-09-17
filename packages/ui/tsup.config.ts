@@ -2,7 +2,7 @@ import { defineConfig } from 'tsup'
 import { vanillaExtractPlugin } from '@vanilla-extract/esbuild-plugin'
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/styles.ts'],
+  entry: ['src/index.ts', 'src/styles.ts', 'src/*/index.ts'],
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,

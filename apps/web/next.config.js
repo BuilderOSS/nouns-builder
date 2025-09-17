@@ -38,7 +38,11 @@ const basicConfig = {
     '@farcaster/frame-wagmi-connector',
   ],
   experimental: {
-    optimizePackageImports: ['@rainbow-me/rainbowkit', '@buildeross/zord'],
+    optimizePackageImports: [
+      '@rainbow-me/rainbowkit',
+      '@buildeross/zord',
+      '@buildeross/ui',
+    ],
   },
   env: {
     BASE_URL: baseUrl,

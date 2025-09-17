@@ -52,7 +52,12 @@
       "import": "./dist/styles.mjs",
       "require": "./dist/styles.js"
     },
-    "./index.css": "./dist/index.css"
+    "./index.css": "./dist/index.css",
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
   },
   "files": [
     "dist/**/*",
