@@ -1,4 +1,5 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import {
@@ -119,7 +120,15 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
               )}
             </Box>
 
-            <Box>{displayName}</Box>
+            <Box>
+              <a
+                href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposer}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {displayName}
+              </a>
+            </Box>
           </Flex>
         </Section>
 
