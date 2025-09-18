@@ -5,7 +5,7 @@ import {
   ESCROW_DELEGATE_SCHEMA,
   ESCROW_DELEGATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
-import { SmartInput } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { Box, Button } from '@buildeross/zord'

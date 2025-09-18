@@ -2,7 +2,7 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
-import { useVotes } from '@buildeross/hooks'
+import { useVotes } from '@buildeross/hooks/useVotes'
 import { getEscrowDelegate } from '@buildeross/sdk/eas'
 import {
   OrderDirection,
@@ -11,7 +11,7 @@ import {
   TokenWithDaoQuery,
 } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
-import { AnimatedModal, SuccessModalContent } from '@buildeross/ui'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'

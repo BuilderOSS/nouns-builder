@@ -1,5 +1,5 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { CopyButton } from '@buildeross/ui'
+import { CopyButton } from '@buildeross/ui/CopyButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Flex, FlexProps, Icon, Text } from '@buildeross/zord'
 import React from 'react'

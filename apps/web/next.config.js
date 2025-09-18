@@ -41,7 +41,9 @@ const basicConfig = {
     optimizePackageImports: [
       '@rainbow-me/rainbowkit',
       '@buildeross/zord',
+      '@buildeross/hooks',
       '@buildeross/ui',
+      '@buildeross/sdk',
     ],
   },
   env: {

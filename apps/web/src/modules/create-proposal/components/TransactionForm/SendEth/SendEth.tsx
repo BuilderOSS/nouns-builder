@@ -1,5 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { FIELD_TYPES, SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { getProvider } from '@buildeross/utils/provider'

@@ -1,5 +1,5 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
-import { SmartInput } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Icon } from '@buildeross/zord'
 import { Field, Form as FormikForm, Formik } from 'formik'

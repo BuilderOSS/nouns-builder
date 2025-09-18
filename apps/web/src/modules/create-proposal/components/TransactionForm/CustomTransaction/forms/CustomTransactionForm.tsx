@@ -1,4 +1,4 @@
-import { FieldSwitch, FieldType } from '@buildeross/ui'
+import { FieldSwitch, FieldType } from '@buildeross/ui/Fields'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import { Form, Formik, FormikValues } from 'formik'

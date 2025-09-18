@@ -1,5 +1,5 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
-import { NetworkController } from '@buildeross/ui'
+import { NetworkController } from '@buildeross/ui/NetworkController'
 import { atoms, Box, Flex, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'

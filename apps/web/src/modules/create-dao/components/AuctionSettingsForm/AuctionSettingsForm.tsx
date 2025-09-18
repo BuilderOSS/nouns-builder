@@ -1,4 +1,4 @@
-import { DaysHoursMinsSecs, FIELD_TYPES, SmartInput } from '@buildeross/ui'
+import { DaysHoursMinsSecs, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
   defaultBackButton,
   defaultFormAdvancedToggle,

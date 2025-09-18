@@ -1,5 +1,6 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
-import { AnimatedModal, SmartInput } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui/Fields'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useState } from 'react'
 import { useLayoutStore } from 'src/stores'

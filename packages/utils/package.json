@@ -7,6 +7,9 @@
     "tinycolor2": "^1.4.2"
   },
   "devDependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
+    "@buildeross/types": "workspace:*",
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@types/node": "^22.15.21",

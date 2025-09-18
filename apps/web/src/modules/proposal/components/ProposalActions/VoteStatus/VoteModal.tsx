@@ -2,7 +2,7 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'
-import { AnimatedModal, SuccessModalContent } from '@buildeross/ui'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import {
   Atoms,
   Box,

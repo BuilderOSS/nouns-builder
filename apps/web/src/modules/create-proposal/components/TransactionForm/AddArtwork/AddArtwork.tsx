@@ -1,7 +1,7 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
-import { getLayerName } from '@buildeross/ui'
+import { getLayerName } from '@buildeross/ui/Artwork'
 import { Stack } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { transformFileProperties } from 'src/modules/create-dao'

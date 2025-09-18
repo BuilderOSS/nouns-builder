@@ -3,7 +3,7 @@ import {
   PUBLIC_NOUNS_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { DatePicker, SmartInput } from '@buildeross/ui'
+import { DatePicker, SmartInput } from '@buildeross/ui/Fields'
 import { yearsAhead } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'

@@ -1,5 +1,5 @@
 import { type DaoMembership } from '@buildeross/hooks/useDaoMembership'
-import { Avatar } from '@buildeross/ui'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Flex, Grid, Icon, PopUp, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'

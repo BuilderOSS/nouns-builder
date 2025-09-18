@@ -1,7 +1,12 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
-import { DaysHoursMinsSecs, FIELD_TYPES, SmartInput, StickySave } from '@buildeross/ui'
+import {
+  DaysHoursMinsSecs,
+  FIELD_TYPES,
+  SmartInput,
+  StickySave,
+} from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   compareAndReturn,

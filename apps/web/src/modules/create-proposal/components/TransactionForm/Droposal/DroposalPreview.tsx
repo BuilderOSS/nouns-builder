@@ -1,4 +1,4 @@
-import { MediaPreview } from '@buildeross/ui'
+import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 

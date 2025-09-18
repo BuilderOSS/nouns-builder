@@ -1,5 +1,6 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import { NetworkController, Uploading } from '@buildeross/ui'
+import { NetworkController } from '@buildeross/ui/NetworkController'
+import { Uploading } from '@buildeross/ui/Uploading'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'

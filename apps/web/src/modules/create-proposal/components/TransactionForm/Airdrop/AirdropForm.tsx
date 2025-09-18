@@ -1,4 +1,5 @@
-import { FIELD_TYPES, Input, SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
+import { Input } from '@buildeross/ui/Input'
 import { Box, Button, Flex } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Form, Formik } from 'formik'

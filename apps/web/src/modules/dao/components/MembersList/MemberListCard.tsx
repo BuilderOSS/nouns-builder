@@ -1,6 +1,6 @@
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'

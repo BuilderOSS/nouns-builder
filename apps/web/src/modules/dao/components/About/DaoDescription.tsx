@@ -1,4 +1,4 @@
-import { MarkdownDisplay } from '@buildeross/ui'
+import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import HTMLReactParser from 'html-react-parser'

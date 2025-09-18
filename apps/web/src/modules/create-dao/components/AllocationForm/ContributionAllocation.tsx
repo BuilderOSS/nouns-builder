@@ -3,7 +3,7 @@ import {
   PUBLIC_NOUNS_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { AnimatedModal } from '@buildeross/ui'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'

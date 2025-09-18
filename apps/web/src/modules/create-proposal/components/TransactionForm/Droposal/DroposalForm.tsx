@@ -1,10 +1,5 @@
-import {
-  DatePicker,
-  FIELD_TYPES,
-  SingleMediaUpload,
-  SmartInput,
-  TextArea,
-} from '@buildeross/ui'
+import { DatePicker, FIELD_TYPES, SmartInput, TextArea } from '@buildeross/ui/Fields'
+import { SingleMediaUpload } from '@buildeross/ui/SingleMediaUpload'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'

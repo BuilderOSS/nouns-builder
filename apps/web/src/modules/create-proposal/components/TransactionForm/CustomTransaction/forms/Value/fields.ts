@@ -1,4 +1,4 @@
-import { FIELD_TYPES } from '@buildeross/ui'
+import { FIELD_TYPES } from '@buildeross/ui/Fields'
 import * as Yup from 'yup'
 
 export const transactionValueFields = [

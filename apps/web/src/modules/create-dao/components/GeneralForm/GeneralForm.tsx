@@ -1,4 +1,5 @@
-import { SingleImageUpload, SmartInput } from '@buildeross/ui'
+import { SmartInput } from '@buildeross/ui/Fields'
+import { SingleImageUpload } from '@buildeross/ui/SingleImageUpload'
 import { defaultFormButton } from '@buildeross/ui/styles'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'

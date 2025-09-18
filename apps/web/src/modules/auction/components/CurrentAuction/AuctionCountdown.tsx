@@ -1,4 +1,4 @@
-import { Countdown } from '@buildeross/ui'
+import { Countdown } from '@buildeross/ui/Countdown'
 
 import { AuctionDetail } from '../AuctionDetail'
 

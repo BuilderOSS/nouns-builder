@@ -1,5 +1,5 @@
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
-import { AnimatedModal } from '@buildeross/ui'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 

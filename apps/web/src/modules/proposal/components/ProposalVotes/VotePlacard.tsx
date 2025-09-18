@@ -1,6 +1,6 @@
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Flex, Grid, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'

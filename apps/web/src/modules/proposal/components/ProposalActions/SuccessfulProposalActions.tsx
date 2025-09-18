@@ -2,7 +2,8 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { getProposal, Proposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'
-import { AnimatedModal, Countdown, SuccessModalContent } from '@buildeross/ui'
+import { Countdown } from '@buildeross/ui/Countdown'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import {
   isProposalExecutable,
   isProposalSuccessful,

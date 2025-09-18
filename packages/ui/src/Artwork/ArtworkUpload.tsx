@@ -1,4 +1,4 @@
-import { ArtworkUploadError, ImageProps } from '@buildeross/hooks/useArtworkUpload'
+import { ArtworkUploadError, ImageProps } from '@buildeross/types'
 import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
 

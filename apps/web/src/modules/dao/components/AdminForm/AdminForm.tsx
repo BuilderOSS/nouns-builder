@@ -4,12 +4,12 @@ import { AddressType } from '@buildeross/types'
 import {
   DaysHoursMinsSecs,
   FIELD_TYPES,
-  MarkdownEditor,
   Radio,
-  SingleImageUpload,
   SmartInput,
   StickySave,
-} from '@buildeross/ui'
+} from '@buildeross/ui/Fields'
+import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
+import { SingleImageUpload } from '@buildeross/ui/SingleImageUpload'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   compareAndReturn,

@@ -7,7 +7,7 @@ import {
   ProposalFragment,
 } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { DisplayPanel } from '@buildeross/ui'
+import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import useSWR from 'swr'

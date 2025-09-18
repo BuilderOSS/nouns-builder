@@ -1,5 +1,5 @@
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
-import { NetworkController } from '@buildeross/ui'
+import { NetworkController } from '@buildeross/ui/NetworkController'
 import { atoms, Flex, Label, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'

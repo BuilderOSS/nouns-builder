@@ -1,6 +1,6 @@
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { AddressType } from '@buildeross/types'
-import { Avatar } from '@buildeross/ui'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useState } from 'react'
 

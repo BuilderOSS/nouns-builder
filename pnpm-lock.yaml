@@ -271,6 +271,19 @@ importers:
         version: 3.1.4(@types/debug@4.1.12)(@types/node@22.15.21)(jiti@2.4.2)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(terser@5.39.2)(yaml@2.8.0)
 
   packages/analytics:
+    dependencies:
+      '@vercel/analytics':
+        specifier: ^0.1.5
+        version: 0.1.11(react@19.1.0)
+      next:
+        specifier: ^15.3.2
+        version: 15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
     devDependencies:
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
@@ -281,21 +294,9 @@ importers:
       '@types/react':
         specifier: ^19.1.5
         version: 19.1.5
-      '@vercel/analytics':
-        specifier: ^0.1.5
-        version: 0.1.11(react@19.1.0)
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      next:
-        specifier: ^15.3.2
-        version: 15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      react:
-        specifier: ^19.1.0
-        version: 19.1.0
-      react-dom:
-        specifier: ^19.1.0
-        version: 19.1.0(react@19.1.0)
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)
@@ -304,6 +305,16 @@ importers:
         version: 5.8.3
 
   packages/blocklist:
+    dependencies:
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
+      react-dom:
+        specifier: ^19.1.0
+        version: 19.1.0(react@19.1.0)
+      viem:
+        specifier: ^2.30.0
+        version: 2.31.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.23)
     devDependencies:
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
@@ -320,24 +331,15 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      react:
-        specifier: ^19.1.0
-        version: 19.1.0
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
-      viem:
-        specifier: ^2.30.0
-        version: 2.31.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.23)
 
   packages/constants:
     dependencies:
-      '@buildeross/types':
-        specifier: workspace:*
-        version: link:../types
       wagmi:
         specifier: ^2.15.4
         version: 2.15.4(@tanstack/query-core@5.76.2)(@tanstack/react-query@5.76.2(react@19.1.0))(@types/react@19.1.5)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.6.1)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.31.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.23))(zod@3.25.23)
@@ -348,6 +350,9 @@ importers:
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
       '@types/node':
         specifier: ^22.15.21
         version: 22.15.21
@@ -362,7 +367,7 @@ importers:
         version: 5.8.3
 
   packages/eslint-config-custom:
-    dependencies:
+    devDependencies:
       '@typescript-eslint/eslint-plugin':
         specifier: ^5.53.0
         version: 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
@@ -396,21 +401,6 @@ importers:
 
   packages/hooks:
     dependencies:
-      '@buildeross/constants':
-        specifier: workspace:*
-        version: link:../constants
-      '@buildeross/ipfs-service':
-        specifier: workspace:*
-        version: link:../ipfs-service
-      '@buildeross/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-      '@buildeross/types':
-        specifier: workspace:*
-        version: link:../types
-      '@buildeross/utils':
-        specifier: workspace:*
-        version: link:../utils
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
@@ -430,12 +420,27 @@ importers:
         specifier: ^2.15.4
         version: 2.15.4(@tanstack/query-core@5.76.2)(@tanstack/react-query@5.76.2(react@19.1.0))(@types/react@19.1.5)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.6.1)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.31.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.23))(zod@3.25.23)
     devDependencies:
+      '@buildeross/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
         version: link:../eslint-config-custom
+      '@buildeross/ipfs-service':
+        specifier: workspace:*
+        version: link:../ipfs-service
+      '@buildeross/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
+      '@buildeross/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@types/node':
         specifier: ^22.15.21
         version: 22.15.21
@@ -488,15 +493,6 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@buildeross/constants':
-        specifier: workspace:*
-        version: link:../constants
-      '@buildeross/types':
-        specifier: workspace:*
-        version: link:../types
-      '@buildeross/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@sentry/nextjs':
         specifier: ^9.22.0
         version: 9.22.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.57.2(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)(webpack@5.99.9)
@@ -516,12 +512,21 @@ importers:
         specifier: ^2.15.4
         version: 2.15.4(@tanstack/query-core@5.76.2)(@tanstack/react-query@5.76.2(react@19.1.0))(@types/react@19.1.5)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.6.1)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.31.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.23))(zod@3.25.23)
     devDependencies:
+      '@buildeross/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
         version: link:../eslint-config-custom
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
+      '@buildeross/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@graphql-codegen/cli':
         specifier: ^5.0.6
         version: 5.0.6(@types/node@22.15.21)(bufferutil@4.0.9)(crossws@0.3.5)(encoding@0.1.13)(enquirer@2.4.1)(graphql@16.11.0)(typescript@5.8.3)(utf-8-validate@5.0.10)
@@ -573,27 +578,6 @@ importers:
 
   packages/ui:
     dependencies:
-      '@buildeross/constants':
-        specifier: workspace:*
-        version: link:../constants
-      '@buildeross/hooks':
-        specifier: workspace:*
-        version: link:../hooks
-      '@buildeross/ipfs-service':
-        specifier: workspace:*
-        version: link:../ipfs-service
-      '@buildeross/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-      '@buildeross/types':
-        specifier: workspace:*
-        version: link:../types
-      '@buildeross/utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@buildeross/zord':
-        specifier: workspace:*
-        version: link:../zord
       '@vanilla-extract/css':
         specifier: ^1.17.2
         version: 1.17.2(babel-plugin-macros@3.1.0)
@@ -628,12 +612,33 @@ importers:
         specifier: ^2.15.4
         version: 2.15.4(@tanstack/query-core@5.76.2)(@tanstack/react-query@5.76.2(react@19.1.0))(@types/react@19.1.5)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.6.1)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.31.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.23))(zod@3.25.23)
     devDependencies:
+      '@buildeross/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
         version: link:../eslint-config-custom
+      '@buildeross/hooks':
+        specifier: workspace:*
+        version: link:../hooks
+      '@buildeross/ipfs-service':
+        specifier: workspace:*
+        version: link:../ipfs-service
+      '@buildeross/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
+      '@buildeross/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@buildeross/zord':
+        specifier: workspace:*
+        version: link:../zord
       '@testing-library/jest-dom':
         specifier: ^6.6.3
         version: 6.6.3
@@ -694,15 +699,6 @@ importers:
 
   packages/utils:
     dependencies:
-      '@buildeross/constants':
-        specifier: workspace:*
-        version: link:../constants
-      '@buildeross/ipfs-service':
-        specifier: workspace:*
-        version: link:../ipfs-service
-      '@buildeross/types':
-        specifier: workspace:*
-        version: link:../types
       bignumber.js:
         specifier: ^9.3.0
         version: 9.3.0
@@ -719,12 +715,21 @@ importers:
         specifier: ^1.6.1
         version: 1.6.1
     devDependencies:
+      '@buildeross/constants':
+        specifier: workspace:*
+        version: link:../constants
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
         version: link:../eslint-config-custom
+      '@buildeross/ipfs-service':
+        specifier: workspace:*
+        version: link:../ipfs-service
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
       '@types/node':
         specifier: ^22.15.21
         version: 22.15.21

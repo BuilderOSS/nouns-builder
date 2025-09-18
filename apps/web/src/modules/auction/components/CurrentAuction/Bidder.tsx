@@ -1,5 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { Avatar } from '@buildeross/ui'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 

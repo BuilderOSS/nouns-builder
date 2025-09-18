@@ -5,15 +5,12 @@ import {
   PROPDATE_SCHEMA,
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { MessageType, type PropDate } from '@buildeross/sdk/eas'
 import { CHAIN_ID } from '@buildeross/types'
-import {
-  AnimatedModal,
-  Avatar,
-  MarkdownEditor,
-  SuccessModalContent,
-} from '@buildeross/ui'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Select, Text } from '@buildeross/zord'

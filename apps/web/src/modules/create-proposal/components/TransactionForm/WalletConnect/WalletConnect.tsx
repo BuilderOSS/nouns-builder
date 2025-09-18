@@ -1,6 +1,6 @@
 import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
 import { CHAIN_ID } from '@buildeross/types'
-import { FIELD_TYPES, SmartInput } from '@buildeross/ui'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'

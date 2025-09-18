@@ -1,5 +1,4 @@
-import { OrderedTraits } from '@buildeross/hooks/useArtworkPreview'
-import { ImageProps } from '@buildeross/hooks/useArtworkUpload'
+import { ImageProps, OrderedTraits } from '@buildeross/types'
 import { Flex, Icon } from '@buildeross/zord'
 
 import { AnimatedModal } from '../Modal'

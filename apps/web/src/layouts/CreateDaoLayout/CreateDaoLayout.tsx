@@ -1,4 +1,4 @@
-import { Uploading } from '@buildeross/ui'
+import { Uploading } from '@buildeross/ui/Uploading'
 import { Box } from '@buildeross/zord'
 import React, { ReactElement, ReactNode } from 'react'
 import { useFormStore } from 'src/modules/create-dao'

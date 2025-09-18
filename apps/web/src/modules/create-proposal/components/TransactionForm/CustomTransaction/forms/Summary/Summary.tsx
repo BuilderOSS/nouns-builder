@@ -1,4 +1,4 @@
-import { CopyButton } from '@buildeross/ui'
+import { CopyButton } from '@buildeross/ui/CopyButton'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   matchTypeParameters,

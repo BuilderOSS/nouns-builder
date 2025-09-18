@@ -1,4 +1,4 @@
-import { useFallbackSrc } from '@buildeross/hooks'
+import { useFallbackSrc } from '@buildeross/hooks/useFallbackSrc'
 import NextImage, { type ImageProps as NextImageProps } from 'next/image'
 import React, { forwardRef } from 'react'
 

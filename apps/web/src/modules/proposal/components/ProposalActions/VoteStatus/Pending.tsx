@@ -1,7 +1,7 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { getProposal } from '@buildeross/sdk/subgraph'
-import { Countdown } from '@buildeross/ui'
+import { Countdown } from '@buildeross/ui/Countdown'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
 import { useChainStore } from 'src/stores/useChainStore'

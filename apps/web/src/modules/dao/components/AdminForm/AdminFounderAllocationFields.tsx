@@ -1,5 +1,5 @@
 import { Duration } from '@buildeross/types'
-import { DatePicker, SmartInput } from '@buildeross/ui'
+import { DatePicker, SmartInput } from '@buildeross/ui/Fields'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { FormikErrors, FormikProps, FormikTouched } from 'formik'
 import React from 'react'

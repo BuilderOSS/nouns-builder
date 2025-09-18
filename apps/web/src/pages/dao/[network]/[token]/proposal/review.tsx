@@ -1,7 +1,7 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { useVotes } from '@buildeross/hooks'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { atoms, Box, Flex, Icon, Stack, Text } from '@buildeross/zord'

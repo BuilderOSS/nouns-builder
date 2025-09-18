@@ -1,6 +1,6 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'

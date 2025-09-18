@@ -7,7 +7,7 @@ import {
   SubgraphSDK,
   Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
-import { MarkdownDisplay } from '@buildeross/ui'
+import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'

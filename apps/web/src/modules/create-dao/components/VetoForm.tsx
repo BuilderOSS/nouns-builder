@@ -1,4 +1,4 @@
-import { Radio, SmartInput } from '@buildeross/ui'
+import { Radio, SmartInput } from '@buildeross/ui/Fields'
 import { defaultBackButton, defaultFormButtonWithPrev } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { isEmpty } from '@buildeross/utils/helpers'

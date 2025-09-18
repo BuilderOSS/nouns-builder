@@ -1,6 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { uploadJson } from '@buildeross/ipfs-service'
-import { erc20Abi } from '@buildeross/sdk'
+import { erc20Abi } from '@buildeross/sdk/contract'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'

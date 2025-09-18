@@ -1,6 +1,6 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
-import { Avatar, NameAvatar } from '@buildeross/ui'
+import { Avatar, NameAvatar } from '@buildeross/ui/Avatar'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'

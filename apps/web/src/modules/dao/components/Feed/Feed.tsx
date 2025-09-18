@@ -1,4 +1,4 @@
-import { DisplayPanel } from '@buildeross/ui'
+import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Button, Flex } from '@buildeross/zord'
 import { CastAddData, Message, SignatureScheme } from '@farcaster/hub-nodejs'
 import axios from 'axios'

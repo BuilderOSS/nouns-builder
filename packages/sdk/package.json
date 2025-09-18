@@ -8,6 +8,9 @@
     "graphql-tag": "^2.12.6"
   },
   "devDependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/utils": "workspace:*",
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@graphql-codegen/cli": "^5.0.6",

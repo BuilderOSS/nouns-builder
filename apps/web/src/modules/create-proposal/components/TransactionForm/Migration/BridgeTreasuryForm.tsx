@@ -4,7 +4,7 @@ import {
 } from '@buildeross/constants/addresses'
 import { l2DeployerAbi, messengerAbi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
-import { Input } from '@buildeross/ui'
+import { Input } from '@buildeross/ui/Input'
 import { Box, Button, Flex } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Form, Formik } from 'formik'

@@ -1,7 +1,7 @@
 import {
   ContractButton as BaseContractButton,
   ContractButtonProps as BaseContractButtonProps,
-} from '@buildeross/ui'
+} from '@buildeross/ui/ContractButton'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import Link from 'next/link'
 import React from 'react'

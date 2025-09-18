@@ -1,7 +1,7 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
-import { FallbackImage } from '@buildeross/ui'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'

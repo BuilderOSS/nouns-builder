@@ -1,4 +1,5 @@
-import { Accordion, DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui'
+import { Accordion } from '@buildeross/ui/Accordion'
+import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { FieldArray, Form, Formik } from 'formik'

@@ -1,4 +1,4 @@
-import { AnimatedModal, SuccessModalContent } from '@buildeross/ui'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box } from '@buildeross/zord'
 import React, { useState } from 'react'
 import { useLayoutStore } from 'src/stores'

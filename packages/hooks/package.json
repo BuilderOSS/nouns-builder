@@ -6,6 +6,11 @@
     "dayjs": "^1.11.13"
   },
   "devDependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
+    "@buildeross/sdk": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/utils": "workspace:*",
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@types/node": "^22.15.21",

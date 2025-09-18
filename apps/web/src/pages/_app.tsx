@@ -10,7 +10,7 @@ import 'flatpickr/dist/themes/light.css'
 import 'react-mde/lib/styles/css/react-mde-all.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
-import { NetworkController } from '@buildeross/ui'
+import { NetworkController } from '@buildeross/ui/NetworkController'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { NextPage } from 'next'

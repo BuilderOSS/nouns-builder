@@ -1,5 +1,5 @@
 import { AddressType } from '@buildeross/types'
-import { CopyButton } from '@buildeross/ui'
+import { CopyButton } from '@buildeross/ui/CopyButton'
 import { Box, Flex, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'

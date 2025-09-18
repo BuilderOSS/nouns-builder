@@ -2,12 +2,9 @@ import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import {
-  AnimatedModal,
-  MarkdownEditor,
-  SuccessModalContent,
-  TextInput,
-} from '@buildeross/ui'
+import { TextInput } from '@buildeross/ui/Fields'
+import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'

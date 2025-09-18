@@ -1,4 +1,4 @@
-import { MarkdownEditor } from '@buildeross/ui'
+import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { Button, Flex, Icon } from '@buildeross/zord'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
