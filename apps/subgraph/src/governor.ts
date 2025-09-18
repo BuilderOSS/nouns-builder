@@ -125,7 +125,7 @@ export function handleVoteCast(event: VoteCastEvent): void {
   if (proposal == null) return
 
   let proposalVote = new ProposalVote(
-    `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`,
+    `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`
   )
 
   proposalVote.transactionHash = event.transaction.hash

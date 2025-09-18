@@ -49,7 +49,7 @@ const chains: Chain[] = [
     slug: 'ethereum',
     icon: '/chains/ethereum.svg',
     // ... other viem chain properties
-  }
+  },
 ]
 ```
 
@@ -72,7 +72,7 @@ interface ContractCall {
 
 const call: ContractCall = {
   to: '0x742d35Cc6634C0532925a3b8D2C31883a29B8f8D',
-  data: '0x70a08231000000000000000000000000742d35cc6634c0532925a3b8d2c31883a29b8f8d'
+  data: '0x70a08231000000000000000000000000742d35cc6634c0532925a3b8d2c31883a29b8f8d',
 }
 ```
 
@@ -121,11 +121,7 @@ function canExecute(state: ProposalState): boolean {
 ### Transaction Decoding
 
 ```typescript
-import { 
-  DecodedTransactionData, 
-  DecodedArg, 
-  DecodedValue 
-} from '@buildeross/types'
+import { DecodedTransactionData, DecodedArg, DecodedValue } from '@buildeross/types'
 
 // Type-safe transaction data
 const decodedTx: DecodedTransactionData = {
@@ -135,14 +131,14 @@ const decodedTx: DecodedTransactionData = {
     to: {
       name: 'to',
       type: 'address',
-      value: '0x742d35Cc6634C0532925a3b8D2C31883a29B8f8D'
+      value: '0x742d35Cc6634C0532925a3b8D2C31883a29B8f8D',
     },
     amount: {
       name: 'amount',
-      type: 'uint256', 
-      value: '1000000000000000000'
-    }
-  }
+      type: 'uint256',
+      value: '1000000000000000000',
+    },
+  },
 }
 
 // Helper to extract argument values
@@ -167,17 +163,17 @@ const votingPeriod: Duration = {
   days: 3,
   hours: 0,
   minutes: 0,
-  seconds: 0
+  seconds: 0,
 }
 
 const executionDelay: Duration = {
-  days: 2
+  days: 2,
 }
 
 // Convert duration to seconds
 function durationToSeconds(duration: Duration): number {
   const { days = 0, hours = 0, minutes = 0, seconds = 0 } = duration
-  return (days * 24 * 60 * 60) + (hours * 60 * 60) + (minutes * 60) + seconds
+  return days * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds
 }
 
 // Create duration from seconds
@@ -212,8 +208,8 @@ enum CHAIN_ID {
 // Extended chain interface with metadata
 interface Chain extends ViemChain {
   id: CHAIN_ID
-  slug: string      // URL-friendly identifier
-  icon: string      // Icon file path
+  slug: string // URL-friendly identifier
+  icon: string // Icon file path
 }
 ```
 
@@ -232,15 +228,15 @@ type BytesType = `0x${string}`
 ```typescript
 // Governance proposal states
 enum ProposalState {
-  Pending = 0,    // Proposal created, voting not started
-  Active = 1,     // Voting period active
-  Canceled = 2,   // Proposal canceled
-  Defeated = 3,   // Voting failed
-  Succeeded = 4,  // Voting passed
-  Queued = 5,     // Queued for execution
-  Expired = 6,    // Execution window expired
-  Executed = 7,   // Successfully executed
-  Vetoed = 8,     // Vetoed by admin
+  Pending = 0, // Proposal created, voting not started
+  Active = 1, // Voting period active
+  Canceled = 2, // Proposal canceled
+  Defeated = 3, // Voting failed
+  Succeeded = 4, // Voting passed
+  Queued = 5, // Queued for execution
+  Expired = 6, // Execution window expired
+  Executed = 7, // Successfully executed
+  Vetoed = 8, // Vetoed by admin
 }
 ```
 
@@ -261,16 +257,16 @@ type DecodedValue = PrimitiveValue | PrimitiveValue[] | TupleValue | TupleValue[
 
 // Function argument with metadata
 type DecodedArg = {
-  name: string        // Argument name
-  type: string        // Solidity type
+  name: string // Argument name
+  type: string // Solidity type
   value: DecodedValue // Decoded value
 }
 
 // Complete decoded transaction
 type DecodedTransactionData = {
-  args: Record<string, DecodedArg>  // Function arguments
-  functionName: string              // Function name
-  functionSig: string              // Function signature
+  args: Record<string, DecodedArg> // Function arguments
+  functionName: string // Function name
+  functionSig: string // Function signature
 }
 ```
 
@@ -280,7 +276,7 @@ type DecodedTransactionData = {
 // Time duration specification
 interface Duration {
   seconds?: number
-  minutes?: number  
+  minutes?: number
   hours?: number
   days?: number
 }
@@ -291,18 +287,21 @@ interface Duration {
 The package provides comprehensive support for all Builder protocol chains:
 
 ### Mainnets
+
 - **Ethereum** (`CHAIN_ID.ETHEREUM`) - Chain ID: 1
-- **Base** (`CHAIN_ID.BASE`) - Chain ID: 8453  
+- **Base** (`CHAIN_ID.BASE`) - Chain ID: 8453
 - **Optimism** (`CHAIN_ID.OPTIMISM`) - Chain ID: 10
 - **Zora** (`CHAIN_ID.ZORA`) - Chain ID: 7777777
 
 ### Testnets
+
 - **Sepolia** (`CHAIN_ID.SEPOLIA`) - Chain ID: 11155111
 - **Base Sepolia** (`CHAIN_ID.BASE_SEPOLIA`) - Chain ID: 84532
 - **Optimism Sepolia** (`CHAIN_ID.OPTIMISM_SEPOLIA`) - Chain ID: 11155420
 - **Zora Sepolia** (`CHAIN_ID.ZORA_SEPOLIA`) - Chain ID: 999999999
 
 ### Development
+
 - **Foundry** (`CHAIN_ID.FOUNDRY`) - Chain ID: 31337
 
 ## Integration with Viem
@@ -319,13 +318,13 @@ const ethereumChain: Chain = {
   ...mainnet,
   id: CHAIN_ID.ETHEREUM,
   slug: 'ethereum',
-  icon: '/chains/ethereum.svg'
+  icon: '/chains/ethereum.svg',
 }
 
 // Use with viem client
 const client = createPublicClient({
   chain: ethereumChain,
-  transport: http()
+  transport: http(),
 })
 ```
 
@@ -366,9 +365,11 @@ pnpm lint
 ## Dependencies
 
 ### Peer Dependencies
+
 - `viem`: ^2.30.0 - Ethereum library for type compatibility
 
 ### Development Dependencies
+
 - TypeScript and ESLint configurations
 
 ## Best Practices
@@ -381,14 +382,11 @@ Create type guards for runtime validation:
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 
 function isAddressType(value: unknown): value is AddressType {
-  return typeof value === 'string' && 
-         value.startsWith('0x') && 
-         value.length === 42
+  return typeof value === 'string' && value.startsWith('0x') && value.length === 42
 }
 
 function isChainId(value: unknown): value is CHAIN_ID {
-  return typeof value === 'number' && 
-         Object.values(CHAIN_ID).includes(value as CHAIN_ID)
+  return typeof value === 'number' && Object.values(CHAIN_ID).includes(value as CHAIN_ID)
 }
 ```
 
@@ -404,12 +402,9 @@ function isActiveProposal(state: ProposalState): boolean {
 }
 
 function isMainnet(chainId: CHAIN_ID): boolean {
-  return [
-    CHAIN_ID.ETHEREUM,
-    CHAIN_ID.BASE,
-    CHAIN_ID.OPTIMISM,
-    CHAIN_ID.ZORA
-  ].includes(chainId)
+  return [CHAIN_ID.ETHEREUM, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM, CHAIN_ID.ZORA].includes(
+    chainId
+  )
 }
 ```
 

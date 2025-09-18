@@ -3,12 +3,11 @@ import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { TEXT } from 'src/components/Fields/types'
 import {
   DropdownSelect,
   SelectOption,
@@ -292,7 +291,7 @@ export const TokenSelectionForm: React.FC = () => {
 
       {selectedTokenOption === 'custom' && (
         <SmartInput
-          type={TEXT}
+          type={FIELD_TYPES.TEXT}
           formik={formik}
           {...formik.getFieldProps('tokenAddress')}
           id="tokenAddress"

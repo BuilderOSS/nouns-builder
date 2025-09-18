@@ -17,7 +17,7 @@ export function getProvider(chainId: CHAIN_ID): PublicClient {
         createPublicClient({
           chain: foundry,
           transport: http(foundry.rpcUrls.default.http[0]),
-        }),
+        })
       )
     } else {
       providerMap.set(
@@ -25,7 +25,7 @@ export function getProvider(chainId: CHAIN_ID): PublicClient {
         createPublicClient({
           chain: chains.find((x) => x.id === chainId),
           transport: transports[chainId],
-        }),
+        })
       )
     }
   }

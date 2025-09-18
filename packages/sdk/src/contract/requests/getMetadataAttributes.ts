@@ -8,7 +8,7 @@ import { metadataAbi } from '../abis'
 export const getMetadataAttributes = async (
   metadata: Address,
   finalTokenId: bigint,
-  chainId: CHAIN_ID,
+  chainId: CHAIN_ID
 ) => {
   let lengthRequests = []
   for (let currentTokenId = 0n; currentTokenId <= finalTokenId; currentTokenId++) {

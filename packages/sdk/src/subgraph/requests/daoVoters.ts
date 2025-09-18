@@ -15,7 +15,7 @@ export const votersRequest = async (
   chainId: CHAIN_ID,
   collectionAddress: string,
   page?: number,
-  limit = 10,
+  limit = 10
 ): Promise<DaoVoter[] | undefined> => {
   try {
     const data = await SDK.connect(chainId).daoVoters({

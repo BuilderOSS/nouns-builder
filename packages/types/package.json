@@ -23,6 +23,7 @@
   ],
   "license": "MIT",
   "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "peerDependencies": {
     "viem": "^2.30.0"
   },
@@ -36,7 +37,7 @@
   },
   "scripts": {
     "build": "tsup",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist .turbo",
     "dev": "tsup --watch",
     "lint": "eslint src --fix",
     "type-check": "tsc --noEmit"

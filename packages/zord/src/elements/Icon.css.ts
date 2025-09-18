@@ -1,17 +1,8 @@
-import { keyframes, style } from '@vanilla-extract/css'
+import { style } from '@vanilla-extract/css'
 import { recipe } from '@vanilla-extract/recipes'
 
 import { atoms } from '../atoms'
 import { vars } from '../theme'
-
-export const rotateKeyframes = keyframes({
-  from: {
-    transform: 'rotate(0deg)',
-  },
-  to: {
-    transform: 'rotate(360deg)',
-  },
-})
 
 export const iconVariants = {
   color: {
@@ -28,37 +19,21 @@ export const iconVariants = {
   },
   size: {
     sm: {
-      width: vars.space.x3,
-      height: vars.space.x3,
-    },
-    md: {
       width: vars.space.x4,
       height: vars.space.x4,
     },
-    lg: {
-      width: vars.space.x5,
-      height: vars.space.x5,
+    md: {
+      width: vars.space.x6,
+      height: vars.space.x6,
     },
-    xl: {
+    lg: {
       width: vars.space.x8,
       height: vars.space.x8,
     },
-  },
-  flip: {
-    true: [
-      style({
-        transformOrigin: '50%',
-        transform: `rotate(180deg)`,
-      }),
-    ],
-  },
-  rotate: {
-    true: [
-      style({
-        transformOrigin: '50%',
-        animation: `${rotateKeyframes} 0.5s infinite linear`,
-      }),
-    ],
+    xl: {
+      width: vars.space.x12,
+      height: vars.space.x12,
+    },
   },
 }
 
@@ -84,6 +59,6 @@ export const icon = recipe({
   variants: iconVariants,
 
   defaultVariants: {
-    size: 'sm',
+    size: 'md',
   },
 })

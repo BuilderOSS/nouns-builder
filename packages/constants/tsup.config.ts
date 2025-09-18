@@ -5,6 +5,5 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['wagmi', 'wagmi/chains'],
+  external: ['wagmi', '@buildeross/types'],
 })
-

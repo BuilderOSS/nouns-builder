@@ -20,7 +20,7 @@ export type ProposalSucceededStatus = Extract<
 >
 
 export function isProposalSuccessful(
-  value: ProposalState,
+  value: ProposalState
 ): value is ProposalSucceededStatus {
   return [ProposalState.Succeeded, ProposalState.Queued].includes(value)
 }

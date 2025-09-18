@@ -1,7 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { highestBidsRequest } from '@buildeross/sdk/subgraph'
-import { Flex } from '@buildeross/zord'
-import { Grid } from '@buildeross/zord'
+import { Flex, Grid } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 import RecentlyCreated from 'src/components/Home/RecentlyCreated'
 import { DaoProps } from 'src/pages'

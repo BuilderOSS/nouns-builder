@@ -1,5 +1,4 @@
-import { color, Flex } from '@buildeross/zord'
-import { Icon } from 'src/components/Icon'
+import { color, Flex, Icon } from '@buildeross/zord'
 
 import { TRANSACTION_TYPES, TransactionType } from '../constants'
 

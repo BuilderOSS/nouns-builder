@@ -1,5 +1,4 @@
-import { Bytes, JSONValueKind } from '@graphprotocol/graph-ts'
-import { json } from '@graphprotocol/graph-ts'
+import { Bytes, json, JSONValueKind } from '@graphprotocol/graph-ts'
 import { decode } from 'as-base64'
 
 import { Token } from '../../generated/schema'

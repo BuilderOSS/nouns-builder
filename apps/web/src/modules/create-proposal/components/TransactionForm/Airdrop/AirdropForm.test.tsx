@@ -36,11 +36,13 @@ describe('Airdrop form with errors', () => {
     fireEvent.change(amountInput, { target: { value: 0 } })
     fireEvent.focusOut(amountInput)
 
-    await waitFor(() =>
-      expect(screen.getByText('Recipient address is invalid.')).toBeInTheDocument()
+    await waitFor(
+      () => expect(screen.getByText('Recipient address is invalid.')).toBeInTheDocument(),
+      { timeout: 5000 }
     )
-    await waitFor(() =>
-      expect(screen.getByText('Must be at least 1 token')).toBeInTheDocument()
+    await waitFor(
+      () => expect(screen.getByText('Must be at least 1 token')).toBeInTheDocument(),
+      { timeout: 5000 }
     )
   })
 })

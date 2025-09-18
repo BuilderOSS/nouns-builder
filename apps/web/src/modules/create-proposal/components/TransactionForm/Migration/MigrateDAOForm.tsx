@@ -1,12 +1,9 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
+import { defaultHelperTextStyle, defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Paragraph, Spinner, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import {
-  defaultHelperTextStyle,
-  defaultInputLabelStyle,
-} from 'src/components/Fields/styles.css'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { usePrepareMigration } from 'src/modules/create-proposal/hooks/usePrepareMigration'
 import { useProposalStore } from 'src/modules/create-proposal/stores'

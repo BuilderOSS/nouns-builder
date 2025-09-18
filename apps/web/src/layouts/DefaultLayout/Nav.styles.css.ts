@@ -17,7 +17,7 @@ export const mobileMenuSlideIn = style([
 ])
 
 export const NavContainer = style([
-  atoms({ m: 'auto', backgroundColor: 'background1', pos: 'fixed', w: '100vw' }),
+  atoms({ m: 'auto', backgroundColor: 'background1', pos: 'fixed', w: '100%' }),
   {
     zIndex: z.NAV_LAYER,
   },

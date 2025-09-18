@@ -1,8 +1,6 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import { atoms, Flex, Text } from '@buildeross/zord'
+import { atoms, Flex, Icon, Text } from '@buildeross/zord'
 import { useLayoutStore } from 'src/stores'
-
-import { Icon } from '../Icon'
 
 const VisitAlternate = () => {
   const { isMobile } = useLayoutStore()

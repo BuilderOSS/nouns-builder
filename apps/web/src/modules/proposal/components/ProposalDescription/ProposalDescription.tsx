@@ -1,17 +1,18 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { SubgraphSDK } from '@buildeross/sdk/subgraph'
-import { Proposal } from '@buildeross/sdk/subgraph'
-import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import {
+  OrderDirection,
+  Proposal,
+  SubgraphSDK,
+  Token_OrderBy,
+} from '@buildeross/sdk/subgraph'
+import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import Image from 'next/image'
 import React, { ReactNode, useMemo } from 'react'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
-import remarkGfm from 'remark-gfm'
 import {
   getEscrowBundler,
   getEscrowBundlerV1,
@@ -91,12 +92,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           <Paragraph overflow={'auto'}>
             {description && (
               <Box className={proposalDescription}>
-                <ReactMarkdown
-                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                  remarkPlugins={[remarkGfm]}
-                >
-                  {description}
-                </ReactMarkdown>
+                <MarkdownDisplay>{description}</MarkdownDisplay>
               </Box>
             )}
           </Paragraph>
@@ -124,7 +120,15 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
               )}
             </Box>
 
-            <Box>{displayName}</Box>
+            <Box>
+              <a
+                href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposer}`}
+                rel="noreferrer"
+                target="_blank"
+              >
+                {displayName}
+              </a>
+            </Box>
           </Flex>
         </Section>
 

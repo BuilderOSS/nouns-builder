@@ -1,7 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { getBids } from '@buildeross/sdk/subgraph'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, getBids } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useRouter } from 'next/router'
 import { useDaoStore } from 'src/stores/useDaoStore'

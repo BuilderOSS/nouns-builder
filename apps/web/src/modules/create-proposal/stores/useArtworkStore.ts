@@ -1,4 +1,4 @@
-import { ArtworkType, IPFSUpload, OrderedTraits } from '@buildeross/hooks'
+import { ArtworkType, IPFSUpload, OrderedTraits } from '@buildeross/types'
 import { create } from 'zustand'
 
 export interface ArtworkFormValues {

@@ -4,7 +4,7 @@ const REQUEST_TIMEOUT = 10000 // 10s
 
 export const fetchWithTimeout = async (
   url: string,
-  controller: AbortController,
+  controller: AbortController
 ): Promise<string> => {
   const { signal } = controller
 
@@ -53,7 +53,7 @@ export const fetchFromURI = async (uri: string): Promise<string> => {
     fetchWithTimeout(url, controller).then((result) => {
       controller.abort() // abort all other pending fetches once one succeeds
       return result
-    }),
+    })
   )
 
   return promiseAny(fetchPromises).catch(() => {

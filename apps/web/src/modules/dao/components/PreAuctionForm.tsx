@@ -1,6 +1,12 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
+import {
+  DaysHoursMinsSecs,
+  FIELD_TYPES,
+  SmartInput,
+  StickySave,
+} from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   compareAndReturn,
@@ -12,10 +18,6 @@ import { Box, Flex, Stack } from '@buildeross/zord'
 import { Formik, FormikValues } from 'formik'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
-import DaysHoursMinsSecs from 'src/components/Fields/DaysHoursMinsSecs'
-import SmartInput from 'src/components/Fields/SmartInput'
-import StickySave from 'src/components/Fields/StickySave'
-import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
@@ -183,7 +185,7 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
                     <SmartInput
                       {...formik.getFieldProps('auctionReservePrice')}
                       inputLabel={'Auction Reserve Price'}
-                      type={NUMBER}
+                      type={FIELD_TYPES.NUMBER}
                       formik={formik}
                       id={'auctionReservePrice'}
                       onChange={({ target }: BaseSyntheticEvent) => {
@@ -223,7 +225,7 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
                       <SmartInput
                         {...formik.getFieldProps('auctionRewardRecipient')}
                         inputLabel="Auction Reward Recipient"
-                        type={TEXT}
+                        type={FIELD_TYPES.TEXT}
                         id="auctionRewardRecipient"
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
@@ -236,7 +238,7 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
                       <SmartInput
                         {...formik.getFieldProps('auctionRewardPercentage')}
                         inputLabel={'Auction Reward Percentage'}
-                        type={NUMBER}
+                        type={FIELD_TYPES.NUMBER}
                         formik={formik}
                         id={'auctionRewardPercentage'}
                         onChange={({ target }: BaseSyntheticEvent) => {
@@ -267,6 +269,7 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
                   isSubmitting={formik.isSubmitting}
                   saveButtonText={'Save Changes'}
                   onSave={formik.handleSubmit}
+                  chainId={chain.id}
                 />
               </Flex>
             )

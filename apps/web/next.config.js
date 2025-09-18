@@ -22,16 +22,29 @@ const baseUrl =
 const basicConfig = {
   reactStrictMode: true,
   transpilePackages: [
-    'ipfs-service',
-    'analytics',
-    'blocklist',
+    '@buildeross/analytics',
+    '@buildeross/blocklist',
+    '@buildeross/constants',
+    '@buildeross/hooks',
+    '@buildeross/ipfs-service',
+    '@buildeross/sdk',
+    '@buildeross/types',
+    '@buildeross/utils',
+    '@buildeross/zord',
+    '@buildeross/ui',
     '@smartinvoicexyz/types',
     '@rainbow-me/rainbowkit',
     '@farcaster/frame-sdk',
     '@farcaster/frame-wagmi-connector',
   ],
   experimental: {
-    optimizePackageImports: ['@rainbow-me/rainbowkit', '@buildeross/zord'],
+    optimizePackageImports: [
+      '@rainbow-me/rainbowkit',
+      '@buildeross/zord',
+      '@buildeross/hooks',
+      '@buildeross/ui',
+      '@buildeross/sdk',
+    ],
   },
   env: {
     BASE_URL: baseUrl,

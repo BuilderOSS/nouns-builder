@@ -1,4 +1,11 @@
-import { IPFSUpload, useArtworkPreview, useArtworkUpload } from '@buildeross/hooks'
+import { useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
+import { useArtworkUpload } from '@buildeross/hooks/useArtworkUpload'
+import { IPFSUpload } from '@buildeross/types'
+import {
+  ArtworkPreview,
+  ArtworkUpload as UploadComponent,
+  LayerOrdering,
+} from '@buildeross/ui/Artwork'
 import * as Sentry from '@sentry/nextjs'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
@@ -9,9 +16,7 @@ import React, {
   useCallback,
   useEffect,
 } from 'react'
-import { ArtworkPreview, ArtworkUpload as UploadComponent } from 'src/components/Artwork'
-import { LayerOrdering } from 'src/components/Artwork/LayerOrdering'
-import { artworkPreviewPanel } from 'src/components/Fields/styles.css'
+import { artworkPreviewPanel } from 'src/styles/Artwork.css'
 
 import { useFormStore } from '../../stores'
 

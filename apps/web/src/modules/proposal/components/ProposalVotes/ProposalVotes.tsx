@@ -1,7 +1,10 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
-import { SubgraphSDK } from '@buildeross/sdk/subgraph'
-import { Proposal } from '@buildeross/sdk/subgraph'
-import { OrderDirection, Snapshot_OrderBy } from '@buildeross/sdk/subgraph'
+import {
+  OrderDirection,
+  Proposal,
+  Snapshot_OrderBy,
+  SubgraphSDK,
+} from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { useChainStore } from 'src/stores/useChainStore'

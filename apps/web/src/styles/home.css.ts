@@ -105,26 +105,6 @@ export const homeSectionWrapper = style({
   maxWidth: 1144,
 })
 
-export const accordionName = style({
-  '@media': {
-    '(max-width: 768px)': {
-      paddingTop: 16,
-      paddingBottom: 16,
-      fontSize: 16,
-      height: 'auto',
-    },
-  },
-})
-
-export const accordionItem = style({
-  '@media': {
-    '(max-width: 768px)': {
-      paddingLeft: 16,
-      paddingRight: 16,
-    },
-  },
-})
-
 export const footerHeading = style({
   '@media': {
     '(max-width: 768px)': {

@@ -1,14 +1,13 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { useVotes } from '@buildeross/hooks'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
-import { atoms, Box, Flex, Stack, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   CreateProposalHeading,

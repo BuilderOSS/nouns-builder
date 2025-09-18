@@ -1,3 +1,4 @@
+import { CopyButton } from '@buildeross/ui/CopyButton'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   matchTypeParameters,
@@ -7,7 +8,6 @@ import {
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import React, { useState } from 'react'
-import CopyButton from 'src/components/CopyButton/CopyButton'
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
 import { encodeFunctionData } from 'viem'
 

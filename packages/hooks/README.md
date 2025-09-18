@@ -32,7 +32,7 @@ function AuctionComponent() {
   const auction = useDaoAuction({
     collectionAddress: '0x...',
     auctionAddress: '0x...',
-    chainId: CHAIN_ID.ETHEREUM
+    chainId: CHAIN_ID.ETHEREUM,
   })
 
   return (
@@ -57,7 +57,7 @@ function VotingPower() {
     chainId: CHAIN_ID.ETHEREUM,
     collectionAddress: '0x...',
     governorAddress: '0x...',
-    signerAddress: '0x...'
+    signerAddress: '0x...',
   })
 
   return (
@@ -81,7 +81,7 @@ function MembershipStatus() {
   const membership = useDaoMembership({
     chainId: CHAIN_ID.ETHEREUM,
     tokenAddress: '0x...',
-    userAddress: '0x...'
+    userAddress: '0x...',
   })
 
   return (
@@ -104,10 +104,7 @@ import { useCountdown, useIsMounted } from '@buildeross/hooks'
 
 function CountdownTimer() {
   const isMounted = useIsMounted()
-  const countdown = useCountdown(
-    endTimestamp,
-    () => console.log('Timer ended!')
-  )
+  const countdown = useCountdown(endTimestamp, () => console.log('Timer ended!'))
 
   if (!isMounted) return null
 
@@ -130,13 +127,15 @@ import { usePagination } from '@buildeross/hooks'
 function PaginatedList() {
   const pagination = usePagination({
     totalItems: 100,
-    itemsPerPage: 10
+    itemsPerPage: 10,
   })
 
   return (
     <div>
       <button onClick={pagination.previousPage}>Previous</button>
-      <span>Page {pagination.currentPage} of {pagination.totalPages}</span>
+      <span>
+        Page {pagination.currentPage} of {pagination.totalPages}
+      </span>
       <button onClick={pagination.nextPage}>Next</button>
     </div>
   )
@@ -154,9 +153,11 @@ function NavigationBar() {
   const scrollDirection = useScrollDirection()
 
   return (
-    <nav style={{
-      transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)'
-    }}>
+    <nav
+      style={{
+        transform: scrollDirection === 'down' ? 'translateY(-100%)' : 'translateY(0)',
+      }}
+    >
       Navigation content
     </nav>
   )
@@ -195,7 +196,7 @@ function TokenInfo() {
   const metadata = useTokenMetadata({
     contractAddress: '0x...',
     tokenId: '1',
-    chainId: CHAIN_ID.ETHEREUM
+    chainId: CHAIN_ID.ETHEREUM,
   })
 
   return (
@@ -219,7 +220,7 @@ function NFTBalance() {
   const balance = useNFTBalance({
     address: '0x...',
     contractAddress: '0x...',
-    chainId: CHAIN_ID.ETHEREUM
+    chainId: CHAIN_ID.ETHEREUM,
   })
 
   return <p>NFT Balance: {balance.toString()}</p>
@@ -280,7 +281,7 @@ function Timer() {
   const [count, setCount] = useState(0)
 
   useInterval(() => {
-    setCount(c => c + 1)
+    setCount((c) => c + 1)
   }, 1000)
 
   return <p>Count: {count}</p>
@@ -377,6 +378,7 @@ pnpm lint
 ## Dependencies
 
 ### Dependencies
+
 - `@buildeross/ipfs-service` - IPFS utilities
 - `@buildeross/constants` - Shared constants
 - `@buildeross/sdk` - Core SDK and contract ABIs
@@ -385,6 +387,7 @@ pnpm lint
 - `dayjs` - Date manipulation
 
 ### Peer Dependencies
+
 - `react` ^19.1.0
 - `react-dom` ^19.1.0
 - `viem` ^2.30.0
@@ -395,6 +398,7 @@ pnpm lint
 ## Hook Categories
 
 ### Blockchain Interaction
+
 - `useDaoAuction` - Current auction data
 - `useDaoMembership` - DAO membership status
 - `useVotes` - Voting power and delegation
@@ -405,12 +409,14 @@ pnpm lint
 - `useIsGnosisSafe` - Gnosis Safe detection
 
 ### UI & UX
+
 - `useCountdown` - Countdown timers
 - `usePagination` - Pagination state
 - `useScrollDirection` - Scroll detection
 - `useBridgeModal` - Bridge modal management
 
 ### Data & Metadata
+
 - `useEnsData` - ENS resolution
 - `useTokenMetadata` - Token metadata
 - `useNftMetadata` - NFT metadata
@@ -418,10 +424,12 @@ pnpm lint
 - `useDecodedTransactions` - Transaction decoding
 
 ### File Handling
+
 - `useArtworkUpload` - IPFS artwork upload
 - `useArtworkPreview` - Artwork preview generation
 
 ### Utilities
+
 - `useInterval` - Interval management
 - `useTimeout` - Timeout management
 - `useIsMounted` - Mount detection

@@ -1,9 +1,9 @@
 import { type DaoMembership } from '@buildeross/hooks/useDaoMembership'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { CopyButton } from '@buildeross/ui/CopyButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex } from '@buildeross/zord'
 import React from 'react'
-import { Avatar } from 'src/components/Avatar'
-import CopyButton from 'src/components/CopyButton/CopyButton'
 import { currentDelegateBtn, proposalFormTitle } from 'src/styles/Proposals.css'
 
 interface CurrentDelegateProps {

@@ -1,8 +1,7 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { Box, Flex } from '@buildeross/zord'
-import { Avatar } from 'src/components/Avatar'
-import { Icon } from 'src/components/Icon'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { Box, Flex, Icon } from '@buildeross/zord'
 
 import { AuctionDetail } from './AuctionDetail'
 

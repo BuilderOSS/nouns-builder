@@ -3,9 +3,9 @@ import { Bytes, ethereum, store } from '@graphprotocol/graph-ts'
 import { DAO, DAOTokenOwner, DAOVoter, Snapshot, Token } from '../generated/schema'
 import {
   DelegateChanged as DelegateChangedEvent,
+  Token as TokenContract,
   Transfer as TransferEvent,
 } from '../generated/templates/Token/Token'
-import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { setTokenMetadata } from './utils/setTokenMetadata'
 
 let ADDRESS_ZERO = Bytes.fromHexString('0x0000000000000000000000000000000000000000')

@@ -1,6 +1,5 @@
-import { Flex, Text, TextProps } from '@buildeross/zord'
+import { Flex, Icon, IconType, Text, TextProps } from '@buildeross/zord'
 import React, { Fragment, ReactNode } from 'react'
-import { Icon, IconType } from 'src/components/Icon'
 
 import { proposalTileSubtitleVariants } from './Tile.css'
 

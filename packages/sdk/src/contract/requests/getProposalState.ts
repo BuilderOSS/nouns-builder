@@ -9,7 +9,7 @@ export { ProposalState }
 export const getProposalState = async (
   chainId: CHAIN_ID,
   governorAddress: AddressType,
-  proposalId: BytesType,
+  proposalId: BytesType
 ) => {
   const baseParams = { address: governorAddress, abi: governorAbi, chainId }
   return (await readContract(serverConfig, {

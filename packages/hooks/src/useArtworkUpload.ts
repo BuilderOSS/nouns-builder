@@ -1,43 +1,13 @@
+import { getFetchableUrls, uploadDirectory } from '@buildeross/ipfs-service'
 import {
-  getFetchableUrls,
-  IPFSUploadResponse,
-  uploadDirectory,
-} from '@buildeross/ipfs-service'
+  ArtworkType,
+  ArtworkUploadError,
+  FileInfo,
+  ImageProps,
+  IPFSUpload,
+} from '@buildeross/types'
 import { sanitizeFileName } from '@buildeross/utils'
 import React from 'react'
-
-export interface ArtworkType {
-  trait: string
-  properties: string[]
-}
-
-export interface IPFSUpload {
-  name: string
-  webkitRelativePath: string
-  ipfs: IPFSUploadResponse | null
-  trait: string
-  type?: string
-  content?: File
-  blob?: Blob | string
-}
-
-export interface ImageProps {
-  cid?: string
-  name: string
-  trait: string
-  uri: string
-  url: string
-  path?: string
-  content?: File
-  blob?: Blob | string
-}
-
-export interface ArtworkUploadError {
-  maxTraits?: string
-  mime?: string
-  directory?: string
-  dimensions?: string
-}
 
 export interface UseArtworkUploadProps {
   artwork: ArtworkType[]
@@ -47,20 +17,6 @@ export interface UseArtworkUploadProps {
   onUploadSuccess: (ipfs: IPFSUpload[]) => void
   onUploadError: (error: Error) => void
   onUploadProgress: (progress: number) => void
-}
-
-export interface Trait {
-  trait: string
-  properties: string[]
-  ipfs?: {}[]
-}
-
-export interface FileInfo {
-  filesLength: number
-  fileType: string
-  collectionName: string
-  traits: Trait[]
-  fileArray: File[]
 }
 
 export interface UseArtworkUploadReturn {
@@ -107,8 +63,8 @@ export const useArtworkUpload = ({
             url: encodeURI(
               fetchableUrl +
                 `/${sanitizeFileName(
-                  upload?.webkitRelativePath?.split('/').slice(1).join('/') ?? '',
-                )}`,
+                  upload?.webkitRelativePath?.split('/').slice(1).join('/') ?? ''
+                )}`
             ),
             path: upload?.webkitRelativePath,
             content: upload?.content,
@@ -293,7 +249,7 @@ export const useArtworkUpload = ({
           content: file,
           path: sanitizeFileName(file.webkitRelativePath.split('/').slice(1).join('/')),
         })),
-        { cache: true, onProgress: onUploadProgress },
+        { cache: true, onProgress: onUploadProgress }
       )
 
       const results = files.map((file) => ({
@@ -312,7 +268,7 @@ export const useArtworkUpload = ({
       return results
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    []
   )
 
   React.useEffect(() => {

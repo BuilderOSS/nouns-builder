@@ -10,7 +10,7 @@ type AuctionDao = {
 }
 
 export const highestBidsRequest = async (
-  chainId: CHAIN_ID,
+  chainId: CHAIN_ID
 ): Promise<{
   data: AuctionDao[]
   statusCode: number

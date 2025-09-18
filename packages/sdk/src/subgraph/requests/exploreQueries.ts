@@ -17,7 +17,7 @@ export interface ExploreDaosResponse {
 }
 
 export const exploreMyDaosRequest = async (
-  memberAddress: string,
+  memberAddress: string
 ): Promise<ExploreDaosResponse | undefined> => {
   try {
     const userDaos: MyDaosResponse = await myDaosRequest(memberAddress)
@@ -31,7 +31,7 @@ export const exploreMyDaosRequest = async (
           .map((x) => x.collectionAddress)
         const res = await SDK.connect(chainId).findAuctionsForDaos({ daos: daosByChain })
         return res.auctions.map((x) => ({ ...x, chainId }))
-      }),
+      })
     )
 
     const auctions = data.flat().sort((a, b) => a.dao.name.localeCompare(b.dao.name))
@@ -50,7 +50,7 @@ export const exploreMyDaosRequest = async (
 export const exploreDaosRequest = async (
   chainId: CHAIN_ID,
   skip: number,
-  orderBy: Auction_OrderBy = Auction_OrderBy.StartTime,
+  orderBy: Auction_OrderBy = Auction_OrderBy.StartTime
 ): Promise<ExploreDaosResponse | undefined> => {
   try {
     const orderDirection =

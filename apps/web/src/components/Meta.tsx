@@ -1,6 +1,5 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import { AddressType, Chain } from '@buildeross/types'
 import Head from 'next/head'
 import React from 'react'
 
@@ -10,12 +9,6 @@ interface MetaProps {
   type?: string
   image?: string
   description?: string
-  farcaster?: {
-    name: string
-    contractAddress: AddressType
-    chain: Chain
-    image?: string
-  }
 }
 
 const trimTitle = (title: string) => {
@@ -25,14 +18,7 @@ const trimTitle = (title: string) => {
   return title
 }
 
-export const Meta: React.FC<MetaProps> = ({
-  title,
-  type,
-  path,
-  image,
-  description,
-  farcaster,
-}) => {
+export const Meta: React.FC<MetaProps> = ({ title, type, path, image, description }) => {
   const name = PUBLIC_IS_TESTNET ? 'Testnet Nouns Builder' : 'Nouns Builder'
 
   // eslint-disable-next-line no-param-reassign
@@ -81,18 +67,6 @@ export const Meta: React.FC<MetaProps> = ({
       <meta name="twitter:image" content={m.imageUrl} />
 
       <meta name="fc:frame" content={`${JSON.stringify(m)}`} />
-      {/* Warpcast-specific NFT meta tags: https://warpcast.notion.site/NFT-extended-Open-Graph-Spec-4e350bd8e4c34e3b86e77d58bf1f5575 */}
-      {/* TODO: Remove any deprecated frame v1 meta tags */}
-      {farcaster && (
-        <>
-          <meta property="eth:nft:collection" content={farcaster.name} />
-          <meta property="eth:nft:contract_address" content={farcaster.contractAddress} />
-          <meta property="eth:nft:creator_address" content={farcaster.contractAddress} />
-          <meta property="eth:nft:schema" content="erc721" />
-          <meta property="eth:nft:chain" content={farcaster.chain.slug} />
-          <meta property="eth:nft:media_url" content={farcaster.image} />
-        </>
-      )}
     </Head>
   )
 }
