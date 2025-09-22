@@ -8,10 +8,10 @@
   },
   "devDependencies": {
     "@buildeross/constants": "workspace:*",
-    "@buildeross/ipfs-service": "workspace:*",
-    "@buildeross/types": "workspace:*",
     "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
+    "@buildeross/types": "workspace:*",
     "@types/node": "^22.15.21",
     "@types/tinycolor2": "^1.4.6",
     "eslint": "8.57.1",

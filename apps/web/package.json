@@ -72,6 +72,7 @@
     "eslint": "8.57.1",
     "jsdom": "^26.1.0",
     "localtunnel": "^2.0.2",
+    "raw-loader": "^4.0.2",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",
     "vite-plugin-svgr": "^4.3.0",
