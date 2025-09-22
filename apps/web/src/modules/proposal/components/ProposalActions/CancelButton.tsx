@@ -1,8 +1,10 @@
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { useLayoutStore } from 'src/stores'
-import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
+import {
+  cancelButtonBorder,
+  proposalActionButtonVariants,
+} from 'src/styles/Proposals.css'
 import { Address } from 'viem'
 
 import { GovernorContractButton } from '../GovernorContractButton'
@@ -32,7 +34,6 @@ const Cancel: React.FC<{
 export const CancelButton: React.FC<CancelButtonProps> = ({ proposalId }) => {
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false)
   const [modalContent, setModalContent] = useState({ title: '', subtitle: '' })
-  const isMobile = useLayoutStore((state) => state.isMobile)
 
   const onSuccessModalClose = () => {
     setShowSuccessModal(false)
@@ -49,9 +50,7 @@ export const CancelButton: React.FC<CancelButtonProps> = ({ proposalId }) => {
       <Box
         w={{ '@initial': '100%', '@768': 'auto' }}
         pt={{ '@initial': 'x3', '@768': 'x0' }}
-        style={{
-          borderTop: isMobile ? '2px solid #F2F2F2' : 'none',
-        }}
+        className={cancelButtonBorder}
       >
         <Cancel
           proposalId={proposalId}

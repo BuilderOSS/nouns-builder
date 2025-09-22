@@ -1,16 +1,14 @@
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 
-import { cardSkeleton, firstRowItem, lastRowItem, row, rowItem } from './MembersList.css'
+import { cardSkeleton, row } from './MembersList.css'
 
 export const MembersPanel = ({
   children,
-  isMobile,
   tableRuler = true,
   exportButton,
 }: {
   children: ReactNode
-  isMobile: boolean
   tableRuler?: boolean
   exportButton?: ReactNode
 }) => {
@@ -35,7 +33,7 @@ export const MembersPanel = ({
         pt={'x8'}
         p={{ '@initial': 'x3', '@768': 'x6' }}
       >
-        {!isMobile && tableRuler && <TableHeader />}
+        {tableRuler && <TableHeader />}
         {children}
       </Box>
     </>
@@ -44,30 +42,31 @@ export const MembersPanel = ({
 
 const TableHeader = () => {
   return (
-    <Flex className={row} mb={{ '@initial': 'x4', '@768': 'x12' }}>
-      <Text fontWeight={'label'} className={firstRowItem}>
+    <Flex
+      className={row}
+      mb={{ '@initial': 'x4', '@768': 'x12' }}
+      display={{ '@initial': 'none', '@768': 'flex' }}
+    >
+      <Text fontWeight={'label'} style={{ width: '35%' }}>
         Delegate
       </Text>
-      <Text fontWeight={'label'} className={rowItem}>
-        Votes
-      </Text>
-      <Text fontWeight={'label'} className={rowItem}>
-        Vote %
-      </Text>
-      <Text fontWeight={'label'} className={lastRowItem}>
-        Joined
-      </Text>
+
+      <Grid columns="1fr 1fr 1fr" flex={1}>
+        <Text fontWeight={'label'}>Votes</Text>
+        <Text fontWeight={'label'}>Vote %</Text>
+        <Text fontWeight={'label'}>Joined</Text>
+      </Grid>
     </Flex>
   )
 }
 
-export const MemberCardSkeleton = ({ isMobile }: { isMobile: boolean }) => {
+export const MemberCardSkeleton = () => {
   return (
     <Flex
       className={cardSkeleton}
       borderRadius="normal"
       backgroundColor="background2"
-      mb={isMobile ? 'x14' : 'x10'}
+      mb={{ '@initial': 'x14', '@768': 'x10' }}
     />
   )
 }

@@ -5,7 +5,6 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
 import { DropdownSelect } from 'src/modules/create-proposal'
-import { useLayoutStore } from 'src/stores'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { useAccount } from 'wagmi'
 
@@ -33,7 +32,6 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
   const [isIPFSUploading, setIsIPFSUploading] = useState(false)
   const { address: user } = useAccount()
   const { treasury } = useDaoStore((x) => x.addresses)
-  const isMobile = useLayoutStore((x) => x.isMobile)
 
   const initialValues: DroposalFormValues = {
     name: '',
@@ -86,7 +84,9 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
 
           return (
             <>
-              {!isMobile && <DroposalPreview formik={formik} editionType={editionType} />}
+              <Box display={{ '@initial': 'none', '@768': 'block' }}>
+                <DroposalPreview formik={formik} editionType={editionType} />
+              </Box>
               <Text
                 mb="x8"
                 ml="x2"

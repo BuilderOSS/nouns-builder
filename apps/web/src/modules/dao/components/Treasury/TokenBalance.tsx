@@ -4,7 +4,6 @@ import { Avatar, NameAvatar } from '@buildeross/ui/Avatar'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { statisticContent } from 'src/styles/About.css'
@@ -17,7 +16,6 @@ export const TokenBalance: React.FC = () => {
   const chain = useChainStore((x) => x.chain)
   const owner = addresses.treasury
   const { balances, isLoading } = useTokenBalances(chain.id, addresses.treasury)
-  const { isMobile } = useLayoutStore()
 
   const totalUSD = balances
     ?.reduce((acc, balance) => acc + parseFloat(balance.valueInUSD), 0)
@@ -79,19 +77,22 @@ export const TokenBalance: React.FC = () => {
           mt={'x6'}
           mb={'x8'}
         >
-          {!isMobile && (
-            <Grid className={erc20AssetsWrapper} align="center" gap="x20">
-              <Text fontWeight="label" textAlign="left">
-                Asset
-              </Text>
-              <Text fontWeight="label" textAlign="center">
-                Balance
-              </Text>
-              <Text fontWeight="label" textAlign="right">
-                Value in USD
-              </Text>
-            </Grid>
-          )}
+          <Grid
+            className={erc20AssetsWrapper}
+            align="center"
+            gap="x20"
+            display={{ '@initial': 'none', '@768': 'grid' }}
+          >
+            <Text fontWeight="label" textAlign="left">
+              Asset
+            </Text>
+            <Text fontWeight="label" textAlign="center">
+              Balance
+            </Text>
+            <Text fontWeight="label" textAlign="right">
+              Value in USD
+            </Text>
+          </Grid>
           {sortedBalances?.map((tokenBalance) => {
             const url =
               ETHERSCAN_BASE_URL[chain.id] +
@@ -123,30 +124,34 @@ export const TokenBalance: React.FC = () => {
               </Flex>
             )
             return (
-              <Grid
-                as="a"
+              <a
+                key={tokenBalance.name + tokenBalance.address}
                 href={url}
                 target="_blank"
                 rel="noreferrer"
-                key={tokenBalance.name + tokenBalance.address}
-                className={erc20AssetsWrapper}
-                align="center"
-                gap="x20"
               >
-                {isMobile ? (
-                  <Flex direction={'column'} gap="x2" style={{ maxWidth: '420px' }}>
-                    {name}
-                    <Flex align={'center'} width={'100%'} justify={'space-between'}>
-                      {value}
-                    </Flex>
-                  </Flex>
-                ) : (
-                  <>
-                    {name}
+                <Flex
+                  direction={'column'}
+                  gap="x2"
+                  style={{ maxWidth: '420px' }}
+                  display={{ '@initial': 'grid', '@768': 'none' }}
+                  align="center"
+                >
+                  {name}
+                  <Flex align={'center'} width={'100%'} justify={'space-between'}>
                     {value}
-                  </>
-                )}
-              </Grid>
+                  </Flex>
+                </Flex>
+                <Grid
+                  className={erc20AssetsWrapper}
+                  align="center"
+                  gap="x20"
+                  display={{ '@initial': 'none', '@768': 'grid' }}
+                >
+                  {name}
+                  {value}
+                </Grid>
+              </a>
             )
           })}
         </Flex>

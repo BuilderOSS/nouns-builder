@@ -4,8 +4,7 @@ import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks'
-import { useLayoutStore } from 'src/stores'
+import { usePagination } from 'src/hooks/usePagination'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import useSWR from 'swr'
@@ -29,7 +28,6 @@ export const MembersList = ({
   const {
     addresses: { token },
   } = useDaoStore()
-  const { isMobile } = useLayoutStore()
   const LIMIT = 10
 
   const {
@@ -100,16 +98,16 @@ export const MembersList = ({
   if (isValidating) {
     const isInitialPageLoad = !query.page && !members
     return (
-      <MembersPanel isMobile={isMobile} exportButton={exportButton}>
+      <MembersPanel exportButton={exportButton}>
         {Array.from({ length: isInitialPageLoad ? 5 : 10 }).map((_, i) => (
-          <MemberCardSkeleton isMobile={isMobile} key={`memberCardSkeleton-${i}`} />
+          <MemberCardSkeleton key={`memberCardSkeleton-${i}`} />
         ))}
       </MembersPanel>
     )
   }
   if (error)
     return (
-      <MembersPanel isMobile={isMobile} tableRuler={false} exportButton={exportButton}>
+      <MembersPanel tableRuler={false} exportButton={exportButton}>
         <Flex minH={'x24'} justify={'center'} align={'center'} direction={'column'}>
           <Text fontSize={20} color={'text3'} fontWeight={'display'} mb={'x3'}>
             Error
@@ -121,14 +119,9 @@ export const MembersList = ({
 
   return (
     <>
-      <MembersPanel isMobile={isMobile} exportButton={exportButton}>
+      <MembersPanel exportButton={exportButton}>
         {members?.map((member) => (
-          <MemberCard
-            key={member.voter}
-            member={member}
-            totalSupply={totalSupply}
-            isMobile={isMobile}
-          />
+          <MemberCard key={member.voter} member={member} totalSupply={totalSupply} />
         ))}
       </MembersPanel>
       <Pagination

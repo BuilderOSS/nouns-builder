@@ -15,14 +15,12 @@ import {
   useProposalStore,
 } from 'src/modules/create-proposal'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { notFoundWrap } from 'src/styles/404.css'
 import { useAccount } from 'wagmi'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
-  const { isMobile } = useLayoutStore()
   const router = useRouter()
   const chain = useChainStore((x) => x.chain)
   const { query } = router
@@ -70,7 +68,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
         <a href="/guidelines" target="_blank" rel="noreferrer noopener">
           <Flex align={'center'} mb={'x10'} color="text1">
             <Text
-              fontSize={isMobile ? 14 : 18}
+              fontSize={{ '@initial': 14, '@768': 18 }}
               fontWeight={'paragraph'}
               className={atoms({ textDecoration: 'underline' })}
             >

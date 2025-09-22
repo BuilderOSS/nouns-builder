@@ -6,7 +6,7 @@ import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
 import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks'
+import { usePagination } from 'src/hooks/usePagination'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 

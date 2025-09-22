@@ -1,6 +1,5 @@
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
-import { useLayoutStore } from 'src/stores'
 import { useAccount } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
@@ -9,7 +8,6 @@ import { ProfileMenu } from './ProfileMenu'
 import { MenuType } from './types'
 
 export const NavMenu = () => {
-  const isMobile = useLayoutStore((x) => x.isMobile)
   const [activeDropdown, setActiveDropdown] = React.useState<MenuType>()
 
   const { address } = useAccount()
@@ -39,8 +37,8 @@ export const NavMenu = () => {
         onOpenMenu={onOpenMenu}
         onSetActiveDropdown={setActiveDropdown}
       />
-      {!address && !isMobile && (
-        <Box style={{ width: 110 }}>
+      {!address && (
+        <Box style={{ width: 110 }} display={{ '@initial': 'none', '@768': 'block' }}>
           <ConnectButton />
         </Box>
       )}

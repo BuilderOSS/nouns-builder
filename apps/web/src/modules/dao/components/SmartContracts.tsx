@@ -1,16 +1,13 @@
 import { Box, Flex, Grid, Text, vars } from '@buildeross/zord'
 import React from 'react'
-import { useLayoutStore } from 'src/stores'
 import { useDaoStore } from 'src/stores/useDaoStore'
-import { about } from 'src/styles/About.css'
+import { about, contractItemGrid } from 'src/styles/About.css'
 
 import { ContractLink } from './ContractLink'
 
 const Contract = ({ title, address }: { title: string; address?: string }) => {
-  const { isMobile } = useLayoutStore()
-
   return (
-    <Grid columns={isMobile ? 1 : '1fr 3fr'} align={'center'}>
+    <Grid className={contractItemGrid} align={'center'}>
       <Text fontWeight={'display'} py={{ '@initial': 'x2', '@768': 'x0' }}>
         {title}
       </Text>

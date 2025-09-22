@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useDelegate } from '@buildeross/hooks/useDelegate'
@@ -14,31 +14,24 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks'
+import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
-import {
-  createProposalBtn,
-  delegateBtn,
-  selectDelegateBtn,
-} from 'src/styles/Proposals.css'
+import { createProposalBtn, delegateBtn } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
-import { MobileMenu } from './MobileMenu'
 
 export const Activity: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
   const { createProposal } = useProposalStore()
   const { address } = useAccount()
   const { query, isReady, push } = useRouter()
-  const { isMobile } = useLayoutStore()
   const { openConnectModal } = useConnectModal()
   const chain = useChainStore((x) => x.chain)
   const LIMIT = 20
@@ -102,66 +95,72 @@ export const Activity: React.FC = () => {
             Proposals
           </Text>
 
-          <Flex justify={'center'} align={'center'}>
-            {address && !isDelegating && !isOwner && !isMobile && (
+          <Flex
+            justify={'center'}
+            align={'center'}
+            display={{ '@initial': 'none', '@768': 'flex' }}
+          >
+            {address && !isDelegating && !isOwner && (
               <Flex mr={'x4'} color={'tertiary'}>
                 You have no votes.
               </Flex>
             )}
-            {isDelegating && !isMobile && (
+            {isDelegating && (
               <Flex mr={'x4'} color={'tertiary'}>
                 Your votes are delegated.
               </Flex>
             )}
-            {isOwner && !hasThreshold && !isMobile && (
+            {isOwner && !hasThreshold && (
               <Flex mr={'x4'} color={'tertiary'}>
                 {Number(proposalVotesRequired)} votes required to propose.
               </Flex>
             )}
-            {isOwner || isDelegating ? (
-              <>
-                {!isMobile ? (
-                  <ContractButton
-                    className={delegateBtn}
-                    borderColor="border"
-                    borderStyle="solid"
-                    borderWidth="normal"
-                    handleClick={view}
-                    mr="x2"
-                  >
-                    Delegate
-                  </ContractButton>
-                ) : (
-                  <MobileMenu>
-                    <ContractButton
-                      className={selectDelegateBtn}
-                      style={{ backgroundColor: '#FFF', color: '#000' }}
-                      handleClick={view}
-                    >
-                      Delegate
-                    </ContractButton>
-                  </MobileMenu>
-                )}
-              </>
-            ) : null}
-            {!address ? (
-              <Button
-                className={createProposalBtn}
-                onClick={openConnectModal}
-                color={'tertiary'}
+            {(isOwner || isDelegating) && (
+              <ContractButton
+                className={delegateBtn}
+                borderColor="border"
+                borderStyle="solid"
+                borderWidth="normal"
+                handleClick={view}
+                mr="x2"
               >
-                Create {!isMobile ? 'proposal' : null}
-              </Button>
-            ) : (
-              <Button
-                className={createProposalBtn}
-                onClick={address ? handleProposalCreation : openConnectModal}
-                disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
-                color={'tertiary'}
-              >
-                Create {!isMobile ? 'proposal' : null}
-              </Button>
+                Delegate
+              </ContractButton>
             )}
+            <Button
+              className={createProposalBtn}
+              onClick={address ? handleProposalCreation : openConnectModal}
+              disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+              color={'tertiary'}
+            >
+              Create proposal
+            </Button>
+          </Flex>
+          <Flex
+            justify={'center'}
+            align={'center'}
+            display={{ '@initial': 'flex', '@768': 'none' }}
+          >
+            {(isOwner || isDelegating) && (
+              <ContractButton
+                className={delegateBtn}
+                borderColor="border"
+                borderStyle="solid"
+                borderWidth="normal"
+                handleClick={view}
+                mr="x2"
+              >
+                Delegate
+              </ContractButton>
+            )}
+            <Button
+              className={createProposalBtn}
+              onClick={address ? handleProposalCreation : openConnectModal}
+              disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+              color={'tertiary'}
+            >
+              Create
+            </Button>
           </Flex>
         </Flex>
         {addresses && (

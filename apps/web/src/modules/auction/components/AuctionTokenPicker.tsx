@@ -3,7 +3,6 @@ import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { OptionalLink } from 'src/components/OptionalLink'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 
 import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
@@ -26,7 +25,6 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
 }: AuctionTokenPickerProps) => {
   const { id: chainId } = useChainStore((x) => x.chain)
   const { query } = useRouter()
-  const { isMobile } = useLayoutStore()
   const disabledStyle = { opacity: 0.2 }
 
   const data = useNextAndPreviousTokens({ chainId, collection, tokenId })
@@ -94,8 +92,17 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
               mx={'x3'}
               style={hasLatestToken ? {} : disabledStyle}
               fontWeight={'display'}
+              display={{ '@initial': 'block', '@1024': 'none' }}
             >
-              {isMobile ? latestText.split(' ')[0] : latestText}
+              {latestText.split(' ')[0]}
+            </Text>
+            <Text
+              mx={'x3'}
+              style={hasLatestToken ? {} : disabledStyle}
+              fontWeight={'display'}
+              display={{ '@initial': 'none', '@1024': 'block' }}
+            >
+              {latestText}
             </Text>
           </Flex>
         </OptionalLink>

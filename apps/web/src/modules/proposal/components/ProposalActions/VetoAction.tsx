@@ -3,7 +3,6 @@ import { SmartInput } from '@buildeross/ui/Fields'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { Address } from 'viem'
@@ -86,7 +85,6 @@ export const VetoAction: React.FC<OwnerActionsProps> = ({
     addresses: { token },
   } = useDaoStore()
   const { chain } = useChainStore()
-  const { isMobile } = useLayoutStore()
 
   const tokenContractParams = {
     abi: tokenAbi,
@@ -126,7 +124,7 @@ export const VetoAction: React.FC<OwnerActionsProps> = ({
           <Button
             onClick={() => setOpen(true)}
             variant="destructive"
-            w={isMobile ? '100%' : 'unset'}
+            w={{ '@initial': '100%', '@768': 'unset' }}
           >
             Veto proposal
           </Button>

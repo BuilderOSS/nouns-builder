@@ -21,6 +21,12 @@ export const delegateBtn = style({
   ':hover': {
     backgroundColor: '#F9F9F9 !important',
   },
+  '@media': {
+    '(max-width: 420px)': {
+      paddingLeft: '8px !important',
+      paddingRight: '8px !important',
+    },
+  },
 })
 
 export const currentDelegateBtn = style({
@@ -33,6 +39,12 @@ export const currentDelegateBtn = style({
 export const createProposalBtn = style({
   fontFamily: 'ptRoot !important',
   height: '40px !important',
+  '@media': {
+    '(max-width: 420px)': {
+      paddingLeft: '8px !important',
+      paddingRight: '8px !important',
+    },
+  },
 })
 
 export const selectDelegateBtn = style({
@@ -174,4 +186,13 @@ export const proposalActionButtonVariants = styleVariants({
       width: '100%',
     },
   ],
+})
+
+export const cancelButtonBorder = style({
+  borderTop: '2px solid #F2F2F2',
+  '@media': {
+    '(min-width: 768px)': {
+      borderTop: 'none',
+    },
+  },
 })

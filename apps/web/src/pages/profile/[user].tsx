@@ -12,12 +12,17 @@ import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
 import Pagination from 'src/components/Pagination'
 import { TokenPreview } from 'src/components/Profile'
-import { usePagination } from 'src/hooks'
+import { usePagination } from 'src/hooks/usePagination'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
-import { artworkSkeleton } from 'src/styles/Artwork.css'
+import {
+  daosContainer,
+  loadingSkeleton,
+  noTokensContainer,
+  responsiveGrid,
+  tokenContainer,
+} from 'src/styles/profile.css'
 import useSWR, { unstable_serialize } from 'swr'
 import { isAddress } from 'viem'
 
@@ -32,7 +37,6 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   userName,
   ogImageURL,
 }) => {
-  const isMobile = useLayoutStore((x) => x.isMobile)
   const chain = useChainStore((x) => x.chain)
   const { query } = useRouter()
 
@@ -70,25 +74,25 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
       />
       <Flex
         align={'center'}
-        position={isMobile ? 'relative' : 'fixed'}
-        h={{ '@initial': 'unset', '@768': '100vh' }}
         top={'x0'}
         left={'x0'}
         justify={'space-around'}
-        w="100%"
+        width="100%"
+        position={{ '@initial': 'relative', '@768': 'fixed' }}
         px={{ '@initial': 'x0', '@768': 'x8' }}
+        h={{ '@initial': 'unset', '@768': '100vh' }}
       >
         <Flex
           w="100%"
           direction={{ '@initial': 'column', '@768': 'row' }}
-          h={{ '@initial': 'unset', '@768': '100%' }}
+          height={{ '@initial': 'unset', '@768': '100%' }}
           style={{ maxWidth: '1440px' }}
           position={'relative'}
         >
           <Box
-            style={{ width: isMobile ? '100%' : '30%' }}
             mt={{ '@initial': 'x12', '@768': 'x32' }}
             pr={{ '@768': 'x18' }}
+            className={daosContainer}
           >
             <Flex
               align={{ '@initial': 'center', '@768': 'flex-start' }}
@@ -98,12 +102,12 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                 mr={{ '@initial': 'x2', '@768': undefined }}
                 address={userAddress}
                 src={ensAvatar}
-                size={isMobile ? '40' : '90'}
+                size="80"
               />
               <Text
-                variant={isMobile ? 'heading-sm' : 'heading-md'}
+                variant={'heading-md'}
                 position={'relative'}
-                mt={{ '@768': 'x4' }}
+                mt={{ '@initial': 'x0', '@768': 'x4' }}
               >
                 {ensName || walletSnippet(userAddress)}
               </Text>
@@ -135,7 +139,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   backgroundColor="background2"
                   h="x6"
                   w="100%"
-                  className={artworkSkeleton}
+                  className={loadingSkeleton}
                   borderRadius="normal"
                 />
               ) : daos && daos?.length > 0 ? (
@@ -158,25 +162,17 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
               )}
             </Flex>
           </Box>
-          {!isMobile && (
-            <Box
-              position={'absolute'}
-              h="100vh"
-              top="x0"
-              style={{ left: '27%', borderRight: '2px solid #F2F2F2' }}
-            />
-          )}
-
           <Box
-            mt={{ '@initial': 'x14', '@768': 'x32' }}
-            style={{
-              width: isMobile ? '100%' : '70%',
-              maxHeight: isMobile ? undefined : '80vh',
-              overflow: 'auto',
-            }}
-          >
+            position={'absolute'}
+            height="100vh"
+            top="x0"
+            display={{ '@initial': 'none', '@768': 'block' }}
+            style={{ left: '27%', borderRight: '2px solid #F2F2F2' }}
+          />
+
+          <Box mt={{ '@initial': 'x14', '@768': 'x32' }} className={tokenContainer}>
             {isLoadingTokens && (
-              <Grid columns={isMobile ? 1 : 3} gap={'x12'}>
+              <Grid className={responsiveGrid} gap={'x12'}>
                 {Array(6)
                   .fill(0)
                   .map((_, i) => (
@@ -187,7 +183,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                       height={'100%'}
                       aspectRatio={1 / 1}
                       position="relative"
-                      className={artworkSkeleton}
+                      className={loadingSkeleton}
                     />
                   ))}
               </Grid>
@@ -196,7 +192,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
             {hasDaos && (
               <>
                 {!!tokens?.tokens.length ? (
-                  <Grid columns={isMobile ? 1 : 3} gap={'x12'}>
+                  <Grid className={responsiveGrid} gap={'x12'}>
                     {tokens?.tokens.map((x, i) => (
                       <Link
                         key={i}
@@ -210,7 +206,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   <Flex
                     align={'center'}
                     justify={'space-around'}
-                    style={{ height: isMobile ? '40vh' : '65vh' }}
+                    className={noTokensContainer}
                   >
                     <Text color="text3">No more DAO tokens found.</Text>
                   </Flex>
@@ -229,7 +225,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
               <Flex
                 align={'center'}
                 justify={'space-around'}
-                style={{ height: isMobile ? '40vh' : '65vh' }}
+                className={noTokensContainer}
               >
                 <Text color="text3">No DAO tokens owned.</Text>
               </Flex>

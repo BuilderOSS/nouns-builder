@@ -3,7 +3,6 @@ import { CopyButton } from '@buildeross/ui/CopyButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Flex, FlexProps, Icon, Text } from '@buildeross/zord'
 import React from 'react'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 
 export type ContractLinkProps = {
@@ -11,7 +10,6 @@ export type ContractLinkProps = {
   size?: 'sm' | 'md'
 }
 export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
-  const { isMobile } = useLayoutStore()
   const { chain } = useChainStore()
 
   const { py, px } = React.useMemo(() => {
@@ -38,8 +36,13 @@ export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
       style={{ backgroundColor: '#fafafa' }}
       gap="x2"
     >
-      <Text fontSize={16}>
-        {isMobile || size === 'sm' ? walletSnippet(address as string, 8) : address}
+      {/* Mobile Layout - Always show snippet */}
+      <Text fontSize={16} display={{ '@initial': 'block', '@768': 'none' }}>
+        {walletSnippet(address as string, 8)}
+      </Text>
+      {/* Desktop Layout - Show snippet only for 'sm' size */}
+      <Text fontSize={16} display={{ '@initial': 'none', '@768': 'block' }}>
+        {size === 'sm' ? walletSnippet(address as string, 8) : address}
       </Text>
       <Flex justify={'center'} align={'center'} gap={{ '@initial': 'x2', '@768': 'x4' }}>
         <a

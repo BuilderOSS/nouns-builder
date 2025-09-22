@@ -7,7 +7,6 @@ import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore } from 'src/stores/useChainStore'
 import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
-import { useLayoutStore } from 'src/stores/useLayoutStore'
 import {
   deployPendingButtonStyle,
   infoSectionLabelStyle,
@@ -31,6 +30,18 @@ const DEPLOYMENT_ERROR = {
     'Oops! It looks like there was a problem. Please ensure that your input data is correct',
 }
 
+const DisplayAddress: React.FC<{ address: string }> = ({ address }) => {
+  return (
+    <Flex align={'center'} fontSize={18} className={infoSectionValueVariants['default']}>
+      <Text display={{ '@initial': 'none', '@768': 'block' }}>{address}</Text>
+      <Text display={{ '@initial': 'block', '@768': 'none' }}>
+        {walletSnippet(address)}
+      </Text>
+      <CopyButton text={address} />
+    </Flex>
+  )
+}
+
 export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   token,
   metadata,
@@ -44,7 +55,6 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   const { general, ipfsUpload, orderedLayers, setFulfilledSections, resetForm } =
     useFormStore()
   const chain = useChainStore((x) => x.chain)
-  const { isMobile } = useLayoutStore()
   const { addresses, setAddresses } = useDaoStore()
   const [isPendingTransaction, setIsPendingTransaction] = useState<boolean>(false)
   const [deploymentError, setDeploymentError] = useState<string | undefined>()
@@ -156,59 +166,23 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
       <Flex direction={'column'} style={{ boxSizing: 'border-box', width: '100%' }}>
         <Flex mb={'x5'} direction={'column'}>
           <Box className={infoSectionLabelStyle}>Token:</Box>{' '}
-          <Flex
-            align={'center'}
-            fontSize={18}
-            className={infoSectionValueVariants['default']}
-          >
-            {isMobile ? walletSnippet(token) : token}
-            <CopyButton text={token as string} />
-          </Flex>
+          {!!token && <DisplayAddress address={token} />}
         </Flex>
         <Flex mb={'x5'} direction={'column'}>
           <Box className={infoSectionLabelStyle}>Auction:</Box>{' '}
-          <Flex
-            align={'center'}
-            fontSize={18}
-            className={infoSectionValueVariants['default']}
-            mr={'x10'}
-          >
-            {isMobile ? walletSnippet(auction) : auction}
-            <CopyButton text={auction as string} />
-          </Flex>
+          {!!auction && <DisplayAddress address={auction} />}
         </Flex>
         <Flex mb={'x5'} direction={'column'}>
           <Box className={infoSectionLabelStyle}>treasury:</Box>{' '}
-          <Flex
-            align={'center'}
-            fontSize={18}
-            className={infoSectionValueVariants['default']}
-          >
-            {isMobile ? walletSnippet(treasury) : treasury}
-            <CopyButton text={treasury as string} />
-          </Flex>
+          {!!treasury && <DisplayAddress address={treasury} />}
         </Flex>
         <Flex mb={'x5'} direction={'column'}>
           <Box className={infoSectionLabelStyle}>Governor:</Box>{' '}
-          <Flex
-            align={'center'}
-            fontSize={18}
-            className={infoSectionValueVariants['default']}
-          >
-            {isMobile ? walletSnippet(governor) : governor}
-            <CopyButton text={governor as string} />
-          </Flex>
+          {!!governor && <DisplayAddress address={governor} />}
         </Flex>
         <Flex mb={'x5'} direction={'column'}>
           <Box className={infoSectionLabelStyle}>Metadata Renderer:</Box>{' '}
-          <Flex
-            align={'center'}
-            fontSize={18}
-            className={infoSectionValueVariants['default']}
-          >
-            {isMobile ? walletSnippet(metadata) : metadata}
-            <CopyButton text={metadata as string} />
-          </Flex>
+          {!!metadata && <DisplayAddress address={metadata} />}
         </Flex>
       </Flex>
 
