@@ -13,6 +13,7 @@ import {
 import { useInvoiceData } from 'src/modules/proposal/components/ProposalDescription/MilestoneDetails/useInvoiceData'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { skeletonAnimation } from 'src/styles/animations.css'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 import { getAddress, zeroHash } from 'viem'
@@ -33,7 +34,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
 
   const proposalId = proposal.proposalId
 
-  const { data, mutate } = useSWR(
+  const { data, mutate, isLoading } = useSWR(
     !!token && !!chain.id ? [SWR_KEYS.PROPDATES, token, chain.id, proposalId] : null,
     () => getPropDates(token as `0x${string}`, chain.id, proposalId),
     { revalidateOnMount: true, refreshInterval: 1000 * 5 }
@@ -146,7 +147,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
               />
             )
           })}
-          {topLevelPropDates.length === 0 && (
+          {topLevelPropDates.length === 0 && !isLoading && (
             <Flex
               justify="center"
               p="x6"
@@ -157,6 +158,23 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
               backgroundColor="background2"
             >
               <Text color="text3">No Updates on this proposal yet!</Text>
+            </Flex>
+          )}
+          {isLoading && topLevelPropDates.length === 0 && (
+            <Flex direction="column" gap="x4">
+              {[...Array(2)].map((_, i) => (
+                <Box
+                  key={i}
+                  p="x6"
+                  borderColor="border"
+                  borderStyle="solid"
+                  borderRadius="curved"
+                  borderWidth="normal"
+                  backgroundColor="background2"
+                  style={{ animation: skeletonAnimation }}
+                  height="x40"
+                />
+              ))}
             </Flex>
           )}
         </Box>
