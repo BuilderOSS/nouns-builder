@@ -1,5 +1,6 @@
 export * from './About'
 export * from './Activity'
+export * from './Admin'
 export * from './AdminForm'
 export * from './DaoCard'
 export * from './DaoFeed'

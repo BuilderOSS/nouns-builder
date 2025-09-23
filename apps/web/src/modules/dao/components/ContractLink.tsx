@@ -9,7 +9,7 @@ import { useChainStore } from 'src/stores/useChainStore'
 
 export type ContractLinkProps = {
   address?: string
-  size?: 'sm' | 'md'
+  size?: 'xs' | 'sm' | 'md'
 }
 export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
   const { isMobile } = useLayoutStore()
@@ -21,6 +21,10 @@ export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
     if (size === 'sm') {
       px = { '@initial': 'x2', '@768': 'x3' } as FlexProps['px']
       py = { '@initial': 'x2', '@768': 'x3' } as FlexProps['py']
+    }
+    if (size === 'xs') {
+      px = { '@initial': 'x2', '@768': 'x3' } as FlexProps['px']
+      py = { '@initial': 'x1', '@768': 'x2' } as FlexProps['py']
     }
 
     return { py, px }
@@ -37,12 +41,12 @@ export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
       borderStyle={'solid'}
       borderWidth={'normal'}
       style={{ backgroundColor: '#fafafa' }}
-      gap="x2"
+      gap={size === 'xs' ? 'x1' : 'x2'}
     >
       <Text fontSize={16}>
-        {isMobile || size === 'sm' ? walletSnippet(address as string, 8) : address}
+        {isMobile || size !== 'md' ? walletSnippet(address as string, 8) : address}
       </Text>
-      <Flex justify={'center'} align={'center'} gap={{ '@initial': 'x2', '@768': 'x4' }}>
+      <Flex justify={'center'} align={'center'} gap={size === 'xs' ? 'x1' : 'x2'}>
         <a
           href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${address}`}
           target="_blank"
@@ -50,7 +54,6 @@ export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
         >
           <Icon id="arrowTopRight" fill="text4" />
         </a>
-
         <CopyButton text={address} variant={'icon'} />
       </Flex>
     </Flex>
