@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import Papa from 'papaparse'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { Icon } from 'src/components/Icon'
 
 export interface CsvRecord {
@@ -36,6 +36,7 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
+        transformHeader: (h) => h.toLowerCase().trim(),
         complete: (results) => {
           try {
             if (results.errors.length > 0) {
@@ -57,7 +58,9 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
 
             // Validate headers
             const expectedHeaders = ['address', 'amount']
-            const actualHeaders = Object.keys(data[0]).map((h) => h.toLowerCase().trim())
+            const actualHeaders = (results.meta?.fields ?? []).map((h) =>
+              h.toLowerCase().trim()
+            )
 
             const missingHeaders = expectedHeaders.filter(
               (h) => !actualHeaders.includes(h)
@@ -72,6 +75,7 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
             // Validate and clean data
             const cleanedRecords: CsvRecord[] = []
             const errors: string[] = []
+            const seen = new Set<string>()
 
             data.forEach((row, index) => {
               const address = row.address?.toString().trim()
@@ -82,16 +86,23 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
                 return
               }
 
-              if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+              const key = address.toLowerCase()
+              if (seen.has(key)) {
+                errors.push(`Row ${index + 1}: Duplicate address`)
+                return
+              }
+              seen.add(key)
+
+              if (!amount || !/^\d+$/.test(amount)) {
                 errors.push(
-                  `Row ${index + 1}: Invalid amount (must be a positive number)`
+                  `Row ${index + 1}: Invalid amount (must be a positive integer)`
                 )
                 return
               }
 
               cleanedRecords.push({
                 address,
-                amount: parseFloat(amount).toString(),
+                amount,
               })
             })
 
@@ -174,6 +185,17 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
     window.URL.revokeObjectURL(url)
   }, [])
 
+  const handleClick = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,text/csv'
+    input.onchange = (e) => {
+      const target = e.target as HTMLInputElement
+      handleFileSelect(target.files)
+    }
+    input.click()
+  }, [handleFileSelect])
+
   return (
     <Box w="100%">
       <Flex direction="column" gap="x3">
@@ -205,16 +227,18 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
+          role="button"
+          tabIndex={disabled || isProcessing ? -1 : 0}
+          aria-disabled={disabled || isProcessing}
+          onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+            if (disabled || isProcessing) return
+            if (e.key === 'Enter' || e.key === ' ') {
+              handleClick()
+            }
+          }}
           onClick={() => {
             if (disabled || isProcessing) return
-            const input = document.createElement('input')
-            input.type = 'file'
-            input.accept = '.csv'
-            input.onchange = (e) => {
-              const target = e.target as HTMLInputElement
-              handleFileSelect(target.files)
-            }
-            input.click()
+            handleClick()
           }}
         >
           <Flex direction="column" align="center" gap="x3">
