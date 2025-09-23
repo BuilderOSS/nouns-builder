@@ -28,6 +28,13 @@ vi.mock('@buildeross/sdk/subgraph', async () => {
   }
 })
 
+// Mock Papa Parse to avoid issues in tests
+vi.mock('papaparse', () => ({
+  default: {
+    parse: vi.fn(),
+  },
+}))
+
 describe('Airdrop', () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -55,8 +62,8 @@ describe('Airdrop', () => {
     expect(screen.getByTestId('airdrop-form')).toBeEnabled()
 
     // fill in airdrop form and submit
-    const recipient = screen.getByTestId('recipientAddress') as HTMLInputElement
-    const amount = screen.getByTestId('amount') as HTMLInputElement
+    const recipient = screen.getByPlaceholderText('0x... or ENS name') as HTMLInputElement
+    const amount = screen.getByDisplayValue(0) as HTMLInputElement
     const addTransactionBtn = screen.getByText(/Add Transaction to Queue/)
 
     fireEvent.change(recipient, {
@@ -68,8 +75,14 @@ describe('Airdrop', () => {
 
     fireEvent.click(addTransactionBtn)
 
-    // form reset after submission
-    await waitFor(() => expect(amount.value).toBe('0'))
-    expect(recipient.value).toBe('')
+    // form reset after submission - check for empty recipient
+    await waitFor(() => {
+      const recipientAfterSubmit = screen.getByPlaceholderText(
+        '0x... or ENS name'
+      ) as HTMLInputElement
+      expect(recipientAfterSubmit.value).toBe('')
+    })
+    const amountAfterSubmit = screen.getByDisplayValue(0) as HTMLInputElement
+    expect(amountAfterSubmit.value).toBe('0')
   })
 })

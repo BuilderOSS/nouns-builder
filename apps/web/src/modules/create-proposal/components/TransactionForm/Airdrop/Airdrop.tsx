@@ -54,9 +54,10 @@ export const Airdrop: React.FC = () => {
     values: AirdropFormValues,
     actions: FormikHelpers<AirdropFormValues>
   ) => {
-    if (!values.amount || !values.recipientAddress || !addresses.treasury) return
+    if (!addresses.treasury || !values.recipients?.length) return
 
-    const { amount, recipientAddress: recipient } = values
+    const recipients = values.recipients
+    const totalTokens = recipients.reduce((sum, r) => sum + r.amount, 0)
 
     const updateMinterTransaction = {
       functionSignature: 'updateMinters',
@@ -68,26 +69,9 @@ export const Airdrop: React.FC = () => {
         args: [[{ minter: addresses.treasury, allowed: true }]],
       }),
     }
+
     const chainToQuery =
       chain.id === CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
-
-    const resolvedRecipientAddress = await getEnsAddress(
-      recipient || '',
-      getProvider(chainToQuery)
-    )
-
-    const airdropTransaction = {
-      functionSignature: 'mintBatchTo',
-      target: addresses?.token as AddressType,
-      value: '',
-      calldata: encodeFunctionData({
-        abi: tokenAbi,
-        functionName: 'mintBatchTo',
-        args: [BigInt(amount), resolvedRecipientAddress as Address],
-      }),
-    }
-
-    const unit = amount > 1 ? 'tokens' : 'token'
 
     const doesNotContainUpdateMinter =
       transactions.findIndex(
@@ -102,10 +86,35 @@ export const Airdrop: React.FC = () => {
       })
     }
 
+    // Process each recipient
+    const airdropTransactions = []
+    for (const recipient of recipients) {
+      const resolvedRecipientAddress = await getEnsAddress(
+        recipient.address,
+        getProvider(chainToQuery)
+      )
+
+      airdropTransactions.push({
+        functionSignature: 'mintBatchTo',
+        target: addresses?.token as AddressType,
+        value: '',
+        calldata: encodeFunctionData({
+          abi: tokenAbi,
+          functionName: 'mintBatchTo',
+          args: [BigInt(recipient.amount), resolvedRecipientAddress as Address],
+        }),
+      })
+    }
+
+    const summary =
+      recipients.length === 1
+        ? `Airdrop ${recipients[0].amount} ${recipients[0].amount > 1 ? 'tokens' : 'token'} to ${walletSnippet(recipients[0].address)}`
+        : `Bulk airdrop ${totalTokens} tokens to ${recipients.length} recipients`
+
     addTransaction({
       type: TransactionType.AIRDROP,
-      summary: `Airdrop ${amount} ${unit} to ${walletSnippet(recipient)}`,
-      transactions: [airdropTransaction],
+      summary,
+      transactions: airdropTransactions,
     })
 
     actions.resetForm()
