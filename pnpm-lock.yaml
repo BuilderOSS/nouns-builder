@@ -205,6 +205,9 @@ importers:
       nextjs-progressbar:
         specifier: ^0.0.16
         version: 0.0.16(next@15.3.2(@babel/core@7.27.1)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react@19.1.0)
+      papaparse:
+        specifier: ^5.5.3
+        version: 5.5.3
       raw-loader:
         specifier: ^4.0.2
         version: 4.0.2(webpack@5.99.9)
@@ -278,6 +281,9 @@ importers:
       '@types/node':
         specifier: ^22.15.21
         version: 22.15.21
+      '@types/papaparse':
+        specifier: ^5.3.16
+        version: 5.3.16
       '@types/react':
         specifier: ^19.1.5
         version: 19.1.5
@@ -431,13 +437,13 @@ importers:
         version: 5.62.0(eslint@8.57.1)(typescript@5.8.3)
       eslint-config-next:
         specifier: latest
-        version: 15.4.3(eslint@8.57.1)(typescript@5.8.3)
+        version: 15.5.3(eslint@8.57.1)(typescript@5.8.3)
       eslint-config-prettier:
         specifier: 8.3.0
         version: 8.3.0(eslint@8.57.1)
       eslint-config-turbo:
         specifier: latest
-        version: 2.5.5(eslint@8.57.1)(turbo@2.5.5)
+        version: 2.5.6(eslint@8.57.1)(turbo@2.5.5)
       eslint-plugin-prettier:
         specifier: ^5.2.6
         version: 5.4.0(@types/eslint@9.6.1)(eslint-config-prettier@8.3.0(eslint@8.57.1))(eslint@8.57.1)(prettier@3.5.3)
@@ -2751,8 +2757,8 @@ packages:
   '@next/env@15.3.2':
     resolution: {integrity: sha512-xURk++7P7qR9JG1jJtLzPzf0qEvqCN0A/T3DXf8IPMKo9/6FfjxtEffRJIIew/bIL4T3C2jLLqBor8B/zVlx6g==}
 
-  '@next/eslint-plugin-next@15.4.3':
-    resolution: {integrity: sha512-wYYbP29uZlm9lqD1C6HDgW9WNNt6AlTogYKYpDyATs0QrKYIv/rPueoIDRH6qttXGCe3zNrb7hxfQx4w8OSkLA==}
+  '@next/eslint-plugin-next@15.5.3':
+    resolution: {integrity: sha512-SdhaKdko6dpsSr0DldkESItVrnPYB1NS2NpShCSX5lc7SSQmLZt5Mug6t2xbiuVWEVDLZSuIAoQyYVBYp0dR5g==}
 
   '@next/swc-darwin-arm64@15.3.2':
     resolution: {integrity: sha512-2DR6kY/OGcokbnCsjHpNeQblqCZ85/1j6njYSkzRdpLn5At7OkSdmk7WyAmB9G0k25+VgqVZ/u356OSoQZ3z0g==}
@@ -4157,6 +4163,9 @@ packages:
 
   '@types/nprogress@0.2.3':
     resolution: {integrity: sha512-k7kRA033QNtC+gLc4VPlfnue58CM1iQLgn1IMAU8VPHGOj7oIHPp9UlhedEnD/Gl8evoCjwkZjlBORtZ3JByUA==}
+
+  '@types/papaparse@5.3.16':
+    resolution: {integrity: sha512-T3VuKMC2H0lgsjI9buTB3uuKj3EMD2eap1MOuEQuBQ44EnDx/IkGhU6EwiTf9zG3za4SKlmwKAImdDKdNnCsXg==}
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
@@ -6265,8 +6274,8 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  eslint-config-next@15.4.3:
-    resolution: {integrity: sha512-blytVMTpdqqlLBvYOvwT51m5eqRHNofKR/pfBSeeHiQMSY33kCph31hAK3DiAsL/RamVJRQzHwTRbbNr+7c/sw==}
+  eslint-config-next@15.5.3:
+    resolution: {integrity: sha512-e6j+QhQFOr5pfsc8VJbuTD9xTXJaRvMHYjEeLPA2pFkheNlgPLCkxdvhxhfuM4KGcqSZj2qEnpHisdTVs3BxuQ==}
     peerDependencies:
       eslint: ^7.23.0 || ^8.0.0 || ^9.0.0
       typescript: '>=3.3.1'
@@ -6280,8 +6289,8 @@ packages:
     peerDependencies:
       eslint: '>=7.0.0'
 
-  eslint-config-turbo@2.5.5:
-    resolution: {integrity: sha512-23lKrCr66HQR62aa94n2dBGUUFz0GzM6N1KwmcREZHxomZ5Ik2rDm00wAz95lOEkhzSt6IaxW00Uz0az/Fcq5Q==}
+  eslint-config-turbo@2.5.6:
+    resolution: {integrity: sha512-1EV/UqdKE75st9q6y0MCxz7qp2v7RyGvbQsMLSuCz+VH8ScnSfmhd8FcAbqx3BshCy5IluujzMB6T5iCgL3/sA==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -6376,8 +6385,8 @@ packages:
     peerDependencies:
       eslint: '>=5.0.0'
 
-  eslint-plugin-turbo@2.5.5:
-    resolution: {integrity: sha512-IlN65X6W7rgK88u5xl1xC+7FIGKA7eyaca0yxZQ9CBNV6keAaqtjZQLw8ZfXdv7T+MzTLYkYOeOHAv8yCRUx4Q==}
+  eslint-plugin-turbo@2.5.6:
+    resolution: {integrity: sha512-KUDE23aP2JV8zbfZ4TeM1HpAXzMM/AYG/bJam7P4AalUxas8Pd/lS/6R3p4uX91qJcH1LwL4h0ED48nDe8KorQ==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -6749,8 +6758,8 @@ packages:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb:
-    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb}
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49:
+    resolution: {tarball: https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49}
     version: 1.10.0
 
   form-data@2.5.3:
@@ -8916,6 +8925,9 @@ packages:
   pako@2.1.0:
     resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
 
+  papaparse@5.5.3:
+    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
+
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
 
@@ -9897,6 +9909,7 @@ packages:
   source-map@0.8.0-beta.0:
     resolution: {integrity: sha512-2ymg6oRBpebeZi9UUNsgQ89bhx01TcTkmNTGnNO88imTmbSgy4nfujrgVEFKWpMTEGA11EDkTt7mqObTPdigIA==}
     engines: {node: '>= 8'}
+    deprecated: The work that was done in this beta branch won't be included in future versions
 
   space-separated-tokens@2.0.2:
     resolution: {integrity: sha512-PEGlAwrG8yXGXRjW32fGbg66JAlOAwbObuqVoJpv/mRgoWDQfgH1wDPvtzWyUSNAXBGSk8h755YDbbcEy3SH2Q==}
@@ -14175,7 +14188,7 @@ snapshots:
 
   '@next/env@15.3.2': {}
 
-  '@next/eslint-plugin-next@15.4.3':
+  '@next/eslint-plugin-next@15.5.3':
     dependencies:
       fast-glob: 3.3.1
 
@@ -16031,6 +16044,10 @@ snapshots:
 
   '@types/nprogress@0.2.3': {}
 
+  '@types/papaparse@5.3.16':
+    dependencies:
+      '@types/node': 22.15.21
+
   '@types/parse-json@4.0.2': {}
 
   '@types/pbkdf2@3.1.2':
@@ -17432,7 +17449,7 @@ snapshots:
       '@openzeppelin/contracts-upgradeable': 4.9.6
       '@types/node': 18.19.103
       ds-test: https://codeload.github.com/dapphub/ds-test/tar.gz/e282159d5170298eb2455a6c05280ab5a73a4ef0
-      forge-std: https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb
+      forge-std: https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49
       micro-onchain-metadata-utils: 0.1.1
       sol-uriencode: 0.2.0
 
@@ -17803,7 +17820,7 @@ snapshots:
 
   axios@1.9.0:
     dependencies:
-      follow-redirects: 1.15.9(debug@4.4.1)
+      follow-redirects: 1.15.9(debug@4.3.4)
       form-data: 4.0.2
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -19250,9 +19267,9 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-config-next@15.4.3(eslint@8.57.1)(typescript@5.8.3):
+  eslint-config-next@15.5.3(eslint@8.57.1)(typescript@5.8.3):
     dependencies:
-      '@next/eslint-plugin-next': 15.4.3
+      '@next/eslint-plugin-next': 15.5.3
       '@rushstack/eslint-patch': 1.11.0
       '@typescript-eslint/eslint-plugin': 5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
       '@typescript-eslint/parser': 5.62.0(eslint@8.57.1)(typescript@5.8.3)
@@ -19274,10 +19291,10 @@ snapshots:
     dependencies:
       eslint: 8.57.1
 
-  eslint-config-turbo@2.5.5(eslint@8.57.1)(turbo@2.5.5):
+  eslint-config-turbo@2.5.6(eslint@8.57.1)(turbo@2.5.5):
     dependencies:
       eslint: 8.57.1
-      eslint-plugin-turbo: 2.5.5(eslint@8.57.1)(turbo@2.5.5)
+      eslint-plugin-turbo: 2.5.6(eslint@8.57.1)(turbo@2.5.5)
       turbo: 2.5.5
 
   eslint-import-resolver-node@0.3.9:
@@ -19420,7 +19437,7 @@ snapshots:
     dependencies:
       eslint: 8.57.1
 
-  eslint-plugin-turbo@2.5.5(eslint@8.57.1)(turbo@2.5.5):
+  eslint-plugin-turbo@2.5.6(eslint@8.57.1)(turbo@2.5.5):
     dependencies:
       dotenv: 16.0.3
       eslint: 8.57.1
@@ -19955,7 +19972,7 @@ snapshots:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
-  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/a3dca253700f19f15b1837c57c67b9388f5cc3fb: {}
+  forge-std@https://codeload.github.com/foundry-rs/forge-std/tar.gz/0768d9c08c085c79bb31d88683a78770764fec49: {}
 
   form-data@2.5.3:
     dependencies:
@@ -22704,6 +22721,8 @@ snapshots:
   pako@0.2.9: {}
 
   pako@2.1.0: {}
+
+  papaparse@5.5.3: {}
 
   param-case@3.0.4:
     dependencies:
