@@ -6,7 +6,7 @@ import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
-import Image from 'next/image'
+import NextImage from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Avatar, DaoAvatar } from 'src/components/Avatar'
@@ -142,65 +142,68 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                 />
               ) : daos && daos?.length > 0 ? (
                 <Flex direction="column" gap="x3" w="100%">
-                  {daos.map((dao) => (
-                    <Link
-                      key={dao.collectionAddress}
-                      href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
-                      style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
-                      className="profile-dao-links"
-                    >
-                      <Flex
-                        align="center"
-                        gap="x3"
-                        p="x3"
-                        borderRadius="curved"
-                        borderStyle="solid"
-                        borderWidth="thin"
-                        borderColor="border"
-                        backgroundColor="background1"
-                        cursor="pointer"
+                  {daos.map((dao) => {
+                    const chainMeta = PUBLIC_DEFAULT_CHAINS.find(
+                      (chain) => chain.id === dao.chainId
+                    )
+                    return (
+                      <Link
+                        key={dao.collectionAddress}
+                        href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
                         style={{
-                          transition: 'all 0.2s ease',
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          width: '100%',
                         }}
+                        className="profile-dao-links"
                       >
-                        <DaoAvatar
-                          collectionAddress={dao.collectionAddress}
-                          size="48"
-                          auctionAddress={dao.auctionAddress}
-                          chainId={dao.chainId}
-                        />
-                        <Flex align="center" justify="space-between" flex="1">
-                          <Text fontWeight="display">{dao.name}</Text>
-                          <Flex align="center" gap="x1">
-                            {PUBLIC_DEFAULT_CHAINS.find(
-                              (chain) => chain.id === dao.chainId
-                            )?.icon && (
-                              <Image
-                                src={
-                                  PUBLIC_DEFAULT_CHAINS.find(
-                                    (chain) => chain.id === dao.chainId
-                                  )?.icon!
-                                }
-                                layout="fixed"
-                                objectFit="contain"
-                                style={{ borderRadius: '12px', maxHeight: '16px' }}
-                                alt=""
-                                height={16}
-                                width={16}
-                              />
-                            )}
-                            <Text fontSize={12} color="text3">
-                              {
-                                PUBLIC_DEFAULT_CHAINS.find(
-                                  (chain) => chain.id === dao.chainId
-                                )?.name
-                              }
-                            </Text>
+                        <Flex
+                          align="center"
+                          gap="x3"
+                          p="x3"
+                          borderRadius="curved"
+                          borderStyle="solid"
+                          borderWidth="thin"
+                          borderColor="border"
+                          backgroundColor="background1"
+                          cursor="pointer"
+                          style={{
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <DaoAvatar
+                            collectionAddress={dao.collectionAddress}
+                            size="48"
+                            auctionAddress={dao.auctionAddress}
+                            chainId={dao.chainId}
+                          />
+                          <Flex align="center" justify="space-between" flex="1">
+                            <Text fontWeight="display">{dao.name}</Text>
+                            <Flex align="center" gap="x1">
+                              {chainMeta?.icon && (
+                                <NextImage
+                                  src={
+                                    PUBLIC_DEFAULT_CHAINS.find(
+                                      (chain) => chain.id === dao.chainId
+                                    )?.icon!
+                                  }
+                                  layout="fixed"
+                                  objectFit="contain"
+                                  style={{ borderRadius: '12px', maxHeight: '16px' }}
+                                  alt=""
+                                  height={16}
+                                  width={16}
+                                />
+                              )}
+                              <Text fontSize={12} color="text3">
+                                {chainMeta?.name}
+                              </Text>
+                            </Flex>
                           </Flex>
                         </Flex>
-                      </Flex>
-                    </Link>
-                  ))}
+                      </Link>
+                    )
+                  })}
                 </Flex>
               ) : (
                 <Text>No DAO tokens owned.</Text>
