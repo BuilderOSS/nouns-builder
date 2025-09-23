@@ -7,8 +7,8 @@ import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { Icon } from 'src/components/Icon'
 import { useChainStore } from 'src/stores/useChainStore'
-import { Hex } from 'viem'
-import { useConfig } from 'wagmi'
+import { formatEther, Hex } from 'viem'
+import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { Section } from '../AdminForm/Section'
@@ -18,13 +18,38 @@ interface AuctionRewardsProps {
   auctionAddress: AddressType
 }
 
+interface TooltipProps {
+  label: string
+  tooltip: string
+}
+
+const LabelWithTooltip: React.FC<TooltipProps> = ({ label, tooltip }) => {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const zIndex = showTooltip ? 102 : 50
+
+  return (
+    <Flex align="center" gap="x2">
+      <Text fontWeight="label">{label}</Text>
+      <Box
+        cursor="pointer"
+        style={{ zIndex }}
+        onMouseOver={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <Icon id="info-16" size="sm" />
+      </Box>
+      <PopUp open={showTooltip} trigger={<></>}>
+        <Box maxWidth="x64">{tooltip}</Box>
+      </PopUp>
+    </Flex>
+  )
+}
+
 export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }) => {
   const chain = useChainStore((state) => state.chain)
   const config = useConfig()
+  const { address } = useAccount()
   const [isWithdrawing, setIsWithdrawing] = useState(false)
-  const [showBuilderTooltip, setShowBuilderTooltip] = useState(false)
-  const [showReferralTooltip, setShowReferralTooltip] = useState(false)
-  const [showFounderTooltip, setShowFounderTooltip] = useState(false)
   const { data, isLoading, error, mutate } = useAuctionRewards({
     chainId: chain.id,
     auctionAddress,
@@ -45,6 +70,7 @@ export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }
         ...protocolRewardsContractParams,
         functionName: 'withdrawFor',
         args: [data.founderRewardsRecipient, data.founderRewardsBalance],
+        account: address,
       })
 
       const txHash: Hex = await writeContract(config, simulateData.request)
@@ -68,6 +94,7 @@ export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }
     config,
     mutate,
     isWithdrawing,
+    address,
   ])
 
   if (isLoading) {
@@ -92,8 +119,7 @@ export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }
 
   const formatBPS = (bps: number) => `${(bps / 100).toFixed(2)}%`
   const formatBalance = (balance: bigint) => {
-    const eth = Number(balance) / 1e18
-    return `${eth.toFixed(6)} ETH`
+    return `${formatEther(balance)} ETH`
   }
 
   return (
@@ -107,65 +133,27 @@ export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }
 
         <Stack gap="x4">
           <Flex justify="space-between" align="center">
-            <Flex align="center" gap="x2">
-              <Text fontWeight="label">Builder Rewards</Text>
-              <Box
-                cursor="pointer"
-                style={{ zIndex: 102 }}
-                onMouseOver={() => setShowBuilderTooltip(true)}
-                onMouseLeave={() => setShowBuilderTooltip(false)}
-              >
-                <Icon id="info-16" size="sm" />
-              </Box>
-              <PopUp open={showBuilderTooltip} trigger={<></>}>
-                <Box maxWidth="x64">
-                  Rewards paid to Nouns Builder for maintaining the DAO's core
-                  infrastructure and tooling.
-                </Box>
-              </PopUp>
-            </Flex>
+            <LabelWithTooltip
+              label="Builder Rewards"
+              tooltip="Rewards paid to Nouns Builder for maintaining the DAO's core infrastructure and tooling."
+            />
             <Text color="text2">{formatBPS(data.builderRewardsBPS)}</Text>
           </Flex>
 
           <Flex justify="space-between" align="center">
-            <Flex align="center" gap="x2">
-              <Text fontWeight="label">Referral Rewards</Text>
-              <Box
-                cursor="pointer"
-                style={{ zIndex: 102 }}
-                onMouseOver={() => setShowReferralTooltip(true)}
-                onMouseLeave={() => setShowReferralTooltip(false)}
-              >
-                <Icon id="info-16" size="sm" />
-              </Box>
-              <PopUp open={showReferralTooltip} trigger={<></>}>
-                <Box maxWidth="x64">
-                  Rewards paid to users who refer new bidders to auctions, or to
-                  developers integrating referrals into external UIs.
-                </Box>
-              </PopUp>
-            </Flex>
+            <LabelWithTooltip
+              label="Referral Rewards"
+              tooltip="Rewards paid to users who refer new bidders to auctions, or to developers integrating referrals into external UIs."
+            />
             <Text color="text2">{formatBPS(data.referralRewardsBPS)}</Text>
           </Flex>
 
           <Box>
             <Flex justify="space-between" align="center" mb="x2">
-              <Flex align="center" gap="x2">
-                <Text fontWeight="label">Founder Rewards</Text>
-                <Box
-                  cursor="pointer"
-                  style={{ zIndex: 102 }}
-                  onMouseOver={() => setShowFounderTooltip(true)}
-                  onMouseLeave={() => setShowFounderTooltip(false)}
-                >
-                  <Icon id="info-16" size="sm" />
-                </Box>
-                <PopUp open={showFounderTooltip} trigger={<></>}>
-                  <Box maxWidth="x64">
-                    Rewards paid to the DAO founders for their role in creating the DAO.
-                  </Box>
-                </PopUp>
-              </Flex>
+              <LabelWithTooltip
+                label="Founder Rewards"
+                tooltip="Rewards paid to the DAO founders for their role in creating the DAO."
+              />
               <Text color="text2">{formatBPS(data.founderRewardsBPS)}</Text>
             </Flex>
             {data.founderRewardsBPS > 0 && (

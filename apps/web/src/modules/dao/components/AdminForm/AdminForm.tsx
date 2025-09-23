@@ -494,7 +494,11 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
                       errors={formik.errors}
                       removeFounderAddress={remove}
                       addFounderAddress={() =>
-                        push({ founderAddress: '', allocation: '', endDate: '' })
+                        push({
+                          founderAddress: '',
+                          allocationPercentage: '',
+                          endDate: '',
+                        })
                       }
                     />
                   )}

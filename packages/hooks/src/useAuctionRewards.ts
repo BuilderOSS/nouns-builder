@@ -19,7 +19,7 @@ export const useAuctionRewards = ({
   chainId,
   auctionAddress,
 }: UseAuctionRewardsProps): UseAuctionRewardsReturnType => {
-  const { data, error, isLoading, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR<GetAuctionRewardsResponse>(
     chainId && auctionAddress
       ? [SWR_KEYS.AUCTION_REWARDS, chainId, auctionAddress]
       : null,

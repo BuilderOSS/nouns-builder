@@ -9,7 +9,7 @@ import { AuctionRewards } from './AuctionRewards'
 export const Admin: React.FC = () => {
   const addresses = useDaoStore((x) => x.addresses)
 
-  if (!addresses.auction || !addresses.token) {
+  if (!addresses?.auction || !addresses?.token) {
     return null
   }
 
