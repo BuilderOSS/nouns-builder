@@ -1,13 +1,15 @@
 import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Avatar } from 'src/components/Avatar'
+import { Avatar, DaoAvatar } from 'src/components/Avatar'
 import CopyButton from 'src/components/CopyButton/CopyButton'
 import { Meta } from 'src/components/Meta'
 import Pagination from 'src/components/Pagination'
@@ -126,8 +128,8 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
               <CopyButton text={userAddress} />
             </Flex>
 
-            <Flex mt="x8" align={'flex-start'}>
-              <Text mr="x4" fontWeight={'display'}>
+            <Flex mt="x8" direction="column" align="flex-start">
+              <Text mb="x4" fontWeight={'display'}>
                 DAOs
               </Text>
               {isLoadingDaos ? (
@@ -139,20 +141,67 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   borderRadius="normal"
                 />
               ) : daos && daos?.length > 0 ? (
-                <Text color="text3">
-                  {daos.map((dao, index) => (
-                    <>
-                      <Link
-                        href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                        className="profile-dao-links"
+                <Flex direction="column" gap="x3" w="100%">
+                  {daos.map((dao) => (
+                    <Link
+                      key={dao.collectionAddress}
+                      href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
+                      style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
+                      className="profile-dao-links"
+                    >
+                      <Flex
+                        align="center"
+                        gap="x3"
+                        p="x3"
+                        borderRadius="curved"
+                        borderStyle="solid"
+                        borderWidth="thin"
+                        borderColor="border"
+                        backgroundColor="background1"
+                        cursor="pointer"
+                        style={{
+                          transition: 'all 0.2s ease',
+                        }}
                       >
-                        {dao.name}
-                      </Link>
-                      {index < daos.length - 1 && ', '}
-                    </>
+                        <DaoAvatar
+                          collectionAddress={dao.collectionAddress}
+                          size="48"
+                          auctionAddress={dao.auctionAddress}
+                          chainId={dao.chainId}
+                        />
+                        <Flex align="center" justify="space-between" flex="1">
+                          <Text fontWeight="display">{dao.name}</Text>
+                          <Flex align="center" gap="x1">
+                            {PUBLIC_DEFAULT_CHAINS.find(
+                              (chain) => chain.id === dao.chainId
+                            )?.icon && (
+                              <Image
+                                src={
+                                  PUBLIC_DEFAULT_CHAINS.find(
+                                    (chain) => chain.id === dao.chainId
+                                  )?.icon!
+                                }
+                                layout="fixed"
+                                objectFit="contain"
+                                style={{ borderRadius: '12px', maxHeight: '16px' }}
+                                alt=""
+                                height={16}
+                                width={16}
+                              />
+                            )}
+                            <Text fontSize={12} color="text3">
+                              {
+                                PUBLIC_DEFAULT_CHAINS.find(
+                                  (chain) => chain.id === dao.chainId
+                                )?.name
+                              }
+                            </Text>
+                          </Flex>
+                        </Flex>
+                      </Flex>
+                    </Link>
                   ))}
-                </Text>
+                </Flex>
               ) : (
                 <Text>No DAO tokens owned.</Text>
               )}
@@ -175,27 +224,31 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
               overflow: 'auto',
             }}
           >
-            {isLoadingTokens && (
-              <Grid columns={isMobile ? 1 : 3} gap={'x12'}>
-                {Array(6)
-                  .fill(0)
-                  .map((_, i) => (
-                    <Box
-                      key={i}
-                      backgroundColor="background2"
-                      width={'100%'}
-                      height={'100%'}
-                      aspectRatio={1 / 1}
-                      position="relative"
-                      className={artworkSkeleton}
-                    />
-                  ))}
-              </Grid>
+            {isMobile && hasDaos && (
+              <Text mb="x4" fontWeight={'display'}>
+                Tokens
+              </Text>
             )}
 
             {hasDaos && (
               <>
-                {!!tokens?.tokens.length ? (
+                {isLoadingTokens ? (
+                  <Grid columns={isMobile ? 1 : 3} gap={'x12'}>
+                    {Array(6)
+                      .fill(0)
+                      .map((_, i) => (
+                        <Box
+                          key={i}
+                          backgroundColor="background2"
+                          width={'100%'}
+                          height={'100%'}
+                          aspectRatio={1 / 1}
+                          position="relative"
+                          className={artworkSkeleton}
+                        />
+                      ))}
+                  </Grid>
+                ) : !!tokens?.tokens.length ? (
                   <Grid columns={isMobile ? 1 : 3} gap={'x12'}>
                     {tokens?.tokens.map((x, i) => (
                       <Link
@@ -212,7 +265,11 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                     justify={'space-around'}
                     style={{ height: isMobile ? '40vh' : '65vh' }}
                   >
-                    <Text color="text3">No more DAO tokens found.</Text>
+                    <Text color="text3">
+                      {page
+                        ? `No more DAO tokens found on ${chain.name}.`
+                        : `No DAO tokens found on ${chain.name}.`}
+                    </Text>
                   </Flex>
                 )}
 
