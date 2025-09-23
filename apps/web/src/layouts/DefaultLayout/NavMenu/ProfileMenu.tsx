@@ -6,6 +6,7 @@ import { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, PopUp, Text } from '@buildeross/zord'
 import axios from 'axios'
+import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { Avatar } from 'src/components/Avatar'
@@ -133,6 +134,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   color={'text1'}
                   gap={'x4'}
                   className={daoButton}
+                  pr="x2"
                   style={{
                     borderRadius: '8px',
                     width: '100%',
@@ -144,7 +146,33 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                     auctionAddress={dao.auctionAddress}
                     chainId={dao.chainId}
                   />
-                  <Text fontWeight={'display'}>{dao.name}</Text>
+                  <Flex align="center" justify="space-between" flex="1">
+                    <Text fontWeight={'display'}>{dao.name}</Text>
+                    <Flex align="center" gap="x1">
+                      {PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === dao.chainId)
+                        ?.icon && (
+                        <Image
+                          src={
+                            PUBLIC_DEFAULT_CHAINS.find(
+                              (chain) => chain.id === dao.chainId
+                            )?.icon!
+                          }
+                          layout="fixed"
+                          objectFit="contain"
+                          style={{ borderRadius: '12px', maxHeight: '16px' }}
+                          alt=""
+                          height={16}
+                          width={16}
+                        />
+                      )}
+                      <Text fontSize={12} color="text3">
+                        {
+                          PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === dao.chainId)
+                            ?.name
+                        }
+                      </Text>
+                    </Flex>
+                  </Flex>
                 </Flex>
               </Link>
             ))}
