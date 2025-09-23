@@ -350,8 +350,16 @@ export const permaInputPlaceHolderStyle = style({
 
 export const inputCheckIcon = styleVariants({
   default: [
-    permaInputPlaceHolderStyle,
-    { top: 52, height: 24, width: 24, borderRadius: '12px', backgroundColor: '#1CB687' },
+    {
+      right: '16px',
+      top: 'auto',
+      bottom: 20,
+      background: 'inherit',
+      height: 24,
+      width: 24,
+      borderRadius: '12px',
+      backgroundColor: '#1CB687',
+    },
   ],
 })
 

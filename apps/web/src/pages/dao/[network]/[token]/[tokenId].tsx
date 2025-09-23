@@ -20,7 +20,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   About,
   Activity,
-  AdminForm,
+  Admin,
   SectionHandler,
   SmartContracts,
   Treasury,
@@ -94,7 +94,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     }
     const adminSection = {
       title: 'Admin',
-      component: [<AdminForm key={'admin'} collectionAddress={collection} />],
+      component: [<Admin key={'admin'} />],
     }
     const smartContractsSection = {
       title: 'Contracts',
