@@ -25,7 +25,7 @@ interface TooltipProps {
 
 const LabelWithTooltip: React.FC<TooltipProps> = ({ label, tooltip }) => {
   const [showTooltip, setShowTooltip] = useState(false)
-  const zIndex = showTooltip ? 102 : 50
+  const zIndex = showTooltip ? 102 : undefined
 
   return (
     <Flex align="center" gap="x2">
