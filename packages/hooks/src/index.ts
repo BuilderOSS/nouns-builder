@@ -1,5 +1,6 @@
 export * from './useArtworkPreview'
 export * from './useArtworkUpload'
+export * from './useAuctionRewards'
 export * from './useCountdown'
 export * from './useDaoAuction'
 export * from './useDaoMembership'

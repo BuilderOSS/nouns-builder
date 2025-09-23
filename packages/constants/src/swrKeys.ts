@@ -19,6 +19,7 @@ export const SWR_KEYS = {
   FEATURED: 'featured',
   TOKEN: 'token',
   AUCTION: 'auction',
+  AUCTION_REWARDS: 'auction-rewards',
   DAO_INFO: 'dao-info',
   DAO_FEED: 'dao-feed',
   MEMBERS: 'members',
