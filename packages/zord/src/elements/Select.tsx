@@ -60,7 +60,7 @@ export const Select = ({
         </Flex>
 
         <Icon
-          id="ChevronDown"
+          id="chevronDown"
           color="tertiary"
           right="x3"
           position="absolute"

@@ -139,7 +139,7 @@ export function InnerBox<E extends ElementType = typeof BoxDefaultElement>(
     wordBreak,
     ...props
   }: PolymorphicPropsWithoutRef<BoxProps, E>,
-  ref: React.ForwardedRef<E>,
+  ref: React.ForwardedRef<E>
 ) {
   const Element: ElementType = as || BoxDefaultElement
 
@@ -208,7 +208,7 @@ export function InnerBox<E extends ElementType = typeof BoxDefaultElement>(
           listStyle,
           wordBreak,
         }),
-        className,
+        className
       )}
       {...props}
     />

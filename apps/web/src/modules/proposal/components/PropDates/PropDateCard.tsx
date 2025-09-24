@@ -1,14 +1,10 @@
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { type PropDate } from '@buildeross/sdk/eas'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
-import ReactMarkdown from 'react-markdown'
-import rehypeRaw from 'rehype-raw'
-import rehypeSanitize from 'rehype-sanitize'
-import remarkGfm from 'remark-gfm'
-import { Avatar } from 'src/components/Avatar'
-import { useLayoutStore } from 'src/stores/useLayoutStore'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 import { PropDateReplyCard } from './PropDateReplyCard'
@@ -28,7 +24,6 @@ export const PropDateCard = ({
   replies?: PropDate[]
   invoiceData?: InvoiceMetadata
 }) => {
-  const isMobile = useLayoutStore((x) => x.isMobile)
   const { ensName, ensAvatar } = useEnsData(propDate?.attester)
 
   const milestoneTitle =
@@ -46,21 +41,15 @@ export const PropDateCard = ({
       borderRadius="curved"
       backgroundColor="background1"
       mb="x2"
-      px={isMobile ? 'x2' : 'x6'}
+      px={{ '@initial': 'x2', '@768': 'x6' }}
       py="x6"
       mt="x4"
       gap="x4"
     >
       <Flex justify="space-between" align="center" wrap="wrap" gap="x2">
         <Flex align="center" gap="x2">
-          <Avatar
-            address={propDate.attester}
-            src={ensAvatar}
-            size={isMobile ? '24' : '32'}
-          />
-          <Text variant={isMobile ? 'label-sm' : 'label-md'} fontWeight="display">
-            {ensName || walletSnippet(propDate.attester)}
-          </Text>
+          <Avatar address={propDate.attester} src={ensAvatar} size="28" />
+          <Text fontWeight="display">{ensName || walletSnippet(propDate.attester)}</Text>
           {milestoneTitle && (
             <Text variant="label-sm" color="text3">
               • {milestoneTitle}
@@ -93,12 +82,7 @@ export const PropDateCard = ({
           backgroundColor={'background2'}
           className={messageStyle}
         >
-          <ReactMarkdown
-            rehypePlugins={[rehypeRaw, rehypeSanitize]}
-            remarkPlugins={[remarkGfm]}
-          >
-            {propDate.message}
-          </ReactMarkdown>
+          <MarkdownDisplay>{propDate.message}</MarkdownDisplay>
         </Box>
       )}
       {/* Render replies if any */}

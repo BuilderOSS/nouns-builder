@@ -1,11 +1,9 @@
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { L1_CHAINS } from '@buildeross/constants/chains'
-import { useVotes } from '@buildeross/hooks'
+import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
-import { auctionAbi } from '@buildeross/sdk/contract'
-import { getDAOAddresses } from '@buildeross/sdk/contract'
+import { useVotes } from '@buildeross/hooks/useVotes'
+import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import { AddressType } from '@buildeross/types'
 import { Flex, Stack } from '@buildeross/zord'
@@ -138,7 +136,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
       {transactionType ? (
         <TwoColumnLayout
           leftColumn={
-            <Stack>
+            <Stack gap="x4">
               <DropdownSelect
                 value={transactionType}
                 options={options}

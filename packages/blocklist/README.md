@@ -80,9 +80,11 @@ pnpm run update
 ## Dependencies
 
 ### Peer Dependencies
+
 - `viem`: ^2.30.0
 
 ### Development Dependencies
+
 - `react`: ^19.1.0 (for hook usage)
 - TypeScript and ESLint configurations
 
@@ -93,9 +95,11 @@ pnpm run update
 React hook to check if an address is blocked.
 
 **Parameters:**
+
 - `address` (string | undefined) - Ethereum address to check
 
 **Returns:**
+
 - `boolean` - True if address is blocked, false otherwise
 
 ### isBlocked(address)
@@ -103,9 +107,11 @@ React hook to check if an address is blocked.
 Synchronous function to check if an address is blocked.
 
 **Parameters:**
+
 - `address` (string | undefined) - Ethereum address to check
 
 **Returns:**
+
 - `boolean` - True if address is blocked, false otherwise
 
 ## Data Sources
@@ -118,6 +124,7 @@ The blocklist is sourced from the US Treasury's Specially Designated Nationals A
 ## Environment Handling
 
 The package automatically selects the appropriate blocklist based on `NODE_ENV`:
+
 - `production` - Uses full SDN list
 - `development` - Uses reduced development list
 - Default fallback to development list

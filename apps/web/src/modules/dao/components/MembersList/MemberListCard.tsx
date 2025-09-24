@@ -1,21 +1,17 @@
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
-import { Flex, Text } from '@buildeross/zord'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { Flex, Grid, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
-import { Avatar } from 'src/components/Avatar'
-
-import { firstRowItem, lastRowItem, rowItem } from './MembersList.css'
 
 export const MemberCard = ({
   member,
   totalSupply,
-  isMobile,
 }: {
   member: DaoVoter
   totalSupply?: number
-  isMobile: boolean
 }) => {
   const { displayName, ensAvatar } = useEnsData(member.voter)
 
@@ -29,16 +25,6 @@ export const MemberCard = ({
     return ((Number(member.tokenCount) / totalSupply) * 100).toFixed(2)
   }, [totalSupply, member])
 
-  const gridInfo = (
-    <>
-      <Text className={rowItem}>
-        {member.tokenCount} Token{member.tokenCount === 1 ? '' : 's'}
-      </Text>
-      <Text className={rowItem}>{votePercent}%</Text>
-      <Text className={lastRowItem}>{timeJoined}</Text>
-    </>
-  )
-
   return (
     <Link href={`/profile/${member.voter}`} passHref>
       <Flex
@@ -47,7 +33,7 @@ export const MemberCard = ({
         align={{ '@initial': 'start', '@768': 'center' }}
       >
         <Flex
-          className={firstRowItem}
+          style={{ width: '35%' }}
           align={'center'}
           mb={{ '@initial': 'x4', '@768': 'x0' }}
         >
@@ -56,7 +42,17 @@ export const MemberCard = ({
             {displayName}
           </Text>
         </Flex>
-        {isMobile ? <Flex w="100%">{gridInfo}</Flex> : gridInfo}
+        <Grid
+          columns="1fr 1fr 1fr"
+          flex={1}
+          width={{ '@initial': '100%', '@768': 'auto' }}
+        >
+          <Text>
+            {member.tokenCount} Token{member.tokenCount === 1 ? '' : 's'}
+          </Text>
+          <Text>{votePercent}%</Text>
+          <Text>{timeJoined}</Text>
+        </Grid>
       </Flex>
     </Link>
   )

@@ -16,8 +16,8 @@ export const dashboardRequest = async (memberAddress: string) => {
             user: memberAddress.toLowerCase(),
             first: 30,
           })
-          .then((x) => ({ ...x, chainId: chain.id })),
-      ),
+          .then((x) => ({ ...x, chainId: chain.id }))
+      )
     )
 
     return data
@@ -31,7 +31,7 @@ export const dashboardRequest = async (memberAddress: string) => {
           currentAuction: dao.currentAuction,
           chainId: queries.chainId,
           daoImage: dao.contractImage,
-        })),
+        }))
       )
       .flat()
       .sort((a, b) => a.name.localeCompare(b.name))
@@ -45,7 +45,7 @@ export const dashboardRequest = async (memberAddress: string) => {
     throw new Error(
       e?.message
         ? `Goldsky Request Error: ${e.message}`
-        : 'Error fetching dashboard data from Goldsky subgraph.',
+        : 'Error fetching dashboard data from Goldsky subgraph.'
     )
   }
 }

@@ -6,14 +6,17 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: [
-    'viem', 
-    'wagmi', 
-    'wagmi/chains', 
-    'yup', 
+    '@buildeross/constants',
+    '@buildeross/ipfs-service',
+    '@buildeross/types',
+    'viem',
+    'wagmi',
+    'wagmi/chains',
+    'yup',
     'lodash',
     'tinycolor2',
     '@farcaster/frame-wagmi-connector',
     '@rainbow-me/rainbowkit',
-    '@rainbow-me/rainbowkit/wallets'
+    '@rainbow-me/rainbowkit/wallets',
   ],
 })

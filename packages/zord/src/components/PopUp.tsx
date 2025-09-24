@@ -97,7 +97,7 @@ export function PopUp({
               p="x3"
               style={{ minWidth: 0, height: 'auto' }}
             >
-              <Icon id="Ellipsis" size="md" />
+              <Icon id="dots" size="md" />
             </Button>
           )}
         </Box>

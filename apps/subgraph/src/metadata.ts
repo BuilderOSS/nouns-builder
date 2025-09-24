@@ -133,7 +133,7 @@ export function handleAddProperties(event: AddPropertiesFunctionCall): void {
 
 // NOTE: function call handlers are disabled for now because they are not working for all networks
 export function handleDeleteAndRecreateProperties(
-  event: DeleteAndRecreatePropertiesFunctionCall,
+  event: DeleteAndRecreatePropertiesFunctionCall
 ): void {
   let context = dataSource.context()
 

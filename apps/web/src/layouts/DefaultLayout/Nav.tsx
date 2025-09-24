@@ -1,9 +1,8 @@
-import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
+import { NetworkController } from '@buildeross/ui/NetworkController'
 import { atoms, Flex, Label, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-import { NetworkController } from 'src/components/NetworkController'
 
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'
@@ -33,7 +32,7 @@ export const Nav = () => {
                 fill={'black'}
                 className={atoms({ width: 'x23', cursor: 'pointer' })}
               />
-              {PUBLIC_IS_TESTNET && (
+              <NetworkController.Testnet>
                 <TestnetLogo
                   className={atoms({
                     width: 'x23',
@@ -41,7 +40,7 @@ export const Nav = () => {
                     mt: 'x1',
                   })}
                 />
-              )}
+              </NetworkController.Testnet>
             </Stack>
           </Link>
           <Flex display={{ '@initial': 'none', '@768': 'flex' }} ml="x10" gap={'x4'}>

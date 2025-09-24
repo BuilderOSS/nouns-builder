@@ -1,9 +1,8 @@
-import { Button, Flex } from '@buildeross/zord'
+import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
+import { Button, Flex, Icon } from '@buildeross/zord'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
-import { MarkdownEditor } from 'src/components/MarkdownEditor'
 
 import { useFormStore } from '../../stores'
 import { ArtworkFormValues, validationSchemaArtwork } from './ArtworkForm.schema'
@@ -60,7 +59,7 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
               return (
                 <MarkdownEditor
                   value={field.value}
-                  onChange={(value: string) => formik?.setFieldValue(field.name, value)}
+                  onChange={(value: string) => formik.setFieldValue(field.name, value)}
                   inputLabel={'DAO Description'}
                   errorMessage={
                     formik.touched?.projectDescription &&

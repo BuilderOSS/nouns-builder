@@ -1,5 +1,4 @@
-import { assert } from 'vitest'
-import { describe } from 'vitest'
+import { assert, describe } from 'vitest'
 
 import { slugify } from './slugify'
 

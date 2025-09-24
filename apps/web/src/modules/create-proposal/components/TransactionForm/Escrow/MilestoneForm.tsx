@@ -1,11 +1,8 @@
-import { Button, Flex, Stack } from '@buildeross/zord'
+import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
+import { SingleMediaUpload } from '@buildeross/ui/SingleMediaUpload'
+import { Button, Flex, Icon, Stack } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React, { useCallback } from 'react'
-import DatePicker from 'src/components/Fields/Date'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { NUMBER, TEXTAREA } from 'src/components/Fields/types'
-import { Icon } from 'src/components/Icon'
-import SingleMediaUpload from 'src/components/SingleMediaUpload/SingleMediaUpload'
 
 import { EscrowFormValues } from './EscrowForm.schema'
 
@@ -31,7 +28,7 @@ export const MilestoneForm: React.FC<{
         {...formik.getFieldProps(`milestones.${index}.amount`)}
         inputLabel="Amount"
         id={`milestones.${index}.amount`}
-        type={NUMBER}
+        type={FIELD_TYPES.NUMBER}
         placeholder={``}
         errorMessage={
           (formik.touched?.milestones as any)?.[index]?.amount &&
@@ -51,7 +48,7 @@ export const MilestoneForm: React.FC<{
 
       <SmartInput
         {...formik.getFieldProps(`milestones.${index}.description`)}
-        type={TEXTAREA}
+        type={FIELD_TYPES.TEXTAREA}
         formik={formik}
         id={`milestones.${index}.description`}
         value={formik.values?.milestones[index]?.description}

@@ -1,27 +1,16 @@
 import { BASE_URL, RENDERER_BASE } from '@buildeross/constants'
+import {
+  ImageProps,
+  ImagesByTraitProps,
+  OrderedTraits,
+  SelectedTraitsProps,
+} from '@buildeross/types'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
-
-import { ImageProps, Trait } from './useArtworkUpload'
-
-export type OrderedTraits = Array<Trait>
 
 export interface UseArtworkPreviewProps {
   orderedLayers: OrderedTraits
   images?: ImageProps[]
   selectedTraits?: SelectedTraitsProps[]
-}
-
-export interface ImagesByTraitProps {
-  trait: string
-  images: ImageProps[]
-}
-
-export interface SelectedTraitsProps {
-  picker: string
-  trait: string
-  uri: string
-  url: string
-  content?: File
 }
 
 const MAX_GENERATED_IMAGES = 20
@@ -53,7 +42,7 @@ export const useArtworkPreview = ({
       orderedLayers.map((item, index) => [
         item.trait.trim().toLowerCase(),
         { trait: item.trait, index },
-      ]),
+      ])
     )
 
     const grouped: { [key: string]: ImagesByTraitProps & { index: number } } = {}
@@ -118,7 +107,7 @@ export const useArtworkPreview = ({
 
     const imageLayerStack = stack.reverse()
     const hasLocalFile = traits.some(
-      (trait) => !!trait.content && trait.content?.webkitRelativePath?.length > 0,
+      (trait) => !!trait.content && trait.content?.webkitRelativePath?.length > 0
     )
 
     const imagesToDraw = imageLayerStack.map((src) => {
@@ -179,8 +168,8 @@ export const useArtworkPreview = ({
                   img.onload = () => resolve()
                   img.onerror = () =>
                     reject(new Error(`Image failed to load: ${img.src}`))
-                }),
-            ),
+                })
+            )
           )
           draw()
           if (isInit) setIsInit(false)
@@ -202,7 +191,7 @@ export const useArtworkPreview = ({
         console.error('Error generating image', err)
       }
     },
-    [canvas, isInit, canvasToBlob, selectImagesToDraw, layers],
+    [canvas, isInit, canvasToBlob, selectImagesToDraw, layers]
   )
 
   return {

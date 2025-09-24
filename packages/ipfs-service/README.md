@@ -35,7 +35,7 @@ async function handleFileUpload(file: File) {
       cache: true,
       onProgress: (progress) => {
         console.log(`Upload progress: ${progress}%`)
-      }
+      },
     })
 
     console.log('IPFS CID:', result.cid)
@@ -54,9 +54,9 @@ Upload multiple files as a directory structure:
 import { uploadDirectory } from '@buildeross/ipfs-service'
 
 async function handleDirectoryUpload(files: File[]) {
-  const fileEntries = files.map(file => ({
+  const fileEntries = files.map((file) => ({
     content: file,
-    path: `assets/${file.name}`
+    path: `assets/${file.name}`,
   }))
 
   try {
@@ -64,7 +64,7 @@ async function handleDirectoryUpload(files: File[]) {
       cache: true,
       onProgress: (progress) => {
         console.log(`Directory upload: ${progress}%`)
-      }
+      },
     })
 
     console.log('Directory CID:', result.cid)
@@ -84,12 +84,10 @@ import { uploadJson } from '@buildeross/ipfs-service'
 
 async function handleJsonUpload() {
   const metadata = {
-    name: "My NFT",
-    description: "A cool NFT",
-    image: "ipfs://...",
-    attributes: [
-      { trait_type: "Color", value: "Blue" }
-    ]
+    name: 'My NFT',
+    description: 'A cool NFT',
+    image: 'ipfs://...',
+    attributes: [{ trait_type: 'Color', value: 'Blue' }],
   }
 
   try {
@@ -172,16 +170,20 @@ await uploadJson(jsonData)
 ### Supported MIME Types
 
 #### Images
+
 - `image/jpeg`, `image/png`, `image/gif`
 - `image/webp`, `image/svg+xml`
 
 #### Videos
+
 - `video/mp4`, `video/webm`, `video/quicktime`
 
 #### Audio
+
 - `audio/mpeg`, `audio/ogg`, `audio/wav`
 
 #### Documents
+
 - `application/pdf`, `application/json`, `text/plain`
 
 ## Caching
@@ -245,6 +247,7 @@ pnpm lint
 ## Dependencies
 
 ### Runtime Dependencies
+
 - `@brokerloop/ttlcache` - TTL caching functionality
 - `ipfs-core-types` - IPFS core type definitions
 - `ipfs-http-client` - IPFS HTTP client
@@ -254,6 +257,7 @@ pnpm lint
 - `url-join` - URL joining utilities
 
 ### Development Dependencies
+
 - `vitest` - Testing framework
 - TypeScript and ESLint configurations
 
@@ -262,17 +266,20 @@ pnpm lint
 The service expects these API endpoints to be available in your Next.js application:
 
 ### `/api/upload-url`
+
 - **Method**: POST
 - **Body**: `{ type: UploadType }`
 - **Response**: `{ url: string }` - Signed upload URL
 
-### `/api/pin-cid` 
+### `/api/pin-cid`
+
 - **Method**: POST
 - **Body**: `{ cid: string }`
 - **Response**: Success confirmation
 
 ### `/api/pin-json`
-- **Method**: POST  
+
+- **Method**: POST
 - **Body**: JSON object to pin
 - **Response**: `{ cid: string }`
 
@@ -284,6 +291,7 @@ The service uses multiple IPFS gateways for redundancy:
 2. **Fallbacks**: IPFS.io, dweb.link, w3s.link, and others
 
 Configure the primary gateway via environment variables:
+
 ```bash
 NEXT_PUBLIC_PINATA_GATEWAY=your-gateway.mypinata.cloud
 BASE_URL=https://your-domain.com
@@ -291,13 +299,13 @@ BASE_URL=https://your-domain.com
 
 ## File Size Limits
 
-| Upload Type | Size Limit | Description |
-|-------------|------------|-------------|
-| `file` | 10MB | General files with broad MIME type support |
-| `image` | 1MB | Image files only |
-| `media` | 50MB | Images, videos, and audio files |
-| `directory` | 200MB | Total size across all files |
-| `json` | 10KB | JSON objects |
+| Upload Type | Size Limit | Description                                |
+| ----------- | ---------- | ------------------------------------------ |
+| `file`      | 10MB       | General files with broad MIME type support |
+| `image`     | 1MB        | Image files only                           |
+| `media`     | 50MB       | Images, videos, and audio files            |
+| `directory` | 200MB      | Total size across all files                |
+| `json`      | 10KB       | JSON objects                               |
 
 ## Type Definitions
 
@@ -311,10 +319,12 @@ export type ProgressCallback = (progress: number) => void
 
 export type UploadType = 'file' | 'image' | 'media' | 'directory' | 'json'
 
-export type FileEntry = File | {
-  content: File
-  path: string
-}
+export type FileEntry =
+  | File
+  | {
+      content: File
+      path: string
+    }
 
 export type IPFSUrl = `ipfs://${string}`
 ```

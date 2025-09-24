@@ -1,12 +1,11 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Form, Formik } from 'formik'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { NUMBER, TEXT } from 'src/components/Fields/types'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
@@ -78,7 +77,7 @@ export const SendEth = () => {
             >
               <Flex as={Form} direction={'column'}>
                 <SmartInput
-                  type={TEXT}
+                  type={FIELD_TYPES.TEXT}
                   formik={formik}
                   {...formik.getFieldProps('recipientAddress')}
                   id="recipientAddress"
@@ -104,7 +103,7 @@ export const SendEth = () => {
                       </Flex>
                     }
                     id={`amount`}
-                    type={NUMBER}
+                    type={FIELD_TYPES.NUMBER}
                     placeholder={'1.0 ETH'}
                     min={0}
                     max={parseFloat(treasuryBalance?.formatted)}

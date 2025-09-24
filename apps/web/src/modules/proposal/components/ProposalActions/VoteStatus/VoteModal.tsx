@@ -2,14 +2,21 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'
-import { Atoms, Box, Button, Flex, Stack, Text, theme } from '@buildeross/zord'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
+import {
+  Atoms,
+  Box,
+  Button,
+  Flex,
+  Icon,
+  IconType,
+  Stack,
+  Text,
+  theme,
+} from '@buildeross/zord'
 import { Field, Formik } from 'formik'
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { Icon } from 'src/components/Icon'
-import { IconType } from 'src/components/Icon/icons'
-import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import {

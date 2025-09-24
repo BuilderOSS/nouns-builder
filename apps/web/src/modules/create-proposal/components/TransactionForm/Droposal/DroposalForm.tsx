@@ -1,14 +1,10 @@
+import { DatePicker, FIELD_TYPES, SmartInput, TextArea } from '@buildeross/ui/Fields'
+import { SingleMediaUpload } from '@buildeross/ui/SingleMediaUpload'
+import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
-import DatePicker from 'src/components/Fields/Date'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { defaultHelperTextStyle } from 'src/components/Fields/styles.css'
-import TextArea from 'src/components/Fields/TextArea'
-import { NUMBER, TEXT } from 'src/components/Fields/types'
-import SingleMediaUpload from 'src/components/SingleMediaUpload/SingleMediaUpload'
 import { DropdownSelect } from 'src/modules/create-proposal'
-import { useLayoutStore } from 'src/stores'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { useAccount } from 'wagmi'
 
@@ -36,7 +32,6 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
   const [isIPFSUploading, setIsIPFSUploading] = useState(false)
   const { address: user } = useAccount()
   const { treasury } = useDaoStore((x) => x.addresses)
-  const isMobile = useLayoutStore((x) => x.isMobile)
 
   const initialValues: DroposalFormValues = {
     name: '',
@@ -89,7 +84,9 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
 
           return (
             <>
-              {!isMobile && <DroposalPreview formik={formik} editionType={editionType} />}
+              <Box display={{ '@initial': 'none', '@768': 'block' }}>
+                <DroposalPreview formik={formik} editionType={editionType} />
+              </Box>
               <Text
                 mb="x8"
                 ml="x2"
@@ -116,7 +113,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     {...formik.getFieldProps('name')}
                     inputLabel={'Name'}
                     placeholder={'Zorbs'}
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     id={'name'}
                     onChange={formik.handleChange}
@@ -132,7 +129,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     {...formik.getFieldProps('symbol')}
                     inputLabel={'Symbol'}
                     placeholder={'$SYMBOL'}
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     id={'symbol'}
                     onChange={formik.handleChange}
@@ -185,7 +182,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     {...formik.getFieldProps('pricePerMint')}
                     inputLabel={'Price'}
                     placeholder={'0.01'}
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     perma={'ETH'}
                     id={'pricePerMint'}
@@ -228,7 +225,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                       {...formik.getFieldProps('maxSupply')}
                       placeholder={'1000'}
                       inputLabel={'Edition size'}
-                      type={TEXT}
+                      type={FIELD_TYPES.TEXT}
                       formik={formik}
                       perma={'Editions'}
                       id={'maxSupply'}
@@ -296,7 +293,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     {...formik.getFieldProps('maxPerAddress')}
                     inputLabel={'Mint limit per address'}
                     placeholder={'Unlimited'}
-                    type={NUMBER}
+                    type={FIELD_TYPES.NUMBER}
                     formik={formik}
                     id={'maxPerAddress'}
                     onChange={formik.handleChange}
@@ -313,7 +310,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     inputLabel={'Royalty'}
                     placeholder={'5'}
                     perma={'%'}
-                    type={NUMBER}
+                    type={FIELD_TYPES.NUMBER}
                     formik={formik}
                     id={'royaltyPercentage'}
                     onChange={formik.handleChange}
@@ -330,7 +327,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     {...formik.getFieldProps('fundsRecipient')}
                     inputLabel={'Payout address'}
                     placeholder={'0x... or .eth'}
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     id={'fundsRecipient'}
                     isAddress={true}
@@ -350,7 +347,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     {...formik.getFieldProps('defaultAdmin')}
                     inputLabel={'Default admin address'}
                     placeholder={'0x... or .eth'}
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     id={'defaultAdmin'}
                     isAddress={true}

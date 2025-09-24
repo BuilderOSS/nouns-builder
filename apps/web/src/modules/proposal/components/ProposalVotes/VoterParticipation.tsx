@@ -1,5 +1,4 @@
 import { Box, Text } from '@buildeross/zord'
-import { useLayoutStore } from 'src/stores'
 
 import { VoterParticipationVariants } from './VoterParticipation.css'
 
@@ -14,7 +13,6 @@ export const VoterParticipation: React.FC<VoterParticipationProps> = ({
   totalVotes,
   maxVotes,
 }) => {
-  const { isMobile } = useLayoutStore()
   const participation = (totalVotes / maxVotes) * 100
 
   return (
@@ -23,8 +21,8 @@ export const VoterParticipation: React.FC<VoterParticipationProps> = ({
       borderColor="border"
       borderRadius="curved"
       w="100%"
-      px={isMobile ? 'x4' : 'x6'}
       py="x4"
+      px={{ '@initial': 'x4', '@768': 'x6' }}
     >
       <Text variant="heading-xs" fontWeight={'display'}>
         Voter participation

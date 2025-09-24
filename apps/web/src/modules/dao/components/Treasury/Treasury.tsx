@@ -1,5 +1,6 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { ContractLink } from '@buildeross/ui/ContractLink'
 import { formatCryptoVal, numberFormatter } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
@@ -11,7 +12,6 @@ import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useBalance } from 'wagmi'
 
-import { ContractLink } from '../ContractLink'
 import { NFTBalance } from './NFTBalance'
 import { TokenBalance } from './TokenBalance'
 import { treasuryWrapper } from './Treasury.css'
@@ -66,7 +66,9 @@ export const Treasury = () => {
         <Text fontSize={28} fontWeight={'display'}>
           Treasury
         </Text>
-        <ContractLink address={addresses.treasury} size={'sm'} />
+        {addresses.treasury && (
+          <ContractLink address={addresses.treasury} size={'sm'} chainId={chain.id} />
+        )}
       </Flex>
 
       <Grid

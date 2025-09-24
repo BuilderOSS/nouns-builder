@@ -1,11 +1,11 @@
-import { TEXTAREA } from 'src/components/Fields/types'
+import { FIELD_TYPES } from '@buildeross/ui/Fields'
 import * as Yup from 'yup'
 
 export const fields = [
   {
     name: 'transactionCustomABI',
     inputLabel: 'Contract ABI',
-    type: TEXTAREA,
+    type: FIELD_TYPES.TEXTAREA,
     placeHolder: 'ABI',
     helperText: 'Optional',
   },

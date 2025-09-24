@@ -15,7 +15,7 @@ export type DaoMembershipResponse = {
 export const daoMembershipRequest = async (
   chainId: CHAIN_ID,
   collectionAddress: string,
-  memberAddress: string,
+  memberAddress: string
 ): Promise<DaoMembershipResponse | null> => {
   const data = await SDK.connect(chainId).daoMembership({
     voterId: `${collectionAddress.toLowerCase()}:${memberAddress.toLowerCase()}`,
@@ -35,7 +35,7 @@ export const daoMembershipRequest = async (
           acc[token.owner] = (acc[token.owner] ?? 0) + 1
           return acc
         },
-        {} as Record<Address, number>,
+        {} as Record<Address, number>
       ) ?? {},
     timeJoined: [
       ...(data.daotokenOwner?.daoTokens ?? []),

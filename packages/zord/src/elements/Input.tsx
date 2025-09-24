@@ -18,7 +18,7 @@ export type InputComponentProps<E extends ElementType> = PolymorphicPropsWithRef
 
 const InnerInput = <E extends ElementType = 'input'>(
   { className, size, as, ...props }: InputComponentProps<E>,
-  ref: React.ForwardedRef<HTMLInputElement>,
+  ref: React.ForwardedRef<HTMLInputElement>
 ) => {
   return (
     <Box

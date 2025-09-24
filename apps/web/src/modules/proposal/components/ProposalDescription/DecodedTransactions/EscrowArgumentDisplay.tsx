@@ -10,8 +10,8 @@ import {
   decodeEscrowDataV1,
   ESCROW_TYPE,
   ESCROW_TYPE_V1,
+  getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
-import { getEscrowBundlerV1 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useChainStore } from 'src/stores/useChainStore'
 import { formatUnits, Hex } from 'viem'
 

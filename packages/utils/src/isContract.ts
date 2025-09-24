@@ -16,7 +16,7 @@ const readIsContract = async (chainId: CHAIN_ID, address: Hex): Promise<boolean>
 
 export const getCachedIsContract = async (
   chainId: CHAIN_ID,
-  address: Hex,
+  address: Hex
 ): Promise<boolean> => {
   if (!isAddress(address)) return false
   // eslint-disable-next-line no-param-reassign

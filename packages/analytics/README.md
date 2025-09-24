@@ -43,24 +43,21 @@ export default function MyApp({ Component, pageProps }) {
 
 ```tsx
 import { GoogleAnalytics } from '@buildeross/analytics'
-
-<GoogleAnalytics id="GA_MEASUREMENT_ID" />
+;<GoogleAnalytics id="GA_MEASUREMENT_ID" />
 ```
 
 #### Segment Analytics
 
 ```tsx
 import { SegmentAnalytics } from '@buildeross/analytics'
-
-<SegmentAnalytics id="SEGMENT_WRITE_KEY" />
+;<SegmentAnalytics id="SEGMENT_WRITE_KEY" />
 ```
 
 #### Vercel Analytics
 
 ```tsx
 import { VercelAnalytics } from '@buildeross/analytics'
-
-<VercelAnalytics />
+;<VercelAnalytics />
 ```
 
 ## Development
@@ -91,25 +88,27 @@ pnpm lint
 ## Dependencies
 
 ### Peer Dependencies
+
 - `next`: ^15.3.2
 - `react`: ^19.1.0
 
 ### Runtime Dependencies
+
 - `@vercel/analytics`: ^0.1.5
 
 ## API Reference
 
 ### GoogleAnalytics
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `id` | `string` | Yes | Google Analytics Measurement ID (GA_MEASUREMENT_ID) |
+| Prop | Type     | Required | Description                                         |
+| ---- | -------- | -------- | --------------------------------------------------- |
+| `id` | `string` | Yes      | Google Analytics Measurement ID (GA_MEASUREMENT_ID) |
 
 ### SegmentAnalytics
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `id` | `string` | Yes | Segment Write Key |
+| Prop | Type     | Required | Description       |
+| ---- | -------- | -------- | ----------------- |
+| `id` | `string` | Yes      | Segment Write Key |
 
 ### VercelAnalytics
 

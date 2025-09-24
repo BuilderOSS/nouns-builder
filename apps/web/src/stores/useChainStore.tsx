@@ -23,8 +23,3 @@ export const useChainStore = create(
     }
   )
 )
-
-export const getChainFromLocalStorage = (): Chain => {
-  const rawChain = localStorage.getItem(CHAIN_STORE_IDENTIFIER)
-  return rawChain ? JSON.parse(rawChain)?.state?.chain : PUBLIC_DEFAULT_CHAINS[0]
-}

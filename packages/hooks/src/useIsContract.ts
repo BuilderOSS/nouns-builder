@@ -13,6 +13,6 @@ export const useIsContract = ({
     address && chainId ? [address, chainId] : null,
     async ([address, chainId]: [AddressType, CHAIN_ID]) => {
       return getCachedIsContract(chainId, address)
-    },
+    }
   )
 }

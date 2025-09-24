@@ -35,13 +35,13 @@ export const formatSendEth = (value: string) => {
 type DecodeFunc = (
   chainId: CHAIN_ID,
   target: string,
-  calldata: string,
+  calldata: string
 ) => Promise<DecodedTransactionData>
 
 const apiDecodeTx: DecodeFunc = async (
   chainId: CHAIN_ID,
   target: string,
-  calldata: string,
+  calldata: string
 ): Promise<DecodedTransactionData> => {
   const decodeRes = await fetch(`/api/decode`, {
     method: 'POST',
@@ -74,7 +74,7 @@ const decodeTx = async (
   target: string,
   calldata: string,
   value: string,
-  decodeFunc: DecodeFunc = apiDecodeTx,
+  decodeFunc: DecodeFunc = apiDecodeTx
 ): Promise<DecodedTransactionData> => {
   /* if calldata is '0x' */
   const isEthTransfer = calldata === '0x'
@@ -102,7 +102,7 @@ export const decodeTransactions = async (
   targets: string[],
   calldatas: string[],
   values: string[],
-  decodeFunc: DecodeFunc = apiDecodeTx,
+  decodeFunc: DecodeFunc = apiDecodeTx
 ): Promise<DecodedTransaction[]> => {
   return Promise.all(
     targets.map(async (target, i) => {
@@ -112,7 +112,7 @@ export const decodeTransactions = async (
           target,
           calldatas[i],
           values[i],
-          decodeFunc,
+          decodeFunc
         )
         return { target, transaction, isNotDecoded: false } as DecodedTransactionSuccess
       } catch (err) {
@@ -122,13 +122,13 @@ export const decodeTransactions = async (
           isNotDecoded: true,
         } as DecodedTransactionFailure
       }
-    }),
+    })
   )
 }
 
 export const useDecodedTransactions = (
   chainId: CHAIN_ID,
-  proposal: Proposal,
+  proposal: Proposal
 ): DecodedTransaction[] | undefined => {
   const { targets, calldatas, values } = proposal
 
@@ -138,7 +138,7 @@ export const useDecodedTransactions = (
       : null,
     async ([_key, chainId, targets, calldatas, values]) =>
       decodeTransactions(chainId, targets, calldatas, values),
-    { revalidateOnFocus: false },
+    { revalidateOnFocus: false }
   )
 
   return decodedTransactions
@@ -148,7 +148,7 @@ export const useDecodedTransactionSingle = (
   chainId: CHAIN_ID,
   target: string,
   calldata: string,
-  value: string,
+  value: string
 ): DecodedTransaction | undefined => {
   const { data: decodedTransaction } = useSWR(
     target && calldata && value
@@ -158,7 +158,7 @@ export const useDecodedTransactionSingle = (
       const decoded = await decodeTransactions(chainId, [target], [calldata], [value])
       return decoded[0]
     },
-    { revalidateOnFocus: false },
+    { revalidateOnFocus: false }
   )
 
   return decodedTransaction

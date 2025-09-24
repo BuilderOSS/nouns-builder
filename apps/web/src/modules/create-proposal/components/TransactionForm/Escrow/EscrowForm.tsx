@@ -1,13 +1,10 @@
+import { Accordion } from '@buildeross/ui/Accordion'
+import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { FieldArray, Form, Formik } from 'formik'
 import { truncate } from 'lodash'
-import React, { useCallback, useState } from 'react'
-import DatePicker from 'src/components/Fields/Date'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { TEXT } from 'src/components/Fields/types'
-import Accordion from 'src/components/Home/accordian'
-import { Icon } from 'src/components/Icon'
+import { useCallback, useState } from 'react'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { formatUnits, parseUnits } from 'viem'
 
@@ -107,7 +104,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                   />
                   <TokenSelectionForm />
                   <SmartInput
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     {...formik.getFieldProps('recipientAddress')}
                     id="recipientAddress"
@@ -122,7 +119,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                     helperText={`The wallet address that will receive funds when milestones are completed.`}
                   />
                   <SmartInput
-                    type={TEXT}
+                    type={FIELD_TYPES.TEXT}
                     formik={formik}
                     {...formik.getFieldProps('clientAddress')}
                     id="clientAddress"

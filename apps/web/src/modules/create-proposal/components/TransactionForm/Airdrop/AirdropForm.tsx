@@ -1,11 +1,9 @@
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { TEXT } from 'src/components/Fields/types'
-import { Icon } from 'src/components/Icon'
 
 import airdropFormSchema, { AirdropFormValues } from './AirdropForm.schema'
 import { CsvRecord, CsvUpload } from './CsvUpload'
@@ -113,7 +111,7 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
                             <Flex align="center" gap="x3">
                               <Box flex="2" style={{ marginBottom: '-32px' }}>
                                 <SmartInput
-                                  type={TEXT}
+                                  type={FIELD_TYPES.TEXT}
                                   formik={formik}
                                   {...formik.getFieldProps(`recipients.${index}.address`)}
                                   id={`recipients.${index}.address`}
@@ -135,7 +133,7 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
                                 <SmartInput
                                   id={`recipients.${index}.amount`}
                                   inputLabel={index === 0 ? 'Amount' : ''}
-                                  type={'number'}
+                                  type={FIELD_TYPES.NUMBER}
                                   formik={formik}
                                   {...formik.getFieldProps(`recipients.${index}.amount`)}
                                   placeholder={'0'}

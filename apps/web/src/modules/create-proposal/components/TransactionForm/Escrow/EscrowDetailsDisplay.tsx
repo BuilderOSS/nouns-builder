@@ -1,5 +1,4 @@
 import { Box, Stack, Text } from '@buildeross/zord'
-import { useLayoutStore } from 'src/stores'
 
 import { link } from './EscrowDetailsDisplay.css'
 
@@ -7,14 +6,17 @@ export const EscrowDetailsDisplay: React.FC<{
   escrowAmountError?: string
   totalEscrowAmountWithSymbol?: string
 }> = ({ totalEscrowAmountWithSymbol, escrowAmountError }) => {
-  const isMobile = useLayoutStore((x) => x.isMobile)
-
   return (
     <Box
-      position={isMobile ? 'relative' : 'absolute'}
+      position={{ '@initial': 'relative', '@768': 'absolute' }}
       style={{
         height: '100%',
-        maxWidth: isMobile ? '100%' : '50%',
+        maxWidth: '100%',
+        '@media': {
+          '(min-width: 768px)': {
+            maxWidth: '50%',
+          },
+        },
       }}
       top={'x0'}
       right={'x0'}

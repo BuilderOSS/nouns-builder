@@ -13,7 +13,7 @@ export type DaoMembership = Omit<DaoMembershipResponse, 'member' | 'delegate'> &
 
 const describeVotePower = (
   membership: DaoMembershipResponse,
-  delegateName: string,
+  delegateName: string
 ): string => {
   const { tokenCount, voteCount, voteDistribution, member } = membership
 
@@ -66,12 +66,12 @@ export const useDaoMembership = ({
       daoMembershipRequest(
         chainId,
         collectionAddress as `0x${string}`,
-        signerAddress as `0x${string}`,
+        signerAddress as `0x${string}`
       ),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-    },
+    }
   )
 
   const memberData = useEnsData(data?.member)

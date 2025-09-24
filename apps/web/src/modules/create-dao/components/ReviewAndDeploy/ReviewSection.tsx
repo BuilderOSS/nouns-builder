@@ -1,7 +1,6 @@
-import { atoms, Flex } from '@buildeross/zord'
+import { atoms, Flex, Icon } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
-import { Icon } from 'src/components/Icon'
 import {
   reviewSectionStyleVariants,
   reviewSectionSubHeading,

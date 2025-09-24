@@ -1,21 +1,16 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import { atoms, Flex, Text } from '@buildeross/zord'
-import { useLayoutStore } from 'src/stores'
-
-import { Icon } from '../Icon'
+import { atoms, Flex, Icon, Text } from '@buildeross/zord'
 
 const VisitAlternate = () => {
-  const { isMobile } = useLayoutStore()
-
   return (
     <a
       href={PUBLIC_IS_TESTNET ? 'https://nouns.build/' : 'https://testnet.nouns.build/'}
       target="_blank"
       rel="noreferrer noopener"
     >
-      <Flex align={'center'} mt={isMobile ? 'x3' : 'x6'} color="text1">
+      <Flex align={'center'} mt={{ '@initial': 'x3', '@768': 'x6' }} color="text1">
         <Text
-          fontSize={isMobile ? 14 : 18}
+          fontSize={{ '@initial': 14, '@768': 18 }}
           fontWeight={'paragraph'}
           className={atoms({ textDecoration: 'underline' })}
         >

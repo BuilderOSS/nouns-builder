@@ -23,7 +23,7 @@ export const useAuctionRewards = ({
     chainId && auctionAddress
       ? [SWR_KEYS.AUCTION_REWARDS, chainId, auctionAddress]
       : null,
-    async () => getAuctionRewards(chainId as CHAIN_ID, auctionAddress as AddressType),
+    async () => getAuctionRewards(chainId as CHAIN_ID, auctionAddress as AddressType)
   )
 
   return {
