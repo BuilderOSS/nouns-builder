@@ -22,6 +22,7 @@ import {
   daosContainer,
   loadingSkeleton,
   noTokensContainer,
+  profileDaoLink,
   responsiveGrid,
   tokenContainer,
 } from 'src/styles/profile.css'
@@ -93,7 +94,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
         >
           <Box
             mt={{ '@initial': 'x12', '@768': 'x32' }}
-            pr={{ '@768': 'x18' }}
+            pr={{ '@768': 'x8', '@1024': 'x16' }}
             className={daosContainer}
           >
             <Flex
@@ -159,7 +160,6 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                           color: 'inherit',
                           width: '100%',
                         }}
-                        className="profile-dao-links"
                       >
                         <Flex
                           align="center"
@@ -169,11 +169,11 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                           borderStyle="solid"
                           borderWidth="thin"
                           borderColor="border"
-                          backgroundColor="background1"
                           cursor="pointer"
                           style={{
                             transition: 'all 0.2s ease',
                           }}
+                          className={profileDaoLink}
                         >
                           <DaoAvatar
                             collectionAddress={dao.collectionAddress}
@@ -235,6 +235,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                         <Box
                           key={i}
                           backgroundColor="background2"
+                          borderRadius="curved"
                           width={'100%'}
                           height={'100%'}
                           aspectRatio={1 / 1}

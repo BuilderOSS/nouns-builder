@@ -18,6 +18,8 @@ export const TokenPreview: React.FC<TokenPreviewProps> = ({ image, name }) => {
         height={'auto'}
         aspectRatio={1 / 1}
         position="relative"
+        borderRadius="curved"
+        overflow="hidden"
       >
         <Image
           priority

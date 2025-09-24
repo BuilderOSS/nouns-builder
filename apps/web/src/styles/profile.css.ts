@@ -1,3 +1,4 @@
+import { color } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 import { skeletonAnimation } from './animations.css'
@@ -39,7 +40,19 @@ export const responsiveGrid = style({
   gridTemplateColumns: '1fr',
   '@media': {
     '(min-width: 768px)': {
+      gridTemplateColumns: '1fr 1fr',
+    },
+    '(min-width: 1024px)': {
       gridTemplateColumns: '1fr 1fr 1fr',
+    },
+  },
+})
+
+export const profileDaoLink = style({
+  backgroundColor: color.background1,
+  selectors: {
+    '&:hover': {
+      backgroundColor: color.background2,
     },
   },
 })
