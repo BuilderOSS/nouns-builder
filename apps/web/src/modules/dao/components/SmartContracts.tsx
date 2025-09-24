@@ -1,17 +1,18 @@
+import { ContractLink } from '@buildeross/ui/ContractLink'
 import { Box, Flex, Grid, Text, vars } from '@buildeross/zord'
 import React from 'react'
+import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { about, contractItemGrid } from 'src/styles/About.css'
 
-import { ContractLink } from './ContractLink'
-
-const Contract = ({ title, address }: { title: string; address?: string }) => {
+const Contract = ({ title, address }: { title: string; address: string }) => {
+  const chain = useChainStore((x) => x.chain)
   return (
     <Grid className={contractItemGrid} align={'center'}>
       <Text fontWeight={'display'} py={{ '@initial': 'x2', '@768': 'x0' }}>
         {title}
       </Text>
-      <ContractLink address={address} />
+      <ContractLink address={address} chainId={chain.id} />
     </Grid>
   )
 }
@@ -46,11 +47,19 @@ export const SmartContracts = () => {
           </Text>
         </Box>
         <Flex direction={'column'} gap={'x4'}>
-          <Contract title="NFT" address={addresses.token} />
-          <Contract title="Auction House" address={addresses.auction} />
-          <Contract title="Governor" address={addresses.governor} />
-          <Contract title="Treasury" address={addresses.treasury} />
-          <Contract title="Metadata" address={addresses.metadata} />
+          {addresses?.token && <Contract title="NFT" address={addresses.token} />}
+          {addresses?.auction && (
+            <Contract title="Auction House" address={addresses.auction} />
+          )}
+          {addresses?.governor && (
+            <Contract title="Governor" address={addresses.governor} />
+          )}
+          {addresses?.treasury && (
+            <Contract title="Treasury" address={addresses.treasury} />
+          )}
+          {addresses?.metadata && (
+            <Contract title="Metadata" address={addresses.metadata} />
+          )}
           {addresses?.escrowDelegate && (
             <Contract title="Escrow Delegate" address={addresses.escrowDelegate} />
           )}

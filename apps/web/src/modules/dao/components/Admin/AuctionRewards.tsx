@@ -2,6 +2,7 @@ import { PROTOCOL_REWARDS_MANAGER } from '@buildeross/constants'
 import { useAuctionRewards } from '@buildeross/hooks'
 import { protocolRewardsAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
+import { ContractLink } from '@buildeross/ui/ContractLink'
 import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
@@ -11,7 +12,6 @@ import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { Section } from '../AdminForm/Section'
-import { ContractLink } from '../ContractLink'
 
 interface AuctionRewardsProps {
   auctionAddress: AddressType
@@ -161,7 +161,11 @@ export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }
                   <Text fontSize={14} fontWeight="label" color="text3">
                     Recipient
                   </Text>
-                  <ContractLink address={data.founderRewardsRecipient} size="xs" />
+                  <ContractLink
+                    address={data.founderRewardsRecipient}
+                    size="xs"
+                    chainId={chain.id}
+                  />
                 </Flex>
 
                 <Flex justify="space-between" align="center">

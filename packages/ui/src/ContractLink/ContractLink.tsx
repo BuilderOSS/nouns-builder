@@ -1,17 +1,18 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { CopyButton } from '@buildeross/ui/CopyButton'
+import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Flex, FlexProps, Icon, Text } from '@buildeross/zord'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+
+import { CopyButton } from '../CopyButton'
 
 export type ContractLinkProps = {
-  address?: string
+  address: string
   size?: 'xs' | 'sm' | 'md'
+  chainId: CHAIN_ID
 }
-export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
-  const { chain } = useChainStore()
 
+export const ContractLink = ({ address, size = 'md', chainId }: ContractLinkProps) => {
   const { py, px } = React.useMemo(() => {
     let px: FlexProps['px'] = { '@initial': 'x4', '@768': 'x6' }
     let py: FlexProps['py'] = { '@initial': 'x4', '@768': 'x5' }
@@ -42,15 +43,15 @@ export const ContractLink = ({ address, size = 'md' }: ContractLinkProps) => {
     >
       {/* Mobile Layout - Always show snippet */}
       <Text fontSize={16} display={{ '@initial': 'block', '@768': 'none' }}>
-        {walletSnippet(address as string, 8)}
+        {walletSnippet(address, 8)}
       </Text>
       {/* Desktop Layout - Show snippet only for 'sm' size */}
       <Text fontSize={16} display={{ '@initial': 'none', '@768': 'block' }}>
-        {size !== 'md' ? walletSnippet(address as string, 8) : address}
+        {size !== 'md' ? walletSnippet(address, 8) : address}
       </Text>
       <Flex justify={'center'} align={'center'} gap={size === 'xs' ? 'x1' : 'x2'}>
         <a
-          href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${address}`}
+          href={`${ETHERSCAN_BASE_URL[chainId]}/address/${address}`}
           target="_blank"
           rel="noreferrer"
         >
