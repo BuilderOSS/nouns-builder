@@ -150,7 +150,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
           {ensAvatar && ethAddress ? (
             <Avatar address={ethAddress} src={ensAvatar} size="32" />
           ) : (
-            <Icon fill="background1" id="check" />
+            <Icon fill="background1" id="check" style={{ width: 24, height: 24 }} />
           )}
         </Flex>
       )}

@@ -1,12 +1,14 @@
 import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
+import NextImage from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
@@ -130,8 +132,8 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
               <CopyButton text={userAddress} />
             </Flex>
 
-            <Flex mt="x8" align={'flex-start'}>
-              <Text mr="x4" fontWeight={'display'}>
+            <Flex mt="x8" direction="column" align="flex-start">
+              <Text mb="x4" fontWeight={'display'}>
                 DAOs
               </Text>
               {isLoadingDaos ? (
@@ -143,55 +145,105 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   borderRadius="normal"
                 />
               ) : daos && daos?.length > 0 ? (
-                <Text color="text3">
-                  {daos.map((dao, index) => (
-                    <>
+                <Flex direction="column" gap="x3" w="100%">
+                  {daos.map((dao) => {
+                    const chainMeta = PUBLIC_DEFAULT_CHAINS.find(
+                      (chain) => chain.id === dao.chainId
+                    )
+                    return (
                       <Link
+                        key={dao.collectionAddress}
                         href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        style={{
+                          textDecoration: 'none',
+                          color: 'inherit',
+                          width: '100%',
+                        }}
                         className="profile-dao-links"
                       >
-                        {dao.name}
+                        <Flex
+                          align="center"
+                          gap="x3"
+                          p="x3"
+                          borderRadius="curved"
+                          borderStyle="solid"
+                          borderWidth="thin"
+                          borderColor="border"
+                          backgroundColor="background1"
+                          cursor="pointer"
+                          style={{
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          <DaoAvatar
+                            collectionAddress={dao.collectionAddress}
+                            size="48"
+                            auctionAddress={dao.auctionAddress}
+                            chainId={dao.chainId}
+                          />
+                          <Flex align="center" justify="space-between" flex="1">
+                            <Text fontWeight="display">{dao.name}</Text>
+                            <Flex align="center" gap="x1">
+                              {chainMeta?.icon && (
+                                <NextImage
+                                  src={
+                                    PUBLIC_DEFAULT_CHAINS.find(
+                                      (chain) => chain.id === dao.chainId
+                                    )?.icon!
+                                  }
+                                  layout="fixed"
+                                  objectFit="contain"
+                                  style={{ borderRadius: '12px', maxHeight: '16px' }}
+                                  alt=""
+                                  height={16}
+                                  width={16}
+                                />
+                              )}
+                              <Text fontSize={12} color="text3">
+                                {chainMeta?.name}
+                              </Text>
+                            </Flex>
+                          </Flex>
+                        </Flex>
                       </Link>
-                      {index < daos.length - 1 && ', '}
-                    </>
-                  ))}
-                </Text>
+                    )
+                  })}
+                </Flex>
               ) : (
                 <Text>No DAO tokens owned.</Text>
               )}
             </Flex>
           </Box>
-          <Box
-            position={'absolute'}
-            height="100vh"
-            top="x0"
-            display={{ '@initial': 'none', '@768': 'block' }}
-            style={{ left: '27%', borderRight: '2px solid #F2F2F2' }}
-          />
-
           <Box mt={{ '@initial': 'x14', '@768': 'x32' }} className={tokenContainer}>
-            {isLoadingTokens && (
-              <Grid className={responsiveGrid} gap={'x12'}>
-                {Array(6)
-                  .fill(0)
-                  .map((_, i) => (
-                    <Box
-                      key={i}
-                      backgroundColor="background2"
-                      width={'100%'}
-                      height={'100%'}
-                      aspectRatio={1 / 1}
-                      position="relative"
-                      className={loadingSkeleton}
-                    />
-                  ))}
-              </Grid>
+            {hasDaos && (
+              <Text
+                mb="x4"
+                fontWeight={'display'}
+                display={{ '@initial': 'block', '@768': 'none' }}
+              >
+                Tokens
+              </Text>
             )}
 
             {hasDaos && (
               <>
-                {!!tokens?.tokens.length ? (
+                {isLoadingTokens ? (
+                  <Grid className={responsiveGrid} gap={'x12'}>
+                    {Array(6)
+                      .fill(0)
+                      .map((_, i) => (
+                        <Box
+                          key={i}
+                          backgroundColor="background2"
+                          width={'100%'}
+                          height={'100%'}
+                          aspectRatio={1 / 1}
+                          position="relative"
+                          className={loadingSkeleton}
+                        />
+                      ))}
+                  </Grid>
+                ) : !!tokens?.tokens.length ? (
                   <Grid className={responsiveGrid} gap={'x12'}>
                     {tokens?.tokens.map((x, i) => (
                       <Link
@@ -208,7 +260,11 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                     justify={'space-around'}
                     className={noTokensContainer}
                   >
-                    <Text color="text3">No more DAO tokens found.</Text>
+                    <Text color="text3">
+                      {page
+                        ? `No more DAO tokens found on ${chain.name}.`
+                        : `No DAO tokens found on ${chain.name}.`}
+                    </Text>
                   </Flex>
                 )}
 

@@ -7,9 +7,11 @@ import { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { NetworkController } from '@buildeross/ui/NetworkController'
+import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import axios from 'axios'
+import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -127,39 +129,62 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   }
             }
           >
-            {viewableDaos.map((dao, index) => (
-              <Link
-                key={dao.collectionAddress}
-                href={`/dao/${
-                  PUBLIC_DEFAULT_CHAINS.find((x) => x.id === dao.chainId)?.slug
-                }/${dao.collectionAddress}`}
-                passHref
-                style={{ width: '100%' }}
-              >
-                <Flex
-                  key={index}
-                  direction={'row'}
-                  align={'center'}
-                  cursor={'pointer'}
-                  id={`close-modal-${index}`}
-                  color={'text1'}
-                  gap={'x4'}
-                  className={daoButton}
-                  style={{
-                    borderRadius: '8px',
-                    width: '100%',
-                  }}
+            {viewableDaos.map((dao, index) => {
+              const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
+              return (
+                <Link
+                  key={dao.collectionAddress}
+                  href={`/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
+                  passHref
+                  style={{ width: '100%' }}
                 >
-                  <DaoAvatar
-                    collectionAddress={dao.collectionAddress}
-                    size={'40'}
-                    auctionAddress={dao.auctionAddress}
-                    chainId={dao.chainId}
-                  />
-                  <Text fontWeight={'display'}>{dao.name}</Text>
-                </Flex>
-              </Link>
-            ))}
+                  <Flex
+                    direction={'row'}
+                    align={'center'}
+                    cursor={'pointer'}
+                    id={`close-modal-${index}`}
+                    color={'text1'}
+                    gap={'x4'}
+                    className={daoButton}
+                    pr="x2"
+                    style={{
+                      borderRadius: '8px',
+                      width: '100%',
+                    }}
+                  >
+                    <DaoAvatar
+                      collectionAddress={dao.collectionAddress}
+                      size={'40'}
+                      auctionAddress={dao.auctionAddress}
+                      chainId={dao.chainId}
+                    />
+                    <Flex align="center" justify="space-between" flex="1">
+                      <Text fontWeight={'display'}>{dao.name}</Text>
+                      <Flex align="center" gap="x1">
+                        {chainMeta?.icon && (
+                          <NextImage
+                            src={
+                              PUBLIC_DEFAULT_CHAINS.find(
+                                (chain) => chain.id === dao.chainId
+                              )?.icon!
+                            }
+                            layout="fixed"
+                            objectFit="contain"
+                            style={{ borderRadius: '12px', maxHeight: '16px' }}
+                            alt=""
+                            height={16}
+                            width={16}
+                          />
+                        )}
+                        <Text fontSize={12} color="text3">
+                          {chainMeta?.name}
+                        </Text>
+                      </Flex>
+                    </Flex>
+                  </Flex>
+                </Link>
+              )
+            })}
           </Flex>
         </>
       )}
