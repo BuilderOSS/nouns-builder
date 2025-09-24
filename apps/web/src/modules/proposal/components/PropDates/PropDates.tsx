@@ -161,7 +161,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
           )}
           {isLoading && topLevelPropDates.length === 0 && (
             <Flex direction="column" gap="x4">
-              {[...Array(2)].map((_, i) => (
+              {[...Array(3)].map((_, i) => (
                 <Box
                   key={i}
                   p="x6"
@@ -171,7 +171,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
                   borderWidth="normal"
                   backgroundColor="background2"
                   style={{ animation: skeletonAnimation }}
-                  height="x40"
+                  height="x32"
                 />
               ))}
             </Flex>
