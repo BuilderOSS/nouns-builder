@@ -84,13 +84,13 @@ export const NFTBalance: React.FC = () => {
           borderWidth={'normal'}
           mt={'x6'}
           align="stretch"
-          style={{ maxHeight: '720px', overflow: 'auto' }}
+          style={{ maxHeight: '70vh', overflowY: 'auto' }}
         >
           {nfts?.map((nft) => {
-            const fetchableUrls = getFetchableUrls(nft.image.originalUrl)
-            const urls = fetchableUrls
-              ? [nft.image.originalUrl, ...fetchableUrls]
-              : [nft.image.originalUrl]
+            const originalUrl = nft.image.originalUrl
+            if (!originalUrl) return null
+            const fetchableUrls = getFetchableUrls(originalUrl)
+            const urls = fetchableUrls ? [originalUrl, ...fetchableUrls] : [originalUrl]
             const url =
               ETHERSCAN_BASE_URL[chain.id] +
               '/token/' +
@@ -133,7 +133,8 @@ export const NFTBalance: React.FC = () => {
                     style={{ maxWidth: '100%', overflow: 'hidden' }}
                   >
                     <Text
-                      fontSize={14}
+                      fontSize={16}
+                      fontWeight={'display'}
                       style={{
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -158,7 +159,7 @@ export const NFTBalance: React.FC = () => {
                     )}
                   </Flex>
                   <Text
-                    fontSize={12}
+                    fontSize={14}
                     color={'secondary'}
                     px="x2"
                     pb="x2"

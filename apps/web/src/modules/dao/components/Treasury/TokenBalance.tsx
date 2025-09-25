@@ -102,7 +102,7 @@ export const TokenBalance: React.FC = () => {
           borderWidth={'normal'}
           mt={'x6'}
           mb={'x8'}
-          style={{ maxHeight: '600px', overflow: 'auto' }}
+          style={{ maxHeight: '70vh', overflowY: 'auto' }}
         >
           <Grid
             className={erc20AssetsWrapper}

@@ -17,19 +17,21 @@ type MembersQuery = {
 export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
   const { isReady } = useRouter()
   const chain = useChainStore((x) => x.chain)
-  const {
-    addresses: { token },
-  } = useDaoStore()
+  const { addresses } = useDaoStore()
+
+  const token = addresses?.token
 
   const {
     data: members,
     error,
-    isValidating,
+    isLoading,
   } = useSWR(
-    isReady && token && chain?.id ? [token, chain.id] : null,
-    () =>
+    isReady && token && chain?.id ? ([token, chain.id] as const) : null,
+    ([_token, _chainId]) =>
       axios
-        .get<MembersQuery>(`/api/membersList/${token}?chainId=${chain.id}`)
+        .get<MembersQuery>(`/api/membersList/${_token}?chainId=${_chainId}`, {
+          timeout: 10000,
+        })
         .then((x) => x.data.membersList),
     {
       revalidateOnFocus: false,
@@ -51,15 +53,18 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
 
       const delegates = response.data.delegates
 
+      const escapeCsv = (v: unknown) => {
+        if (v === null || v === undefined) return ''
+        const s = String(v)
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+      }
+
       const csvContent = [
-        ['Address', 'Token Count', 'Token IDs', 'Date Joined'].join(','),
+        ['Address', 'Token Count', 'Token IDs', 'Date Joined'].map(escapeCsv).join(','),
         ...delegates.map((delegate) =>
-          [
-            delegate.address,
-            delegate.tokenCount,
-            delegate.tokenIds,
-            delegate.dateJoined,
-          ].join(',')
+          [delegate.address, delegate.tokenCount, delegate.tokenIds, delegate.dateJoined]
+            .map(escapeCsv)
+            .join(',')
         ),
       ].join('\n')
 
@@ -72,18 +77,24 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Failed to export delegates:', error)
     }
   }
 
   const exportButton = (
-    <Button variant="secondary" size="sm" onClick={exportDelegatesToCSV}>
+    <Button
+      variant="secondary"
+      size="sm"
+      onClick={exportDelegatesToCSV}
+      disabled={!token || !chain?.id}
+    >
       Export CSV
     </Button>
   )
 
-  if (isValidating) {
+  if (isLoading) {
     return (
       <MembersPanel exportButton={exportButton}>
         {Array.from({ length: 10 }).map((_, i) => (

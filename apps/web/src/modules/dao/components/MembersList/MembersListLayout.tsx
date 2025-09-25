@@ -30,7 +30,7 @@ export const MembersPanel = ({
         borderStyle={'solid'}
         borderWidth={'normal'}
         borderColor={'border'}
-        style={{ maxHeight: '900px', overflow: 'auto' }}
+        style={{ maxHeight: '70vh', overflowY: 'auto' }}
       >
         <Box pt={'x8'} p={{ '@initial': 'x3', '@768': 'x6' }}>
           {tableRuler && <TableHeader />}
