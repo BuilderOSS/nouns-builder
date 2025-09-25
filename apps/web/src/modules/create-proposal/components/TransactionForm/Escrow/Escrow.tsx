@@ -8,7 +8,6 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Stack } from '@buildeross/zord'
 import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { FormikHelpers } from 'formik'
-import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
@@ -30,29 +29,27 @@ export const Escrow: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ipfsUploadError, setIpfsUploadError] = useState<Error | null>(null)
 
-  const { query, isReady } = useRouter()
-
   const chain = useChainStore((state) => state.chain)
 
   const addTransaction = useProposalStore((state) => state.addTransaction)
 
-  const {
-    addresses: { treasury },
-  } = useDaoStore()
+  const { addresses } = useDaoStore()
 
   const { data } = useSWR<ProposalsResponse>(
-    isReady ? [SWR_KEYS.PROPOSALS, chain.id, query.token, '0'] : null,
-    ([_key, chainId, token, _page]) =>
-      getProposals(chainId as CHAIN_ID, token as string, 1, Number(0))
+    addresses?.token ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token] as const) : null,
+    ([, _chainId, _token]) => getProposals(_chainId as CHAIN_ID, _token as string, 1)
   )
 
   const lastProposalId = data?.proposals?.[0]?.proposalNumber ?? 0
 
   const handleEscrowTransaction = useCallback(
     async (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => {
-      if (!treasury || !values.tokenAddress || !values.tokenMetadata) {
+      if (!addresses?.treasury || !values.tokenAddress || !values.tokenMetadata) {
         return
       }
+
+      setIsSubmitting(true)
+      setIpfsUploadError(null)
 
       // Determine if this is ETH or ERC20
       const isEthEscrow = values.tokenAddress.toLowerCase() === NULL_ADDRESS.toLowerCase()
@@ -71,22 +68,25 @@ export const Escrow: React.FC = () => {
       const ipfsDataToUpload: InvoiceMetadata = {
         title: escrowTitle,
         description: escrowDescription,
-        endDate: new Date(
-          values.milestones[values.milestones.length - 1].endDate
-        ).getTime(),
+        endDate: Math.floor(
+          new Date(values.milestones[values.milestones.length - 1].endDate).getTime() /
+            1000
+        ),
         milestones: values.milestones.map(
           (x, index) =>
             ({
               id: 'milestone-00' + index,
               title: x.title,
               description: x.description,
-              endDate: new Date(x.endDate).getTime() / 1000, // in seconds
-              createdAt: Date.now() / 1000, // in seconds
+              endDate: Math.floor(new Date(x.endDate).getTime() / 1000), // seconds
+              createdAt: Math.floor(Date.now() / 1000), // seconds
               // set start date 7 days from submission in seconds
               startDate:
                 index === 0
-                  ? Date.now() / 1000 + 7 * 24 * 60 * 60
-                  : new Date(values.milestones[index - 1].endDate).getTime() / 1000,
+                  ? Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60
+                  : Math.floor(
+                      new Date(values.milestones[index - 1].endDate).getTime() / 1000
+                    ),
               resolverType: 'kleros',
               klerosCourt: 1,
               ...(x.mediaType && x.mediaUrl
@@ -97,7 +97,7 @@ export const Escrow: React.FC = () => {
                         type: 'ipfs',
                         src: x.mediaUrl,
                         mimeType: x.mediaType,
-                        createdAt: new Date().getTime() / 1000,
+                        createdAt: Math.floor(new Date().getTime() / 1000),
                       },
                     ],
                   }
@@ -111,12 +111,9 @@ export const Escrow: React.FC = () => {
       try {
         // eslint-disable-next-line no-console
         console.debug('Uploading to IPFS...')
-        setIsSubmitting(true)
         const response = await uploadJson(ipfsDataToUpload)
         cid = response.cid
         uri = response.uri
-        setIsSubmitting(false)
-        setIpfsUploadError(null)
         // eslint-disable-next-line no-console
         console.debug('IPFS upload successful. CID:', cid, 'URI:', uri)
       } catch (err: any) {
@@ -134,7 +131,7 @@ export const Escrow: React.FC = () => {
       values.recipientAddress = await getEnsAddress(values.recipientAddress)
 
       // create bundler transaction data
-      const escrowData = encodeEscrowData(values, treasury, cid, chain.id)
+      const escrowData = encodeEscrowData(values, addresses.treasury, cid, chain.id)
       const milestoneAmounts = values.milestones.map((x) =>
         parseUnits(x.amount.toString(), tokenDecimals)
       )
@@ -208,7 +205,7 @@ export const Escrow: React.FC = () => {
         setIsSubmitting(false)
       }
     },
-    [addTransaction, chain.id, lastProposalId, treasury]
+    [addTransaction, chain.id, lastProposalId, addresses?.treasury]
   )
 
   return (

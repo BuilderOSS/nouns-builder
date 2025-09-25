@@ -20,7 +20,7 @@ export const votersRequest = async (
   try {
     const data = await SDK.connect(chainId).daoVoters({
       where: {
-        dao: collectionAddress,
+        dao: collectionAddress.toLowerCase(),
       },
       first: limit,
       skip: page ? (page - 1) * limit : 0,

@@ -8,7 +8,7 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -19,6 +19,7 @@ import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { skeletonAnimation } from 'src/styles/animations.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
 import { createProposalBtn, delegateBtn } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
@@ -36,18 +37,18 @@ export const Activity: React.FC = () => {
   const chain = useChainStore((x) => x.chain)
   const LIMIT = 20
 
-  const { token } = addresses
-
-  const { data, error } = useSWR<ProposalsResponse>(
-    isReady ? [SWR_KEYS.PROPOSALS, chain.id, query.token, query.page] : null,
-    ([_key, chainId, token, page]) =>
-      getProposals(chainId as CHAIN_ID, token as string, LIMIT, Number(page))
+  const { data, error, isLoading } = useSWR<ProposalsResponse>(
+    isReady && addresses?.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token, query.page] as const)
+      : null,
+    ([_key, _chainId, _token, _page]) =>
+      getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
   )
 
   const { handlePageBack, handlePageForward } = usePagination(data?.pageInfo?.hasNextPage)
   const { data: membership } = useDaoMembership({
     chainId: chain.id,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses?.token as AddressType,
     signerAddress: address,
   })
 
@@ -55,7 +56,7 @@ export const Activity: React.FC = () => {
     chainId: chain.id,
     governorAddress: addresses?.governor,
     signerAddress: address,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses?.token as AddressType,
   })
 
   const { isGovernanceDelayed, delayedUntilTimestamp } = useDelayedGovernance({
@@ -80,11 +81,35 @@ export const Activity: React.FC = () => {
       disabled: false,
       transactions: [],
     })
-    push(`/dao/${query.network}/${query.token}/proposal/create`)
+    push(`/dao/${query.network}/${addresses?.token}/proposal/create`)
   }
 
-  if (!data && !error) {
+  if (!data && !error && !isLoading) {
     return null
+  }
+
+  if (error) {
+    return (
+      <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
+        <Flex width={'100%'} justify={'space-between'} align={'center'}>
+          <Text variant="heading-sm" style={{ fontWeight: 800 }}>
+            Proposals
+          </Text>
+        </Flex>
+        <Flex
+          width={'100%'}
+          mt={'x4'}
+          p={'x4'}
+          justify={'center'}
+          borderColor={'border'}
+          borderStyle={'solid'}
+          borderRadius={'curved'}
+          borderWidth={'normal'}
+        >
+          <Text color="negative">Failed to load proposals. Please try again.</Text>
+        </Flex>
+      </Flex>
+    )
   }
 
   return (
@@ -165,7 +190,7 @@ export const Activity: React.FC = () => {
         </Flex>
         {addresses && (
           <Upgrade
-            collection={query.token as string}
+            collection={addresses?.token as string}
             hasThreshold={hasThreshold}
             addresses={addresses}
           />
@@ -215,9 +240,22 @@ export const Activity: React.FC = () => {
                 </Text>
               </Flex>
             </Flex>
+          ) : isLoading && !data?.proposals?.length ? (
+            <Flex direction="column" gap="x4">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Box
+                  key={index}
+                  width="100%"
+                  height="x16"
+                  borderRadius="curved"
+                  backgroundColor="background2"
+                  style={{ animation: skeletonAnimation }}
+                />
+              ))}
+            </Flex>
           ) : data?.proposals?.length ? (
             data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard key={index} collection={token} {...proposal} />
+              <ProposalCard key={index} collection={addresses?.token} {...proposal} />
             ))
           ) : (
             <Flex
@@ -234,12 +272,14 @@ export const Activity: React.FC = () => {
             </Flex>
           )}
 
-          <Pagination
-            onNext={handlePageForward}
-            onPrev={handlePageBack}
-            isLast={!data?.pageInfo?.hasNextPage}
-            isFirst={!query.page}
-          />
+          {!isLoading && (
+            <Pagination
+              onNext={handlePageForward}
+              onPrev={handlePageBack}
+              isLast={!data?.pageInfo?.hasNextPage}
+              isFirst={!query.page}
+            />
+          )}
         </Flex>
       </Flex>
 

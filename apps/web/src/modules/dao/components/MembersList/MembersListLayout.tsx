@@ -30,11 +30,12 @@ export const MembersPanel = ({
         borderStyle={'solid'}
         borderWidth={'normal'}
         borderColor={'border'}
-        pt={'x8'}
-        p={{ '@initial': 'x3', '@768': 'x6' }}
+        style={{ maxHeight: '70vh', overflowY: 'auto' }}
       >
-        {tableRuler && <TableHeader />}
-        {children}
+        <Box pt={'x8'} p={{ '@initial': 'x3', '@768': 'x6' }}>
+          {tableRuler && <TableHeader />}
+          {children}
+        </Box>
       </Box>
     </>
   )

@@ -39,7 +39,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
     { revalidateOnMount: true, refreshInterval: 1000 * 5 }
   )
 
-  const decodedTransactions = useDecodedTransactions(chain.id, proposal)
+  const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
 
   const decodedEscrowTxn = useMemo(
     () =>

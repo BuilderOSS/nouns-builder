@@ -1,3 +1,4 @@
+import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { Box, Flex, Grid, Text, vars } from '@buildeross/zord'
 import React from 'react'
@@ -19,6 +20,12 @@ const Contract = ({ title, address }: { title: string; address: string }) => {
 
 export const SmartContracts = () => {
   const { addresses } = useDaoStore()
+  const chain = useChainStore((x) => x.chain)
+  const { escrowDelegate } = useEscrowDelegate({
+    chainId: chain.id,
+    tokenAddress: addresses?.token,
+    treasuryAddress: addresses?.treasury,
+  })
 
   return (
     <Box className={about}>
@@ -60,8 +67,8 @@ export const SmartContracts = () => {
           {addresses?.metadata && (
             <Contract title="Metadata" address={addresses.metadata} />
           )}
-          {addresses?.escrowDelegate && (
-            <Contract title="Escrow Delegate" address={addresses.escrowDelegate} />
+          {escrowDelegate && (
+            <Contract title="Escrow Delegate" address={escrowDelegate} />
           )}
         </Flex>
       </Flex>

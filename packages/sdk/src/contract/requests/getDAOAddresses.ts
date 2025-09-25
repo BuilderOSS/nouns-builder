@@ -3,7 +3,6 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { serverConfig, unpackOptionalArray } from '@buildeross/utils'
 import { readContract } from 'wagmi/actions'
 
-import { getEscrowDelegate } from '../../eas/requests/getEscrowDelegate'
 import { managerAbi } from '../abis'
 
 const getDAOAddresses = async (chainId: CHAIN_ID, tokenAddress: AddressType) => {
@@ -17,12 +16,6 @@ const getDAOAddresses = async (chainId: CHAIN_ID, tokenAddress: AddressType) => 
 
   const [metadata, auction, treasury, governor] = unpackOptionalArray(addresses, 4)
 
-  const escrowDelegate = await getEscrowDelegate(
-    tokenAddress,
-    treasury as AddressType,
-    chainId
-  )
-
   const hasMissingAddresses = Object.values(addresses).includes(NULL_ADDRESS)
   if (hasMissingAddresses) return null
 
@@ -32,7 +25,6 @@ const getDAOAddresses = async (chainId: CHAIN_ID, tokenAddress: AddressType) => 
     governor,
     metadata,
     treasury,
-    escrowDelegate,
   }
 }
 

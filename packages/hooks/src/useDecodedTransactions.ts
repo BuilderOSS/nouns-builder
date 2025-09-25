@@ -2,7 +2,7 @@ import { SWR_KEYS } from '@buildeross/constants'
 import { Proposal } from '@buildeross/sdk'
 import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils'
-import useSWR from 'swr'
+import useSWR, { KeyedMutator } from 'swr'
 import { formatEther } from 'viem'
 
 export type DecodedTransactionSuccess = {
@@ -129,19 +129,42 @@ export const decodeTransactions = async (
 export const useDecodedTransactions = (
   chainId: CHAIN_ID,
   proposal: Proposal
-): DecodedTransaction[] | undefined => {
+): {
+  decodedTransactions: DecodedTransaction[] | undefined
+  isValidating: boolean
+  isLoading: boolean
+  error: Error | undefined
+  mutate: KeyedMutator<DecodedTransaction[]>
+} => {
   const { targets, calldatas, values } = proposal
 
-  const { data: decodedTransactions } = useSWR(
+  const {
+    data: decodedTransactions,
+    isLoading,
+    isValidating,
+    error,
+    mutate,
+  } = useSWR(
     targets && calldatas && values
-      ? [SWR_KEYS.PROPOSALS_TRANSACTIONS, chainId, targets, calldatas, values]
+      ? ([SWR_KEYS.PROPOSALS_TRANSACTIONS, chainId, targets, calldatas, values] as const)
       : null,
-    async ([_key, chainId, targets, calldatas, values]) =>
-      decodeTransactions(chainId, targets, calldatas, values),
+    async ([, _chainId, _targets, _calldatas, _values]) =>
+      decodeTransactions(
+        _chainId as CHAIN_ID,
+        _targets as string[],
+        _calldatas as string[],
+        _values as string[]
+      ),
     { revalidateOnFocus: false }
   )
 
-  return decodedTransactions
+  return {
+    decodedTransactions,
+    isLoading,
+    isValidating,
+    error,
+    mutate,
+  }
 }
 
 export const useDecodedTransactionSingle = (
@@ -149,17 +172,40 @@ export const useDecodedTransactionSingle = (
   target: string,
   calldata: string,
   value: string
-): DecodedTransaction | undefined => {
-  const { data: decodedTransaction } = useSWR(
+): {
+  decodedTransaction: DecodedTransaction | undefined
+  isValidating: boolean
+  isLoading: boolean
+  error: Error | undefined
+  mutate: KeyedMutator<DecodedTransaction>
+} => {
+  const {
+    data: decodedTransaction,
+    isLoading,
+    isValidating,
+    error,
+    mutate,
+  } = useSWR(
     target && calldata && value
-      ? [SWR_KEYS.DECODED_TRANSACTION, chainId, target, calldata, value]
+      ? ([SWR_KEYS.DECODED_TRANSACTION, chainId, target, calldata, value] as const)
       : null,
-    async ([_key, chainId, target, calldata, value]) => {
-      const decoded = await decodeTransactions(chainId, [target], [calldata], [value])
+    async ([, _chainId, _target, _calldata, _value]) => {
+      const decoded = await decodeTransactions(
+        _chainId as CHAIN_ID,
+        [_target],
+        [_calldata],
+        [_value]
+      )
       return decoded[0]
     },
     { revalidateOnFocus: false }
   )
 
-  return decodedTransaction
+  return {
+    decodedTransaction,
+    isLoading,
+    isValidating,
+    error,
+    mutate,
+  }
 }

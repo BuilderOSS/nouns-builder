@@ -202,7 +202,7 @@ export const About: React.FC = () => {
           No founders allocation set.
         </Text>
       )}
-      <MembersList totalSupply={Number(totalSupply)} ownerCount={data?.ownerCount} />
+      <MembersList totalSupply={Number(totalSupply)} />
     </Box>
   )
 }

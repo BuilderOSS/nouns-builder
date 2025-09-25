@@ -3,7 +3,6 @@ import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { getEscrowDelegate } from '@buildeross/sdk/eas'
 import {
   OrderDirection,
   SubgraphSDK,
@@ -241,19 +240,12 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       auctionAddress,
     } = token.dao
 
-    const escrowDelegateAddress = (await getEscrowDelegate(
-      tokenAddress,
-      treasuryAddress,
-      chain.id
-    )) as AddressType
-
     const addresses: DaoContractAddresses = {
       token: collection,
       metadata: metadataAddress,
       treasury: treasuryAddress,
       governor: governorAddress,
       auction: auctionAddress,
-      escrowDelegate: escrowDelegateAddress,
     }
 
     const daoOgMetadata: DaoOgMetadata = {

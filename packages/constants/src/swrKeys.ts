@@ -36,6 +36,7 @@ export const SWR_KEYS = {
   DAO_MIGRATED: 'dao-migrated',
   DAO_NEXT_AND_PREVIOUS_TOKENS: 'dao-next-and-previous-tokens',
   ESCROW_MILESTONES_IPFS_DATA: 'escrow-milestones-ipfs-data',
+  ESCROW_DELEGATE: 'escrow-delegate',
   INVOICE_LOG_NEW_INVOICE: 'invoice-log-new-invoice',
   DYNAMIC: {
     MY_DAOS(str: string) {
