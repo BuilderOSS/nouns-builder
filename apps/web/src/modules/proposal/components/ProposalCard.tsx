@@ -39,10 +39,11 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
         borderRadius={'curved'}
         borderWidth={'normal'}
         cursor={'pointer'}
-        wrap="wrap"
+        wrap="nowrap"
         p={{ '@initial': 'x4', '@768': 'x6' }}
+        gap="x1"
       >
-        <Box display={{ '@initial': 'none', '@768': 'flex' }} w={'x8'} mr={'x4'}>
+        <Box display={{ '@initial': 'none', '@768': 'flex' }} w={'x8'} mr={'x2'}>
           <Label size="lg" color={'text4'}>
             {proposalNumber}
           </Label>
@@ -54,12 +55,14 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
           style={{ order: 2 }}
         >
           <Label size="lg">{title}</Label>
-          <Paragraph color="tertiary">
+          <Paragraph color="tertiary" mt={'x1'}>
             {dayjs(dayjs.unix(timeCreated)).format('MMM DD, YYYY')}
           </Paragraph>
         </Box>
 
-        <ProposalStatus {...proposal} className={statusStyle} flipped showTime />
+        <Flex className={statusStyle} align={'center'} style={{ flexShrink: 0 }}>
+          <ProposalStatus {...proposal} flipped showTime />
+        </Flex>
         <Flex
           display={{ '@initial': 'flex', '@768': 'none' }}
           justify={'flex-end'}
