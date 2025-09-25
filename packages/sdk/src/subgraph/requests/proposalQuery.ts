@@ -59,7 +59,7 @@ export const getProposal = async (
 ): Promise<Proposal | undefined> => {
   try {
     const data = await SDK.connect(chainId).proposal({
-      proposalId,
+      proposalId: proposalId.toLowerCase(),
     })
 
     return await formatAndFetchState(chainId, data.proposal!)

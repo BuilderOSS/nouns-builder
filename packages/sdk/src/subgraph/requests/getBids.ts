@@ -7,7 +7,7 @@ import { AuctionBidFragment } from '../sdk.generated'
 export const getBids = async (chainId: CHAIN_ID, collection: string, tokenId: string) => {
   try {
     return SDK.connect(chainId)
-      .auctionBids({ id: `${collection.toLowerCase()}:${tokenId}` })
+      .auctionBids({ id: `${collection.toLowerCase()}:${tokenId.toLowerCase()}` })
       .then((x) =>
         x.auction?.bids?.map((bid: AuctionBidFragment) => ({
           ...bid,
