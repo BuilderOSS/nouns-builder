@@ -1,16 +1,12 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
-import { decodeTransactions } from '@buildeross/hooks/useDecodedTransactions'
-import {
-  getEscrowDelegate,
-  getPropDates,
-  isChainIdSupportedByEAS,
-} from '@buildeross/sdk/eas'
+import { getEscrowDelegate, isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import type { AddressType } from '@buildeross/types'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
+import { withTimeout } from '@buildeross/utils/withTimeout'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -28,7 +24,6 @@ import { PropDates } from 'src/modules/proposal/components/PropDates'
 import { ProposalVotes } from 'src/modules/proposal/components/ProposalVotes'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
-import { decodeTransaction } from 'src/services/abiService'
 import { useChainStore } from 'src/stores/useChainStore'
 import { type DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
 import { propPageWrapper } from 'src/styles/Proposals.css'
@@ -235,12 +230,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
     auctionAddress,
   } = data.dao
 
-  const escrowDelegateAddress = (await getEscrowDelegate(
-    tokenAddress,
-    treasuryAddress,
-    chain.id
-  )) as AddressType
-
   const ogMetadata: ProposalOgMetadata = {
     proposal: {
       proposalNumber: proposal.proposalNumber,
@@ -256,7 +245,16 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
     chainId: chain.id,
   }
 
-  const propDates = await getPropDates(tokenAddress, chain.id, proposal.proposalId)
+  const escrowDelegateFetcher = async () => {
+    return getEscrowDelegate(tokenAddress, treasuryAddress, chain.id)
+  }
+
+  let escrowDelegateAddress: AddressType | null = null
+  try {
+    escrowDelegateAddress = await withTimeout(escrowDelegateFetcher, 5000)
+  } catch (e) {
+    console.error(`Failed to fetch escrow delegate:`, e)
+  }
 
   const addresses: DaoContractAddresses = {
     token: tokenAddress,
@@ -264,7 +262,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
     governor: governorAddress,
     treasury: treasuryAddress,
     auction: auctionAddress,
-    escrowDelegate: escrowDelegateAddress,
+    escrowDelegate: escrowDelegateAddress as AddressType, // undefined cannot be serialized
   }
 
   const ogImageURL = `${protocol}://${
@@ -280,32 +278,11 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
     `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
   )
 
-  const { targets, calldatas, values } = proposal
-
-  const decodedTransactions = await decodeTransactions(
-    chain.id,
-    targets,
-    calldatas,
-    values,
-    decodeTransaction
-  )
-
   return {
     props: {
       fallback: {
         [unstable_serialize([SWR_KEYS.PROPOSAL, chain.id, proposal.proposalId])]:
           proposal,
-
-        [unstable_serialize([SWR_KEYS.PROPDATES, chain.id, proposal.proposalId])]:
-          propDates,
-
-        [unstable_serialize([
-          SWR_KEYS.PROPOSALS_TRANSACTIONS,
-          chain.id,
-          targets,
-          calldatas,
-          values,
-        ])]: decodedTransactions,
       },
       daoName: name,
       ogImageURL,

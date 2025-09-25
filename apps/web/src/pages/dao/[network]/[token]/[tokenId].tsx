@@ -13,6 +13,7 @@ import {
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
+import { withTimeout } from '@buildeross/utils/withTimeout'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
@@ -241,11 +242,16 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       auctionAddress,
     } = token.dao
 
-    const escrowDelegateAddress = (await getEscrowDelegate(
-      tokenAddress,
-      treasuryAddress,
-      chain.id
-    )) as AddressType
+    const escrowDelegateFetcher = async () => {
+      return getEscrowDelegate(tokenAddress, treasuryAddress, chain.id)
+    }
+
+    let escrowDelegateAddress: AddressType | null = null
+    try {
+      escrowDelegateAddress = await withTimeout(escrowDelegateFetcher, 5000)
+    } catch (e) {
+      console.error(`Failed to fetch escrow delegate:`, e)
+    }
 
     const addresses: DaoContractAddresses = {
       token: collection,
@@ -253,7 +259,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       treasury: treasuryAddress,
       governor: governorAddress,
       auction: auctionAddress,
-      escrowDelegate: escrowDelegateAddress,
+      escrowDelegate: escrowDelegateAddress as AddressType, // undefined cannot be serialized
     }
 
     const daoOgMetadata: DaoOgMetadata = {

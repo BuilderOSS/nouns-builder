@@ -85,6 +85,7 @@
   "scripts": {
     "analyze": "ANALYZE=true next build",
     "build": "next build",
+    "clean": "rm -rf .next .turbo",
     "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "lint": "pnpm type-check && next lint --fix",
     "start": "next start",
