@@ -2,11 +2,12 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { Avatar, NameAvatar } from '@buildeross/ui/Avatar'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Flex, Grid, Text } from '@buildeross/zord'
+import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { statisticContent } from 'src/styles/About.css'
+import { skeletonAnimation } from 'src/styles/animations.css'
 import { formatUnits } from 'viem'
 
 import { erc20AssetsWrapper } from './Treasury.css'
@@ -42,7 +43,33 @@ export const TokenBalance: React.FC = () => {
         )}
       </Flex>
 
-      {numBalances === 0 && (
+      {isLoading && numBalances === 0 && (
+        <Flex
+          direction={'column'}
+          gap="x4"
+          px={{ '@initial': 'x4', '@768': 'x28' }}
+          py={{ '@initial': 'x4', '@768': 'x8' }}
+          borderColor={'border'}
+          borderStyle={'solid'}
+          borderRadius={'curved'}
+          borderWidth={'normal'}
+          mt={'x6'}
+          mb={'x8'}
+        >
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Box
+              key={index}
+              width="100%"
+              height="x12"
+              borderRadius="curved"
+              backgroundColor="background2"
+              style={{ animation: skeletonAnimation }}
+            />
+          ))}
+        </Flex>
+      )}
+
+      {!isLoading && numBalances === 0 && (
         <Flex
           direction={'column'}
           gap="x8"
@@ -58,8 +85,7 @@ export const TokenBalance: React.FC = () => {
           justify="center"
         >
           <Text variant="paragraph-md" color={'tertiary'}>
-            {' '}
-            {isLoading ? 'Loading...' : 'No Tokens Found'}{' '}
+            No Tokens Found
           </Text>
         </Flex>
       )}
@@ -76,6 +102,7 @@ export const TokenBalance: React.FC = () => {
           borderWidth={'normal'}
           mt={'x6'}
           mb={'x8'}
+          style={{ maxHeight: '600px', overflow: 'auto' }}
         >
           <Grid
             className={erc20AssetsWrapper}

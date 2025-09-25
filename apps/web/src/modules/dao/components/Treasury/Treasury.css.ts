@@ -26,7 +26,7 @@ export const erc20AssetsWrapper = style({
 
 export const erc721AssetsWrapper = style({
   gridTemplateColumns: 'repeat(3, 1fr)',
-  gridGap: '0.5rem',
+  gridGap: '1rem',
   '@media': {
     'screen and (max-width: 720px)': {
       gridTemplateColumns: 'repeat(2, 1fr)',

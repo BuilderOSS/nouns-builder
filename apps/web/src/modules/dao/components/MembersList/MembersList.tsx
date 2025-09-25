@@ -2,9 +2,7 @@ import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
-import React, { useMemo } from 'react'
-import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks/usePagination'
+import React from 'react'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import useSWR from 'swr'
@@ -16,39 +14,29 @@ type MembersQuery = {
   membersList: DaoVoter[]
 }
 
-export const MembersList = ({
-  totalSupply,
-  ownerCount,
-}: {
-  totalSupply?: number
-  ownerCount?: number
-}) => {
-  const { query, isReady } = useRouter()
+export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
+  const { isReady } = useRouter()
   const chain = useChainStore((x) => x.chain)
   const {
     addresses: { token },
   } = useDaoStore()
-  const LIMIT = 10
 
   const {
     data: members,
     error,
     isValidating,
-  } = useSWR(isReady ? [token, chain.id, query.page] : null, () =>
-    axios
-      .get<MembersQuery>(
-        `/api/membersList/${token}?chainId=${chain.id}&page=${query.page}&limit=${LIMIT}`
-      )
-      .then((x) => x.data.membersList)
+  } = useSWR(
+    isReady && token && chain?.id ? [token, chain.id] : null,
+    () =>
+      axios
+        .get<MembersQuery>(`/api/membersList/${token}?chainId=${chain.id}`)
+        .then((x) => x.data.membersList),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000, // 60 seconds
+    }
   )
-
-  const { handlePageBack, handlePageForward } = usePagination(true)
-
-  const hasNextPage = useMemo(() => {
-    const totalPages = Math.ceil((ownerCount || 0) / LIMIT)
-    const currentPage = Number(query.page) || 1
-    return currentPage < totalPages
-  }, [ownerCount, query.page])
 
   const exportDelegatesToCSV = async () => {
     try {
@@ -96,10 +84,9 @@ export const MembersList = ({
   )
 
   if (isValidating) {
-    const isInitialPageLoad = !query.page && !members
     return (
       <MembersPanel exportButton={exportButton}>
-        {Array.from({ length: isInitialPageLoad ? 5 : 10 }).map((_, i) => (
+        {Array.from({ length: 10 }).map((_, i) => (
           <MemberCardSkeleton key={`memberCardSkeleton-${i}`} />
         ))}
       </MembersPanel>
@@ -118,18 +105,10 @@ export const MembersList = ({
     )
 
   return (
-    <>
-      <MembersPanel exportButton={exportButton}>
-        {members?.map((member) => (
-          <MemberCard key={member.voter} member={member} totalSupply={totalSupply} />
-        ))}
-      </MembersPanel>
-      <Pagination
-        onNext={handlePageForward}
-        onPrev={handlePageBack}
-        isLast={!hasNextPage}
-        isFirst={!query.page}
-      />
-    </>
+    <MembersPanel exportButton={exportButton}>
+      {members?.map((member) => (
+        <MemberCard key={member.voter} member={member} totalSupply={totalSupply} />
+      ))}
+    </MembersPanel>
   )
 }
