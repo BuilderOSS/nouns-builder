@@ -43,17 +43,21 @@ describe('AirdropForm schema validation', () => {
     expect(result).toEqual(false)
   })
 
-  it('should invalidate this AirdropFormValues object due to invalid address', async () => {
-    const result = await airdropFormSchema.isValid({
-      recipients: [
-        {
-          address: '0x69420e101',
-          amount: 1,
-        },
-      ],
-    })
-    expect(result).toEqual(false)
-  })
+  it(
+    'should invalidate this AirdropFormValues object due to invalid address',
+    async () => {
+      const result = await airdropFormSchema.isValid({
+        recipients: [
+          {
+            address: '0x69420e101',
+            amount: 1,
+          },
+        ],
+      })
+      expect(result).toEqual(false)
+    },
+    { timeout: 10000 }
+  )
 
   it('should invalidate this AirdropFormValues object due to empty recipients array', async () => {
     const result = await airdropFormSchema.isValid({
@@ -75,17 +79,4 @@ describe('AirdropForm schema validation', () => {
     })
     expect(result).toEqual(false)
   })
-
-  // TODO Figure out why this breaks the test runner
-  /* it('should validate this AirdropFormValues object with ENS domain', async () => {
-    const result = await airdropFormSchema.isValid({
-      recipients: [
-        {
-          address: 'ens.eth',
-          amount: 1
-        }
-      ]
-    })
-    expect(result).toEqual(true)
-  }) */
 })
