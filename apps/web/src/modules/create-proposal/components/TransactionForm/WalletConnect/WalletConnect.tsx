@@ -229,7 +229,7 @@ const useDecodedTxPayload = (txPayload: WCPayload | null) => {
 }
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
-  const decoded = useDecodedTxPayload(txPayload)
+  const { decodedTransaction: decoded } = useDecodedTxPayload(txPayload)
 
   if (!decoded) return null
 
@@ -249,7 +249,7 @@ export const WalletConnect = () => {
   const [currentTxPayload, setCurrentTxPayload] = useState<WCPayload | null>(null)
 
   // Decode the current transaction for better summary
-  const decoded = useDecodedTxPayload(currentTxPayload)
+  const { decodedTransaction: decoded } = useDecodedTxPayload(currentTxPayload)
 
   const initialValues: WalletConnectValues = {
     wcLink: '',

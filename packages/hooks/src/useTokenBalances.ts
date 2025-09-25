@@ -1,6 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
-import useSWR from 'swr'
+import useSWR, { KeyedMutator } from 'swr'
 import { Address, isAddress } from 'viem'
 
 export type TokenBalance = {
@@ -16,8 +16,10 @@ export type TokenBalance = {
 
 export type TokenBalancesReturnType = {
   balances: undefined | TokenBalance[]
+  isValidating: boolean
   isLoading: boolean
-  error?: Error | null
+  error: Error | undefined
+  mutate: KeyedMutator<TokenBalance[]>
 }
 
 const fetchTokenBalances = async (
@@ -38,11 +40,12 @@ export const useTokenBalances = (
   chainId?: CHAIN_ID,
   address?: Address
 ): TokenBalancesReturnType => {
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, isValidating, mutate } = useSWR(
     !!address && !!chainId && isAddress(address)
-      ? [SWR_KEYS.TOKEN_BALANCES, chainId, address]
+      ? ([SWR_KEYS.TOKEN_BALANCES, chainId, address] as const)
       : null,
-    async () => fetchTokenBalances(chainId as CHAIN_ID, address as Address),
+    async ([, _chainId, _address]) =>
+      fetchTokenBalances(_chainId as CHAIN_ID, _address as Address),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -52,6 +55,8 @@ export const useTokenBalances = (
   return {
     balances: data,
     isLoading,
+    isValidating,
     error,
+    mutate,
   }
 }

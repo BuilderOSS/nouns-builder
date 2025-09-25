@@ -1,6 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { useMemo } from 'react'
+import { type KeyedMutator } from 'swr'
 import useSWRImmutable from 'swr/immutable'
 import { Address, isAddress } from 'viem'
 
@@ -14,8 +15,10 @@ export type TokenMetadata = {
 
 export type TokenMetadataReturnType = {
   metadata?: TokenMetadata[]
+  isValidating: boolean
   isLoading: boolean
-  error?: Error | null
+  error: Error | undefined
+  mutate: KeyedMutator<TokenMetadata[]>
 }
 
 const fetchTokenMetadata = async (
@@ -46,11 +49,14 @@ export const useTokenMetadata = (
     [addresses]
   )
 
-  const { data, error, isLoading } = useSWRImmutable(
+  const { data, error, isLoading, isValidating, mutate } = useSWRImmutable(
     !!chainId && validAddresses.length > 0
-      ? [SWR_KEYS.TOKEN_METADATA, chainId, validAddresses.join(',')]
+      ? ([SWR_KEYS.TOKEN_METADATA, chainId, validAddresses.join(',')] as const)
       : null,
-    async () => fetchTokenMetadata(chainId as CHAIN_ID, validAddresses),
+    async ([, _chainId, _addressesParam]) => {
+      const _addresses = _addressesParam.split(',') as Address[]
+      return fetchTokenMetadata(_chainId as CHAIN_ID, _addresses)
+    },
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -60,7 +66,9 @@ export const useTokenMetadata = (
   return {
     metadata: data,
     isLoading,
+    isValidating,
     error,
+    mutate,
   }
 }
 
@@ -73,7 +81,9 @@ export const useTokenMetadataSingle = (
 
   return {
     isLoading: result.isLoading,
+    isValidating: result.isValidating,
     error: result.error,
+    mutate: result.mutate,
     tokenMetadata: result.metadata?.[0],
   }
 }

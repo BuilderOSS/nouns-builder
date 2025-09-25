@@ -48,7 +48,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   const { displayName } = useEnsData(proposer)
   const chain = useChainStore((x) => x.chain)
 
-  const decodedTransactions = useDecodedTransactions(chain.id, proposal)
+  const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
 
   const decodedEscrowTxn = useMemo(
     () =>

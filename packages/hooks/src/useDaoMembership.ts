@@ -1,7 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { daoMembershipRequest, type DaoMembershipResponse } from '@buildeross/sdk'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import useSWR from 'swr'
+import useSWR, { KeyedMutator } from 'swr'
 
 import { type EnsData, useEnsData } from './useEnsData'
 
@@ -55,18 +55,20 @@ export const useDaoMembership = ({
   signerAddress?: AddressType
 }): {
   data: DaoMembership | undefined
-  error: Error | undefined
+  isValidating: boolean
   isLoading: boolean
+  error: Error | undefined
+  mutate: KeyedMutator<DaoMembershipResponse | null>
 } => {
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, isValidating, mutate } = useSWR(
     !!collectionAddress && !!signerAddress
-      ? [SWR_KEYS.DAO_MEMBERSHIP, chainId, collectionAddress, signerAddress]
+      ? ([SWR_KEYS.DAO_MEMBERSHIP, chainId, collectionAddress, signerAddress] as const)
       : null,
-    async () =>
+    async ([, _chainId, _collectionAddress, _signerAddress]) =>
       daoMembershipRequest(
-        chainId,
-        collectionAddress as `0x${string}`,
-        signerAddress as `0x${string}`
+        _chainId as CHAIN_ID,
+        _collectionAddress as `0x${string}`,
+        _signerAddress as `0x${string}`
       ),
     {
       revalidateOnFocus: false,
@@ -86,8 +88,10 @@ export const useDaoMembership = ({
       data && !memberData.isLoading && !delegateData.isLoading
         ? { ...data, member: memberData, delegate: delegateData, voteDescription }
         : undefined,
-    error,
     isLoading:
       data === undefined || isLoading || !!memberData.isLoading || delegateData.isLoading,
+    isValidating,
+    error,
+    mutate,
   }
 }

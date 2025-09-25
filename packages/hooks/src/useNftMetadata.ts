@@ -1,6 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
-import useSWR from 'swr'
+import useSWR, { KeyedMutator } from 'swr'
 import { Address, isAddress } from 'viem'
 
 export declare enum NftTokenType {
@@ -24,9 +24,11 @@ export type SerializedNftMetadata = {
 }
 
 export type NftMetadataReturnType = {
-  metadata?: SerializedNftMetadata | null
+  metadata: SerializedNftMetadata | null | undefined
+  isValidating: boolean
   isLoading: boolean
-  error?: Error | null
+  error: Error | undefined
+  mutate: KeyedMutator<SerializedNftMetadata | null>
 }
 
 const fetchNftMetadata = async (
@@ -49,19 +51,19 @@ export const useNftMetadata = (
   contractAddress?: Address,
   tokenId?: string
 ): NftMetadataReturnType => {
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading, isValidating, mutate } = useSWR(
     !!contractAddress &&
       !!tokenId &&
       !!chainId &&
       isAddress(contractAddress) &&
       /^\d+$/.test(tokenId)
-      ? [SWR_KEYS.NFT_METADATA, chainId, contractAddress, tokenId]
+      ? ([SWR_KEYS.NFT_METADATA, chainId, contractAddress, tokenId] as const)
       : null,
-    async () =>
+    async ([, _chainId, _contractAddress, _tokenId]) =>
       fetchNftMetadata(
-        chainId as CHAIN_ID,
-        contractAddress as Address,
-        tokenId as string
+        _chainId as CHAIN_ID,
+        _contractAddress as Address,
+        _tokenId as string
       ),
     {
       revalidateOnFocus: false,
@@ -72,6 +74,8 @@ export const useNftMetadata = (
   return {
     metadata: data,
     isLoading,
+    isValidating,
     error,
+    mutate,
   }
 }
