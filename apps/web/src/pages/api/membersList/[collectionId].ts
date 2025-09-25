@@ -8,14 +8,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     const rawChainId = Array.isArray(chainId) ? chainId[0] : chainId
     const parsedChainId = rawChainId !== undefined ? Number(rawChainId) : undefined
-    const normalizedChainId =
-      parsedChainId !== undefined && Number.isFinite(parsedChainId) && parsedChainId > 0
+    const normalizedChainId: CHAIN_ID | undefined =
+      parsedChainId !== undefined && Number.isInteger(parsedChainId) && parsedChainId > 0
         ? (parsedChainId as CHAIN_ID)
         : undefined
 
-    const collectionAddress = (
-      Array.isArray(collectionId) ? collectionId[0] : collectionId
-    ) as string
+    const rawCollectionId = Array.isArray(collectionId) ? collectionId[0] : collectionId
+
+    const collectionAddress: string | undefined = rawCollectionId?.trim().toLowerCase()
 
     if (!collectionAddress || !normalizedChainId) {
       throw new Error('Invalid query')
@@ -35,11 +35,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           : undefined
 
       const normalizedPage =
-        parsedPage !== undefined && Number.isFinite(parsedPage) && parsedPage > 0
+        parsedPage !== undefined && Number.isInteger(parsedPage) && parsedPage > 0
           ? parsedPage
           : undefined
       const normalizedLimit =
-        parsedLimit !== undefined && Number.isFinite(parsedLimit) && parsedLimit > 0
+        parsedLimit !== undefined && Number.isInteger(parsedLimit) && parsedLimit > 0
           ? parsedLimit
           : undefined
 
@@ -58,8 +58,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let currentPage = 1
     const batchLimit = 1000
     let hasMore = true
+    const MAX_PAGES = 200
 
-    while (hasMore) {
+    while (hasMore && currentPage <= MAX_PAGES) {
       const members = await votersRequest(
         normalizedChainId,
         collectionAddress,
@@ -78,7 +79,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     res.status(200).json({ membersList: allMembers })
   } catch (error) {
-    res.status(500).json({ error })
+    res.status(500).json({ error: (error as Error)?.message ?? 'Internal Server Error' })
   }
 }
 export default handler
