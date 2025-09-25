@@ -1,13 +1,9 @@
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Button, Flex } from '@buildeross/zord'
-import dynamic from 'next/dynamic'
 import { ReactNode } from 'react'
 
 import { AllBids } from './AllBids'
-
-const AnimatedModal = dynamic(() => import('src/components/Modal/AnimatedModal'), {
-  ssr: false,
-})
 
 export const BidHistory = ({ bids }: { bids: AuctionBidFragment[] }) => {
   return (

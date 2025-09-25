@@ -2,7 +2,6 @@ import { atoms, Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import React from 'react'
-import { useLayoutStore } from 'src/stores'
 
 import {
   BlueSun,
@@ -20,7 +19,6 @@ import {
 } from './Marquee.css'
 
 const Marquee = () => {
-  const { isMobile } = useLayoutStore()
   return (
     <Flex direction={'column'} align={'center'} mt={{ '@initial': 'x4', '@768': 'x32' }}>
       <Flex gap={'x2'} mb={'x1'}>
@@ -76,7 +74,7 @@ const Marquee = () => {
         <Image src={'/home/collective.svg'} alt={'collective'} className={Collective} />
 
         <Flex
-          ml={isMobile ? 'x4' : 'x12'}
+          ml={{ '@initial': 'x4', '@768': 'x12' }}
           position={'relative'}
           align={'center'}
           justify={'center'}

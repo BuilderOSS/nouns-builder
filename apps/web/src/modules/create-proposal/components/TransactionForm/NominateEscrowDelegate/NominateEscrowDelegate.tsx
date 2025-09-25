@@ -5,13 +5,14 @@ import {
   ESCROW_DELEGATE_SCHEMA,
   ESCROW_DELEGATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
+import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
+import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { Box, Button } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { Transaction, useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -47,9 +48,14 @@ const escrowDelegateFormSchema = (_escrowDelegate: string | undefined) =>
 const schemaEncoder = new SchemaEncoder(ESCROW_DELEGATE_SCHEMA)
 
 export const NominateEscrowDelegate = () => {
-  const { token, escrowDelegate, treasury } = useDaoStore((state) => state.addresses)
+  const { token, treasury } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
+  const { escrowDelegate } = useEscrowDelegate({
+    chainId: chain.id,
+    tokenAddress: token,
+    treasuryAddress: treasury,
+  })
 
   const handleNominateEscrowDelegateTransaction = useCallback(
     async (values: EscrowDelegateFormValues) => {

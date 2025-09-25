@@ -96,3 +96,12 @@ export const daoInfo = style({
     },
   },
 })
+
+export const contractItemGrid = style({
+  gridTemplateColumns: '1fr',
+  '@media': {
+    [media.min768]: {
+      gridTemplateColumns: '1fr 3fr',
+    },
+  },
+})

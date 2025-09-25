@@ -37,7 +37,7 @@ export const formatAndFetchState = async (chainId: CHAIN_ID, data: ProposalFragm
     state: await getProposalState(
       chainId,
       proposal.dao.governorAddress,
-      proposal.proposalId,
+      proposal.proposalId
     ),
   }
 
@@ -55,11 +55,11 @@ export const formatAndFetchState = async (chainId: CHAIN_ID, data: ProposalFragm
 
 export const getProposal = async (
   chainId: CHAIN_ID,
-  proposalId: string,
+  proposalId: string
 ): Promise<Proposal | undefined> => {
   try {
     const data = await SDK.connect(chainId).proposal({
-      proposalId,
+      proposalId: proposalId.toLowerCase(),
     })
 
     return await formatAndFetchState(chainId, data.proposal!)

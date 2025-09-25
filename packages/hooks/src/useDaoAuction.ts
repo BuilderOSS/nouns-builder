@@ -23,6 +23,8 @@ export type UseDaoAuctionReturnType = {
   endTime: number
   startTime?: number
   tokenId?: bigint
+  isLoading: boolean
+  error: Error | null
 }
 
 const decode = (token?: string): AuctionTokenMetadata | null => {
@@ -46,7 +48,11 @@ export const useDaoAuction = ({
   auctionAddress,
   chainId,
 }: UseDaoAuctionProps): UseDaoAuctionReturnType => {
-  const { data: auction } = useReadContract({
+  const {
+    data: auction,
+    isLoading: isLoadingAuction,
+    error: auctionError,
+  } = useReadContract({
     address: auctionAddress as AddressType,
     chainId,
     abi: auctionAbi,
@@ -55,10 +61,14 @@ export const useDaoAuction = ({
 
   const [tokenId, highestBid, highestBidder, startTime, endTime] = unpackOptionalArray(
     auction,
-    6,
+    6
   )
 
-  const { data: token } = useReadContract({
+  const {
+    data: token,
+    isLoading: isLoadingToken,
+    error: tokenError,
+  } = useReadContract({
     address: collectionAddress as AddressType,
     chainId,
     abi: tokenAbi,
@@ -69,6 +79,9 @@ export const useDaoAuction = ({
     },
   })
 
+  const isLoading = isLoadingAuction || isLoadingToken
+  const error = auctionError || tokenError
+
   return {
     highestBid: highestBid ? formatEther(highestBid) : undefined,
     highestBidder: highestBidder,
@@ -76,5 +89,7 @@ export const useDaoAuction = ({
     startTime: startTime || 0,
     endTime: endTime || 0,
     tokenId: tokenId,
+    isLoading,
+    error,
   }
 }

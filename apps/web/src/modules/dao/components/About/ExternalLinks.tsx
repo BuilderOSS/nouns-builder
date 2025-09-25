@@ -1,7 +1,5 @@
-import { Button, Flex } from '@buildeross/zord'
+import { Button, Flex, Icon, IconType } from '@buildeross/zord'
 import React from 'react'
-import { Icon } from 'src/components/Icon'
-import { IconType } from 'src/components/Icon/icons'
 import { iconAnchor } from 'src/styles/About.css'
 
 interface IconAnchor {

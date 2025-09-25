@@ -1,4 +1,4 @@
-import { Countdown } from 'src/components/Countdown'
+import { Countdown } from '@buildeross/ui/Countdown'
 
 import { AuctionDetail } from '../AuctionDetail'
 

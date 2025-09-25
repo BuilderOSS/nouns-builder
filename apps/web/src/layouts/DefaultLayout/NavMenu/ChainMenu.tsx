@@ -1,11 +1,10 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { Chain, CHAIN_ID } from '@buildeross/types'
-import { Box, Flex, PopUp, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { Icon } from 'src/components/Icon'
-import { useWalletDisconnect } from 'src/hooks/useWalletDisconnect'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useAccount, useSwitchChain } from 'wagmi'
 

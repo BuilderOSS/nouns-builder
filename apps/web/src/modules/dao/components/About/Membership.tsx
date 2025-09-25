@@ -1,10 +1,10 @@
 import { type DaoMembership } from '@buildeross/hooks/useDaoMembership'
-import { Box, Flex, Grid, PopUp, Text } from '@buildeross/zord'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { Box, Flex, Grid, Icon, PopUp, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useState } from 'react'
-import { Avatar } from 'src/components/Avatar/Avatar'
-import { Icon } from 'src/components/Icon'
-import { useLayoutStore } from 'src/stores'
+
+import { responsiveGrid } from './About.css'
 
 export const Membership: React.FC<DaoMembership & { totalSupply: number }> = (info) => {
   const {
@@ -16,7 +16,6 @@ export const Membership: React.FC<DaoMembership & { totalSupply: number }> = (in
     totalSupply,
     voteDescription,
   } = info
-  const { isMobile } = useLayoutStore()
 
   const joinedDate = dayjs(dayjs.unix(timeJoined)).format('MMM DD, YYYY')
   const votePercent = ((Number(voteCount) / totalSupply) * 100).toFixed(2)
@@ -27,7 +26,7 @@ export const Membership: React.FC<DaoMembership & { totalSupply: number }> = (in
       <Text variant="heading-xs" style={{ fontWeight: 800 }}>
         Membership
       </Text>
-      <Grid columns={isMobile ? 1 : 2} gap="x4" pt="x4">
+      <Grid gap="x4" pt="x4" className={responsiveGrid}>
         <MembershipCard
           label="Member"
           value={

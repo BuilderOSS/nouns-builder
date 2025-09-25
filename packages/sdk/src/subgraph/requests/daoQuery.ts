@@ -27,8 +27,8 @@ export const myDaosRequest = async (memberAddress: string): Promise<MyDaosRespon
             user: memberAddress.toLowerCase(),
             first: 30,
           })
-          .then((x) => ({ ...x, chainId: chain.id })),
-      ),
+          .then((x) => ({ ...x, chainId: chain.id }))
+      )
     )
 
     return data
@@ -39,7 +39,7 @@ export const myDaosRequest = async (memberAddress: string): Promise<MyDaosRespon
           collectionAddress: dao.tokenAddress,
           auctionAddress: dao?.auctionAddress || '',
           chainId: queries.chainId,
-        })),
+        }))
       )
       .flat()
       .sort((a, b) => a.name.localeCompare(b.name))

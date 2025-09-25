@@ -123,11 +123,11 @@ export const flatten = (object: object) => {
       if (!isEmpty(o)) {
         return [].concat(
           ...Object?.keys(o).map((k) =>
-            typeof o[k] === 'object' ? _flatten(o[k]) : { [k]: o[k] },
-          ),
+            typeof o[k] === 'object' ? _flatten(o[k]) : { [k]: o[k] }
+          )
         )
       }
-    })(object),
+    })(object)
   )
 }
 
@@ -233,8 +233,7 @@ export const compareAndReturn = (initialValues: {}, values: {}) => {
 
   return updates.filter(
     (object, index) =>
-      index ===
-      updates.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(object)),
+      index === updates.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(object))
   )
 }
 
@@ -309,7 +308,7 @@ export const handleGMTOffset = () => {
  */
 export function unpackOptionalArray<T = []>(
   array: T | undefined,
-  expectedLength: number,
+  expectedLength: number
 ): T | undefined[] {
   if (!array) {
     return Array(expectedLength).fill(undefined)

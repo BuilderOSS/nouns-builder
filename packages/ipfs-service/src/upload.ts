@@ -124,7 +124,7 @@ async function getUploadTarget(useLegacy: boolean, uploadType: UploadType) {
 export async function uploadWithProgress(
   data: FormData,
   uploadType: UploadType,
-  options: UploadOptions = {},
+  options: UploadOptions = {}
 ): Promise<PinataUploadResponse> {
   const { useLegacy = false, onProgress } = options
 
@@ -230,7 +230,7 @@ export async function uploadFile(
     type?: Omit<UploadType, 'json'>
     onProgress?: ProgressCallback
     cache?: boolean
-  },
+  }
 ): Promise<IPFSUploadResponse> {
   console.info('ipfs-service/uploadFile: file:', file)
 
@@ -244,7 +244,7 @@ export async function uploadFile(
 
   if (file.size > uploadOptions.max_file_size) {
     throw new Error(
-      `File size exceeds limit of ${formatFileSize(uploadOptions.max_file_size)}`,
+      `File size exceeds limit of ${formatFileSize(uploadOptions.max_file_size)}`
     )
   }
 
@@ -293,7 +293,7 @@ export async function uploadDirectory(
   options?: {
     onProgress?: (progress: number) => void
     cache?: boolean
-  },
+  }
 ): Promise<IPFSUploadResponse> {
   console.info('ipfs-service/uploadDirectory: files:', fileEntries)
   let totalSize = 0
@@ -311,7 +311,7 @@ export async function uploadDirectory(
 
   if (totalSize > pinataOptions.directory.max_file_size) {
     throw new Error(
-      `Directory size exceeds limit of ${formatFileSize(pinataOptions.directory.max_file_size)}`,
+      `Directory size exceeds limit of ${formatFileSize(pinataOptions.directory.max_file_size)}`
     )
   }
 
@@ -335,13 +335,13 @@ export async function uploadDirectory(
     'pinataOptions',
     JSON.stringify({
       cidVersion: 1,
-    }),
+    })
   )
   data.append(
     'pinataMetadata',
     JSON.stringify({
       name: 'builder',
-    }),
+    })
   )
   data.append('network', 'public')
 

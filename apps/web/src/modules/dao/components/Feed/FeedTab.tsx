@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react'
 
 import { feed } from './Feed.css'
 
-export const FeedTab = ({ children }: { isMobile: boolean; children?: ReactNode }) => (
+export const FeedTab = ({ children }: { children?: ReactNode }) => (
   <Box className={feed}>
     <Flex direction={'column'}>
       <Box mb={{ '@initial': 'x4', '@768': 'x8' }}>

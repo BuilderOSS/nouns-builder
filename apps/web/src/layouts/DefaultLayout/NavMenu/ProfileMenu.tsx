@@ -2,21 +2,18 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constants/layers'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { MyDaosResponse } from '@buildeross/sdk/subgraph'
-import { chainIdToSlug } from '@buildeross/utils'
+import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
+import { CopyButton } from '@buildeross/ui/CopyButton'
+import { NetworkController } from '@buildeross/ui/NetworkController'
+import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex, PopUp, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import axios from 'axios'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { Avatar } from 'src/components/Avatar'
-import { DaoAvatar } from 'src/components/Avatar/DaoAvatar'
-import CopyButton from 'src/components/CopyButton/CopyButton'
-import { Icon } from 'src/components/Icon'
-import { NetworkController } from 'src/components/NetworkController'
-import { useWalletDisconnect } from 'src/hooks/useWalletDisconnect'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import useSWR from 'swr'
 import { useAccount, useBalance } from 'wagmi'
@@ -46,7 +43,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onSetActiveDropdown,
 }) => {
   const { address } = useAccount()
-  const isMobile = useLayoutStore((x) => x.isMobile)
   const { chain: selectedChain } = useChainStore()
   const { displayName, ensAvatar } = useEnsData(address || '')
   const { data: balance } = useBalance({
@@ -74,6 +70,22 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     },
     [onOpenMenu]
   )
+
+  const [isMobile, setIsMobile] = React.useState(false)
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    if (!!window) {
+      window.addEventListener('resize', handleResize)
+      handleResize()
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   React.useEffect(() => {
     if (isMobile && activeDropdown === MenuType.PROFILE_MENU) {

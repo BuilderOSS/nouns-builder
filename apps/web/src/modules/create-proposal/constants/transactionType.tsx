@@ -1,5 +1,4 @@
-import { color } from '@buildeross/zord'
-import { IconType } from 'src/components/Icon/icons'
+import { color, IconType } from '@buildeross/zord'
 
 export enum TransactionType {
   SEND_ETH = 'send-eth',

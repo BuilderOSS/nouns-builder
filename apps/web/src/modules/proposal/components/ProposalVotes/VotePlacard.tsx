@@ -1,11 +1,12 @@
-import { useEnsData } from '@buildeross/hooks'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Flex, Grid, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
-import { Avatar } from 'src/components/Avatar'
-import { useLayoutStore } from 'src/stores'
+
+import { votePlacardReason } from './VoterParticipation.css'
 
 const variants = {
   inital: {
@@ -30,7 +31,6 @@ export interface VotePlacardProps {
 
 export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) => {
   const { ensName, ensAvatar } = useEnsData(vote.voter)
-  const { isMobile } = useLayoutStore()
 
   const supportStyle = useMemo(() => {
     const base = atoms({
@@ -58,11 +58,11 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
     <Grid
       as="button"
       columns={7}
-      gap={isMobile ? 'x1' : 'x0'}
       backgroundColor="background1"
       align={'center'}
       mb="x2"
-      px={isMobile ? 'x2' : 'x6'}
+      px={{ '@initial': 'x2', '@768': 'x6' }}
+      gap={{ '@initial': 'x1', '@768': 'x0' }}
       py="x6"
       mt="x4"
       color="text1"
@@ -76,15 +76,15 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
       }}
     >
       <Text
-        fontSize={isMobile ? 12 : 14}
+        fontSize={{ '@initial': 12, '@768': 14 }}
         style={{ width: 'max-content', fontWeight: 600 }}
         className={supportStyle}
       >
         {vote.support}
       </Text>
       <Flex align={'center'} style={{ gridColumn: 'span 4 / span 4' }}>
-        <Avatar address={vote.voter} src={ensAvatar} size={isMobile ? '24' : '32'} />
-        <Text variant={isMobile ? 'label-sm' : 'label-md'} ml="x2">
+        <Avatar address={vote.voter} src={ensAvatar} size="28" />
+        <Text fontWeight="display" ml="x2">
           {ensName || walletSnippet(vote.voter)}
         </Text>
       </Flex>
@@ -93,23 +93,22 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
         align={'center'}
         style={{ gridColumn: 'span 2 / span 2', justifyContent: 'end' }}
       >
-        <Text variant={isMobile ? 'label-sm' : 'label-md'} mr={isMobile ? 'x2' : 'x6'}>
+        <Text fontWeight="label" mr={{ '@initial': 'x2', '@768': 'x6' }}>
           {vote.weight} {vote.weight === 1 ? 'Vote' : 'Votes'}
         </Text>
-        {!isMobile && (
-          <Text
-            style={{ fontWeight: 500 }}
-            fontSize={12}
-            borderStyle="solid"
-            borderColor="border"
-            color="text4"
-            borderRadius="phat"
-            py="x1"
-            px="x2"
-          >
-            {votePercentage}%
-          </Text>
-        )}
+        <Text
+          fontSize={12}
+          borderStyle="solid"
+          borderColor="border"
+          color="text4"
+          borderRadius="phat"
+          py="x1"
+          px="x2"
+          fontWeight="label"
+          display={{ '@initial': 'none', '@768': 'block' }}
+        >
+          {votePercentage}%
+        </Text>
       </Flex>
 
       <AnimatePresence initial={false}>
@@ -119,18 +118,16 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
             initial={'inital'}
             animate={'animate'}
             exit={'inital'}
-            style={{
-              gridColumn: isMobile ? 'span 7 / span 7' : '2 / span 6',
-            }}
+            className={votePlacardReason}
           >
             <Text
-              variant={isMobile ? 'paragraph-sm' : 'paragraph-md'}
+              variant={'paragraph-sm'}
+              fontSize={{ '@initial': 14, '@768': 16 }}
               borderRadius="curved"
               mt="x4"
               p="x6"
               textAlign={'left'}
               style={{
-                fontWeight: 400,
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 minWidth: '80%',

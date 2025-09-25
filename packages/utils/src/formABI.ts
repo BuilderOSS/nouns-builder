@@ -7,7 +7,7 @@ export function matchInputFromName(name: string, inputs: any[]): any {
     const [first, ...rest] = name.split(FIELD_SEPERATOR_CHAR)
     return matchInputFromName(
       rest.join(FIELD_SEPERATOR_CHAR),
-      inputs.find((input: any) => input.name == first).components,
+      inputs.find((input: any) => input.name == first).components
     )
   }
   return inputs.find((input: any) => input.name === name)!

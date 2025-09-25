@@ -33,7 +33,7 @@ export const InnerText = <E extends ElementType = typeof BoxDefaultElement>(
     as,
     ...props
   }: PolymorphicPropsWithoutRef<TextProps, E>,
-  ref: ForwardedRef<any>, // or HTMLSpanElement if you want to narrow
+  ref: ForwardedRef<any> // or HTMLSpanElement if you want to narrow
 ) => {
   return (
     <Box

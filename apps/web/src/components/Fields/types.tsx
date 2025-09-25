@@ -1,8 +1,0 @@
-export const DATE = 'date'
-export const DAYS_HOURS_MINS = 'daysHoursMins'
-export const DAYS_HOURS_MINS_SECS = 'daysHoursMinsSecs'
-export const NUMBER = 'number'
-export const SELECT = 'select'
-export const TEXT = 'text'
-export const TEXTAREA = 'textarea'
-export const MINS_SECS = 'timeBuffer'

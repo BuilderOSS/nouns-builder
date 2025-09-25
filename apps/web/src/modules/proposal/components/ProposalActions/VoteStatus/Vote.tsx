@@ -1,8 +1,6 @@
 import { ProposalVoteSupport as Support } from '@buildeross/sdk/subgraph'
-import { Atoms, Flex, Text } from '@buildeross/zord'
+import { Atoms, Flex, Icon, IconType, Text } from '@buildeross/zord'
 import { ReactNode } from 'react'
-import { Icon } from 'src/components/Icon'
-import { IconType } from 'src/components/Icon/icons'
 
 interface VoteProps {
   support: Support

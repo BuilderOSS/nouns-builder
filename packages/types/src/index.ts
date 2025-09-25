@@ -1,3 +1,4 @@
+export * from './artwork'
 export * from './chain'
 export * from './decode'
 export * from './duration'

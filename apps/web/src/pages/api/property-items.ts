@@ -1,4 +1,4 @@
-import { getPropertyItems } from '@buildeross/sdk'
+import { getPropertyItems } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { isAddress } from 'viem'

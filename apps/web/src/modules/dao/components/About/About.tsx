@@ -3,6 +3,8 @@ import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { parseContractURI } from '@buildeross/utils/parseContractURI'
@@ -10,9 +12,6 @@ import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import Image from 'next/legacy/image'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { Avatar } from 'src/components/Avatar/Avatar'
-import { FallbackNextLegacyImage } from 'src/components/FallbackImage'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { about, daoInfo, daoName, statisticContent } from 'src/styles/About.css'
@@ -21,6 +20,7 @@ import { Address, formatEther } from 'viem'
 import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
 import { MembersList } from '../MembersList'
+import { responsiveGrid } from './About.css'
 import { DaoDescription } from './DaoDescription'
 import { ExternalLinks } from './ExternalLinks'
 import { Founder } from './Founder'
@@ -32,7 +32,6 @@ export const About: React.FC = () => {
     addresses: { token, treasury, metadata },
   } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
-  const { isMobile } = useLayoutStore()
   const { address } = useAccount()
 
   const { data: membershipInfo } = useDaoMembership({
@@ -118,11 +117,12 @@ export const About: React.FC = () => {
         <Flex align="center" justify="flex-start" w="100%">
           {daoImage ? (
             <Box mr="x4">
-              <FallbackNextLegacyImage
+              <FallbackImage
                 srcList={getFetchableUrls(daoImage)}
-                layout="fixed"
-                objectFit="contain"
-                style={{ borderRadius: '100%' }}
+                style={{
+                  borderRadius: '100%',
+                  objectFit: 'contain',
+                }}
                 alt=""
                 height={52}
                 width={52}
@@ -190,7 +190,7 @@ export const About: React.FC = () => {
       </Text>
 
       {founders && founders?.length > 0 ? (
-        <Grid columns={isMobile ? 1 : 2} mt="x6" gap="x4">
+        <Grid mt="x6" gap="x4" className={responsiveGrid}>
           {founders
             .filter((founder) => founder.ownershipPct > 0)
             .map((founder) => (
@@ -202,7 +202,7 @@ export const About: React.FC = () => {
           No founders allocation set.
         </Text>
       )}
-      <MembersList totalSupply={Number(totalSupply)} ownerCount={data?.ownerCount} />
+      <MembersList totalSupply={Number(totalSupply)} />
     </Box>
   )
 }

@@ -1,4 +1,4 @@
-import { CID } from 'multiformats/cid'
+import { isValid } from '@biglup/is-cid'
 
 export type IPFSUrl = `ipfs://${string}`
 
@@ -6,8 +6,7 @@ export function isCID(str: string | null | undefined): boolean {
   if (!str) return false
 
   try {
-    CID.parse(str)
-    return true
+    return isValid(str)
   } catch (e) {
     if (/^(bafy|Qm)/.test(str)) return true
     return false

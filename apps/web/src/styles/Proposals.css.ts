@@ -21,6 +21,12 @@ export const delegateBtn = style({
   ':hover': {
     backgroundColor: '#F9F9F9 !important',
   },
+  '@media': {
+    '(max-width: 420px)': {
+      paddingLeft: '8px !important',
+      paddingRight: '8px !important',
+    },
+  },
 })
 
 export const currentDelegateBtn = style({
@@ -33,6 +39,12 @@ export const currentDelegateBtn = style({
 export const createProposalBtn = style({
   fontFamily: 'ptRoot !important',
   height: '40px !important',
+  '@media': {
+    '(max-width: 420px)': {
+      paddingLeft: '8px !important',
+      paddingRight: '8px !important',
+    },
+  },
 })
 
 export const selectDelegateBtn = style({
@@ -40,36 +52,6 @@ export const selectDelegateBtn = style({
   fontFamily: 'ptRoot !important',
   borderRadius: '12px',
   height: 40,
-})
-
-export const animatedPanel = style({
-  height: '100vh',
-  width: '100vw',
-  position: 'fixed',
-  background: '#fff',
-  top: 0,
-  left: 0,
-  transform: 'translateY(105%)',
-  boxShadow: '0px 12px 30px rgba(0, 0, 0, 0.3)',
-  zIndex: 1,
-})
-
-export const animatedPanelInner = style({
-  overflowY: 'scroll',
-  height: `calc(100% - 96px)`,
-})
-
-export const panelProposalWrapper = style({
-  maxWidth: 680,
-  width: '100%',
-})
-
-export const panelCloseButton = style({
-  selectors: {
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
 })
 
 /* /votes/[id] */
@@ -204,4 +186,13 @@ export const proposalActionButtonVariants = styleVariants({
       width: '100%',
     },
   ],
+})
+
+export const cancelButtonBorder = style({
+  borderTop: '2px solid #F2F2F2',
+  '@media': {
+    '(min-width: 768px)': {
+      borderTop: 'none',
+    },
+  },
 })

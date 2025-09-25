@@ -1,15 +1,15 @@
 import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
-import { dashboardRequest } from '@buildeross/sdk/subgraph'
 import {
   CurrentAuctionFragment,
   DaoFragment,
+  dashboardRequest,
   ProposalFragment,
 } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
-import { DisplayPanel } from 'src/components/DisplayPanel'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 

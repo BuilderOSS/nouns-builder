@@ -2,20 +2,21 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
-import { useVotes } from '@buildeross/hooks'
-import { getEscrowDelegate } from '@buildeross/sdk/eas'
-import { SubgraphSDK } from '@buildeross/sdk/subgraph'
-import { OrderDirection, Token_OrderBy } from '@buildeross/sdk/subgraph'
-import { TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
+import { useVotes } from '@buildeross/hooks/useVotes'
+import {
+  OrderDirection,
+  SubgraphSDK,
+  Token_OrderBy,
+  TokenWithDaoQuery,
+} from '@buildeross/sdk/subgraph'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Meta } from 'src/components/Meta'
-import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import {
   About,
@@ -147,12 +148,6 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         image={ogImageURL}
         path={path}
         description={ogDescription}
-        farcaster={{
-          name,
-          contractAddress: collection,
-          chain,
-          image: token?.image || undefined,
-        }}
       />
 
       <DaoTopSection
@@ -245,19 +240,12 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       auctionAddress,
     } = token.dao
 
-    const escrowDelegateAddress = (await getEscrowDelegate(
-      tokenAddress,
-      treasuryAddress,
-      chain.id
-    )) as AddressType
-
     const addresses: DaoContractAddresses = {
       token: collection,
       metadata: metadataAddress,
       treasury: treasuryAddress,
       governor: governorAddress,
       auction: auctionAddress,
-      escrowDelegate: escrowDelegateAddress,
     }
 
     const daoOgMetadata: DaoOgMetadata = {

@@ -14,8 +14,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     let page = 1
     const limit = 1000
     let hasMore = true
+    const MAX_PAGES = 200
 
-    while (hasMore) {
+    while (hasMore && page <= MAX_PAGES) {
       const members = await votersRequest(
         Number(chainId) as CHAIN_ID,
         (collectionId as string).toLowerCase(),

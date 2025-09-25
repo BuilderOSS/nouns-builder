@@ -1,61 +1,54 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
-import { useVotes } from '@buildeross/hooks'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useDelegate } from '@buildeross/hooks/useDelegate'
+import { useVotes } from '@buildeross/hooks/useVotes'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { Countdown } from '@buildeross/ui/Countdown'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { Countdown } from 'src/components/Countdown'
-import AnimatedModal from 'src/components/Modal/AnimatedModal'
-import { SuccessModalContent } from 'src/components/Modal/SuccessModalContent'
 import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks'
+import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
+import { skeletonAnimation } from 'src/styles/animations.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
-import {
-  createProposalBtn,
-  delegateBtn,
-  selectDelegateBtn,
-} from 'src/styles/Proposals.css'
+import { createProposalBtn, delegateBtn } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
-import { MobileMenu } from './MobileMenu'
 
 export const Activity: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
   const { createProposal } = useProposalStore()
   const { address } = useAccount()
   const { query, isReady, push } = useRouter()
-  const { isMobile } = useLayoutStore()
   const { openConnectModal } = useConnectModal()
   const chain = useChainStore((x) => x.chain)
   const LIMIT = 20
 
-  const { token } = addresses
-
-  const { data, error } = useSWR<ProposalsResponse>(
-    isReady ? [SWR_KEYS.PROPOSALS, chain.id, query.token, query.page] : null,
-    ([_key, chainId, token, page]) =>
-      getProposals(chainId as CHAIN_ID, token as string, LIMIT, Number(page))
+  const { data, error, isLoading } = useSWR<ProposalsResponse>(
+    isReady && addresses?.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token, query.page] as const)
+      : null,
+    ([_key, _chainId, _token, _page]) =>
+      getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
   )
 
   const { handlePageBack, handlePageForward } = usePagination(data?.pageInfo?.hasNextPage)
   const { data: membership } = useDaoMembership({
     chainId: chain.id,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses?.token as AddressType,
     signerAddress: address,
   })
 
@@ -63,7 +56,7 @@ export const Activity: React.FC = () => {
     chainId: chain.id,
     governorAddress: addresses?.governor,
     signerAddress: address,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses?.token as AddressType,
   })
 
   const { isGovernanceDelayed, delayedUntilTimestamp } = useDelayedGovernance({
@@ -88,11 +81,35 @@ export const Activity: React.FC = () => {
       disabled: false,
       transactions: [],
     })
-    push(`/dao/${query.network}/${query.token}/proposal/create`)
+    push(`/dao/${query.network}/${addresses?.token}/proposal/create`)
   }
 
-  if (!data && !error) {
+  if (!data && !error && !isLoading) {
     return null
+  }
+
+  if (error) {
+    return (
+      <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
+        <Flex width={'100%'} justify={'space-between'} align={'center'}>
+          <Text variant="heading-sm" style={{ fontWeight: 800 }}>
+            Proposals
+          </Text>
+        </Flex>
+        <Flex
+          width={'100%'}
+          mt={'x4'}
+          p={'x4'}
+          justify={'center'}
+          borderColor={'border'}
+          borderStyle={'solid'}
+          borderRadius={'curved'}
+          borderWidth={'normal'}
+        >
+          <Text color="negative">Failed to load proposals. Please try again.</Text>
+        </Flex>
+      </Flex>
+    )
   }
 
   return (
@@ -103,71 +120,77 @@ export const Activity: React.FC = () => {
             Proposals
           </Text>
 
-          <Flex justify={'center'} align={'center'}>
-            {address && !isDelegating && !isOwner && !isMobile && (
+          <Flex
+            justify={'center'}
+            align={'center'}
+            display={{ '@initial': 'none', '@768': 'flex' }}
+          >
+            {address && !isDelegating && !isOwner && (
               <Flex mr={'x4'} color={'tertiary'}>
                 You have no votes.
               </Flex>
             )}
-            {isDelegating && !isMobile && (
+            {isDelegating && (
               <Flex mr={'x4'} color={'tertiary'}>
                 Your votes are delegated.
               </Flex>
             )}
-            {isOwner && !hasThreshold && !isMobile && (
+            {isOwner && !hasThreshold && (
               <Flex mr={'x4'} color={'tertiary'}>
                 {Number(proposalVotesRequired)} votes required to propose.
               </Flex>
             )}
-            {isOwner || isDelegating ? (
-              <>
-                {!isMobile ? (
-                  <ContractButton
-                    className={delegateBtn}
-                    borderColor="border"
-                    borderStyle="solid"
-                    borderWidth="normal"
-                    handleClick={view}
-                    mr="x2"
-                  >
-                    Delegate
-                  </ContractButton>
-                ) : (
-                  <MobileMenu>
-                    <ContractButton
-                      className={selectDelegateBtn}
-                      style={{ backgroundColor: '#FFF', color: '#000' }}
-                      handleClick={view}
-                    >
-                      Delegate
-                    </ContractButton>
-                  </MobileMenu>
-                )}
-              </>
-            ) : null}
-            {!address ? (
-              <Button
-                className={createProposalBtn}
-                onClick={openConnectModal}
-                color={'tertiary'}
+            {(isOwner || isDelegating) && (
+              <ContractButton
+                className={delegateBtn}
+                borderColor="border"
+                borderStyle="solid"
+                borderWidth="normal"
+                handleClick={view}
+                mr="x2"
               >
-                Create {!isMobile ? 'proposal' : null}
-              </Button>
-            ) : (
-              <Button
-                className={createProposalBtn}
-                onClick={address ? handleProposalCreation : openConnectModal}
-                disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
-                color={'tertiary'}
-              >
-                Create {!isMobile ? 'proposal' : null}
-              </Button>
+                Delegate
+              </ContractButton>
             )}
+            <Button
+              className={createProposalBtn}
+              onClick={address ? handleProposalCreation : openConnectModal}
+              disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+              color={'tertiary'}
+            >
+              Create proposal
+            </Button>
+          </Flex>
+          <Flex
+            justify={'center'}
+            align={'center'}
+            display={{ '@initial': 'flex', '@768': 'none' }}
+          >
+            {(isOwner || isDelegating) && (
+              <ContractButton
+                className={delegateBtn}
+                borderColor="border"
+                borderStyle="solid"
+                borderWidth="normal"
+                handleClick={view}
+                mr="x2"
+              >
+                Delegate
+              </ContractButton>
+            )}
+            <Button
+              className={createProposalBtn}
+              onClick={address ? handleProposalCreation : openConnectModal}
+              disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+              color={'tertiary'}
+            >
+              Create
+            </Button>
           </Flex>
         </Flex>
         {addresses && (
           <Upgrade
-            collection={query.token as string}
+            collection={addresses?.token as string}
             hasThreshold={hasThreshold}
             addresses={addresses}
           />
@@ -217,9 +240,22 @@ export const Activity: React.FC = () => {
                 </Text>
               </Flex>
             </Flex>
+          ) : isLoading && !data?.proposals?.length ? (
+            <Flex direction="column" gap="x4">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Box
+                  key={index}
+                  width="100%"
+                  height="x16"
+                  borderRadius="curved"
+                  backgroundColor="background2"
+                  style={{ animation: skeletonAnimation }}
+                />
+              ))}
+            </Flex>
           ) : data?.proposals?.length ? (
             data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard key={index} collection={token} {...proposal} />
+              <ProposalCard key={index} collection={addresses?.token} {...proposal} />
             ))
           ) : (
             <Flex
@@ -236,12 +272,14 @@ export const Activity: React.FC = () => {
             </Flex>
           )}
 
-          <Pagination
-            onNext={handlePageForward}
-            onPrev={handlePageBack}
-            isLast={!data?.pageInfo?.hasNextPage}
-            isFirst={!query.page}
-          />
+          {!isLoading && (
+            <Pagination
+              onNext={handlePageForward}
+              onPrev={handlePageBack}
+              isLast={!data?.pageInfo?.hasNextPage}
+              isFirst={!query.page}
+            />
+          )}
         </Flex>
       </Flex>
 

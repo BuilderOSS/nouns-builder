@@ -13,7 +13,7 @@ interface Countdown {
  * does not match server-rendered HTML" errors. */
 export const useCountdown = (
   endTime: number,
-  onEnd: <T extends any[]>(...args: T) => void,
+  onEnd: <T extends any[]>(...args: T) => void
 ): Countdown => {
   const [now, setNow] = useState(dayjs.unix(Date.now() / 1000))
   const [isRunning, setIsRunning] = useState(true)
@@ -37,7 +37,7 @@ export const useCountdown = (
   return {
     isEnded: now >= end,
     countdownString: `${Math.floor(countdown / 3600)}h ${Math.floor(
-      (countdown % 3600) / 60,
+      (countdown % 3600) / 60
     )}m ${countdown % 60}s`,
     countdownStringDays:
       countdown > 172800

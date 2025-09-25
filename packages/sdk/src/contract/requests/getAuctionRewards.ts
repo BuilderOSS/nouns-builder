@@ -16,7 +16,7 @@ export type GetAuctionRewardsResponse = {
 
 export const getAuctionRewards = async (
   chainId: CHAIN_ID,
-  auctionAddress: AddressType,
+  auctionAddress: AddressType
 ): Promise<GetAuctionRewardsResponse> => {
   const [founderReward, referralRewardsBPS, builderRewardsBPS] = await readContracts(
     serverConfig,
@@ -45,7 +45,7 @@ export const getAuctionRewards = async (
           args: [],
         },
       ],
-    },
+    }
   )
 
   const founderRewardsRecipient = founderReward[0]

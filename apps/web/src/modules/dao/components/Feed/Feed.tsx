@@ -1,9 +1,8 @@
+import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Button, Flex } from '@buildeross/zord'
 import { CastAddData, Message, SignatureScheme } from '@farcaster/hub-nodejs'
 import axios from 'axios'
 import React, { useMemo } from 'react'
-import { DisplayPanel } from 'src/components/DisplayPanel'
-import { useLayoutStore } from 'src/stores'
 import { useChainStore } from 'src/stores/useChainStore'
 import useSWRInfinite from 'swr/infinite'
 
@@ -33,7 +32,6 @@ type AddMsgWithUnix = Message & {
 type PageData = { value: AddMsgWithUnix[]; nextPageToken?: string }
 
 const Feed = ({ collectionAddress }: FeedTabProps) => {
-  const isMobile = useLayoutStore((x) => x.isMobile)
   const chain = useChainStore((x) => x.chain)
 
   const { data, error, isValidating, setSize } = useSWRInfinite(
@@ -60,7 +58,7 @@ const Feed = ({ collectionAddress }: FeedTabProps) => {
 
   if (error) {
     return (
-      <FeedTab isMobile={isMobile}>
+      <FeedTab>
         <Flex
           justify="center"
           align="center"
@@ -76,7 +74,7 @@ const Feed = ({ collectionAddress }: FeedTabProps) => {
 
   if (isValidating && !casts?.length) {
     return (
-      <FeedTab isMobile={isMobile}>
+      <FeedTab>
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
@@ -86,7 +84,7 @@ const Feed = ({ collectionAddress }: FeedTabProps) => {
   // this shouldn't occur. Keeping this here for next update.
   if (!casts?.length) {
     return (
-      <FeedTab isMobile={isMobile}>
+      <FeedTab>
         <Flex
           justify="center"
           align="center"
@@ -104,7 +102,7 @@ const Feed = ({ collectionAddress }: FeedTabProps) => {
   }
 
   return (
-    <FeedTab isMobile={isMobile}>
+    <FeedTab>
       {casts?.map((msg) => (
         <CastCard
           key={msg.hexHash}

@@ -37,7 +37,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export const awaitSubgraphSync = async (
   chainId: CHAIN_ID,
-  transactionBlockNumber: bigint,
+  transactionBlockNumber: bigint
 ) => {
   let status = await getSyncStatus(chainId)
   let tries = 0

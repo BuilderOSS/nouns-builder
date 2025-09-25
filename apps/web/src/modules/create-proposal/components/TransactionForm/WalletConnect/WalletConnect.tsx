@@ -1,13 +1,11 @@
 import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
 import { CHAIN_ID } from '@buildeross/types'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import SmartInput from 'src/components/Fields/SmartInput'
-import { TEXT } from 'src/components/Fields/types'
-import { Icon } from 'src/components/Icon'
 import {
   TransactionType,
   useProposalStore,
@@ -165,7 +163,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
     >
       <Flex as={Form} direction="column" gap="x4">
         <SmartInput
-          type={TEXT}
+          type={FIELD_TYPES.TEXT}
           formik={formik}
           {...formik.getFieldProps('wcLink')}
           id="wcLink"
@@ -231,7 +229,7 @@ const useDecodedTxPayload = (txPayload: WCPayload | null) => {
 }
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
-  const decoded = useDecodedTxPayload(txPayload)
+  const { decodedTransaction: decoded } = useDecodedTxPayload(txPayload)
 
   if (!decoded) return null
 
@@ -251,7 +249,7 @@ export const WalletConnect = () => {
   const [currentTxPayload, setCurrentTxPayload] = useState<WCPayload | null>(null)
 
   // Decode the current transaction for better summary
-  const decoded = useDecodedTxPayload(currentTxPayload)
+  const { decodedTransaction: decoded } = useDecodedTxPayload(currentTxPayload)
 
   const initialValues: WalletConnectValues = {
     wcLink: '',

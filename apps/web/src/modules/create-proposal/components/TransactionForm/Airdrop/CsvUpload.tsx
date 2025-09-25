@@ -1,7 +1,6 @@
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import Papa from 'papaparse'
 import React, { useCallback, useState } from 'react'
-import { Icon } from 'src/components/Icon'
 
 export interface CsvRecord {
   address: string

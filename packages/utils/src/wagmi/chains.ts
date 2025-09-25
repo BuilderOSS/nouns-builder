@@ -23,5 +23,5 @@ export const transports: Record<CHAIN_ID, Transport> = chains.reduce(
       [chain.id]: fallback(list),
     }
   },
-  {} as Record<CHAIN_ID, Transport>,
+  {} as Record<CHAIN_ID, Transport>
 )

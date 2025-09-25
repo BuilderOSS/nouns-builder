@@ -1,7 +1,5 @@
-import { Box, Text } from '@buildeross/zord'
-import { color } from '@buildeross/zord'
+import { Box, color, Text } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useLayoutStore } from 'src/stores'
 import { formatEther } from 'viem'
 
 import { AuctionHistory, StartTimes } from './AuctionChart'
@@ -37,7 +35,6 @@ export const AuctionGraph = ({
   const chartWidth = width - paddingX * 2
   const chartHeight = height - paddingY * 2
 
-  const { isMobile } = useLayoutStore()
   const maximumYFromData = Math.max(...chartData.map((e) => Number(e.winningBidAmt)))
   const lineRef = useRef<SVGPolylineElement | null>(null)
 
@@ -118,7 +115,6 @@ export const AuctionGraph = ({
         visibleIndex={visibleIndex}
         maximumYFromData={maximumYFromData}
         chartHeight={chartHeight}
-        isMobile={isMobile}
         cursorOpacity={cursorOpacity}
       />
       <Box
@@ -170,7 +166,6 @@ type XValuesProps = {
   visibleIndex: number
   maximumYFromData: number
   chartHeight: number
-  isMobile: boolean
   cursorOpacity: number
 }
 
@@ -184,10 +179,9 @@ const XValues = React.memo(
     visibleIndex,
     maximumYFromData,
     chartHeight,
-    isMobile,
     cursorOpacity,
   }: XValuesProps) => {
-    const FONT_SIZE = width / (isMobile ? 36 : 60)
+    const FONT_SIZE = width / 42
     const parts = chartData.length
     return (
       <>
@@ -201,7 +195,7 @@ const XValues = React.memo(
           return (
             <Text
               style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
-              fontSize={isMobile ? 20 : 12}
+              fontSize={{ '@initial': 20, '@768': 12 }}
               key={index}
               as="text"
               variant="eyebrow"
