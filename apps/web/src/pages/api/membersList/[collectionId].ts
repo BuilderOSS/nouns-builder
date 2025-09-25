@@ -12,11 +12,31 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // If pagination parameters are provided, use them
     if (page !== undefined || limit !== undefined) {
+      const parsedPage = Array.isArray(page)
+        ? Number(page[0])
+        : page !== undefined
+          ? Number(page)
+          : undefined
+      const parsedLimit = Array.isArray(limit)
+        ? Number(limit[0])
+        : limit !== undefined
+          ? Number(limit)
+          : undefined
+
+      const normalizedPage =
+        parsedPage !== undefined && Number.isFinite(parsedPage) && parsedPage > 0
+          ? parsedPage
+          : undefined
+      const normalizedLimit =
+        parsedLimit !== undefined && Number.isFinite(parsedLimit) && parsedLimit > 0
+          ? parsedLimit
+          : undefined
+
       const membersList = await votersRequest(
         Number(chainId) as CHAIN_ID,
         (collectionId as string).toLowerCase(),
-        typeof Number(page) === 'number' ? Number(page) : undefined,
-        typeof Number(limit) === 'number' ? Number(limit) : undefined
+        normalizedPage,
+        normalizedLimit
       )
       res.status(200).json({ membersList })
       return
