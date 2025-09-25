@@ -1,3 +1,4 @@
+import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -5,6 +6,7 @@ import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { FieldArray, Form, Formik } from 'formik'
 import { truncate } from 'lodash'
 import { useCallback, useState } from 'react'
+import { useChainStore } from 'src/stores/useChainStore'
 import { useDaoStore } from 'src/stores/useDaoStore'
 import { formatUnits, parseUnits } from 'viem'
 
@@ -22,8 +24,14 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
   const [isMediaUploading, setIsMediaUploading] = useState(false)
 
   const {
-    addresses: { escrowDelegate, treasury },
+    addresses: { token, treasury },
   } = useDaoStore()
+  const chain = useChainStore((x) => x.chain)
+  const { escrowDelegate } = useEscrowDelegate({
+    chainId: chain.id,
+    tokenAddress: token,
+    treasuryAddress: treasury,
+  })
 
   const handleAddMilestone = useCallback(
     (

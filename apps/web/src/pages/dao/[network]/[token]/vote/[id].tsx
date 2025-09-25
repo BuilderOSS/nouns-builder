@@ -1,12 +1,11 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import SWR_KEYS from '@buildeross/constants/swrKeys'
-import { getEscrowDelegate, isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
+import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import type { AddressType } from '@buildeross/types'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
-import { withTimeout } from '@buildeross/utils/withTimeout'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -245,24 +244,12 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
     chainId: chain.id,
   }
 
-  const escrowDelegateFetcher = async () => {
-    return getEscrowDelegate(tokenAddress, treasuryAddress, chain.id)
-  }
-
-  let escrowDelegateAddress: AddressType | null = null
-  try {
-    escrowDelegateAddress = await withTimeout(escrowDelegateFetcher, 5000)
-  } catch (e) {
-    console.error(`Failed to fetch escrow delegate:`, e)
-  }
-
   const addresses: DaoContractAddresses = {
     token: tokenAddress,
     metadata: metadataAddress,
     governor: governorAddress,
     treasury: treasuryAddress,
     auction: auctionAddress,
-    escrowDelegate: escrowDelegateAddress as AddressType, // undefined cannot be serialized
   }
 
   const ogImageURL = `${protocol}://${
