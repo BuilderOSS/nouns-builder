@@ -58,7 +58,7 @@ export const AuctionPaused = () => {
       )
 
       const isPausing =
-        pauseIndex >= 0 ? proposal.targets[pauseIndex] !== addresses?.auction : false
+        pauseIndex >= 0 ? proposal.targets[pauseIndex] === addresses?.auction : false
       const isUnpausing =
         unpauseIndex >= 0 ? proposal.targets[unpauseIndex] === addresses?.auction : false
 

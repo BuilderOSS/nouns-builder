@@ -6,7 +6,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { collectionId, chainId, page, limit } = req.query
 
   try {
-    if (!collectionId || !chainId) {
+    const rawChainId = Array.isArray(chainId) ? chainId[0] : chainId
+    const parsedChainId = rawChainId !== undefined ? Number(rawChainId) : undefined
+    const normalizedChainId =
+      parsedChainId !== undefined && Number.isFinite(parsedChainId) && parsedChainId > 0
+        ? (parsedChainId as CHAIN_ID)
+        : undefined
+
+    const collectionAddress = (
+      Array.isArray(collectionId) ? collectionId[0] : collectionId
+    ) as string
+
+    if (!collectionAddress || !normalizedChainId) {
       throw new Error('Invalid query')
     }
 
@@ -33,8 +44,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           : undefined
 
       const membersList = await votersRequest(
-        Number(chainId) as CHAIN_ID,
-        (collectionId as string).toLowerCase(),
+        normalizedChainId,
+        collectionAddress,
         normalizedPage,
         normalizedLimit
       )
@@ -50,8 +61,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     while (hasMore) {
       const members = await votersRequest(
-        Number(chainId) as CHAIN_ID,
-        (collectionId as string).toLowerCase(),
+        normalizedChainId,
+        collectionAddress,
         currentPage,
         batchLimit
       )
