@@ -37,18 +37,18 @@ export const Activity: React.FC = () => {
   const chain = useChainStore((x) => x.chain)
   const LIMIT = 20
 
-  const { token } = addresses
-
   const { data, error, isLoading } = useSWR<ProposalsResponse>(
-    isReady ? [SWR_KEYS.PROPOSALS, chain.id, query.token, query.page] : null,
-    ([_key, chainId, token, page]) =>
-      getProposals(chainId as CHAIN_ID, token as string, LIMIT, Number(page))
+    isReady && addresses?.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token, query.page] as const)
+      : null,
+    ([_key, _chainId, _token, _page]) =>
+      getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
   )
 
   const { handlePageBack, handlePageForward } = usePagination(data?.pageInfo?.hasNextPage)
   const { data: membership } = useDaoMembership({
     chainId: chain.id,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses?.token as AddressType,
     signerAddress: address,
   })
 
@@ -56,7 +56,7 @@ export const Activity: React.FC = () => {
     chainId: chain.id,
     governorAddress: addresses?.governor,
     signerAddress: address,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses?.token as AddressType,
   })
 
   const { isGovernanceDelayed, delayedUntilTimestamp } = useDelayedGovernance({
@@ -81,7 +81,7 @@ export const Activity: React.FC = () => {
       disabled: false,
       transactions: [],
     })
-    push(`/dao/${query.network}/${query.token}/proposal/create`)
+    push(`/dao/${query.network}/${addresses?.token}/proposal/create`)
   }
 
   if (!data && !error && !isLoading) {
@@ -190,7 +190,7 @@ export const Activity: React.FC = () => {
         </Flex>
         {addresses && (
           <Upgrade
-            collection={query.token as string}
+            collection={addresses?.token as string}
             hasThreshold={hasThreshold}
             addresses={addresses}
           />
@@ -255,7 +255,7 @@ export const Activity: React.FC = () => {
             </Flex>
           ) : data?.proposals?.length ? (
             data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard key={index} collection={token} {...proposal} />
+              <ProposalCard key={index} collection={addresses?.token} {...proposal} />
             ))
           ) : (
             <Flex

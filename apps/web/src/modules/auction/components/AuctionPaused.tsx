@@ -17,23 +17,25 @@ export const AuctionPaused = () => {
   const chain = useChainStore((x) => x.chain)
   const LIMIT = 20
 
-  const { auction } = useDaoStore((x) => x.addresses)
+  const addresses = useDaoStore((x) => x.addresses)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
-    address: auction,
+    address: addresses?.auction,
     functionName: 'paused',
     chainId: chain.id,
   })
 
   const { data } = useSWR<ProposalsResponse>(
-    paused && isReady ? [SWR_KEYS.PROPOSALS, chain.id, query.token, query.page] : null,
-    ([_key, chainId, token, page]) =>
-      getProposals(chainId as CHAIN_ID, token as string, LIMIT, Number(page))
+    paused && isReady && addresses?.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token, query.page] as const)
+      : null,
+    ([_key, _chainId, _token, _page]) =>
+      getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
   )
 
   const pausedProposal = useMemo(() => {
-    if (!(paused && auction)) return undefined
+    if (!(paused && addresses?.auction)) return undefined
 
     const pauseCalldata = encodeFunctionData({
       abi: auctionAbi,
@@ -55,13 +57,14 @@ export const AuctionPaused = () => {
         (calldata) => calldata === unpauseCalldata
       )
 
-      const isPausing = pauseIndex >= 0 ? proposal.targets[pauseIndex] !== auction : false
+      const isPausing =
+        pauseIndex >= 0 ? proposal.targets[pauseIndex] !== addresses?.auction : false
       const isUnpausing =
-        unpauseIndex >= 0 ? proposal.targets[unpauseIndex] === auction : false
+        unpauseIndex >= 0 ? proposal.targets[unpauseIndex] === addresses?.auction : false
 
       if (isPausing && !isUnpausing) return proposal
     })
-  }, [paused, data?.proposals, auction])
+  }, [paused, data?.proposals, addresses?.auction])
 
   if (!paused) return null
 

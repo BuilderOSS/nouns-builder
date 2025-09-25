@@ -8,7 +8,6 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Stack } from '@buildeross/zord'
 import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { FormikHelpers } from 'formik'
-import { useRouter } from 'next/router'
 import { useCallback, useState } from 'react'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
@@ -30,27 +29,25 @@ export const Escrow: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ipfsUploadError, setIpfsUploadError] = useState<Error | null>(null)
 
-  const { query, isReady } = useRouter()
-
   const chain = useChainStore((state) => state.chain)
 
   const addTransaction = useProposalStore((state) => state.addTransaction)
 
-  const {
-    addresses: { treasury },
-  } = useDaoStore()
+  const { addresses } = useDaoStore()
 
   const { data } = useSWR<ProposalsResponse>(
-    isReady ? [SWR_KEYS.PROPOSALS, chain.id, query.token, '0'] : null,
-    ([_key, chainId, token, _page]) =>
-      getProposals(chainId as CHAIN_ID, token as string, 1, Number(0))
+    addresses?.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token, '0'] as const)
+      : null,
+    ([_key, _chainId, _token, _page]) =>
+      getProposals(_chainId as CHAIN_ID, _token as string, 1, Number(0))
   )
 
   const lastProposalId = data?.proposals?.[0]?.proposalNumber ?? 0
 
   const handleEscrowTransaction = useCallback(
     async (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => {
-      if (!treasury || !values.tokenAddress || !values.tokenMetadata) {
+      if (!addresses?.treasury || !values.tokenAddress || !values.tokenMetadata) {
         return
       }
 
@@ -134,7 +131,7 @@ export const Escrow: React.FC = () => {
       values.recipientAddress = await getEnsAddress(values.recipientAddress)
 
       // create bundler transaction data
-      const escrowData = encodeEscrowData(values, treasury, cid, chain.id)
+      const escrowData = encodeEscrowData(values, addresses.treasury, cid, chain.id)
       const milestoneAmounts = values.milestones.map((x) =>
         parseUnits(x.amount.toString(), tokenDecimals)
       )
@@ -208,7 +205,7 @@ export const Escrow: React.FC = () => {
         setIsSubmitting(false)
       }
     },
-    [addTransaction, chain.id, lastProposalId, treasury]
+    [addTransaction, chain.id, lastProposalId, addresses?.treasury]
   )
 
   return (
