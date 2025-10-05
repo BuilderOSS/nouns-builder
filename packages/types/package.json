@@ -38,7 +38,6 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist .turbo",
-    "dev": "tsup --watch",
     "lint": "eslint src --fix",
     "type-check": "tsc --noEmit"
   },
