@@ -38,7 +38,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
   const { name: chainName, icon: chainIcon } =
     PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? {}
-  const router = useRouter()
+  const { push } = useRouter()
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
@@ -71,7 +71,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     },
   })
   const handleSelectAuction = () => {
-    router.push(`/dao/${currentChainSlug}/${tokenAddress}`)
+    push(`/dao/${currentChainSlug}/${tokenAddress}`)
   }
   const currentChainSlug = chainIdToSlug(chainId)
 

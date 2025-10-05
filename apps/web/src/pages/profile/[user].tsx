@@ -14,7 +14,6 @@ import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
 import Pagination from 'src/components/Pagination'
 import { TokenPreview } from 'src/components/Profile'
-import { usePagination } from 'src/hooks/usePagination'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -59,8 +58,6 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
 
   const isLoading = isLoadingTokens || isLoadingDaos
   const hasDaos = !!daos && daos.length > 0
-
-  const { handlePageBack, handlePageForward } = usePagination(tokens?.hasNextPage)
 
   const pageTitle = `${userName}'s Profile`
   const pageDescription = `View ${userName}'s profile and DAO tokens on Nouns Builder`
@@ -269,12 +266,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   </Flex>
                 )}
 
-                <Pagination
-                  onNext={handlePageForward}
-                  onPrev={handlePageBack}
-                  isLast={!tokens?.hasNextPage}
-                  isFirst={!page}
-                />
+                <Pagination hasNextPage={tokens?.hasNextPage} />
               </>
             )}
 

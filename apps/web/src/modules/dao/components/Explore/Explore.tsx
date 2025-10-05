@@ -18,65 +18,10 @@ interface ExploreProps extends Partial<ExploreDaosResponse> {
 }
 
 export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }) => {
-  const router = useRouter()
-  const { pathname } = router
+  const { query } = useRouter()
   const chain = useChainStore((x) => x.chain)
 
-  const page = router.query.page
-
-  const handlePageBack = React.useCallback(() => {
-    // user is on the first page
-    if (!page)
-      return {
-        pathname,
-        query: {
-          ...router.query,
-        },
-      }
-
-    // user is at least on the second page
-    return Number(page) > 2
-      ? {
-          pathname,
-          query: {
-            ...router.query,
-            page: Number(page) - 1,
-          },
-        }
-      : {
-          pathname,
-        }
-  }, [router, pathname, page])
-
-  const handlePageForward = React.useCallback(() => {
-    // there are no more results to be fetched
-    if (!hasNextPage)
-      return {
-        pathname,
-        query: {
-          page,
-        },
-      }
-
-    // user is on the first page
-    if (!page)
-      return {
-        pathname,
-        query: {
-          ...router.query,
-          page: 2,
-        },
-      }
-
-    // user is at least on the second page
-    return {
-      pathname,
-      query: {
-        ...router.query,
-        page: Number(page) + 1,
-      },
-    }
-  }, [router, pathname, page, hasNextPage])
+  const page = query.page
 
   return (
     <Fragment>
@@ -103,13 +48,7 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
               )
             })}
           </Grid>
-          <Pagination
-            onNext={handlePageForward}
-            onPrev={handlePageBack}
-            isLast={!hasNextPage}
-            isFirst={!router.query.page}
-            scroll={true}
-          />
+          <Pagination hasNextPage={hasNextPage} scroll={true} />
         </Fragment>
       ) : isLoading ? (
         <ExploreSkeleton />
@@ -125,12 +64,7 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
             There are no DAOs here
           </Text>
 
-          <Pagination
-            onNext={handlePageForward}
-            onPrev={handlePageBack}
-            isLast={!hasNextPage}
-            isFirst={!router.query.page}
-          />
+          <Pagination hasNextPage={hasNextPage} />
         </Fragment>
       )}
     </Fragment>

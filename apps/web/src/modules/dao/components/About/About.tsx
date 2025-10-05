@@ -91,15 +91,15 @@ export const About: React.FC = () => {
     return balance ? formatCryptoVal(formatEther(balance.value)) : null
   }, [balance])
 
-  const router = useRouter()
+  const { push, query, pathname } = useRouter()
 
   const openTreasuryTab = () => {
-    const current = { ...router.query } // Get existing query params
+    const current = { ...query } // Get existing query params
     current['tab'] = 'treasury'
 
-    router.push(
+    push(
       {
-        pathname: router.pathname,
+        pathname,
         query: current,
       },
       undefined,

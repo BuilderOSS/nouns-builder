@@ -14,7 +14,7 @@ interface ExploreSortMenuProps {
 }
 
 const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
-  const router = useRouter()
+  const { push, pathname, query } = useRouter()
 
   const selectionToOrderBy = React.useCallback((option: string) => {
     switch (option) {
@@ -31,15 +31,15 @@ const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
 
   const handleSortChange = React.useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      router.push({
-        pathname: router.pathname,
+      push({
+        pathname,
         query: {
-          ...router.query,
+          ...query,
           orderBy: selectionToOrderBy(e.target.value),
         },
       })
     },
-    [router, selectionToOrderBy]
+    [push, pathname, query, selectionToOrderBy]
   )
 
   return (

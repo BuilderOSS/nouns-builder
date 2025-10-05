@@ -50,7 +50,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   governor,
   title,
 }) => {
-  const router = useRouter()
+  const { push } = useRouter()
   const config = useConfig()
   const { general, ipfsUpload, orderedLayers, setFulfilledSections, resetForm } =
     useFormStore()
@@ -122,7 +122,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     setIsPendingTransaction(false)
     setFulfilledSections(title)
 
-    router.push(`/dao/${chain.slug}/${token}`).then(() => {
+    push(`/dao/${chain.slug}/${token}`).then(() => {
       resetForm()
     })
   }, [
@@ -136,7 +136,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     token,
     setFulfilledSections,
     title,
-    router,
+    push,
     resetForm,
   ])
 

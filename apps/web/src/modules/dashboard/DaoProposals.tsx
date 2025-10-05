@@ -28,7 +28,7 @@ export const DaoProposals = ({
     chainId,
   })
 
-  const router = useRouter()
+  const { push } = useRouter()
 
   const currentChainSlug = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)?.slug
 
@@ -65,9 +65,7 @@ export const DaoProposals = ({
           borderRadius="curved"
           size={'sm'}
           disabled={isGovernanceDelayed}
-          onClick={() =>
-            router.push(`/dao/${currentChainSlug}/${tokenAddress}/proposal/create`)
-          }
+          onClick={() => push(`/dao/${currentChainSlug}/${tokenAddress}/proposal/create`)}
         >
           Create Proposal
         </Button>

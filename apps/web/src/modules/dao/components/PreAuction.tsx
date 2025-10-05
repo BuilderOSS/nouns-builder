@@ -22,7 +22,7 @@ interface PreAuctionProps {
 }
 
 export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress }) => {
-  const router = useRouter()
+  const { push, query, pathname } = useRouter()
   const { address } = useAccount()
   const { addresses } = useDaoStore()
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -63,7 +63,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
     })
 
     const [tokenId] = unpackOptionalArray(auction, 6)
-    router.push(`/dao/${router.query.network}/${collectionAddress}/${tokenId}`)
+    push(`/dao/${query.network}/${collectionAddress}/${tokenId}`)
   }
 
   return (
@@ -81,9 +81,9 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
         <Button className={preAuctionButtonVariants['edit']}>
           <Link
             href={{
-              pathname: router.pathname,
+              pathname,
               query: {
-                network: router.query.network,
+                network: query.network,
                 token: collectionAddress,
                 tab: 'admin',
               },

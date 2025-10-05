@@ -19,7 +19,7 @@ export const Transactions = ({
   disabled?: boolean
   simulationError?: string
 }) => {
-  const router = useRouter()
+  const { back } = useRouter()
 
   return (
     <Stack mb={'x10'}>
@@ -43,7 +43,7 @@ export const Transactions = ({
                 simulationError={error}
                 disabled={disabled || transaction.type === 'upgrade'}
                 transaction={transaction}
-                handleEdit={() => router.back()}
+                handleEdit={() => back()}
                 simulationUrl={simulation?.url}
               >
                 <Field

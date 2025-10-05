@@ -8,7 +8,7 @@ import { useDaoStore } from 'src/stores/useDaoStore'
 import { useReadContract } from 'wagmi'
 
 const AdminNav = () => {
-  const router = useRouter()
+  const { push, query } = useRouter()
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((state) => state.chain)
 
@@ -25,11 +25,11 @@ const AdminNav = () => {
   const [tokenId] = unpackOptionalArray(auction, 6)
 
   const handleNavigation = async () => {
-    await router.push({
+    await push({
       pathname: `/dao/[network]/[token]/[tokenId]`,
       query: {
-        network: router.query?.network,
-        token: router.query?.token,
+        network: query?.network,
+        token: query?.token,
         tokenId: Number(tokenId),
         tab: 'admin',
       },

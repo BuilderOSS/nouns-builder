@@ -19,7 +19,7 @@ export const FixRendererBase = ({
   collection: string
   addresses: DaoContractAddresses
 }) => {
-  const router = useRouter()
+  const { push } = useRouter()
   const createProposal = useProposalStore((state) => state.createProposal)
   const chain = useChainStore((x) => x.chain)
 
@@ -38,7 +38,7 @@ export const FixRendererBase = ({
       summary,
     })
 
-    router.push({
+    push({
       pathname: '/dao/[network]/[token]/proposal/review',
       query: { network: chain.slug, token: collection },
     })

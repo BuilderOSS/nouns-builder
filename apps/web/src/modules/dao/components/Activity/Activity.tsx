@@ -14,7 +14,6 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
 import { useChainStore } from 'src/stores/useChainStore'
@@ -45,7 +44,6 @@ export const Activity: React.FC = () => {
       getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
   )
 
-  const { handlePageBack, handlePageForward } = usePagination(data?.pageInfo?.hasNextPage)
   const { data: membership } = useDaoMembership({
     chainId: chain.id,
     collectionAddress: addresses?.token as AddressType,
@@ -272,14 +270,7 @@ export const Activity: React.FC = () => {
             </Flex>
           )}
 
-          {!isLoading && (
-            <Pagination
-              onNext={handlePageForward}
-              onPrev={handlePageBack}
-              isLast={!data?.pageInfo?.hasNextPage}
-              isFirst={!query.page}
-            />
-          )}
+          {!isLoading && <Pagination hasNextPage={data?.pageInfo?.hasNextPage} />}
         </Flex>
       </Flex>
 

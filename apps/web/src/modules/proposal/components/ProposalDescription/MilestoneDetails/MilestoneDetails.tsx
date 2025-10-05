@@ -58,7 +58,7 @@ export const MilestoneDetails = ({
   decodedTransaction,
   executionTransactionHash,
 }: MilestoneDetailsProps) => {
-  const router = useRouter()
+  const { push, query } = useRouter()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { addTransaction } = useProposalStore()
@@ -154,15 +154,15 @@ export const MilestoneDetails = ({
 
       setTimeout(() => addTransaction(releaseEscrowTxnData), 3000)
 
-      router.push({
+      push({
         pathname: `/dao/[network]/[token]/proposal/review`,
         query: {
-          network: router.query?.network,
-          token: router.query?.token,
+          network: query?.network,
+          token: query?.token,
         },
       })
     },
-    [router, addTransaction, invoiceData?.title, invoiceAddress, currentMilestone]
+    [push, query, addTransaction, invoiceData?.title, invoiceAddress, currentMilestone]
   )
 
   const [isReleasing, setIsReleasing] = useState(false)
