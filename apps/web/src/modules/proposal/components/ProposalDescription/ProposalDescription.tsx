@@ -17,7 +17,7 @@ import {
   getEscrowBundler,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 

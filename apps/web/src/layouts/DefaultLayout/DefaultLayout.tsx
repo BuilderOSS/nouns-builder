@@ -1,23 +1,33 @@
-import { Box } from '@buildeross/zord'
-import React, { ReactElement, ReactNode } from 'react'
+import { Chain } from '@buildeross/types'
+import React, { ReactNode } from 'react'
+import { DaoContractAddresses } from 'src/stores'
 
+import { BaseLayout } from '../BaseLayout'
 import { LayoutWrapper } from '../LayoutWrapper'
 import { Footer } from './Footer'
-import { Nav } from './Nav'
 
-export function DefaultLayout({ children }: { children: ReactNode }) {
+export function DefaultLayout({
+  children,
+  chain,
+  addresses,
+}: {
+  children: ReactNode
+  chain?: Chain
+  addresses?: DaoContractAddresses
+}) {
   return (
-    <Box>
-      <Nav />
-      <Box px={'x4'} pt={{ '@initial': 'x20', '@480': 'x16' }}>
-        {children}
-      </Box>
-      <Footer />
-    </Box>
+    <BaseLayout
+      chain={chain}
+      addresses={addresses}
+      contentPadding={{ '@initial': 'x20', '@480': 'x16' }}
+      footer={<Footer />}
+    >
+      {children}
+    </BaseLayout>
   )
 }
 
-export function getDefaultLayout(page: ReactElement) {
+export function getDefaultLayout(page: React.ReactElement) {
   return (
     <LayoutWrapper>
       <DefaultLayout>{page}</DefaultLayout>

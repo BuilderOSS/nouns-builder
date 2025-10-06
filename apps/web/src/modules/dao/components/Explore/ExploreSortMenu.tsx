@@ -42,15 +42,23 @@ const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
     [push, pathname, query, selectionToOrderBy]
   )
 
+  const defaultSort = React.useMemo(() => {
+    const { sortKey } = query
+    if (
+      sortKey &&
+      typeof sortKey === 'string' &&
+      Object.keys(SORT_KEY).includes(sortKey)
+    ) {
+      return SORT_KEY[sortKey as keyof typeof SORT_KEY]
+    }
+    return 'Created'
+  }, [query])
+
   return (
     <Flex w={'auto'}>
       <Select
         name="Explore Sort"
-        defaultValue={
-          // (SORT_KEY[router?.query.sortKey] as string) is throwing a ts error
-          // @ts-ignore-next-line
-          router.query.sortKey ? (SORT_KEY[router?.query.sortKey] as string) : 'Created'
-        }
+        defaultValue={defaultSort}
         onChange={(e) => handleSortChange(e)}
       >
         {Object.values(SORT_KEY).map((value) => (

@@ -2,8 +2,7 @@ import { atoms, Box, Icon, Paragraph } from '@buildeross/zord'
 import Link from 'next/link'
 import { VersionType } from 'src/modules/create-proposal/constants'
 import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 
 export interface UpgradeInProgressProps {
   contractVersion: VersionType

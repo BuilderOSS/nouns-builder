@@ -6,7 +6,7 @@ import {
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useDaoStore } from 'src/stores'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 import { getAddress } from 'viem'
 import { useAccount, useWatchContractEvent } from 'wagmi'

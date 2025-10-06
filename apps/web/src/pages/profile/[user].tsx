@@ -16,7 +16,7 @@ import Pagination from 'src/components/Pagination'
 import { TokenPreview } from 'src/components/Profile'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import {
   daosContainer,
   loadingSkeleton,

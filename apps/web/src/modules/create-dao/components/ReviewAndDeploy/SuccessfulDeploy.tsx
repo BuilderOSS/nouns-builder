@@ -5,8 +5,7 @@ import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { useChainStore } from 'src/stores/useChainStore'
-import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
+import { DaoContractAddresses, useChainStore, useDaoStore } from 'src/stores'
 import {
   deployPendingButtonStyle,
   infoSectionLabelStyle,

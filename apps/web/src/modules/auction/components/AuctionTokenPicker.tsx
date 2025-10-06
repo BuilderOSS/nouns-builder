@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { OptionalLink } from 'src/components/OptionalLink'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 
 import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
 import { auctionDateNavButton, auctionTextVariants } from './Auction.css'

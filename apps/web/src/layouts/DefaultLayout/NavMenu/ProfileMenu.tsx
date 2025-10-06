@@ -14,7 +14,7 @@ import axios from 'axios'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 import { useAccount, useBalance } from 'wagmi'
 

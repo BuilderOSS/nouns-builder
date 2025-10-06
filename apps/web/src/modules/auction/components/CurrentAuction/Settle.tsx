@@ -3,8 +3,7 @@ import { AddressType } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import {
   useAccount,
   useConfig,

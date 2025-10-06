@@ -1,12 +1,12 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { render } from 'src/test/utils'
 import { describe, expect } from 'vitest'
 
 import AirdropForm from './AirdropForm'
 
-vi.mock('src/stores/useChainStore', () => ({
+vi.mock('src/stores', () => ({
   useChainStore: vi.fn(),
 }))
 

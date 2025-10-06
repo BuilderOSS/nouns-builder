@@ -1,7 +1,7 @@
 import { Button, Flex, mixins, Stack, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'
 
 const RecentlyCreated: React.FC<{

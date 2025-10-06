@@ -5,7 +5,7 @@ import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { useAccount, useSwitchChain } from 'wagmi'
 
 import { chainPopUpButton, navButton, wrongNetworkButton } from '../Nav.styles.css'
@@ -30,7 +30,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
   const { switchChain } = useSwitchChain()
   const onDisconnect = useWalletDisconnect()
 
-  const { chain: selectedChain, setChain } = useChainStore()
+  const { chain: selectedChain, setChain, hasHydrated } = useChainStore()
 
   const hasNetwork = useMemo(() => !!router.query?.network, [router.query])
 
@@ -74,39 +74,36 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
     [address, wagmiChain?.id, selectedChain?.id, hasNetwork]
   )
 
+  // Handle route change start events
   useEffect(() => {
     const handleRouteChangeStart = () => {
       onSetActiveDropdown(undefined)
       setIsChainInitialized(false)
     }
 
+    router.events.on('routeChangeStart', handleRouteChangeStart)
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart)
+    }
+  }, [router, onSetActiveDropdown])
+
+  // Handle route change completion and initial hydration
+  useEffect(() => {
     const handleRouteChangeComplete = () => {
-      const chain = useChainStore.getState().chain
-      if (chain && address) {
-        switchChain({ chainId: chain.id })
+      if (selectedChain && address) {
+        switchChain({ chainId: selectedChain.id })
       }
       setIsChainInitialized(true)
     }
 
-    router.events.on('routeChangeStart', handleRouteChangeStart)
-
-    const hasHydrated = useChainStore.persist.hasHydrated()
-    let hydrationUnsubscribe: (() => void) | undefined
-
-    if (hasHydrated) handleRouteChangeComplete()
-    else {
-      hydrationUnsubscribe = useChainStore.persist.onFinishHydration(
-        handleRouteChangeComplete
-      )
+    // Only execute route change completion after hydration is complete
+    if (hasHydrated) {
+      handleRouteChangeComplete()
     }
+  }, [hasHydrated, selectedChain, address, switchChain])
 
-    return () => {
-      router.events.off('routeChangeStart', handleRouteChangeStart)
-      hydrationUnsubscribe?.()
-    }
-  }, [router, onSetActiveDropdown, switchChain, address])
-
-  if (!isChainInitialized) {
+  if (!hasHydrated || !isChainInitialized) {
     return null
   }
 

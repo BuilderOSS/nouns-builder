@@ -1,19 +1,14 @@
-import { Box } from '@buildeross/zord'
 import React, { ReactElement, ReactNode } from 'react'
 
-import { Nav } from '../DefaultLayout/Nav'
+import { BaseLayout } from '../BaseLayout'
 import { LayoutWrapper } from '../LayoutWrapper'
 import { Footer } from './Footer'
 
 export function HomeLayout({ children }: { children: ReactNode }) {
   return (
-    <Box>
-      <Nav />
-      <Box px={'x4'} pt={{ '@initial': 'x20', '@768': 'x0' }}>
-        {children}
-      </Box>
-      <Footer />
-    </Box>
+    <BaseLayout contentPadding={{ '@initial': 'x4', '@768': 'x0' }} footer={<Footer />}>
+      {children}
+    </BaseLayout>
   )
 }
 

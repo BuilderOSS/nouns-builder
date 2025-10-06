@@ -1,6 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { BUILDER_DAO } from 'src/test/fixtures/dao'
 import { render } from 'src/test/utils'
@@ -10,11 +9,11 @@ import { ProposalNavigation } from './ProposalNavigation'
 
 vi.mock('next/router', () => ({ useRouter: vi.fn() }))
 
-vi.mock('src/stores/useDaoStore', () => ({
+vi.mock('src/stores', () => ({
   useDaoStore: vi.fn(),
 }))
 
-vi.mock('src/stores/useChainStore', () => ({
+vi.mock('src/stores', () => ({
   useChainStore: vi.fn(),
 }))
 

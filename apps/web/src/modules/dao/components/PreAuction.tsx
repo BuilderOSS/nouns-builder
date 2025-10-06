@@ -5,7 +5,7 @@ import { atoms, Box, Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useDaoStore } from 'src/stores'
 import { useAccount, useConfig, useSimulateContract, useWriteContract } from 'wagmi'
 import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
 

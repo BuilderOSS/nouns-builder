@@ -3,8 +3,7 @@ import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { useReadContract } from 'wagmi'
 
 const AdminNav = () => {

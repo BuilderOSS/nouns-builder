@@ -13,7 +13,7 @@ import {
 } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { DaoContractAddresses } from 'src/stores'
 import useSWRImmutable from 'swr/immutable'
 import { encodeAbiParameters, parseAbiParameters } from 'viem'
 import { useReadContracts } from 'wagmi'

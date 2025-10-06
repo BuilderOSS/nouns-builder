@@ -3,7 +3,7 @@ import { Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import Pagination from 'src/components/Pagination'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { formatEther } from 'viem'
 
 import { DaoCard } from '../DaoCard'

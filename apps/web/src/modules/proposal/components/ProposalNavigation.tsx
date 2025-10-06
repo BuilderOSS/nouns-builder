@@ -10,8 +10,7 @@ import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
 import { OptionalLink } from 'src/components/OptionalLink'
 import { Queue, TransactionType, useProposalStore } from 'src/modules/create-proposal'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { useReadContracts } from 'wagmi'
 
 interface ProposalNavigationProps {

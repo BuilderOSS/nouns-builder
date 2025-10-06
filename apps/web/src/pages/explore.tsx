@@ -6,7 +6,7 @@ import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 import { Explore } from 'src/modules/dao'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 
 import { NextPageWithLayout } from './_app'

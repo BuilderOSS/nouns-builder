@@ -2,7 +2,7 @@ import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from '@buildeross/sdk/
 import { AddressType } from '@buildeross/types'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
-import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { DaoContractAddresses } from 'src/stores'
 import { encodeFunctionData, parseEther } from 'viem'
 
 import { AdminFormValues } from './AdminForm.schema'

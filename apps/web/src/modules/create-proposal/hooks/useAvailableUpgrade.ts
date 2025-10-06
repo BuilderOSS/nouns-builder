@@ -15,7 +15,7 @@ import {
   TransactionType,
   VersionType,
 } from 'src/modules/create-proposal'
-import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { DaoContractAddresses } from 'src/stores'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 import { useReadContracts } from 'wagmi'

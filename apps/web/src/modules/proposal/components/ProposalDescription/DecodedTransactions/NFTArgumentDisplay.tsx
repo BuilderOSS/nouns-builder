@@ -4,7 +4,7 @@ import { DecodedArg } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
 

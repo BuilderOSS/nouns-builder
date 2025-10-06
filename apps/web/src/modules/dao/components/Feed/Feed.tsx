@@ -3,7 +3,7 @@ import { Button, Flex } from '@buildeross/zord'
 import { CastAddData, Message, SignatureScheme } from '@farcaster/hub-nodejs'
 import axios from 'axios'
 import React, { useMemo } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import useSWRInfinite from 'swr/infinite'
 
 import { CardSkeleton } from './CardSkeleton'
