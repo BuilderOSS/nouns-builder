@@ -1,8 +1,14 @@
+import { Chain } from '@buildeross/types'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, render, renderHook, RenderOptions, waitFor } from '@testing-library/react'
-import { Chain } from '@buildeross/types'
 import * as React from 'react'
-import { ChainStoreProvider, createChainStore, createDaoStore, DaoContractAddresses, DaoStoreProvider } from 'src/stores'
+import {
+  ChainStoreProvider,
+  createChainStore,
+  createDaoStore,
+  DaoContractAddresses,
+  DaoStoreProvider,
+} from 'src/stores'
 import { SWRConfig } from 'swr'
 import { expect } from 'vitest'
 import { useConnect, useDisconnect, WagmiProvider } from 'wagmi'
@@ -61,7 +67,7 @@ export function renderWagmiHook<TResult, TProps>(
   options?: { chain?: Chain; addresses?: DaoContractAddresses }
 ) {
   const { chain, addresses } = options || {}
-  
+
   return renderHook(hook, {
     wrapper: ({ children }) => (
       <Providers chain={chain} addresses={addresses}>
@@ -97,13 +103,13 @@ type CustomRenderOptions = RenderOptions & {
 
 const customRender = (ui: React.ReactElement, options?: CustomRenderOptions) => {
   const { chain, addresses, ...renderOptions } = options || {}
-  
+
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <Providers chain={chain} addresses={addresses}>
       {children}
     </Providers>
   )
-  
+
   return render(ui, { wrapper: Wrapper, ...renderOptions })
 }
 

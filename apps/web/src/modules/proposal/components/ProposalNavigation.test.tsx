@@ -6,7 +6,15 @@ import { vi } from 'vitest'
 
 import { ProposalNavigation } from './ProposalNavigation'
 
-vi.mock('next/router', () => ({ useRouter: vi.fn() }))
+vi.mock('next/router', () => ({
+  useRouter: vi.fn(() => ({
+    back: vi.fn(),
+    push: vi.fn(),
+    query: {},
+    pathname: '/test',
+    asPath: '/test',
+  })),
+}))
 
 describe('Proposal Navigation', () => {
   it('should render the nav', async () => {
