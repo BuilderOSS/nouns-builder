@@ -1,6 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, render, renderHook, RenderOptions, waitFor } from '@testing-library/react'
+import { Chain } from '@buildeross/types'
 import * as React from 'react'
+import { ChainStoreProvider, createChainStore, createDaoStore, DaoContractAddresses, DaoStoreProvider } from 'src/stores'
 import { SWRConfig } from 'swr'
 import { expect } from 'vitest'
 import { useConnect, useDisconnect, WagmiProvider } from 'wagmi'
@@ -9,6 +11,8 @@ import { config } from './wagmi'
 
 type ProvidersProps = {
   children: React.ReactNode
+  chain?: Chain
+  addresses?: DaoContractAddresses
 }
 
 export async function connectAs(user: 'alice' | 'bob' | 'carol') {
@@ -52,29 +56,55 @@ export async function disconnect() {
 /**
  * Custom renderHook that wraps the hook in WagmiProvider with the test config
  */
-export function renderWagmiHook<TResult, TProps>(hook: (props: TProps) => TResult) {
+export function renderWagmiHook<TResult, TProps>(
+  hook: (props: TProps) => TResult,
+  options?: { chain?: Chain; addresses?: DaoContractAddresses }
+) {
+  const { chain, addresses } = options || {}
+  
   return renderHook(hook, {
     wrapper: ({ children }) => (
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </WagmiProvider>
+      <Providers chain={chain} addresses={addresses}>
+        {children}
+      </Providers>
     ),
   })
 }
 
 const queryClient = new QueryClient()
 
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children, chain, addresses }: ProvidersProps) {
+  const chainStore = React.useMemo(() => createChainStore(chain), [chain])
+  const daoStore = React.useMemo(() => createDaoStore(addresses), [addresses])
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>
+        <ChainStoreProvider store={chainStore}>
+          <DaoStoreProvider store={daoStore}>
+            <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>
+          </DaoStoreProvider>
+        </ChainStoreProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
 }
 
-const customRender = (ui: React.ReactElement, options?: RenderOptions) =>
-  render(ui, { wrapper: Providers, ...options })
+type CustomRenderOptions = RenderOptions & {
+  chain?: Chain
+  addresses?: DaoContractAddresses
+}
+
+const customRender = (ui: React.ReactElement, options?: CustomRenderOptions) => {
+  const { chain, addresses, ...renderOptions } = options || {}
+  
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <Providers chain={chain} addresses={addresses}>
+      {children}
+    </Providers>
+  )
+  
+  return render(ui, { wrapper: Wrapper, ...renderOptions })
+}
 
 export { customRender as render }

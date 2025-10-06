@@ -1,19 +1,10 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { BUILDER_DAO } from 'src/test/fixtures/dao'
 import { render } from 'src/test/utils'
 import { vi } from 'vitest'
 
 import { Airdrop } from './Airdrop'
-
-vi.mock('src/stores', () => ({
-  useDaoStore: vi.fn(),
-}))
-
-vi.mock('src/stores', () => ({
-  useChainStore: vi.fn(),
-}))
 
 vi.mock('@buildeross/sdk/subgraph', async () => {
   const mod = await vi.importActual<typeof import('@buildeross/sdk/subgraph')>(
@@ -40,10 +31,10 @@ describe('Airdrop', () => {
   })
 
   it('should render initially disabled airdrop form given a required upgrade', async () => {
-    vi.mocked(useChainStore).mockReturnValue(FOUNDRY_CHAIN)
-    vi.mocked(useDaoStore).mockReturnValue(BUILDER_DAO)
-
-    render(<Airdrop />)
+    render(<Airdrop />, {
+      chain: FOUNDRY_CHAIN,
+      addresses: BUILDER_DAO,
+    })
 
     await waitFor(
       () => expect(screen.queryByTestId('upgrade-card')).toBeInTheDocument(),

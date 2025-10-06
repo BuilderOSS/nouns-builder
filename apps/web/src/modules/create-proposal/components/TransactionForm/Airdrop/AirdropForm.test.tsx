@@ -1,14 +1,9 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { useChainStore } from 'src/stores'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { render } from 'src/test/utils'
-import { describe, expect } from 'vitest'
+import { describe, expect, vi } from 'vitest'
 
 import AirdropForm from './AirdropForm'
-
-vi.mock('src/stores', () => ({
-  useChainStore: vi.fn(),
-}))
 
 // Mock Papa Parse to avoid issues in tests
 vi.mock('papaparse', () => ({
@@ -19,8 +14,9 @@ vi.mock('papaparse', () => ({
 
 describe('Airdrop form', () => {
   it('should render airdrop form with default values', () => {
-    vi.mocked(useChainStore).mockReturnValue(FOUNDRY_CHAIN)
-    render(<AirdropForm />)
+    render(<AirdropForm />, {
+      chain: FOUNDRY_CHAIN,
+    })
 
     expect(screen.getByText('Upload CSV File')).toBeInTheDocument()
     expect(screen.getByText('Recipients')).toBeInTheDocument()
@@ -31,8 +27,9 @@ describe('Airdrop form', () => {
   })
 
   it('should allow adding and removing recipients', async () => {
-    vi.mocked(useChainStore).mockReturnValue(FOUNDRY_CHAIN)
-    render(<AirdropForm />)
+    render(<AirdropForm />, {
+      chain: FOUNDRY_CHAIN,
+    })
 
     // Initially should have 1 recipient
     expect(screen.getAllByPlaceholderText('0x... or ENS name')).toHaveLength(1)
@@ -55,8 +52,9 @@ describe('Airdrop form', () => {
 
 describe('Airdrop form with errors', () => {
   it('should render airdrop form with invalid values and errors', async () => {
-    vi.mocked(useChainStore).mockReturnValue(FOUNDRY_CHAIN)
-    render(<AirdropForm />)
+    render(<AirdropForm />, {
+      chain: FOUNDRY_CHAIN,
+    })
 
     const amountInput = screen.getByDisplayValue(0)
     const recipientInput = screen.getByPlaceholderText('0x... or ENS name')
