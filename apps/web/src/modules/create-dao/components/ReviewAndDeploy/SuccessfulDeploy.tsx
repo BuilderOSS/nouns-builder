@@ -32,8 +32,24 @@ const DEPLOYMENT_ERROR = {
 const DisplayAddress: React.FC<{ address: string }> = ({ address }) => {
   return (
     <Flex align={'center'} fontSize={18} className={infoSectionValueVariants['default']}>
-      <Text display={{ '@initial': 'none', '@768': 'block' }}>{address}</Text>
-      <Text display={{ '@initial': 'block', '@768': 'none' }}>
+      <Text
+        display={{
+          '@initial': 'none',
+          '@480': 'block',
+          '@768': 'none',
+          '@1024': 'block',
+        }}
+      >
+        {address}
+      </Text>
+      <Text
+        display={{
+          '@initial': 'block',
+          '@480': 'none',
+          '@768': 'block',
+          '@1024': 'none',
+        }}
+      >
         {walletSnippet(address)}
       </Text>
       <CopyButton text={address} />
