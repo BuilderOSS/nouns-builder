@@ -47,13 +47,14 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const { ensName, ensAvatar } = useEnsData(userAddress)
 
   const { data: tokens, isValidating: isLoadingTokens } = useSWR(
-    userAddress ? [SWR_KEYS.PROFILE_TOKENS, chain.slug, userAddress, page] : undefined,
-    () => tokensQuery(chain.id, userAddress, page ? parseInt(page) : undefined)
+    userAddress ? [SWR_KEYS.PROFILE_TOKENS, chain.id, userAddress, page] : undefined,
+    ([, _chainId, _userAddress, _page]) =>
+      tokensQuery(_chainId, _userAddress, _page ? parseInt(_page) : undefined)
   )
 
   const { data: daos, isValidating: isLoadingDaos } = useSWR(
     userAddress ? [SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()] : undefined,
-    () => myDaosRequest(userAddress)
+    ([, _userAddress]) => myDaosRequest(_userAddress)
   )
 
   const isLoading = isLoadingTokens || isLoadingDaos

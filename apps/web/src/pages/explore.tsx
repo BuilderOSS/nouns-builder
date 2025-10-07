@@ -20,11 +20,11 @@ const ExplorePage: NextPageWithLayout = () => {
 
   const { data, error } = useSWR(
     isReady ? [SWR_KEYS.EXPLORE, page, orderBy, chain.slug] : null,
-    async () => {
+    async ([, _page, _orderBy, _chainSlug]) => {
       const params: any = {}
-      if (page) params['page'] = page
-      if (orderBy) params['orderBy'] = orderBy
-      if (chain) params['network'] = chain.slug
+      if (_page) params['page'] = _page
+      if (_orderBy) params['orderBy'] = _orderBy
+      if (_chainSlug) params['network'] = _chainSlug
 
       return await axios
         .get<ExploreDaosResponse>('/api/explore', { params })
@@ -32,16 +32,12 @@ const ExplorePage: NextPageWithLayout = () => {
     }
   )
 
-  const { daos, hasNextPage } = data || {}
+  const { daos = [], hasNextPage = false } = data || {}
 
   return (
     <Flex direction={'column'} align={'center'} mt={'x5'} minH={'100vh'}>
       <Meta title={'Explore'} type={'website'} path={'/explore'} />
-      <Explore
-        daos={daos}
-        hasNextPage={hasNextPage || false}
-        isLoading={!data && !error}
-      />
+      <Explore daos={daos} hasNextPage={hasNextPage} isLoading={!data && !error} />
     </Flex>
   )
 }

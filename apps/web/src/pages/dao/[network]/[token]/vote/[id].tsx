@@ -23,8 +23,7 @@ import { PropDates } from 'src/modules/proposal/components/PropDates'
 import { ProposalVotes } from 'src/modules/proposal/components/ProposalVotes'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
-import { useChainStore } from 'src/stores'
-import { type DaoContractAddresses, useDaoStore } from 'src/stores'
+import { type DaoContractAddresses } from 'src/stores'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR, { unstable_serialize } from 'swr'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
@@ -54,18 +53,19 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   proposalId,
   daoName,
   ogImageURL,
+  chainId,
+  addresses,
 }) => {
   const { query } = useRouter()
-  const chain = useChainStore((x) => x.chain)
-  const { addresses } = useDaoStore()
 
   const { data: balance } = useBalance({
     address: addresses?.treasury as `0x${string}`,
-    chainId: chain.id,
+    chainId: chainId,
   })
 
-  const { data: proposal } = useSWR([SWR_KEYS.PROPOSAL, chain.id, proposalId], () =>
-    getProposal(chain.id, proposalId)
+  const { data: proposal } = useSWR(
+    [SWR_KEYS.PROPOSAL, chainId, proposalId],
+    ([, _chainId, _proposalId]) => getProposal(_chainId, _proposalId)
   )
 
   const sections = React.useMemo(() => {
@@ -87,14 +87,14 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
       },
     ]
 
-    if (isChainIdSupportedByEAS(chain.id)) {
+    if (isChainIdSupportedByEAS(chainId)) {
       sections.push({
         title: 'Propdates',
         component: [<PropDates key="propdates" proposal={proposal} />],
       })
     }
     return sections
-  }, [proposal, chain.id, query?.token])
+  }, [proposal, chainId, query?.token])
 
   const { displayActions, displayWarning } = React.useMemo(() => {
     if (!proposal) return { displayActions: false, displayWarning: false }
