@@ -5,7 +5,7 @@ import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
-import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import NextImage from 'next/image'
@@ -152,7 +152,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                     return (
                       <Link
                         key={dao.collectionAddress}
-                        href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
+                        href={`${BASE_URL}/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
                         style={{
                           textDecoration: 'none',
                           color: 'inherit',
@@ -184,11 +184,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                             <Flex align="center" gap="x1">
                               {chainMeta?.icon && (
                                 <NextImage
-                                  src={
-                                    PUBLIC_DEFAULT_CHAINS.find(
-                                      (chain) => chain.id === dao.chainId
-                                    )?.icon!
-                                  }
+                                  src={chainMeta.icon}
                                   layout="fixed"
                                   objectFit="contain"
                                   style={{ borderRadius: '12px', maxHeight: '16px' }}

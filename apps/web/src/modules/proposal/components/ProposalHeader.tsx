@@ -2,7 +2,6 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Box, Flex, Icon, Label, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import { useChainStore } from 'src/stores'
@@ -33,7 +32,6 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
 
   const { displayName: proposerDisplayName } = useEnsData(proposer)
   const chain = useChainStore((x) => x.chain)
-  const chainSlug = chainIdToSlug(chain.id)
 
   const displayTransactionHash = getDisplayTransactionHash(proposal)
 
@@ -54,7 +52,7 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
           push({
             pathname: `/dao/[network]/[token]`,
             query: {
-              network: chainSlug,
+              network: chain.slug,
               token: proposal.dao.tokenAddress,
               tab: 'activity',
             },

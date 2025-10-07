@@ -1,4 +1,3 @@
-import { chainIdToSlug } from '@buildeross/utils'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
@@ -23,7 +22,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   name,
   currentTokenId,
 }: AuctionTokenPickerProps) => {
-  const { id: chainId } = useChainStore((x) => x.chain)
+  const { id: chainId, slug: chainSlug } = useChainStore((x) => x.chain)
   const disabledStyle = { opacity: 0.2 }
 
   const data = useNextAndPreviousTokens({ chainId, collection, tokenId })
@@ -39,8 +38,6 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
     hasLatestToken && currentTokenId !== undefined && data?.latest !== currentTokenId
       ? `Current Auction`
       : `Latest Auction`
-
-  const chainSlug = chainIdToSlug(chainId)
 
   return (
     <Flex direction={'column'}>
