@@ -30,7 +30,7 @@ export const Settle = ({
   compact = false,
 }: SettleProps) => {
   const chain = useChainStore((x) => x.chain)
-  const addresses = useDaoStore?.((state) => state.addresses) || {}
+  const addresses = useDaoStore((state) => state.addresses) || {}
   const config = useConfig()
 
   const { address } = useAccount()

@@ -7,7 +7,7 @@ import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { walletSnippet } from '@buildeross/utils/helpers'
+import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
@@ -33,6 +33,7 @@ export const Activity: React.FC = () => {
   const { query, isReady, push } = useRouter()
   const { openConnectModal } = useConnectModal()
   const chain = useChainStore((x) => x.chain)
+  const chainSlug = chainIdToSlug(chain.id)
   const LIMIT = 20
 
   const { data, error, isLoading } = useSWR<ProposalsResponse>(
@@ -78,7 +79,7 @@ export const Activity: React.FC = () => {
       disabled: false,
       transactions: [],
     })
-    push(`/dao/${query.network}/${addresses?.token}/proposal/create`)
+    push(`/dao/${chainSlug}/${addresses?.token}/proposal/create`)
   }
 
   if (!data && !error && !isLoading) {

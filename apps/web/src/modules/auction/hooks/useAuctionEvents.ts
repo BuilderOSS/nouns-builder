@@ -2,6 +2,7 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { awaitSubgraphSync, getBids } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { chainIdToSlug } from '@buildeross/utils'
 import { useRouter } from 'next/router'
 import { useDaoStore } from 'src/stores'
 import { useSWRConfig } from 'swr'
@@ -23,6 +24,7 @@ export const useAuctionEvents = ({
   const { mutate } = useSWRConfig()
   const { auction } = useDaoStore((state) => state.addresses)
   const config = useConfig()
+  const chainSlug = chainIdToSlug(chainId)
 
   useWatchContractEvent({
     address: isTokenActiveAuction ? auction : undefined,
@@ -47,7 +49,7 @@ export const useAuctionEvents = ({
         getBids(chainId, collection, tokenId.toString())
       )
 
-      await router.push(`/dao/${router.query.network}/${collection}/${tokenId}`)
+      await router.push(`/dao/${chainSlug}/${collection}/${tokenId}`)
     },
   })
 

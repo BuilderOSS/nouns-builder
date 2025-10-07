@@ -17,7 +17,7 @@ vi.mock('next/router', () => ({
   })),
 }))
 
-describe('proposaal card', () => {
+describe('proposal card', () => {
   const date = new Date(2022, 1, 1)
 
   beforeEach(() => {

@@ -1,9 +1,10 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
+import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import React from 'react'
+import { useChainStore } from 'src/stores'
 
 import { statusStyle, titleStyle } from './ProposalCard.css'
 import { ProposalForStatus, ProposalStatus } from './ProposalStatus'
@@ -17,16 +18,15 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
   ...proposal
 }) => {
   const { title, proposalNumber, timeCreated } = proposal
+  const chain = useChainStore((x) => x.chain)
+  const chainSlug = chainIdToSlug(chain.id)
   const isMounted = useIsMounted()
-  const { query } = useRouter()
 
   if (!isMounted) return null
 
   return (
     <Link
-      href={
-        collection ? `/dao/${query.network}/${collection}/vote/${proposalNumber}` : ''
-      }
+      href={collection ? `/dao/${chainSlug}/${collection}/vote/${proposalNumber}` : ''}
       passHref
     >
       <Flex

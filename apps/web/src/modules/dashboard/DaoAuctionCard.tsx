@@ -42,38 +42,43 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
+  const timeoutRefs = React.useRef<NodeJS.Timeout[]>([])
 
-  const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
-  const onEnd = () => {
-    setIsEnded(true)
-  }
+  React.useEffect(() => {
+    const refs = timeoutRefs.current
+    return () => refs.forEach(clearTimeout)
+  }, [])
+
+  const onLogs = React.useCallback(async () => {
+    const timeoutId = setTimeout(() => {
+      handleMutate()
+    }, 3000)
+    timeoutRefs.current.push(timeoutId)
+  }, [handleMutate])
 
   useWatchContractEvent({
     address: auctionAddress,
     abi: auctionAbi,
     eventName: 'AuctionCreated',
     chainId,
-    onLogs: async () => {
-      setTimeout(() => {
-        handleMutate()
-      }, 3000)
-    },
+    onLogs,
   })
+
   useWatchContractEvent({
     address: auctionAddress,
     abi: auctionAbi,
     eventName: 'AuctionBid',
     chainId,
-    onLogs: async () => {
-      setTimeout(() => {
-        handleMutate()
-      }, 3000)
-    },
+    onLogs,
   })
-  const handleSelectAuction = () => {
-    push(`/dao/${currentChainSlug}/${tokenAddress}`)
-  }
+
   const currentChainSlug = chainIdToSlug(chainId)
+
+  const handleSelectAuction = () => push(`/dao/${currentChainSlug}/${tokenAddress}`)
+  const onEnd = () => {
+    setIsEnded(true)
+  }
+  const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
 
   if (!currentAuction) {
     return (

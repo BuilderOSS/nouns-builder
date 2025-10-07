@@ -4,7 +4,7 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
-import type { AddressType } from '@buildeross/types'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
@@ -34,6 +34,8 @@ export interface VotePageProps {
   proposalId: string
   daoName: string
   ogImageURL: string
+  addresses: DaoContractAddresses
+  chainId: CHAIN_ID
 }
 
 const BAD_ACTORS = [

@@ -1,6 +1,6 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { Chain } from '@buildeross/types'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import { chainIdToSlug, unpackOptionalArray } from '@buildeross/utils/helpers'
 import { atoms, Box, Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -22,11 +22,12 @@ interface PreAuctionProps {
 }
 
 export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress }) => {
-  const { push, query, pathname } = useRouter()
+  const { push, pathname } = useRouter()
   const { address } = useAccount()
   const { addresses } = useDaoStore()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const config = useConfig()
+  const chainSlug = chainIdToSlug(chain.id)
 
   const { data, isError } = useSimulateContract({
     query: {
@@ -63,7 +64,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
     })
 
     const [tokenId] = unpackOptionalArray(auction, 6)
-    push(`/dao/${query.network}/${collectionAddress}/${tokenId}`)
+    push(`/dao/${chainSlug}/${collectionAddress}/${tokenId}`)
   }
 
   return (
@@ -83,7 +84,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
             href={{
               pathname,
               query: {
-                network: query.network,
+                network: chainSlug,
                 token: collectionAddress,
                 tab: 'admin',
               },

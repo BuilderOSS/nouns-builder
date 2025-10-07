@@ -108,7 +108,7 @@ describe('List of transactions', () => {
     expect(within(firstReviewCard).queryAllByText(/View details/)).toHaveLength(1)
   })
 
-  it('should render a given list of failed transactions', () => {
+  it('should render multiple failed simulations across transaction groups', () => {
     render(
       <Formik initialValues={{ daoAvatar: undefined }} onSubmit={vi.fn()}>
         <Transactions

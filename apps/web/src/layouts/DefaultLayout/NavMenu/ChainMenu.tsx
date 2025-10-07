@@ -90,6 +90,8 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
 
   // Handle route change completion and initial hydration
   useEffect(() => {
+    if (!hasHydrated) return
+
     const handleRouteChangeComplete = () => {
       if (selectedChain && address) {
         switchChain({ chainId: selectedChain.id })
@@ -97,11 +99,13 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
       setIsChainInitialized(true)
     }
 
-    // Only execute route change completion after hydration is complete
-    if (hasHydrated) {
-      handleRouteChangeComplete()
+    handleRouteChangeComplete()
+    router.events.on('routeChangeComplete', handleRouteChangeComplete)
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChangeComplete)
     }
-  }, [hasHydrated, selectedChain, address, switchChain])
+  }, [router, hasHydrated, selectedChain, address, switchChain])
 
   if (!hasHydrated || !isChainInitialized) {
     return null
