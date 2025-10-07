@@ -4,7 +4,6 @@ import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
@@ -36,8 +35,11 @@ type DaoAuctionCardProps = DashboardDaoProps & {
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
-  const { name: chainName, icon: chainIcon } =
-    PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? {}
+  const {
+    name: chainName,
+    icon: chainIcon,
+    slug: chainSlug,
+  } = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? {}
   const { push } = useRouter()
   const { endTime } = currentAuction ?? {}
 
@@ -72,9 +74,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     onLogs,
   })
 
-  const currentChainSlug = chainIdToSlug(chainId)
-
-  const handleSelectAuction = () => push(`/dao/${currentChainSlug}/${tokenAddress}`)
+  const handleSelectAuction = () => push(`/dao/${chainSlug}/${tokenAddress}`)
   const onEnd = () => {
     setIsEnded(true)
   }
@@ -84,7 +84,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     return (
       <AuctionPaused
         {...props}
-        currentChainSlug={currentChainSlug}
+        currentChainSlug={chainSlug}
         tokenAddress={tokenAddress}
         chainName={chainName}
         chainIcon={chainIcon}

@@ -1,5 +1,4 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Link from 'next/link'
@@ -19,14 +18,13 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
 }) => {
   const { title, proposalNumber, timeCreated } = proposal
   const chain = useChainStore((x) => x.chain)
-  const chainSlug = chainIdToSlug(chain.id)
   const isMounted = useIsMounted()
 
   if (!isMounted) return null
 
   return (
     <Link
-      href={collection ? `/dao/${chainSlug}/${collection}/vote/${proposalNumber}` : ''}
+      href={collection ? `/dao/${chain.slug}/${collection}/vote/${proposalNumber}` : ''}
       passHref
     >
       <Flex

@@ -2,7 +2,6 @@ import SWR_KEYS from '@buildeross/constants/swrKeys'
 import { auctionAbi, ProposalState } from '@buildeross/sdk/contract'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils'
 import { atoms, Box, Icon, Stack } from '@buildeross/zord'
 import Link from 'next/link'
 import { useMemo } from 'react'
@@ -15,7 +14,6 @@ const LIMIT = 20
 
 export const AuctionPaused = () => {
   const chain = useChainStore((x) => x.chain)
-  const chainSlug = chainIdToSlug(chain.id)
 
   const addresses = useDaoStore((x) => x.addresses)
 
@@ -77,8 +75,8 @@ export const AuctionPaused = () => {
         shallow={!pausedProposal?.proposalId}
         href={
           pausedProposal?.proposalId
-            ? `/dao/${chainSlug}/${addresses?.token}/vote/${pausedProposal?.proposalNumber}`
-            : `/dao/${chainSlug}/${addresses?.token}?tab=activity`
+            ? `/dao/${chain.slug}/${addresses?.token}/vote/${pausedProposal?.proposalNumber}`
+            : `/dao/${chain.slug}/${addresses?.token}?tab=activity`
         }
       >
         <Box
