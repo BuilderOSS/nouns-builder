@@ -121,7 +121,7 @@ export const useInvoiceData = (
   )
 
   const { data: invoiceData, isValidating: isLoadingInvoiceData } = useSWR(
-    invoiceCid ? [SWR_KEYS.ESCROW_MILESTONES_IPFS_DATA, invoiceCid] : null,
+    invoiceCid ? ([SWR_KEYS.ESCROW_MILESTONES_IPFS_DATA, invoiceCid] as const) : null,
     async ([, _invoiceCid]) => {
       try {
         const text = await fetchFromURI(`ipfs://${_invoiceCid}`)

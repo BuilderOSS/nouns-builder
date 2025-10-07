@@ -55,7 +55,9 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   )
 
   const { data: daos, isValidating: isLoadingDaos } = useSWR(
-    userAddress ? [SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()] : undefined,
+    userAddress
+      ? ([SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()] as const)
+      : undefined,
     ([, _userAddress]) => myDaosRequest(_userAddress)
   )
 
