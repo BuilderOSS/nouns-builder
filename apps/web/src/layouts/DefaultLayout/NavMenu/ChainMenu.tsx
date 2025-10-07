@@ -93,8 +93,15 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
     if (!hasHydrated) return
 
     const handleRouteChangeComplete = () => {
-      if (selectedChain && address) {
-        switchChain({ chainId: selectedChain.id })
+      if (selectedChain) {
+        switchChain(
+          { chainId: selectedChain.id },
+          {
+            onError(error) {
+              console.error(`Failed to automatically switch chain:`, error)
+            },
+          }
+        )
       }
       setIsChainInitialized(true)
     }
@@ -105,7 +112,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
     return () => {
       router.events.off('routeChangeComplete', handleRouteChangeComplete)
     }
-  }, [router, hasHydrated, selectedChain, address, switchChain])
+  }, [router, hasHydrated, selectedChain, switchChain])
 
   if (!hasHydrated || !isChainInitialized) {
     return null
