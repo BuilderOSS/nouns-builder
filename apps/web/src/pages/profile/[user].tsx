@@ -5,7 +5,7 @@ import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
-import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import NextImage from 'next/image'
@@ -14,10 +14,9 @@ import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
 import Pagination from 'src/components/Pagination'
 import { TokenPreview } from 'src/components/Profile'
-import { usePagination } from 'src/hooks/usePagination'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import {
   daosContainer,
   loadingSkeleton,
@@ -48,19 +47,22 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const { ensName, ensAvatar } = useEnsData(userAddress)
 
   const { data: tokens, isValidating: isLoadingTokens } = useSWR(
-    userAddress ? [SWR_KEYS.PROFILE_TOKENS, chain.slug, userAddress, page] : undefined,
-    () => tokensQuery(chain.id, userAddress, page ? parseInt(page) : undefined)
+    userAddress && chain.id
+      ? ([SWR_KEYS.PROFILE_TOKENS, chain.id, userAddress, page] as const)
+      : undefined,
+    ([, _chainId, _userAddress, _page]) =>
+      tokensQuery(_chainId, _userAddress, _page ? parseInt(_page) : undefined)
   )
 
   const { data: daos, isValidating: isLoadingDaos } = useSWR(
-    userAddress ? [SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()] : undefined,
-    () => myDaosRequest(userAddress)
+    userAddress
+      ? ([SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()] as const)
+      : undefined,
+    ([, _userAddress]) => myDaosRequest(_userAddress)
   )
 
   const isLoading = isLoadingTokens || isLoadingDaos
   const hasDaos = !!daos && daos.length > 0
-
-  const { handlePageBack, handlePageForward } = usePagination(tokens?.hasNextPage)
 
   const pageTitle = `${userName}'s Profile`
   const pageDescription = `View ${userName}'s profile and DAO tokens on Nouns Builder`
@@ -154,7 +156,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                     return (
                       <Link
                         key={dao.collectionAddress}
-                        href={`${BASE_URL}/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
+                        href={`${BASE_URL}/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
                         style={{
                           textDecoration: 'none',
                           color: 'inherit',
@@ -186,11 +188,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                             <Flex align="center" gap="x1">
                               {chainMeta?.icon && (
                                 <NextImage
-                                  src={
-                                    PUBLIC_DEFAULT_CHAINS.find(
-                                      (chain) => chain.id === dao.chainId
-                                    )?.icon!
-                                  }
+                                  src={chainMeta.icon}
                                   layout="fixed"
                                   objectFit="contain"
                                   style={{ borderRadius: '12px', maxHeight: '16px' }}
@@ -269,12 +267,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   </Flex>
                 )}
 
-                <Pagination
-                  onNext={handlePageForward}
-                  onPrev={handlePageBack}
-                  isLast={!tokens?.hasNextPage}
-                  isFirst={!page}
-                />
+                <Pagination hasNextPage={tokens?.hasNextPage} />
               </>
             )}
 

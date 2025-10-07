@@ -4,7 +4,7 @@ import { Flex, Grid } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 import RecentlyCreated from 'src/components/Home/RecentlyCreated'
 import { DaoProps } from 'src/pages'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 
 import { DaoErrorFeed } from './DaoErrorFeed'

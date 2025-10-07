@@ -4,8 +4,7 @@ import { ContractLink } from '@buildeross/ui/ContractLink'
 import { formatCryptoVal, numberFormatter } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { statisticContent } from 'src/styles/About.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
 import useSWR from 'swr'
@@ -35,11 +34,11 @@ export const Treasury = () => {
 
   const { data: earnings } = useSWR(
     chain && addresses.token
-      ? [SWR_KEYS.TREASURY_SALES, chain.id, addresses.token]
+      ? ([SWR_KEYS.TREASURY_SALES, chain.id, addresses.token] as const)
       : null,
-    ([_key, chainId, tokenAddress]) =>
-      SubgraphSDK.connect(chainId)
-        .totalAuctionSales({ tokenAddress: tokenAddress.toLowerCase() })
+    ([, _chainId, _tokenAddress]) =>
+      SubgraphSDK.connect(_chainId)
+        .totalAuctionSales({ tokenAddress: _tokenAddress.toLowerCase() })
         .then((x) =>
           x.dao?.totalAuctionSales ? formatEther(x.dao.totalAuctionSales) : 0
         )

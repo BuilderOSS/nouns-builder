@@ -9,7 +9,7 @@ import axios from 'axios'
 import React, { Fragment, ReactNode } from 'react'
 import { L2MigratedResponse } from 'src/pages/api/migrated'
 import { TokenWithDao } from 'src/pages/dao/[network]/[token]/[tokenId]'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useConfig } from 'wagmi'
@@ -52,22 +52,24 @@ export const Auction: React.FC<AuctionControllerProps> = ({
 
   const { data: migratedRes } = useSWR(
     L1_CHAINS.find((x) => x === chain.id) && treasury
-      ? [SWR_KEYS.DAO_MIGRATED, treasury]
+      ? ([SWR_KEYS.DAO_MIGRATED, treasury] as const)
       : null,
-    ([_key, treasury]) =>
+    ([, _treasury]) =>
       axios
-        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${treasury}`)
+        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${_treasury}`)
         .then((x) => x.data)
   )
 
   const { data: auction } = useSWR(
-    [SWR_KEYS.AUCTION, chain.id, auctionAddress],
-    ([_key, chainId, auctionAddress]) =>
+    chain.id && auctionAddress
+      ? ([SWR_KEYS.AUCTION, chain.id, auctionAddress] as const)
+      : null,
+    ([, _chainId, _auctionAddress]) =>
       readContract(config, {
         abi: auctionAbi,
-        address: auctionAddress as AddressType,
+        address: _auctionAddress as AddressType,
         functionName: 'auction',
-        chainId,
+        chainId: _chainId,
       }),
     { revalidateOnFocus: true }
   )
@@ -93,8 +95,10 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   })
 
   const { data: bids } = useSWR(
-    [SWR_KEYS.AUCTION_BIDS, chain.id, collection, queriedTokenId],
-    () => getBids(chain.id, collection, queriedTokenId)
+    chain.id && queriedTokenId && collection
+      ? ([SWR_KEYS.AUCTION_BIDS, chain.id, collection, queriedTokenId] as const)
+      : null,
+    ([, _chainId, _collection, _tokenId]) => getBids(_chainId, _collection, _tokenId)
   )
 
   return (

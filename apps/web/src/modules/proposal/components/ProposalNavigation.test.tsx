@@ -1,6 +1,4 @@
 import { screen, waitFor } from '@testing-library/react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { BUILDER_DAO } from 'src/test/fixtures/dao'
 import { render } from 'src/test/utils'
@@ -8,26 +6,22 @@ import { vi } from 'vitest'
 
 import { ProposalNavigation } from './ProposalNavigation'
 
-vi.mock('next/router', () => ({ useRouter: vi.fn() }))
-
-vi.mock('src/stores/useDaoStore', () => ({
-  useDaoStore: vi.fn(),
-}))
-
-vi.mock('src/stores/useChainStore', () => ({
-  useChainStore: vi.fn(),
+vi.mock('next/router', () => ({
+  useRouter: vi.fn(() => ({
+    back: vi.fn(),
+    push: vi.fn(),
+    query: {},
+    pathname: '/test',
+    asPath: '/test',
+  })),
 }))
 
 describe('Proposal Navigation', () => {
   it('should render the nav', async () => {
-    vi.mocked(useDaoStore).mockReturnValue({
-      token: BUILDER_DAO.token,
-      metadata: BUILDER_DAO.metadata,
+    render(<ProposalNavigation />, {
+      chain: FOUNDRY_CHAIN,
+      addresses: BUILDER_DAO,
     })
-
-    vi.mocked(useChainStore).mockReturnValue(FOUNDRY_CHAIN)
-
-    render(<ProposalNavigation />)
 
     // loading state, no image exists
     expect(screen.queryByTestId('dao-image')).not.toBeInTheDocument()

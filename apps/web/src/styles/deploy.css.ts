@@ -20,15 +20,12 @@ export const infoSectionStyle = style({
 
 export const infoSectionValueWrapperStyle = style({
   width: '100%',
-  fontSize: 18,
   lineHeight: '24px',
   overflow: 'auto',
+  fontSize: '18px',
   '@media': {
     '(max-width: 1200px)': {
       fontSize: '16px',
-    },
-    '(max-width: 768px)': {
-      fontSize: '14px',
     },
   },
 })

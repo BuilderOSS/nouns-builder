@@ -6,9 +6,9 @@ import { GridContainer } from './DaoFeed'
 import { emptyTile } from './DaoFeed.css'
 
 export const EmptyTile = ({ displayContent }: { displayContent: boolean }) => {
-  const router = useRouter()
+  const { reload } = useRouter()
 
-  const onClick = () => router.reload()
+  const onClick = () => reload()
 
   return (
     <Flex

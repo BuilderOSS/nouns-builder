@@ -3,8 +3,7 @@ import { AddressType } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import {
   useAccount,
   useConfig,
@@ -31,7 +30,7 @@ export const Settle = ({
   compact = false,
 }: SettleProps) => {
   const chain = useChainStore((x) => x.chain)
-  const addresses = useDaoStore?.((state) => state.addresses) || {}
+  const addresses = useDaoStore((state) => state.addresses) || {}
   const config = useConfig()
 
   const { address } = useAccount()

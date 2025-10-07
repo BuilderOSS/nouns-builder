@@ -18,8 +18,7 @@ import {
   DropdownSelect,
   SelectOption,
 } from 'src/modules/create-proposal/components/DropdownSelect'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { encodeFunctionData, getAddress, isAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 

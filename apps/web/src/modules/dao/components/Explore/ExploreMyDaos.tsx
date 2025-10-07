@@ -16,8 +16,8 @@ export const ExploreMyDaos = () => {
   const { address } = useAccount()
 
   const { data, error, isValidating } = useSWR(
-    address ? [SWR_KEYS.DYNAMIC.MY_DAOS_PAGE(address as string)] : null,
-    () => exploreMyDaosRequest(address as string),
+    address ? ([SWR_KEYS.DYNAMIC.MY_DAOS_PAGE(address), address] as const) : null,
+    ([, _address]) => exploreMyDaosRequest(_address),
     { revalidateOnFocus: false }
   )
 

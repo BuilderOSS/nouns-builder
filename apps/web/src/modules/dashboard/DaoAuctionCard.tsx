@@ -4,7 +4,6 @@ import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
@@ -36,50 +35,56 @@ type DaoAuctionCardProps = DashboardDaoProps & {
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
-  const { name: chainName, icon: chainIcon } =
-    PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? {}
-  const router = useRouter()
+  const {
+    name: chainName,
+    icon: chainIcon,
+    slug: chainSlug,
+  } = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? {}
+  const { push } = useRouter()
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
+  const timeoutRefs = React.useRef<NodeJS.Timeout[]>([])
 
-  const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
-  const onEnd = () => {
-    setIsEnded(true)
-  }
+  React.useEffect(() => {
+    const refs = timeoutRefs.current
+    return () => refs.forEach(clearTimeout)
+  }, [])
+
+  const onLogs = React.useCallback(async () => {
+    const timeoutId = setTimeout(() => {
+      handleMutate()
+    }, 3000)
+    timeoutRefs.current.push(timeoutId)
+  }, [handleMutate])
 
   useWatchContractEvent({
     address: auctionAddress,
     abi: auctionAbi,
     eventName: 'AuctionCreated',
     chainId,
-    onLogs: async () => {
-      setTimeout(() => {
-        handleMutate()
-      }, 3000)
-    },
+    onLogs,
   })
+
   useWatchContractEvent({
     address: auctionAddress,
     abi: auctionAbi,
     eventName: 'AuctionBid',
     chainId,
-    onLogs: async () => {
-      setTimeout(() => {
-        handleMutate()
-      }, 3000)
-    },
+    onLogs,
   })
-  const handleSelectAuction = () => {
-    router.push(`/dao/${currentChainSlug}/${tokenAddress}`)
+
+  const handleSelectAuction = () => push(`/dao/${chainSlug}/${tokenAddress}`)
+  const onEnd = () => {
+    setIsEnded(true)
   }
-  const currentChainSlug = chainIdToSlug(chainId)
+  const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
 
   if (!currentAuction) {
     return (
       <AuctionPaused
         {...props}
-        currentChainSlug={currentChainSlug}
+        currentChainSlug={chainSlug}
         tokenAddress={tokenAddress}
         chainName={chainName}
         chainIcon={chainIcon}

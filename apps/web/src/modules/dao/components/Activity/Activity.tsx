@@ -14,11 +14,9 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { skeletonAnimation } from 'src/styles/animations.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
 import { createProposalBtn, delegateBtn } from 'src/styles/Proposals.css'
@@ -45,7 +43,6 @@ export const Activity: React.FC = () => {
       getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
   )
 
-  const { handlePageBack, handlePageForward } = usePagination(data?.pageInfo?.hasNextPage)
   const { data: membership } = useDaoMembership({
     chainId: chain.id,
     collectionAddress: addresses?.token as AddressType,
@@ -81,7 +78,7 @@ export const Activity: React.FC = () => {
       disabled: false,
       transactions: [],
     })
-    push(`/dao/${query.network}/${addresses?.token}/proposal/create`)
+    push(`/dao/${chain.slug}/${addresses?.token}/proposal/create`)
   }
 
   if (!data && !error && !isLoading) {
@@ -272,14 +269,7 @@ export const Activity: React.FC = () => {
             </Flex>
           )}
 
-          {!isLoading && (
-            <Pagination
-              onNext={handlePageForward}
-              onPrev={handlePageBack}
-              isLast={!data?.pageInfo?.hasNextPage}
-              isFirst={!query.page}
-            />
-          )}
+          {!isLoading && <Pagination hasNextPage={data?.pageInfo?.hasNextPage} />}
         </Flex>
       </Flex>
 

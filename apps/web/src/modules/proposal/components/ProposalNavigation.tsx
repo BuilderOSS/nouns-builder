@@ -10,8 +10,7 @@ import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
 import { OptionalLink } from 'src/components/OptionalLink'
 import { Queue, TransactionType, useProposalStore } from 'src/modules/create-proposal'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { useReadContracts } from 'wagmi'
 
 interface ProposalNavigationProps {
@@ -23,7 +22,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
   transactionType,
   handleBack,
 }) => {
-  const router = useRouter()
+  const { back } = useRouter()
   const chain = useChainStore((x) => x.chain)
   const addresses = useDaoStore((state) => state.addresses)
   const transactions = useProposalStore((state) => state.transactions)
@@ -56,7 +55,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
   const [name, daoImage] = unpackOptionalArray(contractData, 2)
 
   const handleNavigation = () => {
-    handleBack ? handleBack() : router.back()
+    handleBack ? handleBack() : back()
   }
 
   return (

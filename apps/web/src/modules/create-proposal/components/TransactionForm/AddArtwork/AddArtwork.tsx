@@ -26,11 +26,10 @@ export const AddArtwork = () => {
   )
 
   const { data } = useSWR(
-    addresses.metadata && chain.id ? SWR_KEYS.ARTWORK_PROPERTY_ITEMS_COUNT : undefined,
-    () => {
-      if (!addresses.metadata) return
-      return getPropertyItems(chain.id, addresses?.metadata)
-    }
+    addresses.metadata && chain.id
+      ? ([SWR_KEYS.ARTWORK_PROPERTY_ITEMS_COUNT, chain.id, addresses?.metadata] as const)
+      : undefined,
+    ([, _chainId, _metadata]) => getPropertyItems(_chainId, _metadata)
   )
 
   useEffect(() => {

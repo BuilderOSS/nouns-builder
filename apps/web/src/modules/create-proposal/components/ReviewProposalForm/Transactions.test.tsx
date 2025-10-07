@@ -5,7 +5,15 @@ import { vi } from 'vitest'
 import { TransactionType } from '../../constants/transactionType'
 import { Transactions } from './Transactions'
 
-vi.mock('next/router', () => ({ useRouter: vi.fn() }))
+vi.mock('next/router', () => ({
+  useRouter: vi.fn(() => ({
+    back: vi.fn(),
+    push: vi.fn(),
+    query: {},
+    pathname: '/test',
+    asPath: '/test',
+  })),
+}))
 
 describe('List of transactions', () => {
   afterEach(() => {
@@ -100,7 +108,7 @@ describe('List of transactions', () => {
     expect(within(firstReviewCard).queryAllByText(/View details/)).toHaveLength(1)
   })
 
-  it('should render a given list of failed transactions', () => {
+  it('should render multiple failed simulations across transaction groups', () => {
     render(
       <Formik initialValues={{ daoAvatar: undefined }} onSubmit={vi.fn()}>
         <Transactions

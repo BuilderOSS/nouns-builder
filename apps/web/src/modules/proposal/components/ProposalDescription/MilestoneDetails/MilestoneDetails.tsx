@@ -16,8 +16,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { TransactionType } from 'src/modules/create-proposal'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { encodeFunctionData, formatUnits, Hex } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
@@ -58,7 +57,7 @@ export const MilestoneDetails = ({
   decodedTransaction,
   executionTransactionHash,
 }: MilestoneDetailsProps) => {
-  const router = useRouter()
+  const { push, query } = useRouter()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { addTransaction } = useProposalStore()
@@ -154,15 +153,15 @@ export const MilestoneDetails = ({
 
       setTimeout(() => addTransaction(releaseEscrowTxnData), 3000)
 
-      router.push({
+      push({
         pathname: `/dao/[network]/[token]/proposal/review`,
         query: {
-          network: router.query?.network,
-          token: router.query?.token,
+          network: query?.network,
+          token: query?.token,
         },
       })
     },
-    [router, addTransaction, invoiceData?.title, invoiceAddress, currentMilestone]
+    [push, query, addTransaction, invoiceData?.title, invoiceAddress, currentMilestone]
   )
 
   const [isReleasing, setIsReleasing] = useState(false)

@@ -28,8 +28,7 @@ import {
   TransactionType,
   useProposalStore,
 } from 'src/modules/create-proposal'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { Address, encodeFunctionData, formatEther } from 'viem'
 import { useReadContracts } from 'wagmi'
 

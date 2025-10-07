@@ -14,7 +14,7 @@ import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { formatFounderAllocation } from 'src/modules/create-dao'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import {
   deployCheckboxHelperText,
   deployCheckboxStyleVariants,

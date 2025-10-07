@@ -8,7 +8,7 @@ import type { FormikHelpers } from 'formik'
 import { Formik } from 'formik'
 import { useCallback } from 'react'
 import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { encodeFunctionData, getAddress, parseUnits } from 'viem'
 
 import { sendErc20Schema, SendErc20Values } from './SendErc20.schema'

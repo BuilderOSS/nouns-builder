@@ -4,7 +4,7 @@ import { getProposal } from '@buildeross/sdk/subgraph'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { useSWRConfig } from 'swr'
 
 interface PendingProps {

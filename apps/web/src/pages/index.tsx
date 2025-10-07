@@ -1,6 +1,6 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
 import { Stack } from '@buildeross/zord'
-import React from 'react'
+import React, { ReactNode } from 'react'
 import Everything from 'src/components/Home/Everything'
 import FAQ from 'src/components/Home/FAQ'
 import GetStarted from 'src/components/Home/GetStarted'
@@ -19,23 +19,33 @@ import { NextPageWithLayout } from './_app'
 
 export type DaoProps = AuctionFragment['dao']
 
-const HomePage: NextPageWithLayout = () => {
+function ConditionalLayout({ children }: { children: ReactNode }) {
   const { address } = useAccount()
 
   if (address) {
     return (
       <LayoutWrapper>
-        <DefaultLayout>
-          <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
-          <Dashboard />
-        </DefaultLayout>
+        <DefaultLayout>{children}</DefaultLayout>
       </LayoutWrapper>
     )
   }
+
   return (
     <LayoutWrapper>
-      <HomeLayout>
-        <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
+      <HomeLayout>{children}</HomeLayout>
+    </LayoutWrapper>
+  )
+}
+
+const HomePage: NextPageWithLayout = () => {
+  const { address } = useAccount()
+
+  return (
+    <>
+      <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
+      {address ? (
+        <Dashboard />
+      ) : (
         <Stack align={'center'}>
           <Marquee />
           <GetStarted />
@@ -45,11 +55,15 @@ const HomePage: NextPageWithLayout = () => {
           <FAQ />
           <Twitter />
         </Stack>
-      </HomeLayout>
-    </LayoutWrapper>
+      )}
+    </>
   )
 }
 
-// HomePage.getLayout = getHomeLayout
+HomePage.getLayout = (page) => {
+  // We need to check the page content to determine layout
+  // Since we can't access useAccount here, we'll create a wrapper that handles both cases
+  return <ConditionalLayout>{page}</ConditionalLayout>
+}
 
 export default HomePage

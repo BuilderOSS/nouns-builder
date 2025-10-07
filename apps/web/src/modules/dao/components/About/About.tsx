@@ -12,8 +12,7 @@ import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import Image from 'next/legacy/image'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { about, daoInfo, daoName, statisticContent } from 'src/styles/About.css'
 import useSWR from 'swr'
 import { Address, formatEther } from 'viem'
@@ -73,11 +72,11 @@ export const About: React.FC = () => {
   })
 
   const { data } = useSWR(
-    chain && token ? [SWR_KEYS.DAO_INFO, chain.id, token] : null,
-    async ([_key, chainId, token]) => {
-      const res = await SubgraphSDK.connect(chainId)
+    chain && token ? ([SWR_KEYS.DAO_INFO, chain.id, token] as const) : null,
+    async ([, _chainId, _token]) => {
+      const res = await SubgraphSDK.connect(_chainId)
         .daoInfo({
-          tokenAddress: token.toLowerCase(),
+          tokenAddress: _token.toLowerCase(),
         })
         .then((x) => x.dao)
 
@@ -91,15 +90,15 @@ export const About: React.FC = () => {
     return balance ? formatCryptoVal(formatEther(balance.value)) : null
   }, [balance])
 
-  const router = useRouter()
+  const { push, query, pathname } = useRouter()
 
   const openTreasuryTab = () => {
-    const current = { ...router.query } // Get existing query params
+    const current = { ...query } // Get existing query params
     current['tab'] = 'treasury'
 
-    router.push(
+    push(
       {
-        pathname: router.pathname,
+        pathname,
         query: current,
       },
       undefined,

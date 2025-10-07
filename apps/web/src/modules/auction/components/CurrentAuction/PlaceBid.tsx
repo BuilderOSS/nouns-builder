@@ -8,7 +8,7 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useDaoStore } from 'src/stores'
 import useSWR, { useSWRConfig } from 'swr'
 import { Address, formatEther, parseEther } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
@@ -65,8 +65,10 @@ export const PlaceBid = ({
   })
 
   const { data: averageBid } = useSWR(
-    addresses.token ? [SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token] : null,
-    () => averageWinningBid(chain.id, addresses.token as Address)
+    addresses.token && chain.id
+      ? ([SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token] as const)
+      : null,
+    ([, _chainId, _token]) => averageWinningBid(_chainId, _token)
   )
 
   const isMinBid = useMemo(

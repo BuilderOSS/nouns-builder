@@ -19,8 +19,7 @@ import {
   SmartContracts,
 } from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore } from 'src/stores/useChainStore'
-import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
+import { DaoContractAddresses, useChainStore, useDaoStore } from 'src/stores'
 import { isAddress } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 import { readContract } from 'wagmi/actions'

@@ -5,7 +5,7 @@ import { Button, Flex, Icon } from '@buildeross/zord'
 import { FieldArray, Form, Formik, FormikProps } from 'formik'
 import sum from 'lodash/sum'
 import React, { useRef, useState } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { useAccount } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 

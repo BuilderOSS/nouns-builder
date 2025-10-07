@@ -35,7 +35,7 @@ const queryClient = new QueryClient({
 })
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode
+  getLayout?: (page: ReactElement<P>) => ReactNode
 }
 
 type AppPropsWithLayout = AppProps & {

@@ -1,7 +1,7 @@
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { formatUnits } from 'viem'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'

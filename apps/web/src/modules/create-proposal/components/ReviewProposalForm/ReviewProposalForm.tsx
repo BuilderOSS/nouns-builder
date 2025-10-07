@@ -14,8 +14,7 @@ import React, { useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { ErrorResult } from 'src/services/errorResult'
 import { SimulationOutput, SimulationResult } from 'src/services/simulationService'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
@@ -57,7 +56,7 @@ export const ReviewProposalForm = ({
   summary,
   transactions,
 }: ReviewProposalProps) => {
-  const router = useRouter()
+  const { push, query } = useRouter()
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
@@ -161,20 +160,18 @@ export const ReviewProposalForm = ({
 
         await waitForTransactionReceipt(config, { hash, chainId: chain.id })
 
-        router
-          .push({
-            pathname: `/dao/[network]/[token]`,
-            query: {
-              network: router.query?.network,
-              token: router.query?.token,
-              message: SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS,
-              tab: 'activity',
-            },
-          })
-          .then(() => {
-            setProposing(false)
-            clearProposal()
-          })
+        push({
+          pathname: `/dao/[network]/[token]`,
+          query: {
+            network: query?.network,
+            token: query?.token,
+            message: SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS,
+            tab: 'activity',
+          },
+        }).then(() => {
+          setProposing(false)
+          clearProposal()
+        })
       } catch (err: any) {
         setProposing(false)
         if (
@@ -189,7 +186,16 @@ export const ReviewProposalForm = ({
         setError(err.message)
       }
     },
-    [router, addresses, hasThreshold, clearProposal, chain.id, config, skipSimulation]
+    [
+      push,
+      query,
+      addresses,
+      hasThreshold,
+      clearProposal,
+      chain.id,
+      config,
+      skipSimulation,
+    ]
   )
 
   if (isLoading) return null

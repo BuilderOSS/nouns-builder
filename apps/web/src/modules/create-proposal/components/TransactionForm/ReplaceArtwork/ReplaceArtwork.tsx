@@ -10,8 +10,7 @@ import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
@@ -39,13 +38,10 @@ export const ReplaceArtwork = () => {
   )
 
   const { data } = useSWR(
-    addresses.metadata
-      ? [SWR_KEYS.ARTWORK_PROPERTY_ITEMS_COUNT, chain.id, addresses.metadata]
+    addresses.metadata && chain.id
+      ? ([SWR_KEYS.ARTWORK_PROPERTY_ITEMS_COUNT, chain.id, addresses.metadata] as const)
       : null,
-    () => {
-      if (!addresses.metadata) return
-      return getPropertyItems(chain.id, addresses?.metadata)
-    }
+    ([, _chainId, _metadata]) => getPropertyItems(_chainId, _metadata)
   )
 
   const upgradeNotQueued = !currentTransactions.some(

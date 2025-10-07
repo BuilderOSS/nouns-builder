@@ -29,11 +29,11 @@ export const AuctionPaused = ({
   name,
   chainIcon,
 }: PausedType) => {
-  const router = useRouter()
+  const { push } = useRouter()
   const Paused = icons.pause
 
   const handleSelectAuction = () => {
-    router.push(`/dao/${currentChainSlug}/${tokenAddress}`)
+    push(`/dao/${currentChainSlug}/${tokenAddress}`)
   }
   return (
     <Flex className={outerAuctionCard}>

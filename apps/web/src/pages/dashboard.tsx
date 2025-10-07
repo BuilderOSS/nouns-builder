@@ -1,18 +1,17 @@
 import React from 'react'
 import { Meta } from 'src/components/Meta'
-import { DefaultLayout } from 'src/layouts/DefaultLayout'
-import { LayoutWrapper } from 'src/layouts/LayoutWrapper'
+import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 import Dashboard from 'src/modules/dashboard/Dashboard'
 
 const DashboardPage = () => {
   return (
-    <LayoutWrapper>
-      <DefaultLayout>
-        <Meta title={'Dashboard'} type={'website'} path={'/dashboard'} />
-        <Dashboard />
-      </DefaultLayout>
-    </LayoutWrapper>
+    <>
+      <Meta title={'Dashboard'} type={'website'} path={'/dashboard'} />
+      <Dashboard />
+    </>
   )
 }
+
+DashboardPage.getLayout = getDefaultLayout
 
 export default DashboardPage

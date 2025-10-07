@@ -4,8 +4,7 @@ import { AddressType } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import axios from 'axios'
 import { L2MigratedResponse } from 'src/pages/api/migrated'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { useReadContract } from 'wagmi'
 
@@ -34,10 +33,10 @@ export const Migration: React.FC = () => {
   })
 
   const { data: migratedRes } = useSWR(
-    treasury ? [SWR_KEYS.DAO_MIGRATED, treasury] : null,
-    ([_key, treasury]) =>
+    treasury ? ([SWR_KEYS.DAO_MIGRATED, treasury] as const) : null,
+    ([, _treasury]) =>
       axios
-        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${treasury}`)
+        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${_treasury}`)
         .then((x) => x.data)
   )
 

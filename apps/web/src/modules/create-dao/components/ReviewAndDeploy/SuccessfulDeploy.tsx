@@ -5,8 +5,7 @@ import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { useChainStore } from 'src/stores/useChainStore'
-import { DaoContractAddresses, useDaoStore } from 'src/stores/useDaoStore'
+import { DaoContractAddresses, useChainStore, useDaoStore } from 'src/stores'
 import {
   deployPendingButtonStyle,
   infoSectionLabelStyle,
@@ -33,8 +32,24 @@ const DEPLOYMENT_ERROR = {
 const DisplayAddress: React.FC<{ address: string }> = ({ address }) => {
   return (
     <Flex align={'center'} fontSize={18} className={infoSectionValueVariants['default']}>
-      <Text display={{ '@initial': 'none', '@768': 'block' }}>{address}</Text>
-      <Text display={{ '@initial': 'block', '@768': 'none' }}>
+      <Text
+        display={{
+          '@initial': 'none',
+          '@480': 'block',
+          '@768': 'none',
+          '@1024': 'block',
+        }}
+      >
+        {address}
+      </Text>
+      <Text
+        display={{
+          '@initial': 'block',
+          '@480': 'none',
+          '@768': 'block',
+          '@1024': 'none',
+        }}
+      >
         {walletSnippet(address)}
       </Text>
       <CopyButton text={address} />
@@ -50,7 +65,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   governor,
   title,
 }) => {
-  const router = useRouter()
+  const { push } = useRouter()
   const config = useConfig()
   const { general, ipfsUpload, orderedLayers, setFulfilledSections, resetForm } =
     useFormStore()
@@ -122,7 +137,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     setIsPendingTransaction(false)
     setFulfilledSections(title)
 
-    router.push(`/dao/${chain.slug}/${token}`).then(() => {
+    push(`/dao/${chain.slug}/${token}`).then(() => {
       resetForm()
     })
   }, [
@@ -136,7 +151,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     token,
     setFulfilledSections,
     title,
-    router,
+    push,
     resetForm,
   ])
 

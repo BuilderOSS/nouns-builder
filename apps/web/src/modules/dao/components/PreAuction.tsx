@@ -5,7 +5,7 @@ import { atoms, Box, Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useDaoStore } from 'src/stores'
 import { useAccount, useConfig, useSimulateContract, useWriteContract } from 'wagmi'
 import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
 
@@ -22,7 +22,7 @@ interface PreAuctionProps {
 }
 
 export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress }) => {
-  const router = useRouter()
+  const { push, pathname } = useRouter()
   const { address } = useAccount()
   const { addresses } = useDaoStore()
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -63,7 +63,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
     })
 
     const [tokenId] = unpackOptionalArray(auction, 6)
-    router.push(`/dao/${router.query.network}/${collectionAddress}/${tokenId}`)
+    push(`/dao/${chain.slug}/${collectionAddress}/${tokenId}`)
   }
 
   return (
@@ -81,9 +81,9 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
         <Button className={preAuctionButtonVariants['edit']}>
           <Link
             href={{
-              pathname: router.pathname,
+              pathname,
               query: {
-                network: router.query.network,
+                network: chain.slug,
                 token: collectionAddress,
                 tab: 'admin',
               },

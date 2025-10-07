@@ -7,14 +7,13 @@ import { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { NetworkController } from '@buildeross/ui/NetworkController'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import axios from 'axios'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 import { useAccount, useBalance } from 'wagmi'
 
@@ -134,7 +133,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
               return (
                 <Link
                   key={dao.collectionAddress}
-                  href={`/dao/${chainIdToSlug(dao.chainId)}/${dao.collectionAddress}`}
+                  href={`/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
                   passHref
                   style={{ width: '100%' }}
                 >

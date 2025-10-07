@@ -1,5 +1,5 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
-import { Duration } from '@buildeross/types'
+import { PUBLIC_ALL_CHAINS, TESTNET_CHAINS } from '@buildeross/constants'
+import { CHAIN_ID, Duration } from '@buildeross/types'
 import { isAddress } from 'viem'
 
 /**
@@ -330,5 +330,8 @@ export function maxChar(str: string, maxLength: number) {
   return str.slice(0, maxLength) + '...'
 }
 
-export const chainIdToSlug = (chainId: number): string | undefined =>
+export const chainIdToSlug = (chainId: CHAIN_ID): string | undefined =>
   PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)?.slug
+
+export const isTestnetChain = (chainId: CHAIN_ID): boolean =>
+  TESTNET_CHAINS.some((chain) => chain.id === chainId)

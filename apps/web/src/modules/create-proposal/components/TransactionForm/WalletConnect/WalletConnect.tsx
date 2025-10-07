@@ -15,8 +15,7 @@ import {
   WCPayload,
 } from 'src/modules/create-proposal'
 import { DecodedTransactionDisplay } from 'src/modules/proposal/components/ProposalDescription/DecodedTransactions/DecodedTransactions'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 
 import * as styles from './WalletConnect.css'
 import walletConnectSchema, { WalletConnectValues } from './WalletConnect.schema'

@@ -17,7 +17,7 @@ import {
   getEscrowBundler,
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 
@@ -62,7 +62,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
 
   const { data: tokenImage, error } = useSWR(
     !!collection && !!proposer
-      ? [SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposer]
+      ? ([SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposer] as const)
       : null,
     async ([_key, chainId, collection, proposer]) => {
       const data = await SubgraphSDK.connect(chainId).tokens({

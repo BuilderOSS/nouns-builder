@@ -4,18 +4,16 @@ import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { atoms, Box, Icon, Stack } from '@buildeross/zord'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useMemo } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
+const LIMIT = 20
+
 export const AuctionPaused = () => {
-  const { query, isReady } = useRouter()
   const chain = useChainStore((x) => x.chain)
-  const LIMIT = 20
 
   const addresses = useDaoStore((x) => x.addresses)
 
@@ -27,11 +25,11 @@ export const AuctionPaused = () => {
   })
 
   const { data } = useSWR<ProposalsResponse>(
-    paused && isReady && addresses?.token
-      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token, query.page] as const)
+    paused && addresses?.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token] as const)
       : null,
     ([_key, _chainId, _token, _page]) =>
-      getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
+      getProposals(_chainId as CHAIN_ID, _token as string, LIMIT)
   )
 
   const pausedProposal = useMemo(() => {
@@ -77,8 +75,8 @@ export const AuctionPaused = () => {
         shallow={!pausedProposal?.proposalId}
         href={
           pausedProposal?.proposalId
-            ? `/dao/${query.network}/${query.token}/vote/${pausedProposal?.proposalNumber}`
-            : `/dao/${query.network}/${query.token}?tab=activity`
+            ? `/dao/${chain.slug}/${addresses?.token}/vote/${pausedProposal?.proposalNumber}`
+            : `/dao/${chain.slug}/${addresses?.token}?tab=activity`
         }
       >
         <Box
@@ -89,10 +87,8 @@ export const AuctionPaused = () => {
           className={atoms({ textDecoration: 'underline' })}
         >
           {pausedProposal?.proposalId ? 'See proposal here' : 'See activity tab'}
-          {pausedProposal?.proposalId ? (
+          {pausedProposal?.proposalId && (
             <Icon align="center" fill="text4" id="external-16" size="sm" />
-          ) : (
-            <></>
           )}
         </Box>
       </Link>
