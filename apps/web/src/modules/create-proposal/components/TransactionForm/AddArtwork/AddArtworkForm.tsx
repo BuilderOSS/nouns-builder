@@ -146,7 +146,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
                   </Flex>
 
                   <Flex className={checkboxHelperText}>
-                    I confirm I have tested an artwork replacement proposal on{' '}
+                    I confirm I have tested an artwork addition proposal on{' '}
                     <a
                       href={'https://testnet.nouns.build'}
                       target="_blank"
