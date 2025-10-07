@@ -1,6 +1,6 @@
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { AuctionHistoryQuery } from '@buildeross/sdk/subgraph'
 import axios from 'axios'
-import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
@@ -30,7 +30,6 @@ const startTimeFromNow = (startTime: StartTimes) => {
 }
 
 export const AuctionChart = () => {
-  const { isReady } = useRouter()
   const chain = useChainStore((x) => x.chain)
   const {
     addresses: { token },
@@ -38,22 +37,22 @@ export const AuctionChart = () => {
 
   const [startTime, setStartTime] = useState(StartTimes['30d'])
 
-  const startSeconds = startTimeFromNow(startTime)
-
   const { data, error, isValidating } = useSWR(
-    isReady ? [token, chain.id, startSeconds] : null,
-    () =>
-      axios
-        .get<{
-          auctionHistory: AuctionHistoryQuery
-        }>(`/api/auctionHistory/${token}?chainId=${chain.id}&startTime=${startSeconds}`)
-        .then((x) =>
-          x.data.auctionHistory.dao?.auctions.map((auction) => ({
-            id: auction.id,
-            endTime: Number(auction.endTime),
-            winningBidAmt: auction?.winningBid?.amount || ('1' as string),
-          }))
-        ),
+    token && chain.id
+      ? ([SWR_KEYS.AUCTION_HISTORY, token, chain.id, startTime] as const)
+      : null,
+    async ([, _token, _chainId, _startTime]) => {
+      const startSeconds = startTimeFromNow(_startTime)
+      const { data } = await axios.get<{
+        auctionHistory: AuctionHistoryQuery
+      }>(`/api/auctionHistory/${_token}?chainId=${_chainId}&startTime=${startSeconds}`)
+
+      return data.auctionHistory.dao?.auctions.map((auction) => ({
+        id: auction.id,
+        endTime: Number(auction.endTime),
+        winningBidAmt: auction?.winningBid?.amount || ('1' as string),
+      }))
+    },
     { revalidateOnFocus: false }
   )
 

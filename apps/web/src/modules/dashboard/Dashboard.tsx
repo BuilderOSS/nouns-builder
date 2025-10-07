@@ -86,8 +86,8 @@ const Dashboard = () => {
   const { address } = useAccount()
 
   const { data, error, isValidating, mutate } = useSWR(
-    [`${SWR_KEYS.DASHBOARD}:${address}`],
-    address ? () => fetchDashboardData(address) : null,
+    address ? ([SWR_KEYS.DASHBOARD, address] as const) : null,
+    ([, _address]) => fetchDashboardData(_address),
     { revalidateOnFocus: false }
   )
 

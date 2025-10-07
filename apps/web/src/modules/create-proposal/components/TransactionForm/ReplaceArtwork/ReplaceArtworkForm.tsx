@@ -1,3 +1,4 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { Uploading } from '@buildeross/ui/Uploading'
 import { isTestnetChain } from '@buildeross/utils/helpers'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
@@ -128,15 +129,24 @@ export const ReplaceArtworkForm: React.FC<ReplaceArtworkFormProps> = ({
                 </Flex>
 
                 <Flex className={checkboxHelperText}>
-                  I confirm I have tested an artwork replacement proposal on{' '}
-                  <a
-                    href={'https://testnet.nouns.build'}
-                    target="_blank"
-                    className={atoms({ color: 'accent' })}
-                    rel="noreferrer"
-                  >
-                    testnet
-                  </a>
+                  I confirm I have tested an artwork replacement proposal on a{' '}
+                  <strong>testnet DAO</strong>
+                  {!PUBLIC_IS_TESTNET && (
+                    <>
+                      {' '}
+                      (via{' '}
+                      <a
+                        href="https://testnet.nouns.build"
+                        target="_blank"
+                        className={atoms({ color: 'accent' })}
+                        rel="noreferrer"
+                      >
+                        testnet.nouns.build
+                      </a>
+                      ).
+                    </>
+                  )}
+                  {PUBLIC_IS_TESTNET && '.'}
                 </Flex>
               </Flex>
             )}

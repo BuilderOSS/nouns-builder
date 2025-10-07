@@ -1,5 +1,6 @@
 export const SWR_KEYS = {
   AUCTION_BIDS: 'auction-bids',
+  AUCTION_HISTORY: 'auction-history',
   ARTWORK_PROPERTY_ITEMS_COUNT: 'artwork-property-items-count',
   SNAPSHOT_SUPPLY: 'snapshot-supply',
   AVERAGE_WINNING_BID: 'average-winning-bid',
@@ -23,6 +24,7 @@ export const SWR_KEYS = {
   DAO_INFO: 'dao-info',
   DAO_FEED: 'dao-feed',
   MEMBERS: 'members',
+  MEMBERS_LIST: 'members-list',
   TOKEN_IMAGE: 'token-image',
   DASHBOARD: 'dashboard',
   DAO_MEMBERSHIP: 'dao-membership',

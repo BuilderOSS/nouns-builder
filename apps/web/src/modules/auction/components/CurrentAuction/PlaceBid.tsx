@@ -65,8 +65,10 @@ export const PlaceBid = ({
   })
 
   const { data: averageBid } = useSWR(
-    addresses.token ? [SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token] : null,
-    () => averageWinningBid(chain.id, addresses.token as Address)
+    addresses.token && chain.id
+      ? ([SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token] as const)
+      : null,
+    ([, _chainId, _token]) => averageWinningBid(_chainId, _token)
   )
 
   const isMinBid = useMemo(

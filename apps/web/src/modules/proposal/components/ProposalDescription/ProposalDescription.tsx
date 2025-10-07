@@ -62,7 +62,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
 
   const { data: tokenImage, error } = useSWR(
     !!collection && !!proposer
-      ? [SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposer]
+      ? ([SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposer] as const)
       : null,
     async ([_key, chainId, collection, proposer]) => {
       const data = await SubgraphSDK.connect(chainId).tokens({
