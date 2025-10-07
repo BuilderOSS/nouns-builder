@@ -1,11 +1,11 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { Chain } from '@buildeross/types'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import { chainIdToSlug, unpackOptionalArray } from '@buildeross/utils/helpers'
 import { atoms, Box, Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useDaoStore } from 'src/stores'
 import { useAccount, useConfig, useSimulateContract, useWriteContract } from 'wagmi'
 import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
 
@@ -22,11 +22,12 @@ interface PreAuctionProps {
 }
 
 export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress }) => {
-  const router = useRouter()
+  const { push, pathname } = useRouter()
   const { address } = useAccount()
   const { addresses } = useDaoStore()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const config = useConfig()
+  const chainSlug = chainIdToSlug(chain.id)
 
   const { data, isError } = useSimulateContract({
     query: {
@@ -63,7 +64,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
     })
 
     const [tokenId] = unpackOptionalArray(auction, 6)
-    router.push(`/dao/${router.query.network}/${collectionAddress}/${tokenId}`)
+    push(`/dao/${chainSlug}/${collectionAddress}/${tokenId}`)
   }
 
   return (
@@ -81,9 +82,9 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
         <Button className={preAuctionButtonVariants['edit']}>
           <Link
             href={{
-              pathname: router.pathname,
+              pathname,
               query: {
-                network: router.query.network,
+                network: chainSlug,
                 token: collectionAddress,
                 tab: 'admin',
               },

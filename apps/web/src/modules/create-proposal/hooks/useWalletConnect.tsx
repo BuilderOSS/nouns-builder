@@ -6,8 +6,7 @@ import { SessionTypes, SignClientTypes } from '@walletconnect/types'
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils'
 import { IWeb3Wallet, Web3Wallet } from '@walletconnect/web3wallet'
 import { useCallback, useEffect, useState } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { getAddress, zeroHash } from 'viem'
 
 export type WCParams = {

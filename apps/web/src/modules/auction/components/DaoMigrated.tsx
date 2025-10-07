@@ -3,8 +3,7 @@ import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { atoms, Box, Icon, Stack } from '@buildeross/zord'
 import Link from 'next/link'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { useReadContract } from 'wagmi'
 
 export const DaoMigrated = ({

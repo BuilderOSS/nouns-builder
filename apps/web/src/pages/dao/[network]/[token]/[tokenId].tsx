@@ -30,7 +30,7 @@ import { DaoTopSection } from 'src/modules/dao/components/DaoTopSection'
 import FeedTab from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
-import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { DaoContractAddresses } from 'src/stores'
 import { useAccount } from 'wagmi'
 
 export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>

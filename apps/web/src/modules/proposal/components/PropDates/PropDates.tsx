@@ -10,8 +10,7 @@ import {
   getEscrowBundlerV1,
 } from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useInvoiceData } from 'src/modules/proposal/components/ProposalDescription/MilestoneDetails/useInvoiceData'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { skeletonAnimation } from 'src/styles/animations.css'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'

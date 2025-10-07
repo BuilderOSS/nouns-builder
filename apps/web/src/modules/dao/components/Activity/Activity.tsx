@@ -7,18 +7,16 @@ import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { walletSnippet } from '@buildeross/utils/helpers'
+import { chainIdToSlug, walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import Pagination from 'src/components/Pagination'
-import { usePagination } from 'src/hooks/usePagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
 import { ProposalCard } from 'src/modules/proposal'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { skeletonAnimation } from 'src/styles/animations.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
 import { createProposalBtn, delegateBtn } from 'src/styles/Proposals.css'
@@ -35,6 +33,7 @@ export const Activity: React.FC = () => {
   const { query, isReady, push } = useRouter()
   const { openConnectModal } = useConnectModal()
   const chain = useChainStore((x) => x.chain)
+  const chainSlug = chainIdToSlug(chain.id)
   const LIMIT = 20
 
   const { data, error, isLoading } = useSWR<ProposalsResponse>(
@@ -45,7 +44,6 @@ export const Activity: React.FC = () => {
       getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
   )
 
-  const { handlePageBack, handlePageForward } = usePagination(data?.pageInfo?.hasNextPage)
   const { data: membership } = useDaoMembership({
     chainId: chain.id,
     collectionAddress: addresses?.token as AddressType,
@@ -81,7 +79,7 @@ export const Activity: React.FC = () => {
       disabled: false,
       transactions: [],
     })
-    push(`/dao/${query.network}/${addresses?.token}/proposal/create`)
+    push(`/dao/${chainSlug}/${addresses?.token}/proposal/create`)
   }
 
   if (!data && !error && !isLoading) {
@@ -272,14 +270,7 @@ export const Activity: React.FC = () => {
             </Flex>
           )}
 
-          {!isLoading && (
-            <Pagination
-              onNext={handlePageForward}
-              onPrev={handlePageBack}
-              isLast={!data?.pageInfo?.hasNextPage}
-              isFirst={!query.page}
-            />
-          )}
+          {!isLoading && <Pagination hasNextPage={data?.pageInfo?.hasNextPage} />}
         </Flex>
       </Flex>
 

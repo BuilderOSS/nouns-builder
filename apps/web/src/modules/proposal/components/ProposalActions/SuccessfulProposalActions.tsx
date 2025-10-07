@@ -10,7 +10,7 @@ import {
 } from '@buildeross/utils/proposalState'
 import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 import { useSWRConfig } from 'swr'
 import { Address } from 'viem'

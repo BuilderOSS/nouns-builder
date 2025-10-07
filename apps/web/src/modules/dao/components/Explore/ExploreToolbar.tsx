@@ -12,7 +12,7 @@ interface ExploreToolbarProps {
 }
 
 const ExploreToolbar: React.FC<ExploreToolbarProps> = ({ title, showSort = false }) => {
-  const router = useRouter()
+  const { query, pathname } = useRouter()
   const { address } = useAccount()
 
   return (
@@ -27,9 +27,7 @@ const ExploreToolbar: React.FC<ExploreToolbarProps> = ({ title, showSort = false
         <Box fontSize={28} fontWeight={'heading'} mb={'x8'}>
           {title}
         </Box>
-        {showSort && (
-          <ExploreSortMenu choice={(router.query?.sortKey as string) || 'CREATED'} />
-        )}
+        {showSort && <ExploreSortMenu choice={(query?.sortKey as string) || 'CREATED'} />}
       </Flex>
       {address && (
         <>
@@ -40,8 +38,7 @@ const ExploreToolbar: React.FC<ExploreToolbarProps> = ({ title, showSort = false
                 mb={'x4'}
                 mx={'x4'}
                 style={{
-                  borderBottom:
-                    router.pathname === '/explore' ? `2px solid black` : `0px`,
+                  borderBottom: pathname === '/explore' ? `2px solid black` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">Explore</Text>
@@ -53,7 +50,7 @@ const ExploreToolbar: React.FC<ExploreToolbarProps> = ({ title, showSort = false
                 mb={'x4'}
                 mx={'x4'}
                 style={{
-                  borderBottom: router.pathname === '/mydaos' ? `2px solid black` : `0px`,
+                  borderBottom: pathname === '/mydaos' ? `2px solid black` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">My DAOs</Text>

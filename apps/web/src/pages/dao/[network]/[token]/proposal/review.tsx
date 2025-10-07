@@ -15,8 +15,7 @@ import {
   useProposalStore,
 } from 'src/modules/create-proposal'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { notFoundWrap } from 'src/styles/404.css'
 import { useAccount } from 'wagmi'
 

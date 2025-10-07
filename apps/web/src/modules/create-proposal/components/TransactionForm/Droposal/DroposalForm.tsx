@@ -5,7 +5,7 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
 import { DropdownSelect } from 'src/modules/create-proposal'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useDaoStore } from 'src/stores'
 import { useAccount } from 'wagmi'
 
 import { defaultInputLabelStyle } from './Droposal.css'

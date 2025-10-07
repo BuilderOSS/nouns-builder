@@ -7,8 +7,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 

@@ -2,7 +2,7 @@ import { Button } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { marqueeButton } from 'src/styles/home.css'
 import { useAccount, useSwitchChain } from 'wagmi'
 

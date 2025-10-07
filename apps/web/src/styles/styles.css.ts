@@ -269,7 +269,7 @@ export const formWrapper = style({
   width: '80%',
   '@media': {
     '(max-width: 1200px)': {
-      maxWidth: 400,
+      maxWidth: 420,
     },
     '(max-width: 768px)': {
       position: 'relative',

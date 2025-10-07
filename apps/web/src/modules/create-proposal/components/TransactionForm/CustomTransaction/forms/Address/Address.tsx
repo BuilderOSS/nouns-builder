@@ -5,7 +5,7 @@ import {
   initCustomTransaction,
   useCustomTransactionStore,
 } from 'src/modules/create-proposal'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { isAddress } from 'viem'
 
 import { CustomTransactionForm } from '../CustomTransactionForm'

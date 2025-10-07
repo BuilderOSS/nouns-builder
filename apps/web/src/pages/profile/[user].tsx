@@ -14,10 +14,9 @@ import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
 import Pagination from 'src/components/Pagination'
 import { TokenPreview } from 'src/components/Profile'
-import { usePagination } from 'src/hooks/usePagination'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import {
   daosContainer,
   loadingSkeleton,
@@ -48,19 +47,18 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const { ensName, ensAvatar } = useEnsData(userAddress)
 
   const { data: tokens, isValidating: isLoadingTokens } = useSWR(
-    userAddress ? [SWR_KEYS.PROFILE_TOKENS, chain.slug, userAddress, page] : undefined,
-    () => tokensQuery(chain.id, userAddress, page ? parseInt(page) : undefined)
+    userAddress ? [SWR_KEYS.PROFILE_TOKENS, chain.id, userAddress, page] : undefined,
+    ([, _chainId, _userAddress, _page]) =>
+      tokensQuery(_chainId, _userAddress, _page ? parseInt(_page) : undefined)
   )
 
   const { data: daos, isValidating: isLoadingDaos } = useSWR(
     userAddress ? [SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()] : undefined,
-    () => myDaosRequest(userAddress)
+    ([, _userAddress]) => myDaosRequest(_userAddress)
   )
 
   const isLoading = isLoadingTokens || isLoadingDaos
   const hasDaos = !!daos && daos.length > 0
-
-  const { handlePageBack, handlePageForward } = usePagination(tokens?.hasNextPage)
 
   const pageTitle = `${userName}'s Profile`
   const pageDescription = `View ${userName}'s profile and DAO tokens on Nouns Builder`
@@ -269,12 +267,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   </Flex>
                 )}
 
-                <Pagination
-                  onNext={handlePageForward}
-                  onPrev={handlePageBack}
-                  isLast={!tokens?.hasNextPage}
-                  isFirst={!page}
-                />
+                <Pagination hasNextPage={tokens?.hasNextPage} />
               </>
             )}
 

@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { DaoContractAddresses } from 'src/stores'
 import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
 import { expect, vi } from 'vitest'
 import { useReadContracts } from 'wagmi'

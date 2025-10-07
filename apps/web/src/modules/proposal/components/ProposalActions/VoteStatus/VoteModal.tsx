@@ -17,8 +17,7 @@ import {
 import { Field, Formik } from 'formik'
 import React, { Fragment, useCallback, useMemo } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { useChainStore } from 'src/stores/useChainStore'
-import { useDaoStore } from 'src/stores/useDaoStore'
+import { useChainStore, useDaoStore } from 'src/stores'
 import {
   proposalFormTitle,
   voteModalFieldset,

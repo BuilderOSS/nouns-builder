@@ -1,26 +1,82 @@
 import { atoms, Flex, Icon } from '@buildeross/zord'
+import omit from 'lodash/omit'
 import Link from 'next/link'
-import React from 'react'
+import { useRouter } from 'next/router'
+import React, { useCallback } from 'react'
 
 type PaginationProps = {
-  isFirst: boolean
-  isLast: boolean
+  hasNextPage?: boolean
   scroll?: boolean
-  onNext: () => {}
-  onPrev: () => {}
 }
 
 const Pagination: React.FC<PaginationProps> = ({
-  onNext,
-  onPrev,
-  isFirst,
-  isLast,
+  hasNextPage = false,
   scroll = false,
 }) => {
+  const { query, pathname } = useRouter()
+
+  const handlePageBack = useCallback(() => {
+    // user is on the first page
+    if (!query.page)
+      return {
+        pathname,
+        query: {
+          ...query,
+        },
+      }
+
+    // user is at least on the second page
+    return Number(query.page) > 2
+      ? {
+          pathname,
+          query: {
+            ...query,
+            page: Number(query.page) - 1,
+          },
+        }
+      : {
+          pathname,
+          query: omit(query, ['page']),
+        }
+  }, [query, pathname])
+
+  const handlePageForward = useCallback(() => {
+    // there are more results to be fetched
+    if (!hasNextPage)
+      return {
+        pathname,
+        query: {
+          ...query,
+        },
+      }
+
+    // user is on the first page
+    if (!query.page)
+      return {
+        pathname,
+        query: {
+          ...query,
+          page: 2,
+        },
+      }
+
+    // user is at least on the second page
+    return {
+      pathname,
+      query: {
+        ...query,
+        page: Number(query.page) + 1,
+      },
+    }
+  }, [hasNextPage, pathname, query])
+
+  const isFirst = !query.page
+  const isLast = !hasNextPage
+
   return (
     <Flex direction={'row'} w={'100%'} justify={'center'} my={'x16'}>
       <Link
-        href={onPrev()}
+        href={handlePageBack()}
         passHref
         scroll={scroll}
         className={atoms({ pointerEvents: isFirst ? 'none' : 'auto' })}
@@ -50,7 +106,7 @@ const Pagination: React.FC<PaginationProps> = ({
       </Link>
 
       <Link
-        href={onNext()}
+        href={handlePageForward()}
         passHref
         scroll={scroll}
         className={atoms({ pointerEvents: isLast ? 'none' : 'auto' })}

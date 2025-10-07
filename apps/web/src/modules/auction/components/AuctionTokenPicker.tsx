@@ -1,9 +1,9 @@
+import { chainIdToSlug } from '@buildeross/utils'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import { useRouter } from 'next/router'
 import React from 'react'
 import { OptionalLink } from 'src/components/OptionalLink'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 
 import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
 import { auctionDateNavButton, auctionTextVariants } from './Auction.css'
@@ -24,7 +24,6 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   currentTokenId,
 }: AuctionTokenPickerProps) => {
   const { id: chainId } = useChainStore((x) => x.chain)
-  const { query } = useRouter()
   const disabledStyle = { opacity: 0.2 }
 
   const data = useNextAndPreviousTokens({ chainId, collection, tokenId })
@@ -41,12 +40,14 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
       ? `Current Auction`
       : `Latest Auction`
 
+  const chainSlug = chainIdToSlug(chainId)
+
   return (
     <Flex direction={'column'}>
       <Flex align="center" direction={'row'} gap={'x2'}>
         <OptionalLink
           enabled={hasPreviousToken}
-          href={`/dao/${query.network}/${collection}/${data?.prev}`}
+          href={`/dao/${chainSlug}/${collection}/${data?.prev}`}
           passHref
           legacyBehavior
         >
@@ -62,7 +63,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
 
         <OptionalLink
           enabled={hasNextToken}
-          href={`/dao/${query.network}/${collection}/${data?.next}`}
+          href={`/dao/${chainSlug}/${collection}/${data?.next}`}
           passHref
           legacyBehavior
         >
@@ -78,7 +79,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
 
         <OptionalLink
           enabled={hasLatestToken}
-          href={`/dao/${query.network}/${collection}/${latestTokenId}`}
+          href={`/dao/${chainSlug}/${collection}/${latestTokenId}`}
           passHref
           legacyBehavior
         >

@@ -5,7 +5,7 @@ import {
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import Link from 'next/link'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 
 export type ContractButtonProps = Omit<
   BaseContractButtonProps,

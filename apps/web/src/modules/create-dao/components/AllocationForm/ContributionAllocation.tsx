@@ -7,7 +7,7 @@ import { AnimatedModal } from '@buildeross/ui/Modal'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 
 import { useFormStore } from '../../stores'
 import { TokenAllocation } from '../AllocationForm'

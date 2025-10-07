@@ -6,7 +6,7 @@ import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import { TransactionType } from 'src/modules/create-proposal/constants'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 import { encodeFunctionData, parseEther } from 'viem'
 
 import { DroposalForm } from './DroposalForm'

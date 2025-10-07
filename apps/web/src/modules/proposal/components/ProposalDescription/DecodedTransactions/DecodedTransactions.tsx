@@ -3,7 +3,7 @@ import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
+import { useChainStore } from 'src/stores'
 
 import { ArgumentDisplay } from './ArgumentDisplay'
 

@@ -2,8 +2,7 @@ import { Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useChainStore } from 'src/stores/useChainStore'
-import { DaoContractAddresses } from 'src/stores/useDaoStore'
+import { DaoContractAddresses, useChainStore } from 'src/stores'
 
 import { useRendererBaseFix } from '../../hooks'
 import { useProposalStore } from '../../stores'
@@ -19,7 +18,7 @@ export const FixRendererBase = ({
   collection: string
   addresses: DaoContractAddresses
 }) => {
-  const router = useRouter()
+  const { push } = useRouter()
   const createProposal = useProposalStore((state) => state.createProposal)
   const chain = useChainStore((x) => x.chain)
 
@@ -38,7 +37,7 @@ export const FixRendererBase = ({
       summary,
     })
 
-    router.push({
+    push({
       pathname: '/dao/[network]/[token]/proposal/review',
       query: { network: chain.slug, token: collection },
     })
