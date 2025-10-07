@@ -47,7 +47,9 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const { ensName, ensAvatar } = useEnsData(userAddress)
 
   const { data: tokens, isValidating: isLoadingTokens } = useSWR(
-    userAddress ? [SWR_KEYS.PROFILE_TOKENS, chain.id, userAddress, page] : undefined,
+    userAddress && chain.id
+      ? ([SWR_KEYS.PROFILE_TOKENS, chain.id, userAddress, page] as const)
+      : undefined,
     ([, _chainId, _userAddress, _page]) =>
       tokensQuery(_chainId, _userAddress, _page ? parseInt(_page) : undefined)
   )

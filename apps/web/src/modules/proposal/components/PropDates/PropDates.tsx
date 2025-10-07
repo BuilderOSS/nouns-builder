@@ -33,8 +33,10 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
   const proposalId = proposal.proposalId
 
   const { data, mutate, isLoading } = useSWR(
-    !!token && !!chain.id ? [SWR_KEYS.PROPDATES, token, chain.id, proposalId] : null,
-    () => getPropDates(token as `0x${string}`, chain.id, proposalId),
+    !!token && !!chain.id
+      ? ([SWR_KEYS.PROPDATES, token, chain.id, proposalId] as const)
+      : null,
+    ([, _token, _chainId, _proposalId]) => getPropDates(_token, _chainId, _proposalId),
     { revalidateOnMount: true, refreshInterval: 1000 * 5 }
   )
 

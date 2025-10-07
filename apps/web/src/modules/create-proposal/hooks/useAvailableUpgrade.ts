@@ -53,8 +53,10 @@ export const useAvailableUpgrade = ({
   }
 
   const { data: proposals } = useSWR(
-    !!addresses?.token ? [SWR_KEYS.PROPOSALS_CALLDATAS, chainId, addresses?.token] : null,
-    () => getProposals(chainId, addresses?.token as string, 100)
+    !!addresses?.token
+      ? ([SWR_KEYS.PROPOSALS_CALLDATAS, chainId, addresses?.token] as const)
+      : null,
+    ([, _chainId, _token]) => getProposals(_chainId, _token, 100)
   )
 
   const { data, isLoading, isError } = useReadContracts({

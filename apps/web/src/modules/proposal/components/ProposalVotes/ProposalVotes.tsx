@@ -30,14 +30,19 @@ export const ProposalVotes: React.FC<ProposalVotesProps> = ({ proposal }) => {
 
   const { data: snapshot } = useSWR(
     addresses.token
-      ? [SWR_KEYS.SNAPSHOT_SUPPLY, chain.id, addresses.token, proposal.timeCreated]
+      ? ([
+          SWR_KEYS.SNAPSHOT_SUPPLY,
+          chain.id,
+          addresses.token,
+          proposal.timeCreated,
+        ] as const)
       : null,
-    () =>
-      SubgraphSDK.connect(chain.id)
+    ([, _chainId, _token, _timestamp]) =>
+      SubgraphSDK.connect(_chainId)
         .snapshots({
           where: {
-            dao: addresses.token?.toLowerCase(),
-            timestamp_lte: proposal.timeCreated,
+            dao: _token.toLowerCase(),
+            timestamp_lte: _timestamp,
           },
           orderBy: Snapshot_OrderBy.Timestamp,
           orderDirection: OrderDirection.Desc,

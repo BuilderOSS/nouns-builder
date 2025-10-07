@@ -64,7 +64,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   })
 
   const { data: proposal } = useSWR(
-    [SWR_KEYS.PROPOSAL, chainId, proposalId],
+    chainId && proposalId ? ([SWR_KEYS.PROPOSAL, chainId, proposalId] as const) : null,
     ([, _chainId, _proposalId]) => getProposal(_chainId, _proposalId)
   )
 

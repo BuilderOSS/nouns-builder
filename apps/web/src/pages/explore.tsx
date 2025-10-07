@@ -19,7 +19,7 @@ const ExplorePage: NextPageWithLayout = () => {
   const chain = useChainStore((x) => x.chain)
 
   const { data, error } = useSWR(
-    isReady ? [SWR_KEYS.EXPLORE, page, orderBy, chain.slug] : null,
+    isReady ? ([SWR_KEYS.EXPLORE, page, orderBy, chain.slug] as const) : null,
     async ([, _page, _orderBy, _chainSlug]) => {
       const params: any = {}
       if (_page) params['page'] = _page

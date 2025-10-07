@@ -92,15 +92,13 @@ export const useInvoiceData = (
   }, [decodedTransaction, chainId])
 
   const { data: invoiceAddress, isValidating: isLoadingInvoiceAddress } = useSWR(
-    executionTransactionHash
-      ? [SWR_KEYS.INVOICE_LOG_NEW_INVOICE, chainId, executionTransactionHash]
+    executionTransactionHash && isHex(executionTransactionHash)
+      ? ([SWR_KEYS.INVOICE_LOG_NEW_INVOICE, chainId, executionTransactionHash] as const)
       : null,
-    async () => {
-      if (!executionTransactionHash || !isHex(executionTransactionHash)) return undefined
-
-      const provider = getProvider(chainId)
+    async ([, _chainId, _txHash]) => {
+      const provider = getProvider(_chainId)
       const { logs } = await provider.getTransactionReceipt({
-        hash: executionTransactionHash as Hex,
+        hash: _txHash,
       })
 
       const parsedLogs = logs.map((log) => {
@@ -124,10 +122,9 @@ export const useInvoiceData = (
 
   const { data: invoiceData, isValidating: isLoadingInvoiceData } = useSWR(
     invoiceCid ? [SWR_KEYS.ESCROW_MILESTONES_IPFS_DATA, invoiceCid] : null,
-    async () => {
-      if (!invoiceCid) return undefined
+    async ([, _invoiceCid]) => {
       try {
-        const text = await fetchFromURI(`ipfs://${invoiceCid}`)
+        const text = await fetchFromURI(`ipfs://${_invoiceCid}`)
         return JSON.parse(text) as InvoiceMetadata
       } catch (error) {
         console.error('Failed to fetch invoice data:', error)

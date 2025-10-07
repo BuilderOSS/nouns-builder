@@ -72,11 +72,11 @@ export const About: React.FC = () => {
   })
 
   const { data } = useSWR(
-    chain && token ? [SWR_KEYS.DAO_INFO, chain.id, token] : null,
-    async ([_key, chainId, token]) => {
-      const res = await SubgraphSDK.connect(chainId)
+    chain && token ? ([SWR_KEYS.DAO_INFO, chain.id, token] as const) : null,
+    async ([, _chainId, _token]) => {
+      const res = await SubgraphSDK.connect(_chainId)
         .daoInfo({
-          tokenAddress: token.toLowerCase(),
+          tokenAddress: _token.toLowerCase(),
         })
         .then((x) => x.dao)
 

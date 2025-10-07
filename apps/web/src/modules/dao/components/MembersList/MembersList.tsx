@@ -1,7 +1,7 @@
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
-import { useRouter } from 'next/router'
 import React from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
@@ -14,7 +14,6 @@ type MembersQuery = {
 }
 
 export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
-  const { isReady } = useRouter()
   const chain = useChainStore((x) => x.chain)
   const { addresses } = useDaoStore()
 
@@ -25,8 +24,8 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     error,
     isLoading,
   } = useSWR(
-    isReady && token && chain?.id ? ([token, chain.id] as const) : null,
-    ([_token, _chainId]) =>
+    token && chain?.id ? ([SWR_KEYS.MEMBERS_LIST, token, chain.id] as const) : null,
+    ([, _token, _chainId]) =>
       axios
         .get<MembersQuery>(`/api/membersList/${_token}?chainId=${_chainId}`, {
           timeout: 10000,

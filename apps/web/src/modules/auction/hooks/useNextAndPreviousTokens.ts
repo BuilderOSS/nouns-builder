@@ -23,11 +23,14 @@ export const useNextAndPreviousTokens = ({
 
   const { data } = useSWR(
     isReady
-      ? [SWR_KEYS.DAO_NEXT_AND_PREVIOUS_TOKENS, chainId, collection, tokenId]
+      ? ([SWR_KEYS.DAO_NEXT_AND_PREVIOUS_TOKENS, chainId, collection, tokenId] as const)
       : null,
-    () =>
-      SubgraphSDK.connect(chainId)
-        .daoNextAndPreviousTokens({ tokenId, tokenAddress: collection.toLowerCase() })
+    ([, _chainId, _collection, _tokenId]) =>
+      SubgraphSDK.connect(_chainId)
+        .daoNextAndPreviousTokens({
+          tokenId: _tokenId,
+          tokenAddress: _collection.toLowerCase(),
+        })
         .then((x) => ({
           next: x.next.length > 0 ? parseInt(x.next[0].tokenId) : undefined,
           prev: x.prev.length > 0 ? parseInt(x.prev[0].tokenId) : undefined,

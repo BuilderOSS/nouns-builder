@@ -33,10 +33,10 @@ export const Migration: React.FC = () => {
   })
 
   const { data: migratedRes } = useSWR(
-    treasury ? [SWR_KEYS.DAO_MIGRATED, treasury] : null,
-    ([_key, treasury]) =>
+    treasury ? ([SWR_KEYS.DAO_MIGRATED, treasury] as const) : null,
+    ([, _treasury]) =>
       axios
-        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${treasury}`)
+        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${_treasury}`)
         .then((x) => x.data)
   )
 
