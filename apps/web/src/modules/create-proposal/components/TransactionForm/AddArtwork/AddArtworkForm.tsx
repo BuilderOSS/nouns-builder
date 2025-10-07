@@ -1,16 +1,16 @@
-import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { type Property } from '@buildeross/sdk/contract'
-import { NetworkController } from '@buildeross/ui/NetworkController'
 import { Uploading } from '@buildeross/ui/Uploading'
+import { isTestnetChain } from '@buildeross/utils/helpers'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React, { useState } from 'react'
 import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
+import { useChainStore } from 'src/stores'
 
 import { ArtworkUpload } from '../../ArtworkUpload'
 import { checkboxHelperText, checkboxStyleVariants } from './AddArtworkForm.css'
-import { ArtworkFormValues, validationSchemaArtwork } from './AddArtworkForm.schema'
+import { type ArtworkFormValues, validationSchemaArtwork } from './AddArtworkForm.schema'
 
 export interface InvalidProperty {
   currentVariantCount: number
@@ -45,7 +45,9 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
 }) => {
   const { isUploadingToIPFS, ipfsUploadProgress, ipfsUpload, setUpArtwork } =
     useArtworkStore()
-  const [hasConfirmed, setHasConfirmed] = useState(PUBLIC_IS_TESTNET ? true : false)
+  const { id: chainId } = useChainStore((state) => state.chain)
+  const isTestnetDAO = React.useMemo(() => isTestnetChain(chainId), [chainId])
+  const [hasConfirmed, setHasConfirmed] = useState(isTestnetDAO ? true : false)
 
   const initialValues = {
     artwork: setUpArtwork?.artwork || [],
@@ -132,7 +134,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
                 >{`The trait "${invalidPropertyOrder.trait}" in ${invalidPropertyOrder.invalidLayerName} is not in the correct position. It should be in ${invalidPropertyOrder.layerName}.`}</Text>
               )}
 
-              <NetworkController.Mainnet>
+              {!isTestnetDAO && (
                 <Flex align={'center'} justify={'center'} gap={'x4'} mt="x4">
                   <Flex
                     align={'center'}
@@ -157,7 +159,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
                     </a>
                   </Flex>
                 </Flex>
-              </NetworkController.Mainnet>
+              )}
 
               <Button
                 mt={'x9'}
