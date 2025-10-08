@@ -3,7 +3,8 @@ import { useAuctionRewards } from '@buildeross/hooks'
 import { protocolRewardsAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { ContractLink } from '@buildeross/ui/ContractLink'
-import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
+import { Tooltip } from '@buildeross/ui/Tooltip'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore } from 'src/stores'
@@ -22,27 +23,12 @@ interface TooltipProps {
   tooltip: string
 }
 
-const LabelWithTooltip: React.FC<TooltipProps> = ({ label, tooltip }) => {
-  const [showTooltip, setShowTooltip] = useState(false)
-  const zIndex = showTooltip ? 102 : undefined
-
-  return (
-    <Flex align="center" gap="x2">
-      <Text fontWeight="label">{label}</Text>
-      <Box
-        cursor="pointer"
-        style={{ zIndex }}
-        onMouseOver={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        <Icon id="info-16" size="sm" />
-      </Box>
-      <PopUp open={showTooltip} trigger={<></>}>
-        <Box maxWidth="x64">{tooltip}</Box>
-      </PopUp>
-    </Flex>
-  )
-}
+const LabelWithTooltip: React.FC<TooltipProps> = ({ label, tooltip }) => (
+  <Flex align="center" gap="x2">
+    <Text fontWeight="label">{label}</Text>
+    <Tooltip>{tooltip}</Tooltip>
+  </Flex>
+)
 
 export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }) => {
   const chain = useChainStore((state) => state.chain)

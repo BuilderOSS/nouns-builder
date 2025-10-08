@@ -111,7 +111,7 @@ export const EscrowFormSchema = yup.object({
     .required('Safety valve date is required.')
     .min(
       new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      'Safety valve date must be at least 30 days from today or the last milestone whichever is later.'
+      'Safety valve date must be at least 30 days from today or the last milestone.'
     )
     .test(
       'after-last-milestone',

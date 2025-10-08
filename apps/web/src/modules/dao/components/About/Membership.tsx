@@ -1,8 +1,9 @@
 import { type DaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { Avatar } from '@buildeross/ui/Avatar'
-import { Box, Flex, Grid, Icon, PopUp, Text } from '@buildeross/zord'
+import { Tooltip } from '@buildeross/ui/Tooltip'
+import { Flex, Grid, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import React from 'react'
 
 import { responsiveGrid } from './About.css'
 
@@ -69,9 +70,8 @@ export const Membership: React.FC<DaoMembership & { totalSupply: number }> = (in
 const MembershipCard: React.FC<{
   label: string
   value: string | number | React.ReactElement
-  tooltip?: string | React.ReactElement
+  tooltip?: string
 }> = ({ label, value, tooltip }) => {
-  const [showTooltip, setShowTooltip] = useState(false)
   return (
     <Flex
       borderRadius="curved"
@@ -89,21 +89,7 @@ const MembershipCard: React.FC<{
       <Text fontWeight="label">{label}</Text>
       <Flex align={'center'} justify="center" gap="x2">
         {typeof value === 'string' ? <Text variant="paragraph-md">{value}</Text> : value}
-        {!!tooltip && (
-          <>
-            <Box
-              cursor="pointer"
-              style={{ zIndex: 102 }}
-              onMouseOver={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
-            >
-              <Icon id="info-16" size="sm" />
-            </Box>
-            <PopUp open={showTooltip} trigger={<></>}>
-              <Box>{tooltip}</Box>
-            </PopUp>
-          </>
-        )}
+        {!!tooltip && <Tooltip>{tooltip}</Tooltip>}
       </Flex>
     </Flex>
   )

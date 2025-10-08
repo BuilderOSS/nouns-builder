@@ -1,19 +1,37 @@
-import { Flex, Grid } from '@buildeross/zord'
+import { Box, Flex, Grid } from '@buildeross/zord'
 import { FormikProps } from 'formik'
+import { motion } from 'framer-motion'
 import React, { ChangeEventHandler, ReactElement } from 'react'
 
+import { Tooltip } from '../Tooltip'
 import NumberInput from './NumberInput'
-import { defaultInputLabelStyle, mobileTwoColumnGrid } from './styles.css'
+import {
+  defaultHelperTextStyle,
+  defaultInputLabelStyle,
+  mobileTwoColumnGrid,
+} from './styles.css'
 
 interface DaysHoursMinsProps {
   id: string
   value: any
   inputLabel: string | ReactElement
   onChange: ChangeEventHandler
-  onBlur: ChangeEventHandler
+  onBlur?: ChangeEventHandler
   formik?: FormikProps<any>
   errorMessage?: any
   placeholder?: string[]
+  helperText?: string
+  tooltip?: string
+}
+
+const helperVariants = {
+  init: {
+    height: 0,
+    overflow: 'hidden',
+  },
+  open: {
+    height: 'auto',
+  },
 }
 
 const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
@@ -23,6 +41,9 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   errorMessage,
   placeholder,
   value,
+  tooltip,
+  helperText,
+  onBlur,
 }) => {
   const { days, hours, minutes, seconds } = value
   const handleChange = (e: any, type: string) => {
@@ -49,12 +70,32 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
     return errorMessage?.seconds?.length > 0
   }, [errorMessage])
 
+  const [isFocus, setIsFocus] = React.useState<boolean>(false)
+  const handleBlur: ChangeEventHandler = (e) => {
+    setIsFocus(false)
+    onBlur?.(e)
+  }
+
+  const handleFocus = () => {
+    setIsFocus(true)
+  }
+
   return (
     <Flex direction={'column'} mb={'x8'}>
-      <label className={defaultInputLabelStyle}>{inputLabel}</label>
+      <Flex
+        align={'center'}
+        justify={'flex-start'}
+        gap={'x2'}
+        className={defaultInputLabelStyle}
+      >
+        <label>{inputLabel}</label>
+        {tooltip && <Tooltip>{tooltip}</Tooltip>}
+      </Flex>
       <Grid gap={'x5'} mb={'x3'} className={mobileTwoColumnGrid}>
         <NumberInput
           label={'[Days]'}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           placeholder={placeholder?.[0] || '3'}
           hasError={valueHasError || daysHasError}
           errorMessage={errorMessage?.days}
@@ -66,6 +107,8 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
 
         <NumberInput
           label={'[Hours]'}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           placeholder={placeholder?.[1] || '0'}
           hasError={valueHasError || hoursHasError}
           errorMessage={errorMessage?.hours}
@@ -77,6 +120,8 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
 
         <NumberInput
           label={'[Minutes]'}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           placeholder={placeholder?.[2] || '0'}
           errorMessage={errorMessage?.minutes}
           hasError={valueHasError || minutesHasError}
@@ -88,6 +133,8 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
 
         <NumberInput
           label={'[Seconds]'}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           placeholder={placeholder?.[3] || '0'}
           errorMessage={errorMessage?.seconds}
           hasError={valueHasError || secondsHasError}
@@ -97,6 +144,15 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           min={0}
         />
       </Grid>
+      <motion.div
+        variants={helperVariants}
+        initial={'init'}
+        animate={isFocus ? 'open' : 'init'}
+      >
+        {!!helperText && helperText?.length > 0 ? (
+          <Box className={defaultHelperTextStyle}>{helperText}</Box>
+        ) : null}
+      </motion.div>
 
       {valueHasError && <Flex color="negative">{errorMessage}</Flex>}
     </Flex>

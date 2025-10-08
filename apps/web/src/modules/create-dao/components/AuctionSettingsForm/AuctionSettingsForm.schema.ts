@@ -9,6 +9,7 @@ export interface AuctionSettingsFormValues {
   quorumThreshold?: number
   votingPeriod: Duration
   votingDelay: Duration
+  timelockDelay: Duration
 }
 
 const twentyFourWeeks = 60 * 60 * 24 * 7 * 24
@@ -40,6 +41,10 @@ export const auctionSettingsValidationSchema = Yup.object().shape({
     { value: twentyFourWeeks, description: '24 weeks' }
   ),
   votingPeriod: durationValidationSchema(
+    { value: tenMinutes, description: '10 minutes' },
+    { value: twentyFourWeeks, description: '24 weeks' }
+  ),
+  timelockDelay: durationValidationSchema(
     { value: tenMinutes, description: '10 minutes' },
     { value: twentyFourWeeks, description: '24 weeks' }
   ),

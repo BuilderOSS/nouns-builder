@@ -39,6 +39,10 @@ export interface FormStoreState {
   setIsUploadingToIPFS: (bool: boolean) => void
   ipfsUploadProgress: number
   setIpfsUploadProgress: (ipfsUploadProgress: number) => void
+  founderRewardRecipient: string
+  setFounderRewardRecipient: (founderRewardRecipient: string) => void
+  founderRewardBps: number
+  setFounderRewardBps: (founderRewardBps: number) => void
   resetForm: () => void
 }
 
@@ -54,7 +58,7 @@ const initialState = {
   auctionSettings: {
     auctionDuration: {
       seconds: undefined,
-      days: undefined,
+      days: 1,
       hours: undefined,
       minutes: undefined,
     },
@@ -73,11 +77,19 @@ const initialState = {
       hours: undefined,
       minutes: undefined,
     },
+    timelockDelay: {
+      seconds: undefined,
+      days: 2,
+      hours: undefined,
+      minutes: undefined,
+    },
   },
   founderAllocation: [],
   contributionAllocation: [],
   vetoPower: undefined,
   vetoerAddress: '',
+  founderRewardRecipient: '',
+  founderRewardBps: 0,
   setUpArtwork: {
     projectDescription: '',
     artwork: [],
@@ -119,6 +131,9 @@ export const useFormStore = create(
         set({ contributionAllocation }),
       setVetoPower: (vetoPower: boolean) => set({ vetoPower }),
       setVetoerAddress: (vetoerAddress: string) => set({ vetoerAddress }),
+      setFounderRewardRecipient: (founderRewardRecipient: string) =>
+        set({ founderRewardRecipient }),
+      setFounderRewardBps: (founderRewardBps: number) => set({ founderRewardBps }),
       setSetUpArtwork: (artwork: ArtworkFormValues) => set({ setUpArtwork: artwork }),
       setIpfsUpload: (ipfsUpload: IPFSUpload[]) => set({ ipfsUpload }),
       setOrderedLayers: (orderedLayers: OrderedTraits) => {

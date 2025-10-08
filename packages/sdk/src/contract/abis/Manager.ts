@@ -152,7 +152,7 @@ export const managerAbi = [
             internalType: 'uint256',
           },
           {
-            name: 'founderRewardRecipent',
+            name: 'founderRewardRecipient',
             type: 'address',
             internalType: 'address',
           },
