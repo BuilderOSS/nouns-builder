@@ -92,6 +92,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     setFulfilledSections,
     vetoPower,
     vetoerAddress,
+    founderRewardRecipient,
+    founderRewardBps,
   } = useFormStore()
 
   const handlePrev = useCallback(() => {
@@ -150,13 +152,15 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
         : auctionSettings?.auctionDuration
           ? BigInt(toSeconds(auctionSettings?.auctionDuration))
           : BigInt('86400'),
-      founderRewardRecipent: NULL_ADDRESS,
-      founderRewardBps: 0,
+      founderRewardRecipient: (founderRewardRecipient || NULL_ADDRESS) as AddressType,
+      founderRewardBps: founderRewardBps,
     }),
     [
       auctionSettings?.auctionDuration,
       auctionSettings?.auctionReservePrice,
       enableFastDAO,
+      founderRewardRecipient,
+      founderRewardBps,
     ]
   )
 
@@ -234,11 +238,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
           args: [
             founderParams,
             { ...tokenParams, reservedUntilTokenId: 0n, metadataRenderer: NULL_ADDRESS },
-            {
-              ...auctionParams,
-              founderRewardRecipent: NULL_ADDRESS,
-              founderRewardBps: 0,
-            },
+            auctionParams,
             govParams,
           ],
         })
@@ -370,6 +370,9 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
                   enableFastDAO ? '0 ETH' : `${auctionSettings.auctionReservePrice} ETH`
                 }
               />
+            </ReviewSection>
+
+            <ReviewSection subHeading="Governance Settings">
               <ReviewItem
                 label="Proposal Threshold"
                 value={`${auctionSettings.proposalThreshold} %`}
@@ -378,9 +381,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
                 label="Quorum Threshold"
                 value={`${auctionSettings.quorumThreshold} %`}
               />
-            </ReviewSection>
-
-            <ReviewSection subHeading="Governance Settings">
               <ReviewItem
                 label="Voting Delay"
                 value={
@@ -407,7 +407,20 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
               />
             </ReviewSection>
 
-            <ReviewSection subHeading="Allocation">
+            {founderRewardRecipient && founderRewardRecipient !== NULL_ADDRESS && (
+              <ReviewSection subHeading="Auction Rewards">
+                <ReviewItem
+                  label="Founder Reward Recipient"
+                  value={founderRewardRecipient}
+                />
+                <ReviewItem
+                  label="Founder Reward Percentage"
+                  value={`${(founderRewardBps / 100).toFixed(2)}%`}
+                />
+              </ReviewSection>
+            )}
+
+            <ReviewSection subHeading="Token Allocation">
               {[...founderAllocation, ...contributionAllocation].map((value, i) => (
                 <ReviewItem
                   label="Founder Allocation"

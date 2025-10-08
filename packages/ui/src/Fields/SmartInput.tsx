@@ -120,59 +120,63 @@ const SmartInput: React.FC<SmartInputProps> = ({
           {tooltip && <Tooltip>{tooltip}</Tooltip>}
         </Flex>
       )}
-      {errorMessage && (
-        <Box
-          position={'absolute'}
-          right={'x2'}
-          top={'x10'}
-          fontSize={12}
-          className={defaultInputErrorMessageStyle}
-        >
-          {errorMessage}
-        </Box>
-      )}
-      <input
-        id={id}
-        data-testid={id}
-        type={type}
-        onChange={onChange}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        value={ensName ? ensName : typeof value === 'number' && isNaN(value) ? '' : value}
-        className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']} ${
-          isAddress ? atoms({ pr: 'x13' }) : ''
-        }`}
-        min={type === 'number' && typeof min === 'number' ? min : undefined}
-        max={type === 'number' && typeof max === 'number' ? max : undefined}
-        step={step}
-        placeholder={perma || placeholder || ''}
-        ref={input}
-        disabled={disabled}
-        onWheel={
-          disableWheelEvent
-            ? (e: WheelEvent<HTMLInputElement>) => e.currentTarget.blur()
-            : undefined
-        }
-      />
-      {isAddress && !!value.toString().length && !errorMessage && (
-        <Flex
-          align={'center'}
-          justify={'center'}
-          position={'absolute'}
-          className={inputCheckIcon['default']}
-        >
-          {ensAvatar && ethAddress ? (
-            <Avatar address={ethAddress} src={ensAvatar} size="32" />
-          ) : (
-            <Icon fill="background1" id="check" style={{ width: 24, height: 24 }} />
-          )}
-        </Flex>
-      )}
-      {(typeof value === 'number' || value) && perma ? (
-        <Box position={'absolute'} className={permaInputPlaceHolderStyle}>
-          {perma}
-        </Box>
-      ) : null}
+      <Box position="relative">
+        <input
+          id={id}
+          data-testid={id}
+          type={type}
+          onChange={onChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          value={
+            ensName ? ensName : typeof value === 'number' && isNaN(value) ? '' : value
+          }
+          className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']} ${
+            isAddress ? atoms({ pr: 'x13' }) : ''
+          }`}
+          min={type === 'number' && typeof min === 'number' ? min : undefined}
+          max={type === 'number' && typeof max === 'number' ? max : undefined}
+          step={step}
+          placeholder={perma || placeholder || ''}
+          ref={input}
+          disabled={disabled}
+          onWheel={
+            disableWheelEvent
+              ? (e: WheelEvent<HTMLInputElement>) => e.currentTarget.blur()
+              : undefined
+          }
+        />
+        {errorMessage && (
+          <Box
+            position={'absolute'}
+            right={'x2'}
+            top={'x1'}
+            fontSize={12}
+            className={defaultInputErrorMessageStyle}
+          >
+            {errorMessage}
+          </Box>
+        )}
+        {isAddress && !!value.toString().length && !errorMessage && (
+          <Flex
+            align={'center'}
+            justify={'center'}
+            position={'absolute'}
+            className={inputCheckIcon['default']}
+          >
+            {ensAvatar && ethAddress ? (
+              <Avatar address={ethAddress} src={ensAvatar} size="32" />
+            ) : (
+              <Icon fill="background1" id="check" style={{ width: 24, height: 24 }} />
+            )}
+          </Flex>
+        )}
+        {(typeof value === 'number' || value) && perma ? (
+          <Box position={'absolute'} className={permaInputPlaceHolderStyle}>
+            {perma}
+          </Box>
+        ) : null}
+      </Box>
       <motion.div
         variants={helperVariants}
         initial={'init'}

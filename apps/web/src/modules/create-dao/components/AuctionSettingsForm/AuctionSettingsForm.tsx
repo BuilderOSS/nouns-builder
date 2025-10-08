@@ -73,10 +73,10 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
       hours: auctionSettings?.votingPeriod?.hours,
     },
     timelockDelay: {
-      seconds: auctionSettings?.votingPeriod?.seconds,
-      minutes: auctionSettings?.votingPeriod?.minutes,
-      days: auctionSettings?.votingPeriod?.days || 2,
-      hours: auctionSettings?.votingPeriod?.hours,
+      seconds: auctionSettings?.timelockDelay?.seconds,
+      minutes: auctionSettings?.timelockDelay?.minutes,
+      days: auctionSettings?.timelockDelay?.days || 2,
+      hours: auctionSettings?.timelockDelay?.hours,
     },
   }
 

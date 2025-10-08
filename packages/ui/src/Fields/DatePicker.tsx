@@ -72,27 +72,29 @@ const DatePicker: React.FC<DatePickerProps> = ({
   return (
     <Box as="fieldset" mb={'x8'} p={'x0'} className={defaultFieldsetStyle}>
       {inputLabel && <label className={defaultInputLabelStyle}>{inputLabel}</label>}
-      {errorMessage && (
-        <Box
-          right={'x2'}
-          top={'x15'}
-          pt={'x4'}
-          fontSize={14}
-          className={defaultInputErrorMessageStyle}
-        >
-          {errorMessage as string}
-        </Box>
-      )}
-      <input
-        className={!!errorMessage ? defaultInputErrorStyle : defaultInputStyle}
-        ref={ref}
-        type={'text'}
-        data-input={true}
-        value={value || ''}
-        placeholder={placeholder}
-        readOnly={true}
-        disabled={disabled}
-      />
+      <Box position="relative">
+        <input
+          className={!!errorMessage ? defaultInputErrorStyle : defaultInputStyle}
+          ref={ref}
+          type={'text'}
+          data-input={true}
+          value={value || ''}
+          placeholder={placeholder}
+          readOnly={true}
+          disabled={disabled}
+        />
+        {errorMessage && (
+          <Box
+            right={'x2'}
+            top={'x1'}
+            position={'absolute'}
+            fontSize={12}
+            className={defaultInputErrorMessageStyle}
+          >
+            {errorMessage as string}
+          </Box>
+        )}
+      </Box>
       {helperText && (
         <Box
           right={'x2'}

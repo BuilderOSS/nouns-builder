@@ -13,6 +13,7 @@ import { useFormStore } from '../../stores'
 import { validationSchemaFounderAllocation } from './AllocationForm.schema'
 import { ContributionAllocation } from './ContributionAllocation'
 import { FounderAllocationFields } from './FounderAllocationFields'
+import { FounderRewardsFields } from './FounderRewardsFields'
 
 interface AllocationFormProps {
   title: string
@@ -32,6 +33,7 @@ export interface FounderAllocationFormValues {
 export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
   const formRef = useRef<FormikProps<FounderAllocationFormValues>>(null)
   const [allocationError, setAllocationError] = useState(false)
+  const [rewardValidationError, setRewardValidationError] = useState<string | undefined>()
   const chain = useChainStore((x) => x.chain)
   const {
     founderAllocation,
@@ -43,6 +45,10 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
     vetoPower,
     vetoerAddress,
     auctionSettings: { auctionDuration },
+    founderRewardRecipient,
+    founderRewardBps,
+    setFounderRewardRecipient,
+    setFounderRewardBps,
   } = useFormStore(
     useShallow((state) => ({
       founderAllocation: state.founderAllocation,
@@ -54,6 +60,10 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
       vetoPower: state.vetoPower,
       vetoerAddress: state.vetoerAddress,
       auctionSettings: state.auctionSettings,
+      founderRewardRecipient: state.founderRewardRecipient,
+      founderRewardBps: state.founderRewardBps,
+      setFounderRewardRecipient: state.setFounderRewardRecipient,
+      setFounderRewardBps: state.setFounderRewardBps,
     }))
   )
 
@@ -86,6 +96,18 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
 
   const handleSubmit = async ({ founderAllocation }: FounderAllocationFormValues) => {
     setAllocationError(false)
+    setRewardValidationError(undefined)
+
+    // Validate founder rewards: if BPS > 0, recipient address is required
+    if (
+      founderRewardBps > 0 &&
+      (!founderRewardRecipient || founderRewardRecipient.trim() === '')
+    ) {
+      setRewardValidationError(
+        'Founder reward recipient address is required when percentage is greater than 0%'
+      )
+      return
+    }
 
     const totalAllocation = sum(
       [...founderAllocation, ...contributionAllocation].map(
@@ -129,6 +151,15 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
       >
         {(formik) => (
           <Form>
+            <FounderRewardsFields
+              founderRewardRecipient={founderRewardRecipient}
+              founderRewardBps={founderRewardBps}
+              setFounderRewardRecipient={setFounderRewardRecipient}
+              setFounderRewardBps={setFounderRewardBps}
+              recipientErrorMessage={rewardValidationError}
+              clearRewardError={() => setRewardValidationError(undefined)}
+            />
+
             <FieldArray name="founderAllocation">
               {({ remove, push }) => (
                 <FounderAllocationFields
