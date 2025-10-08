@@ -54,7 +54,7 @@ const initialState = {
   auctionSettings: {
     auctionDuration: {
       seconds: undefined,
-      days: undefined,
+      days: 1,
       hours: undefined,
       minutes: undefined,
     },
@@ -70,6 +70,12 @@ const initialState = {
     votingPeriod: {
       seconds: undefined,
       days: 4,
+      hours: undefined,
+      minutes: undefined,
+    },
+    timelockDelay: {
+      seconds: undefined,
+      days: 2,
       hours: undefined,
       minutes: undefined,
     },

@@ -5,10 +5,9 @@ import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
 import type { AddressType } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { NetworkController } from '@buildeross/ui/NetworkController'
 import { defaultBackButton } from '@buildeross/ui/styles'
 import { formatDuration } from '@buildeross/utils/formatDuration'
-import { toSeconds } from '@buildeross/utils/helpers'
+import { isTestnetChain, toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -47,8 +46,6 @@ const FAST_DAO_TIMINGS = {
   VOTING_DELAY: { minutes: 5 },
   VOTING_PERIOD: { minutes: 10 },
 } as const
-
-const DEFAULT_TIMELOCK_DELAY = { days: 2 }
 
 const DEPLOYMENT_ERROR = {
   MISSING_IPFS_ARTWORK: `Oops! It looks like your artwork wasn't correctly uploaded to ipfs. Please go back to the artwork step to re-upload your artwork before proceeding.`,
@@ -167,7 +164,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     () => ({
       timelockDelay: enableFastDAO
         ? BigInt(toSeconds(FAST_DAO_TIMINGS.TIMELOCK_DELAY))
-        : BigInt(toSeconds(DEFAULT_TIMELOCK_DELAY)),
+        : BigInt(toSeconds(auctionSettings.timelockDelay)),
       votingDelay: enableFastDAO
         ? BigInt(toSeconds(FAST_DAO_TIMINGS.VOTING_DELAY))
         : BigInt(toSeconds(auctionSettings.votingDelay)),
@@ -186,6 +183,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
           : getAddress(NULL_ADDRESS),
     }),
     [
+      auctionSettings?.timelockDelay,
       auctionSettings?.votingPeriod,
       auctionSettings?.votingDelay,
       auctionSettings?.proposalThreshold,
@@ -404,7 +402,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
                 value={
                   enableFastDAO
                     ? formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)
-                    : formatDuration(DEFAULT_TIMELOCK_DELAY)
+                    : formatDuration(auctionSettings.timelockDelay)
                 }
               />
             </ReviewSection>
@@ -512,7 +510,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
               </Flex>
             )}
 
-            <NetworkController.Testnet>
+            {isTestnetChain(chain.id) && (
               <Flex mt="x4">
                 <Flex align={'center'} justify={'center'} gap={'x4'}>
                   <Flex
@@ -537,7 +535,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
                   </Flex>
                 </Flex>
               </Flex>
-            </NetworkController.Testnet>
+            )}
 
             {deploymentError && (
               <Flex mt={'x4'} color="negative">

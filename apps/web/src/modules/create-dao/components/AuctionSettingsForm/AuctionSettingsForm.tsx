@@ -10,7 +10,6 @@ import { Button, Flex, Icon, Stack } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent } from 'react'
-import { useAccount } from 'wagmi'
 
 import { useFormStore } from '../../stores'
 import {
@@ -31,11 +30,11 @@ const animation = {
   },
 }
 
-const VOTING_DELAY_AND_PERIOD_AUTHORIZED_USERS = [
-  '0x7498e6e471f31e869f038D8DBffbDFdf650c3F95',
-  '0x2767500a75D90D711b2Ac27b3a032a0dAa40e4B2',
-  '0x3B60e31CFC48a9074CD5bEbb26C9EAa77650a43F',
-]
+// const VOTING_DELAY_AND_PERIOD_AUTHORIZED_USERS = [
+//   '0x7498e6e471f31e869f038D8DBffbDFdf650c3F95',
+//   '0x2767500a75D90D711b2Ac27b3a032a0dAa40e4B2',
+//   '0x3B60e31CFC48a9074CD5bEbb26C9EAa77650a43F',
+// ]
 
 export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title }) => {
   const {
@@ -45,14 +44,13 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
     setActiveSection,
     activeSection,
   } = useFormStore()
-  const { address: user } = useAccount()
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false)
 
   const initialValues: AuctionSettingsFormValues = {
     auctionDuration: {
       seconds: auctionSettings?.auctionDuration?.seconds,
       minutes: auctionSettings?.auctionDuration?.minutes,
-      days: auctionSettings?.auctionDuration?.days,
+      days: auctionSettings?.auctionDuration?.days || 1,
       hours: auctionSettings?.auctionDuration?.hours,
     },
     auctionReservePrice: auctionSettings?.auctionReservePrice,
@@ -74,6 +72,12 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
       days: auctionSettings?.votingPeriod?.days || 4,
       hours: auctionSettings?.votingPeriod?.hours,
     },
+    timelockDelay: {
+      seconds: auctionSettings?.votingPeriod?.seconds,
+      minutes: auctionSettings?.votingPeriod?.minutes,
+      days: auctionSettings?.votingPeriod?.days || 2,
+      hours: auctionSettings?.votingPeriod?.hours,
+    },
   }
 
   const handleSubmit = (values: AuctionSettingsFormValues) => {
@@ -85,9 +89,6 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
   const handlePrev = () => {
     setActiveSection(activeSection - 1)
   }
-
-  const isVotingDelayAndPeriodAuthorized =
-    user && VOTING_DELAY_AND_PERIOD_AUTHORIZED_USERS.includes(user)
 
   return (
     <Formik<AuctionSettingsFormValues>
@@ -105,6 +106,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               <DaysHoursMinsSecs
                 {...formik.getFieldProps('auctionDuration')}
                 inputLabel={'Auction Duration'}
+                helperText="How long each auction will run before it ends. When time expires, the highest bid wins and a new DAO NFT is minted."
                 formik={formik}
                 id={'auctionDuration'}
                 onChange={formik.handleChange}
@@ -127,7 +129,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                   formik.setFieldValue('auctionReservePrice', parseFloat(target.value))
                 }}
                 onBlur={formik.handleBlur}
-                helperText={'The starting price of an auction.'}
+                helperText="The minimum bid required to start an auction. If no bids meet this price, the auction won’t begin."
                 errorMessage={
                   formik.touched['auctionReservePrice'] &&
                   formik.errors['auctionReservePrice']
@@ -167,9 +169,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                   formik.setFieldValue('proposalThreshold', parseFloat(target.value))
                 }}
                 onBlur={formik.handleBlur}
-                helperText={
-                  'This is the percentage of all existing tokens that must be owned by someone attempting to create a proposal. We recommend a starting value of 0.5% to encourage participation.'
-                }
+                helperText="The minimum percent of total NFTs required to create a proposal. For example, if set to 0.5% and there are 1,000 NFTs, a member must hold at least 5 NFTs to propose."
                 errorMessage={
                   formik.touched['proposalThreshold'] &&
                   formik.errors['proposalThreshold']
@@ -189,9 +189,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                   formik.setFieldValue('quorumThreshold', parseFloat(target.value))
                 }}
                 onBlur={formik.handleBlur}
-                helperText={
-                  'This is the percentage of all existing tokens that must vote in a proposal in order for it to pass (as long as a majority of votes approve). We recommend a starting value of 10%.'
-                }
+                helperText="The minimum percent of total NFTs that must vote ‘For’ for a proposal to pass. We recommend a starting value of 10%."
                 errorMessage={
                   formik.touched['quorumThreshold'] && formik.errors['quorumThreshold']
                     ? formik.errors['quorumThreshold']
@@ -200,39 +198,53 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                 perma={'%'}
                 step={1}
               />
-              {isVotingDelayAndPeriodAuthorized && (
-                <>
-                  <DaysHoursMinsSecs
-                    {...formik.getFieldProps('votingPeriod')}
-                    inputLabel={'Voting Period'}
-                    formik={formik}
-                    id={'votingPeriod'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['votingPeriod'] && formik.errors['votingPeriod']
-                        ? formik.errors['votingPeriod']
-                        : undefined
-                    }
-                    placeholder={['4', '0', '0', '0']}
-                  />
+              <DaysHoursMinsSecs
+                {...formik.getFieldProps('votingPeriod')}
+                inputLabel={'Voting Period'}
+                formik={formik}
+                id={'votingPeriod'}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errorMessage={
+                  formik.touched['votingPeriod'] && formik.errors['votingPeriod']
+                    ? formik.errors['votingPeriod']
+                    : undefined
+                }
+                helperText="How long a proposal remains open for voting before it closes and results are tallied."
+                placeholder={['4', '0', '0', '0']}
+              />
 
-                  <DaysHoursMinsSecs
-                    {...formik.getFieldProps('votingDelay')}
-                    inputLabel={'Voting Delay'}
-                    formik={formik}
-                    id={'votingDelay'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['votingDelay'] && formik.errors['votingDelay']
-                        ? formik.errors['votingDelay']
-                        : undefined
-                    }
-                    placeholder={['1', '0', '0', '0']}
-                  />
-                </>
-              )}
+              <DaysHoursMinsSecs
+                {...formik.getFieldProps('votingDelay')}
+                inputLabel={'Voting Delay'}
+                formik={formik}
+                id={'votingDelay'}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errorMessage={
+                  formik.touched['votingDelay'] && formik.errors['votingDelay']
+                    ? formik.errors['votingDelay']
+                    : undefined
+                }
+                helperText="The time between when a proposal is created and when voting begins. This gives members a chance to review and discuss the proposal."
+                placeholder={['1', '0', '0', '0']}
+              />
+
+              <DaysHoursMinsSecs
+                {...formik.getFieldProps('timelockDelay')}
+                inputLabel={'Grace Delay'}
+                formik={formik}
+                id={'timelockDelay'}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                errorMessage={
+                  formik.touched['timelockDelay'] && formik.errors['timelockDelay']
+                    ? formik.errors['timelockDelay']
+                    : undefined
+                }
+                helperText="The delay between when a passed proposal is queued and when it can be executed. This provides time for final review, vetoing, or cancellation before execution."
+                placeholder={['2', '0', '0', '0']}
+              />
             </motion.div>
 
             <Flex>

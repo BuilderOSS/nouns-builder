@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import React, { ChangeEventHandler, ReactElement, WheelEvent } from 'react'
 
 import { Avatar } from '../Avatar'
+import { Tooltip } from '../Tooltip'
 import {
   defaultFieldsetStyle,
   defaultHelperTextStyle,
@@ -23,7 +24,7 @@ interface SmartInputProps {
   type: typeof FIELD_TYPES.TEXT | typeof FIELD_TYPES.NUMBER | typeof FIELD_TYPES.TEXTAREA
   inputLabel?: string | ReactElement
   onChange: ChangeEventHandler
-  onBlur: ChangeEventHandler
+  onBlur?: ChangeEventHandler
   formik?: FormikProps<any>
   errorMessage?: any
   helperText?: string
@@ -37,6 +38,17 @@ interface SmartInputProps {
   disabled?: boolean
   disableWheelEvent?: boolean
   isAddress?: boolean
+  tooltip?: string
+}
+
+const helperVariants = {
+  init: {
+    height: 0,
+    overflow: 'hidden',
+  },
+  open: {
+    height: 'auto',
+  },
 }
 
 const SmartInput: React.FC<SmartInputProps> = ({
@@ -59,6 +71,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
   disabled = false,
   disableWheelEvent = type === 'number',
   isAddress,
+  tooltip,
 }) => {
   const addrForEns: string | undefined =
     isAddress && typeof value === 'string' && value.length > 0 ? value : undefined
@@ -78,7 +91,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
     handlers: blur, focus
   */
   const [isFocus, setIsFocus] = React.useState<boolean>(false)
-  const handleBlur = () => {
+  const handleBlur: ChangeEventHandler = (e) => {
     setIsFocus(false)
     if (autoSubmit && formik) {
       formik.submitForm()
@@ -87,25 +100,26 @@ const SmartInput: React.FC<SmartInputProps> = ({
         submitCallback(formik.values)
       }
     }
+    onBlur?.(e)
   }
 
   const handleFocus = () => {
     setIsFocus(true)
   }
 
-  const helperVariants = {
-    init: {
-      height: 0,
-      overflow: 'hidden',
-    },
-    open: {
-      height: 'auto',
-    },
-  }
-
   return (
     <Box as="fieldset" mb={'x8'} p={'x0'} className={defaultFieldsetStyle}>
-      {inputLabel && <label className={defaultInputLabelStyle}>{inputLabel}</label>}
+      {inputLabel && (
+        <Flex
+          align={'center'}
+          gap={'x2'}
+          justify="flex-start"
+          className={defaultInputLabelStyle}
+        >
+          <label>{inputLabel}</label>
+          {tooltip && <Tooltip>{tooltip}</Tooltip>}
+        </Flex>
+      )}
       {errorMessage && (
         <Box
           position={'absolute'}
@@ -122,7 +136,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
         data-testid={id}
         type={type}
         onChange={onChange}
-        onBlur={!!onBlur ? onBlur : handleBlur}
+        onBlur={handleBlur}
         onFocus={handleFocus}
         value={ensName ? ensName : typeof value === 'number' && isNaN(value) ? '' : value}
         className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']} ${
