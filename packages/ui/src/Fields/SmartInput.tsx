@@ -3,7 +3,7 @@ import { isEmpty } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
-import React, { ChangeEventHandler, ReactElement, WheelEvent } from 'react'
+import React, { ChangeEventHandler, WheelEvent } from 'react'
 
 import { Avatar } from '../Avatar'
 import { Tooltip } from '../Tooltip'
@@ -22,7 +22,8 @@ interface SmartInputProps {
   id: string
   value?: string | number
   type: typeof FIELD_TYPES.TEXT | typeof FIELD_TYPES.NUMBER | typeof FIELD_TYPES.TEXTAREA
-  inputLabel?: string | ReactElement
+  inputLabel?: string
+  secondaryLabel?: string
   onChange: ChangeEventHandler
   onBlur?: ChangeEventHandler
   formik?: FormikProps<any>
@@ -56,6 +57,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
   value = '',
   type,
   inputLabel,
+  secondaryLabel,
   onChange,
   onBlur,
   autoSubmit,
@@ -110,14 +112,16 @@ const SmartInput: React.FC<SmartInputProps> = ({
   return (
     <Box as="fieldset" mb={'x8'} p={'x0'} className={defaultFieldsetStyle}>
       {inputLabel && (
-        <Flex
-          align={'center'}
-          gap={'x2'}
-          justify="flex-start"
-          className={defaultInputLabelStyle}
-        >
-          <label>{inputLabel}</label>
-          {tooltip && <Tooltip>{tooltip}</Tooltip>}
+        <Flex align={'center'} justify="space-between" className={defaultInputLabelStyle}>
+          <Flex align={'center'} gap={'x2'} justify="flex-start">
+            <label>{inputLabel}</label>
+            {tooltip && <Tooltip>{tooltip}</Tooltip>}
+          </Flex>
+          {secondaryLabel && (
+            <Box color={'text3'} fontWeight="paragraph">
+              {secondaryLabel}
+            </Box>
+          )}
         </Flex>
       )}
       <Box position="relative">

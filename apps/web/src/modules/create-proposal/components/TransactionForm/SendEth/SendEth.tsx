@@ -93,14 +93,8 @@ export const SendEth = () => {
                 <Box mt={'x5'}>
                   <SmartInput
                     {...formik.getFieldProps(`amount`)}
-                    inputLabel={
-                      <Flex justify={'space-between'} width={'100%'}>
-                        <Box fontWeight={'label'}>Amount</Box>
-                        <Box color={'text3'} fontWeight="paragraph">
-                          Treasury Balance: {`${treasuryBalance?.formatted} ETH`}
-                        </Box>
-                      </Flex>
-                    }
+                    inputLabel="Amount"
+                    secondaryLabel={`Treasury Balance: ${treasuryBalance?.formatted} ETH`}
                     id={`amount`}
                     type={FIELD_TYPES.NUMBER}
                     placeholder={'1.0 ETH'}
