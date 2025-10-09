@@ -13,7 +13,7 @@ import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { formatFounderAllocation } from 'src/modules/create-dao'
-import { useChainStore } from 'src/stores'
+import { useChainStore, useDaoStore } from 'src/stores'
 import {
   deployCheckboxHelperText,
   deployCheckboxStyleVariants,
@@ -38,6 +38,7 @@ import { SuccessfulDeploy } from './SuccessfulDeploy'
 
 interface ReviewAndDeploy {
   title: string
+  handleSuccessfulDeploy: (token: string) => void
 }
 
 const FAST_DAO_TIMINGS = {
@@ -59,7 +60,10 @@ const DEPLOYMENT_ERROR = {
     'Oops! It looks like there are undefined founder allocation values. Please go back to the allocation step to ensure that valid allocation values are set.',
 }
 
-export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
+export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
+  title,
+  handleSuccessfulDeploy,
+}) => {
   const [enableFastDAO, setEnableFastDAO] = useState<boolean>(false)
   const [isPendingTransaction, setIsPendingTransaction] = useState<boolean>(false)
   const [hasConfirmedTerms, setHasConfirmedTerms] = useState<boolean>(false)
@@ -67,6 +71,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
   const [hasConfirmedRewards, setHasConfirmedRewards] = useState<boolean>(false)
   const [deploymentError, setDeploymentError] = useState<string | undefined>()
   const chain = useChainStore((x) => x.chain)
+  const { setAddresses } = useDaoStore()
   const isL2 = L2_CHAINS.includes(chain.id)
   const { data: version, isLoading: isVersionLoading } = useReadContract({
     abi: managerAbi,
@@ -86,7 +91,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     setActiveSection,
     activeSection,
     fulfilledSections,
-    deployedDao,
     setDeployedDao,
     ipfsUpload,
     setFulfilledSections,
@@ -291,9 +295,17 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
     }
 
     setDeployedDao(deployedAddresses)
+    setAddresses({
+      token: deployedAddresses.token,
+      metadata: deployedAddresses.metadata,
+      auction: deployedAddresses.auction,
+      treasury: deployedAddresses.treasury,
+      governor: deployedAddresses.governor,
+    })
     setIsPendingTransaction(false)
     setFulfilledSections(title)
   }, [
+    setAddresses,
     founderAllocation,
     contributionAllocation,
     address,
@@ -583,14 +595,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({ title }) => {
           </Flex>
         </Box>
       ) : (
-        <SuccessfulDeploy
-          token={deployedDao?.token}
-          metadata={deployedDao?.metadata}
-          auction={deployedDao?.auction}
-          treasury={deployedDao?.treasury}
-          governor={deployedDao?.governor}
-          title={title}
-        />
+        <SuccessfulDeploy title={title} onSuccessfulDeploy={handleSuccessfulDeploy} />
       )}
     </Box>
   )

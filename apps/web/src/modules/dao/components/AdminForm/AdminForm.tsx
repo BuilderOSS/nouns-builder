@@ -20,7 +20,6 @@ import { Flex, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
-import { useRouter } from 'next/router'
 import React, { BaseSyntheticEvent } from 'react'
 import { TokenAllocation } from 'src/modules/create-dao'
 import {
@@ -38,7 +37,7 @@ import { Section } from './Section'
 import { formValuesToTransactionMap } from './utils'
 
 interface AdminFormProps {
-  collectionAddress: string
+  onOpenProposalReview: () => void
 }
 
 const vetoerAnimation = {
@@ -51,9 +50,7 @@ const vetoerAnimation = {
   },
 }
 
-export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
-  const { push } = useRouter()
-
+export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) => {
   const createProposal = useProposalStore((state) => state.createProposal)
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -277,7 +274,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ collectionAddress }) => {
       transactions: transactionsWithPauseUnpause,
     })
 
-    push(`/dao/${chain.slug}/${collectionAddress}/proposal/review`)
+    onOpenProposalReview()
   }
 
   return (

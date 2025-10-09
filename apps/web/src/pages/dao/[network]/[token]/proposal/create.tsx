@@ -32,11 +32,10 @@ import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
 const CreateProposalPage: NextPageWithLayout = () => {
-  const router = useRouter()
+  const { query, push } = useRouter()
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const { query } = router
   const [transactionType, setTransactionType] = useState<
     TransactionFormType | undefined
   >()
@@ -131,6 +130,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
         title={'Create Proposal'}
         transactionType={transactionType}
         showDocsLink
+        handleBack={() => {
+          push({
+            pathname: `/dao/[network]/[token]`,
+            query: {
+              network: chain.slug,
+              token: addresses.token,
+              tab: 'activity',
+            },
+          })
+        }}
       />
       {transactionType ? (
         <TwoColumnLayout
@@ -151,6 +160,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
             <SelectTransactionType
               transactionTypes={TRANSACTION_FORM_OPTIONS_FILTERED}
               onSelect={setTransactionType}
+              onOpenAdminSettings={() =>
+                push({
+                  pathname: `/dao/[network]/[token]`,
+                  query: {
+                    network: chain.slug,
+                    token: addresses.token,
+                    tab: 'admin',
+                  },
+                })
+              }
             />
           }
         />

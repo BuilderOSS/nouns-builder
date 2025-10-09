@@ -6,7 +6,11 @@ import { sectionWrapperStyle } from 'src/styles/dao.css'
 import { AdminForm } from '../AdminForm/AdminForm'
 import { AuctionRewards } from './AuctionRewards'
 
-export const Admin: React.FC = () => {
+export type AdminProps = {
+  onOpenProposalReview: () => void
+}
+
+export const Admin: React.FC<AdminProps> = ({ onOpenProposalReview }) => {
   const addresses = useDaoStore((x) => x.addresses)
 
   if (!addresses?.auction || !addresses?.token) {
@@ -16,7 +20,7 @@ export const Admin: React.FC = () => {
   return (
     <Flex direction={'column'} className={sectionWrapperStyle['admin']} mx={'auto'}>
       <Flex direction={'column'} w={'100%'}>
-        <AdminForm collectionAddress={addresses.token} />
+        <AdminForm onOpenProposalReview={onOpenProposalReview} />
         <AuctionRewards auctionAddress={addresses.auction} />
       </Flex>
     </Flex>

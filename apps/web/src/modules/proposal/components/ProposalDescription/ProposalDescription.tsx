@@ -37,11 +37,13 @@ const Section = ({ children, title }: { children: ReactNode; title: string }) =>
 type ProposalDescriptionProps = {
   proposal: Proposal
   collection: string
+  onOpenProposalReview: () => void
 }
 
 export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   proposal,
   collection,
+  onOpenProposalReview,
 }) => {
   const { description, proposer, executionTransactionHash } = proposal
 
@@ -84,6 +86,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
             <MilestoneDetails
               decodedTransaction={decodedEscrowTxn}
               executionTransactionHash={executionTransactionHash}
+              onOpenProposalReview={onOpenProposalReview}
             />
           </Section>
         )}

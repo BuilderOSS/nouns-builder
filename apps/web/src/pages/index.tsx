@@ -1,5 +1,8 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
+import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Stack } from '@buildeross/zord'
+import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'
 import Everything from 'src/components/Home/Everything'
 import FAQ from 'src/components/Home/FAQ'
@@ -39,12 +42,29 @@ function ConditionalLayout({ children }: { children: ReactNode }) {
 
 const HomePage: NextPageWithLayout = () => {
   const { address } = useAccount()
+  const { push } = useRouter()
+
+  const handleSelectAuction = (
+    chainId: CHAIN_ID,
+    tokenAddress: string,
+    tokenId: number | undefined = undefined
+  ) => {
+    if (!tokenId) push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}`)
+    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`)
+  }
+
+  const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: string) => {
+    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`)
+  }
 
   return (
     <>
       <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
       {address ? (
-        <Dashboard />
+        <Dashboard
+          handleSelectAuction={handleSelectAuction}
+          handleOpenCreateProposal={handleOpenCreateProposal}
+        />
       ) : (
         <Stack align={'center'}>
           <Marquee />

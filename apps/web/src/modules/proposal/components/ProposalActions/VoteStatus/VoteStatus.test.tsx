@@ -2,11 +2,9 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { ProposalVoteSupport as Support } from '@buildeross/sdk/subgraph'
 import { screen } from '@testing-library/react'
 import { render } from 'src/test/utils'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { VoteStatus } from './VoteStatus'
-
-vi.mock('next/router', () => ({ useRouter: vi.fn() }))
 
 describe('VoteStatus', () => {
   it('should render proposal countdown to active if state is in pending', () => {

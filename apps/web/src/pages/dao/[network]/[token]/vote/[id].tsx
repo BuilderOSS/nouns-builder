@@ -56,7 +56,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   chainId,
   addresses,
 }) => {
-  const { query } = useRouter()
+  const { query, push } = useRouter()
 
   const { data: balance } = useBalance({
     address: addresses?.treasury as `0x${string}`,
@@ -68,8 +68,18 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     ([, _chainId, _proposalId]) => getProposal(_chainId, _proposalId)
   )
 
+  const openProposalReviewPage = React.useCallback(() => {
+    push({
+      pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: query.network,
+        token: query.token,
+      },
+    })
+  }, [push, query])
+
   const sections = React.useMemo(() => {
-    if (!proposal) return []
+    if (!proposal || !addresses.token) return []
     const sections = [
       {
         title: 'Details',
@@ -77,7 +87,8 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
           <ProposalDescription
             key="description"
             proposal={proposal}
-            collection={query?.token as string}
+            collection={addresses.token}
+            onOpenProposalReview={openProposalReviewPage}
           />,
         ],
       },
@@ -94,7 +105,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
       })
     }
     return sections
-  }, [proposal, chainId, query?.token])
+  }, [proposal, chainId, addresses.token, openProposalReviewPage])
 
   const { displayActions, displayWarning } = React.useMemo(() => {
     if (!proposal) return { displayActions: false, displayWarning: false }
@@ -126,7 +137,19 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
 
       <Flex position="relative" direction="column">
         <Flex className={propPageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
-          <ProposalHeader proposal={proposal} />
+          <ProposalHeader
+            proposal={proposal}
+            handleBack={() => {
+              push({
+                pathname: `/dao/[network]/[token]`,
+                query: {
+                  network: query.network,
+                  token: query.token,
+                  tab: 'activity',
+                },
+              })
+            }}
+          />
           <>
             {displayWarning && (
               <Flex

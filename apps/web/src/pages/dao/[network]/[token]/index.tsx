@@ -31,7 +31,7 @@ interface DaoPageProps {
 }
 
 const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress }) => {
-  const { query } = useRouter()
+  const { query, pathname, push } = useRouter()
 
   const { address: signerAddress } = useAccount()
   const { addresses } = useDaoStore()
@@ -44,10 +44,45 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     chainId: chainId,
   })
 
+  const openAdminTab = React.useCallback(() => {
+    const current = { ...query } // Get existing query params
+    current['tab'] = 'admin'
+
+    push(
+      {
+        pathname,
+        query: current,
+      },
+      undefined,
+      { shallow: true } // Prevent full page reload
+    )
+  }, [push, pathname, query])
+
+  const openTokenPage = React.useCallback(
+    (tokenId: number) => push(`/dao/${query.network}/${query.token}/${tokenId}`),
+    [push, query.network, query.token]
+  )
+
+  const openProposalCreatePage = React.useCallback(
+    () => push(`/dao/${query.network}/${query.token}/proposal/create`),
+    [push, query.network, query.token]
+  )
+
+  const openProposalReviewPage = React.useCallback(
+    () => push(`/dao/${query.network}/${query.token}/proposal/review`),
+    [push, query.network, query.token]
+  )
+
   const sections = [
     {
       title: 'Activity',
-      component: [<Activity key={'proposals'} />],
+      component: [
+        <Activity
+          key={'proposals'}
+          onOpenProposalCreate={openProposalCreatePage}
+          onOpenProposalReview={openProposalReviewPage}
+        />,
+      ],
     },
     {
       title: 'Admin',
@@ -82,14 +117,18 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   }
 
   const activeTab = query?.tab ? (query.tab as string) : 'activity'
-
-  const path = `/dao/${query.network}/${query.token}/${query.tokenId}?tab=${activeTab}`
+  const path = `/dao/${query.network}/${query.token}/?tab=${activeTab}`
 
   return (
     <Flex direction="column" pb="x30">
       <Meta title={'dao page'} path={path} />
 
-      <PreAuction chain={chain} collectionAddress={collectionAddress} />
+      <PreAuction
+        chain={chain}
+        collectionAddress={collectionAddress}
+        onOpenAuction={openTokenPage}
+        onOpenSettings={openAdminTab}
+      />
 
       <SectionHandler
         sections={sections}
@@ -115,6 +154,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const network = context?.params?.network
   const tab = context?.query?.tab as string
   const referral = context?.query?.referral as string
+  const message = context?.query?.message as string
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
 
@@ -175,6 +215,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const params = new URLSearchParams()
     if (tab) params.set('tab', tab)
     if (referral) params.set('referral', referral)
+    if (message) params.set('message', message)
 
     return {
       redirect: {

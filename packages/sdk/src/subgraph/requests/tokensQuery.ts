@@ -20,7 +20,7 @@ export const tokensQuery = async (
     },
     orderBy: Token_OrderBy.MintedAt,
     orderDirection: OrderDirection.Desc,
-    skip: page ? (page - 1) * limit : undefined,
+    skip: page ? (page - 1) * limit : 0,
     first: limit,
   })
 

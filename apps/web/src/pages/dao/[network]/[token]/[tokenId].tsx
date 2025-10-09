@@ -18,6 +18,7 @@ import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
+import { DaoAuctionSection } from 'src/modules/auction/components/DaoAuctionSection'
 import {
   About,
   Activity,
@@ -26,14 +27,13 @@ import {
   SmartContracts,
   Treasury,
 } from 'src/modules/dao'
-import { DaoTopSection } from 'src/modules/dao/components/DaoTopSection'
-import FeedTab from 'src/modules/dao/components/Feed/Feed'
+import { Feed } from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { DaoContractAddresses } from 'src/stores'
 import { useAccount } from 'wagmi'
 
-export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
+type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
 
 interface TokenPageProps {
   collection: AddressType
@@ -55,7 +55,8 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   ogImageURL,
   chainId,
 }) => {
-  const { query, replace, pathname } = useRouter()
+  const { query, replace, push, pathname } = useRouter()
+
   const { address } = useAccount()
 
   const chain = PUBLIC_ALL_CHAINS.find((x) => x.id === chainId) as Chain
@@ -67,7 +68,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     governorAddress: addresses?.governor,
   })
 
-  const handleCloseSuccessModal = () => {
+  const handleCloseSuccessModal = React.useCallback(() => {
     replace(
       {
         pathname,
@@ -78,12 +79,36 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         shallow: true,
       }
     )
-  }
+  }, [replace, pathname, chain.slug, collection, token.tokenId])
+
+  const openTreasuryTab = React.useCallback(() => {
+    const current = { ...query } // Get existing query params
+    current['tab'] = 'treasury'
+
+    push(
+      {
+        pathname,
+        query: current,
+      },
+      undefined,
+      { shallow: true } // Prevent full page reload
+    )
+  }, [push, pathname, query])
+
+  const openProposalCreatePage = React.useCallback(
+    () => push(`/dao/${query.network}/${query.token}/proposal/create`),
+    [push, query.network, query.token]
+  )
+
+  const openProposalReviewPage = React.useCallback(
+    () => push(`/dao/${query.network}/${query.token}/proposal/review`),
+    [push, query.network, query.token]
+  )
 
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
-      component: [<About key={'about'} />],
+      component: [<About key={'about'} onOpenTreasury={openTreasuryTab} />],
     }
     const treasurySection = {
       title: 'Treasury',
@@ -91,11 +116,17 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     }
     const proposalsSection = {
       title: 'Activity',
-      component: [<Activity key={'proposals'} />],
+      component: [
+        <Activity
+          key={'proposals'}
+          onOpenProposalCreate={openProposalCreatePage}
+          onOpenProposalReview={openProposalReviewPage}
+        />,
+      ],
     }
     const adminSection = {
       title: 'Admin',
-      component: [<Admin key={'admin'} />],
+      component: [<Admin key={'admin'} onOpenProposalReview={openProposalReviewPage} />],
     }
     const smartContractsSection = {
       title: 'Contracts',
@@ -103,7 +134,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     }
     const daoFeed = {
       title: 'Feed',
-      component: [<FeedTab key="feed" collectionAddress={collection} />],
+      component: [<Feed key="feed" collectionAddress={collection} />],
     }
 
     const publicSections = [
@@ -117,7 +148,13 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     return CAST_ENABLED.includes(collection)
       ? [...baseSections.slice(0, 1), daoFeed, ...baseSections.slice(1)]
       : baseSections
-  }, [hasThreshold, collection])
+  }, [
+    hasThreshold,
+    collection,
+    openTreasuryTab,
+    openProposalCreatePage,
+    openProposalReviewPage,
+  ])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''
@@ -140,6 +177,13 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
 
   const path = `/dao/${query.network}/${query.token}/${query.tokenId}?tab=${activeTab}`
 
+  const onAuctionCreated = React.useCallback(
+    (tokenId: number) => {
+      push(`/dao/${query.network}/${query.token}/${tokenId}`)
+    },
+    [push, query.network, query.token]
+  )
+
   return (
     <Flex direction="column" pb="x30">
       <Meta
@@ -150,11 +194,12 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         description={ogDescription}
       />
 
-      <DaoTopSection
+      <DaoAuctionSection
         chain={chain}
         collection={collection}
         auctionAddress={addresses.auction!}
         token={token}
+        onAuctionCreated={onAuctionCreated}
       />
       <SectionHandler
         sections={sections}

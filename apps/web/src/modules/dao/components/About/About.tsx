@@ -10,7 +10,6 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { parseContractURI } from '@buildeross/utils/parseContractURI'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import Image from 'next/legacy/image'
-import { useRouter } from 'next/router'
 import React from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
 import { about, daoInfo, daoName, statisticContent } from 'src/styles/About.css'
@@ -26,7 +25,11 @@ import { Founder } from './Founder'
 import { Membership } from './Membership'
 import { Statistic } from './Statistic'
 
-export const About: React.FC = () => {
+export type AboutProps = {
+  onOpenTreasury?: () => void
+}
+
+export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
   const {
     addresses: { token, treasury, metadata },
   } = useDaoStore()
@@ -90,22 +93,6 @@ export const About: React.FC = () => {
     return balance ? formatCryptoVal(formatEther(balance.value)) : null
   }, [balance])
 
-  const { push, query, pathname } = useRouter()
-
-  const openTreasuryTab = () => {
-    const current = { ...query } // Get existing query params
-    current['tab'] = 'treasury'
-
-    push(
-      {
-        pathname,
-        query: current,
-      },
-      undefined,
-      { shallow: true } // Prevent full page reload
-    )
-  }
-
   return (
     <Box className={about}>
       <Flex
@@ -150,7 +137,7 @@ export const About: React.FC = () => {
         <Statistic
           title="Treasury"
           content={`${treasuryBalance} ETH`}
-          onClick={openTreasuryTab}
+          onClick={onOpenTreasury}
         />
         <Statistic title="Owners" content={data?.ownerCount} />
         <Statistic title="Total supply" content={Number(totalSupply)} />

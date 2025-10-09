@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { Button, Flex, Text } from '@buildeross/zord'
@@ -27,7 +28,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     token && chain?.id ? ([SWR_KEYS.MEMBERS_LIST, token, chain.id] as const) : null,
     ([, _token, _chainId]) =>
       axios
-        .get<MembersQuery>(`/api/membersList/${_token}?chainId=${_chainId}`, {
+        .get<MembersQuery>(`${BASE_URL}/api/membersList/${_token}?chainId=${_chainId}`, {
           timeout: 10000,
         })
         .then((x) => x.data.membersList),
@@ -38,18 +39,16 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     }
   )
 
-  const exportDelegatesToCSV = async () => {
+  const exportDelegatesToCSV = React.useCallback(() => {
     try {
-      const response = await axios.get<{
-        delegates: Array<{
-          address: string
-          tokenCount: number
-          tokenIds: string
-          dateJoined: string
-        }>
-      }>(`/api/membersList/${token}/export?chainId=${chain.id}`)
+      if (!members) throw new Error('No members found')
 
-      const delegates = response.data.delegates
+      const delegates = members.map((member) => ({
+        address: member.voter,
+        tokenCount: member.tokenCount,
+        tokenIds: member.tokens.join(';'),
+        dateJoined: new Date(member.timeJoined * 1000).toISOString().split('T')[0],
+      }))
 
       const escapeCsv = (v: unknown) => {
         if (v === null || v === undefined) return ''
@@ -79,7 +78,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     } catch (error) {
       console.error('Failed to export delegates:', error)
     }
-  }
+  }, [members])
 
   const exportButton = (
     <Button

@@ -1,15 +1,10 @@
-import { Button, Flex, Text } from '@buildeross/zord'
-import { useRouter } from 'next/router'
+import { Flex, Text } from '@buildeross/zord'
 import { Fragment } from 'react'
 
 import { GridContainer } from './DaoFeed'
 import { emptyTile } from './DaoFeed.css'
 
 export const EmptyTile = ({ displayContent }: { displayContent: boolean }) => {
-  const { reload } = useRouter()
-
-  const onClick = () => reload()
-
   return (
     <Flex
       backgroundColor="border"
@@ -24,9 +19,6 @@ export const EmptyTile = ({ displayContent }: { displayContent: boolean }) => {
             Error loading DAOs
           </Text>
           <Text mb="x2">Please reload the page</Text>
-          <Button onClick={onClick} variant="secondary" size="sm">
-            Reload
-          </Button>
         </Fragment>
       )}
     </Flex>

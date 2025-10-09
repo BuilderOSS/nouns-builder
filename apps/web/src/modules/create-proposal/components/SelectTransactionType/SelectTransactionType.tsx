@@ -8,11 +8,13 @@ import TransactionTypeCard from './TransactionTypeCard'
 interface SelectTransactionTypeProps {
   transactionTypes: TransactionFormType[]
   onSelect: (value: TransactionFormType) => void
+  onOpenAdminSettings?: () => void
 }
 
 export const SelectTransactionType: React.FC<SelectTransactionTypeProps> = ({
   transactionTypes,
   onSelect,
+  onOpenAdminSettings,
 }) => {
   return (
     <Stack style={{ maxWidth: 680, minHeight: '80vh' }} mx={'auto'}>
@@ -34,7 +36,7 @@ export const SelectTransactionType: React.FC<SelectTransactionTypeProps> = ({
         mt={'x4'}
         mb={'x4'}
       />
-      <AdminNav />
+      {onOpenAdminSettings && <AdminNav onClick={onOpenAdminSettings} />}
     </Stack>
   )
 }

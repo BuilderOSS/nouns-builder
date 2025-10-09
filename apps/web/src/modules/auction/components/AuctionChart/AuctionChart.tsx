@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { AuctionHistoryQuery } from '@buildeross/sdk/subgraph'
 import axios from 'axios'
@@ -45,7 +46,9 @@ export const AuctionChart = () => {
       const startSeconds = startTimeFromNow(_startTime)
       const { data } = await axios.get<{
         auctionHistory: AuctionHistoryQuery
-      }>(`/api/auctionHistory/${_token}?chainId=${_chainId}&startTime=${startSeconds}`)
+      }>(
+        `${BASE_URL}/api/auctionHistory/${_token}?chainId=${_chainId}&startTime=${startSeconds}`
+      )
 
       return data.auctionHistory.dao?.auctions.map((auction) => ({
         id: auction.id,

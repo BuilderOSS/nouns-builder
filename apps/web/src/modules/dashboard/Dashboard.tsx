@@ -9,7 +9,7 @@ import {
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Flex, Text } from '@buildeross/zord'
-import React, { useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
@@ -82,16 +82,39 @@ const fetchDashboardData = async (address: string) => {
   }
 }
 
-const Dashboard = () => {
+export type DashboardProps = {
+  handleSelectAuction: (chainId: CHAIN_ID, tokenAddress: string, tokenId?: number) => void
+  handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: string) => void
+}
+
+const Dashboard: React.FC<DashboardProps> = ({
+  handleSelectAuction,
+  handleOpenCreateProposal,
+}) => {
   const { address } = useAccount()
 
-  const { data, error, isValidating, mutate } = useSWR(
+  const { data, error, isLoading, mutate } = useSWR(
     address ? ([SWR_KEYS.DASHBOARD, address] as const) : null,
     ([, _address]) => fetchDashboardData(_address),
     { revalidateOnFocus: false }
   )
 
-  const [mutating, setMutating] = useState(false)
+  const auctionCards = useMemo(() => {
+    if (!address || !data) return null
+    return data.map((dao) => (
+      <DaoAuctionCard
+        // React diffing wasn't catching new auctions starting, so this
+        // long key is to help rerender when new auction starts
+        key={`auctionCard:${dao.tokenAddress}:${dao}:${
+          dao?.currentAuction?.endTime || 0
+        }`}
+        {...dao}
+        userAddress={address}
+        handleMutate={mutate}
+        handleSelectAuction={handleSelectAuction}
+      />
+    ))
+  }, [data, address, mutate, handleSelectAuction])
 
   const proposalList = useMemo(() => {
     if (!data) return null
@@ -127,9 +150,10 @@ const Dashboard = () => {
           key={dao.tokenAddress}
           {...dao}
           userAddress={address as AddressType}
+          onOpenCreateProposal={handleOpenCreateProposal}
         />
       ))
-  }, [data, address])
+  }, [data, address, handleOpenCreateProposal])
 
   if (error) {
     return (
@@ -146,7 +170,7 @@ const Dashboard = () => {
       </DashPage>
     )
   }
-  if (isValidating && !mutating) {
+  if (isLoading) {
     return (
       <DashboardLayout
         auctionCards={Array.from({ length: 3 }).map((_, i) => (
@@ -163,9 +187,11 @@ const Dashboard = () => {
       />
     )
   }
+
   if (!address) {
     return <DashConnect />
   }
+
   if (!data?.length) {
     return (
       <DashPage>
@@ -175,29 +201,7 @@ const Dashboard = () => {
     )
   }
 
-  const handleMutate = async () => {
-    setMutating(true)
-    await mutate(() => fetchDashboardData(address))
-    setMutating(false)
-  }
-
-  return (
-    <DashboardLayout
-      auctionCards={data.map((dao) => (
-        <DaoAuctionCard
-          // React diffing wasn't catching new auctions starting, so this
-          // long key is to help rerender when new auction starts
-          key={`auctionCard:${dao.tokenAddress}:${dao}:${
-            dao?.currentAuction?.endTime || 0
-          }`}
-          {...dao}
-          userAddress={address}
-          handleMutate={handleMutate}
-        />
-      ))}
-      daoProposals={proposalList}
-    />
-  )
+  return <DashboardLayout auctionCards={auctionCards} daoProposals={proposalList} />
 }
 
 export default Dashboard
