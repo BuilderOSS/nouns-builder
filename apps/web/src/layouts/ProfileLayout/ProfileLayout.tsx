@@ -4,7 +4,11 @@ import { BaseLayout } from '../BaseLayout'
 import { LayoutWrapper } from '../LayoutWrapper'
 
 export function ProfileLayout({ children }: { children: ReactNode }) {
-  return <BaseLayout contentPadding={{ '@initial': 'x4' }}>{children}</BaseLayout>
+  return (
+    <BaseLayout px={'x4'} pt={{ '@initial': 'x20', '@480': 'x16' }}>
+      {children}
+    </BaseLayout>
+  )
 }
 
 export function getProfileLayout(page: ReactElement) {

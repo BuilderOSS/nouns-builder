@@ -1,5 +1,5 @@
 import { FormikProps } from 'formik'
-import React, { BaseSyntheticEvent, ReactElement, ReactNode } from 'react'
+import React, { BaseSyntheticEvent, ReactNode } from 'react'
 
 import Date from './DatePicker'
 import DaysHoursMins from './DaysHoursMins'
@@ -14,7 +14,7 @@ interface FieldSwitchProps {
   field: {
     type: FieldType
     name: string
-    inputLabel: string | ReactElement
+    inputLabel: string
     helperText?: string
     max?: number
     min?: number

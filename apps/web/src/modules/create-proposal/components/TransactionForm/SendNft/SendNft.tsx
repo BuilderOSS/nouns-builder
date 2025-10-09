@@ -437,14 +437,8 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           <Box mt={'x5'}>
             <SmartInput
               {...formik.getFieldProps('amount')}
-              inputLabel={
-                <Flex justify={'space-between'} width={'100%'}>
-                  <Box fontWeight={'label'}>Amount</Box>
-                  <Box color={'text3'} fontWeight="paragraph">
-                    Max: {computedMetadata.balance.toString()}
-                  </Box>
-                </Flex>
-              }
+              inputLabel={'Amount'}
+              secondaryLabel={`Max: ${computedMetadata.balance.toString()}`}
               id="amount"
               type={FIELD_TYPES.NUMBER}
               placeholder={'1'}

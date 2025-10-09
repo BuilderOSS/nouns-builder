@@ -1,7 +1,7 @@
 import { Box, Flex, Grid } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
-import React, { ChangeEventHandler, ReactElement } from 'react'
+import React, { ChangeEventHandler } from 'react'
 
 import { Tooltip } from '../Tooltip'
 import NumberInput from './NumberInput'
@@ -14,7 +14,7 @@ import {
 interface DaysHoursMinsProps {
   id: string
   value: any
-  inputLabel: string | ReactElement
+  inputLabel: string
   onChange: ChangeEventHandler
   onBlur?: ChangeEventHandler
   formik?: FormikProps<any>

@@ -2,7 +2,7 @@ import { FieldSwitch, FieldType } from '@buildeross/ui/Fields'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import { Form, Formik, FormikValues } from 'formik'
-import React, { ReactElement } from 'react'
+import React from 'react'
 import { useCustomTransactionStore } from 'src/modules/create-proposal'
 
 import { backButton, transactionFormButtonWithPrev } from './CustomTransactionForm.css'
@@ -10,7 +10,7 @@ import { backButton, transactionFormButtonWithPrev } from './CustomTransactionFo
 interface FormField {
   name: string
   type: FieldType
-  inputLabel: string | ReactElement
+  inputLabel: string
   helperText?: string
 }
 
