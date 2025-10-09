@@ -55,4 +55,17 @@ export const validationSchemaFounderAllocation = (signerAddress: string | null) 
           return values?.length === new Set(addresses).size
         }
       ),
+    founderRewardRecipient: Yup.string().when(['founderRewardBps'], {
+      is: (founderRewardBps: number) => founderRewardBps > 0,
+      then: () =>
+        addressValidationSchema.required(
+          'Founder reward recipient address is required when percentage is greater than 0%'
+        ),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+    founderRewardBps: Yup.number()
+      .integer('Must be whole number')
+      .min(0, 'Percentage must be at least 0%')
+      .max(1000, 'Percentage must be at most 10%')
+      .default(0),
   })
