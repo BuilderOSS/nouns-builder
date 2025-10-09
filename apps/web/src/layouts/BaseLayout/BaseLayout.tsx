@@ -34,7 +34,7 @@ export function BaseLayout({
   return (
     <ChainStoreProvider store={chainStore}>
       <DaoStoreProvider store={daoStore}>
-        <Box>
+        <Box pt="x20">
           {nav || <DefaultLayoutNav />}
           <Box px={contentPadding}>{children}</Box>
           {footer}
