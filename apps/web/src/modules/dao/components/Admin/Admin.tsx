@@ -13,7 +13,7 @@ export type AdminProps = {
 export const Admin: React.FC<AdminProps> = ({ onOpenProposalReview }) => {
   const addresses = useDaoStore((x) => x.addresses)
 
-  if (!addresses?.auction || !addresses?.token) {
+  if (!addresses.auction || !addresses.token) {
     return null
   }
 

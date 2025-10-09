@@ -62,17 +62,17 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
 
   const governorContractParams = {
     abi: governorAbi,
-    address: addresses?.governor as Address,
+    address: addresses.governor as Address,
   }
 
   const metadataContractParams = {
     abi: metadataAbi,
-    address: addresses?.metadata as Address,
+    address: addresses.metadata as Address,
   }
 
   const tokenContractParams = {
     abi: tokenAbi,
-    address: addresses?.token as Address,
+    address: addresses.token as Address,
   }
 
   const { data } = useReadContracts({
@@ -264,7 +264,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
 
     const transactionsWithPauseUnpause = withPauseUnpause(
       transactions,
-      addresses?.auction as Address
+      addresses.auction as Address
     )
 
     createProposal({

@@ -63,15 +63,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
     signerAddress: address,
     collectionAddress: query?.token as AddressType,
   })
 
   const { isGovernanceDelayed } = useDelayedGovernance({
     chainId: chain.id,
-    tokenAddress: addresses?.token,
-    governorAddress: addresses?.governor,
+    tokenAddress: addresses.token,
+    governorAddress: addresses.governor,
   })
 
   const createSelectOption = (type: TransactionFormType) => ({

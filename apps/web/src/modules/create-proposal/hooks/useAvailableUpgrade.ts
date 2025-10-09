@@ -53,7 +53,7 @@ export const useAvailableUpgrade = ({
   }
 
   const { data: proposals } = useSWR(
-    addresses?.token && chainId
+    addresses.token && chainId
       ? ([SWR_KEYS.PROPOSALS_CALLDATAS, chainId, addresses.token] as const)
       : null,
     ([, _chainId, _token]) => getProposals(_chainId, _token, 100)
@@ -62,7 +62,7 @@ export const useAvailableUpgrade = ({
   const { data, isLoading, isError } = useReadContracts({
     allowFailure: false,
     query: {
-      enabled: !!addresses?.token,
+      enabled: !!addresses.token,
     },
     contracts: [
       {
@@ -82,7 +82,7 @@ export const useAvailableUpgrade = ({
       {
         ...contract,
         functionName: 'getDAOVersions',
-        args: [addresses?.token as AddressType],
+        args: [addresses.token as AddressType],
       },
       { ...contract, functionName: 'tokenImpl' },
       { ...contract, functionName: 'governorImpl' },
@@ -186,7 +186,7 @@ export const useAvailableUpgrade = ({
     }
 
     const pause = {
-      target: addresses?.auction as AddressType,
+      target: addresses.auction as AddressType,
       functionSignature: 'pause()',
       calldata: encodeFunctionData({
         abi: auctionAbi,
@@ -196,7 +196,7 @@ export const useAvailableUpgrade = ({
     }
 
     const unpause = {
-      target: addresses?.auction as AddressType,
+      target: addresses.auction as AddressType,
       functionSignature: 'unpause()',
       calldata: encodeFunctionData({
         abi: auctionAbi,

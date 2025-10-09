@@ -19,21 +19,21 @@ export const AuctionPaused = () => {
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
-    address: addresses?.auction,
+    address: addresses.auction,
     functionName: 'paused',
     chainId: chain.id,
   })
 
   const { data } = useSWR<ProposalsResponse>(
-    paused && addresses?.token
-      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token] as const)
+    paused && addresses.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token] as const)
       : null,
     ([_key, _chainId, _token, _page]) =>
       getProposals(_chainId as CHAIN_ID, _token as string, LIMIT)
   )
 
   const pausedProposal = useMemo(() => {
-    if (!(paused && addresses?.auction)) return undefined
+    if (!(paused && addresses.auction)) return undefined
 
     const pauseCalldata = encodeFunctionData({
       abi: auctionAbi,
@@ -56,13 +56,13 @@ export const AuctionPaused = () => {
       )
 
       const isPausing =
-        pauseIndex >= 0 ? proposal.targets[pauseIndex] === addresses?.auction : false
+        pauseIndex >= 0 ? proposal.targets[pauseIndex] === addresses.auction : false
       const isUnpausing =
-        unpauseIndex >= 0 ? proposal.targets[unpauseIndex] === addresses?.auction : false
+        unpauseIndex >= 0 ? proposal.targets[unpauseIndex] === addresses.auction : false
 
       if (isPausing && !isUnpausing) return proposal
     })
-  }, [paused, data?.proposals, addresses?.auction])
+  }, [paused, data?.proposals, addresses.auction])
 
   if (!paused) return null
 
@@ -75,8 +75,8 @@ export const AuctionPaused = () => {
         shallow={!pausedProposal?.proposalId}
         href={
           pausedProposal?.proposalId
-            ? `/dao/${chain.slug}/${addresses?.token}/vote/${pausedProposal?.proposalNumber}`
-            : `/dao/${chain.slug}/${addresses?.token}?tab=activity`
+            ? `/dao/${chain.slug}/${addresses.token}/vote/${pausedProposal?.proposalNumber}`
+            : `/dao/${chain.slug}/${addresses.token}?tab=activity`
         }
       >
         <Box

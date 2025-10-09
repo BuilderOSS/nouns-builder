@@ -58,7 +58,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     chainId: chainId,
     signerAddress: address,
     collectionAddress: collection,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
   })
 
   const handleCloseSuccessModal = React.useCallback(() => {
@@ -91,13 +91,13 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   }, [push, pathname, query])
 
   const openProposalCreatePage = React.useCallback(
-    () => push(`/dao/${query.network}/${query.token}/proposal/create`),
-    [push, query.network, query.token]
+    () => push(`/dao/${chain.slug}/${addresses.token}/proposal/create`),
+    [push, chain.slug, addresses.token]
   )
 
   const openProposalReviewPage = React.useCallback(
-    () => push(`/dao/${query.network}/${query.token}/proposal/review`),
-    [push, query.network, query.token]
+    () => push(`/dao/${chain.slug}/${addresses.token}/proposal/review`),
+    [push, chain.slug, addresses.token]
   )
 
   const sections = React.useMemo(() => {
@@ -168,15 +168,14 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     return cleanDesc.length > 111 ? `${cleanDesc.slice(0, 111)}...` : cleanDesc
   }, [description, name])
 
-  const activeTab = query?.tab ? (query.tab as string) : 'about'
-
-  const path = `/dao/${query.network}/${query.token}/${query.tokenId}?tab=${activeTab}`
+  const activeTab = query.tab ? (query.tab as string) : 'about'
+  const path = `/dao/${chain.slug}/${addresses.token}/${token.tokenId}?tab=${activeTab}`
 
   const onAuctionCreated = React.useCallback(
     (tokenId: bigint) => {
-      push(`/dao/${query.network}/${query.token}/${tokenId.toString()}`)
+      push(`/dao/${chain.slug}/${addresses.token}/${tokenId.toString()}`)
     },
-    [push, query.network, query.token]
+    [push, chain.slug, addresses.token]
   )
 
   return (
@@ -199,11 +198,11 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       <SectionHandler
         sections={sections}
         activeTab={activeTab}
-        basePath={`/dao/${query.network}/${collection}/${token.tokenId}`}
+        basePath={`/dao/${chain.slug}/${collection}/${token.tokenId}`}
       />
 
       <AnimatedModal
-        open={query?.message === SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS}
+        open={query.message === SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS}
         close={handleCloseSuccessModal}
       >
         <SuccessModalContent

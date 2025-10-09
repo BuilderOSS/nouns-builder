@@ -36,7 +36,7 @@ export const Settle = ({
   const { address } = useAccount()
   const isWinner = owner != undefined && address == owner
 
-  const auctionAddress = externalAuctionAddress || addresses?.auction
+  const auctionAddress = externalAuctionAddress || addresses.auction
 
   const { data: paused } = useReadContract({
     query: {

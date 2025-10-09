@@ -26,8 +26,8 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
   const transactions = useProposalStore((state) => state.transactions)
   const [queueModalOpen, setQueueModalOpen] = useState(false)
 
-  const token = addresses?.token
-  const metadata = addresses?.metadata
+  const token = addresses.token
+  const metadata = addresses.metadata
 
   const { data: contractData } = useReadContracts({
     allowFailure: false,

@@ -22,22 +22,22 @@ import { useAccount } from 'wagmi'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
   const chain = useChainStore((x) => x.chain)
-  const { query, back, push } = useRouter()
+  const { back, push } = useRouter()
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
     signerAddress: address,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses.token,
   })
 
   const { isGovernanceDelayed } = useDelayedGovernance({
     chainId: chain.id,
-    tokenAddress: addresses?.token,
-    governorAddress: addresses?.governor,
+    tokenAddress: addresses.token,
+    governorAddress: addresses.governor,
   })
 
   const { transactions, disabled, title, summary } = useProposalStore()

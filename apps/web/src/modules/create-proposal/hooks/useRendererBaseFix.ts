@@ -63,8 +63,8 @@ export const useRendererBaseFix = ({
   })
 
   const { data: proposals } = useSWR(
-    !!addresses?.token
-      ? ([SWR_KEYS.PROPOSALS_CALLDATAS, chainId, addresses?.token] as const)
+    !!addresses.token
+      ? ([SWR_KEYS.PROPOSALS_CALLDATAS, chainId, addresses.token] as const)
       : null,
     ([, _chainId, _token]) => getProposals(_chainId, _token, 100)
   )

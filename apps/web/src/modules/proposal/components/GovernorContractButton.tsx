@@ -48,9 +48,9 @@ export function GovernorContractButton({
 
   const { data, isError } = useSimulateContract({
     query: {
-      enabled: !!addresses?.governor,
+      enabled: !!addresses.governor,
     },
-    address: addresses?.governor,
+    address: addresses.governor,
     abi: governorAbi,
     functionName: functionName,
     args: args,

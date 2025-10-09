@@ -49,7 +49,7 @@ const HomePage: NextPageWithLayout = () => {
     tokenAddress: string,
     tokenId?: number | string | bigint
   ) => {
-    if (!tokenId) {
+    if (tokenId === undefined || tokenId === null) {
       push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}`)
       return
     }

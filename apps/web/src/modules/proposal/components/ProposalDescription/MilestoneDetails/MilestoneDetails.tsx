@@ -66,9 +66,9 @@ export const MilestoneDetails = ({
 
   const { hasThreshold } = useVotes({
     chainId: chain.id,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
     signerAddress: address,
-    collectionAddress: addresses?.token,
+    collectionAddress: addresses.token,
   })
 
   const {

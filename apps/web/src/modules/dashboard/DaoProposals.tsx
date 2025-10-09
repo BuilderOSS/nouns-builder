@@ -72,11 +72,12 @@ export const DaoProposals = ({
           </Flex>
         </Link>
 
-        {onOpenCreateProposal && !isGovernanceDelayed && hasThreshold && (
+        {onOpenCreateProposal && (
           <Button
             variant="outline"
             borderRadius="curved"
             size={'sm'}
+            disabled={!hasThreshold || isGovernanceDelayed}
             onClick={() => onOpenCreateProposal(chainId, tokenAddress)}
             loading={isLoading}
           >

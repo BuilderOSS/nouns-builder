@@ -20,7 +20,7 @@ export const Treasury = () => {
   const chain = useChainStore((x) => x.chain)
 
   const { data: balance } = useBalance({
-    address: addresses?.treasury as `0x${string}`,
+    address: addresses.treasury as `0x${string}`,
     chainId: chain.id,
   })
 

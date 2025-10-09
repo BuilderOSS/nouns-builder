@@ -23,13 +23,14 @@ import { PropDates } from 'src/modules/proposal/components/PropDates'
 import { ProposalVotes } from 'src/modules/proposal/components/ProposalVotes'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
-import { type DaoContractAddresses } from 'src/stores'
+import { type DaoContractAddresses, useChainStore } from 'src/stores'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR, { unstable_serialize } from 'swr'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useBalance } from 'wagmi'
 
 export interface VotePageProps {
+  proposalNumber: number
   proposalId: string
   daoName: string
   ogImageURL: string
@@ -50,16 +51,18 @@ const checkDrain = (values: string[], treasuryBalance: bigint) => {
 }
 
 const VotePage: NextPageWithLayout<VotePageProps> = ({
+  proposalNumber,
   proposalId,
   daoName,
   ogImageURL,
   chainId,
   addresses,
 }) => {
+  const chain = useChainStore((state) => state.chain)
   const { query, push } = useRouter()
 
   const { data: balance } = useBalance({
-    address: addresses?.treasury as `0x${string}`,
+    address: addresses.treasury,
     chainId: chainId,
   })
 
@@ -72,22 +75,22 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     push({
       pathname: `/dao/[network]/[token]/proposal/review`,
       query: {
-        network: query.network,
-        token: query.token,
+        network: chain.slug,
+        token: addresses.token,
       },
     })
-  }, [push, query.network, query.token])
+  }, [push, chain.slug, addresses.token])
 
   const openDaoActivityPage = React.useCallback(() => {
     push({
       pathname: `/dao/[network]/[token]`,
       query: {
-        network: query.network,
-        token: query.token,
+        network: chain.slug,
+        token: addresses.token,
         tab: 'activity',
       },
     })
-  }, [push, query.network, query.token])
+  }, [push, chain.slug, addresses.token])
 
   const sections = React.useMemo(() => {
     if (!proposal || !addresses.token) return []
@@ -141,7 +144,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     <Fragment>
       <Meta
         title={`${daoName} - Prop ${proposal.proposalNumber}`}
-        path={`/dao/${query.network}/${query.token}/vote/${query.id}`}
+        path={`/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`}
         image={ogImageURL}
         description={`View this proposal from ${daoName}`}
       />
@@ -178,7 +181,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
         <SectionHandler
           sections={sections}
           activeTab={query.tab ? (query.tab as string) : 'Details'}
-          basePath={`/dao/${query.network}/${query.token}/vote/${query.id}`}
+          basePath={`/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`}
         />
       </Box>
     </Fragment>
@@ -191,7 +194,7 @@ export default VotePage
 
 export const getServerSideProps: GetServerSideProps = async ({ params, req, res }) => {
   const collection = params?.token as AddressType
-  const proposalIdOrNumber = params?.id as `0x${string}`
+  const proposalIdOrNumber = params?.id as string
   const network = params?.network as string
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
@@ -298,6 +301,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
       daoName: name,
       ogImageURL,
       proposalId: proposal.proposalId,
+      proposalNumber: proposal.proposalNumber,
       addresses,
       chainId: chain.id,
     },

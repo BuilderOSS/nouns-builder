@@ -104,7 +104,7 @@ export const ReplaceArtwork = () => {
 
       return {
         functionSignature,
-        target: addresses?.metadata as AddressType,
+        target: addresses.metadata as AddressType,
         value: '',
         calldata: encodeFunctionData({
           abi: metadataAbi,
@@ -121,7 +121,7 @@ export const ReplaceArtwork = () => {
     })
 
     resetForm()
-  }, [addTransaction, resetForm, transactions, isValid, addresses?.metadata])
+  }, [addTransaction, resetForm, transactions, isValid, addresses.metadata])
 
   return (
     <Stack>

@@ -28,7 +28,7 @@ const CreatePage: NextPageWithLayout = () => {
   const { address } = useAccount()
   const chain = useChainStore((x) => x.chain)
 
-  const { isGnosisSafe } = useIsGnosisSafe(address, chain?.id)
+  const { isGnosisSafe } = useIsGnosisSafe(address, chain.id)
 
   const { push } = useRouter()
   const handleSuccessfulDeploy = React.useCallback(

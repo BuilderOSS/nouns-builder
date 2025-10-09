@@ -18,14 +18,14 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
   const chain = useChainStore((x) => x.chain)
   const { addresses } = useDaoStore()
 
-  const token = addresses?.token
+  const token = addresses.token
 
   const {
     data: members,
     error,
     isLoading,
   } = useSWR(
-    token && chain?.id ? ([SWR_KEYS.MEMBERS_LIST, token, chain.id] as const) : null,
+    token && chain.id ? ([SWR_KEYS.MEMBERS_LIST, token, chain.id] as const) : null,
     ([, _token, _chainId]) =>
       axios
         .get<MembersQuery>(`${BASE_URL}/api/membersList/${_token}?chainId=${_chainId}`, {
@@ -85,7 +85,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
       variant="secondary"
       size="sm"
       onClick={exportDelegatesToCSV}
-      disabled={!token || !chain?.id || !members || members.length === 0}
+      disabled={!token || !chain.id || !members || members.length === 0}
     >
       Export CSV
     </Button>
