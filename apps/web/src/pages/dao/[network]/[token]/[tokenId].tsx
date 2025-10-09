@@ -26,6 +26,7 @@ import { Feed } from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { DaoContractAddresses } from 'src/stores'
+import { isAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
 interface TokenPageProps {
@@ -175,6 +176,13 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     [push, chain.slug, addresses.token]
   )
 
+  const referral = useMemo(() => {
+    if (!query.referral) return undefined
+    const referralStr = Array.isArray(query.referral) ? query.referral[0] : query.referral
+    if (isAddress(referralStr)) return referralStr as AddressType
+    return undefined
+  }, [query.referral])
+
   return (
     <Flex direction="column" pb="x30">
       <Meta
@@ -191,6 +199,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         auctionAddress={addresses.auction!}
         token={token}
         onAuctionCreated={onAuctionCreated}
+        referral={referral}
       />
       <SectionHandler
         sections={sections}

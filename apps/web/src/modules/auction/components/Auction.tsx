@@ -36,6 +36,7 @@ interface AuctionControllerProps {
   token: TokenWithDao
   viewSwitcher?: ReactNode
   onAuctionCreated?: (tokenId: bigint) => void
+  referral?: AddressType
 }
 
 export const Auction: React.FC<AuctionControllerProps> = ({
@@ -44,6 +45,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   collection,
   token,
   onAuctionCreated,
+  referral,
 }) => {
   const { mintedAt, name, image, owner: tokenOwner, tokenId: queriedTokenId } = token
   const mintDate = mintedAt * 1000
@@ -139,6 +141,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
             owner={highestBidder}
             endTime={endTime}
             bids={bids || []}
+            referral={referral}
           />
         )}
 
