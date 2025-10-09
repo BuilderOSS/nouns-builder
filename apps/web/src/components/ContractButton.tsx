@@ -13,11 +13,13 @@ export type ContractButtonProps = Omit<
 > & {
   // Accept an optional click event; callers may also pass a 0-arg handler.
   handleClick: (e?: any) => void | Promise<void>
+  chainId?: number
 }
 
 export const ContractButton = ({
   children,
   handleClick,
+  chainId,
   ...rest
 }: ContractButtonProps) => {
   const appChain = useChainStore((x) => x.chain)
@@ -37,7 +39,7 @@ export const ContractButton = ({
 
   return (
     <BaseContractButton
-      chainId={appChain.id}
+      chainId={chainId || appChain.id}
       handleClick={handleClick}
       zeroBalanceHint={zeroBalanceHint}
       onConnectWallet={openConnectModal}
