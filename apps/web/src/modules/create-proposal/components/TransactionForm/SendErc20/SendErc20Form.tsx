@@ -399,19 +399,13 @@ export const SendErc20Form = ({ formik }: SendErc20FormProps) => {
 
         <SmartInput
           {...formik.getFieldProps(`amount`)}
-          inputLabel={
-            <Flex justify={'space-between'} width={'100%'}>
-              <Box fontWeight={'label'}>Amount</Box>
-              {fullTokenMetadata && (
-                <Box color={'text3'} fontWeight="paragraph">
-                  Max:{' '}
-                  {formatCryptoVal(
-                    formatUnits(fullTokenMetadata.balance, fullTokenMetadata.decimals)
-                  )}{' '}
-                  {fullTokenMetadata.symbol}
-                </Box>
-              )}
-            </Flex>
+          inputLabel="Amount"
+          secondaryLabel={
+            fullTokenMetadata
+              ? `Max: ${formatCryptoVal(
+                  formatUnits(fullTokenMetadata.balance, fullTokenMetadata.decimals)
+                )} ${fullTokenMetadata.symbol}`
+              : undefined
           }
           id={`amount`}
           type={FIELD_TYPES.NUMBER}
