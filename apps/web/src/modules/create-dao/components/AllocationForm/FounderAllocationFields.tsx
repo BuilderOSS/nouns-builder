@@ -55,13 +55,11 @@ export const FounderAllocationFields = ({
 
           return (
             <Flex key={`founder-${index}`} direction="column" mb={'x4'}>
-              <Flex>
+              <Flex position="relative">
                 <Flex style={{ flex: '2 1 0' }}>
                   <SmartInput
                     inputLabel={
-                      isFounder
-                        ? 'Admin founder address'
-                        : 'Additional founder allocations'
+                      isFounder ? 'Admin founder address' : 'Additional founder'
                     }
                     id={`founderAllocation.${index}.founderAddress`}
                     value={founder.founderAddress}
@@ -116,19 +114,21 @@ export const FounderAllocationFields = ({
                     }
                   />
                 </Flex>
-              </Flex>
 
-              <Flex align={'center'} justify={'space-between'} style={{ marginTop: -24 }}>
                 {!isFounder && (
                   <Button
                     type="button"
                     variant="unset"
+                    position="absolute"
                     onClick={() => removeFounderAddress(index)}
+                    style={{ top: '50%', right: '-32px', transform: 'translateY(-50%)' }}
                   >
                     <Icon id="trash" />
                   </Button>
                 )}
+              </Flex>
 
+              <Flex align={'center'} justify={'space-between'} style={{ marginTop: -24 }}>
                 {isVetoer && (
                   <Flex
                     align={'center'}

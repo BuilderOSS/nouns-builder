@@ -291,7 +291,8 @@ export const placeholderStyle = style({
 export const permaInputPlaceHolderStyle = style({
   right: '16px',
   height: '26px',
-  top: 57,
+  top: '50%',
+  transform: 'translateY(-50%)',
   background: 'inherit',
 })
 
@@ -299,8 +300,8 @@ export const inputCheckIcon = styleVariants({
   default: [
     {
       right: '16px',
-      top: 'auto',
-      bottom: 20,
+      top: '50%',
+      transform: 'translateY(-50%)',
       background: 'inherit',
       height: 24,
       width: 24,
