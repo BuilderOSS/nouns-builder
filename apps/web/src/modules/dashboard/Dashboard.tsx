@@ -89,11 +89,19 @@ export type DashboardProps = {
     tokenId?: number | string | bigint
   ) => void
   handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: string) => void
+  handleOpenDao: (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => void
+  handleOpenProposal: (
+    chainId: CHAIN_ID,
+    tokenAddress: string,
+    proposalNumber: number
+  ) => void
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
+  handleOpenDao,
   handleSelectAuction,
   handleOpenCreateProposal,
+  handleOpenProposal,
 }) => {
   const { address } = useAccount()
 
@@ -116,9 +124,10 @@ const Dashboard: React.FC<DashboardProps> = ({
         userAddress={address}
         handleMutate={mutate}
         handleSelectAuction={handleSelectAuction}
+        handleOpenDao={handleOpenDao}
       />
     ))
-  }, [data, address, mutate, handleSelectAuction])
+  }, [data, address, mutate, handleSelectAuction, handleOpenDao])
 
   const proposalList = useMemo(() => {
     if (!data) return null
@@ -155,9 +164,11 @@ const Dashboard: React.FC<DashboardProps> = ({
           {...dao}
           userAddress={address as AddressType}
           onOpenCreateProposal={handleOpenCreateProposal}
+          onOpenProposal={handleOpenProposal}
+          onOpenDao={handleOpenDao}
         />
       ))
-  }, [data, address, handleOpenCreateProposal])
+  }, [data, address, handleOpenCreateProposal, handleOpenProposal, handleOpenDao])
 
   if (error) {
     return (

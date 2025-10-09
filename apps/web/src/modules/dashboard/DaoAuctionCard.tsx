@@ -30,6 +30,7 @@ import {
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
+  handleOpenDao: (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => void
   handleSelectAuction: (
     chainId: CHAIN_ID,
     tokenAddress: string,
@@ -45,6 +46,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     handleMutate,
     tokenAddress,
     handleSelectAuction,
+    handleOpenDao,
   } = props
   const chain =
     PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? ({} as Partial<Chain>)
@@ -91,6 +93,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
       <AuctionPaused
         {...props}
         handleSelectAuction={() => handleSelectAuction(chainId, tokenAddress)}
+        handleOpenDaoActivity={() => handleOpenDao(chainId, tokenAddress, 'activity')}
         tokenAddress={tokenAddress}
         chain={chain}
       />
