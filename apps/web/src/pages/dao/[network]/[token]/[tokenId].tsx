@@ -3,12 +3,7 @@ import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import {
-  OrderDirection,
-  SubgraphSDK,
-  Token_OrderBy,
-  TokenWithDaoQuery,
-} from '@buildeross/sdk/subgraph'
+import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
@@ -18,7 +13,7 @@ import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import { DaoAuctionSection } from 'src/modules/auction/components/DaoAuctionSection'
+import { DaoAuctionSection, type TokenWithDao } from 'src/modules/auction'
 import {
   About,
   Activity,
@@ -32,8 +27,6 @@ import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { DaoContractAddresses } from 'src/stores'
 import { useAccount } from 'wagmi'
-
-type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
 
 interface TokenPageProps {
   collection: AddressType
@@ -69,17 +62,19 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   })
 
   const handleCloseSuccessModal = React.useCallback(() => {
+    const nextQuery = { ...query }
+    delete nextQuery.message
     replace(
       {
         pathname,
-        query: { token: collection, network: chain.slug, tokenId: token.tokenId },
+        query: nextQuery,
       },
       undefined,
       {
         shallow: true,
       }
     )
-  }, [replace, pathname, chain.slug, collection, token.tokenId])
+  }, [replace, pathname, query])
 
   const openTreasuryTab = React.useCallback(() => {
     const current = { ...query } // Get existing query params
@@ -178,8 +173,8 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   const path = `/dao/${query.network}/${query.token}/${query.tokenId}?tab=${activeTab}`
 
   const onAuctionCreated = React.useCallback(
-    (tokenId: number) => {
-      push(`/dao/${query.network}/${query.token}/${tokenId}`)
+    (tokenId: bigint) => {
+      push(`/dao/${query.network}/${query.token}/${tokenId.toString()}`)
     },
     [push, query.network, query.token]
   )

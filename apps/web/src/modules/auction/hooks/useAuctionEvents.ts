@@ -18,8 +18,8 @@ export const useAuctionEvents = ({
   chainId: CHAIN_ID
   collection: string
   isTokenActiveAuction: boolean
-  onAuctionCreated?: (tokenId: number) => void
-  onAuctionBidCreated?: (tokenId: number) => void
+  onAuctionCreated?: (tokenId: bigint) => void
+  onAuctionBidCreated?: (tokenId: bigint) => void
 }) => {
   const { mutate } = useSWRConfig()
   const { auction } = useDaoStore((state) => state.addresses)
@@ -53,7 +53,7 @@ export const useAuctionEvents = ({
     onLogs: async (logs) => {
       const tokenId = logs[0].args.tokenId as bigint
       await refreshAuctionAndBids(logs[0].blockNumber, tokenId)
-      onAuctionCreated?.(Number(tokenId))
+      onAuctionCreated?.(tokenId)
     },
   })
 
@@ -64,7 +64,7 @@ export const useAuctionEvents = ({
     onLogs: async (logs) => {
       const tokenId = logs[0].args.tokenId as bigint
       await refreshAuctionAndBids(logs[0].blockNumber, tokenId)
-      onAuctionBidCreated?.(Number(tokenId))
+      onAuctionBidCreated?.(tokenId)
     },
   })
 }

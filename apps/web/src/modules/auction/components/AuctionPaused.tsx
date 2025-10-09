@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi, ProposalState } from '@buildeross/sdk/contract'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'

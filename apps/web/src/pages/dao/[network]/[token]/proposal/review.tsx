@@ -55,8 +55,14 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   }, [push, chain.slug, addresses.token])
 
   const onEditTransactions = React.useCallback(() => {
-    push('/dao/[network]/[token]/proposal/create')
-  }, [push])
+    push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [push, chain.slug, addresses.token])
 
   if (isLoading) return null
 

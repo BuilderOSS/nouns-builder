@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'

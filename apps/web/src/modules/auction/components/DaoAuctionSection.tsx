@@ -1,7 +1,7 @@
 import { Chain } from '@buildeross/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
-import { Auction, type TokenWithDao } from 'src/modules/auction'
+import { Auction, type TokenWithDao } from 'src/modules/auction/components/Auction'
 import { AuctionChart } from 'src/modules/auction/components/AuctionChart/AuctionChart'
 import { ViewSwitcher } from 'src/modules/auction/components/ViewSwitcher'
 
@@ -10,7 +10,7 @@ type TopSectionProps = {
   collection: string
   auctionAddress: string
   token: TokenWithDao
-  onAuctionCreated?: (tokenId: number) => void
+  onAuctionCreated?: (tokenId: bigint) => void
 }
 
 export enum TopSectionView {

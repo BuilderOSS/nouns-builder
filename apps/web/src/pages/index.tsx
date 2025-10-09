@@ -47,10 +47,13 @@ const HomePage: NextPageWithLayout = () => {
   const handleSelectAuction = (
     chainId: CHAIN_ID,
     tokenAddress: string,
-    tokenId: number | undefined = undefined
+    tokenId?: number | string | bigint
   ) => {
-    if (!tokenId) push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}`)
-    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`)
+    if (!tokenId) {
+      push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}`)
+      return
+    }
+    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId.toString()}`)
   }
 
   const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: string) => {

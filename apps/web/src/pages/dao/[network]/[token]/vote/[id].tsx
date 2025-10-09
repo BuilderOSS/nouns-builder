@@ -1,6 +1,6 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
@@ -76,7 +76,18 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
         token: query.token,
       },
     })
-  }, [push, query])
+  }, [push, query.network, query.token])
+
+  const openDaoActivityPage = React.useCallback(() => {
+    push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: query.network,
+        token: query.token,
+        tab: 'activity',
+      },
+    })
+  }, [push, query.network, query.token])
 
   const sections = React.useMemo(() => {
     if (!proposal || !addresses.token) return []
@@ -137,19 +148,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
 
       <Flex position="relative" direction="column">
         <Flex className={propPageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
-          <ProposalHeader
-            proposal={proposal}
-            handleBack={() => {
-              push({
-                pathname: `/dao/[network]/[token]`,
-                query: {
-                  network: query.network,
-                  token: query.token,
-                  tab: 'activity',
-                },
-              })
-            }}
-          />
+          <ProposalHeader proposal={proposal} handleBack={openDaoActivityPage} />
           <>
             {displayWarning && (
               <Flex

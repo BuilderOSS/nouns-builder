@@ -3,7 +3,7 @@ import { L1_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { getBids, TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
-import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { AddressType, Chain, L2MigratedResponse } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Grid } from '@buildeross/zord'
 import axios from 'axios'
@@ -35,16 +35,7 @@ interface AuctionControllerProps {
   collection: string
   token: TokenWithDao
   viewSwitcher?: ReactNode
-  onAuctionCreated?: (tokenId: number) => void
-}
-
-interface L2MigratedResponse {
-  migrated:
-    | {
-        l2TokenAddress: AddressType
-        chainId: CHAIN_ID
-      }
-    | undefined
+  onAuctionCreated?: (tokenId: bigint) => void
 }
 
 export const Auction: React.FC<AuctionControllerProps> = ({

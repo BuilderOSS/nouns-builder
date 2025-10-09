@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'

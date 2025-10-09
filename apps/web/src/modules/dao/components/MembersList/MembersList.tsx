@@ -41,7 +41,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
 
   const exportDelegatesToCSV = React.useCallback(() => {
     try {
-      if (!members) throw new Error('No members found')
+      if (!members || members.length === 0) throw new Error('No members found')
 
       const delegates = members.map((member) => ({
         address: member.voter,
@@ -85,7 +85,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
       variant="secondary"
       size="sm"
       onClick={exportDelegatesToCSV}
-      disabled={!token || !chain?.id}
+      disabled={!token || !chain?.id || !members || members.length === 0}
     >
       Export CSV
     </Button>

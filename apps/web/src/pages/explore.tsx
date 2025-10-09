@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'

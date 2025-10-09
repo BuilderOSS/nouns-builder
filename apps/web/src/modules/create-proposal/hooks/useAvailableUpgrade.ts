@@ -1,5 +1,5 @@
 import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi, managerAbi, ProposalState } from '@buildeross/sdk/contract'
 import { getProposals, Proposal } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'

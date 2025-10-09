@@ -1,7 +1,7 @@
 import { Box } from '@buildeross/zord'
 
 import { GridContainer } from './DaoFeed'
-import { exploreSkeleton } from './DaoFeed.css'
+import { daoFeedSkeleton } from './DaoFeed.css'
 
 export const DaoFeedCardSkeleton = () => {
   return (
@@ -11,7 +11,7 @@ export const DaoFeedCardSkeleton = () => {
       width={'100%'}
       aspectRatio={1}
       position="relative"
-      className={exploreSkeleton}
+      className={daoFeedSkeleton}
     />
   )
 }

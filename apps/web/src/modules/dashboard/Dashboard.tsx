@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
 import {
   CurrentAuctionFragment,
@@ -83,7 +83,11 @@ const fetchDashboardData = async (address: string) => {
 }
 
 export type DashboardProps = {
-  handleSelectAuction: (chainId: CHAIN_ID, tokenAddress: string, tokenId?: number) => void
+  handleSelectAuction: (
+    chainId: CHAIN_ID,
+    tokenAddress: string,
+    tokenId?: number | string | bigint
+  ) => void
   handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: string) => void
 }
 

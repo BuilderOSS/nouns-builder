@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { Box, ButtonProps } from '@buildeross/zord'

@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { formatCryptoVal, numberFormatter } from '@buildeross/utils/numbers'

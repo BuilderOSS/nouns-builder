@@ -18,7 +18,6 @@ export const EmptyTile = ({ displayContent }: { displayContent: boolean }) => {
           <Text fontWeight="display" mb="x1">
             Error loading DAOs
           </Text>
-          <Text mb="x2">Please reload the page</Text>
         </Fragment>
       )}
     </Flex>

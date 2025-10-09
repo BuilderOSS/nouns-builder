@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { Countdown } from '@buildeross/ui/Countdown'

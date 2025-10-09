@@ -30,7 +30,11 @@ import {
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
-  handleSelectAuction: (chainId: CHAIN_ID, tokenAddress: string, tokenId?: number) => void
+  handleSelectAuction: (
+    chainId: CHAIN_ID,
+    tokenAddress: string,
+    tokenId?: number | string | bigint
+  ) => void
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {

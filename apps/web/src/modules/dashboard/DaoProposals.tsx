@@ -26,18 +26,21 @@ export const DaoProposals = ({
   userAddress?: AddressType
   onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: string) => void
 }) => {
-  const { isGovernanceDelayed } = useDelayedGovernance({
-    tokenAddress: tokenAddress,
-    governorAddress: governorAddress,
-    chainId,
-  })
+  const { isGovernanceDelayed, isLoading: isLoadingDelayedGovernance } =
+    useDelayedGovernance({
+      tokenAddress: tokenAddress,
+      governorAddress: governorAddress,
+      chainId,
+    })
 
-  const { hasThreshold } = useVotes({
+  const { hasThreshold, isLoading: isLoadingVotes } = useVotes({
     chainId,
     governorAddress,
     signerAddress: userAddress,
     collectionAddress: tokenAddress,
   })
+
+  const isLoading = isLoadingDelayedGovernance || isLoadingVotes
 
   const currentChainSlug = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)?.slug
 
@@ -69,13 +72,13 @@ export const DaoProposals = ({
           </Flex>
         </Link>
 
-        {onOpenCreateProposal && (
+        {onOpenCreateProposal && !isGovernanceDelayed && hasThreshold && (
           <Button
             variant="outline"
             borderRadius="curved"
             size={'sm'}
-            disabled={isGovernanceDelayed || !hasThreshold}
             onClick={() => onOpenCreateProposal(chainId, tokenAddress)}
+            loading={isLoading}
           >
             Create Proposal
           </Button>

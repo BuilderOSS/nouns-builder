@@ -1,5 +1,5 @@
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { metadataAbi, ProposalState } from '@buildeross/sdk/contract'
 import { getProposals, Proposal } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
