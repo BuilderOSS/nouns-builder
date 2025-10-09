@@ -1,11 +1,10 @@
-import { useQueryParams } from '@buildeross/hooks/useQueryParams'
 import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain } from '@buildeross/types'
 import dayjs from 'dayjs'
 import React, { Fragment, useState } from 'react'
-import { formatEther } from 'viem'
+import { formatEther, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { AuctionDetails } from '../AuctionDetails'
@@ -26,6 +25,7 @@ export const CurrentAuction = ({
   owner,
   endTime,
   bids,
+  referral: referralParam,
 }: {
   chain: Chain
   tokenId: string
@@ -35,8 +35,8 @@ export const CurrentAuction = ({
   owner?: string
   endTime?: number
   bids: AuctionBidFragment[]
+  referral?: AddressType
 }) => {
-  const query = useQueryParams()
   const [isEnded, setIsEnded] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
 
@@ -62,8 +62,8 @@ export const CurrentAuction = ({
 
   // Set the referral if auction version is != 1 and query.referral is present
   const referral =
-    !auctionVersion?.startsWith('1') && query.referral
-      ? (query.referral as AddressType)
+    !auctionVersion?.startsWith('1') && !!referralParam && isAddress(referralParam)
+      ? (referralParam as AddressType)
       : undefined
 
   if (isEnded || isOver) {

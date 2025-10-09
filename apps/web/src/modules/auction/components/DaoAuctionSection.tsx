@@ -1,4 +1,4 @@
-import { Chain } from '@buildeross/types'
+import { AddressType, Chain } from '@buildeross/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
 import { Auction, type TokenWithDao } from 'src/modules/auction/components/Auction'
@@ -11,6 +11,7 @@ type TopSectionProps = {
   auctionAddress: string
   token: TokenWithDao
   onAuctionCreated?: (tokenId: bigint) => void
+  referral?: AddressType
 }
 
 export enum TopSectionView {
@@ -24,6 +25,7 @@ export const DaoAuctionSection = ({
   collection,
   token,
   onAuctionCreated,
+  referral,
 }: TopSectionProps) => {
   const [topSectionView, setTopSectionView] = React.useState<TopSectionView>(
     TopSectionView.Auction
@@ -41,6 +43,7 @@ export const DaoAuctionSection = ({
             collection={collection}
             token={token}
             onAuctionCreated={onAuctionCreated}
+            referral={referral}
           />
         )}
       </TabSwitchAnimation>
