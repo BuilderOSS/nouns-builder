@@ -1,6 +1,7 @@
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useRouter } from 'next/router'
 import React from 'react'
 import { Meta } from 'src/components/Meta'
 import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
@@ -16,6 +17,7 @@ import {
   useFormStore,
   VetoForm,
 } from 'src/modules/create-dao'
+import { useChainStore } from 'src/stores'
 import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/styles.css'
 import { useAccount } from 'wagmi'
 
@@ -23,10 +25,18 @@ import { NextPageWithLayout } from './_app'
 
 const CreatePage: NextPageWithLayout = () => {
   const { activeSection } = useFormStore()
-  const { address, chain } = useAccount()
+  const { address } = useAccount()
+  const chain = useChainStore((x) => x.chain)
 
-  const { isGnosisSafe } = useIsGnosisSafe(address, chain?.id)
+  const { isGnosisSafe } = useIsGnosisSafe(address, chain.id)
 
+  const { push } = useRouter()
+  const handleSuccessfulDeploy = React.useCallback(
+    async (token: string) => {
+      await push(`/dao/${chain.slug}/${token}`)
+    },
+    [chain.slug, push]
+  )
   /*
 
     Initialize Form Sections
@@ -70,7 +80,13 @@ const CreatePage: NextPageWithLayout = () => {
     const reviewAndDeploy: CreateFormSection = {
       title: 'Deploy',
       subHeading: '[Confirm your contract settings before deploying your DAO]',
-      form: <ReviewAndDeploy key={'review-and-deploy'} title={'Deploy'} />,
+      form: (
+        <ReviewAndDeploy
+          key={'review-and-deploy'}
+          title={'Deploy'}
+          handleSuccessfulDeploy={handleSuccessfulDeploy}
+        />
+      ),
     }
 
     return [
@@ -81,7 +97,7 @@ const CreatePage: NextPageWithLayout = () => {
       setUpArtwork,
       reviewAndDeploy,
     ]
-  }, [])
+  }, [handleSuccessfulDeploy])
 
   return (
     <>

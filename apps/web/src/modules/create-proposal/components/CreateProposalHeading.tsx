@@ -9,6 +9,7 @@ interface CreateProposalHeadingProps {
   transactionType?: TransactionType
   align?: 'center' | 'left'
   showDocsLink?: boolean
+  handleBack: () => void
 }
 
 export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
@@ -16,10 +17,11 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
   transactionType,
   align = 'left',
   showDocsLink = false,
+  handleBack,
 }) => {
   return (
     <Stack mx={'auto'} pb={'x3'} w={'100%'}>
-      <ProposalNavigation transactionType={transactionType} />
+      <ProposalNavigation transactionType={transactionType} handleBack={handleBack} />
       <Flex
         direction="column"
         align={align === 'center' ? 'center' : 'flex-start'}

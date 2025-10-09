@@ -28,12 +28,13 @@ export interface TokenAllocation {
 
 export interface FounderAllocationFormValues {
   founderAllocation: TokenAllocation[]
+  founderRewardRecipient: string
+  founderRewardBps: number
 }
 
 export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
   const formRef = useRef<FormikProps<FounderAllocationFormValues>>(null)
   const [allocationError, setAllocationError] = useState(false)
-  const [rewardValidationError, setRewardValidationError] = useState<string | undefined>()
   const chain = useChainStore((x) => x.chain)
   const {
     founderAllocation,
@@ -94,20 +95,12 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
     setActiveSection(activeSection - 1)
   }
 
-  const handleSubmit = async ({ founderAllocation }: FounderAllocationFormValues) => {
+  const handleSubmit = async ({
+    founderAllocation,
+    founderRewardRecipient,
+    founderRewardBps,
+  }: FounderAllocationFormValues) => {
     setAllocationError(false)
-    setRewardValidationError(undefined)
-
-    // Validate founder rewards: if BPS > 0, recipient address is required
-    if (
-      founderRewardBps > 0 &&
-      (!founderRewardRecipient || founderRewardRecipient.trim() === '')
-    ) {
-      setRewardValidationError(
-        'Founder reward recipient address is required when percentage is greater than 0%'
-      )
-      return
-    }
 
     const totalAllocation = sum(
       [...founderAllocation, ...contributionAllocation].map(
@@ -131,6 +124,18 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
       }))
     )
 
+    // Process founder reward with ENS resolution if recipient is provided
+    const trimmedRecipient = (founderRewardRecipient ?? '').trim()
+    if (trimmedRecipient) {
+      const resolvedRewardRecipient = await getEnsAddress(trimmedRecipient)
+      setFounderRewardRecipient(resolvedRewardRecipient)
+    } else {
+      setFounderRewardRecipient('')
+    }
+    setFounderRewardBps(
+      Number.isFinite(Number(founderRewardBps)) ? Number(founderRewardBps) : 0
+    )
+
     setFulfilledSections(title)
     setActiveSection(activeSection + 1)
   }
@@ -140,7 +145,11 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
   return (
     <>
       <Formik<FounderAllocationFormValues>
-        initialValues={{ founderAllocation: initialFounderValues }}
+        initialValues={{
+          founderAllocation: initialFounderValues,
+          founderRewardRecipient: founderRewardRecipient || '',
+          founderRewardBps: founderRewardBps || 0,
+        }}
         enableReinitialize
         validateOnBlur={false}
         innerRef={formRef}
@@ -152,12 +161,21 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
         {(formik) => (
           <Form>
             <FounderRewardsFields
-              founderRewardRecipient={founderRewardRecipient}
-              founderRewardBps={founderRewardBps}
-              setFounderRewardRecipient={setFounderRewardRecipient}
-              setFounderRewardBps={setFounderRewardBps}
-              recipientErrorMessage={rewardValidationError}
-              clearRewardError={() => setRewardValidationError(undefined)}
+              founderRewardRecipient={formik.values.founderRewardRecipient}
+              founderRewardBps={formik.values.founderRewardBps}
+              setFounderRewardRecipient={(value) =>
+                formik.setFieldValue('founderRewardRecipient', (value ?? '').trim())
+              }
+              setFounderRewardBps={(value) =>
+                formik.setFieldValue(
+                  'founderRewardBps',
+                  Number.isFinite(Number(value)) ? Number(value) : 0
+                )
+              }
+              recipientErrorMessage={formik.errors.founderRewardRecipient}
+              clearRewardError={() =>
+                formik.setFieldError('founderRewardRecipient', undefined)
+              }
             />
 
             <FieldArray name="founderAllocation">

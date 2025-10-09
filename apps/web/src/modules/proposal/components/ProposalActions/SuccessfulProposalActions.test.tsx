@@ -8,8 +8,6 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { SuccessfulProposalActions } from './SuccessfulProposalActions'
 
-vi.mock('next/router', () => ({ useRouter: vi.fn() }))
-
 describe('proposal status', () => {
   const date = new Date(2022, 1, 1)
 

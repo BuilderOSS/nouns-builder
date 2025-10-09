@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { getPropDates, type PropDate } from '@buildeross/sdk/eas'
 import { Proposal } from '@buildeross/sdk/subgraph'

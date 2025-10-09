@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { highestBidsRequest } from '@buildeross/sdk/subgraph'
 import { Flex, Grid } from '@buildeross/zord'
 import React, { ReactNode } from 'react'

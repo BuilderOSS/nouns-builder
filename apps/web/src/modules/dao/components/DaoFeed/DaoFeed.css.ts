@@ -1,5 +1,11 @@
 import { atoms, media } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
+import { skeletonAnimation } from 'src/styles/animations.css'
+
+export const daoFeedSkeleton = style({
+  animation: skeletonAnimation,
+  height: '390px',
+})
 
 export const emptyTile = style({
   borderRadius: 12,

@@ -1,11 +1,11 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
-import { AddressType } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import React from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
 
@@ -21,14 +21,26 @@ export const DaoProposals = ({
   proposals,
   chainId,
   userAddress,
-}: DashboardDaoProps & { userAddress?: AddressType }) => {
-  const { isGovernanceDelayed } = useDelayedGovernance({
-    tokenAddress: tokenAddress,
-    governorAddress: governorAddress,
+  onOpenCreateProposal,
+}: DashboardDaoProps & {
+  userAddress?: AddressType
+  onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: string) => void
+}) => {
+  const { isGovernanceDelayed, isLoading: isLoadingDelayedGovernance } =
+    useDelayedGovernance({
+      tokenAddress: tokenAddress,
+      governorAddress: governorAddress,
+      chainId,
+    })
+
+  const { hasThreshold, isLoading: isLoadingVotes } = useVotes({
     chainId,
+    governorAddress,
+    signerAddress: userAddress,
+    collectionAddress: tokenAddress,
   })
 
-  const { push } = useRouter()
+  const isLoading = isLoadingDelayedGovernance || isLoadingVotes
 
   const currentChainSlug = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)?.slug
 
@@ -60,15 +72,18 @@ export const DaoProposals = ({
           </Flex>
         </Link>
 
-        <Button
-          variant="outline"
-          borderRadius="curved"
-          size={'sm'}
-          disabled={isGovernanceDelayed}
-          onClick={() => push(`/dao/${currentChainSlug}/${tokenAddress}/proposal/create`)}
-        >
-          Create Proposal
-        </Button>
+        {onOpenCreateProposal && (
+          <Button
+            variant="outline"
+            borderRadius="curved"
+            size={'sm'}
+            disabled={!hasThreshold || isGovernanceDelayed}
+            onClick={() => onOpenCreateProposal(chainId, tokenAddress)}
+            loading={isLoading}
+          >
+            Create Proposal
+          </Button>
+        )}
       </Flex>
       <Box>
         {proposals.map((proposal) => (

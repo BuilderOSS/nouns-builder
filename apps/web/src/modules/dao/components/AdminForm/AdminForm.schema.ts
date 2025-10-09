@@ -1,9 +1,5 @@
 import { Duration } from '@buildeross/types'
-import {
-  addressValidationSchema,
-  durationValidationSchema,
-  urlValidationSchema,
-} from '@buildeross/utils/yup'
+import { addressValidationSchema, urlValidationSchema } from '@buildeross/utils/yup'
 import { auctionSettingsValidationSchema, TokenAllocation } from 'src/modules/create-dao'
 import * as Yup from 'yup'
 
@@ -18,13 +14,11 @@ export interface AdminFormValues {
   quorumThreshold: number
   votingPeriod: Duration
   votingDelay: Duration
+  timelockDelay: Duration
   founderAllocation: TokenAllocation[]
   vetoPower: boolean
   vetoer: string
 }
-
-const twentyFourWeeks = 60 * 60 * 24 * 7 * 24
-const tenMinutes = 60 * 10
 
 const allocationSchema = Yup.object().shape({
   founderAddress: addressValidationSchema,
@@ -66,14 +60,6 @@ export const adminValidationSchema = () =>
         daoWebsite: urlValidationSchema,
         rendererBaseUrl: urlValidationSchema,
         vetoer: addressValidationSchema,
-        votingDelay: durationValidationSchema(
-          { value: 1, description: '1 second' },
-          { value: twentyFourWeeks, description: '24 weeks' }
-        ),
-        votingPeriod: durationValidationSchema(
-          { value: tenMinutes, description: '10 minutes' },
-          { value: twentyFourWeeks, description: '24 weeks' }
-        ),
         founderAllocation: Yup.array()
           .of(allocationSchema)
           .test(

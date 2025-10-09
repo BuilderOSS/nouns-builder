@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Button, Flex } from '@buildeross/zord'
 import { CastAddData, Message, SignatureScheme } from '@farcaster/hub-nodejs'
@@ -31,13 +32,13 @@ type AddMsgWithUnix = Message & {
 }
 type PageData = { value: AddMsgWithUnix[]; nextPageToken?: string }
 
-const Feed = ({ collectionAddress }: FeedTabProps) => {
+export const Feed = ({ collectionAddress }: FeedTabProps) => {
   const chain = useChainStore((x) => x.chain)
 
   const { data, error, isValidating, setSize } = useSWRInfinite(
     (_pageIndex: number, prevPageData: PageData) => {
       if (prevPageData && !prevPageData.nextPageToken) return null
-      return `/api/feed/${collectionAddress}:${chain.id}:${
+      return `${BASE_URL}/api/feed/${collectionAddress}:${chain.id}:${
         prevPageData?.nextPageToken || ''
       }`
     },
@@ -122,5 +123,3 @@ const Feed = ({ collectionAddress }: FeedTabProps) => {
     </FeedTab>
   )
 }
-
-export default Feed

@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { formatCryptoVal, numberFormatter } from '@buildeross/utils/numbers'
@@ -20,7 +20,7 @@ export const Treasury = () => {
   const chain = useChainStore((x) => x.chain)
 
   const { data: balance } = useBalance({
-    address: addresses?.treasury as `0x${string}`,
+    address: addresses.treasury as `0x${string}`,
     chainId: chain.id,
   })
 

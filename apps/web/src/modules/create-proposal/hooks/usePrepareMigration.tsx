@@ -2,7 +2,8 @@ import {
   L1_CROSS_DOMAIN_MESSENGER,
   L2_MIGRATION_DEPLOYER,
 } from '@buildeross/constants/addresses'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   auctionAbi,
   l2DeployerAbi,
@@ -67,7 +68,7 @@ export const usePrepareMigration = ({
       const attributes = await axios
         .get<
           number[][]
-        >(`/api/migrate/attributes?metadata=${metadata}&chainId=${chainId}&finalTokenId=${tokenId}`)
+        >(`${BASE_URL}/api/migrate/attributes?metadata=${metadata}&chainId=${chainId}&finalTokenId=${tokenId}`)
         .then((x) => x.data)
       return prepareAttributesMerkleRoot(attributes)
     }
@@ -81,7 +82,7 @@ export const usePrepareMigration = ({
       const snapshot = await axios
         .get<
           DaoMember[]
-        >(`/api/migrate/snapshot?token=${currentAddresses.token}&chainId=${chain.id}`)
+        >(`${BASE_URL}/api/migrate/snapshot?token=${currentAddresses.token}&chainId=${chain.id}`)
         .then((x) => x.data)
       return prepareMemberMerkleRoot(snapshot)
     }

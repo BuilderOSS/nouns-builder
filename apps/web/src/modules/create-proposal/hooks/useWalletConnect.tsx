@@ -81,8 +81,8 @@ export const useWalletConnect = (): useWalletConnectType => {
   const [txPayload, setTxPayload] = useState<WCPayload>()
   const [error, setError] = useState<string>()
 
-  const chainId = useChainStore((s) => s.chain?.id)
-  const treasury = useDaoStore((s) => s.addresses?.treasury)
+  const chainId = useChainStore((s) => s.chain.id)
+  const treasury = useDaoStore((s) => s.addresses.treasury)
 
   useEffect(() => {
     const createWalletConnectClient = async (): Promise<IWeb3Wallet | undefined> => {

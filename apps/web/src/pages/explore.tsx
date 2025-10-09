@@ -1,11 +1,11 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import { Explore } from 'src/components/Explore'
 import { Meta } from 'src/components/Meta'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
-import { Explore } from 'src/modules/dao'
 import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 

@@ -35,7 +35,7 @@ export const Escrow: React.FC = () => {
   const { addresses } = useDaoStore()
 
   const { data } = useSWR<ProposalsResponse>(
-    addresses?.token ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token] as const) : null,
+    addresses.token ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token] as const) : null,
     ([, _chainId, _token]) => getProposals(_chainId as CHAIN_ID, _token as string, 1)
   )
 
@@ -43,7 +43,7 @@ export const Escrow: React.FC = () => {
 
   const handleEscrowTransaction = useCallback(
     async (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => {
-      if (!addresses?.treasury || !values.tokenAddress || !values.tokenMetadata) {
+      if (!addresses.treasury || !values.tokenAddress || !values.tokenMetadata) {
         return
       }
 
@@ -204,7 +204,7 @@ export const Escrow: React.FC = () => {
         setIsSubmitting(false)
       }
     },
-    [addTransaction, chain.id, lastProposalId, addresses?.treasury]
+    [addTransaction, chain.id, lastProposalId, addresses.treasury]
   )
 
   return (

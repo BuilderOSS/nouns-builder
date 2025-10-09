@@ -1,4 +1,3 @@
-import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
@@ -9,7 +8,6 @@ import { Box, Flex, Icon } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
-import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { ErrorResult } from 'src/services/errorResult'
@@ -41,6 +39,8 @@ interface ReviewProposalProps {
   title?: string
   summary?: string
   transactions: BuilderTransaction[]
+  onProposalCreated: () => Promise<void>
+  onEditTransactions?: () => void
 }
 
 const logError = async (e: unknown) => {
@@ -55,8 +55,9 @@ export const ReviewProposalForm = ({
   title,
   summary,
   transactions,
+  onProposalCreated,
+  onEditTransactions,
 }: ReviewProposalProps) => {
-  const { push, query } = useRouter()
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
@@ -72,13 +73,17 @@ export const ReviewProposalForm = ({
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
-    collectionAddress: addresses?.token,
-    governorAddress: addresses?.governor,
+    collectionAddress: addresses.token,
+    governorAddress: addresses.governor,
     signerAddress: address,
   })
 
   const onSubmit = React.useCallback(
     async (values: FormValues) => {
+      if (!addresses.governor) {
+        return
+      }
+
       setError(undefined)
       setSimulationError(undefined)
       setFailedSimulations([])
@@ -103,7 +108,7 @@ export const ReviewProposalForm = ({
 
           simulationResult = await axios
             .post<SimulationResult>('/api/simulate', {
-              treasuryAddress: addresses?.treasury,
+              treasuryAddress: addresses.treasury,
               chainId: chain.id,
               calldatas: calldata,
               values: transactionValues.map((x) => toHex(x)),
@@ -151,7 +156,7 @@ export const ReviewProposalForm = ({
         const data = await simulateContract(config, {
           abi: governorAbi,
           functionName: 'propose',
-          address: addresses?.governor!,
+          address: addresses.governor,
           chainId: chain.id,
           args: [params.targets, params.values, params.calldatas, params.description],
         })
@@ -160,20 +165,8 @@ export const ReviewProposalForm = ({
 
         await waitForTransactionReceipt(config, { hash, chainId: chain.id })
 
-        push({
-          pathname: `/dao/[network]/[token]`,
-          query: {
-            network: query?.network,
-            token: query?.token,
-            message: SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS,
-            tab: 'activity',
-          },
-        }).then(() => {
-          setProposing(false)
-          clearProposal()
-        })
+        onProposalCreated().then(() => clearProposal())
       } catch (err: any) {
-        setProposing(false)
         if (
           err?.code === 'ACTION_REJECTED' ||
           err?.message?.includes('rejected') ||
@@ -184,17 +177,18 @@ export const ReviewProposalForm = ({
         }
         logError(err)
         setError(err.message)
+      } finally {
+        setProposing(false)
       }
     },
     [
-      push,
-      query,
       addresses,
       hasThreshold,
       clearProposal,
       chain.id,
       config,
       skipSimulation,
+      onProposalCreated,
     ]
   )
 
@@ -220,6 +214,7 @@ export const ReviewProposalForm = ({
                 transactions={transactions}
                 simulations={failedSimulations}
                 simulationError={simulationError}
+                onEditTransactions={onEditTransactions}
               />
 
               <Field name="title">

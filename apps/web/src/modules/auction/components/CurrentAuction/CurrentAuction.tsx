@@ -1,9 +1,9 @@
+import { useQueryParams } from '@buildeross/hooks/useQueryParams'
 import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain } from '@buildeross/types'
 import dayjs from 'dayjs'
-import { useRouter } from 'next/router'
 import React, { Fragment, useState } from 'react'
 import { formatEther } from 'viem'
 import { useReadContract } from 'wagmi'
@@ -36,7 +36,7 @@ export const CurrentAuction = ({
   endTime?: number
   bids: AuctionBidFragment[]
 }) => {
-  const { query } = useRouter()
+  const query = useQueryParams()
   const [isEnded, setIsEnded] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
 

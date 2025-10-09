@@ -1,7 +1,6 @@
 import { Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useRouter } from 'next/router'
 import React from 'react'
 import { DaoContractAddresses, useChainStore } from 'src/stores'
 
@@ -21,12 +20,13 @@ export const Upgrade = ({
   hasThreshold,
   collection,
   addresses,
+  onOpenProposalReview,
 }: {
   hasThreshold: boolean
   collection: string
   addresses: DaoContractAddresses
+  onOpenProposalReview: () => void
 }) => {
-  const { push } = useRouter()
   const createProposal = useProposalStore((state) => state.createProposal)
   const chain = useChainStore((x) => x.chain)
 
@@ -43,7 +43,11 @@ export const Upgrade = ({
   })
 
   if (!shouldUpgrade)
-    return <FixRendererBase {...{ hasThreshold, collection, addresses }} />
+    return (
+      <FixRendererBase
+        {...{ hasThreshold, collection, addresses, onOpenProposalReview }}
+      />
+    )
 
   const handleUpgrade = (): void => {
     createProposal({
@@ -53,10 +57,7 @@ export const Upgrade = ({
       summary: VERSION_PROPOSAL_SUMMARY?.[latest as string] || '',
     })
 
-    push({
-      pathname: '/dao/[network]/[token]/proposal/review',
-      query: { network: chain.slug, token: collection },
-    })
+    onOpenProposalReview()
   }
 
   return (

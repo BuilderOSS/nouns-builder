@@ -1,9 +1,7 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { Chain } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import { atoms, Box, Button, Flex } from '@buildeross/zord'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { Box, Button, Flex } from '@buildeross/zord'
 import React, { useState } from 'react'
 import { useDaoStore } from 'src/stores'
 import { useAccount, useConfig, useSimulateContract, useWriteContract } from 'wagmi'
@@ -19,10 +17,15 @@ import {
 interface PreAuctionProps {
   chain: Chain
   collectionAddress: string
+  onOpenAuction: (tokenId: number) => void
+  onOpenSettings: () => void
 }
 
-export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress }) => {
-  const { push, pathname } = useRouter()
+export const PreAuction: React.FC<PreAuctionProps> = ({
+  chain,
+  onOpenAuction,
+  onOpenSettings,
+}) => {
   const { address } = useAccount()
   const { addresses } = useDaoStore()
   const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -63,7 +66,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
     })
 
     const [tokenId] = unpackOptionalArray(auction, 6)
-    push(`/dao/${chain.slug}/${collectionAddress}/${tokenId}`)
+    if (tokenId) onOpenAuction(Number(tokenId))
   }
 
   return (
@@ -78,27 +81,8 @@ export const PreAuction: React.FC<PreAuctionProps> = ({ chain, collectionAddress
           Start Auction
         </Button>
 
-        <Button className={preAuctionButtonVariants['edit']}>
-          <Link
-            href={{
-              pathname,
-              query: {
-                network: chain.slug,
-                token: collectionAddress,
-                tab: 'admin',
-              },
-            }}
-            shallow={true}
-            className={atoms({
-              display: 'flex',
-              w: '100%',
-              h: '100%',
-              justifyContent: 'center',
-              alignItems: 'center',
-            })}
-          >
-            Edit Settings
-          </Link>
+        <Button className={preAuctionButtonVariants['edit']} onClick={onOpenSettings}>
+          Edit Settings
         </Button>
 
         <Box className={preAuctionHelperText} mt={'x4'}>

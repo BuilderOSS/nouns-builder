@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { fetchFromURI } from '@buildeross/utils/fetch'

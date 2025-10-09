@@ -32,7 +32,7 @@ export const Airdrop: React.FC = () => {
 
   const { data: auctionOwner } = useReadContract({
     abi: auctionAbi,
-    address: addresses?.auction,
+    address: addresses.auction,
     functionName: 'owner',
     chainId: chain.id,
   })
@@ -43,10 +43,10 @@ export const Airdrop: React.FC = () => {
       enabled: gte(currentVersions?.token, AIRDROP_CONTRACT_VERSION),
     },
     abi: tokenAbi,
-    address: addresses?.token,
+    address: addresses.token,
     chainId: chain.id,
     functionName: 'isMinter',
-    args: [addresses?.treasury as AddressType],
+    args: [addresses.treasury as AddressType],
   })
 
   const handleAirdropTransaction = async (
@@ -60,7 +60,7 @@ export const Airdrop: React.FC = () => {
 
     const updateMinterTransaction = {
       functionSignature: 'updateMinters',
-      target: addresses?.token as AddressType,
+      target: addresses.token as AddressType,
       value: '',
       calldata: encodeFunctionData({
         abi: tokenAbi,
@@ -95,7 +95,7 @@ export const Airdrop: React.FC = () => {
 
       airdropTransactions.push({
         functionSignature: 'mintBatchTo',
-        target: addresses?.token as AddressType,
+        target: addresses.token as AddressType,
         value: '',
         calldata: encodeFunctionData({
           abi: tokenAbi,
@@ -119,7 +119,7 @@ export const Airdrop: React.FC = () => {
     actions.resetForm()
   }
 
-  const isTreasuryContractOwner = auctionOwner === addresses?.treasury
+  const isTreasuryContractOwner = auctionOwner === addresses.treasury
   if (!isTreasuryContractOwner) {
     return (
       <Stack>

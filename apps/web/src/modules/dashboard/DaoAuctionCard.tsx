@@ -3,11 +3,10 @@ import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { AddressType } from '@buildeross/types'
+import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
-import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
 import { formatEther } from 'viem'
@@ -31,16 +30,24 @@ import {
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
+  handleSelectAuction: (
+    chainId: CHAIN_ID,
+    tokenAddress: string,
+    tokenId?: number | string | bigint
+  ) => void
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
-  const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
   const {
-    name: chainName,
-    icon: chainIcon,
-    slug: chainSlug,
-  } = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? {}
-  const { push } = useRouter()
+    currentAuction,
+    chainId,
+    auctionAddress,
+    handleMutate,
+    tokenAddress,
+    handleSelectAuction,
+  } = props
+  const chain =
+    PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? ({} as Partial<Chain>)
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
@@ -74,7 +81,6 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     onLogs,
   })
 
-  const handleSelectAuction = () => push(`/dao/${chainSlug}/${tokenAddress}`)
   const onEnd = () => {
     setIsEnded(true)
   }
@@ -84,10 +90,9 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     return (
       <AuctionPaused
         {...props}
-        currentChainSlug={chainSlug}
+        handleSelectAuction={() => handleSelectAuction(chainId, tokenAddress)}
         tokenAddress={tokenAddress}
-        chainName={chainName}
-        chainIcon={chainIcon}
+        chain={chain}
       />
     )
   }
@@ -100,7 +105,12 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
 
   return (
     <Flex className={outerAuctionCard}>
-      <Flex className={auctionCardBrand} onClick={handleSelectAuction}>
+      <Flex
+        className={auctionCardBrand}
+        onClick={() =>
+          handleSelectAuction(chainId, tokenAddress, currentAuction?.token?.tokenId)
+        }
+      >
         <Box className={daoAvatarBox}>
           <FallbackNextImage
             className={daoAvatar}
@@ -112,9 +122,9 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
         </Box>
         <Box>
           <Flex mb="x1" align="center">
-            {chainIcon && (
+            {chain.icon && (
               <Image
-                src={chainIcon}
+                src={chain.icon}
                 layout="fixed"
                 objectFit="contain"
                 style={{ borderRadius: '12px', maxHeight: '22px' }}
@@ -124,7 +134,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
               />
             )}
             <Text fontSize={16} color="text3" ml={'x1'}>
-              {chainName}
+              {chain.name}
             </Text>
           </Flex>
           <Text className={daoTokenName}>{currentAuction.token.name}</Text>

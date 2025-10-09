@@ -1,12 +1,12 @@
+import { useQueryParams } from '@buildeross/hooks/useQueryParams'
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
 import { Grid, Text } from '@buildeross/zord'
-import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import Pagination from 'src/components/Pagination'
+import { DaoCard } from 'src/modules/dao/components/DaoCard'
 import { useChainStore } from 'src/stores'
 import { formatEther } from 'viem'
 
-import { DaoCard } from '../DaoCard'
 import { exploreGrid } from './Explore.css'
 import ExploreNoDaos from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
@@ -18,7 +18,7 @@ interface ExploreProps extends Partial<ExploreDaosResponse> {
 }
 
 export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }) => {
-  const { query } = useRouter()
+  const query = useQueryParams()
   const chain = useChainStore((x) => x.chain)
 
   const page = query.page

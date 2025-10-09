@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { Box, ButtonProps } from '@buildeross/zord'
@@ -48,9 +48,9 @@ export function GovernorContractButton({
 
   const { data, isError } = useSimulateContract({
     query: {
-      enabled: !!addresses?.governor,
+      enabled: !!addresses.governor,
     },
-    address: addresses?.governor,
+    address: addresses.governor,
     abi: governorAbi,
     functionName: functionName,
     args: args,

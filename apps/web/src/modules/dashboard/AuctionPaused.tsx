@@ -1,7 +1,7 @@
+import { Chain } from '@buildeross/types'
 import { atoms, Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import React from 'react'
 
 import { DashboardDaoProps } from './Dashboard'
@@ -16,25 +16,19 @@ import {
 } from './dashboard.css'
 
 type PausedType = DashboardDaoProps & {
-  chainName?: string
-  chainIcon?: string
-  currentChainSlug?: string
+  chain: Partial<Chain>
   tokenAddress: string
+  handleSelectAuction: () => void
 }
 
 export const AuctionPaused = ({
-  currentChainSlug,
   tokenAddress,
-  chainName,
   name,
-  chainIcon,
+  chain,
+  handleSelectAuction,
 }: PausedType) => {
-  const { push } = useRouter()
   const Paused = icons.pause
 
-  const handleSelectAuction = () => {
-    push(`/dao/${currentChainSlug}/${tokenAddress}`)
-  }
   return (
     <Flex className={outerAuctionCard}>
       <Flex className={auctionCardBrand} onClick={handleSelectAuction}>
@@ -58,9 +52,9 @@ export const AuctionPaused = ({
         </Flex>
         <Box>
           <Flex mb="x1" align="center">
-            {chainIcon && (
+            {chain.icon && (
               <Image
-                src={chainIcon}
+                src={chain.icon}
                 layout="fixed"
                 objectFit="contain"
                 style={{ borderRadius: '12px', maxHeight: '22px' }}
@@ -70,7 +64,7 @@ export const AuctionPaused = ({
               />
             )}
             <Text fontSize={16} color="text3" ml={'x1'}>
-              {chainName}
+              {chain.name}
             </Text>
           </Flex>
           <Text className={daoTokenName}>{name}</Text>
@@ -105,13 +99,14 @@ export const AuctionPaused = ({
             Auctions are paused.
           </Text>
         </Flex>
-        <Link href={`/dao/${currentChainSlug}/${tokenAddress}?tab=activity`}>
+        <Link href={`/dao/${chain.slug}/${tokenAddress}?tab=activity`}>
           <Box
             display={'inline-flex'}
             color="text3"
             mt={{ '@initial': 'x3', '@768': 'x1' }}
             fontSize={18}
             className={atoms({ textDecoration: 'underline' })}
+            onClick={handleSelectAuction}
           >
             See activity
           </Box>

@@ -11,7 +11,6 @@ import { Accordion } from '@buildeross/ui/Accordion'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { TransactionType } from 'src/modules/create-proposal'
@@ -51,13 +50,14 @@ const createSafeUrl = (chainId: CHAIN_ID, safeAddress: Hex) => {
 interface MilestoneDetailsProps {
   decodedTransaction: DecodedTransaction
   executionTransactionHash?: string
+  onOpenProposalReview: () => Promise<void>
 }
 
 export const MilestoneDetails = ({
   decodedTransaction,
   executionTransactionHash,
+  onOpenProposalReview,
 }: MilestoneDetailsProps) => {
-  const { push, query } = useRouter()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { addTransaction } = useProposalStore()
@@ -66,9 +66,9 @@ export const MilestoneDetails = ({
 
   const { hasThreshold } = useVotes({
     chainId: chain.id,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
     signerAddress: address,
-    collectionAddress: addresses?.token,
+    collectionAddress: addresses.token,
   })
 
   const {
@@ -151,17 +151,16 @@ export const MilestoneDetails = ({
         transactions: [releaseMilestone],
       }
 
-      setTimeout(() => addTransaction(releaseEscrowTxnData), 3000)
-
-      push({
-        pathname: `/dao/[network]/[token]/proposal/review`,
-        query: {
-          network: query?.network,
-          token: query?.token,
-        },
-      })
+      addTransaction(releaseEscrowTxnData)
+      onOpenProposalReview()
     },
-    [push, query, addTransaction, invoiceData?.title, invoiceAddress, currentMilestone]
+    [
+      onOpenProposalReview,
+      addTransaction,
+      invoiceData?.title,
+      invoiceAddress,
+      currentMilestone,
+    ]
   )
 
   const [isReleasing, setIsReleasing] = useState(false)

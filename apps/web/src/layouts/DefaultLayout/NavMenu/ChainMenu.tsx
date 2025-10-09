@@ -65,13 +65,13 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
   )
 
   const isSelectedChain = useCallback(
-    (chainId: CHAIN_ID) => selectedChain?.id === chainId,
-    [selectedChain?.id]
+    (chainId: CHAIN_ID) => selectedChain.id === chainId,
+    [selectedChain.id]
   )
 
   const isWrongNetwork = useMemo(
-    () => hasNetwork && !!address && wagmiChain?.id !== selectedChain?.id,
-    [address, wagmiChain?.id, selectedChain?.id, hasNetwork]
+    () => hasNetwork && !!address && wagmiChain?.id !== selectedChain.id,
+    [address, wagmiChain?.id, selectedChain.id, hasNetwork]
   )
 
   // Handle route change start events

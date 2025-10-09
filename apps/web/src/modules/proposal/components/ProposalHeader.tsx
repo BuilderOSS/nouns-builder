@@ -3,7 +3,6 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { Box, Flex, Icon, Label, Text } from '@buildeross/zord'
-import { useRouter } from 'next/router'
 import { useChainStore } from 'src/stores'
 
 import { ProposalNavigation } from './ProposalNavigation'
@@ -11,6 +10,7 @@ import { ProposalStatus } from './ProposalStatus'
 
 interface ProposalHeaderProps {
   proposal: Proposal
+  handleBack: () => void
 }
 
 const getDisplayTransactionHash = (proposal: Proposal) => {
@@ -26,8 +26,10 @@ const getDisplayTransactionHash = (proposal: Proposal) => {
   }
 }
 
-export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
-  const { push } = useRouter()
+export const ProposalHeader: React.FC<ProposalHeaderProps> = ({
+  proposal,
+  handleBack,
+}) => {
   const { title, proposer, proposalNumber } = proposal
 
   const { displayName: proposerDisplayName } = useEnsData(proposer)
@@ -47,18 +49,7 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({ proposal }) => {
 
   return (
     <Flex direction={'column'} gap={{ '@initial': 'x4', '@768': 'x7' }} mb={'x2'}>
-      <ProposalNavigation
-        handleBack={() => {
-          push({
-            pathname: `/dao/[network]/[token]`,
-            query: {
-              network: chain.slug,
-              token: proposal.dao.tokenAddress,
-              tab: 'activity',
-            },
-          })
-        }}
-      />
+      <ProposalNavigation handleBack={handleBack} />
       <Flex gap={'x2'} direction={'column'}>
         <Flex align={'center'}>
           <Label fontSize={20} color={'text3'} mr={'x2'}>

@@ -1,7 +1,6 @@
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { Flex, Stack } from '@buildeross/zord'
 import { Field } from 'formik'
-import { useRouter } from 'next/router'
 import React from 'react'
 import { SimulationOutput } from 'src/services/simulationService'
 
@@ -13,14 +12,14 @@ export const Transactions = ({
   disabled,
   simulations,
   simulationError,
+  onEditTransactions,
 }: {
   transactions: BuilderTransaction[]
   simulations: SimulationOutput[]
   disabled?: boolean
   simulationError?: string
+  onEditTransactions?: () => void
 }) => {
-  const { back } = useRouter()
-
   return (
     <Stack mb={'x10'}>
       <label className={defaultInputLabelStyle}>Transactions</label>
@@ -43,7 +42,7 @@ export const Transactions = ({
                 simulationError={error}
                 disabled={disabled || transaction.type === 'upgrade'}
                 transaction={transaction}
-                handleEdit={() => back()}
+                handleEdit={onEditTransactions}
                 simulationUrl={simulation?.url}
               >
                 <Field

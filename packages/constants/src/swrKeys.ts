@@ -49,5 +49,3 @@ export const SWR_KEYS = {
     },
   },
 }
-
-export default SWR_KEYS
