@@ -12,7 +12,7 @@ function CreateDaoLayout({ children }: { children: ReactNode }) {
   const ipfsUploadProgress = useFormStore((x) => x.ipfsUploadProgress)
 
   return (
-    <BaseLayout contentPadding={{ '@initial': 'x0' }} nav={<Nav />}>
+    <BaseLayout px={'x0'} nav={<Nav />}>
       <Box>{children}</Box>
       <Uploading
         isUploadingToIPFS={isUploadingToIPFS}

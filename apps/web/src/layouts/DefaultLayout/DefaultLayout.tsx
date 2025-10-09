@@ -19,7 +19,8 @@ export function DefaultLayout({
     <BaseLayout
       chain={chain}
       addresses={addresses}
-      contentPadding={{ '@initial': 'x20', '@480': 'x16' }}
+      px={'x4'}
+      pt={{ '@initial': 'x20', '@480': 'x16' }}
       footer={<Footer />}
     >
       {children}

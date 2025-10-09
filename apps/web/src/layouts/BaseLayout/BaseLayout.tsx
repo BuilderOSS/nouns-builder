@@ -11,22 +11,23 @@ import {
 
 import { Nav as DefaultLayoutNav } from '../DefaultLayout/Nav'
 
-interface BaseLayoutProps {
+type BoxProps = React.ComponentProps<typeof Box>
+
+type BaseLayoutProps = {
   children: ReactNode
   chain?: Chain
   addresses?: DaoContractAddresses
-  contentPadding?: Record<string, string>
   footer?: ReactNode
   nav?: ReactNode
-}
+} & BoxProps
 
 export function BaseLayout({
   children,
   chain,
   addresses,
-  contentPadding = { '@initial': 'x20', '@480': 'x16' },
   footer,
   nav,
+  ...props
 }: BaseLayoutProps) {
   const chainStore = useMemo(() => createChainStore(chain), [chain])
   const daoStore = useMemo(() => createDaoStore(addresses), [addresses])
@@ -34,9 +35,9 @@ export function BaseLayout({
   return (
     <ChainStoreProvider store={chainStore}>
       <DaoStoreProvider store={daoStore}>
-        <Box pt="x20">
+        <Box>
           {nav || <DefaultLayoutNav />}
-          <Box px={contentPadding}>{children}</Box>
+          <Box {...props}>{children}</Box>
           {footer}
         </Box>
       </DaoStoreProvider>

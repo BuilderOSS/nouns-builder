@@ -6,7 +6,7 @@ import { Footer } from './Footer'
 
 export function HomeLayout({ children }: { children: ReactNode }) {
   return (
-    <BaseLayout contentPadding={{ '@initial': 'x4', '@768': 'x0' }} footer={<Footer />}>
+    <BaseLayout px={'x4'} pt={{ '@initial': 'x20', '@480': 'x0' }} footer={<Footer />}>
       {children}
     </BaseLayout>
   )
