@@ -1,5 +1,11 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
-import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import {
+  auctionAbi,
+  governorAbi,
+  metadataAbi,
+  tokenAbi,
+  treasuryAbi,
+} from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import {
   DaysHoursMinsSecs,
@@ -65,6 +71,11 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     address: addresses.governor as Address,
   }
 
+  const treasuryContractParams = {
+    abi: treasuryAbi,
+    address: addresses.treasury as Address,
+  }
+
   const metadataContractParams = {
     abi: metadataAbi,
     address: addresses.metadata as Address,
@@ -75,7 +86,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     address: addresses.token as Address,
   }
 
-  const { data } = useReadContracts({
+  const { data: governorData } = useReadContracts({
     allowFailure: false,
     contracts: [
       { ...auctionContractParams, chainId: chain.id, functionName: 'duration' },
@@ -83,6 +94,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
       { ...governorContractParams, chainId: chain.id, functionName: 'vetoer' },
       { ...governorContractParams, chainId: chain.id, functionName: 'votingPeriod' },
       { ...governorContractParams, chainId: chain.id, functionName: 'votingDelay' },
+      { ...treasuryContractParams, chainId: chain.id, functionName: 'delay' },
       {
         ...governorContractParams,
         chainId: chain.id,
@@ -93,6 +105,12 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
         chainId: chain.id,
         functionName: 'proposalThresholdBps',
       },
+    ] as const,
+  })
+
+  const { data: tokenData } = useReadContracts({
+    allowFailure: false,
+    contracts: [
       { ...metadataContractParams, chainId: chain.id, functionName: 'contractImage' },
       { ...metadataContractParams, chainId: chain.id, functionName: 'projectURI' },
       { ...metadataContractParams, chainId: chain.id, functionName: 'rendererBase' },
@@ -107,14 +125,15 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     vetoer,
     votingPeriod,
     votingDelay,
+    timelockDelay,
     quorumVotesBps,
     proposalThresholdBps,
-    daoImage,
-    daoWebsite,
-    rendererBase,
-    description,
-    founders,
-  ] = unpackOptionalArray(data, 12)
+  ] = unpackOptionalArray(governorData, 8)
+
+  const [daoImage, daoWebsite, rendererBase, description, founders] = unpackOptionalArray(
+    tokenData,
+    5
+  )
 
   const initialValues: AdminFormValues = {
     /* artwork */
@@ -131,6 +150,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     quorumThreshold: Number(quorumVotesBps) / 100 || 0,
     votingPeriod: fromSeconds(votingPeriod && BigInt(votingPeriod)),
     votingDelay: fromSeconds(votingDelay && BigInt(votingDelay)),
+    timelockDelay: fromSeconds(timelockDelay && BigInt(timelockDelay)),
     founderAllocation:
       founders?.map((x) => ({
         founderAddress: x.wallet,
@@ -358,6 +378,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
               <Section title="Auction Settings">
                 <DaysHoursMinsSecs
                   {...formik.getFieldProps('auctionDuration')}
+                  helperText="How long each auction will run before it ends. When time expires, the highest bid wins and a new DAO NFT is minted."
                   inputLabel={'Auction Duration'}
                   formik={formik}
                   id={'auctionDuration'}
@@ -378,6 +399,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   }}
                   onBlur={formik.handleBlur}
                   errorMessage={formik.errors['auctionReservePrice']}
+                  helperText="The minimum bid required to start an auction. If no bids meet this price, the auction won’t begin."
                   perma={'ETH'}
                 />
               </Section>
@@ -396,9 +418,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   errorMessage={formik.errors['proposalThreshold']}
                   perma={'%'}
                   step={0.1}
-                  helperText={
-                    'This is the percentage of all existing tokens that must be owned by someone attempting to create a proposal. We recommend a starting value of 0.5% to encourage participation.'
-                  }
+                  helperText="The minimum percent of total NFTs required to create a proposal. For example, if set to 0.5% and there are 1,000 NFTs, a member must hold at least 5 NFTs to propose."
                 />
 
                 <SmartInput
@@ -414,9 +434,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   errorMessage={formik.errors['quorumThreshold']}
                   perma={'%'}
                   step={1}
-                  helperText={
-                    'This is the percentage of all existing tokens that must vote in a proposal in order for it to pass (as long as a majority of votes approve). We recommend a starting value of 10%.'
-                  }
+                  helperText="The minimum percent of total NFTs that must vote ‘For’ for a proposal to pass. We recommend a starting value of 10%."
                 />
 
                 <DaysHoursMinsSecs
@@ -427,6 +445,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   errorMessage={formik.errors['votingPeriod']}
+                  helperText="How long a proposal remains open for voting before it closes and results are tallied."
                 />
 
                 <DaysHoursMinsSecs
@@ -437,6 +456,18 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
                   errorMessage={formik.errors['votingDelay']}
+                  helperText="The time between when a proposal is created and when voting begins. This gives members a chance to review and discuss the proposal."
+                />
+
+                <DaysHoursMinsSecs
+                  {...formik.getFieldProps('timelockDelay')}
+                  inputLabel={'Timelock Delay'}
+                  formik={formik}
+                  id={'timelockDelay'}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  errorMessage={formik.errors['timelockDelay']}
+                  helperText="The delay between when a passed proposal is queued and when it can be executed. This provides time for final review, vetoing, or cancellation before execution."
                 />
               </Section>
 
