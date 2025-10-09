@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/nextjs'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { Address, parseEther } from 'viem'
-import { useChainId, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useMinBidIncrement } from '../auction'
@@ -28,7 +28,6 @@ export const BidActionButton = ({
 }) => {
   const { minimumBidIncrement, reservePrice } = auctionConfig
   const { highestBid } = currentAuction || {}
-  const wagmiChainId = useChainId()
   const config = useConfig()
   const { minBidAmount } = useMinBidIncrement({
     highestBid: highestBid?.amount ? BigInt(highestBid?.amount) : undefined,
@@ -45,8 +44,6 @@ export const BidActionButton = ({
   )
 
   const isValidBid = bidAmount && isMinBid
-
-  const isValidChain = wagmiChainId === chainId
 
   const handleCreateBid = useCallback(async () => {
     if (!isMinBid || !bidAmount || isLoading) return
@@ -89,6 +86,7 @@ export const BidActionButton = ({
         owner={highestBid?.bidder}
         externalAuctionAddress={auctionAddress}
         compact={true}
+        chainId={chainId}
       />
     )
   }
@@ -126,11 +124,12 @@ export const BidActionButton = ({
       </form>
       <ContractButton
         borderRadius={'curved'}
-        disabled={!isValidBid || !isValidChain}
+        disabled={!isValidBid}
         loading={isLoading}
         handleClick={handleCreateBid}
         position={'relative'}
         className={bidButton}
+        chainId={chainId}
       >
         Bid
       </ContractButton>

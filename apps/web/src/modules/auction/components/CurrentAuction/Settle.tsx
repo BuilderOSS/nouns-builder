@@ -1,5 +1,5 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { AddressType } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
@@ -21,9 +21,11 @@ interface SettleProps {
   owner?: string | undefined
   externalAuctionAddress?: AddressType
   compact?: boolean
+  chainId: CHAIN_ID
 }
 
 export const Settle = ({
+  chainId,
   isEnding,
   owner,
   externalAuctionAddress,
@@ -116,6 +118,7 @@ export const Settle = ({
         }
         variant={compact ? 'outline' : 'primary'}
         size="lg"
+        chainId={chainId}
       >
         {isWinner ? 'Claim NFT' : 'Start next auction'}
       </ContractButton>
