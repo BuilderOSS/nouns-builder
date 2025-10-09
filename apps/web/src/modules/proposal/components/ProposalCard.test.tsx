@@ -7,16 +7,6 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { ProposalCard } from './ProposalCard'
 
-vi.mock('next/router', () => ({
-  useRouter: vi.fn(() => ({
-    back: vi.fn(),
-    push: vi.fn(),
-    query: {},
-    pathname: '/test',
-    asPath: '/test',
-  })),
-}))
-
 describe('proposal card', () => {
   const date = new Date(2022, 1, 1)
 

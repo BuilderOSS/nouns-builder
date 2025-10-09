@@ -1,14 +1,13 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { L1_CHAINS } from '@buildeross/constants/chains'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { getBids } from '@buildeross/sdk/subgraph'
-import { AddressType, Chain } from '@buildeross/types'
+import { getBids, TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
+import { AddressType, Chain, L2MigratedResponse } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Grid } from '@buildeross/zord'
 import axios from 'axios'
 import React, { Fragment, ReactNode } from 'react'
-import { L2MigratedResponse } from 'src/pages/api/migrated'
-import { TokenWithDao } from 'src/pages/dao/[network]/[token]/[tokenId]'
 import { useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
@@ -28,12 +27,16 @@ import { Settle } from './CurrentAuction/Settle'
 import { DaoMigrated } from './DaoMigrated'
 import { WinningBidder } from './WinningBidder'
 
+export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
+
 interface AuctionControllerProps {
   chain: Chain
   auctionAddress: string
   collection: string
   token: TokenWithDao
   viewSwitcher?: ReactNode
+  onAuctionCreated?: (tokenId: bigint) => void
+  referral?: AddressType
 }
 
 export const Auction: React.FC<AuctionControllerProps> = ({
@@ -41,6 +44,8 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   auctionAddress,
   collection,
   token,
+  onAuctionCreated,
+  referral,
 }) => {
   const { mintedAt, name, image, owner: tokenOwner, tokenId: queriedTokenId } = token
   const mintDate = mintedAt * 1000
@@ -56,7 +61,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
       : null,
     ([, _treasury]) =>
       axios
-        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${_treasury}`)
+        .get<L2MigratedResponse>(`${BASE_URL}/api/migrated?l1Treasury=${_treasury}`)
         .then((x) => x.data)
   )
 
@@ -91,7 +96,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
     chainId: chain.id,
     collection,
     isTokenActiveAuction,
-    tokenId: queriedTokenId,
+    onAuctionCreated,
   })
 
   const { data: bids } = useSWR(
@@ -136,6 +141,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
             owner={highestBidder}
             endTime={endTime}
             bids={bids || []}
+            referral={referral}
           />
         )}
 

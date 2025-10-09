@@ -34,14 +34,14 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     contracts: [
       {
         abi: governorAbi,
-        address: addresses?.governor as AddressType,
+        address: addresses.governor as AddressType,
         chainId: chain.id,
         functionName: 'getVotes',
         args: [userAddress as AddressType, BigInt(proposal.timeCreated)],
       },
       {
         abi: governorAbi,
-        address: addresses?.governor as AddressType,
+        address: addresses.governor as AddressType,
         chainId: chain.id,
         functionName: 'vetoer',
       },

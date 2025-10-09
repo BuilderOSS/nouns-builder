@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
@@ -27,7 +27,7 @@ export const AddArtwork = () => {
 
   const { data } = useSWR(
     addresses.metadata && chain.id
-      ? ([SWR_KEYS.ARTWORK_PROPERTY_ITEMS_COUNT, chain.id, addresses?.metadata] as const)
+      ? ([SWR_KEYS.ARTWORK_PROPERTY_ITEMS_COUNT, chain.id, addresses.metadata] as const)
       : undefined,
     ([, _chainId, _metadata]) => getPropertyItems(_chainId, _metadata)
   )
@@ -118,7 +118,7 @@ export const AddArtwork = () => {
     const formattedTransactions = transactions.map((transaction) => {
       return {
         functionSignature: 'addProperties',
-        target: addresses?.metadata as AddressType,
+        target: addresses.metadata as AddressType,
         value: '',
         calldata: encodeFunctionData({
           abi: metadataAbi,
@@ -135,7 +135,7 @@ export const AddArtwork = () => {
     })
 
     resetForm()
-  }, [addresses?.metadata, addTransaction, isValid, resetForm, transactions])
+  }, [addresses.metadata, addTransaction, isValid, resetForm, transactions])
 
   return (
     <Stack>

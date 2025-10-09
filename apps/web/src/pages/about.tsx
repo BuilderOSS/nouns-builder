@@ -10,11 +10,11 @@ import { whyCreateButton, whyTextStyle } from '../styles/why.css'
 import { NextPageWithLayout } from './_app'
 
 const AboutPage: NextPageWithLayout = () => {
-  const router = useRouter()
+  const { push } = useRouter()
 
   const handleCreateClick = useCallback(() => {
-    router.push('/create')
-  }, [router])
+    push('/create')
+  }, [push])
 
   return (
     <>

@@ -1,7 +1,7 @@
 import { Button, Flex } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-import { buttonTab } from 'src/modules/dao/components/AuctionChart/AuctionChart.css'
-import { TopSectionView } from 'src/modules/dao/components/DaoTopSection'
+import { buttonTab } from 'src/modules/auction/components/AuctionChart/AuctionChart.css'
+import { TopSectionView } from 'src/modules/auction/components/DaoAuctionSection'
 
 import { auctionWrapVariants, switcherBox } from './Auction.css'
 

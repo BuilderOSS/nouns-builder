@@ -1,40 +1,7 @@
-import { auctionAbi } from '@buildeross/sdk/contract'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Icon, Stack, Text } from '@buildeross/zord'
-import { useRouter } from 'next/router'
 import React from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
-import { useReadContract } from 'wagmi'
 
-const AdminNav = () => {
-  const { push, query } = useRouter()
-  const addresses = useDaoStore((state) => state.addresses)
-  const chain = useChainStore((state) => state.chain)
-
-  const { data: auction } = useReadContract({
-    abi: auctionAbi,
-    address: addresses?.auction,
-    chainId: chain.id,
-    functionName: 'auction',
-    query: {
-      enabled: !!addresses?.auction,
-    },
-  })
-
-  const [tokenId] = unpackOptionalArray(auction, 6)
-
-  const handleNavigation = async () => {
-    await push({
-      pathname: `/dao/[network]/[token]/[tokenId]`,
-      query: {
-        network: query?.network,
-        token: query?.token,
-        tokenId: Number(tokenId),
-        tab: 'admin',
-      },
-    })
-  }
-
+const AdminNav: React.FC<{ onClick: () => void }> = ({ onClick }) => {
   return (
     <Flex
       w={'100%'}
@@ -47,7 +14,7 @@ const AdminNav = () => {
       style={{ borderRadius: 12 }}
       gap={'x2'}
       cursor={'pointer'}
-      onClick={() => handleNavigation()}
+      onClick={onClick}
     >
       <Stack>
         <Text variant="label-lg" mb={'x1'}>

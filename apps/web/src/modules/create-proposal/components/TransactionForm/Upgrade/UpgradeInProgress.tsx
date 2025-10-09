@@ -28,7 +28,7 @@ export const UpgradeInProgress: React.FC<UpgradeInProgressProps> = ({
             pathname: '/dao/[network]/[token]/vote/[id]',
             query: {
               network: chain.slug,
-              token: addresses?.token,
+              token: addresses.token,
               id: activeUpgradeProposalId,
             },
           }}

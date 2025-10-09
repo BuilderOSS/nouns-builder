@@ -1,20 +1,11 @@
 import { L2_MIGRATION_DEPLOYER, NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { l2DeployerAbi } from '@buildeross/sdk/contract'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AddressType, L2MigratedResponse } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { readContract } from 'wagmi/actions'
-
-export interface L2MigratedResponse {
-  migrated:
-    | {
-        l2TokenAddress: AddressType
-        chainId: CHAIN_ID
-      }
-    | undefined
-}
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { l1Treasury } = req.query

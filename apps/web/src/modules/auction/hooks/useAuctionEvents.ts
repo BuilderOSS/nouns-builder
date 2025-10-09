@@ -1,9 +1,8 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { awaitSubgraphSync, getBids } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils'
-import { useRouter } from 'next/router'
+import React from 'react'
 import { useDaoStore } from 'src/stores'
 import { useSWRConfig } from 'swr'
 import { useConfig, useWatchContractEvent } from 'wagmi'
@@ -12,27 +11,23 @@ import { readContract } from 'wagmi/actions'
 export const useAuctionEvents = ({
   chainId,
   collection,
-  tokenId,
   isTokenActiveAuction,
+  onAuctionCreated,
+  onAuctionBidCreated,
 }: {
   chainId: CHAIN_ID
   collection: string
-  tokenId: string
   isTokenActiveAuction: boolean
+  onAuctionCreated?: (tokenId: bigint) => void
+  onAuctionBidCreated?: (tokenId: bigint) => void
 }) => {
-  const router = useRouter()
   const { mutate } = useSWRConfig()
   const { auction } = useDaoStore((state) => state.addresses)
   const config = useConfig()
-  const chainSlug = chainIdToSlug(chainId)
 
-  useWatchContractEvent({
-    address: isTokenActiveAuction ? auction : undefined,
-    abi: auctionAbi,
-    eventName: 'AuctionCreated',
-    chainId,
-    onLogs: async (logs) => {
-      await awaitSubgraphSync(chainId, logs[0].blockNumber)
+  const refreshAuctionAndBids = React.useCallback(
+    async (_blockNumber: bigint, _tokenId: bigint) => {
+      await awaitSubgraphSync(chainId, _blockNumber)
 
       await mutate([SWR_KEYS.AUCTION, chainId, auction], () =>
         readContract(config, {
@@ -43,13 +38,22 @@ export const useAuctionEvents = ({
         })
       )
 
-      const tokenId = logs[0].args.tokenId as bigint
-
-      await mutate([SWR_KEYS.AUCTION_BIDS, chainId, auction, tokenId], () =>
-        getBids(chainId, collection, tokenId.toString())
+      await mutate([SWR_KEYS.AUCTION_BIDS, chainId, auction, _tokenId.toString()], () =>
+        getBids(chainId, collection, _tokenId.toString())
       )
+    },
+    [chainId, collection, auction, mutate, config]
+  )
 
-      await router.push(`/dao/${chainSlug}/${collection}/${tokenId}`)
+  useWatchContractEvent({
+    address: isTokenActiveAuction ? auction : undefined,
+    abi: auctionAbi,
+    eventName: 'AuctionCreated',
+    chainId,
+    onLogs: async (logs) => {
+      const tokenId = logs[0].args.tokenId as bigint
+      await refreshAuctionAndBids(logs[0].blockNumber, tokenId)
+      onAuctionCreated?.(tokenId)
     },
   })
 
@@ -58,20 +62,9 @@ export const useAuctionEvents = ({
     abi: auctionAbi,
     eventName: 'AuctionBid',
     onLogs: async (logs) => {
-      await awaitSubgraphSync(chainId, logs[0].blockNumber)
-
-      await mutate([SWR_KEYS.AUCTION, chainId, auction], () =>
-        readContract(config, {
-          abi: auctionAbi,
-          address: auction as AddressType,
-          chainId: chainId,
-          functionName: 'auction',
-        })
-      )
-
-      await mutate([SWR_KEYS.AUCTION_BIDS, chainId, auction, tokenId], () =>
-        getBids(chainId, auction as string, tokenId)
-      )
+      const tokenId = logs[0].args.tokenId as bigint
+      await refreshAuctionAndBids(logs[0].blockNumber, tokenId)
+      onAuctionBidCreated?.(tokenId)
     },
   })
 }

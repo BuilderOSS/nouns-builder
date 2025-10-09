@@ -14,6 +14,7 @@ export interface AuctionSettingsFormValues {
 
 const twentyFourWeeks = 60 * 60 * 24 * 7 * 24
 const tenMinutes = 60 * 10
+const fiveMinutes = 60 * 5
 
 export const auctionReservePriceValidationSchema = Yup.number()
   .transform((value) => (isNaN(value) ? undefined : value))
@@ -45,7 +46,7 @@ export const auctionSettingsValidationSchema = Yup.object().shape({
     { value: twentyFourWeeks, description: '24 weeks' }
   ),
   timelockDelay: durationValidationSchema(
-    { value: tenMinutes, description: '10 minutes' },
+    { value: fiveMinutes, description: '5 minutes' },
     { value: twentyFourWeeks, description: '24 weeks' }
   ),
 })

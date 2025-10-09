@@ -13,7 +13,7 @@ const GetStarted = () => {
   const { openConnectModal } = useConnectModal()
   const { switchChain } = useSwitchChain()
 
-  const handleSwitchChain = () => switchChain?.({ chainId: chain.id })
+  const handleSwitchChain = () => switchChain({ chainId: chain.id })
 
   const { push } = useRouter()
 

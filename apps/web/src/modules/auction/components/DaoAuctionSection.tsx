@@ -1,16 +1,17 @@
-import { Chain } from '@buildeross/types'
+import { AddressType, Chain } from '@buildeross/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
-import { Auction } from 'src/modules/auction'
+import { Auction, type TokenWithDao } from 'src/modules/auction/components/Auction'
+import { AuctionChart } from 'src/modules/auction/components/AuctionChart/AuctionChart'
 import { ViewSwitcher } from 'src/modules/auction/components/ViewSwitcher'
-import { AuctionChart } from 'src/modules/dao/components/AuctionChart/AuctionChart'
-import { TokenWithDao } from 'src/pages/dao/[network]/[token]/[tokenId]'
 
 type TopSectionProps = {
   chain: Chain
   collection: string
   auctionAddress: string
   token: TokenWithDao
+  onAuctionCreated?: (tokenId: bigint) => void
+  referral?: AddressType
 }
 
 export enum TopSectionView {
@@ -18,11 +19,13 @@ export enum TopSectionView {
   Chart = 'chart',
 }
 
-export const DaoTopSection = ({
+export const DaoAuctionSection = ({
   chain,
   auctionAddress,
   collection,
   token,
+  onAuctionCreated,
+  referral,
 }: TopSectionProps) => {
   const [topSectionView, setTopSectionView] = React.useState<TopSectionView>(
     TopSectionView.Auction
@@ -39,6 +42,8 @@ export const DaoTopSection = ({
             auctionAddress={auctionAddress}
             collection={collection}
             token={token}
+            onAuctionCreated={onAuctionCreated}
+            referral={referral}
           />
         )}
       </TabSwitchAnimation>

@@ -2,10 +2,9 @@ import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
-import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { DaoContractAddresses, useChainStore, useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore } from 'src/stores'
 import {
   deployPendingButtonStyle,
   infoSectionLabelStyle,
@@ -18,8 +17,9 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import { useFormStore } from '../../stores'
 import { Properties, transformFileProperties } from '../../utils'
 
-interface DeployedDaoProps extends DaoContractAddresses {
+interface DeployedDaoProps {
   title: string
+  onSuccessfulDeploy: (token: string) => Promise<void>
 }
 
 const DEPLOYMENT_ERROR = {
@@ -58,19 +58,16 @@ const DisplayAddress: React.FC<{ address: string }> = ({ address }) => {
 }
 
 export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
-  token,
-  metadata,
-  auction,
-  treasury,
-  governor,
   title,
+  onSuccessfulDeploy,
 }) => {
-  const { push } = useRouter()
   const config = useConfig()
   const { general, ipfsUpload, orderedLayers, setFulfilledSections, resetForm } =
     useFormStore()
   const chain = useChainStore((x) => x.chain)
-  const { addresses, setAddresses } = useDaoStore()
+  const {
+    addresses: { token, metadata, auction, treasury, governor },
+  } = useDaoStore()
   const [isPendingTransaction, setIsPendingTransaction] = useState<boolean>(false)
   const [deploymentError, setDeploymentError] = useState<string | undefined>()
   const { address } = useAccount()
@@ -84,10 +81,6 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     chainId: chain.id,
     functionName: 'owner',
   })
-
-  React.useEffect(() => {
-    setAddresses({ token, metadata, auction, treasury, governor })
-  }, [setAddresses, token, metadata, auction, treasury, governor])
 
   /*
    Initialize Contracts
@@ -105,7 +98,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   const handleDeployMetadata = useCallback(async () => {
     setDeploymentError(undefined)
 
-    if (!transactions || !addresses.metadata) {
+    if (!transactions || !metadata || !token) {
       setDeploymentError(DEPLOYMENT_ERROR.GENERIC)
       return
     }
@@ -120,7 +113,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
       try {
         const data = await simulateContract(config, {
           abi: metadataAbi,
-          address: addresses.metadata,
+          address: metadata,
           functionName: 'addProperties',
           chainId: chain.id,
           args: [transaction.names, transaction.items, transaction.data],
@@ -137,21 +130,20 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     setIsPendingTransaction(false)
     setFulfilledSections(title)
 
-    push(`/dao/${chain.slug}/${token}`).then(() => {
+    onSuccessfulDeploy(token).then(() => {
       resetForm()
     })
   }, [
     transactions,
-    addresses.metadata,
+    metadata,
     tokenOwner,
     address,
     config,
     chain.id,
-    chain.slug,
     token,
     setFulfilledSections,
     title,
-    push,
+    onSuccessfulDeploy,
     resetForm,
   ])
 

@@ -1,4 +1,10 @@
-import { auctionAbi, governorAbi, metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import {
+  auctionAbi,
+  governorAbi,
+  metadataAbi,
+  tokenAbi,
+  treasuryAbi,
+} from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
@@ -154,6 +160,18 @@ export const formValuesToTransactionMap: FormValuesTransactionMap = {
         abi: governorAbi,
         functionName: 'updateVetoer',
         args: [value as AddressType],
+      }),
+  },
+
+  /* treasury */
+  timelockDelay: {
+    functionSignature: 'updateDelay',
+    getTarget: (addresses) => addresses.treasury as AddressType,
+    constructCalldata: (value) =>
+      encodeFunctionData({
+        abi: treasuryAbi,
+        functionName: 'updateDelay',
+        args: [BigInt(toSeconds(value))],
       }),
   },
 }

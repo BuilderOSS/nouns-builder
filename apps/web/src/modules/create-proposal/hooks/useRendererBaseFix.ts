@@ -1,5 +1,5 @@
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { metadataAbi, ProposalState } from '@buildeross/sdk/contract'
 import { getProposals, Proposal } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
@@ -63,8 +63,8 @@ export const useRendererBaseFix = ({
   })
 
   const { data: proposals } = useSWR(
-    !!addresses?.token
-      ? ([SWR_KEYS.PROPOSALS_CALLDATAS, chainId, addresses?.token] as const)
+    !!addresses.token
+      ? ([SWR_KEYS.PROPOSALS_CALLDATAS, chainId, addresses.token] as const)
       : null,
     ([, _chainId, _token]) => getProposals(_chainId, _token, 100)
   )

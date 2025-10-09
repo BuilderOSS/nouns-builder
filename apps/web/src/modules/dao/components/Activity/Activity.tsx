@@ -2,15 +2,15 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useDelegate } from '@buildeross/hooks/useDelegate'
+import { useQueryParams } from '@buildeross/hooks/useQueryParams'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID } from '@buildeross/types'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { useRouter } from 'next/router'
 import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import Pagination from 'src/components/Pagination'
@@ -26,39 +26,49 @@ import { useAccount } from 'wagmi'
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
 
-export const Activity: React.FC = () => {
+export type ActivityProps = {
+  onOpenProposalCreate: () => void
+  onOpenProposalReview: () => void
+}
+
+export const Activity: React.FC<ActivityProps> = ({
+  onOpenProposalCreate,
+  onOpenProposalReview,
+}) => {
   const addresses = useDaoStore((state) => state.addresses)
+  const chain = useChainStore((x) => x.chain)
+
   const { createProposal } = useProposalStore()
   const { address } = useAccount()
-  const { query, isReady, push } = useRouter()
+  const query = useQueryParams()
   const { openConnectModal } = useConnectModal()
-  const chain = useChainStore((x) => x.chain)
   const LIMIT = 20
+  const page: number = query.page ? Number(query.page) : 1
 
   const { data, error, isLoading } = useSWR<ProposalsResponse>(
-    isReady && addresses?.token
-      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses?.token, query.page] as const)
+    addresses.token && chain.id
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token, page] as const)
       : null,
-    ([_key, _chainId, _token, _page]) =>
-      getProposals(_chainId as CHAIN_ID, _token as string, LIMIT, Number(_page))
+    ([, _chainId, _token, _page]: [string, CHAIN_ID, string, number]) =>
+      getProposals(_chainId, _token, LIMIT, _page)
   )
 
   const { data: membership } = useDaoMembership({
     chainId: chain.id,
-    collectionAddress: addresses?.token as AddressType,
+    collectionAddress: addresses.token,
     signerAddress: address,
   })
 
   const { isOwner, isDelegating, hasThreshold, proposalVotesRequired } = useVotes({
     chainId: chain.id,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
     signerAddress: address,
-    collectionAddress: addresses?.token as AddressType,
+    collectionAddress: addresses.token,
   })
 
   const { isGovernanceDelayed, delayedUntilTimestamp } = useDelayedGovernance({
-    tokenAddress: addresses?.token,
-    governorAddress: addresses?.governor,
+    tokenAddress: addresses.token,
+    governorAddress: addresses.governor,
     chainId: chain.id,
   })
 
@@ -78,7 +88,7 @@ export const Activity: React.FC = () => {
       disabled: false,
       transactions: [],
     })
-    push(`/dao/${chain.slug}/${addresses?.token}/proposal/create`)
+    onOpenProposalCreate()
   }
 
   if (!data && !error && !isLoading) {
@@ -185,11 +195,12 @@ export const Activity: React.FC = () => {
             </Button>
           </Flex>
         </Flex>
-        {addresses && (
+        {addresses.token && (
           <Upgrade
-            collection={addresses?.token as string}
+            collection={addresses.token}
             hasThreshold={hasThreshold}
             addresses={addresses}
+            onOpenProposalReview={onOpenProposalReview}
           />
         )}
         <Flex direction={'column'} mt={'x6'}>
@@ -252,7 +263,7 @@ export const Activity: React.FC = () => {
             </Flex>
           ) : data?.proposals?.length ? (
             data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard key={index} collection={addresses?.token} {...proposal} />
+              <ProposalCard key={index} collection={addresses.token} {...proposal} />
             ))
           ) : (
             <Flex

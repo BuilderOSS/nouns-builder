@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import React, { useEffect } from 'react'
@@ -29,7 +30,7 @@ export const Address = () => {
       let customABI
       try {
         const response = await axios(
-          `/api/abi?chainid=${chain.id}&address=${transactionContractAddress}`
+          `${BASE_URL}/api/abi?chainid=${chain.id}&address=${transactionContractAddress}`
         )
         customABI = response.data?.abi
       } catch (e) {

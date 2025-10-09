@@ -5,7 +5,6 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
-import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
 import { OptionalLink } from 'src/components/OptionalLink'
@@ -15,21 +14,20 @@ import { useReadContracts } from 'wagmi'
 
 interface ProposalNavigationProps {
   transactionType?: TransactionType
-  handleBack?: () => void
+  handleBack: () => void
 }
 
 export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
   transactionType,
   handleBack,
 }) => {
-  const { back } = useRouter()
   const chain = useChainStore((x) => x.chain)
   const addresses = useDaoStore((state) => state.addresses)
   const transactions = useProposalStore((state) => state.transactions)
   const [queueModalOpen, setQueueModalOpen] = useState(false)
 
-  const token = addresses?.token
-  const metadata = addresses?.metadata
+  const token = addresses.token
+  const metadata = addresses.metadata
 
   const { data: contractData } = useReadContracts({
     allowFailure: false,
@@ -54,14 +52,10 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
 
   const [name, daoImage] = unpackOptionalArray(contractData, 2)
 
-  const handleNavigation = () => {
-    handleBack ? handleBack() : back()
-  }
-
   return (
     <Flex direction={'column'} w={'100%'} align={'center'} mt={'x8'}>
       <Flex w={'100%'} justify="space-between">
-        <Box onClick={handleNavigation} aria-label="Back" cursor={'pointer'}>
+        <Box onClick={handleBack} aria-label="Back" cursor={'pointer'}>
           <Flex direction={'row'} align={'center'} gap={'x2'}>
             <Icon id="arrowLeft" />
 

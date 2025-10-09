@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { Countdown } from '@buildeross/ui/Countdown'
@@ -18,10 +18,10 @@ const Pending: React.FC<PendingProps> = ({ voteStart, proposalId }) => {
   const [isEnded, setIsEnded] = useState<boolean>(false)
   const chain = useChainStore((x) => x.chain)
 
-  const isEndedtimeout = isEnded ? 4000 : null
+  const isEndedTimeout = isEnded ? 4000 : null
   useTimeout(() => {
     mutate([SWR_KEYS.PROPOSAL, chain.id, proposalId], getProposal(chain.id, proposalId))
-  }, isEndedtimeout)
+  }, isEndedTimeout)
 
   const onEnd = () => {
     setIsEnded(true)

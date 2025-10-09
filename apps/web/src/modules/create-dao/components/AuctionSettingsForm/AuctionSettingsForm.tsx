@@ -232,7 +232,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
 
               <DaysHoursMinsSecs
                 {...formik.getFieldProps('timelockDelay')}
-                inputLabel={'Grace Delay'}
+                inputLabel={'Timelock Delay'}
                 formik={formik}
                 id={'timelockDelay'}
                 onChange={formik.handleChange}

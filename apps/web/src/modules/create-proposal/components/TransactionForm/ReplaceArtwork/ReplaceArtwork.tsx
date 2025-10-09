@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
@@ -104,7 +104,7 @@ export const ReplaceArtwork = () => {
 
       return {
         functionSignature,
-        target: addresses?.metadata as AddressType,
+        target: addresses.metadata as AddressType,
         value: '',
         calldata: encodeFunctionData({
           abi: metadataAbi,
@@ -121,7 +121,7 @@ export const ReplaceArtwork = () => {
     })
 
     resetForm()
-  }, [addTransaction, resetForm, transactions, isValid, addresses?.metadata])
+  }, [addTransaction, resetForm, transactions, isValid, addresses.metadata])
 
   return (
     <Stack>

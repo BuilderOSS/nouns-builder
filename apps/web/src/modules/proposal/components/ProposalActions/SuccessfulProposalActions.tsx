@@ -1,4 +1,4 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { getProposal, Proposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'

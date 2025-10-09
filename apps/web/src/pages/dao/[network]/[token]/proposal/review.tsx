@@ -1,5 +1,6 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
@@ -20,30 +21,48 @@ import { notFoundWrap } from 'src/styles/404.css'
 import { useAccount } from 'wagmi'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
-  const router = useRouter()
   const chain = useChainStore((x) => x.chain)
-  const { query } = router
+  const { back, push } = useRouter()
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
     signerAddress: address,
-    collectionAddress: query?.token as AddressType,
+    collectionAddress: addresses.token,
   })
 
   const { isGovernanceDelayed } = useDelayedGovernance({
     chainId: chain.id,
-    tokenAddress: addresses?.token,
-    governorAddress: addresses?.governor,
+    tokenAddress: addresses.token,
+    governorAddress: addresses.governor,
   })
 
-  const transactions = useProposalStore((state) => state.transactions)
-  const disabled = useProposalStore((state) => state.disabled)
-  const title = useProposalStore((state) => state.title)
-  const summary = useProposalStore((state) => state.summary)
+  const { transactions, disabled, title, summary } = useProposalStore()
+
+  const onProposalCreated = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        message: SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS,
+        tab: 'activity',
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const onEditTransactions = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [push, chain.slug, addresses.token])
 
   if (isLoading) return null
 
@@ -62,7 +81,11 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   return (
     <Stack mb={'x20'} w={'100%'} px={'x3'} style={{ maxWidth: 1060 }} mx="auto">
-      <CreateProposalHeading title={'Review and Submit Proposal'} align={'center'} />
+      <CreateProposalHeading
+        title={'Review and Submit Proposal'}
+        align={'center'}
+        handleBack={back}
+      />
       <Box mx="auto">
         <a href="/guidelines" target="_blank" rel="noreferrer noopener">
           <Flex align={'center'} mb={'x10'} color="text1">
@@ -83,6 +106,8 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           transactions={transactions}
           title={title}
           summary={summary}
+          onProposalCreated={onProposalCreated}
+          onEditTransactions={onEditTransactions}
         />
       </Stack>
     </Stack>

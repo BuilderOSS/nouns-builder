@@ -5,16 +5,6 @@ import { vi } from 'vitest'
 import { TransactionType } from '../../constants/transactionType'
 import { Transactions } from './Transactions'
 
-vi.mock('next/router', () => ({
-  useRouter: vi.fn(() => ({
-    back: vi.fn(),
-    push: vi.fn(),
-    query: {},
-    pathname: '/test',
-    asPath: '/test',
-  })),
-}))
-
 describe('List of transactions', () => {
   afterEach(() => {
     vi.restoreAllMocks()

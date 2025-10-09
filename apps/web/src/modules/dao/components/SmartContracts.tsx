@@ -22,8 +22,8 @@ export const SmartContracts = () => {
   const chain = useChainStore((x) => x.chain)
   const { escrowDelegate } = useEscrowDelegate({
     chainId: chain.id,
-    tokenAddress: addresses?.token,
-    treasuryAddress: addresses?.treasury,
+    tokenAddress: addresses.token,
+    treasuryAddress: addresses.treasury,
   })
 
   return (
@@ -53,17 +53,17 @@ export const SmartContracts = () => {
           </Text>
         </Box>
         <Flex direction={'column'} gap={'x4'}>
-          {addresses?.token && <Contract title="NFT" address={addresses.token} />}
-          {addresses?.auction && (
+          {addresses.token && <Contract title="NFT" address={addresses.token} />}
+          {addresses.auction && (
             <Contract title="Auction House" address={addresses.auction} />
           )}
-          {addresses?.governor && (
+          {addresses.governor && (
             <Contract title="Governor" address={addresses.governor} />
           )}
-          {addresses?.treasury && (
+          {addresses.treasury && (
             <Contract title="Treasury" address={addresses.treasury} />
           )}
-          {addresses?.metadata && (
+          {addresses.metadata && (
             <Contract title="Metadata" address={addresses.metadata} />
           )}
           {escrowDelegate && (

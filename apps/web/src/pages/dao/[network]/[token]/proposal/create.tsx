@@ -32,11 +32,10 @@ import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
 const CreateProposalPage: NextPageWithLayout = () => {
-  const router = useRouter()
+  const { query, push } = useRouter()
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const { query } = router
   const [transactionType, setTransactionType] = useState<
     TransactionFormType | undefined
   >()
@@ -64,15 +63,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
-    governorAddress: addresses?.governor,
+    governorAddress: addresses.governor,
     signerAddress: address,
     collectionAddress: query?.token as AddressType,
   })
 
   const { isGovernanceDelayed } = useDelayedGovernance({
     chainId: chain.id,
-    tokenAddress: addresses?.token,
-    governorAddress: addresses?.governor,
+    tokenAddress: addresses.token,
+    governorAddress: addresses.governor,
   })
 
   const createSelectOption = (type: TransactionFormType) => ({
@@ -103,6 +102,28 @@ const CreateProposalPage: NextPageWithLayout = () => {
     setTransactionType(value)
   }
 
+  const openDaoActivityPage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        tab: 'activity',
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const openDaoAdminPage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        tab: 'admin',
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
   if (isLoading) return null
 
   if (!address)
@@ -131,6 +152,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
         title={'Create Proposal'}
         transactionType={transactionType}
         showDocsLink
+        handleBack={openDaoActivityPage}
       />
       {transactionType ? (
         <TwoColumnLayout
@@ -151,6 +173,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
             <SelectTransactionType
               transactionTypes={TRANSACTION_FORM_OPTIONS_FILTERED}
               onSelect={setTransactionType}
+              onOpenAdminSettings={openDaoAdminPage}
             />
           }
         />

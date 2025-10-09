@@ -1,9 +1,9 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { AddressType } from '@buildeross/types'
+import { AddressType, L2MigratedResponse } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import axios from 'axios'
-import { L2MigratedResponse } from 'src/pages/api/migrated'
 import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { useReadContract } from 'wagmi'
@@ -36,7 +36,7 @@ export const Migration: React.FC = () => {
     treasury ? ([SWR_KEYS.DAO_MIGRATED, treasury] as const) : null,
     ([, _treasury]) =>
       axios
-        .get<L2MigratedResponse>(`/api/migrated?l1Treasury=${_treasury}`)
+        .get<L2MigratedResponse>(`${BASE_URL}/api/migrated?l1Treasury=${_treasury}`)
         .then((x) => x.data)
   )
 

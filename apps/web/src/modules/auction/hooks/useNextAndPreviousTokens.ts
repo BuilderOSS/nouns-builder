@@ -1,7 +1,6 @@
-import SWR_KEYS from '@buildeross/constants/swrKeys'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
-import { useRouter } from 'next/router'
 import useSWR from 'swr'
 
 type UseNextAndPreviousTokensResponse = {
@@ -19,10 +18,8 @@ export const useNextAndPreviousTokens = ({
   collection: string
   tokenId: number
 }): UseNextAndPreviousTokensResponse => {
-  const { isReady } = useRouter()
-
   const { data } = useSWR(
-    isReady
+    chainId && collection && tokenId != null
       ? ([SWR_KEYS.DAO_NEXT_AND_PREVIOUS_TOKENS, chainId, collection, tokenId] as const)
       : null,
     ([, _chainId, _collection, _tokenId]) =>
