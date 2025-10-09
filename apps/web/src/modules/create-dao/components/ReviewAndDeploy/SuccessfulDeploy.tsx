@@ -19,7 +19,7 @@ import { Properties, transformFileProperties } from '../../utils'
 
 interface DeployedDaoProps {
   title: string
-  onSuccessfulDeploy: (token: string) => void
+  onSuccessfulDeploy: (token: string) => Promise<void>
 }
 
 const DEPLOYMENT_ERROR = {
@@ -130,9 +130,9 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
     setIsPendingTransaction(false)
     setFulfilledSections(title)
 
-    resetForm()
-
-    onSuccessfulDeploy(token)
+    onSuccessfulDeploy(token).then(() => {
+      resetForm()
+    })
   }, [
     transactions,
     metadata,

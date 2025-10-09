@@ -61,44 +61,41 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     governorAddress: addresses.governor,
   })
 
-  const handleCloseSuccessModal = React.useCallback(() => {
+  const handleCloseSuccessModal = React.useCallback(async () => {
     const nextQuery = { ...query }
     delete nextQuery.message
-    replace(
+
+    await replace(
       {
         pathname,
         query: nextQuery,
       },
       undefined,
-      {
-        shallow: true,
-      }
+      { shallow: true }
     )
   }, [replace, pathname, query])
 
-  const openTreasuryTab = React.useCallback(() => {
-    const current = { ...query } // Get existing query params
-    current['tab'] = 'treasury'
+  const openTreasuryTab = React.useCallback(async () => {
+    const nextQuery = { ...query } // Get existing query params
+    nextQuery['tab'] = 'treasury'
 
-    push(
+    await push(
       {
         pathname,
-        query: current,
+        query: nextQuery,
       },
       undefined,
       { shallow: true } // Prevent full page reload
     )
   }, [push, pathname, query])
 
-  const openProposalCreatePage = React.useCallback(
-    () => push(`/dao/${chain.slug}/${addresses.token}/proposal/create`),
-    [push, chain.slug, addresses.token]
-  )
+  const openProposalCreatePage = React.useCallback(async () => {
+    await push(`/dao/${chain.slug}/${addresses.token}/proposal/create`)
+  }, [push, chain.slug, addresses.token])
 
-  const openProposalReviewPage = React.useCallback(
-    () => push(`/dao/${chain.slug}/${addresses.token}/proposal/review`),
-    [push, chain.slug, addresses.token]
-  )
+  const openProposalReviewPage = React.useCallback(async () => {
+    await push(`/dao/${chain.slug}/${addresses.token}/proposal/review`)
+  }, [push, chain.slug, addresses.token])
 
   const sections = React.useMemo(() => {
     const aboutSection = {

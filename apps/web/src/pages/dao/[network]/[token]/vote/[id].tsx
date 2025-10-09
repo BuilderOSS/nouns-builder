@@ -71,8 +71,8 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     ([, _chainId, _proposalId]) => getProposal(_chainId, _proposalId)
   )
 
-  const openProposalReviewPage = React.useCallback(() => {
-    push({
+  const openProposalReviewPage = React.useCallback(async () => {
+    await push({
       pathname: `/dao/[network]/[token]/proposal/review`,
       query: {
         network: chain.slug,
@@ -81,8 +81,8 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     })
   }, [push, chain.slug, addresses.token])
 
-  const openDaoActivityPage = React.useCallback(() => {
-    push({
+  const openDaoActivityPage = React.useCallback(async () => {
+    await push({
       pathname: `/dao/[network]/[token]`,
       query: {
         network: chain.slug,

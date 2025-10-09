@@ -38,7 +38,7 @@ import { SuccessfulDeploy } from './SuccessfulDeploy'
 
 interface ReviewAndDeploy {
   title: string
-  handleSuccessfulDeploy: (token: string) => void
+  handleSuccessfulDeploy: (token: string) => Promise<void>
 }
 
 const FAST_DAO_TIMINGS = {

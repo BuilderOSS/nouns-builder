@@ -44,14 +44,14 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     chainId: chainId,
   })
 
-  const openAdminTab = React.useCallback(() => {
-    const current = { ...query } // Get existing query params
-    current['tab'] = 'admin'
+  const openAdminTab = React.useCallback(async () => {
+    const nextQuery = { ...query } // Get existing query params
+    nextQuery['tab'] = 'admin'
 
-    push(
+    await push(
       {
         pathname,
-        query: current,
+        query: nextQuery,
       },
       undefined,
       { shallow: true } // Prevent full page reload
@@ -59,19 +59,19 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   }, [push, pathname, query])
 
   const openTokenPage = React.useCallback(
-    (tokenId: number) => push(`/dao/${chain.slug}/${addresses.token}/${tokenId}`),
+    async (tokenId: number) => {
+      await push(`/dao/${chain.slug}/${addresses.token}/${tokenId}`)
+    },
     [push, chain.slug, addresses.token]
   )
 
-  const openProposalCreatePage = React.useCallback(
-    () => push(`/dao/${chain.slug}/${addresses.token}/proposal/create`),
-    [push, chain.slug, addresses.token]
-  )
+  const openProposalCreatePage = React.useCallback(async () => {
+    await push(`/dao/${chain.slug}/${addresses.token}/proposal/create`)
+  }, [push, chain.slug, addresses.token])
 
-  const openProposalReviewPage = React.useCallback(
-    () => push(`/dao/${chain.slug}/${addresses.token}/proposal/review`),
-    [push, chain.slug, addresses.token]
-  )
+  const openProposalReviewPage = React.useCallback(async () => {
+    await push(`/dao/${chain.slug}/${addresses.token}/proposal/review`)
+  }, [push, chain.slug, addresses.token])
 
   const sections = [
     {

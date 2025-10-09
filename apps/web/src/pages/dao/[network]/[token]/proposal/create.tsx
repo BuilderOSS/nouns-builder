@@ -102,6 +102,28 @@ const CreateProposalPage: NextPageWithLayout = () => {
     setTransactionType(value)
   }
 
+  const openDaoActivityPage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        tab: 'activity',
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const openDaoAdminPage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        tab: 'admin',
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
   if (isLoading) return null
 
   if (!address)
@@ -130,16 +152,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
         title={'Create Proposal'}
         transactionType={transactionType}
         showDocsLink
-        handleBack={() => {
-          push({
-            pathname: `/dao/[network]/[token]`,
-            query: {
-              network: chain.slug,
-              token: addresses.token,
-              tab: 'activity',
-            },
-          })
-        }}
+        handleBack={openDaoActivityPage}
       />
       {transactionType ? (
         <TwoColumnLayout
@@ -160,16 +173,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
             <SelectTransactionType
               transactionTypes={TRANSACTION_FORM_OPTIONS_FILTERED}
               onSelect={setTransactionType}
-              onOpenAdminSettings={() =>
-                push({
-                  pathname: `/dao/[network]/[token]`,
-                  query: {
-                    network: chain.slug,
-                    token: addresses.token,
-                    tab: 'admin',
-                  },
-                })
-              }
+              onOpenAdminSettings={openDaoAdminPage}
             />
           }
         />

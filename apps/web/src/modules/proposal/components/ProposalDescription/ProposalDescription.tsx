@@ -37,7 +37,7 @@ const Section = ({ children, title }: { children: ReactNode; title: string }) =>
 type ProposalDescriptionProps = {
   proposal: Proposal
   collection: string
-  onOpenProposalReview: () => void
+  onOpenProposalReview: () => Promise<void>
 }
 
 export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({

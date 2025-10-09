@@ -32,8 +32,8 @@ const CreatePage: NextPageWithLayout = () => {
 
   const { push } = useRouter()
   const handleSuccessfulDeploy = React.useCallback(
-    (token: string) => {
-      push(`/dao/${chain.slug}/${token}`)
+    async (token: string) => {
+      await push(`/dao/${chain.slug}/${token}`)
     },
     [chain.slug, push]
   )

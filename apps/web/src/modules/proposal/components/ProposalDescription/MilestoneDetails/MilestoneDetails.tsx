@@ -50,7 +50,7 @@ const createSafeUrl = (chainId: CHAIN_ID, safeAddress: Hex) => {
 interface MilestoneDetailsProps {
   decodedTransaction: DecodedTransaction
   executionTransactionHash?: string
-  onOpenProposalReview: () => void
+  onOpenProposalReview: () => Promise<void>
 }
 
 export const MilestoneDetails = ({

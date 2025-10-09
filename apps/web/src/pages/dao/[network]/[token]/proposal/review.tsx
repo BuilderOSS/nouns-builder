@@ -42,8 +42,8 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   const { transactions, disabled, title, summary } = useProposalStore()
 
-  const onProposalCreated = React.useCallback(() => {
-    push({
+  const onProposalCreated = React.useCallback(async () => {
+    await push({
       pathname: `/dao/[network]/[token]`,
       query: {
         network: chain.slug,
@@ -54,8 +54,8 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
-  const onEditTransactions = React.useCallback(() => {
-    push({
+  const onEditTransactions = React.useCallback(async () => {
+    await push({
       pathname: `/dao/[network]/[token]/proposal/create`,
       query: {
         network: chain.slug,

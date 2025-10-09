@@ -39,7 +39,7 @@ interface ReviewProposalProps {
   title?: string
   summary?: string
   transactions: BuilderTransaction[]
-  onProposalCreated: () => void
+  onProposalCreated: () => Promise<void>
   onEditTransactions?: () => void
 }
 
@@ -165,8 +165,7 @@ export const ReviewProposalForm = ({
 
         await waitForTransactionReceipt(config, { hash, chainId: chain.id })
 
-        onProposalCreated()
-        clearProposal()
+        onProposalCreated().then(() => clearProposal())
       } catch (err: any) {
         if (
           err?.code === 'ACTION_REJECTED' ||
