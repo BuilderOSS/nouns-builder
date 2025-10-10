@@ -300,6 +300,9 @@ importers:
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.15.21
       '@types/react':
         specifier: ^19.1.5
         version: 19.1.5

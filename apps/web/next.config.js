@@ -1,6 +1,7 @@
 const { createVanillaExtractPlugin } = require('@vanilla-extract/next-plugin')
 const { withSentryConfig } = require('@sentry/nextjs')
 const createBundleAnalyzerPlugin = require('@next/bundle-analyzer')
+const webpack = require('webpack')
 
 const {
   NEXT_PUBLIC_SENTRY_DSN,
@@ -130,6 +131,12 @@ const basicConfig = {
     })
 
     config.resolve.fallback = { fs: false, net: false, tls: false }
+
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __BUILDEROSS_APP_ENV__: JSON.stringify('platform'),
+      })
+    )
 
     return {
       ...config,

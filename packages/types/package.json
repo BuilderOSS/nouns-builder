@@ -14,6 +14,9 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./globals": {
+      "types": "./dist/globals.d.ts"
     }
   },
   "files": [
@@ -37,9 +40,16 @@
   },
   "scripts": {
     "build": "tsup",
+    "postbuild": "cp src/globals.d.ts dist/",
     "clean": "rm -rf dist .turbo",
     "lint": "eslint src --fix",
     "type-check": "tsc --noEmit"
   },
-  "types": "./dist/index.d.ts"
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": ["./dist/index.d.ts"],
+      "globals": ["./dist/globals.d.ts"]
+    }
+  }
 }
