@@ -47,9 +47,6 @@ const basicConfig = {
       '@buildeross/sdk',
     ],
   },
-  env: {
-    BASE_URL: baseUrl,
-  },
   images: {
     dangerouslyAllowSVG: true,
     remotePatterns: [
@@ -135,6 +132,7 @@ const basicConfig = {
     config.plugins.push(
       new webpack.DefinePlugin({
         __BUILDEROSS_APP_ENV__: JSON.stringify('platform'),
+        __BUILDEROSS_BASE_URL__: JSON.stringify(baseUrl),
       })
     )
 

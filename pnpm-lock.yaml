@@ -477,6 +477,9 @@ importers:
       '@biglup/is-cid':
         specifier: ^1.0.3
         version: 1.0.3
+      '@buildeross/constants':
+        specifier: workspace:*
+        version: link:../constants
       sha.js:
         specifier: ^2.4.12
         version: 2.4.12

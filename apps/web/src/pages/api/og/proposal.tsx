@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { ProposalState } from '@buildeross/sdk/contract'
@@ -200,7 +201,7 @@ export default async function handler(req: NextRequest) {
                   objectPosition: 'center',
                   marginRight: '10px',
                 }}
-                src={process.env.BASE_URL + chain.icon}
+                src={BASE_URL + chain.icon}
                 alt={chain.name}
               />
               <p

@@ -30,7 +30,8 @@
     "TENDERLY_ACCESS_KEY",
     "NODE_ENV",
     "VERCEL_PROJECT_PRODUCTION_URL",
-    "BASE_URL"
+    "BUILDEROSS_BASE_URL",
+    "BUILDEROSS_APP_ENV"
   ],
   "tasks": {
     "build": {
