@@ -89,6 +89,14 @@ export const DaoCard = ({
                 {tokenName}
               </Box>
             </Box>
+          </Flex>
+        )}
+
+        {!!collectionName && (
+          <Flex width="100%" align="center" justify="space-between" px="x4" mb={'x4'}>
+            <Paragraph data-testid="collection-name" color={'text3'} className={name}>
+              {collectionName}
+            </Paragraph>
             {chainMeta && (
               <Flex align="center" gap="x1">
                 <NextImage
@@ -106,18 +114,6 @@ export const DaoCard = ({
               </Flex>
             )}
           </Flex>
-        )}
-
-        {!!collectionName && (
-          <Paragraph
-            data-testid="collection-name"
-            color={'text3'}
-            mb={'x4'}
-            px={'x4'}
-            className={name}
-          >
-            {collectionName}
-          </Paragraph>
         )}
       </Box>
 
