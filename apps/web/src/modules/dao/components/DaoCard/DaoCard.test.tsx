@@ -22,7 +22,6 @@ describe('Dao card', () => {
         tokenName="Token name"
         tokenImage="https://fakeimg.pl/300/"
         collectionName="Collection name"
-        collectionAddress="0x12345"
         bid={2}
         endTime={dayjs('1/1/21').unix()}
       />
@@ -41,7 +40,6 @@ describe('Dao card', () => {
         tokenName={undefined}
         tokenImage={undefined}
         collectionName={undefined}
-        collectionAddress="0x12345"
         bid={undefined}
         endTime={undefined}
       />
@@ -60,7 +58,6 @@ describe('Dao card', () => {
         tokenName="Token name"
         tokenImage="https://fakeimg.pl/300/"
         collectionName="Collection name"
-        collectionAddress="0x12345"
         bid={2}
         endTime={dayjs().add(30, 'seconds').unix()}
       />

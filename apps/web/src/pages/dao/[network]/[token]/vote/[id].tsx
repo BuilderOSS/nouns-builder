@@ -59,7 +59,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   addresses,
 }) => {
   const chain = useChainStore((state) => state.chain)
-  const { query, push } = useRouter()
+  const { query, push, pathname } = useRouter()
 
   const { data: balance } = useBalance({
     address: addresses.treasury,
@@ -136,6 +136,23 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     return { displayActions, displayWarning }
   }, [proposal, balance])
 
+  const openTab = React.useCallback(
+    async (tab: string, scroll?: boolean) => {
+      const nextQuery = { ...query } // Get existing query params
+      nextQuery['tab'] = tab
+
+      await push(
+        {
+          pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true, scroll }
+      )
+    },
+    [push, pathname, query]
+  )
+
   if (!proposal) {
     return null
   }
@@ -181,7 +198,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
         <SectionHandler
           sections={sections}
           activeTab={query.tab ? (query.tab as string) : 'Details'}
-          basePath={`/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`}
+          onTabChange={(tab) => openTab(tab, false)}
         />
       </Box>
     </Fragment>

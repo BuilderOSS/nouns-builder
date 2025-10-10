@@ -34,7 +34,7 @@ export const DaoProposalCard = ({
       px={{ '@initial': 'x6', '@768': 'x3' }}
       position={'relative'}
       onClick={onClick}
-      cursor={onClick ? 'pointer' : 'default'}
+      cursor={onClick ? 'pointer' : 'auto'}
     >
       <Text
         fontSize={18}

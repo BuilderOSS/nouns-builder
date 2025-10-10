@@ -2,7 +2,6 @@ import { slugify } from '@buildeross/utils/slugify'
 import { unslugify } from '@buildeross/utils/unslugify'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-import Link from 'next/link'
 import React, { ReactElement } from 'react'
 import {
   sectionHandler,
@@ -17,7 +16,7 @@ interface SectionHandlerProps {
     component: ReactElement[]
   }[]
   activeTab: string
-  basePath: string
+  onTabChange: (tab: string) => void
 }
 
 interface activeSectionProps {
@@ -28,7 +27,7 @@ interface activeSectionProps {
 export const SectionHandler: React.FC<SectionHandlerProps> = ({
   sections,
   activeTab,
-  basePath,
+  onTabChange,
 }) => {
   /*
 
@@ -59,33 +58,23 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
             className={sectionNavigation}
             w={'100%'}
           >
-            {sections?.map((section, index) => {
+            {sections?.map((section) => {
               return (
-                <Link
-                  href={{
-                    pathname: basePath,
-                    query: {
-                      tab: slugify(section.title),
-                    },
-                  }}
-                  scroll={false}
-                  shallow={true}
+                <Flex
+                  cursor={'pointer'}
+                  onClick={() => onTabChange(slugify(section.title))}
                   key={section.title}
+                  direction="column"
+                  className={
+                    sectionTabVariants[
+                      activeSection?.title === section.title ? 'active' : 'default'
+                    ]
+                  }
+                  w={'100%'}
+                  align={'center'}
                 >
-                  <Flex
-                    direction="column"
-                    key={index}
-                    className={
-                      sectionTabVariants[
-                        activeSection?.title === section.title ? 'active' : 'default'
-                      ]
-                    }
-                    w={'100%'}
-                    align={'center'}
-                  >
-                    <Text fontWeight={'display'}>{section.title}</Text>
-                  </Flex>
-                </Link>
+                  <Text fontWeight={'display'}>{section.title}</Text>
+                </Flex>
               )
             })}
           </Flex>

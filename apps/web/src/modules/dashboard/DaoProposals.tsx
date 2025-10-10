@@ -51,7 +51,11 @@ export const DaoProposals = ({
   return (
     <Box mb={'x10'}>
       <Flex justify={'space-between'} mb={'x6'} align="center">
-        <Flex align={'center'} onClick={() => onOpenDao(chainId, tokenAddress)}>
+        <Flex
+          align={'center'}
+          onClick={() => onOpenDao(chainId, tokenAddress)}
+          cursor="pointer"
+        >
           {daoImage ? (
             <Box mr="x4">
               <FallbackNextImage

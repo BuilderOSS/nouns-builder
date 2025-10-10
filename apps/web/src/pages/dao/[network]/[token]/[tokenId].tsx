@@ -76,19 +76,22 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     )
   }, [replace, pathname, query])
 
-  const openTreasuryTab = React.useCallback(async () => {
-    const nextQuery = { ...query } // Get existing query params
-    nextQuery['tab'] = 'treasury'
+  const openTab = React.useCallback(
+    async (tab: string, scroll?: boolean) => {
+      const nextQuery = { ...query } // Get existing query params
+      nextQuery['tab'] = tab
 
-    await push(
-      {
-        pathname,
-        query: nextQuery,
-      },
-      undefined,
-      { shallow: true } // Prevent full page reload
-    )
-  }, [push, pathname, query])
+      await push(
+        {
+          pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true, scroll }
+      )
+    },
+    [push, pathname, query]
+  )
 
   const openProposalCreatePage = React.useCallback(async () => {
     await push({
@@ -113,7 +116,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
-      component: [<About key={'about'} onOpenTreasury={openTreasuryTab} />],
+      component: [<About key={'about'} onOpenTreasury={() => openTab('treasury')} />],
     }
     const treasurySection = {
       title: 'Treasury',
@@ -153,13 +156,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     return CAST_ENABLED.includes(collection)
       ? [...baseSections.slice(0, 1), daoFeed, ...baseSections.slice(1)]
       : baseSections
-  }, [
-    hasThreshold,
-    collection,
-    openTreasuryTab,
-    openProposalCreatePage,
-    openProposalReviewPage,
-  ])
+  }, [hasThreshold, collection, openTab, openProposalCreatePage, openProposalReviewPage])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''
@@ -218,12 +215,13 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         auctionAddress={addresses.auction!}
         token={token}
         onAuctionCreated={onAuctionCreated}
+        onOpenActivity={() => openTab('activity')}
         referral={referral}
       />
       <SectionHandler
         sections={sections}
         activeTab={activeTab}
-        basePath={`/dao/${chain.slug}/${collection}/${token.tokenId}`}
+        onTabChange={(tab) => openTab(tab, false)}
       />
 
       <AnimatedModal

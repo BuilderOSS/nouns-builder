@@ -11,6 +11,7 @@ type TopSectionProps = {
   auctionAddress: string
   token: TokenWithDao
   onAuctionCreated?: (tokenId: bigint) => void
+  onOpenActivity?: () => void
   referral?: AddressType
 }
 
@@ -25,6 +26,7 @@ export const DaoAuctionSection = ({
   collection,
   token,
   onAuctionCreated,
+  onOpenActivity,
   referral,
 }: TopSectionProps) => {
   const [topSectionView, setTopSectionView] = React.useState<TopSectionView>(
@@ -43,6 +45,7 @@ export const DaoAuctionSection = ({
             collection={collection}
             token={token}
             onAuctionCreated={onAuctionCreated}
+            onOpenActivity={onOpenActivity}
             referral={referral}
           />
         )}

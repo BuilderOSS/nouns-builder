@@ -106,6 +106,7 @@ export const AuctionPaused = ({
           fontSize={18}
           className={atoms({ textDecoration: 'underline' })}
           onClick={handleOpenDaoActivity}
+          cursor={'pointer'}
         >
           See activity
         </Box>
