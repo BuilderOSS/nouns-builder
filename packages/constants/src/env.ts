@@ -2,6 +2,10 @@ export type AppEnvironment = 'platform' | 'external' | 'test'
 
 const VALID_APP_ENVS: AppEnvironment[] = ['platform', 'external', 'test']
 
+const NODE_ENV = process.env.NODE_ENV
+
+const BUILDEROSS_APP_ENV = process.env.BUILDEROSS_APP_ENV
+
 /**
  * Resolves the BuilderOSS App Environment.
  *
@@ -17,7 +21,7 @@ function resolveAppEnv(): AppEnvironment {
   }
 
   // Validate the runtime override (if provided)
-  const runtimeEnv = process.env.BUILDEROSS_APP_ENV
+  const runtimeEnv = BUILDEROSS_APP_ENV
 
   if (runtimeEnv) {
     if (VALID_APP_ENVS.includes(runtimeEnv as AppEnvironment)) {
@@ -25,7 +29,7 @@ function resolveAppEnv(): AppEnvironment {
     }
 
     // Optional: strict vs soft behavior
-    if (process.env.NODE_ENV !== 'production') {
+    if (NODE_ENV !== 'production') {
       console.warn(
         `[buildeross:constants] Invalid BUILDEROSS_APP_ENV "${runtimeEnv}". Expected one of: ${VALID_APP_ENVS.join(', ')}. Falling back to "external".`
       )

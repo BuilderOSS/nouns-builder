@@ -34,17 +34,13 @@ const DashboardPage = () => {
     })
   }
 
-  const handleOpenDao = (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    tab: string = 'about'
-  ) => {
+  const handleOpenDao = (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => {
     push({
       pathname: `/dao/[network]/[token]`,
       query: {
         network: chainIdToSlug(chainId),
         token: tokenAddress,
-        tab,
+        ...(tab ? { tab } : {}),
       },
     })
   }

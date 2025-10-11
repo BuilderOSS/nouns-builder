@@ -1,3 +1,7 @@
+const NODE_ENV = process.env.NODE_ENV
+
+const BUILDEROSS_BASE_URL = process.env.BUILDEROSS_BASE_URL
+
 /**
  * BASE_URL resolution order:
  * 1. __BUILDEROSS_BASE_URL__  (injected at build-time)
@@ -9,7 +13,7 @@ function resolveBaseUrl(): string {
   const raw =
     typeof __BUILDEROSS_BASE_URL__ !== 'undefined' && !!__BUILDEROSS_BASE_URL__
       ? __BUILDEROSS_BASE_URL__
-      : (process.env.BUILDEROSS_BASE_URL ?? 'https://nouns.build')
+      : (BUILDEROSS_BASE_URL ?? 'https://nouns.build')
 
   // validate format
   let url: URL
@@ -17,7 +21,7 @@ function resolveBaseUrl(): string {
     url = new URL(raw)
   } catch {
     const msg = `[buildeross:constants] Invalid BASE_URL "${raw}". Must be a valid absolute URL (e.g., https://example.com).`
-    if (process.env.NODE_ENV === 'production') {
+    if (NODE_ENV === 'production') {
       throw new Error(msg)
     } else {
       console.warn(msg)
