@@ -1,6 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { atoms, Box, Icon, Paragraph } from '@buildeross/zord'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 import { useChainStore, useDaoStore } from 'src/stores'
 
 export interface UpgradeInProgressProps {

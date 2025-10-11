@@ -1,5 +1,8 @@
+import {
+  type BaseLinkProps,
+  useLinkComponent,
+} from '@buildeross/ui/LinkComponentProvider'
 import { ReactNode } from 'react'
-import { BaseLinkProps, useLinkComponent } from 'src/components/LinkComponentProvider'
 
 export const OptionalLink: React.FC<
   { enabled: boolean; children: ReactNode } & BaseLinkProps

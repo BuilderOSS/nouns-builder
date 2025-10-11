@@ -3,13 +3,13 @@ import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID, DaoLinkHandler } from '@buildeross/types'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { BigNumberish, formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import NextImage from 'next/image'
 import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 import { auction, daoImage, name, title } from './DaoCard.css'
 import { Detail } from './Detail'
@@ -56,12 +56,11 @@ export const DaoCard = ({
 
   return (
     <Link
+      direction="column"
       link={getDaoLink?.(chainId, collectionAddress, tokenId)}
-      style={{
-        borderRadius: 'curved',
-        height: '100%',
-        overflow: 'hidden',
-      }}
+      borderRadius={'curved'}
+      height={'100%'}
+      overflow={'hidden'}
     >
       <Box
         backgroundColor="background2"

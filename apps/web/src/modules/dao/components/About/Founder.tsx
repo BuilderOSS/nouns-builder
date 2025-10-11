@@ -1,6 +1,7 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { AddressType } from '@buildeross/types'
+import { AddressType, ProfileLinkHandler } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useState } from 'react'
 
@@ -8,9 +9,15 @@ interface FounderProps {
   wallet: AddressType
   ownershipPct: number
   vestExpiry: number
+  getProfileLink?: ProfileLinkHandler
 }
 
-export const Founder: React.FC<FounderProps> = ({ wallet, ownershipPct, vestExpiry }) => {
+export const Founder: React.FC<FounderProps> = ({
+  wallet,
+  ownershipPct,
+  vestExpiry,
+  getProfileLink,
+}) => {
   const [showTooltip, setShowTooltip] = useState(false)
   const { displayName, ensAvatar } = useEnsData(wallet as string)
   const vestDate = new Date(vestExpiry * 1000).toLocaleDateString(undefined, {
@@ -31,20 +38,12 @@ export const Founder: React.FC<FounderProps> = ({ wallet, ownershipPct, vestExpi
       p="x4"
       px="x6"
     >
-      <Flex direction={'row'} align={'center'}>
+      <Link direction={'row'} align={'center'} link={getProfileLink?.(wallet)} flex={1}>
         <Avatar address={wallet} src={ensAvatar} size={'40'} />
         <Flex direction={'column'} ml={'x2'}>
-          <Text
-            as="a"
-            target="_blank"
-            rel="noreferrer noopener"
-            href={`/profile/${wallet}`}
-            fontWeight={'display'}
-          >
-            {displayName}
-          </Text>
+          <Text fontWeight={'display'}>{displayName}</Text>
         </Flex>
-      </Flex>
+      </Link>
       <Flex align={'center'} justify="center">
         <Text fontWeight={'display'} mr="x2">
           {ownershipPct}%

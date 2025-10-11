@@ -2,10 +2,10 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { ProfileLinkHandler } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 export const MemberCard = ({
   member,

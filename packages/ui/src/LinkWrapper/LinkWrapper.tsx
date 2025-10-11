@@ -1,7 +1,8 @@
 import { LinkOptions } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React from 'react'
-import { useLinkComponent } from 'src/components/LinkComponentProvider'
+
+import { useLinkComponent } from '../LinkComponentProvider'
 
 type FlexProps = React.ComponentProps<typeof Flex>
 
@@ -23,19 +24,24 @@ const buttonResetStyles = {
 export const LinkWrapper: React.FC<LinkWrapperProps> = ({
   link,
   children,
-  ...boxProps
+  style,
+  ...flexProps
 }) => {
   const Link = useLinkComponent()
 
   if (!link) {
     // No link provided → just render Flex with content
-    return <Flex {...boxProps}>{children}</Flex>
+    return (
+      <Flex style={style} {...flexProps}>
+        {children}
+      </Flex>
+    )
   }
 
   if (link.href) {
     // Link navigation
     return (
-      <Flex as={Link} href={link.href} {...boxProps}>
+      <Flex as={Link} href={link.href} style={style} {...flexProps}>
         {children}
       </Flex>
     )
@@ -44,11 +50,20 @@ export const LinkWrapper: React.FC<LinkWrapperProps> = ({
   if (link.onClick) {
     // Action navigation
     return (
-      <Flex as="button" onClick={link.onClick} style={buttonResetStyles} {...boxProps}>
+      <Flex
+        as="button"
+        onClick={link.onClick}
+        style={{ ...buttonResetStyles, ...style }}
+        {...flexProps}
+      >
         {children}
       </Flex>
     )
   }
 
-  return <Flex {...boxProps}>{children}</Flex>
+  return (
+    <Flex style={style} {...flexProps}>
+      {children}
+    </Flex>
+  )
 }

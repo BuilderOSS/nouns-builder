@@ -1,9 +1,9 @@
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { slugify } from '@buildeross/utils/slugify'
 import { unslugify } from '@buildeross/utils/unslugify'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 import {
   sectionHandler,
   sectionNavigation,

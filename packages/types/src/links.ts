@@ -17,6 +17,4 @@ export type ProposalLinkHandler = (
   proposalNumber: number
 ) => LinkOptions
 
-export type ProfileLinkHandler = (
-  address: AddressType
-) => LinkOptions
+export type ProfileLinkHandler = (address: AddressType) => LinkOptions

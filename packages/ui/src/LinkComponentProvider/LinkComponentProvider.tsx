@@ -1,4 +1,4 @@
-import React, {
+import {
   ComponentType,
   createContext,
   CSSProperties,
@@ -20,7 +20,6 @@ export type BaseLinkProps = {
 type LinkComponent =
   | ComponentType<BaseLinkProps>
   | ForwardRefExoticComponent<BaseLinkProps & RefAttributes<HTMLAnchorElement>>
-  | 'a'
 
 interface LinkContextType {
   LinkComponent: LinkComponent
