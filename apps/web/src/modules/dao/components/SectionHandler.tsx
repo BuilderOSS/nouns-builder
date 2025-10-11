@@ -3,6 +3,7 @@ import { unslugify } from '@buildeross/utils/unslugify'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 import {
   sectionHandler,
   sectionNavigation,
@@ -29,13 +30,9 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
   activeTab,
   onTabChange,
 }) => {
-  /*
-
-    handle active session if:
+  /*  handle active session if:
     - query tab is defined
-    - unknown query tab is set
-
-   */
+    - unknown query tab is set */
   const tab = React.useCallback(
     (title: string) => {
       return sections?.find((section) => section.title === title)
@@ -60,9 +57,9 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
           >
             {sections?.map((section) => {
               return (
-                <Flex
-                  cursor={'pointer'}
-                  onClick={() => onTabChange(slugify(section.title))}
+                <Link
+                  aria-label={`Switch to ${section.title} tab`}
+                  link={{ onClick: () => onTabChange(slugify(section.title)) }}
                   key={section.title}
                   direction="column"
                   className={
@@ -74,7 +71,7 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
                   align={'center'}
                 >
                   <Text fontWeight={'display'}>{section.title}</Text>
-                </Flex>
+                </Link>
               )
             })}
           </Flex>

@@ -26,7 +26,14 @@ export const ReplaceArtwork = () => {
   const currentTransactions = useProposalStore((state) => state.transactions)
   const chain = useChainStore((x) => x.chain)
 
-  const { shouldUpgrade, activeUpgradeProposalId } = useAvailableUpgrade({
+  const {
+    shouldUpgrade,
+    activeUpgradeProposalId,
+    transaction,
+    latest,
+    date,
+    totalContractUpgrades,
+  } = useAvailableUpgrade({
     chainId: chain.id,
     addresses,
     contractVersion: REPLACE_ARTWORK_CONTRACT_VERSION,
@@ -131,11 +138,9 @@ export const ReplaceArtwork = () => {
       </Text>
 
       {upgradeRequired && (
-        <UpgradeRequired contractVersion={REPLACE_ARTWORK_CONTRACT_VERSION} />
+        <UpgradeRequired {...{ transaction, latest, date, totalContractUpgrades }} />
       )}
-      {upgradeInProgress && (
-        <UpgradeInProgress contractVersion={REPLACE_ARTWORK_CONTRACT_VERSION} />
-      )}
+      {upgradeInProgress && <UpgradeInProgress proposalId={activeUpgradeProposalId} />}
 
       <ReplaceArtworkForm
         disabled={!isValid || upgradeRequired || upgradeInProgress}

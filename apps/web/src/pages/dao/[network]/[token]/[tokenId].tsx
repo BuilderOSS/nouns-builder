@@ -121,10 +121,23 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     },
     [chain.slug, addresses.token]
   )
+
+  const getProfileLink = React.useCallback((address: AddressType) => {
+    return {
+      href: `/profile/${address}`,
+    }
+  }, [])
+
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
-      component: [<About key={'about'} onOpenTreasury={() => openTab('treasury')} />],
+      component: [
+        <About
+          key={'about'}
+          onOpenTreasury={() => openTab('treasury')}
+          getProfileLink={getProfileLink}
+        />,
+      ],
     }
     const treasurySection = {
       title: 'Treasury',
@@ -172,6 +185,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     openProposalCreatePage,
     openProposalReviewPage,
     getProposalLink,
+    getProfileLink,
   ])
 
   const ogDescription = useMemo(() => {

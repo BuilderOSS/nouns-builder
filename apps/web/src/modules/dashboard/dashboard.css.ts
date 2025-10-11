@@ -77,7 +77,6 @@ export const auctionCardBrand = style([
     },
   },
   atoms({
-    cursor: 'pointer',
     alignItems: 'center',
   }),
 ])

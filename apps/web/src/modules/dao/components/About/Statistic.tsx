@@ -1,4 +1,5 @@
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Flex, Text } from '@buildeross/zord'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 import { statistic, statisticContent, statisticHover } from 'src/styles/About.css'
 
 interface StatisticProps {
@@ -9,7 +10,10 @@ interface StatisticProps {
 
 export const Statistic: React.FC<StatisticProps> = ({ title, content, onClick }) => {
   return (
-    <Box className={onClick ? statisticHover : statistic} onClick={onClick}>
+    <Link
+      className={onClick ? statisticHover : statistic}
+      link={onClick ? { onClick } : {}}
+    >
       <Flex direction={'row'} w={'100%'} justify={'space-between'}>
         <Text color="tertiary">{title}</Text>
       </Flex>
@@ -24,6 +28,6 @@ export const Statistic: React.FC<StatisticProps> = ({ title, content, onClick })
       ) : (
         content
       )}
-    </Box>
+    </Link>
   )
 }

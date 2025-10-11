@@ -3,12 +3,13 @@ import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
+import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
 import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
@@ -27,15 +28,16 @@ import {
   statsBox,
 } from './dashboard.css'
 
+export type DaoLinkHandler = (
+  chainId: CHAIN_ID,
+  tokenAddress: AddressType,
+  tokenId?: number | string | bigint
+) => LinkWrapperOptions
+
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
-  handleOpenDao: (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => void
-  handleSelectAuction: (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    tokenId?: number | string | bigint
-  ) => void
+  getDaoLink?: DaoLinkHandler
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
@@ -45,11 +47,9 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     auctionAddress,
     handleMutate,
     tokenAddress,
-    handleSelectAuction,
-    handleOpenDao,
+    getDaoLink,
   } = props
-  const chain =
-    PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? ({} as Partial<Chain>)
+  const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
@@ -88,12 +88,16 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   }
   const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
 
+  if (!chain) {
+    console.error(`Chain with ID ${chainId} not found in PUBLIC_ALL_CHAINS`)
+    return null // or render an error state
+  }
+
   if (!currentAuction) {
     return (
       <AuctionPaused
         {...props}
-        handleSelectAuction={() => handleSelectAuction(chainId, tokenAddress)}
-        handleOpenDaoActivity={() => handleOpenDao(chainId, tokenAddress, 'activity')}
+        getDaoLink={getDaoLink}
         tokenAddress={tokenAddress}
         chain={chain}
       />
@@ -108,11 +112,9 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
 
   return (
     <Flex className={outerAuctionCard}>
-      <Flex
+      <Link
         className={auctionCardBrand}
-        onClick={() =>
-          handleSelectAuction(chainId, tokenAddress, currentAuction?.token?.tokenId)
-        }
+        link={getDaoLink?.(chainId, tokenAddress, currentAuction?.token?.tokenId)}
       >
         <Box className={daoAvatarBox}>
           <FallbackNextImage
@@ -142,7 +144,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
           </Flex>
           <Text className={daoTokenName}>{currentAuction.token.name}</Text>
         </Box>
-      </Flex>
+      </Link>
       <Flex className={statsBox}>
         <Box className={stats}>
           <Text fontSize={16} color="text3" mb={'x1'}>

@@ -1,5 +1,5 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Stack } from '@buildeross/zord'
 import { useRouter } from 'next/router'
@@ -44,58 +44,7 @@ const HomePage: NextPageWithLayout = () => {
   const { address } = useAccount()
   const { push } = useRouter()
 
-  const handleSelectAuction = (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    tokenId?: number | string | bigint
-  ) => {
-    if (tokenId === undefined || tokenId === null) {
-      push({
-        pathname: `/dao/[network]/[token]`,
-        query: {
-          network: chainIdToSlug(chainId),
-          token: tokenAddress,
-        },
-      })
-      return
-    }
-    push({
-      pathname: `/dao/[network]/[token]/[tokenId]`,
-      query: {
-        network: chainIdToSlug(chainId),
-        token: tokenAddress,
-        tokenId: tokenId.toString(),
-      },
-    })
-  }
-
-  const handleOpenDao = (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => {
-    push({
-      pathname: `/dao/[network]/[token]`,
-      query: {
-        network: chainIdToSlug(chainId),
-        token: tokenAddress,
-        ...(tab ? { tab } : {}),
-      },
-    })
-  }
-
-  const handleOpenProposal = (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    proposalNumber: number
-  ) => {
-    push({
-      pathname: `/dao/[network]/[token]/vote/[id]`,
-      query: {
-        network: chainIdToSlug(chainId),
-        token: tokenAddress,
-        id: proposalNumber.toString(),
-      },
-    })
-  }
-
-  const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: string) => {
+  const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
     push({
       pathname: `/dao/[network]/[token]/proposal/create`,
       query: {
@@ -104,16 +53,39 @@ const HomePage: NextPageWithLayout = () => {
       },
     })
   }
+  const getDaoLink = (
+    chainId: CHAIN_ID,
+    tokenAddress: AddressType,
+    tokenId?: number | string | bigint
+  ) => {
+    if (tokenId === undefined || tokenId === null) {
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`,
+      }
+    }
+    return {
+      href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`,
+    }
+  }
+
+  const getProposalLink = (
+    chainId: CHAIN_ID,
+    tokenAddress: AddressType,
+    proposalNumber: number
+  ) => {
+    return {
+      href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalNumber}`,
+    }
+  }
 
   return (
     <>
       <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
       {address ? (
         <Dashboard
-          handleSelectAuction={handleSelectAuction}
           handleOpenCreateProposal={handleOpenCreateProposal}
-          handleOpenDao={handleOpenDao}
-          handleOpenProposal={handleOpenProposal}
+          getDaoLink={getDaoLink}
+          getProposalLink={getProposalLink}
         />
       ) : (
         <Stack align={'center'}>

@@ -1,27 +1,38 @@
 import { ProposalState } from '@buildeross/sdk/contract'
-import { AddressType } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
+import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
 
 import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
 
+export type ProposalLinkHandler = (
+  chainId: CHAIN_ID,
+  tokenAddress: AddressType,
+  proposalNumber: number
+) => LinkWrapperOptions
+
 type DaoProposalCardProps = ProposalForStatus & {
+  chainId: CHAIN_ID
+  collectionAddress: AddressType
   userAddress?: AddressType
   votes: {
     voter: string
   }[]
-  onClick?: () => void
+  getProposalLink?: ProposalLinkHandler
 }
 
 export const DaoProposalCard = ({
   userAddress,
   votes,
-  onClick,
+  getProposalLink,
+  chainId,
+  collectionAddress,
   ...proposal
 }: DaoProposalCardProps) => {
   const { proposalNumber, title, state } = proposal
   return (
-    <Flex
+    <Link
       mb={'x4'}
       direction={{ '@initial': 'column-reverse', '@768': 'row' }}
       w={'100%'}
@@ -33,18 +44,19 @@ export const DaoProposalCard = ({
       py={{ '@initial': 'x3', '@768': 'x6' }}
       px={{ '@initial': 'x6', '@768': 'x3' }}
       position={'relative'}
-      onClick={onClick}
-      cursor={onClick ? 'pointer' : 'auto'}
+      link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
     >
-      <Text
-        fontSize={18}
-        fontWeight="label"
-        color={'text4'}
-        mr={'x4'}
-        display={{ '@initial': 'none', '@768': 'flex' }}
-      >
-        {proposalNumber}
-      </Text>
+      <Flex align="center">
+        <Text
+          fontSize={18}
+          fontWeight="label"
+          color={'text4'}
+          mr={'x4'}
+          display={{ '@initial': 'none', '@768': 'flex' }}
+        >
+          {proposalNumber}
+        </Text>
+      </Flex>
       <Flex
         mr={'auto'}
         align="center"
@@ -72,7 +84,7 @@ export const DaoProposalCard = ({
           </Text>
         </Flex>
       </Flex>
-    </Flex>
+    </Link>
   )
 }
 

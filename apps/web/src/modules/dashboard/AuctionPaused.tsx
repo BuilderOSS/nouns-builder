@@ -1,7 +1,8 @@
-import { Chain } from '@buildeross/types'
-import { atoms, Box, Flex, Icon, icons, Text } from '@buildeross/zord'
+import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'
+import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
 
 import { DashboardDaoProps } from './Dashboard'
 import {
@@ -14,24 +15,23 @@ import {
   statsBox,
 } from './dashboard.css'
 
+export type DaoLinkHandler = (
+  chainId: CHAIN_ID,
+  tokenAddress: AddressType
+) => LinkWrapperOptions
+
 type PausedType = DashboardDaoProps & {
-  chain: Partial<Chain>
-  tokenAddress: string
-  handleSelectAuction: () => void
-  handleOpenDaoActivity: () => void
+  chain: Chain
+  tokenAddress: AddressType
+  getDaoLink?: DaoLinkHandler
 }
 
-export const AuctionPaused = ({
-  name,
-  chain,
-  handleSelectAuction,
-  handleOpenDaoActivity,
-}: PausedType) => {
+export const AuctionPaused = ({ name, tokenAddress, chain, getDaoLink }: PausedType) => {
   const Paused = icons.pause
 
   return (
     <Flex className={outerAuctionCard}>
-      <Flex className={auctionCardBrand} onClick={handleSelectAuction}>
+      <Link className={auctionCardBrand} link={getDaoLink?.(chain.id, tokenAddress)}>
         <Flex
           width="x16"
           height="x16"
@@ -69,7 +69,7 @@ export const AuctionPaused = ({
           </Flex>
           <Text className={daoTokenName}>{name}</Text>
         </Box>
-      </Flex>
+      </Link>
       <Flex className={statsBox}>
         <Box className={stats}>
           <Text fontSize={16} color="text3" mb={'x1'}>
@@ -99,17 +99,6 @@ export const AuctionPaused = ({
             Auctions are paused.
           </Text>
         </Flex>
-        <Box
-          display={'inline-flex'}
-          color="text3"
-          mt={{ '@initial': 'x3', '@768': 'x1' }}
-          fontSize={18}
-          className={atoms({ textDecoration: 'underline' })}
-          onClick={handleOpenDaoActivity}
-          cursor={'pointer'}
-        >
-          See activity
-        </Box>
       </Flex>
     </Flex>
   )

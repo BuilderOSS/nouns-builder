@@ -6,10 +6,18 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
+import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
 
-import { DaoProposalCard } from './DaoProposalCard'
+import { DaoProposalCard, ProposalLinkHandler } from './DaoProposalCard'
 import { DashboardDaoProps } from './Dashboard'
 import { daoName } from './dashboard.css'
+
+export type DaoLinkHandler = (
+  chainId: CHAIN_ID,
+  tokenAddress: AddressType
+) => LinkWrapperOptions
+
+export { type ProposalLinkHandler }
 
 export const DaoProposals = ({
   daoImage,
@@ -20,17 +28,13 @@ export const DaoProposals = ({
   chainId,
   userAddress,
   onOpenCreateProposal,
-  onOpenDao,
-  onOpenProposal,
+  getDaoLink,
+  getProposalLink,
 }: DashboardDaoProps & {
   userAddress?: AddressType
-  onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: string) => void
-  onOpenDao: (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => void
-  onOpenProposal: (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    proposalNumber: number
-  ) => void
+  onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
+  getDaoLink?: DaoLinkHandler
+  getProposalLink?: ProposalLinkHandler
 }) => {
   const { isGovernanceDelayed, isLoading: isLoadingDelayedGovernance } =
     useDelayedGovernance({
@@ -51,18 +55,12 @@ export const DaoProposals = ({
   return (
     <Box mb={'x10'}>
       <Flex justify={'space-between'} mb={'x6'} align="center">
-        <Flex
-          align={'center'}
-          onClick={() => onOpenDao(chainId, tokenAddress)}
-          cursor="pointer"
-        >
+        <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
           {daoImage ? (
             <Box mr="x4">
               <FallbackNextImage
                 srcList={getFetchableUrls(daoImage)}
-                layout="fixed"
-                objectFit="contain"
-                style={{ borderRadius: '12px' }}
+                style={{ borderRadius: '12px', objectFit: 'contain' }}
                 alt=""
                 height={48}
                 width={48}
@@ -76,7 +74,7 @@ export const DaoProposals = ({
           <Text fontSize={20} fontWeight="label" className={daoName} mr={'x2'}>
             {name}
           </Text>
-        </Flex>
+        </Link>
 
         {onOpenCreateProposal && (
           <Button
@@ -96,7 +94,9 @@ export const DaoProposals = ({
           <DaoProposalCard
             key={proposal.proposalNumber}
             userAddress={userAddress}
-            onClick={() => onOpenProposal(chainId, tokenAddress, proposal.proposalNumber)}
+            chainId={chainId}
+            collectionAddress={tokenAddress}
+            getProposalLink={getProposalLink}
             {...proposal}
           />
         ))}

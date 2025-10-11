@@ -1,31 +1,24 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { atoms, Box, Icon, Paragraph } from '@buildeross/zord'
-import { useLinkComponent } from 'src/components/LinkComponentProvider'
-import { VersionType } from 'src/modules/create-proposal/constants'
-import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 import { useChainStore, useDaoStore } from 'src/stores'
 
 export interface UpgradeInProgressProps {
-  contractVersion: VersionType
+  proposalId: string
 }
 
-export const UpgradeInProgress: React.FC<UpgradeInProgressProps> = ({
-  contractVersion,
-}) => {
-  const addresses = useDaoStore((state) => state.addresses)
-  const chain = useChainStore((x) => x.chain)
-  const Link = useLinkComponent()
-  const { activeUpgradeProposalId } = useAvailableUpgrade({
-    chainId: chain.id,
-    addresses,
-    contractVersion,
-  })
+// NOTE: the link to the proposal is hardcoded here until there's a better way to pass proposal links to transaction forms
+export const UpgradeInProgress: React.FC<UpgradeInProgressProps> = ({ proposalId }) => {
+  const { token } = useDaoStore((s) => s.addresses)
+  const chain = useChainStore((s) => s.chain)
 
   return (
     <Box mb={'x10'} data-testid="upgrade-in-progress">
       <Paragraph size="md" color="negative">
         It looks like you currently have an{' '}
         <Link
-          href={`/dao/${chain.slug}/${addresses.token}/vote/${activeUpgradeProposalId}`}
+          display={'inline-flex'}
+          link={{ href: `${BASE_URL}/dao/${token}/${chain}/vote/${proposalId}` }}
         >
           <Box display={'inline-flex'} className={atoms({ textDecoration: 'underline' })}>
             upgrade proposal{' '}

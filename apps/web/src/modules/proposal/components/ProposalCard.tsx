@@ -2,16 +2,12 @@ import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
+import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
 
 import { statusStyle, titleStyle } from './ProposalCard.css'
 import { ProposalForStatus, ProposalStatus } from './ProposalStatus'
 
-type OptionalLink =
-  | { href: string; onClick?: never }
-  | { onClick: () => void; href?: never }
-
-export type ProposalLinkHandler = (proposalNumber: number) => OptionalLink
+export type ProposalLinkHandler = (proposalNumber: number) => LinkWrapperOptions
 
 type ProposalCardProps = ProposalForStatus & {
   getProposalLink?: ProposalLinkHandler

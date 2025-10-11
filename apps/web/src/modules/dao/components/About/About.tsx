@@ -17,7 +17,7 @@ import useSWR from 'swr'
 import { Address, formatEther } from 'viem'
 import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
-import { MembersList } from '../MembersList'
+import { MembersList, type ProfileLinkHandler } from '../MembersList'
 import { responsiveGrid } from './About.css'
 import { DaoDescription } from './DaoDescription'
 import { ExternalLinks } from './ExternalLinks'
@@ -27,9 +27,10 @@ import { Statistic } from './Statistic'
 
 export type AboutProps = {
   onOpenTreasury?: () => void
+  getProfileLink?: ProfileLinkHandler
 }
 
-export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
+export const About: React.FC<AboutProps> = ({ onOpenTreasury, getProfileLink }) => {
   const {
     addresses: { token, treasury, metadata },
   } = useDaoStore()
@@ -188,7 +189,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
           No founders allocation set.
         </Text>
       )}
-      <MembersList totalSupply={Number(totalSupply)} />
+      <MembersList totalSupply={Number(totalSupply)} getProfileLink={getProfileLink} />
     </Box>
   )
 }

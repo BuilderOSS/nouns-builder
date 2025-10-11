@@ -7,14 +7,22 @@ import React from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 
-import { MemberCard } from './MemberListCard'
+import { MemberCard, ProfileLinkHandler } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
 
 type MembersQuery = {
   membersList: DaoVoter[]
 }
 
-export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
+export type { ProfileLinkHandler }
+
+export const MembersList = ({
+  totalSupply,
+  getProfileLink,
+}: {
+  totalSupply?: number
+  getProfileLink?: ProfileLinkHandler
+}) => {
   const chain = useChainStore((x) => x.chain)
   const { addresses } = useDaoStore()
 
@@ -115,7 +123,12 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
   return (
     <MembersPanel exportButton={exportButton}>
       {members?.map((member) => (
-        <MemberCard key={member.voter} member={member} totalSupply={totalSupply} />
+        <MemberCard
+          key={member.voter}
+          member={member}
+          totalSupply={totalSupply}
+          getProfileLink={getProfileLink}
+        />
       ))}
     </MembersPanel>
   )

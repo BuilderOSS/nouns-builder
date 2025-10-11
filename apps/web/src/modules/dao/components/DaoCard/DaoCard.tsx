@@ -2,24 +2,34 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { BigNumberish, formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import NextImage from 'next/image'
 import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
+import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
 
 import { auction, daoImage, name, title } from './DaoCard.css'
 import { Detail } from './Detail'
 
+export type DaoLinkHandler = (
+  chainId: CHAIN_ID,
+  tokenAddress: AddressType,
+  tokenId?: number | string | bigint
+) => LinkWrapperOptions
+
 interface DaoCardProps {
-  chainId?: number
+  chainId: CHAIN_ID
+  collectionAddress: AddressType
+  tokenId?: number | string | bigint
   tokenName?: string
   tokenImage?: string
   collectionName?: string
   bid?: BigNumberish
   endTime?: number
-  onClick?: () => void
+  getDaoLink?: DaoLinkHandler
 }
 
 const Countdown = ({ end, onEnd }: { end: any; onEnd: () => void }) => {
@@ -29,12 +39,14 @@ const Countdown = ({ end, onEnd }: { end: any; onEnd: () => void }) => {
 
 export const DaoCard = ({
   chainId,
+  tokenId,
   tokenName,
   tokenImage,
   collectionName,
+  collectionAddress,
   bid,
   endTime,
-  onClick,
+  getDaoLink,
 }: DaoCardProps) => {
   const isMounted = useIsMounted()
   const [isEnded, setIsEnded] = useState(false)
@@ -49,12 +61,13 @@ export const DaoCard = ({
   const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
 
   return (
-    <Box
-      borderRadius="curved"
-      height={'100%'}
-      overflow="hidden"
-      cursor={onClick ? 'pointer' : 'auto'}
-      onClick={onClick}
+    <Link
+      link={getDaoLink?.(chainId, collectionAddress, tokenId)}
+      style={{
+        borderRadius: 'curved',
+        height: '100%',
+        overflow: 'hidden',
+      }}
     >
       <Box
         backgroundColor="background2"
@@ -133,6 +146,6 @@ export const DaoCard = ({
           </>
         )}
       </Flex>
-    </Box>
+    </Link>
   )
 }

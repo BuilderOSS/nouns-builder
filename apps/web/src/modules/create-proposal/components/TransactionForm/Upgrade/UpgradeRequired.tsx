@@ -1,15 +1,15 @@
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-import { VersionType } from 'src/modules/create-proposal/constants'
-import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
-import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useChainStore, useDaoStore } from 'src/stores'
+import { BuilderTransaction, useProposalStore } from 'src/modules/create-proposal/stores'
 
 import { Alert } from '../../Alert'
 import { UpgradeCard } from '../../UpgradeCard'
 
 export interface UpgradeRequiredProps {
-  contractVersion: VersionType
+  transaction?: BuilderTransaction
+  latest?: string
+  date?: string
+  totalContractUpgrades?: number
 }
 
 const animation = {
@@ -28,19 +28,12 @@ const animation = {
   },
 }
 
-export const UpgradeRequired: React.FC<UpgradeRequiredProps> = ({ contractVersion }) => {
-  const addresses = useDaoStore((state) => state.addresses)
-  const chain = useChainStore((x) => x.chain)
-  const {
-    latest,
-    date,
-    transaction: upgradeTransaction,
-    totalContractUpgrades,
-  } = useAvailableUpgrade({
-    chainId: chain.id,
-    addresses,
-    contractVersion,
-  })
+export const UpgradeRequired: React.FC<UpgradeRequiredProps> = ({
+  latest,
+  date,
+  transaction: upgradeTransaction,
+  totalContractUpgrades,
+}) => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
 
   const handleUpgrade = (): void => {

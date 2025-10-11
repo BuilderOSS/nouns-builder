@@ -26,9 +26,19 @@ export const Airdrop: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
 
-  const { currentVersions, shouldUpgrade, activeUpgradeProposalId } = useAvailableUpgrade(
-    { chainId: chain.id, addresses, contractVersion: AIRDROP_CONTRACT_VERSION }
-  )
+  const {
+    currentVersions,
+    shouldUpgrade,
+    activeUpgradeProposalId,
+    transaction,
+    latest,
+    date,
+    totalContractUpgrades,
+  } = useAvailableUpgrade({
+    chainId: chain.id,
+    addresses,
+    contractVersion: AIRDROP_CONTRACT_VERSION,
+  })
 
   const { data: auctionOwner } = useReadContract({
     abi: auctionAbi,
@@ -138,10 +148,10 @@ export const Airdrop: React.FC = () => {
 
   return (
     <Stack data-testid="airdrop">
-      {upgradeRequired && <UpgradeRequired contractVersion={AIRDROP_CONTRACT_VERSION} />}
-      {upgradeInProgress && (
-        <UpgradeInProgress contractVersion={AIRDROP_CONTRACT_VERSION} />
+      {upgradeRequired && (
+        <UpgradeRequired {...{ transaction, latest, date, totalContractUpgrades }} />
       )}
+      {upgradeInProgress && <UpgradeInProgress proposalId={activeUpgradeProposalId} />}
       <Stack>
         <AirdropForm
           onSubmit={handleAirdropTransaction}
