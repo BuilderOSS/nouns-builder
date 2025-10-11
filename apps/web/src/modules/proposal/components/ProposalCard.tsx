@@ -25,7 +25,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
   if (!isMounted || !token) return null
 
   return (
-    <Link link={getProposalLink?.(chainId, token, proposalNumber)}>
+    <Link w="100%" link={getProposalLink?.(chainId, token, proposalNumber)}>
       <Flex
         direction={{ '@initial': 'column', '@768': 'row' }}
         my={'x2'}
@@ -37,6 +37,7 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
         wrap="nowrap"
         p={{ '@initial': 'x4', '@768': 'x6' }}
         gap="x1"
+        w="100%"
       >
         <Box display={{ '@initial': 'none', '@768': 'flex' }} w={'x8'} mr={'x2'}>
           <Label size="lg" color={'text4'}>

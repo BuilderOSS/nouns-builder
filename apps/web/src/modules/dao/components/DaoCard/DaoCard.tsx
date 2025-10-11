@@ -56,12 +56,11 @@ export const DaoCard = ({
 
   return (
     <Link
+      direction="column"
       link={getDaoLink?.(chainId, collectionAddress, tokenId)}
-      style={{
-        borderRadius: 'curved',
-        height: '100%',
-        overflow: 'hidden',
-      }}
+      borderRadius={'curved'}
+      height={'100%'}
+      overflow={'hidden'}
     >
       <Box
         backgroundColor="background2"

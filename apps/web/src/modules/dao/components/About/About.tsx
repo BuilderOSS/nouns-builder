@@ -182,7 +182,11 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury, getProfileLink }) 
           {founders
             .filter((founder) => founder.ownershipPct > 0)
             .map((founder) => (
-              <Founder key={founder.wallet} {...founder} />
+              <Founder
+                key={founder.wallet}
+                getProfileLink={getProfileLink}
+                {...founder}
+              />
             ))}
         </Grid>
       ) : (

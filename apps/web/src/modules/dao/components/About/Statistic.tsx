@@ -1,5 +1,5 @@
 import { Flex, Text } from '@buildeross/zord'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
+import { useMemo } from 'react'
 import { statistic, statisticContent, statisticHover } from 'src/styles/About.css'
 
 interface StatisticProps {
@@ -9,11 +9,20 @@ interface StatisticProps {
 }
 
 export const Statistic: React.FC<StatisticProps> = ({ title, content, onClick }) => {
+  const props = useMemo(() => {
+    if (onClick) {
+      return {
+        as: 'button',
+        onClick,
+        className: statisticHover,
+      }
+    } else {
+      return { className: statistic }
+    }
+  }, [onClick])
+
   return (
-    <Link
-      className={onClick ? statisticHover : statistic}
-      link={onClick ? { onClick } : {}}
-    >
+    <Flex direction={'column'} {...props}>
       <Flex direction={'row'} w={'100%'} justify={'space-between'}>
         <Text color="tertiary">{title}</Text>
       </Flex>
@@ -28,6 +37,6 @@ export const Statistic: React.FC<StatisticProps> = ({ title, content, onClick })
       ) : (
         content
       )}
-    </Link>
+    </Flex>
   )
 }

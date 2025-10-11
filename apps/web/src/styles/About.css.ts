@@ -34,6 +34,8 @@ export const statisticHover = style([
     whiteSpace: 'nowrap',
     width: 'fit-content',
     cursor: 'pointer',
+    backgroundColor: 'transparent',
+    transition: 'background-color 0.2s ease-in-out',
     ':hover': {
       backgroundColor: vars.color.border,
     },
