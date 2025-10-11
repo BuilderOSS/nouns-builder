@@ -10,9 +10,9 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
-import Link from 'next/link'
 import { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
+import { useLinkComponent } from 'src/components/LinkComponentProvider'
 import { TransactionType } from 'src/modules/create-proposal'
 import { useProposalStore } from 'src/modules/create-proposal/stores'
 import { useChainStore, useDaoStore } from 'src/stores'
@@ -63,6 +63,7 @@ export const MilestoneDetails = ({
   const { addTransaction } = useProposalStore()
   const { address } = useAccount()
   const config = useConfig()
+  const Link = useLinkComponent()
 
   const { hasThreshold } = useVotes({
     chainId: chain.id,

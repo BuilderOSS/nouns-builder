@@ -1,32 +1,33 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import Link from 'next/link'
 import React from 'react'
-import { useChainStore } from 'src/stores'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 import { statusStyle, titleStyle } from './ProposalCard.css'
 import { ProposalForStatus, ProposalStatus } from './ProposalStatus'
 
+type OptionalLink =
+  | { href: string; onClick?: never }
+  | { onClick: () => void; href?: never }
+
+export type ProposalLinkHandler = (proposalNumber: number) => OptionalLink
+
 type ProposalCardProps = ProposalForStatus & {
-  collection?: string
+  getProposalLink?: ProposalLinkHandler
 }
 
 export const ProposalCard: React.FC<ProposalCardProps> = ({
-  collection,
+  getProposalLink,
   ...proposal
 }) => {
   const { title, proposalNumber, timeCreated } = proposal
-  const chain = useChainStore((x) => x.chain)
   const isMounted = useIsMounted()
 
   if (!isMounted) return null
 
   return (
-    <Link
-      href={collection ? `/dao/${chain.slug}/${collection}/vote/${proposalNumber}` : ''}
-      passHref
-    >
+    <Link link={getProposalLink?.(proposalNumber)}>
       <Flex
         direction={{ '@initial': 'column', '@768': 'row' }}
         my={'x2'}

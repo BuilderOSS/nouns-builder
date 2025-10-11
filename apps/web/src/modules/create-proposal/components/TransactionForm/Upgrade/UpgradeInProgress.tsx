@@ -1,5 +1,5 @@
 import { atoms, Box, Icon, Paragraph } from '@buildeross/zord'
-import Link from 'next/link'
+import { useLinkComponent } from 'src/components/LinkComponentProvider'
 import { VersionType } from 'src/modules/create-proposal/constants'
 import { useAvailableUpgrade } from 'src/modules/create-proposal/hooks'
 import { useChainStore, useDaoStore } from 'src/stores'
@@ -13,6 +13,7 @@ export const UpgradeInProgress: React.FC<UpgradeInProgressProps> = ({
 }) => {
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
+  const Link = useLinkComponent()
   const { activeUpgradeProposalId } = useAvailableUpgrade({
     chainId: chain.id,
     addresses,
@@ -24,14 +25,7 @@ export const UpgradeInProgress: React.FC<UpgradeInProgressProps> = ({
       <Paragraph size="md" color="negative">
         It looks like you currently have an{' '}
         <Link
-          href={{
-            pathname: '/dao/[network]/[token]/vote/[id]',
-            query: {
-              network: chain.slug,
-              token: addresses.token,
-              id: activeUpgradeProposalId,
-            },
-          }}
+          href={`/dao/${chain.slug}/${addresses.token}/vote/${activeUpgradeProposalId}`}
         >
           <Box display={'inline-flex'} className={atoms({ textDecoration: 'underline' })}>
             upgrade proposal{' '}

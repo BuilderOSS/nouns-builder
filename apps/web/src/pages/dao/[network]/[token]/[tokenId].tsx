@@ -113,6 +113,14 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     })
   }, [push, chain.slug, addresses.token])
 
+  const getProposalLink = React.useCallback(
+    (proposalNumber: number) => {
+      return {
+        href: `/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`,
+      }
+    },
+    [chain.slug, addresses.token]
+  )
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
@@ -129,6 +137,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
           key={'proposals'}
           onOpenProposalCreate={openProposalCreatePage}
           onOpenProposalReview={openProposalReviewPage}
+          getProposalLink={getProposalLink}
         />,
       ],
     }
@@ -156,7 +165,14 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     return CAST_ENABLED.includes(collection)
       ? [...baseSections.slice(0, 1), daoFeed, ...baseSections.slice(1)]
       : baseSections
-  }, [hasThreshold, collection, openTab, openProposalCreatePage, openProposalReviewPage])
+  }, [
+    hasThreshold,
+    collection,
+    openTab,
+    openProposalCreatePage,
+    openProposalReviewPage,
+    getProposalLink,
+  ])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''

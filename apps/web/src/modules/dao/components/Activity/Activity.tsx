@@ -15,7 +15,7 @@ import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import Pagination from 'src/components/Pagination'
 import { Upgrade, useProposalStore } from 'src/modules/create-proposal'
-import { ProposalCard } from 'src/modules/proposal'
+import { ProposalCard, ProposalLinkHandler } from 'src/modules/proposal'
 import { useChainStore, useDaoStore } from 'src/stores'
 import { skeletonAnimation } from 'src/styles/animations.css'
 import { sectionWrapperStyle } from 'src/styles/dao.css'
@@ -29,11 +29,13 @@ import { DelegateForm } from './DelegateForm'
 export type ActivityProps = {
   onOpenProposalCreate: () => void
   onOpenProposalReview: () => void
+  getProposalLink: ProposalLinkHandler
 }
 
 export const Activity: React.FC<ActivityProps> = ({
   onOpenProposalCreate,
   onOpenProposalReview,
+  getProposalLink,
 }) => {
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -263,7 +265,7 @@ export const Activity: React.FC<ActivityProps> = ({
             </Flex>
           ) : data?.proposals?.length ? (
             data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard key={index} collection={addresses.token} {...proposal} />
+              <ProposalCard key={index} {...proposal} getProposalLink={getProposalLink} />
             ))
           ) : (
             <Flex

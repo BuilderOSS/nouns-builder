@@ -25,7 +25,6 @@ describe('proposal card', () => {
         title="A proposal title"
         proposalNumber={1}
         state={ProposalState.Succeeded}
-        collection="sdflkdsjf"
         voteEnd={dayjs('2/1/21').unix()}
         voteStart={dayjs('1/1/21').unix()}
       />
@@ -43,7 +42,6 @@ describe('proposal card', () => {
         title="A proposal title"
         proposalNumber={1}
         state={ProposalState.Active}
-        collection="sdflkdsjf"
         voteEnd={dayjs(date).add(2, 'day').unix()}
         voteStart={dayjs(date).subtract(1, 'day').unix()}
       />

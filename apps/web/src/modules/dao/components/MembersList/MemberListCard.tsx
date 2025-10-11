@@ -3,8 +3,8 @@ import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import Link from 'next/link'
 import React, { useMemo } from 'react'
+import { useLinkComponent } from 'src/components/LinkComponentProvider'
 
 export const MemberCard = ({
   member,
@@ -14,6 +14,7 @@ export const MemberCard = ({
   totalSupply?: number
 }) => {
   const { displayName, ensAvatar } = useEnsData(member.voter)
+  const Link = useLinkComponent()
 
   const timeJoined = useMemo(
     () => dayjs(dayjs.unix(member.timeJoined)).format('MMM DD, YYYY'),
@@ -26,7 +27,7 @@ export const MemberCard = ({
   }, [totalSupply, member])
 
   return (
-    <Link href={`/profile/${member.voter}`} passHref>
+    <Link href={`/profile/${member.voter}`}>
       <Flex
         mb={'x14'}
         direction={{ '@initial': 'column', '@768': 'row' }}

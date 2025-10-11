@@ -45,15 +45,8 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         <OptionalLink
           enabled={hasPreviousToken}
           href={`/dao/${chainSlug}/${collection}/${data?.prev}`}
-          passHref
-          legacyBehavior
         >
-          <Flex
-            as={hasPreviousToken ? 'a' : undefined}
-            align={'center'}
-            justify={'center'}
-            className={auctionDateNavButton}
-          >
+          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
             <Icon id="arrowLeft" style={hasPreviousToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
@@ -61,15 +54,8 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         <OptionalLink
           enabled={hasNextToken}
           href={`/dao/${chainSlug}/${collection}/${data?.next}`}
-          passHref
-          legacyBehavior
         >
-          <Flex
-            as={hasNextToken ? 'a' : undefined}
-            align={'center'}
-            justify={'center'}
-            className={auctionDateNavButton}
-          >
+          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
             <Icon id="arrowRight" style={hasNextToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
@@ -77,15 +63,8 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         <OptionalLink
           enabled={hasLatestToken}
           href={`/dao/${chainSlug}/${collection}/${latestTokenId}`}
-          passHref
-          legacyBehavior
         >
-          <Flex
-            as={hasLatestToken ? 'a' : undefined}
-            align={'center'}
-            justify={'center'}
-            className={auctionDateNavButton}
-          >
+          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
             <Text
               mx={'x3'}
               style={hasLatestToken ? {} : disabledStyle}
