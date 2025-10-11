@@ -113,10 +113,31 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     })
   }, [push, chain.slug, addresses.token])
 
+  const getProposalLink = React.useCallback(
+    (_chainId: CHAIN_ID, _collectionAddress: AddressType, proposalNumber: number) => {
+      return {
+        href: `/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`,
+      }
+    },
+    [chain.slug, addresses.token]
+  )
+
+  const getProfileLink = React.useCallback((address: AddressType) => {
+    return {
+      href: `/profile/${address}`,
+    }
+  }, [])
+
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
-      component: [<About key={'about'} onOpenTreasury={() => openTab('treasury')} />],
+      component: [
+        <About
+          key={'about'}
+          onOpenTreasury={() => openTab('treasury')}
+          getProfileLink={getProfileLink}
+        />,
+      ],
     }
     const treasurySection = {
       title: 'Treasury',
@@ -129,6 +150,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
           key={'proposals'}
           onOpenProposalCreate={openProposalCreatePage}
           onOpenProposalReview={openProposalReviewPage}
+          getProposalLink={getProposalLink}
         />,
       ],
     }
@@ -156,7 +178,15 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     return CAST_ENABLED.includes(collection)
       ? [...baseSections.slice(0, 1), daoFeed, ...baseSections.slice(1)]
       : baseSections
-  }, [hasThreshold, collection, openTab, openProposalCreatePage, openProposalReviewPage])
+  }, [
+    hasThreshold,
+    collection,
+    openTab,
+    openProposalCreatePage,
+    openProposalReviewPage,
+    getProposalLink,
+    getProfileLink,
+  ])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''

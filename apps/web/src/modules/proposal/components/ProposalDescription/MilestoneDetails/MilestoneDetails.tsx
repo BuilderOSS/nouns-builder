@@ -10,7 +10,6 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
-import Link from 'next/link'
 import { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { TransactionType } from 'src/modules/create-proposal'
@@ -236,9 +235,14 @@ export const MilestoneDetails = ({
                         if (!href) return null
 
                         return (
-                          <Link key={doc.src} href={href}>
-                            {href}
-                          </Link>
+                          <a
+                            key={doc.src}
+                            href={href}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                          >
+                            {doc.src}
+                          </a>
                         )
                       })}
                     </Stack>

@@ -1,6 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
+import { ProfileLinkHandler } from '@buildeross/types'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
 import React from 'react'
@@ -14,7 +15,13 @@ type MembersQuery = {
   membersList: DaoVoter[]
 }
 
-export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
+export const MembersList = ({
+  totalSupply,
+  getProfileLink,
+}: {
+  totalSupply?: number
+  getProfileLink?: ProfileLinkHandler
+}) => {
   const chain = useChainStore((x) => x.chain)
   const { addresses } = useDaoStore()
 
@@ -115,7 +122,12 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
   return (
     <MembersPanel exportButton={exportButton}>
       {members?.map((member) => (
-        <MemberCard key={member.voter} member={member} totalSupply={totalSupply} />
+        <MemberCard
+          key={member.voter}
+          member={member}
+          totalSupply={totalSupply}
+          getProfileLink={getProfileLink}
+        />
       ))}
     </MembersPanel>
   )

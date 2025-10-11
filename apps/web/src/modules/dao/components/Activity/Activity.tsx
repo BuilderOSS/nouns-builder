@@ -5,7 +5,7 @@ import { useDelegate } from '@buildeross/hooks/useDelegate'
 import { useQueryParams } from '@buildeross/hooks/useQueryParams'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, ProposalLinkHandler } from '@buildeross/types'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -29,11 +29,13 @@ import { DelegateForm } from './DelegateForm'
 export type ActivityProps = {
   onOpenProposalCreate: () => void
   onOpenProposalReview: () => void
+  getProposalLink: ProposalLinkHandler
 }
 
 export const Activity: React.FC<ActivityProps> = ({
   onOpenProposalCreate,
   onOpenProposalReview,
+  getProposalLink,
 }) => {
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -263,7 +265,7 @@ export const Activity: React.FC<ActivityProps> = ({
             </Flex>
           ) : data?.proposals?.length ? (
             data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard key={index} collection={addresses.token} {...proposal} />
+              <ProposalCard key={index} {...proposal} getProposalLink={getProposalLink} />
             ))
           ) : (
             <Flex

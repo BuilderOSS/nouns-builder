@@ -6,7 +6,12 @@ import {
   dashboardRequest,
   ProposalFragment,
 } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import {
+  AddressType,
+  CHAIN_ID,
+  DaoLinkHandler,
+  ProposalLinkHandler,
+} from '@buildeross/types'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
@@ -83,25 +88,15 @@ const fetchDashboardData = async (address: string) => {
 }
 
 export type DashboardProps = {
-  handleSelectAuction: (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    tokenId?: number | string | bigint
-  ) => void
-  handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: string) => void
-  handleOpenDao: (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => void
-  handleOpenProposal: (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    proposalNumber: number
-  ) => void
+  handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
+  getDaoLink?: DaoLinkHandler
+  getProposalLink?: ProposalLinkHandler
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
-  handleOpenDao,
-  handleSelectAuction,
   handleOpenCreateProposal,
-  handleOpenProposal,
+  getDaoLink,
+  getProposalLink,
 }) => {
   const { address } = useAccount()
 
@@ -123,11 +118,10 @@ const Dashboard: React.FC<DashboardProps> = ({
         {...dao}
         userAddress={address}
         handleMutate={mutate}
-        handleSelectAuction={handleSelectAuction}
-        handleOpenDao={handleOpenDao}
+        getDaoLink={getDaoLink}
       />
     ))
-  }, [data, address, mutate, handleSelectAuction, handleOpenDao])
+  }, [data, address, mutate, getDaoLink])
 
   const proposalList = useMemo(() => {
     if (!data) return null
@@ -164,11 +158,11 @@ const Dashboard: React.FC<DashboardProps> = ({
           {...dao}
           userAddress={address as AddressType}
           onOpenCreateProposal={handleOpenCreateProposal}
-          onOpenProposal={handleOpenProposal}
-          onOpenDao={handleOpenDao}
+          getDaoLink={getDaoLink}
+          getProposalLink={getProposalLink}
         />
       ))
-  }, [data, address, handleOpenCreateProposal, handleOpenProposal, handleOpenDao])
+  }, [data, address, handleOpenCreateProposal, getDaoLink, getProposalLink])
 
   if (error) {
     return (

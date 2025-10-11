@@ -1,4 +1,6 @@
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
@@ -18,33 +20,27 @@ interface ExploreProps extends Partial<ExploreDaosResponse> {
 }
 
 export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }) => {
-  const { query, push } = useRouter()
+  const { query } = useRouter()
   const chain = useChainStore((x) => x.chain)
 
   const page = query.page
 
-  const onOpenDao = React.useCallback(
-    (tokenAddress: string, tokenId?: number | string | bigint) => {
+  const getDaoLink = React.useCallback(
+    (
+      chainId: CHAIN_ID,
+      tokenAddress: AddressType,
+      tokenId?: number | string | bigint
+    ) => {
       if (tokenId === undefined || tokenId === null) {
-        push({
-          pathname: `/dao/[network]/[token]`,
-          query: {
-            network: chain.slug,
-            token: tokenAddress,
-          },
-        })
-        return
+        return {
+          href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`,
+        }
       }
-      push({
-        pathname: `/dao/[network]/[token]/[tokenId]`,
-        query: {
-          network: chain.slug,
-          token: tokenAddress,
-          tokenId: tokenId.toString(),
-        },
-      })
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`,
+      }
     },
-    [chain.slug, push]
+    []
   )
 
   return (
@@ -61,12 +57,14 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
                 <DaoCard
                   chainId={chain.id}
                   key={dao.dao.tokenAddress}
+                  tokenId={dao.token?.tokenId ?? undefined}
                   tokenImage={dao.token?.image ?? undefined}
                   tokenName={dao.token?.name ?? undefined}
                   collectionName={dao.dao.name ?? undefined}
+                  collectionAddress={dao.dao.tokenAddress}
                   bid={bidInEth}
                   endTime={dao.endTime ?? undefined}
-                  onClick={() => onOpenDao(dao.dao.tokenAddress, dao.token?.tokenId)}
+                  getDaoLink={getDaoLink}
                 />
               )
             })}

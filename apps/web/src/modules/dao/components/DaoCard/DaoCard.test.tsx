@@ -19,6 +19,7 @@ describe('Dao card', () => {
     render(
       <DaoCard
         chainId={CHAIN_ID.FOUNDRY}
+        collectionAddress="0x123"
         tokenName="Token name"
         tokenImage="https://fakeimg.pl/300/"
         collectionName="Collection name"
@@ -37,6 +38,7 @@ describe('Dao card', () => {
     render(
       <DaoCard
         chainId={CHAIN_ID.FOUNDRY}
+        collectionAddress="0x123"
         tokenName={undefined}
         tokenImage={undefined}
         collectionName={undefined}
@@ -55,6 +57,7 @@ describe('Dao card', () => {
     render(
       <DaoCard
         chainId={CHAIN_ID.FOUNDRY}
+        collectionAddress="0x123"
         tokenName="Token name"
         tokenImage="https://fakeimg.pl/300/"
         collectionName="Collection name"

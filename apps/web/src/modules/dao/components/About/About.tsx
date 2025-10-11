@@ -3,6 +3,7 @@ import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { type ProfileLinkHandler } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
@@ -27,9 +28,10 @@ import { Statistic } from './Statistic'
 
 export type AboutProps = {
   onOpenTreasury?: () => void
+  getProfileLink?: ProfileLinkHandler
 }
 
-export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
+export const About: React.FC<AboutProps> = ({ onOpenTreasury, getProfileLink }) => {
   const {
     addresses: { token, treasury, metadata },
   } = useDaoStore()
@@ -188,7 +190,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
           No founders allocation set.
         </Text>
       )}
-      <MembersList totalSupply={Number(totalSupply)} />
+      <MembersList totalSupply={Number(totalSupply)} getProfileLink={getProfileLink} />
     </Box>
   )
 }

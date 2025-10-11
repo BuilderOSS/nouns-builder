@@ -1,5 +1,6 @@
 import { useDaoAuction } from '@buildeross/hooks/useDaoAuction'
-import { useRouter } from 'next/router'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { chainIdToSlug } from '@buildeross/utils/helpers'
 import React from 'react'
 import { DaoCard } from 'src/modules/dao'
 import { DaoProps } from 'src/pages'
@@ -12,36 +13,28 @@ interface DaoCardProps {
 }
 
 export const DaoFeedCard: React.FC<DaoCardProps> = ({ dao }) => {
-  const { push } = useRouter()
   const chain = useChainStore((x) => x.chain)
   const { highestBid, tokenId, tokenUri, endTime } = useDaoAuction({
     collectionAddress: dao.tokenAddress,
     auctionAddress: dao.auctionAddress,
     chainId: chain.id,
   })
-
-  const onOpenDao = React.useCallback(
-    (tokenAddress: string, tokenId?: number | string | bigint) => {
+  const getDaoLink = React.useCallback(
+    (
+      chainId: CHAIN_ID,
+      tokenAddress: AddressType,
+      tokenId?: number | string | bigint
+    ) => {
       if (tokenId === undefined || tokenId === null) {
-        push({
-          pathname: `/dao/[network]/[token]`,
-          query: {
-            network: chain.slug,
-            token: tokenAddress,
-          },
-        })
-        return
+        return {
+          href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`,
+        }
       }
-      push({
-        pathname: `/dao/[network]/[token]/[tokenId]`,
-        query: {
-          network: chain.slug,
-          token: tokenAddress,
-          tokenId: tokenId.toString(),
-        },
-      })
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`,
+      }
     },
-    [chain.slug, push]
+    []
   )
 
   if (!tokenUri?.image || !tokenUri?.name) {
@@ -51,12 +44,14 @@ export const DaoFeedCard: React.FC<DaoCardProps> = ({ dao }) => {
   return (
     <DaoCard
       chainId={chain.id}
+      tokenId={tokenId}
       tokenName={tokenUri?.name}
       tokenImage={tokenUri?.image}
       collectionName={dao?.name}
+      collectionAddress={dao.tokenAddress}
       bid={highestBid}
       endTime={endTime as number}
-      onClick={() => onOpenDao(dao.tokenAddress, tokenId)}
+      getDaoLink={getDaoLink}
     />
   )
 }
