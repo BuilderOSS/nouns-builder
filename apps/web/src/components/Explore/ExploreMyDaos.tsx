@@ -1,6 +1,9 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { exploreMyDaosRequest } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
+import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Grid } from '@buildeross/zord'
+import { useRouter } from 'next/router'
 import React from 'react'
 import { DaoCard } from 'src/modules/dao/components/DaoCard'
 import useSWR from 'swr'
@@ -14,6 +17,7 @@ import ExploreToolbar from './ExploreToolbar'
 
 export const ExploreMyDaos = () => {
   const { address } = useAccount()
+  const { push } = useRouter()
 
   const { data, error, isValidating } = useSWR(
     address ? ([SWR_KEYS.DYNAMIC.MY_DAOS_PAGE(address), address] as const) : null,
@@ -22,6 +26,30 @@ export const ExploreMyDaos = () => {
   )
 
   const isLoading = data ? false : isValidating && !data && !error
+
+  const onOpenDao = React.useCallback(
+    (chainId: CHAIN_ID, tokenAddress: string, tokenId?: number | string | bigint) => {
+      if (tokenId === undefined || tokenId === null) {
+        push({
+          pathname: `/dao/[network]/[token]`,
+          query: {
+            network: chainIdToSlug(chainId),
+            token: tokenAddress,
+          },
+        })
+        return
+      }
+      push({
+        pathname: `/dao/[network]/[token]/[tokenId]`,
+        query: {
+          network: chainIdToSlug(chainId),
+          token: tokenAddress,
+          tokenId: tokenId.toString(),
+        },
+      })
+    },
+    [push]
+  )
 
   return (
     <>
@@ -33,18 +61,20 @@ export const ExploreMyDaos = () => {
           {data.daos.map((dao) => {
             const bid = dao.highestBid?.amount ?? undefined
             const bidInEth = bid ? formatEther(bid) : undefined
+            if (!dao.chainId) return null
 
             return (
               <DaoCard
-                chainId={dao.chainId!}
-                tokenId={dao.token?.tokenId ?? undefined}
                 key={dao.dao.tokenAddress}
+                chainId={dao.chainId}
                 tokenImage={dao.token?.image ?? undefined}
                 tokenName={dao.token?.name ?? undefined}
-                collectionAddress={dao.dao.tokenAddress as string}
                 collectionName={dao.dao.name ?? undefined}
                 bid={bidInEth}
                 endTime={dao.endTime ?? undefined}
+                onClick={() =>
+                  onOpenDao(dao.chainId, dao.dao.tokenAddress, dao.token?.tokenId)
+                }
               />
             )
           })}

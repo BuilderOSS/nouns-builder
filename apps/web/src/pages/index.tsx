@@ -50,14 +50,59 @@ const HomePage: NextPageWithLayout = () => {
     tokenId?: number | string | bigint
   ) => {
     if (tokenId === undefined || tokenId === null) {
-      push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}`)
+      push({
+        pathname: `/dao/[network]/[token]`,
+        query: {
+          network: chainIdToSlug(chainId),
+          token: tokenAddress,
+        },
+      })
       return
     }
-    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId.toString()}`)
+    push({
+      pathname: `/dao/[network]/[token]/[tokenId]`,
+      query: {
+        network: chainIdToSlug(chainId),
+        token: tokenAddress,
+        tokenId: tokenId.toString(),
+      },
+    })
+  }
+
+  const handleOpenDao = (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => {
+    push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: chainIdToSlug(chainId),
+        token: tokenAddress,
+        ...(tab ? { tab } : {}),
+      },
+    })
+  }
+
+  const handleOpenProposal = (
+    chainId: CHAIN_ID,
+    tokenAddress: string,
+    proposalNumber: number
+  ) => {
+    push({
+      pathname: `/dao/[network]/[token]/vote/[id]`,
+      query: {
+        network: chainIdToSlug(chainId),
+        token: tokenAddress,
+        id: proposalNumber.toString(),
+      },
+    })
   }
 
   const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: string) => {
-    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`)
+    push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chainIdToSlug(chainId),
+        token: tokenAddress,
+      },
+    })
   }
 
   return (
@@ -67,6 +112,8 @@ const HomePage: NextPageWithLayout = () => {
         <Dashboard
           handleSelectAuction={handleSelectAuction}
           handleOpenCreateProposal={handleOpenCreateProposal}
+          handleOpenDao={handleOpenDao}
+          handleOpenProposal={handleOpenProposal}
         />
       ) : (
         <Stack align={'center'}>

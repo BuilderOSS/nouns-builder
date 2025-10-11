@@ -1,11 +1,9 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
-import Link from 'next/link'
 import React from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
 
@@ -22,9 +20,17 @@ export const DaoProposals = ({
   chainId,
   userAddress,
   onOpenCreateProposal,
+  onOpenDao,
+  onOpenProposal,
 }: DashboardDaoProps & {
   userAddress?: AddressType
   onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: string) => void
+  onOpenDao: (chainId: CHAIN_ID, tokenAddress: string, tab?: string) => void
+  onOpenProposal: (
+    chainId: CHAIN_ID,
+    tokenAddress: string,
+    proposalNumber: number
+  ) => void
 }) => {
   const { isGovernanceDelayed, isLoading: isLoadingDelayedGovernance } =
     useDelayedGovernance({
@@ -42,35 +48,35 @@ export const DaoProposals = ({
 
   const isLoading = isLoadingDelayedGovernance || isLoadingVotes
 
-  const currentChainSlug = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)?.slug
-
   return (
     <Box mb={'x10'}>
       <Flex justify={'space-between'} mb={'x6'} align="center">
-        <Link href={`/dao/${currentChainSlug}/${tokenAddress}`} passHref>
-          <Flex align={'center'}>
-            {daoImage ? (
-              <Box mr="x4">
-                <FallbackNextImage
-                  srcList={getFetchableUrls(daoImage)}
-                  layout="fixed"
-                  objectFit="contain"
-                  style={{ borderRadius: '12px' }}
-                  alt=""
-                  height={48}
-                  width={48}
-                />
-              </Box>
-            ) : (
-              <Box mr="x4" borderRadius="phat">
-                <Avatar address={tokenAddress ?? undefined} size="52" />
-              </Box>
-            )}
-            <Text fontSize={20} fontWeight="label" className={daoName} mr={'x2'}>
-              {name}
-            </Text>
-          </Flex>
-        </Link>
+        <Flex
+          align={'center'}
+          onClick={() => onOpenDao(chainId, tokenAddress)}
+          cursor="pointer"
+        >
+          {daoImage ? (
+            <Box mr="x4">
+              <FallbackNextImage
+                srcList={getFetchableUrls(daoImage)}
+                layout="fixed"
+                objectFit="contain"
+                style={{ borderRadius: '12px' }}
+                alt=""
+                height={48}
+                width={48}
+              />
+            </Box>
+          ) : (
+            <Box mr="x4" borderRadius="phat">
+              <Avatar address={tokenAddress ?? undefined} size="52" />
+            </Box>
+          )}
+          <Text fontSize={20} fontWeight="label" className={daoName} mr={'x2'}>
+            {name}
+          </Text>
+        </Flex>
 
         {onOpenCreateProposal && (
           <Button
@@ -89,10 +95,8 @@ export const DaoProposals = ({
         {proposals.map((proposal) => (
           <DaoProposalCard
             key={proposal.proposalNumber}
-            chainId={chainId}
-            currentChainSlug={currentChainSlug}
-            tokenAddress={tokenAddress}
             userAddress={userAddress}
+            onClick={() => onOpenProposal(chainId, tokenAddress, proposal.proposalNumber)}
             {...proposal}
           />
         ))}

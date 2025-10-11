@@ -1,6 +1,7 @@
 {
   "extends": "@buildeross/tsconfig/base.json",
   "compilerOptions": {
+    "types": ["node", "@buildeross/types/globals"],
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true

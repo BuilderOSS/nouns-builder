@@ -5,5 +5,5 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['ipfs-http-client', 'ipfs-core-types'],
+  external: ['ipfs-http-client', 'ipfs-core-types', '@buildeross/constants'],
 })

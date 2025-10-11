@@ -1,5 +1,4 @@
 import { Box, Flex, Text } from '@buildeross/zord'
-import Link from 'next/link'
 import React, { ReactNode } from 'react'
 
 import { feed } from './Feed.css'
@@ -17,15 +16,23 @@ export const FeedTab = ({ children }: { children?: ReactNode }) => (
         </Text>
         <Text mb="x3">
           This feed is a read-only, alpha feature for DAOs that have a{' '}
-          <Link href="https://github.com/farcasterxyz/protocol/discussions/71">
+          <a
+            href="https://github.com/farcasterxyz/protocol/discussions/71"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
             Farcaster channel
-          </Link>
+          </a>
         </Text>
         <Text mb="x3">
           Please leave any feedback or feature requests on this{' '}
-          <Link href="https://github.com/ourzora/nouns-builder/issues/270">
+          <a
+            href="https://github.com/ourzora/nouns-builder/issues/270"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
             Github issue
-          </Link>
+          </a>
         </Text>
         <Flex
           direction={'column'}

@@ -23,7 +23,6 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": [
-    "typings",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",

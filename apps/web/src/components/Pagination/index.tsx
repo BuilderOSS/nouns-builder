@@ -92,7 +92,7 @@ const Pagination: React.FC<PaginationProps> = ({
           mx={'x1'}
           disabled={isFirst}
           style={{
-            cursor: isFirst ? 'default' : 'pointer',
+            cursor: isFirst ? 'auto' : 'pointer',
           }}
         >
           <Flex
@@ -122,7 +122,7 @@ const Pagination: React.FC<PaginationProps> = ({
           mx={'x1'}
           disabled={isLast}
           style={{
-            cursor: isLast ? 'default' : 'pointer',
+            cursor: isLast ? 'auto' : 'pointer',
           }}
         >
           <Flex

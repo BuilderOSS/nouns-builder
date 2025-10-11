@@ -11,7 +11,7 @@
     "noUnusedLocals": false,
     "skipLibCheck": true,
     "noUnusedParameters": false,
-    "types": ["@testing-library/jest-dom", "vitest/globals"],
+    "types": ["@testing-library/jest-dom", "vitest/globals", "@buildeross/types/globals"],
     "plugins": [
       {
         "name": "next"
@@ -19,7 +19,6 @@
     ]
   },
   "include": [
-    "typings",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",

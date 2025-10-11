@@ -1,6 +1,6 @@
-import { useQueryParams } from '@buildeross/hooks/useQueryParams'
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
 import { Grid, Text } from '@buildeross/zord'
+import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import Pagination from 'src/components/Pagination'
 import { DaoCard } from 'src/modules/dao/components/DaoCard'
@@ -18,10 +18,34 @@ interface ExploreProps extends Partial<ExploreDaosResponse> {
 }
 
 export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }) => {
-  const query = useQueryParams()
+  const { query, push } = useRouter()
   const chain = useChainStore((x) => x.chain)
 
   const page = query.page
+
+  const onOpenDao = React.useCallback(
+    (tokenAddress: string, tokenId?: number | string | bigint) => {
+      if (tokenId === undefined || tokenId === null) {
+        push({
+          pathname: `/dao/[network]/[token]`,
+          query: {
+            network: chain.slug,
+            token: tokenAddress,
+          },
+        })
+        return
+      }
+      push({
+        pathname: `/dao/[network]/[token]/[tokenId]`,
+        query: {
+          network: chain.slug,
+          token: tokenAddress,
+          tokenId: tokenId.toString(),
+        },
+      })
+    },
+    [chain.slug, push]
+  )
 
   return (
     <Fragment>
@@ -35,15 +59,14 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
 
               return (
                 <DaoCard
-                  tokenId={dao.token?.tokenId ?? undefined}
                   chainId={chain.id}
                   key={dao.dao.tokenAddress}
                   tokenImage={dao.token?.image ?? undefined}
                   tokenName={dao.token?.name ?? undefined}
-                  collectionAddress={dao.dao.tokenAddress as string}
                   collectionName={dao.dao.name ?? undefined}
                   bid={bidInEth}
                   endTime={dao.endTime ?? undefined}
+                  onClick={() => onOpenDao(dao.dao.tokenAddress, dao.token?.tokenId)}
                 />
               )
             })}

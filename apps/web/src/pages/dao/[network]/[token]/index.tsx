@@ -44,33 +44,55 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     chainId: chainId,
   })
 
-  const openAdminTab = React.useCallback(async () => {
-    const nextQuery = { ...query } // Get existing query params
-    nextQuery['tab'] = 'admin'
-
-    await push(
-      {
-        pathname,
-        query: nextQuery,
-      },
-      undefined,
-      { shallow: true } // Prevent full page reload
-    )
-  }, [push, pathname, query])
-
   const openTokenPage = React.useCallback(
     async (tokenId: number) => {
-      await push(`/dao/${chain.slug}/${addresses.token}/${tokenId}`)
+      await push({
+        pathname: `/dao/[network]/[token]/[tokenId]`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          tokenId: tokenId.toString(),
+        },
+      })
     },
     [push, chain.slug, addresses.token]
   )
 
+  const openTab = React.useCallback(
+    async (tab: string, scroll?: boolean) => {
+      const nextQuery = { ...query } // Get existing query params
+      nextQuery['tab'] = tab
+
+      await push(
+        {
+          pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true, scroll }
+      )
+    },
+    [push, pathname, query]
+  )
+
   const openProposalCreatePage = React.useCallback(async () => {
-    await push(`/dao/${chain.slug}/${addresses.token}/proposal/create`)
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
   }, [push, chain.slug, addresses.token])
 
   const openProposalReviewPage = React.useCallback(async () => {
-    await push(`/dao/${chain.slug}/${addresses.token}/proposal/review`)
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
   }, [push, chain.slug, addresses.token])
 
   const sections = [
@@ -127,13 +149,13 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
         chain={chain}
         collectionAddress={collectionAddress}
         onOpenAuction={openTokenPage}
-        onOpenSettings={openAdminTab}
+        onOpenSettings={() => openTab('admin')}
       />
 
       <SectionHandler
         sections={sections}
         activeTab={activeTab}
-        basePath={`/dao/${chain.slug}/${collectionAddress}`}
+        onTabChange={(tab) => openTab(tab, false)}
       />
     </Flex>
   )

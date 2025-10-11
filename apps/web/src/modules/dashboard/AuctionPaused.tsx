@@ -1,7 +1,6 @@
 import { Chain } from '@buildeross/types'
 import { atoms, Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import Image from 'next/image'
-import Link from 'next/link'
 import React from 'react'
 
 import { DashboardDaoProps } from './Dashboard'
@@ -19,13 +18,14 @@ type PausedType = DashboardDaoProps & {
   chain: Partial<Chain>
   tokenAddress: string
   handleSelectAuction: () => void
+  handleOpenDaoActivity: () => void
 }
 
 export const AuctionPaused = ({
-  tokenAddress,
   name,
   chain,
   handleSelectAuction,
+  handleOpenDaoActivity,
 }: PausedType) => {
   const Paused = icons.pause
 
@@ -99,18 +99,17 @@ export const AuctionPaused = ({
             Auctions are paused.
           </Text>
         </Flex>
-        <Link href={`/dao/${chain.slug}/${tokenAddress}?tab=activity`}>
-          <Box
-            display={'inline-flex'}
-            color="text3"
-            mt={{ '@initial': 'x3', '@768': 'x1' }}
-            fontSize={18}
-            className={atoms({ textDecoration: 'underline' })}
-            onClick={handleSelectAuction}
-          >
-            See activity
-          </Box>
-        </Link>
+        <Box
+          display={'inline-flex'}
+          color="text3"
+          mt={{ '@initial': 'x3', '@768': 'x1' }}
+          fontSize={18}
+          className={atoms({ textDecoration: 'underline' })}
+          onClick={handleOpenDaoActivity}
+          cursor={'pointer'}
+        >
+          See activity
+        </Box>
       </Flex>
     </Flex>
   )

@@ -1,86 +1,78 @@
 import { ProposalState } from '@buildeross/sdk/contract'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AddressType } from '@buildeross/types'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
-import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
 
 type DaoProposalCardProps = ProposalForStatus & {
-  chainId: CHAIN_ID
-  tokenAddress: AddressType
-  currentChainSlug?: string
   userAddress?: AddressType
   votes: {
     voter: string
   }[]
+  onClick?: () => void
 }
 
 export const DaoProposalCard = ({
-  tokenAddress,
-  currentChainSlug,
   userAddress,
   votes,
+  onClick,
   ...proposal
 }: DaoProposalCardProps) => {
   const { proposalNumber, title, state } = proposal
   return (
-    <Link
-      href={`/dao/${currentChainSlug}/${tokenAddress}/vote/${proposalNumber}`}
-      passHref
+    <Flex
+      mb={'x4'}
+      direction={{ '@initial': 'column-reverse', '@768': 'row' }}
+      w={'100%'}
+      align={{ '@initial': 'flex-start', '@768': 'center' }}
+      borderColor={'border'}
+      borderStyle={'solid'}
+      borderRadius={'curved'}
+      borderWidth={'normal'}
+      py={{ '@initial': 'x3', '@768': 'x6' }}
+      px={{ '@initial': 'x6', '@768': 'x3' }}
+      position={'relative'}
+      onClick={onClick}
+      cursor={onClick ? 'pointer' : 'auto'}
     >
-      <Flex
-        mb={'x4'}
-        direction={{ '@initial': 'column-reverse', '@768': 'row' }}
-        w={'100%'}
-        align={{ '@initial': 'flex-start', '@768': 'center' }}
-        borderColor={'border'}
-        borderStyle={'solid'}
-        borderRadius={'curved'}
-        borderWidth={'normal'}
-        cursor={'pointer'}
-        py={{ '@initial': 'x3', '@768': 'x6' }}
-        px={{ '@initial': 'x6', '@768': 'x3' }}
-        position={'relative'}
+      <Text
+        fontSize={18}
+        fontWeight="label"
+        color={'text4'}
+        mr={'x4'}
+        display={{ '@initial': 'none', '@768': 'flex' }}
       >
-        <Text
-          fontSize={18}
-          fontWeight="label"
-          color={'text4'}
-          mr={'x4'}
-          display={{ '@initial': 'none', '@768': 'flex' }}
-        >
-          {proposalNumber}
+        {proposalNumber}
+      </Text>
+      <Flex
+        mr={'auto'}
+        align="center"
+        mb={{ '@initial': 'x2', '@768': 'x0' }}
+        w="100%"
+        justify={{ '@initial': 'space-between' }}
+      >
+        <Text fontSize={18} fontWeight="label" mr="x3">
+          {title}
         </Text>
-        <Flex
-          mr={'auto'}
-          align="center"
-          mb={{ '@initial': 'x2', '@768': 'x0' }}
-          w="100%"
-          justify={{ '@initial': 'space-between' }}
-        >
-          <Text fontSize={18} fontWeight="label" mr="x3">
-            {title}
+        <NeedsVote userAddress={userAddress} proposalState={state} votes={votes} />
+      </Flex>
+      <Flex
+        justify={'space-between'}
+        width={{ '@initial': '100%', '@768': 'unset' }}
+        align={'center'}
+        mb={{ '@initial': 'x3', '@768': 'x0' }}
+      >
+        <Box style={{ width: '225px' }}>
+          <ProposalStatus {...proposal} flipped showTime />
+        </Box>
+        <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
+          <Text fontSize={18} fontWeight="label" color={'text4'}>
+            {proposalNumber}
           </Text>
-          <NeedsVote userAddress={userAddress} proposalState={state} votes={votes} />
-        </Flex>
-        <Flex
-          justify={'space-between'}
-          width={{ '@initial': '100%', '@768': 'unset' }}
-          align={'center'}
-          mb={{ '@initial': 'x3', '@768': 'x0' }}
-        >
-          <Box style={{ width: '225px' }}>
-            <ProposalStatus {...proposal} flipped showTime />
-          </Box>
-          <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
-            <Text fontSize={18} fontWeight="label" color={'text4'}>
-              {proposalNumber}
-            </Text>
-          </Flex>
         </Flex>
       </Flex>
-    </Link>
+    </Flex>
   )
 }
 

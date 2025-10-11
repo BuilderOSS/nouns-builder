@@ -1,20 +1,20 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { BASE_URL } from '@buildeross/constants'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { atoms, Box, Icon, Stack } from '@buildeross/zord'
-import Link from 'next/link'
+import { atoms, Box, Stack } from '@buildeross/zord'
 import { useChainStore, useDaoStore } from 'src/stores'
 import { useReadContract } from 'wagmi'
 
 export const DaoMigrated = ({
   l2ChainId,
   l2TokenAddress,
+  onOpenDao,
 }: {
   l2ChainId: CHAIN_ID
   l2TokenAddress: AddressType
+  onOpenDao?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
 }) => {
   const { id: chainId } = useChainStore((x) => x.chain)
-  const migratedToChain = PUBLIC_ALL_CHAINS.find((x) => x.id === l2ChainId)
 
   const { auction } = useDaoStore((x) => x.addresses)
 
@@ -25,6 +25,15 @@ export const DaoMigrated = ({
     chainId,
   })
 
+  const linkProps = onOpenDao
+    ? { onClick: () => onOpenDao(l2ChainId, l2TokenAddress) }
+    : {
+        as: 'a',
+        href: `${BASE_URL}/dao/${l2ChainId}/${l2TokenAddress}`,
+        target: '_blank',
+        rel: 'noreferrer noopener',
+      }
+
   if (!paused) return null
 
   return (
@@ -32,18 +41,17 @@ export const DaoMigrated = ({
       <Box color="text3" fontSize={18}>
         This DAO has been migrated to L2.
       </Box>
-      <Link href={`/dao/${migratedToChain?.slug}/${l2TokenAddress}`}>
-        <Box
-          display={'inline-flex'}
-          color="text3"
-          mt="x1"
-          fontSize={18}
-          className={atoms({ textDecoration: 'underline' })}
-        >
-          View DAO on L2
-          <Icon align="center" fill="text4" id="external-16" size="sm" />
-        </Box>
-      </Link>
+      <Box
+        {...linkProps}
+        display="inline-flex"
+        color="text3"
+        mt="x1"
+        fontSize={18}
+        className={atoms({ textDecoration: 'underline' })}
+        cursor="pointer"
+      >
+        View DAO on L2
+      </Box>
     </Stack>
   )
 }

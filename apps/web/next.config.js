@@ -1,6 +1,7 @@
 const { createVanillaExtractPlugin } = require('@vanilla-extract/next-plugin')
 const { withSentryConfig } = require('@sentry/nextjs')
 const createBundleAnalyzerPlugin = require('@next/bundle-analyzer')
+const webpack = require('webpack')
 
 const {
   NEXT_PUBLIC_SENTRY_DSN,
@@ -45,9 +46,6 @@ const basicConfig = {
       '@buildeross/ui',
       '@buildeross/sdk',
     ],
-  },
-  env: {
-    BASE_URL: baseUrl,
   },
   images: {
     dangerouslyAllowSVG: true,
@@ -130,6 +128,13 @@ const basicConfig = {
     })
 
     config.resolve.fallback = { fs: false, net: false, tls: false }
+
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __BUILDEROSS_APP_ENV__: JSON.stringify('platform'),
+        __BUILDEROSS_BASE_URL__: JSON.stringify(baseUrl),
+      })
+    )
 
     return {
       ...config,

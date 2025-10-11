@@ -162,11 +162,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                       <Flex align="center" gap="x1">
                         {chainMeta?.icon && (
                           <NextImage
-                            src={
-                              PUBLIC_DEFAULT_CHAINS.find(
-                                (chain) => chain.id === dao.chainId
-                              )?.icon!
-                            }
+                            src={chainMeta?.icon}
                             layout="fixed"
                             objectFit="contain"
                             style={{ borderRadius: '12px', maxHeight: '16px' }}
