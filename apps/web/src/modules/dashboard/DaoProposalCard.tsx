@@ -1,16 +1,10 @@
 import { ProposalState } from '@buildeross/sdk/contract'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID, ProposalLinkHandler } from '@buildeross/types'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
-import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
-
-export type ProposalLinkHandler = (
-  chainId: CHAIN_ID,
-  tokenAddress: AddressType,
-  proposalNumber: number
-) => LinkWrapperOptions
 
 type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID

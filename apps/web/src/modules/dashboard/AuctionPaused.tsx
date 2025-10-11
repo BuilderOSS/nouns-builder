@@ -1,8 +1,8 @@
-import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { AddressType, Chain, DaoLinkHandler } from '@buildeross/types'
 import { Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'
-import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 import { DashboardDaoProps } from './Dashboard'
 import {
@@ -14,11 +14,6 @@ import {
   stats,
   statsBox,
 } from './dashboard.css'
-
-export type DaoLinkHandler = (
-  chainId: CHAIN_ID,
-  tokenAddress: AddressType
-) => LinkWrapperOptions
 
 type PausedType = DashboardDaoProps & {
   chain: Chain

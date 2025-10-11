@@ -114,7 +114,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   }, [push, chain.slug, addresses.token])
 
   const getProposalLink = React.useCallback(
-    (proposalNumber: number) => {
+    (_chainId: CHAIN_ID, _collectionAddress: AddressType, proposalNumber: number) => {
       return {
         href: `/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`,
       }

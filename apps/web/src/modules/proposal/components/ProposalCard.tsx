@@ -1,13 +1,13 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
+import { ProposalLinkHandler } from '@buildeross/types'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
+import { useChainStore, useDaoStore } from 'src/stores'
 
 import { statusStyle, titleStyle } from './ProposalCard.css'
 import { ProposalForStatus, ProposalStatus } from './ProposalStatus'
-
-export type ProposalLinkHandler = (proposalNumber: number) => LinkWrapperOptions
 
 type ProposalCardProps = ProposalForStatus & {
   getProposalLink?: ProposalLinkHandler
@@ -19,11 +19,13 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
 }) => {
   const { title, proposalNumber, timeCreated } = proposal
   const isMounted = useIsMounted()
+  const { token } = useDaoStore((state) => state.addresses)
+  const { id: chainId } = useChainStore((state) => state.chain)
 
-  if (!isMounted) return null
+  if (!isMounted || !token) return null
 
   return (
-    <Link link={getProposalLink?.(proposalNumber)}>
+    <Link link={getProposalLink?.(chainId, token, proposalNumber)}>
       <Flex
         direction={{ '@initial': 'column', '@768': 'row' }}
         my={'x2'}

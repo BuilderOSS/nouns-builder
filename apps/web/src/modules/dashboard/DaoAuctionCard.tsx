@@ -3,13 +3,13 @@ import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AddressType, DaoLinkHandler } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
-import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
@@ -27,12 +27,6 @@ import {
   stats,
   statsBox,
 } from './dashboard.css'
-
-export type DaoLinkHandler = (
-  chainId: CHAIN_ID,
-  tokenAddress: AddressType,
-  tokenId?: number | string | bigint
-) => LinkWrapperOptions
 
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType

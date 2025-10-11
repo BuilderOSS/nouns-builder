@@ -6,7 +6,12 @@ import {
   dashboardRequest,
   ProposalFragment,
 } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import {
+  AddressType,
+  CHAIN_ID,
+  DaoLinkHandler,
+  ProposalLinkHandler,
+} from '@buildeross/types'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
@@ -14,13 +19,11 @@ import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
 import { DaoFeed } from '../dao'
-import { DaoAuctionCard, DaoLinkHandler } from './DaoAuctionCard'
-import { DaoProposals, ProposalLinkHandler } from './DaoProposals'
+import { DaoAuctionCard } from './DaoAuctionCard'
+import { DaoProposals } from './DaoProposals'
 import { DashboardLayout, DashPage } from './DashboardLayout'
 import { DashConnect } from './DashConnect'
 import { AuctionCardSkeleton, DAOCardSkeleton, ProposalCardSkeleton } from './Skeletons'
-
-export type { DaoLinkHandler, ProposalLinkHandler }
 
 const ACTIVE_PROPOSAL_STATES = [
   ProposalState.Pending,

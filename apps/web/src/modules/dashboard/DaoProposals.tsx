@@ -1,23 +1,21 @@
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import {
+  AddressType,
+  CHAIN_ID,
+  DaoLinkHandler,
+  ProposalLinkHandler,
+} from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
-import { LinkWrapper as Link, LinkWrapperOptions } from 'src/components/LinkWrapper'
+import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
-import { DaoProposalCard, ProposalLinkHandler } from './DaoProposalCard'
+import { DaoProposalCard } from './DaoProposalCard'
 import { DashboardDaoProps } from './Dashboard'
 import { daoName } from './dashboard.css'
-
-export type DaoLinkHandler = (
-  chainId: CHAIN_ID,
-  tokenAddress: AddressType
-) => LinkWrapperOptions
-
-export { type ProposalLinkHandler }
 
 export const DaoProposals = ({
   daoImage,

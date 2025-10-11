@@ -1,20 +1,19 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
+import { ProfileLinkHandler } from '@buildeross/types'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
 import React from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 
-import { MemberCard, ProfileLinkHandler } from './MemberListCard'
+import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
 
 type MembersQuery = {
   membersList: DaoVoter[]
 }
-
-export type { ProfileLinkHandler }
 
 export const MembersList = ({
   totalSupply,
