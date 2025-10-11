@@ -1,7 +1,8 @@
 import { LinkOptions } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React from 'react'
-import { useLinkComponent } from 'src/components/LinkComponentProvider'
+
+import { useLinkComponent } from '../LinkComponentProvider'
 
 type FlexProps = React.ComponentProps<typeof Flex>
 

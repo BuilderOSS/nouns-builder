@@ -1,9 +1,9 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { ProposalLinkHandler } from '@buildeross/types'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 import { useChainStore, useDaoStore } from 'src/stores'
 
 import { statusStyle, titleStyle } from './ProposalCard.css'

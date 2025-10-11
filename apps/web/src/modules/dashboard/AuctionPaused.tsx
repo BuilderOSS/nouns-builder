@@ -1,8 +1,8 @@
 import { AddressType, Chain, DaoLinkHandler } from '@buildeross/types'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 import { DashboardDaoProps } from './Dashboard'
 import {

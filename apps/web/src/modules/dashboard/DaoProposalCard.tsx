@@ -1,8 +1,8 @@
 import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID, ProposalLinkHandler } from '@buildeross/types'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
 

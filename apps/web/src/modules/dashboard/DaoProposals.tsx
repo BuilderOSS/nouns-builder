@@ -8,10 +8,10 @@ import {
   ProposalLinkHandler,
 } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import { FallbackNextImage } from 'src/components/FallbackNextImage'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 import { DaoProposalCard } from './DaoProposalCard'
 import { DashboardDaoProps } from './Dashboard'

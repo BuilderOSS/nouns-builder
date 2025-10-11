@@ -1,9 +1,9 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { AddressType, ProfileLinkHandler } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { LinkWrapper as Link } from 'src/components/LinkWrapper'
 
 interface FounderProps {
   wallet: AddressType

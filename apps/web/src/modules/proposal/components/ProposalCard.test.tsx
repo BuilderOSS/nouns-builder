@@ -2,6 +2,8 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import React from 'react'
+import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
+import { BUILDER_DAO } from 'src/test/fixtures/dao'
 import { render } from 'src/test/utils'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -27,7 +29,11 @@ describe('proposal card', () => {
         state={ProposalState.Succeeded}
         voteEnd={dayjs('2/1/21').unix()}
         voteStart={dayjs('1/1/21').unix()}
-      />
+      />,
+      {
+        chain: FOUNDRY_CHAIN,
+        addresses: BUILDER_DAO,
+      }
     )
 
     expect(screen.getByText(/A proposal title/)).toBeInTheDocument()
@@ -44,7 +50,11 @@ describe('proposal card', () => {
         state={ProposalState.Active}
         voteEnd={dayjs(date).add(2, 'day').unix()}
         voteStart={dayjs(date).subtract(1, 'day').unix()}
-      />
+      />,
+      {
+        chain: FOUNDRY_CHAIN,
+        addresses: BUILDER_DAO,
+      }
     )
 
     expect(screen.getByText(/A proposal title/)).toBeInTheDocument()
