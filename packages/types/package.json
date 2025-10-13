@@ -40,16 +40,20 @@
   },
   "scripts": {
     "build": "tsup",
-    "postbuild": "cp src/globals.d.ts dist/",
     "clean": "rm -rf dist .turbo",
     "lint": "eslint src --fix",
+    "postbuild": "cp src/globals.d.ts dist/",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
-      ".": ["./dist/index.d.ts"],
-      "globals": ["./dist/globals.d.ts"]
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "globals": [
+        "./dist/globals.d.ts"
+      ]
     }
   }
 }

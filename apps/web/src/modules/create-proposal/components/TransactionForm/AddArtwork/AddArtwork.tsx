@@ -1,17 +1,15 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
-import { AddressType } from '@buildeross/types'
+import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
+import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { transformFileProperties } from 'src/modules/create-dao'
-import { TransactionType } from 'src/modules/create-proposal/constants'
-import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
-import { useChainStore, useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
+import { useArtworkStore } from '../../../stores/useArtworkStore'
 import { AddArtworkForm } from './AddArtworkForm'
 
 export const AddArtwork = () => {

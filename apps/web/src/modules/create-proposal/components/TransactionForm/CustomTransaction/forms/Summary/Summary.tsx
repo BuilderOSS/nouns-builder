@@ -8,9 +8,9 @@ import {
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { useCustomTransactionStore } from 'src/modules/create-proposal'
 import { encodeFunctionData } from 'viem'
 
+import { useCustomTransactionStore } from '../../../../../stores/useCustomTransactionStore'
 import {
   defaultBackButtonVariants,
   transactionFormButtonWithPrev,

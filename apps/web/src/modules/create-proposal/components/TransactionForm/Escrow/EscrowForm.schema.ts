@@ -3,8 +3,28 @@ import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
 
-export const NULL_ADDRESS: AddressType =
-  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase() as AddressType
+export const getInitialEscrowFormState = (): EscrowFormValues => ({
+  tokenAddress: undefined,
+  tokenMetadata: undefined,
+  clientAddress: '',
+  recipientAddress: '',
+  milestones: [
+    {
+      amount: 0.5,
+      title: 'Milestone 1',
+      endDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 10)
+        .toISOString()
+        .split('T')[0],
+      mediaUrl: '',
+      mediaType: undefined,
+      mediaFileName: '',
+      description: 'About Milestone 1',
+    },
+  ],
+  safetyValveDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+    .toISOString()
+    .split('T')[0],
+})
 
 export interface MilestoneFormValues {
   amount: number

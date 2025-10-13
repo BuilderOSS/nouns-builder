@@ -2,27 +2,26 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { uploadJson } from '@buildeross/ipfs-service'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
+import {
+  deployEscrowAbi,
+  ESCROW_TYPE,
+  getEscrowBundler,
+  NULL_ADDRESS,
+} from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Stack } from '@buildeross/zord'
 import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
-import { TransactionType } from 'src/modules/create-proposal/constants'
-import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useChainStore, useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import useSWR from 'swr'
 import { Address, encodeFunctionData, formatUnits, parseUnits } from 'viem'
 
 import EscrowForm from './EscrowForm'
-import { EscrowFormValues, NULL_ADDRESS } from './EscrowForm.schema'
-import {
-  deployEscrowAbi,
-  encodeEscrowData,
-  ESCROW_TYPE,
-  getEscrowBundler,
-} from './EscrowUtils'
+import { EscrowFormValues } from './EscrowForm.schema'
+import { encodeEscrowData } from './EscrowUtils'
 
 export const Escrow: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)

@@ -4,12 +4,12 @@ import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, DaoLinkHandler } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import Image from 'next/image'
 import React, { useState } from 'react'
-import { FallbackNextImage } from 'src/components/FallbackNextImage'
 import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
@@ -45,6 +45,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   } = props
   const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
   const { endTime } = currentAuction ?? {}
+  const Image = useImageComponent()
 
   const [isEnded, setIsEnded] = useState(false)
   const timeoutRefs = React.useRef<NodeJS.Timeout[]>([])
@@ -111,11 +112,9 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
         link={getDaoLink?.(chainId, tokenAddress, currentAuction?.token?.tokenId)}
       >
         <Box className={daoAvatarBox}>
-          <FallbackNextImage
+          <FallbackImage
             className={daoAvatar}
             srcList={getFetchableUrls(tokenImage)}
-            unoptimized
-            layout="fixed"
             alt=""
           />
         </Box>
@@ -124,10 +123,13 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
             {chain.icon && (
               <Image
                 src={chain.icon}
-                layout="fixed"
-                objectFit="contain"
-                style={{ borderRadius: '12px', maxHeight: '22px' }}
-                alt=""
+                style={{
+                  borderRadius: '12px',
+                  maxHeight: '22px',
+                  maxWidth: '22px',
+                  objectFit: 'contain',
+                }}
+                alt={chain.name}
                 height={22}
                 width={22}
               />

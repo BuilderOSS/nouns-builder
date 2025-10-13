@@ -1,8 +1,8 @@
+import { TransactionType } from '@buildeross/types'
 import { render, screen, within } from '@testing-library/react'
 import { Formik } from 'formik'
 import { vi } from 'vitest'
 
-import { TransactionType } from '../../constants/transactionType'
 import { Transactions } from './Transactions'
 
 describe('List of transactions', () => {

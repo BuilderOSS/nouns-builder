@@ -19,8 +19,8 @@ import React, {
   useEffect,
   useMemo,
 } from 'react'
-import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
 
+import { useArtworkStore } from '../../stores/useArtworkStore'
 import { artworkPreviewPanel } from './ArtworkUpload.css'
 
 const previewVariants = {

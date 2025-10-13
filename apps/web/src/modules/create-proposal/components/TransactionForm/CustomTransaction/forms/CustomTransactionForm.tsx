@@ -3,8 +3,8 @@ import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import { Form, Formik, FormikValues } from 'formik'
 import React from 'react'
-import { useCustomTransactionStore } from 'src/modules/create-proposal'
 
+import { useCustomTransactionStore } from '../../../../stores/useCustomTransactionStore'
 import { backButton, transactionFormButtonWithPrev } from './CustomTransactionForm.css'
 
 interface FormField {

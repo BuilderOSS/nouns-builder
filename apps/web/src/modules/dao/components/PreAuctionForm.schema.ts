@@ -2,8 +2,8 @@ import { Duration } from '@buildeross/types'
 import {
   addressValidationOptionalSchema,
   durationValidationSchema,
+  priceValidationSchema,
 } from '@buildeross/utils/yup'
-import { auctionReservePriceValidationSchema } from 'src/modules/create-dao'
 import * as Yup from 'yup'
 
 export interface PreAuctionFormValues {
@@ -15,7 +15,7 @@ export interface PreAuctionFormValues {
 
 export const preAuctionValidationSchema = Yup.object().shape({
   auctionDuration: durationValidationSchema(),
-  auctionReservePrice: auctionReservePriceValidationSchema,
+  auctionReservePrice: priceValidationSchema,
   auctionRewardRecipient: addressValidationOptionalSchema.when(
     'auctionRewardPercentage',
     (auctionRewardPercentage, schema) => {
@@ -24,8 +24,5 @@ export const preAuctionValidationSchema = Yup.object().shape({
       return schema
     }
   ),
-  auctionRewardPercentage: Yup.number()
-    .transform((value) => (isNaN(value) ? undefined : value))
-    .required('*')
-    .max(50, '<= 50%'),
+  auctionRewardPercentage: priceValidationSchema.max(50, '<= 50%'),
 })

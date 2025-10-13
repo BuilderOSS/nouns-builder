@@ -1,16 +1,14 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, TransactionType } from '@buildeross/types'
+import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { defaultHelperTextStyle, defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Paragraph, Spinner, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { TransactionType } from 'src/modules/create-proposal/constants'
-import { usePrepareMigration } from 'src/modules/create-proposal/hooks/usePrepareMigration'
-import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useChainStore, useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { useReadContract } from 'wagmi'
 
-import { DropdownSelect } from '../../DropdownSelect'
+import { usePrepareMigration } from '../../../hooks/usePrepareMigration'
 
 const chainOptions = [{ label: 'Base', value: CHAIN_ID.BASE }]
 

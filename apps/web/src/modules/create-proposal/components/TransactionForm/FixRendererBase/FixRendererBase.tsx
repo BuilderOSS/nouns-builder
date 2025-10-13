@@ -1,7 +1,6 @@
+import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { Box, Button, Paragraph } from '@buildeross/zord'
-import { useRendererBaseFix } from 'src/modules/create-proposal/hooks/useRendererBaseFix'
-import { useProposalStore } from 'src/modules/create-proposal/stores'
-import { useChainStore, useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 
 export const FixRendererBase = () => {
   const addresses = useDaoStore((state) => state.addresses)

@@ -3,24 +3,18 @@ import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
+import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
+import { NULL_ADDRESS } from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  DropdownSelect,
-  SelectOption,
-} from 'src/modules/create-proposal/components/DropdownSelect'
 import { useChainStore, useDaoStore } from 'src/stores'
 import { formatEther, formatUnits, getAddress, isAddress } from 'viem'
 import { useBalance, useReadContract } from 'wagmi'
 
-import {
-  EscrowFormValues,
-  NULL_ADDRESS,
-  TokenMetadataFormValidated,
-} from './EscrowForm.schema'
+import { EscrowFormValues, TokenMetadataFormValidated } from './EscrowForm.schema'
 
 type TokenOption = '' | 'eth' | AddressType | 'custom'
 

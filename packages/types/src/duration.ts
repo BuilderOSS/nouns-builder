@@ -1,4 +1,4 @@
-export interface Duration {
+export type Duration = {
   seconds?: number
   days?: number
   hours?: number

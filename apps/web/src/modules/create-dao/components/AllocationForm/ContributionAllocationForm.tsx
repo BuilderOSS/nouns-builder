@@ -9,7 +9,7 @@ import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { useChainStore } from 'src/stores'
 
-import { TokenAllocation } from '../AllocationForm'
+import { TokenAllocation } from './AllocationForm'
 import { validationSchemaContributions } from './AllocationForm.schema'
 import { ContributionChain } from './ContributionAllocation'
 import { DaoCopyAddress } from './DaoCopyAddress'

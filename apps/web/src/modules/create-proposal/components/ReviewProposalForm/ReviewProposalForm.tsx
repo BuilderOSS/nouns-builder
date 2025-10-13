@@ -12,12 +12,16 @@ import React, { useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
 import { ErrorResult } from 'src/services/errorResult'
 import { SimulationOutput, SimulationResult } from 'src/services/simulationService'
-import { useChainStore, useDaoStore } from 'src/stores'
+import {
+  BuilderTransaction,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from 'src/stores'
 import { toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { BuilderTransaction, useProposalStore } from '../../stores'
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
 import { ERROR_CODE, FormValues, validationSchema } from './fields'
 import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'

@@ -13,9 +13,9 @@ import { EscrowDetailsDisplay } from './EscrowDetailsDisplay'
 import {
   EscrowFormProps,
   EscrowFormSchema,
+  getInitialEscrowFormState,
   MilestoneFormValues,
 } from './EscrowForm.schema'
-import { INITIAL_ESCROW_FORM_STATE } from './EscrowUtils'
 import { MilestoneForm } from './MilestoneForm'
 import { TokenSelectionForm } from './TokenSelectionForm'
 
@@ -57,7 +57,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
     <Box>
       <Formik
         initialValues={{
-          ...INITIAL_ESCROW_FORM_STATE,
+          ...getInitialEscrowFormState(),
           clientAddress: escrowDelegate || treasury || '',
         }}
         validationSchema={EscrowFormSchema}

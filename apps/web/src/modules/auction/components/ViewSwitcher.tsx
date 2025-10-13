@@ -1,23 +1,27 @@
 import { Button, Flex } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-import { buttonTab } from 'src/modules/auction/components/AuctionChart/AuctionChart.css'
-import { TopSectionView } from 'src/modules/auction/components/DaoAuctionSection'
 
 import { auctionWrapVariants, switcherBox } from './Auction.css'
+import { buttonTab } from './AuctionChart/AuctionChart.css'
+
+export enum ViewSection {
+  Auction = 'auction',
+  Chart = 'chart',
+}
 
 export const ViewSwitcher = ({
   topSectionView,
-  setTopSectionView,
+  setViewSection,
   children,
 }: {
-  topSectionView: TopSectionView
-  setTopSectionView: (view: TopSectionView) => void
+  topSectionView: ViewSection
+  setViewSection: (view: ViewSection) => void
   children: ReactNode
 }) => (
   <Flex className={auctionWrapVariants['post']}>
     <Flex w={'100%'} justify={'center'} mb={'x3'}>
       <Flex className={switcherBox}>
-        {Object.values(TopSectionView).map((view) => (
+        {Object.values(ViewSection).map((view) => (
           <Button
             key={view}
             variant={'ghost'}
@@ -25,7 +29,7 @@ export const ViewSwitcher = ({
             pos={'relative'}
             px={'x0'}
             mr={'x3'}
-            onClick={() => setTopSectionView(view)}
+            onClick={() => setViewSection(view)}
             className={
               view === topSectionView ? buttonTab['selected'] : buttonTab['unselected']
             }

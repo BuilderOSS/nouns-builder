@@ -1,6 +1,7 @@
 // Re-export hooks (maintains existing import paths)
 export { type ChainStoreWithHydration, useChainStore } from './hooks/useChainStore'
 export { useDaoStore } from './hooks/useDaoStore'
+export * from './hooks/useProposalStore'
 
 // Export store factories
 export {

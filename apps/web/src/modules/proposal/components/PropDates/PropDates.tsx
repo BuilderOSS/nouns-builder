@@ -1,15 +1,12 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
+import { useInvoiceData } from '@buildeross/hooks/useInvoiceData'
 import { getPropDates, type PropDate } from '@buildeross/sdk/eas'
 import { Proposal } from '@buildeross/sdk/subgraph'
+import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { useMemo, useState } from 'react'
-import {
-  getEscrowBundler,
-  getEscrowBundlerV1,
-} from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
-import { useInvoiceData } from 'src/modules/proposal/components/ProposalDescription/MilestoneDetails/useInvoiceData'
 import { useChainStore, useDaoStore } from 'src/stores'
 import { skeletonAnimation } from 'src/styles/animations.css'
 import { propPageWrapper } from 'src/styles/Proposals.css'

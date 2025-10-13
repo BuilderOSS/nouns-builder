@@ -12,7 +12,6 @@ import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import { formatFounderAllocation } from 'src/modules/create-dao'
 import { useChainStore, useDaoStore } from 'src/stores'
 import {
   deployCheckboxHelperText,
@@ -31,10 +30,19 @@ import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
+import { TokenAllocation } from '../AllocationForm'
 import { PreviewArtwork } from './PreviewArtwork'
 import { ReviewItem } from './ReviewItem'
 import { ReviewSection } from './ReviewSection'
 import { SuccessfulDeploy } from './SuccessfulDeploy'
+
+const formatFounderAllocation = ({
+  founderAddress,
+  allocationPercentage,
+  endDate,
+}: TokenAllocation): string => {
+  return `${founderAddress} will receive ${allocationPercentage}% of Tokens, until ${endDate}.`
+}
 
 interface ReviewAndDeploy {
   title: string

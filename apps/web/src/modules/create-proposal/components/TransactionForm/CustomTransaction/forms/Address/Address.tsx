@@ -2,13 +2,13 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import React, { useEffect } from 'react'
-import {
-  initCustomTransaction,
-  useCustomTransactionStore,
-} from 'src/modules/create-proposal'
 import { useChainStore } from 'src/stores'
 import { isAddress } from 'viem'
 
+import {
+  initCustomTransaction,
+  useCustomTransactionStore,
+} from '../../../../../stores/useCustomTransactionStore'
 import { CustomTransactionForm } from '../CustomTransactionForm'
 import { contractAddressFields, validateContractAddress } from './fields'
 

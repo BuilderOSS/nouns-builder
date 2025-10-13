@@ -3,8 +3,7 @@ import { AddressType, CHAIN_ID, ProposalLinkHandler } from '@buildeross/types'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
-
-import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
+import { ProposalForStatus, ProposalStatus } from 'src/modules/proposal'
 
 type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID

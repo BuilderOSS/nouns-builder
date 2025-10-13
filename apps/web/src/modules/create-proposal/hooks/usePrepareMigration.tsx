@@ -11,10 +11,9 @@ import {
   messengerAbi,
 } from '@buildeross/sdk/contract'
 import { DaoMember, encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
-import { AddressType, BytesType, CHAIN_ID } from '@buildeross/types'
+import { AddressType, BytesType, CHAIN_ID, Transaction } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import axios from 'axios'
-import { Transaction } from 'src/modules/create-proposal/stores'
 import { useChainStore, useDaoStore } from 'src/stores'
 import useSWRImmutable from 'swr/immutable'
 import { encodeFunctionData } from 'viem'

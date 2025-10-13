@@ -1,5 +1,5 @@
+import { TransactionType } from '@buildeross/types'
 import React, { ReactNode } from 'react'
-import { TransactionType } from 'src/modules/create-proposal/constants'
 
 import { AddArtwork } from './AddArtwork'
 import { Airdrop } from './Airdrop'

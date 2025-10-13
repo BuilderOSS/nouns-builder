@@ -1,8 +1,8 @@
 import { Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
+import { TRANSACTION_TYPES, TransactionType } from 'src/modules/proposal'
 
-import { TRANSACTION_TYPES, TransactionType } from '../../constants'
-import { TransactionTypeIcon } from '../TransactionTypeIcon'
+import { TransactionTypeIcon } from '../TransactionCard'
 
 interface TransactionTypeCardProps {
   transactionType: TransactionType
