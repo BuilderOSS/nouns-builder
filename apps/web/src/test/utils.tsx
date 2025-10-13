@@ -1,14 +1,14 @@
-import { Chain } from '@buildeross/types'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, render, renderHook, RenderOptions, waitFor } from '@testing-library/react'
-import * as React from 'react'
 import {
   ChainStoreProvider,
   createChainStore,
   createDaoStore,
   DaoContractAddresses,
   DaoStoreProvider,
-} from 'src/stores'
+} from '@buildeross/stores'
+import { Chain } from '@buildeross/types'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { act, render, renderHook, RenderOptions, waitFor } from '@testing-library/react'
+import * as React from 'react'
 import { SWRConfig } from 'swr'
 import { expect } from 'vitest'
 import { useConnect, useDisconnect, WagmiProvider } from 'wagmi'

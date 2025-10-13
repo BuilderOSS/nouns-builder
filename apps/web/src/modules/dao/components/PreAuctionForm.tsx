@@ -1,5 +1,6 @@
 import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import {
   DaysHoursMinsSecs,
@@ -18,7 +19,6 @@ import { Box, Flex, Stack } from '@buildeross/zord'
 import { Formik, FormikValues } from 'formik'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { formatEther, isAddressEqual, parseEther } from 'viem'
 import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'

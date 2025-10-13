@@ -1,3 +1,4 @@
+import { useChainStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, Stack } from '@buildeross/zord'
 import Head from 'next/head'
@@ -5,7 +6,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
-import { useChainStore } from 'src/stores'
 import { whyCreateButton, whyTextStyle } from 'src/styles/about.css'
 
 import { NextPageWithLayout } from './_app'

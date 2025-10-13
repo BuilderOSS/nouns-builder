@@ -1,15 +1,14 @@
-import { Chain } from '@buildeross/types'
-import { ConnectModalProvider } from '@buildeross/ui/ConnectModalProvider'
-import { Box } from '@buildeross/zord'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
-import React, { ReactNode, useMemo } from 'react'
 import {
   ChainStoreProvider,
   createChainStore,
   createDaoStore,
-  DaoContractAddresses,
   DaoStoreProvider,
-} from 'src/stores'
+} from '@buildeross/stores'
+import type { Chain, DaoContractAddresses } from '@buildeross/types'
+import { ConnectModalProvider } from '@buildeross/ui/ConnectModalProvider'
+import { Box } from '@buildeross/zord'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
+import React, { ReactNode, useMemo } from 'react'
 
 import { Nav as DefaultLayoutNav } from '../DefaultLayout/Nav'
 

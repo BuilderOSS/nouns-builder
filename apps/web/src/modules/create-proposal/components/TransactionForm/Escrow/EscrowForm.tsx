@@ -1,4 +1,5 @@
 import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -6,7 +7,6 @@ import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { FieldArray, Form, Formik } from 'formik'
 import { truncate } from 'lodash'
 import { useCallback, useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { formatUnits, parseUnits } from 'viem'
 
 import { EscrowDetailsDisplay } from './EscrowDetailsDisplay'

@@ -1,9 +1,9 @@
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
+import { DaoContractAddresses, useChainStore, useProposalStore } from '@buildeross/stores'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
-import { DaoContractAddresses, useChainStore, useProposalStore } from 'src/stores'
 
 import { default as summary } from './summary.md'
 

@@ -5,10 +5,10 @@ import {
   tokenAbi,
   treasuryAbi,
 } from '@buildeross/sdk/contract'
+import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
-import { DaoContractAddresses } from 'src/stores'
 import { encodeFunctionData, parseEther } from 'viem'
 
 import { AdminFormValues } from './AdminForm.schema'

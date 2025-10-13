@@ -1,6 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { getProposal, Proposal } from '@buildeross/sdk/subgraph'
+import { useChainStore } from '@buildeross/stores'
 import { BytesType } from '@buildeross/types'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
@@ -10,7 +11,6 @@ import {
 } from '@buildeross/utils/proposalState'
 import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
-import { useChainStore } from 'src/stores'
 import { useSWRConfig } from 'swr'
 import { Address } from 'viem'
 

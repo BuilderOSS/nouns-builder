@@ -70,6 +70,9 @@ importers:
       '@buildeross/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
+      '@buildeross/stores':
+        specifier: workspace:*
+        version: link:../../packages/stores
       '@buildeross/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -581,6 +584,43 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
+
+  packages/stores:
+    dependencies:
+      '@buildeross/constants':
+        specifier: workspace:*
+        version: link:../constants
+      zustand:
+        specifier: ^5.0.4
+        version: 5.0.5(@types/react@19.1.5)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
+    devDependencies:
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@buildeross/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.15.21
+      '@types/react':
+        specifier: ^19.1.5
+        version: 19.1.5
+      eslint:
+        specifier: 8.57.1
+        version: 8.57.1
+      react:
+        specifier: ^19.1.0
+        version: 19.1.0
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.4.2)(postcss@8.5.3)(typescript@5.8.3)(yaml@2.8.0)

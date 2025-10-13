@@ -1,6 +1,12 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
 import {
+  BuilderTransaction,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
+import {
   AddressType,
   CHAIN_ID,
   ErrorResult,
@@ -16,12 +22,6 @@ import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
 import React, { useState } from 'react'
-import {
-  BuilderTransaction,
-  useChainStore,
-  useDaoStore,
-  useProposalStore,
-} from 'src/stores'
 import { toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'

@@ -1,11 +1,11 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo } from 'react'
-import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 

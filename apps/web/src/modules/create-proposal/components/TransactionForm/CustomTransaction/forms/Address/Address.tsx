@@ -1,8 +1,8 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { useChainStore } from '@buildeross/stores'
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'
 import React, { useEffect } from 'react'
-import { useChainStore } from 'src/stores'
 import { isAddress } from 'viem'
 
 import {

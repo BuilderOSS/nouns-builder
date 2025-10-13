@@ -1,3 +1,4 @@
+import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID, type TokenAllocation } from '@buildeross/types'
 import { defaultBackButton, defaultFormButtonWithPrev } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -5,7 +6,6 @@ import { Button, Flex, Icon } from '@buildeross/zord'
 import { FieldArray, Form, Formik, FormikProps } from 'formik'
 import sum from 'lodash/sum'
 import React, { useRef, useState } from 'react'
-import { useChainStore } from 'src/stores'
 import { useAccount } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 

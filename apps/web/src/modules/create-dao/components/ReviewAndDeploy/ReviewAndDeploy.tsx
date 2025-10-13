@@ -3,6 +3,7 @@ import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -12,7 +13,6 @@ import { isTestnetChain, toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import {
   decodeEventLog,
   encodeAbiParameters,

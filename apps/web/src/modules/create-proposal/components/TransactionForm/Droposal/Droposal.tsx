@@ -1,10 +1,10 @@
 import { PUBLIC_ZORA_NFT_CREATOR } from '@buildeross/constants/addresses'
 import { zoraNFTCreatorAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
-import { useChainStore, useProposalStore } from 'src/stores'
 import { encodeFunctionData, parseEther } from 'viem'
 
 import { DroposalForm } from './DroposalForm'

@@ -1,4 +1,5 @@
 import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
@@ -7,7 +8,6 @@ import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 
 import {
   useWalletConnect,

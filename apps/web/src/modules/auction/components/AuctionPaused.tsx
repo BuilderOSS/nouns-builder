@@ -1,8 +1,8 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { atoms, Box, Stack } from '@buildeross/zord'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { useReadContract } from 'wagmi'
 
 export const AuctionPaused: React.FC = () => {

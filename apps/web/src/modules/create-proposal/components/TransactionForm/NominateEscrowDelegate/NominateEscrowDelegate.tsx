@@ -6,6 +6,7 @@ import {
   ESCROW_DELEGATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { Transaction, TransactionType } from '@buildeross/types'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -14,7 +15,6 @@ import { Box, Button } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
-import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { encodeFunctionData, getAddress, Hex, zeroHash } from 'viem'
 import * as yup from 'yup'
 

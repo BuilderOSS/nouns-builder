@@ -1,12 +1,12 @@
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { useReadContracts } from 'wagmi'
 
 import { responsiveFlex } from './ProposalNavigation.css'

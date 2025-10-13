@@ -3,6 +3,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
+import { useChainStore } from '@buildeross/stores'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -17,7 +18,6 @@ import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore } from 'src/stores'
 import {
   daosContainer,
   loadingSkeleton,

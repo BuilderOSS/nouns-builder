@@ -1,10 +1,10 @@
 import { useAvailableUpgrade } from '@buildeross/hooks/useAvailableUpgrade'
+import { DaoContractAddresses, useChainStore, useProposalStore } from '@buildeross/stores'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
-import { DaoContractAddresses, useChainStore, useProposalStore } from 'src/stores'
 
 import { FixRendererBase } from '../FixRendererBase'
 import { v1_1_0, v1_2_0, v2_0_0 } from './versions'

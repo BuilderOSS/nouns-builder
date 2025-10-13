@@ -3,11 +3,11 @@ import {
   PUBLIC_NOUNS_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { useChainStore } from '@buildeross/stores'
 import { DatePicker, SmartInput } from '@buildeross/ui/Fields'
 import { yearsAhead } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
-import { useChainStore } from 'src/stores'
 
 import { TokenAllocation } from './AllocationForm'
 import { validationSchemaContributions } from './AllocationForm.schema'

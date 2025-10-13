@@ -1,10 +1,10 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
 import React from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 
 import { MemberCard } from './MemberListCard'

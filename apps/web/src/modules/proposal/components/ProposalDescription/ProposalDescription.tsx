@@ -8,13 +8,13 @@ import {
   SubgraphSDK,
   Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
+import { useChainStore } from '@buildeross/stores'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { ReactNode, useMemo } from 'react'
-import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 
 import { propPageWrapper } from '../styles.css'

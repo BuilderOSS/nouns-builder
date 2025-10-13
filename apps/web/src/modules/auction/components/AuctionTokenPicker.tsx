@@ -1,10 +1,10 @@
+import { useChainStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as OptionalLink } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-import { useChainStore } from 'src/stores'
 
 import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
 import {

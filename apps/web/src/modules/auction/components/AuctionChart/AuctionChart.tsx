@@ -1,9 +1,9 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { AuctionHistoryQuery } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import axios from 'axios'
 import React, { useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 
 import { AuctionGraph } from './AuctionGraph'

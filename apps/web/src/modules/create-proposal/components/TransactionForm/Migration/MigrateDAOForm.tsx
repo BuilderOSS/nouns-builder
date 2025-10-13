@@ -1,11 +1,11 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { defaultHelperTextStyle, defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Paragraph, Spinner, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { useReadContract } from 'wagmi'
 
 import { usePrepareMigration } from '../../../hooks/usePrepareMigration'

@@ -1,5 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { Chain } from '@buildeross/types'
+import type { Chain } from '@buildeross/types'
 import { createStore } from 'zustand'
 import { createJSONStorage, persist, StorageValue } from 'zustand/middleware'
 

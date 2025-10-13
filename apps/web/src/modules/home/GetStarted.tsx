@@ -1,8 +1,8 @@
+import { useChainStore } from '@buildeross/stores'
 import { Button } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useChainStore } from 'src/stores'
 import { useAccount, useSwitchChain } from 'wagmi'
 
 import { marqueeButton } from './Home.css'

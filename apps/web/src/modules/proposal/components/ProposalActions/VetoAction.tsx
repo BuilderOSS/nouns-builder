@@ -1,9 +1,9 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { Address } from 'viem'
 import { useReadContract } from 'wagmi'
 

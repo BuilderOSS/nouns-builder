@@ -1,10 +1,10 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { useChainStore } from '@buildeross/stores'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Button, Flex } from '@buildeross/zord'
 import { CastAddData, Message, SignatureScheme } from '@farcaster/hub-nodejs'
 import axios from 'axios'
 import React, { useMemo } from 'react'
-import { useChainStore } from 'src/stores'
 import useSWRInfinite from 'swr/infinite'
 
 import { CardSkeleton } from './CardSkeleton'

@@ -1,10 +1,10 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, L2MigratedResponse } from '@buildeross/types'
 import { Stack } from '@buildeross/zord'
 import axios from 'axios'
-import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { useReadContract } from 'wagmi'
 
