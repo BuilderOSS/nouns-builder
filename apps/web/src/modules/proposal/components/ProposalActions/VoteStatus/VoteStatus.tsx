@@ -3,14 +3,14 @@ import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
-import { useDaoStore } from 'src/stores'
-import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { getAddress } from 'viem'
 import { useAccount, useWatchContractEvent } from 'wagmi'
 
+import { proposalActionButtonVariants } from '../ProposalActions.css'
 import Pending from './Pending'
 import Vote from './Vote'
 import VoteModal from './VoteModal'
@@ -41,6 +41,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
   daoName,
   title,
 }) => {
+  const chain = useChainStore((x) => x.chain)
   const { address: userAddress } = useAccount()
   const { governor } = useDaoStore((state) => state.addresses)
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false)
@@ -137,6 +138,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
             align={'center'}
           >
             <ContractButton
+              chainId={chain.id}
               handleClick={handleOpenVoteModal}
               className={proposalActionButtonVariants['vote']}
               w={{ '@initial': '100%', '@768': 'auto' }}

@@ -53,6 +53,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         <OptionalLink
           enabled={hasPreviousToken}
           link={getAuctionLink(chainId, collection, data?.prev)}
+          aria-label="Previous Auction"
         >
           <Flex
             align={'center'}
@@ -68,6 +69,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         <OptionalLink
           enabled={hasNextToken}
           link={getAuctionLink(chainId, collection, data?.next)}
+          aria-label="Next Auction"
         >
           <Flex
             align={'center'}
@@ -83,6 +85,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
         <OptionalLink
           enabled={hasLatestToken}
           link={getAuctionLink(chainId, collection, latestTokenId)}
+          aria-label={latestText}
         >
           <Flex
             align={'center'}

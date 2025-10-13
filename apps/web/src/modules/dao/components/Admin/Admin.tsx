@@ -1,8 +1,8 @@
 import { Flex } from '@buildeross/zord'
 import React from 'react'
 import { useDaoStore } from 'src/stores'
-import { sectionWrapperStyle } from 'src/styles/dao.css'
 
+import { adminSection } from '../../styles/Section.css'
 import { AdminForm } from '../AdminForm/AdminForm'
 import { AuctionRewards } from './AuctionRewards'
 
@@ -18,7 +18,7 @@ export const Admin: React.FC<AdminProps> = ({ onOpenProposalReview }) => {
   }
 
   return (
-    <Flex direction={'column'} className={sectionWrapperStyle['admin']} mx={'auto'}>
+    <Flex direction={'column'} className={adminSection} mx={'auto'}>
       <Flex direction={'column'} w={'100%'}>
         <AdminForm onOpenProposalReview={onOpenProposalReview} />
         <AuctionRewards auctionAddress={addresses.auction} />

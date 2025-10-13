@@ -2,6 +2,7 @@
 export * from './Accordion'
 export * from './Artwork'
 export * from './Avatar'
+export * from './ConnectModalProvider'
 export * from './ContractButton'
 export * from './ContractLink'
 export * from './CopyButton'

@@ -11,11 +11,11 @@ import {
 import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useState } from 'react'
 import { useChainStore } from 'src/stores'
-import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
 import { useSWRConfig } from 'swr'
 import { Address } from 'viem'
 
 import { GovernorContractButton } from '../GovernorContractButton'
+import { proposalActionButtonVariants } from './ProposalActions.css'
 
 interface SuccessfulProposalActionsProps {
   proposal: Proposal

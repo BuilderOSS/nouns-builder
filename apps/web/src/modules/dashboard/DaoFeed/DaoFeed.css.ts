@@ -1,6 +1,6 @@
+import { skeletonAnimation } from '@buildeross/ui/styles'
 import { atoms, media } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-import { skeletonAnimation } from 'src/styles/animations.css'
 
 export const daoFeedSkeleton = style({
   animation: skeletonAnimation,

@@ -1,7 +1,6 @@
+import { skeletonAnimation } from '@buildeross/ui/styles'
 import { color } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
-
-import { skeletonAnimation } from './animations.css'
 
 export const loadingSkeleton = style({
   animation: skeletonAnimation,

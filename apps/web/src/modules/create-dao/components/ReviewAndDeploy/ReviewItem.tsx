@@ -1,11 +1,12 @@
 import { Box, Flex } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
+
 import {
   infoSectionLabelStyle,
   infoSectionStyle,
   infoSectionValueStyle,
   infoSectionValueWrapperStyle,
-} from 'src/styles/deploy.css'
+} from './ReviewItem.css'
 
 interface ReviewItem {
   label: string

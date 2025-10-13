@@ -1,16 +1,16 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Icon } from '@buildeross/zord'
 import { Field, Form as FormikForm, Formik } from 'formik'
 import React, { useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore, useDaoStore } from 'src/stores'
-import { proposalFormTitle } from 'src/styles/Proposals.css'
 import { Address } from 'viem'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
+import { proposalFormTitle } from './Activity.css'
 import { delegateValidationSchema } from './DelegateForm.schema'
 
 interface AddressFormProps {
@@ -98,6 +98,7 @@ export const DelegateForm = ({ handleBack, handleUpdate }: DelegateFormProps) =>
                   <Icon id="arrowLeft" />
                 </Button>
                 <ContractButton
+                  chainId={chain.id}
                   ml="x4"
                   style={{ flex: 'auto' }}
                   disabled={!dirty || !isValid}

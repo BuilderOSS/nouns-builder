@@ -4,7 +4,8 @@ import { CopyButton } from '@buildeross/ui/CopyButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex } from '@buildeross/zord'
 import React from 'react'
-import { currentDelegateBtn, proposalFormTitle } from 'src/styles/Proposals.css'
+
+import { currentDelegateBtn, proposalFormTitle } from './Activity.css'
 
 interface CurrentDelegateProps {
   toggleIsEditing: () => void

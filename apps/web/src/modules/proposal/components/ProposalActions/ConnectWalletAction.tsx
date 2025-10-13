@@ -1,9 +1,12 @@
-import { Button, Flex, Text } from '@buildeross/zord'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
-import { proposalActionButtonVariants } from 'src/styles/Proposals.css'
+import { ContractButton } from '@buildeross/ui/ContractButton'
+import { Flex, Text } from '@buildeross/zord'
+import { useChainStore } from 'src/stores'
+
+import { proposalActionButtonVariants } from './ProposalActions.css'
 
 export const ConnectWalletAction = () => {
-  const { openConnectModal } = useConnectModal()
+  const { id: chainId } = useChainStore((x) => x.chain)
+
   return (
     <Flex
       direction={{ '@initial': 'column', '@768': 'row' }}
@@ -22,13 +25,14 @@ export const ConnectWalletAction = () => {
         gap={'x3'}
         textAlign={{ '@initial': 'center', '@768': 'left' }}
       >
-        <Button
-          onClick={openConnectModal}
+        <ContractButton
+          chainId={chainId}
+          handleClick={() => {}}
           className={proposalActionButtonVariants['vote']}
           w={{ '@initial': '100%', '@768': 'auto' }}
         >
           Submit Vote
-        </Button>
+        </ContractButton>
         <Text color={'text3'}>Connect your wallet to vote on proposals</Text>
       </Flex>
     </Flex>

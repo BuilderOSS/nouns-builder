@@ -9,6 +9,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { MessageType, type PropDate } from '@buildeross/sdk/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
@@ -18,10 +19,9 @@ import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import { useCallback, useMemo, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
-import { useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore } from 'src/stores'
 import { getAddress, type Hex, zeroHash } from 'viem'
-import { useChainId, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import * as Yup from 'yup'
 
@@ -83,7 +83,7 @@ export const PropDateForm = ({
       }) as PropDateFormValues,
     [proposalId, replyTo?.txid]
   )
-  const chainId = useChainId()
+  const { id: chainId } = useChainStore((x) => x.chain)
   const {
     addresses: { token },
   } = useDaoStore()
@@ -267,6 +267,7 @@ export const PropDateForm = ({
                   Reset
                 </Button>
                 <ContractButton
+                  chainId={chainId}
                   variant="primary"
                   disabled={!formik.isValid || isSubmitting}
                   loading={isSubmitting}

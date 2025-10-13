@@ -51,7 +51,12 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
 
   return (
     <Flex w={'100%'} mt={'x8'} gap="x4" className={responsiveFlex}>
-      <Box onClick={handleBack} aria-label="Back" cursor={'pointer'}>
+      <Box
+        as="button"
+        onClick={handleBack}
+        aria-label="Back"
+        style={{ background: 'none', border: 'none', padding: 0 }}
+      >
         <Flex direction={'row'} align={'center'} gap={'x2'}>
           <Icon id="arrowLeft" />
 

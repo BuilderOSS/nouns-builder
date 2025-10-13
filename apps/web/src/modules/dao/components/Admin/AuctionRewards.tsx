@@ -2,11 +2,11 @@ import { PROTOCOL_REWARDS_MANAGER } from '@buildeross/constants'
 import { useAuctionRewards } from '@buildeross/hooks'
 import { protocolRewardsAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { Tooltip } from '@buildeross/ui/Tooltip'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore } from 'src/stores'
 import { formatEther, Hex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
@@ -163,6 +163,7 @@ export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }
                       {formatBalance(data.founderRewardsBalance)}
                     </Text>
                     <ContractButton
+                      chainId={chain.id}
                       variant="secondary"
                       size="sm"
                       handleClick={handleWithdrawRewards}

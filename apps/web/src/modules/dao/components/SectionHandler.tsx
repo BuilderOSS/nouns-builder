@@ -4,12 +4,8 @@ import { unslugify } from '@buildeross/utils/unslugify'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
-import {
-  sectionHandler,
-  sectionNavigation,
-  sectionNavigationWrapper,
-  sectionTabVariants,
-} from 'src/styles/SectionNavigation.css'
+
+import { sectionNavigationWrapper, sectionTabVariants } from './SectionHandler.css'
 
 interface SectionHandlerProps {
   sections: {
@@ -52,7 +48,6 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
             px={'x2'}
             mx={{ '@initial': 'x0', '@768': 'auto' }}
             justify={'center'}
-            className={sectionNavigation}
             w={'100%'}
           >
             {sections?.map((section) => {
@@ -77,7 +72,7 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
           </Flex>
         </Box>
       )}
-      <Flex direction="column" className={sectionHandler} mx={'auto'}>
+      <Flex direction="column" w="100%" mx={'auto'}>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeSection?.title}

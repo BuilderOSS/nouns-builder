@@ -2,12 +2,12 @@ import { BASE_URL, SWR_KEYS } from '@buildeross/constants'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid, getBids } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useDaoStore } from 'src/stores'
 import useSWR, { useSWRConfig } from 'swr'
 import { Address, formatEther, parseEther } from 'viem'
@@ -223,6 +223,7 @@ export const PlaceBid = ({
           </form>
           <Flex w="100%" wrap="wrap" mt="x2">
             <ContractButton
+              chainId={chain.id}
               className={auctionActionButtonVariants['bid']}
               size="lg"
               handleClick={handleCreateBid}
@@ -244,6 +245,7 @@ export const PlaceBid = ({
                   }}
                 >
                   <ContractButton
+                    chainId={chain.id}
                     className={auctionActionButtonVariants['share']}
                     size="lg"
                     ml="x2"

@@ -3,8 +3,9 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { useChainStore } from 'src/stores'
-import { marqueeButton } from 'src/styles/home.css'
 import { useAccount, useSwitchChain } from 'wagmi'
+
+import { marqueeButton } from './Home.css'
 
 export const GetStarted = () => {
   const { address, chain: wagmiChain } = useAccount()

@@ -8,9 +8,9 @@ import {
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
-import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 
+import { propPageWrapper } from '../styles.css'
 import { VotePlacard } from './VotePlacard'
 import { VoterParticipation } from './VoterParticipation'
 

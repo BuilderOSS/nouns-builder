@@ -4,6 +4,7 @@ import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
 import type { AddressType } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { defaultBackButton } from '@buildeross/ui/styles'
 import { formatDuration } from '@buildeross/utils/formatDuration'
@@ -11,14 +12,7 @@ import { isTestnetChain, toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore, useDaoStore } from 'src/stores'
-import {
-  deployCheckboxHelperText,
-  deployCheckboxStyleVariants,
-  deployCheckboxWrapperStyle,
-  deployContractButtonStyle,
-} from 'src/styles/deploy.css'
 import {
   decodeEventLog,
   encodeAbiParameters,
@@ -32,6 +26,12 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import { useFormStore } from '../../stores'
 import { TokenAllocation } from '../AllocationForm'
 import { PreviewArtwork } from './PreviewArtwork'
+import {
+  deployCheckboxHelperText,
+  deployCheckboxStyleVariants,
+  deployCheckboxWrapperStyle,
+  deployContractButtonStyle,
+} from './ReviewAndDeploy.css'
 import { ReviewItem } from './ReviewItem'
 import { ReviewSection } from './ReviewSection'
 import { SuccessfulDeploy } from './SuccessfulDeploy'
@@ -590,6 +590,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                 <Icon id="arrowLeft" />
               </Flex>
               <ContractButton
+                chainId={chain.id}
                 handleClick={handleDeploy}
                 w={'100%'}
                 disabled={isDisabled}

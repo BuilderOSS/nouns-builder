@@ -5,12 +5,12 @@ import { formatCryptoVal, numberFormatter } from '@buildeross/utils/numbers'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
-import { statisticContent } from 'src/styles/About.css'
-import { sectionWrapperStyle } from 'src/styles/dao.css'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useBalance } from 'wagmi'
 
+import { statisticContent } from '../../styles/About.css'
+import { activitySection } from '../../styles/Section.css'
 import { NFTBalance } from './NFTBalance'
 import { TokenBalance } from './TokenBalance'
 import { treasuryWrapper } from './Treasury.css'
@@ -60,7 +60,7 @@ export const Treasury = () => {
   }, [balance])
 
   return (
-    <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
+    <Flex direction={'column'} className={activitySection} mx={'auto'}>
       <Flex width={'100%'} justify={'space-between'} align={'center'}>
         <Text fontSize={28} fontWeight={'display'}>
           Treasury

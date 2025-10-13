@@ -1,10 +1,6 @@
 import { atoms, media, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
-export const sectionNavigation = style({
-  width: '100%',
-})
-
 export const sectionNavigationWrapper = style({
   margin: '0 -16px 0 -16px',
   selectors: {
@@ -27,15 +23,7 @@ export const sectionNavigationWrapper = style({
   },
 })
 
-export const sectionMobileMenuButton = style({
-  selectors: {
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
-})
-
-export const sectionTab = style([
+const sectionTab = style([
   atoms({ mx: { '@initial': 'x2', '@768': 'x3' } }),
   {
     cursor: 'pointer',
@@ -68,8 +56,4 @@ export const sectionTabVariants = styleVariants({
       },
     },
   ],
-})
-
-export const sectionHandler = style({
-  width: '100%',
 })

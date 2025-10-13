@@ -16,9 +16,9 @@ import React, {
   useCallback,
   useEffect,
 } from 'react'
-import { artworkPreviewPanel } from 'src/styles/Artwork.css'
 
 import { useFormStore } from '../../stores'
+import { artworkPreviewPanel } from './ArtworkUpload.css'
 
 const previewVariants = {
   closed: {

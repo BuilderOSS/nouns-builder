@@ -1,5 +1,7 @@
 import { Chain } from '@buildeross/types'
+import { ConnectModalProvider } from '@buildeross/ui/ConnectModalProvider'
 import { Box } from '@buildeross/zord'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import React, { ReactNode, useMemo } from 'react'
 import {
   ChainStoreProvider,
@@ -31,16 +33,19 @@ export function BaseLayout({
 }: BaseLayoutProps) {
   const chainStore = useMemo(() => createChainStore(chain), [chain])
   const daoStore = useMemo(() => createDaoStore(addresses), [addresses])
+  const { openConnectModal } = useConnectModal()
 
   return (
-    <ChainStoreProvider store={chainStore}>
-      <DaoStoreProvider store={daoStore}>
-        <Box>
-          {nav || <DefaultLayoutNav />}
-          <Box {...props}>{children}</Box>
-          {footer}
-        </Box>
-      </DaoStoreProvider>
-    </ChainStoreProvider>
+    <ConnectModalProvider value={{ openConnectModal }}>
+      <ChainStoreProvider store={chainStore}>
+        <DaoStoreProvider store={daoStore}>
+          <Box>
+            {nav || <DefaultLayoutNav />}
+            <Box {...props}>{children}</Box>
+            {footer}
+          </Box>
+        </DaoStoreProvider>
+      </ChainStoreProvider>
+    </ConnectModalProvider>
   )
 }
