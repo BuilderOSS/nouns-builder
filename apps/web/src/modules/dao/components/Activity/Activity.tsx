@@ -262,8 +262,8 @@ export const Activity: React.FC<ActivityProps> = ({
               ))}
             </Flex>
           ) : data?.proposals?.length ? (
-            data?.proposals?.map((proposal, index: number) => (
-              <ProposalCard key={index} {...proposal} />
+            data?.proposals?.map((proposal) => (
+              <ProposalCard key={proposal.proposalId} {...proposal} />
             ))
           ) : (
             <Flex

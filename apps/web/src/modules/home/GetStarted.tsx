@@ -6,7 +6,7 @@ import { useChainStore } from 'src/stores'
 import { marqueeButton } from 'src/styles/home.css'
 import { useAccount, useSwitchChain } from 'wagmi'
 
-const GetStarted = () => {
+export const GetStarted = () => {
   const { address, chain: wagmiChain } = useAccount()
   const chain = useChainStore((x) => x.chain)
 
@@ -49,5 +49,3 @@ const GetStarted = () => {
     </Button>
   )
 }
-
-export default GetStarted

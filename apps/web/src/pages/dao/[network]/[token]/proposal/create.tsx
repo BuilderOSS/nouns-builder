@@ -78,10 +78,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     governorAddress: addresses.governor,
   })
 
-  const isL1Chain = useMemo(
-    () => L1_CHAINS.find((l1ChainIds) => l1ChainIds === chain.id),
-    [chain.id]
-  )
+  const isL1Chain = useMemo(() => L1_CHAINS.some((id) => id === chain.id), [chain.id])
 
   const isAllowedMigrationDao = useMemo(
     () =>

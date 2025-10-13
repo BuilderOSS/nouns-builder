@@ -1,7 +1,7 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { atoms, Flex, Icon, Text } from '@buildeross/zord'
 
-const VisitAlternate = () => {
+export const VisitAlternate = () => {
   return (
     <a
       href={PUBLIC_IS_TESTNET ? 'https://nouns.build/' : 'https://testnet.nouns.build/'}
@@ -21,5 +21,3 @@ const VisitAlternate = () => {
     </a>
   )
 }
-
-export default VisitAlternate

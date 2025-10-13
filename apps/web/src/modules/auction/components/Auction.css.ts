@@ -133,6 +133,13 @@ export const auctionDateNavButton = style({
   minWidth: 36,
   borderRadius: '18px',
   border: `2px solid ${vars.color.border}`,
+})
+
+export const auctionDateNavButtonWithHover = style({
+  height: 36,
+  minWidth: 36,
+  borderRadius: '18px',
+  border: `2px solid ${vars.color.border}`,
   selectors: {
     '&:hover': {
       background: vars.color.border,

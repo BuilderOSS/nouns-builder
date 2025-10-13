@@ -64,12 +64,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
         }
       })
     }
-
-    return () => {
-      wcDisconnect()
-      setConnectionStatus(ConnectionStatus.DISCONNECTED)
-    }
-  }, [connectionStatus, treasury, chain.id, wcConnect, wcLink, wcDisconnect])
+  }, [connectionStatus, treasury, chain.id, wcConnect, wcLink])
 
   const handleDisconnect = useCallback(() => {
     wcDisconnect()

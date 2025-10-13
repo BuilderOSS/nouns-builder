@@ -1,12 +1,11 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { highestBidsRequest } from '@buildeross/sdk/subgraph'
+import { AuctionFragment, highestBidsRequest } from '@buildeross/sdk/subgraph'
 import { Flex, Grid } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-import RecentlyCreated from 'src/components/Home/RecentlyCreated'
-import { DaoProps } from 'src/pages'
 import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 
+import { RecentlyCreated } from '../RecentlyCreated'
 import { DaoErrorFeed } from './DaoErrorFeed'
 import { daoFeedGrid } from './DaoFeed.css'
 import { DaoFeedCard } from './DaoFeedCard'
@@ -25,7 +24,7 @@ const DaoFeedContent = ({
 }: {
   loading: boolean
   error: boolean
-  featuredDaos?: Array<DaoProps>
+  featuredDaos?: Array<AuctionFragment['dao']>
 }) => {
   if (loading) return <DaoFeedSkeleton />
   if (error) return <DaoErrorFeed />

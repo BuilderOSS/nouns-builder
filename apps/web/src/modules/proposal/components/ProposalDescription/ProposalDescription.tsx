@@ -111,9 +111,8 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                 <img
                   alt="proposer"
                   src={tokenImage}
-                  width={128}
-                  height={128}
                   className={atoms({ borderRadius: 'small' })}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               )}
             </Box>

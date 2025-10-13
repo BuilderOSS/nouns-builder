@@ -13,8 +13,8 @@ import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
-import { DaoFeed } from '../dao'
 import { DaoAuctionCard } from './DaoAuctionCard'
+import { DaoFeed } from './DaoFeed'
 import { DaoProposals } from './DaoProposals'
 import { DashboardLayout, DashPage } from './DashboardLayout'
 import { DashConnect } from './DashConnect'
@@ -86,7 +86,7 @@ export type DashboardProps = {
   handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
   const { address } = useAccount()
 
   const { data, error, isLoading, mutate } = useSWR(
@@ -198,5 +198,3 @@ const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
 
   return <DashboardLayout auctionCards={auctionCards} daoProposals={proposalList} />
 }
-
-export default Dashboard

@@ -4,18 +4,19 @@ import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Stack } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'
-import Everything from 'src/components/Home/Everything'
-import FAQ from 'src/components/Home/FAQ'
-import GetStarted from 'src/components/Home/GetStarted'
-import Marquee from 'src/components/Home/Marquee'
-import Twitter from 'src/components/Home/Twitter'
-import VisitAlternate from 'src/components/Home/VisitAlternate'
 import { Meta } from 'src/components/Meta'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'
 import { HomeLayout } from 'src/layouts/HomeLayout'
 import { LayoutWrapper } from 'src/layouts/LayoutWrapper'
-import { DaoFeed } from 'src/modules/dao'
-import Dashboard from 'src/modules/dashboard/Dashboard'
+import { DaoFeed, Dashboard } from 'src/modules/dashboard'
+import {
+  Everything,
+  FAQ,
+  GetStarted,
+  Marquee,
+  Twitter,
+  VisitAlternate,
+} from 'src/modules/home'
 import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'

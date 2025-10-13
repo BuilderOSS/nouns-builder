@@ -52,7 +52,7 @@ const TabSwitchAnimation = ({
   topSectionView,
 }: {
   children: ReactElement
-  topSectionView: string
+  topSectionView: ViewSection
 }) => {
   return (
     <AnimatePresence mode="wait">

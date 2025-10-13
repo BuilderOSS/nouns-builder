@@ -1,7 +1,7 @@
 import { atoms, mixins, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
-const Twitter = () => (
+export const Twitter = () => (
   <Stack align={'center'} mt={'x9'}>
     <Text fontSize={18} fontWeight={'label'}>
       Have more questions?
@@ -24,5 +24,3 @@ const Twitter = () => (
     </Text>
   </Stack>
 )
-
-export default Twitter

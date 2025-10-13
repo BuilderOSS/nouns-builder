@@ -7,7 +7,11 @@ import React from 'react'
 import { useChainStore } from 'src/stores'
 
 import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
-import { auctionDateNavButton, auctionTextVariants } from './Auction.css'
+import {
+  auctionDateNavButton,
+  auctionDateNavButtonWithHover,
+  auctionTextVariants,
+} from './Auction.css'
 
 interface AuctionTokenPickerProps {
   collection: AddressType
@@ -17,6 +21,8 @@ interface AuctionTokenPickerProps {
   name?: string
 }
 
+const disabledStyle = { opacity: 0.2 }
+
 export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   collection,
   tokenId,
@@ -25,7 +31,6 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   currentTokenId,
 }: AuctionTokenPickerProps) => {
   const { id: chainId } = useChainStore((x) => x.chain)
-  const disabledStyle = { opacity: 0.2 }
   const { getAuctionLink } = useLinks()
 
   const data = useNextAndPreviousTokens({ chainId, collection, tokenId })
@@ -49,7 +54,13 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
           enabled={hasPreviousToken}
           link={getAuctionLink(chainId, collection, data?.prev)}
         >
-          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
+          <Flex
+            align={'center'}
+            justify={'center'}
+            className={
+              hasPreviousToken ? auctionDateNavButtonWithHover : auctionDateNavButton
+            }
+          >
             <Icon id="arrowLeft" style={hasPreviousToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
@@ -58,7 +69,13 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
           enabled={hasNextToken}
           link={getAuctionLink(chainId, collection, data?.next)}
         >
-          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
+          <Flex
+            align={'center'}
+            justify={'center'}
+            className={
+              hasNextToken ? auctionDateNavButtonWithHover : auctionDateNavButton
+            }
+          >
             <Icon id="arrowRight" style={hasNextToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
@@ -67,7 +84,11 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
           enabled={hasLatestToken}
           link={getAuctionLink(chainId, collection, latestTokenId)}
         >
-          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
+          <Flex
+            align={'center'}
+            justify={'center'}
+            className={auctionDateNavButtonWithHover}
+          >
             <Text
               mx={'x3'}
               style={hasLatestToken ? {} : disabledStyle}

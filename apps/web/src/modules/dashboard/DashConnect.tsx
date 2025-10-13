@@ -1,7 +1,7 @@
 import { Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 
-import { DaoFeed } from '../dao'
+import { DaoFeed } from './DaoFeed'
 import { DashPage } from './DashboardLayout'
 
 export const DashConnect = () => {

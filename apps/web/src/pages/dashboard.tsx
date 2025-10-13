@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
-import Dashboard from 'src/modules/dashboard/Dashboard'
+import { Dashboard } from 'src/modules/dashboard'
 
 const DashboardPage = () => {
   const { push } = useRouter()
