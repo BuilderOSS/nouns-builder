@@ -3,8 +3,9 @@ import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { AddressType, DaoLinkHandler } from '@buildeross/types'
+import { AddressType } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
@@ -30,18 +31,12 @@ import {
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
-  getDaoLink?: DaoLinkHandler
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
-  const {
-    currentAuction,
-    chainId,
-    auctionAddress,
-    handleMutate,
-    tokenAddress,
-    getDaoLink,
-  } = props
+  const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
+
+  const { getAuctionLink } = useLinks()
   const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
   const { endTime } = currentAuction ?? {}
 
@@ -87,14 +82,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   }
 
   if (!currentAuction) {
-    return (
-      <AuctionPaused
-        {...props}
-        getDaoLink={getDaoLink}
-        tokenAddress={tokenAddress}
-        chain={chain}
-      />
-    )
+    return <AuctionPaused {...props} tokenAddress={tokenAddress} chain={chain} />
   }
 
   const bidText = currentAuction.highestBid?.amount
@@ -107,7 +95,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
     <Flex className={outerAuctionCard}>
       <Link
         className={auctionCardBrand}
-        link={getDaoLink?.(chainId, tokenAddress, currentAuction?.token?.tokenId)}
+        link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
       >
         <Box className={daoAvatarBox}>
           {tokenImage && (

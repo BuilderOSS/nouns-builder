@@ -1,6 +1,7 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { AddressType, ProfileLinkHandler } from '@buildeross/types'
+import { AddressType } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useState } from 'react'
@@ -9,15 +10,9 @@ interface FounderProps {
   wallet: AddressType
   ownershipPct: number
   vestExpiry: number
-  getProfileLink?: ProfileLinkHandler
 }
 
-export const Founder: React.FC<FounderProps> = ({
-  wallet,
-  ownershipPct,
-  vestExpiry,
-  getProfileLink,
-}) => {
+export const Founder: React.FC<FounderProps> = ({ wallet, ownershipPct, vestExpiry }) => {
   const [showTooltip, setShowTooltip] = useState(false)
   const { displayName, ensAvatar } = useEnsData(wallet as string)
   const vestDate = new Date(vestExpiry * 1000).toLocaleDateString(undefined, {
@@ -25,6 +20,8 @@ export const Founder: React.FC<FounderProps> = ({
     month: 'short',
     day: 'numeric',
   })
+  const { getProfileLink } = useLinks()
+
   return (
     <Flex
       direction={'row'}

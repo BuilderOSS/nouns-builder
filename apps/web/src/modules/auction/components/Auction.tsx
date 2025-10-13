@@ -3,7 +3,7 @@ import { L1_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { getBids, TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
-import { AddressType, Chain, CHAIN_ID, L2MigratedResponse } from '@buildeross/types'
+import { AddressType, Chain, L2MigratedResponse } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Grid } from '@buildeross/zord'
 import axios from 'axios'
@@ -31,13 +31,11 @@ export type TokenWithDao = NonNullable<TokenWithDaoQuery['token']>
 
 interface AuctionControllerProps {
   chain: Chain
-  auctionAddress: string
-  collection: string
+  auctionAddress: AddressType
+  collection: AddressType
   token: TokenWithDao
   viewSwitcher?: ReactNode
-  onOpenDao?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
   onAuctionCreated?: (tokenId: bigint) => void
-  onOpenActivity?: () => void
   referral?: AddressType
 }
 
@@ -46,9 +44,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   auctionAddress,
   collection,
   token,
-  onOpenDao,
   onAuctionCreated,
-  onOpenActivity,
   referral,
 }) => {
   const { mintedAt, name, image, owner: tokenOwner, tokenId: queriedTokenId } = token
@@ -167,10 +163,9 @@ export const Auction: React.FC<AuctionControllerProps> = ({
               <DaoMigrated
                 l2ChainId={migratedRes.migrated.chainId}
                 l2TokenAddress={migratedRes.migrated.l2TokenAddress}
-                onOpenDao={onOpenDao}
               />
             ) : (
-              <AuctionPaused handleOpenDaoActivity={onOpenActivity} />
+              <AuctionPaused />
             )}
           </Fragment>
         )}

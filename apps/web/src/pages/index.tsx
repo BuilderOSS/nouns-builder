@@ -53,40 +53,12 @@ const HomePage: NextPageWithLayout = () => {
       },
     })
   }
-  const getDaoLink = (
-    chainId: CHAIN_ID,
-    tokenAddress: AddressType,
-    tokenId?: number | string | bigint
-  ) => {
-    if (tokenId === undefined || tokenId === null) {
-      return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`,
-      }
-    }
-    return {
-      href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`,
-    }
-  }
-
-  const getProposalLink = (
-    chainId: CHAIN_ID,
-    tokenAddress: AddressType,
-    proposalNumber: number
-  ) => {
-    return {
-      href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalNumber}`,
-    }
-  }
 
   return (
     <>
       <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
       {address ? (
-        <Dashboard
-          handleOpenCreateProposal={handleOpenCreateProposal}
-          getDaoLink={getDaoLink}
-          getProposalLink={getProposalLink}
-        />
+        <Dashboard handleOpenCreateProposal={handleOpenCreateProposal} />
       ) : (
         <Stack align={'center'}>
           <Marquee />

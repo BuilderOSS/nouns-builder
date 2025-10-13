@@ -1,7 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { exploreMyDaosRequest } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Grid } from '@buildeross/zord'
 import React from 'react'
 import { DaoCard } from 'src/modules/dao/components/DaoCard'
@@ -24,24 +22,6 @@ export const ExploreMyDaos = () => {
   )
 
   const isLoading = data ? false : isValidating && !data && !error
-
-  const getDaoLink = React.useCallback(
-    (
-      chainId: CHAIN_ID,
-      tokenAddress: AddressType,
-      tokenId?: number | string | bigint
-    ) => {
-      if (tokenId === undefined || tokenId === null) {
-        return {
-          href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`,
-        }
-      }
-      return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`,
-      }
-    },
-    []
-  )
 
   return (
     <>
@@ -66,7 +46,6 @@ export const ExploreMyDaos = () => {
                 collectionAddress={dao.dao.tokenAddress}
                 bid={bidInEth}
                 endTime={dao.endTime ?? undefined}
-                getDaoLink={getDaoLink}
               />
             )
           })}

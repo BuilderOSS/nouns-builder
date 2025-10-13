@@ -8,6 +8,7 @@ type FlexProps = React.ComponentProps<typeof Flex>
 
 export type LinkWrapperProps = FlexProps & {
   link?: LinkOptions
+  enabled?: boolean
   children: React.ReactNode
 }
 
@@ -25,12 +26,13 @@ export const LinkWrapper: React.FC<LinkWrapperProps> = ({
   link,
   children,
   style,
+  enabled = true,
   ...flexProps
 }) => {
   const Link = useLinkComponent()
 
-  if (!link) {
-    // No link provided → just render Flex with content
+  if (!link || !enabled) {
+    // No link provided or link is disabled
     return (
       <Flex style={style} {...flexProps}>
         {children}

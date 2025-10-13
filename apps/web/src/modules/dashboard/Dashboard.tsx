@@ -6,12 +6,7 @@ import {
   dashboardRequest,
   ProposalFragment,
 } from '@buildeross/sdk/subgraph'
-import {
-  AddressType,
-  CHAIN_ID,
-  DaoLinkHandler,
-  ProposalLinkHandler,
-} from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
@@ -89,15 +84,9 @@ const fetchDashboardData = async (address: string) => {
 
 export type DashboardProps = {
   handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
-  getDaoLink?: DaoLinkHandler
-  getProposalLink?: ProposalLinkHandler
 }
 
-const Dashboard: React.FC<DashboardProps> = ({
-  handleOpenCreateProposal,
-  getDaoLink,
-  getProposalLink,
-}) => {
+const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
   const { address } = useAccount()
 
   const { data, error, isLoading, mutate } = useSWR(
@@ -118,10 +107,9 @@ const Dashboard: React.FC<DashboardProps> = ({
         {...dao}
         userAddress={address}
         handleMutate={mutate}
-        getDaoLink={getDaoLink}
       />
     ))
-  }, [data, address, mutate, getDaoLink])
+  }, [data, address, mutate])
 
   const proposalList = useMemo(() => {
     if (!data) return null
@@ -158,11 +146,9 @@ const Dashboard: React.FC<DashboardProps> = ({
           {...dao}
           userAddress={address as AddressType}
           onOpenCreateProposal={handleOpenCreateProposal}
-          getDaoLink={getDaoLink}
-          getProposalLink={getProposalLink}
         />
       ))
-  }, [data, address, handleOpenCreateProposal, getDaoLink, getProposalLink])
+  }, [data, address, handleOpenCreateProposal])
 
   if (error) {
     return (

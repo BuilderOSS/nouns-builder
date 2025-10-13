@@ -2,8 +2,9 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
-import { AddressType, CHAIN_ID, DaoLinkHandler } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { BigNumberish, formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
@@ -22,7 +23,6 @@ interface DaoCardProps {
   collectionName?: string
   bid?: BigNumberish
   endTime?: number
-  getDaoLink?: DaoLinkHandler
 }
 
 const Countdown = ({ end, onEnd }: { end: any; onEnd: () => void }) => {
@@ -32,18 +32,17 @@ const Countdown = ({ end, onEnd }: { end: any; onEnd: () => void }) => {
 
 export const DaoCard = ({
   chainId,
-  tokenId,
   tokenName,
   tokenImage,
   collectionName,
   collectionAddress,
   bid,
   endTime,
-  getDaoLink,
 }: DaoCardProps) => {
   const isMounted = useIsMounted()
   const [isEnded, setIsEnded] = useState(false)
   const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)
+  const { getDaoLink } = useLinks()
 
   const onEnd = () => {
     setIsEnded(true)
@@ -56,7 +55,7 @@ export const DaoCard = ({
   return (
     <Link
       direction="column"
-      link={getDaoLink?.(chainId, collectionAddress, tokenId)}
+      link={getDaoLink?.(chainId, collectionAddress)}
       borderRadius={'curved'}
       height={'100%'}
       overflow={'hidden'}

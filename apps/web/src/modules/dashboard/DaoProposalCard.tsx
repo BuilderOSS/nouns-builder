@@ -1,5 +1,6 @@
 import { ProposalState } from '@buildeross/sdk/contract'
-import { AddressType, CHAIN_ID, ProposalLinkHandler } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
@@ -12,18 +13,17 @@ type DaoProposalCardProps = ProposalForStatus & {
   votes: {
     voter: string
   }[]
-  getProposalLink?: ProposalLinkHandler
 }
 
 export const DaoProposalCard = ({
   userAddress,
   votes,
-  getProposalLink,
   chainId,
   collectionAddress,
   ...proposal
 }: DaoProposalCardProps) => {
   const { proposalNumber, title, state } = proposal
+  const { getProposalLink } = useLinks()
   return (
     <Link
       mb={'x4'}

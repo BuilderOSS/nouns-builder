@@ -21,6 +21,7 @@ import NextNProgress from 'nextjs-progressbar'
 import type { ReactElement, ReactNode } from 'react'
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
+import { LinksProvider } from 'src/components/LinksProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
@@ -53,21 +54,23 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
     <WagmiProvider config={clientConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
-          <LinkComponentProvider LinkComponent={Link}>
-            <SWRConfig value={{ fallback }}>
-              <NextNProgress
-                color={'#008BFF'}
-                startPosition={0.125}
-                stopDelayMs={200}
-                height={2}
-                showOnShallow={false}
-                options={{ showSpinner: false }}
-              />
-              <FrameProvider>
-                {getLayout(<Component {...pageProps} err={err} />)}
-              </FrameProvider>
-            </SWRConfig>
-          </LinkComponentProvider>
+          <SWRConfig value={{ fallback }}>
+            <NextNProgress
+              color={'#008BFF'}
+              startPosition={0.125}
+              stopDelayMs={200}
+              height={2}
+              showOnShallow={false}
+              options={{ showSpinner: false }}
+            />
+            <FrameProvider>
+              <LinksProvider>
+                <LinkComponentProvider LinkComponent={Link}>
+                  {getLayout(<Component {...pageProps} err={err} />)}
+                </LinkComponentProvider>
+              </LinksProvider>
+            </FrameProvider>
+          </SWRConfig>
           <NetworkController.Mainnet>
             <VercelAnalytics />
           </NetworkController.Mainnet>

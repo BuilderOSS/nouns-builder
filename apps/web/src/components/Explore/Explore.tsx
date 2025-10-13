@@ -1,7 +1,5 @@
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Pagination } from '@buildeross/ui/Pagination'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
@@ -25,24 +23,6 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
 
   const page = query.page
 
-  const getDaoLink = React.useCallback(
-    (
-      chainId: CHAIN_ID,
-      tokenAddress: AddressType,
-      tokenId?: number | string | bigint
-    ) => {
-      if (tokenId === undefined || tokenId === null) {
-        return {
-          href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`,
-        }
-      }
-      return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`,
-      }
-    },
-    []
-  )
-
   return (
     <Fragment>
       <ExploreToolbar title={`DAOs on ${chain.name}`} showSort />
@@ -64,7 +44,6 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
                   collectionAddress={dao.dao.tokenAddress}
                   bid={bidInEth}
                   endTime={dao.endTime ?? undefined}
-                  getDaoLink={getDaoLink}
                 />
               )
             })}

@@ -1,4 +1,5 @@
-import { AddressType, Chain, DaoLinkHandler } from '@buildeross/types'
+import { AddressType, Chain } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import React from 'react'
@@ -17,15 +18,15 @@ import {
 type PausedType = DashboardDaoProps & {
   chain: Chain
   tokenAddress: AddressType
-  getDaoLink?: DaoLinkHandler
 }
 
-export const AuctionPaused = ({ name, tokenAddress, chain, getDaoLink }: PausedType) => {
+export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
   const Paused = icons.pause
+  const { getDaoLink } = useLinks()
 
   return (
     <Flex className={outerAuctionCard}>
-      <Link className={auctionCardBrand} link={getDaoLink?.(chain.id, tokenAddress)}>
+      <Link className={auctionCardBrand} link={getDaoLink(chain.id, tokenAddress)}>
         <Flex
           width="x16"
           height="x16"
