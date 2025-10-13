@@ -75,7 +75,12 @@ export const CurrentAuction = ({
         </AuctionDetails>
 
         <ActionsWrapper>
-          <Settle isEnding={isEnding} owner={owner} chainId={chain.id} />
+          <Settle
+            isEnding={isEnding}
+            owner={owner}
+            chainId={chain.id}
+            auctionAddress={auctionAddress}
+          />
         </ActionsWrapper>
       </Fragment>
     )

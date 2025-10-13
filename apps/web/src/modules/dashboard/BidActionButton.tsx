@@ -84,7 +84,7 @@ export const BidActionButton = ({
       <Settle
         isEnding={false}
         owner={highestBid?.bidder}
-        externalAuctionAddress={auctionAddress}
+        auctionAddress={auctionAddress}
         compact={true}
         chainId={chainId}
       />

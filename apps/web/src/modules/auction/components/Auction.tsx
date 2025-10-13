@@ -153,7 +153,12 @@ export const Auction: React.FC<AuctionControllerProps> = ({
             </AuctionDetails>
             <ActionsWrapper>
               {isLatestButNotActive && (
-                <Settle isEnding={false} owner={tokenOwner} chainId={chain.id} />
+                <Settle
+                  isEnding={false}
+                  owner={tokenOwner}
+                  chainId={chain.id}
+                  auctionAddress={auctionAddress}
+                />
               )}
               {(!isLatestButNotActive || (!!bids && bids.length > 0)) && (
                 <BidHistory bids={bids || []} />
