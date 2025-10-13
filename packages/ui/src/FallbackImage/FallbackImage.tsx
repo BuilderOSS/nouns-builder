@@ -1,8 +1,8 @@
 import { useFallbackSrc } from '@buildeross/hooks/useFallbackSrc'
-import { forwardRef, JSX } from 'react'
+import React, { forwardRef } from 'react'
 
 type FallbackImageProps = Omit<
-  JSX.IntrinsicElements['img'],
+  React.ImgHTMLAttributes<HTMLImageElement>,
   'src' | 'srcSet' | 'onError'
 > & {
   srcList?: string[]

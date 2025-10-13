@@ -3,6 +3,7 @@ import { atoms, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback } from 'react'
 
 import { useLinkComponent } from '../LinkComponentProvider'
+import { hoverButton } from './Pagination.css'
 
 type PaginationProps = {
   hasNextPage?: boolean
@@ -74,6 +75,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           mx="x1"
           disabled={isFirst}
           style={{ cursor: isFirst ? 'auto' : 'pointer' }}
+          className={isFirst ? undefined : hoverButton}
         >
           <Flex style={{ height: 24, width: 24 }} placeItems="center" justify="center">
             <Icon id="arrowLeft" style={{ opacity: isFirst ? 0.3 : 1 }} />
@@ -97,6 +99,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           mx="x1"
           disabled={isLast}
           style={{ cursor: isLast ? 'auto' : 'pointer' }}
+          className={isLast ? undefined : hoverButton}
         >
           <Flex style={{ height: 24, width: 24 }} placeItems="center" justify="center">
             <Icon id="arrowRight" style={{ opacity: isLast ? 0.3 : 1 }} />

@@ -81,7 +81,7 @@ export async function getEnsName(
     return result
   } catch (e) {
     console.error('Error getting ENS name:', e)
-    return address
+    return checksummedAddress
   }
 }
 
