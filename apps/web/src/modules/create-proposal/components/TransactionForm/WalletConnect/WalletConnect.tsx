@@ -49,12 +49,12 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
     if (
       treasury &&
       chain.id &&
-      wcLink?.startsWith('wc:') &&
+      wcLink?.trim().startsWith('wc:') &&
       connectionStatus === ConnectionStatus.DISCONNECTED
     ) {
       const params: WCParams = {
         chainId: chain.id as CHAIN_ID,
-        uri: wcLink,
+        uri: wcLink.trim(),
       }
       setConnectionStatus(ConnectionStatus.CONNECTING)
 
@@ -64,7 +64,12 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
         }
       })
     }
-  }, [connectionStatus, treasury, chain.id, wcConnect, wcLink])
+
+    return () => {
+      wcDisconnect()
+      setConnectionStatus(ConnectionStatus.DISCONNECTED)
+    }
+  }, [connectionStatus, treasury, chain.id, wcConnect, wcLink, wcDisconnect])
 
   const handleDisconnect = useCallback(() => {
     wcDisconnect()

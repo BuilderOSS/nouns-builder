@@ -31,7 +31,12 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
       {showQueue && (
         <Flex align="center" direction="row" justify="flex-end" w="100%">
           <Flex>
-            <Button mr="x6" variant="secondary" onClick={() => setQueueModalOpen(true)}>
+            <Button
+              mr="x6"
+              variant="secondary"
+              disabled={!transactions.length}
+              onClick={() => setQueueModalOpen(true)}
+            >
               {`${transactions.length} transactions queued`}
             </Button>
             {onOpenProposalReview && (

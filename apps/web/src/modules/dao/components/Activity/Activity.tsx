@@ -8,12 +8,12 @@ import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID, ProposalLinkHandler } from '@buildeross/types'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
+import { Pagination } from '@buildeross/ui/Pagination'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import React from 'react'
 import { ContractButton } from 'src/components/ContractButton'
-import Pagination from 'src/components/Pagination'
 import { ProposalCard } from 'src/modules/proposal'
 import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { skeletonAnimation } from 'src/styles/animations.css'
@@ -42,7 +42,7 @@ export const Activity: React.FC<ActivityProps> = ({
 
   const { createProposal } = useProposalStore()
   const { address } = useAccount()
-  const query = useQueryParams()
+  const { query } = useQueryParams()
   const { openConnectModal } = useConnectModal()
   const LIMIT = 20
   const page: number = query.page ? Number(query.page) : 1

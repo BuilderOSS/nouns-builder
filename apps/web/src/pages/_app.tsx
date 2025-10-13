@@ -10,14 +10,12 @@ import 'flatpickr/dist/themes/light.css'
 import 'react-mde/lib/styles/css/react-mde-all.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
-import { ImageComponentProvider } from '@buildeross/ui/ImageComponentProvider'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
-import Image from 'next/image'
 import Link from 'next/link'
 import NextNProgress from 'nextjs-progressbar'
 import type { ReactElement, ReactNode } from 'react'
@@ -56,21 +54,19 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
           <LinkComponentProvider LinkComponent={Link}>
-            <ImageComponentProvider ImageComponent={Image}>
-              <SWRConfig value={{ fallback }}>
-                <NextNProgress
-                  color={'#008BFF'}
-                  startPosition={0.125}
-                  stopDelayMs={200}
-                  height={2}
-                  showOnShallow={false}
-                  options={{ showSpinner: false }}
-                />
-                <FrameProvider>
-                  {getLayout(<Component {...pageProps} err={err} />)}
-                </FrameProvider>
-              </SWRConfig>
-            </ImageComponentProvider>
+            <SWRConfig value={{ fallback }}>
+              <NextNProgress
+                color={'#008BFF'}
+                startPosition={0.125}
+                stopDelayMs={200}
+                height={2}
+                showOnShallow={false}
+                options={{ showSpinner: false }}
+              />
+              <FrameProvider>
+                {getLayout(<Component {...pageProps} err={err} />)}
+              </FrameProvider>
+            </SWRConfig>
           </LinkComponentProvider>
           <NetworkController.Mainnet>
             <VercelAnalytics />

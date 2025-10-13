@@ -1,7 +1,7 @@
+import { OptionalLink } from '@buildeross/ui/OptionalLink'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-import { OptionalLink } from 'src/components/OptionalLink'
 import { useChainStore } from 'src/stores'
 
 import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'

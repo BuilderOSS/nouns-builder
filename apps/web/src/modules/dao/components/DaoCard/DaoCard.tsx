@@ -4,7 +4,6 @@ import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID, DaoLinkHandler } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { BigNumberish, formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
@@ -45,7 +44,6 @@ export const DaoCard = ({
   const isMounted = useIsMounted()
   const [isEnded, setIsEnded] = useState(false)
   const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)
-  const Image = useImageComponent()
 
   const onEnd = () => {
     setIsEnded(true)
@@ -74,6 +72,7 @@ export const DaoCard = ({
         <FallbackImage
           srcList={getFetchableUrls(tokenImage)}
           sizes="100vw"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           alt={`${collectionName} image`}
         />
       </Box>
@@ -103,7 +102,7 @@ export const DaoCard = ({
             </Paragraph>
             {chainMeta && (
               <Flex align="center" gap="x1">
-                <Image
+                <img
                   src={chainMeta.icon}
                   style={{
                     borderRadius: '12px',

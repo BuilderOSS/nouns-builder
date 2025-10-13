@@ -9,7 +9,6 @@ import {
   Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
-import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
@@ -42,7 +41,6 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   collection,
   onOpenProposalReview,
 }) => {
-  const Image = useImageComponent()
   const { description, proposer, executionTransactionHash } = proposal
 
   const { displayName } = useEnsData(proposer)
@@ -110,7 +108,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
               position="relative"
             >
               {!!tokenImage && !error && (
-                <Image
+                <img
                   alt="proposer"
                   src={tokenImage}
                   width={128}

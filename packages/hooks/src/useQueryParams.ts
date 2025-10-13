@@ -2,23 +2,28 @@ import { useEffect, useState } from 'react'
 
 type QueryParams = Record<string, string>
 
-export const useQueryParams = (): QueryParams => {
-  const [query, setQuery] = useState<QueryParams>({})
+export const useQueryParams = () => {
+  const [state, setState] = useState<{ pathname: string; query: QueryParams }>({
+    pathname: '',
+    query: {},
+  })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const getParams = (): QueryParams =>
-      Object.fromEntries(new URLSearchParams(window.location.search))
+    const getParams = () => {
+      const url = new URL(window.location.href)
+      const query = Object.fromEntries(url.searchParams.entries())
+      return { pathname: url.pathname, query }
+    }
 
-    const update = () => setQuery(getParams())
+    const update = () => setState(getParams())
 
     update() // initial
 
-    // Generic browser listeners for navigation updates
+    // Fire synthetic event on push/replace
     const dispatch = () => window.dispatchEvent(new Event('locationchange'))
 
-    // Patch pushState / replaceState once per runtime
     if (!(window as any).__location_patched) {
       const { pushState, replaceState } = window.history
 
@@ -42,5 +47,5 @@ export const useQueryParams = (): QueryParams => {
     }
   }, [])
 
-  return query
+  return state
 }

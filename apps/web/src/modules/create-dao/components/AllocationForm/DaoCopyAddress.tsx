@@ -1,6 +1,5 @@
 import { AddressType } from '@buildeross/types'
 import { CopyButton } from '@buildeross/ui/CopyButton'
-import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -15,11 +14,10 @@ export const DaoCopyAddress = ({
   ens: string
   address: AddressType
 }) => {
-  const Image = useImageComponent()
   return (
     <Flex gap={'x3'} style={{ width: '50%' }} align={'center'}>
       <Box width={'x13'} height={'x13'}>
-        <Image
+        <img
           src={image}
           alt={`${name} icon`}
           height={52}

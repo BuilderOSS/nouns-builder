@@ -5,7 +5,6 @@ import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, DaoLinkHandler } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
@@ -45,7 +44,6 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   } = props
   const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
   const { endTime } = currentAuction ?? {}
-  const Image = useImageComponent()
 
   const [isEnded, setIsEnded] = useState(false)
   const timeoutRefs = React.useRef<NodeJS.Timeout[]>([])
@@ -85,7 +83,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
 
   if (!chain) {
     console.error(`Chain with ID ${chainId} not found in PUBLIC_ALL_CHAINS`)
-    return null // or render an error state
+    return null
   }
 
   if (!currentAuction) {
@@ -112,16 +110,18 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
         link={getDaoLink?.(chainId, tokenAddress, currentAuction?.token?.tokenId)}
       >
         <Box className={daoAvatarBox}>
-          <FallbackImage
-            className={daoAvatar}
-            srcList={getFetchableUrls(tokenImage)}
-            alt=""
-          />
+          {tokenImage && (
+            <FallbackImage
+              className={daoAvatar}
+              srcList={getFetchableUrls(tokenImage)}
+              alt=""
+            />
+          )}
         </Box>
         <Box>
           <Flex mb="x1" align="center">
             {chain.icon && (
-              <Image
+              <img
                 src={chain.icon}
                 style={{
                   borderRadius: '12px',
