@@ -3,7 +3,7 @@ import { defaultFileDownloadStyle } from '@buildeross/ui/styles'
 import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'
 
-const FAQ = () => {
+export const FAQ = () => {
   const items = [
     {
       title: 'What is Nouns Builder?',
@@ -113,5 +113,3 @@ const FAQ = () => {
     </Stack>
   )
 }
-
-export default FAQ

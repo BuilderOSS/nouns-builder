@@ -10,19 +10,18 @@ import 'flatpickr/dist/themes/light.css'
 import 'react-mde/lib/styles/css/react-mde-all.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
-import { ImageComponentProvider } from '@buildeross/ui/ImageComponentProvider'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
-import Image from 'next/image'
 import Link from 'next/link'
 import NextNProgress from 'nextjs-progressbar'
 import type { ReactElement, ReactNode } from 'react'
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
+import { LinksProvider } from 'src/components/LinksProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
@@ -55,23 +54,23 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
     <WagmiProvider config={clientConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
-          <LinkComponentProvider LinkComponent={Link}>
-            <ImageComponentProvider ImageComponent={Image}>
-              <SWRConfig value={{ fallback }}>
-                <NextNProgress
-                  color={'#008BFF'}
-                  startPosition={0.125}
-                  stopDelayMs={200}
-                  height={2}
-                  showOnShallow={false}
-                  options={{ showSpinner: false }}
-                />
-                <FrameProvider>
+          <SWRConfig value={{ fallback }}>
+            <NextNProgress
+              color={'#008BFF'}
+              startPosition={0.125}
+              stopDelayMs={200}
+              height={2}
+              showOnShallow={false}
+              options={{ showSpinner: false }}
+            />
+            <FrameProvider>
+              <LinksProvider>
+                <LinkComponentProvider LinkComponent={Link}>
                   {getLayout(<Component {...pageProps} err={err} />)}
-                </FrameProvider>
-              </SWRConfig>
-            </ImageComponentProvider>
-          </LinkComponentProvider>
+                </LinkComponentProvider>
+              </LinksProvider>
+            </FrameProvider>
+          </SWRConfig>
           <NetworkController.Mainnet>
             <VercelAnalytics />
           </NetworkController.Mainnet>

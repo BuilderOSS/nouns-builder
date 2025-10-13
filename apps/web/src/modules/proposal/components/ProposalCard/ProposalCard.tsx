@@ -1,5 +1,5 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
-import { ProposalLinkHandler } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
@@ -9,14 +9,10 @@ import { useChainStore, useDaoStore } from 'src/stores'
 import { ProposalForStatus, ProposalStatus } from '../ProposalStatus'
 import { statusStyle, titleStyle } from './ProposalCard.css'
 
-type ProposalCardProps = ProposalForStatus & {
-  getProposalLink?: ProposalLinkHandler
-}
+type ProposalCardProps = ProposalForStatus
 
-export const ProposalCard: React.FC<ProposalCardProps> = ({
-  getProposalLink,
-  ...proposal
-}) => {
+export const ProposalCard: React.FC<ProposalCardProps> = ({ ...proposal }) => {
+  const { getProposalLink } = useLinks()
   const { title, proposalNumber, timeCreated } = proposal
   const isMounted = useIsMounted()
   const { token } = useDaoStore((state) => state.addresses)

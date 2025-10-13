@@ -1,5 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { Address, isAddress, PublicClient } from 'viem'
+import { Address, getAddress, isAddress, PublicClient } from 'viem'
 
 import { getProvider } from './provider'
 
@@ -19,7 +19,7 @@ export async function isValidAddress(
   errorMessage = 'Must be a valid Ethereum address or resolvable ENS name'
 ): Promise<IsValidAddressResult> {
   try {
-    if (isAddress(input)) return { data: true }
+    if (isAddress(input, { strict: false })) return { data: true }
 
     const resolved = await provider?.getEnsAddress({ name: input })
     return {
@@ -40,7 +40,7 @@ export async function getEnsAddress(
 ): Promise<Address> {
   if (!nameOrAddress) return nameOrAddress as Address
 
-  if (isAddress(nameOrAddress)) return nameOrAddress as Address
+  if (isAddress(nameOrAddress, { strict: false })) return getAddress(nameOrAddress)
 
   // Check cache
   if (ensAddressCache.has(nameOrAddress)) {
@@ -65,21 +65,23 @@ export async function getEnsName(
   address: Address,
   provider: PublicClient | undefined = defaultProvider
 ): Promise<string> {
-  if (!address) return address
+  if (!address || !isAddress(address, { strict: false })) return address
+
+  const checksummedAddress = getAddress(address)
 
   // Check cache
-  if (ensNameCache.has(address)) {
-    return ensNameCache.get(address)!
+  if (ensNameCache.has(checksummedAddress)) {
+    return ensNameCache.get(checksummedAddress)!
   }
 
   try {
-    const name = await provider.getEnsName({ address })
-    const result = name ?? address
-    ensNameCache.set(address, result)
+    const name = await provider.getEnsName({ address: checksummedAddress })
+    const result = name ?? checksummedAddress
+    ensNameCache.set(checksummedAddress, result)
     return result
   } catch (e) {
     console.error('Error getting ENS name:', e)
-    return address
+    return checksummedAddress
   }
 }
 

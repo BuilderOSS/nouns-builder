@@ -1,9 +1,10 @@
 import { useFallbackSrc } from '@buildeross/hooks/useFallbackSrc'
-import { forwardRef } from 'react'
+import React, { forwardRef } from 'react'
 
-import { BaseImageProps, useImageComponent } from '../ImageComponentProvider'
-
-type FallbackImageProps = Omit<BaseImageProps, 'src' | 'alt' | 'onError'> & {
+type FallbackImageProps = Omit<
+  React.ImgHTMLAttributes<HTMLImageElement>,
+  'src' | 'srcSet' | 'onError'
+> & {
   srcList?: string[]
   alt?: string
   onImageError?: () => void
@@ -29,11 +30,9 @@ export const FallbackImage = forwardRef<HTMLImageElement, FallbackImageProps>(
       loadingPlaceholderSrc,
     })
 
-    const Image = useImageComponent()
-
     if (!src) return null
 
-    return <Image ref={ref} alt={alt} src={src} onError={handleError} {...rest} />
+    return <img ref={ref} alt={alt} src={src} onError={handleError} {...rest} />
   }
 )
 

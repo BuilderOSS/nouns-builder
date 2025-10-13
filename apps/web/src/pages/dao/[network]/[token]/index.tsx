@@ -58,15 +58,6 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     [push, chain.slug, addresses.token]
   )
 
-  const getProposalLink = React.useCallback(
-    (_chainId: CHAIN_ID, _collectionAddress: AddressType, proposalNumber: number) => {
-      return {
-        href: `/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`,
-      }
-    },
-    [chain.slug, addresses.token]
-  )
-
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
       const nextQuery = { ...query } // Get existing query params
@@ -112,7 +103,6 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
           key={'proposals'}
           onOpenProposalCreate={openProposalCreatePage}
           onOpenProposalReview={openProposalReviewPage}
-          getProposalLink={getProposalLink}
         />,
       ],
     },

@@ -27,21 +27,28 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
   const transactions = useProposalStore((state) => state.transactions)
   return (
     <Stack mx={'auto'} pb={'x3'} w={'100%'}>
-      <ProposalNavigation handleBack={handleBack} />
-      {showQueue && (
-        <Flex align="center" direction="row" justify="flex-end" w="100%">
-          <Flex>
-            <Button mr="x6" variant="secondary" onClick={() => setQueueModalOpen(true)}>
-              {`${transactions.length} transactions queued`}
-            </Button>
-            {onOpenProposalReview && (
-              <Button disabled={!transactions.length} onClick={onOpenProposalReview}>
-                Continue
-              </Button>
-            )}
+      <ProposalNavigation handleBack={handleBack}>
+        {showQueue && (
+          <Flex align="center" direction="row" justify="flex-end" w="100%">
+            <Flex>
+              {transactions.length > 0 && (
+                <Button
+                  mr="x6"
+                  variant="secondary"
+                  onClick={() => setQueueModalOpen(true)}
+                >
+                  {`${transactions.length} transactions queued`}
+                </Button>
+              )}
+              {onOpenProposalReview && (
+                <Button disabled={!transactions.length} onClick={onOpenProposalReview}>
+                  Continue
+                </Button>
+              )}
+            </Flex>
           </Flex>
-        </Flex>
-      )}
+        )}
+      </ProposalNavigation>
       <AnimatedModal close={() => setQueueModalOpen(false)} open={queueModalOpen}>
         <Queue setQueueModalOpen={setQueueModalOpen} />
       </AnimatedModal>

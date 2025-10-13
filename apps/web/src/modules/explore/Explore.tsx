@@ -1,10 +1,8 @@
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { Pagination } from '@buildeross/ui/Pagination'
 import { Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
-import Pagination from 'src/components/Pagination'
 import { DaoCard } from 'src/modules/dao/components/DaoCard'
 import { useChainStore } from 'src/stores'
 import { formatEther } from 'viem'
@@ -24,24 +22,6 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
   const chain = useChainStore((x) => x.chain)
 
   const page = query.page
-
-  const getDaoLink = React.useCallback(
-    (
-      chainId: CHAIN_ID,
-      tokenAddress: AddressType,
-      tokenId?: number | string | bigint
-    ) => {
-      if (tokenId === undefined || tokenId === null) {
-        return {
-          href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`,
-        }
-      }
-      return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId}`,
-      }
-    },
-    []
-  )
 
   return (
     <Fragment>
@@ -64,7 +44,6 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
                   collectionAddress={dao.dao.tokenAddress}
                   bid={bidInEth}
                   endTime={dao.endTime ?? undefined}
-                  getDaoLink={getDaoLink}
                 />
               )
             })}

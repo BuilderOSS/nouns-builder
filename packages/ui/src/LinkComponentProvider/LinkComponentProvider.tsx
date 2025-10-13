@@ -1,3 +1,4 @@
+import { BASE_URL, isPlatform } from '@buildeross/constants'
 import {
   ComponentType,
   createContext,
@@ -6,6 +7,7 @@ import {
   ReactNode,
   RefAttributes,
   useContext,
+  useMemo,
 } from 'react'
 
 export type BaseLinkProps = {
@@ -15,6 +17,8 @@ export type BaseLinkProps = {
   style?: CSSProperties
   target?: '_blank' | '_self' | '_parent' | '_top'
   rel?: string
+  // Optional scroll prop — only used when supported by the LinkComponent
+  scroll?: boolean
 }
 
 type LinkComponent =
@@ -32,6 +36,9 @@ interface LinkComponentProviderProps {
   LinkComponent: LinkComponent
 }
 
+/**
+ * Provider for custom link components (e.g., Next.js Link).
+ */
 export const LinkComponentProvider = ({
   children,
   LinkComponent,
@@ -39,12 +46,26 @@ export const LinkComponentProvider = ({
   return <LinkContext.Provider value={{ LinkComponent }}>{children}</LinkContext.Provider>
 }
 
-const DefaultLink = ({ href, children, ...props }: BaseLinkProps) => (
-  <a href={href} {...props}>
-    {children}
-  </a>
-)
+/**
+ * Default fallback: plain <a> link.
+ * Ignores scroll prop.
+ */
+const DefaultLink = ({ href: hrefProp, children, ...props }: BaseLinkProps) => {
+  const href = useMemo(() => {
+    if (!hrefProp || !hrefProp.startsWith('/') || isPlatform) return hrefProp
+    return `${BASE_URL}${hrefProp}`
+  }, [hrefProp])
 
+  return (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  )
+}
+
+/**
+ * Hook that returns the appropriate Link component.
+ */
 export const useLinkComponent = (): LinkComponent => {
   const context = useContext(LinkContext)
   return context?.LinkComponent ?? DefaultLink

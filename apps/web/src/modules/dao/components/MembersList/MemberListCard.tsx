@@ -1,7 +1,7 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
-import { ProfileLinkHandler } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
@@ -10,12 +10,11 @@ import React, { useMemo } from 'react'
 export const MemberCard = ({
   member,
   totalSupply,
-  getProfileLink,
 }: {
   member: DaoVoter
   totalSupply?: number
-  getProfileLink?: ProfileLinkHandler
 }) => {
+  const { getProfileLink } = useLinks()
   const { displayName, ensAvatar } = useEnsData(member.voter)
 
   const timeJoined = useMemo(

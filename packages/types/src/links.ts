@@ -8,13 +8,19 @@ export type LinkOptions =
 export type DaoLinkHandler = (
   chainId: CHAIN_ID,
   tokenAddress: AddressType,
+  tab?: string
+) => LinkOptions
+
+export type AuctionLinkHandler = (
+  chainId: CHAIN_ID,
+  tokenAddress: AddressType,
   tokenId?: number | string | bigint
 ) => LinkOptions
 
 export type ProposalLinkHandler = (
   chainId: CHAIN_ID,
   tokenAddress: AddressType,
-  proposalNumber: number
+  proposalId: number | string | bigint
 ) => LinkOptions
 
 export type ProfileLinkHandler = (address: AddressType) => LinkOptions

@@ -1,6 +1,6 @@
 import React, { SVGProps } from 'react'
 
-export function Skull(props: SVGProps<SVGSVGElement>) {
+export const Skull: React.FC<SVGProps<SVGSVGElement>> = (props) => {
   return (
     <svg
       viewBox="0 0 136 192"

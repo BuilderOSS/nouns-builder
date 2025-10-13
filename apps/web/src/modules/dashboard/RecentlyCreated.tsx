@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react'
 import { useChainStore } from 'src/stores'
 import { homeSectionHeader, homeSectionWrapper } from 'src/styles/home.css'
 
-const RecentlyCreated: React.FC<{
+export const RecentlyCreated: React.FC<{
   children: ReactNode
   isDashboard?: boolean
 }> = ({ children, isDashboard }) => {
@@ -47,5 +47,3 @@ const RecentlyCreated: React.FC<{
     </Stack>
   )
 }
-
-export default RecentlyCreated

@@ -1,19 +1,27 @@
+import type { AddressType } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper as OptionalLink } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-import { OptionalLink } from 'src/components/OptionalLink'
 import { useChainStore } from 'src/stores'
 
 import { useNextAndPreviousTokens } from '../hooks/useNextAndPreviousTokens'
-import { auctionDateNavButton, auctionTextVariants } from './Auction.css'
+import {
+  auctionDateNavButton,
+  auctionDateNavButtonWithHover,
+  auctionTextVariants,
+} from './Auction.css'
 
 interface AuctionTokenPickerProps {
-  collection: string
+  collection: AddressType
   tokenId: number
   currentTokenId?: number
   mintDate?: number
   name?: string
 }
+
+const disabledStyle = { opacity: 0.2 }
 
 export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   collection,
@@ -22,8 +30,8 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
   name,
   currentTokenId,
 }: AuctionTokenPickerProps) => {
-  const { id: chainId, slug: chainSlug } = useChainStore((x) => x.chain)
-  const disabledStyle = { opacity: 0.2 }
+  const { id: chainId } = useChainStore((x) => x.chain)
+  const { getAuctionLink } = useLinks()
 
   const data = useNextAndPreviousTokens({ chainId, collection, tokenId })
 
@@ -44,27 +52,43 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
       <Flex align="center" direction={'row'} gap={'x2'}>
         <OptionalLink
           enabled={hasPreviousToken}
-          href={`/dao/${chainSlug}/${collection}/${data?.prev}`}
+          link={getAuctionLink(chainId, collection, data?.prev)}
         >
-          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
+          <Flex
+            align={'center'}
+            justify={'center'}
+            className={
+              hasPreviousToken ? auctionDateNavButtonWithHover : auctionDateNavButton
+            }
+          >
             <Icon id="arrowLeft" style={hasPreviousToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
 
         <OptionalLink
           enabled={hasNextToken}
-          href={`/dao/${chainSlug}/${collection}/${data?.next}`}
+          link={getAuctionLink(chainId, collection, data?.next)}
         >
-          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
+          <Flex
+            align={'center'}
+            justify={'center'}
+            className={
+              hasNextToken ? auctionDateNavButtonWithHover : auctionDateNavButton
+            }
+          >
             <Icon id="arrowRight" style={hasNextToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
 
         <OptionalLink
           enabled={hasLatestToken}
-          href={`/dao/${chainSlug}/${collection}/${latestTokenId}`}
+          link={getAuctionLink(chainId, collection, latestTokenId)}
         >
-          <Flex align={'center'} justify={'center'} className={auctionDateNavButton}>
+          <Flex
+            align={'center'}
+            justify={'center'}
+            className={auctionDateNavButtonWithHover}
+          >
             <Text
               mx={'x3'}
               style={hasLatestToken ? {} : disabledStyle}

@@ -1,14 +1,10 @@
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
-import {
-  AddressType,
-  CHAIN_ID,
-  DaoLinkHandler,
-  ProposalLinkHandler,
-} from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React from 'react'
@@ -26,14 +22,11 @@ export const DaoProposals = ({
   chainId,
   userAddress,
   onOpenCreateProposal,
-  getDaoLink,
-  getProposalLink,
 }: DashboardDaoProps & {
   userAddress?: AddressType
   onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
-  getDaoLink?: DaoLinkHandler
-  getProposalLink?: ProposalLinkHandler
 }) => {
+  const { getDaoLink } = useLinks()
   const { isGovernanceDelayed, isLoading: isLoadingDelayedGovernance } =
     useDelayedGovernance({
       tokenAddress: tokenAddress,
@@ -94,7 +87,6 @@ export const DaoProposals = ({
             userAddress={userAddress}
             chainId={chainId}
             collectionAddress={tokenAddress}
-            getProposalLink={getProposalLink}
             {...proposal}
           />
         ))}

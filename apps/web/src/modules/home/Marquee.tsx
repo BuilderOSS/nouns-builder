@@ -18,7 +18,7 @@ import {
   Unlock,
 } from './Marquee.css'
 
-const Marquee = () => {
+export const Marquee = () => {
   return (
     <Flex direction={'column'} align={'center'} mt={{ '@initial': 'x4', '@768': 'x32' }}>
       <Flex gap={'x2'} mb={'x1'}>
@@ -135,5 +135,3 @@ const Marquee = () => {
     </Flex>
   )
 }
-
-export default Marquee
