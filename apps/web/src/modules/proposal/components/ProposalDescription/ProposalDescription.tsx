@@ -8,20 +8,17 @@ import {
   SubgraphSDK,
   Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
+import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
+import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
+import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
-import Image from 'next/image'
 import React, { ReactNode, useMemo } from 'react'
-import {
-  getEscrowBundler,
-  getEscrowBundlerV1,
-} from 'src/modules/create-proposal/components/TransactionForm/Escrow/EscrowUtils'
 import { useChainStore } from 'src/stores'
 import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 
-import { DecodedTransactions } from './DecodedTransactions'
 import { MilestoneDetails } from './MilestoneDetails'
 import { proposalDescription } from './ProposalDescription.css'
 
@@ -45,6 +42,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   collection,
   onOpenProposalReview,
 }) => {
+  const Image = useImageComponent()
   const { description, proposer, executionTransactionHash } = proposal
 
   const { displayName } = useEnsData(proposer)
@@ -115,7 +113,6 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                 <Image
                   alt="proposer"
                   src={tokenImage}
-                  quality={50}
                   width={128}
                   height={128}
                   className={atoms({ borderRadius: 'small' })}
@@ -136,7 +133,10 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         </Section>
 
         <Section title="Proposed Transactions">
-          <DecodedTransactions decodedTransactions={decodedTransactions} />
+          <DecodedTransactions
+            decodedTransactions={decodedTransactions}
+            chainId={chain.id}
+          />
         </Section>
       </Flex>
     </Flex>

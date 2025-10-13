@@ -1,14 +1,11 @@
 import { Duration } from '@buildeross/types'
 import { DatePicker, SmartInput } from '@buildeross/ui/Fields'
+import { calculateMaxAllocation } from '@buildeross/utils'
 import { Button, Flex, Heading, Icon, Paragraph, Stack, Text } from '@buildeross/zord'
 import { FormikErrors, FormikProps, FormikTouched } from 'formik'
 import React from 'react'
-import {
-  calculateMaxAllocation,
-  FounderAllocationFormValues,
-} from 'src/modules/create-dao'
 
-import { TokenAllocation } from '../AllocationForm'
+import { FounderAllocationFormValues, TokenAllocation } from '../AllocationForm'
 
 interface FounderAllocationFieldsProps {
   values: FounderAllocationFormValues

@@ -1,7 +1,5 @@
-import { AddressType } from '@buildeross/types'
+import { AddressType, BuilderTransaction } from '@buildeross/types'
 import { hexToBigInt } from 'viem'
-
-import { BuilderTransaction } from '../stores/useProposalStore'
 
 interface ProposalTransactions {
   calldata: string[]

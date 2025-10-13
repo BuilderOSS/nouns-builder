@@ -14,6 +14,7 @@
     "@buildeross/types": "workspace:*",
     "@types/node": "^22.15.21",
     "@types/tinycolor2": "^1.4.6",
+    "bs58": "^6.0.0",
     "eslint": "8.57.1",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3",

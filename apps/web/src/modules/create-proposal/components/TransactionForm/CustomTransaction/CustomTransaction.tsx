@@ -1,10 +1,10 @@
-import { AddressType } from '@buildeross/types'
+import { AddressType, TransactionType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
+import { useProposalStore } from 'src/stores'
 
-import { TransactionType } from '../../../constants'
-import { useCustomTransactionStore, useProposalStore } from '../../../stores'
+import { useCustomTransactionStore } from '../../../stores/useCustomTransactionStore'
 import { customTransactionWrapper, transactionFormWrapper } from './CustomTransaction.css'
 import { FormHeading } from './FormHeading'
 import { ABI, Address, Arguments, Function, Summary, Value } from './forms'

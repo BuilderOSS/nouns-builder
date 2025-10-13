@@ -1,21 +1,21 @@
-import React, {
+import {
   ComponentType,
   createContext,
   ForwardRefExoticComponent,
+  JSX,
   ReactNode,
   RefAttributes,
   useContext,
 } from 'react'
 
-interface BaseImageProps {
+export type BaseImageProps = Omit<
+  JSX.IntrinsicElements['img'],
+  'src' | 'srcSet' | 'ref' | 'alt' | 'width' | 'height'
+> & {
   src: string
   alt: string
   width?: number | `${number}`
   height?: number | `${number}`
-  className?: string
-  style?: React.CSSProperties
-  onLoad?: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void
-  onError?: (event: React.SyntheticEvent<HTMLImageElement, Event>) => void
 }
 
 type ImageComponent =

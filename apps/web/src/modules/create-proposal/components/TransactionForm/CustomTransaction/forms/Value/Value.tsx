@@ -1,8 +1,8 @@
 import { Flex } from '@buildeross/zord'
 import React from 'react'
-import { useCustomTransactionStore } from 'src/modules/create-proposal'
 import { formatEther, parseEther } from 'viem'
 
+import { useCustomTransactionStore } from '../../../../../stores/useCustomTransactionStore'
 import { CustomTransactionForm } from '../CustomTransactionForm'
 import { transactionValueFields, validateTransactionValue } from './fields'
 

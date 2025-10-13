@@ -6,7 +6,7 @@ import {
   tokenAbi,
   treasuryAbi,
 } from '@buildeross/sdk/contract'
-import { AddressType } from '@buildeross/types'
+import { AddressType, TransactionType } from '@buildeross/types'
 import {
   DaysHoursMinsSecs,
   FIELD_TYPES,
@@ -27,17 +27,20 @@ import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
-import { TokenAllocation } from 'src/modules/create-dao'
 import {
   BuilderTransaction,
-  TransactionType,
+  useChainStore,
+  useDaoStore,
   useProposalStore,
-} from 'src/modules/create-proposal'
-import { useChainStore, useDaoStore } from 'src/stores'
+} from 'src/stores'
 import { Address, encodeFunctionData, formatEther } from 'viem'
 import { useReadContracts } from 'wagmi'
 
-import { AdminFormValues, adminValidationSchema } from './AdminForm.schema'
+import {
+  AdminFormValues,
+  adminValidationSchema,
+  TokenAllocation,
+} from './AdminForm.schema'
 import { AdminFounderAllocationFields } from './AdminFounderAllocationFields'
 import { Section } from './Section'
 import { formValuesToTransactionMap } from './utils'

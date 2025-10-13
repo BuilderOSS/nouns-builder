@@ -1,8 +1,8 @@
 import { AddressType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React from 'react'
-import { useCustomTransactionStore } from 'src/modules/create-proposal'
 
+import { useCustomTransactionStore } from '../../../../../stores/useCustomTransactionStore'
 import { CustomTransactionForm } from '../CustomTransactionForm'
 import { fields, validateABI } from './fields'
 

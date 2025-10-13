@@ -5,9 +5,9 @@ import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React, { useState } from 'react'
-import { useArtworkStore } from 'src/modules/create-proposal/stores/useArtworkStore'
 import { useChainStore } from 'src/stores'
 
+import { useArtworkStore } from '../../../stores/useArtworkStore'
 import { ArtworkUpload } from '../../ArtworkUpload'
 import { checkboxHelperText, checkboxStyleVariants } from './ReplaceArtworkForm.css'
 import {

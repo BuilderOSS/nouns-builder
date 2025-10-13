@@ -2,7 +2,7 @@ import { Box, Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { memo } from 'react'
 
-import { useCustomTransactionStore } from '../../../stores'
+import { useCustomTransactionStore } from '../../../stores/useCustomTransactionStore'
 import { transactionFlowHeading, transactionFlowWrapper } from './CustomTransaction.css'
 
 export const FormHeading: React.FC<{

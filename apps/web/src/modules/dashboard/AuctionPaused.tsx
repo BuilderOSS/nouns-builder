@@ -1,7 +1,7 @@
 import { AddressType, Chain, DaoLinkHandler } from '@buildeross/types'
+import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, icons, Text } from '@buildeross/zord'
-import Image from 'next/image'
 import React from 'react'
 
 import { DashboardDaoProps } from './Dashboard'
@@ -23,6 +23,7 @@ type PausedType = DashboardDaoProps & {
 
 export const AuctionPaused = ({ name, tokenAddress, chain, getDaoLink }: PausedType) => {
   const Paused = icons.pause
+  const Image = useImageComponent()
 
   return (
     <Flex className={outerAuctionCard}>
@@ -50,9 +51,12 @@ export const AuctionPaused = ({ name, tokenAddress, chain, getDaoLink }: PausedT
             {chain.icon && (
               <Image
                 src={chain.icon}
-                layout="fixed"
-                objectFit="contain"
-                style={{ borderRadius: '12px', maxHeight: '22px' }}
+                style={{
+                  borderRadius: '12px',
+                  maxHeight: '22px',
+                  maxWidth: '22px',
+                  objectFit: 'contain',
+                }}
                 alt=""
                 height={22}
                 width={22}

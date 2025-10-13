@@ -10,7 +10,7 @@ import React, { useState } from 'react'
 import { useChainStore } from 'src/stores'
 
 import { useFormStore } from '../../stores'
-import { TokenAllocation } from '../AllocationForm'
+import { TokenAllocation } from './AllocationForm'
 import { Contribution } from './Contribution'
 import {
   ContributionAllocationForm,

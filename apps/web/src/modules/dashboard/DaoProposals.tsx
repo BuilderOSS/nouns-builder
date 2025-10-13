@@ -8,10 +8,10 @@ import {
   ProposalLinkHandler,
 } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React from 'react'
-import { FallbackNextImage } from 'src/components/FallbackNextImage'
 
 import { DaoProposalCard } from './DaoProposalCard'
 import { DashboardDaoProps } from './Dashboard'
@@ -56,7 +56,7 @@ export const DaoProposals = ({
         <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
           {daoImage ? (
             <Box mr="x4">
-              <FallbackNextImage
+              <FallbackImage
                 srcList={getFetchableUrls(daoImage)}
                 style={{ borderRadius: '12px', objectFit: 'contain' }}
                 alt=""

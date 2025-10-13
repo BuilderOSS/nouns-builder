@@ -3,7 +3,8 @@ import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
 import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { erc721Abi, erc1155Abi } from '@buildeross/sdk/contract'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, TransactionType } from '@buildeross/types'
+import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -13,12 +14,7 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { TransactionType, useProposalStore } from 'src/modules/create-proposal'
-import {
-  DropdownSelect,
-  SelectOption,
-} from 'src/modules/create-proposal/components/DropdownSelect'
-import { useChainStore, useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { encodeFunctionData, getAddress, isAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 

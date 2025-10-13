@@ -3,8 +3,8 @@ import { Flex, Stack } from '@buildeross/zord'
 import { Field } from 'formik'
 import React from 'react'
 import { SimulationOutput } from 'src/services/simulationService'
+import { BuilderTransaction } from 'src/stores'
 
-import { BuilderTransaction } from '../../stores'
 import { SimulationError, TransactionCard } from '../TransactionCard'
 
 export const Transactions = ({

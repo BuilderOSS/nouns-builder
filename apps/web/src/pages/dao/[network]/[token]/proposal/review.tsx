@@ -10,13 +10,9 @@ import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import {
-  CreateProposalHeading,
-  ReviewProposalForm,
-  useProposalStore,
-} from 'src/modules/create-proposal'
+import { CreateProposalHeading, ReviewProposalForm } from 'src/modules/create-proposal'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore, useDaoStore } from 'src/stores'
+import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { notFoundWrap } from 'src/styles/404.css'
 import { useAccount } from 'wagmi'
 

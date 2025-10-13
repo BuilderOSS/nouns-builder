@@ -1,5 +1,5 @@
 import { Duration } from '@buildeross/types'
-import { durationValidationSchema } from '@buildeross/utils/yup'
+import { durationValidationSchema, priceValidationSchema } from '@buildeross/utils/yup'
 import * as Yup from 'yup'
 
 export interface AuctionSettingsFormValues {
@@ -16,13 +16,9 @@ const twentyFourWeeks = 60 * 60 * 24 * 7 * 24
 const tenMinutes = 60 * 10
 const fiveMinutes = 60 * 5
 
-export const auctionReservePriceValidationSchema = Yup.number()
-  .transform((value) => (isNaN(value) ? undefined : value))
-  .required('*')
-
 export const auctionSettingsValidationSchema = Yup.object().shape({
   auctionDuration: durationValidationSchema(),
-  auctionReservePrice: auctionReservePriceValidationSchema,
+  auctionReservePrice: priceValidationSchema,
   proposalThreshold: Yup.number()
     .transform((value) => (isNaN(value) ? undefined : value))
     .required('*')

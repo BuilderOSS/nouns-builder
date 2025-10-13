@@ -1,6 +1,5 @@
+import { BuilderTransaction } from '@buildeross/types'
 import * as Yup from 'yup'
-
-import { BuilderTransaction } from '../../stores/useProposalStore'
 
 export const ERROR_CODE: Record<string, string> = {
   GENERIC: `Oops. Looks like there was a problem submitting this proposal, please try again..`,

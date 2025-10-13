@@ -3,13 +3,13 @@ import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID, DaoLinkHandler } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useImageComponent } from '@buildeross/ui/ImageComponentProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { BigNumberish, formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import NextImage from 'next/image'
 import React, { useState } from 'react'
-import { FallbackNextImage } from 'src/components/FallbackNextImage'
 
 import { auction, daoImage, name, title } from './DaoCard.css'
 import { Detail } from './Detail'
@@ -45,6 +45,7 @@ export const DaoCard = ({
   const isMounted = useIsMounted()
   const [isEnded, setIsEnded] = useState(false)
   const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)
+  const Image = useImageComponent()
 
   const onEnd = () => {
     setIsEnded(true)
@@ -70,10 +71,7 @@ export const DaoCard = ({
         position="relative"
         className={daoImage}
       >
-        <FallbackNextImage
-          priority
-          unoptimized
-          fill
+        <FallbackImage
           srcList={getFetchableUrls(tokenImage)}
           sizes="100vw"
           alt={`${collectionName} image`}
@@ -105,12 +103,15 @@ export const DaoCard = ({
             </Paragraph>
             {chainMeta && (
               <Flex align="center" gap="x1">
-                <NextImage
+                <Image
                   src={chainMeta.icon}
-                  layout="fixed"
-                  objectFit="contain"
-                  style={{ borderRadius: '12px', maxHeight: '16px' }}
-                  alt=""
+                  style={{
+                    borderRadius: '12px',
+                    maxHeight: '16px',
+                    objectFit: 'contain',
+                    maxWidth: '16px',
+                  }}
+                  alt={chainMeta.name}
                   height={16}
                   width={16}
                 />

@@ -5,7 +5,7 @@ import { createJSONStorage, persist, StorageValue } from 'zustand/middleware'
 
 export const CHAIN_STORE_IDENTIFIER = `nouns-builder-chain-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`
 
-export interface ChainStoreProps {
+export type ChainStoreProps = {
   chain: Chain
   setChain: (chain: Chain) => void
 }

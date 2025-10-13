@@ -3,16 +3,13 @@ import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
+import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import type { FormikProps } from 'formik'
 import { Form } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  DropdownSelect,
-  SelectOption,
-} from 'src/modules/create-proposal/components/DropdownSelect'
 import { useChainStore, useDaoStore } from 'src/stores'
 import { formatUnits, getAddress, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'

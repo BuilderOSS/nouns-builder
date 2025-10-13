@@ -1,22 +1,20 @@
 import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, TransactionType } from '@buildeross/types'
+import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
+
 import {
-  TransactionType,
-  useProposalStore,
   useWalletConnect,
   WCClientData,
   WCParams,
   WCPayload,
-} from 'src/modules/create-proposal'
-import { DecodedTransactionDisplay } from 'src/modules/proposal/components/ProposalDescription/DecodedTransactions/DecodedTransactions'
-import { useChainStore, useDaoStore } from 'src/stores'
-
+} from '../../../hooks/useWalletConnect'
 import * as styles from './WalletConnect.css'
 import walletConnectSchema, { WalletConnectValues } from './WalletConnect.schema'
 
@@ -229,6 +227,8 @@ const useDecodedTxPayload = (txPayload: WCPayload | null) => {
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
   const { decodedTransaction: decoded } = useDecodedTxPayload(txPayload)
+  const chain = useChainStore((state) => state.chain)
+  const transactions = useMemo(() => (decoded ? [decoded] : []), [decoded])
 
   if (!decoded) return null
 
@@ -237,7 +237,7 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
       <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight={'display'}>
         Transaction Preview
       </Box>
-      <DecodedTransactionDisplay {...decoded} />
+      <DecodedTransactions chainId={chain.id} decodedTransactions={transactions} />
     </Box>
   )
 }

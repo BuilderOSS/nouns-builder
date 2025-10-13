@@ -1,18 +1,12 @@
-import { AddressType } from '@buildeross/types'
+import type { DaoContractAddresses } from '@buildeross/types'
 import { createStore } from 'zustand'
 
-export interface DaoContractAddresses {
-  token?: AddressType
-  metadata?: AddressType
-  auction?: AddressType
-  treasury?: AddressType
-  governor?: AddressType
-}
-
-export interface DaoStoreProps {
+export type DaoStoreProps = {
   addresses: DaoContractAddresses
   setAddresses: (addresses: DaoContractAddresses) => void
 }
+
+export type { DaoContractAddresses }
 
 export const createDaoStore = (init?: DaoContractAddresses) =>
   createStore<DaoStoreProps>((set) => ({

@@ -9,10 +9,10 @@ import { camelToTitle } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import isEqual from 'lodash/isEqual'
 import React from 'react'
-import { useCustomTransactionStore } from 'src/modules/create-proposal'
 import { encodeAbiParameters, isAddress, isHex } from 'viem'
 import * as Yup from 'yup'
 
+import { useCustomTransactionStore } from '../../../../../stores/useCustomTransactionStore'
 import { CustomTransactionForm } from '../CustomTransactionForm'
 
 export const Arguments = () => {

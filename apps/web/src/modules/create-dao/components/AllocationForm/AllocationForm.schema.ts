@@ -51,7 +51,7 @@ export const validationSchemaFounderAllocation = (signerAddress: string | null) 
         'unique',
         'Founder allocation addresses should be unique.',
         function (values) {
-          const addresses = values?.map((v) => v.founderAddress)
+          const addresses = values?.map((v) => v.founderAddress?.toLowerCase?.() || '')
           return values?.length === new Set(addresses).size
         }
       ),

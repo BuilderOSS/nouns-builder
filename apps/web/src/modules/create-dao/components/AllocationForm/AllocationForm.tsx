@@ -1,4 +1,4 @@
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, type TokenAllocation } from '@buildeross/types'
 import { defaultBackButton, defaultFormButtonWithPrev } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Button, Flex, Icon } from '@buildeross/zord'
@@ -15,15 +15,10 @@ import { ContributionAllocation } from './ContributionAllocation'
 import { FounderAllocationFields } from './FounderAllocationFields'
 import { FounderRewardsFields } from './FounderRewardsFields'
 
+export type { TokenAllocation }
+
 interface AllocationFormProps {
   title: string
-}
-
-export interface TokenAllocation {
-  allocationPercentage: number | string
-  founderAddress: string
-  endDate: string
-  admin?: boolean
 }
 
 export interface FounderAllocationFormValues {

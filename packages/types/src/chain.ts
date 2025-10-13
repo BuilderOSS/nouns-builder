@@ -12,7 +12,7 @@ export enum CHAIN_ID {
   FOUNDRY = 31337,
 }
 
-export interface Chain extends ViemChain {
+export type Chain = ViemChain & {
   id: CHAIN_ID
   slug: string
   icon: string

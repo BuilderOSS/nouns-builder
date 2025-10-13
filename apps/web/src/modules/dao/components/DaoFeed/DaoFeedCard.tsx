@@ -1,15 +1,15 @@
 import { useDaoAuction } from '@buildeross/hooks/useDaoAuction'
+import { AuctionFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { chainIdToSlug } from '@buildeross/utils/helpers'
 import React from 'react'
-import { DaoCard } from 'src/modules/dao'
-import { DaoProps } from 'src/pages'
 import { useChainStore } from 'src/stores'
 
+import { DaoCard } from '../DaoCard'
 import { DaoFeedCardSkeleton } from './DaoFeedSkeleton'
 
 interface DaoCardProps {
-  dao: DaoProps
+  dao: AuctionFragment['dao']
 }
 
 export const DaoFeedCard: React.FC<DaoCardProps> = ({ dao }) => {

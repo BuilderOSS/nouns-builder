@@ -1,9 +1,10 @@
 import { AddressType, Chain } from '@buildeross/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
-import { Auction, type TokenWithDao } from 'src/modules/auction/components/Auction'
-import { AuctionChart } from 'src/modules/auction/components/AuctionChart/AuctionChart'
-import { ViewSwitcher } from 'src/modules/auction/components/ViewSwitcher'
+
+import { Auction, type TokenWithDao } from './Auction'
+import { AuctionChart } from './AuctionChart/AuctionChart'
+import { ViewSection, ViewSwitcher } from './ViewSwitcher'
 
 type TopSectionProps = {
   chain: Chain
@@ -15,11 +16,6 @@ type TopSectionProps = {
   referral?: AddressType
 }
 
-export enum TopSectionView {
-  Auction = 'auction',
-  Chart = 'chart',
-}
-
 export const DaoAuctionSection = ({
   chain,
   auctionAddress,
@@ -29,14 +25,14 @@ export const DaoAuctionSection = ({
   onOpenActivity,
   referral,
 }: TopSectionProps) => {
-  const [topSectionView, setTopSectionView] = React.useState<TopSectionView>(
-    TopSectionView.Auction
+  const [topSectionView, setViewSection] = React.useState<ViewSection>(
+    ViewSection.Auction
   )
 
   return (
-    <ViewSwitcher topSectionView={topSectionView} setTopSectionView={setTopSectionView}>
+    <ViewSwitcher topSectionView={topSectionView} setViewSection={setViewSection}>
       <TabSwitchAnimation topSectionView={topSectionView}>
-        {topSectionView === TopSectionView.Chart ? (
+        {topSectionView === ViewSection.Chart ? (
           <AuctionChart />
         ) : (
           <Auction

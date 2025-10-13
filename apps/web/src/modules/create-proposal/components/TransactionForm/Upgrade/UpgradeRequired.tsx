@@ -1,9 +1,9 @@
+import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BuilderTransaction, useProposalStore } from 'src/modules/create-proposal/stores'
+import { BuilderTransaction, useProposalStore } from 'src/stores'
 
 import { Alert } from '../../Alert'
-import { UpgradeCard } from '../../UpgradeCard'
 
 export interface UpgradeRequiredProps {
   transaction?: BuilderTransaction
