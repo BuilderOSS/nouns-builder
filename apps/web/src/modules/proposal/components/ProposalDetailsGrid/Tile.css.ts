@@ -33,3 +33,16 @@ export const voteProgressVariants = styleVariants({
   against: [voteProgress, atoms({ backgroundColor: 'negative' })],
   abstain: [voteProgress, atoms({ backgroundColor: 'text3' })],
 })
+
+export const propDataGrid = style([
+  atoms({ gap: 'x4' }),
+  {
+    gridTemplateColumns: '1fr 1fr 1fr',
+    '@media': {
+      'screen and (max-width: 768px)': {
+        gridTemplateColumns: '1fr',
+        gap: '8px',
+      },
+    },
+  },
+])

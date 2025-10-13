@@ -1,16 +1,18 @@
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, Stack } from '@buildeross/zord'
 import Head from 'next/head'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
+import { useChainStore } from 'src/stores'
+import { whyCreateButton, whyTextStyle } from 'src/styles/about.css'
 
-import { whyCreateButton, whyTextStyle } from '../styles/why.css'
 import { NextPageWithLayout } from './_app'
 
 const AboutPage: NextPageWithLayout = () => {
   const { push } = useRouter()
+  const { id: chainId } = useChainStore((x) => x.chain)
 
   const handleCreateClick = useCallback(() => {
     push('/create')
@@ -59,6 +61,7 @@ const AboutPage: NextPageWithLayout = () => {
           </Box>
 
           <ContractButton
+            chainId={chainId}
             alignSelf={'center'}
             align={'center'}
             justify={'center'}

@@ -1,10 +1,8 @@
 import { atoms, Flex, Icon } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
-import {
-  reviewSectionStyleVariants,
-  reviewSectionSubHeading,
-} from 'src/styles/deploy.css'
+
+import { reviewSectionStyleVariants, reviewSectionSubHeading } from './ReviewSection.css'
 
 export const ReviewSection: React.FC<{
   subHeading: string

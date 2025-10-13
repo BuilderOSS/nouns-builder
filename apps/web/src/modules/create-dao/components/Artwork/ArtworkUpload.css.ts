@@ -1,12 +1,6 @@
 import { atoms } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
-import { skeletonAnimation } from './animations.css'
-
-export const artworkSkeleton = style({
-  animation: skeletonAnimation,
-})
-
 export const artworkPreviewPanel = style([
   atoms({
     position: 'fixed',

@@ -24,7 +24,7 @@ import { ProposalVotes } from 'src/modules/proposal/components/ProposalVotes'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
 import { type DaoContractAddresses, useChainStore } from 'src/stores'
-import { propPageWrapper } from 'src/styles/Proposals.css'
+import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR, { unstable_serialize } from 'swr'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useBalance } from 'wagmi'
@@ -167,7 +167,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
       />
 
       <Flex position="relative" direction="column">
-        <Flex className={propPageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
+        <Flex className={votePageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
           <ProposalHeader proposal={proposal} handleBack={openDaoActivityPage} />
           <>
             {displayWarning && (

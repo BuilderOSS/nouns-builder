@@ -1,5 +1,5 @@
+import { skeletonAnimation } from '@buildeross/ui/styles'
 import { style, styleVariants } from '@vanilla-extract/css'
-import { skeletonAnimation } from 'src/styles/animations.css'
 
 const tabBase = style({
   textTransform: 'capitalize',

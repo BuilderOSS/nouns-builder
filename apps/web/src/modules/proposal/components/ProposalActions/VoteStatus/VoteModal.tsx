@@ -2,6 +2,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { BytesType } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import {
   Atoms,
@@ -16,20 +17,20 @@ import {
 } from '@buildeross/zord'
 import { Field, Formik } from 'formik'
 import React, { Fragment, useCallback, useMemo } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore, useDaoStore } from 'src/stores'
-import {
-  proposalFormTitle,
-  voteModalFieldset,
-  voteModalOption,
-  voteModalOptionText,
-  voteModalRadioInput,
-  voteModalReason,
-} from 'src/styles/Proposals.css'
 import { useSWRConfig } from 'swr'
 import { Hex } from 'viem'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+
+import {
+  voteModalFieldset,
+  voteModalFormTitle,
+  voteModalOption,
+  voteModalOptionText,
+  voteModalRadioInput,
+  voteModalReason,
+} from './VoteModal.css'
 
 enum Choice {
   AGAINST = '0',
@@ -173,7 +174,7 @@ const SubmitVoteForm: React.FC<{
     <Box>
       <Flex justify={'space-between'}>
         <Box>
-          <Text variant="heading-md" className={proposalFormTitle}>
+          <Text variant="heading-md" className={voteModalFormTitle}>
             {votesAvailable === 0 ? 'Submit Vote' : 'Submit Votes'}
           </Text>
           <Text variant="paragraph-sm" color="tertiary">
@@ -282,6 +283,7 @@ const SubmitVoteForm: React.FC<{
               </Box>
 
               <ContractButton
+                chainId={chain.id}
                 loading={isSubmitting}
                 disabled={!values.choice}
                 w="100%"

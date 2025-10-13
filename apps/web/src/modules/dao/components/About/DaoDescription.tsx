@@ -3,8 +3,8 @@ import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import HTMLReactParser from 'html-react-parser'
 import React, { useEffect, useMemo, useRef } from 'react'
-import { daoDescription as plainDesciption } from 'src/styles/About.css'
 
+import { daoDescription as plainDescription } from '../../styles/About.css'
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
 
 export const DaoDescription = ({ description }: { description?: string }) => {
@@ -41,7 +41,7 @@ export const DaoDescription = ({ description }: { description?: string }) => {
   if (!isMarkdown)
     return (
       <Box mt={{ '@initial': 'x4', '@768': 'x6' }}>
-        <Text className={plainDesciption}>
+        <Text className={plainDescription}>
           {HTMLReactParser(description.replace(/\\n/g, '<br />'))}
         </Text>
       </Box>

@@ -1,5 +1,5 @@
+import { skeletonAnimation } from '@buildeross/ui/styles'
 import { style } from '@vanilla-extract/css'
-import { skeletonAnimation } from 'src/styles/animations.css'
 
 export const row = style({
   width: '100%',

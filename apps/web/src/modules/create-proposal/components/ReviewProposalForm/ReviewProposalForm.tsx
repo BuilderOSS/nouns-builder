@@ -1,6 +1,7 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { TextInput } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
@@ -9,7 +10,6 @@ import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
 import React, { useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { ErrorResult } from 'src/services/errorResult'
 import { SimulationOutput, SimulationResult } from 'src/services/simulationService'
 import {
@@ -266,6 +266,7 @@ export const ReviewProposalForm = ({
               )}
 
               <ContractButton
+                chainId={chain.id}
                 mt={'x3'}
                 width={'100%'}
                 borderRadius={'curved'}

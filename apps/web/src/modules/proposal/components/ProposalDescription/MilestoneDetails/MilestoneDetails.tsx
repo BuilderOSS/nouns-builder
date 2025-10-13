@@ -9,10 +9,10 @@ import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { useCallback, useMemo, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { encodeFunctionData, formatUnits, Hex } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
@@ -264,6 +264,7 @@ export const MilestoneDetails = ({
                                   : `Release funds for all milestones up to Milestone ${index + 1}`}
                               </Text>
                               <ContractButton
+                                chainId={chain.id}
                                 variant="primary"
                                 handleClick={() =>
                                   isClientConnected

@@ -1,9 +1,9 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, ButtonProps } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore, useDaoStore } from 'src/stores'
 import { useSWRConfig } from 'swr'
 import { ContractFunctionName } from 'viem'
@@ -80,6 +80,7 @@ export function GovernorContractButton({
 
   return (
     <ContractButton
+      chainId={chain.id}
       handleClick={handleClick}
       className={buttonClassName}
       disabled={isPending || isError}

@@ -1,4 +1,5 @@
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import {
@@ -7,18 +8,13 @@ import {
 } from '@buildeross/utils/transformFileProperties'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore, useDaoStore } from 'src/stores'
-import {
-  deployPendingButtonStyle,
-  infoSectionLabelStyle,
-  infoSectionValueVariants,
-  successHeadingStyle,
-} from 'src/styles/deploy.css'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
+import { deployPendingButtonStyle } from './ReviewAndDeploy.css'
+import { infoSectionLabelStyle, infoSectionValueVariants } from './ReviewItem.css'
 
 interface DeployedDaoProps {
   title: string
@@ -162,7 +158,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
 
   return (
     <Flex direction={'column'}>
-      <Box mb={'x1'} className={successHeadingStyle}>
+      <Box mb={'x1'} fontWeight={700}>
         Successfully Deployed Contracts
       </Box>
       <Flex direction={'row'} align={'center'} mb={'x5'} height={'x6'}>
@@ -203,6 +199,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
       )}
 
       <ContractButton
+        chainId={chain.id}
         size={'lg'}
         borderRadius={'curved'}
         className={isPendingTransaction ? deployPendingButtonStyle : undefined}

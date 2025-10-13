@@ -1,8 +1,8 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { useChainStore, useDaoStore } from 'src/stores'
 import {
   useAccount,
@@ -52,7 +52,7 @@ export const Settle = ({
 
   const { data, error } = useSimulateContract({
     query: {
-      enabled: !!auctionAddress,
+      enabled: !!auctionAddress && paused !== undefined,
     },
     address: auctionAddress,
     abi: auctionAbi,

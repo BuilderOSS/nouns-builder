@@ -18,7 +18,7 @@ import {
   VetoForm,
 } from 'src/modules/create-dao'
 import { useChainStore } from 'src/stores'
-import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/styles.css'
+import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/create.css'
 import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'

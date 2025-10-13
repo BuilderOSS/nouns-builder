@@ -15,9 +15,9 @@ import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { ReactNode, useMemo } from 'react'
 import { useChainStore } from 'src/stores'
-import { propPageWrapper } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 
+import { propPageWrapper } from '../styles.css'
 import { MilestoneDetails } from './MilestoneDetails'
 import { proposalDescription } from './ProposalDescription.css'
 

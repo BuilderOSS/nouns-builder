@@ -1,6 +1,7 @@
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import { statistic, statisticContent, statisticHover } from 'src/styles/About.css'
+
+import { statistic, statisticContent, statisticHover } from '../../styles/About.css'
 
 interface StatisticProps {
   title: string

@@ -19,11 +19,11 @@ import { Formik, FormikValues } from 'formik'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
-import { sectionWrapperStyle } from 'src/styles/dao.css'
 import { formatEther, isAddressEqual, parseEther } from 'viem'
 import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
+import { adminSection } from '../styles/Section.css'
 import { Section } from './AdminForm/Section'
 import { PreAuctionFormValues, preAuctionValidationSchema } from './PreAuctionForm.schema'
 
@@ -149,7 +149,7 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
   }
 
   return (
-    <Flex direction={'column'} className={sectionWrapperStyle['admin']} mx={'auto'}>
+    <Flex direction={'column'} className={adminSection} mx={'auto'}>
       <Flex direction={'column'} w={'100%'}>
         <Formik
           initialValues={initialValues}

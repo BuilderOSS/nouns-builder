@@ -1,8 +1,8 @@
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
-import { flowWrapper } from 'src/styles/styles.css'
 
 import { CreateFormSection } from '../../types'
+import { flowWrapper } from './CreateNavigation.css'
 import { NavSection } from './NavSection'
 
 export const CreateNavigation: React.FC<{

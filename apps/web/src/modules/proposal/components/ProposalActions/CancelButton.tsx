@@ -1,13 +1,9 @@
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box } from '@buildeross/zord'
 import React, { useState } from 'react'
-import {
-  cancelButtonBorder,
-  proposalActionButtonVariants,
-} from 'src/styles/Proposals.css'
-import { Address } from 'viem'
 
 import { GovernorContractButton } from '../GovernorContractButton'
+import { cancelButtonBorder, proposalActionButtonVariants } from './ProposalActions.css'
 
 interface CancelButtonProps {
   proposalId: string
@@ -22,7 +18,7 @@ const Cancel: React.FC<{
   return (
     <GovernorContractButton
       functionName="cancel"
-      args={[props.proposalId as Address]}
+      args={[props.proposalId as `0x${string}`]}
       buttonText="Cancel Proposal"
       buttonClassName={proposalActionButtonVariants['cancel']}
       w={'100%'}

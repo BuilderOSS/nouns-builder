@@ -1,14 +1,14 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { Avatar, NameAvatar } from '@buildeross/ui/Avatar'
+import { skeletonAnimation } from '@buildeross/ui/styles'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import { useChainStore, useDaoStore } from 'src/stores'
-import { statisticContent } from 'src/styles/About.css'
-import { skeletonAnimation } from 'src/styles/animations.css'
 import { formatUnits } from 'viem'
 
+import { statisticContent } from '../../styles/About.css'
 import { erc20AssetsWrapper } from './Treasury.css'
 
 export const TokenBalance: React.FC = () => {

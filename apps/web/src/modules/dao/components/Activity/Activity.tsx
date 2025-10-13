@@ -6,23 +6,22 @@ import { useQueryParams } from '@buildeross/hooks/useQueryParams'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Countdown } from '@buildeross/ui/Countdown'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Pagination } from '@buildeross/ui/Pagination'
+import { skeletonAnimation } from '@buildeross/ui/styles'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
-import { ContractButton } from 'src/components/ContractButton'
 import { ProposalCard } from 'src/modules/proposal'
 import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
-import { skeletonAnimation } from 'src/styles/animations.css'
-import { sectionWrapperStyle } from 'src/styles/dao.css'
-import { createProposalBtn, delegateBtn } from 'src/styles/Proposals.css'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
+import { activitySection } from '../../styles/Section.css'
 import { Upgrade } from '../Upgrade'
+import { createProposalBtn, delegateBtn } from './Activity.css'
 import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
 
@@ -41,7 +40,6 @@ export const Activity: React.FC<ActivityProps> = ({
   const { createProposal } = useProposalStore()
   const { address } = useAccount()
   const { query } = useQueryParams()
-  const { openConnectModal } = useConnectModal()
   const LIMIT = 20
   const page: number = query.page ? Number(query.page) : 1
 
@@ -97,7 +95,7 @@ export const Activity: React.FC<ActivityProps> = ({
 
   if (error) {
     return (
-      <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
+      <Flex direction={'column'} className={activitySection} mx={'auto'}>
         <Flex width={'100%'} justify={'space-between'} align={'center'}>
           <Text variant="heading-sm" style={{ fontWeight: 800 }}>
             Proposals
@@ -121,7 +119,7 @@ export const Activity: React.FC<ActivityProps> = ({
 
   return (
     <>
-      <Flex direction={'column'} className={sectionWrapperStyle['proposals']} mx={'auto'}>
+      <Flex direction={'column'} className={activitySection} mx={'auto'}>
         <Flex width={'100%'} justify={'space-between'} align={'center'}>
           <Text variant="heading-sm" style={{ fontWeight: 800 }}>
             Proposals
@@ -154,19 +152,21 @@ export const Activity: React.FC<ActivityProps> = ({
                 borderStyle="solid"
                 borderWidth="normal"
                 handleClick={view}
+                chainId={chain.id}
                 mr="x2"
               >
                 Delegate
               </ContractButton>
             )}
-            <Button
+            <ContractButton
               className={createProposalBtn}
-              onClick={address ? handleProposalCreation : openConnectModal}
+              chainId={chain.id}
+              handleClick={handleProposalCreation}
               disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
               color={'tertiary'}
             >
               Create proposal
-            </Button>
+            </ContractButton>
           </Flex>
           <Flex
             justify={'center'}
@@ -175,6 +175,7 @@ export const Activity: React.FC<ActivityProps> = ({
           >
             {(isOwner || isDelegating) && (
               <ContractButton
+                chainId={chain.id}
                 className={delegateBtn}
                 borderColor="border"
                 borderStyle="solid"
@@ -185,14 +186,15 @@ export const Activity: React.FC<ActivityProps> = ({
                 Delegate
               </ContractButton>
             )}
-            <Button
+            <ContractButton
+              chainId={chain.id}
               className={createProposalBtn}
-              onClick={address ? handleProposalCreation : openConnectModal}
+              handleClick={handleProposalCreation}
               disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
               color={'tertiary'}
             >
               Create
-            </Button>
+            </ContractButton>
           </Flex>
         </Flex>
         {addresses.token && (

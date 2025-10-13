@@ -1,13 +1,13 @@
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
+
+import { useFormStore } from '../../stores'
+import { CreateFormSection } from '../../types'
 import {
   circleVariant,
   flowSectionWrapperVariants,
   flowTitleVariant,
-} from 'src/styles/styles.css'
-
-import { useFormStore } from '../../stores'
-import { CreateFormSection } from '../../types'
+} from './NavSection.css'
 
 export const NavSection: React.FC<{
   sections: CreateFormSection[]

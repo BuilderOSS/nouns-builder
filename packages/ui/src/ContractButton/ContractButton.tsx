@@ -4,6 +4,8 @@ import { Box, Button, ButtonProps, Flex, Icon, PopUp, Text } from '@buildeross/z
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
+import { useConnectModal } from '../ConnectModalProvider'
+
 export const INSUFFICIENT_BALANCE_ERROR =
   'Insufficient balance. Please add ETH to your wallet to complete the transaction.'
 
@@ -32,6 +34,7 @@ export const ContractButton = ({
     address: userAddress,
     chainId: chainId,
   })
+  const { openConnectModal } = useConnectModal()
 
   const chainName = useMemo(() => {
     const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
@@ -55,6 +58,8 @@ export const ContractButton = ({
       if (!userAddress) {
         if (onConnectWallet) {
           return onConnectWallet()
+        } else if (openConnectModal) {
+          return openConnectModal()
         } else {
           setButtonError('Please connect your wallet to continue.')
           return
@@ -94,6 +99,7 @@ export const ContractButton = ({
       userBalance,
       handleClick,
       onConnectWallet,
+      openConnectModal,
     ]
   )
 
