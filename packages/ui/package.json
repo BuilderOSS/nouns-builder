@@ -43,18 +43,18 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
     "./styles": {
-      "types": "./dist/styles.d.ts",
+      "types": "./dist/types/styles.d.ts",
       "import": "./dist/styles.mjs",
       "require": "./dist/styles.js"
     },
     "./index.css": "./dist/index.css",
     "./*": {
-      "types": "./dist/*/index.d.ts",
+      "types": "./dist/types/*/index.d.ts",
       "import": "./dist/*/index.mjs",
       "require": "./dist/*/index.js"
     }
@@ -93,7 +93,9 @@
     "directory": "packages/ui"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "pnpm run build:cjs && pnpm run build:dts",
+    "build:cjs": "tsup",
+    "build:dts": "tsc -b tsconfig.build.json",
     "clean": "rm -rf .turbo dist",
     "lint": "eslint src --fix",
     "test": "vitest run",
