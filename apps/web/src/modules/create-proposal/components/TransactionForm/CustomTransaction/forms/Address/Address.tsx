@@ -2,8 +2,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useChainStore } from '@buildeross/stores'
 import { Flex } from '@buildeross/zord'
 import axios from 'axios'
-import React, { useEffect } from 'react'
-import { isAddress } from 'viem'
+import React from 'react'
 
 import {
   initCustomTransaction,
@@ -20,11 +19,6 @@ export const Address = () => {
     transactionCustomABI: customTransaction?.customABI || '',
   }
 
-  useEffect(() => {
-    if (isAddress(customTransaction.address)) {
-    }
-  }, [customTransaction])
-
   const submitCallback = React.useCallback(
     async ({ transactionContractAddress }: { transactionContractAddress: string }) => {
       let customABI
@@ -37,7 +31,9 @@ export const Address = () => {
         console.error(e)
       }
 
-      const isSame = transactionContractAddress == customTransaction.address
+      const isSame =
+        transactionContractAddress.toLowerCase() ===
+        customTransaction.address.toLowerCase()
 
       composeCustomTransaction({
         ...(isSame ? customTransaction : initCustomTransaction),
