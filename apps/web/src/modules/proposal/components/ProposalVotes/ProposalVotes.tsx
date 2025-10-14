@@ -5,9 +5,9 @@ import {
   Snapshot_OrderBy,
   SubgraphSDK,
 } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 
 import { propPageWrapper } from '../styles.css'

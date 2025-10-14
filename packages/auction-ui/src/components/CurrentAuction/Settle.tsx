@@ -3,7 +3,6 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import {
   useAccount,
   useConfig,
@@ -17,9 +16,8 @@ import { auctionActionButtonVariants } from '../Auction.css'
 
 interface SettleProps {
   isEnding: boolean
-  collectionAddress?: string
   owner?: string | undefined
-  externalAuctionAddress?: AddressType
+  auctionAddress: AddressType
   compact?: boolean
   chainId: CHAIN_ID
 }
@@ -28,29 +26,26 @@ export const Settle = ({
   chainId,
   isEnding,
   owner,
-  externalAuctionAddress,
+  auctionAddress,
   compact = false,
 }: SettleProps) => {
-  const chain = useChainStore((x) => x.chain)
-  const addresses = useDaoStore((state) => state.addresses) || {}
   const config = useConfig()
 
   const { address } = useAccount()
   const isWinner = owner != undefined && address == owner
-
-  const auctionAddress = externalAuctionAddress || addresses.auction
 
   const { data: paused } = useReadContract({
     query: {
       enabled: !!auctionAddress,
     },
     address: auctionAddress,
-    chainId: chain.id,
+    chainId: chainId,
     abi: auctionAbi,
     functionName: 'paused',
   })
 
   const { data, error } = useSimulateContract({
+    chainId: chainId,
     query: {
       enabled: !!auctionAddress && paused !== undefined,
     },
@@ -69,13 +64,12 @@ export const Settle = ({
     setSettling(true)
     try {
       const txHash = await writeContractAsync?.(data.request)
-      if (txHash)
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+      if (txHash) await waitForTransactionReceipt(config, { hash: txHash, chainId })
       setSettling(false)
     } catch (error) {
       setSettling(false)
     }
-  }, [error, data, writeContractAsync, config, chain.id, setSettling])
+  }, [error, data, writeContractAsync, config, chainId, setSettling])
 
   if (isEnding && !settling) {
     return (

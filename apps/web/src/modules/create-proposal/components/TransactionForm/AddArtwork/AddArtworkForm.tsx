@@ -1,12 +1,12 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { type Property } from '@buildeross/sdk/contract'
+import { useChainStore } from '@buildeross/stores'
 import { Uploading } from '@buildeross/ui/Uploading'
 import { isTestnetChain } from '@buildeross/utils/helpers'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React, { useState } from 'react'
-import { useChainStore } from 'src/stores'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
 import { ArtworkUpload } from '../../ArtworkUpload'

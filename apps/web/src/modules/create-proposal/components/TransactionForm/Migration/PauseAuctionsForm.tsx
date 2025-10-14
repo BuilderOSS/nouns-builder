@@ -1,10 +1,10 @@
 import { auctionAbi, governorAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Paragraph, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 

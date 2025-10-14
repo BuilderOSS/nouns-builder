@@ -1,7 +1,7 @@
+import { BuilderTransaction, useProposalStore } from '@buildeross/stores'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
-import { BuilderTransaction, useProposalStore } from 'src/stores'
 
 import { Alert } from '../../Alert'
 

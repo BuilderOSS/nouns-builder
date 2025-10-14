@@ -1,9 +1,9 @@
 import { governorAbi } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React, { Fragment, useMemo } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { getAddress } from 'viem'
 import { useAccount, useReadContracts } from 'wagmi'
 

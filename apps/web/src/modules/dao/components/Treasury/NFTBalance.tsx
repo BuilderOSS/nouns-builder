@@ -1,11 +1,11 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { skeletonAnimation } from '@buildeross/ui/styles'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 
 import { erc721AssetsWrapper } from './Treasury.css'
 

@@ -3,10 +3,10 @@ import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { getAddress } from 'viem'
 import { useAccount, useWatchContractEvent } from 'wagmi'
 

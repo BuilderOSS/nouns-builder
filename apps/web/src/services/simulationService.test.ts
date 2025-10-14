@@ -1,10 +1,10 @@
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, SimulationOutput } from '@buildeross/types'
 import axios from 'axios'
 import { Address, parseEther } from 'viem'
 import { vi } from 'vitest'
 
 import { InvalidRequestError } from './errors'
-import { simulate, SimulationOutput, SimulationRequestBody } from './simulationService'
+import { simulate, SimulationRequestBody } from './simulationService'
 
 vi.mock('axios', () => {
   return {

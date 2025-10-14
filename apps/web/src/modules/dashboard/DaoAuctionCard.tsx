@@ -1,3 +1,4 @@
+import { overflowEllipsis } from '@buildeross/auction-ui'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
@@ -13,7 +14,6 @@ import React, { useState } from 'react'
 import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
-import { overflowEllipsis } from '../auction/components/Auction.css'
 import { AuctionPaused } from './AuctionPaused'
 import { BidActionButton } from './BidActionButton'
 import { DashboardDaoProps } from './Dashboard'

@@ -33,6 +33,8 @@ const basicConfig = {
     '@buildeross/utils',
     '@buildeross/zord',
     '@buildeross/ui',
+    '@buildeross/stores',
+    '@buildeross/auction-ui',
     '@smartinvoicexyz/types',
     '@rainbow-me/rainbowkit',
     '@farcaster/frame-sdk',
@@ -43,9 +45,11 @@ const basicConfig = {
       '@rainbow-me/rainbowkit',
       '@buildeross/zord',
       '@buildeross/hooks',
+      '@buildeross/auction-ui',
       '@buildeross/ui',
       '@buildeross/sdk',
     ],
+    esmExternals: 'loose',
   },
   images: {
     dangerouslyAllowSVG: true,
@@ -128,6 +132,9 @@ const basicConfig = {
     })
 
     config.resolve.fallback = { fs: false, net: false, tls: false }
+
+    config.externals = config.externals || []
+    config.externals.push('pino-pretty')
 
     config.plugins.push(
       new webpack.DefinePlugin({

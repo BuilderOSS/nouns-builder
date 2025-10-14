@@ -1,4 +1,5 @@
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
+import { useChainStore } from '@buildeross/stores'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
@@ -17,7 +18,6 @@ import {
   useFormStore,
   VetoForm,
 } from 'src/modules/create-dao'
-import { useChainStore } from 'src/stores'
 import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/create.css'
 import { useAccount } from 'wagmi'
 

@@ -3,12 +3,12 @@ import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions
 import { useInvoiceData } from '@buildeross/hooks/useInvoiceData'
 import { getPropDates, type PropDate } from '@buildeross/sdk/eas'
 import { Proposal } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { skeletonAnimation } from '@buildeross/ui/styles'
 import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { useMemo, useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { getAddress, zeroHash } from 'viem'
 

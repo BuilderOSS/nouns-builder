@@ -1,6 +1,6 @@
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { Box } from '@buildeross/zord'
-import Image from 'next/legacy/image'
-import React from 'react'
 
 import { auctionImg, tokenImage } from './Auction.css'
 
@@ -11,8 +11,6 @@ interface AucitonImageProps {
 }
 
 export const AuctionImage = ({ image, name }: AucitonImageProps) => {
-  const [imgErr, setImgErr] = React.useState<boolean>(false)
-
   return (
     <Box
       backgroundColor="background2"
@@ -22,15 +20,16 @@ export const AuctionImage = ({ image, name }: AucitonImageProps) => {
       position="relative"
       className={tokenImage}
     >
-      <Image
-        priority
-        unoptimized
-        layout="fill"
-        src={imgErr ? '/ImageError.svg' : image || ''}
-        onError={() => setImgErr(true)}
-        sizes="100vw"
-        alt={name || ''}
+      <FallbackImage
+        srcList={getFetchableUrls(image)}
         className={auctionImg}
+        alt={name || ''}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          borderRadius: '12px',
+        }}
       />
     </Box>
   )

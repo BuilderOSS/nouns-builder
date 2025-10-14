@@ -1,4 +1,5 @@
 import { erc20Abi } from '@buildeross/sdk/contract'
+import { useChainStore, useProposalStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -7,7 +8,6 @@ import { Box } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Formik } from 'formik'
 import { useCallback } from 'react'
-import { useChainStore, useProposalStore } from 'src/stores'
 import { encodeFunctionData, getAddress, parseUnits } from 'viem'
 
 import { sendErc20Schema, SendErc20Values } from './SendErc20.schema'

@@ -3,18 +3,18 @@ import { L1_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { getBids, TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
+import { useDaoStore } from '@buildeross/stores'
 import { AddressType, Chain, L2MigratedResponse } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Grid } from '@buildeross/zord'
 import axios from 'axios'
 import React, { Fragment, ReactNode } from 'react'
-import { useDaoStore } from 'src/stores'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useConfig } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
-import { useAuctionEvents } from '../hooks'
+import { useAuctionEvents } from '../hooks/useAuctionEvents'
 import { auctionGrid, auctionWrapper } from './Auction.css'
 import { AuctionDetails } from './AuctionDetails'
 import { AuctionImage } from './AuctionImage'
@@ -153,7 +153,12 @@ export const Auction: React.FC<AuctionControllerProps> = ({
             </AuctionDetails>
             <ActionsWrapper>
               {isLatestButNotActive && (
-                <Settle isEnding={false} owner={tokenOwner} chainId={chain.id} />
+                <Settle
+                  isEnding={false}
+                  owner={tokenOwner}
+                  chainId={chain.id}
+                  auctionAddress={auctionAddress}
+                />
               )}
               {(!isLatestButNotActive || (!!bids && bids.length > 0)) && (
                 <BidHistory bids={bids || []} />

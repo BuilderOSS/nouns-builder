@@ -6,6 +6,12 @@ import {
   tokenAbi,
   treasuryAbi,
 } from '@buildeross/sdk/contract'
+import {
+  BuilderTransaction,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import {
   DaysHoursMinsSecs,
@@ -27,12 +33,6 @@ import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
-import {
-  BuilderTransaction,
-  useChainStore,
-  useDaoStore,
-  useProposalStore,
-} from 'src/stores'
 import { Address, encodeFunctionData, formatEther } from 'viem'
 import { useReadContracts } from 'wagmi'
 

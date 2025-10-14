@@ -1,3 +1,4 @@
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -6,7 +7,6 @@ import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Form, Formik } from 'formik'
-import { useChainStore, useDaoStore, useProposalStore } from 'src/stores'
 import { formatEther, getAddress, parseEther } from 'viem'
 import { useBalance } from 'wagmi'
 

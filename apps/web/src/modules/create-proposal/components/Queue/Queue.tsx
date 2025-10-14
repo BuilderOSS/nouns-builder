@@ -1,8 +1,8 @@
+import { useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import { useProposalStore } from 'src/stores'
 
 import { TransactionCard } from '../TransactionCard'
 import { ConfirmRemove } from './ConfirmRemove'

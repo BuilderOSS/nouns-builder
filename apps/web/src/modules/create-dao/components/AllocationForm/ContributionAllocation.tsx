@@ -3,11 +3,11 @@ import {
   PUBLIC_NOUNS_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { useChainStore } from '@buildeross/stores'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { useChainStore } from 'src/stores'
 
 import { useFormStore } from '../../stores'
 import { TokenAllocation } from './AllocationForm'

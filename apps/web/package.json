@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "dependencies": {
     "@buildeross/analytics": "workspace:*",
+    "@buildeross/auction-ui": "workspace:*",
     "@buildeross/blocklist": "workspace:*",
     "@buildeross/constants": "workspace:*",
     "@buildeross/hooks": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/sdk": "workspace:*",
+    "@buildeross/stores": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/ui": "workspace:*",
     "@buildeross/utils": "workspace:*",
@@ -49,6 +51,7 @@
     "sharp": "^0.34.2",
     "swr": "^2.3.3",
     "viem": "^2.30.0",
+    "wagmi": "^2.15.4",
     "yup": "^1.6.1",
     "zustand": "^5.0.4"
   },

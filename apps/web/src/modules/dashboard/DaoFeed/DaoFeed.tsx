@@ -1,8 +1,8 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { AuctionFragment, highestBidsRequest } from '@buildeross/sdk/subgraph'
+import { useChainStore } from '@buildeross/stores'
 import { Flex, Grid } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
-import { useChainStore } from 'src/stores'
 import useSWR from 'swr'
 
 import { RecentlyCreated } from '../RecentlyCreated'

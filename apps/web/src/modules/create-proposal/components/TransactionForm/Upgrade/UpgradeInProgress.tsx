@@ -1,7 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { atoms, Box, Icon, Paragraph } from '@buildeross/zord'
-import { useChainStore, useDaoStore } from 'src/stores'
 
 export interface UpgradeInProgressProps {
   proposalId: string

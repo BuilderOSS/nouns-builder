@@ -1,8 +1,8 @@
+import { useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
-import { useProposalStore } from 'src/stores'
 
 import { useCustomTransactionStore } from '../../../stores/useCustomTransactionStore'
 import { customTransactionWrapper, transactionFormWrapper } from './CustomTransaction.css'

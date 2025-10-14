@@ -1,10 +1,10 @@
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Label, Paragraph } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 
 import { ProposalForStatus, ProposalStatus } from '../ProposalStatus'
 import { statusStyle, titleStyle } from './ProposalCard.css'

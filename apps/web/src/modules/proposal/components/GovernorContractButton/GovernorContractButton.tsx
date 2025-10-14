@@ -1,10 +1,10 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, ButtonProps } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { useSWRConfig } from 'swr'
 import { ContractFunctionName } from 'viem'
 import {

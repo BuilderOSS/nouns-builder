@@ -11,10 +11,10 @@ import {
   messengerAbi,
 } from '@buildeross/sdk/contract'
 import { DaoMember, encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, BytesType, CHAIN_ID, Transaction } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import axios from 'axios'
-import { useChainStore, useDaoStore } from 'src/stores'
 import useSWRImmutable from 'swr/immutable'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'

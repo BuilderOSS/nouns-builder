@@ -1,9 +1,6 @@
 {
   "name": "nouns-builder",
   "version": "0.0.0",
-  "dependencies": {
-    "wagmi": "^2.15.4"
-  },
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@changesets/cli": "^2.29.5",
@@ -15,6 +12,11 @@
   },
   "packageManager": "pnpm@10.13.1",
   "private": true,
+  "resolutions": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "wagmi": "^2.15.4"
+  },
   "scripts": {
     "anvil": "bash -c 'source .env.local && anvil --fork-url \"$ANVIL_FORK_URL\" --fork-block-number \"$ANVIL_BLOCK_NUMBER\"'",
     "build": "turbo run build",

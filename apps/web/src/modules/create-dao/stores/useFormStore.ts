@@ -1,5 +1,5 @@
+import type { DaoContractAddresses } from '@buildeross/stores'
 import type { IPFSUpload, OrderedTraits } from '@buildeross/types'
-import type { DaoContractAddresses } from 'src/stores'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 

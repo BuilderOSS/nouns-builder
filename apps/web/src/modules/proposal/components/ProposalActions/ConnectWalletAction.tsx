@@ -1,6 +1,6 @@
+import { useChainStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Flex, Text } from '@buildeross/zord'
-import { useChainStore } from 'src/stores'
 
 import { proposalActionButtonVariants } from './ProposalActions.css'
 

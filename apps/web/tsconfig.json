@@ -11,6 +11,8 @@
     "noUnusedLocals": false,
     "skipLibCheck": true,
     "noUnusedParameters": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "types": ["@testing-library/jest-dom", "vitest/globals", "@buildeross/types/globals"],
     "plugins": [
       {

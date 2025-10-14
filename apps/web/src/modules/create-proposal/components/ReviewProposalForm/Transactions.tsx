@@ -1,9 +1,9 @@
+import { BuilderTransaction } from '@buildeross/stores'
+import { SimulationOutput } from '@buildeross/types'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { Flex, Stack } from '@buildeross/zord'
 import { Field } from 'formik'
 import React from 'react'
-import { SimulationOutput } from 'src/services/simulationService'
-import { BuilderTransaction } from 'src/stores'
 
 import { SimulationError, TransactionCard } from '../TransactionCard'
 

@@ -11,9 +11,9 @@ import {
   tokenAbi,
   treasuryAbi,
 } from '@buildeross/sdk/contract'
+import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import { DaoContractAddresses } from 'src/stores'
 import useSWRImmutable from 'swr/immutable'
 import { encodeAbiParameters, parseAbiParameters } from 'viem'
 import { useReadContracts } from 'wagmi'

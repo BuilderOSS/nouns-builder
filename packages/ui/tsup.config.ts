@@ -4,8 +4,10 @@ import { vanillaExtractPlugin } from '@vanilla-extract/esbuild-plugin'
 export default defineConfig({
   entry: ['src/index.ts', 'src/styles.ts', 'src/*/index.ts'],
   format: ['cjs', 'esm'],
-  dts: true,
+  dts: false,
   clean: true,
+  platform: 'browser',
+  target: 'es2020',
   esbuildPlugins: [
     vanillaExtractPlugin({
       identifiers: 'short',

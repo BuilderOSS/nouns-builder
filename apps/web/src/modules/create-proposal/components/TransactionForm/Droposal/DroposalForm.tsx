@@ -1,3 +1,4 @@
+import { useDaoStore } from '@buildeross/stores'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { DatePicker, FIELD_TYPES, SmartInput, TextArea } from '@buildeross/ui/Fields'
 import { SingleMediaUpload } from '@buildeross/ui/SingleMediaUpload'
@@ -5,7 +6,6 @@ import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
-import { useDaoStore } from 'src/stores'
 import { useAccount } from 'wagmi'
 
 import { defaultInputLabelStyle } from './Droposal.css'

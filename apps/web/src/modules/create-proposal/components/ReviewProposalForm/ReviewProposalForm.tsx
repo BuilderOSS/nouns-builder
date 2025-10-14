@@ -1,6 +1,18 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import {
+  BuilderTransaction,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
+import {
+  AddressType,
+  CHAIN_ID,
+  ErrorResult,
+  SimulationOutput,
+  SimulationResult,
+} from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { TextInput } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
@@ -10,14 +22,6 @@ import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
 import React, { useState } from 'react'
-import { ErrorResult } from 'src/services/errorResult'
-import { SimulationOutput, SimulationResult } from 'src/services/simulationService'
-import {
-  BuilderTransaction,
-  useChainStore,
-  useDaoStore,
-  useProposalStore,
-} from 'src/stores'
 import { toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'

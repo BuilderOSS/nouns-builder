@@ -1,6 +1,6 @@
+import { useDaoStore } from '@buildeross/stores'
 import { Flex } from '@buildeross/zord'
 import React from 'react'
-import { useDaoStore } from 'src/stores'
 
 import { adminSection } from '../../styles/Section.css'
 import { AdminForm } from '../AdminForm/AdminForm'
