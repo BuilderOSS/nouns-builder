@@ -6,6 +6,8 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
+  platform: 'browser',
+  target: 'es2020',
   esbuildPlugins: [
     vanillaExtractPlugin({
       identifiers: 'short',

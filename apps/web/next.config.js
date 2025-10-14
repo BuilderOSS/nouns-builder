@@ -49,6 +49,7 @@ const basicConfig = {
       '@buildeross/ui',
       '@buildeross/sdk',
     ],
+    esmExternals: 'loose',
   },
   images: {
     dangerouslyAllowSVG: true,
@@ -131,6 +132,9 @@ const basicConfig = {
     })
 
     config.resolve.fallback = { fs: false, net: false, tls: false }
+
+    config.externals = config.externals || []
+    config.externals.push('pino-pretty')
 
     config.plugins.push(
       new webpack.DefinePlugin({

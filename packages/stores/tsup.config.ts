@@ -5,10 +5,5 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: [
-    '@buildeross/constants',
-    '@buildeross/types',
-    'react',
-    'zustand',
-  ],
+  external: ['@buildeross/constants', '@buildeross/types', 'react', 'zustand'],
 })

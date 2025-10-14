@@ -14,7 +14,7 @@ import { Address, formatEther, parseEther } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { useMinBidIncrement } from '../../hooks'
+import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionActionButtonVariants, bidForm, bidInput } from '../Auction.css'
 import { WarningModal } from './WarningModal'
 

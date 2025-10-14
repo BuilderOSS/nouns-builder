@@ -1,4 +1,5 @@
-import { Settle, useMinBidIncrement } from '@buildeross/auction-ui'
+import { Settle } from '@buildeross/auction-ui'
+import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'

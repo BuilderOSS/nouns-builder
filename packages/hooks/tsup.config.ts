@@ -13,5 +13,8 @@ export default defineConfig({
     '@buildeross/utils',
     'react',
     'react-dom',
+    'swr',
+    'viem',
+    'wagmi',
   ],
 })

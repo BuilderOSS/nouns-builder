@@ -14,7 +14,7 @@ import { formatEther } from 'viem'
 import { useConfig } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
-import { useAuctionEvents } from '../hooks'
+import { useAuctionEvents } from '../hooks/useAuctionEvents'
 import { auctionGrid, auctionWrapper } from './Auction.css'
 import { AuctionDetails } from './AuctionDetails'
 import { AuctionImage } from './AuctionImage'
