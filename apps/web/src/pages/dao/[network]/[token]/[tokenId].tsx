@@ -1,3 +1,4 @@
+import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
@@ -14,7 +15,6 @@ import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import { DaoAuctionSection, type TokenWithDao } from 'src/modules/auction'
 import {
   About,
   Activity,

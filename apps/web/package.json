@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "dependencies": {
     "@buildeross/analytics": "workspace:*",
+    "@buildeross/auction-ui": "workspace:*",
     "@buildeross/blocklist": "workspace:*",
     "@buildeross/constants": "workspace:*",
     "@buildeross/hooks": "workspace:*",

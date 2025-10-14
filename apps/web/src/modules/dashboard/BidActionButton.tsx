@@ -1,3 +1,4 @@
+import { Settle, useMinBidIncrement } from '@buildeross/auction-ui'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -9,8 +10,6 @@ import { Address, parseEther } from 'viem'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { useMinBidIncrement } from '../auction'
-import { Settle } from '../auction/components/CurrentAuction/Settle'
 import { DashboardDaoProps } from './Dashboard'
 import { bidButton, bidForm, bidInput, minButton } from './dashboard.css'
 
