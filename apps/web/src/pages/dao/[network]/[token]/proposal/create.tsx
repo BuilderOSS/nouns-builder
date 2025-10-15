@@ -1,6 +1,15 @@
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import {
+  CreateProposalHeading,
+  SelectTransactionType,
+  TRANSACTION_FORM_OPTIONS,
+  TransactionForm,
+  TransactionFormType,
+  TransactionTypeIcon,
+  TwoColumnLayout,
+} from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useVotes } from '@buildeross/hooks/useVotes'
@@ -15,15 +24,6 @@ import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import {
-  CreateProposalHeading,
-  SelectTransactionType,
-  TRANSACTION_FORM_OPTIONS,
-  TransactionForm,
-  TransactionFormType,
-  TransactionTypeIcon,
-  TwoColumnLayout,
-} from '@buildeross/create-proposal-ui'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
 import { isAddressEqual } from 'viem'
