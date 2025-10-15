@@ -37,7 +37,6 @@
     "@vitejs/plugin-react": "^4.5.0",
     "eslint": "8.57.1",
     "jsdom": "^26.1.0",
-    "swr": "^2.3.3",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"

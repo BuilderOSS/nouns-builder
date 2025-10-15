@@ -32,8 +32,6 @@
     "@types/react-dom": "^19.1.5",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
     "eslint": "8.57.1",
-    "formik": "^2.4.6",
-    "swr": "^2.3.3",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3"
   },

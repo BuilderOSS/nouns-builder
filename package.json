@@ -40,7 +40,7 @@
     "build:packages": "turbo run build --filter=@buildeross/*",
     "changeset": "changeset",
     "ci": "turbo run lint test",
-    "clean": "turbo run clean",
+    "clean": "rm -rf .turbo && turbo run clean",
     "dev": "turbo run dev",
     "eslint": "eslint --fix . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
