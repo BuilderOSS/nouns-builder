@@ -30,7 +30,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.17",
     "@types/node": "^22.15.21",
-    "@types/react": "19.2.2",
+    "@types/react": "^19.2.2",
     "@types/react-dom": "^19.1.5",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
     "@vanilla-extract/vite-plugin": "^5.0.2",
@@ -69,10 +69,10 @@
     "@buildeross/utils": "0.1.3",
     "@buildeross/zord": "0.1.3",
     "@sentry/nextjs": "^9.22.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "viem": "2.38.2",
-    "wagmi": "2.18.1"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "viem": "^2.38.2",
+    "wagmi": "^2.18.1"
   },
   "peerDependenciesMeta": {
     "@sentry/nextjs": {
