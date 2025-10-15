@@ -10,7 +10,6 @@ import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { parseContractURI } from '@buildeross/utils/parseContractURI'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
-import Image from 'next/legacy/image'
 import React from 'react'
 import useSWR from 'swr'
 import { Address, formatEther } from 'viem'
@@ -146,7 +145,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
           content={
             <Flex align={'center'} mt={{ '@initial': 'x1', '@768': 'x3' }} pr="x2">
               <Box mr="x2">
-                <Image src={chain.icon} alt={chain.name} height={28} width={28} />
+                <img src={chain.icon} alt={chain.name} height={28} width={28} />
               </Box>
               <Text fontWeight={'display'} className={statisticContent}>
                 {chain.name}

@@ -1,5 +1,12 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import {
+  Activity,
+  PreAuction,
+  PreAuctionForm,
+  SectionHandler,
+  SmartContracts,
+} from '@buildeross/dao-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
@@ -12,13 +19,6 @@ import React from 'react'
 import { Meta } from 'src/components/Meta'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import {
-  Activity,
-  PreAuction,
-  PreAuctionForm,
-  SectionHandler,
-  SmartContracts,
-} from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { isAddress } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'

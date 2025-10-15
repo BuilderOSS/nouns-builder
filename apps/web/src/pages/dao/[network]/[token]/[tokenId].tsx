@@ -3,6 +3,15 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
+import {
+  About,
+  Activity,
+  Admin,
+  Feed,
+  SectionHandler,
+  SmartContracts,
+  Treasury,
+} from '@buildeross/dao-ui'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
@@ -15,15 +24,6 @@ import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import {
-  About,
-  Activity,
-  Admin,
-  SectionHandler,
-  SmartContracts,
-  Treasury,
-} from 'src/modules/dao'
-import { Feed } from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { isAddress } from 'viem'

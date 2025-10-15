@@ -1,8 +1,8 @@
+import { DaoCard } from '@buildeross/dao-ui'
 import { useDaoAuction } from '@buildeross/hooks/useDaoAuction'
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
 import React from 'react'
-import { DaoCard } from 'src/modules/dao'
 
 import { DaoFeedCardSkeleton } from './DaoFeedSkeleton'
 

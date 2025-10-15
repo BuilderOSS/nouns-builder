@@ -1,6 +1,7 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { SectionHandler } from '@buildeross/dao-ui'
 import {
   PropDates,
   ProposalActions,
@@ -21,7 +22,6 @@ import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import { SectionHandler } from 'src/modules/dao'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
 import { votePageWrapper } from 'src/styles/vote.css'
