@@ -14,7 +14,7 @@ const FormHeadingBase: React.FC<{
       <Flex direction={'column'}>
         <Box className={transactionFlowHeading}>Add Transaction</Box>
         <Box>
-          Step {activeCustomTransactionSection + 1} of 6:{' '}
+          Step {activeCustomTransactionSection + 1} of {sections.length}:{' '}
           {sections[activeCustomTransactionSection].title}
         </Box>
       </Flex>
