@@ -4,6 +4,7 @@ import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useVotes } from '@buildeross/hooks/useVotes'
+import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
@@ -23,7 +24,6 @@ import {
   TransactionTypeIcon,
   TwoColumnLayout,
 } from 'src/modules/create-proposal'
-import { TRANSACTION_TYPES, TransactionType } from 'src/modules/proposal'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
 import { isAddressEqual } from 'viem'

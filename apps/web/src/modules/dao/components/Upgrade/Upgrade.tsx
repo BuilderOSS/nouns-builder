@@ -69,13 +69,13 @@ export const Upgrade = ({
             height: 0,
             overflow: 'hidden',
             transition: {
-              animate: 'easeInOut',
+              ease: 'easeInOut',
             },
           },
           open: {
             height: 'auto',
             transition: {
-              animate: 'easeInOut',
+              ease: 'easeInOut',
             },
           },
         }}

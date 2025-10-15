@@ -1,11 +1,13 @@
 {
-  "name": "@buildeross/auction-ui",
-  "description": "Auction UI components for BuilderOSS apps",
+  "name": "@buildeross/proposal-ui",
+  "description": "Proposal UI components for BuilderOSS apps",
   "version": "0.1.3",
   "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@vanilla-extract/css": "^1.17.2",
     "axios": "^1.12.2",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@buildeross/constants": "workspace:*",
@@ -19,11 +21,14 @@
     "@buildeross/ui": "workspace:*",
     "@buildeross/utils": "workspace:*",
     "@buildeross/zord": "workspace:*",
+    "@smartinvoicexyz/types": "^0.1.27",
+    "@types/lodash": "^4.17.17",
     "@types/node": "^22.15.21",
     "@types/react": "19.2.2",
     "@types/react-dom": "^19.1.5",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
     "eslint": "8.57.1",
+    "formik": "^2.4.6",
     "swr": "^2.3.3",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3"
@@ -54,12 +59,14 @@
     "@buildeross/ui": "0.1.3",
     "@buildeross/utils": "0.1.3",
     "@buildeross/zord": "0.1.3",
+    "formik": "^2.4.6",
     "framer-motion": "^12.12.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "swr": "^2.3.3",
     "viem": "2.38.2",
-    "wagmi": "2.18.1"
+    "wagmi": "2.18.1",
+    "yup": "^1.6.1"
   },
   "publishConfig": {
     "access": "public"
@@ -67,7 +74,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/BuilderOSS/nouns-builder.git",
-    "directory": "packages/auction-ui"
+    "directory": "packages/proposal-ui"
   },
   "scripts": {
     "build": "tsup",

@@ -20,30 +20,6 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
   size = 'small',
   trigger,
 }) => {
-  const contentVariants = {
-    initial: {
-      y: 50,
-      opacity: 0,
-    },
-    animate: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        delay: 0.5,
-        ease: 'easeInOut',
-      },
-    },
-  }
-
-  const wrapperVariants = {
-    initial: {
-      opacity: 0,
-    },
-    animate: {
-      opacity: 1,
-    },
-  }
-
   const [isOpen, setIsOpen] = React.useState<boolean>(false)
   const handleClose = React.useCallback(() => {
     close && typeof close === 'function' && close()
@@ -72,7 +48,14 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
         <AnimatePresence>
           {(isOpen || open) && (
             <motion.div
-              variants={wrapperVariants}
+              variants={{
+                initial: {
+                  opacity: 0,
+                },
+                animate: {
+                  opacity: 1,
+                },
+              }}
               initial={'initial'}
               animate={'animate'}
               exit={'initial'}
@@ -80,7 +63,20 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
               onClick={() => handleClose()}
             >
               <motion.div
-                variants={contentVariants}
+                variants={{
+                  initial: {
+                    y: 50,
+                    opacity: 0,
+                  },
+                  animate: {
+                    y: 0,
+                    opacity: 1,
+                    transition: {
+                      delay: 0.5,
+                      ease: 'easeInOut',
+                    },
+                  },
+                }}
                 initial={'initial'}
                 animate={'animate'}
                 exit={'initial'}

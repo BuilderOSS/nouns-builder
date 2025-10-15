@@ -7,5 +7,5 @@
     "outDir": "dist/types",
     "tsBuildInfoFile": "tsconfig.build.tsbuildinfo"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*"]
 }

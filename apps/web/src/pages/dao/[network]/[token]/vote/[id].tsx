@@ -1,6 +1,14 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import {
+  PropDates,
+  ProposalActions,
+  ProposalDescription,
+  ProposalDetailsGrid,
+  ProposalHeader,
+  ProposalVotes,
+} from '@buildeross/proposal-ui'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
@@ -14,14 +22,6 @@ import React, { Fragment } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { SectionHandler } from 'src/modules/dao'
-import {
-  ProposalActions,
-  ProposalDescription,
-  ProposalDetailsGrid,
-  ProposalHeader,
-} from 'src/modules/proposal'
-import { PropDates } from 'src/modules/proposal/components/PropDates'
-import { ProposalVotes } from 'src/modules/proposal/components/ProposalVotes'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
 import { votePageWrapper } from 'src/styles/vote.css'

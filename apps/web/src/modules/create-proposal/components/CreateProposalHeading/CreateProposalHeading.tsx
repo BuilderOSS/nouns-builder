@@ -1,8 +1,8 @@
+import { ProposalNavigation } from '@buildeross/proposal-ui'
 import { useProposalStore } from '@buildeross/stores'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { atoms, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { ProposalNavigation } from 'src/modules/proposal'
 
 import { Queue } from '../Queue'
 

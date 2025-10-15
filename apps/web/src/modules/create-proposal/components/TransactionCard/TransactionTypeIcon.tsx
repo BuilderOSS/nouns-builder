@@ -1,5 +1,5 @@
+import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
 import { color, Flex, Icon } from '@buildeross/zord'
-import { TRANSACTION_TYPES, TransactionType } from 'src/modules/proposal'
 
 interface TransactionTypeIconProps {
   transactionType: TransactionType

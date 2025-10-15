@@ -87,13 +87,13 @@ export function DropdownSelect<T extends React.Key>({
                 overflow: 'hidden',
                 boxShadow: 'none',
                 transition: {
-                  animate: 'easeInOut',
+                  ease: 'easeInOut',
                 },
               },
               open: {
                 height: 'auto',
                 transition: {
-                  animate: 'easeInOut',
+                  ease: 'easeInOut',
                 },
               },
             }}

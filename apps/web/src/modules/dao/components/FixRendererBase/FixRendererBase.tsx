@@ -1,5 +1,9 @@
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
-import { DaoContractAddresses, useChainStore, useProposalStore } from '@buildeross/stores'
+import {
+  type DaoContractAddresses,
+  useChainStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -48,13 +52,13 @@ export const FixRendererBase = ({
             height: 0,
             overflow: 'hidden',
             transition: {
-              animate: 'easeInOut',
+              ease: 'easeInOut',
             },
           },
           open: {
             height: 'auto',
             transition: {
-              animate: 'easeInOut',
+              ease: 'easeInOut',
             },
           },
         }}

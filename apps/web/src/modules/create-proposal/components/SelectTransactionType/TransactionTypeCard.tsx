@@ -1,6 +1,6 @@
+import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import { TRANSACTION_TYPES, TransactionType } from 'src/modules/proposal'
 
 import { TransactionTypeIcon } from '../TransactionCard'
 
