@@ -28,6 +28,7 @@
     "@buildeross/proposal-ui": "workspace:*",
     "@buildeross/sdk": "workspace:*",
     "@buildeross/stores": "workspace:*",
+    "@buildeross/test-fixtures": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/ui": "workspace:*",

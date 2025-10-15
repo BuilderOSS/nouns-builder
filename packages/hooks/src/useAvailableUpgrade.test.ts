@@ -17,9 +17,7 @@ vi.mock('@buildeross/sdk', async () => {
   const mod = await vi.importActual<typeof import('@buildeross/sdk')>('@buildeross/sdk')
   return {
     ...mod,
-    getSdk: vi.fn(() => ({
-      getProposals: () => ({ proposals: [] }),
-    })),
+    getProposals: vi.fn(() => Promise.resolve({ proposals: [] })),
   }
 })
 
@@ -85,6 +83,8 @@ describe('Use available upgrade hook', () => {
       })
     )
 
+    await waitFor(() => expect(result.current).toBeTruthy())
+
     expect(result.current).toStrictEqual({
       shouldUpgrade: false,
       transaction: undefined,
@@ -105,6 +105,8 @@ describe('Use available upgrade hook', () => {
     } as any)
 
     const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
+
+    await waitFor(() => expect(result.current).toBeTruthy())
 
     expect(result.current).toStrictEqual({
       shouldUpgrade: false,
@@ -172,6 +174,8 @@ describe('Use available upgrade hook', () => {
 
     const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
 
+    await waitFor(() => expect(result.current).toBeTruthy())
+
     expect(result.current).toStrictEqual({
       latest: '1.1.0',
       shouldUpgrade: false,
@@ -221,6 +225,8 @@ describe('Use available upgrade hook', () => {
 
     const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
 
+    await waitFor(() => expect(result.current).toBeTruthy())
+
     expect(result.current).toStrictEqual({
       shouldUpgrade: false,
       transaction: undefined,
@@ -264,6 +270,8 @@ describe('Use available upgrade hook', () => {
     } as any)
 
     const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
+
+    await waitFor(() => expect(result.current.latest).toBeTruthy())
 
     expect(result.current.latest).toBe('1.1.0')
     expect(result.current.totalContractUpgrades).toBe(3)
@@ -336,6 +344,8 @@ describe('Use available upgrade hook', () => {
 
     const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
 
+    await waitFor(() => expect(result.current.latest).toBeTruthy())
+
     expect(result.current.latest).toEqual('1.1.0')
     expect(result.current.totalContractUpgrades).toBe(3)
     expect(result.current.transaction).toBeDefined()
@@ -395,6 +405,8 @@ describe('Use available upgrade hook', () => {
 
     const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
 
+    await waitFor(() => expect(result.current.latest).toBeTruthy())
+
     expect(result.current.latest).toEqual('1.1.0')
     expect(result.current.totalContractUpgrades).toBe(5)
     expect(result.current.transaction).toBeDefined()
@@ -449,7 +461,7 @@ describe('Use available upgrade hook', () => {
     ])
   })
 
-  it('should determine no upgrades required given provided version is met', () => {
+  it('should determine no upgrades required given provided version is met', async () => {
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         false,
@@ -481,6 +493,8 @@ describe('Use available upgrade hook', () => {
     const { result } = renderHook(() =>
       useAvailableUpgrade({ chainId, addresses, contractVersion: '1.1.0' })
     )
+
+    await waitFor(() => expect(result.current).toBeTruthy())
 
     expect(result.current).toStrictEqual({
       latest: '1.2.0',
@@ -532,6 +546,8 @@ describe('Use available upgrade hook', () => {
     const { result } = renderHook(() =>
       useAvailableUpgrade({ chainId, addresses, contractVersion: '1.1.0' })
     )
+
+    await waitFor(() => expect(result.current.latest).toBeTruthy())
 
     expect(result.current.latest).toBe('1.2.0')
     expect(result.current.totalContractUpgrades).toBe(5)

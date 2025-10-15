@@ -1,6 +1,6 @@
+import { render } from '@buildeross/test-fixtures'
 import { TransactionType } from '@buildeross/types'
 import { fireEvent, screen } from '@testing-library/react'
-import { render } from 'src/test/utils'
 import { vi } from 'vitest'
 
 import { TransactionCard } from './TransactionCard'

@@ -1,6 +1,5 @@
+import { FOUNDRY_CHAIN, render } from '@buildeross/test-fixtures'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
-import { render } from 'src/test/utils'
 import { describe, expect, vi } from 'vitest'
 
 import AirdropForm from './AirdropForm'

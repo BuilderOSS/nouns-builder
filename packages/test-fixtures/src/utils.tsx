@@ -7,7 +7,7 @@ import {
 } from '@buildeross/stores'
 import { Chain } from '@buildeross/types'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, render, renderHook, RenderOptions, waitFor } from '@testing-library/react'
+import { act, render, renderHook, RenderOptions, waitFor, RenderResult } from '@testing-library/react'
 import * as React from 'react'
 import { SWRConfig } from 'swr'
 import { expect } from 'vitest'
@@ -101,7 +101,7 @@ type CustomRenderOptions = RenderOptions & {
   addresses?: DaoContractAddresses
 }
 
-const customRender = (ui: React.ReactElement, options?: CustomRenderOptions) => {
+const customRender = (ui: React.ReactElement, options?: CustomRenderOptions): RenderResult => {
   const { chain, addresses, ...renderOptions } = options || {}
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
