@@ -5,9 +5,9 @@ import React, { memo } from 'react'
 import { useCustomTransactionStore } from '../../../stores/useCustomTransactionStore'
 import { transactionFlowHeading, transactionFlowWrapper } from './CustomTransaction.css'
 
-export const FormHeading: React.FC<{
+const NoMemoisedFormHeading: React.FC<{
   sections: any[]
-}> = memo(({ sections }) => {
+}> = ({ sections }) => {
   const [isOpen] = React.useState(false)
   const { active: activeCustomTransactionSection } = useCustomTransactionStore()
 
@@ -28,4 +28,6 @@ export const FormHeading: React.FC<{
       </motion.div>
     </Flex>
   )
-})
+}
+
+export const FormHeading = memo(NoMemoisedFormHeading)

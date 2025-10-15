@@ -10,6 +10,7 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
+import Image from 'next/image'
 import React, { useState } from 'react'
 import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
@@ -109,7 +110,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
         <Box>
           <Flex mb="x1" align="center">
             {chain.icon && (
-              <img
+              <Image
                 src={chain.icon}
                 style={{
                   borderRadius: '12px',

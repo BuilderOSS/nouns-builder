@@ -6,7 +6,7 @@ export const MigrationTracker: React.FC<{ checkpoint: number }> = ({ checkpoint 
     <Box w={'100%'} mb="x4">
       <Flex direction={'column'}>
         {sections.map((section, i) => (
-          <Flex direction={'row'} align={'center'} mb={'x1'}>
+          <Flex direction={'row'} align={'center'} mb={'x1'} key={section}>
             <Flex
               align={'center'}
               justify={'center'}

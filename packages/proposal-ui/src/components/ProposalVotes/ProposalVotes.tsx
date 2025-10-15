@@ -62,7 +62,9 @@ export const ProposalVotes: React.FC<ProposalVotesProps> = ({ proposal }) => {
         <>
           <VoterParticipation totalVotes={totalVotes} maxVotes={maxVotes} />
           {proposal.votes
-            ?.map((vote) => <VotePlacard vote={vote} totalVotes={totalVotes} />)
+            ?.map((vote) => (
+              <VotePlacard key={vote.voter} vote={vote} totalVotes={totalVotes} />
+            ))
             .reverse()}
         </>
       ) : (

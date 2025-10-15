@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { getFetchableUrls } from '@buildeross/ipfs-service'

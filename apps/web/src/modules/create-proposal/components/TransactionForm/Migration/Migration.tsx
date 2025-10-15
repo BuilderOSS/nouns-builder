@@ -47,9 +47,12 @@ export const Migration: React.FC = () => {
   else if (!deployed) daoProgress = DAOMigrationProgress.PAUSED
 
   const formComponents = [
-    <PauseAuctionsForm />,
-    <MigrateDAOForm />,
-    <BridgeTreasuryForm migratedToChainId={migratedRes?.migrated?.chainId} />,
+    <PauseAuctionsForm key="pause-auctions-form" />,
+    <MigrateDAOForm key="migrate-dao-form" />,
+    <BridgeTreasuryForm
+      migratedToChainId={migratedRes?.migrated?.chainId}
+      key="bridge-treasury-form"
+    />,
   ]
 
   return (

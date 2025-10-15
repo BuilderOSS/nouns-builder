@@ -255,6 +255,9 @@ importers:
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
+      '@eslint/eslintrc':
+        specifier: ^3.3.1
+        version: 3.3.1
       '@next/bundle-analyzer':
         specifier: ^15.3.2
         version: 15.5.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -306,6 +309,9 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
+      eslint-config-next:
+        specifier: ^15.5.5
+        version: 15.5.5(eslint@8.57.1)(typescript@5.9.3)
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -518,7 +524,7 @@ importers:
         specifier: ^1.17.2
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
-        specifier: ^1.9.0
+        specifier: ^1.12.2
         version: 1.12.2
       dayjs:
         specifier: ^1.11.13
@@ -2297,6 +2303,10 @@ packages:
   '@eslint/eslintrc@2.1.4':
     resolution: {integrity: sha512-269Z39MS6wVJtsoUl10L60WdkhJVdPG24Q4eZTH3nnF6lpvSShEK3wQjDX9JRWAUPvPh7COouPpU9IrqaZFvtQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  '@eslint/eslintrc@3.3.1':
+    resolution: {integrity: sha512-gtF186CXhIl1p4pJNGZw8Yc6RlshoePRvE0X91oPGb3vZ8pM3qOS9W9NGPat9LziaBV7XrJWGylNQXkGcnM3IQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/js@8.57.1':
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
@@ -6650,6 +6660,10 @@ packages:
     resolution: {integrity: sha512-wpc+LXeiyiisxPlEkUzU6svyS1frIO3Mgxj1fdy7Pm8Ygzguax2N3Fa/D/ag1WqbOprdI+uY6wMUl8/a2G+iag==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
+  eslint-visitor-keys@4.2.1:
+    resolution: {integrity: sha512-Uhdk5sfqcee/9H/rCOJikYz67o0a2Tw2hGRPOG2Y1R2dg7brRe1uG0yaNQDHu+TO/uQPF/5eCapvYSmHUjt7JQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
   eslint@8.57.1:
     resolution: {integrity: sha512-ypowyDxpVSYpkXr9WPv2PAZCtNip1Mv5KTW0SCurXv/9iOpcrH9PaqUElksqEB6pChqHGDRCFTyrZlGhnLNGiA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -6659,6 +6673,10 @@ packages:
   esniff@2.0.1:
     resolution: {integrity: sha512-kTUIGKQ/mDPFoJ0oVfcmyJn4iBDRptjNVIzwIFR7tqWXdVI9xfA2RMwY/gbSpJG3lkdWNEjLap/NqVHZiJsdfg==}
     engines: {node: '>=0.10'}
+
+  espree@10.4.0:
+    resolution: {integrity: sha512-j6PAQ2uUr79PZhBjP5C5fhl8e39FmRnOjsD5lGnWrFU8i2G776tBK7+nP8KuQUTTyAZUwfQqXAgrVH5MbH9CYQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   espree@9.6.1:
     resolution: {integrity: sha512-oruZaFkjorTpF32kDSI5/75ViwGeZginGGy2NoOSg3Q9bnwlnmDm4HLnkl0RE3n+njDXR037aY1+x58Z/zFdwQ==}
@@ -7168,6 +7186,10 @@ packages:
   globals@13.24.0:
     resolution: {integrity: sha512-AhO5QUcj8llrbG09iWhPU2B204J1xnPeL8kQmVorSsy+Sjj1sk8gIyh6cUocGmH4L0UuhAJy+hJMRA4mgA4mFQ==}
     engines: {node: '>=8'}
+
+  globals@14.0.0:
+    resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
+    engines: {node: '>=18'}
 
   globalthis@1.0.4:
     resolution: {integrity: sha512-DpLKbNU4WylpxJykQujfCcwYWiV/Jhm50Goo0wrVILAv5jOr9d+H+UR3PhSCD2rCCEIg0uc+G+muBTwD54JhDQ==}
@@ -12800,6 +12822,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@eslint/eslintrc@3.3.1':
+    dependencies:
+      ajv: 6.12.6
+      debug: 4.4.3(supports-color@8.1.1)
+      espree: 10.4.0
+      globals: 14.0.0
+      ignore: 5.3.2
+      import-fresh: 3.3.1
+      js-yaml: 4.1.0
+      minimatch: 3.1.2
+      strip-json-comments: 3.1.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@eslint/js@8.57.1': {}
 
   '@ethereum-attestation-service/eas-contracts@1.7.1(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)':
@@ -13210,7 +13246,7 @@ snapshots:
       binary-install-raw: 0.0.13(debug@4.3.4)
       chalk: 3.0.0
       chokidar: 3.5.3
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       docker-compose: 0.23.19
       dockerode: 2.5.8
       fs-extra: 9.1.0
@@ -14061,7 +14097,7 @@ snapshots:
       bufferutil: 4.0.9
       cross-fetch: 4.1.0(encoding@0.1.13)
       date-fns: 2.30.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       eciesjs: 0.4.16
       eventemitter2: 6.4.9
       readable-stream: 3.6.2
@@ -14086,7 +14122,7 @@ snapshots:
       '@paulmillr/qr': 0.2.1
       bowser: 2.12.1
       cross-fetch: 4.1.0(encoding@0.1.13)
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       eciesjs: 0.4.16
       eth-rpc-errors: 4.0.3
       eventemitter2: 6.4.9
@@ -14370,7 +14406,7 @@ snapshots:
       chalk: 4.1.2
       clean-stack: 3.0.1
       cli-progress: 3.12.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@8.1.1)
       ejs: 3.1.10
       get-package-type: 0.1.0
       globby: 11.1.0
@@ -14406,7 +14442,7 @@ snapshots:
       chalk: 4.1.2
       clean-stack: 3.0.1
       cli-progress: 3.12.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@8.1.1)
       ejs: 3.1.10
       fs-extra: 9.1.0
       get-package-type: 0.1.0
@@ -14438,7 +14474,7 @@ snapshots:
     dependencies:
       '@oclif/core': 2.16.0(@types/node@22.18.10)(typescript@5.9.3)
       chalk: 4.1.2
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@8.1.1)
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -17823,7 +17859,7 @@ snapshots:
 
   axios@1.12.2:
     dependencies:
-      follow-redirects: 1.15.11(debug@4.4.3)
+      follow-redirects: 1.15.11(debug@4.3.4)
       form-data: 4.0.4
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -18731,11 +18767,9 @@ snapshots:
     dependencies:
       ms: 2.1.2
 
-  debug@4.3.4(supports-color@8.1.1):
+  debug@4.3.4:
     dependencies:
       ms: 2.1.2
-    optionalDependencies:
-      supports-color: 8.1.1
 
   debug@4.4.1:
     dependencies:
@@ -19010,7 +19044,7 @@ snapshots:
   engine.io-client@6.6.3(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
       '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       engine.io-parser: 5.2.3
       ws: 8.17.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       xmlhttprequest-ssl: 2.1.2
@@ -19234,7 +19268,7 @@ snapshots:
       '@typescript-eslint/parser': 5.62.0(eslint@8.57.1)(typescript@5.9.3)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1)
       eslint-plugin-import: 2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
@@ -19264,7 +19298,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3(supports-color@8.1.1)
@@ -19279,14 +19313,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 5.62.0(eslint@8.57.1)(typescript@5.9.3)
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@8.57.1)
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -19301,7 +19335,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -19423,6 +19457,8 @@ snapshots:
 
   eslint-visitor-keys@3.4.3: {}
 
+  eslint-visitor-keys@4.2.1: {}
+
   eslint@8.57.1:
     dependencies:
       '@eslint-community/eslint-utils': 4.9.0(eslint@8.57.1)
@@ -19472,6 +19508,12 @@ snapshots:
       es5-ext: 0.10.64
       event-emitter: 0.3.5
       type: 2.7.3
+
+  espree@10.4.0:
+    dependencies:
+      acorn: 8.15.0
+      acorn-jsx: 5.3.2(acorn@8.15.0)
+      eslint-visitor-keys: 4.2.1
 
   espree@9.6.1:
     dependencies:
@@ -19902,7 +19944,7 @@ snapshots:
 
   follow-redirects@1.15.11(debug@4.3.4):
     optionalDependencies:
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
 
   follow-redirects@1.15.11(debug@4.4.3):
     optionalDependencies:
@@ -20141,6 +20183,8 @@ snapshots:
   globals@13.24.0:
     dependencies:
       type-fest: 0.20.2
+
+  globals@14.0.0: {}
 
   globalthis@1.0.4:
     dependencies:
@@ -20748,7 +20792,7 @@ snapshots:
       any-signal: 2.1.2
       blob-to-it: 1.0.4
       browser-readablestream-to-it: 1.0.3
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@8.1.1)
       err-code: 3.0.1
       ipfs-core-types: 0.9.0(node-fetch@2.7.0(encoding@0.1.13))
       ipfs-unixfs: 6.0.9
@@ -20777,7 +20821,7 @@ snapshots:
       '@ipld/dag-pb': 2.1.18
       abort-controller: 3.0.0
       any-signal: 2.1.2
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.4.3(supports-color@8.1.1)
       err-code: 3.0.1
       ipfs-core-types: 0.9.0(node-fetch@2.7.0(encoding@0.1.13))
       ipfs-core-utils: 0.13.0(encoding@0.1.13)(node-fetch@2.7.0(encoding@0.1.13))
@@ -23198,7 +23242,7 @@ snapshots:
     dependencies:
       debug: 4.4.3(supports-color@8.1.1)
       module-details-from-path: 1.0.4
-      resolve: 1.22.8
+      resolve: 1.22.10
     transitivePeerDependencies:
       - supports-color
 
@@ -23595,7 +23639,7 @@ snapshots:
   socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
       '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       engine.io-client: 6.6.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       socket.io-parser: 4.2.4
     transitivePeerDependencies:
@@ -23606,7 +23650,7 @@ snapshots:
   socket.io-parser@4.2.4:
     dependencies:
       '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
 
