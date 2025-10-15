@@ -23,7 +23,7 @@ import {
   TransactionFormType,
   TransactionTypeIcon,
   TwoColumnLayout,
-} from 'src/modules/create-proposal'
+} from '@buildeross/create-proposal-ui'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
 import { isAddressEqual } from 'viem'

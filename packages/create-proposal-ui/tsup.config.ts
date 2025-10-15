@@ -1,0 +1,46 @@
+import { defineConfig } from 'tsup'
+import { vanillaExtractPlugin } from '@vanilla-extract/esbuild-plugin'
+
+export default defineConfig({
+  entry: ['src/index.ts'],
+  format: ['cjs', 'esm'],
+  dts: false,
+  clean: true,
+  platform: 'browser',
+  target: 'es2020',
+  esbuildPlugins: [
+    vanillaExtractPlugin({
+      identifiers: 'short',
+    }),
+  ],
+  external: [
+    '@buildeross/ipfs-service',
+    '@buildeross/constants',
+    '@buildeross/hooks',
+    '@buildeross/proposal-ui',
+    '@buildeross/sdk',
+    '@buildeross/stores',
+    '@buildeross/types',
+    '@buildeross/ui',
+    '@buildeross/utils',
+    '@buildeross/zord',
+    '@ethereum-attestation-service/eas-sdk',
+    '@walletconnect/core',
+    '@walletconnect/utils',
+    '@walletconnect/web3wallet',
+    'formik',
+    'framer-motion',
+    'lanyard',
+    'lodash',
+    'lodash/isEmpty',
+    'lodash/gte',
+    'lodash/isEqual',
+    'react',
+    'react-dom',
+    'swr',
+    'viem',
+    'wagmi',
+    'yup',
+    'zustand',
+  ],
+})

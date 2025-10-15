@@ -65,6 +65,11 @@
     "viem": "2.38.2",
     "wagmi": "2.18.1"
   },
+  "peerDependenciesMeta": {
+    "@sentry/nextjs": {
+      "optional": true
+    }
+  },
   "publishConfig": {
     "access": "public"
   },

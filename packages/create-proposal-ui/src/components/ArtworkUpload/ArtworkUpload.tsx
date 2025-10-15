@@ -8,7 +8,6 @@ import {
   ArtworkUpload as UploadComponent,
   LayerOrdering,
 } from '@buildeross/ui/Artwork'
-import * as Sentry from '@sentry/nextjs'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
 import React, {
@@ -159,8 +158,11 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
       setIpfsUpload([])
       setIsUploadingToIPFS(false)
       setIpfsUploadProgress(0)
-      Sentry.captureException(err)
-      Sentry.flush(2000).catch(() => {})
+      try {
+        const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+        sentry.captureException(err)
+        sentry.flush(2000).catch(() => {})
+      } catch (_) {}
       return
     },
     [setIpfsUpload, setIsUploadingToIPFS, setIpfsUploadProgress]

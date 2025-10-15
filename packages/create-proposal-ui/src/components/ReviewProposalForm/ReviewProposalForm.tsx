@@ -18,7 +18,6 @@ import { TextInput } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box, Flex, Icon } from '@buildeross/zord'
-import * as Sentry from '@sentry/nextjs'
 import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
 import React, { useState } from 'react'
@@ -53,9 +52,13 @@ interface ReviewProposalProps {
 
 const logError = async (e: unknown) => {
   console.error(e)
-  Sentry.captureException(e)
-  await Sentry.flush(2000)
-  return
+  try {
+    const sentry = await import('@sentry/nextjs').catch(() => null)
+    if (sentry) {
+      sentry.captureException(e)
+      sentry.flush(2000).catch(() => {})
+    }
+  } catch (_) {}
 }
 
 export const ReviewProposalForm = ({

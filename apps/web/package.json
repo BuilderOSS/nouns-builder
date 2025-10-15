@@ -6,6 +6,7 @@
     "@buildeross/auction-ui": "workspace:*",
     "@buildeross/blocklist": "workspace:*",
     "@buildeross/constants": "workspace:*",
+    "@buildeross/create-proposal-ui": "workspace:*",
     "@buildeross/dao-ui": "workspace:*",
     "@buildeross/hooks": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
