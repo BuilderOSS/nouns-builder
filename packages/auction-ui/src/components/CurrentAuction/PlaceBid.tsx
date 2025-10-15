@@ -1,4 +1,5 @@
 import { BASE_URL, SWR_KEYS } from '@buildeross/constants'
+import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid, getBids } from '@buildeross/sdk/subgraph'
 import { useDaoStore } from '@buildeross/stores'
@@ -14,7 +15,6 @@ import { Address, formatEther, parseEther } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionActionButtonVariants, bidForm, bidInput } from '../Auction.css'
 import { WarningModal } from './WarningModal'
 

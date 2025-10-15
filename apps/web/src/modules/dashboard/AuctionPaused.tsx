@@ -2,6 +2,7 @@ import { AddressType, Chain } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, icons, Text } from '@buildeross/zord'
+import Image from 'next/image'
 import React from 'react'
 
 import { DashboardDaoProps } from './Dashboard'
@@ -48,7 +49,7 @@ export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
         <Box>
           <Flex mb="x1" align="center">
             {chain.icon && (
-              <img
+              <Image
                 src={chain.icon}
                 style={{
                   borderRadius: '12px',

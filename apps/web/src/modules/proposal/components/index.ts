@@ -1,7 +1,0 @@
-export * from './ProposalActions'
-export * from './ProposalCard'
-export * from './ProposalDescription'
-export * from './ProposalDetailsGrid'
-export * from './ProposalHeader'
-export * from './ProposalNavigation'
-export * from './ProposalStatus'

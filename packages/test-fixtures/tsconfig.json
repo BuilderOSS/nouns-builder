@@ -1,0 +1,9 @@
+{
+  "extends": "@buildeross/tsconfig/react-library.json",
+  "include": [
+    "src"
+  ],
+  "compilerOptions": {
+    "outDir": "dist"
+  }
+}

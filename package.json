@@ -4,26 +4,43 @@
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@changesets/cli": "^2.29.5",
+    "@tanstack/query-core": "^5.90.3",
+    "@tanstack/react-query": "^5.90.3",
+    "@types/react": "^19.2.2",
     "eslint": "8.57.1",
     "husky": "^8.0.3",
+    "ioredis": "^5.8.1",
     "prettier": "3.5.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "syncpack": "^13.0.4",
-    "turbo": "2.5.5"
+    "turbo": "2.5.5",
+    "viem": "^2.38.2",
+    "wagmi": "^2.18.1",
+    "zod": "^4.1.12"
   },
   "packageManager": "pnpm@10.13.1",
-  "private": true,
-  "resolutions": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "wagmi": "^2.15.4"
+  "pnpm": {
+    "overrides": {
+      "react": "^19.2.0",
+      "react-dom": "^19.2.0",
+      "@types/react": "^19.2.2",
+      "wagmi": "^2.18.1",
+      "viem": "^2.38.2",
+      "zod": "^4.1.12",
+      "ioredis": "^5.8.1",
+      "@tanstack/query-core": "^5.90.3",
+      "@tanstack/react-query": "^5.90.3"
+    }
   },
+  "private": true,
   "scripts": {
     "anvil": "bash -c 'source .env.local && anvil --fork-url \"$ANVIL_FORK_URL\" --fork-block-number \"$ANVIL_BLOCK_NUMBER\"'",
     "build": "turbo run build",
     "build:packages": "turbo run build --filter=@buildeross/*",
     "changeset": "changeset",
     "ci": "turbo run lint test",
-    "clean": "turbo run clean",
+    "clean": "rm -rf .turbo && turbo run clean",
     "dev": "turbo run dev",
     "eslint": "eslint --fix . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",

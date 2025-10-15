@@ -28,7 +28,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "viem": "^2.30.0"
+    "viem": "^2.38.2"
   },
   "publishConfig": {
     "access": "public"

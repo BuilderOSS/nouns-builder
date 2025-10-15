@@ -9,7 +9,7 @@
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@types/node": "^22.15.21",
-    "@types/react": "^19.1.5",
+    "@types/react": "^19.2.2",
     "eslint": "8.57.1",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3"
@@ -31,8 +31,8 @@
   "module": "./dist/index.mjs",
   "peerDependencies": {
     "next": "^15.3.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "publishConfig": {
     "access": "public"

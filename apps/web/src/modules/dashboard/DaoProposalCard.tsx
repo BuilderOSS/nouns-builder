@@ -1,10 +1,10 @@
+import { ProposalForStatus, ProposalStatus } from '@buildeross/proposal-ui'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
-import { ProposalForStatus, ProposalStatus } from 'src/modules/proposal'
 
 type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID

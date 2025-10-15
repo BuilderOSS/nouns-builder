@@ -55,7 +55,7 @@ const BridgePage: NextPageWithLayout = () => {
             style={{ flexWrap: 'wrap' }}
           >
             {networks.map((network) => (
-              <NetworkCard {...network} />
+              <NetworkCard key={network.chainId} {...network} />
             ))}
           </Flex>
         </Box>

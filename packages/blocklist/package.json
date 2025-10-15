@@ -6,7 +6,7 @@
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@types/node": "^22.15.21",
-    "@types/react": "^19.1.5",
+    "@types/react": "^19.2.2",
     "eslint": "8.57.1",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3"
@@ -27,9 +27,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "viem": "^2.30.0"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "viem": "^2.38.2"
   },
   "publishConfig": {
     "access": "public"

@@ -2,15 +2,18 @@
   "name": "@buildeross/stores",
   "description": "State management stores for BuilderOSS apps",
   "version": "0.1.3",
+  "dependencies": {
+    "zustand": "^5.0.4"
+  },
   "devDependencies": {
     "@buildeross/constants": "workspace:*",
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@types/node": "^22.15.21",
-    "@types/react": "^19.1.5",
+    "@types/react": "^19.2.2",
     "eslint": "8.57.1",
-    "react": "^19.1.0",
+    "react": "^19.2.0",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3",
     "zustand": "^5.0.4"
@@ -33,8 +36,7 @@
   "peerDependencies": {
     "@buildeross/constants": "0.1.3",
     "@buildeross/types": "0.1.3",
-    "react": "^19.1.0",
-    "zustand": "^5.0.4"
+    "react": "^19.2.0"
   },
   "publishConfig": {
     "access": "public"

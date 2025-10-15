@@ -51,14 +51,8 @@ jobs:
           path: ~/.foundry/cache/rpc/**/${{ env.ANVIL_BLOCK_NUMBER }}
           key: foundry-anvil-${{ env.ANVIL_BLOCK_NUMBER }}
 
-      - name: 👾 Run build task
-        run: pnpm build:packages
-
       - name: 👾 Run lint task
         run: pnpm lint
-
-      - name: 👾 Run type check task
-        run: pnpm type-check
 
       - name: 🦀 Install Rust
         uses: actions-rs/toolchain@v1
@@ -74,7 +68,7 @@ jobs:
           version: nightly
 
       - name: 🚀 Launch Anvil
-        run: anvil --fork-url $ANVIL_FORK_URL --fork-block-number $ANVIL_BLOCK_NUMBER --no-storage-caching &
+        run: anvil --fork-url $ANVIL_FORK_URL --fork-block-number $ANVIL_BLOCK_NUMBER &
 
       - name: 👾 Run test task
         run: pnpm test

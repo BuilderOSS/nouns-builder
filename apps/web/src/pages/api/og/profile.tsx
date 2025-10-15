@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { getEnsAvatar, getEnsName } from '@buildeross/utils/ens'
@@ -143,6 +145,7 @@ export default async function handler(req: NextRequest) {
             {daos.slice(0, 6).map((dao) => {
               return (
                 <div
+                  key={dao.collectionAddress}
                   style={{
                     display: 'flex',
                     flexDirection: 'row',
