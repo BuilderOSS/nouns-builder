@@ -134,9 +134,6 @@ importers:
       '@buildeross/zord':
         specifier: workspace:*
         version: link:../../packages/zord
-      '@ethereum-attestation-service/eas-sdk':
-        specifier: ^2.7.0
-        version: 2.9.0(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
       '@farcaster/frame-sdk':
         specifier: ^0.0.50
         version: 0.0.50(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -173,60 +170,33 @@ importers:
       '@vercel/og':
         specifier: ^0.6.8
         version: 0.6.8
-      '@walletconnect/core':
-        specifier: 2.11.3
-        version: 2.11.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)
       '@walletconnect/types':
         specifier: 2.11.3
         version: 2.11.3(ioredis@5.8.1)
-      '@walletconnect/utils':
-        specifier: 2.11.3
-        version: 2.11.3(ioredis@5.8.1)
-      '@walletconnect/web3wallet':
-        specifier: 1.10.3
-        version: 1.10.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)
       alchemy-sdk:
         specifier: ^3.6.0
         version: 3.6.5(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.12.2
         version: 1.12.2
-      bs58:
-        specifier: ^6.0.0
-        version: 6.0.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
       flatpickr:
         specifier: ^4.6.13
         version: 4.6.13
-      formik:
-        specifier: ^2.4.6
-        version: 2.4.6(@types/react@19.2.2)(react@19.2.0)
       framer-motion:
         specifier: ^12.12.1
         version: 12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      html-react-parser:
-        specifier: ^5.2.5
-        version: 5.2.7(@types/react@19.2.2)(react@19.2.0)
       ioredis:
         specifier: 5.8.1
         version: 5.8.1
-      lanyard:
-        specifier: ^1.1.2
-        version: 1.1.2(encoding@0.1.13)
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
       next:
         specifier: ^15.3.2
         version: 15.5.5(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       nextjs-progressbar:
         specifier: ^0.0.16
         version: 0.0.16(next@15.5.5(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
-      papaparse:
-        specifier: ^5.5.3
-        version: 5.5.3
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -248,12 +218,6 @@ importers:
       wagmi:
         specifier: 2.18.1
         version: 2.18.1(@tanstack/query-core@5.90.3)(@tanstack/react-query@5.90.3(react@19.2.0))(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12)
-      yup:
-        specifier: ^1.6.1
-        version: 1.7.1
-      zustand:
-        specifier: ^5.0.4
-        version: 5.0.8(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.4.0(react@19.2.0))
     devDependencies:
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
@@ -397,6 +361,9 @@ importers:
       react-dom:
         specifier: 19.2.0
         version: 19.2.0(react@19.2.0)
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.6(react@19.2.0)
       viem:
         specifier: 2.38.2
         version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -452,9 +419,6 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      swr:
-        specifier: ^2.3.3
-        version: 2.3.6(react@19.2.0)
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -553,6 +517,9 @@ importers:
       react-dom:
         specifier: 19.2.0
         version: 19.2.0(react@19.2.0)
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.6(react@19.2.0)
       viem:
         specifier: 2.38.2
         version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -635,9 +602,6 @@ importers:
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      swr:
-        specifier: ^2.3.3
-        version: 2.3.6(react@19.2.0)
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -698,6 +662,9 @@ importers:
       react-dom:
         specifier: 19.2.0
         version: 19.2.0(react@19.2.0)
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.6(react@19.2.0)
       viem:
         specifier: 2.38.2
         version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -786,9 +753,6 @@ importers:
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      swr:
-        specifier: ^2.3.3
-        version: 2.3.6(react@19.2.0)
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -810,6 +774,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      formik:
+        specifier: ^2.4.6
+        version: 2.4.6(@types/react@19.2.2)(react@19.2.0)
       framer-motion:
         specifier: ^12.12.1
         version: 12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -825,6 +792,9 @@ importers:
       react-dom:
         specifier: 19.2.0
         version: 19.2.0(react@19.2.0)
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.6(react@19.2.0)
       viem:
         specifier: 2.38.2
         version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -904,15 +874,9 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      formik:
-        specifier: ^2.4.6
-        version: 2.4.6(@types/react@19.2.2)(react@19.2.0)
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      swr:
-        specifier: ^2.3.3
-        version: 2.3.6(react@19.2.0)
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -973,9 +937,6 @@ importers:
       react-dom:
         specifier: 19.2.0
         version: 19.2.0(react@19.2.0)
-      swr:
-        specifier: ^2.3.3
-        version: 2.3.6(react@19.2.0)
       viem:
         specifier: 2.38.2
         version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -1028,6 +989,9 @@ importers:
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.6(react@19.2.0)
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -1086,6 +1050,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      formik:
+        specifier: ^2.4.6
+        version: 2.4.6(@types/react@19.2.2)(react@19.2.0)
       framer-motion:
         specifier: ^12.12.1
         version: 12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -1098,6 +1065,9 @@ importers:
       react-dom:
         specifier: 19.2.0
         version: 19.2.0(react@19.2.0)
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.6(react@19.2.0)
       viem:
         specifier: 2.38.2
         version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -1162,12 +1132,6 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      formik:
-        specifier: ^2.4.6
-        version: 2.4.6(@types/react@19.2.2)(react@19.2.0)
-      swr:
-        specifier: ^2.3.3
-        version: 2.3.6(react@19.2.0)
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.1)
@@ -1237,6 +1201,10 @@ importers:
         version: 5.9.3
 
   packages/stores:
+    dependencies:
+      zustand:
+        specifier: ^5.0.4
+        version: 5.0.8(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
       '@buildeross/constants':
         specifier: workspace:*
@@ -1268,9 +1236,6 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
-      zustand:
-        specifier: ^5.0.4
-        version: 5.0.8(@types/react@19.2.2)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
 
   packages/tsconfig: {}
 
@@ -1307,6 +1272,12 @@ importers:
       flatpickr:
         specifier: ^4.6.13
         version: 4.6.13
+      formik:
+        specifier: ^2.4.6
+        version: 2.4.6(@types/react@19.2.2)(react@19.2.0)
+      framer-motion:
+        specifier: ^12.12.1
+        version: 12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.2.2)(react@19.2.0)
@@ -1392,12 +1363,6 @@ importers:
       eslint:
         specifier: 8.57.1
         version: 8.57.1
-      formik:
-        specifier: ^2.4.6
-        version: 2.4.6(@types/react@19.2.2)(react@19.2.0)
-      framer-motion:
-        specifier: ^12.12.1
-        version: 12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       jsdom:
         specifier: ^26.1.0
         version: 26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)

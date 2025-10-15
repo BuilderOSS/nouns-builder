@@ -3,12 +3,22 @@
   "description": "Create Proposal UI components for BuilderOSS apps",
   "version": "0.1.3",
   "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@vanilla-extract/css": "^1.17.2",
+    "@walletconnect/core": "2.11.3",
+    "@walletconnect/utils": "2.11.3",
+    "@walletconnect/web3wallet": "1.10.3",
     "axios": "^1.12.2",
     "bs58": "^6.0.0",
     "dayjs": "^1.11.13",
+    "formik": "^2.4.6",
+    "framer-motion": "^12.12.1",
+    "lanyard": "^1.1.2",
     "lodash": "^4.17.21",
-    "papaparse": "^5.5.3"
+    "papaparse": "^5.5.3",
+    "swr": "^2.3.3",
+    "yup": "^1.6.1",
+    "zustand": "^5.0.4"
   },
   "devDependencies": {
     "@buildeross/constants": "workspace:*",
@@ -68,21 +78,11 @@
     "@buildeross/ui": "0.1.3",
     "@buildeross/utils": "0.1.3",
     "@buildeross/zord": "0.1.3",
-    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@sentry/nextjs": "^9.22.0",
-    "@walletconnect/core": "2.11.3",
-    "@walletconnect/utils": "2.11.3",
-    "@walletconnect/web3wallet": "1.10.3",
-    "formik": "^2.4.6",
-    "framer-motion": "^12.12.1",
-    "lanyard": "^1.1.2",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "swr": "^2.3.3",
     "viem": "2.38.2",
-    "wagmi": "2.18.1",
-    "yup": "^1.6.1",
-    "zustand": "^5.0.4"
+    "wagmi": "2.18.1"
   },
   "peerDependenciesMeta": {
     "@sentry/nextjs": {
