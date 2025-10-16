@@ -1,4 +1,4 @@
-import { BASE_URL } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 
 import { isNormalizeableIPFSUrl, normalizeIPFSUrl } from './url'
 
