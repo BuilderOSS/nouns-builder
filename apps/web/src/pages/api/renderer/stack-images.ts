@@ -1,5 +1,5 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
 import { NextApiRequest, NextApiResponse } from 'next'
 import sharp from 'sharp'
 
