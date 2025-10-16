@@ -68,7 +68,7 @@
     "@vitejs/plugin-react": "^4.5.0",
     "dotenv": "^16.5.0",
     "eslint": "8.57.1",
-    "eslint-config-next": "*",
+    "eslint-config-next": "^15.5.5",
     "jsdom": "^26.1.0",
     "localtunnel": "^2.0.2",
     "raw-loader": "^4.0.2",
