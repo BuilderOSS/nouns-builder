@@ -1,12 +1,11 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { getProvider } from '@buildeross/utils/provider'
 import axios from 'axios'
 import Redis from 'ioredis'
-import { Hex } from 'viem'
 import { describe, expect, it, vi } from 'vitest'
 
 import { getContractABIByAddress } from './abiService'
 import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors'
+import * as implementationService from './implementationService'
 
 vi.mock('ioredis', () => {
   const Redis = vi.fn()
@@ -27,56 +26,54 @@ describe('abiService', () => {
   beforeEach(() => {
     vi.resetModules()
     process.env = { ...OLD_ENV } // Make a copy
+    // Mock getImplementationAddress to return the same address by default
+    vi.spyOn(implementationService, 'getImplementationAddress').mockResolvedValue({
+      implementation: '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D',
+      source: 'none',
+    })
   })
 
   afterEach(() => {
     process.env = OLD_ENV
+    vi.restoreAllMocks()
   })
 
   describe('runs fetch', () => {
     it('fails with invalid address', async () => {
-      expect(() => getContractABIByAddress(CHAIN_ID.ETHEREUM, 'asdf')).rejects.toThrow(
-        InvalidRequestError
-      )
+      await expect(() =>
+        getContractABIByAddress(CHAIN_ID.ETHEREUM, 'asdf')
+      ).rejects.toThrow(InvalidRequestError)
     })
 
     it('fails with an undefined address', async () => {
-      expect(() => getContractABIByAddress(CHAIN_ID.ETHEREUM, undefined)).rejects.toThrow(
-        InvalidRequestError
-      )
+      await expect(() =>
+        getContractABIByAddress(CHAIN_ID.ETHEREUM, undefined)
+      ).rejects.toThrow(InvalidRequestError)
     })
 
-    it('attempts to fetch the slot from the provider', async () => {
-      const spy = vi.spyOn(getProvider(CHAIN_ID.ETHEREUM), 'getStorageAt')
-
-      spy.mockImplementationOnce(
-        async () =>
-          '0x0000000000000000000000000000000000000000000000000000000000000000' as Hex
+    it('calls getImplementationAddress to resolve proxy', async () => {
+      const implementationSpy = vi.spyOn(
+        implementationService,
+        'getImplementationAddress'
       )
 
-      // We know the contract call will fail but we want to validate the slot call
-      try {
-        await getContractABIByAddress(
-          CHAIN_ID.ETHEREUM,
-          '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D'
-        )
-      } catch (err) {}
-
-      expect(spy).toHaveBeenCalledOnce()
-      expect(spy).toHaveBeenCalledWith({
-        address: '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D',
-        slot: '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc',
+      vi.mocked(axios.get).mockResolvedValueOnce({
+        status: 200,
+        data: { status: '1', result: '[]' },
       })
+
+      await getContractABIByAddress(
+        CHAIN_ID.ETHEREUM,
+        '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D'
+      )
+
+      expect(implementationSpy).toHaveBeenCalledWith(
+        CHAIN_ID.ETHEREUM,
+        '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D'
+      )
     })
 
     it('skips redis check and checks original contract with etherscan', async () => {
-      const spy = vi.spyOn(getProvider(CHAIN_ID.ETHEREUM), 'getStorageAt')
-
-      spy.mockImplementationOnce(
-        async () =>
-          '0x0000000000000000000000000000000000000000000000000000000000000000' as Hex
-      )
-
       vi.mocked(axios.get).mockResolvedValueOnce({
         status: 200,
         data: { status: '1', result: '[]' },
@@ -96,18 +93,11 @@ describe('abiService', () => {
     })
 
     it('fails given an non 200 response status from etherscan', async () => {
-      const spy = vi.spyOn(getProvider(CHAIN_ID.ETHEREUM), 'getStorageAt')
-
-      spy.mockImplementationOnce(
-        async () =>
-          '0x0000000000000000000000000000000000000000000000000000000000000000' as Hex
-      )
-
       vi.mocked(axios.get).mockResolvedValueOnce({
         status: 500,
       })
 
-      expect(() =>
+      await expect(() =>
         getContractABIByAddress(
           CHAIN_ID.ETHEREUM,
           '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D'
@@ -116,19 +106,12 @@ describe('abiService', () => {
     })
 
     it('fails given a non-verified abi', async () => {
-      const spy = vi.spyOn(getProvider(CHAIN_ID.ETHEREUM), 'getStorageAt')
-
-      spy.mockImplementationOnce(
-        async () =>
-          '0x0000000000000000000000000000000000000000000000000000000000000000' as Hex
-      )
-
       vi.mocked(axios.get).mockResolvedValueOnce({
         status: 200,
         data: { status: '2', result: '[]' },
       })
 
-      expect(() =>
+      await expect(() =>
         getContractABIByAddress(
           CHAIN_ID.ETHEREUM,
           '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D'
@@ -141,14 +124,14 @@ describe('abiService', () => {
 
       const connection = new Redis(process.env.REDIS_URL)
 
+      // Mock the Redis cache to return an ABI cache entry
       vi.mocked(connection.get).mockResolvedValue(JSON.stringify({ result: '[]' }))
 
-      const spy = vi.spyOn(getProvider(CHAIN_ID.ETHEREUM), 'getStorageAt')
-
-      spy.mockImplementationOnce(
-        async () =>
-          '0x0000000000000000000000000000000000000000000000000000000000000123' as Hex
-      )
+      // Mock getImplementationAddress to return a different address (simulating proxy resolution)
+      vi.spyOn(implementationService, 'getImplementationAddress').mockResolvedValue({
+        implementation: '0x0000000000000000000000000000000000000123',
+        source: 'cache',
+      })
 
       const response = await getContractABIByAddress(
         CHAIN_ID.ETHEREUM,

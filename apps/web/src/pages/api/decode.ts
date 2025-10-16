@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'abi not found', encodedData: calldata })
     }
     if (error instanceof InvalidRequestError) {
-      return res.status(400).json({ error: 'bad address input', encodedData: calldata })
+      return res.status(400).json({ error: 'invalid input', encodedData: calldata })
     }
 
     Sentry.captureException(error)
