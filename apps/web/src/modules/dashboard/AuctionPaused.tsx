@@ -98,7 +98,7 @@ export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
             Auctions are paused.
           </Text>
         </Flex>
-        <Link link={getDaoLink(chain.id, tokenAddress, "activity")}>
+        <Link link={getDaoLink(chain.id, tokenAddress, 'activity')}>
           <Box
             display={'inline-flex'}
             color="text3"

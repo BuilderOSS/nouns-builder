@@ -12,7 +12,17 @@ import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
 const LIMIT = 20
-const page = 1
+const PAGE = 1
+
+const PAUSE_CALLDATA = encodeFunctionData({
+  abi: auctionAbi,
+  functionName: 'pause',
+})
+
+const UNPAUSE_CALLDATA = encodeFunctionData({
+  abi: auctionAbi,
+  functionName: 'unpause',
+})
 
 export const AuctionPaused: React.FC = () => {
   const chain = useChainStore((x) => x.chain)
@@ -29,41 +39,33 @@ export const AuctionPaused: React.FC = () => {
 
   const { data, isLoading } = useSWR<ProposalsResponse>(
     addresses.token && chain.id
-      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token, page] as const)
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token, LIMIT, PAGE] as const)
       : null,
-    ([, _chainId, _token, _page]: [string, CHAIN_ID, string, number]) =>
-      getProposals(_chainId, _token, LIMIT, _page)
+    ([, _chainId, _token, _limit, _page]: [string, CHAIN_ID, string, number, number]) =>
+      getProposals(_chainId, _token, _limit, _page)
   )
 
   const pausedProposalNumber: number | undefined = useMemo(() => {
     if (!(paused && addresses.auction)) return undefined
 
-    const pauseCalldata = encodeFunctionData({
-      abi: auctionAbi,
-      functionName: 'pause',
-    })
+    const proposal = data?.proposals.find((p) => {
+      if (p.state !== ProposalState.Executed) return false
 
-    const unpauseCalldata = encodeFunctionData({
-      abi: auctionAbi,
-      functionName: 'unpause',
-    })
-
-    const proposal = data?.proposals.find((proposal) => {
-      if (proposal.state !== ProposalState.Executed) return false
-
-      const pauseIndex = proposal.calldatas.findIndex(
-        (calldata) => calldata === pauseCalldata
-      )
-      const unpauseIndex = proposal.calldatas.findIndex(
-        (calldata) => calldata === unpauseCalldata
+      const pauseIndex = p.calldatas.findIndex((calldata) => calldata === PAUSE_CALLDATA)
+      const unpauseIndex = p.calldatas.findIndex(
+        (calldata) => calldata === UNPAUSE_CALLDATA
       )
 
       const isPausing =
-        pauseIndex >= 0 ? proposal.targets[pauseIndex] === addresses.auction : false
+        pauseIndex >= 0
+          ? p.targets[pauseIndex]?.toLowerCase() === addresses.auction?.toLowerCase()
+          : false
       const isUnpausing =
-        unpauseIndex >= 0 ? proposal.targets[unpauseIndex] === addresses.auction : false
+        unpauseIndex >= 0
+          ? p.targets[unpauseIndex]?.toLowerCase() === addresses.auction?.toLowerCase()
+          : false
 
-      if (isPausing && !isUnpausing) return proposal
+      return isPausing && !isUnpausing
     })
 
     return proposal?.proposalNumber
