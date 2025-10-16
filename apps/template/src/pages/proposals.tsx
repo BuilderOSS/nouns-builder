@@ -1,11 +1,20 @@
 import { NextPage } from 'next'
+import Head from 'next/head'
 
 const ProposalsPage: NextPage = () => {
   return (
-    <div>
-      <h1>Proposals</h1>
-      <p>Proposals page - coming soon</p>
-    </div>
+    <>
+      <Head>
+        <title>Proposals | DAO</title>
+        <meta name="description" content="DAO Proposals" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <main style={{ padding: '2rem' }}>
+        <h1>Proposals</h1>
+        <p>Proposals page - coming soon</p>
+      </main>
+    </>
   )
 }
 

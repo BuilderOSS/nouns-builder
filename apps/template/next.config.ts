@@ -30,6 +30,18 @@ const nextConfig: NextConfig = {
       '@buildeross/sdk',
     ],
   },
+  webpack(config, { dev }) {
+    config.resolve.fallback = { fs: false, net: false, tls: false }
+
+    config.externals = config.externals || []
+    config.externals.push('pino-pretty')
+
+    return {
+      ...config,
+      // Hot-fix for $RefreshReg issues: https://github.com/vanilla-extract-css/vanilla-extract/issues/679#issuecomment-1402839249
+      mode: dev ? 'production' : config.mode,
+    }
+  },
 }
 
 export default withVanillaExtract(nextConfig)

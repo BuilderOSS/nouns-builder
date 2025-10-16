@@ -4,6 +4,9 @@ import '@buildeross/auction-ui/index.css'
 import '@buildeross/proposal-ui/index.css'
 import '@buildeross/dao-ui/index.css'
 import '@buildeross/create-proposal-ui/index.css'
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/600.css'
+import '@fontsource/londrina-solid'
 import '@rainbow-me/rainbowkit/styles.css'
 import '@/styles/globals.css'
 
@@ -23,6 +26,7 @@ import { useMemo } from 'react'
 import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
 
+import { Layout } from '@/components/Layout'
 import { LinksProvider } from '@/components/LinksProvider'
 import { getDaoConfig } from '@/config'
 import { config } from '@/utils/clientConfig'
@@ -76,7 +80,9 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
             <SWRConfig value={{ fallback }}>
               <LinksProvider>
                 <LinkComponentProvider LinkComponent={Link}>
-                  <Component {...pageProps} err={err} />
+                  <Layout>
+                    <Component {...pageProps} err={err} />
+                  </Layout>
                 </LinkComponentProvider>
               </LinksProvider>
             </SWRConfig>
