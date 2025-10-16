@@ -28,14 +28,12 @@ export const ERC20ArgumentDisplay: React.FC<ERC20ArgumentDisplayProps> = ({
     tokenMetadata &&
     tokenMetadata.symbol
   ) {
-    const formattedAmount = formatUnits(
-      BigInt(arg.value.toString()),
-      tokenMetadata.decimals
-    )
+    const decimals = tokenMetadata.decimals ?? 18
+    const formattedAmount = formatUnits(BigInt(arg.value.toString()), decimals)
     const value = `${formatCryptoVal(formattedAmount)} ${tokenMetadata.symbol}`
 
     return (
-      <Flex key={arg.name} align="flex-start" w="100%">
+      <Flex align="flex-start" w="100%">
         <Text pr="x1" style={{ flexShrink: 0 }}>
           {arg.name}:
         </Text>
@@ -44,6 +42,8 @@ export const ERC20ArgumentDisplay: React.FC<ERC20ArgumentDisplayProps> = ({
             <img
               src={tokenMetadata.logo}
               alt={tokenMetadata.symbol}
+              loading="lazy"
+              decoding="async"
               width="16px"
               height="16px"
               style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
