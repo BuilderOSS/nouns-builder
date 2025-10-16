@@ -5,10 +5,9 @@ export function isCID(str: string | null | undefined): boolean {
 
   return (
     typeof str === 'string' &&
-    /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|baf[0-9A-Za-z]{50,})$/.test(str)
+    /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|ba[A-Za-z0-9]{50,})$/.test(str)
   )
 }
-
 
 export function normalizeIPFSUrl(url: string | null | undefined): IPFSUrl | null {
   if (!url || typeof url !== 'string') return null
