@@ -30,6 +30,8 @@ export type ActivityProps = {
   onOpenProposalReview: () => void
 }
 
+const LIMIT = 20
+
 export const Activity: React.FC<ActivityProps> = ({
   onOpenProposalCreate,
   onOpenProposalReview,
@@ -40,7 +42,6 @@ export const Activity: React.FC<ActivityProps> = ({
   const { createProposal } = useProposalStore()
   const { address } = useAccount()
   const { query } = useQueryParams()
-  const LIMIT = 20
   const page: number = query.page ? Number(query.page) : 1
 
   const { data, error, isLoading } = useSWR<ProposalsResponse>(
