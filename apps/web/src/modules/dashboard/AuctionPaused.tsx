@@ -1,7 +1,7 @@
 import { AddressType, Chain } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
-import { Box, Flex, Icon, icons, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import React from 'react'
 
@@ -98,6 +98,17 @@ export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
             Auctions are paused.
           </Text>
         </Flex>
+        <Link link={getDaoLink(chain.id, tokenAddress, 'activity')}>
+          <Box
+            display={'inline-flex'}
+            color="text3"
+            mt={{ '@initial': 'x3', '@768': 'x1' }}
+            fontSize={18}
+            className={atoms({ textDecoration: 'underline' })}
+          >
+            View activity
+          </Box>
+        </Link>
       </Flex>
     </Flex>
   )

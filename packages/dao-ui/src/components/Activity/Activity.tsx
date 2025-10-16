@@ -30,6 +30,8 @@ export type ActivityProps = {
   onOpenProposalReview: () => void
 }
 
+const LIMIT = 20
+
 export const Activity: React.FC<ActivityProps> = ({
   onOpenProposalCreate,
   onOpenProposalReview,
@@ -40,15 +42,14 @@ export const Activity: React.FC<ActivityProps> = ({
   const { createProposal } = useProposalStore()
   const { address } = useAccount()
   const { query } = useQueryParams()
-  const LIMIT = 20
   const page: number = query.page ? Number(query.page) : 1
 
   const { data, error, isLoading } = useSWR<ProposalsResponse>(
     addresses.token && chain.id
-      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token, page] as const)
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token, LIMIT, page] as const)
       : null,
-    ([, _chainId, _token, _page]: [string, CHAIN_ID, string, number]) =>
-      getProposals(_chainId, _token, LIMIT, _page)
+    ([, _chainId, _token, _limit, _page]: [string, CHAIN_ID, string, number, number]) =>
+      getProposals(_chainId, _token, _limit, _page)
   )
 
   const { data: membership } = useDaoMembership({

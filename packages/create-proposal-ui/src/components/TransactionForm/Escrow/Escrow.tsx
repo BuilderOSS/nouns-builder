@@ -1,5 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { uploadJson } from '@buildeross/ipfs-service'
+import { uploadJson } from '@buildeross/ipfs-service/upload'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
@@ -23,6 +23,9 @@ import EscrowForm from './EscrowForm'
 import { EscrowFormValues } from './EscrowForm.schema'
 import { encodeEscrowData } from './EscrowUtils'
 
+const LIMIT = 20
+const PAGE = 1
+
 export const Escrow: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ipfsUploadError, setIpfsUploadError] = useState<Error | null>(null)
@@ -34,8 +37,11 @@ export const Escrow: React.FC = () => {
   const { addresses } = useDaoStore()
 
   const { data } = useSWR<ProposalsResponse>(
-    addresses.token ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token] as const) : null,
-    ([, _chainId, _token]) => getProposals(_chainId as CHAIN_ID, _token as string, 1)
+    addresses.token
+      ? ([SWR_KEYS.PROPOSALS, chain.id, addresses.token, LIMIT, PAGE] as const)
+      : null,
+    ([, _chainId, _token, _limit, _page]: [string, CHAIN_ID, string, number, number]) =>
+      getProposals(_chainId, _token, _limit, _page)
   )
 
   const lastProposalId = data?.proposals?.[0]?.proposalNumber ?? 0
