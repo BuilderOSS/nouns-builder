@@ -1,28 +1,23 @@
-import {
+import type {
   CHAIN_ID,
   DecodedArg,
   DecodedTransactionData,
   DecodedValue,
 } from '@buildeross/types'
-import { getProvider } from '@buildeross/utils/provider'
 import axios from 'axios'
 import {
-  AbiFunction,
-  Address,
+  type AbiFunction,
+  type Address,
   decodeFunctionData,
+  type DecodeFunctionDataReturnType,
   getAbiItem,
   getAddress,
   Hex,
-  pad,
-  trim,
-  zeroHash,
 } from 'viem'
 
 import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors'
+import { getImplementationAddress } from './implementationService'
 import { getRedisConnection } from './redisConnection'
-
-const EIP1967_PROXY_STORAGE_SLOT =
-  '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
 
 const getEtherscanABIRedisKey = (chain: string, address: string) =>
   `etherscan:abi:${chain}:${address}`
@@ -42,30 +37,17 @@ export const getContractABIByAddress = async (
     throw new InvalidRequestError('Invalid address')
   }
 
-  let address: any
+  let address: Address
   try {
     address = getAddress(addressInput)
   } catch {
     throw new InvalidRequestError('Invalid address')
   }
 
-  if (!address) {
-    throw new InvalidRequestError('Invalid address')
-  }
-
-  let fetchedAddress = address
-
-  // Only handles EIP1967 proxy slots – does not handle minimal proxies (EIP11)
-  const proxyAddress = await getProvider(chainId).getStorageAt({
-    address,
-    slot: EIP1967_PROXY_STORAGE_SLOT,
-  })
-
-  if (proxyAddress != zeroHash) {
-    fetchedAddress = pad(trim(proxyAddress as Address), {
-      size: 20,
-    }) as typeof fetchedAddress
-  }
+  const { implementation: fetchedAddress } = await getImplementationAddress(
+    chainId,
+    address
+  )
 
   const chainIdStr = chainId.toString()
 
@@ -93,8 +75,9 @@ export const getContractABIByAddress = async (
     const abi = etherscan.data
 
     if (abi.status === '1') {
-      redisConnection?.set(
+      await redisConnection?.setex(
         getEtherscanABIRedisKey(chainIdStr, fetchedAddress),
+        60 * 60 * 24, // 24 hours
         JSON.stringify(abi)
       )
       return {
@@ -117,12 +100,20 @@ export const decodeTransaction = async (
   const { abi: abiJsonString } = await getContractABIByAddress(chainId, contract)
 
   const abi = JSON.parse(abiJsonString)
-  const decodeResult = decodeFunctionData({ abi, data: calldata as Hex })
+
+  let decodeResult: DecodeFunctionDataReturnType<typeof abi>
+  try {
+    decodeResult = decodeFunctionData({ abi, data: calldata as Hex })
+  } catch (error) {
+    console.error(error)
+    throw new InvalidRequestError('Invalid calldata')
+  }
+
   const functionSig = calldata.slice(0, 10)
 
   const functionInfo = getAbiItem({
     abi,
-    name: decodeResult.functionName,
+    name: functionSig,
   })
 
   const formatArgValue = (input: any, value: any): DecodedValue => {

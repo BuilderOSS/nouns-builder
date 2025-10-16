@@ -1,6 +1,7 @@
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { CHAIN_ID, DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { Flex, Text } from '@buildeross/zord'
 import { formatUnits } from 'viem'
 
 import { DecodedValueRenderer } from './DecodedValueRenderer'
@@ -33,7 +34,25 @@ export const ERC20ArgumentDisplay: React.FC<ERC20ArgumentDisplayProps> = ({
     )
     const value = `${formatCryptoVal(formattedAmount)} ${tokenMetadata.symbol}`
 
-    return <DecodedValueRenderer name={arg.name} value={value} />
+    return (
+      <Flex key={arg.name} align="flex-start" w="100%">
+        <Text pr="x1" style={{ flexShrink: 0 }}>
+          {arg.name}:
+        </Text>
+        <Flex align="center" gap="x1">
+          {tokenMetadata.logo && (
+            <img
+              src={tokenMetadata.logo}
+              alt={tokenMetadata.symbol}
+              width="16px"
+              height="16px"
+              style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
+            />
+          )}
+          <Text>{value}</Text>
+        </Flex>
+      </Flex>
+    )
   }
 
   // Default rendering for other arguments or if metadata failed to load
