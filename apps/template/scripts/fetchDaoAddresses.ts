@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 /* eslint-disable no-console */
 
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { config } from 'dotenv'
@@ -40,13 +40,13 @@ async function fetchDaoAddresses() {
   }
 
   // Find the chain object
-  const daoChain = PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === parsedChainId)
+  const daoChain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === parsedChainId)
 
   if (!daoChain) {
     console.error(`❌ Chain with ID ${parsedChainId} not found in supported chains`)
     console.error(
       '   Supported chains:',
-      PUBLIC_DEFAULT_CHAINS.map((c) => `${c.name} (${c.id})`).join(', ')
+      PUBLIC_ALL_CHAINS.map((c) => `${c.name} (${c.id})`).join(', ')
     )
     process.exit(1)
   }
@@ -97,7 +97,6 @@ async function fetchDaoAddresses() {
 // Do not edit manually
 
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 
 export const DAO_CHAIN_ID: CHAIN_ID = ${parsedChainId}
@@ -107,7 +106,16 @@ export const DAO_CHAIN: Chain = PUBLIC_DEFAULT_CHAINS.find(
   (chain) => chain.id === DAO_CHAIN_ID
 )!
 
-export const DAO_ADDRESSES: DaoContractAddresses = {
+// Custom type to ensure all addresses are defined (not optional)
+export interface RequiredDaoContractAddresses {
+  token: AddressType
+  auction: AddressType
+  governor: AddressType
+  metadata: AddressType
+  treasury: AddressType
+}
+
+export const DAO_ADDRESSES: RequiredDaoContractAddresses = {
   token: '${addresses.token}' as AddressType,
   auction: '${addresses.auction}' as AddressType,
   governor: '${addresses.governor}' as AddressType,

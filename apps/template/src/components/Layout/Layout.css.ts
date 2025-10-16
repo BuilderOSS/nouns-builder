@@ -11,5 +11,9 @@ export const layoutContainer = style([
 export const mainContent = style([
   atoms({
     flex: 1,
+    px: 'x4', // Left and right padding
   }),
+  {
+    paddingTop: '80px', // Top padding to account for fixed header
+  },
 ])

@@ -9,6 +9,9 @@ import '@fontsource/inter/600.css'
 import '@fontsource/londrina-solid'
 import '@rainbow-me/rainbowkit/styles.css'
 import '@/styles/globals.css'
+import '@/styles/styles.css'
+import 'flatpickr/dist/themes/light.css'
+import 'react-mde/lib/styles/css/react-mde-all.css'
 
 import {
   ChainStoreProvider,

@@ -1,10 +1,68 @@
+import { Admin } from '@buildeross/dao-ui'
+import { Flex } from '@buildeross/zord'
+import { NextPage } from 'next'
+import Head from 'next/head'
+import { useRouter } from 'next/router'
 import React from 'react'
+import { useAccount } from 'wagmi'
 
-export default function Settings() {
+import { useSettingsAccess } from '@/hooks/useSettingsAccess'
+
+const SettingsPage: NextPage = () => {
+  const { push } = useRouter()
+  const { address } = useAccount()
+  const { isLoading, hasAccess } = useSettingsAccess()
+
+  const onOpenProposalReview = React.useCallback(async () => {
+    await push('/proposal/review')
+  }, [push])
+
+  if (isLoading) return null
+
+  if (!address)
+    return (
+      <>
+        <Head>
+          <title>Settings | DAO</title>
+          <meta name="description" content="DAO Admin Settings" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Flex align="center" justify="center" style={{ minHeight: '60vh' }}>
+          Please connect your wallet to access this page
+        </Flex>
+      </>
+    )
+
+  if (!hasAccess) {
+    return (
+      <>
+        <Head>
+          <title>Settings | DAO</title>
+          <meta name="description" content="DAO Admin Settings" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <Flex align="center" justify="center" style={{ minHeight: '60vh' }}>
+          Access Restricted - You don't have permission to access this page
+        </Flex>
+      </>
+    )
+  }
+
   return (
-    <div>
-      <h1>Settings</h1>
-      <p>DAO admin settings page</p>
-    </div>
+    <>
+      <Head>
+        <title>Settings | DAO</title>
+        <meta name="description" content="DAO Admin Settings" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <main>
+        <Admin onOpenProposalReview={onOpenProposalReview} />
+      </main>
+    </>
   )
 }
+
+export default SettingsPage

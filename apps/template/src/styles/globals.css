@@ -1,33 +1,34 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* combine */
+@import url('https://fonts.googleapis.com/css2?family=Londrina+Solid:wght@400;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=M+PLUS+Rounded+1c:wght@900&display=swap');
+
+@font-face {
+  font-family: ptRoot;
+  src: url('/fonts/pt-root-ui_regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@font-face {
+  font-family: ptRoot;
+  src: url('/fonts/pt-root-ui_medium.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: ptRoot;
+  src: url('/fonts/pt-root-ui_bold.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
 }
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {
@@ -35,8 +36,43 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+a:hover {
+  color: #000;
 }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+#connect-button-wrapper * div,
+#connect-button-wrapper * button {
+  background: #000;
+  border: 0;
+  font-family: 'ptRoot', 'Arial', 'Helvetica', 'sans-serif' !important;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: none;
+  font-size: 16px;
+  line-height: 24px;
+  z-index: 2;
+  padding: 8px 0 8px 0;
+  width: 100%;
+  border-radius: 8px;
+  text-align: center;
+}
+
+#connect-button-wrapper > div {
+  width: 100%;
+}
+
+#connect-button-wrapper * div:hover,
+#connect-button-wrapper * button:hover {
+  cursor: pointer;
+}
+

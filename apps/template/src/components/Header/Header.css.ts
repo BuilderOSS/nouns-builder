@@ -89,10 +89,21 @@ export const navLink = style([
     color: 'text2',
   }),
   {
-    transition: 'color 0.2s ease',
+    transition: 'all 0.2s ease',
+    borderBottom: '2px solid transparent',
+    paddingBottom: '2px',
     ':hover': {
       color: color.text1,
     },
+  },
+])
+
+export const navLinkActive = style([
+  atoms({
+    color: 'text1',
+  }),
+  {
+    borderBottomColor: color.accent,
   },
 ])
 
