@@ -15,6 +15,17 @@ export interface UserTokensResponse {
 }
 
 export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  // Set CORS headers to allow any origin
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+
   const { user, page, network } = req.query
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)

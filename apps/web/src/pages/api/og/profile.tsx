@@ -29,13 +29,41 @@ const ptRootBold = fetch(
 ).then((res) => res.arrayBuffer())
 
 export default async function handler(req: NextRequest) {
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    })
+  }
+
   const { searchParams } = new URL(req.url)
   const address = searchParams.get('address')
   const rawData = searchParams.get('data')
 
-  if (!rawData) return new Response(undefined, { status: 400 })
+  if (!rawData)
+    return new Response(undefined, {
+      status: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    })
 
-  if (!address || !isAddress(address)) return new Response(undefined, { status: 400 })
+  if (!address || !isAddress(address))
+    return new Response(undefined, {
+      status: 400,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    })
 
   const ens = await getEnsName(address)
 
@@ -51,7 +79,7 @@ export default async function handler(req: NextRequest) {
     ptRootBold,
   ])
 
-  return new ImageResponse(
+  const imageResponse = new ImageResponse(
     (
       <div
         style={{
@@ -220,4 +248,11 @@ export default async function handler(req: NextRequest) {
       ],
     }
   )
+
+  // Add CORS headers to the response
+  imageResponse.headers.set('Access-Control-Allow-Origin', '*')
+  imageResponse.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  imageResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+
+  return imageResponse
 }

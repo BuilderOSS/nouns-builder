@@ -1,3 +1,5 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+
 import { hashFiles } from './hash'
 
 const defaultOptions = {
@@ -96,7 +98,7 @@ type UploadOptions = {
 async function getUploadTarget(useLegacy: boolean, uploadType: UploadType) {
   // TODO: support directory in pinata v3 once supported by pinata
   if (useLegacy) {
-    const res = await fetch('/api/generate-jwt', {
+    const res = await fetch(`${BASE_URL}/api/generate-jwt`, {
       method: 'POST',
       headers: { Accept: 'application/json' },
     })
@@ -107,7 +109,7 @@ async function getUploadTarget(useLegacy: boolean, uploadType: UploadType) {
       jwt: JWT as string,
     }
   } else {
-    const res = await fetch('/api/upload-url', {
+    const res = await fetch(`${BASE_URL}/api/upload-url`, {
       method: 'POST',
       body: JSON.stringify({ type: uploadType }),
       headers: {
@@ -164,7 +166,7 @@ export async function uploadWithProgress(
 
         try {
           // ensure cid is pinned if it wasn't already
-          fetch('/api/pin-cid', {
+          fetch(`${BASE_URL}/api/pin-cid`, {
             method: 'POST',
             body: JSON.stringify(result),
             headers: {
@@ -378,7 +380,7 @@ export async function uploadJson(jsonObject: object): Promise<IPFSUploadResponse
 
   const data = JSON.stringify(jsonObject)
 
-  const response = await fetch('/api/pin-json', {
+  const response = await fetch(`${BASE_URL}/api/pin-json`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

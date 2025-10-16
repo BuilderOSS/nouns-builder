@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
 import {
@@ -118,7 +119,7 @@ export const ReviewProposalForm = ({
           setSimulating(true)
 
           simulationResult = await axios
-            .post<SimulationResult>('/api/simulate', {
+            .post<SimulationResult>(`${BASE_URL}/api/simulate`, {
               treasuryAddress: addresses.treasury,
               chainId: chain.id,
               calldatas: calldata,

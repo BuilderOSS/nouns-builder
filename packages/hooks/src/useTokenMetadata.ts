@@ -1,4 +1,5 @@
-import { SWR_KEYS } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { CHAIN_ID } from '@buildeross/types'
 import { useMemo } from 'react'
 import { type KeyedMutator } from 'swr'
@@ -27,7 +28,7 @@ const fetchTokenMetadata = async (
 ): Promise<TokenMetadata[]> => {
   const addressParam = addresses.join(',')
   const response = await fetch(
-    `/api/token-metadata?chainId=${chainId}&addresses=${addressParam}`
+    `${BASE_URL}/api/token-metadata?chainId=${chainId}&addresses=${addressParam}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch token metadata')

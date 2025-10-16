@@ -1,7 +1,8 @@
-import { SWR_KEYS } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { Proposal } from '@buildeross/sdk'
 import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
-import { formatCryptoVal } from '@buildeross/utils'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import useSWR, { KeyedMutator } from 'swr'
 import { formatEther } from 'viem'
 
@@ -43,7 +44,7 @@ const apiDecodeTx: DecodeFunc = async (
   target: string,
   calldata: string
 ): Promise<DecodedTransactionData> => {
-  const decodeRes = await fetch(`/api/decode`, {
+  const decodeRes = await fetch(`${BASE_URL}/api/decode`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

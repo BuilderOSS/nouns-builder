@@ -1,4 +1,5 @@
-import { SWR_KEYS } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { CHAIN_ID } from '@buildeross/types'
 import useSWR, { KeyedMutator } from 'swr'
 import { Address, isAddress } from 'viem'
@@ -27,7 +28,7 @@ const fetchTokenBalances = async (
   address: Address
 ): Promise<TokenBalance[]> => {
   const response = await fetch(
-    `/api/token-balances?chainId=${chainId}&address=${address}`
+    `${BASE_URL}/api/token-balances?chainId=${chainId}&address=${address}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch token balances')

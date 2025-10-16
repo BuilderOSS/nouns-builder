@@ -1,4 +1,5 @@
-import { SWR_KEYS } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { CHAIN_ID } from '@buildeross/types'
 import useSWR, { KeyedMutator } from 'swr'
 import { Address, isAddress } from 'viem'
@@ -33,7 +34,9 @@ const fetchNFTBalance = async (
   chainId: CHAIN_ID,
   address: Address
 ): Promise<SerializedNft[]> => {
-  const response = await fetch(`/api/nft-balances?chainId=${chainId}&address=${address}`)
+  const response = await fetch(
+    `${BASE_URL}/api/nft-balances?chainId=${chainId}&address=${address}`
+  )
   if (!response.ok) {
     throw new Error('Failed to fetch NFT balances')
   }

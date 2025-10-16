@@ -8,6 +8,17 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { readContract } from 'wagmi/actions'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  // Set CORS headers to allow any origin
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+
   const { l1Treasury } = req.query
 
   const data = await Promise.all(
