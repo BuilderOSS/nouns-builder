@@ -1,6 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/cors'
 
 const TESTNET_ACCOUNT_ASSOCIATION = {
   // testnet.nouns.build
@@ -22,23 +23,7 @@ const MAINNET_ACCOUNT_ASSOCIATION = {
     'MHhkZTg2N2RkMGVjYTI4MzZjZjc0YTczMDNiYTg3NTdiYjRkM2EzYzcxODRmM2I1ZDAyZTNhYWIzM2RmY2U4NjljNDIyYmY3ZDM1MzY5NTc0NjY2YjE0OTYxMjNkYTc3NTlkODBmZWQ3YjM3MTY5NDM0Y2JmYWFiMzNkOWM0YjQ4MjFi',
 }
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Set CORS headers to allow any origin
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
-
-  if (req.method !== 'GET') {
-    res.status(405).end()
-    return
-  }
-
+function handler(_req: NextApiRequest, res: NextApiResponse) {
   const name = PUBLIC_IS_TESTNET ? 'Testnet Nouns Builder' : 'Nouns Builder'
 
   const frame = {
@@ -66,3 +51,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader('Content-Type', 'application/json')
   res.status(200).json(farcaster)
 }
+
+export default withCors(['GET'])(handler)

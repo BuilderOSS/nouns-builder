@@ -1,18 +1,8 @@
 import { WALLET_CONNECT_METADATA } from '@buildeross/constants/walletconnect'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/cors'
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Set CORS headers to allow any origin
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
-
+function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.status(405).end()
     return
@@ -20,3 +10,5 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   res.status(200).send(WALLET_CONNECT_METADATA)
 }
+
+export default withCors(['GET'])(handler)

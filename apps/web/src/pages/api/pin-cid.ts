@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/cors'
 
 const PINATA_API_KEY = process.env.PINATA_API_KEY
 
@@ -8,18 +9,7 @@ type PinCidOptions = {
   group_id?: string
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // Set CORS headers to allow any origin
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     try {
       const { cid, name, group_id } = req.body
@@ -68,3 +58,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end(`Method ${req.method} Not Allowed`)
   }
 }
+
+export default withCors(['POST'])(handler)

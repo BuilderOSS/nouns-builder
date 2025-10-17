@@ -5,20 +5,10 @@ import { AddressType, L2MigratedResponse } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/cors'
 import { readContract } from 'wagmi/actions'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  // Set CORS headers to allow any origin
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
-
   const { l1Treasury } = req.query
 
   const data = await Promise.all(
@@ -57,4 +47,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } as L2MigratedResponse)
 }
 
-export default handler
+export default withCors(['GET'])(handler)

@@ -1,19 +1,9 @@
 import { votersRequest } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/cors'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  // Set CORS headers to allow any origin
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
-
   const { collectionId, chainId, page, limit } = req.query
 
   try {
@@ -93,4 +83,5 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(500).json({ error: (error as Error)?.message ?? 'Internal Server Error' })
   }
 }
-export default handler
+
+export default withCors(['GET'])(handler)

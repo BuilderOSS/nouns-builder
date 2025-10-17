@@ -1,19 +1,9 @@
 import { getMetadataAttributes } from '@buildeross/sdk/contract'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/cors'
 import { Address } from 'viem'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  // Set CORS headers to allow any origin
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
-
   try {
     const { metadata, chainId, finalTokenId } = req.query as {
       metadata: Address
@@ -33,4 +23,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default handler
+export default withCors(['GET'])(handler)
