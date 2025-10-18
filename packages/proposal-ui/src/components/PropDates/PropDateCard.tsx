@@ -11,14 +11,12 @@ import { PropDateReplyCard } from './PropDateReplyCard'
 
 export const PropDateCard = ({
   propDate,
-  index,
   isReplying,
   onReplyClick,
   replies = [],
   invoiceData,
 }: {
   propDate: PropDate
-  index: number
   isReplying: boolean
   onReplyClick: (propDate: PropDate) => void
   replies?: PropDate[]
@@ -31,6 +29,8 @@ export const PropDateCard = ({
     !!invoiceData?.milestones?.[propDate.milestoneId]?.title
       ? invoiceData.milestones[propDate.milestoneId].title
       : ''
+
+  const repliesSorted = replies.sort((a, b) => a.timeCreated - b.timeCreated)
 
   return (
     <Flex
@@ -50,28 +50,26 @@ export const PropDateCard = ({
         <Flex align="center" gap="x2">
           <Avatar address={propDate.attester} src={ensAvatar} size="28" />
           <Text fontWeight="display">{ensName || walletSnippet(propDate.attester)}</Text>
-          {milestoneTitle && (
-            <Text variant="label-sm" color="text3">
-              • {milestoneTitle}
-            </Text>
-          )}
           <Text variant="label-sm" color="text3">
-            • {new Date(propDate.timeCreated * 1000).toLocaleDateString()}
+            • {new Date(propDate.timeCreated * 1000).toLocaleString()}
           </Text>
         </Flex>
-        <Box
-          borderStyle="solid"
-          borderRadius="phat"
-          borderWidth="thin"
-          py="x1"
-          px="x3"
-          color="text3"
-          borderColor="border"
-        >
-          <Text variant="label-sm" style={{ fontWeight: 600 }}>
-            Update #{index + 1}
-          </Text>
-        </Box>
+        {milestoneTitle && (
+          <Flex
+            borderStyle="solid"
+            borderRadius="phat"
+            borderWidth="thin"
+            py="x1"
+            px="x3"
+            color="text3"
+            borderColor="border"
+            align="center"
+          >
+            <Text variant="label-sm" style={{ fontWeight: 600 }}>
+              {milestoneTitle}
+            </Text>
+          </Flex>
+        )}
       </Flex>
 
       {propDate.message && (
@@ -86,9 +84,9 @@ export const PropDateCard = ({
         </Box>
       )}
       {/* Render replies if any */}
-      {replies && replies.length > 0 && (
+      {repliesSorted && repliesSorted.length > 0 && (
         <Box mt="x4" ml="x4" style={{ borderLeft: '4px solid var(--colors-border)' }}>
-          {replies.map((reply: PropDate) => (
+          {repliesSorted.map((reply: PropDate) => (
             <PropDateReplyCard key={reply.txid} reply={reply} />
           ))}
         </Box>

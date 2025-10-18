@@ -10,7 +10,7 @@ import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import { useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { getAddress, zeroHash } from 'viem'
+import { zeroHash } from 'viem'
 
 import { propPageWrapper } from '../styles.css'
 import { PropDateCard } from './PropDateCard'
@@ -59,7 +59,9 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
   const [showForm, setShowForm] = useState(false)
 
   const filteredPropDates = showOnlyDaoMembers
-    ? propDates.filter((propDate) => daoMembers.includes(getAddress(propDate.attester)))
+    ? propDates.filter((propDate) =>
+        daoMembers.some((m) => m.toLowerCase() === propDate.attester.toLowerCase())
+      )
     : propDates
 
   const handleReplyClick = (propDateToReply: PropDate) => {
@@ -74,7 +76,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
 
   const topLevelPropDates = filteredPropDates
     .filter((pd) => !pd.originalMessageId || pd.originalMessageId === zeroHash)
-    .sort((a, b) => a.timeCreated - b.timeCreated)
+    .sort((a, b) => b.timeCreated - a.timeCreated)
 
   return (
     <Flex className={propPageWrapper}>
@@ -102,8 +104,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
               size="sm"
               onClick={() => setShowOnlyDaoMembers(!showOnlyDaoMembers)}
             >
-              {showOnlyDaoMembers && <Icon id="check" />}
-              {showOnlyDaoMembers ? 'DAO Members Only' : 'All Propdates'}
+              {showOnlyDaoMembers ? 'Show All' : 'Show Only DAO Members'}
             </Button>
           </Flex>
         </Flex>
@@ -136,7 +137,6 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
               <PropDateCard
                 key={`${propDate.txid}-${i}`}
                 propDate={propDate}
-                index={i}
                 isReplying={replyingTo?.txid === propDate.txid}
                 onReplyClick={handleReplyClick}
                 replies={replies}

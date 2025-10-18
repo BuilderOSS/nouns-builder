@@ -25,7 +25,7 @@ export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
         <Flex align="center" gap="x2" mb="x1">
           <Text fontWeight="display">{ensName || walletSnippet(reply.attester)}</Text>
           <Text variant="label-sm" color="text3">
-            • {new Date(reply.timeCreated * 1000).toLocaleDateString()}
+            • {new Date(reply.timeCreated * 1000).toLocaleString()}
           </Text>
         </Flex>
         <Box className={messageStyle}>
