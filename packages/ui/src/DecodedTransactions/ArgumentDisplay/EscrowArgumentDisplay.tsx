@@ -13,7 +13,7 @@ import { Flex, Stack } from '@buildeross/zord'
 import { useCallback } from 'react'
 import { formatUnits, Hex } from 'viem'
 
-import { DecodedValueRenderer } from './DecodedValueRenderer'
+import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 
@@ -106,5 +106,5 @@ export const EscrowArgumentDisplay: React.FC<EscrowArgumentDisplayProps> = ({
         : 'updatable'
   }
 
-  return <DecodedValueRenderer name={arg.name} value={value} />
+  return <BaseArgumentDisplay name={arg.name} value={value} />
 }

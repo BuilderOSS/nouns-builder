@@ -4,7 +4,7 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Text } from '@buildeross/zord'
 import { formatUnits } from 'viem'
 
-import { DecodedValueRenderer } from './DecodedValueRenderer'
+import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 interface ERC20ArgumentDisplayProps {
   chainId: CHAIN_ID
@@ -56,5 +56,5 @@ export const ERC20ArgumentDisplay: React.FC<ERC20ArgumentDisplayProps> = ({
   }
 
   // Default rendering for other arguments or if metadata failed to load
-  return <DecodedValueRenderer name={arg.name} value={arg.value} />
+  return <BaseArgumentDisplay name={arg.name} value={arg.value} />
 }

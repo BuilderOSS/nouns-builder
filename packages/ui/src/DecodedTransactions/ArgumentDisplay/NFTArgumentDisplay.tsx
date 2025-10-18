@@ -4,8 +4,8 @@ import { CHAIN_ID, DecodedArg } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 
-import { FallbackImage } from '../FallbackImage'
-import { DecodedValueRenderer } from './DecodedValueRenderer'
+import { FallbackImage } from '../../FallbackImage'
+import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 interface NFTArgumentDisplayProps {
   chainId: CHAIN_ID
@@ -53,7 +53,7 @@ export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
     const typeName = arg.name.startsWith('_') ? '_type' : 'type'
     return (
       <>
-        <DecodedValueRenderer name={typeName} value={nftMetadata.tokenType} />
+        <BaseArgumentDisplay name={typeName} value={nftMetadata.tokenType} />
         <Box key={arg.name + target}>
           <Flex key={'nft' + target} align="center" w="100%" gap="x2">
             <Text style={{ flexShrink: 0 }}>{name}:</Text>
@@ -84,7 +84,7 @@ export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
     arg.name === 'amount' ||
     arg.name === '_amount'
   ) {
-    return <DecodedValueRenderer name="amount" value={arg.value} />
+    return <BaseArgumentDisplay name="amount" value={arg.value} />
   }
 
   if ((arg.name === 'data' || arg.name === '_data') && arg.value === '0x') {
@@ -92,5 +92,5 @@ export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
   }
 
   // Default rendering for other arguments
-  return <DecodedValueRenderer name={arg.name} value={arg.value} />
+  return <BaseArgumentDisplay name={arg.name} value={arg.value} />
 }
