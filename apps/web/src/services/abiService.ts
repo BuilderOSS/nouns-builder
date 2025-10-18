@@ -6,6 +6,7 @@ import type {
 } from '@buildeross/types'
 import axios from 'axios'
 import {
+  Abi,
   type AbiFunction,
   type Address,
   decodeFunctionData,
@@ -13,6 +14,7 @@ import {
   getAbiItem,
   getAddress,
   Hex,
+  toFunctionSelector,
 } from 'viem'
 
 import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors'
@@ -32,13 +34,20 @@ export type ContractABIResult = {
   source: 'fetched' | 'cache'
 }
 
+type GetContractABIByAddressOptions = {
+  skipImplementationCheck?: boolean
+}
+
 export const getContractABIByAddress = async (
   chainId: CHAIN_ID,
-  addressInput?: string
+  addressInput?: string,
+  options?: GetContractABIByAddressOptions
 ): Promise<ContractABIResult> => {
   if (!addressInput) {
     throw new InvalidRequestError('Invalid address')
   }
+
+  const { skipImplementationCheck = false } = options ?? {}
 
   let address: Address
   try {
@@ -47,10 +56,12 @@ export const getContractABIByAddress = async (
     throw new InvalidRequestError('Invalid address')
   }
 
-  const { implementation: fetchedAddress } = await getImplementationAddress(
-    chainId,
-    address
-  )
+  let fetchedAddress: Address = address
+
+  if (!skipImplementationCheck) {
+    const implementationData = await getImplementationAddress(chainId, address)
+    fetchedAddress = implementationData.implementation
+  }
 
   const chainIdStr = chainId.toString()
 
@@ -94,14 +105,63 @@ export const getContractABIByAddress = async (
   }
 }
 
+const formatArgValue = (input: any, value: any): DecodedValue => {
+  if (value === undefined || value === null) return value
+
+  // tuple
+  if (input.type === 'tuple' && input.components) {
+    return input.components.reduce((acc: any, component: any, i: number) => {
+      const key = component.name || i
+      const val = Array.isArray(value) ? value[i] : value[key]
+      acc[key] = formatArgValue(component, val)
+      return acc
+    }, {})
+  }
+
+  // array
+  if (input.type.endsWith('[]') && Array.isArray(value)) {
+    if (input.components) {
+      // array of tuples
+      return value.map((v: any) =>
+        input.components.reduce((acc: any, component: any, i: number) => {
+          const key = component.name || i
+          const val = Array.isArray(v) ? v[i] : v[key]
+          acc[key] = formatArgValue(component, val)
+          return acc
+        }, {})
+      )
+    }
+    // array of base types
+    return value.map((v: any) => v?.toString?.() ?? v)
+  }
+
+  // base
+  return value?.toString?.() ?? value
+}
+
 export const decodeTransaction = async (
   chainId: CHAIN_ID,
   contract: string,
   calldata: string
 ): Promise<DecodedTransactionData> => {
-  const { abi: abiJsonString } = await getContractABIByAddress(chainId, contract)
+  const { abi: abiJsonString } = await getContractABIByAddress(chainId, contract, {
+    skipImplementationCheck: true,
+  })
 
-  const abi = JSON.parse(abiJsonString)
+  let abi = JSON.parse(abiJsonString) as Abi
+
+  const functionSelector = calldata.slice(0, 10)
+
+  const abiHasSig = abi.some(
+    (item) => item.type === 'function' && toFunctionSelector(item) === functionSelector
+  )
+
+  if (!abiHasSig) {
+    const { abi: implAbiJsonString } = await getContractABIByAddress(chainId, contract, {
+      skipImplementationCheck: false,
+    })
+    abi = JSON.parse(implAbiJsonString) as Abi
+  }
 
   let decodeResult: DecodeFunctionDataReturnType<typeof abi>
   try {
@@ -111,38 +171,10 @@ export const decodeTransaction = async (
     throw new InvalidRequestError('Invalid calldata')
   }
 
-  const functionSig = calldata.slice(0, 10)
-
   const functionInfo = getAbiItem({
     abi,
-    name: functionSig,
+    name: functionSelector,
   })
-
-  const formatArgValue = (input: any, value: any): DecodedValue => {
-    if (input.type === 'tuple') {
-      return input.components.reduce((acc: any, component: any, i: number) => {
-        acc[component.name || i] = formatArgValue(component, value[component.name || i])
-        return acc
-      }, {})
-    }
-
-    if (input.type.endsWith('[]') && Array.isArray(value)) {
-      if (input.components) {
-        // Array of tuples
-        return value.map((v: any) =>
-          input.components.reduce((acc: any, component: any, i: number) => {
-            acc[component.name || i] = formatArgValue(component, v[component.name || i])
-            return acc
-          }, {})
-        )
-      }
-      // Array of base types
-      return value.map((v: any) => v?.toString?.() ?? v)
-    }
-
-    // Base type
-    return value?.toString?.() ?? value
-  }
 
   if (!functionInfo) {
     throw new NotFoundError('Function not found')
@@ -155,7 +187,7 @@ export const decodeTransaction = async (
     acc[name] = {
       name,
       type: input.type,
-      value: formatArgValue(input, decodeResult.args[index]),
+      value: formatArgValue(input, decodeResult.args?.[index]),
     }
     return acc
   }, {})
@@ -163,7 +195,10 @@ export const decodeTransaction = async (
   return {
     args: argMapping,
     functionName: decodeResult.functionName,
-    functionSig,
+    functionSig: functionSelector,
     encodedData: calldata,
+    argOrder: (functionInfo as AbiFunction).inputs.map(
+      (input, i) => input.name || i.toString()
+    ),
   }
 }

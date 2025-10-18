@@ -21,7 +21,7 @@ export type DecodedTransactionFailure = {
 export type DecodedTransaction = DecodedTransactionSuccess | DecodedTransactionFailure
 
 /* format in shape defined in ethers actor */
-export const formatSendEth = (value: string) => {
+export const formatSendEth = (value: string): DecodedTransactionData => {
   const amount = formatCryptoVal(formatEther(BigInt(value)))
   return {
     functionName: 'send',
@@ -30,6 +30,7 @@ export const formatSendEth = (value: string) => {
     },
     functionSig: '',
     encodedData: '0x',
+    argOrder: ['value'],
   }
 }
 
