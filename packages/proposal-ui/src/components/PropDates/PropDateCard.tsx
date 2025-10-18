@@ -5,6 +5,7 @@ import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
+import { useMemo } from 'react'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 import { PropDateReplyCard } from './PropDateReplyCard'
@@ -24,13 +25,19 @@ export const PropDateCard = ({
 }) => {
   const { ensName, ensAvatar } = useEnsData(propDate?.attester)
 
-  const milestoneTitle =
-    typeof propDate.milestoneId === 'number' &&
-    !!invoiceData?.milestones?.[propDate.milestoneId]?.title
-      ? invoiceData.milestones[propDate.milestoneId].title
-      : ''
+  const milestoneTitle = useMemo(
+    () =>
+      typeof propDate.milestoneId === 'number' &&
+      !!invoiceData?.milestones?.[propDate.milestoneId]?.title
+        ? invoiceData.milestones[propDate.milestoneId].title
+        : '',
+    [invoiceData?.milestones, propDate.milestoneId]
+  )
 
-  const repliesSorted = replies.sort((a, b) => a.timeCreated - b.timeCreated)
+  const repliesSorted = useMemo(
+    () => [...replies].sort((a, b) => a.timeCreated - b.timeCreated),
+    [replies]
+  )
 
   return (
     <Flex
