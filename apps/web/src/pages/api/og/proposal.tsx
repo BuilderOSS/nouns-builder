@@ -2,14 +2,22 @@
 
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { bgForAddress } from '@buildeross/utils/gradient'
-import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
-import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
+import {
+  baseContainerStyle,
+  createOGImageResponse,
+  getFontsData,
+  handleHead,
+  handleOptions,
+  OGFooter,
+  OGHeader,
+  parseRequestData,
+} from 'src/utils/api/og'
 
 export const config = {
   runtime: 'edge',
@@ -70,18 +78,6 @@ export function parseBgColor(state: ProposalState) {
   }
 }
 
-const ptRootRegular = fetch(
-  new URL('public/fonts/pt-root-ui_regular.ttf', import.meta.url)
-).then((res) => res.arrayBuffer())
-
-const ptRootMedium = fetch(
-  new URL('public/fonts/pt-root-ui_medium.ttf', import.meta.url)
-).then((res) => res.arrayBuffer())
-
-const ptRootBold = fetch(
-  new URL('public/fonts/pt-root-ui_bold.ttf', import.meta.url)
-).then((res) => res.arrayBuffer())
-
 export type ProposalOgMetadata = {
   chainId: CHAIN_ID
   tokenAddress: string
@@ -94,226 +90,170 @@ export type ProposalOgMetadata = {
 }
 
 export default async function handler(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  const rawData = searchParams.get('data')
+  if (req.method === 'OPTIONS') {
+    return handleOptions()
+  }
 
-  if (!rawData) return new Response(undefined, { status: 400 })
+  if (req.method === 'HEAD') {
+    return handleHead()
+  }
 
-  const data: ProposalOgMetadata = JSON.parse(rawData)
+  const { data, error } = parseRequestData<ProposalOgMetadata>(req)
+  if (error) return error
   const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === data.chainId)
 
-  const [ptRootRegularData, ptRootMediumData, ptRootBoldData] = await Promise.all([
-    ptRootRegular,
-    ptRootMedium,
-    ptRootBold,
-  ])
+  const fontsData = await getFontsData()
 
   const proposalStatusColor = parseBgColor(data.proposal.state)
 
-  return new ImageResponse(
-    (
+  return createOGImageResponse(
+    <div style={baseContainerStyle}>
+      <OGHeader />
+      <OGFooter />
       <div
         style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          position: 'relative',
-          justifyContent: 'space-around',
-          backgroundColor: 'white',
-          padding: '100px',
-          width: '100%',
-          height: '100%',
-          fontFamily: 'PT Root UI',
+          position: 'absolute',
+          alignItems: 'center',
+          bottom: 50,
+          left: 95,
         }}
       >
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            position: 'absolute',
-            top: 50,
-            left: 95,
+            justifyContent: 'center',
+            background: bgForAddress(data.tokenAddress ?? '', data.daoImage),
+            height: '52px',
+            width: '52px',
+            borderRadius: '9999px',
+            marginRight: '10px',
           }}
         >
-          <NogglesLogo
-            fill={'white'}
-            width="120"
-            style={{ objectFit: 'contain', paddingRight: '2px' }}
-            alt="logo"
-          />
-          <p style={{ marginLeft: '10px', fontWeight: 500, fontSize: '24px' }}>Builder</p>
+          {data.daoImage && (
+            <img
+              alt="user image"
+              src={getFetchableUrls(data.daoImage)?.[0]}
+              style={{
+                height: '52px',
+                width: '52px',
+                borderRadius: '9999px',
+                objectFit: 'cover',
+                objectPosition: 'center',
+              }}
+            />
+          )}
         </div>
-        <div style={{ display: 'flex', position: 'absolute', bottom: 50, right: 95 }}>
-          <p style={{ fontSize: '28px', color: '#808080' }}>nouns.build</p>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.daoName}</p>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            position: 'absolute',
-            alignItems: 'center',
-            bottom: 50,
-            left: 95,
-          }}
-        >
+        {chain && (
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              background: bgForAddress(data.tokenAddress ?? '', data.daoImage),
-              height: '52px',
-              width: '52px',
-              borderRadius: '9999px',
-              marginRight: '10px',
+              border: '2px solid #f2f2f2',
+              borderRadius: '8px',
+              padding: '0px 10px',
+              marginLeft: '10px',
+              height: '40px',
             }}
           >
-            {data.daoImage && (
-              <img
-                alt="user image"
-                src={getFetchableUrls(data.daoImage)?.[0]}
-                style={{
-                  height: '52px',
-                  width: '52px',
-                  borderRadius: '9999px',
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                }}
-              />
-            )}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <p style={{ fontSize: '28px', fontWeight: 700 }}>{data.daoName}</p>
-          </div>
-          {chain && (
-            <div
+            <img
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                border: '2px solid #f2f2f2',
-                borderRadius: '8px',
-                padding: '0px 10px',
-                marginLeft: '10px',
-                height: '40px',
+                height: 20,
+                objectFit: 'cover',
+                objectPosition: 'center',
+                marginRight: '10px',
+              }}
+              src={BASE_URL + chain.icon}
+              alt={chain.name}
+            />
+            <p
+              style={{
+                fontSize: '20px',
+                fontWeight: 500,
+                padding: '0px',
               }}
             >
-              <img
-                style={{
-                  height: 20,
-                  objectFit: 'cover',
-                  objectPosition: 'center',
-                  marginRight: '10px',
-                }}
-                src={BASE_URL + chain.icon}
-                alt={chain.name}
-              />
-              <p
-                style={{
-                  fontSize: '20px',
-                  fontWeight: 500,
-                  padding: '0px',
-                }}
-              >
-                {chain.name}
-              </p>
-            </div>
-          )}
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-          }}
-        >
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p
-                style={{
-                  fontSize: '24px',
-                  fontWeight: 700,
-                  marginRight: '12px',
-                  color: '#808080',
-                }}
-              >
-                Proposal {data.proposal.proposalNumber}
-              </p>
-              <p
-                style={{
-                  border: '2px solid',
-                  borderColor: proposalStatusColor.borderColor,
-                  borderRadius: '9999px',
-                  padding: '4px 12px',
-                  color: proposalStatusColor.color,
-                  fontWeight: 500,
-                }}
-              >
-                {parseState(data.proposal.state)}
-              </p>
-            </div>
-            <p style={{ fontSize: '32px', fontWeight: 700 }}>{data.proposal.title}</p>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p
-                style={{
-                  fontSize: '24px',
-                  fontWeight: 400,
-                  marginRight: '42px',
-                }}
-              >
-                For{' '}
-                <span style={{ marginLeft: '6px', color: '#1CB687', fontWeight: 700 }}>
-                  {data.proposal.forVotes}
-                </span>
-              </p>
-              <p
-                style={{
-                  fontSize: '24px',
-                  fontWeight: 400,
-                  marginRight: '42px',
-                }}
-              >
-                Against{' '}
-                <span style={{ marginLeft: '6px', color: '#F03232', fontWeight: 700 }}>
-                  {data.proposal.againstVotes}
-                </span>
-              </p>
-              <p
-                style={{
-                  fontSize: '24px',
-                  fontWeight: 400,
-                }}
-              >
-                Abstain{' '}
-                <span style={{ marginLeft: '6px', color: '#808080', fontWeight: 700 }}>
-                  {data.proposal.abstainVotes}
-                </span>
-              </p>
-            </div>
+              {chain.name}
+            </p>
+          </div>
+        )}
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              style={{
+                fontSize: '24px',
+                fontWeight: 700,
+                marginRight: '12px',
+                color: '#808080',
+              }}
+            >
+              Proposal {data.proposal.proposalNumber}
+            </p>
+            <p
+              style={{
+                border: '2px solid',
+                borderColor: proposalStatusColor.borderColor,
+                borderRadius: '9999px',
+                padding: '4px 12px',
+                color: proposalStatusColor.color,
+                fontWeight: 500,
+              }}
+            >
+              {parseState(data.proposal.state)}
+            </p>
+          </div>
+          <p style={{ fontSize: '32px', fontWeight: 700 }}>{data.proposal.title}</p>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <p
+              style={{
+                fontSize: '24px',
+                fontWeight: 400,
+                marginRight: '42px',
+              }}
+            >
+              For{' '}
+              <span style={{ marginLeft: '6px', color: '#1CB687', fontWeight: 700 }}>
+                {data.proposal.forVotes}
+              </span>
+            </p>
+            <p
+              style={{
+                fontSize: '24px',
+                fontWeight: 400,
+                marginRight: '42px',
+              }}
+            >
+              Against{' '}
+              <span style={{ marginLeft: '6px', color: '#F03232', fontWeight: 700 }}>
+                {data.proposal.againstVotes}
+              </span>
+            </p>
+            <p
+              style={{
+                fontSize: '24px',
+                fontWeight: 400,
+              }}
+            >
+              Abstain{' '}
+              <span style={{ marginLeft: '6px', color: '#808080', fontWeight: 700 }}>
+                {data.proposal.abstainVotes}
+              </span>
+            </p>
           </div>
         </div>
       </div>
-    ),
-    {
-      width: 1200,
-      height: 800,
-      fonts: [
-        {
-          name: 'PT Root UI',
-          data: ptRootRegularData,
-          style: 'normal',
-          weight: 400,
-        },
-        {
-          name: 'PT Root UI',
-          data: ptRootMediumData,
-          style: 'normal',
-          weight: 500,
-        },
-        {
-          name: 'PT Root UI',
-          data: ptRootBoldData,
-          style: 'normal',
-          weight: 700,
-        },
-      ],
-    }
+    </div>,
+    fontsData
   )
 }

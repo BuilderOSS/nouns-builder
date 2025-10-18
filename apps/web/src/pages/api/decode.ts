@@ -4,9 +4,10 @@ import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { decodeTransaction } from 'src/services/abiService'
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'
+import { withCors } from 'src/utils/api/cors'
 import { isHex } from 'viem'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { contract, calldata, chain } = req.body
 
   if (!contract) return res.status(404).json({ error: 'no address request' })
@@ -45,3 +46,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'backend failed', encodedData: calldata })
   }
 }
+
+export default withCors(['POST'])(handler)

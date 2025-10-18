@@ -6,40 +6,26 @@ import {
   useDaoStore,
   useProposalStore,
 } from '@buildeross/stores'
-import {
-  AddressType,
-  CHAIN_ID,
-  ErrorResult,
-  SimulationOutput,
-  SimulationResult,
-} from '@buildeross/types'
+import { type SimulationOutput } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { TextInput } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box, Flex, Icon } from '@buildeross/zord'
-import axios from 'axios'
 import { Field, FieldProps, Formik } from 'formik'
 import React, { useState } from 'react'
-import { toHex } from 'viem'
+import { type Hex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
+import {
+  isSimulationSupported,
+  simulateTransactions,
+} from '../../utils/tenderlySimulation'
 import { ERROR_CODE, FormValues, validationSchema } from './fields'
 import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'
 import { Transactions } from './Transactions'
-
-const CHAINS_TO_SIMULATE = [
-  CHAIN_ID.ETHEREUM,
-  CHAIN_ID.SEPOLIA,
-  CHAIN_ID.OPTIMISM,
-  CHAIN_ID.OPTIMISM_SEPOLIA,
-  CHAIN_ID.BASE,
-  CHAIN_ID.BASE_SEPOLIA,
-  CHAIN_ID.ZORA,
-  CHAIN_ID.ZORA_SEPOLIA,
-]
 
 interface ReviewProposalProps {
   disabled: boolean
@@ -49,6 +35,8 @@ interface ReviewProposalProps {
   onProposalCreated: () => Promise<void>
   onEditTransactions?: () => void
 }
+
+const SKIP_SIMULATION = process.env.NEXT_PUBLIC_SKIP_TENDERLY_SIMULATION === 'true'
 
 const logError = async (e: unknown) => {
   console.error(e)
@@ -80,7 +68,7 @@ export const ReviewProposalForm = ({
   const [simulating, setSimulating] = useState<boolean>(false)
   const [failedSimulations, setFailedSimulations] = useState<Array<SimulationOutput>>([])
   const [proposing, setProposing] = useState<boolean>(false)
-  const [skipSimulation, setSkipSimulation] = useState<boolean>(false)
+  const [skipSimulation, setSkipSimulation] = useState<boolean>(SKIP_SIMULATION)
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
@@ -91,14 +79,13 @@ export const ReviewProposalForm = ({
 
   const onSubmit = React.useCallback(
     async (values: FormValues) => {
-      if (!addresses.governor) {
+      if (!addresses.governor || !addresses.treasury) {
         return
       }
 
       setError(undefined)
       setSimulationError(undefined)
       setFailedSimulations([])
-      setSkipSimulation(false)
 
       if (!hasThreshold) {
         setError(ERROR_CODE.NOT_ENOUGH_VOTES)
@@ -111,47 +98,42 @@ export const ReviewProposalForm = ({
         calldata,
       } = prepareProposalTransactions(values.transactions)
 
-      if (!!CHAINS_TO_SIMULATE.find((x) => x === chain.id) && !skipSimulation) {
-        let simulationResult
-
+      if (isSimulationSupported(chain.id) && !skipSimulation) {
         try {
           setSimulating(true)
 
-          simulationResult = await axios
-            .post<SimulationResult>('/api/simulate', {
-              treasuryAddress: addresses.treasury,
-              chainId: chain.id,
-              calldatas: calldata,
-              values: transactionValues.map((x) => toHex(x)),
-              targets,
-            })
-            .then((res) => res.data)
+          const simulationResult = await simulateTransactions({
+            treasuryAddress: addresses.treasury,
+            chainId: chain.id,
+            calldatas: calldata,
+            values: transactionValues,
+            targets,
+          })
 
           // eslint-disable-next-line no-console
           console.info({ simulationResult })
-        } catch (err) {
-          if (axios.isAxiosError(err)) {
-            const data = err.response?.data as ErrorResult
-            setSimulationError(data.error)
-            logError(err)
-          } else {
-            logError(err)
-            setSimulationError('Unable to simulate transactions on DAO create form')
+
+          if (simulationResult?.error) {
+            logError(simulationResult.error)
+            setSimulationError('Error simulating transactions: ' + simulationResult.error)
+            return
           }
+          if (simulationResult?.success === false) {
+            const failed =
+              simulationResult?.simulations.filter(({ status }) => status === false) || []
+            setFailedSimulations(failed)
+            return
+          }
+        } catch (err) {
+          logError(err)
+          setSimulationError(
+            err instanceof Error
+              ? err.message
+              : 'Unable to simulate transactions on DAO create form'
+          )
           return
         } finally {
           setSimulating(false)
-        }
-        if (simulationResult?.error) {
-          logError(simulationResult.error)
-          setSimulationError('Error simulating transactions: ' + simulationResult.error)
-          return
-        }
-        if (simulationResult?.success === false) {
-          const failed =
-            simulationResult?.simulations.filter(({ status }) => status === false) || []
-          setFailedSimulations(failed)
-          return
         }
       }
 
@@ -160,7 +142,7 @@ export const ReviewProposalForm = ({
         const params = {
           targets: targets,
           values: transactionValues,
-          calldatas: calldata as Array<AddressType>,
+          calldatas: calldata as Hex[],
           description: values.title + '&&' + values.summary,
         }
 

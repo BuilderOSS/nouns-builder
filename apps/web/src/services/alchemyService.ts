@@ -9,10 +9,14 @@ import {
   OwnedNft,
   TokenBalanceType,
 } from 'alchemy-sdk'
+import axios from 'axios'
 import { formatUnits, fromHex, getAddress, Hex, zeroHash } from 'viem'
 
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'
+
+const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY ?? ''
+const COINGECKO_API_KEY_PARAM = COINGECKO_API_KEY ? `&x-api-key=${COINGECKO_API_KEY}` : ''
 
 const chainTypeTag = PUBLIC_IS_TESTNET ? 'testnet' : 'mainnet'
 
@@ -319,26 +323,15 @@ const getCoinGeckoTokenLogo = async (
     return cached
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY
-
-  let url = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${address.toLowerCase()}`
-
-  if (apiKey) {
-    url = `${url}?x-api-key=${apiKey}`
-  }
-
   try {
-    const response = await fetch(url, {
-      headers: {
-        accept: 'application/json',
-      },
-    })
+    const url = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${address.toLowerCase()}?${COINGECKO_API_KEY_PARAM}`
 
-    if (!response.ok) {
-      return ''
+    const response = await axios.get(url)
+
+    if (response.status !== 200) {
+      throw new BackendFailedError('Coingecko API request failed')
     }
-
-    const data = await response.json()
+    const data = response.data
     const logoUrl = data?.image?.small || data?.image?.thumb || data?.image?.large || ''
 
     // Cache the result (24 hours TTL for successful responses)

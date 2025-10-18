@@ -1,11 +1,12 @@
 import { CHAIN_ID } from '@buildeross/types'
 import axios from 'axios'
 import Redis from 'ioredis'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getContractABIByAddress } from './abiService'
 import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors'
 import * as implementationService from './implementationService'
+import * as redisConnection from './redisConnection'
 
 vi.mock('ioredis', () => {
   const Redis = vi.fn()
@@ -21,11 +22,8 @@ vi.mock('axios', () => {
 })
 
 describe('abiService', () => {
-  const OLD_ENV = process.env
-
   beforeEach(() => {
     vi.resetModules()
-    process.env = { ...OLD_ENV } // Make a copy
     // Mock getImplementationAddress to return the same address by default
     vi.spyOn(implementationService, 'getImplementationAddress').mockResolvedValue({
       implementation: '0x9444390c01Dd5b7249E53FAc31290F7dFF53450D',
@@ -34,7 +32,6 @@ describe('abiService', () => {
   })
 
   afterEach(() => {
-    process.env = OLD_ENV
     vi.restoreAllMocks()
   })
 
@@ -120,9 +117,10 @@ describe('abiService', () => {
     })
 
     it('checks redis for existing key in a proxy case', async () => {
-      process.env.REDIS_URL = 'something'
+      const connection = new Redis('something')
 
-      const connection = new Redis(process.env.REDIS_URL)
+      // Mock getRedisConnection to return our mocked Redis instance
+      vi.spyOn(redisConnection, 'getRedisConnection').mockReturnValue(connection)
 
       // Mock the Redis cache to return an ABI cache entry
       vi.mocked(connection.get).mockResolvedValue(JSON.stringify({ result: '[]' }))

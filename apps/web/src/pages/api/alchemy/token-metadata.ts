@@ -2,12 +2,9 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getCachedIsContract } from '@buildeross/utils'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedTokenMetadatas } from 'src/services/alchemyService'
+import { withCors } from 'src/utils/api/cors'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, addresses } = req.query
 
   if (!chainId || !addresses) {
@@ -68,3 +65,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
+
+export default withCors(['GET'])(handler)

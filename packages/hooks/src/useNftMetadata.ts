@@ -1,4 +1,5 @@
-import { SWR_KEYS } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { CHAIN_ID } from '@buildeross/types'
 import useSWR, { KeyedMutator } from 'swr'
 import { Address, isAddress } from 'viem'
@@ -37,7 +38,7 @@ const fetchNftMetadata = async (
   tokenId: string
 ): Promise<SerializedNftMetadata | null> => {
   const response = await fetch(
-    `/api/nft-metadata?chainId=${chainId}&contractAddress=${contractAddress}&tokenId=${tokenId}`
+    `${BASE_URL}/api/alchemy/nft-metadata?chainId=${chainId}&contractAddress=${contractAddress}&tokenId=${tokenId}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch NFT metadata')
