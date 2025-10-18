@@ -8,9 +8,9 @@ import { skeletonAnimation } from '@buildeross/ui/styles'
 import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { getAddress, zeroHash } from 'viem'
+import { zeroHash } from 'viem'
 
 import { propPageWrapper } from '../styles.css'
 import { PropDateCard } from './PropDateCard'
@@ -27,11 +27,9 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
     addresses: { token },
   } = useDaoStore()
 
-  const proposalId = proposal.proposalId
-
   const { data, mutate, isLoading } = useSWR(
     !!token && !!chain.id
-      ? ([SWR_KEYS.PROPDATES, token, chain.id, proposalId] as const)
+      ? ([SWR_KEYS.PROPDATES, token, chain.id, proposal.proposalId] as const)
       : null,
     ([, _token, _chainId, _proposalId]) => getPropDates(_token, _chainId, _proposalId),
     { revalidateOnMount: true, refreshInterval: 1000 * 5 }
@@ -51,30 +49,41 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
 
   const { invoiceData } = useInvoiceData(chain.id, decodedEscrowTxn)
 
-  const propDates = data ?? []
-
   const [showOnlyDaoMembers, setShowOnlyDaoMembers] = useState(false)
   const [replyingTo, setReplyingTo] = useState<PropDate | undefined>(undefined)
   const daoMembers = useDaoMembers(chain.id, token ? token : '')
   const [showForm, setShowForm] = useState(false)
 
-  const filteredPropDates = showOnlyDaoMembers
-    ? propDates.filter((propDate) => daoMembers.includes(getAddress(propDate.attester)))
-    : propDates
-
-  const handleReplyClick = (propDateToReply: PropDate) => {
-    if (replyingTo?.txid === propDateToReply.txid) {
-      setShowForm(false)
-      setReplyingTo(undefined)
-    } else {
-      setReplyingTo(propDateToReply)
-      setShowForm(true)
+  const filteredPropDates = useMemo(() => {
+    const allPropDates = data ?? []
+    if (!showOnlyDaoMembers) {
+      return allPropDates
     }
-  }
+    return allPropDates.filter((propDate) =>
+      daoMembers.some((m) => m.toLowerCase() === propDate.attester.toLowerCase())
+    )
+  }, [data, showOnlyDaoMembers, daoMembers])
 
-  const topLevelPropDates = filteredPropDates
-    .filter((pd) => !pd.originalMessageId || pd.originalMessageId === zeroHash)
-    .sort((a, b) => a.timeCreated - b.timeCreated)
+  const handleReplyClick = useCallback(
+    (propDateToReply: PropDate) => {
+      if (replyingTo?.txid === propDateToReply.txid) {
+        setShowForm(false)
+        setReplyingTo(undefined)
+      } else {
+        setReplyingTo(propDateToReply)
+        setShowForm(true)
+      }
+    },
+    [replyingTo]
+  )
+
+  const topLevelPropDates = useMemo(
+    () =>
+      [...filteredPropDates]
+        .filter((pd) => !pd.originalMessageId || pd.originalMessageId === zeroHash)
+        .sort((a, b) => b.timeCreated - a.timeCreated),
+    [filteredPropDates]
+  )
 
   return (
     <Flex className={propPageWrapper}>
@@ -102,8 +111,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
               size="sm"
               onClick={() => setShowOnlyDaoMembers(!showOnlyDaoMembers)}
             >
-              {showOnlyDaoMembers && <Icon id="check" />}
-              {showOnlyDaoMembers ? 'DAO Members Only' : 'All Propdates'}
+              {showOnlyDaoMembers ? 'Show All' : 'Show Only DAO Members'}
             </Button>
           </Flex>
         </Flex>
@@ -121,22 +129,21 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
                   setReplyingTo(undefined)
                   mutate()
                 },
-                proposalId,
-                propDates,
+                proposalId: proposal.proposalId,
                 invoiceData,
                 replyTo: replyingTo,
               }}
             />
           )}
           {topLevelPropDates.map((propDate, i) => {
-            const replies = filteredPropDates
+            const replies = [...filteredPropDates]
               .filter((pd) => pd.originalMessageId === propDate.txid)
               .sort((a, b) => a.timeCreated - b.timeCreated)
+
             return (
               <PropDateCard
                 key={`${propDate.txid}-${i}`}
                 propDate={propDate}
-                index={i}
                 isReplying={replyingTo?.txid === propDate.txid}
                 onReplyClick={handleReplyClick}
                 replies={replies}
