@@ -2,7 +2,6 @@ import { ErrorResult, SimulationResult } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
 import { simulate } from 'src/services/simulationService'
-import { withCors } from 'src/utils/cors'
 
 async function handler(
   req: NextApiRequest,
@@ -33,4 +32,4 @@ async function handler(
   }
 }
 
-export default withCors(['POST'])(handler)
+export default handler

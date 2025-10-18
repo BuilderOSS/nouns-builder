@@ -38,7 +38,7 @@ const fetchNftMetadata = async (
   tokenId: string
 ): Promise<SerializedNftMetadata | null> => {
   const response = await fetch(
-    `${BASE_URL}/api/nft-metadata?chainId=${chainId}&contractAddress=${contractAddress}&tokenId=${tokenId}`
+    `${BASE_URL}/api/alchemy/nft-metadata?chainId=${chainId}&contractAddress=${contractAddress}&tokenId=${tokenId}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch NFT metadata')

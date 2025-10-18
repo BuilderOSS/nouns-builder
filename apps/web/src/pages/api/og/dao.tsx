@@ -17,7 +17,7 @@ import {
   OGFooter,
   OGHeader,
   parseRequestData,
-} from 'src/utils/og'
+} from 'src/utils/api/og'
 import { formatEther } from 'viem'
 import { getBalance } from 'wagmi/actions'
 

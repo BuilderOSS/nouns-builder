@@ -1,13 +1,11 @@
-import { CHAIN_ID } from '@buildeross/types'
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getEnrichedTokenBalances } from 'src/services/alchemyService'
-import { withCors } from 'src/utils/cors'
+import { getCachedNFTBalance } from 'src/services/alchemyService'
+import { withCors } from 'src/utils/api/cors'
+import { isAddress } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-
   const { chainId, address } = req.query
 
   if (!chainId || !address) {
@@ -20,10 +18,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Invalid chainId' })
   }
 
+  if (!isAddress(address as string)) {
+    return res.status(400).json({ error: 'Invalid address' })
+  }
+
   try {
-    const result = await getEnrichedTokenBalances(
+    const options = {
+      filterSpam: PUBLIC_IS_TESTNET ? false : true,
+      useCache: true,
+    }
+    const result = await getCachedNFTBalance(
       chainIdNum as CHAIN_ID,
-      address as `0x${string}`
+      address as AddressType,
+      options
     )
 
     // Handle null result (unsupported chain or missing API key)
@@ -40,7 +47,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       source: result.source,
     })
   } catch (error) {
-    console.error('Token balances API error:', error)
+    console.error('NFT balances API error:', error)
     return res.status(500).json({ error: 'Internal server error' })
   }
 }

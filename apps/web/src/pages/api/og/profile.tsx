@@ -14,7 +14,7 @@ import {
   handleOptions,
   OGFooter,
   OGHeader,
-} from 'src/utils/og'
+} from 'src/utils/api/og'
 import { isAddress } from 'viem'
 
 const walletSnippet = (_addr: string) =>

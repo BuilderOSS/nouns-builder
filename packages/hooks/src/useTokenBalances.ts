@@ -28,7 +28,7 @@ const fetchTokenBalances = async (
   address: Address
 ): Promise<TokenBalance[]> => {
   const response = await fetch(
-    `${BASE_URL}/api/token-balances?chainId=${chainId}&address=${address}`
+    `${BASE_URL}/api/alchemy/token-balances?chainId=${chainId}&address=${address}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch token balances')

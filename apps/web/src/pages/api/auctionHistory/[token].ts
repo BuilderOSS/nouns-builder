@@ -1,7 +1,7 @@
 import { auctionHistoryRequest } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { token, chainId, startTime } = req.query

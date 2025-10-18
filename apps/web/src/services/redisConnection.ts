@@ -1,7 +1,9 @@
 import Redis from 'ioredis'
 
-export const getRedisConnection = (): Redis | undefined => {
-  if (!process.env.REDIS_URL) return
+const REDIS_URL = process.env.REDIS_URL
 
-  return new Redis(process.env.REDIS_URL)
+export const getRedisConnection = (): Redis | undefined => {
+  if (!REDIS_URL) return
+
+  return new Redis(REDIS_URL)
 }

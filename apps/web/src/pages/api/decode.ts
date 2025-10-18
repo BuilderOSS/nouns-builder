@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { decodeTransaction } from 'src/services/abiService'
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 import { isHex } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

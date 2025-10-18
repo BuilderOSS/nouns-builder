@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ContractABIResult, getContractABIByAddress } from 'src/services/abiService'
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 
 const fetchRedis = async (
   req: NextApiRequest,

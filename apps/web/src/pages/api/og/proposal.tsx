@@ -17,7 +17,7 @@ import {
   OGFooter,
   OGHeader,
   parseRequestData,
-} from 'src/utils/og'
+} from 'src/utils/api/og'
 
 export const config = {
   runtime: 'edge',

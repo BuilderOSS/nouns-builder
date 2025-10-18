@@ -17,7 +17,9 @@ export type SimulationRequestBody = {
   values: string[]
 }
 
-const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = process.env
+const TENDERLY_USER = process.env.TENDERLY_USER
+const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT
+const TENDERLY_ACCESS_KEY = process.env.TENDERLY_ACCESS_KEY
 
 const getSimulationUrl = (simulation: SimulationOutput) => {
   return `https://dashboard.tenderly.co/shared/simulation/${simulation.id}`

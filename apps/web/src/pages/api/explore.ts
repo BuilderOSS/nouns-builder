@@ -2,7 +2,7 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { Auction_OrderBy, exploreDaosRequest } from '@buildeross/sdk/subgraph'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const limit = 30

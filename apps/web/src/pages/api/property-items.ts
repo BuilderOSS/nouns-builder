@@ -1,7 +1,7 @@
 import { getPropertyItems } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 import { isAddress } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {

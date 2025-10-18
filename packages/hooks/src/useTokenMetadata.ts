@@ -28,7 +28,7 @@ const fetchTokenMetadata = async (
 ): Promise<TokenMetadata[]> => {
   const addressParam = addresses.join(',')
   const response = await fetch(
-    `${BASE_URL}/api/token-metadata?chainId=${chainId}&addresses=${addressParam}`
+    `${BASE_URL}/api/alchemy/token-metadata?chainId=${chainId}&addresses=${addressParam}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch token metadata')

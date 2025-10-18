@@ -1,14 +1,10 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedNftMetadata } from 'src/services/alchemyService'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 import { isAddress } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
-
   const { chainId, contractAddress, tokenId } = req.query
 
   if (!chainId || !contractAddress || !tokenId) {

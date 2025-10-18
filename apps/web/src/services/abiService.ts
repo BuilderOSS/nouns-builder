@@ -19,6 +19,8 @@ import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors
 import { getImplementationAddress } from './implementationService'
 import { getRedisConnection } from './redisConnection'
 
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
+
 const getEtherscanABIRedisKey = (chain: string, address: string) =>
   `etherscan:abi:${chain}:${address}`
 
@@ -66,7 +68,7 @@ export const getContractABIByAddress = async (
     }
   } else {
     const etherscan = await axios.get(
-      `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getabi&address=${fetchedAddress}&tag=latest&apikey=${process.env.ETHERSCAN_API_KEY}`
+      `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getabi&address=${fetchedAddress}&tag=latest&apikey=${ETHERSCAN_API_KEY}`
     )
 
     if (etherscan.status !== 200) {

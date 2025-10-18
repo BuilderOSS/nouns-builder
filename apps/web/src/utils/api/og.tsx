@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
 import { ImageResponse } from '@vercel/og'
 import { NextRequest } from 'next/server'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'

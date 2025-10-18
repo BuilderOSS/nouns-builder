@@ -1,6 +1,6 @@
 import { memberSnapshotRequest } from '@buildeross/sdk/subgraph'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 import { Address } from 'viem'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {

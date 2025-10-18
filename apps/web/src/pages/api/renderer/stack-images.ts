@@ -2,7 +2,7 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
 import { NextApiRequest, NextApiResponse } from 'next'
 import sharp from 'sharp'
-import { withCors } from 'src/utils/cors'
+import { withCors } from 'src/utils/api/cors'
 
 const SVG_DEFAULT_SIZE = 1080
 const REQUEST_TIMEOUT = 20000 // 20s

@@ -1,6 +1,10 @@
-import { BASE_URL } from '@buildeross/constants/baseUrl'
-
 import { hashFiles } from './hash'
+
+// NOTE/TODO: Currently this service only supports Pinata as the IPFS provider.
+// Ideally we should support multiple IPFS providers (e.g., Infura, Web3.Storage, etc.)
+// and allow developers to choose between them. Additionally, the API endpoints are
+// hardcoded to specific paths (/api/pinata/*), which means developers must implement
+// the same endpoint structure in their applications for this service to work.
 
 const defaultOptions = {
   onProgress: undefined,
@@ -98,7 +102,7 @@ type UploadOptions = {
 async function getUploadTarget(useLegacy: boolean, uploadType: UploadType) {
   // TODO: support directory in pinata v3 once supported by pinata
   if (useLegacy) {
-    const res = await fetch(`${BASE_URL}/api/generate-jwt`, {
+    const res = await fetch(`/api/pinata/generate-jwt`, {
       method: 'POST',
       headers: { Accept: 'application/json' },
     })
@@ -109,7 +113,7 @@ async function getUploadTarget(useLegacy: boolean, uploadType: UploadType) {
       jwt: JWT as string,
     }
   } else {
-    const res = await fetch(`${BASE_URL}/api/upload-url`, {
+    const res = await fetch(`/api/pinata/upload-url`, {
       method: 'POST',
       body: JSON.stringify({ type: uploadType }),
       headers: {
@@ -166,7 +170,7 @@ export async function uploadWithProgress(
 
         try {
           // ensure cid is pinned if it wasn't already
-          fetch(`${BASE_URL}/api/pin-cid`, {
+          fetch(`/api/pinata/pin-cid`, {
             method: 'POST',
             body: JSON.stringify(result),
             headers: {
@@ -380,7 +384,7 @@ export async function uploadJson(jsonObject: object): Promise<IPFSUploadResponse
 
   const data = JSON.stringify(jsonObject)
 
-  const response = await fetch(`${BASE_URL}/api/pin-json`, {
+  const response = await fetch(`/api/pinata/pin-json`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

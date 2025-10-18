@@ -14,6 +14,8 @@ import { formatUnits, fromHex, getAddress, Hex, zeroHash } from 'viem'
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'
 
+const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY
+
 const chainTypeTag = PUBLIC_IS_TESTNET ? 'testnet' : 'mainnet'
 
 const getTokenPriceKey = (chainId: CHAIN_ID, address: string) =>
@@ -319,12 +321,10 @@ const getCoinGeckoTokenLogo = async (
     return cached
   }
 
-  const apiKey = process.env.NEXT_PUBLIC_COINGECKO_API_KEY
-
   let url = `https://api.coingecko.com/api/v3/coins/${platform}/contract/${address.toLowerCase()}`
 
-  if (apiKey) {
-    url = `${url}?x-api-key=${apiKey}`
+  if (COINGECKO_API_KEY) {
+    url = `${url}?x-api-key=${COINGECKO_API_KEY}`
   }
 
   try {
