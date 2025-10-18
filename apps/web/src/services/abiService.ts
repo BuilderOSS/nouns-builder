@@ -19,7 +19,8 @@ import { BackendFailedError, InvalidRequestError, NotFoundError } from './errors
 import { getImplementationAddress } from './implementationService'
 import { getRedisConnection } from './redisConnection'
 
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY ?? ''
+const ETHERSCAN_API_KEY_PARAM = ETHERSCAN_API_KEY ? `&apikey=${ETHERSCAN_API_KEY}` : ''
 
 const getEtherscanABIRedisKey = (chain: string, address: string) =>
   `etherscan:abi:${chain}:${address}`
@@ -67,14 +68,13 @@ export const getContractABIByAddress = async (
       source: 'cache',
     }
   } else {
-    const etherscan = await axios.get(
-      `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getabi&address=${fetchedAddress}&tag=latest&apikey=${ETHERSCAN_API_KEY}`
-    )
+    const url = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getabi&address=${fetchedAddress}&tag=latest&${ETHERSCAN_API_KEY_PARAM}`
+    const response = await axios.get(url)
 
-    if (etherscan.status !== 200) {
+    if (response.status !== 200) {
       throw new BackendFailedError('Remote request failed')
     }
-    const abi = etherscan.data
+    const abi = response.data
 
     if (abi.status === '1') {
       await redisConnection?.setex(

@@ -183,8 +183,21 @@ export async function uploadWithProgress(
         }
         resolve(result)
       } else {
-        const jsonResponse = JSON.parse(xhr.responseText)
-        reject(new Error(`Upload failed with: ${jsonResponse.error.message}`))
+        try {
+          const jsonResponse = JSON.parse(xhr.responseText)
+          const msg =
+            jsonResponse?.error?.message ||
+            jsonResponse?.message ||
+            xhr.statusText ||
+            'Unknown error'
+          reject(new Error(`Upload failed: ${msg}`))
+        } catch {
+          reject(
+            new Error(
+              `Upload failed (${xhr.status}): ${xhr.responseText?.slice(0, 256) || 'No body'}`
+            )
+          )
+        }
       }
     }
 

@@ -25,7 +25,7 @@ const fetchRedis = async (
       return res.status(404).json({ error: 'abi not found' })
     }
     if (error instanceof InvalidRequestError) {
-      return res.status(400).json({ error: 'bad address input ' })
+      return res.status(400).json({ error: 'bad address input' })
     }
 
     Sentry.captureException(error)

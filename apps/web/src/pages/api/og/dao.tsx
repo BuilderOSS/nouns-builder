@@ -76,7 +76,8 @@ export default async function handler(req: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           border: '2px solid #f2f2f2',
-          justifyItems: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
           padding: '20px',
           paddingTop: '0px',
           paddingBottom: '0px',
@@ -93,6 +94,8 @@ export default async function handler(req: NextRequest) {
       </div>
     )
   }
+
+  const treasuryBalance = await getTreasuryBalance(data.chainId, data.treasuryAddress)
 
   return createOGImageResponse(
     <div style={baseContainerStyle}>
@@ -113,7 +116,7 @@ export default async function handler(req: NextRequest) {
         >
           {data.contractImage && (
             <img
-              alt="user image"
+              alt="dao image"
               src={getFetchableUrls(data.contractImage)?.[0]}
               style={{
                 height: '180px',
@@ -135,10 +138,7 @@ export default async function handler(req: NextRequest) {
             <p style={{ fontSize: '32px', fontWeight: 700 }}>{data.name}</p>
           </div>
           <div style={{ display: 'flex' }}>
-            {daoDataWithLabel(
-              'Treasury',
-              await getTreasuryBalance(data.chainId, data.treasuryAddress)
-            )}
+            {daoDataWithLabel('Treasury', treasuryBalance)}
             {daoDataWithLabel('Owners', data.ownerCount.toString())}
             {daoDataWithLabel(
               'Total supply',

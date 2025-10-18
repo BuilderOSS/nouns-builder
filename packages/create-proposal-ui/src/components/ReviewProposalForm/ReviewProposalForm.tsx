@@ -6,7 +6,7 @@ import {
   useDaoStore,
   useProposalStore,
 } from '@buildeross/stores'
-import { AddressType, SimulationOutput } from '@buildeross/types'
+import { type SimulationOutput } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { TextInput } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
@@ -14,6 +14,7 @@ import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import { Field, FieldProps, Formik } from 'formik'
 import React, { useState } from 'react'
+import { type Hex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -141,7 +142,7 @@ export const ReviewProposalForm = ({
         const params = {
           targets: targets,
           values: transactionValues,
-          calldatas: calldata as Array<AddressType>,
+          calldatas: calldata as Hex[],
           description: values.title + '&&' + values.summary,
         }
 

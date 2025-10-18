@@ -8,7 +8,10 @@ export const withCors = (allowedMethods: Method[]) => {
       const allowedMethodsWithOptions: string[] = [...allowedMethods, 'OPTIONS']
       res.setHeader('Access-Control-Allow-Origin', '*')
       res.setHeader('Access-Control-Allow-Methods', allowedMethodsWithOptions.join(', '))
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+      const requestHeaders = req.headers['access-control-request-headers']
+      if (requestHeaders) {
+        res.setHeader('Access-Control-Allow-Headers', requestHeaders)
+      }
 
       if (req.method === 'OPTIONS') {
         res.status(200).end()

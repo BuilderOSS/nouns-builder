@@ -38,6 +38,21 @@ const getPinataHeaders = () => ({
   Authorization: `Bearer ${PINATA_API_KEY}`,
 })
 
+const DEFAULT_TIMEOUT_MS = 10_000
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  ms = DEFAULT_TIMEOUT_MS
+) {
+  const ctrl = new AbortController()
+  const id = setTimeout(() => ctrl.abort(), ms)
+  try {
+    return await fetch(input, { ...init, signal: ctrl.signal })
+  } finally {
+    clearTimeout(id)
+  }
+}
+
 /**
  * Pin JSON data to IPFS via Pinata and ensure it's also pinned via pin_by_cid
  */
@@ -57,7 +72,7 @@ export async function pinJsonToIPFS(
       pinataContent: data,
     })
 
-    const pinRes = await fetch(`${PINATA_BASE_URL}/pinning/pinJSONToIPFS`, {
+    const pinRes = await fetchWithTimeout(`${PINATA_BASE_URL}/pinning/pinJSONToIPFS`, {
       method: 'POST',
       headers: getPinataHeaders(),
       body: pinataPayload,
@@ -115,11 +130,14 @@ export async function pinCidToIPFS(options: {
     if (name) payload.name = name
     if (group_id) payload.group_id = group_id
 
-    const pinResponse = await fetch(`${PINATA_BASE_URL}/v3/files/public/pin_by_cid`, {
-      method: 'POST',
-      headers: getPinataHeaders(),
-      body: JSON.stringify(payload),
-    })
+    const pinResponse = await fetchWithTimeout(
+      `${PINATA_BASE_URL}/v3/files/public/pin_by_cid`,
+      {
+        method: 'POST',
+        headers: getPinataHeaders(),
+        body: JSON.stringify(payload),
+      }
+    )
 
     if (!pinResponse.ok) {
       const errorText = await pinResponse.text()
@@ -142,11 +160,14 @@ export async function pinCidToIPFS(options: {
  */
 export async function generateUploadJWT(): Promise<{ JWT: string }> {
   try {
-    const jwtResponse = await fetch(`${PINATA_BASE_URL}/users/generateApiKey`, {
-      method: 'POST',
-      headers: getPinataHeaders(),
-      body: JSON.stringify(UPLOAD_JWT_KEY_RESTRICTIONS),
-    })
+    const jwtResponse = await fetchWithTimeout(
+      `${PINATA_BASE_URL}/users/generateApiKey`,
+      {
+        method: 'POST',
+        headers: getPinataHeaders(),
+        body: JSON.stringify(UPLOAD_JWT_KEY_RESTRICTIONS),
+      }
+    )
 
     if (!jwtResponse.ok) {
       const errorText = await jwtResponse.text()
@@ -184,11 +205,11 @@ export async function createSignedUploadUrl(type: string): Promise<{ url: string
     const options = pinataOptions[type as UploadType]
     const payload = JSON.stringify({
       expires: 30,
-      date: new Date().getTime(),
+      date: Math.floor(new Date().getTime() / 1000),
       ...options,
     })
 
-    const urlRequest = await fetch(`${PINATA_UPLOAD_URL}/v3/files/sign`, {
+    const urlRequest = await fetchWithTimeout(`${PINATA_UPLOAD_URL}/v3/files/sign`, {
       method: 'POST',
       headers: getPinataHeaders(),
       body: payload,

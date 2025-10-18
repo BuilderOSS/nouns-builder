@@ -1,3 +1,5 @@
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import type { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import {
@@ -5,6 +7,7 @@ import {
   InvalidRequestError,
   NotFoundError,
 } from 'src/services/errors'
+import { getAddress, isAddress } from 'viem'
 
 /**
  * Standard error response format
@@ -75,7 +78,7 @@ export const validate = {
     }
   },
 
-  chainId: (chainId: unknown): number => {
+  chainId: (chainId: unknown): CHAIN_ID => {
     if (!chainId) {
       throw new InvalidRequestError('chainId is required')
     }
@@ -86,7 +89,11 @@ export const validate = {
       throw new InvalidRequestError('chainId must be a valid positive number')
     }
 
-    return parsed
+    if (!PUBLIC_ALL_CHAINS.some((chain) => chain.id === parsed)) {
+      throw new InvalidRequestError('chainId must be a valid supported chain ID')
+    }
+
+    return parsed as CHAIN_ID
   },
 
   address: (address: unknown): string => {
@@ -94,11 +101,11 @@ export const validate = {
       throw new InvalidRequestError('address is required and must be a string')
     }
 
-    if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    if (!isAddress(address, { strict: false })) {
       throw new InvalidRequestError('address must be a valid Ethereum address')
     }
 
-    return address.toLowerCase()
+    return getAddress(address)
   },
 
   pagination: (page?: unknown, limit?: unknown) => {

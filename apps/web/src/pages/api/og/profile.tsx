@@ -14,6 +14,7 @@ import {
   handleOptions,
   OGFooter,
   OGHeader,
+  parseRequestData,
 } from 'src/utils/api/og'
 import { isAddress } from 'viem'
 
@@ -34,12 +35,14 @@ export default async function handler(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const address = searchParams.get('address')?.toLowerCase()
+  const addressParam = searchParams.get('address')
   const rawData = searchParams.get('data')
 
-  if (!rawData || !address || !isAddress(address)) {
+  if (!rawData || !addressParam || !isAddress(addressParam, { strict: false })) {
     return handleBadRequest()
   }
+
+  const address = addressParam.toLowerCase() as `0x${string}`
 
   const ens = (await getEnsName(address))?.toLowerCase()
 
@@ -47,7 +50,9 @@ export default async function handler(req: NextRequest) {
 
   const avatar = ens === address ? '' : await getEnsAvatar(ens)
 
-  const { daos }: { daos: MyDaosResponse } = JSON.parse(rawData)
+  const { data, error } = parseRequestData<{ daos: MyDaosResponse }>(req)
+  if (error) return error
+  const daos = Array.isArray(data.daos) ? data.daos : []
 
   const fontsData = await getFontsData()
 
@@ -78,8 +83,8 @@ export default async function handler(req: NextRequest) {
         >
           {avatar && (
             <img
-              alt="user image"
-              src={avatar}
+              alt="avatar"
+              src={getFetchableUrls(avatar)?.[0]}
               style={{
                 height: '36px',
                 width: '36px',

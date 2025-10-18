@@ -9,7 +9,8 @@ const handler = withErrorHandling(async (req: NextApiRequest, res: NextApiRespon
   }
 
   const result = await generateUploadJWT()
-  return res.status(200).json(result)
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+  res.status(200).json(result)
 })
 
 export default handler
