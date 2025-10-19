@@ -3,6 +3,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { Proposal } from '@buildeross/sdk'
 import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
 import useSWR, { KeyedMutator } from 'swr'
+import { hexToBigInt } from 'viem'
 
 export type DecodedTransactionSuccess = {
   target: string
@@ -55,13 +56,9 @@ const apiDecodeTx: DecodeFunc = async (
     }),
   })
 
-  if (!decodeRes.ok) {
-    throw new Error('Decode failed')
-  }
+  if (!decodeRes.ok) throw new Error('Decode failed')
 
   const data = await decodeRes.json()
-
-  if (data?.statusCode) throw new Error('Decode failed')
 
   if (data?.error) throw new Error('Decode failed')
 
@@ -89,7 +86,10 @@ const decodeTx = async (
     console.error('Error decoding transaction:', err)
 
     // if this tx has value display it as a send eth tx
-    if (value.length && parseInt(value)) return formatSendEth(value)
+    if (value.startsWith('0x') && hexToBigInt(value as `0x${string}`) > 0n)
+      return formatSendEth(hexToBigInt(value as `0x${string}`).toString())
+
+    if (BigInt(value) > 0n) return formatSendEth(value)
 
     // if no value return original calldata
     throw new Error('Decode failed')

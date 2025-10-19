@@ -119,7 +119,10 @@ const formatArgValue = (input: any, value: any): DecodedValue => {
   }
 
   // array
-  if (input.type.endsWith('[]') && Array.isArray(value)) {
+  if (
+    (input.type.endsWith('[]') || /\[\d+\]$/.test(input.type)) &&
+    Array.isArray(value)
+  ) {
     if (input.components) {
       // array of tuples
       return value.map((v: any) =>
