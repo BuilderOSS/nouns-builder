@@ -1,8 +1,10 @@
 import { CHAIN_ID, DecodedArg } from '@buildeross/types'
 import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import React from 'react'
+import { formatEther } from 'viem'
 
-import { DecodedValueRenderer } from './DecodedValueRenderer'
+import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
 import { EscrowArgumentDisplay } from './EscrowArgumentDisplay'
 import { NFTArgumentDisplay } from './NFTArgumentDisplay'
@@ -66,6 +68,22 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
     )
   }
 
+  if (
+    functionName === 'send' &&
+    arg.name === 'value' &&
+    Object.keys(allArguments).length === 1 &&
+    typeof arg.value === 'string'
+  ) {
+    // is a simple send eth
+
+    let value = arg.value
+    try {
+      value = `${formatCryptoVal(formatEther(BigInt(String(arg.value))))} ETH`
+    } catch {}
+
+    return <BaseArgumentDisplay name={arg.name} value={value} />
+  }
+
   // Default rendering for other arguments
-  return <DecodedValueRenderer name={arg.name} value={arg.value} />
+  return <BaseArgumentDisplay name={arg.name} value={arg.value} />
 }

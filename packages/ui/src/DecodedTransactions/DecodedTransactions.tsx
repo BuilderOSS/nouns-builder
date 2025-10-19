@@ -3,7 +3,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { atoms, Stack } from '@buildeross/zord'
 import React from 'react'
 
-import { DecodedTransactionDisplay } from './DecodedTransactionDisplay'
+import { TransactionDisplay } from './TransactionDisplay'
 
 interface DecodedTransactionProps {
   chainId: CHAIN_ID
@@ -19,7 +19,7 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
       <ol>
         {decodedTransactions?.map((decoded, i) => (
           <li className={atoms({ paddingBottom: 'x4' })} key={`${decoded.target}-${i}`}>
-            <DecodedTransactionDisplay chainId={chainId} {...decoded} />
+            <TransactionDisplay chainId={chainId} {...decoded} />
           </li>
         ))}
       </ol>

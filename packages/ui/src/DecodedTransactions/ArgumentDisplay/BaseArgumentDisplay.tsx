@@ -1,18 +1,18 @@
 import { DecodedValue } from '@buildeross/types'
 import { Flex, Stack, Text } from '@buildeross/zord'
 
-interface DecodedValueRendererProps {
+interface BaseArgumentDisplayProps {
   name: string
   value: DecodedValue
 }
 
-export const DecodedValueRenderer: React.FC<DecodedValueRendererProps> = ({
+export const BaseArgumentDisplay: React.FC<BaseArgumentDisplayProps> = ({
   name,
   value,
 }) => {
   if (typeof value === 'string') {
     return (
-      <Flex key={name} align="flex-start" w="100%">
+      <Flex align="flex-start" w="100%">
         <Text pr="x1" style={{ flexShrink: 0 }}>
           {name}:
         </Text>
@@ -32,7 +32,7 @@ export const DecodedValueRenderer: React.FC<DecodedValueRendererProps> = ({
         </Flex>
         <Stack pl="x4" gap="x1">
           {value.map((item, index) => (
-            <DecodedValueRenderer
+            <BaseArgumentDisplay
               key={`${name}-${index}`}
               name={`[${index}]`}
               value={item}
@@ -55,7 +55,7 @@ export const DecodedValueRenderer: React.FC<DecodedValueRendererProps> = ({
         </Flex>
         <Stack pl="x4" gap="x1">
           {Object.entries(value).map(([key, val], i) => (
-            <DecodedValueRenderer key={`${key}-${i}`} name={key} value={val} />
+            <BaseArgumentDisplay key={`${key}-${i}`} name={key} value={val} />
           ))}
         </Stack>
         <Text>{'}'}</Text>
@@ -63,5 +63,17 @@ export const DecodedValueRenderer: React.FC<DecodedValueRendererProps> = ({
     )
   }
 
-  return <DecodedValueRenderer {...{ name, value: JSON.stringify(value) }} /> // fallback
+  let text = String(value)
+  try {
+    text = JSON.stringify(value)
+  } catch {}
+
+  return (
+    <Flex align="flex-start" w="100%">
+      <Text pr="x1" style={{ flexShrink: 0 }}>
+        {name}:
+      </Text>
+      <Text>{text}</Text>
+    </Flex>
+  )
 }
