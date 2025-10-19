@@ -1,4 +1,5 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -19,6 +20,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'bad calldata input' })
 
     const chainInt = parseInt(chain)
+
+    if (!PUBLIC_ALL_CHAINS.some((c) => c.id === chainInt))
+      return res.status(404).json({ error: 'chain not supported' })
 
     const data = await decodeTransaction(chainInt as CHAIN_ID, contract, calldata)
 

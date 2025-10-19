@@ -71,10 +71,16 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   if (
     functionName === 'send' &&
     arg.name === 'value' &&
-    Object.keys(allArguments).length === 1
+    Object.keys(allArguments).length === 1 &&
+    typeof arg.value === 'string'
   ) {
     // is a simple send eth
-    const value = `${formatCryptoVal(formatEther(BigInt(String(arg.value))))} ETH`
+
+    let value = arg.value
+    try {
+      value = `${formatCryptoVal(formatEther(BigInt(String(arg.value))))} ETH`
+    } catch {}
+
     return <BaseArgumentDisplay name={arg.name} value={value} />
   }
 
