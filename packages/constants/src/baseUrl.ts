@@ -1,19 +1,25 @@
+import { PUBLIC_IS_TESTNET } from './chains'
+
 const NODE_ENV = process.env.NODE_ENV
 
 const BUILDEROSS_BASE_URL = process.env.BUILDEROSS_BASE_URL
+
+const DEFAULT_BASE_URL = PUBLIC_IS_TESTNET
+  ? 'https://testnet.nouns.build'
+  : 'https://nouns.build'
 
 /**
  * BASE_URL resolution order:
  * 1. __BUILDEROSS_BASE_URL__  (injected at build-time)
  * 2. process.env.BUILDEROSS_BASE_URL (runtime override)
- * 3. "https://nouns.build" (default fallback)
+ * 3. "https://nouns.build" or "https://testnet.nouns.build" (default)
  */
 function resolveBaseUrl(): string {
   // pick value from constants/env
   const raw =
     typeof __BUILDEROSS_BASE_URL__ !== 'undefined' && !!__BUILDEROSS_BASE_URL__
       ? __BUILDEROSS_BASE_URL__
-      : (BUILDEROSS_BASE_URL ?? 'https://nouns.build')
+      : (BUILDEROSS_BASE_URL ?? DEFAULT_BASE_URL)
 
   // validate format
   let url: URL
@@ -25,7 +31,7 @@ function resolveBaseUrl(): string {
       throw new Error(msg)
     } else {
       console.warn(msg)
-      return 'https://nouns.build'
+      return DEFAULT_BASE_URL
     }
   }
 
