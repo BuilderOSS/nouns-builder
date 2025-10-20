@@ -104,7 +104,7 @@ export const withCorsHandler = ({
       } else {
         res.setHeader(
           'Access-Control-Allow-Headers',
-          'Origin, Content-Type, Authorization, X-Requested-With, Accept, Accept-Language'
+          'Content-Type, Authorization, X-Requested-With, Accept, Accept-Language'
         )
       }
 
