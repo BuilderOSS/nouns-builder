@@ -79,7 +79,7 @@ export const getContractABIByAddress = async (
       source: 'cache',
     }
   } else {
-    const url = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getabi&address=${fetchedAddress}&tag=latest&${ETHERSCAN_API_KEY_PARAM}`
+    const url = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getabi&address=${fetchedAddress}&tag=latest${ETHERSCAN_API_KEY_PARAM}`
     const response = await axios.get(url)
 
     if (response.status !== 200) {
@@ -90,7 +90,7 @@ export const getContractABIByAddress = async (
     if (abi.status === '1') {
       await redisConnection?.setex(
         getEtherscanABIRedisKey(chainIdStr, fetchedAddress),
-        60 * 60 * 24, // 24 hours
+        60 * 60 * 24 * 30, // 30 days
         JSON.stringify(abi)
       )
       return {
