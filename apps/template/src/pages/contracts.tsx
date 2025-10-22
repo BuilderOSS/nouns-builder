@@ -10,7 +10,7 @@ const ContractsPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Smart Contracts | {daoConfig.name}</title>
+        <title>{`Smart Contracts | ${daoConfig.name}`}</title>
         <meta name="description" content={`${daoConfig.name} Smart Contracts`} />
         <meta property="og:title" content={`Smart Contracts | ${daoConfig.name}`} />
         <meta property="og:description" content={`${daoConfig.name} Smart Contracts`} />

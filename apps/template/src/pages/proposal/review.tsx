@@ -54,7 +54,7 @@ const ReviewProposalPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>Review Proposal | DAO</title>
+          <title>{`Review Proposal | ${daoConfig.name}`}</title>
           <meta name="description" content="Review and submit DAO proposal" />
           <meta property="og:title" content="Review Proposal | DAO" />
           <meta property="og:description" content="Review and submit DAO proposal" />
@@ -71,7 +71,7 @@ const ReviewProposalPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>Review Proposal | DAO</title>
+          <title>{`Review Proposal | ${daoConfig.name}`}</title>
           <meta name="description" content="Review and submit DAO proposal" />
           <meta property="og:title" content="Review Proposal | DAO" />
           <meta property="og:description" content="Review and submit DAO proposal" />
@@ -88,7 +88,7 @@ const ReviewProposalPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Review Proposal | {daoConfig.name}</title>
+        <title>{`Review Proposal | ${daoConfig.name}`}</title>
         <meta
           name="description"
           content={`Review and submit ${daoConfig.name} proposal`}
@@ -101,7 +101,7 @@ const ReviewProposalPage: NextPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Stack mb={'x20'} w={'100%'} px={'x3'} style={{ maxWidth: 1060 }} mx="auto">
+      <Stack w={'100%'} px={'x3'} style={{ maxWidth: 1060 }} mx="auto">
         <CreateProposalHeading
           title={'Review and Submit Proposal'}
           align={'center'}

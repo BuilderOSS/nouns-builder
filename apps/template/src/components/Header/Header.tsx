@@ -62,9 +62,9 @@ export const Header: React.FC = () => {
         </Link>
 
         {/* Right side - Navigation links and Connect button */}
-        <Flex align="center" gap="x6">
+        <Flex align="center">
           {/* Navigation links - hidden on mobile */}
-          <Flex align="center" gap="x6" className={navLinks}>
+          <Flex align="center" className={navLinks}>
             <Link href="/about" passHref>
               <Text className={getLinkClassName('/about')} fontWeight="display">
                 About
@@ -92,12 +92,12 @@ export const Header: React.FC = () => {
                 </Text>
               </Link>
             )}
-          </Flex>
 
-          {/* Connect button - hidden on mobile */}
-          <Box className={connectButtonWrapper}>
-            <ConnectButton />
-          </Box>
+            {/* Connect button - hidden on mobile */}
+            <Box className={connectButtonWrapper}>
+              <ConnectButton showBalance={false} />
+            </Box>
+          </Flex>
 
           {/* Mobile menu button - only visible on mobile */}
           <Box
@@ -114,7 +114,7 @@ export const Header: React.FC = () => {
         <>
           <Box className={mobileMenuOverlay} onClick={() => setIsMobileMenuOpen(false)} />
           <Box className={mobileMenuContent}>
-            <Flex direction="column" gap="x4" p="x6">
+            <Flex direction="column" gap="x4" p="x6" align="center">
               <Link href="/about" passHref>
                 <Text
                   className={getLinkClassName('/about')}
@@ -163,7 +163,7 @@ export const Header: React.FC = () => {
                 </Link>
               )}
               <Box mt="x4">
-                <ConnectButton />
+                <ConnectButton showBalance={false} />
               </Box>
             </Flex>
           </Box>

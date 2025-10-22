@@ -124,7 +124,7 @@ const CreateProposalPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>Create Proposal | DAO</title>
+          <title>{`Create Proposal | ${daoConfig.name}`}</title>
           <meta name="description" content="Create a new DAO proposal" />
           <meta property="og:title" content="Create Proposal | DAO" />
           <meta property="og:description" content="Create a new DAO proposal" />
@@ -141,7 +141,7 @@ const CreateProposalPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>Create Proposal | DAO</title>
+          <title>{`Create Proposal | ${daoConfig.name}`}</title>
           <meta name="description" content="Create a new DAO proposal" />
           <meta property="og:title" content="Create Proposal | DAO" />
           <meta property="og:description" content="Create a new DAO proposal" />
@@ -158,7 +158,7 @@ const CreateProposalPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Create Proposal | {daoConfig.name}</title>
+        <title>{`Create Proposal | ${daoConfig.name}`}</title>
         <meta name="description" content={`Create a new ${daoConfig.name} proposal`} />
         <meta property="og:title" content={`Create Proposal | ${daoConfig.name}`} />
         <meta
@@ -168,14 +168,7 @@ const CreateProposalPage: NextPage = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Stack
-        mt={'x24'}
-        mb={'x20'}
-        w={'100%'}
-        px={'x3'}
-        style={{ maxWidth: 1060 }}
-        mx="auto"
-      >
+      <Stack w={'100%'} px={'x3'} style={{ maxWidth: 1060 }} mx="auto">
         <CreateProposalHeading
           title={'Create Proposal'}
           handleBack={openDaoActivityPage}

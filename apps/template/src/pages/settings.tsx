@@ -25,10 +25,10 @@ const SettingsPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>Settings | DAO</title>
-          <meta name="description" content="DAO Admin Settings" />
-          <meta property="og:title" content="Settings | DAO" />
-          <meta property="og:description" content="DAO Admin Settings" />
+          <title>{`Settings | ${daoConfig.name}`}</title>
+          <meta name="description" content={`${daoConfig.name} Admin Settings`} />
+          <meta property="og:title" content={`Settings | ${daoConfig.name}`} />
+          <meta property="og:description" content={`${daoConfig.name} Admin Settings`} />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -42,10 +42,10 @@ const SettingsPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>Settings | DAO</title>
-          <meta name="description" content="DAO Admin Settings" />
-          <meta property="og:title" content="Settings | DAO" />
-          <meta property="og:description" content="DAO Admin Settings" />
+          <title>{`Settings | ${daoConfig.name}`}</title>
+          <meta name="description" content={`${daoConfig.name} Admin Settings`} />
+          <meta property="og:title" content={`Settings | ${daoConfig.name}`} />
+          <meta property="og:description" content={`${daoConfig.name} Admin Settings`} />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -59,7 +59,7 @@ const SettingsPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Settings | {daoConfig.name}</title>
+        <title>{`Settings | ${daoConfig.name}`}</title>
         <meta name="description" content={`${daoConfig.name} Admin Settings`} />
         <meta property="og:title" content={`Settings | ${daoConfig.name}`} />
         <meta property="og:description" content={`${daoConfig.name} Admin Settings`} />

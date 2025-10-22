@@ -10,7 +10,7 @@ const TreasuryPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Treasury | {daoConfig.name}</title>
+        <title>{`Treasury | ${daoConfig.name}`}</title>
         <meta name="description" content={`${daoConfig.name} Treasury`} />
         <meta property="og:title" content={`Treasury | ${daoConfig.name}`} />
         <meta property="og:description" content={`${daoConfig.name} Treasury`} />

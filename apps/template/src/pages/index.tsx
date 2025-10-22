@@ -43,14 +43,14 @@ export default function Home({
   return (
     <>
       <Head>
-        <title>{daoConfig.name} - Home</title>
+        <title>{`${daoConfig.name} - Home`}</title>
         <meta name="description" content={`${daoConfig.name} Homepage`} />
         <meta property="og:title" content={`${daoConfig.name} - Home`} />
         <meta property="og:description" content={`${daoConfig.name} Homepage`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex direction="column" pb="x30" style={{ margin: '0 -1rem' }}>
+      <Flex direction="column">
         <PreAuction
           chain={chain}
           collectionAddress={collectionAddress}

@@ -14,8 +14,7 @@ import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/s
 import { useDaoStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
-import { atoms, Box, Flex, Icon } from '@buildeross/zord'
-import { style } from '@vanilla-extract/css'
+import { Box, Flex, Icon } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -25,18 +24,6 @@ import { getAddress, isAddressEqual } from 'viem'
 import { useBalance } from 'wagmi'
 
 import { getDaoConfig } from '@/config'
-
-const votePageWrapper = style([
-  atoms({
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-  }),
-  {
-    maxWidth: 912,
-    margin: '0 auto',
-  },
-])
 
 export interface VotePageProps {
   proposalNumber: number
@@ -159,8 +146,13 @@ const ProposalDetailPage: React.FC<VotePageProps> = ({
         <meta property="og:description" content={`View this proposal from ${daoName}`} />
       </Head>
 
-      <Flex position="relative" direction="column">
-        <Flex className={votePageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
+      <Flex position="relative" direction="column" w="100%" align="center">
+        <Flex
+          direction="column"
+          w="100%"
+          gap={{ '@initial': 'x2', '@768': 'x4' }}
+          style={{ maxWidth: 912 }}
+        >
           <ProposalHeader proposal={proposal} handleBack={openDaoActivityPage} />
           <>
             {displayWarning && (

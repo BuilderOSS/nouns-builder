@@ -29,6 +29,7 @@ export const logoSection = style([
 
 export const navLinks = style([
   {
+    gap: '16px',
     '@media': {
       'screen and (max-width: 768px)': {
         display: 'none',
@@ -49,6 +50,7 @@ export const mobileMenuButton = style([
     height: '40px',
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 103,
     '@media': {
       'screen and (max-width: 768px)': {
         display: 'flex',

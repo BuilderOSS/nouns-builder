@@ -17,7 +17,7 @@ const AboutPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>About | {daoConfig.name}</title>
+        <title>{`About | ${daoConfig.name}`}</title>
         <meta name="description" content={`About ${daoConfig.name}`} />
         <meta property="og:title" content={`About | ${daoConfig.name}`} />
         <meta property="og:description" content={`About ${daoConfig.name}`} />

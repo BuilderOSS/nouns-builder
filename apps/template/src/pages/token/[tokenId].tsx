@@ -37,9 +37,7 @@ const TokenPage: React.FC<TokenPageProps> = ({
   return (
     <>
       <Head>
-        <title>
-          {daoConfig.name} - Token #{token.tokenId}
-        </title>
+        <title>{`${daoConfig.name} - Token #${token.tokenId}`}</title>
         <meta
           name="description"
           content={`Token #${token.tokenId} from ${daoConfig.name}`}
