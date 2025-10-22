@@ -10,7 +10,6 @@ import {
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import { formatUnits } from 'viem'
 
 import { ArgumentDisplay } from '../ArgumentDisplay'
 
@@ -88,117 +87,18 @@ export const DecodedDisplay: React.FC<{
     (!!tokenAddress && isTokenLoading) || (!!nftInfo && isNftLoading)
   )
 
-  // Generate AI prompt for transaction summary (only when not loading)
-  const generateAIPrompt = React.useCallback(() => {
+  // Prepare transaction data for AI summary (only when not loading)
+  const getTransactionData = React.useCallback(() => {
     if (isLoadingMetadata) return null
 
-    // Format token amounts for better AI understanding
-    const formatTokenAmounts = () => {
-      if (!tokenMetadata) return ''
-
-      const amountKeys = [
-        '_milestoneAmounts',
-        '_amount',
-        '_value',
-        'amount',
-        'value',
-        '_fundAmount',
-      ]
-      const formattedAmounts: string[] = []
-
-      for (const key of amountKeys) {
-        const arg = transaction.args[key]
-        if (arg && arg.value) {
-          try {
-            if (key === '_milestoneAmounts' && typeof arg.value === 'string') {
-              // Handle comma-separated milestone amounts
-              const amounts = arg.value.split(',').map((amt) => {
-                const formatted = formatUnits(BigInt(amt.trim()), tokenMetadata.decimals)
-                return `${formatted} ${tokenMetadata.symbol}`
-              })
-              formattedAmounts.push(`${key}: ${amounts.join(', ')}`)
-            } else {
-              const formatted = formatUnits(
-                BigInt(arg.value.toString()),
-                tokenMetadata.decimals
-              )
-              formattedAmounts.push(`${key}: ${formatted} ${tokenMetadata.symbol}`)
-            }
-          } catch {
-            formattedAmounts.push(`${key}: ${arg.value} (raw)`)
-          }
-        }
-      }
-
-      return formattedAmounts.length > 0
-        ? `\n### Formatted Amounts\n${formattedAmounts.map((amt) => `- ${amt}`).join('\n')}\n`
-        : ''
+    return {
+      chainId,
+      transaction,
+      target,
+      tokenMetadata: tokenMetadata || undefined,
+      nftMetadata: nftMetadata || undefined,
+      escrowData: escrowData || undefined,
     }
-
-    return `You are an expert blockchain analyst who specializes in explaining complex smart contract activity in simple, conversational English.
-Your goal is to describe what this transaction does so that a non-technical person could understand it.
-
-Focus primarily on:
-1. The purpose of the transaction (what action it performs)
-2. Who the participants are (sender, receiver, or contract)
-3. The assets involved (token/NFT type and amount)
-
-Context for common transaction types:
-- If the transaction looks like a token "approve" call, explain that it allows another address to spend tokens.
-- If it looks like a transfer or escrow deposit, describe the asset movement and purpose.
-- If it involves NFTs, mention ownership transfer.
-- All transfers are from the DAO's treasury, not from individual users.
-
----
-
-### Transaction Overview
-- Function: ${transaction.functionName}
-- Target Contract: ${target}
-- Chain ID: ${chainId}
-
-### Arguments
-${JSON.stringify(transaction.args, null, 2)}
-
-${
-  tokenMetadata
-    ? `### Token Information
-- Symbol: ${tokenMetadata.symbol}
-- Name: ${tokenMetadata.name}
-- Decimals: ${tokenMetadata.decimals}
-`
-    : ''
-}
-
-${
-  nftMetadata
-    ? `### NFT Information
-- Name: ${nftMetadata.name || 'Unknown'}
-- Type: ${nftMetadata.tokenType}
-`
-    : ''
-}
-
-${
-  escrowData
-    ? `### Escrow Information
-- Client: ${escrowData.clientAddress || 'N/A'}
-- Provider: ${escrowData.providerAddress || 'N/A'}
-- Token: ${escrowData.tokenAddress || 'N/A'}
-- Termination Time: ${escrowData.terminationTime ? new Date(Number(escrowData.terminationTime) * 1000).toLocaleString() : 'N/A'}
-`
-    : ''
-}${formatTokenAmounts()}
----
-
-### Instructions
-Write a single, concise sentence describing what this transaction does in plain English.
-
-Respond ONLY with one short sentence — no headers, labels, or lists.
-
-Example of desired output:
-"Approves the escrow contract to spend up to 1,000 DAI tokens."
-
-Make the tone simple, informative, and human-readable. Avoid jargon like "function selector" or "ABI encoding."`
   }, [
     transaction,
     target,
@@ -217,8 +117,8 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
   // Generate AI summary when metadata is loaded
   React.useEffect(() => {
     if (isLoadingMetadata || aiSummary || isGeneratingSummary || errorSummary) return
-    const prompt = generateAIPrompt()
-    if (!prompt) return
+    const transactionData = getTransactionData()
+    if (!transactionData) return
 
     const abortController = new AbortController()
     const TIMEOUT_MS = 30000 // 30 seconds
@@ -230,12 +130,12 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
       setErrorSummary(null)
 
       try {
-        const response = await fetch('/api/ai/generateText', {
+        const response = await fetch('/api/ai/generateTxSummary', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ prompt }),
+          body: JSON.stringify(transactionData),
           signal: abortController.signal,
         })
 
@@ -276,7 +176,7 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
       clearTimeout(timeoutId)
       abortController.abort()
     }
-  }, [isLoadingMetadata, aiSummary, isGeneratingSummary, generateAIPrompt])
+  }, [isLoadingMetadata, aiSummary, isGeneratingSummary, getTransactionData])
 
   return (
     <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
