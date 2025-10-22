@@ -1,7 +1,7 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
-import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
+import { CHAIN_ID, DaoContractAddresses, DecodedTransactionData } from '@buildeross/types'
 import {
   decodeEscrowData,
   decodeEscrowDataV1,
@@ -15,9 +15,10 @@ import { ArgumentDisplay } from '../ArgumentDisplay'
 
 export const DecodedDisplay: React.FC<{
   chainId: CHAIN_ID
+  addresses: DaoContractAddresses
   transaction: DecodedTransactionData
   target: string
-}> = ({ chainId, transaction, target }) => {
+}> = ({ chainId, addresses, transaction, target }) => {
   const sortedArgs = React.useMemo(() => {
     const keys = Object.keys(transaction.args)
     const inOrder = (transaction.argOrder as string[]).filter((k) => keys.includes(k))
@@ -93,6 +94,7 @@ export const DecodedDisplay: React.FC<{
 
     return {
       chainId,
+      addresses,
       transaction,
       target,
       tokenMetadata: tokenMetadata || undefined,
@@ -103,6 +105,7 @@ export const DecodedDisplay: React.FC<{
     transaction,
     target,
     chainId,
+    addresses,
     tokenMetadata,
     nftMetadata,
     escrowData,

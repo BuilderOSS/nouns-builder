@@ -1,4 +1,6 @@
 import { gateway } from '@ai-sdk/gateway'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { CHAIN_ID, DaoContractAddresses } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { generateText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -31,7 +33,8 @@ interface EscrowData {
 }
 
 interface RequestBody {
-  chainId: number
+  chainId: CHAIN_ID
+  addresses: DaoContractAddresses
   transaction: TransactionData
   target: string
   tokenMetadata?: TokenMetadata
@@ -45,7 +48,19 @@ const getCacheKey = (data: RequestBody, model: string) => {
 }
 
 const generatePrompt = (data: RequestBody): string => {
-  const { chainId, transaction, target, tokenMetadata, nftMetadata, escrowData } = data
+  const {
+    chainId,
+    addresses,
+    transaction,
+    target,
+    tokenMetadata,
+    nftMetadata,
+    escrowData,
+  } = data
+
+  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
+
+  if (!chain) throw new Error(`Chain ${chainId} not found`)
 
   // Format token amounts for better AI understanding
   const formatTokenAmounts = (): string => {
@@ -103,13 +118,28 @@ Context for common transaction types:
 - If it looks like a transfer or escrow deposit, describe the asset movement and purpose.
 - If it involves NFTs, mention ownership transfer.
 - All transfers are from the DAO's treasury, not from individual users.
+- If there are mint transactions on the token contract, these are minting governance tokens (ERC-721 NFTs) to addresses.
 
 ---
 
 ### Transaction Overview
 - Function: ${transaction.functionName}
 - Target Contract: ${target}
-- Chain ID: ${chainId}
+- Network: ${chain.name} (ID: ${chain.id})
+
+### DAO Contract Context
+The following are the core contracts for this DAO:
+- Token Contract (${addresses.token}): The DAO's ERC-721 governance token (NFT collection)
+- Governor Contract (${addresses.governor}): The DAO's proposal manager and transaction scheduler
+- Treasury Contract (${addresses.treasury}): The DAO's treasury and transaction executor
+- Metadata Contract (${addresses.metadata}): The DAO's artwork generator and renderer
+- Auction Contract (${addresses.auction}): The DAO's auction house
+
+${target === addresses.token ? '🎯 This transaction targets the TOKEN CONTRACT (governance NFT collection)' : ''}
+${target === addresses.governor ? '🎯 This transaction targets the GOVERNOR CONTRACT (proposal management)' : ''}
+${target === addresses.treasury ? '🎯 This transaction targets the TREASURY CONTRACT (DAO treasury)' : ''}
+${target === addresses.metadata ? '🎯 This transaction targets the METADATA CONTRACT (artwork generation)' : ''}
+${target === addresses.auction ? '🎯 This transaction targets the AUCTION CONTRACT (auction house)' : ''}
 
 ### Arguments
 ${JSON.stringify(transaction.args, null, 2)}

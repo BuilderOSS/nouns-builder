@@ -8,7 +8,7 @@ import {
   SubgraphSDK,
   Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
-import { useChainStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
@@ -44,7 +44,8 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   const { description, proposer, executionTransactionHash } = proposal
 
   const { displayName } = useEnsData(proposer)
-  const chain = useChainStore((x) => x.chain)
+  const { chain } = useChainStore()
+  const { addresses } = useDaoStore()
 
   const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
 
@@ -133,6 +134,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           <DecodedTransactions
             decodedTransactions={decodedTransactions}
             chainId={chain.id}
+            addresses={addresses}
           />
         </Section>
       </Flex>
