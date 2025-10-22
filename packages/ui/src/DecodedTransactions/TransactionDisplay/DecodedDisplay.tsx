@@ -145,6 +145,7 @@ Context for common transaction types:
 - If the transaction looks like a token "approve" call, explain that it allows another address to spend tokens.
 - If it looks like a transfer or escrow deposit, describe the asset movement and purpose.
 - If it involves NFTs, mention ownership transfer.
+- All transfers are from the DAO's treasury, not from individual users.
 
 ---
 
@@ -188,15 +189,12 @@ ${
 ---
 
 ### Instructions
-1. Write a concise summary (2–3 sentences) describing what this transaction does, in plain English.
-2. Highlight **who sends or receives what**, and any **notable parameters** (e.g., amount, token, NFT, escrow terms).
-3. Mention any **special behavior or implications** (e.g., approvals, locking funds, transferring ownership).
-4. If some details are unknown, say so briefly (e.g. "The amount is not specified").
+Write a single, concise sentence describing what this transaction does in plain English.
 
-Respond ONLY with the explanation paragraph — no headers, labels, or lists.
+Respond ONLY with one short sentence — no headers, labels, or lists.
 
 Example of desired output:
-"This transaction sends 1.2 ETH from Alice to a contract that locks funds in escrow until the service is complete."
+"Approves the escrow contract to spend up to 1,000 DAI tokens."
 
 Make the tone simple, informative, and human-readable. Avoid jargon like "function selector" or "ABI encoding."`
   }, [
@@ -275,22 +273,6 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
           </a>
         </Box>
 
-        {/* AI Summary Section - only show if successful */}
-        {aiSummary && (
-          <Box
-            p="x4"
-            backgroundColor="background2"
-            borderRadius="curved"
-            border="1px solid"
-            borderColor="border"
-          >
-            <Text fontWeight="heading" mb="x2" color="accent">
-              🤖 AI Summary
-            </Text>
-            <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
-          </Box>
-        )}
-
         <Flex pl={'x2'}>
           {`.${transaction.functionName}(`}
           {sortedArgs.length === 0 ? `)` : null}
@@ -316,6 +298,23 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
         </Stack>
 
         {sortedArgs.length > 0 ? `)` : null}
+
+        {/* AI Summary Section - only show if successful */}
+        {aiSummary && (
+          <Box
+            p="x4"
+            backgroundColor="background2"
+            borderRadius="curved"
+            border="1px solid"
+            borderColor="border"
+            mt="x4"
+          >
+            <Text fontWeight="heading" mb="x2" color="accent">
+              🤖 AI Summary
+            </Text>
+            <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
+          </Box>
+        )}
       </Stack>
     </Stack>
   )
