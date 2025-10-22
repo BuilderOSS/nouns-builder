@@ -84,7 +84,9 @@ export const DecodedDisplay: React.FC<{
   )
 
   // Determine if we're still loading metadata
-  const isLoadingMetadata = (tokenAddress && isTokenLoading) || (nftInfo && isNftLoading)
+  const isLoadingMetadata = Boolean(
+    (!!tokenAddress && isTokenLoading) || (!!nftInfo && isNftLoading)
+  )
 
   // Generate AI prompt for transaction summary (only when not loading)
   const generateAIPrompt = React.useCallback(() => {
@@ -210,15 +212,22 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
   // AI Summary state
   const [aiSummary, setAiSummary] = React.useState<string | null>(null)
   const [isGeneratingSummary, setIsGeneratingSummary] = React.useState(false)
+  const [errorSummary, setErrorSummary] = React.useState<string | null>(null)
 
   // Generate AI summary when metadata is loaded
   React.useEffect(() => {
-    if (isLoadingMetadata || aiSummary || isGeneratingSummary) return
+    if (isLoadingMetadata || aiSummary || isGeneratingSummary || errorSummary) return
     const prompt = generateAIPrompt()
     if (!prompt) return
 
+    const abortController = new AbortController()
+    const TIMEOUT_MS = 30000 // 30 seconds
+    const timeoutId = setTimeout(() => abortController.abort(), TIMEOUT_MS)
+    let mounted = true
+
     const generateSummary = async () => {
       setIsGeneratingSummary(true)
+      setErrorSummary(null)
 
       try {
         const response = await fetch('/api/ai/generateText', {
@@ -227,6 +236,7 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ prompt }),
+          signal: abortController.signal,
         })
 
         if (!response.ok) {
@@ -234,6 +244,7 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
         }
 
         const data = await response.json()
+        if (!mounted || abortController.signal.aborted) return
         if (data && typeof data === 'string') {
           setAiSummary(data)
         } else if (data && data.text && typeof data.text === 'string') {
@@ -245,12 +256,26 @@ Make the tone simple, informative, and human-readable. Avoid jargon like "functi
         console.error(
           `Failed to generate summary: ${error instanceof Error ? error.message : error}`
         )
+        setErrorSummary(
+          error instanceof Error ? error.message : (error?.toString() ?? 'Unknown error')
+        )
+        if (error instanceof Error && error.name === 'AbortError') {
+          return // Request was cancelled, this is expected
+        }
       } finally {
+        if (mounted) setIsGeneratingSummary(false)
         setIsGeneratingSummary(false)
+        clearTimeout(timeoutId)
       }
     }
 
     generateSummary()
+
+    return () => {
+      mounted = false
+      clearTimeout(timeoutId)
+      abortController.abort()
+    }
   }, [isLoadingMetadata, aiSummary, isGeneratingSummary, generateAIPrompt])
 
   return (

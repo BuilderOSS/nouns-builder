@@ -38,6 +38,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const result = await generateText({
       model: gateway(model),
       prompt,
+      abortSignal: AbortSignal.timeout(30000),
     })
 
     // Cache the generated text for 24 hours

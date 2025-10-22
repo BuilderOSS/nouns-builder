@@ -7,9 +7,9 @@ import {
   getEscrowBundlerV1,
 } from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
-import { Flex, Text } from '@buildeross/zord'
 
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
@@ -25,7 +25,7 @@ interface ArgumentDisplayProps {
   functionName: string
   tokenMetadata?: TokenMetadata
   nftMetadata?: SerializedNftMetadata | null
-  escrowData?: Partial<DecodedEscrowData> | null
+  escrowData?: DecodedEscrowData | null
 }
 
 export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
@@ -89,7 +89,7 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
     let value = arg.value
     try {
       value = `${formatCryptoVal(formatEther(BigInt(String(arg.value))))} ETH`
-    } catch { }
+    } catch {}
 
     return (
       <Flex align="flex-start" w="100%">
