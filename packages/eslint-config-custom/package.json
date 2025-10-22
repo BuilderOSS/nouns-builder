@@ -3,16 +3,16 @@
   "description": "Shared ESLint configuration for BuilderOSS apps",
   "version": "0.2.0",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.53.0",
-    "@typescript-eslint/parser": "^5.53.0",
-    "eslint-config-next": "latest",
+    "@typescript-eslint/eslint-plugin": "5.62.0",
+    "@typescript-eslint/parser": "5.62.0",
+    "eslint-config-next": "15.5.5",
     "eslint-config-prettier": "8.3.0",
     "eslint-config-turbo": "2.5.6",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-import": "2.32.0",
+    "eslint-plugin-prettier": "5.2.6",
     "eslint-plugin-react": "7.28.0",
-    "eslint-plugin-simple-import-sort": "^12.1.0",
-    "eslint-plugin-unused-imports": "^2.0.0"
+    "eslint-plugin-simple-import-sort": "12.1.0",
+    "eslint-plugin-unused-imports": "2.0.0"
   },
   "license": "MIT",
   "main": "index.js",

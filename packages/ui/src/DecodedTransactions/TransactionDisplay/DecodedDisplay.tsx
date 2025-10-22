@@ -10,6 +10,7 @@ import {
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
+import { formatUnits } from 'viem'
 
 import { ArgumentDisplay } from '../ArgumentDisplay'
 
@@ -25,6 +26,17 @@ export const DecodedDisplay: React.FC<{
     return [...inOrder, ...rest]
   }, [transaction.args, transaction.argOrder])
 
+  // Prepare escrow data once
+  const escrowData = React.useMemo(() => {
+    const arg = transaction.args['_escrowData']
+    if (!arg) return null
+    const decoder =
+      target.toLowerCase() === getEscrowBundlerV1(chainId).toLowerCase()
+        ? decodeEscrowDataV1
+        : decodeEscrowData
+    return decoder(arg.value as `0x${string}`)
+  }, [transaction.args, target, chainId])
+
   // Determine single token address for ERC20 operations
   const tokenAddress = React.useMemo(() => {
     // For ERC20 transfer/approve, use target
@@ -36,18 +48,8 @@ export const DecodedDisplay: React.FC<{
     }
 
     // For escrow operations, get token from escrow data
-    const escrowDataArg = transaction.args['_escrowData']
-    if (escrowDataArg) {
-      const escrowData =
-        target.toLowerCase() === getEscrowBundlerV1(chainId).toLowerCase()
-          ? decodeEscrowDataV1(escrowDataArg.value as `0x${string}`)
-          : decodeEscrowData(escrowDataArg.value as `0x${string}`)
-
-      return escrowData?.tokenAddress
-    }
-
-    return null
-  }, [transaction.args, transaction.functionName, target, chainId])
+    return escrowData?.tokenAddress || null
+  }, [transaction.functionName, target, escrowData])
 
   // Determine single NFT contract and token ID
   const nftInfo = React.useMemo(() => {
@@ -69,27 +71,189 @@ export const DecodedDisplay: React.FC<{
   }, [transaction.args, transaction.functionName, target, sortedArgs])
 
   // Fetch token metadata only if we have a token address
-  const { tokenMetadata } = useTokenMetadataSingle(
+  const { tokenMetadata, isLoading: isTokenLoading } = useTokenMetadataSingle(
     chainId,
     tokenAddress as `0x${string}` | undefined
   )
 
   // Fetch NFT metadata only if we have NFT info
-  const { metadata: nftMetadata } = useNftMetadata(
+  const { metadata: nftMetadata, isLoading: isNftLoading } = useNftMetadata(
     chainId,
     nftInfo?.contract as `0x${string}` | undefined,
     nftInfo?.tokenId
   )
 
-  // Prepare escrow data
-  const escrowData = React.useMemo(() => {
-    const escrowDataArg = transaction.args['_escrowData']
-    if (!escrowDataArg) return null
+  // Determine if we're still loading metadata
+  const isLoadingMetadata = (tokenAddress && isTokenLoading) || (nftInfo && isNftLoading)
 
-    return target.toLowerCase() === getEscrowBundlerV1(chainId).toLowerCase()
-      ? decodeEscrowDataV1(escrowDataArg.value as `0x${string}`)
-      : decodeEscrowData(escrowDataArg.value as `0x${string}`)
-  }, [transaction.args, target, chainId])
+  // Generate AI prompt for transaction summary (only when not loading)
+  const generateAIPrompt = React.useCallback(() => {
+    if (isLoadingMetadata) return null
+
+    // Format token amounts for better AI understanding
+    const formatTokenAmounts = () => {
+      if (!tokenMetadata) return ''
+
+      const amountKeys = [
+        '_milestoneAmounts',
+        '_amount',
+        '_value',
+        'amount',
+        'value',
+        '_fundAmount',
+      ]
+      const formattedAmounts: string[] = []
+
+      for (const key of amountKeys) {
+        const arg = transaction.args[key]
+        if (arg && arg.value) {
+          try {
+            if (key === '_milestoneAmounts' && typeof arg.value === 'string') {
+              // Handle comma-separated milestone amounts
+              const amounts = arg.value.split(',').map((amt) => {
+                const formatted = formatUnits(BigInt(amt.trim()), tokenMetadata.decimals)
+                return `${formatted} ${tokenMetadata.symbol}`
+              })
+              formattedAmounts.push(`${key}: ${amounts.join(', ')}`)
+            } else {
+              const formatted = formatUnits(
+                BigInt(arg.value.toString()),
+                tokenMetadata.decimals
+              )
+              formattedAmounts.push(`${key}: ${formatted} ${tokenMetadata.symbol}`)
+            }
+          } catch {
+            formattedAmounts.push(`${key}: ${arg.value} (raw)`)
+          }
+        }
+      }
+
+      return formattedAmounts.length > 0
+        ? `\n### Formatted Amounts\n${formattedAmounts.map((amt) => `- ${amt}`).join('\n')}\n`
+        : ''
+    }
+
+    return `You are an expert blockchain analyst who specializes in explaining complex smart contract activity in simple, conversational English.
+Your goal is to describe what this transaction does so that a non-technical person could understand it.
+
+Focus primarily on:
+1. The purpose of the transaction (what action it performs)
+2. Who the participants are (sender, receiver, or contract)
+3. The assets involved (token/NFT type and amount)
+
+Context for common transaction types:
+- If the transaction looks like a token "approve" call, explain that it allows another address to spend tokens.
+- If it looks like a transfer or escrow deposit, describe the asset movement and purpose.
+- If it involves NFTs, mention ownership transfer.
+
+---
+
+### Transaction Overview
+- Function: ${transaction.functionName}
+- Target Contract: ${target}
+- Chain ID: ${chainId}
+
+### Arguments
+${JSON.stringify(transaction.args, null, 2)}
+
+${
+  tokenMetadata
+    ? `### Token Information
+- Symbol: ${tokenMetadata.symbol}
+- Name: ${tokenMetadata.name}
+- Decimals: ${tokenMetadata.decimals}
+`
+    : ''
+}
+
+${
+  nftMetadata
+    ? `### NFT Information
+- Name: ${nftMetadata.name || 'Unknown'}
+- Type: ${nftMetadata.tokenType}
+`
+    : ''
+}
+
+${
+  escrowData
+    ? `### Escrow Information
+- Client: ${escrowData.clientAddress || 'N/A'}
+- Provider: ${escrowData.providerAddress || 'N/A'}
+- Token: ${escrowData.tokenAddress || 'N/A'}
+- Termination Time: ${escrowData.terminationTime ? new Date(Number(escrowData.terminationTime) * 1000).toLocaleString() : 'N/A'}
+`
+    : ''
+}${formatTokenAmounts()}
+---
+
+### Instructions
+1. Write a concise summary (2–3 sentences) describing what this transaction does, in plain English.
+2. Highlight **who sends or receives what**, and any **notable parameters** (e.g., amount, token, NFT, escrow terms).
+3. Mention any **special behavior or implications** (e.g., approvals, locking funds, transferring ownership).
+4. If some details are unknown, say so briefly (e.g. "The amount is not specified").
+
+Respond ONLY with the explanation paragraph — no headers, labels, or lists.
+
+Example of desired output:
+"This transaction sends 1.2 ETH from Alice to a contract that locks funds in escrow until the service is complete."
+
+Make the tone simple, informative, and human-readable. Avoid jargon like "function selector" or "ABI encoding."`
+  }, [
+    transaction,
+    target,
+    chainId,
+    tokenMetadata,
+    nftMetadata,
+    escrowData,
+    isLoadingMetadata,
+  ])
+
+  // AI Summary state
+  const [aiSummary, setAiSummary] = React.useState<string | null>(null)
+  const [isGeneratingSummary, setIsGeneratingSummary] = React.useState(false)
+
+  // Generate AI summary when metadata is loaded
+  React.useEffect(() => {
+    if (isLoadingMetadata || aiSummary || isGeneratingSummary) return
+    const prompt = generateAIPrompt()
+    if (!prompt) return
+
+    const generateSummary = async () => {
+      setIsGeneratingSummary(true)
+
+      try {
+        const response = await fetch('/api/ai/generateText', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ prompt }),
+        })
+
+        if (!response.ok) {
+          throw new Error(`API request failed: ${response.statusText}`)
+        }
+
+        const data = await response.json()
+        if (data && typeof data === 'string') {
+          setAiSummary(data)
+        } else if (data && data.text && typeof data.text === 'string') {
+          setAiSummary(data.text)
+        } else {
+          throw new Error('Invalid response format')
+        }
+      } catch (error) {
+        console.error(
+          `Failed to generate summary: ${error instanceof Error ? error.message : error}`
+        )
+      } finally {
+        setIsGeneratingSummary(false)
+      }
+    }
+
+    generateSummary()
+  }, [isLoadingMetadata, aiSummary, isGeneratingSummary, generateAIPrompt])
 
   return (
     <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
@@ -110,6 +274,23 @@ export const DecodedDisplay: React.FC<{
             <Text display={{ '@initial': 'none', '@768': 'flex' }}>{target}</Text>
           </a>
         </Box>
+
+        {/* AI Summary Section - only show if successful */}
+        {aiSummary && (
+          <Box
+            p="x4"
+            backgroundColor="background2"
+            borderRadius="curved"
+            border="1px solid"
+            borderColor="border"
+          >
+            <Text fontWeight="heading" mb="x2" color="accent">
+              🤖 AI Summary
+            </Text>
+            <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
+          </Box>
+        )}
+
         <Flex pl={'x2'}>
           {`.${transaction.functionName}(`}
           {sortedArgs.length === 0 ? `)` : null}
