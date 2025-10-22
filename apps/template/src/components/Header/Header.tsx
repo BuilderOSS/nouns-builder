@@ -1,16 +1,14 @@
-import { tokenAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { Address } from 'viem'
-import { useReadContracts } from 'wagmi'
 
+import { getDaoConfig } from '@/config'
 import { useSettingsAccess } from '@/hooks/useSettingsAccess'
+
 import {
   connectButtonWrapper,
   headerContainer,
@@ -29,20 +27,7 @@ export const Header: React.FC = () => {
   const { hasAccess: hasSettingsAccess } = useSettingsAccess()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
   const router = useRouter()
-
-  const { data: contractData } = useReadContracts({
-    allowFailure: false,
-    contracts: [
-      {
-        abi: tokenAbi,
-        address: addresses.token as Address,
-        chainId: chain.id,
-        functionName: 'name',
-      },
-    ] as const,
-  })
-
-  const [daoName] = unpackOptionalArray(contractData, 1)
+  const daoConfig = getDaoConfig()
 
   const isActiveRoute = (path: string) => {
     if (path === '/' && router.pathname === '/') return true
@@ -71,7 +56,7 @@ export const Header: React.FC = () => {
               </Box>
             )}
             <Text fontWeight="display" fontSize={20}>
-              {daoName || 'DAO'}
+              {daoConfig.name}
             </Text>
           </Flex>
         </Link>

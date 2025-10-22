@@ -57,9 +57,9 @@ function ProvidersWrapper({ children }: { children: React.ReactNode }) {
   const daoConfig = getDaoConfig()
 
   // Create stores
-  const chainStore = useMemo(() => createChainStore(daoConfig?.chain), [daoConfig?.chain])
+  const chainStore = useMemo(() => createChainStore(daoConfig.chain), [daoConfig.chain])
   const daoStore = useMemo(
-    () => createDaoStore(daoConfig?.addresses),
+    () => createDaoStore(daoConfig.addresses),
     [daoConfig?.addresses]
   )
 

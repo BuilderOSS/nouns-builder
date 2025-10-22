@@ -25,6 +25,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
+import { getDaoConfig } from '@/config'
+
 const createSelectOption = (type: TransactionFormType) => ({
   value: type,
   label: TRANSACTION_TYPES[type].title,
@@ -34,6 +36,7 @@ const createSelectOption = (type: TransactionFormType) => ({
 const CreateProposalPage: NextPage = () => {
   const { push } = useRouter()
   const addresses = useDaoStore((x) => x.addresses)
+  const daoConfig = getDaoConfig()
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
   const [transactionType, setTransactionType] = useState<
@@ -123,6 +126,8 @@ const CreateProposalPage: NextPage = () => {
         <Head>
           <title>Create Proposal | DAO</title>
           <meta name="description" content="Create a new DAO proposal" />
+          <meta property="og:title" content="Create Proposal | DAO" />
+          <meta property="og:description" content="Create a new DAO proposal" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -138,6 +143,8 @@ const CreateProposalPage: NextPage = () => {
         <Head>
           <title>Create Proposal | DAO</title>
           <meta name="description" content="Create a new DAO proposal" />
+          <meta property="og:title" content="Create Proposal | DAO" />
+          <meta property="og:description" content="Create a new DAO proposal" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -151,8 +158,13 @@ const CreateProposalPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Create Proposal | DAO</title>
-        <meta name="description" content="Create a new DAO proposal" />
+        <title>Create Proposal | {daoConfig.name}</title>
+        <meta name="description" content={`Create a new ${daoConfig.name} proposal`} />
+        <meta property="og:title" content={`Create Proposal | ${daoConfig.name}`} />
+        <meta
+          property="og:description"
+          content={`Create a new ${daoConfig.name} proposal`}
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

@@ -38,16 +38,24 @@ const TokenPage: React.FC<TokenPageProps> = ({
     <>
       <Head>
         <title>
-          {token.dao.name} - Token #{token.tokenId}
+          {daoConfig.name} - Token #{token.tokenId}
         </title>
         <meta
           name="description"
-          content={`Token #${token.tokenId} from ${token.dao.name}`}
+          content={`Token #${token.tokenId} from ${daoConfig.name}`}
+        />
+        <meta
+          property="og:title"
+          content={`${daoConfig.name} - Token #${token.tokenId}`}
+        />
+        <meta
+          property="og:description"
+          content={`Token #${token.tokenId} from ${daoConfig.name}`}
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Flex direction="column" >
+      <Flex direction="column">
         <DaoAuctionSection
           chain={chain}
           collection={collectionAddress}

@@ -4,7 +4,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { useAccount } from 'wagmi'
 
 export const useSettingsAccess = () => {
-  const chain = useChainStore((x) => x.chain)
+  const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { address } = useAccount()
 

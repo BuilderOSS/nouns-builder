@@ -10,9 +10,12 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useAccount } from 'wagmi'
 
+import { getDaoConfig } from '@/config'
+
 const ReviewProposalPage: NextPage = () => {
   const chain = useChainStore((x) => x.chain)
   const { back, push } = useRouter()
+  const daoConfig = getDaoConfig()
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
@@ -53,6 +56,8 @@ const ReviewProposalPage: NextPage = () => {
         <Head>
           <title>Review Proposal | DAO</title>
           <meta name="description" content="Review and submit DAO proposal" />
+          <meta property="og:title" content="Review Proposal | DAO" />
+          <meta property="og:description" content="Review and submit DAO proposal" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -68,6 +73,8 @@ const ReviewProposalPage: NextPage = () => {
         <Head>
           <title>Review Proposal | DAO</title>
           <meta name="description" content="Review and submit DAO proposal" />
+          <meta property="og:title" content="Review Proposal | DAO" />
+          <meta property="og:description" content="Review and submit DAO proposal" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -81,8 +88,16 @@ const ReviewProposalPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Review Proposal | DAO</title>
-        <meta name="description" content="Review and submit DAO proposal" />
+        <title>Review Proposal | {daoConfig.name}</title>
+        <meta
+          name="description"
+          content={`Review and submit ${daoConfig.name} proposal`}
+        />
+        <meta property="og:title" content={`Review Proposal | ${daoConfig.name}`} />
+        <meta
+          property="og:description"
+          content={`Review and submit ${daoConfig.name} proposal`}
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

@@ -4,8 +4,11 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import React from 'react'
 
+import { getDaoConfig } from '@/config'
+
 const ProposalsPage: NextPage = () => {
   const { push } = useRouter()
+  const daoConfig = getDaoConfig()
 
   const onOpenProposalCreate = React.useCallback(async () => {
     await push('/proposal/create')
@@ -18,8 +21,10 @@ const ProposalsPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Proposals | DAO</title>
-        <meta name="description" content="DAO Proposals" />
+        <title>Proposals | {daoConfig.name}</title>
+        <meta name="description" content={`${daoConfig.name} Proposals`} />
+        <meta property="og:title" content={`Proposals | ${daoConfig.name}`} />
+        <meta property="og:description" content={`${daoConfig.name} Proposals`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

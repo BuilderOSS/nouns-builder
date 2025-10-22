@@ -43,8 +43,10 @@ export default function Home({
   return (
     <>
       <Head>
-        <title>DAO - Home</title>
-        <meta name="description" content="DAO Homepage" />
+        <title>{daoConfig.name} - Home</title>
+        <meta name="description" content={`${daoConfig.name} Homepage`} />
+        <meta property="og:title" content={`${daoConfig.name} - Home`} />
+        <meta property="og:description" content={`${daoConfig.name} Homepage`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

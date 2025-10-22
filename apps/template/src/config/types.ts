@@ -9,6 +9,7 @@ export type RequiredDaoContractAddresses = DaoContractAddresses & {
 }
 
 export type DaoConfig = {
-  chain: Chain,
-  addresses: RequiredDaoContractAddresses,
+  chain: Chain
+  addresses: RequiredDaoContractAddresses
+  name: string
 }

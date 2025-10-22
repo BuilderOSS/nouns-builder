@@ -1,9 +1,10 @@
 #!/usr/bin/env npx tsx
 /* eslint-disable no-console */
 
-import { TESTNET_CHAINS, PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
-import { getDAOAddresses } from '@buildeross/sdk/contract'
+import { PUBLIC_ALL_CHAINS, TESTNET_CHAINS } from '@buildeross/constants/chains'
+import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { getProvider } from '@buildeross/utils'
 import { config } from 'dotenv'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
@@ -73,8 +74,24 @@ async function fetchDaoAddresses() {
       process.exit(1)
     }
 
+    // Fetch DAO name using the token contract
+    const provider = getProvider(parsedChainId)
+    let daoName = 'DAO' // fallback
+
+    try {
+      daoName = (await provider.readContract({
+        address: addresses.token,
+        abi: tokenAbi,
+        functionName: 'name',
+      })) as string
+      console.log(`✅ Successfully fetched DAO name: ${daoName}`)
+    } catch (error) {
+      console.warn('⚠️  Could not fetch DAO name, using fallback "DAO"')
+    }
+
     console.log('✅ Successfully fetched DAO addresses:')
     console.log(`   Chain: ${daoChain.name} (${daoChain.id})`)
+    console.log(`   Name: ${daoName}`)
     console.log(`   Token: ${addresses.token}`)
     console.log(`   Auction: ${addresses.auction}`)
     console.log(`   Governor: ${addresses.governor}`)
@@ -89,6 +106,7 @@ async function fetchDaoAddresses() {
     const config = {
       chainId: parsedChainId,
       addresses,
+      name: daoName,
     }
 
     // Write to static file
@@ -122,6 +140,7 @@ const DAO_ADDRESSES: RequiredDaoContractAddresses = {
 export const DAO_CONFIG: DaoConfig = {
   chain: DAO_CHAIN,
   addresses: DAO_ADDRESSES,
+  name: '${daoName}',
 } as const
 `
 

@@ -6,12 +6,14 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useAccount } from 'wagmi'
 
+import { getDaoConfig } from '@/config'
 import { useSettingsAccess } from '@/hooks/useSettingsAccess'
 
 const SettingsPage: NextPage = () => {
   const { push } = useRouter()
   const { address } = useAccount()
   const { isLoading, hasAccess } = useSettingsAccess()
+  const daoConfig = getDaoConfig()
 
   const onOpenProposalReview = React.useCallback(async () => {
     await push('/proposal/review')
@@ -25,6 +27,8 @@ const SettingsPage: NextPage = () => {
         <Head>
           <title>Settings | DAO</title>
           <meta name="description" content="DAO Admin Settings" />
+          <meta property="og:title" content="Settings | DAO" />
+          <meta property="og:description" content="DAO Admin Settings" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -40,6 +44,8 @@ const SettingsPage: NextPage = () => {
         <Head>
           <title>Settings | DAO</title>
           <meta name="description" content="DAO Admin Settings" />
+          <meta property="og:title" content="Settings | DAO" />
+          <meta property="og:description" content="DAO Admin Settings" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
@@ -53,8 +59,10 @@ const SettingsPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Settings | DAO</title>
-        <meta name="description" content="DAO Admin Settings" />
+        <title>Settings | {daoConfig.name}</title>
+        <meta name="description" content={`${daoConfig.name} Admin Settings`} />
+        <meta property="og:title" content={`Settings | ${daoConfig.name}`} />
+        <meta property="og:description" content={`${daoConfig.name} Admin Settings`} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
