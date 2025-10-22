@@ -1,43 +1,27 @@
-import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
-import { CHAIN_ID, DecodedArg } from '@buildeross/types'
+import { TokenMetadata } from '@buildeross/hooks/useTokenMetadata'
+import { DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils'
-import {
-  decodeEscrowData,
-  decodeEscrowDataV1,
-  ESCROW_TYPE,
-  ESCROW_TYPE_V1,
-  getEscrowBundlerV1,
-} from '@buildeross/utils/escrow'
+import { DecodedEscrowData, ESCROW_TYPE, ESCROW_TYPE_V1 } from '@buildeross/utils/escrow'
 import { formatDateTime } from '@buildeross/utils/helpers'
 import { Flex, Stack } from '@buildeross/zord'
 import { useCallback } from 'react'
-import { formatUnits, Hex } from 'viem'
+import { formatUnits } from 'viem'
 
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 
 interface EscrowArgumentDisplayProps {
-  chainId: CHAIN_ID
   arg: DecodedArg
-  target: string
-  allArguments: Record<string, DecodedArg>
+  tokenMetadata?: TokenMetadata
+  escrowData?: DecodedEscrowData | null
 }
 
 export const EscrowArgumentDisplay: React.FC<EscrowArgumentDisplayProps> = ({
-  chainId,
   arg,
-  target,
-  allArguments,
+  tokenMetadata,
+  escrowData,
 }) => {
-  const escrowDataValue = allArguments['_escrowData']?.value
-  const escrowData =
-    toLower(target) === toLower(getEscrowBundlerV1(chainId))
-      ? decodeEscrowDataV1(escrowDataValue as Hex)
-      : decodeEscrowData(escrowDataValue as Hex)
-
-  const { tokenMetadata } = useTokenMetadataSingle(chainId, escrowData?.tokenAddress)
-
   const formatAmount = useCallback(
     (amount: bigint) => {
       if (!tokenMetadata) return amount.toString()

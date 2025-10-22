@@ -1,5 +1,5 @@
-import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
-import { CHAIN_ID, DecodedArg } from '@buildeross/types'
+import { TokenMetadata } from '@buildeross/hooks/useTokenMetadata'
+import { DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Text } from '@buildeross/zord'
 import { formatUnits } from 'viem'
@@ -7,18 +7,14 @@ import { formatUnits } from 'viem'
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 interface ERC20ArgumentDisplayProps {
-  chainId: CHAIN_ID
   arg: DecodedArg
-  target: string
+  tokenMetadata?: TokenMetadata
 }
 
 export const ERC20ArgumentDisplay: React.FC<ERC20ArgumentDisplayProps> = ({
-  chainId,
   arg,
-  target,
+  tokenMetadata,
 }) => {
-  const { tokenMetadata } = useTokenMetadataSingle(chainId, target as `0x${string}`)
-
   // Handle amount formatting for ERC20 transfers
   if (
     (arg.name === 'amount' ||
