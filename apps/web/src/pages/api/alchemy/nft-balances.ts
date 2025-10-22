@@ -53,6 +53,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withRateLimit({
-  keyPrefix: 'alchemy:nftBalances',
-})(withCors(['GET'])(handler))
+export default withCors(['GET'])(
+  withRateLimit({
+    keyPrefix: 'alchemy:nftBalances',
+  })(handler)
+)

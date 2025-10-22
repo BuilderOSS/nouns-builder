@@ -79,8 +79,17 @@ const generatePrompt = (data: RequestBody): string => {
       const arg = transaction.args[key]
       if (arg && arg.value !== undefined && arg.value !== null) {
         try {
-          if (key === '_milestoneAmounts' && typeof arg.value === 'string') {
-            const amounts = arg.value.split(',').map((amt) => {
+          if (key === '_milestoneAmounts') {
+            const list = Array.isArray(arg.value)
+              ? arg.value.map((v: any) => v?.toString?.() ?? String(v))
+              : typeof arg.value === 'string'
+                ? arg.value
+                    .split(',')
+                    .map((s: string) => s.trim())
+                    .filter(Boolean)
+                : [arg.value?.toString?.() ?? String(arg.value)]
+
+            const amounts = list.map((amt) => {
               const formatted = formatUnits(BigInt(amt.trim()), tokenMetadata.decimals)
               return `${formatted} ${tokenMetadata.symbol}`
             })
@@ -211,7 +220,7 @@ ${
 
 Fallback Rule (only if purpose cannot be determined):
 If you cannot confidently infer the action from the name, arguments, or DAO context:
-Calls the ${safeFunctionName} function on thpe}.
+Calls the ${safeFunctionName} function on the target contract.
 
 ---
 
@@ -221,6 +230,7 @@ Respond with one concise sentence describing this transaction, and nothing else.
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Method not allowed' })
   }
 

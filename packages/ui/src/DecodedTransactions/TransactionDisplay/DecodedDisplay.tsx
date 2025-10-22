@@ -42,7 +42,9 @@ export const DecodedDisplay: React.FC<{
     // For ERC20 transfer/approve, use target
     if (
       transaction.functionName === 'transfer' ||
-      transaction.functionName === 'approve'
+      transaction.functionName === 'approve' ||
+      transaction.functionName === 'increaseAllowance' ||
+      transaction.functionName === 'decreaseAllowance'
     ) {
       return target
     }
@@ -52,6 +54,7 @@ export const DecodedDisplay: React.FC<{
   }, [transaction.functionName, target, escrowData])
 
   // Determine single NFT contract and token ID
+  // TODO: add erc1155 support later
   const nftInfo = React.useMemo(() => {
     if (transaction.functionName !== 'safeTransferFrom') return null
 
@@ -116,12 +119,22 @@ export const DecodedDisplay: React.FC<{
   const [aiSummary, setAiSummary] = React.useState<string | null>(null)
   const [isGeneratingSummary, setIsGeneratingSummary] = React.useState(false)
   const [errorSummary, setErrorSummary] = React.useState<string | null>(null)
+  const attemptedRef = React.useRef(false)
 
   // Generate AI summary when metadata is loaded
   React.useEffect(() => {
-    if (isLoadingMetadata || aiSummary || isGeneratingSummary || errorSummary) return
+    if (
+      isLoadingMetadata ||
+      aiSummary ||
+      isGeneratingSummary ||
+      errorSummary ||
+      attemptedRef.current
+    )
+      return
     const transactionData = getTransactionData()
     if (!transactionData) return
+
+    attemptedRef.current = true
 
     const abortController = new AbortController()
     const TIMEOUT_MS = 30000 // 30 seconds
@@ -148,26 +161,30 @@ export const DecodedDisplay: React.FC<{
 
         const data = await response.json()
         if (!mounted || abortController.signal.aborted) return
-        if (data && typeof data === 'string') {
+        if (data && typeof data === 'string' && data.trim()) {
           setAiSummary(data)
-        } else if (data && data.text && typeof data.text === 'string') {
+        } else if (
+          data &&
+          data.text &&
+          typeof data.text === 'string' &&
+          data.text.trim()
+        ) {
           setAiSummary(data.text)
         } else {
-          throw new Error('Invalid response format')
+          throw new Error('Empty or invalid response format')
         }
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return // Request was cancelled, this is expected
+        }
         console.error(
           `Failed to generate summary: ${error instanceof Error ? error.message : error}`
         )
         setErrorSummary(
           error instanceof Error ? error.message : (error?.toString() ?? 'Unknown error')
         )
-        if (error instanceof Error && error.name === 'AbortError') {
-          return // Request was cancelled, this is expected
-        }
       } finally {
         if (mounted) setIsGeneratingSummary(false)
-        setIsGeneratingSummary(false)
         clearTimeout(timeoutId)
       }
     }
@@ -179,7 +196,13 @@ export const DecodedDisplay: React.FC<{
       clearTimeout(timeoutId)
       abortController.abort()
     }
-  }, [isLoadingMetadata, aiSummary, isGeneratingSummary, getTransactionData])
+  }, [
+    isLoadingMetadata,
+    aiSummary,
+    isGeneratingSummary,
+    getTransactionData,
+    errorSummary,
+  ])
 
   return (
     <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>

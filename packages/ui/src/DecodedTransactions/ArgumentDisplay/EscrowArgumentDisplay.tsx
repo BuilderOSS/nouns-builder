@@ -73,10 +73,15 @@ export const EscrowArgumentDisplay: React.FC<EscrowArgumentDisplayProps> = ({
   }
 
   if (arg.name === '_milestoneAmounts') {
-    const values = arg.value
-      .toString()
-      .split(',')
-      .map((amt: string) => `${formatAmount(BigInt(amt))}`)
+    const list = Array.isArray(arg.value)
+      ? arg.value.map((v: any) => v?.toString?.() ?? String(v))
+      : typeof arg.value === 'string'
+        ? arg.value
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        : [arg.value?.toString?.() ?? String(arg.value)]
+    const values = list.map((amt: string) => `${formatAmount(BigInt(amt))}`)
 
     return (
       <>

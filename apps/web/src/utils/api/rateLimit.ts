@@ -41,22 +41,35 @@ export const withRateLimit = ({
           return handler(req, res)
         }
 
-        // Get client IP from x-forwarded-for header or fallback to 'unknown'
-        const clientIp = (req.headers['x-forwarded-for'] as string) || 'unknown'
+        // Derive client IP safely
+        const xff = req.headers['x-forwarded-for'] ?? req.headers['x-real-ip']
+        const rawIp = Array.isArray(xff)
+          ? xff[0]
+          : typeof xff === 'string'
+            ? xff.split(',')[0]?.trim()
+            : (req.socket.remoteAddress ?? 'unknown')
+        const clientIp = rawIp || 'unknown'
 
-        // Create rate limit key with endpoint-specific prefix
-        const rateLimitKey = `${keyPrefix}:ratelimit:${clientIp}`
+        // Create rate limit key scoped by route (path only) + IP
+        const route = req.url?.split('?')[0] ?? ''
+        const rateLimitKey = `${keyPrefix}:ratelimit:${route}:${clientIp}`
 
         // Increment request count
         const requests = await redisConnection.incr(rateLimitKey)
 
-        // Set expiry on first request
+        // Ensure key has expiry (handles first-request races)
         if (requests === 1) {
           await redisConnection.expire(rateLimitKey, windowSeconds)
+        } else {
+          const ttl = await redisConnection.ttl(rateLimitKey)
+          if (ttl === -1) {
+            await redisConnection.expire(rateLimitKey, windowSeconds)
+          }
         }
 
         // Check if rate limit exceeded
         if (requests > maxRequests) {
+          res.setHeader('Retry-After', windowSeconds.toString())
           res.status(429).json({
             error: 'Rate limit exceeded',
             retryAfter: windowSeconds,
@@ -72,7 +85,8 @@ export const withRateLimit = ({
           'X-RateLimit-Remaining',
           Math.max(0, maxRequests - requests).toString()
         )
-        res.setHeader('X-RateLimit-Reset', (Date.now() + windowSeconds * 1000).toString())
+        const resetAt = Math.floor(Date.now() / 1000) + windowSeconds
+        res.setHeader('X-RateLimit-Reset', resetAt.toString())
 
         // Continue to actual handler
         return handler(req, res)

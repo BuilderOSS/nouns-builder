@@ -67,6 +67,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withRateLimit({
-  keyPrefix: 'alchemy:tokenMetadata',
-})(withCors(['GET'])(handler))
+export default withCors(['GET'])(
+  withRateLimit({
+    keyPrefix: 'alchemy:tokenMetadata',
+  })(handler)
+)
