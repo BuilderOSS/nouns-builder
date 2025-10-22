@@ -1,7 +1,7 @@
 #!/usr/bin/env npx tsx
 /* eslint-disable no-console */
 
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { TESTNET_CHAINS, PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { config } from 'dotenv'
@@ -15,6 +15,7 @@ async function fetchDaoAddresses() {
   // Get environment variables
   const chainId = process.env.NEXT_PUBLIC_CHAIN_ID
   const daoTokenAddress = process.env.NEXT_PUBLIC_DAO_TOKEN_ADDRESS
+  const chainType = process.env.NEXT_PUBLIC_CHAIN_TYPE
 
   if (!chainId) {
     console.error('❌ NEXT_PUBLIC_CHAIN_ID environment variable is required')
@@ -51,6 +52,11 @@ async function fetchDaoAddresses() {
     process.exit(1)
   }
 
+  if (TESTNET_CHAINS.some((c) => c.id === parsedChainId) && chainType !== 'testnet') {
+    console.error(`❌ NEXT_PUBLIC_CHAIN_TYPE must be "testnet" to use testnet chains`)
+    process.exit(1)
+  }
+
   console.log(
     `🔄 Fetching DAO addresses for chain ${daoChain.name} (${parsedChainId}) and token ${daoTokenAddress}...`
   )
@@ -79,11 +85,10 @@ async function fetchDaoAddresses() {
     const configDir = join(process.cwd(), 'src/config')
     mkdirSync(configDir, { recursive: true })
 
-    // Create the configuration object (only store chainId in JSON)
+    // Create the configuration object
     const config = {
       chainId: parsedChainId,
       addresses,
-      generatedAt: new Date().toISOString(),
     }
 
     // Write to static file
@@ -98,35 +103,25 @@ async function fetchDaoAddresses() {
 
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { RequiredDaoContractAddresses, DaoConfig } from './types'
 
-export const DAO_CHAIN_ID: CHAIN_ID = ${parsedChainId}
+const DAO_CHAIN_ID: CHAIN_ID = ${parsedChainId}
 
-// Find the chain object from the PUBLIC_DEFAULT_CHAINS array
-export const DAO_CHAIN: Chain = PUBLIC_DEFAULT_CHAINS.find(
+const DAO_CHAIN: Chain = PUBLIC_DEFAULT_CHAINS.find(
   (chain) => chain.id === DAO_CHAIN_ID
 )!
 
-// Custom type to ensure all addresses are defined (not optional)
-export interface RequiredDaoContractAddresses {
-  token: AddressType
-  auction: AddressType
-  governor: AddressType
-  metadata: AddressType
-  treasury: AddressType
-}
-
-export const DAO_ADDRESSES: RequiredDaoContractAddresses = {
+const DAO_ADDRESSES: RequiredDaoContractAddresses = {
   token: '${addresses.token}' as AddressType,
   auction: '${addresses.auction}' as AddressType,
   governor: '${addresses.governor}' as AddressType,
   metadata: '${addresses.metadata}' as AddressType,
   treasury: '${addresses.treasury}' as AddressType,
-}
+} as const
 
-export const DAO_CONFIG = {
+export const DAO_CONFIG: DaoConfig = {
   chain: DAO_CHAIN,
   addresses: DAO_ADDRESSES,
-  generatedAt: '${config.generatedAt}',
 } as const
 `
 

@@ -12,7 +12,7 @@ if (!daoChain) {
 
 export const config = getDefaultConfig({
   appName: 'Builder Template',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'dummy_project_id',
+  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'dummy_project_id',
   chains: [daoChain],
   transports: {
     [daoChain.id]: transports[daoChain.id],
