@@ -16,7 +16,7 @@ async function fetchDaoAddresses() {
   // Get environment variables
   const chainId = process.env.NEXT_PUBLIC_CHAIN_ID
   const daoTokenAddress = process.env.NEXT_PUBLIC_DAO_TOKEN_ADDRESS
-  const chainType = process.env.NEXT_PUBLIC_CHAIN_TYPE
+  const networkType = process.env.NEXT_PUBLIC_NETWORK_TYPE
 
   if (!chainId) {
     console.error('❌ NEXT_PUBLIC_CHAIN_ID environment variable is required')
@@ -53,8 +53,8 @@ async function fetchDaoAddresses() {
     process.exit(1)
   }
 
-  if (TESTNET_CHAINS.some((c) => c.id === parsedChainId) && chainType !== 'testnet') {
-    console.error(`❌ NEXT_PUBLIC_CHAIN_TYPE must be "testnet" to use testnet chains`)
+  if (TESTNET_CHAINS.some((c) => c.id === parsedChainId) && networkType !== 'testnet') {
+    console.error(`❌ NEXT_PUBLIC_NETWORK_TYPE must be "testnet" to use testnet chains`)
     process.exit(1)
   }
 
