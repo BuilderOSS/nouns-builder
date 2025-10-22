@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/types",
   "description": "Shared TypeScript types for BuilderOSS apps",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",

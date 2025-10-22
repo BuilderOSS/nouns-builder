@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/sdk",
   "description": "SDK for interacting with Nouns Builder contracts and subgraphs",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "dependencies": {
     "graphql": "^16.11.0",
     "graphql-request": "^7.1.2",
@@ -58,9 +58,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": "0.1.3",
-    "@buildeross/types": "0.1.3",
-    "@buildeross/utils": "0.1.3",
+    "@buildeross/constants": "0.2.0",
+    "@buildeross/types": "0.2.0",
+    "@buildeross/utils": "0.2.0",
     "@sentry/nextjs": "^9.22.0",
     "viem": "^2.38.2",
     "wagmi": "^2.18.1"
