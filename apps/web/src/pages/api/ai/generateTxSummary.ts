@@ -1,6 +1,7 @@
 import { gateway } from '@ai-sdk/gateway'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID, DaoContractAddresses } from '@buildeross/types'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
 import { generateText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -58,11 +59,9 @@ const generatePrompt = (data: RequestBody): string => {
     escrowData,
   } = data
 
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
+  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
 
-  if (!chain) throw new Error(`Chain ${chainId} not found`)
-
-  // Format token amounts for better AI understanding
+  // Format numeric token amounts for model reference (reference only)
   const formatTokenAmounts = (): string => {
     if (!tokenMetadata) return ''
 
@@ -78,10 +77,9 @@ const generatePrompt = (data: RequestBody): string => {
 
     for (const key of amountKeys) {
       const arg = transaction.args[key]
-      if (arg && arg.value) {
+      if (arg && arg.value !== undefined && arg.value !== null) {
         try {
           if (key === '_milestoneAmounts' && typeof arg.value === 'string') {
-            // Handle comma-separated milestone amounts
             const amounts = arg.value.split(',').map((amt) => {
               const formatted = formatUnits(BigInt(amt.trim()), tokenMetadata.decimals)
               return `${formatted} ${tokenMetadata.symbol}`
@@ -101,89 +99,124 @@ const generatePrompt = (data: RequestBody): string => {
     }
 
     return formattedAmounts.length > 0
-      ? `\n### Formatted Amounts\n${formattedAmounts.map((amt) => `- ${amt}`).join('\n')}\n`
+      ? `\n(For internal reference only — do not copy these values verbatim)\n${formattedAmounts
+          .map((amt) => `- ${amt}`)
+          .join('\n')}\n`
       : ''
   }
 
-  return `You are an expert blockchain analyst who specializes in explaining complex smart contract activity in simple, conversational English.
-Your goal is to describe what this transaction does so that a non-technical person could understand it.
+  const safeFunctionName = transaction.functionName.replace(/[^a-zA-Z0-9]/g, '')
+  const contractType =
+    target === addresses.token
+      ? '- DAO token contract'
+      : target === addresses.governor
+        ? '- DAO governor contract'
+        : target === addresses.treasury
+          ? '- DAO treasury contract'
+          : target === addresses.metadata
+            ? '- DAO metadata contract'
+            : target === addresses.auction
+              ? '- DAO auction contract'
+              : ''
 
-Focus primarily on:
-1. The purpose of the transaction (what action it performs)
-2. Who the participants are (sender, receiver, or contract)
-3. The assets involved (token/NFT type and amount)
-
-Context for common transaction types:
-- If the transaction looks like a token "approve" call, explain that it allows another address to spend tokens.
-- If it looks like a transfer or escrow deposit, describe the asset movement and purpose.
-- If it involves NFTs, mention ownership transfer.
-- All transfers are from the DAO's treasury, not from individual users.
-- If there are mint transactions on the token contract, these are minting governance tokens (ERC-721 NFTs) to addresses.
+  return `You are an expert blockchain analyst who explains smart contract transactions in clear, plain English for a general audience.
+Write one short, plain-English sentence describing what this transaction does.
 
 ---
 
-### Transaction Overview
-- Function: ${transaction.functionName}
-- Target Contract: ${target}
-- Network: ${chain.name} (ID: ${chain.id})
+Writing Rules:
+- Start with a capitalized verb in present tense (e.g., Transfers, Approves, Mints, Deposits).
+- Write exactly one sentence and end it with a period.
+- Use correct singular/plural forms (e.g., "1 NFT" vs "2 NFTs").
+- Use natural amount formatting (omit extra zeros).
+- Be clear, simple, and factual — avoid technical jargon, markdown, or speculation.
+- If token symbol or amount is missing, use general words like "tokens" or "assets".
+- Only use relevant argument data to describe the transaction’s action.
 
-### DAO Contract Context
-The following are the core contracts for this DAO:
-- Token Contract (${addresses.token}): The DAO's ERC-721 governance token (NFT collection)
-- Governor Contract (${addresses.governor}): The DAO's proposal manager and transaction scheduler
-- Treasury Contract (${addresses.treasury}): The DAO's treasury and transaction executor
-- Metadata Contract (${addresses.metadata}): The DAO's artwork generator and renderer
-- Auction Contract (${addresses.auction}): The DAO's auction house
+---
 
-${target === addresses.token ? '🎯 This transaction targets the TOKEN CONTRACT (governance NFT collection)' : ''}
-${target === addresses.governor ? '🎯 This transaction targets the GOVERNOR CONTRACT (proposal management)' : ''}
-${target === addresses.treasury ? '🎯 This transaction targets the TREASURY CONTRACT (DAO treasury)' : ''}
-${target === addresses.metadata ? '🎯 This transaction targets the METADATA CONTRACT (artwork generation)' : ''}
-${target === addresses.auction ? '🎯 This transaction targets the AUCTION CONTRACT (auction house)' : ''}
+DAO Contracts and Roles:
+Token (${walletSnippet(addresses.token)}) — Governance NFTs  
+Governor (${walletSnippet(addresses.governor)}) — Proposal management and transaction scheduling
+Treasury (${walletSnippet(addresses.treasury)}) — Treasury and transaction execution
+Metadata (${walletSnippet(addresses.metadata)}) — Artwork generation and rendering
+Auction (${walletSnippet(addresses.auction)}) — Auction operations
 
-### Arguments
+---
+
+Output Examples (for style and brevity; not related to this transaction):
+
+Example 1 — Minting Governance NFTs  
+mintBatchTo (DAO token contract); amount = 2; recipient = 0x2feb...AEd6a  
+Mints 2 governance NFTs to the address 0x2feb...AEd6a.
+
+Example 1a — Singular NFT Mint  
+mintTo (DAO token contract); amount = 1; recipient = 0x1111...1111  
+Mints 1 governance NFT to the address 0x1111...1111.
+
+Example 2 — Treasury Token Transfer  
+transfer (DAO treasury contract); to = 0xE5f6...8bEb; value = 780 USDC  
+Transfers 780 USDC from the DAO's treasury to the address 0xE5f6...8bEb.
+
+Example 3 — Approving Token Spend  
+approve (USDC token contract); spender = 0xA0b8...0ce3; value = 1,000 DAI  
+Approves address 0xA0b8...0ce3 to spend up to 1,000 DAI tokens.
+
+Example 4 — Unclear Function  
+executeProposal (governor contract); proposalId = 42  
+Calls the executeProposal function on the governor contract.
+
+---
+
+Transaction Overview:
+Function: ${transaction.functionName} | Network: ${chain.name} (ID: ${chain.id})  
+Target: ${target} ${contractType}
+
+Below are the transaction arguments — use only the relevant information to describe the action:
 ${JSON.stringify(transaction.args, null, 2)}
+
+${formatTokenAmounts()}
 
 ${
   tokenMetadata
-    ? `### Token Information
+    ? `Token Information:
 - Symbol: ${tokenMetadata.symbol}
 - Name: ${tokenMetadata.name}
 - Decimals: ${tokenMetadata.decimals}
 `
     : ''
-}
-
-${
-  nftMetadata
-    ? `### NFT Information
+}${
+    nftMetadata
+      ? `NFT Information:
 - Name: ${nftMetadata.name || 'Unknown'}
 - Type: ${nftMetadata.tokenType}
 `
-    : ''
-}
-
-${
-  escrowData
-    ? `### Escrow Information
+      : ''
+  }${
+    escrowData
+      ? `Escrow Information:
 - Client: ${escrowData.clientAddress || 'N/A'}
 - Provider: ${escrowData.providerAddress || 'N/A'}
 - Token: ${escrowData.tokenAddress || 'N/A'}
-- Termination Time: ${escrowData.terminationTime ? new Date(Number(escrowData.terminationTime) * 1000).toLocaleString() : 'N/A'}
+- Termination Time: ${
+          escrowData.terminationTime
+            ? new Date(Number(escrowData.terminationTime) * 1000).toLocaleString()
+            : 'N/A'
+        }
 `
-    : ''
-}${formatTokenAmounts()}
+      : ''
+  }
+
 ---
 
-### Instructions
-Write a single, concise sentence describing what this transaction does in plain English.
+Fallback Rule (only if purpose cannot be determined):
+If you cannot confidently infer the action from the name, arguments, or DAO context:
+Calls the ${safeFunctionName} function on thpe}.
 
-Respond ONLY with one short sentence — no headers, labels, or lists.
+---
 
-Example of desired output:
-"Approves the escrow contract to spend up to 1,000 DAI tokens."
-
-Make the tone simple, informative, and human-readable. Avoid jargon like "function selector" or "ABI encoding."`
+Final Instruction:
+Respond with one concise sentence describing this transaction, and nothing else.`
 }
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -194,11 +227,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const requestData: RequestBody = req.body
 
-    // Validate required fields
-    if (!requestData.chainId || !requestData.transaction || !requestData.target) {
-      return res
-        .status(400)
-        .json({ error: 'chainId, transaction, and target are required' })
+    if (!requestData.chainId || !requestData.addresses) {
+      return res.status(400).json({ error: 'chainId and addresses are required' })
+    }
+
+    if (!PUBLIC_ALL_CHAINS.some((c) => c.id === requestData.chainId))
+      return res.status(400).json({ error: 'chainId not found' })
+
+    if (!requestData.addresses || Object.values(requestData.addresses).length < 5)
+      return res.status(400).json({ error: 'addresses not found' })
+
+    if (!requestData.transaction || !requestData.target) {
+      return res.status(400).json({ error: 'transaction and target are required' })
     }
 
     if (!requestData.transaction.functionName || !requestData.transaction.args) {
