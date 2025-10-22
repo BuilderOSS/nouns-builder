@@ -1,18 +1,20 @@
+import { overflowEllipsis } from '@buildeross/auction-ui'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { AddressType } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { useState } from 'react'
-import { FallbackNextImage } from 'src/components/FallbackNextImage'
 import { formatEther } from 'viem'
 import { useWatchContractEvent } from 'wagmi'
 
-import { overflowEllipsis } from '../auction/components/Auction.css'
 import { AuctionPaused } from './AuctionPaused'
 import { BidActionButton } from './BidActionButton'
 import { DashboardDaoProps } from './Dashboard'
@@ -30,24 +32,13 @@ import {
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
-  handleSelectAuction: (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    tokenId?: number | string | bigint
-  ) => void
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
-  const {
-    currentAuction,
-    chainId,
-    auctionAddress,
-    handleMutate,
-    tokenAddress,
-    handleSelectAuction,
-  } = props
-  const chain =
-    PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId) ?? ({} as Partial<Chain>)
+  const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
+
+  const { getAuctionLink } = useLinks()
+  const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
@@ -86,15 +77,13 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   }
   const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
 
+  if (!chain) {
+    console.error(`Chain with ID ${chainId} not found in PUBLIC_ALL_CHAINS`)
+    return null
+  }
+
   if (!currentAuction) {
-    return (
-      <AuctionPaused
-        {...props}
-        handleSelectAuction={() => handleSelectAuction(chainId, tokenAddress)}
-        tokenAddress={tokenAddress}
-        chain={chain}
-      />
-    )
+    return <AuctionPaused {...props} tokenAddress={tokenAddress} chain={chain} />
   }
 
   const bidText = currentAuction.highestBid?.amount
@@ -105,30 +94,31 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
 
   return (
     <Flex className={outerAuctionCard}>
-      <Flex
+      <Link
         className={auctionCardBrand}
-        onClick={() =>
-          handleSelectAuction(chainId, tokenAddress, currentAuction?.token?.tokenId)
-        }
+        link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
       >
         <Box className={daoAvatarBox}>
-          <FallbackNextImage
-            className={daoAvatar}
-            srcList={getFetchableUrls(tokenImage)}
-            unoptimized
-            layout="fixed"
-            alt=""
-          />
+          {tokenImage && (
+            <FallbackImage
+              className={daoAvatar}
+              srcList={getFetchableUrls(tokenImage)}
+              alt=""
+            />
+          )}
         </Box>
         <Box>
           <Flex mb="x1" align="center">
             {chain.icon && (
               <Image
                 src={chain.icon}
-                layout="fixed"
-                objectFit="contain"
-                style={{ borderRadius: '12px', maxHeight: '22px' }}
-                alt=""
+                style={{
+                  borderRadius: '12px',
+                  maxHeight: '22px',
+                  maxWidth: '22px',
+                  objectFit: 'contain',
+                }}
+                alt={chain.name}
                 height={22}
                 width={22}
               />
@@ -139,7 +129,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
           </Flex>
           <Text className={daoTokenName}>{currentAuction.token.name}</Text>
         </Box>
-      </Flex>
+      </Link>
       <Flex className={statsBox}>
         <Box className={stats}>
           <Text fontSize={16} color="text3" mb={'x1'}>

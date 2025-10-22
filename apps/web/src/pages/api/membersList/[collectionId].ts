@@ -1,6 +1,7 @@
 import { votersRequest } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/api/cors'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { collectionId, chainId, page, limit } = req.query
@@ -82,4 +83,5 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(500).json({ error: (error as Error)?.message ?? 'Internal Server Error' })
   }
 }
-export default handler
+
+export default withCors(['GET'])(handler)

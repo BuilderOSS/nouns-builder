@@ -1,7 +1,15 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import {
+  Activity,
+  PreAuction,
+  PreAuctionForm,
+  SectionHandler,
+  SmartContracts,
+} from '@buildeross/dao-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { atoms, Flex, Text, theme } from '@buildeross/zord'
@@ -11,15 +19,7 @@ import React from 'react'
 import { Meta } from 'src/components/Meta'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import {
-  Activity,
-  PreAuction,
-  PreAuctionForm,
-  SectionHandler,
-  SmartContracts,
-} from 'src/modules/dao'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { DaoContractAddresses, useChainStore, useDaoStore } from 'src/stores'
 import { isAddress } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 import { readContract } from 'wagmi/actions'
@@ -44,33 +44,55 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     chainId: chainId,
   })
 
-  const openAdminTab = React.useCallback(async () => {
-    const nextQuery = { ...query } // Get existing query params
-    nextQuery['tab'] = 'admin'
-
-    await push(
-      {
-        pathname,
-        query: nextQuery,
-      },
-      undefined,
-      { shallow: true } // Prevent full page reload
-    )
-  }, [push, pathname, query])
-
   const openTokenPage = React.useCallback(
     async (tokenId: number) => {
-      await push(`/dao/${chain.slug}/${addresses.token}/${tokenId}`)
+      await push({
+        pathname: `/dao/[network]/[token]/[tokenId]`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          tokenId: tokenId.toString(),
+        },
+      })
     },
     [push, chain.slug, addresses.token]
   )
 
+  const openTab = React.useCallback(
+    async (tab: string, scroll?: boolean) => {
+      const nextQuery = { ...query } // Get existing query params
+      nextQuery['tab'] = tab
+
+      await push(
+        {
+          pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true, scroll }
+      )
+    },
+    [push, pathname, query]
+  )
+
   const openProposalCreatePage = React.useCallback(async () => {
-    await push(`/dao/${chain.slug}/${addresses.token}/proposal/create`)
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
   }, [push, chain.slug, addresses.token])
 
   const openProposalReviewPage = React.useCallback(async () => {
-    await push(`/dao/${chain.slug}/${addresses.token}/proposal/review`)
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
   }, [push, chain.slug, addresses.token])
 
   const sections = [
@@ -127,13 +149,13 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
         chain={chain}
         collectionAddress={collectionAddress}
         onOpenAuction={openTokenPage}
-        onOpenSettings={openAdminTab}
+        onOpenSettings={() => openTab('admin')}
       />
 
       <SectionHandler
         sections={sections}
         activeTab={activeTab}
-        basePath={`/dao/${chain.slug}/${collectionAddress}`}
+        onTabChange={(tab) => openTab(tab, false)}
       />
     </Flex>
   )

@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/utils",
   "description": "Shared utilities and helper functions for BuilderOSS apps",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "dependencies": {
     "bignumber.js": "^9.3.0",
     "tinycolor2": "^1.4.2"
@@ -14,6 +14,7 @@
     "@buildeross/types": "workspace:*",
     "@types/node": "^22.15.21",
     "@types/tinycolor2": "^1.4.6",
+    "bs58": "^6.0.0",
     "eslint": "8.57.1",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3",
@@ -50,11 +51,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": "0.1.3",
-    "@buildeross/ipfs-service": "0.1.3",
-    "@buildeross/types": "0.1.3",
-    "viem": "^2.30.0",
-    "wagmi": "^2.15.4",
+    "@buildeross/constants": "0.2.0",
+    "@buildeross/ipfs-service": "0.2.0",
+    "@buildeross/types": "0.2.0",
+    "viem": "^2.38.2",
+    "wagmi": "^2.18.1",
     "yup": "^1.6.1"
   },
   "publishConfig": {

@@ -1,22 +1,13 @@
-import { BytesType, CHAIN_ID } from '@buildeross/types'
+import {
+  BytesType,
+  CHAIN_ID,
+  SimulationOutput,
+  SimulationResult,
+} from '@buildeross/types'
 import axios from 'axios'
 import { Address, isAddress } from 'viem'
 
 import { InvalidRequestError } from './errors'
-
-export type SimulationOutput = {
-  id: string
-  status: boolean
-  gas_used: number
-  block_number: number
-  from: string
-  to: string
-  input: string
-  value: string
-  // the following are added manually after simulation
-  index: number
-  url: string
-}
 
 export type SimulationRequestBody = {
   treasuryAddress: Address
@@ -26,14 +17,9 @@ export type SimulationRequestBody = {
   values: string[]
 }
 
-export type SimulationResult = {
-  simulations: SimulationOutput[]
-  success: boolean
-  totalGasUsed: string
-  error: string | null
-}
-
-const { TENDERLY_USER, TENDERLY_PROJECT, TENDERLY_ACCESS_KEY } = process.env
+const TENDERLY_USER = process.env.TENDERLY_USER
+const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT
+const TENDERLY_ACCESS_KEY = process.env.TENDERLY_ACCESS_KEY
 
 const getSimulationUrl = (simulation: SimulationOutput) => {
   return `https://dashboard.tenderly.co/shared/simulation/${simulation.id}`

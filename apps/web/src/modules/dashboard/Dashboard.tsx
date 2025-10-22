@@ -13,8 +13,8 @@ import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
-import { DaoFeed } from '../dao'
 import { DaoAuctionCard } from './DaoAuctionCard'
+import { DaoFeed } from './DaoFeed'
 import { DaoProposals } from './DaoProposals'
 import { DashboardLayout, DashPage } from './DashboardLayout'
 import { DashConnect } from './DashConnect'
@@ -83,18 +83,10 @@ const fetchDashboardData = async (address: string) => {
 }
 
 export type DashboardProps = {
-  handleSelectAuction: (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    tokenId?: number | string | bigint
-  ) => void
-  handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: string) => void
+  handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
 }
 
-const Dashboard: React.FC<DashboardProps> = ({
-  handleSelectAuction,
-  handleOpenCreateProposal,
-}) => {
+export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
   const { address } = useAccount()
 
   const { data, error, isLoading, mutate } = useSWR(
@@ -115,10 +107,9 @@ const Dashboard: React.FC<DashboardProps> = ({
         {...dao}
         userAddress={address}
         handleMutate={mutate}
-        handleSelectAuction={handleSelectAuction}
       />
     ))
-  }, [data, address, mutate, handleSelectAuction])
+  }, [data, address, mutate])
 
   const proposalList = useMemo(() => {
     if (!data) return null
@@ -207,5 +198,3 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return <DashboardLayout auctionCards={auctionCards} daoProposals={proposalList} />
 }
-
-export default Dashboard

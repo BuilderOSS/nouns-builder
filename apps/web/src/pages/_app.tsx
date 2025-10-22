@@ -1,5 +1,10 @@
 import '@buildeross/zord/index.css'
 import '@buildeross/ui/index.css'
+import '@buildeross/auction-ui/index.css'
+import '@buildeross/proposal-ui/index.css'
+import '@buildeross/dao-ui/index.css'
+import '@buildeross/create-proposal-ui/index.css'
+import '@buildeross/create-dao-ui/index.css'
 import '@fontsource/inter/400.css'
 import '@fontsource/inter/600.css'
 import '@fontsource/londrina-solid'
@@ -10,15 +15,18 @@ import 'flatpickr/dist/themes/light.css'
 import 'react-mde/lib/styles/css/react-mde-all.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
+import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
+import Link from 'next/link'
 import NextNProgress from 'nextjs-progressbar'
 import type { ReactElement, ReactNode } from 'react'
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
+import { LinksProvider } from 'src/components/LinksProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
@@ -61,7 +69,11 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
               options={{ showSpinner: false }}
             />
             <FrameProvider>
-              {getLayout(<Component {...pageProps} err={err} />)}
+              <LinksProvider>
+                <LinkComponentProvider LinkComponent={Link}>
+                  {getLayout(<Component {...pageProps} err={err} />)}
+                </LinkComponentProvider>
+              </LinksProvider>
             </FrameProvider>
           </SWRConfig>
           <NetworkController.Mainnet>

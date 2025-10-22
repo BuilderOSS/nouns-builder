@@ -1,10 +1,3 @@
-import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
-import { Box, Flex, Text } from '@buildeross/zord'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useRouter } from 'next/router'
-import React from 'react'
-import { Meta } from 'src/components/Meta'
-import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
 import {
   AllocationForm,
   Artwork,
@@ -16,15 +9,23 @@ import {
   ReviewAndDeploy,
   useFormStore,
   VetoForm,
-} from 'src/modules/create-dao'
-import { useChainStore } from 'src/stores'
-import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/styles.css'
+} from '@buildeross/create-dao-ui'
+import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
+import { useChainStore } from '@buildeross/stores'
+import { Uploading } from '@buildeross/ui/Uploading'
+import { Box, Flex, Text } from '@buildeross/zord'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useRouter } from 'next/router'
+import React from 'react'
+import { Meta } from 'src/components/Meta'
+import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
+import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/create.css'
 import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 
 const CreatePage: NextPageWithLayout = () => {
-  const { activeSection } = useFormStore()
+  const { activeSection, isUploadingToIPFS, ipfsUploadProgress } = useFormStore()
   const { address } = useAccount()
   const chain = useChainStore((x) => x.chain)
 
@@ -33,7 +34,13 @@ const CreatePage: NextPageWithLayout = () => {
   const { push } = useRouter()
   const handleSuccessfulDeploy = React.useCallback(
     async (token: string) => {
-      await push(`/dao/${chain.slug}/${token}`)
+      await push({
+        pathname: `/dao/[network]/[token]`,
+        query: {
+          network: chain.slug,
+          token,
+        },
+      })
     },
     [chain.slug, push]
   )
@@ -189,6 +196,10 @@ const CreatePage: NextPageWithLayout = () => {
           </Flex>
         </Flex>
       </Box>
+      <Uploading
+        isUploadingToIPFS={isUploadingToIPFS}
+        ipfsUploadProgress={ipfsUploadProgress}
+      />
     </>
   )
 }

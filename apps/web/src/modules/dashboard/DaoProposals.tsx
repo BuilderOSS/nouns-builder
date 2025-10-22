@@ -1,13 +1,13 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
-import Link from 'next/link'
 import React from 'react'
-import { FallbackNextImage } from 'src/components/FallbackNextImage'
 
 import { DaoProposalCard } from './DaoProposalCard'
 import { DashboardDaoProps } from './Dashboard'
@@ -24,8 +24,9 @@ export const DaoProposals = ({
   onOpenCreateProposal,
 }: DashboardDaoProps & {
   userAddress?: AddressType
-  onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: string) => void
+  onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
 }) => {
+  const { getDaoLink } = useLinks()
   const { isGovernanceDelayed, isLoading: isLoadingDelayedGovernance } =
     useDelayedGovernance({
       tokenAddress: tokenAddress,
@@ -42,34 +43,28 @@ export const DaoProposals = ({
 
   const isLoading = isLoadingDelayedGovernance || isLoadingVotes
 
-  const currentChainSlug = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)?.slug
-
   return (
     <Box mb={'x10'}>
       <Flex justify={'space-between'} mb={'x6'} align="center">
-        <Link href={`/dao/${currentChainSlug}/${tokenAddress}`} passHref>
-          <Flex align={'center'}>
-            {daoImage ? (
-              <Box mr="x4">
-                <FallbackNextImage
-                  srcList={getFetchableUrls(daoImage)}
-                  layout="fixed"
-                  objectFit="contain"
-                  style={{ borderRadius: '12px' }}
-                  alt=""
-                  height={48}
-                  width={48}
-                />
-              </Box>
-            ) : (
-              <Box mr="x4" borderRadius="phat">
-                <Avatar address={tokenAddress ?? undefined} size="52" />
-              </Box>
-            )}
-            <Text fontSize={20} fontWeight="label" className={daoName} mr={'x2'}>
-              {name}
-            </Text>
-          </Flex>
+        <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
+          {daoImage ? (
+            <Box mr="x4">
+              <FallbackImage
+                srcList={getFetchableUrls(daoImage)}
+                style={{ borderRadius: '12px', objectFit: 'contain' }}
+                alt=""
+                height={48}
+                width={48}
+              />
+            </Box>
+          ) : (
+            <Box mr="x4" borderRadius="phat">
+              <Avatar address={tokenAddress ?? undefined} size="52" />
+            </Box>
+          )}
+          <Text fontSize={20} fontWeight="label" className={daoName} mr={'x2'}>
+            {name}
+          </Text>
         </Link>
 
         {onOpenCreateProposal && (
@@ -89,10 +84,9 @@ export const DaoProposals = ({
         {proposals.map((proposal) => (
           <DaoProposalCard
             key={proposal.proposalNumber}
-            chainId={chainId}
-            currentChainSlug={currentChainSlug}
-            tokenAddress={tokenAddress}
             userAddress={userAddress}
+            chainId={chainId}
+            collectionAddress={tokenAddress}
             {...proposal}
           />
         ))}

@@ -1,5 +1,5 @@
 import { walletSnippet } from '@buildeross/utils'
-import { Address, isAddress } from 'viem'
+import { Address, getAddress, isAddress } from 'viem'
 import { useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 
 export type EnsData = {
@@ -11,9 +11,10 @@ export type EnsData = {
 }
 
 export const useEnsData = (addressOrName?: string): EnsData => {
-  const isAddressValid = !!addressOrName && isAddress(addressOrName)
-  const inputAddress = isAddressValid ? (addressOrName as Address) : undefined
-  const inputName = isAddressValid ? undefined : (addressOrName as string)
+  const isAddressValid = !!addressOrName && isAddress(addressOrName, { strict: false })
+  const inputAddress = isAddressValid ? getAddress(addressOrName) : undefined
+  const inputName =
+    isAddressValid || !addressOrName ? undefined : addressOrName.toLowerCase()
 
   const { data: ensName, isLoading: ensNameLoading } = useEnsName({
     address: inputAddress,
@@ -39,9 +40,9 @@ export const useEnsData = (addressOrName?: string): EnsData => {
     },
   })
 
-  const ethAddress = (inputAddress?.toLowerCase() ??
-    ensAddress?.toLowerCase() ??
-    undefined) as `0x${string}` | undefined
+  const ethAddress = (inputAddress ?? ensAddress ?? undefined) as
+    | `0x${string}`
+    | undefined
 
   const finalEnsName = ensName ?? (ensAddress ? inputName : undefined)
 
@@ -50,10 +51,10 @@ export const useEnsData = (addressOrName?: string): EnsData => {
   const isLoading = ensNameLoading || ensAddressLoading || ensAvatarLoading
 
   return {
-    ensName: finalEnsName,
+    ensName: finalEnsName?.toLowerCase(),
     isLoading,
     ensAvatar: ensAvatar ?? undefined,
-    ethAddress,
+    ethAddress: ethAddress ? getAddress(ethAddress) : undefined,
     displayName,
   }
 }

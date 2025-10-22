@@ -1,7 +1,7 @@
 import { Flex } from '@buildeross/zord'
-import { ExploreMyDaos } from 'src/components/Explore'
 import { Meta } from 'src/components/Meta'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
+import { ExploreMyDaos } from 'src/modules/explore'
 
 import { NextPageWithLayout } from './_app'
 

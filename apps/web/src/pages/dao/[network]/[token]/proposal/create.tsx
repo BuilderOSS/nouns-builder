@@ -1,35 +1,39 @@
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import {
+  CreateProposalHeading,
+  SelectTransactionType,
+  TRANSACTION_FORM_OPTIONS,
+  TransactionForm,
+  TransactionFormType,
+  TransactionTypeIcon,
+  TwoColumnLayout,
+} from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useVotes } from '@buildeross/hooks/useVotes'
+import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
+import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import {
-  CreateProposalHeading,
-  DropdownSelect,
-  SelectTransactionType,
-  TRANSACTION_FORM_OPTIONS,
-  TRANSACTION_TYPES,
-  TransactionForm,
-  TransactionFormType,
-  TransactionType,
-  TransactionTypeIcon,
-  TwoColumnLayout,
-  useProposalStore,
-} from 'src/modules/create-proposal'
-import { useRendererBaseFix } from 'src/modules/create-proposal/hooks'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore, useDaoStore } from 'src/stores'
 import { notFoundWrap } from 'src/styles/404.css'
 import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
+
+const createSelectOption = (type: TransactionFormType) => ({
+  value: type,
+  label: TRANSACTION_TYPES[type].title,
+  icon: <TransactionTypeIcon transactionType={type} />,
+})
 
 const CreateProposalPage: NextPageWithLayout = () => {
   const { query, push } = useRouter()
@@ -74,35 +78,36 @@ const CreateProposalPage: NextPageWithLayout = () => {
     governorAddress: addresses.governor,
   })
 
-  const createSelectOption = (type: TransactionFormType) => ({
-    value: type,
-    label: TRANSACTION_TYPES[type].title,
-    icon: <TransactionTypeIcon transactionType={type} />,
-  })
+  const isL1Chain = useMemo(() => L1_CHAINS.some((id) => id === chain.id), [chain.id])
 
-  const isL1Chain = L1_CHAINS.find((l1ChainIds) => l1ChainIds === chain.id)
-  const isAllowedMigrationDao = token
-    ? !!ALLOWED_MIGRATION_DAOS.find((x) => isAddressEqual(x, token))
-    : false
+  const isAllowedMigrationDao = useMemo(
+    () =>
+      token ? !!ALLOWED_MIGRATION_DAOS.find((x) => isAddressEqual(x, token)) : false,
+    [token]
+  )
+
   const isEASSupported = useMemo(() => isChainIdSupportedByEAS(chain.id), [chain.id])
 
-  const TRANSACTION_FORM_OPTIONS_FILTERED = TRANSACTION_FORM_OPTIONS.filter((x) => {
-    if (x === TransactionType.MIGRATION && (!isL1Chain || !isAllowedMigrationDao))
-      return false
-    if (x === TransactionType.PAUSE_AUCTIONS && paused) return false
-    if (x === TransactionType.RESUME_AUCTIONS && !paused) return false
-    if (x === TransactionType.FIX_RENDERER_BASE && !shouldFixRendererBase) return false
-    if (x === TransactionType.ESCROW_DELEGATE && !isEASSupported) return false
-    return true
-  })
+  const TRANSACTION_FORM_OPTIONS_FILTERED = useMemo(
+    () =>
+      TRANSACTION_FORM_OPTIONS.filter((x) => {
+        if (x === TransactionType.MIGRATION && (!isL1Chain || !isAllowedMigrationDao))
+          return false
+        if (x === TransactionType.PAUSE_AUCTIONS && paused) return false
+        if (x === TransactionType.RESUME_AUCTIONS && !paused) return false
+        if (x === TransactionType.FIX_RENDERER_BASE && !shouldFixRendererBase)
+          return false
+        if (x === TransactionType.ESCROW_DELEGATE && !isEASSupported) return false
+        return true
+      }),
+    [isL1Chain, isAllowedMigrationDao, paused, shouldFixRendererBase, isEASSupported]
+  )
 
-  const options = TRANSACTION_FORM_OPTIONS_FILTERED.map(createSelectOption)
+  const options = useMemo(() => {
+    return TRANSACTION_FORM_OPTIONS_FILTERED.map(createSelectOption)
+  }, [TRANSACTION_FORM_OPTIONS_FILTERED])
 
-  const handleDropdownOnChange = (value: TransactionFormType) => {
-    setTransactionType(value)
-  }
-
-  const openDaoActivityPage = React.useCallback(async () => {
+  const openDaoActivityPage = useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]`,
       query: {
@@ -113,13 +118,23 @@ const CreateProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
-  const openDaoAdminPage = React.useCallback(async () => {
+  const openDaoAdminPage = useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]`,
       query: {
         network: chain.slug,
         token: addresses.token,
         tab: 'admin',
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const openProposalReviewPage = useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
       },
     })
   }, [push, chain.slug, addresses.token])
@@ -150,9 +165,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
     >
       <CreateProposalHeading
         title={'Create Proposal'}
-        transactionType={transactionType}
-        showDocsLink
         handleBack={openDaoActivityPage}
+        showDocsLink
+        showQueue
+        onOpenProposalReview={openProposalReviewPage}
       />
       {transactionType ? (
         <TwoColumnLayout
@@ -161,7 +177,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
               <DropdownSelect
                 value={transactionType}
                 options={options}
-                onChange={(value) => handleDropdownOnChange(value)}
+                onChange={(value) => setTransactionType(value)}
               />
               <TransactionForm type={transactionType} />
             </Stack>

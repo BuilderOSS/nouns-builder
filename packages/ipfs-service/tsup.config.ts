@@ -1,9 +1,9 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['index.ts'],
+  entry: ['src/*.ts', '!src/**/*.test.ts'],
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
-  external: ['ipfs-http-client', 'ipfs-core-types'],
+  external: ['@buildeross/constants'],
 })

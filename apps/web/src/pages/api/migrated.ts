@@ -5,6 +5,7 @@ import { AddressType, L2MigratedResponse } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/api/cors'
 import { readContract } from 'wagmi/actions'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -46,4 +47,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } as L2MigratedResponse)
 }
 
-export default handler
+export default withCors(['GET'])(handler)

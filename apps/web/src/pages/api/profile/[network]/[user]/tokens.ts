@@ -7,6 +7,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { NotFoundError } from 'src/services/errors'
+import { withCors } from 'src/utils/api/cors'
 import { getAddress } from 'viem'
 
 export interface UserTokensResponse {
@@ -52,4 +53,4 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default handler
+export default withCors(['GET'])(handler)

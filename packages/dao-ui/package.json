@@ -1,0 +1,94 @@
+{
+  "name": "@buildeross/dao-ui",
+  "description": "DAO UI components for BuilderOSS apps",
+  "version": "0.2.0",
+  "dependencies": {
+    "@vanilla-extract/css": "^1.17.2",
+    "axios": "^1.12.2",
+    "dayjs": "^1.11.13",
+    "formik": "^2.4.6",
+    "framer-motion": "^12.12.1",
+    "html-react-parser": "^5.2.5",
+    "lodash": "^4.17.21",
+    "swr": "^2.3.3",
+    "yup": "^1.6.1"
+  },
+  "devDependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/hooks": "workspace:*",
+    "@buildeross/ipfs-service": "workspace:*",
+    "@buildeross/proposal-ui": "workspace:*",
+    "@buildeross/sdk": "workspace:*",
+    "@buildeross/stores": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/ui": "workspace:*",
+    "@buildeross/utils": "workspace:*",
+    "@buildeross/zord": "workspace:*",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/lodash": "^4.17.17",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.1.5",
+    "@vanilla-extract/esbuild-plugin": "^2.3.16",
+    "@vanilla-extract/vite-plugin": "^5.0.2",
+    "@vitejs/plugin-react": "^4.5.0",
+    "eslint": "8.57.1",
+    "jsdom": "^26.1.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./index.css": "./dist/index.css"
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "peerDependencies": {
+    "@buildeross/constants": "0.2.0",
+    "@buildeross/hooks": "0.2.0",
+    "@buildeross/ipfs-service": "0.2.0",
+    "@buildeross/proposal-ui": "0.2.0",
+    "@buildeross/sdk": "0.2.0",
+    "@buildeross/stores": "0.2.0",
+    "@buildeross/types": "0.2.0",
+    "@buildeross/ui": "0.2.0",
+    "@buildeross/utils": "0.2.0",
+    "@buildeross/zord": "0.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "viem": "^2.38.2",
+    "wagmi": "^2.18.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/dao-ui"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf .turbo dist",
+    "lint": "eslint src --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
+}

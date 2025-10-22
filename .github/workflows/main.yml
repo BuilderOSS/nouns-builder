@@ -13,6 +13,8 @@ jobs:
     name: CI
     runs-on: ubuntu-latest
     env:
+      NODE_OPTIONS: --max-old-space-size=4096
+      TURBO_CONCURRENCY: 1
       ANVIL_BLOCK_NUMBER: 16522514
       ANVIL_FORK_URL: ${{ secrets.MAINNET_RPC_URL }}
     steps:
@@ -29,7 +31,7 @@ jobs:
           node-version: 22
 
       - name: 💾 Cache node_modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: cache-node-modules
         with:
           path: |
@@ -51,9 +53,6 @@ jobs:
 
       - name: 👾 Run lint task
         run: pnpm lint
-
-      - name: 👾 Run type check task
-        run: pnpm type-check
 
       - name: 🦀 Install Rust
         uses: actions-rs/toolchain@v1

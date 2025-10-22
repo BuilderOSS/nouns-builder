@@ -3,7 +3,7 @@ import React, { forwardRef } from 'react'
 
 type FallbackImageProps = Omit<
   React.ImgHTMLAttributes<HTMLImageElement>,
-  'src' | 'alt' | 'onError'
+  'src' | 'srcSet' | 'onError'
 > & {
   srcList?: string[]
   alt?: string

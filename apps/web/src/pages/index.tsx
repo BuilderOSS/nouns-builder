@@ -1,21 +1,22 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { Stack } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'
-import Everything from 'src/components/Home/Everything'
-import FAQ from 'src/components/Home/FAQ'
-import GetStarted from 'src/components/Home/GetStarted'
-import Marquee from 'src/components/Home/Marquee'
-import Twitter from 'src/components/Home/Twitter'
-import VisitAlternate from 'src/components/Home/VisitAlternate'
 import { Meta } from 'src/components/Meta'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'
 import { HomeLayout } from 'src/layouts/HomeLayout'
 import { LayoutWrapper } from 'src/layouts/LayoutWrapper'
-import { DaoFeed } from 'src/modules/dao'
-import Dashboard from 'src/modules/dashboard/Dashboard'
+import { DaoFeed, Dashboard } from 'src/modules/dashboard'
+import {
+  Everything,
+  FAQ,
+  GetStarted,
+  Marquee,
+  Twitter,
+  VisitAlternate,
+} from 'src/modules/home'
 import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
@@ -44,30 +45,21 @@ const HomePage: NextPageWithLayout = () => {
   const { address } = useAccount()
   const { push } = useRouter()
 
-  const handleSelectAuction = (
-    chainId: CHAIN_ID,
-    tokenAddress: string,
-    tokenId?: number | string | bigint
-  ) => {
-    if (tokenId === undefined || tokenId === null) {
-      push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}`)
-      return
-    }
-    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/${tokenId.toString()}`)
-  }
-
-  const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: string) => {
-    push(`/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`)
+  const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+    push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chainIdToSlug(chainId),
+        token: tokenAddress,
+      },
+    })
   }
 
   return (
     <>
       <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
       {address ? (
-        <Dashboard
-          handleSelectAuction={handleSelectAuction}
-          handleOpenCreateProposal={handleOpenCreateProposal}
-        />
+        <Dashboard handleOpenCreateProposal={handleOpenCreateProposal} />
       ) : (
         <Stack align={'center'}>
           <Marquee />

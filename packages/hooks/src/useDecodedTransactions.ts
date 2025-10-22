@@ -1,9 +1,9 @@
-import { SWR_KEYS } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { Proposal } from '@buildeross/sdk'
 import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
-import { formatCryptoVal } from '@buildeross/utils'
 import useSWR, { KeyedMutator } from 'swr'
-import { formatEther } from 'viem'
+import { hexToBigInt } from 'viem'
 
 export type DecodedTransactionSuccess = {
   target: string
@@ -20,15 +20,15 @@ export type DecodedTransactionFailure = {
 export type DecodedTransaction = DecodedTransactionSuccess | DecodedTransactionFailure
 
 /* format in shape defined in ethers actor */
-export const formatSendEth = (value: string) => {
-  const amount = formatCryptoVal(formatEther(BigInt(value)))
+export const formatSendEth = (value: string): DecodedTransactionData => {
   return {
     functionName: 'send',
     args: {
-      ['send']: { name: `value`, value: `${amount} ETH`, type: `uint256` },
+      ['value']: { name: `value`, value: value, type: `uint256` },
     },
     functionSig: '',
     encodedData: '0x',
+    argOrder: ['value'],
   }
 }
 
@@ -43,7 +43,7 @@ const apiDecodeTx: DecodeFunc = async (
   target: string,
   calldata: string
 ): Promise<DecodedTransactionData> => {
-  const decodeRes = await fetch(`/api/decode`, {
+  const decodeRes = await fetch(`${BASE_URL}/api/decode`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -56,13 +56,9 @@ const apiDecodeTx: DecodeFunc = async (
     }),
   })
 
-  if (!decodeRes.ok) {
-    throw new Error('Decode failed')
-  }
+  if (!decodeRes.ok) throw new Error('Decode failed')
 
   const data = await decodeRes.json()
-
-  if (data?.statusCode) throw new Error('Decode failed')
 
   if (data?.error) throw new Error('Decode failed')
 
@@ -90,7 +86,10 @@ const decodeTx = async (
     console.error('Error decoding transaction:', err)
 
     // if this tx has value display it as a send eth tx
-    if (value.length && parseInt(value)) return formatSendEth(value)
+    if (value.startsWith('0x') && hexToBigInt(value as `0x${string}`) > 0n)
+      return formatSendEth(hexToBigInt(value as `0x${string}`).toString())
+
+    if (BigInt(value) > 0n) return formatSendEth(value)
 
     // if no value return original calldata
     throw new Error('Decode failed')

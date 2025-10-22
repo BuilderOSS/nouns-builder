@@ -1,0 +1,96 @@
+import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { CHAIN_ID, DecodedArg } from '@buildeross/types'
+import { Box, Flex, Text } from '@buildeross/zord'
+import { useMemo } from 'react'
+
+import { FallbackImage } from '../../FallbackImage'
+import { BaseArgumentDisplay } from './BaseArgumentDisplay'
+
+interface NFTArgumentDisplayProps {
+  chainId: CHAIN_ID
+  arg: DecodedArg
+  target: string
+  functionName?: string
+}
+
+export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
+  chainId,
+  arg,
+  target,
+  functionName,
+}) => {
+  const tokenId = useMemo(() => {
+    if (
+      arg.name === 'tokenId' ||
+      arg.name === 'id' ||
+      arg.name === '_tokenId' ||
+      arg.name === '_id'
+    ) {
+      return arg.value as string
+    }
+    return undefined
+  }, [arg])
+
+  const { metadata: nftMetadata } = useNftMetadata(
+    chainId,
+    target as `0x${string}`,
+    tokenId
+  )
+
+  // Memoize image sources to prevent re-renders
+  const imageSrcList = useMemo(() => {
+    if (!nftMetadata?.image) return []
+    const fetchableUrls = getFetchableUrls(nftMetadata.image)
+    return fetchableUrls ? [nftMetadata.image, ...fetchableUrls] : [nftMetadata.image]
+  }, [nftMetadata?.image])
+
+  // Check if this is an NFT transfer function and we have the necessary data
+  const isNftTransfer = functionName === 'safeTransferFrom' && tokenId && nftMetadata
+
+  if (isNftTransfer && nftMetadata.image) {
+    const name = arg.name.startsWith('_') ? '_token' : 'token'
+    const typeName = arg.name.startsWith('_') ? '_type' : 'type'
+    return (
+      <>
+        <BaseArgumentDisplay name={typeName} value={nftMetadata.tokenType} />
+        <Box key={arg.name + target}>
+          <Flex key={'nft' + target} align="center" w="100%" gap="x2">
+            <Text style={{ flexShrink: 0 }}>{name}:</Text>
+            <Box style={{ width: '24px', height: '24px', flexShrink: 0 }}>
+              <Box aspectRatio={1} backgroundColor="border" borderRadius="curved">
+                <FallbackImage
+                  srcList={imageSrcList}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderRadius: 'inherit',
+                  }}
+                />
+              </Box>
+            </Box>
+            <Text>
+              {nftMetadata.name} #{tokenId}
+            </Text>
+          </Flex>
+        </Box>
+      </>
+    )
+  }
+  if (
+    arg.name === 'value' ||
+    arg.name === '_value' ||
+    arg.name === 'amount' ||
+    arg.name === '_amount'
+  ) {
+    return <BaseArgumentDisplay name="amount" value={arg.value} />
+  }
+
+  if ((arg.name === 'data' || arg.name === '_data') && arg.value === '0x') {
+    return null
+  }
+
+  // Default rendering for other arguments
+  return <BaseArgumentDisplay name={arg.name} value={arg.value} />
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "@buildeross/tsconfig/base.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "types": ["@testing-library/jest-dom", "vitest/globals", "@buildeross/types/globals"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

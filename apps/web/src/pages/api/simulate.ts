@@ -1,9 +1,9 @@
+import { ErrorResult, SimulationResult } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { ErrorResult } from 'src/services/errorResult'
 import { InvalidRequestError } from 'src/services/errors'
-import { simulate, SimulationResult } from 'src/services/simulationService'
+import { simulate } from 'src/services/simulationService'
 
-export default async function handler(
+async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SimulationResult | ErrorResult>
 ) {
@@ -31,3 +31,5 @@ export default async function handler(
       .json({ error: 'Unexpected Error: Unable to simulate these transactions' })
   }
 }
+
+export default handler

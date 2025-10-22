@@ -1,6 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { type DaoContractAddresses } from '@buildeross/types'
 import { ReactElement } from 'react'
-import { type DaoContractAddresses } from 'src/stores'
 
 import { DefaultLayout } from '../DefaultLayout'
 

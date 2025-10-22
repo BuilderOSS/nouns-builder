@@ -1,6 +1,7 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+
 import { isNormalizeableIPFSUrl, normalizeIPFSUrl } from './url'
 
-export const BASE_URL = process.env.BASE_URL || 'https://nouns.build'
 export const PINATA_GATEWAY =
   process.env.NEXT_PUBLIC_PINATA_GATEWAY || 'nouns-builder.mypinata.cloud'
 

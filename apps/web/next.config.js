@@ -1,6 +1,7 @@
 const { createVanillaExtractPlugin } = require('@vanilla-extract/next-plugin')
 const { withSentryConfig } = require('@sentry/nextjs')
 const createBundleAnalyzerPlugin = require('@next/bundle-analyzer')
+const webpack = require('webpack')
 
 const {
   NEXT_PUBLIC_SENTRY_DSN,
@@ -32,6 +33,12 @@ const basicConfig = {
     '@buildeross/utils',
     '@buildeross/zord',
     '@buildeross/ui',
+    '@buildeross/stores',
+    '@buildeross/auction-ui',
+    '@buildeross/proposal-ui',
+    '@buildeross/dao-ui',
+    '@buildeross/create-proposal-ui',
+    '@buildeross/create-dao-ui',
     '@smartinvoicexyz/types',
     '@rainbow-me/rainbowkit',
     '@farcaster/frame-sdk',
@@ -45,9 +52,6 @@ const basicConfig = {
       '@buildeross/ui',
       '@buildeross/sdk',
     ],
-  },
-  env: {
-    BASE_URL: baseUrl,
   },
   images: {
     dangerouslyAllowSVG: true,
@@ -130,6 +134,16 @@ const basicConfig = {
     })
 
     config.resolve.fallback = { fs: false, net: false, tls: false }
+
+    config.externals = config.externals || []
+    config.externals.push('pino-pretty')
+
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __BUILDEROSS_APP_ENV__: JSON.stringify('platform'),
+        __BUILDEROSS_BASE_URL__: JSON.stringify(baseUrl),
+      })
+    )
 
     return {
       ...config,

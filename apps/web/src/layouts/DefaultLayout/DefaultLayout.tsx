@@ -1,6 +1,6 @@
+import type { DaoContractAddresses } from '@buildeross/types'
 import { Chain } from '@buildeross/types'
 import React, { ReactNode } from 'react'
-import { DaoContractAddresses } from 'src/stores'
 
 import { BaseLayout } from '../BaseLayout'
 import { LayoutWrapper } from '../LayoutWrapper'

@@ -1,9 +1,20 @@
+import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
+import {
+  About,
+  Activity,
+  Admin,
+  Feed,
+  SectionHandler,
+  SmartContracts,
+  Treasury,
+} from '@buildeross/dao-ui'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
+import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
@@ -13,19 +24,8 @@ import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import { DaoAuctionSection, type TokenWithDao } from 'src/modules/auction'
-import {
-  About,
-  Activity,
-  Admin,
-  SectionHandler,
-  SmartContracts,
-  Treasury,
-} from 'src/modules/dao'
-import { Feed } from 'src/modules/dao/components/Feed/Feed'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
-import { DaoContractAddresses } from 'src/stores'
 import { isAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
@@ -76,32 +76,47 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     )
   }, [replace, pathname, query])
 
-  const openTreasuryTab = React.useCallback(async () => {
-    const nextQuery = { ...query } // Get existing query params
-    nextQuery['tab'] = 'treasury'
+  const openTab = React.useCallback(
+    async (tab: string, scroll?: boolean) => {
+      const nextQuery = { ...query } // Get existing query params
+      nextQuery['tab'] = tab
 
-    await push(
-      {
-        pathname,
-        query: nextQuery,
-      },
-      undefined,
-      { shallow: true } // Prevent full page reload
-    )
-  }, [push, pathname, query])
+      await push(
+        {
+          pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true, scroll }
+      )
+    },
+    [push, pathname, query]
+  )
 
   const openProposalCreatePage = React.useCallback(async () => {
-    await push(`/dao/${chain.slug}/${addresses.token}/proposal/create`)
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
   }, [push, chain.slug, addresses.token])
 
   const openProposalReviewPage = React.useCallback(async () => {
-    await push(`/dao/${chain.slug}/${addresses.token}/proposal/review`)
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
   }, [push, chain.slug, addresses.token])
 
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
-      component: [<About key={'about'} onOpenTreasury={openTreasuryTab} />],
+      component: [<About key={'about'} onOpenTreasury={() => openTab('treasury')} />],
     }
     const treasurySection = {
       title: 'Treasury',
@@ -141,13 +156,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     return CAST_ENABLED.includes(collection)
       ? [...baseSections.slice(0, 1), daoFeed, ...baseSections.slice(1)]
       : baseSections
-  }, [
-    hasThreshold,
-    collection,
-    openTreasuryTab,
-    openProposalCreatePage,
-    openProposalReviewPage,
-  ])
+  }, [hasThreshold, collection, openTab, openProposalCreatePage, openProposalReviewPage])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''
@@ -171,7 +180,14 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
 
   const onAuctionCreated = React.useCallback(
     (tokenId: bigint) => {
-      push(`/dao/${chain.slug}/${addresses.token}/${tokenId.toString()}`)
+      push({
+        pathname: `/dao/[network]/[token]/[tokenId]`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          tokenId: tokenId.toString(),
+        },
+      })
     },
     [push, chain.slug, addresses.token]
   )
@@ -204,7 +220,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       <SectionHandler
         sections={sections}
         activeTab={activeTab}
-        basePath={`/dao/${chain.slug}/${collection}/${token.tokenId}`}
+        onTabChange={(tab) => openTab(tab, false)}
       />
 
       <AnimatedModal

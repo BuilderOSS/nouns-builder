@@ -1,21 +1,13 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
 import { NextApiRequest, NextApiResponse } from 'next'
 import sharp from 'sharp'
+import { withCors } from 'src/utils/api/cors'
 
 const SVG_DEFAULT_SIZE = 1080
 const REQUEST_TIMEOUT = 20000 // 20s
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  if (req.method === 'OPTIONS') {
-    res.status(200).end()
-    return
-  }
-
   let images = req.query.images
 
   if (!images || !images.length)
@@ -85,7 +77,7 @@ const getImageData = async (imageUrl: string): Promise<Buffer> => {
   throw new Error('Failed to fetch image from all fetchable URLs')
 }
 
-export default handler
+export default withCors(['GET', 'HEAD'])(handler)
 
 export const config = {
   runtime: 'nodejs',

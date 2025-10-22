@@ -1,9 +1,19 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { SectionHandler } from '@buildeross/dao-ui'
+import {
+  PropDates,
+  ProposalActions,
+  ProposalDescription,
+  ProposalDetailsGrid,
+  ProposalHeader,
+  ProposalVotes,
+} from '@buildeross/proposal-ui'
 import { isChainIdSupportedByEAS } from '@buildeross/sdk/eas'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { Box, Flex, Icon } from '@buildeross/zord'
@@ -12,19 +22,9 @@ import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
-import { SectionHandler } from 'src/modules/dao'
-import {
-  ProposalActions,
-  ProposalDescription,
-  ProposalDetailsGrid,
-  ProposalHeader,
-} from 'src/modules/proposal'
-import { PropDates } from 'src/modules/proposal/components/PropDates'
-import { ProposalVotes } from 'src/modules/proposal/components/ProposalVotes'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
-import { type DaoContractAddresses, useChainStore } from 'src/stores'
-import { propPageWrapper } from 'src/styles/Proposals.css'
+import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR, { unstable_serialize } from 'swr'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useBalance } from 'wagmi'
@@ -59,7 +59,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   addresses,
 }) => {
   const chain = useChainStore((state) => state.chain)
-  const { query, push } = useRouter()
+  const { query, push, pathname } = useRouter()
 
   const { data: balance } = useBalance({
     address: addresses.treasury,
@@ -136,6 +136,23 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     return { displayActions, displayWarning }
   }, [proposal, balance])
 
+  const openTab = React.useCallback(
+    async (tab: string, scroll?: boolean) => {
+      const nextQuery = { ...query } // Get existing query params
+      nextQuery['tab'] = tab
+
+      await push(
+        {
+          pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true, scroll }
+      )
+    },
+    [push, pathname, query]
+  )
+
   if (!proposal) {
     return null
   }
@@ -150,7 +167,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
       />
 
       <Flex position="relative" direction="column">
-        <Flex className={propPageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
+        <Flex className={votePageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
           <ProposalHeader proposal={proposal} handleBack={openDaoActivityPage} />
           <>
             {displayWarning && (
@@ -181,7 +198,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
         <SectionHandler
           sections={sections}
           activeTab={query.tab ? (query.tab as string) : 'Details'}
-          basePath={`/dao/${chain.slug}/${addresses.token}/vote/${proposalNumber}`}
+          onTabChange={(tab) => openTab(tab, false)}
         />
       </Box>
     </Fragment>

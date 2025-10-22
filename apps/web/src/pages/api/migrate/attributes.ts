@@ -1,5 +1,6 @@
 import { getMetadataAttributes } from '@buildeross/sdk/contract'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { withCors } from 'src/utils/api/cors'
 import { Address } from 'viem'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -22,4 +23,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default handler
+export default withCors(['GET'])(handler)

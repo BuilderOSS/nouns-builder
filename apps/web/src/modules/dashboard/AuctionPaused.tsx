@@ -1,7 +1,8 @@
-import { Chain } from '@buildeross/types'
+import { AddressType, Chain } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { atoms, Box, Flex, Icon, icons, Text } from '@buildeross/zord'
 import Image from 'next/image'
-import Link from 'next/link'
 import React from 'react'
 
 import { DashboardDaoProps } from './Dashboard'
@@ -16,22 +17,17 @@ import {
 } from './dashboard.css'
 
 type PausedType = DashboardDaoProps & {
-  chain: Partial<Chain>
-  tokenAddress: string
-  handleSelectAuction: () => void
+  chain: Chain
+  tokenAddress: AddressType
 }
 
-export const AuctionPaused = ({
-  tokenAddress,
-  name,
-  chain,
-  handleSelectAuction,
-}: PausedType) => {
+export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
   const Paused = icons.pause
+  const { getDaoLink } = useLinks()
 
   return (
     <Flex className={outerAuctionCard}>
-      <Flex className={auctionCardBrand} onClick={handleSelectAuction}>
+      <Link className={auctionCardBrand} link={getDaoLink(chain.id, tokenAddress)}>
         <Flex
           width="x16"
           height="x16"
@@ -55,9 +51,12 @@ export const AuctionPaused = ({
             {chain.icon && (
               <Image
                 src={chain.icon}
-                layout="fixed"
-                objectFit="contain"
-                style={{ borderRadius: '12px', maxHeight: '22px' }}
+                style={{
+                  borderRadius: '12px',
+                  maxHeight: '22px',
+                  maxWidth: '22px',
+                  objectFit: 'contain',
+                }}
                 alt=""
                 height={22}
                 width={22}
@@ -69,7 +68,7 @@ export const AuctionPaused = ({
           </Flex>
           <Text className={daoTokenName}>{name}</Text>
         </Box>
-      </Flex>
+      </Link>
       <Flex className={statsBox}>
         <Box className={stats}>
           <Text fontSize={16} color="text3" mb={'x1'}>
@@ -99,16 +98,15 @@ export const AuctionPaused = ({
             Auctions are paused.
           </Text>
         </Flex>
-        <Link href={`/dao/${chain.slug}/${tokenAddress}?tab=activity`}>
+        <Link link={getDaoLink(chain.id, tokenAddress, 'activity')}>
           <Box
             display={'inline-flex'}
             color="text3"
             mt={{ '@initial': 'x3', '@768': 'x1' }}
             fontSize={18}
             className={atoms({ textDecoration: 'underline' })}
-            onClick={handleSelectAuction}
           >
-            See activity
+            View activity
           </Box>
         </Link>
       </Flex>

@@ -258,6 +258,14 @@ export const formatDate = (date: Date | string, readable: boolean = false) => {
   }
 }
 
+export const formatDateShort = (_date: Date | string) => {
+  const date = new Date(_date)
+  const ye = new Intl.DateTimeFormat('en-US', { year: 'numeric' }).format(date)
+  const mo = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(date)
+  const da = new Intl.DateTimeFormat('en-US', { day: '2-digit' }).format(date)
+  return `${mo} ${da}, ${ye}`
+}
+
 export const formatDateTime = (date: Date) => {
   const ye = new Intl.DateTimeFormat('en-US', {
     year: 'numeric',

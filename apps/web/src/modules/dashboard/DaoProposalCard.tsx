@@ -1,15 +1,14 @@
+import { ProposalForStatus, ProposalStatus } from '@buildeross/proposal-ui'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
-import Link from 'next/link'
 import { useMemo, useState } from 'react'
-
-import { ProposalForStatus, ProposalStatus } from '../proposal/components/ProposalStatus'
 
 type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID
-  tokenAddress: AddressType
-  currentChainSlug?: string
+  collectionAddress: AddressType
   userAddress?: AddressType
   votes: {
     voter: string
@@ -17,32 +16,30 @@ type DaoProposalCardProps = ProposalForStatus & {
 }
 
 export const DaoProposalCard = ({
-  tokenAddress,
-  currentChainSlug,
   userAddress,
   votes,
+  chainId,
+  collectionAddress,
   ...proposal
 }: DaoProposalCardProps) => {
   const { proposalNumber, title, state } = proposal
+  const { getProposalLink } = useLinks()
   return (
     <Link
-      href={`/dao/${currentChainSlug}/${tokenAddress}/vote/${proposalNumber}`}
-      passHref
+      mb={'x4'}
+      direction={{ '@initial': 'column-reverse', '@768': 'row' }}
+      w={'100%'}
+      align={{ '@initial': 'flex-start', '@768': 'center' }}
+      borderColor={'border'}
+      borderStyle={'solid'}
+      borderRadius={'curved'}
+      borderWidth={'normal'}
+      py={{ '@initial': 'x3', '@768': 'x6' }}
+      px={{ '@initial': 'x6', '@768': 'x3' }}
+      position={'relative'}
+      link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
     >
-      <Flex
-        mb={'x4'}
-        direction={{ '@initial': 'column-reverse', '@768': 'row' }}
-        w={'100%'}
-        align={{ '@initial': 'flex-start', '@768': 'center' }}
-        borderColor={'border'}
-        borderStyle={'solid'}
-        borderRadius={'curved'}
-        borderWidth={'normal'}
-        cursor={'pointer'}
-        py={{ '@initial': 'x3', '@768': 'x6' }}
-        px={{ '@initial': 'x6', '@768': 'x3' }}
-        position={'relative'}
-      >
+      <Flex align="center">
         <Text
           fontSize={18}
           fontWeight="label"
@@ -52,32 +49,32 @@ export const DaoProposalCard = ({
         >
           {proposalNumber}
         </Text>
-        <Flex
-          mr={'auto'}
-          align="center"
-          mb={{ '@initial': 'x2', '@768': 'x0' }}
-          w="100%"
-          justify={{ '@initial': 'space-between' }}
-        >
-          <Text fontSize={18} fontWeight="label" mr="x3">
-            {title}
+      </Flex>
+      <Flex
+        mr={'auto'}
+        align="center"
+        mb={{ '@initial': 'x2', '@768': 'x0' }}
+        w="100%"
+        justify={{ '@initial': 'space-between' }}
+      >
+        <Text fontSize={18} fontWeight="label" mr="x3">
+          {title}
+        </Text>
+        <NeedsVote userAddress={userAddress} proposalState={state} votes={votes} />
+      </Flex>
+      <Flex
+        justify={'space-between'}
+        width={{ '@initial': '100%', '@768': 'unset' }}
+        align={'center'}
+        mb={{ '@initial': 'x3', '@768': 'x0' }}
+      >
+        <Box style={{ width: '225px' }}>
+          <ProposalStatus {...proposal} flipped showTime />
+        </Box>
+        <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
+          <Text fontSize={18} fontWeight="label" color={'text4'}>
+            {proposalNumber}
           </Text>
-          <NeedsVote userAddress={userAddress} proposalState={state} votes={votes} />
-        </Flex>
-        <Flex
-          justify={'space-between'}
-          width={{ '@initial': '100%', '@768': 'unset' }}
-          align={'center'}
-          mb={{ '@initial': 'x3', '@768': 'x0' }}
-        >
-          <Box style={{ width: '225px' }}>
-            <ProposalStatus {...proposal} flipped showTime />
-          </Box>
-          <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
-            <Text fontSize={18} fontWeight="label" color={'text4'}>
-              {proposalNumber}
-            </Text>
-          </Flex>
         </Flex>
       </Flex>
     </Link>

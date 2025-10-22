@@ -1,0 +1,45 @@
+{
+  "name": "@buildeross/test-fixtures",
+  "version": "0.2.0",
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.3",
+    "@testing-library/react": "^16.3.0",
+    "swr": "^2.3.3",
+    "vitest": "^3.1.4"
+  },
+  "devDependencies": {
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/stores": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.1.5",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "peerDependencies": {
+    "@buildeross/stores": "0.2.0",
+    "@buildeross/types": "0.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "viem": "^2.38.2",
+    "wagmi": "^2.18.1"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf .turbo dist",
+    "lint": "eslint src --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "dist/index.d.ts"
+}

@@ -1,9 +1,13 @@
 import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
+import { useChainStore } from '@buildeross/stores'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { Pagination } from '@buildeross/ui/Pagination'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
@@ -12,11 +16,8 @@ import NextImage from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { Meta } from 'src/components/Meta'
-import Pagination from 'src/components/Pagination'
-import { TokenPreview } from 'src/components/Profile'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useChainStore } from 'src/stores'
 import {
   daosContainer,
   loadingSkeleton,
@@ -249,7 +250,26 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                         key={i}
                         href={`/dao/${chain.slug}/${x.tokenContract}/${x.tokenId}`}
                       >
-                        <TokenPreview name={x.name} image={x.image} />
+                        <Box>
+                          <Box
+                            backgroundColor="background2"
+                            width={'100%'}
+                            height={'auto'}
+                            aspectRatio={1 / 1}
+                            position="relative"
+                            borderRadius="curved"
+                            overflow="hidden"
+                          >
+                            <FallbackImage
+                              srcList={getFetchableUrls(x.image)}
+                              sizes="100vw"
+                              alt={x.name}
+                            />
+                          </Box>
+                          <Text variant="heading-xs" mt="x4">
+                            {x.name}
+                          </Text>
+                        </Box>
                       </Link>
                     ))}
                   </Grid>
