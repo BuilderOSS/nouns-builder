@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs'
 import { generateText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { formatUnits, keccak256, toHex } from 'viem'
 
 interface TransactionData {
@@ -155,7 +156,7 @@ Example of desired output:
 Make the tone simple, informative, and human-readable. Avoid jargon like "function selector" or "ABI encoding."`
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
@@ -210,3 +211,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'transaction summary generation failed' })
   }
 }
+
+export default withRateLimit({
+  keyPrefix: 'ai:txSummary',
+})(handler)
