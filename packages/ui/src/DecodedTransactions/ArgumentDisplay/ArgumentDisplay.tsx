@@ -9,6 +9,7 @@ import {
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import React from 'react'
 import { formatEther } from 'viem'
+import { Flex, Text } from '@buildeross/zord'
 
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
@@ -88,9 +89,27 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
     let value = arg.value
     try {
       value = `${formatCryptoVal(formatEther(BigInt(String(arg.value))))} ETH`
-    } catch {}
+    } catch { }
 
-    return <BaseArgumentDisplay name={arg.name} value={value} />
+    return (
+      <Flex align="flex-start" w="100%">
+        <Text pr="x1" style={{ flexShrink: 0 }}>
+          {arg.name}:
+        </Text>
+        <Flex align="center" gap="x1">
+          <img
+            src="/chains/ethereum.svg"
+            alt="ETH"
+            loading="lazy"
+            decoding="async"
+            width="16px"
+            height="16px"
+            style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
+          />
+          <Text>{value}</Text>
+        </Flex>
+      </Flex>
+    )
   }
 
   // Default rendering for other arguments
