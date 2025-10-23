@@ -1,6 +1,7 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
+import { useTransactionSummary } from '@buildeross/hooks/useTransactionSummary'
 import { CHAIN_ID, DaoContractAddresses, DecodedTransactionData } from '@buildeross/types'
 import {
   decodeEscrowData,
@@ -92,14 +93,14 @@ export const DecodedDisplay: React.FC<{
   )
 
   // Prepare transaction data for AI summary (only when not loading)
-  const getTransactionData = React.useCallback(() => {
+  const transactionData = React.useMemo(() => {
     if (isLoadingMetadata) return null
 
     return {
       chainId,
       addresses,
-      transaction,
-      target,
+      transaction: { args: transaction.args, functionName: transaction.functionName },
+      target: target as `0x${string}`,
       tokenMetadata: tokenMetadata || undefined,
       nftMetadata: nftMetadata || undefined,
       escrowData: escrowData || undefined,
@@ -115,94 +116,11 @@ export const DecodedDisplay: React.FC<{
     isLoadingMetadata,
   ])
 
-  // AI Summary state
-  const [aiSummary, setAiSummary] = React.useState<string | null>(null)
-  const [isGeneratingSummary, setIsGeneratingSummary] = React.useState(false)
-  const [errorSummary, setErrorSummary] = React.useState<string | null>(null)
-  const attemptedRef = React.useRef(false)
-
-  // Generate AI summary when metadata is loaded
-  React.useEffect(() => {
-    if (
-      isLoadingMetadata ||
-      aiSummary ||
-      isGeneratingSummary ||
-      errorSummary ||
-      attemptedRef.current
-    )
-      return
-    const transactionData = getTransactionData()
-    if (!transactionData) return
-
-    attemptedRef.current = true
-
-    const abortController = new AbortController()
-    const TIMEOUT_MS = 30000 // 30 seconds
-    const timeoutId = setTimeout(() => abortController.abort(), TIMEOUT_MS)
-    let mounted = true
-
-    const generateSummary = async () => {
-      setIsGeneratingSummary(true)
-      setErrorSummary(null)
-
-      try {
-        const response = await fetch('/api/ai/generateTxSummary', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(transactionData),
-          signal: abortController.signal,
-        })
-
-        if (!response.ok) {
-          throw new Error(`API request failed: ${response.statusText}`)
-        }
-
-        const data = await response.json()
-        if (!mounted || abortController.signal.aborted) return
-        if (data && typeof data === 'string' && data.trim()) {
-          setAiSummary(data)
-        } else if (
-          data &&
-          data.text &&
-          typeof data.text === 'string' &&
-          data.text.trim()
-        ) {
-          setAiSummary(data.text)
-        } else {
-          throw new Error('Empty or invalid response format')
-        }
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
-          return // Request was cancelled, this is expected
-        }
-        console.error(
-          `Failed to generate summary: ${error instanceof Error ? error.message : error}`
-        )
-        setErrorSummary(
-          error instanceof Error ? error.message : (error?.toString() ?? 'Unknown error')
-        )
-      } finally {
-        if (mounted) setIsGeneratingSummary(false)
-        clearTimeout(timeoutId)
-      }
-    }
-
-    generateSummary()
-
-    return () => {
-      mounted = false
-      clearTimeout(timeoutId)
-      abortController.abort()
-    }
-  }, [
-    isLoadingMetadata,
-    aiSummary,
-    isGeneratingSummary,
-    getTransactionData,
-    errorSummary,
-  ])
+  const {
+    summary: aiSummary,
+    error: errorSummary,
+    isLoading: isGeneratingSummary,
+  } = useTransactionSummary(transactionData)
 
   return (
     <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
@@ -250,8 +168,7 @@ export const DecodedDisplay: React.FC<{
 
         {sortedArgs.length > 0 ? `)` : null}
 
-        {/* AI Summary Section - only show if successful */}
-        {aiSummary && (
+        {!isLoadingMetadata && (
           <Box
             p="x4"
             backgroundColor="background2"
@@ -263,7 +180,17 @@ export const DecodedDisplay: React.FC<{
             <Text fontWeight="heading" mb="x2" color="accent">
               🤖 AI Summary
             </Text>
-            <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
+            {isGeneratingSummary && (
+              <Text style={{ whiteSpace: 'pre-wrap' }}>Generating summary...</Text>
+            )}
+            {!isGeneratingSummary && aiSummary && (
+              <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
+            )}
+            {!isGeneratingSummary && !aiSummary && errorSummary && (
+              <Text color="critical" style={{ whiteSpace: 'pre-wrap' }}>
+                Error generating summary: {errorSummary.message || errorSummary}
+              </Text>
+            )}
           </Box>
         )}
       </Stack>
