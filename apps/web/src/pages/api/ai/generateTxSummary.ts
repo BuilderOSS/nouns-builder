@@ -1,51 +1,90 @@
 import { gateway } from '@ai-sdk/gateway'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
-import { CHAIN_ID, DaoContractAddresses } from '@buildeross/types'
+import type {
+  CHAIN_ID,
+  DaoContractAddresses,
+  DecodedArgs,
+  SerializedNftMetadata,
+  TokenMetadata,
+} from '@buildeross/types'
+import type { DecodedEscrowData } from '@buildeross/utils/escrow'
+import { formatBpsValue, formatTokenValue } from '@buildeross/utils/formatArgs'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
 import { generateText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
 import { withRateLimit } from 'src/utils/api/rateLimit'
-import { formatUnits, keccak256, toHex } from 'viem'
+import { keccak256, toHex } from 'viem'
 
-interface TransactionData {
-  functionName: string
-  args: Record<string, { name: string; value: any }>
-  argOrder?: string[]
-}
-
-interface TokenMetadata {
-  symbol: string
-  name: string
-  decimals: number
-}
-
-interface NftMetadata {
-  name?: string
-  tokenType: string
-}
-
-interface EscrowData {
-  clientAddress?: string
-  providerAddress?: string
-  tokenAddress?: string
-  terminationTime?: string
-}
-
-interface RequestBody {
+type RequestBody = {
   chainId: CHAIN_ID
   addresses: DaoContractAddresses
-  transaction: TransactionData
+  transaction: { functionName: string; args: DecodedArgs }
   target: string
   tokenMetadata?: TokenMetadata
-  nftMetadata?: NftMetadata
-  escrowData?: EscrowData
+  nftMetadata?: SerializedNftMetadata
+  escrowData?: DecodedEscrowData
 }
 
-const getCacheKey = (data: RequestBody, model: string) => {
-  const hash = keccak256(toHex(`${JSON.stringify(data)}:${model}`))
+const getCacheKey = (prompt: string, model: string) => {
+  const hash = keccak256(toHex(`${prompt}:${model}`))
   return `ai:txSummary:${hash}`
+}
+
+/**
+ * Recursively traverses transaction arguments and formats
+ * token-related fields or BPS percentage fields.
+ */
+export const formatAmounts = ({
+  transaction,
+  tokenMetadata,
+  nftMetadata,
+}: RequestBody): string => {
+  const isNFT = !!nftMetadata
+  const keywords = isNFT ? ['price'] : ['amount', 'value', 'price']
+  const formattedEntries: string[] = []
+
+  const traverse = (obj: any, path: string[] = []) => {
+    if (!obj || typeof obj !== 'object') return
+
+    for (const [key, val] of Object.entries(obj)) {
+      const currentPath = [...path, key]
+      const lowerKey = key.toLowerCase()
+
+      const matchesTokenKey = keywords.some((k) => lowerKey.includes(k))
+      const matchesBpsKey = key.endsWith('BPS') && key !== 'BPS'
+
+      if (val !== undefined && val !== null) {
+        try {
+          if (matchesBpsKey) {
+            const formatted = formatBpsValue(val)
+            formattedEntries.push(`${currentPath.join('.')}: ${formatted}`)
+          } else if (matchesTokenKey) {
+            const formatted = formatTokenValue(val, tokenMetadata)
+            const finalFormatted = Array.isArray(formatted)
+              ? formatted.join(', ')
+              : formatted
+            formattedEntries.push(`${currentPath.join('.')}: ${finalFormatted}`)
+          }
+        } catch {
+          formattedEntries.push(`${currentPath.join('.')}: ${val} (raw)`)
+        }
+      }
+
+      if (typeof val === 'object') {
+        traverse(val, currentPath)
+      }
+    }
+  }
+
+  traverse(transaction.args)
+
+  return formattedEntries.length > 0
+    ? `\n(For internal reference only — do not copy these values verbatim)\n${formattedEntries
+        .map((entry) => `- ${entry}`)
+        .join('\n')}\n`
+    : ''
 }
 
 const generatePrompt = (data: RequestBody): string => {
@@ -60,59 +99,6 @@ const generatePrompt = (data: RequestBody): string => {
   } = data
 
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
-
-  // Format numeric token amounts for model reference (reference only)
-  const formatTokenAmounts = (): string => {
-    if (!tokenMetadata) return ''
-
-    const amountKeys = [
-      '_milestoneAmounts',
-      '_amount',
-      '_value',
-      'amount',
-      'value',
-      '_fundAmount',
-    ]
-    const formattedAmounts: string[] = []
-
-    for (const key of amountKeys) {
-      const arg = transaction.args[key]
-      if (arg && arg.value !== undefined && arg.value !== null) {
-        try {
-          if (key === '_milestoneAmounts') {
-            const list = Array.isArray(arg.value)
-              ? arg.value.map((v: any) => v?.toString?.() ?? String(v))
-              : typeof arg.value === 'string'
-                ? arg.value
-                    .split(',')
-                    .map((s: string) => s.trim())
-                    .filter(Boolean)
-                : [arg.value?.toString?.() ?? String(arg.value)]
-
-            const amounts = list.map((amt) => {
-              const formatted = formatUnits(BigInt(amt.trim()), tokenMetadata.decimals)
-              return `${formatted} ${tokenMetadata.symbol}`
-            })
-            formattedAmounts.push(`${key}: ${amounts.join(', ')}`)
-          } else {
-            const formatted = formatUnits(
-              BigInt(arg.value.toString()),
-              tokenMetadata.decimals
-            )
-            formattedAmounts.push(`${key}: ${formatted} ${tokenMetadata.symbol}`)
-          }
-        } catch {
-          formattedAmounts.push(`${key}: ${arg.value} (raw)`)
-        }
-      }
-    }
-
-    return formattedAmounts.length > 0
-      ? `\n(For internal reference only — do not copy these values verbatim)\n${formattedAmounts
-          .map((amt) => `- ${amt}`)
-          .join('\n')}\n`
-      : ''
-  }
 
   const safeFunctionName = transaction.functionName.replace(/[^a-zA-Z0-9]/g, '')
   const contractType =
@@ -129,13 +115,13 @@ const generatePrompt = (data: RequestBody): string => {
               : ''
 
   return `You are an expert blockchain analyst who explains smart contract transactions in clear, plain English for a general audience.
-Write one short, plain-English sentence describing what this transaction does.
+Write 1-2 short, plain-English sentence describing what this transaction does.
 
 ---
 
 Writing Rules:
 - Start with a capitalized verb in present tense (e.g., Transfers, Approves, Mints, Deposits).
-- Write exactly one sentence and end it with a period.
+- Write 1-2 sentences and end it with a period.
 - Use correct singular/plural forms (e.g., "1 NFT" vs "2 NFTs").
 - Use natural amount formatting (omit extra zeros).
 - Be clear, simple, and factual — avoid technical jargon, markdown, or speculation.
@@ -182,9 +168,14 @@ Function: ${transaction.functionName} | Network: ${chain.name} (ID: ${chain.id})
 Target: ${target} ${contractType}
 
 Below are the transaction arguments — use only the relevant information to describe the action:
-${JSON.stringify(transaction.args, null, 2)}
+${
+  (JSON.stringify(transaction.args, (_key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  ),
+  2)
+}
 
-${formatTokenAmounts()}
+${formatAmounts(data)}
 
 ${
   tokenMetadata
@@ -225,7 +216,7 @@ Calls the ${safeFunctionName} function on the target contract.
 ---
 
 Final Instruction:
-Respond with one concise sentence describing this transaction, and nothing else.`
+Respond with 1-2 concise sentences describing this transaction, and nothing else.`
 }
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -257,9 +248,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .json({ error: 'transaction must have functionName and args' })
     }
 
+    // Generate prompt on backend
+    const prompt = generatePrompt(requestData)
     const model = process.env.AI_MODEL || 'xai/grok-3'
+
     const redisConnection = getRedisConnection()
-    const cacheKey = getCacheKey(requestData, model)
+    const cacheKey = getCacheKey(prompt, model)
 
     // Check cache first
     let cachedText = await redisConnection?.get(cacheKey)
@@ -267,9 +261,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (cachedText) {
       return res.status(200).json({ text: cachedText })
     }
-
-    // Generate prompt on backend
-    const prompt = generatePrompt(requestData)
 
     // Generate new text if not in cache
     const result = await generateText({

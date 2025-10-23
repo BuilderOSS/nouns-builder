@@ -187,7 +187,7 @@ export const DecodedDisplay: React.FC<{
               <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
             )}
             {!isGeneratingSummary && !aiSummary && errorSummary && (
-              <Text color="critical" style={{ whiteSpace: 'pre-wrap' }}>
+              <Text color="negative" style={{ whiteSpace: 'pre-wrap' }}>
                 Error generating summary: {errorSummary.message || errorSummary}
               </Text>
             )}

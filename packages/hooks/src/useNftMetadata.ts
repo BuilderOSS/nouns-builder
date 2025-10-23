@@ -1,28 +1,14 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { CHAIN_ID } from '@buildeross/types'
+import {
+  type CHAIN_ID,
+  NftTokenType,
+  type SerializedNftMetadata,
+} from '@buildeross/types'
 import useSWR, { KeyedMutator } from 'swr'
 import { Address, isAddress } from 'viem'
 
-export declare enum NftTokenType {
-  ERC721 = 'ERC721',
-  ERC1155 = 'ERC1155',
-  NO_SUPPORTED_NFT_STANDARD = 'NO_SUPPORTED_NFT_STANDARD',
-  NOT_A_CONTRACT = 'NOT_A_CONTRACT',
-  UNKNOWN = 'UNKNOWN',
-}
-
-export type SerializedNftMetadata = {
-  contract: {
-    address: string
-  }
-  tokenId: string
-  tokenType: NftTokenType
-  name: string | null
-  description: string | null
-  image: string | null
-  tokenUri: string | null
-}
+export { NftTokenType, type SerializedNftMetadata }
 
 export type NftMetadataReturnType = {
   metadata: SerializedNftMetadata | null | undefined

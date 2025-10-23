@@ -33,7 +33,9 @@ const aiSummaryFetcher = async (data: TransactionSummaryData): Promise<string> =
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(data, (_key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+      ),
       signal: controller.signal,
     })
 
