@@ -7,12 +7,12 @@ export const PINATA_GATEWAY =
 
 export const IPFS_GATEWAYS = [
   `https://${PINATA_GATEWAY}`,
+  'https://magic.decentralized-content.com',
   'https://ipfs.io',
   'https://dweb.link',
-  'https://w3s.link',
-  'https://flk-ipfs.xyz',
-  'https://ipfs.decentralized-content.com',
   'https://gateway.pinata.cloud',
+  'https://w3s.link',
+  'https://ipfs.decentralized-content.com',
 ]
 
 export function ipfsGatewayUrls(url: string | null | undefined): string[] | undefined {

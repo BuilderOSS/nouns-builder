@@ -14,6 +14,8 @@ import React from 'react'
 
 import { ArgumentDisplay } from '../ArgumentDisplay'
 
+const DISABLE_AI_SUMMARY = process.env.NEXT_PUBLIC_DISABLE_AI_SUMMARY === 'true'
+
 export const DecodedDisplay: React.FC<{
   chainId: CHAIN_ID
   addresses: DaoContractAddresses
@@ -101,7 +103,7 @@ export const DecodedDisplay: React.FC<{
 
   // Prepare transaction data for AI summary (only when not loading)
   const transactionData = React.useMemo(() => {
-    if (isLoadingMetadata) return null
+    if (isLoadingMetadata || DISABLE_AI_SUMMARY) return null
 
     return {
       chainId,
@@ -175,7 +177,7 @@ export const DecodedDisplay: React.FC<{
 
         {sortedArgs.length > 0 ? `)` : null}
 
-        {!isLoadingMetadata && (
+        {!isLoadingMetadata && !DISABLE_AI_SUMMARY && (
           <Box
             p="x4"
             backgroundColor="background2"
