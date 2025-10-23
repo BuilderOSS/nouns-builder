@@ -18,7 +18,7 @@ import { getRedisConnection } from 'src/services/redisConnection'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 import { keccak256, toHex } from 'viem'
 
-const AI_MODEL = process.env.AI_MODEL || 'openai/gpt-5'
+const AI_MODEL = process.env.AI_MODEL || 'openai/gpt-4-turbo'
 
 type RequestBody = {
   chainId: CHAIN_ID
