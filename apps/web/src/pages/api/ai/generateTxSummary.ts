@@ -169,12 +169,11 @@ Function: ${transaction.functionName} | Network: ${chain.name} (ID: ${chain.id})
 Target: ${target} ${contractType}
 
 Below are the transaction arguments — use only the relevant information to describe the action:
-${
-  (JSON.stringify(transaction.args, (_key, value) =>
-    typeof value === 'bigint' ? value.toString() : value
-  ),
-  2)
-}
+${JSON.stringify(
+  transaction.args,
+  (_key, value) => (typeof value === 'bigint' ? value.toString() : value),
+  2
+)}
 
 ${formatAmounts(data)}
 

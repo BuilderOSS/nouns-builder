@@ -8,7 +8,7 @@ export type TokenMetadata = {
   logo: string
 }
 
-export declare enum NftTokenType {
+export enum NftTokenType {
   ERC721 = 'ERC721',
   ERC1155 = 'ERC1155',
   NO_SUPPORTED_NFT_STANDARD = 'NO_SUPPORTED_NFT_STANDARD',
