@@ -30,12 +30,19 @@ export const DecodedDisplay: React.FC<{
   // Prepare escrow data once
   const escrowData = React.useMemo(() => {
     const arg = transaction.args['_escrowData']
-    if (!arg) return null
+    const raw = arg?.value
+    if (!raw || typeof raw !== 'string' || !raw.startsWith('0x')) return null
     const decoder =
       target.toLowerCase() === getEscrowBundlerV1(chainId).toLowerCase()
         ? decodeEscrowDataV1
         : decodeEscrowData
-    return decoder(arg.value as `0x${string}`)
+
+    try {
+      return decoder(raw as `0x${string}`)
+    } catch (e) {
+      console.warn('Failed to decode escrow data', e)
+      return null
+    }
   }, [transaction.args, target, chainId])
 
   // Determine single token address for ERC20 operations

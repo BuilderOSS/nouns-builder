@@ -158,15 +158,20 @@ export const useDecodedTransactions = (
     { revalidateOnFocus: false }
   )
 
-  const fallbackData = useMemo(
-    () =>
-      targets.map((target, i) => ({
-        target,
-        transaction: calldatas[i],
-        isNotDecoded: true,
-      })),
-    [targets, calldatas]
-  ) as DecodedTransactionFailure[]
+  const fallbackData = useMemo(() => {
+    const hasInputs =
+      Array.isArray(targets) &&
+      Array.isArray(calldatas) &&
+      targets.length === calldatas.length
+
+    if (!hasInputs) return undefined
+
+    return targets.map((target, i) => ({
+      target,
+      transaction: calldatas[i],
+      isNotDecoded: true,
+    })) as DecodedTransactionFailure[]
+  }, [targets, calldatas])
 
   return {
     decodedTransactions: decodedTransactions ?? fallbackData,
@@ -211,14 +216,14 @@ export const useDecodedTransactionSingle = (
     { revalidateOnFocus: false }
   )
 
-  const fallbackData = useMemo(
-    () => ({
+  const fallbackData = useMemo(() => {
+    if (!target || !calldata) return undefined
+    return {
       target,
       transaction: calldata,
       isNotDecoded: true,
-    }),
-    [target, calldata]
-  ) as DecodedTransactionFailure
+    } as DecodedTransactionFailure
+  }, [target, calldata])
 
   return {
     decodedTransaction: decodedTransaction ?? fallbackData,

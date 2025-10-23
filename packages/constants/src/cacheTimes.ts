@@ -45,7 +45,7 @@ export const CACHE_TIMES = {
     swr: ONE_WEEK,
   },
   AI_TRANSACTION_SUMMARY: {
-    maxAge: ONE_HOUR,
-    swr: ONE_DAY,
+    maxAge: ONE_DAY,
+    swr: ONE_WEEK,
   },
 }

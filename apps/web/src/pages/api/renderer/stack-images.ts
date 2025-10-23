@@ -62,8 +62,12 @@ const getImageData = async (imageUrl: string): Promise<Buffer> => {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
 
-      const res = await fetch(url, { signal: controller.signal })
-      clearTimeout(timeoutId)
+      let res: Response
+      try {
+        res = await fetch(url, { signal: controller.signal })
+      } finally {
+        clearTimeout(timeoutId)
+      }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 

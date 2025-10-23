@@ -28,8 +28,11 @@ type RequestBody = {
   escrowData?: DecodedEscrowData
 }
 
-const getCacheKey = (prompt: string, model: string) => {
-  const hash = keccak256(toHex(`${prompt}:${model}`))
+const safeStringify = (v: unknown) =>
+  JSON.stringify(v, (_k, val) => (typeof val === 'bigint' ? val.toString() : val))
+
+const getCacheKey = (data: RequestBody, model: string) => {
+  const hash = keccak256(toHex(`${safeStringify(data)}:${model}`))
   return `ai:txSummary:${hash}`
 }
 
@@ -86,6 +89,22 @@ export const formatAmounts = ({
         .map((entry) => `- ${entry}`)
         .join('\n')}\n`
     : ''
+}
+
+const formatArgs = (args: DecodedArgs) => {
+  const MAX_ARGS_CHARS = 4000
+  try {
+    const json = JSON.stringify(
+      args,
+      (_k, v) => (typeof v === 'bigint' ? v.toString() : v),
+      2
+    )
+    return json.length > MAX_ARGS_CHARS
+      ? json.slice(0, MAX_ARGS_CHARS) + '\n… [truncated]'
+      : json
+  } catch {
+    return '[omitted: failed to serialize args]'
+  }
 }
 
 const generatePrompt = (data: RequestBody): string => {
@@ -169,11 +188,7 @@ Function: ${transaction.functionName} | Network: ${chain.name} (ID: ${chain.id})
 Target: ${target} ${contractType}
 
 Below are the transaction arguments — use only the relevant information to describe the action:
-${JSON.stringify(
-  transaction.args,
-  (_key, value) => (typeof value === 'bigint' ? value.toString() : value),
-  2
-)}
+${formatArgs(transaction.args)}
 
 ${formatAmounts(data)}
 
@@ -260,7 +275,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const model = process.env.AI_MODEL || 'xai/grok-3'
 
     const redisConnection = getRedisConnection()
-    const cacheKey = getCacheKey(prompt, model)
+    const cacheKey = getCacheKey(requestData, model)
 
     // Check cache first
     let cachedText = await redisConnection?.get(cacheKey)
