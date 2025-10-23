@@ -1,4 +1,5 @@
 import { gateway } from '@ai-sdk/gateway'
+import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import type {
   CHAIN_ID,
@@ -248,6 +249,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         .json({ error: 'transaction must have functionName and args' })
     }
 
+    const { maxAge, swr } = CACHE_TIMES.AI_TRANSACTION_SUMMARY
+
+    res.setHeader(
+      'Cache-Control',
+      `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
+    )
+
     // Generate prompt on backend
     const prompt = generatePrompt(requestData)
     const model = process.env.AI_MODEL || 'xai/grok-3'
@@ -284,5 +292,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default withRateLimit({
+  maxRequests: 30,
   keyPrefix: 'ai:txSummary',
 })(handler)

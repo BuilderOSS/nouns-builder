@@ -13,7 +13,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!images || !images.length)
     return res.status(400).json({ error: 'No images provided' })
 
-  const { maxAge, swr } = CACHE_TIMES.DAO_FEED
+  const { maxAge, swr } = CACHE_TIMES.RENDERER
 
   res.setHeader(
     'Cache-Control',
