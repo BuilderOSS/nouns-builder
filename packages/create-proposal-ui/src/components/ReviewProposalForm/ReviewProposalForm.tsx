@@ -36,7 +36,7 @@ interface ReviewProposalProps {
   onEditTransactions?: () => void
 }
 
-const SKIP_SIMULATION = process.env.NEXT_PUBLIC_SKIP_TENDERLY_SIMULATION === 'true'
+const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_TENDERLY_SIMULATION === 'true'
 
 const logError = async (e: unknown) => {
   console.error(e)
