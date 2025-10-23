@@ -1,18 +1,12 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { CHAIN_ID } from '@buildeross/types'
+import type { CHAIN_ID, TokenMetadata } from '@buildeross/types'
 import { useMemo } from 'react'
 import { type KeyedMutator } from 'swr'
 import useSWRImmutable from 'swr/immutable'
 import { Address, isAddress } from 'viem'
 
-export type TokenMetadata = {
-  address: Address
-  name: string
-  symbol: string
-  decimals: number
-  logo: string
-}
+export type { TokenMetadata }
 
 export type TokenMetadataReturnType = {
   metadata?: TokenMetadata[]

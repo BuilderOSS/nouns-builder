@@ -2,6 +2,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getEnrichedTokenBalances } from 'src/services/alchemyService'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, address } = req.query
@@ -41,4 +42,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withCors(['GET'])(handler)
+export default withCors(['GET'])(
+  withRateLimit({
+    keyPrefix: 'alchemy:tokenBalances',
+  })(handler)
+)

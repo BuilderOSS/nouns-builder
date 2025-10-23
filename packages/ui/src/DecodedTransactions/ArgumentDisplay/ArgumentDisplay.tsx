@@ -1,6 +1,13 @@
+import { SerializedNftMetadata } from '@buildeross/hooks/useNftMetadata'
+import { TokenMetadata } from '@buildeross/hooks/useTokenMetadata'
 import { CHAIN_ID, DecodedArg } from '@buildeross/types'
-import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
+import {
+  DecodedEscrowData,
+  getEscrowBundler,
+  getEscrowBundlerV1,
+} from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
 
@@ -16,7 +23,9 @@ interface ArgumentDisplayProps {
   arg: DecodedArg
   target: string
   functionName: string
-  allArguments: Record<string, DecodedArg>
+  tokenMetadata?: TokenMetadata
+  nftMetadata?: SerializedNftMetadata | null
+  escrowData?: DecodedEscrowData | null
 }
 
 export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
@@ -24,7 +33,9 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   arg,
   target,
   functionName,
-  allArguments,
+  tokenMetadata,
+  nftMetadata,
+  escrowData,
 }) => {
   if (!arg) return null
 
@@ -32,17 +43,17 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   if (functionName === 'safeTransferFrom') {
     return (
       <NFTArgumentDisplay
-        chainId={chainId}
         arg={arg}
         target={target}
         functionName={functionName}
+        nftMetadata={nftMetadata}
       />
     )
   }
 
   // Check if this is an ERC20 transfer/approve function
   if (functionName === 'transfer' || functionName === 'approve') {
-    return <ERC20ArgumentDisplay chainId={chainId} arg={arg} target={target} />
+    return <ERC20ArgumentDisplay arg={arg} tokenMetadata={tokenMetadata} />
   }
 
   // Check if this is an escrow argument
@@ -60,10 +71,9 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   if (isEscrowArgument) {
     return (
       <EscrowArgumentDisplay
-        chainId={chainId}
         arg={arg}
-        target={target}
-        allArguments={allArguments}
+        tokenMetadata={tokenMetadata}
+        escrowData={escrowData}
       />
     )
   }
@@ -71,7 +81,7 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   if (
     functionName === 'send' &&
     arg.name === 'value' &&
-    Object.keys(allArguments).length === 1 &&
+    arg.type === 'uint256' &&
     typeof arg.value === 'string'
   ) {
     // is a simple send eth
@@ -81,7 +91,25 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
       value = `${formatCryptoVal(formatEther(BigInt(String(arg.value))))} ETH`
     } catch {}
 
-    return <BaseArgumentDisplay name={arg.name} value={value} />
+    return (
+      <Flex align="flex-start" w="100%">
+        <Text pr="x1" style={{ flexShrink: 0 }}>
+          {arg.name}:
+        </Text>
+        <Flex align="center" gap="x1">
+          <img
+            src="/chains/ethereum.svg"
+            alt="ETH"
+            loading="lazy"
+            decoding="async"
+            width="16px"
+            height="16px"
+            style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
+          />
+          <Text>{value}</Text>
+        </Flex>
+      </Flex>
+    )
   }
 
   // Default rendering for other arguments

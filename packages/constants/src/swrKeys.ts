@@ -1,4 +1,5 @@
 export const SWR_KEYS = {
+  AI_TRANSACTION_SUMMARY: 'ai-transaction-summary',
   AUCTION_BIDS: 'auction-bids',
   AUCTION_HISTORY: 'auction-history',
   ARTWORK_PROPERTY_ITEMS_COUNT: 'artwork-property-items-count',

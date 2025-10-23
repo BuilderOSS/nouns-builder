@@ -1,14 +1,16 @@
 import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, DaoContractAddresses } from '@buildeross/types'
 import React from 'react'
 
 import { DecodedDisplay } from './DecodedDisplay'
 import { NonDecodedDisplay } from './NonDecodedDisplay'
 
-export const TransactionDisplay: React.FC<DecodedTransaction & { chainId: CHAIN_ID }> = ({
-  chainId,
-  ...decoded
-}) => {
+export const TransactionDisplay: React.FC<
+  DecodedTransaction & {
+    chainId: CHAIN_ID
+    addresses: DaoContractAddresses
+  }
+> = ({ chainId, addresses, ...decoded }) => {
   if (decoded.isNotDecoded || !decoded.transaction.args) {
     const calldata = decoded.isNotDecoded
       ? decoded.transaction
@@ -19,7 +21,12 @@ export const TransactionDisplay: React.FC<DecodedTransaction & { chainId: CHAIN_
 
   return (
     <DecodedDisplay
-      {...{ chainId, transaction: decoded.transaction, target: decoded.target }}
+      {...{
+        chainId,
+        addresses,
+        transaction: decoded.transaction,
+        target: decoded.target,
+      }}
     />
   )
 }

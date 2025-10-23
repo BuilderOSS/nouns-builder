@@ -1,5 +1,5 @@
 import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, DaoContractAddresses } from '@buildeross/types'
 import { atoms, Stack } from '@buildeross/zord'
 import React from 'react'
 
@@ -7,11 +7,13 @@ import { TransactionDisplay } from './TransactionDisplay'
 
 interface DecodedTransactionProps {
   chainId: CHAIN_ID
+  addresses: DaoContractAddresses
   decodedTransactions: DecodedTransaction[] | undefined
 }
 
 export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
   chainId,
+  addresses,
   decodedTransactions,
 }) => {
   return (
@@ -19,7 +21,7 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
       <ol>
         {decodedTransactions?.map((decoded, i) => (
           <li className={atoms({ paddingBottom: 'x4' })} key={`${decoded.target}-${i}`}>
-            <TransactionDisplay chainId={chainId} {...decoded} />
+            <TransactionDisplay chainId={chainId} addresses={addresses} {...decoded} />
           </li>
         ))}
       </ol>

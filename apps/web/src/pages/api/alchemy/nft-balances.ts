@@ -3,6 +3,7 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedNFTBalance } from 'src/services/alchemyService'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -52,4 +53,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withCors(['GET'])(handler)
+export default withCors(['GET'])(
+  withRateLimit({
+    keyPrefix: 'alchemy:nftBalances',
+  })(handler)
+)
