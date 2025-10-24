@@ -20,4 +20,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     res.status(500).json({ error })
   }
 }
-export default withCors(['GET'])(handler)
+export default withCors()(handler)

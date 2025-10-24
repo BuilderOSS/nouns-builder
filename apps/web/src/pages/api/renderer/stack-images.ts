@@ -81,7 +81,7 @@ const getImageData = async (imageUrl: string): Promise<Buffer> => {
   throw new Error('Failed to fetch image from all fetchable URLs')
 }
 
-export default withCors(['GET', 'HEAD'])(handler)
+export default withCors()(handler)
 
 export const config = {
   runtime: 'nodejs',

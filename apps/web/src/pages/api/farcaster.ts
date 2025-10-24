@@ -52,4 +52,4 @@ function handler(_req: NextApiRequest, res: NextApiResponse) {
   res.status(200).json(farcaster)
 }
 
-export default withCors(['GET'])(handler)
+export default withCors()(handler)

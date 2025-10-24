@@ -4,13 +4,13 @@ import { getRedisConnection } from 'src/services/redisConnection'
 interface RateLimitOptions {
   /**
    * Maximum number of requests allowed within the time window
-   * @default 20
+   * @default 30
    */
   maxRequests?: number
 
   /**
    * Time window in seconds
-   * @default 3600 (1 hour)
+   * @default 300 (5 minutes)
    */
   windowSeconds?: number
 
@@ -26,8 +26,8 @@ interface RateLimitOptions {
  * Uses Redis to track request counts per IP address
  */
 export const withRateLimit = ({
-  maxRequests = 20,
-  windowSeconds = 3600, // 1 hour
+  maxRequests = 30,
+  windowSeconds = 300, // 5 minutes
   keyPrefix = 'api',
 }: RateLimitOptions = {}) => {
   return <T extends NextApiHandler>(handler: T): T => {
