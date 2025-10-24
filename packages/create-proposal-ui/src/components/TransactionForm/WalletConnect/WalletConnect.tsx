@@ -30,8 +30,9 @@ interface WalletConnectFormProps {
 }
 
 const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormProps) => {
-  const { treasury } = useDaoStore((state) => state.addresses)
-  const chain = useChainStore((x) => x.chain)
+  const { addresses } = useDaoStore()
+  const { treasury } = addresses
+  const { chain } = useChainStore()
   const [connectionStatus, setConnectionStatus] = useState(ConnectionStatus.DISCONNECTED)
 
   const { txPayload, wcClientData, wcConnect, wcDisconnect, txError } = useWalletConnect()
@@ -227,7 +228,8 @@ const useDecodedTxPayload = (txPayload: WCPayload | null) => {
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
   const { decodedTransaction: decoded } = useDecodedTxPayload(txPayload)
-  const chain = useChainStore((state) => state.chain)
+  const { chain } = useChainStore()
+  const { addresses } = useDaoStore()
   const transactions = useMemo(() => (decoded ? [decoded] : []), [decoded])
 
   if (!decoded) return null
@@ -237,7 +239,11 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
       <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight={'display'}>
         Transaction Preview
       </Box>
-      <DecodedTransactions chainId={chain.id} decodedTransactions={transactions} />
+      <DecodedTransactions
+        chainId={chain.id}
+        addresses={addresses}
+        decodedTransactions={transactions}
+      />
     </Box>
   )
 }

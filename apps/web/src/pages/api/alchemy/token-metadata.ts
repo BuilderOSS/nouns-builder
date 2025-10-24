@@ -3,6 +3,7 @@ import { getCachedIsContract } from '@buildeross/utils'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedTokenMetadatas } from 'src/services/alchemyService'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, addresses } = req.query
@@ -66,4 +67,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withCors(['GET'])(handler)
+export default withCors()(
+  withRateLimit({
+    keyPrefix: 'alchemy:tokenMetadata',
+  })(handler)
+)

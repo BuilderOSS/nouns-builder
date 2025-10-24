@@ -1,6 +1,6 @@
-import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
+import { SerializedNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
-import { CHAIN_ID, DecodedArg } from '@buildeross/types'
+import { DecodedArg } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 
@@ -8,17 +8,17 @@ import { FallbackImage } from '../../FallbackImage'
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 interface NFTArgumentDisplayProps {
-  chainId: CHAIN_ID
   arg: DecodedArg
   target: string
   functionName?: string
+  nftMetadata?: SerializedNftMetadata | null
 }
 
 export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
-  chainId,
   arg,
   target,
   functionName,
+  nftMetadata,
 }) => {
   const tokenId = useMemo(() => {
     if (
@@ -31,12 +31,6 @@ export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
     }
     return undefined
   }, [arg])
-
-  const { metadata: nftMetadata } = useNftMetadata(
-    chainId,
-    target as `0x${string}`,
-    tokenId
-  )
 
   // Memoize image sources to prevent re-renders
   const imageSrcList = useMemo(() => {

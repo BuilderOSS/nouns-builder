@@ -1,43 +1,27 @@
-import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
-import { CHAIN_ID, DecodedArg } from '@buildeross/types'
+import { TokenMetadata } from '@buildeross/hooks/useTokenMetadata'
+import { DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils'
-import {
-  decodeEscrowData,
-  decodeEscrowDataV1,
-  ESCROW_TYPE,
-  ESCROW_TYPE_V1,
-  getEscrowBundlerV1,
-} from '@buildeross/utils/escrow'
+import { DecodedEscrowData, ESCROW_TYPE, ESCROW_TYPE_V1 } from '@buildeross/utils/escrow'
 import { formatDateTime } from '@buildeross/utils/helpers'
-import { Flex, Stack } from '@buildeross/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 import { useCallback } from 'react'
-import { formatUnits, Hex } from 'viem'
+import { formatUnits } from 'viem'
 
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 
 interface EscrowArgumentDisplayProps {
-  chainId: CHAIN_ID
   arg: DecodedArg
-  target: string
-  allArguments: Record<string, DecodedArg>
+  tokenMetadata?: TokenMetadata
+  escrowData?: DecodedEscrowData | null
 }
 
 export const EscrowArgumentDisplay: React.FC<EscrowArgumentDisplayProps> = ({
-  chainId,
   arg,
-  target,
-  allArguments,
+  tokenMetadata,
+  escrowData,
 }) => {
-  const escrowDataValue = allArguments['_escrowData']?.value
-  const escrowData =
-    toLower(target) === toLower(getEscrowBundlerV1(chainId))
-      ? decodeEscrowDataV1(escrowDataValue as Hex)
-      : decodeEscrowData(escrowDataValue as Hex)
-
-  const { tokenMetadata } = useTokenMetadataSingle(chainId, escrowData?.tokenAddress)
-
   const formatAmount = useCallback(
     (amount: bigint) => {
       if (!tokenMetadata) return amount.toString()
@@ -88,23 +72,79 @@ export const EscrowArgumentDisplay: React.FC<EscrowArgumentDisplayProps> = ({
     )
   }
 
-  // Handle escrow value formatting
-  let value = arg.value
-
   if (arg.name === '_milestoneAmounts') {
-    value = arg.value
-      .toString()
-      .split(',')
-      .map((amt: string) => `${formatAmount(BigInt(amt))}`)
-      .join(', ')
+    const list = Array.isArray(arg.value)
+      ? arg.value.map((v: any) => v?.toString?.() ?? String(v))
+      : typeof arg.value === 'string'
+        ? arg.value
+            .split(',')
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+        : [arg.value?.toString?.() ?? String(arg.value)]
+    const values = list.map((amt: string) => `${formatAmount(BigInt(amt))}`)
+
+    return (
+      <>
+        <Flex wrap="wrap" align="flex-start">
+          <Text pr="x1" style={{ flexShrink: 0 }}>
+            {arg.name}:
+          </Text>
+          <Text>[</Text>
+        </Flex>
+        <Stack pl="x4" gap="x1">
+          {values.map((item, index) => (
+            <Flex align="center" gap="x1" key={`${arg.name}-${index}`}>
+              {tokenMetadata?.logo && (
+                <img
+                  src={tokenMetadata.logo}
+                  alt={tokenMetadata.symbol}
+                  loading="lazy"
+                  decoding="async"
+                  width="16px"
+                  height="16px"
+                  style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
+                />
+              )}
+              <Text>{item}</Text>
+            </Flex>
+          ))}
+        </Stack>
+        <Text>]</Text>
+      </>
+    )
   } else if (arg.name === '_fundAmount') {
-    value = formatAmount(BigInt(arg.value.toString()))
+    const value = formatAmount(BigInt(arg.value.toString()))
+
+    return (
+      <Flex align="flex-start" w="100%">
+        <Text pr="x1" style={{ flexShrink: 0 }}>
+          {arg.name}:
+        </Text>
+        <Flex align="center" gap="x1">
+          {tokenMetadata?.logo && (
+            <img
+              src={tokenMetadata.logo}
+              alt={tokenMetadata.symbol}
+              loading="lazy"
+              decoding="async"
+              width="16px"
+              height="16px"
+              style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
+            />
+          )}
+          <Text>{value}</Text>
+        </Flex>
+      </Flex>
+    )
   } else if (arg.name === '_escrowType') {
-    value =
+    const value =
       toLower(arg.value.toString()) === toLower(ESCROW_TYPE)
         ? 'updatable-v2'
         : 'updatable'
+
+    return <BaseArgumentDisplay name={arg.name} value={value} />
   }
 
-  return <BaseArgumentDisplay name={arg.name} value={value} />
+  // fallback
+  return <BaseArgumentDisplay name={arg.name} value={arg.value} />
 }

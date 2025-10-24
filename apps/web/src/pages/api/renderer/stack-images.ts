@@ -13,7 +13,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!images || !images.length)
     return res.status(400).json({ error: 'No images provided' })
 
-  const { maxAge, swr } = CACHE_TIMES.DAO_FEED
+  const { maxAge, swr } = CACHE_TIMES.RENDERER
 
   res.setHeader(
     'Cache-Control',
@@ -62,8 +62,12 @@ const getImageData = async (imageUrl: string): Promise<Buffer> => {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
 
-      const res = await fetch(url, { signal: controller.signal })
-      clearTimeout(timeoutId)
+      let res: Response
+      try {
+        res = await fetch(url, { signal: controller.signal })
+      } finally {
+        clearTimeout(timeoutId)
+      }
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
@@ -77,7 +81,7 @@ const getImageData = async (imageUrl: string): Promise<Buffer> => {
   throw new Error('Failed to fetch image from all fetchable URLs')
 }
 
-export default withCors(['GET', 'HEAD'])(handler)
+export default withCors()(handler)
 
 export const config = {
   runtime: 'nodejs',

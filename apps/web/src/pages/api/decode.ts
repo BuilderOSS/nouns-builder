@@ -50,4 +50,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withCors(['POST'])(handler)
+export default withCors({ allowedMethods: ['POST'] })(handler)

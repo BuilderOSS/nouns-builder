@@ -24,7 +24,7 @@ interface WithCorsOptions {
   allowCredentials?: boolean
 }
 
-export const withCorsHandler = ({
+export const withCors = ({
   allowedMethods = ['GET'],
   allowedOrigins = ['*'],
   allowCredentials = false,
@@ -133,5 +133,3 @@ export const withCorsHandler = ({
     }) as T
   }
 }
-
-export const withCors = (allowedMethods: Method[]) => withCorsHandler({ allowedMethods })

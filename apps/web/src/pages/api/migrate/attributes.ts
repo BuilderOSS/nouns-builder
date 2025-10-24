@@ -23,4 +23,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default withCors(['GET'])(handler)
+export default withCors()(handler)

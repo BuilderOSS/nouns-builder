@@ -2,6 +2,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { Proposal } from '@buildeross/sdk'
 import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
+import { useMemo } from 'react'
 import useSWR, { KeyedMutator } from 'swr'
 import { hexToBigInt } from 'viem'
 
@@ -157,8 +158,23 @@ export const useDecodedTransactions = (
     { revalidateOnFocus: false }
   )
 
+  const fallbackData = useMemo(() => {
+    const hasInputs =
+      Array.isArray(targets) &&
+      Array.isArray(calldatas) &&
+      targets.length === calldatas.length
+
+    if (!hasInputs) return undefined
+
+    return targets.map((target, i) => ({
+      target,
+      transaction: calldatas[i],
+      isNotDecoded: true,
+    })) as DecodedTransactionFailure[]
+  }, [targets, calldatas])
+
   return {
-    decodedTransactions,
+    decodedTransactions: decodedTransactions ?? fallbackData,
     isLoading,
     isValidating,
     error,
@@ -200,8 +216,17 @@ export const useDecodedTransactionSingle = (
     { revalidateOnFocus: false }
   )
 
+  const fallbackData = useMemo(() => {
+    if (!target || !calldata) return undefined
+    return {
+      target,
+      transaction: calldata,
+      isNotDecoded: true,
+    } as DecodedTransactionFailure
+  }, [target, calldata])
+
   return {
-    decodedTransaction,
+    decodedTransaction: decodedTransaction ?? fallbackData,
     isLoading,
     isValidating,
     error,
