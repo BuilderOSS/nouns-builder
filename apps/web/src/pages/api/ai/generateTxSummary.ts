@@ -298,7 +298,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     res.status(200).json({ text: result.text })
   } catch (error) {
-    console.error(error)
+    console.error(`Error generating transaction summary:`, error)
 
     Sentry.captureException(error)
     await Sentry.flush(2000)
@@ -308,6 +308,5 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default withRateLimit({
-  maxRequests: 30,
   keyPrefix: 'ai:txSummary',
 })(handler)

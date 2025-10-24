@@ -9,12 +9,18 @@ import {
   getEscrowBundlerV1,
 } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { atoms, Box, Flex, Stack, Text } from '@buildeross/zord'
+import { atoms, Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { ArgumentDisplay } from '../ArgumentDisplay'
 
 const DISABLE_AI_SUMMARY = process.env.NEXT_PUBLIC_DISABLE_AI_SUMMARY === 'true'
+
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  return JSON.stringify(error)
+}
 
 export const DecodedDisplay: React.FC<{
   chainId: CHAIN_ID
@@ -129,6 +135,7 @@ export const DecodedDisplay: React.FC<{
     summary: aiSummary,
     error: errorSummary,
     isLoading: isGeneratingSummary,
+    mutate: regenerateSummary,
   } = useTransactionSummary(transactionData)
 
   return (
@@ -179,16 +186,31 @@ export const DecodedDisplay: React.FC<{
 
         {!isLoadingMetadata && !DISABLE_AI_SUMMARY && (
           <Box
-            p="x4"
+            px="x4"
+            pt="x3"
+            pb="x4"
             backgroundColor="background2"
             borderRadius="curved"
             border="1px solid"
             borderColor="border"
             mt="x4"
           >
-            <Text fontWeight="heading" mb="x2" color="accent">
-              🤖 AI Summary
-            </Text>
+            <Flex gap="x4" align="center" mb="x2" style={{ height: '32px' }}>
+              <Text fontWeight="heading" color="accent">
+                🤖 AI Summary
+              </Text>
+              {!isGeneratingSummary && !aiSummary && errorSummary && (
+                <Button
+                  onClick={() => regenerateSummary()}
+                  variant="outline"
+                  size="sm"
+                  px="x2"
+                  style={{ height: '32px' }}
+                >
+                  Regenerate
+                </Button>
+              )}
+            </Flex>
             {isGeneratingSummary && (
               <Text style={{ whiteSpace: 'pre-wrap' }}>Generating summary...</Text>
             )}
@@ -197,7 +219,7 @@ export const DecodedDisplay: React.FC<{
             )}
             {!isGeneratingSummary && !aiSummary && errorSummary && (
               <Text color="negative" style={{ whiteSpace: 'pre-wrap' }}>
-                Error generating summary: {errorSummary.message || errorSummary}
+                Error generating summary: {getErrorMessage(errorSummary)}
               </Text>
             )}
           </Box>

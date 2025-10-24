@@ -47,4 +47,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } as L2MigratedResponse)
 }
 
-export default withCors(['GET'])(handler)
+export default withCors()(handler)

@@ -40,7 +40,19 @@ const aiSummaryFetcher = async (data: TransactionSummaryData): Promise<string> =
     })
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`)
+      const result = await response.json()
+      if (result && typeof result === 'string' && result.trim()) {
+        throw new Error(result)
+      } else if (
+        result &&
+        result.error &&
+        typeof result.error === 'string' &&
+        result.error.trim()
+      ) {
+        throw new Error(result.error)
+      } else {
+        throw new Error(`Unknown error`)
+      }
     }
 
     const result = await response.json()
@@ -59,7 +71,7 @@ const aiSummaryFetcher = async (data: TransactionSummaryData): Promise<string> =
   } catch (error) {
     console.error('Error fetching AI summary:', error)
     if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('AI summary generation timed out')
+      throw new Error('transaction summary generation timed out')
     }
     throw error
   } finally {

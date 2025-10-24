@@ -5,7 +5,7 @@ import { ContractABIResult, getContractABIByAddress } from 'src/services/abiServ
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'
 import { withCors } from 'src/utils/api/cors'
 
-const fetchRedis = async (
+const handler = async (
   req: NextApiRequest,
   res: NextApiResponse<ContractABIResult | ErrorResult>
 ) => {
@@ -35,4 +35,4 @@ const fetchRedis = async (
   }
 }
 
-export default withCors(['GET'])(fetchRedis)
+export default withCors()(handler)
