@@ -35,12 +35,24 @@ export function decodePropdate(data: Bytes): Propdate | null {
   const messageType = headTuple[2].toI32()
   const messageOffset = headTuple[3].toI32()
 
+  // --- validate offsets to avoid OOB ---
+  const totalLen = data.length
+  // offset must be non‑negative and leave room for the string length word
+  if (messageOffset < 0 || messageOffset + 32 > totalLen) {
+    return null
+  }
+
   // --- manually parse string tail ---
   const stringBytes = changetype<Bytes>(data.subarray(messageOffset))
   const stringHead = ethereum.decode('(uint256)', stringBytes)
   if (stringHead == null) return null
 
   const stringLength = stringHead.toTuple()[0].toI32()
+  // length must be non‑negative and within bounds
+  if (stringLength < 0 || messageOffset + 32 + stringLength > totalLen) {
+    return null
+  }
+
   const msgBytes = changetype<Bytes>(
     data.subarray(messageOffset + 32, messageOffset + 32 + stringLength)
   )
