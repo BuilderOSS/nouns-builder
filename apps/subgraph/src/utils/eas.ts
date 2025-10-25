@@ -25,12 +25,35 @@ export class Propdate extends ethereum.Tuple {
 
 // const PROPDATE_SCHEMA = 'bytes32 proposalId, bytes32 originalMessageId, uint8 messageType, string message'
 export function decodePropdate(data: Bytes): Propdate | null {
-  const value = ethereum.decode('(bytes32,bytes32,uint8,string)', data)
-  if (!value) {
-    return null
-  }
-  return changetype<Propdate>(value.toTuple())
+  // --- decode static portion only ---
+  const head = ethereum.decode('(bytes32,bytes32,uint8,uint256)', data)
+  if (head == null) return null
+
+  const headTuple = head.toTuple()
+  const proposalId = headTuple[0].toBytes()
+  const originalMessageId = headTuple[1].toBytes()
+  const messageType = headTuple[2].toI32()
+  const messageOffset = headTuple[3].toI32()
+
+  // --- manually parse string tail ---
+  const stringBytes = changetype<Bytes>(data.subarray(messageOffset))
+  const stringHead = ethereum.decode('(uint256)', stringBytes)
+  if (stringHead == null) return null
+
+  const stringLength = stringHead.toTuple()[0].toI32()
+  const msgBytes = changetype<Bytes>(data.subarray(messageOffset + 32, messageOffset + 32 + stringLength))
+  const message = msgBytes.toString() // AssemblyScript Bytes → string
+
+  // --- rebuild Propdate tuple ---
+  const tupleVals: Array<ethereum.Value> = [
+    ethereum.Value.fromFixedBytes(proposalId),
+    ethereum.Value.fromFixedBytes(originalMessageId),
+    ethereum.Value.fromI32(messageType),
+    ethereum.Value.fromString(message)
+  ]
+  return changetype<Propdate>(tupleVals)
 }
+
 
 // const ESCROW_DELEGATE_SCHEMA = `address daoMultiSig`
 export function decodeEscrowDelegate(data: Bytes): Address | null {
