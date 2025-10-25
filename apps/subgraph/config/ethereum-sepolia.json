@@ -6,7 +6,7 @@
   },
   "eas": {
     "address": "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
-    "startBlock": 8090450
+    "startBlock": 6927101
   },
   "callHandlers": false
 }
