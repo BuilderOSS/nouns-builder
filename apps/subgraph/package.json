@@ -23,7 +23,7 @@
     "graph:build": "graph build",
     "graph:codegen": "graph codegen",
     "test": "graph test",
-    "lint": "eslint src --fix",
+    "lint": "eslint src tests --fix",
     "local-node": "docker compose up",
     "remove:local": "graph remove --node http://localhost:8020/ nouns-builder"
   }

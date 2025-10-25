@@ -1,6 +1,7 @@
-import { describe, test, assert, beforeAll } from 'matchstick-as'
-import { Address, BigInt, Bytes, ethereum } from '@graphprotocol/graph-ts'
-import { decodePropdate, decodeEscrowDelegate } from '../src/utils/eas'
+import { Address, Bytes } from '@graphprotocol/graph-ts'
+import { assert, describe, test } from 'matchstick-as'
+
+import { decodeDaoMultisig, decodePropdate } from '../src/utils/eas'
 
 describe('Eas Decode Tests', () => {
   test('decode propdate test - message type 0', () => {
@@ -137,7 +138,7 @@ describe('Eas Decode Tests', () => {
     const data = Bytes.fromHexString(
       '0x00000000000000000000000019a8eb80c1483ceaa1278b16c5d5ef0104f85905'
     )
-    const decoded = decodeEscrowDelegate(data)
+    const decoded = decodeDaoMultisig(data)
     if (!decoded) {
       assert.assertTrue(false, 'decoded should not be null')
       return
