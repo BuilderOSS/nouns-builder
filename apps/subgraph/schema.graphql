@@ -11,6 +11,7 @@ type DAO @entity {
   auctionAddress: Bytes!
   treasuryAddress: Bytes!
   governorAddress: Bytes!
+  escrowDelegateAddress: Bytes
   ownerCount: Int!
   voterCount: Int!
   tokenCount: Int!
@@ -108,6 +109,19 @@ type Proposal @entity {
   snapshotBlockNumber: BigInt!
   transactionHash: Bytes!
   votes: [ProposalVote!]! @derivedFrom(field: "proposal")
+  updates: [ProposalUpdate!]! @derivedFrom(field: "proposal")
+}
+
+type ProposalUpdate @entity {
+  id: ID!
+  transactionHash: Bytes!
+  timestamp: BigInt!
+  proposal: Proposal!
+  messageType: Int!
+  message: String!
+  creator: Bytes!
+  originalUpdate: ProposalUpdate
+  replies: [ProposalUpdate!]! @derivedFrom(field: "originalUpdate")
 }
 
 enum ProposalVoteSupport {
