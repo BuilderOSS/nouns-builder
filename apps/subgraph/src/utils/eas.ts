@@ -4,7 +4,7 @@ export const PROPDATE_SCHEMA_UID = Bytes.fromHexString(
   '0x8bd0d42901ce3cd9898dbea6ae2fbf1e796ef0923e7cbb0a1cecac2e42d47cb3'
 )
 
-export const ESCROW_DELEGATE_SCHEMA_UID = Bytes.fromHexString(
+export const DAO_MULTISIG_SCHEMA_UID = Bytes.fromHexString(
   '0x1289c5f988998891af7416d83820c40ba1c6f5ba31467f2e611172334dc53a0e'
 )
 
@@ -41,7 +41,9 @@ export function decodePropdate(data: Bytes): Propdate | null {
   if (stringHead == null) return null
 
   const stringLength = stringHead.toTuple()[0].toI32()
-  const msgBytes = changetype<Bytes>(data.subarray(messageOffset + 32, messageOffset + 32 + stringLength))
+  const msgBytes = changetype<Bytes>(
+    data.subarray(messageOffset + 32, messageOffset + 32 + stringLength)
+  )
   const message = msgBytes.toString() // AssemblyScript Bytes → string
 
   // --- rebuild Propdate tuple ---
@@ -49,14 +51,13 @@ export function decodePropdate(data: Bytes): Propdate | null {
     ethereum.Value.fromFixedBytes(proposalId),
     ethereum.Value.fromFixedBytes(originalMessageId),
     ethereum.Value.fromI32(messageType),
-    ethereum.Value.fromString(message)
+    ethereum.Value.fromString(message),
   ]
   return changetype<Propdate>(tupleVals)
 }
 
-
-// const ESCROW_DELEGATE_SCHEMA = `address daoMultiSig`
-export function decodeEscrowDelegate(data: Bytes): Address | null {
+// const DAO_MULTISIG_SCHEMA = `address daoMultiSig`
+export function decodeDaoMultisig(data: Bytes): Address | null {
   const value = ethereum.decode('(address)', data)
   if (!value) {
     return null
