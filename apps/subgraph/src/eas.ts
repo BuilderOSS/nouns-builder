@@ -51,11 +51,12 @@ function handlePropdateAttestation(event: AttestedEvent): void {
   update.messageType = propdate.messageType
   update.message = propdate.message
   update.creator = event.params.attester
-  if (propdate.originalMessageId.equals(zeroBytes32)) {
-    // is zero hash for original update
-    update.originalUpdate = null
-  } else {
-    update.originalUpdate = propdate.originalMessageId.toHexString()
+  if (propdate.originalMessageId != zeroBytes32) {
+    const originalUpdate = ProposalUpdate.load(propdate.originalMessageId.toHexString())
+    if (originalUpdate) {
+      // original update found
+      update.originalUpdate = propdate.originalMessageId.toHexString()
+    }
   }
   update.deleted = false
   update.save()
