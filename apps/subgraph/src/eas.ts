@@ -13,10 +13,6 @@ import {
   PROPDATE_SCHEMA_UID,
 } from './utils/eas'
 
-const zeroBytes32 = Bytes.fromHexString(
-  '0x0000000000000000000000000000000000000000000000000000000000000000'
-)
-
 function getAttestation(address: Address, uid: Bytes): Bytes | null {
   const eas = EAS.bind(address)
   const attestation = eas.try_getAttestation(uid)
@@ -51,13 +47,7 @@ function handlePropdateAttestation(event: AttestedEvent): void {
   update.messageType = propdate.messageType
   update.message = propdate.message
   update.creator = event.params.attester
-  if (propdate.originalMessageId != zeroBytes32) {
-    const originalUpdate = ProposalUpdate.load(propdate.originalMessageId.toHexString())
-    if (originalUpdate) {
-      // original update found
-      update.originalUpdate = propdate.originalMessageId.toHexString()
-    }
-  }
+  update.originalMessageId = propdate.originalMessageId
   update.deleted = false
   update.save()
 }

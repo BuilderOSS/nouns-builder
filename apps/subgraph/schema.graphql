@@ -120,8 +120,7 @@ type ProposalUpdate @entity {
   messageType: Int!
   message: String!
   creator: Bytes!
-  originalUpdate: ProposalUpdate
-  replies: [ProposalUpdate!]! @derivedFrom(field: "originalUpdate")
+  originalMessageId: Bytes!
   deleted: Boolean!
 }
 
