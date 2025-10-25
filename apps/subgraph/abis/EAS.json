@@ -231,7 +231,7 @@
     "outputs": [
       { "internalType": "contract ISchemaRegistry", "name": "", "type": "address" }
     ],
-    "stateMutability": "pure",
+    "stateMutability": "view",
     "type": "function"
   },
   {

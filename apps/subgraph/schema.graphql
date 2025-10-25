@@ -14,7 +14,7 @@ type DAO @entity {
   escrowDelegateAddress: Bytes
   ownerCount: Int!
   voterCount: Int!
-  tokenCount: Int!
+  tokensCount: Int!
   proposalCount: Int!
   totalAuctionSales: BigInt!
   auctionConfig: AuctionConfig!
@@ -67,7 +67,7 @@ type Snapshot @entity {
   totalSupply: Int!
   ownerCount: Int!
   voterCount: Int!
-  tokenCount: Int!
+  tokensCount: Int!
   proposalCount: Int!
 }
 
@@ -122,6 +122,7 @@ type ProposalUpdate @entity {
   creator: Bytes!
   originalUpdate: ProposalUpdate
   replies: [ProposalUpdate!]! @derivedFrom(field: "originalUpdate")
+  deleted: Boolean!
 }
 
 enum ProposalVoteSupport {
