@@ -27,6 +27,24 @@ type DAO @entity {
   daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
 }
 
+type _Schema_
+  @fulltext(
+    name: "daoSearch"
+    language: en
+    algorithm: rank
+    include: [
+      {
+        entity: "DAO"
+        fields: [
+          { name: "name" }
+          { name: "symbol" }
+          { name: "description" }
+          { name: "projectURI" }
+        ]
+      }
+    ]
+  )
+
 type DAOTokenOwner @entity {
   id: ID!
   owner: Bytes!
