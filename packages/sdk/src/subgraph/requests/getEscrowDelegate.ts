@@ -25,16 +25,25 @@ export async function getEscrowDelegate(
   }
 
   try {
-    const updateIssuerPriorityOrder = [
-      getAddress(treasuryAddress),
-      getAddress(BUILDER_DAO_TREASURY),
-      getAddress(BUILDER_DAO_OPS_MULTISIG),
-      getAddress(SMART_INVOICE_MULTISIG),
-    ]
+    const updateIssuerPriorityOrder =
+      treasuryAddress.toLowerCase() === BUILDER_DAO_TREASURY.toLowerCase()
+        ? [
+            getAddress(BUILDER_DAO_TREASURY),
+            getAddress(BUILDER_DAO_OPS_MULTISIG),
+            getAddress(SMART_INVOICE_MULTISIG),
+          ]
+        : [
+            getAddress(treasuryAddress),
+            getAddress(BUILDER_DAO_TREASURY),
+            getAddress(BUILDER_DAO_OPS_MULTISIG),
+            getAddress(SMART_INVOICE_MULTISIG),
+          ]
 
     const variables = {
       daoId: tokenAddress.toLowerCase(),
       creators: updateIssuerPriorityOrder.map((address) => address.toLowerCase()),
+      first: 1000,
+      skip: 0,
     }
 
     const { daoMultisigUpdates: updates } =
@@ -45,8 +54,10 @@ export async function getEscrowDelegate(
     }
 
     const sortedUpdates = updates.sort((a, b) => {
-      const indexA = updateIssuerPriorityOrder.indexOf(getAddress(a.creator))
-      const indexB = updateIssuerPriorityOrder.indexOf(getAddress(b.creator))
+      const idxA = updateIssuerPriorityOrder.indexOf(getAddress(a.creator))
+      const idxB = updateIssuerPriorityOrder.indexOf(getAddress(b.creator))
+      const indexA = idxA === -1 ? Number.POSITIVE_INFINITY : idxA
+      const indexB = idxB === -1 ? Number.POSITIVE_INFINITY : idxB
 
       // First sort by priority order
       if (indexA !== indexB) {
@@ -54,7 +65,7 @@ export async function getEscrowDelegate(
       }
 
       // If same priority, sort by timeCreated, latest first
-      return b.timestamp - a.timestamp
+      return Number(b.timestamp) - Number(a.timestamp)
     })
 
     try {

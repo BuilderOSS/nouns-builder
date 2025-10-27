@@ -3357,6 +3357,8 @@ export type DaoMetadataQuery = {
 export type DaoMultisigsQueryVariables = Exact<{
   daoId: Scalars['String']['input']
   creators: Array<Scalars['Bytes']['input']> | Scalars['Bytes']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
 }>
 
 export type DaoMultisigsQuery = {
@@ -3550,6 +3552,8 @@ export type SyncStatusQuery = {
 
 export type PropdatesQueryVariables = Exact<{
   proposalId: Scalars['String']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
 }>
 
 export type PropdatesQuery = {
@@ -4071,8 +4075,14 @@ export const DaoMetadataDocument = gql`
   }
 `
 export const DaoMultisigsDocument = gql`
-  query daoMultisigs($daoId: String!, $creators: [Bytes!]!) {
-    daoMultisigUpdates(where: { dao: $daoId, deleted: false, creator_in: $creators }) {
+  query daoMultisigs($daoId: String!, $creators: [Bytes!]!, $first: Int!, $skip: Int!) {
+    daoMultisigUpdates(
+      where: { dao: $daoId, deleted: false, creator_in: $creators }
+      orderBy: timestamp
+      orderDirection: desc
+      first: $first
+      skip: $skip
+    ) {
       ...DaoMultisigUpdate
     }
   }
@@ -4242,8 +4252,14 @@ export const SyncStatusDocument = gql`
   }
 `
 export const PropdatesDocument = gql`
-  query propdates($proposalId: String!) {
-    proposalUpdates(where: { proposal: $proposalId, deleted: false }) {
+  query propdates($proposalId: String!, $first: Int!, $skip: Int!) {
+    proposalUpdates(
+      where: { proposal: $proposalId, deleted: false }
+      orderBy: timestamp
+      orderDirection: desc
+      first: $first
+      skip: $skip
+    ) {
       ...ProposalUpdate
     }
   }

@@ -83,6 +83,8 @@ export async function getPropDates(
   try {
     const variables = {
       proposalId: propId.toLowerCase(),
+      first: 1000,
+      skip: 0,
     }
 
     const { proposalUpdates: updates } = await SDK.connect(chainId).propdates(variables)
@@ -114,9 +116,7 @@ export async function getPropDates(
 
     const propdates = await Promise.all(propdatePromises)
 
-    return propdates
-      .filter((p: PropDate) => p.proposalId.toLowerCase() === propId.toLowerCase())
-      .sort((a: PropDate, b: PropDate) => a.timeCreated - b.timeCreated)
+    return propdates.sort((a: PropDate, b: PropDate) => a.timeCreated - b.timeCreated)
   } catch (error) {
     console.error(
       'Error fetching updates:',

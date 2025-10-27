@@ -10,7 +10,7 @@ import { proposalDescription as messageStyle } from '../ProposalDescription/Prop
 export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
   const { ensName, ensAvatar } = useEnsData(reply.creator)
   return (
-    <Flex key={reply.id} direction="row" gap="x2" align="flex-start" mb="x3">
+    <Flex direction="row" gap="x2" align="flex-start" mb="x3">
       <Avatar address={reply.creator} src={ensAvatar} size="24" />
       <Box
         backgroundColor="background2"

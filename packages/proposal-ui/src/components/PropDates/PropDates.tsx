@@ -58,9 +58,8 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
     if (!showOnlyDaoMembers) {
       return allPropDates
     }
-    return allPropDates.filter((propDate) =>
-      daoMembers.some((m) => m.toLowerCase() === propDate.creator.toLowerCase())
-    )
+    const members = new Set(daoMembers.map((m) => m.toLowerCase()))
+    return allPropDates.filter((propDate) => members.has(propDate.creator.toLowerCase()))
   }, [data, showOnlyDaoMembers, daoMembers])
 
   const handleReplyClick = useCallback(
@@ -145,7 +144,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
 
             return (
               <PropDateCard
-                key={`${propDate.id}-${i}`}
+                key={propDate.id}
                 propDate={propDate}
                 isReplying={replyingTo?.id === propDate.id}
                 onReplyClick={handleReplyClick}
