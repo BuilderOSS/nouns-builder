@@ -4,7 +4,8 @@
   "version": "0.2.1",
   "dependencies": {
     "bignumber.js": "^9.3.0",
-    "tinycolor2": "^1.4.2"
+    "tinycolor2": "^1.4.2",
+    "wink-porter2-stemmer": "^2.0.1"
   },
   "devDependencies": {
     "@buildeross/constants": "workspace:*",
