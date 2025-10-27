@@ -89,7 +89,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
   )
 
   const treasuryBalance = React.useMemo(() => {
-    return balance ? formatCryptoVal(formatEther(balance.value)) : null
+    return balance ? `${formatCryptoVal(formatEther(balance.value))} ETH` : ''
   }, [balance])
 
   return (
@@ -133,11 +133,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         wrap={'wrap'}
         className={daoInfo}
       >
-        <Statistic
-          title="Treasury"
-          content={`${treasuryBalance} ETH`}
-          onClick={onOpenTreasury}
-        />
+        <Statistic title="Treasury" content={treasuryBalance} onClick={onOpenTreasury} />
         <Statistic title="Owners" content={data?.ownerCount} />
         <Statistic title="Total supply" content={Number(totalSupply)} />
         <Statistic
