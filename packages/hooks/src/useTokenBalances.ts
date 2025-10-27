@@ -1,8 +1,8 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import type { CHAIN_ID } from '@buildeross/types'
-import useSWR, { KeyedMutator } from 'swr'
-import { Address, isAddress } from 'viem'
+import useSWR, { type KeyedMutator } from 'swr'
+import { type Address, isAddress } from 'viem'
 
 export type TokenBalance = {
   address: string

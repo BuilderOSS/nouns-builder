@@ -19,6 +19,11 @@ export async function getEscrowDelegate(
     return null
   }
 
+  if (!isAddress(treasuryAddress)) {
+    console.error('Invalid treasury address')
+    return null
+  }
+
   if (!isChainIdSupportedByEAS(chainId)) {
     console.error('Chain ID not supported by EAS')
     return null

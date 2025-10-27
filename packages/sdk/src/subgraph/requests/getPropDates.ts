@@ -107,8 +107,8 @@ export async function getPropDates(
           milestoneId: !Number.isNaN(Number(parsedMessage.milestoneId))
             ? Number(parsedMessage.milestoneId)
             : null,
-          timeCreated: update.timestamp,
-          txid: update.transactionHash.toLowerCase() as Hex,
+          timeCreated: Number(update.timestamp),
+          txid: (update.transactionHash as string).toLowerCase() as Hex,
         }
         return propdate
       }
@@ -116,7 +116,7 @@ export async function getPropDates(
 
     const propdates = await Promise.all(propdatePromises)
 
-    return propdates.sort((a: PropDate, b: PropDate) => a.timeCreated - b.timeCreated)
+    return propdates
   } catch (error) {
     console.error(
       'Error fetching updates:',
