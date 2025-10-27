@@ -3356,7 +3356,7 @@ export type DaoMetadataQuery = {
 
 export type DaoMultisigsQueryVariables = Exact<{
   daoId: Scalars['String']['input']
-  creators: Array<Scalars['String']['input']> | Scalars['String']['input']
+  creators: Array<Scalars['Bytes']['input']> | Scalars['Bytes']['input']
 }>
 
 export type DaoMultisigsQuery = {
@@ -4071,10 +4071,8 @@ export const DaoMetadataDocument = gql`
   }
 `
 export const DaoMultisigsDocument = gql`
-  query daoMultisigs($daoId: String!, $creators: [String!]!) {
-    daoMultisigUpdates(
-      where: { dao: $daoId, deleted: false, creator: { in: $creators } }
-    ) {
+  query daoMultisigs($daoId: String!, $creators: [Bytes!]!) {
+    daoMultisigUpdates(where: { dao: $daoId, deleted: false, creator_in: $creators }) {
       ...DaoMultisigUpdate
     }
   }

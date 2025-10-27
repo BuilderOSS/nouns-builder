@@ -1,9 +1,9 @@
-query daoMultisigs($daoId: String!, $creators: [String!]!) {
+query daoMultisigs($daoId: String!, $creators: [Bytes!]!) {
   daoMultisigUpdates(
     where: {
       dao: $daoId
       deleted: false
-      creator: { in: $creators }
+      creator_in: $creators
     }
   ) {
     ...DaoMultisigUpdate
