@@ -1,0 +1,12 @@
+query daoMultisigs($daoId: String!, $creators: [String!]!) {
+  daoMultisigUpdates(
+    where: {
+      dao: $daoId
+      deleted: false
+      creator: { in: $creators }
+    }
+  ) {
+    ...DaoMultisigUpdate
+  }
+}
+

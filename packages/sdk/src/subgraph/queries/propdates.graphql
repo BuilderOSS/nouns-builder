@@ -1,0 +1,10 @@
+query propdates($proposalId: String!) {
+  proposalUpdates(
+    where: {
+      proposal: $proposalId
+      deleted: false
+    }
+  ) {
+    ...ProposalUpdate
+  }
+}

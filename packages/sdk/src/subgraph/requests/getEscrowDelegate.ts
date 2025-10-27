@@ -1,9 +1,8 @@
-import { ESCROW_DELEGATE_SCHEMA_UID } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { getAddress, Hex, isAddress } from 'viem'
 
 import { SDK } from '../client'
-import { DecodedData, getDecodedValue, isChainIdSupportedByEAS } from '../helpers'
+import { isChainIdSupportedByEAS } from '../helpers'
 
 const SMART_INVOICE_MULTISIG = `0xD609883e5eb442d364Aa57369224bE839A38C6f9`
 const BUILDER_DAO_TREASURY = `0xcf325a4c78912216249b818521b0798a0f904c10`
@@ -26,7 +25,7 @@ export async function getEscrowDelegate(
   }
 
   try {
-    const attestationIssuerPriorityOrder = [
+    const updateIssuerPriorityOrder = [
       getAddress(treasuryAddress),
       getAddress(BUILDER_DAO_TREASURY),
       getAddress(BUILDER_DAO_OPS_MULTISIG),
@@ -34,20 +33,20 @@ export async function getEscrowDelegate(
     ]
 
     const variables = {
-      schemaId: ESCROW_DELEGATE_SCHEMA_UID,
-      recipient: getAddress(tokenAddress),
-      attesters: attestationIssuerPriorityOrder,
+      daoId: tokenAddress.toLowerCase(),
+      creators: updateIssuerPriorityOrder.map((address) => address.toLowerCase()),
     }
 
-    const { attestations } = await SDK.connect(chainId).escrowDelegates(variables)
+    const { daoMultisigUpdates: updates } =
+      await SDK.connect(chainId).daoMultisigs(variables)
 
-    if (!attestations || attestations.length === 0) {
+    if (!updates || updates.length === 0) {
       return null
     }
 
-    const sortedAttestations = attestations.sort((a, b) => {
-      const indexA = attestationIssuerPriorityOrder.indexOf(getAddress(a.attester))
-      const indexB = attestationIssuerPriorityOrder.indexOf(getAddress(b.attester))
+    const sortedUpdates = updates.sort((a, b) => {
+      const indexA = updateIssuerPriorityOrder.indexOf(getAddress(a.creator))
+      const indexB = updateIssuerPriorityOrder.indexOf(getAddress(b.creator))
 
       // First sort by priority order
       if (indexA !== indexB) {
@@ -55,24 +54,18 @@ export async function getEscrowDelegate(
       }
 
       // If same priority, sort by timeCreated, latest first
-      return b.timeCreated - a.timeCreated
+      return b.timestamp - a.timestamp
     })
 
     try {
-      // Get the first attestation from priority
-      const decodedData = JSON.parse(
-        sortedAttestations[0].decodedDataJson
-      ) as DecodedData[]
-
-      const escrowDelegateAddress = getDecodedValue(decodedData, 'daoMultiSig') as Hex
-
-      return getAddress(escrowDelegateAddress)
+      // Get the first update from priority
+      return getAddress(sortedUpdates[0].daoMultisig)
     } catch (parseError) {
-      console.error('Error parsing attestation data:', parseError)
+      console.error('Error parsing update data:', parseError)
       return null
     }
   } catch (error) {
-    console.error('Error fetching attestations:', error)
+    console.error('Error fetching updates:', error)
     return null
   }
 }
