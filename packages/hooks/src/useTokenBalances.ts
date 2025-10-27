@@ -1,6 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { CHAIN_ID } from '@buildeross/types'
+import type { CHAIN_ID } from '@buildeross/types'
 import useSWR, { KeyedMutator } from 'swr'
 import { Address, isAddress } from 'viem'
 

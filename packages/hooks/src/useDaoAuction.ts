@@ -1,6 +1,6 @@
-import { auctionAbi, tokenAbi } from '@buildeross/sdk'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { unpackOptionalArray } from '@buildeross/utils'
+import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatEther } from 'viem'
 import { useReadContract } from 'wagmi'
 

@@ -1,10 +1,10 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { CHAIN_ID } from '@buildeross/types'
-import useSWR, { KeyedMutator } from 'swr'
-import { Address, isAddress } from 'viem'
+import type { CHAIN_ID } from '@buildeross/types'
+import useSWR, { type KeyedMutator } from 'swr'
+import { type Address, isAddress } from 'viem'
 
-import { NftTokenType } from './useNftMetadata'
+import { type NftTokenType } from './useNftMetadata'
 
 export type SerializedNft = {
   tokenId: string

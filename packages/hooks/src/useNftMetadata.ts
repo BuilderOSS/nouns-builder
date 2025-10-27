@@ -5,8 +5,8 @@ import {
   NftTokenType,
   type SerializedNftMetadata,
 } from '@buildeross/types'
-import useSWR, { KeyedMutator } from 'swr'
-import { Address, isAddress } from 'viem'
+import useSWR, { type KeyedMutator } from 'swr'
+import { type Address, isAddress } from 'viem'
 
 export { NftTokenType, type SerializedNftMetadata }
 
