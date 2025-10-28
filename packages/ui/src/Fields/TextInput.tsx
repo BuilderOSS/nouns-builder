@@ -1,6 +1,6 @@
 import { Box } from '@buildeross/zord'
 import { FormikProps } from 'formik'
-import React, { ChangeEventHandler, ReactElement } from 'react'
+import React, { ChangeEventHandler, KeyboardEventHandler, ReactElement } from 'react'
 
 import FieldError from './FieldError'
 import {
@@ -9,16 +9,21 @@ import {
   inputStyleVariants,
 } from './styles.css'
 
+type BoxProps = React.ComponentProps<typeof Box>
+type MarginBottom = BoxProps['mb']
+
 interface TextInputProps {
   id: string
   value: string | number
   inputLabel?: string | ReactElement
   onChange: ChangeEventHandler<HTMLInputElement>
+  onKeyPress?: KeyboardEventHandler<HTMLInputElement>
   formik?: FormikProps<any>
   errorMessage?: any
   placeholder?: string
   disabled?: boolean
   style?: React.CSSProperties
+  mb?: MarginBottom
 }
 
 const TextInput: React.FC<TextInputProps> = ({
@@ -26,19 +31,22 @@ const TextInput: React.FC<TextInputProps> = ({
   value,
   inputLabel,
   onChange,
+  onKeyPress,
   errorMessage,
   placeholder,
   disabled = false,
   style,
+  mb = 'x8',
 }) => {
   return (
-    <Box as="fieldset" mb={'x8'} p={'x0'} className={defaultFieldsetStyle}>
+    <Box as="fieldset" mb={mb} p={'x0'} className={defaultFieldsetStyle}>
       {inputLabel && <label className={defaultInputLabelStyle}>{inputLabel}</label>}
 
       <input
         id={id}
         type="text"
         onChange={onChange}
+        onKeyPress={onKeyPress}
         value={value}
         className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']}`}
         placeholder={placeholder || ''}

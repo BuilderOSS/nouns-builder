@@ -3,9 +3,9 @@ import { useDaoSearch, useExplore } from '@buildeross/hooks'
 import { useChainStore } from '@buildeross/stores'
 import { TextInput } from '@buildeross/ui/Fields'
 import { Pagination } from '@buildeross/ui/Pagination'
-import { Box, Grid, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useCallback, useState } from 'react'
 import { formatEther } from 'viem'
 
 import { exploreGrid, searchContainer } from './Explore.css'
@@ -21,17 +21,43 @@ export const Explore: React.FC = () => {
     isReady,
   } = useRouter()
   const chain = useChainStore((x) => x.chain)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [activeSearchQuery, setActiveSearchQuery] = useState('')
 
   // Determine if we're in search mode
-  const isSearching = searchQuery.trim().length >= MIN_SEARCH_LENGTH
+  const isSearching = activeSearchQuery.trim().length >= MIN_SEARCH_LENGTH
 
   // Search hook for DAO search functionality
   const {
     daos: searchDaos,
     isLoading: isSearchLoading,
     isEmpty: isSearchEmpty,
-  } = useDaoSearch(searchQuery, chain.slug, { enabled: isSearching })
+  } = useDaoSearch(activeSearchQuery, chain.slug, { enabled: isSearching })
+
+  // Handle search execution
+  const handleSearch = useCallback(() => {
+    if (searchInput.trim().length >= MIN_SEARCH_LENGTH) {
+      setActiveSearchQuery(searchInput.trim())
+    } else {
+      setActiveSearchQuery('')
+    }
+  }, [searchInput])
+
+  // Handle Enter key press
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSearch()
+      }
+    },
+    [handleSearch]
+  )
+
+  // Handle clear search
+  const handleClearSearch = useCallback(() => {
+    setSearchInput('')
+    setActiveSearchQuery('')
+  }, [])
 
   // Regular explore data when not searching
   const {
@@ -55,13 +81,30 @@ export const Explore: React.FC = () => {
 
       {/* Search Bar */}
       <Box className={searchContainer}>
-        <TextInput
-          id="search"
-          placeholder={`Search DAOs... (min ${MIN_SEARCH_LENGTH} characters)`}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ width: '100%', borderColor: '#F2F2F2' }}
-        />
+        <Flex gap="x2" align="center" w="100%" mb="x8">
+          <Flex align="stretch" direction="column" flex={1}>
+            <TextInput
+              id="search"
+              placeholder={`Search DAOs... (min ${MIN_SEARCH_LENGTH} characters)`}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              mb="x0"
+              style={{ width: '100%', borderColor: '#F2F2F2' }}
+            />
+          </Flex>
+          <Button
+            onClick={handleSearch}
+            disabled={searchInput.trim().length < MIN_SEARCH_LENGTH}
+          >
+            Search
+          </Button>
+          {isSearching && (
+            <Button onClick={handleClearSearch} variant="outline">
+              Clear
+            </Button>
+          )}
+        </Flex>
       </Box>
 
       {/* Search Results or Empty State */}
@@ -71,7 +114,7 @@ export const Explore: React.FC = () => {
           variant={'paragraph-md'}
           color={'tertiary'}
         >
-          No DAOs found for "{searchQuery}"
+          No DAOs found for "{activeSearchQuery}"
         </Text>
       )}
 
