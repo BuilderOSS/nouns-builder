@@ -7,6 +7,23 @@ export const exploreSkeleton = style({
   height: '390px',
 })
 
+// Responsive skeleton visibility
+export const skeletonTabletAndUp = style({
+  '@media': {
+    'screen and (max-width: 600px)': {
+      display: 'none',
+    },
+  },
+})
+
+export const skeletonDesktopOnly = style({
+  '@media': {
+    'screen and (max-width: 1023px)': {
+      display: 'none',
+    },
+  },
+})
+
 export const exploreGrid = style([
   atoms({
     gap: 'x4',
