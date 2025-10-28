@@ -1,5 +1,5 @@
 import { Icon, Spinner } from '@buildeross/zord'
-import React, { ChangeEventHandler, KeyboardEventHandler, useCallback } from 'react'
+import React, { ChangeEventHandler, KeyboardEventHandler, useEffect, useRef } from 'react'
 
 import {
   clearIconStyle,
@@ -35,17 +35,29 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   minSearchLength = 0,
   isLoading = false,
 }) => {
-  const isSearchEnabled = value.trim().length >= minSearchLength
-  const showHelper = value.length > 0
+  const hasSearchedRef = useRef(false)
 
-  const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
-    (e) => {
-      if (e.key === 'Enter' && onSearch && isSearchEnabled && !isLoading) {
-        onSearch()
-      }
-    },
-    [onSearch, isSearchEnabled, isLoading]
-  )
+  // Reset "searched" whenever the value changes
+  useEffect(() => {
+    hasSearchedRef.current = false
+  }, [value])
+
+  const trimmed = value.trim()
+  const isSearchEnabled = trimmed.length >= minSearchLength && !isLoading
+  const showHelper = trimmed.length > 0 && !hasSearchedRef.current
+  const helperText = isSearchEnabled
+    ? 'Press Enter to search'
+    : `Minimum ${minSearchLength} characters`
+
+  const triggerSearch = () => {
+    if (!onSearch || !isSearchEnabled) return
+    hasSearchedRef.current = true
+    onSearch()
+  }
+
+  const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === 'Enter') triggerSearch()
+  }
 
   return (
     <div className={searchInputWrapper}>
@@ -60,8 +72,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         disabled={disabled || isLoading}
       />
 
-      {/* Clear icon - only show when there's text and showClear is true */}
-      {showClear && value.trim().length > 0 && onClear && (
+      {showClear && trimmed.length > 0 && onClear && (
         <button
           type="button"
           className={clearIconStyle}
@@ -72,28 +83,24 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         </button>
       )}
 
-      {/* Search icon/spinner - always visible */}
       {onSearch && (
         <button
           type="button"
           className={searchIconStyle}
-          onClick={onSearch}
-          disabled={!isSearchEnabled || isLoading}
+          onClick={triggerSearch}
+          disabled={!isSearchEnabled}
           aria-label={isLoading ? 'Searching...' : 'Search'}
           style={{
             opacity: isSearchEnabled ? 1 : 0.5,
-            cursor: isSearchEnabled && !isLoading ? 'pointer' : 'not-allowed',
+            cursor: isSearchEnabled ? 'pointer' : 'not-allowed',
           }}
         >
           {isLoading ? <Spinner size="sm" color="accent" /> : <Icon id="search" />}
         </button>
       )}
 
-      {/* Helper text */}
       <div className={`${helperTextStyle} ${showHelper ? 'visible' : 'hidden'}`}>
-        {isSearchEnabled
-          ? 'Press Enter to search'
-          : `Need ${minSearchLength} characters to search`}
+        {helperText}
       </div>
     </div>
   )
