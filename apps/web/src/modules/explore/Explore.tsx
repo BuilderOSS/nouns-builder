@@ -85,7 +85,7 @@ export const Explore: React.FC = () => {
       </Box>
 
       {/* Search Results or Empty State */}
-      {isSearching && isSearchEmpty && !isSearchLoading && (
+      {isSearching && !isSearchLoading && isSearchEmpty && searchDaos !== undefined && (
         <Text
           style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
           variant={'paragraph-md'}
