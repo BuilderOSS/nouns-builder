@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type ExploreDaoWithChainId } from '@buildeross/sdk/subgraph'
 import { buildSearchText } from '@buildeross/utils/search'
@@ -20,7 +21,11 @@ const DEFAULT_DEBOUNCE_MS = 300
 
 // Fetcher function defined outside the hook
 const searchFetcher = async ([, searchText, network]: [string, string, string]) => {
-  const url = `/api/search?search=${encodeURIComponent(searchText)}&network=${encodeURIComponent(network)}`
+  const params = new URLSearchParams()
+  params.set('search', searchText)
+  params.set('network', network)
+
+  const url = `${BASE_URL}/api/search?${params.toString()}`
 
   const response = await fetch(url, {
     headers: {

@@ -1,9 +1,7 @@
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoCard } from '@buildeross/dao-ui'
-import { exploreMyDaosRequest } from '@buildeross/sdk/subgraph'
+import { useMyDaos } from '@buildeross/hooks'
 import { Grid } from '@buildeross/zord'
 import React from 'react'
-import useSWR from 'swr'
 import { formatEther } from 'viem'
 import { useAccount } from 'wagmi'
 
@@ -15,22 +13,16 @@ import ExploreToolbar from './ExploreToolbar'
 export const ExploreMyDaos = () => {
   const { address } = useAccount()
 
-  const { data, error, isValidating } = useSWR(
-    address ? ([SWR_KEYS.DYNAMIC.MY_DAOS_PAGE(address), address] as const) : null,
-    ([, _address]) => exploreMyDaosRequest(_address),
-    { revalidateOnFocus: false }
-  )
-
-  const isLoading = data ? false : isValidating && !data && !error
+  const { daos, isLoading } = useMyDaos({ address })
 
   return (
     <>
       <ExploreToolbar title={`My DAOs`} />
       {isLoading ? (
         <ExploreSkeleton />
-      ) : data?.daos?.length ? (
+      ) : daos?.length ? (
         <Grid className={exploreGrid} mb={'x16'}>
-          {data.daos.map((dao) => {
+          {daos.map((dao) => {
             const bid = dao.highestBid?.amount ?? undefined
             const bidInEth = bid ? formatEther(bid) : undefined
             if (!dao.chainId) return null

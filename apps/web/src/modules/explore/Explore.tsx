@@ -1,15 +1,11 @@
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoCard } from '@buildeross/dao-ui'
-import { useDaoSearch } from '@buildeross/hooks'
-import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
+import { useDaoSearch, useExplore } from '@buildeross/hooks'
 import { useChainStore } from '@buildeross/stores'
 import { TextInput } from '@buildeross/ui/Fields'
 import { Pagination } from '@buildeross/ui/Pagination'
 import { Box, Grid, Text } from '@buildeross/zord'
-import axios from 'axios'
 import { useRouter } from 'next/router'
 import React, { Fragment, useState } from 'react'
-import useSWR from 'swr'
 import { formatEther } from 'viem'
 
 import { exploreGrid, searchContainer } from './Explore.css'
@@ -38,26 +34,20 @@ export const Explore: React.FC = () => {
   } = useDaoSearch(searchQuery, chain.slug, { enabled: isSearching })
 
   // Regular explore data when not searching
-  const { data, error } = useSWR(
-    isReady && !isSearching
-      ? ([SWR_KEYS.EXPLORE, page, orderBy, chain.slug] as const)
-      : null,
-    async ([, _page, _orderBy, _chainSlug]) => {
-      const params: any = {}
-      if (_page) params['page'] = _page
-      if (_orderBy) params['orderBy'] = _orderBy
-      if (_chainSlug) params['network'] = _chainSlug
-
-      return await axios
-        .get<ExploreDaosResponse>('/api/explore', { params })
-        .then((x) => x.data)
-    }
-  )
+  const {
+    daos: exploreDaos,
+    hasNextPage,
+    isLoading: isExploreLoading,
+  } = useExplore({
+    page,
+    orderBy,
+    chainSlug: chain.slug,
+    enabled: isReady && !isSearching,
+  })
 
   // Use search results if searching, otherwise use regular explore data
-  const displayDaos = isSearching ? searchDaos : data?.daos
-  const isLoading = isSearching ? isSearchLoading : !data && !error
-  const { hasNextPage = false } = data || {}
+  const displayDaos = isSearching ? searchDaos : exploreDaos
+  const isLoading = isSearching ? isSearchLoading : isExploreLoading
 
   return (
     <Fragment>
