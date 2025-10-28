@@ -1,17 +1,17 @@
 import { DaoCard } from '@buildeross/dao-ui'
 import { useDaoSearch, useExplore } from '@buildeross/hooks'
 import { useChainStore } from '@buildeross/stores'
-import { TextInput } from '@buildeross/ui/Fields'
 import { Pagination } from '@buildeross/ui/Pagination'
-import { Box, Button, Flex, Grid, Text } from '@buildeross/zord'
+import { Box, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
-import React, { Fragment, useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { formatEther } from 'viem'
 
 import { exploreGrid, searchContainer } from './Explore.css'
-import ExploreNoDaos from './ExploreNoDaos'
+import { ExploreNoDaos } from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
-import ExploreToolbar from './ExploreToolbar'
+import { ExploreToolbar } from './ExploreToolbar'
+import { SearchInput } from './SearchInput'
 
 const MIN_SEARCH_LENGTH = 3
 
@@ -43,16 +43,6 @@ export const Explore: React.FC = () => {
     }
   }, [searchInput])
 
-  // Handle Enter key press
-  const handleKeyPress = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        handleSearch()
-      }
-    },
-    [handleSearch]
-  )
-
   // Handle clear search
   const handleClearSearch = useCallback(() => {
     setSearchInput('')
@@ -76,35 +66,22 @@ export const Explore: React.FC = () => {
   const isLoading = isSearching ? isSearchLoading : isExploreLoading
 
   return (
-    <Fragment>
+    <>
       <ExploreToolbar title={`DAOs on ${chain.name}`} showSort={!isSearching} />
 
       {/* Search Bar */}
-      <Box className={searchContainer}>
-        <Flex gap="x2" align="center" w="100%" mb="x8">
-          <Flex align="stretch" direction="column" flex={1}>
-            <TextInput
-              id="search"
-              placeholder={`Search DAOs... (min ${MIN_SEARCH_LENGTH} characters)`}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              mb="x0"
-              style={{ width: '100%', borderColor: '#F2F2F2' }}
-            />
-          </Flex>
-          <Button
-            onClick={handleSearch}
-            disabled={searchInput.trim().length < MIN_SEARCH_LENGTH}
-          >
-            Search
-          </Button>
-          {isSearching && (
-            <Button onClick={handleClearSearch} variant="outline">
-              Clear
-            </Button>
-          )}
-        </Flex>
+      <Box className={searchContainer} mb="x8">
+        <SearchInput
+          id="search"
+          placeholder={`Search DAOs... (min ${MIN_SEARCH_LENGTH} characters)`}
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          onSearch={handleSearch}
+          onClear={handleClearSearch}
+          showClear={searchInput.trim().length > 0}
+          minSearchLength={MIN_SEARCH_LENGTH}
+          isLoading={isSearchLoading}
+        />
       </Box>
 
       {/* Search Results or Empty State */}
@@ -120,7 +97,7 @@ export const Explore: React.FC = () => {
 
       {/* DAO Grid */}
       {displayDaos?.length ? (
-        <Fragment>
+        <>
           <Grid className={exploreGrid}>
             {displayDaos?.map((dao) => {
               const bid = dao.highestBid?.amount ?? undefined
@@ -142,13 +119,13 @@ export const Explore: React.FC = () => {
             })}
           </Grid>
           {!isSearching && <Pagination hasNextPage={hasNextPage} scroll={true} />}
-        </Fragment>
+        </>
       ) : isLoading ? (
         <ExploreSkeleton />
       ) : !page && !isSearching ? (
         <ExploreNoDaos />
       ) : !isSearching ? (
-        <Fragment>
+        <>
           <Text
             style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
             variant={'paragraph-md'}
@@ -158,8 +135,8 @@ export const Explore: React.FC = () => {
           </Text>
 
           <Pagination hasNextPage={hasNextPage} />
-        </Fragment>
+        </>
       ) : null}
-    </Fragment>
+    </>
   )
 }

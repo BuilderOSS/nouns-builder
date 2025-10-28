@@ -6,9 +6,9 @@ import { formatEther } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { exploreGrid } from './Explore.css'
-import ExploreNoDaos from './ExploreNoDaos'
+import { ExploreNoDaos } from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
-import ExploreToolbar from './ExploreToolbar'
+import { ExploreToolbar } from './ExploreToolbar'
 
 export const ExploreMyDaos = () => {
   const { address } = useAccount()

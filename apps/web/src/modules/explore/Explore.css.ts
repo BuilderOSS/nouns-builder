@@ -10,6 +10,7 @@ export const exploreSkeleton = style({
 export const exploreGrid = style([
   atoms({
     gap: 'x4',
+    mb: 'x4',
     w: '100%',
   }),
   {
