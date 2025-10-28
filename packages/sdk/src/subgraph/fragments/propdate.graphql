@@ -1,0 +1,9 @@
+fragment ProposalUpdate on ProposalUpdate {
+  id
+  transactionHash
+  timestamp
+  messageType
+  message
+  creator
+  originalMessageId
+}

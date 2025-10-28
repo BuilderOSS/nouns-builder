@@ -1,8 +1,0 @@
-fragment Attestation on Attestation {
-  id
-  attester
-  recipient
-  decodedDataJson
-  timeCreated
-  txid
-}

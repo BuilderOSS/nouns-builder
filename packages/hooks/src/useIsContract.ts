@@ -1,5 +1,5 @@
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { getCachedIsContract } from '@buildeross/utils'
+import { type AddressType, CHAIN_ID } from '@buildeross/types'
+import { getCachedIsContract } from '@buildeross/utils/isContract'
 import { type KeyedMutator } from 'swr'
 import useSWRImmutable from 'swr/immutable'
 

@@ -33,6 +33,38 @@ dataSources:
         - event: MetadataRendererUpdated(address,address)
           handler: handleMetadataRendererUpdated
       file: ./src/manager.ts
+{{#eas}}
+  - kind: ethereum
+    name: EAS
+    network: {{network}}
+    source:
+      address: '{{eas.address}}'
+      abi: EAS
+      startBlock: {{eas.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - DAO
+        - Proposal
+        - ProposalUpdate
+      abis:
+        - name: EAS
+          file: ./abis/EAS.json
+        - name: Token
+          file: ./abis/Token.json 
+        - name: Governor
+          file: ./abis/Governor.json
+        - name: Treasury
+          file: ./abis/Treasury.json
+      eventHandlers:
+        - event: Attested(indexed address,indexed address,bytes32,indexed bytes32)
+          handler: handleAttested
+        - event: Revoked(indexed address,indexed address,bytes32,indexed bytes32)
+          handler: handleRevoked
+      file: ./src/eas.ts
+{{/eas}}
 templates:
   - kind: ethereum
     name: Token

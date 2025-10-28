@@ -6,6 +6,8 @@
     "as-base64": "^0.2.0"
   },
   "devDependencies": {
+    "assemblyscript": "^0.19.20",
+    "matchstick-as": "^0.6.0",
     "mustache": "^4.2.0"
   },
   "license": "MIT",
@@ -20,7 +22,8 @@
     "deploy:subgraph": "pnpm clean && pnpm deploy:only",
     "graph:build": "graph build",
     "graph:codegen": "graph codegen",
-    "lint": "eslint src --fix",
+    "graph:test": "graph test",
+    "lint": "eslint src tests --fix",
     "local-node": "docker compose up",
     "remove:local": "graph remove --node http://localhost:8020/ nouns-builder"
   }

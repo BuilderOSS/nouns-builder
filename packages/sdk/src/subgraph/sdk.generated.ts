@@ -377,6 +377,7 @@ export enum Auction_OrderBy {
   DaoProposalCount = 'dao__proposalCount',
   DaoSymbol = 'dao__symbol',
   DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
   DaoTotalAuctionSales = 'dao__totalAuctionSales',
   DaoTotalSupply = 'dao__totalSupply',
   DaoTreasuryAddress = 'dao__treasuryAddress',
@@ -427,6 +428,7 @@ export type Dao = {
   auctions: Array<Auction>
   contractImage: Scalars['String']['output']
   currentAuction?: Maybe<Auction>
+  daoMultisigUpdates: Array<DaoMultisigUpdate>
   description: Scalars['String']['output']
   governorAddress: Scalars['Bytes']['output']
   id: Scalars['ID']['output']
@@ -441,6 +443,7 @@ export type Dao = {
   symbol: Scalars['String']['output']
   tokenAddress: Scalars['Bytes']['output']
   tokens: Array<Token>
+  tokensCount: Scalars['Int']['output']
   totalAuctionSales: Scalars['BigInt']['output']
   totalSupply: Scalars['Int']['output']
   treasuryAddress: Scalars['Bytes']['output']
@@ -454,6 +457,14 @@ export type DaoAuctionsArgs = {
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<Auction_Filter>
+}
+
+export type DaoDaoMultisigUpdatesArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<DaoMultisigUpdate_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<DaoMultisigUpdate_Filter>
 }
 
 export type DaoMetadataPropertiesArgs = {
@@ -595,6 +606,7 @@ export enum DaoTokenOwner_OrderBy {
   DaoProposalCount = 'dao__proposalCount',
   DaoSymbol = 'dao__symbol',
   DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
   DaoTotalAuctionSales = 'dao__totalAuctionSales',
   DaoTotalSupply = 'dao__totalSupply',
   DaoTreasuryAddress = 'dao__treasuryAddress',
@@ -692,6 +704,7 @@ export enum DaoVoter_OrderBy {
   DaoProposalCount = 'dao__proposalCount',
   DaoSymbol = 'dao__symbol',
   DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
   DaoTotalAuctionSales = 'dao__totalAuctionSales',
   DaoTotalSupply = 'dao__totalSupply',
   DaoTreasuryAddress = 'dao__treasuryAddress',
@@ -777,6 +790,7 @@ export type Dao_Filter = {
   currentAuction_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   currentAuction_starts_with?: InputMaybe<Scalars['String']['input']>
   currentAuction_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  daoMultisigUpdates_?: InputMaybe<DaoMultisigUpdate_Filter>
   description?: InputMaybe<Scalars['String']['input']>
   description_contains?: InputMaybe<Scalars['String']['input']>
   description_contains_nocase?: InputMaybe<Scalars['String']['input']>
@@ -921,6 +935,14 @@ export type Dao_Filter = {
   tokenAddress_not?: InputMaybe<Scalars['Bytes']['input']>
   tokenAddress_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   tokenAddress_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokensCount?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_gt?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_gte?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  tokensCount_lt?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_lte?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_not?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
   tokens_?: InputMaybe<Token_Filter>
   totalAuctionSales?: InputMaybe<Scalars['BigInt']['input']>
   totalAuctionSales_gt?: InputMaybe<Scalars['BigInt']['input']>
@@ -977,6 +999,7 @@ export enum Dao_OrderBy {
   CurrentAuctionId = 'currentAuction__id',
   CurrentAuctionSettled = 'currentAuction__settled',
   CurrentAuctionStartTime = 'currentAuction__startTime',
+  DaoMultisigUpdates = 'daoMultisigUpdates',
   Description = 'description',
   GovernorAddress = 'governorAddress',
   Id = 'id',
@@ -991,11 +1014,128 @@ export enum Dao_OrderBy {
   Symbol = 'symbol',
   TokenAddress = 'tokenAddress',
   Tokens = 'tokens',
+  TokensCount = 'tokensCount',
   TotalAuctionSales = 'totalAuctionSales',
   TotalSupply = 'totalSupply',
   TreasuryAddress = 'treasuryAddress',
   VoterCount = 'voterCount',
   Voters = 'voters',
+}
+
+export type DaoMultisigUpdate = {
+  __typename?: 'DaoMultisigUpdate'
+  creator: Scalars['Bytes']['output']
+  dao: Dao
+  daoMultisig: Scalars['Bytes']['output']
+  deleted: Scalars['Boolean']['output']
+  id: Scalars['ID']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+}
+
+export type DaoMultisigUpdate_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<DaoMultisigUpdate_Filter>>>
+  creator?: InputMaybe<Scalars['Bytes']['input']>
+  creator_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  creator_lt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_lte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  daoMultisig?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_contains?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_gt?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_gte?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  daoMultisig_lt?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_lte?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_not?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  daoMultisig_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  deleted?: InputMaybe<Scalars['Boolean']['input']>
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<DaoMultisigUpdate_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum DaoMultisigUpdate_OrderBy {
+  Creator = 'creator',
+  Dao = 'dao',
+  DaoMultisig = 'daoMultisig',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Deleted = 'deleted',
+  Id = 'id',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
 }
 
 export type MetadataItem = {
@@ -1228,6 +1368,7 @@ export enum MetadataProperty_OrderBy {
   DaoProposalCount = 'dao__proposalCount',
   DaoSymbol = 'dao__symbol',
   DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
   DaoTotalAuctionSales = 'dao__totalAuctionSales',
   DaoTotalSupply = 'dao__totalSupply',
   DaoTreasuryAddress = 'dao__treasuryAddress',
@@ -1277,6 +1418,7 @@ export type Proposal = {
   timeCreated: Scalars['BigInt']['output']
   title?: Maybe<Scalars['String']['output']>
   transactionHash: Scalars['Bytes']['output']
+  updates: Array<ProposalUpdate>
   values: Array<Scalars['BigInt']['output']>
   vetoTransactionHash?: Maybe<Scalars['Bytes']['output']>
   vetoed: Scalars['Boolean']['output']
@@ -1287,12 +1429,184 @@ export type Proposal = {
   votes: Array<ProposalVote>
 }
 
+export type ProposalUpdatesArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ProposalUpdate_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ProposalUpdate_Filter>
+}
+
 export type ProposalVotesArgs = {
   first?: InputMaybe<Scalars['Int']['input']>
   orderBy?: InputMaybe<ProposalVote_OrderBy>
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<ProposalVote_Filter>
+}
+
+export type ProposalUpdate = {
+  __typename?: 'ProposalUpdate'
+  creator: Scalars['Bytes']['output']
+  deleted: Scalars['Boolean']['output']
+  id: Scalars['ID']['output']
+  message: Scalars['String']['output']
+  messageType: Scalars['Int']['output']
+  originalMessageId: Scalars['Bytes']['output']
+  proposal: Proposal
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+}
+
+export type ProposalUpdate_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ProposalUpdate_Filter>>>
+  creator?: InputMaybe<Scalars['Bytes']['input']>
+  creator_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  creator_lt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_lte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  deleted?: InputMaybe<Scalars['Boolean']['input']>
+  deleted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  deleted_not?: InputMaybe<Scalars['Boolean']['input']>
+  deleted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  message?: InputMaybe<Scalars['String']['input']>
+  messageType?: InputMaybe<Scalars['Int']['input']>
+  messageType_gt?: InputMaybe<Scalars['Int']['input']>
+  messageType_gte?: InputMaybe<Scalars['Int']['input']>
+  messageType_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  messageType_lt?: InputMaybe<Scalars['Int']['input']>
+  messageType_lte?: InputMaybe<Scalars['Int']['input']>
+  messageType_not?: InputMaybe<Scalars['Int']['input']>
+  messageType_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  message_contains?: InputMaybe<Scalars['String']['input']>
+  message_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  message_ends_with?: InputMaybe<Scalars['String']['input']>
+  message_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  message_gt?: InputMaybe<Scalars['String']['input']>
+  message_gte?: InputMaybe<Scalars['String']['input']>
+  message_in?: InputMaybe<Array<Scalars['String']['input']>>
+  message_lt?: InputMaybe<Scalars['String']['input']>
+  message_lte?: InputMaybe<Scalars['String']['input']>
+  message_not?: InputMaybe<Scalars['String']['input']>
+  message_not_contains?: InputMaybe<Scalars['String']['input']>
+  message_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  message_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  message_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  message_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  message_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  message_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  message_starts_with?: InputMaybe<Scalars['String']['input']>
+  message_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  or?: InputMaybe<Array<InputMaybe<ProposalUpdate_Filter>>>
+  originalMessageId?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_contains?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_gt?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_gte?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  originalMessageId_lt?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_lte?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_not?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  originalMessageId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  proposal?: InputMaybe<Scalars['String']['input']>
+  proposal_?: InputMaybe<Proposal_Filter>
+  proposal_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_gt?: InputMaybe<Scalars['String']['input']>
+  proposal_gte?: InputMaybe<Scalars['String']['input']>
+  proposal_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_lt?: InputMaybe<Scalars['String']['input']>
+  proposal_lte?: InputMaybe<Scalars['String']['input']>
+  proposal_not?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum ProposalUpdate_OrderBy {
+  Creator = 'creator',
+  Deleted = 'deleted',
+  Id = 'id',
+  Message = 'message',
+  MessageType = 'messageType',
+  OriginalMessageId = 'originalMessageId',
+  Proposal = 'proposal',
+  ProposalAbstainVotes = 'proposal__abstainVotes',
+  ProposalAgainstVotes = 'proposal__againstVotes',
+  ProposalCalldatas = 'proposal__calldatas',
+  ProposalCancelTransactionHash = 'proposal__cancelTransactionHash',
+  ProposalCanceled = 'proposal__canceled',
+  ProposalCanceledAt = 'proposal__canceledAt',
+  ProposalDescription = 'proposal__description',
+  ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalExecutableFrom = 'proposal__executableFrom',
+  ProposalExecuted = 'proposal__executed',
+  ProposalExecutedAt = 'proposal__executedAt',
+  ProposalExecutionTransactionHash = 'proposal__executionTransactionHash',
+  ProposalExpiresAt = 'proposal__expiresAt',
+  ProposalForVotes = 'proposal__forVotes',
+  ProposalId = 'proposal__id',
+  ProposalProposalId = 'proposal__proposalId',
+  ProposalProposalNumber = 'proposal__proposalNumber',
+  ProposalProposalThreshold = 'proposal__proposalThreshold',
+  ProposalProposer = 'proposal__proposer',
+  ProposalQueued = 'proposal__queued',
+  ProposalQueuedAt = 'proposal__queuedAt',
+  ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
+  ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
+  ProposalTimeCreated = 'proposal__timeCreated',
+  ProposalTitle = 'proposal__title',
+  ProposalTransactionHash = 'proposal__transactionHash',
+  ProposalVetoTransactionHash = 'proposal__vetoTransactionHash',
+  ProposalVetoed = 'proposal__vetoed',
+  ProposalVetoedAt = 'proposal__vetoedAt',
+  ProposalVoteCount = 'proposal__voteCount',
+  ProposalVoteEnd = 'proposal__voteEnd',
+  ProposalVoteStart = 'proposal__voteStart',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
 }
 
 export type ProposalVote = {
@@ -1739,6 +2053,7 @@ export type Proposal_Filter = {
   transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
   transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  updates_?: InputMaybe<ProposalUpdate_Filter>
   values?: InputMaybe<Array<Scalars['BigInt']['input']>>
   values_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>
   values_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>
@@ -1814,6 +2129,7 @@ export enum Proposal_OrderBy {
   DaoProposalCount = 'dao__proposalCount',
   DaoSymbol = 'dao__symbol',
   DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
   DaoTotalAuctionSales = 'dao__totalAuctionSales',
   DaoTotalSupply = 'dao__totalSupply',
   DaoTreasuryAddress = 'dao__treasuryAddress',
@@ -1840,6 +2156,7 @@ export enum Proposal_OrderBy {
   TimeCreated = 'timeCreated',
   Title = 'title',
   TransactionHash = 'transactionHash',
+  Updates = 'updates',
   Values = 'values',
   VetoTransactionHash = 'vetoTransactionHash',
   Vetoed = 'vetoed',
@@ -1861,6 +2178,8 @@ export type Query = {
   auctionConfigs: Array<AuctionConfig>
   auctions: Array<Auction>
   dao?: Maybe<Dao>
+  daoMultisigUpdate?: Maybe<DaoMultisigUpdate>
+  daoMultisigUpdates: Array<DaoMultisigUpdate>
   daos: Array<Dao>
   daotokenOwner?: Maybe<DaoTokenOwner>
   daotokenOwners: Array<DaoTokenOwner>
@@ -1871,6 +2190,8 @@ export type Query = {
   metadataProperties: Array<MetadataProperty>
   metadataProperty?: Maybe<MetadataProperty>
   proposal?: Maybe<Proposal>
+  proposalUpdate?: Maybe<ProposalUpdate>
+  proposalUpdates: Array<ProposalUpdate>
   proposalVote?: Maybe<ProposalVote>
   proposalVotes: Array<ProposalVote>
   proposals: Array<Proposal>
@@ -1936,6 +2257,22 @@ export type QueryDaoArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
   subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryDaoMultisigUpdateArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryDaoMultisigUpdatesArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<DaoMultisigUpdate_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<DaoMultisigUpdate_Filter>
 }
 
 export type QueryDaosArgs = {
@@ -2018,6 +2355,22 @@ export type QueryProposalArgs = {
   subgraphError?: _SubgraphErrorPolicy_
 }
 
+export type QueryProposalUpdateArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryProposalUpdatesArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ProposalUpdate_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ProposalUpdate_Filter>
+}
+
 export type QueryProposalVoteArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
@@ -2084,6 +2437,7 @@ export type Snapshot = {
   ownerCount: Scalars['Int']['output']
   proposalCount: Scalars['Int']['output']
   timestamp: Scalars['BigInt']['output']
+  tokensCount: Scalars['Int']['output']
   totalSupply: Scalars['Int']['output']
   voterCount: Scalars['Int']['output']
 }
@@ -2154,6 +2508,14 @@ export type Snapshot_Filter = {
   timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
   timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
   timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  tokensCount?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_gt?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_gte?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  tokensCount_lt?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_lte?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_not?: InputMaybe<Scalars['Int']['input']>
+  tokensCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
   totalSupply?: InputMaybe<Scalars['Int']['input']>
   totalSupply_gt?: InputMaybe<Scalars['Int']['input']>
   totalSupply_gte?: InputMaybe<Scalars['Int']['input']>
@@ -2187,6 +2549,7 @@ export enum Snapshot_OrderBy {
   DaoProposalCount = 'dao__proposalCount',
   DaoSymbol = 'dao__symbol',
   DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
   DaoTotalAuctionSales = 'dao__totalAuctionSales',
   DaoTotalSupply = 'dao__totalSupply',
   DaoTreasuryAddress = 'dao__treasuryAddress',
@@ -2195,6 +2558,7 @@ export enum Snapshot_OrderBy {
   OwnerCount = 'ownerCount',
   ProposalCount = 'proposalCount',
   Timestamp = 'timestamp',
+  TokensCount = 'tokensCount',
   TotalSupply = 'totalSupply',
   VoterCount = 'voterCount',
 }
@@ -2210,6 +2574,8 @@ export type Subscription = {
   auctionConfigs: Array<AuctionConfig>
   auctions: Array<Auction>
   dao?: Maybe<Dao>
+  daoMultisigUpdate?: Maybe<DaoMultisigUpdate>
+  daoMultisigUpdates: Array<DaoMultisigUpdate>
   daos: Array<Dao>
   daotokenOwner?: Maybe<DaoTokenOwner>
   daotokenOwners: Array<DaoTokenOwner>
@@ -2220,6 +2586,8 @@ export type Subscription = {
   metadataProperties: Array<MetadataProperty>
   metadataProperty?: Maybe<MetadataProperty>
   proposal?: Maybe<Proposal>
+  proposalUpdate?: Maybe<ProposalUpdate>
+  proposalUpdates: Array<ProposalUpdate>
   proposalVote?: Maybe<ProposalVote>
   proposalVotes: Array<ProposalVote>
   proposals: Array<Proposal>
@@ -2285,6 +2653,22 @@ export type SubscriptionDaoArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
   subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type SubscriptionDaoMultisigUpdateArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type SubscriptionDaoMultisigUpdatesArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<DaoMultisigUpdate_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<DaoMultisigUpdate_Filter>
 }
 
 export type SubscriptionDaosArgs = {
@@ -2365,6 +2749,22 @@ export type SubscriptionProposalArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
   subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type SubscriptionProposalUpdateArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type SubscriptionProposalUpdatesArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ProposalUpdate_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ProposalUpdate_Filter>
 }
 
 export type SubscriptionProposalVoteArgs = {
@@ -2639,6 +3039,7 @@ export enum Token_OrderBy {
   DaoProposalCount = 'dao__proposalCount',
   DaoSymbol = 'dao__symbol',
   DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
   DaoTotalAuctionSales = 'dao__totalAuctionSales',
   DaoTotalSupply = 'dao__totalSupply',
   DaoTreasuryAddress = 'dao__treasuryAddress',
@@ -2794,6 +3195,26 @@ export type TokenFragment = {
   dao: { __typename?: 'DAO'; description: string }
 }
 
+export type DaoMultisigUpdateFragment = {
+  __typename?: 'DaoMultisigUpdate'
+  id: string
+  transactionHash: any
+  timestamp: any
+  daoMultisig: any
+  creator: any
+}
+
+export type ProposalUpdateFragment = {
+  __typename?: 'ProposalUpdate'
+  id: string
+  transactionHash: any
+  timestamp: any
+  messageType: number
+  message: string
+  creator: any
+  originalMessageId: any
+}
+
 export type ActiveAuctionsQueryVariables = Exact<{
   first: Scalars['Int']['input']
   where: Auction_Filter
@@ -2931,6 +3352,25 @@ export type DaoMetadataQuery = {
       }>
     }> | null
   } | null
+}
+
+export type DaoMultisigsQueryVariables = Exact<{
+  daoId: Scalars['String']['input']
+  creators: Array<Scalars['Bytes']['input']> | Scalars['Bytes']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
+}>
+
+export type DaoMultisigsQuery = {
+  __typename?: 'Query'
+  daoMultisigUpdates: Array<{
+    __typename?: 'DaoMultisigUpdate'
+    id: string
+    transactionHash: any
+    timestamp: any
+    daoMultisig: any
+    creator: any
+  }>
 }
 
 export type DaoNextAndPreviousTokensQueryVariables = Exact<{
@@ -3108,6 +3548,26 @@ export type SyncStatusQuery = {
     hasIndexingErrors: boolean
     block: { __typename?: '_Block_'; number: number }
   } | null
+}
+
+export type PropdatesQueryVariables = Exact<{
+  proposalId: Scalars['String']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
+}>
+
+export type PropdatesQuery = {
+  __typename?: 'Query'
+  proposalUpdates: Array<{
+    __typename?: 'ProposalUpdate'
+    id: string
+    transactionHash: any
+    timestamp: any
+    messageType: number
+    message: string
+    creator: any
+    originalMessageId: any
+  }>
 }
 
 export type ProposalQueryVariables = Exact<{
@@ -3469,6 +3929,26 @@ export const TokenFragmentDoc = gql`
     mintedAt
   }
 `
+export const DaoMultisigUpdateFragmentDoc = gql`
+  fragment DaoMultisigUpdate on DaoMultisigUpdate {
+    id
+    transactionHash
+    timestamp
+    daoMultisig
+    creator
+  }
+`
+export const ProposalUpdateFragmentDoc = gql`
+  fragment ProposalUpdate on ProposalUpdate {
+    id
+    transactionHash
+    timestamp
+    messageType
+    message
+    creator
+    originalMessageId
+  }
+`
 export const ActiveAuctionsDocument = gql`
   query activeAuctions($first: Int!, $where: Auction_filter!) {
     auctions(orderBy: endTime, orderDirection: desc, first: $first, where: $where) {
@@ -3593,6 +4073,20 @@ export const DaoMetadataDocument = gql`
       }
     }
   }
+`
+export const DaoMultisigsDocument = gql`
+  query daoMultisigs($daoId: String!, $creators: [Bytes!]!, $first: Int!, $skip: Int!) {
+    daoMultisigUpdates(
+      where: { dao: $daoId, deleted: false, creator_in: $creators }
+      orderBy: timestamp
+      orderDirection: desc
+      first: $first
+      skip: $skip
+    ) {
+      ...DaoMultisigUpdate
+    }
+  }
+  ${DaoMultisigUpdateFragmentDoc}
 `
 export const DaoNextAndPreviousTokensDocument = gql`
   query daoNextAndPreviousTokens($tokenAddress: String!, $tokenId: BigInt!) {
@@ -3757,6 +4251,20 @@ export const SyncStatusDocument = gql`
     }
   }
 `
+export const PropdatesDocument = gql`
+  query propdates($proposalId: String!, $first: Int!, $skip: Int!) {
+    proposalUpdates(
+      where: { proposal: $proposalId, deleted: false }
+      orderBy: timestamp
+      orderDirection: desc
+      first: $first
+      skip: $skip
+    ) {
+      ...ProposalUpdate
+    }
+  }
+  ${ProposalUpdateFragmentDoc}
+`
 export const ProposalDocument = gql`
   query proposal($proposalId: ID!) {
     proposal(id: $proposalId) {
@@ -3904,13 +4412,16 @@ export function getSdk(
   return {
     activeAuctions(
       variables: ActiveAuctionsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<ActiveAuctionsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<ActiveAuctionsQuery>(ActiveAuctionsDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<ActiveAuctionsQuery>({
+            document: ActiveAuctionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'activeAuctions',
         'query',
@@ -3919,13 +4430,16 @@ export function getSdk(
     },
     activeDaos(
       variables: ActiveDaosQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<ActiveDaosQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<ActiveDaosQuery>(ActiveDaosDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<ActiveDaosQuery>({
+            document: ActiveDaosDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'activeDaos',
         'query',
@@ -3934,13 +4448,16 @@ export function getSdk(
     },
     auctionBids(
       variables: AuctionBidsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<AuctionBidsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<AuctionBidsQuery>(AuctionBidsDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<AuctionBidsQuery>({
+            document: AuctionBidsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'auctionBids',
         'query',
@@ -3949,13 +4466,16 @@ export function getSdk(
     },
     auctionHistory(
       variables: AuctionHistoryQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<AuctionHistoryQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<AuctionHistoryQuery>(AuctionHistoryDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<AuctionHistoryQuery>({
+            document: AuctionHistoryDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'auctionHistory',
         'query',
@@ -3964,13 +4484,16 @@ export function getSdk(
     },
     daoInfo(
       variables: DaoInfoQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaoInfoQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaoInfoQuery>(DaoInfoDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaoInfoQuery>({
+            document: DaoInfoDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daoInfo',
         'query',
@@ -3979,13 +4502,16 @@ export function getSdk(
     },
     daoMembersList(
       variables?: DaoMembersListQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaoMembersListQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaoMembersListQuery>(DaoMembersListDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaoMembersListQuery>({
+            document: DaoMembersListDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daoMembersList',
         'query',
@@ -3994,13 +4520,16 @@ export function getSdk(
     },
     daoMembership(
       variables: DaoMembershipQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaoMembershipQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaoMembershipQuery>(DaoMembershipDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaoMembershipQuery>({
+            document: DaoMembershipDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daoMembership',
         'query',
@@ -4009,30 +4538,53 @@ export function getSdk(
     },
     daoMetadata(
       variables: DaoMetadataQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaoMetadataQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaoMetadataQuery>(DaoMetadataDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaoMetadataQuery>({
+            document: DaoMetadataDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daoMetadata',
         'query',
         variables
       )
     },
+    daoMultisigs(
+      variables: DaoMultisigsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaoMultisigsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaoMultisigsQuery>({
+            document: DaoMultisigsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daoMultisigs',
+        'query',
+        variables
+      )
+    },
     daoNextAndPreviousTokens(
       variables: DaoNextAndPreviousTokensQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaoNextAndPreviousTokensQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaoNextAndPreviousTokensQuery>(
-            DaoNextAndPreviousTokensDocument,
+          client.request<DaoNextAndPreviousTokensQuery>({
+            document: DaoNextAndPreviousTokensDocument,
             variables,
-            { ...requestHeaders, ...wrappedRequestHeaders }
-          ),
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
         'daoNextAndPreviousTokens',
         'query',
         variables
@@ -4040,13 +4592,16 @@ export function getSdk(
     },
     daoOGMetadata(
       variables: DaoOgMetadataQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaoOgMetadataQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaoOgMetadataQuery>(DaoOgMetadataDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaoOgMetadataQuery>({
+            document: DaoOgMetadataDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daoOGMetadata',
         'query',
@@ -4055,13 +4610,16 @@ export function getSdk(
     },
     daoVoters(
       variables?: DaoVotersQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaoVotersQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaoVotersQuery>(DaoVotersDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaoVotersQuery>({
+            document: DaoVotersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daoVoters',
         'query',
@@ -4070,13 +4628,16 @@ export function getSdk(
     },
     daosForDashboard(
       variables: DaosForDashboardQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaosForDashboardQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaosForDashboardQuery>(DaosForDashboardDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaosForDashboardQuery>({
+            document: DaosForDashboardDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daosForDashboard',
         'query',
@@ -4085,13 +4646,16 @@ export function getSdk(
     },
     daosForUser(
       variables: DaosForUserQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<DaosForUserQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<DaosForUserQuery>(DaosForUserDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<DaosForUserQuery>({
+            document: DaosForUserDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'daosForUser',
         'query',
@@ -4100,13 +4664,16 @@ export function getSdk(
     },
     findAuctions(
       variables?: FindAuctionsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<FindAuctionsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<FindAuctionsQuery>(FindAuctionsDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<FindAuctionsQuery>({
+            document: FindAuctionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'findAuctions',
         'query',
@@ -4115,15 +4682,17 @@ export function getSdk(
     },
     findAuctionsForDaos(
       variables?: FindAuctionsForDaosQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<FindAuctionsForDaosQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<FindAuctionsForDaosQuery>(
-            FindAuctionsForDaosDocument,
+          client.request<FindAuctionsForDaosQuery>({
+            document: FindAuctionsForDaosDocument,
             variables,
-            { ...requestHeaders, ...wrappedRequestHeaders }
-          ),
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
         'findAuctionsForDaos',
         'query',
         variables
@@ -4131,28 +4700,52 @@ export function getSdk(
     },
     syncStatus(
       variables?: SyncStatusQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<SyncStatusQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<SyncStatusQuery>(SyncStatusDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<SyncStatusQuery>({
+            document: SyncStatusDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'syncStatus',
         'query',
         variables
       )
     },
+    propdates(
+      variables: PropdatesQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<PropdatesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<PropdatesQuery>({
+            document: PropdatesDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'propdates',
+        'query',
+        variables
+      )
+    },
     proposal(
       variables: ProposalQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<ProposalQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<ProposalQuery>(ProposalDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<ProposalQuery>({
+            document: ProposalDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'proposal',
         'query',
@@ -4161,13 +4754,16 @@ export function getSdk(
     },
     proposalOGMetadata(
       variables: ProposalOgMetadataQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<ProposalOgMetadataQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<ProposalOgMetadataQuery>(ProposalOgMetadataDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<ProposalOgMetadataQuery>({
+            document: ProposalOgMetadataDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'proposalOGMetadata',
         'query',
@@ -4176,13 +4772,16 @@ export function getSdk(
     },
     proposals(
       variables: ProposalsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<ProposalsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<ProposalsQuery>(ProposalsDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<ProposalsQuery>({
+            document: ProposalsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'proposals',
         'query',
@@ -4191,13 +4790,16 @@ export function getSdk(
     },
     snapshots(
       variables?: SnapshotsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<SnapshotsQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<SnapshotsQuery>(SnapshotsDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<SnapshotsQuery>({
+            document: SnapshotsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'snapshots',
         'query',
@@ -4206,13 +4808,16 @@ export function getSdk(
     },
     tokenWithDao(
       variables: TokenWithDaoQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<TokenWithDaoQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<TokenWithDaoQuery>(TokenWithDaoDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<TokenWithDaoQuery>({
+            document: TokenWithDaoDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'tokenWithDao',
         'query',
@@ -4221,13 +4826,16 @@ export function getSdk(
     },
     tokens(
       variables?: TokensQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<TokensQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<TokensQuery>(TokensDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<TokensQuery>({
+            document: TokensDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'tokens',
         'query',
@@ -4236,13 +4844,16 @@ export function getSdk(
     },
     totalAuctionSales(
       variables: TotalAuctionSalesQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
     ): Promise<TotalAuctionSalesQuery> {
       return withWrapper(
         (wrappedRequestHeaders) =>
-          client.request<TotalAuctionSalesQuery>(TotalAuctionSalesDocument, variables, {
-            ...requestHeaders,
-            ...wrappedRequestHeaders,
+          client.request<TotalAuctionSalesQuery>({
+            document: TotalAuctionSalesDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
           }),
         'totalAuctionSales',
         'query',

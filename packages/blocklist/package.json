@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/blocklist",
   "description": "OFAC sanctions blocklist utilities for BuilderOSS apps",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",

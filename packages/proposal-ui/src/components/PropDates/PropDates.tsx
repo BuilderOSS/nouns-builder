@@ -1,8 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useInvoiceData } from '@buildeross/hooks/useInvoiceData'
-import { getPropDates, type PropDate } from '@buildeross/sdk/eas'
-import { Proposal } from '@buildeross/sdk/subgraph'
+import { getPropDates, type PropDate, type Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { skeletonAnimation } from '@buildeross/ui/styles'
 import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
@@ -59,14 +58,13 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
     if (!showOnlyDaoMembers) {
       return allPropDates
     }
-    return allPropDates.filter((propDate) =>
-      daoMembers.some((m) => m.toLowerCase() === propDate.attester.toLowerCase())
-    )
+    const members = new Set(daoMembers.map((m) => m.toLowerCase()))
+    return allPropDates.filter((propDate) => members.has(propDate.creator.toLowerCase()))
   }, [data, showOnlyDaoMembers, daoMembers])
 
   const handleReplyClick = useCallback(
     (propDateToReply: PropDate) => {
-      if (replyingTo?.txid === propDateToReply.txid) {
+      if (replyingTo?.id === propDateToReply.id) {
         setShowForm(false)
         setReplyingTo(undefined)
       } else {
@@ -137,14 +135,18 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
           )}
           {topLevelPropDates.map((propDate, i) => {
             const replies = [...filteredPropDates]
-              .filter((pd) => pd.originalMessageId === propDate.txid)
+              .filter(
+                (pd) =>
+                  pd.originalMessageId === propDate.txid ||
+                  pd.originalMessageId === propDate.id
+              )
               .sort((a, b) => a.timeCreated - b.timeCreated)
 
             return (
               <PropDateCard
-                key={`${propDate.txid}-${i}`}
+                key={propDate.id}
                 propDate={propDate}
-                isReplying={replyingTo?.txid === propDate.txid}
+                isReplying={replyingTo?.id === propDate.id}
                 onReplyClick={handleReplyClick}
                 replies={replies}
                 invoiceData={invoiceData}

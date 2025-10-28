@@ -1,0 +1,16 @@
+query daoMultisigs($daoId: String!, $creators: [Bytes!]!, $first: Int!, $skip: Int!) {
+  daoMultisigUpdates(
+    where: {
+      dao: $daoId
+      deleted: false
+      creator_in: $creators
+    }
+    orderBy: timestamp
+    orderDirection: desc
+    first: $first
+    skip: $skip
+  ) {
+    ...DaoMultisigUpdate
+  }
+}
+

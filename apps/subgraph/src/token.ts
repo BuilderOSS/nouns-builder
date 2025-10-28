@@ -93,7 +93,7 @@ export function handleTransfer(event: TransferEvent): void {
     token.dao = event.address.toHexString()
 
     dao.totalSupply = dao.totalSupply + 1
-    dao.tokenCount = dao.tokenCount + 1
+    dao.tokensCount = dao.tokensCount + 1
   }
 
   token.owner = event.params.to
@@ -119,7 +119,7 @@ export function handleTransfer(event: TransferEvent): void {
   } else {
     // Handle burning
     dao.totalSupply = dao.totalSupply - 1
-    // totalSupply decreases but tokenCount stays the same
+    // totalSupply decreases but tokensCount stays the same
   }
 
   if (toDelegate.notEqual(ADDRESS_ZERO)) {
@@ -190,6 +190,6 @@ function saveSnapshot(event: ethereum.Event): void {
   snapshot.ownerCount = dao.ownerCount
   snapshot.voterCount = dao.voterCount
   snapshot.proposalCount = dao.proposalCount
-  snapshot.tokenCount = dao.tokenCount
+  snapshot.tokensCount = dao.tokensCount
   snapshot.save()
 }
