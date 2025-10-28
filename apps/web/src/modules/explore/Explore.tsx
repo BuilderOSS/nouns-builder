@@ -17,6 +17,8 @@ import ExploreNoDaos from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
 import ExploreToolbar from './ExploreToolbar'
 
+const MIN_SEARCH_LENGTH = 3
+
 export const Explore: React.FC = () => {
   const {
     query: { page, orderBy },
@@ -25,16 +27,19 @@ export const Explore: React.FC = () => {
   const chain = useChainStore((x) => x.chain)
   const [searchQuery, setSearchQuery] = useState('')
 
+  // Determine if we're in search mode
+  const isSearching = searchQuery.trim().length >= MIN_SEARCH_LENGTH
+
   // Search hook for DAO search functionality
   const {
     daos: searchDaos,
     isLoading: isSearchLoading,
     isEmpty: isSearchEmpty,
-  } = useDaoSearch(searchQuery, chain.slug, { enabled: !!searchQuery.trim() })
+  } = useDaoSearch(searchQuery, chain.slug, { enabled: isSearching })
 
   // Regular explore data when not searching
   const { data, error } = useSWR(
-    isReady && !searchQuery.trim()
+    isReady && !isSearching
       ? ([SWR_KEYS.EXPLORE, page, orderBy, chain.slug] as const)
       : null,
     async ([, _page, _orderBy, _chainSlug]) => {
@@ -50,7 +55,6 @@ export const Explore: React.FC = () => {
   )
 
   // Use search results if searching, otherwise use regular explore data
-  const isSearching = !!searchQuery.trim()
   const displayDaos = isSearching ? searchDaos : data?.daos
   const isLoading = isSearching ? isSearchLoading : !data && !error
   const { hasNextPage = false } = data || {}
@@ -63,7 +67,7 @@ export const Explore: React.FC = () => {
       <Box className={searchContainer}>
         <TextInput
           id="search"
-          placeholder="Search DAOs..."
+          placeholder={`Search DAOs... (min ${MIN_SEARCH_LENGTH} characters)`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ width: '100%', borderColor: '#F2F2F2' }}
