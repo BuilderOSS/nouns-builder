@@ -1,3 +1,4 @@
+// @ts-expect-error no types
 import stem from 'wink-porter2-stemmer'
 
 const stemToken = (t: string): string => stem(t)

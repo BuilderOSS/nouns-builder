@@ -18,6 +18,7 @@ export const SWR_KEYS = {
   DECODED_TRANSACTION: 'decoded-transaction',
   ENS: 'ens',
   EXPLORE: 'explore',
+  DAO_SEARCH: 'dao-search',
   FEATURED: 'featured',
   TOKEN: 'token',
   AUCTION: 'auction',
