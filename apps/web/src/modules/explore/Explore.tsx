@@ -1,35 +1,91 @@
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { DaoCard } from '@buildeross/dao-ui'
+import { useDaoSearch } from '@buildeross/hooks'
 import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
+import { TextInput } from '@buildeross/ui/Fields'
 import { Pagination } from '@buildeross/ui/Pagination'
-import { Grid, Text } from '@buildeross/zord'
+import { Box, Grid, Text } from '@buildeross/zord'
+import axios from 'axios'
 import { useRouter } from 'next/router'
-import React, { Fragment } from 'react'
+import React, { Fragment, useState } from 'react'
+import useSWR from 'swr'
 import { formatEther } from 'viem'
 
-import { exploreGrid } from './Explore.css'
+import { exploreGrid, searchContainer } from './Explore.css'
 import ExploreNoDaos from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
 import ExploreToolbar from './ExploreToolbar'
 
-interface ExploreProps extends Partial<ExploreDaosResponse> {
-  isLoading: boolean
-  hasNextPage: boolean
-}
-
-export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }) => {
-  const { query } = useRouter()
+export const Explore: React.FC = () => {
+  const {
+    query: { page, orderBy },
+    isReady,
+  } = useRouter()
   const chain = useChainStore((x) => x.chain)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const page = query.page
+  // Search hook for DAO search functionality
+  const {
+    daos: searchDaos,
+    isLoading: isSearchLoading,
+    isEmpty: isSearchEmpty,
+  } = useDaoSearch(searchQuery, chain.slug, { enabled: !!searchQuery.trim() })
+
+  // Regular explore data when not searching
+  const { data, error } = useSWR(
+    isReady && !searchQuery.trim()
+      ? ([SWR_KEYS.EXPLORE, page, orderBy, chain.slug] as const)
+      : null,
+    async ([, _page, _orderBy, _chainSlug]) => {
+      const params: any = {}
+      if (_page) params['page'] = _page
+      if (_orderBy) params['orderBy'] = _orderBy
+      if (_chainSlug) params['network'] = _chainSlug
+
+      return await axios
+        .get<ExploreDaosResponse>('/api/explore', { params })
+        .then((x) => x.data)
+    }
+  )
+
+  // Use search results if searching, otherwise use regular explore data
+  const isSearching = !!searchQuery.trim()
+  const displayDaos = isSearching ? searchDaos : data?.daos
+  const isLoading = isSearching ? isSearchLoading : !data && !error
+  const { hasNextPage = false } = data || {}
 
   return (
     <Fragment>
-      <ExploreToolbar title={`DAOs on ${chain.name}`} showSort />
-      {daos?.length ? (
+      <ExploreToolbar title={`DAOs on ${chain.name}`} showSort={!isSearching} />
+
+      {/* Search Bar */}
+      <Box className={searchContainer}>
+        <TextInput
+          id="search"
+          placeholder="Search DAOs..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{ width: '100%', borderColor: '#F2F2F2' }}
+        />
+      </Box>
+
+      {/* Search Results or Empty State */}
+      {isSearching && isSearchEmpty && !isSearchLoading && (
+        <Text
+          style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
+          variant={'paragraph-md'}
+          color={'tertiary'}
+        >
+          No DAOs found for "{searchQuery}"
+        </Text>
+      )}
+
+      {/* DAO Grid */}
+      {displayDaos?.length ? (
         <Fragment>
           <Grid className={exploreGrid}>
-            {daos?.map((dao) => {
+            {displayDaos?.map((dao) => {
               const bid = dao.highestBid?.amount ?? undefined
               const bidInEth = bid ? formatEther(bid) : undefined
 
@@ -48,13 +104,13 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
               )
             })}
           </Grid>
-          <Pagination hasNextPage={hasNextPage} scroll={true} />
+          {!isSearching && <Pagination hasNextPage={hasNextPage} scroll={true} />}
         </Fragment>
       ) : isLoading ? (
         <ExploreSkeleton />
-      ) : !page ? (
+      ) : !page && !isSearching ? (
         <ExploreNoDaos />
-      ) : (
+      ) : !isSearching ? (
         <Fragment>
           <Text
             style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
@@ -66,7 +122,7 @@ export const Explore: React.FC<ExploreProps> = ({ daos, hasNextPage, isLoading }
 
           <Pagination hasNextPage={hasNextPage} />
         </Fragment>
-      )}
+      ) : null}
     </Fragment>
   )
 }

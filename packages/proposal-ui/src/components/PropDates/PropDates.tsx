@@ -133,7 +133,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
               }}
             />
           )}
-          {topLevelPropDates.map((propDate, i) => {
+          {topLevelPropDates.map((propDate) => {
             const replies = [...filteredPropDates]
               .filter(
                 (pd) =>

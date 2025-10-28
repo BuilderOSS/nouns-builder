@@ -28,3 +28,19 @@ export const exploreGrid = style([
     },
   },
 ])
+
+export const searchContainer = style([
+  atoms({
+    w: '100%',
+  }),
+  {
+    maxWidth: 912,
+    '@media': {
+      'screen and (min-width: 1024px)': {},
+      'screen and (min-width: 600px) and (max-width: 1023px)': {
+        maxWidth: 660,
+      },
+      'screen and (max-width: 600px)': {},
+    },
+  },
+])
