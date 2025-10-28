@@ -36,7 +36,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   isLoading = false,
 }) => {
   const isSearchEnabled = value.trim().length >= minSearchLength
-  const showHelper = value.length > 0 && value.trim().length < minSearchLength
+  const showHelper = value.length > 0
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     (e) => {
@@ -91,7 +91,9 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
       {/* Helper text */}
       <div className={`${helperTextStyle} ${showHelper ? 'visible' : 'hidden'}`}>
-        Minimum {minSearchLength} characters
+        {isSearchEnabled
+          ? 'Press Enter to search'
+          : `Need ${minSearchLength} characters to search`}
       </div>
     </div>
   )

@@ -19,8 +19,13 @@ interface UseDaoSearchOptions {
 
 const DEFAULT_DEBOUNCE_MS = 300
 
-// Fetcher function defined outside the hook
-const searchFetcher = async ([, searchText, network]: [string, string, string]) => {
+// Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
+type HttpError = Error & { status?: number; body?: unknown }
+type SearchResponse = { daos: ExploreDaoWithChainId[] }
+const searchFetcher = async (
+  [, searchText, network]: readonly [string, string, string],
+  { signal }: { signal?: AbortSignal } = {}
+): Promise<SearchResponse> => {
   const params = new URLSearchParams()
   params.set('search', searchText)
   params.set('network', network)
@@ -28,16 +33,19 @@ const searchFetcher = async ([, searchText, network]: [string, string, string]) 
   const url = `${BASE_URL}/api/search?${params.toString()}`
 
   const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    signal,
+    headers: { Accept: 'application/json' },
   })
 
+  const text = await response.text()
+  const body = text ? JSON.parse(text) : {}
   if (!response.ok) {
-    throw new Error(`Search failed: ${response.status} ${response.statusText}`)
+    const err: HttpError = new Error(body?.error || response.statusText)
+    err.status = response.status
+    err.body = body
+    throw err
   }
-
-  return response.json()
+  return body as SearchResponse
 }
 
 /**
@@ -83,22 +91,28 @@ export function useDaoSearch(
       : null
 
   // Use SWR for data fetching with caching
-  const { data, error, isLoading } = useSWR(swrKey, searchFetcher, {
-    // Prevent automatic revalidation on focus/reconnect for search
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    // Keep data fresh for 30 seconds
-    dedupingInterval: 30000,
-    // Custom error retry logic
-    shouldRetryOnError: (error) => {
-      // Don't retry 4xx errors
-      return !(error?.status >= 400 && error?.status < 500)
-    },
-    errorRetryCount: 2,
-    errorRetryInterval: 1000,
-  })
+  const { data, error, isLoading } = useSWR<SearchResponse, HttpError>(
+    swrKey,
+    searchFetcher,
+    {
+      // Prevent automatic revalidation on focus/reconnect for search
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      // Keep data fresh for 30 seconds
+      dedupingInterval: 30000,
+      // Custom error retry logic
+      shouldRetryOnError: (error) => {
+        // Don't retry 4xx errors
+        return !(error?.status && error.status >= 400 && error.status < 500)
+      },
+      errorRetryCount: 2,
+      errorRetryInterval: 1000,
+      // Optional: reduce UI flicker while typing
+      keepPreviousData: true,
+    }
+  )
 
-  const isEmpty = !isLoading && (!data?.daos || data.daos.length === 0)
+  const isEmpty = !!swrKey && !isLoading && (!data?.daos || data.daos.length === 0)
 
   return {
     daos: data?.daos,

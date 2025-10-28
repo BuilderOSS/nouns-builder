@@ -16,6 +16,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const searchRes = await searchDaosRequest(chain.id, search, limit, 0)
 
+  if (!searchRes) {
+    return res.status(500).json({ error: 'Search failed' })
+  }
+
   const { maxAge, swr } = CACHE_TIMES.EXPLORE
   res.setHeader(
     'Cache-Control',
