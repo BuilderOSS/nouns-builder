@@ -3,6 +3,7 @@ import React, { ChangeEventHandler, KeyboardEventHandler, useCallback } from 're
 
 import {
   clearIconStyle,
+  helperTextStyle,
   searchIconStyle,
   searchInputStyle,
   searchInputWithClear,
@@ -35,6 +36,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   isLoading = false,
 }) => {
   const isSearchEnabled = value.trim().length >= minSearchLength
+  const showHelper = value.length > 0 && value.trim().length < minSearchLength
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback(
     (e) => {
@@ -86,6 +88,11 @@ export const SearchInput: React.FC<SearchInputProps> = ({
           {isLoading ? <Spinner size="sm" color="accent" /> : <Icon id="search" />}
         </button>
       )}
+
+      {/* Helper text */}
+      <div className={`${helperTextStyle} ${showHelper ? 'visible' : 'hidden'}`}>
+        Minimum {minSearchLength} characters
+      </div>
     </div>
   )
 }

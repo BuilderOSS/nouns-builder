@@ -3,6 +3,7 @@ import { style } from '@vanilla-extract/css'
 export const searchInputWrapper = style({
   position: 'relative',
   width: '100%',
+  marginBottom: 8,
 })
 
 export const searchInputStyle = style({
@@ -69,6 +70,26 @@ export const clearIconStyle = style({
   selectors: {
     '&:hover': {
       opacity: 0.7,
+    },
+  },
+})
+
+export const helperTextStyle = style({
+  position: 'absolute',
+  top: '100%',
+  left: 16,
+  marginTop: 4,
+  fontSize: 14,
+  color: '#808080',
+  transition: 'opacity 0.2s ease-in-out',
+  pointerEvents: 'none',
+  whiteSpace: 'nowrap',
+  selectors: {
+    '&.visible': {
+      opacity: 1,
+    },
+    '&.hidden': {
+      opacity: 0,
     },
   },
 })

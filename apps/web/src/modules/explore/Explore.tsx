@@ -73,7 +73,7 @@ export const Explore: React.FC = () => {
       <Box className={searchContainer} mb="x8">
         <SearchInput
           id="search"
-          placeholder={`Search DAOs... (min ${MIN_SEARCH_LENGTH} characters)`}
+          placeholder="Search DAOs..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onSearch={handleSearch}
