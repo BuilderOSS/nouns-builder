@@ -49,10 +49,14 @@ export const exploreMyDaosRequest = async (
 
 export const exploreDaosRequest = async (
   chainId: CHAIN_ID,
+  limit: number,
   skip: number,
   orderBy: Auction_OrderBy = Auction_OrderBy.StartTime
 ): Promise<ExploreDaosResponse | undefined> => {
   try {
+    if (limit <= 0 || limit > 100) {
+      throw new Error('Limit must be between 1 and 100')
+    }
     const orderDirection =
       orderBy === Auction_OrderBy.EndTime ? OrderDirection.Asc : OrderDirection.Desc
 
@@ -60,7 +64,7 @@ export const exploreDaosRequest = async (
       settled: false,
     }
 
-    const first = 30
+    const fetchLimit = limit + 1
 
     // filter spam daos from L2
     if (
@@ -69,12 +73,12 @@ export const exploreDaosRequest = async (
       chainId === CHAIN_ID.OPTIMISM
     ) {
       const activeDaos = await SDK.connect(chainId).activeDaos({
-        first,
+        first: fetchLimit,
         where: { totalAuctionSales_gt: '1000000000000000' },
       })
 
       // If we have less than one explore page of active daos, we apply the filter
-      if (activeDaos.daos.length !== first)
+      if (activeDaos.daos.length !== limit)
         where.dao_in = activeDaos.daos.map((x) => x.id)
     }
 
@@ -87,13 +91,16 @@ export const exploreDaosRequest = async (
       orderDirection,
       where,
       skip,
-      first,
+      first: limit,
     })
 
     if (!data.auctions) return undefined
+
+    const hasNextPage = data.auctions.length > limit
+    const limitedAuctions = hasNextPage ? data.auctions.slice(0, limit) : data.auctions
     return {
-      daos: data.auctions.map((x) => ({ ...x, chainId })),
-      hasNextPage: data.auctions.length === first,
+      daos: limitedAuctions.map((x) => ({ ...x, chainId })),
+      hasNextPage: hasNextPage,
     }
   } catch (error) {
     console.error(error)

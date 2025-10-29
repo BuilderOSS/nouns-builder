@@ -6,7 +6,8 @@ import { withCors } from 'src/utils/api/cors'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const limit = 30
-  const { search, network } = req.query
+  const { page, search, network } = req.query
+  const pageInt = parseInt(page as string, 10) || 1
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
 
@@ -14,7 +15,12 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (!search || typeof search !== 'string') return res.status(400).end()
 
-  const searchRes = await searchDaosRequest(chain.id, search, limit, 0)
+  const searchRes = await searchDaosRequest(
+    chain.id,
+    search,
+    limit,
+    (pageInt - 1) * limit
+  )
 
   if (!searchRes) {
     return res.status(500).json({ error: 'Search failed' })

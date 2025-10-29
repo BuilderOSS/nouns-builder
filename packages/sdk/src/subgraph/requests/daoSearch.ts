@@ -6,6 +6,7 @@ import { type ExploreDaoWithChainId } from './exploreQueries'
 
 export type SearchDaosResponse = {
   daos: ExploreDaoWithChainId[]
+  hasNextPage: boolean
 }
 
 export const searchDaosRequest = async (
@@ -26,15 +27,20 @@ export const searchDaosRequest = async (
       where = { totalAuctionSales_gt: '1000000000000000' }
     }
 
+    const fetchLimit = first + 1
+
     const data = await SDK.connect(chainId).exploreDaosSearch({
       text,
       skip,
-      first,
+      first: fetchLimit,
       where,
     })
 
+    const hasNextPage = data.daoSearch.length > first
+    const limitedData = hasNextPage ? data.daoSearch.slice(0, first) : data.daoSearch
+
     return {
-      daos: data.daoSearch.map((dao) => ({
+      daos: limitedData.map((dao) => ({
         dao: {
           name: dao.name,
           contractImage: dao.contractImage,
@@ -43,6 +49,7 @@ export const searchDaosRequest = async (
         chainId,
         ...dao.currentAuction,
       })) as Array<ExploreDaoWithChainId>,
+      hasNextPage,
     }
   } catch (error) {
     console.error(error)

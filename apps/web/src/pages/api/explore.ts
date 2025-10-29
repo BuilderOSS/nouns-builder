@@ -15,6 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const exploreRes = await exploreDaosRequest(
     chain.id,
+    limit,
     (pageInt - 1) * limit,
     orderBy as Auction_OrderBy
   )
