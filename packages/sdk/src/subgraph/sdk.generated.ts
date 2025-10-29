@@ -5186,6 +5186,88 @@ export type DaosForUserQuery = {
   }>
 }
 
+export type FeedDataQueryVariables = Exact<{
+  first: Scalars['Int']['input']
+  skip?: InputMaybe<Scalars['Int']['input']>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+}>
+
+export type FeedDataQuery = {
+  __typename?: 'Query'
+  proposals: Array<{
+    __typename?: 'Proposal'
+    abstainVotes: number
+    againstVotes: number
+    calldatas?: string | null
+    description?: string | null
+    descriptionHash: any
+    executableFrom?: any | null
+    expiresAt?: any | null
+    forVotes: number
+    proposalId: any
+    proposalNumber: number
+    proposalThreshold: any
+    proposer: any
+    quorumVotes: any
+    targets: Array<any>
+    timeCreated: any
+    title?: string | null
+    values: Array<any>
+    voteEnd: any
+    voteStart: any
+    snapshotBlockNumber: any
+    transactionHash: any
+    executedAt?: any | null
+    executionTransactionHash?: any | null
+    vetoTransactionHash?: any | null
+    cancelTransactionHash?: any | null
+    dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+  }>
+  proposalVotes: Array<{
+    __typename?: 'ProposalVote'
+    timestamp: any
+    transactionHash: any
+    voter: any
+    support: ProposalVoteSupport
+    weight: number
+    reason?: string | null
+    proposal: {
+      __typename?: 'Proposal'
+      proposalId: any
+      dao: { __typename?: 'DAO'; tokenAddress: any }
+    }
+  }>
+  proposalUpdates: Array<{
+    __typename?: 'ProposalUpdate'
+    id: string
+    transactionHash: any
+    timestamp: any
+    messageType: number
+    message: string
+    creator: any
+    originalMessageId: any
+    proposal: {
+      __typename?: 'Proposal'
+      proposalId: any
+      dao: { __typename?: 'DAO'; tokenAddress: any }
+    }
+  }>
+  auctionBids: Array<{
+    __typename?: 'AuctionBid'
+    bidTime: any
+    transactionHash: any
+    id: string
+    amount: any
+    bidder: any
+    auction: {
+      __typename?: 'Auction'
+      dao: { __typename?: 'DAO'; tokenAddress: any }
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    }
+  }>
+}
+
 export type FindAuctionsQueryVariables = Exact<{
   orderBy?: InputMaybe<Auction_OrderBy>
   orderDirection?: InputMaybe<OrderDirection>
@@ -5219,6 +5301,87 @@ export type FindAuctionsForDaosQuery = {
     dao: { __typename?: 'DAO'; name: string; tokenAddress: any }
     highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
     token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
+  }>
+}
+
+export type GlobalFeedDataQueryVariables = Exact<{
+  first: Scalars['Int']['input']
+  skip?: InputMaybe<Scalars['Int']['input']>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+}>
+
+export type GlobalFeedDataQuery = {
+  __typename?: 'Query'
+  proposals: Array<{
+    __typename?: 'Proposal'
+    abstainVotes: number
+    againstVotes: number
+    calldatas?: string | null
+    description?: string | null
+    descriptionHash: any
+    executableFrom?: any | null
+    expiresAt?: any | null
+    forVotes: number
+    proposalId: any
+    proposalNumber: number
+    proposalThreshold: any
+    proposer: any
+    quorumVotes: any
+    targets: Array<any>
+    timeCreated: any
+    title?: string | null
+    values: Array<any>
+    voteEnd: any
+    voteStart: any
+    snapshotBlockNumber: any
+    transactionHash: any
+    executedAt?: any | null
+    executionTransactionHash?: any | null
+    vetoTransactionHash?: any | null
+    cancelTransactionHash?: any | null
+    dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+  }>
+  proposalVotes: Array<{
+    __typename?: 'ProposalVote'
+    timestamp: any
+    transactionHash: any
+    voter: any
+    support: ProposalVoteSupport
+    weight: number
+    reason?: string | null
+    proposal: {
+      __typename?: 'Proposal'
+      proposalId: any
+      dao: { __typename?: 'DAO'; tokenAddress: any }
+    }
+  }>
+  proposalUpdates: Array<{
+    __typename?: 'ProposalUpdate'
+    id: string
+    transactionHash: any
+    timestamp: any
+    messageType: number
+    message: string
+    creator: any
+    originalMessageId: any
+    proposal: {
+      __typename?: 'Proposal'
+      proposalId: any
+      dao: { __typename?: 'DAO'; tokenAddress: any }
+    }
+  }>
+  auctionBids: Array<{
+    __typename?: 'AuctionBid'
+    bidTime: any
+    transactionHash: any
+    id: string
+    amount: any
+    bidder: any
+    auction: {
+      __typename?: 'Auction'
+      dao: { __typename?: 'DAO'; tokenAddress: any }
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    }
   }>
 }
 
@@ -5911,6 +6074,76 @@ export const DaosForUserDocument = gql`
   }
   ${DaoFragmentDoc}
 `
+export const FeedDataDocument = gql`
+  query feedData($first: Int!, $skip: Int, $timestamp_lt: BigInt, $dao: String) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: { timeCreated_lt: $timestamp_lt, dao: $dao }
+      orderBy: timeCreated
+      orderDirection: desc
+    ) {
+      ...Proposal
+    }
+    proposalVotes(
+      first: $first
+      skip: $skip
+      where: { timestamp_lt: $timestamp_lt, proposal_: { dao: $dao } }
+      orderBy: timestamp
+      orderDirection: desc
+    ) {
+      ...ProposalVote
+      timestamp
+      transactionHash
+      proposal {
+        proposalId
+        dao {
+          tokenAddress
+        }
+      }
+    }
+    proposalUpdates(
+      first: $first
+      skip: $skip
+      where: { timestamp_lt: $timestamp_lt, proposal_: { dao: $dao } }
+      orderBy: timestamp
+      orderDirection: desc
+    ) {
+      ...ProposalUpdate
+      proposal {
+        proposalId
+        dao {
+          tokenAddress
+        }
+      }
+    }
+    auctionBids(
+      first: $first
+      skip: $skip
+      where: { bidTime_lt: $timestamp_lt, auction_: { dao: $dao } }
+      orderBy: bidTime
+      orderDirection: desc
+    ) {
+      ...AuctionBid
+      bidTime
+      transactionHash
+      auction {
+        dao {
+          tokenAddress
+        }
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+  }
+  ${ProposalFragmentDoc}
+  ${ProposalVoteFragmentDoc}
+  ${ProposalUpdateFragmentDoc}
+  ${AuctionBidFragmentDoc}
+`
 export const FindAuctionsDocument = gql`
   query findAuctions(
     $orderBy: Auction_orderBy
@@ -5944,6 +6177,76 @@ export const FindAuctionsForDaosDocument = gql`
     }
   }
   ${ExploreDaoFragmentDoc}
+`
+export const GlobalFeedDataDocument = gql`
+  query globalFeedData($first: Int!, $skip: Int, $timestamp_lt: BigInt) {
+    proposals(
+      first: $first
+      skip: $skip
+      where: { timeCreated_lt: $timestamp_lt }
+      orderBy: timeCreated
+      orderDirection: desc
+    ) {
+      ...Proposal
+    }
+    proposalVotes(
+      first: $first
+      skip: $skip
+      where: { timestamp_lt: $timestamp_lt }
+      orderBy: timestamp
+      orderDirection: desc
+    ) {
+      ...ProposalVote
+      timestamp
+      transactionHash
+      proposal {
+        proposalId
+        dao {
+          tokenAddress
+        }
+      }
+    }
+    proposalUpdates(
+      first: $first
+      skip: $skip
+      where: { timestamp_lt: $timestamp_lt }
+      orderBy: timestamp
+      orderDirection: desc
+    ) {
+      ...ProposalUpdate
+      proposal {
+        proposalId
+        dao {
+          tokenAddress
+        }
+      }
+    }
+    auctionBids(
+      first: $first
+      skip: $skip
+      where: { bidTime_lt: $timestamp_lt }
+      orderBy: bidTime
+      orderDirection: desc
+    ) {
+      ...AuctionBid
+      bidTime
+      transactionHash
+      auction {
+        dao {
+          tokenAddress
+        }
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+  }
+  ${ProposalFragmentDoc}
+  ${ProposalVoteFragmentDoc}
+  ${ProposalUpdateFragmentDoc}
+  ${AuctionBidFragmentDoc}
 `
 export const SyncStatusDocument = gql`
   query syncStatus {
@@ -6384,6 +6687,24 @@ export function getSdk(
         variables
       )
     },
+    feedData(
+      variables: FeedDataQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<FeedDataQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<FeedDataQuery>({
+            document: FeedDataDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'feedData',
+        'query',
+        variables
+      )
+    },
     findAuctions(
       variables?: FindAuctionsQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -6416,6 +6737,24 @@ export function getSdk(
             signal,
           }),
         'findAuctionsForDaos',
+        'query',
+        variables
+      )
+    },
+    globalFeedData(
+      variables: GlobalFeedDataQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<GlobalFeedDataQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GlobalFeedDataQuery>({
+            document: GlobalFeedDataDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'globalFeedData',
         'query',
         variables
       )
