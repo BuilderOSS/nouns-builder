@@ -1,46 +1,81 @@
-// pages/api/feed.ts
+import { CHAIN_ID } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { getRedisConnection } from '@/services/redisConnection'
-import { fetchFeedData } from '@/services/feed'
-import type { FeedItem } from '@buildeross/types'
-import withCors from '@/middleware/cors'
+import {
+  fetchFeedDataService,
+  fetchUserActivityFeedService,
+  getTtlByScope,
+} from 'src/services/feedService'
+import { isAddress, keccak256, toHex } from 'viem'
 
-const redis = new Redis(process.env.REDIS_URL!)
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  try {
+    if (req.method === 'OPTIONS') return res.status(200).end()
 
-const FEED_CACHE_TTL = 60 // seconds
+    const limit =
+      Number(req.query.limit) > 0 ? Math.min(Number(req.query.limit), 100) : 20
+    const cursor = req.query.cursor ? Number(req.query.cursor) : undefined
+    const chainId = req.query.chainId
+      ? (Number(req.query.chainId) as CHAIN_ID)
+      : undefined
+    const daoAddress =
+      req.query.daoAddress &&
+      typeof req.query.daoAddress === 'string' &&
+      isAddress(req.query.daoAddress, { strict: false })
+        ? req.query.daoAddress.toLowerCase()
+        : undefined
+    const actor =
+      req.query.actor &&
+      typeof req.query.actor === 'string' &&
+      isAddress(req.query.actor, { strict: false })
+        ? req.query.actor.toLowerCase()
+        : undefined
 
-async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { cursor, limit = 20 } = req.query
-  const cacheKey = `feed:${cursor || 'start'}:${limit}`
+    // Early conditional GET check (optional optimization)
+    const requestKey = keccak256(
+      toHex(JSON.stringify({ chainId, daoAddress, actor, cursor, limit }))
+    )
+    res.setHeader('ETag', requestKey)
+    if (req.headers['if-none-match'] === requestKey) {
+      res.status(304).end()
+      return
+    }
 
-  const redis = getRedisConnection()
-  // Try cache first
-  const cached = await redis?.get(cacheKey)
-  if (cached) {
-    return res.status(200).json(JSON.parse(cached))
+    let result
+
+    if (actor) {
+      // User activity feed
+      result = await fetchUserActivityFeedService({
+        actor,
+        chainId,
+        cursor,
+        limit,
+      })
+    } else {
+      // Global / Chain / DAO feed
+      result = await fetchFeedDataService({
+        chainId,
+        daoAddress,
+        cursor,
+        limit,
+      })
+    }
+
+    // Determine TTL based on scope
+    const ttl = getTtlByScope({
+      chainId,
+      daoAddress,
+      actor,
+    })
+
+    // Cache-Control: browser/CDN caching hints
+    res.setHeader(
+      'Cache-Control',
+      `public, max-age=${ttl}, stale-while-revalidate=${Math.floor(ttl * 0.5)}, no-transform`
+    )
+
+    return res.status(200).json(result)
+  } catch (err) {
+    console.error('Feed API error:', err)
+    return res.status(500).json({ error: 'Failed to fetch feed' })
   }
-
-  // Fetch from GraphQL sources
-  const items = await fetchFeedData({ cursor: cursor as string, limit: +limit })
-
-  // Sort by time desc
-  const sorted = items.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-
-  // Compute next cursor (oldest item’s timestamp)
-  const nextCursor = sorted.at(-1)?.createdAt ?? null
-
-  const result = { items: sorted, nextCursor }
-
-  // Cache result
-  await redis?.setex(cacheKey, FEED_CACHE_TTL, JSON.stringify(result))
-
-  return res.status(200).json(result)
 }
-
-
-export default withCors()(handler)
