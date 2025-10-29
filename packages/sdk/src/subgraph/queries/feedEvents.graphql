@@ -1,0 +1,311 @@
+query feedData($first: Int!, $cursor: BigInt, $dao: String) {
+  feedEvents(
+    first: $first
+    where: { 
+      timestamp_lt: $cursor
+      dao: $dao
+    }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    __typename
+    id
+    type
+    timestamp
+    blockNumber
+    transactionHash
+    actor
+    dao {
+      tokenAddress
+    }
+    
+    ... on ProposalCreatedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+        description
+        proposer
+        timeCreated
+      }
+    }
+    
+    ... on ProposalVotedEvent {
+      proposal {
+        proposalId
+      }
+      vote {
+        support
+        weight
+        reason
+      }
+    }
+    
+    ... on ProposalUpdatedEvent {
+      proposal {
+        proposalId
+      }
+      update {
+        messageType
+        message
+        originalMessageId
+      }
+    }
+    
+    ... on ProposalExecutedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+      }
+    }
+    
+    ... on AuctionCreatedEvent {
+      auction {
+        id
+        startTime
+        endTime
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+    
+    ... on AuctionBidPlacedEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      bid {
+        amount
+        bidTime
+      }
+    }
+    
+    ... on AuctionSettledEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      winner
+      amount
+    }
+  }
+}
+
+query globalFeedData($first: Int!, $cursor: BigInt) {
+  feedEvents(
+    first: $first
+    where: { 
+      timestamp_lt: $cursor
+    }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    __typename
+    id
+    type
+    timestamp
+    blockNumber
+    transactionHash
+    actor
+    dao {
+      tokenAddress
+    }
+    
+    ... on ProposalCreatedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+        description
+        proposer
+        timeCreated
+      }
+    }
+    
+    ... on ProposalVotedEvent {
+      proposal {
+        proposalId
+      }
+      vote {
+        support
+        weight
+        reason
+      }
+    }
+    
+    ... on ProposalUpdatedEvent {
+      proposal {
+        proposalId
+      }
+      update {
+        messageType
+        message
+        originalMessageId
+      }
+    }
+    
+    ... on ProposalExecutedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+      }
+    }
+    
+    ... on AuctionCreatedEvent {
+      auction {
+        id
+        startTime
+        endTime
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+    
+    ... on AuctionBidPlacedEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      bid {
+        amount
+        bidTime
+      }
+    }
+    
+    ... on AuctionSettledEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      winner
+      amount
+    }
+  }
+}
+
+query userActivityFeed($actor: Bytes!, $first: Int!, $cursor: BigInt) {
+  feedEvents(
+    first: $first
+    where: { 
+      actor: $actor
+      timestamp_lt: $cursor
+    }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    __typename
+    id
+    type
+    timestamp
+    blockNumber
+    transactionHash
+    actor
+    dao {
+      tokenAddress
+      name
+      symbol
+    }
+    
+    ... on ProposalCreatedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+        description
+        timeCreated
+      }
+    }
+    
+    ... on ProposalVotedEvent {
+      proposal {
+        proposalId
+        title
+      }
+      vote {
+        support
+        weight
+        reason
+      }
+    }
+    
+    ... on ProposalUpdatedEvent {
+      proposal {
+        proposalId
+        title
+      }
+      update {
+        message
+      }
+    }
+    
+    ... on ProposalExecutedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+      }
+    }
+    
+    ... on AuctionCreatedEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+    
+    ... on AuctionBidPlacedEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      bid {
+        amount
+      }
+    }
+    
+    ... on AuctionSettledEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      winner
+      amount
+    }
+  }
+}

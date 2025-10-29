@@ -1,11 +1,7 @@
 import {
-  AuctionBidPlacedFeedItem,
   CHAIN_ID,
   FeedItem,
   FeedResponse,
-  ProposalCreatedFeedItem,
-  ProposalUpdatePostedFeedItem,
-  ProposalVotedFeedItem,
   ProposalVoteSupportType,
 } from '@buildeross/types'
 
@@ -16,40 +12,28 @@ import {
   GlobalFeedDataQuery,
   GlobalFeedDataQueryVariables,
   ProposalVoteSupport,
+  UserActivityFeedQuery,
+  UserActivityFeedQueryVariables,
 } from '../sdk.generated'
 
 interface FeedQueryParams {
   chainId: CHAIN_ID
   limit: number
-  cursor?: string
+  cursor?: number
   dao?: string
 }
 
-type CombinedFeedQuery = FeedDataQuery | GlobalFeedDataQuery
-
-type ProposalWithItemType = CombinedFeedQuery['proposals'][0] & {
-  itemType: 'PROPOSAL_CREATED'
-  timestamp: any
+interface UserActivityQueryParams {
+  chainId: CHAIN_ID
+  limit: number
+  cursor?: number
+  actor: string
 }
 
-type ProposalVoteWithItemType = CombinedFeedQuery['proposalVotes'][0] & {
-  itemType: 'PROPOSAL_VOTED'
-}
-
-type ProposalUpdateWithItemType = CombinedFeedQuery['proposalUpdates'][0] & {
-  itemType: 'PROPOSAL_UPDATE_POSTED'
-}
-
-type AuctionBidWithItemType = CombinedFeedQuery['auctionBids'][0] & {
-  itemType: 'AUCTION_BID_PLACED'
-  timestamp: any
-}
-
-type FeedItemWithType =
-  | ProposalWithItemType
-  | ProposalVoteWithItemType
-  | ProposalUpdateWithItemType
-  | AuctionBidWithItemType
+type FeedEvent =
+  | FeedDataQuery['feedEvents'][0]
+  | GlobalFeedDataQuery['feedEvents'][0]
+  | UserActivityFeedQuery['feedEvents'][0]
 
 function mapProposalVoteSupport(support: ProposalVoteSupport): ProposalVoteSupportType {
   switch (support) {
@@ -64,98 +48,116 @@ function mapProposalVoteSupport(support: ProposalVoteSupport): ProposalVoteSuppo
   }
 }
 
-function transformProposal(
-  proposal: ProposalWithItemType,
-  chainId: CHAIN_ID
-): ProposalCreatedFeedItem {
-  return {
-    id: `proposal-${proposal.proposalId}`,
-    type: 'PROPOSAL_CREATED',
-    proposalId: proposal.proposalId,
-    proposalNumber: proposal.proposalNumber.toString(),
-    title: proposal.title || '',
-    description: proposal.description || '',
-    creator: proposal.proposer,
-    daoId: proposal.dao.tokenAddress,
+function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
+  const baseItem = {
+    id: event.id,
+    daoId: event.dao.tokenAddress,
     chainId,
-    timestamp: Number(proposal.timeCreated),
+    timestamp: Number(event.timestamp),
+    actor: event.actor,
+    txHash: event.transactionHash,
+    blockNumber: Number(event.blockNumber),
+  }
+
+  switch (event.__typename) {
+    case 'ProposalCreatedEvent': {
+      return {
+        ...baseItem,
+        type: 'PROPOSAL_CREATED',
+        proposalId: event.proposal.proposalId,
+        proposalNumber: event.proposal.proposalNumber.toString(),
+        title: event.proposal.title || '',
+        description: event.proposal.description || '',
+        creator: (event.proposal as any).proposer,
+      }
+    }
+
+    case 'ProposalVotedEvent': {
+      return {
+        ...baseItem,
+        type: 'PROPOSAL_VOTED',
+        proposalId: event.proposal.proposalId,
+        voter: event.actor,
+        reason: event.vote.reason || undefined,
+        support: mapProposalVoteSupport(event.vote.support),
+        weight: event.vote.weight.toString(),
+      }
+    }
+
+    case 'ProposalUpdatedEvent': {
+      return {
+        ...baseItem,
+        type: 'PROPOSAL_UPDATED',
+        proposalId: event.proposal.proposalId,
+        messageType: (event.update as any).messageType,
+        message: event.update.message,
+        originalMessageId: (event.update as any).originalMessageId,
+      }
+    }
+
+    case 'ProposalExecutedEvent': {
+      return {
+        ...baseItem,
+        type: 'PROPOSAL_EXECUTED',
+        proposalId: event.proposal.proposalId,
+        proposalNumber: event.proposal.proposalNumber.toString(),
+        title: event.proposal.title || '',
+      }
+    }
+
+    case 'AuctionCreatedEvent': {
+      return {
+        ...baseItem,
+        type: 'AUCTION_CREATED',
+        auctionId: event.auction.id,
+        tokenId: event.auction.token.tokenId.toString(),
+        tokenName: event.auction.token.name,
+        tokenImage: event.auction.token.image || '',
+        startTime: Number((event.auction as any).startTime),
+        endTime: Number((event.auction as any).endTime),
+      }
+    }
+
+    case 'AuctionBidPlacedEvent': {
+      return {
+        ...baseItem,
+        type: 'AUCTION_BID_PLACED',
+        auctionId: event.auction.id,
+        tokenId: event.auction.token.tokenId.toString(),
+        bidder: event.actor,
+        amount: event.bid.amount.toString(),
+        tokenName: event.auction.token.name,
+        tokenImage: event.auction.token.image || '',
+      }
+    }
+
+    case 'AuctionSettledEvent': {
+      return {
+        ...baseItem,
+        type: 'AUCTION_SETTLED',
+        auctionId: event.auction.id,
+        tokenId: event.auction.token.tokenId.toString(),
+        tokenName: event.auction.token.name,
+        tokenImage: event.auction.token.image || '',
+        winner: event.winner,
+        amount: event.amount.toString(),
+      }
+    }
+
+    default: {
+      const _exhaustive: never = event
+      throw new Error(`Unknown event type: ${(_exhaustive as any).__typename}`)
+    }
   }
 }
 
-function transformProposalVote(
-  vote: ProposalVoteWithItemType,
-  chainId: CHAIN_ID
-): ProposalVotedFeedItem {
-  return {
-    id: `vote-${vote.transactionHash}`,
-    type: 'PROPOSAL_VOTED',
-    proposalId: vote.proposal.proposalId,
-    reason: vote.reason || undefined,
-    support: mapProposalVoteSupport(vote.support),
-    txHash: vote.transactionHash,
-    weight: vote.weight.toString(),
-    voter: vote.voter,
-    daoId: vote.proposal.dao.tokenAddress,
-    chainId,
-    timestamp: Number(vote.timestamp),
-  }
-}
-
-function transformProposalUpdate(
-  update: ProposalUpdateWithItemType,
-  chainId: CHAIN_ID
-): ProposalUpdatePostedFeedItem {
-  return {
-    id: `update-${update.id}`,
-    type: 'PROPOSAL_UPDATE_POSTED',
-    proposalId: update.proposal.proposalId,
-    txHash: update.transactionHash,
-    messageType: update.messageType,
-    message: update.message,
-    originalMessageId: update.originalMessageId,
-    author: update.creator,
-    daoId: update.proposal.dao.tokenAddress,
-    chainId,
-    timestamp: Number(update.timestamp),
-  }
-}
-
-function transformAuctionBid(
-  bid: AuctionBidWithItemType,
-  chainId: CHAIN_ID
-): AuctionBidPlacedFeedItem {
-  return {
-    id: `bid-${bid.transactionHash}`,
-    type: 'AUCTION_BID_PLACED',
-    amount: bid.amount.toString(),
-    txHash: bid.transactionHash,
-    bidder: bid.bidder,
-    tokenId: bid.auction.token.tokenId.toString(),
-    tokenImage: bid.auction.token.image || '',
-    tokenName: bid.auction.token.name,
-    daoId: bid.auction.dao.tokenAddress,
-    chainId,
-    timestamp: Number(bid.bidTime),
-  }
-}
-
-function transformFeedItem(item: FeedItemWithType, chainId: CHAIN_ID): FeedItem {
-  switch (item.itemType) {
-    case 'PROPOSAL_CREATED':
-      return transformProposal(item, chainId)
-    case 'PROPOSAL_VOTED':
-      return transformProposalVote(item, chainId)
-    case 'PROPOSAL_UPDATE_POSTED':
-      return transformProposalUpdate(item, chainId)
-    case 'AUCTION_BID_PLACED':
-      return transformAuctionBid(item, chainId)
-    default:
-      // TypeScript exhaustiveness check
-      const _exhaustive: never = item
-      throw new Error(`Unknown item type: ${(_exhaustive as any).itemType}`)
-  }
-}
-
+/**
+ * Get feed data for a specific chain
+ * @param chainId - The chain ID to fetch from
+ * @param limit - Number of items to return (1-100)
+ * @param cursor - Timestamp cursor for pagination
+ * @param dao - Optional DAO address to filter by
+ */
 export const getFeedData = async ({
   chainId,
   limit,
@@ -163,77 +165,120 @@ export const getFeedData = async ({
   dao,
 }: FeedQueryParams): Promise<FeedResponse> => {
   try {
-    const timestamp_lt = cursor ? cursor.toString() : undefined
+    // Validate input
+    if (limit <= 0 || limit > 100) {
+      throw new Error('Limit must be between 1 and 100')
+    }
 
-    const data: CombinedFeedQuery = dao
+    const timestamp_lt = cursor?.toString()
+
+    // Fetch limit + 1 to determine if there are more items
+    const fetchLimit = limit + 1
+
+    // Query the appropriate feed based on whether dao is specified
+    const data = dao
       ? await SDK.connect(chainId).feedData({
-          first: limit,
-          skip: 0,
+          first: fetchLimit,
           timestamp_lt,
           dao: dao.toLowerCase(),
         } as FeedDataQueryVariables)
       : await SDK.connect(chainId).globalFeedData({
-          first: limit,
-          skip: 0,
+          first: fetchLimit,
           timestamp_lt,
         } as GlobalFeedDataQueryVariables)
 
-    // Combine and tag all feed items with their type and normalized timestamp
-    const allItems: FeedItemWithType[] = [
-      ...data.proposals.map(
-        (proposal): ProposalWithItemType => ({
-          ...proposal,
-          itemType: 'PROPOSAL_CREATED',
-          timestamp: proposal.timeCreated,
-        })
-      ),
-      ...data.proposalVotes.map(
-        (vote): ProposalVoteWithItemType => ({
-          ...vote,
-          itemType: 'PROPOSAL_VOTED',
-        })
-      ),
-      ...data.proposalUpdates.map(
-        (update): ProposalUpdateWithItemType => ({
-          ...update,
-          itemType: 'PROPOSAL_UPDATE_POSTED',
-        })
-      ),
-      ...data.auctionBids.map(
-        (bid): AuctionBidWithItemType => ({
-          ...bid,
-          itemType: 'AUCTION_BID_PLACED',
-          timestamp: bid.bidTime,
-        })
-      ),
-    ]
+    const events = data.feedEvents
 
-    // Sort by timestamp descending
-    allItems.sort((a, b) => Number(b.timestamp) - Number(a.timestamp))
+    // Check if there are more items beyond the limit
+    const hasMore = events.length > limit
 
     // Take only the requested limit
-    const limitedItems = allItems.slice(0, limit)
+    const limitedEvents = events.slice(0, limit)
 
     // Transform to typed FeedItem format
-    const feedItems: FeedItem[] = limitedItems.map((item) =>
-      transformFeedItem(item, chainId)
-    )
+    const feedItems = limitedEvents.map((event) => transformFeedEvent(event, chainId))
 
-    const hasMore = allItems.length > limit
-    const nextCursor = hasMore
-      ? feedItems[feedItems.length - 1]?.timestamp.toString()
-      : null
+    // Build response
+    if (hasMore && feedItems.length > 0) {
+      return {
+        items: feedItems,
+        hasMore: true,
+        nextCursor: feedItems[feedItems.length - 1].timestamp,
+      }
+    }
 
-    return hasMore
-      ? { items: feedItems, hasMore: true, nextCursor: nextCursor! }
-      : { items: feedItems, hasMore: false, nextCursor: null }
+    return { items: feedItems, hasMore: false, nextCursor: null }
   } catch (e) {
     console.error('Error fetching feed', { dao, chainId, limit, cursor }, e)
+
     try {
-      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      const sentry = await import('@sentry/nextjs')
       sentry.captureException(e)
-      sentry.flush(2000).catch(() => {})
-    } catch (_) {}
+      await sentry.flush(2000)
+    } catch (sentryError) {
+      console.error('Failed to send to Sentry:', sentryError)
+    }
+
+    return { items: [], hasMore: false, nextCursor: null }
+  }
+}
+
+/**
+ * Get user activity feed for a specific chain
+ * @param chainId - The chain ID to fetch from
+ * @param limit - Number of items to return (1-100)
+ * @param cursor - Timestamp cursor for pagination
+ * @param actor - User's address
+ */
+export const getUserActivityFeed = async ({
+  chainId,
+  limit,
+  cursor,
+  actor,
+}: UserActivityQueryParams): Promise<FeedResponse> => {
+  try {
+    // Validate input
+    if (limit <= 0 || limit > 100) {
+      throw new Error('Limit must be between 1 and 100')
+    }
+
+    const timestamp_lt = cursor?.toString()
+    const fetchLimit = limit + 1
+
+    const data = await SDK.connect(chainId).userActivityFeed({
+      first: fetchLimit,
+      timestamp_lt,
+      actor: actor.toLowerCase(),
+    } as UserActivityFeedQueryVariables)
+
+    const events = data.feedEvents
+    const hasMore = events.length > limit
+    const limitedEvents = events.slice(0, limit)
+    const feedItems = limitedEvents.map((event) => transformFeedEvent(event, chainId))
+
+    if (hasMore && feedItems.length > 0) {
+      return {
+        items: feedItems,
+        hasMore: true,
+        nextCursor: feedItems[feedItems.length - 1].timestamp,
+      }
+    }
+
+    return { items: feedItems, hasMore: false, nextCursor: null }
+  } catch (e) {
+    console.error(
+      'Error fetching user activity feed',
+      { actor, chainId, limit, cursor },
+      e
+    )
+
+    try {
+      const sentry = await import('@sentry/nextjs')
+      sentry.captureException(e)
+      await sentry.flush(2000)
+    } catch (sentryError) {
+      console.error('Failed to send to Sentry:', sentryError)
+    }
 
     return { items: [], hasMore: false, nextCursor: null }
   }
