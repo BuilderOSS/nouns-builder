@@ -25,6 +25,7 @@ type DAO @entity {
   proposals: [Proposal!]! @derivedFrom(field: "dao")
   auctions: [Auction!]! @derivedFrom(field: "dao")
   daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
+  feedEvents: [FeedEvent!]! @derivedFrom(field: "dao")
 }
 
 type _Schema_
@@ -219,4 +220,106 @@ type MetadataItem @entity {
   propertyId: BigInt!
   name: String!
   isNewProperty: Boolean!
+}
+
+enum FeedEventType {
+  PROPOSAL_CREATED
+  PROPOSAL_UPDATED
+  PROPOSAL_VOTED
+  PROPOSAL_EXECUTED
+  AUCTION_CREATED
+  AUCTION_BID_PLACED
+  AUCTION_SETTLED
+}
+
+interface FeedEvent {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+}
+
+type ProposalCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+}
+
+type ProposalUpdatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+  update: ProposalUpdate!
+}
+
+type ProposalVotedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+  vote: ProposalVote!
+}
+
+type ProposalExecutedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+}
+
+type AuctionCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  auction: Auction!
+}
+
+type AuctionBidPlacedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  auction: Auction!
+  bid: AuctionBid!
+}
+
+type AuctionSettledEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  auction: Auction!
+  winner: Bytes!
+  amount: BigInt!
 }
