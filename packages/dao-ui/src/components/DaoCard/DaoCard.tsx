@@ -9,7 +9,7 @@ import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { BigNumberish, formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { auction, daoImage, name, title } from './DaoCard.css'
 import { Detail } from './Detail'
@@ -66,6 +66,7 @@ export const DaoCard = ({
         height={'auto'}
         aspectRatio={1 / 1}
         position="relative"
+        overflow={'hidden'}
         className={daoImage}
       >
         <FallbackImage
@@ -77,49 +78,54 @@ export const DaoCard = ({
       </Box>
 
       <Box pt="x4" position={'relative'} overflow={'hidden'} className={title}>
-        {!!tokenName && (
-          <Flex
-            width="100%"
-            minW={'x0'}
-            align="center"
-            justify="space-between"
-            px="x4"
-            mb={'x1'}
-          >
-            <Box data-testid="token-name" flex={1}>
-              <Box style={{ fontSize: 22 }} fontWeight={'display'} className={name}>
-                {tokenName}
-              </Box>
+        <Flex
+          width="100%"
+          minW={'x0'}
+          align="center"
+          justify="space-between"
+          px="x4"
+          mb={'x1'}
+        >
+          <Box data-testid="token-name" flex={1}>
+            <Box
+              style={{ fontSize: 22, height: 27 }}
+              fontWeight={'display'}
+              className={name}
+            >
+              {tokenName ?? collectionName ?? null}
             </Box>
-          </Flex>
-        )}
+          </Box>
+        </Flex>
 
-        {!!collectionName && (
-          <Flex width="100%" align="center" justify="space-between" px="x4" mb={'x4'}>
-            <Paragraph data-testid="collection-name" color={'text3'} className={name}>
-              {collectionName}
-            </Paragraph>
-            {chainMeta && (
-              <Flex align="center" gap="x1">
-                <img
-                  src={chainMeta.icon}
-                  style={{
-                    borderRadius: '12px',
-                    maxHeight: '16px',
-                    objectFit: 'contain',
-                    maxWidth: '16px',
-                  }}
-                  alt={chainMeta.name}
-                  height={16}
-                  width={16}
-                />
-                <Text fontSize={12} color="text3">
-                  {chainMeta.name}
-                </Text>
-              </Flex>
-            )}
-          </Flex>
-        )}
+        <Flex width="100%" align="center" justify="space-between" px="x4" mb={'x4'}>
+          <Paragraph
+            data-testid="collection-name"
+            color={'text3'}
+            className={name}
+            style={{ height: 24 }}
+          >
+            {collectionName ?? null}
+          </Paragraph>
+          {chainMeta && (
+            <Flex align="center" gap="x1">
+              <img
+                src={chainMeta.icon}
+                style={{
+                  borderRadius: '12px',
+                  maxHeight: '16px',
+                  objectFit: 'contain',
+                  maxWidth: '16px',
+                }}
+                alt={chainMeta.name}
+                height={16}
+                width={16}
+              />
+              <Text fontSize={12} color="text3">
+                {chainMeta.name}
+              </Text>
+            </Flex>
+          )}
+        </Flex>
       </Box>
 
       <Flex direction={'row'} width={'100%'} className={auction}>

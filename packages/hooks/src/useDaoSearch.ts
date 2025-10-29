@@ -107,8 +107,6 @@ export function useDaoSearch(
       },
       errorRetryCount: 2,
       errorRetryInterval: 1000,
-      // Optional: reduce UI flicker while typing
-      keepPreviousData: true,
     }
   )
 
