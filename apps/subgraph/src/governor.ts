@@ -1,12 +1,12 @@
 import { Address, BigInt, Bytes, dataSource, log } from '@graphprotocol/graph-ts'
 
-import { 
-  DAO, 
-  Proposal, 
-  ProposalVote,
+import {
+  DAO,
+  Proposal,
   ProposalCreatedEvent as ProposalCreatedFeedEvent,
+  ProposalExecutedEvent as ProposalExecutedFeedEvent,
+  ProposalVote,
   ProposalVotedEvent as ProposalVotedFeedEvent,
-  ProposalExecutedEvent as ProposalExecutedFeedEvent
 } from '../generated/schema'
 import {
   ProposalCanceled as ProposalCanceledEvent,
@@ -75,11 +75,11 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
 
   dao.save()
   proposal.save()
-  
+
   // Create feed event
-  let feedEventId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let feedEvent = new ProposalCreatedFeedEvent(feedEventId)
-  feedEvent.type = "PROPOSAL_CREATED"
+  feedEvent.type = 'PROPOSAL_CREATED'
   feedEvent.dao = dao.id
   feedEvent.timestamp = event.block.timestamp
   feedEvent.blockNumber = event.block.number
@@ -114,11 +114,11 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
   proposal.executionTransactionHash = event.transaction.hash
   proposal.queued = false
   proposal.save()
-  
+
   // Create feed event
-  let feedEventId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let feedEvent = new ProposalExecutedFeedEvent(feedEventId)
-  feedEvent.type = "PROPOSAL_EXECUTED"
+  feedEvent.type = 'PROPOSAL_EXECUTED'
   feedEvent.dao = proposal.dao
   feedEvent.timestamp = event.block.timestamp
   feedEvent.blockNumber = event.block.number
@@ -188,11 +188,11 @@ export function handleVoteCast(event: VoteCastEvent): void {
 
   proposal.save()
   proposalVote.save()
-  
+
   // Create feed event
-  let feedEventId = event.transaction.hash.toHex() + "-" + event.logIndex.toString()
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let feedEvent = new ProposalVotedFeedEvent(feedEventId)
-  feedEvent.type = "PROPOSAL_VOTED"
+  feedEvent.type = 'PROPOSAL_VOTED'
   feedEvent.dao = proposal.dao
   feedEvent.timestamp = event.block.timestamp
   feedEvent.blockNumber = event.block.number
