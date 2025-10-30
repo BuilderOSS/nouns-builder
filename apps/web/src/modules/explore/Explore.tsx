@@ -60,6 +60,7 @@ export const Explore: React.FC = () => {
     isLoading: isSearchLoading,
     isEmpty: isSearchEmpty,
     hasNextPage: hasSearchNextPage,
+    error: searchError,
   } = useDaoSearch(activeSearchQuery, chain.slug, {
     enabled: isSearching,
     page: isSearching ? page : undefined,
@@ -124,6 +125,7 @@ export const Explore: React.FC = () => {
     daos: exploreDaos,
     hasNextPage,
     isLoading: isExploreLoading,
+    error: exploreError,
   } = useExplore({
     page,
     orderBy,
@@ -135,6 +137,7 @@ export const Explore: React.FC = () => {
   const displayDaos = isSearching ? searchDaos : exploreDaos
   const isLoading = isSearching ? isSearchLoading : isExploreLoading
   const hasNextPageForDisplay = isSearching ? hasSearchNextPage : hasNextPage
+  const error = isSearching ? searchError : exploreError
 
   return (
     <>
@@ -155,59 +158,75 @@ export const Explore: React.FC = () => {
         />
       </Box>
 
-      {/* Search Results or Empty State */}
-      {isSearching && !isSearchLoading && isSearchEmpty && searchDaos !== undefined && (
+      {/* Error State */}
+      {error ? (
         <Text
           style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
           variant={'paragraph-md'}
-          color={'tertiary'}
+          color={'negative'}
         >
-          No DAOs found for "{activeSearchQuery}"
+          Error while loading DAOs
         </Text>
+      ) : (
+        <>
+          {/* Search Results or Empty State */}
+          {isSearching &&
+            !isSearchLoading &&
+            isSearchEmpty &&
+            searchDaos !== undefined && (
+              <Text
+                style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
+                variant={'paragraph-md'}
+                color={'tertiary'}
+              >
+                No DAOs found for "{activeSearchQuery}"
+              </Text>
+            )}
+
+          {/* DAO Grid */}
+          {displayDaos?.length ? (
+            <>
+              <Grid className={exploreGrid}>
+                {displayDaos?.map((dao) => {
+                  const bid = dao.highestBid?.amount ?? undefined
+                  const bidInEth = bid ? formatEther(bid) : undefined
+
+                  return (
+                    <DaoCard
+                      chainId={chain.id}
+                      key={dao.dao.tokenAddress}
+                      tokenId={dao.token?.tokenId ?? undefined}
+                      tokenImage={dao.token?.image ?? undefined}
+                      tokenName={dao.token?.name ?? undefined}
+                      collectionName={dao.dao.name ?? undefined}
+                      collectionAddress={dao.dao.tokenAddress}
+                      bid={bidInEth}
+                      endTime={dao.endTime ?? undefined}
+                    />
+                  )
+                })}
+              </Grid>
+              <Pagination hasNextPage={hasNextPageForDisplay} scroll={true} />
+            </>
+          ) : isLoading ? (
+            <ExploreSkeleton />
+          ) : !page && !isSearching ? (
+            <ExploreNoDaos />
+          ) : !isSearching ? (
+            <>
+              <Text
+                style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
+                variant={'paragraph-md'}
+                color={'tertiary'}
+              >
+                There are no DAOs here
+              </Text>
+
+              <Pagination hasNextPage={hasNextPageForDisplay} />
+            </>
+          ) : null}
+        </>
       )}
-
-      {/* DAO Grid */}
-      {displayDaos?.length ? (
-        <>
-          <Grid className={exploreGrid}>
-            {displayDaos?.map((dao) => {
-              const bid = dao.highestBid?.amount ?? undefined
-              const bidInEth = bid ? formatEther(bid) : undefined
-
-              return (
-                <DaoCard
-                  chainId={chain.id}
-                  key={dao.dao.tokenAddress}
-                  tokenId={dao.token?.tokenId ?? undefined}
-                  tokenImage={dao.token?.image ?? undefined}
-                  tokenName={dao.token?.name ?? undefined}
-                  collectionName={dao.dao.name ?? undefined}
-                  collectionAddress={dao.dao.tokenAddress}
-                  bid={bidInEth}
-                  endTime={dao.endTime ?? undefined}
-                />
-              )
-            })}
-          </Grid>
-          <Pagination hasNextPage={hasNextPageForDisplay} scroll={true} />
-        </>
-      ) : isLoading ? (
-        <ExploreSkeleton />
-      ) : !page && !isSearching ? (
-        <ExploreNoDaos />
-      ) : !isSearching ? (
-        <>
-          <Text
-            style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
-            variant={'paragraph-md'}
-            color={'tertiary'}
-          >
-            There are no DAOs here
-          </Text>
-
-          <Pagination hasNextPage={hasNextPageForDisplay} />
-        </>
-      ) : null}
     </>
   )
 }

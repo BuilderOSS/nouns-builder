@@ -56,8 +56,11 @@ export const exploreDaosRequest = async (
   skip: number,
   orderBy: Auction_OrderBy = Auction_OrderBy.StartTime
 ): Promise<ExploreDaosResponse | undefined> => {
-  if (limit < 1 || limit > 100) {
-    throw new Error('Limit must be between 1 and 100')
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('Limit must be an integer between 1 and 100')
+  }
+  if (!Number.isInteger(skip) || skip < 0) {
+    throw new Error('Skip must be a non-negative integer')
   }
   try {
     const orderDirection =

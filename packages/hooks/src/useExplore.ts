@@ -17,13 +17,17 @@ export interface UseExploreResult {
   error?: Error
 }
 
+type HttpError = Error & { status?: number; body?: unknown }
 // Fetcher function for explore API
-const exploreFetcher = async ([, _page, _orderBy, _chainSlug]: [
-  string,
-  string | undefined,
-  string | undefined,
-  string,
-]) => {
+const exploreFetcher = async (
+  [, _page, _orderBy, _chainSlug]: [
+    string,
+    string | undefined,
+    string | undefined,
+    string,
+  ],
+  { signal }: { signal?: AbortSignal } = {}
+): Promise<ExploreDaosResponse> => {
   const params = new URLSearchParams()
   if (_page) params.set('page', _page)
   if (_orderBy) params.set('orderBy', _orderBy)
@@ -32,16 +36,19 @@ const exploreFetcher = async ([, _page, _orderBy, _chainSlug]: [
   const url = `${BASE_URL}/api/explore?${params.toString()}`
 
   const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    signal,
+    headers: { Accept: 'application/json' },
   })
 
+  const text = await response.text()
+  const body = text ? JSON.parse(text) : {}
   if (!response.ok) {
-    throw new Error(`Explore API failed: ${response.status} ${response.statusText}`)
+    const err: HttpError = new Error(body?.error || response.statusText)
+    err.status = response.status
+    err.body = body
+    throw err
   }
-
-  return response.json() as Promise<ExploreDaosResponse>
+  return body as ExploreDaosResponse
 }
 
 /**
@@ -55,16 +62,20 @@ export function useExplore(options: UseExploreOptions): UseExploreResult {
   const swrKey = enabled ? ([SWR_KEYS.EXPLORE, page, orderBy, chainSlug] as const) : null
 
   // Use SWR for data fetching with caching
-  const { data, error, isLoading } = useSWR(swrKey, exploreFetcher, {
-    // Revalidate on focus for fresh data
-    revalidateOnFocus: true,
-    revalidateOnReconnect: true,
-    // Keep data fresh for 30 seconds
-    dedupingInterval: 30000,
-    // Standard retry logic
-    errorRetryCount: 3,
-    errorRetryInterval: 1000,
-  })
+  const { data, error, isLoading } = useSWR<ExploreDaosResponse, HttpError>(
+    swrKey,
+    exploreFetcher,
+    {
+      // Revalidate on focus for fresh data
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      // Keep data fresh for 30 seconds
+      dedupingInterval: 30000,
+      // Standard retry logic
+      errorRetryCount: 3,
+      errorRetryInterval: 1000,
+    }
+  )
 
   return {
     daos: data?.daos,

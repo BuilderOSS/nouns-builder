@@ -7,7 +7,7 @@ import useSWR from 'swr'
 
 export interface DaoSearchResult {
   daos?: ExploreDaoWithChainId[]
-  error?: Error
+  error?: HttpError
   isLoading: boolean
   isEmpty: boolean
   hasNextPage?: boolean
