@@ -1,5 +1,5 @@
 import type { CHAIN_ID, FeedItem, FeedResponse } from '@buildeross/types'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import useSWRInfinite from 'swr/infinite'
 
 type UseFeedOptions = {
@@ -8,12 +8,14 @@ type UseFeedOptions = {
   actor?: string
   limit?: number
   enabled?: boolean
+  onError?: (error: HttpError) => void
 }
 
 type UseFeedReturn = {
   items: FeedItem[]
   hasMore: boolean
   isLoading: boolean
+  isLoadingMore: boolean
   isValidating: boolean
   error: Error | undefined
   refresh: () => Promise<void>
@@ -55,7 +57,7 @@ const fetcher = async (
     signal,
     headers: { Accept: 'application/json' },
   })
-  if (res.status === 304) return { items: [], hasMore: false, nextCursor: null }
+
   const text = await res.text()
   const body = text ? JSON.parse(text) : {}
   if (!res.ok) {
@@ -68,7 +70,13 @@ const fetcher = async (
 }
 
 /**
- * useFeedInfinite — automatic infinite scroll pagination via useSWRInfinite
+ * Hook for infinite scroll feed with automatic deduplication
+ *
+ * @example
+ * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
+ *   chainId: 1,
+ *   limit: 20,
+ * })
  */
 export function useFeed({
   chainId,
@@ -76,6 +84,7 @@ export function useFeed({
   actor,
   limit = 20,
   enabled = true,
+  onError,
 }: UseFeedOptions): UseFeedReturn {
   const baseKey = useMemo(() => {
     if (!enabled) return null
@@ -102,26 +111,52 @@ export function useFeed({
       revalidateIfStale: false,
       dedupingInterval: 15_000,
       keepPreviousData: true,
+
+      shouldRetryOnError: true,
+      errorRetryCount: 3,
+      errorRetryInterval: 1000,
+      onError: (err) => {
+        console.error('Feed fetch error:', err)
+        onError?.(err)
+      },
     }
   )
 
   // flatten paginated items
-  const items = data ? data.flatMap((page) => page.items) : []
-  const hasMore = data?.[data.length - 1]?.hasMore ?? false
-  const isLoading = !data && !error && enabled
+  const items = useMemo(() => {
+    if (!data) return []
+    const seen = new Set<string>()
+    // NOTE: backend might return duplicate items on page boundaries
+    return data
+      .flatMap((page) => page.items)
+      .filter((item) => {
+        if (seen.has(item.id)) return false
+        seen.add(item.id)
+        return true
+      })
+  }, [data])
+  const hasMore = useMemo(() => data?.[data.length - 1]?.hasMore ?? false, [data])
+  const isLoading = useMemo(() => !data && !error && enabled, [data, error, enabled])
+  const isLoadingMore = useMemo(
+    () => (isValidating && data && data.length < size ? true : false),
+    [isValidating, data, size]
+  )
 
-  const fetchNextPage = async () => {
-    if (hasMore) await setSize(size + 1)
-  }
+  const fetchNextPage = useCallback(async () => {
+    if (hasMore && !isLoadingMore) {
+      await setSize(size + 1)
+    }
+  }, [hasMore, isLoadingMore, setSize, size])
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     await mutate()
-  }
+  }, [mutate])
 
   return {
     items,
     hasMore,
     isLoading,
+    isLoadingMore,
     isValidating,
     error,
     fetchNextPage,
