@@ -2,20 +2,26 @@ import { CHAIN_ID } from '@buildeross/types'
 
 import { SDK } from '../client'
 import { Dao_Filter } from '../sdk.generated'
-import { type ExploreDaoWithChainId } from './exploreQueries'
-
-export type SearchDaosResponse = {
-  daos: ExploreDaoWithChainId[]
-  hasNextPage: boolean
-}
+import {
+  type ExploreDaosResponse,
+  type ExploreDaoWithChainId,
+  MIN_BID_AMOUNT,
+} from './exploreQueries'
 
 export const searchDaosRequest = async (
   chainId: CHAIN_ID,
   text: string,
-  first: number,
+  limit: number,
   skip: number
-): Promise<SearchDaosResponse | undefined> => {
+): Promise<ExploreDaosResponse | undefined> => {
+  if (limit < 1 || limit > 100) {
+    throw new Error('Limit must be between 1 and 100')
+  }
   try {
+    const queryText = text?.trim() ?? ''
+    if (!queryText) {
+      return { daos: [], hasNextPage: false }
+    }
     let where: Dao_Filter | undefined = undefined
 
     // filter spam daos from L2
@@ -24,20 +30,20 @@ export const searchDaosRequest = async (
       chainId === CHAIN_ID.ZORA ||
       chainId === CHAIN_ID.OPTIMISM
     ) {
-      where = { totalAuctionSales_gt: '1000000000000000' }
+      where = { totalAuctionSales_gt: MIN_BID_AMOUNT.toString() }
     }
 
-    const fetchLimit = first + 1
+    const fetchLimit = limit + 1
 
     const data = await SDK.connect(chainId).exploreDaosSearch({
-      text,
+      text: queryText,
       skip,
       first: fetchLimit,
       where,
     })
 
-    const hasNextPage = data.daoSearch.length > first
-    const limitedData = hasNextPage ? data.daoSearch.slice(0, first) : data.daoSearch
+    const hasNextPage = data.daoSearch.length > limit
+    const limitedData = hasNextPage ? data.daoSearch.slice(0, limit) : data.daoSearch
 
     return {
       daos: limitedData.map((dao) => ({

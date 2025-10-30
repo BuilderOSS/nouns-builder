@@ -2,6 +2,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { exploreMyDaosRequest } from '@buildeross/sdk/subgraph'
 import { type ExploreDaoWithChainId } from '@buildeross/sdk/subgraph'
 import useSWR from 'swr'
+import { isAddress } from 'viem'
 
 export interface UseMyDaosOptions {
   address?: string
@@ -28,7 +29,7 @@ export function useMyDaos(options: UseMyDaosOptions = {}): UseMyDaosResult {
 
   // Create SWR key - only when enabled and has address
   const swrKey =
-    enabled && address
+    enabled && address && isAddress(address, { strict: false })
       ? ([SWR_KEYS.DYNAMIC.MY_DAOS_PAGE(address), address] as const)
       : null
 

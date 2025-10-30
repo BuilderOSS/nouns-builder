@@ -20,13 +20,13 @@ export interface UseExploreResult {
 // Fetcher function for explore API
 const exploreFetcher = async ([, _page, _orderBy, _chainSlug]: [
   string,
-  string | string[] | undefined,
-  string | string[] | undefined,
+  string | undefined,
+  string | undefined,
   string,
 ]) => {
   const params = new URLSearchParams()
-  if (_page) params.set('page', Array.isArray(_page) ? _page[0] : _page)
-  if (_orderBy) params.set('orderBy', Array.isArray(_orderBy) ? _orderBy[0] : _orderBy)
+  if (_page) params.set('page', _page)
+  if (_orderBy) params.set('orderBy', _orderBy)
   if (_chainSlug) params.set('network', _chainSlug)
 
   const url = `${BASE_URL}/api/explore?${params.toString()}`

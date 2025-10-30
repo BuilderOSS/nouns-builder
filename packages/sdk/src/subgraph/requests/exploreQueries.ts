@@ -1,4 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { parseEther } from 'viem'
 
 import { SDK } from '../client'
 import {
@@ -15,6 +16,8 @@ export interface ExploreDaosResponse {
   daos: ExploreDaoWithChainId[]
   hasNextPage: boolean
 }
+
+export const MIN_BID_AMOUNT = parseEther('0.001')
 
 export const exploreMyDaosRequest = async (
   memberAddress: string
@@ -53,10 +56,10 @@ export const exploreDaosRequest = async (
   skip: number,
   orderBy: Auction_OrderBy = Auction_OrderBy.StartTime
 ): Promise<ExploreDaosResponse | undefined> => {
+  if (limit < 1 || limit > 100) {
+    throw new Error('Limit must be between 1 and 100')
+  }
   try {
-    if (limit <= 0 || limit > 100) {
-      throw new Error('Limit must be between 1 and 100')
-    }
     const orderDirection =
       orderBy === Auction_OrderBy.EndTime ? OrderDirection.Asc : OrderDirection.Desc
 
@@ -74,12 +77,13 @@ export const exploreDaosRequest = async (
     ) {
       const activeDaos = await SDK.connect(chainId).activeDaos({
         first: fetchLimit,
-        where: { totalAuctionSales_gt: '1000000000000000' },
+        where: { totalAuctionSales_gt: MIN_BID_AMOUNT.toString() },
       })
 
       // If we have less than one explore page of active daos, we apply the filter
-      if (activeDaos.daos.length !== limit)
+      if (activeDaos.daos.length < fetchLimit) {
         where.dao_in = activeDaos.daos.map((x) => x.id)
+      }
     }
 
     if (orderBy === Auction_OrderBy.HighestBidAmount) where.bidCount_gt = 0

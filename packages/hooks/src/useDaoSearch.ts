@@ -16,7 +16,7 @@ export interface DaoSearchResult {
 interface UseDaoSearchOptions {
   debounceMs?: number
   enabled?: boolean
-  page?: string | string[]
+  page?: string
 }
 
 const DEFAULT_DEBOUNCE_MS = 300

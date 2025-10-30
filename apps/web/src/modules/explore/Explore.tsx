@@ -18,9 +18,11 @@ const MIN_SEARCH_LENGTH = 3
 export const Explore: React.FC = () => {
   const router = useRouter()
   const {
-    query: { page, orderBy, search: urlSearch },
+    query: { page: urlPage, orderBy: urlOrderBy, search: urlSearch },
     isReady,
   } = router
+  const page = Array.isArray(urlPage) ? urlPage[0] : urlPage
+  const orderBy = Array.isArray(urlOrderBy) ? urlOrderBy[0] : urlOrderBy
   const chain = useChainStore((x) => x.chain)
   const [searchInput, setSearchInput] = useState('')
   const [activeSearchQuery, setActiveSearchQuery] = useState('')
@@ -33,14 +35,14 @@ export const Explore: React.FC = () => {
         setActiveSearchQuery(urlSearch)
       } else {
         // If URL search is less than minimum, clear it from URL
-        const queryWithoutSearch = {
+        const nextQuery = {
           ...router.query,
         }
-        delete queryWithoutSearch.search
+        delete nextQuery.search
         router.replace(
           {
             pathname: router.pathname,
-            query: queryWithoutSearch,
+            query: nextQuery,
           },
           undefined,
           { shallow: true }
@@ -69,14 +71,13 @@ export const Explore: React.FC = () => {
     if (trimmedInput.length >= MIN_SEARCH_LENGTH) {
       setActiveSearchQuery(trimmedInput)
       // Update URL with search query and reset to page 1
+      const nextQuery = { ...router.query }
+      nextQuery.search = trimmedInput
+      delete nextQuery.page
       router.push(
         {
           pathname: router.pathname,
-          query: {
-            ...router.query,
-            search: trimmedInput,
-            page: undefined, // Reset to first page when searching
-          },
+          query: nextQuery,
         },
         undefined,
         { shallow: true }
@@ -84,14 +85,14 @@ export const Explore: React.FC = () => {
     } else {
       setActiveSearchQuery('')
       // Remove search from URL
-      const queryWithoutSearch = {
+      const nextQuery = {
         ...router.query,
       }
-      delete queryWithoutSearch.search
+      delete nextQuery.search
       router.push(
         {
           pathname: router.pathname,
-          query: queryWithoutSearch,
+          query: nextQuery,
         },
         undefined,
         { shallow: true }
@@ -104,14 +105,14 @@ export const Explore: React.FC = () => {
     setSearchInput('')
     setActiveSearchQuery('')
     // Remove search from URL
-    const queryWithoutSearch = {
+    const nextQuery = {
       ...router.query,
     }
-    delete queryWithoutSearch.search
+    delete nextQuery.search
     router.push(
       {
         pathname: router.pathname,
-        query: queryWithoutSearch,
+        query: nextQuery,
       },
       undefined,
       { shallow: true }
