@@ -1,0 +1,15 @@
+query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_filter) {
+  daoSearch(
+    text: $text
+    first: $first
+    skip: $skip
+    where: $where
+  ) {
+    name
+    contractImage
+    tokenAddress
+    currentAuction {
+      ...CurrentAuction
+    }
+  }
+}

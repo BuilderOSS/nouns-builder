@@ -1,7 +1,6 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
 import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { erc721Abi, erc1155Abi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
@@ -168,16 +167,13 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
       },
       ...(treasuryNfts?.map((nft) => {
         const optionValue = `${nft.contract.address}:${nft.tokenId}` as NftOption
-        const fetchableUrls = nft.image.originalUrl
-          ? getFetchableUrls(nft.image.originalUrl)
-          : []
 
         return {
           value: optionValue,
           label: `${nft.name || 'Unnamed'} #${nft.tokenId} (${nft.tokenType})`,
           icon: nft.image.originalUrl ? (
             <FallbackImage
-              srcList={fetchableUrls}
+              src={nft.image.originalUrl}
               style={{ width: 20, height: 20, borderRadius: '4px' }}
             />
           ) : undefined,
@@ -220,15 +216,6 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
     () => (computedMetadata?.isERC1155 ? Number(computedMetadata.balance) : 1),
     [computedMetadata]
   )
-
-  // Memoize the image source list to prevent re-renders
-  const imageSrcList = useMemo(() => {
-    if (!computedMetadata?.image) return []
-    const fetchableUrls = getFetchableUrls(computedMetadata.image)
-    return fetchableUrls
-      ? [computedMetadata.image, ...fetchableUrls]
-      : [computedMetadata.image]
-  }, [computedMetadata?.image])
 
   return (
     <Box
@@ -352,7 +339,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
                 <Box style={{ width: '80px', height: '80px', flexShrink: 0 }}>
                   <Box aspectRatio={1} backgroundColor={'border'} borderRadius={'curved'}>
                     <FallbackImage
-                      srcList={imageSrcList}
+                      src={computedMetadata?.image}
                       style={{
                         width: '100%',
                         height: '100%',

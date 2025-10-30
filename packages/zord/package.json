@@ -58,7 +58,7 @@
     "build": "tsup",
     "build-icons": "svgr --out-dir src/icons --icon --replace-attr-values '#000=currentColor' --typescript icons ",
     "clean": "rm -rf .turbo dist",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
     "type-check": "tsc --noEmit"
   },
   "sideEffects": [

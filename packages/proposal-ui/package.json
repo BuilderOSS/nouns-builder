@@ -20,20 +20,26 @@
     "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/sdk": "workspace:*",
     "@buildeross/stores": "workspace:*",
+    "@buildeross/test-fixtures": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/ui": "workspace:*",
     "@buildeross/utils": "workspace:*",
     "@buildeross/zord": "workspace:*",
     "@smartinvoicexyz/types": "^0.1.27",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/lodash": "^4.17.17",
     "@types/node": "^22.15.21",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.1.5",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
+    "@vitejs/plugin-react": "^4.5.0",
     "eslint": "8.57.1",
     "tsup": "^8.3.5",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
   },
   "exports": {
     ".": {
@@ -77,7 +83,9 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf .turbo dist",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts"

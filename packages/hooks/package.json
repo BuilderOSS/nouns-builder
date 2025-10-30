@@ -72,7 +72,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist .turbo",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"

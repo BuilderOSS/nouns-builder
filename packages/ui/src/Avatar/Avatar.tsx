@@ -1,4 +1,3 @@
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { Box, BoxProps } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
@@ -43,7 +42,7 @@ export function Avatar({
       {src && !imageHasError && (
         <FallbackImage
           key={src}
-          srcList={getFetchableUrls(src)}
+          src={src}
           alt={address || 'Avatar image'}
           style={{
             objectFit: 'cover',

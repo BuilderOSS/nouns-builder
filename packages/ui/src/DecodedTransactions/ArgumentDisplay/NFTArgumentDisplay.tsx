@@ -1,5 +1,4 @@
 import { SerializedNftMetadata } from '@buildeross/hooks/useNftMetadata'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { DecodedArg } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
@@ -32,13 +31,6 @@ export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
     return undefined
   }, [arg])
 
-  // Memoize image sources to prevent re-renders
-  const imageSrcList = useMemo(() => {
-    if (!nftMetadata?.image) return []
-    const fetchableUrls = getFetchableUrls(nftMetadata.image)
-    return fetchableUrls ? [nftMetadata.image, ...fetchableUrls] : [nftMetadata.image]
-  }, [nftMetadata?.image])
-
   // Check if this is an NFT transfer function and we have the necessary data
   const isNftTransfer = functionName === 'safeTransferFrom' && tokenId && nftMetadata
 
@@ -54,7 +46,7 @@ export const NFTArgumentDisplay: React.FC<NFTArgumentDisplayProps> = ({
             <Box style={{ width: '24px', height: '24px', flexShrink: 0 }}>
               <Box aspectRatio={1} backgroundColor="border" borderRadius="curved">
                 <FallbackImage
-                  srcList={imageSrcList}
+                  src={nftMetadata.image}
                   style={{
                     width: '100%',
                     height: '100%',

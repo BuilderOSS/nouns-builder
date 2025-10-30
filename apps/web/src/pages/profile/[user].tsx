@@ -1,7 +1,6 @@
 import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
@@ -260,11 +259,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                             borderRadius="curved"
                             overflow="hidden"
                           >
-                            <FallbackImage
-                              srcList={getFetchableUrls(x.image)}
-                              sizes="100vw"
-                              alt={x.name}
-                            />
+                            <FallbackImage src={x.image} sizes="100vw" alt={x.name} />
                           </Box>
                           <Text variant="heading-xs" mt="x4">
                             {x.name}

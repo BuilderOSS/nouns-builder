@@ -2180,6 +2180,7 @@ export type Query = {
   dao?: Maybe<Dao>
   daoMultisigUpdate?: Maybe<DaoMultisigUpdate>
   daoMultisigUpdates: Array<DaoMultisigUpdate>
+  daoSearch: Array<Dao>
   daos: Array<Dao>
   daotokenOwner?: Maybe<DaoTokenOwner>
   daotokenOwners: Array<DaoTokenOwner>
@@ -2273,6 +2274,15 @@ export type QueryDaoMultisigUpdatesArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<DaoMultisigUpdate_Filter>
+}
+
+export type QueryDaoSearchArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  text: Scalars['String']['input']
+  where?: InputMaybe<Dao_Filter>
 }
 
 export type QueryDaosArgs = {
@@ -3407,6 +3417,29 @@ export type DaoOgMetadataQuery = {
   } | null
 }
 
+export type ExploreDaosSearchQueryVariables = Exact<{
+  text: Scalars['String']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
+  where?: InputMaybe<Dao_Filter>
+}>
+
+export type ExploreDaosSearchQuery = {
+  __typename?: 'Query'
+  daoSearch: Array<{
+    __typename?: 'DAO'
+    name: string
+    contractImage: string
+    tokenAddress: any
+    currentAuction?: {
+      __typename?: 'Auction'
+      endTime: any
+      highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+      token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
+    } | null
+  }>
+}
+
 export type DaoVotersQueryVariables = Exact<{
   where?: InputMaybe<DaoVoter_Filter>
   first?: InputMaybe<Scalars['Int']['input']>
@@ -4133,6 +4166,19 @@ export const DaoOgMetadataDocument = gql`
     }
   }
 `
+export const ExploreDaosSearchDocument = gql`
+  query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_filter) {
+    daoSearch(text: $text, first: $first, skip: $skip, where: $where) {
+      name
+      contractImage
+      tokenAddress
+      currentAuction {
+        ...CurrentAuction
+      }
+    }
+  }
+  ${CurrentAuctionFragmentDoc}
+`
 export const DaoVotersDocument = gql`
   query daoVoters(
     $where: DAOVoter_filter
@@ -4604,6 +4650,24 @@ export function getSdk(
             signal,
           }),
         'daoOGMetadata',
+        'query',
+        variables
+      )
+    },
+    exploreDaosSearch(
+      variables: ExploreDaosSearchQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ExploreDaosSearchQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ExploreDaosSearchQuery>({
+            document: ExploreDaosSearchDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'exploreDaosSearch',
         'query',
         variables
       )

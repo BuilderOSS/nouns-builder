@@ -97,7 +97,7 @@
     "build:cjs": "tsup",
     "build:dts": "tsc -b tsconfig.build.json",
     "clean": "rm -rf .turbo dist",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"

@@ -1,6 +1,6 @@
 generates:
   src/subgraph/sdk.generated.ts:
-    schema: 'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-ethereum-sepolia/0.1.4/gn'
+    schema: 'https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-ethereum-sepolia/0.1.6/gn'
     documents: 'src/subgraph/**/*.graphql'
     plugins:
       - typescript

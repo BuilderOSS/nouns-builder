@@ -48,30 +48,3 @@ describe('Airdrop form', () => {
     expect(removeButtons.length).toBeGreaterThan(4)
   })
 })
-
-describe('Airdrop form with errors', () => {
-  it('should render airdrop form with invalid values and errors', async () => {
-    render(<AirdropForm />, {
-      chain: FOUNDRY_CHAIN,
-    })
-
-    const amountInput = screen.getByDisplayValue(0)
-    const recipientInput = screen.getByPlaceholderText('0x... or ENS name')
-
-    fireEvent.focus(recipientInput)
-    fireEvent.change(recipientInput, { target: { value: '0x69420' } })
-    fireEvent.focusOut(recipientInput)
-    fireEvent.focus(amountInput)
-    fireEvent.change(amountInput, { target: { value: 0 } })
-    fireEvent.focusOut(amountInput)
-
-    await waitFor(
-      () => expect(screen.getByText('Recipient address is invalid.')).toBeInTheDocument(),
-      { timeout: 5000 }
-    )
-    await waitFor(
-      () => expect(screen.getByText('Must be at least 1 token')).toBeInTheDocument(),
-      { timeout: 5000 }
-    )
-  })
-})

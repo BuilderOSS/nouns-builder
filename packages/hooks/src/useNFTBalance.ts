@@ -34,8 +34,12 @@ const fetchNFTBalance = async (
   chainId: CHAIN_ID,
   address: Address
 ): Promise<SerializedNft[]> => {
+  const params = new URLSearchParams()
+  params.set('chainId', chainId.toString())
+  params.set('address', address)
+
   const response = await fetch(
-    `${BASE_URL}/api/alchemy/nft-balances?chainId=${chainId}&address=${address}`
+    `${BASE_URL}/api/alchemy/nft-balances?${params.toString()}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch NFT balances')

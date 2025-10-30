@@ -216,7 +216,6 @@ export const ReviewProposalForm = ({
                     {...formik.getFieldProps('title')}
                     id={'title'}
                     inputLabel={'Proposal Title'}
-                    type={'text'}
                     disabled={disabledForm}
                     errorMessage={formik.errors['title']}
                   />
