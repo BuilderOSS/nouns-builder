@@ -164,12 +164,12 @@ export const getFeedData = async ({
   cursor,
   dao,
 }: FeedQueryParams): Promise<FeedResponse> => {
-  try {
-    // Validate input
-    if (limit < 1 || limit > 100) {
-      throw new Error('Limit must be between 1 and 100')
-    }
+  // Validate input
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('Limit must be an integer between 1 and 100')
+  }
 
+  try {
     const timestamp_lt = cursor?.toString()
 
     // Fetch limit + 1 to determine if there are more items
@@ -236,12 +236,12 @@ export const getUserActivityFeed = async ({
   cursor,
   actor,
 }: UserActivityQueryParams): Promise<FeedResponse> => {
-  try {
-    // Validate input
-    if (limit < 1 || limit > 100) {
-      throw new Error('Limit must be between 1 and 100')
-    }
+  // Validate input
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('Limit must be an integer between 1 and 100')
+  }
 
+  try {
     const timestamp_lt = cursor?.toString()
     const fetchLimit = limit + 1
 

@@ -304,87 +304,74 @@ export async function fetchFeedDataService({
   limit = 20,
   maxConcurrentConnections = 2,
 }: FeedServiceParams): Promise<FeedResponse> {
-  try {
-    // Validate limit
-    if (limit <= 0 || limit > 100) {
-      throw new InvalidRequestError('Limit must be between 1 and 100')
-    }
-
-    // Validate daoAddress requires chainId
-    if (daoAddress && !chainId) {
-      throw new InvalidRequestError('chainId is required when daoAddress is specified')
-    }
-
-    // Validate chainId is supported
-    if (chainId && !SUPPORTED_CHAIN_IDS.includes(chainId)) {
-      throw new InvalidRequestError(
-        `Unsupported chainId: ${chainId}. Supported chains: ${SUPPORTED_CHAIN_IDS.join(', ')}`
-      )
-    }
-
-    // DAO-specific feed (single chain)
-    if (chainId && daoAddress) {
-      const key = generateCacheKey({ chainId, daoAddress })
-      const ttl = getTtlByScope({ chainId, daoAddress })
-
-      return fetchWithSortedSetCache(
-        key,
-        () => getFeedData({ chainId, limit: limit * 3, cursor, dao: daoAddress }),
-        ttl,
-        cursor,
-        limit
-      )
-    }
-
-    // Chain-specific feed (single chain)
-    if (chainId) {
-      const key = generateCacheKey({ chainId })
-      const ttl = getTtlByScope({ chainId })
-
-      return fetchWithSortedSetCache(
-        key,
-        () => getFeedData({ chainId, limit: limit * 3, cursor }),
-        ttl,
-        cursor,
-        limit
-      )
-    }
-
-    // Global feed (all chains) - don't cache merged result, only individual chains
-    const perChainLimit = Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10
-
-    const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
-      try {
-        const key = generateCacheKey({ chainId: cid })
-        const ttl = getTtlByScope({ chainId: cid })
-
-        return await fetchWithSortedSetCache(
-          key,
-          () => getFeedData({ chainId: cid, limit: perChainLimit * 3, cursor }),
-          ttl,
-          cursor,
-          perChainLimit
-        )
-      } catch (e) {
-        console.error(`Feed fetch failed for chain ${cid}:`, e)
-        return { items: [], hasMore: false, nextCursor: null } as FeedResponse
-      }
-    })
-
-    const allFeeds = await executeConcurrently(tasks, maxConcurrentConnections)
-    return sortAndPaginate(allFeeds, limit)
-  } catch (err) {
-    console.error('Feed service error:', err)
-
-    // Log to Sentry if available
-    try {
-      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
-      sentry.captureException(err)
-      await sentry.flush(2000)
-    } catch (_) {}
-
-    return { items: [], hasMore: false, nextCursor: null }
+  // Validate limit
+  if (limit <= 0 || limit > 100) {
+    throw new InvalidRequestError('Limit must be between 1 and 100')
   }
+
+  // Validate daoAddress requires chainId
+  if (daoAddress && !chainId) {
+    throw new InvalidRequestError('chainId is required when daoAddress is specified')
+  }
+
+  // Validate chainId is supported
+  if (chainId && !SUPPORTED_CHAIN_IDS.includes(chainId)) {
+    throw new InvalidRequestError(
+      `Unsupported chainId: ${chainId}. Supported chains: ${SUPPORTED_CHAIN_IDS.join(', ')}`
+    )
+  }
+
+  // DAO-specific feed (single chain)
+  if (chainId && daoAddress) {
+    const key = generateCacheKey({ chainId, daoAddress })
+    const ttl = getTtlByScope({ chainId, daoAddress })
+
+    return fetchWithSortedSetCache(
+      key,
+      () => getFeedData({ chainId, limit: limit * 3, cursor, dao: daoAddress }),
+      ttl,
+      cursor,
+      limit
+    )
+  }
+
+  // Chain-specific feed (single chain)
+  if (chainId) {
+    const key = generateCacheKey({ chainId })
+    const ttl = getTtlByScope({ chainId })
+
+    return fetchWithSortedSetCache(
+      key,
+      () => getFeedData({ chainId, limit: limit * 3, cursor }),
+      ttl,
+      cursor,
+      limit
+    )
+  }
+
+  // Global feed (all chains) - don't cache merged result, only individual chains
+  const perChainLimit = Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10
+
+  const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
+    try {
+      const key = generateCacheKey({ chainId: cid })
+      const ttl = getTtlByScope({ chainId: cid })
+
+      return await fetchWithSortedSetCache(
+        key,
+        () => getFeedData({ chainId: cid, limit: perChainLimit * 3, cursor }),
+        ttl,
+        cursor,
+        perChainLimit
+      )
+    } catch (e) {
+      console.error(`Feed fetch failed for chain ${cid}:`, e)
+      return { items: [], hasMore: false, nextCursor: null } as FeedResponse
+    }
+  })
+
+  const allFeeds = await executeConcurrently(tasks, maxConcurrentConnections)
+  return sortAndPaginate(allFeeds, limit)
 }
 
 //
@@ -415,79 +402,66 @@ export async function fetchUserActivityFeedService({
   limit = 20,
   maxConcurrentConnections = 2,
 }: UserActivityParams): Promise<FeedResponse> {
-  try {
-    // Validate limit
-    if (limit <= 0 || limit > 100) {
-      throw new InvalidRequestError('Limit must be between 1 and 100')
-    }
+  // Validate limit
+  if (limit <= 0 || limit > 100) {
+    throw new InvalidRequestError('Limit must be between 1 and 100')
+  }
 
-    // Validate actor
-    if (!actor) {
-      throw new InvalidRequestError('actor is required')
-    }
+  // Validate actor
+  if (!actor) {
+    throw new InvalidRequestError('actor is required')
+  }
 
-    // Validate chainId is supported if provided
-    if (chainId && !SUPPORTED_CHAIN_IDS.includes(chainId)) {
-      throw new InvalidRequestError(
-        `Unsupported chainId: ${chainId}. Supported chains: ${SUPPORTED_CHAIN_IDS.join(', ')}`
-      )
-    }
+  // Validate chainId is supported if provided
+  if (chainId && !SUPPORTED_CHAIN_IDS.includes(chainId)) {
+    throw new InvalidRequestError(
+      `Unsupported chainId: ${chainId}. Supported chains: ${SUPPORTED_CHAIN_IDS.join(', ')}`
+    )
+  }
 
-    // Chain-specific user activity
-    if (chainId) {
-      const key = generateCacheKey({ chainId, actor })
-      const ttl = getTtlByScope({ chainId, actor })
+  // Chain-specific user activity
+  if (chainId) {
+    const key = generateCacheKey({ chainId, actor })
+    const ttl = getTtlByScope({ chainId, actor })
 
-      return fetchWithSortedSetCache(
+    return fetchWithSortedSetCache(
+      key,
+      () => getUserActivityFeed({ chainId, limit: limit * 3, cursor, actor }),
+      ttl,
+      cursor,
+      limit
+    )
+  }
+
+  // Global user activity (all chains) - don't cache merged result
+  const perChainLimit = Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10
+
+  const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
+    try {
+      const key = generateCacheKey({ chainId: cid, actor })
+      const ttl = getTtlByScope({ chainId: cid, actor })
+
+      return await fetchWithSortedSetCache(
         key,
-        () => getUserActivityFeed({ chainId, limit: limit * 3, cursor, actor }),
+        () =>
+          getUserActivityFeed({
+            chainId: cid,
+            limit: perChainLimit * 3,
+            cursor,
+            actor,
+          }),
         ttl,
         cursor,
-        limit
+        perChainLimit
       )
+    } catch (e) {
+      console.error(`User activity fetch failed for chain ${cid}:`, e)
+      return { items: [], hasMore: false, nextCursor: null } as FeedResponse
     }
+  })
 
-    // Global user activity (all chains) - don't cache merged result
-    const perChainLimit = Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10
-
-    const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
-      try {
-        const key = generateCacheKey({ chainId: cid, actor })
-        const ttl = getTtlByScope({ chainId: cid, actor })
-
-        return await fetchWithSortedSetCache(
-          key,
-          () =>
-            getUserActivityFeed({
-              chainId: cid,
-              limit: perChainLimit * 3,
-              cursor,
-              actor,
-            }),
-          ttl,
-          cursor,
-          perChainLimit
-        )
-      } catch (e) {
-        console.error(`User activity fetch failed for chain ${cid}:`, e)
-        return { items: [], hasMore: false, nextCursor: null } as FeedResponse
-      }
-    })
-
-    const allFeeds = await executeConcurrently(tasks, maxConcurrentConnections)
-    return sortAndPaginate(allFeeds, limit)
-  } catch (err) {
-    console.error('User activity feed error:', err)
-
-    // Log to Sentry if available
-    try {
-      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
-      sentry.captureException(err)
-      await sentry.flush(2000)
-    } catch (_) {}
-
-    return { items: [], hasMore: false, nextCursor: null }
-  }
+  const allFeeds = await executeConcurrently(tasks, maxConcurrentConnections)
+  return sortAndPaginate(allFeeds, limit)
 }
 
 //

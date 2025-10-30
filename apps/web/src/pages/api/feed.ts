@@ -21,61 +21,61 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  // Validate and parse limit
+  let limit = 20 // default
+  if (req.query.limit) {
+    const parsed = parseInt(req.query.limit as string, 10)
+    if (isNaN(parsed) || parsed < 1 || parsed > 100) {
+      return res.status(400).json({ error: 'limit must be between 1 and 100' })
+    }
+    limit = parsed
+  }
+
+  // Validate and parse cursor
+  let cursor: number | undefined
+  if (req.query.cursor) {
+    const parsed = Number(req.query.cursor)
+    if (isNaN(parsed) || parsed < 0) {
+      return res.status(400).json({ error: 'cursor must be a valid positive number' })
+    }
+    cursor = parsed
+  }
+
+  // Validate and parse chainId
+  let chainId: CHAIN_ID | undefined
+  if (req.query.chainId) {
+    const parsed = Number(req.query.chainId)
+    if (isNaN(parsed)) {
+      return res.status(400).json({ error: 'chainId must be a valid number' })
+    }
+    chainId = parsed as CHAIN_ID
+  }
+
+  // Validate and parse daoAddress
+  let daoAddress: string | undefined
+  if (req.query.daoAddress) {
+    if (typeof req.query.daoAddress !== 'string') {
+      return res.status(400).json({ error: 'daoAddress must be a string' })
+    }
+    if (!isAddress(req.query.daoAddress, { strict: false })) {
+      return res.status(400).json({ error: 'Invalid daoAddress format' })
+    }
+    daoAddress = req.query.daoAddress.toLowerCase()
+  }
+
+  // Validate and parse actor
+  let actor: string | undefined
+  if (req.query.actor) {
+    if (typeof req.query.actor !== 'string') {
+      return res.status(400).json({ error: 'actor must be a string' })
+    }
+    if (!isAddress(req.query.actor, { strict: false })) {
+      return res.status(400).json({ error: 'Invalid actor address format' })
+    }
+    actor = req.query.actor.toLowerCase()
+  }
+
   try {
-    // Validate and parse limit
-    let limit = 20 // default
-    if (req.query.limit) {
-      const parsed = parseInt(req.query.limit as string, 10)
-      if (isNaN(parsed) || parsed < 1 || parsed > 100) {
-        return res.status(400).json({ error: 'limit must be between 1 and 100' })
-      }
-      limit = parsed
-    }
-
-    // Validate and parse cursor
-    let cursor: number | undefined
-    if (req.query.cursor) {
-      const parsed = Number(req.query.cursor)
-      if (isNaN(parsed) || parsed < 0) {
-        return res.status(400).json({ error: 'cursor must be a valid positive number' })
-      }
-      cursor = parsed
-    }
-
-    // Validate and parse chainId
-    let chainId: CHAIN_ID | undefined
-    if (req.query.chainId) {
-      const parsed = Number(req.query.chainId)
-      if (isNaN(parsed)) {
-        return res.status(400).json({ error: 'chainId must be a valid number' })
-      }
-      chainId = parsed as CHAIN_ID
-    }
-
-    // Validate and parse daoAddress
-    let daoAddress: string | undefined
-    if (req.query.daoAddress) {
-      if (typeof req.query.daoAddress !== 'string') {
-        return res.status(400).json({ error: 'daoAddress must be a string' })
-      }
-      if (!isAddress(req.query.daoAddress, { strict: false })) {
-        return res.status(400).json({ error: 'Invalid daoAddress format' })
-      }
-      daoAddress = req.query.daoAddress.toLowerCase()
-    }
-
-    // Validate and parse actor
-    let actor: string | undefined
-    if (req.query.actor) {
-      if (typeof req.query.actor !== 'string') {
-        return res.status(400).json({ error: 'actor must be a string' })
-      }
-      if (!isAddress(req.query.actor, { strict: false })) {
-        return res.status(400).json({ error: 'Invalid actor address format' })
-      }
-      actor = req.query.actor.toLowerCase()
-    }
-
     // Fetch data
     let result
     if (actor) {
