@@ -1,6 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
@@ -103,7 +102,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
           {daoImage ? (
             <Box mr="x4">
               <FallbackImage
-                srcList={getFetchableUrls(daoImage)}
+                src={daoImage}
                 style={{
                   borderRadius: '100%',
                   objectFit: 'contain',

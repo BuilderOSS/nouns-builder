@@ -1,7 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -70,7 +69,7 @@ export const DaoCard = ({
         className={daoImage}
       >
         <FallbackImage
-          srcList={getFetchableUrls(tokenImage)}
+          src={tokenImage}
           sizes="100vw"
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           alt={`${collectionName} image`}

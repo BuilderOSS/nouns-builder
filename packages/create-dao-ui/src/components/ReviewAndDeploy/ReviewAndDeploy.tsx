@@ -1,7 +1,6 @@
 import { NULL_ADDRESS, PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
@@ -365,7 +364,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                       width: 'x24',
                       borderRadius: 'round',
                     })}
-                    srcList={getFetchableUrls(general.daoAvatar)}
+                    src={general.daoAvatar}
                     alt=""
                   />
                 }
