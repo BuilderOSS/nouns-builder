@@ -12,27 +12,10 @@ export const FeedTab = ({ children }: { children?: ReactNode }) => (
           fontSize={28}
           fontWeight={'display'}
         >
-          DAO Feed
+          Activity Feed
         </Text>
-        <Text mb="x3">
-          This feed is a read-only, alpha feature for DAOs that have a{' '}
-          <a
-            href="https://github.com/farcasterxyz/protocol/discussions/71"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            Farcaster channel
-          </a>
-        </Text>
-        <Text mb="x3">
-          Please leave any feedback or feature requests on this{' '}
-          <a
-            href="https://github.com/ourzora/nouns-builder/issues/270"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            Github issue
-          </a>
+        <Text mb="x3" color="text3">
+          View all recent activity for this DAO including auctions, proposals, and votes.
         </Text>
         <Flex
           direction={'column'}

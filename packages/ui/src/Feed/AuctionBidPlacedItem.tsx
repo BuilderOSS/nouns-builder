@@ -1,6 +1,7 @@
 import type { AuctionBidPlacedFeedItem } from '@buildeross/types'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
+import { formatEther } from 'viem'
 
 import { FallbackImage } from '../FallbackImage'
 import { useLinks } from '../LinksProvider'
@@ -26,7 +27,9 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
       <Stack gap="x2">
         <Text className={feedItemTitle}>Bid Placed</Text>
         <Text className={feedItemSubtitle}>{item.tokenName}</Text>
-        <Text className={feedItemMeta}>Amount: {item.amount} ETH</Text>
+        <Text className={feedItemMeta}>
+          Amount: {formatEther(BigInt(item.amount))} ETH
+        </Text>
       </Stack>
     </LinkWrapper>
   )

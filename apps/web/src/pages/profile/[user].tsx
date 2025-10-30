@@ -1,11 +1,14 @@
 import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { SectionHandler } from '@buildeross/dao-ui'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
+import { AddressType } from '@buildeross/types'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { Feed } from '@buildeross/ui/Feed'
 import { Pagination } from '@buildeross/ui/Pagination'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -14,6 +17,7 @@ import { GetServerSideProps } from 'next'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import React from 'react'
 import { Meta } from 'src/components/Meta'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
@@ -40,11 +44,28 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   ogImageURL,
 }) => {
   const chain = useChainStore((x) => x.chain)
-  const { query } = useRouter()
+  const { query, push, pathname } = useRouter()
 
   const page = query.page as string
 
   const { ensName, ensAvatar } = useEnsData(userAddress)
+
+  const openTab = React.useCallback(
+    async (tab: string, scroll?: boolean) => {
+      const nextQuery = { ...query }
+      nextQuery['tab'] = tab
+
+      await push(
+        {
+          pathname,
+          query: nextQuery,
+        },
+        undefined,
+        { shallow: true, scroll }
+      )
+    },
+    [push, pathname, query]
+  )
 
   const { data: tokens, isValidating: isLoadingTokens } = useSWR(
     userAddress && chain.id
@@ -67,6 +88,99 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const pageTitle = `${userName}'s Profile`
   const pageDescription = `View ${userName}'s profile and DAO tokens on Nouns Builder`
   const profilePath = `/profile/${userAddress}`
+
+  const activeTab = query.tab ? (query.tab as string) : 'feed'
+
+  // Create the Feed section
+  const feedSection = {
+    title: 'Feed',
+    component: [
+      <Flex key="feed" w="100%" direction="column" align="center">
+        <Box w="100%" style={{ maxWidth: '912px' }}>
+          <Feed actor={userAddress as AddressType} chainId={chain.id} />
+        </Box>
+      </Flex>,
+    ],
+  }
+
+  // Create the Tokens section
+  const tokensSection = {
+    title: 'Tokens',
+    component: [
+      <Box key="tokens" w="100%">
+        {hasDaos && (
+          <>
+            {isLoadingTokens ? (
+              <Grid className={responsiveGrid} gap={'x12'}>
+                {Array(6)
+                  .fill(0)
+                  .map((_, i) => (
+                    <Box
+                      key={i}
+                      backgroundColor="background2"
+                      borderRadius="curved"
+                      width={'100%'}
+                      height={'100%'}
+                      aspectRatio={1 / 1}
+                      position="relative"
+                      className={loadingSkeleton}
+                    />
+                  ))}
+              </Grid>
+            ) : !!tokens?.tokens.length ? (
+              <Grid className={responsiveGrid} gap={'x12'}>
+                {tokens?.tokens.map((x, i) => (
+                  <Link
+                    key={i}
+                    href={`/dao/${chain.slug}/${x.tokenContract}/${x.tokenId}`}
+                  >
+                    <Box>
+                      <Box
+                        backgroundColor="background2"
+                        width={'100%'}
+                        height={'auto'}
+                        aspectRatio={1 / 1}
+                        position="relative"
+                        borderRadius="curved"
+                        overflow="hidden"
+                      >
+                        <FallbackImage src={x.image} sizes="100vw" alt={x.name} />
+                      </Box>
+                      <Text variant="heading-xs" mt="x4">
+                        {x.name}
+                      </Text>
+                    </Box>
+                  </Link>
+                ))}
+              </Grid>
+            ) : (
+              <Flex
+                align={'center'}
+                justify={'space-around'}
+                className={noTokensContainer}
+              >
+                <Text color="text3">
+                  {page
+                    ? `No more DAO tokens found on ${chain.name}.`
+                    : `No DAO tokens found on ${chain.name}.`}
+                </Text>
+              </Flex>
+            )}
+
+            <Pagination hasNextPage={tokens?.hasNextPage} />
+          </>
+        )}
+
+        {!isLoading && !hasDaos && (
+          <Flex align={'center'} justify={'space-around'} className={noTokensContainer}>
+            <Text color="text3">No DAO tokens owned.</Text>
+          </Flex>
+        )}
+      </Box>,
+    ],
+  }
+
+  const sections = [feedSection, tokensSection]
 
   return (
     <>
@@ -212,89 +326,17 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
               )}
             </Flex>
           </Box>
-          <Box mt={{ '@initial': 'x14', '@768': 'x32' }} className={tokenContainer}>
-            {hasDaos && (
-              <Text
-                mb="x4"
-                fontWeight={'display'}
-                display={{ '@initial': 'block', '@768': 'none' }}
-              >
-                Tokens
-              </Text>
-            )}
-
-            {hasDaos && (
-              <>
-                {isLoadingTokens ? (
-                  <Grid className={responsiveGrid} gap={'x12'}>
-                    {Array(6)
-                      .fill(0)
-                      .map((_, i) => (
-                        <Box
-                          key={i}
-                          backgroundColor="background2"
-                          borderRadius="curved"
-                          width={'100%'}
-                          height={'100%'}
-                          aspectRatio={1 / 1}
-                          position="relative"
-                          className={loadingSkeleton}
-                        />
-                      ))}
-                  </Grid>
-                ) : !!tokens?.tokens.length ? (
-                  <Grid className={responsiveGrid} gap={'x12'}>
-                    {tokens?.tokens.map((x, i) => (
-                      <Link
-                        key={i}
-                        href={`/dao/${chain.slug}/${x.tokenContract}/${x.tokenId}`}
-                      >
-                        <Box>
-                          <Box
-                            backgroundColor="background2"
-                            width={'100%'}
-                            height={'auto'}
-                            aspectRatio={1 / 1}
-                            position="relative"
-                            borderRadius="curved"
-                            overflow="hidden"
-                          >
-                            <FallbackImage src={x.image} sizes="100vw" alt={x.name} />
-                          </Box>
-                          <Text variant="heading-xs" mt="x4">
-                            {x.name}
-                          </Text>
-                        </Box>
-                      </Link>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Flex
-                    align={'center'}
-                    justify={'space-around'}
-                    className={noTokensContainer}
-                  >
-                    <Text color="text3">
-                      {page
-                        ? `No more DAO tokens found on ${chain.name}.`
-                        : `No DAO tokens found on ${chain.name}.`}
-                    </Text>
-                  </Flex>
-                )}
-
-                <Pagination hasNextPage={tokens?.hasNextPage} />
-              </>
-            )}
-
-            {!isLoading && !hasDaos && (
-              <Flex
-                align={'center'}
-                justify={'space-around'}
-                className={noTokensContainer}
-              >
-                <Text color="text3">No DAO tokens owned.</Text>
-              </Flex>
-            )}
+          <Box
+            mt={{ '@initial': 'x14', '@768': 'x32' }}
+            w="100%"
+            className={tokenContainer}
+            pb={{ '@initial': 'x10', '@768': 'x32' }}
+          >
+            <SectionHandler
+              sections={sections}
+              activeTab={activeTab}
+              onTabChange={(tab) => openTab(tab, false)}
+            />
           </Box>
         </Flex>
       </Flex>

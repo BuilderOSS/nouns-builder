@@ -1,10 +1,7 @@
-query feedData($first: Int!, $cursor: BigInt, $dao: String) {
+query feedEvents($first: Int!, $where: FeedEvent_filter) {
   feedEvents(
     first: $first
-    where: { 
-      timestamp_lt: $cursor
-      dao: $dao
-    }
+    where: $where
     orderBy: timestamp
     orderDirection: desc
   ) {
@@ -21,7 +18,7 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
       symbol
       contractImage
     }
-    
+
     ... on ProposalCreatedEvent {
       proposal {
         proposalId
@@ -32,10 +29,11 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
         timeCreated
       }
     }
-    
+
     ... on ProposalVotedEvent {
       proposal {
         proposalId
+        title
       }
       vote {
         support
@@ -43,10 +41,11 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
         reason
       }
     }
-    
+
     ... on ProposalUpdatedEvent {
       proposal {
         proposalId
+        title
       }
       update {
         messageType
@@ -54,7 +53,7 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
         originalMessageId
       }
     }
-    
+
     ... on ProposalExecutedEvent {
       proposal {
         proposalId
@@ -62,7 +61,7 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
         title
       }
     }
-    
+
     ... on AuctionCreatedEvent {
       auction {
         id
@@ -75,7 +74,7 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
         }
       }
     }
-    
+
     ... on AuctionBidPlacedEvent {
       auction {
         id
@@ -90,218 +89,7 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
         bidTime
       }
     }
-    
-    ... on AuctionSettledEvent {
-      auction {
-        id
-        token {
-          tokenId
-          name
-          image
-        }
-      }
-      winner
-      amount
-    }
-  }
-}
 
-query globalFeedData($first: Int!, $cursor: BigInt) {
-  feedEvents(
-    first: $first
-    where: { 
-      timestamp_lt: $cursor
-    }
-    orderBy: timestamp
-    orderDirection: desc
-  ) {
-    __typename
-    id
-    type
-    timestamp
-    blockNumber
-    transactionHash
-    actor
-    dao {
-      tokenAddress
-      name
-      symbol
-      contractImage
-    }
-    
-    ... on ProposalCreatedEvent {
-      proposal {
-        proposalId
-        proposalNumber
-        title
-        description
-        proposer
-        timeCreated
-      }
-    }
-    
-    ... on ProposalVotedEvent {
-      proposal {
-        proposalId
-      }
-      vote {
-        support
-        weight
-        reason
-      }
-    }
-    
-    ... on ProposalUpdatedEvent {
-      proposal {
-        proposalId
-      }
-      update {
-        messageType
-        message
-        originalMessageId
-      }
-    }
-    
-    ... on ProposalExecutedEvent {
-      proposal {
-        proposalId
-        proposalNumber
-        title
-      }
-    }
-    
-    ... on AuctionCreatedEvent {
-      auction {
-        id
-        startTime
-        endTime
-        token {
-          tokenId
-          name
-          image
-        }
-      }
-    }
-    
-    ... on AuctionBidPlacedEvent {
-      auction {
-        id
-        token {
-          tokenId
-          name
-          image
-        }
-      }
-      bid {
-        amount
-        bidTime
-      }
-    }
-    
-    ... on AuctionSettledEvent {
-      auction {
-        id
-        token {
-          tokenId
-          name
-          image
-        }
-      }
-      winner
-      amount
-    }
-  }
-}
-
-query userActivityFeed($actor: Bytes!, $first: Int!, $cursor: BigInt) {
-  feedEvents(
-    first: $first
-    where: { 
-      actor: $actor
-      timestamp_lt: $cursor
-    }
-    orderBy: timestamp
-    orderDirection: desc
-  ) {
-    __typename
-    id
-    type
-    timestamp
-    blockNumber
-    transactionHash
-    actor
-    dao {
-      tokenAddress
-      name
-      symbol
-      contractImage
-    }
-    
-    ... on ProposalCreatedEvent {
-      proposal {
-        proposalId
-        proposalNumber
-        title
-        description
-        timeCreated
-      }
-    }
-    
-    ... on ProposalVotedEvent {
-      proposal {
-        proposalId
-        title
-      }
-      vote {
-        support
-        weight
-        reason
-      }
-    }
-    
-    ... on ProposalUpdatedEvent {
-      proposal {
-        proposalId
-        title
-      }
-      update {
-        message
-      }
-    }
-    
-    ... on ProposalExecutedEvent {
-      proposal {
-        proposalId
-        proposalNumber
-        title
-      }
-    }
-    
-    ... on AuctionCreatedEvent {
-      auction {
-        id
-        token {
-          tokenId
-          name
-          image
-        }
-      }
-    }
-    
-    ... on AuctionBidPlacedEvent {
-      auction {
-        id
-        token {
-          tokenId
-          name
-          image
-        }
-      }
-      bid {
-        amount
-      }
-    }
-    
     ... on AuctionSettledEvent {
       auction {
         id

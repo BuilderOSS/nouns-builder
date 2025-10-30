@@ -1,7 +1,6 @@
 import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import {
   About,
@@ -147,15 +146,13 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
 
     const publicSections = [
       aboutSection,
+      daoFeed,
       treasurySection,
       proposalsSection,
       smartContractsSection,
     ]
 
-    const baseSections = hasThreshold ? [...publicSections, adminSection] : publicSections
-    return CAST_ENABLED.includes(collection)
-      ? [...baseSections.slice(0, 1), daoFeed, ...baseSections.slice(1)]
-      : baseSections
+    return hasThreshold ? [...publicSections, adminSection] : publicSections
   }, [hasThreshold, collection, openTab, openProposalCreatePage, openProposalReviewPage])
 
   const ogDescription = useMemo(() => {
