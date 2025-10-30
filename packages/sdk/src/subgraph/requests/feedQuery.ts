@@ -166,7 +166,7 @@ export const getFeedData = async ({
 }: FeedQueryParams): Promise<FeedResponse> => {
   try {
     // Validate input
-    if (limit <= 0 || limit > 100) {
+    if (limit < 1 || limit > 100) {
       throw new Error('Limit must be between 1 and 100')
     }
 
@@ -238,7 +238,7 @@ export const getUserActivityFeed = async ({
 }: UserActivityQueryParams): Promise<FeedResponse> => {
   try {
     // Validate input
-    if (limit <= 0 || limit > 100) {
+    if (limit < 1 || limit > 100) {
       throw new Error('Limit must be between 1 and 100')
     }
 

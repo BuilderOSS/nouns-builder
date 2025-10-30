@@ -35,7 +35,19 @@ const CACHE_CONFIG = {
   GLOBAL_FEED_PREFIX: 'feed:global',
   DAO_FEED_PREFIX: 'feed:dao',
   USER_ACTIVITY_PREFIX: 'feed:user',
+  CHAIN_FEED_PREFIX: 'feed:chain',
 } as const
+
+const getScopePrefix = (params: {
+  chainId?: CHAIN_ID
+  daoAddress?: string
+  actor?: string
+}) => {
+  if (params.actor) return CACHE_CONFIG.USER_ACTIVITY_PREFIX
+  if (params.daoAddress) return CACHE_CONFIG.DAO_FEED_PREFIX
+  if (params.chainId) return CACHE_CONFIG.CHAIN_FEED_PREFIX
+  return CACHE_CONFIG.GLOBAL_FEED_PREFIX
+}
 
 /**
  * Generate cache key for Redis
@@ -59,9 +71,9 @@ function generateCacheKey(params: {
 
   // short prefix + hash of params
   const hash = keccak256(toHex(baseKey))
-  const scope = actor ? 'user' : daoAddress ? 'dao' : chainId ? 'chain' : 'global'
+  const scopePrefix = getScopePrefix({ chainId, daoAddress, actor })
 
-  return `feed:${scope}:${hash}`
+  return `${scopePrefix}:${hash}`
 }
 
 /**
@@ -295,43 +307,58 @@ export async function fetchUserActivityFeedService({
 // ♻️ CACHE INVALIDATION
 // ────────────────────────────────────────────────────────────────
 //
-
 export async function invalidateFeedCache(params: {
   chainId?: CHAIN_ID
   daoAddress?: string
   actor?: string
+  cursor?: string | number
+  limit?: number
+  invalidateAllInScope?: boolean // optional: if true, delete all keys with same prefix
 }): Promise<void> {
   const redis = getRedisConnection()
   if (!redis) return
+
   try {
-    const patterns: string[] = []
+    const {
+      chainId,
+      daoAddress,
+      actor,
+      cursor,
+      limit = 20,
+      invalidateAllInScope,
+    } = params
 
-    if (params.actor && params.chainId)
-      patterns.push(
-        `${CACHE_CONFIG.USER_ACTIVITY_PREFIX}:${params.actor.toLowerCase()}:${params.chainId}:*`
-      )
-    else if (params.actor)
-      patterns.push(
-        `${CACHE_CONFIG.USER_ACTIVITY_PREFIX}:${params.actor.toLowerCase()}:*`
-      )
+    if (invalidateAllInScope) {
+      // Bulk invalidation per scope (rare, use with caution)
+      const prefix = getScopePrefix({ chainId, daoAddress, actor })
 
-    if (params.daoAddress && params.chainId)
-      patterns.push(
-        `${CACHE_CONFIG.DAO_FEED_PREFIX}:${params.chainId}:${params.daoAddress.toLowerCase()}:*`
-      )
-    else if (params.chainId)
-      patterns.push(`${CACHE_CONFIG.GLOBAL_FEED_PREFIX}:${params.chainId}:*`)
-    else if (params.daoAddress)
-      patterns.push(
-        `${CACHE_CONFIG.DAO_FEED_PREFIX}:*:${params.daoAddress.toLowerCase()}:*`
-      )
-
-    for (const pattern of patterns) {
-      const keys = await redis.keys(pattern)
+      const keys = await redis.keys(`${prefix}:*`)
       if (keys.length > 0) {
         await redis.del(...keys)
-        console.log(`Invalidated ${keys.length} cache keys for ${pattern}`)
+        setImmediate(() =>
+          // eslint-disable-next-line no-console
+          console.log(`Invalidated ${keys.length} keys under prefix ${prefix}`)
+        )
       }
+      return
+    }
+
+    // Single-key deterministic invalidation
+    const key = generateCacheKey({
+      chainId,
+      daoAddress,
+      actor,
+      cursor,
+      limit,
+    })
+
+    const deleted = await redis.del(key)
+    if (deleted) {
+      // eslint-disable-next-line no-console
+      console.log(`Invalidated feed cache key: ${key}`)
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(`No cache key found for: ${key}`)
     }
   } catch (err) {
     console.warn('Feed cache invalidation error', err)
