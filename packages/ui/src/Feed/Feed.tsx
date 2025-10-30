@@ -54,9 +54,9 @@ export const Feed: React.FC<FeedProps> = ({
   }
 
   return (
-    <Stack gap="x4" w="100%">
+    <Stack gap="x4" w="100%" pb="x4">
       {items.map((item: FeedItemType) => (
-        <FeedItem key={item.id} item={item} />
+        <FeedItem key={item.id} item={item} hideActor={!!actor} />
       ))}
 
       {isLoadingMore && <FeedSkeleton count={3} />}
