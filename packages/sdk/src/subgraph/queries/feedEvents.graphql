@@ -17,6 +17,9 @@ query feedData($first: Int!, $cursor: BigInt, $dao: String) {
     actor
     dao {
       tokenAddress
+      name
+      symbol
+      contractImage
     }
     
     ... on ProposalCreatedEvent {
@@ -121,6 +124,9 @@ query globalFeedData($first: Int!, $cursor: BigInt) {
     actor
     dao {
       tokenAddress
+      name
+      symbol
+      contractImage
     }
     
     ... on ProposalCreatedEvent {
@@ -228,6 +234,7 @@ query userActivityFeed($actor: Bytes!, $first: Int!, $cursor: BigInt) {
       tokenAddress
       name
       symbol
+      contractImage
     }
     
     ... on ProposalCreatedEvent {

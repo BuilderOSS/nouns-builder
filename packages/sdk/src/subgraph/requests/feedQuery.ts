@@ -52,6 +52,9 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
   const baseItem = {
     id: event.id,
     daoId: event.dao.tokenAddress,
+    daoName: event.dao.name,
+    daoImage: event.dao.contractImage,
+    daoSymbol: event.dao.symbol,
     chainId,
     timestamp: Number(event.timestamp),
     actor: event.actor,
@@ -66,8 +69,8 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         type: 'PROPOSAL_CREATED',
         proposalId: event.proposal.proposalId,
         proposalNumber: event.proposal.proposalNumber.toString(),
-        title: event.proposal.title || '',
-        description: event.proposal.description || '',
+        proposalTitle: event.proposal.title || '',
+        proposalDescription: event.proposal.description || '',
         creator: (event.proposal as any).proposer,
       }
     }
@@ -101,7 +104,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         type: 'PROPOSAL_EXECUTED',
         proposalId: event.proposal.proposalId,
         proposalNumber: event.proposal.proposalNumber.toString(),
-        title: event.proposal.title || '',
+        proposalTitle: event.proposal.title || '',
       }
     }
 

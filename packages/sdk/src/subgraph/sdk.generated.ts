@@ -5209,7 +5209,13 @@ export type FeedDataQuery = {
           }
         }
         bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'AuctionCreatedEvent'
@@ -5231,7 +5237,13 @@ export type FeedDataQuery = {
             image?: string | null
           }
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'AuctionSettledEvent'
@@ -5253,7 +5265,13 @@ export type FeedDataQuery = {
             image?: string | null
           }
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalCreatedEvent'
@@ -5272,7 +5290,13 @@ export type FeedDataQuery = {
           proposer: any
           timeCreated: any
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalExecutedEvent'
@@ -5288,7 +5312,13 @@ export type FeedDataQuery = {
           proposalNumber: number
           title?: string | null
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalUpdatedEvent'
@@ -5305,7 +5335,13 @@ export type FeedDataQuery = {
           message: string
           originalMessageId: any
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalVotedEvent'
@@ -5322,7 +5358,13 @@ export type FeedDataQuery = {
           weight: number
           reason?: string | null
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
   >
 }
@@ -5354,7 +5396,13 @@ export type GlobalFeedDataQuery = {
           }
         }
         bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'AuctionCreatedEvent'
@@ -5376,7 +5424,13 @@ export type GlobalFeedDataQuery = {
             image?: string | null
           }
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'AuctionSettledEvent'
@@ -5398,7 +5452,13 @@ export type GlobalFeedDataQuery = {
             image?: string | null
           }
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalCreatedEvent'
@@ -5417,7 +5477,13 @@ export type GlobalFeedDataQuery = {
           proposer: any
           timeCreated: any
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalExecutedEvent'
@@ -5433,7 +5499,13 @@ export type GlobalFeedDataQuery = {
           proposalNumber: number
           title?: string | null
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalUpdatedEvent'
@@ -5450,7 +5522,13 @@ export type GlobalFeedDataQuery = {
           message: string
           originalMessageId: any
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalVotedEvent'
@@ -5467,7 +5545,13 @@ export type GlobalFeedDataQuery = {
           weight: number
           reason?: string | null
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
   >
 }
@@ -5500,7 +5584,13 @@ export type UserActivityFeedQuery = {
           }
         }
         bid: { __typename?: 'AuctionBid'; amount: any }
-        dao: { __typename?: 'DAO'; tokenAddress: any; name: string; symbol: string }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'AuctionCreatedEvent'
@@ -5520,7 +5610,13 @@ export type UserActivityFeedQuery = {
             image?: string | null
           }
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any; name: string; symbol: string }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'AuctionSettledEvent'
@@ -5542,7 +5638,13 @@ export type UserActivityFeedQuery = {
             image?: string | null
           }
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any; name: string; symbol: string }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalCreatedEvent'
@@ -5560,7 +5662,13 @@ export type UserActivityFeedQuery = {
           description?: string | null
           timeCreated: any
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any; name: string; symbol: string }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalExecutedEvent'
@@ -5576,7 +5684,13 @@ export type UserActivityFeedQuery = {
           proposalNumber: number
           title?: string | null
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any; name: string; symbol: string }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalUpdatedEvent'
@@ -5588,7 +5702,13 @@ export type UserActivityFeedQuery = {
         actor: any
         proposal: { __typename?: 'Proposal'; proposalId: any; title?: string | null }
         update: { __typename?: 'ProposalUpdate'; message: string }
-        dao: { __typename?: 'DAO'; tokenAddress: any; name: string; symbol: string }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
     | {
         __typename: 'ProposalVotedEvent'
@@ -5605,7 +5725,13 @@ export type UserActivityFeedQuery = {
           weight: number
           reason?: string | null
         }
-        dao: { __typename?: 'DAO'; tokenAddress: any; name: string; symbol: string }
+        dao: {
+          __typename?: 'DAO'
+          tokenAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
       }
   >
 }
@@ -6344,6 +6470,9 @@ export const FeedDataDocument = gql`
       actor
       dao {
         tokenAddress
+        name
+        symbol
+        contractImage
       }
       ... on ProposalCreatedEvent {
         proposal {
@@ -6440,6 +6569,9 @@ export const GlobalFeedDataDocument = gql`
       actor
       dao {
         tokenAddress
+        name
+        symbol
+        contractImage
       }
       ... on ProposalCreatedEvent {
         proposal {
@@ -6538,6 +6670,7 @@ export const UserActivityFeedDocument = gql`
         tokenAddress
         name
         symbol
+        contractImage
       }
       ... on ProposalCreatedEvent {
         proposal {
