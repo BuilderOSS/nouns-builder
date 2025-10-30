@@ -30,26 +30,10 @@ export const Explore: React.FC = () => {
   // Sync search input with URL parameter on mount
   useEffect(() => {
     if (isReady && urlSearch && typeof urlSearch === 'string') {
-      if (urlSearch.trim().length >= MIN_SEARCH_LENGTH) {
-        setSearchInput(urlSearch)
-        setActiveSearchQuery(urlSearch)
-      } else {
-        // If URL search is less than minimum, clear it from URL
-        const nextQuery = {
-          ...router.query,
-        }
-        delete nextQuery.search
-        router.replace(
-          {
-            pathname: router.pathname,
-            query: nextQuery,
-          },
-          undefined,
-          { shallow: true }
-        )
-      }
+      setSearchInput(urlSearch)
+      setActiveSearchQuery(urlSearch.length >= MIN_SEARCH_LENGTH ? urlSearch : '')
     }
-  }, [isReady, urlSearch, router])
+  }, [isReady, urlSearch])
 
   // Determine if we're in search mode
   const isSearching = activeSearchQuery.trim().length >= MIN_SEARCH_LENGTH
@@ -65,6 +49,37 @@ export const Explore: React.FC = () => {
     enabled: isSearching,
     page: isSearching ? page : undefined,
   })
+
+  // Regular explore data when not searching
+  const {
+    daos: exploreDaos,
+    hasNextPage,
+    isLoading: isExploreLoading,
+    error: exploreError,
+  } = useExplore({
+    page,
+    orderBy,
+    chainSlug: chain.slug,
+    enabled: isReady && !isSearching,
+  })
+
+  // Handle clear search
+  const handleClearSearch = useCallback(() => {
+    setSearchInput('')
+    setActiveSearchQuery('')
+    // Remove search from URL
+    const nextQuery = { ...router.query }
+    delete nextQuery.search
+    delete nextQuery.page
+    router.push(
+      {
+        pathname: router.pathname,
+        query: nextQuery,
+      },
+      undefined,
+      { shallow: true }
+    )
+  }, [router])
 
   // Handle search execution
   const handleSearch = useCallback(() => {
@@ -84,60 +99,18 @@ export const Explore: React.FC = () => {
         { shallow: true }
       )
     } else {
-      setActiveSearchQuery('')
-      // Remove search from URL
-      const nextQuery = {
-        ...router.query,
-      }
-      delete nextQuery.search
-      router.push(
-        {
-          pathname: router.pathname,
-          query: nextQuery,
-        },
-        undefined,
-        { shallow: true }
-      )
+      handleClearSearch()
     }
-  }, [searchInput, router])
+  }, [searchInput, router, handleClearSearch])
 
-  // Handle clear search
-  const handleClearSearch = useCallback(() => {
-    setSearchInput('')
-    setActiveSearchQuery('')
-    // Remove search from URL
-    const nextQuery = {
-      ...router.query,
-    }
-    delete nextQuery.search
-    router.push(
-      {
-        pathname: router.pathname,
-        query: nextQuery,
-      },
-      undefined,
-      { shallow: true }
-    )
-  }, [router])
-
-  // Regular explore data when not searching
-  const {
-    daos: exploreDaos,
-    hasNextPage,
-    isLoading: isExploreLoading,
-    error: exploreError,
-  } = useExplore({
-    page,
-    orderBy,
-    chainSlug: chain.slug,
-    enabled: isReady && !isSearching,
-  })
-
-  // Use search results if searching, otherwise use regular explore data
+  // Derived state for cleaner rendering logic
   const displayDaos = isSearching ? searchDaos : exploreDaos
   const isLoading = isSearching ? isSearchLoading : isExploreLoading
   const hasNextPageForDisplay = isSearching ? hasSearchNextPage : hasNextPage
   const error = isSearching ? searchError : exploreError
+  const showEmptySearch = isSearching && !isSearchLoading && isSearchEmpty
+  const showEmptyExplore = !isSearching && !isLoading && !displayDaos.length && !page
+  const showNoDaosMessage = !isSearching && !isLoading && !displayDaos.length && page
 
   return (
     <>
@@ -159,72 +132,71 @@ export const Explore: React.FC = () => {
       </Box>
 
       {/* Error State */}
-      {error ? (
+      {error && (
         <Text
           style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
-          variant={'paragraph-md'}
-          color={'negative'}
+          variant="paragraph-md"
+          color="negative"
         >
           Error while loading DAOs
         </Text>
-      ) : (
+      )}
+
+      {/* Search Empty State */}
+      {!error && showEmptySearch && (
+        <Text
+          style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
+          variant="paragraph-md"
+          color="tertiary"
+        >
+          No DAOs found for "{activeSearchQuery}"
+        </Text>
+      )}
+
+      {/* Loading State */}
+      {!error && !showEmptySearch && isLoading && <ExploreSkeleton />}
+
+      {/* DAO Grid */}
+      {!error && !isLoading && displayDaos?.length > 0 && (
         <>
-          {/* Search Results or Empty State */}
-          {isSearching &&
-            !isSearchLoading &&
-            isSearchEmpty &&
-            searchDaos !== undefined && (
-              <Text
-                style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
-                variant={'paragraph-md'}
-                color={'tertiary'}
-              >
-                No DAOs found for "{activeSearchQuery}"
-              </Text>
-            )}
+          <Grid className={exploreGrid}>
+            {displayDaos.map((dao) => {
+              const bid = dao.highestBid?.amount ?? undefined
+              const bidInEth = bid ? formatEther(bid) : undefined
 
-          {/* DAO Grid */}
-          {displayDaos?.length ? (
-            <>
-              <Grid className={exploreGrid}>
-                {displayDaos?.map((dao) => {
-                  const bid = dao.highestBid?.amount ?? undefined
-                  const bidInEth = bid ? formatEther(bid) : undefined
+              return (
+                <DaoCard
+                  chainId={chain.id}
+                  key={dao.dao.tokenAddress}
+                  tokenId={dao.token?.tokenId ?? undefined}
+                  tokenImage={dao.token?.image ?? undefined}
+                  tokenName={dao.token?.name ?? undefined}
+                  collectionName={dao.dao.name ?? undefined}
+                  collectionAddress={dao.dao.tokenAddress}
+                  bid={bidInEth}
+                  endTime={dao.endTime ?? undefined}
+                />
+              )
+            })}
+          </Grid>
+          <Pagination hasNextPage={hasNextPageForDisplay} scroll={true} />
+        </>
+      )}
 
-                  return (
-                    <DaoCard
-                      chainId={chain.id}
-                      key={dao.dao.tokenAddress}
-                      tokenId={dao.token?.tokenId ?? undefined}
-                      tokenImage={dao.token?.image ?? undefined}
-                      tokenName={dao.token?.name ?? undefined}
-                      collectionName={dao.dao.name ?? undefined}
-                      collectionAddress={dao.dao.tokenAddress}
-                      bid={bidInEth}
-                      endTime={dao.endTime ?? undefined}
-                    />
-                  )
-                })}
-              </Grid>
-              <Pagination hasNextPage={hasNextPageForDisplay} scroll={true} />
-            </>
-          ) : isLoading ? (
-            <ExploreSkeleton />
-          ) : !page && !isSearching ? (
-            <ExploreNoDaos />
-          ) : !isSearching ? (
-            <>
-              <Text
-                style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
-                variant={'paragraph-md'}
-                color={'tertiary'}
-              >
-                There are no DAOs here
-              </Text>
+      {/* Empty Explore State (no DAOs on first page) */}
+      {!error && !isLoading && showEmptyExplore && <ExploreNoDaos />}
 
-              <Pagination hasNextPage={hasNextPageForDisplay} />
-            </>
-          ) : null}
+      {/* No DAOs on Paginated Page */}
+      {!error && !isLoading && showNoDaosMessage && (
+        <>
+          <Text
+            style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
+            variant="paragraph-md"
+            color="tertiary"
+          >
+            There are no DAOs here
+          </Text>
+          <Pagination hasNextPage={hasNextPageForDisplay} />
         </>
       )}
     </>

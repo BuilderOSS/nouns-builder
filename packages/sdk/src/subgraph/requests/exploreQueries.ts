@@ -98,7 +98,7 @@ export const exploreDaosRequest = async (
       orderDirection,
       where,
       skip,
-      first: limit,
+      first: fetchLimit,
     })
 
     if (!data.auctions) return undefined

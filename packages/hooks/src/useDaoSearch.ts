@@ -2,11 +2,11 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type ExploreDaoWithChainId } from '@buildeross/sdk/subgraph'
 import { buildSearchText } from '@buildeross/utils/search'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
 export interface DaoSearchResult {
-  daos?: ExploreDaoWithChainId[]
+  daos: ExploreDaoWithChainId[]
   error?: HttpError
   isLoading: boolean
   isEmpty: boolean
@@ -67,25 +67,19 @@ export function useDaoSearch(
   const { debounceMs = DEFAULT_DEBOUNCE_MS, enabled = true, page } = options
 
   // Normalize page parameter
-  const pageNumber = Array.isArray(page) ? page[0] : page
-
   const [debouncedQuery, setDebouncedQuery] = useState(query)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Debounce the search query using useEffect
   useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-
-    timeoutRef.current = setTimeout(() => {
-      setDebouncedQuery(query)
+    let isMounted = true
+    const timeout = setTimeout(() => {
+      if (isMounted) {
+        setDebouncedQuery(query)
+      }
     }, debounceMs)
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
+      isMounted = false
+      clearTimeout(timeout)
     }
   }, [query, debounceMs])
 
@@ -95,11 +89,11 @@ export function useDaoSearch(
   // Create SWR key - only when enabled, has searchText, and has network
   const swrKey =
     enabled && searchText && network
-      ? ([SWR_KEYS.DAO_SEARCH, searchText, network, pageNumber] as const)
+      ? ([SWR_KEYS.DAO_SEARCH, searchText, network, page] as const)
       : null
 
   // Use SWR for data fetching with caching
-  const { data, error, isLoading } = useSWR<SearchResponse, HttpError>(
+  const { data, error, isLoading, isValidating } = useSWR<SearchResponse, HttpError>(
     swrKey,
     searchFetcher,
     {
@@ -118,10 +112,15 @@ export function useDaoSearch(
     }
   )
 
-  const isEmpty = !!swrKey && !isLoading && (!data?.daos || data.daos.length === 0)
+  const isEmpty =
+    !!swrKey &&
+    !isLoading &&
+    !isValidating &&
+    !error &&
+    (!data?.daos || data.daos.length === 0)
 
   return {
-    daos: data?.daos,
+    daos: data?.daos ?? [],
     error,
     isLoading: isLoading && !!swrKey,
     isEmpty,

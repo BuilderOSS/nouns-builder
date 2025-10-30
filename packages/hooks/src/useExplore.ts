@@ -1,6 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { ExploreDaosResponse } from '@buildeross/sdk/subgraph'
+import { ExploreDaosResponse, ExploreDaoWithChainId } from '@buildeross/sdk/subgraph'
 import useSWR from 'swr'
 
 export interface UseExploreOptions {
@@ -11,7 +11,7 @@ export interface UseExploreOptions {
 }
 
 export interface UseExploreResult {
-  daos?: ExploreDaosResponse['daos']
+  daos: ExploreDaoWithChainId[]
   hasNextPage: boolean
   isLoading: boolean
   error?: Error
@@ -62,7 +62,7 @@ export function useExplore(options: UseExploreOptions): UseExploreResult {
   const swrKey = enabled ? ([SWR_KEYS.EXPLORE, page, orderBy, chainSlug] as const) : null
 
   // Use SWR for data fetching with caching
-  const { data, error, isLoading } = useSWR<ExploreDaosResponse, HttpError>(
+  const { data, error, isLoading, isValidating } = useSWR<ExploreDaosResponse, HttpError>(
     swrKey,
     exploreFetcher,
     {
@@ -78,9 +78,9 @@ export function useExplore(options: UseExploreOptions): UseExploreResult {
   )
 
   return {
-    daos: data?.daos,
+    daos: data?.daos ?? [],
     hasNextPage: data?.hasNextPage ?? false,
-    isLoading: isLoading && !!swrKey,
+    isLoading: (isLoading || isValidating) && !!swrKey,
     error,
   }
 }
