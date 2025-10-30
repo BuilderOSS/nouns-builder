@@ -34,23 +34,22 @@ export type BaseFeedItem = {
   id: string
   type: FeedItemType
   daoId: AddressType
+  daoName: string
+  daoSymbol: string
+  daoImage: string
   chainId: CHAIN_ID
   timestamp: number
   actor: AddressType
   txHash: BytesType
   blockNumber: number
-  title?: string
-  content?: string
-  media?: MediaItem[]
-  link?: string
 }
 
 export type ProposalCreatedFeedItem = BaseFeedItem & {
   type: 'PROPOSAL_CREATED'
   proposalId: BytesType
   proposalNumber: string
-  title: string
-  description: string
+  proposalTitle: string
+  proposalDescription: string
   creator: AddressType
 }
 
@@ -75,7 +74,7 @@ export type ProposalExecutedFeedItem = BaseFeedItem & {
   type: 'PROPOSAL_EXECUTED'
   proposalId: BytesType
   proposalNumber: string
-  title: string
+  proposalTitle: string
 }
 
 export type AuctionCreatedFeedItem = BaseFeedItem & {
