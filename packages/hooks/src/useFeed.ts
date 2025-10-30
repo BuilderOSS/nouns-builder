@@ -1,20 +1,18 @@
 import type { CHAIN_ID, FeedItem, FeedResponse } from '@buildeross/types'
-import { useCallback, useMemo } from 'react'
-import useSWR from 'swr'
+import { useMemo } from 'react'
+import useSWRInfinite from 'swr/infinite'
 
 type UseFeedOptions = {
   chainId?: CHAIN_ID
   daoAddress?: string
   actor?: string
   limit?: number
-  cursor?: number | null
   enabled?: boolean
 }
 
 type UseFeedReturn = {
   items: FeedItem[]
   hasMore: boolean
-  nextCursor: number | null
   isLoading: boolean
   isValidating: boolean
   error: Error | undefined
@@ -48,6 +46,7 @@ function buildFeedUrl({
 }
 
 type HttpError = Error & { status?: number; body?: unknown }
+
 const fetcher = async (
   url: string,
   { signal }: { signal?: AbortSignal } = {}
@@ -69,78 +68,59 @@ const fetcher = async (
 }
 
 /**
- * useFeed hook — handles feed fetching, pagination, and caching
+ * useFeedInfinite — automatic infinite scroll pagination via useSWRInfinite
  */
 export function useFeed({
   chainId,
   daoAddress,
   actor,
   limit = 20,
-  cursor = null,
   enabled = true,
 }: UseFeedOptions): UseFeedReturn {
-  const key = useMemo(() => {
+  const baseKey = useMemo(() => {
     if (!enabled) return null
-    return buildFeedUrl({ chainId, daoAddress, actor, limit, cursor })
-  }, [enabled, chainId, daoAddress, actor, limit, cursor])
+    return { chainId, daoAddress, actor, limit }
+  }, [enabled, chainId, daoAddress, actor, limit])
 
-  const { data, error, isValidating, mutate } = useSWR<FeedResponse, HttpError>(
-    key,
+  const { data, error, isValidating, size, setSize, mutate } = useSWRInfinite<
+    FeedResponse,
+    HttpError
+  >(
+    (pageIndex, previousPageData) => {
+      if (!baseKey) return null
+      if (previousPageData && !previousPageData.hasMore) return null
+
+      const cursor = pageIndex === 0 ? null : (previousPageData?.nextCursor ?? null)
+      return buildFeedUrl({
+        ...baseKey,
+        cursor,
+      })
+    },
     fetcher,
     {
       revalidateOnFocus: false,
       revalidateIfStale: false,
-      dedupingInterval: 15_000, // 15s deduping
+      dedupingInterval: 15_000,
       keepPreviousData: true,
     }
   )
 
-  const items = data?.items ?? []
-  const hasMore = data?.hasMore ?? false
-  const nextCursor = data?.nextCursor ?? null
+  // flatten paginated items
+  const items = data ? data.flatMap((page) => page.items) : []
+  const hasMore = data?.[data.length - 1]?.hasMore ?? false
   const isLoading = !data && !error && enabled
 
-  const fetchNextPage = useCallback(async () => {
-    if (!hasMore || !nextCursor) return
-    const nextUrl = buildFeedUrl({
-      chainId,
-      daoAddress,
-      actor,
-      limit,
-      cursor: nextCursor,
-    })
+  const fetchNextPage = async () => {
+    if (hasMore) await setSize(size + 1)
+  }
 
-    const nextData = await fetcher(nextUrl)
-    if (!nextData?.items?.length) return
-
-    // Merge with current cache
-    mutate((current) => {
-      const finalItems = [...(current?.items || []), ...nextData.items]
-      if (nextData.hasMore) {
-        // If we have more items, we need to merge them with the current cache
-        return {
-          items: finalItems,
-          hasMore: true,
-          nextCursor: nextData.nextCursor,
-        }
-      }
-
-      return {
-        items: finalItems,
-        hasMore: false,
-        nextCursor: null,
-      }
-    })
-  }, [hasMore, nextCursor, chainId, daoAddress, actor, limit, mutate])
-
-  const refresh = useCallback(async () => {
+  const refresh = async () => {
     await mutate()
-  }, [mutate])
+  }
 
   return {
     items,
     hasMore,
-    nextCursor,
     isLoading,
     isValidating,
     error,
