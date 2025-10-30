@@ -1,11 +1,11 @@
 import type { FeedItem as FeedItemType } from '@buildeross/types'
-import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
 import { AuctionCreatedItem } from './AuctionCreatedItem'
 import { AuctionSettledItem } from './AuctionSettledItem'
-import { feedItemCard, feedItemIcon, feedItemMeta } from './Feed.css'
+import { feedItemCard, feedItemMeta } from './Feed.css'
 import { FeedItemActor } from './FeedItemActor'
 import { FeedItemDao } from './FeedItemDao'
 import { ProposalCreatedItem } from './ProposalCreatedItem'
@@ -15,6 +15,7 @@ import { ProposalVotedItem } from './ProposalVotedItem'
 
 export interface FeedItemProps {
   item: FeedItemType
+  hideActor?: boolean
 }
 
 const formatTimestamp = (timestamp: number) => {
@@ -34,36 +35,7 @@ const formatTimestamp = (timestamp: number) => {
   })
 }
 
-const FeedItemIconWrapper = ({ type }: { type: FeedItemType['type'] }) => {
-  const getIcon = () => {
-    switch (type) {
-      case 'PROPOSAL_CREATED':
-        return 'plus'
-      case 'PROPOSAL_UPDATED':
-        return 'refresh'
-      case 'PROPOSAL_VOTED':
-        return 'check'
-      case 'PROPOSAL_EXECUTED':
-        return 'checkInCircle'
-      case 'AUCTION_CREATED':
-        return 'collection'
-      case 'AUCTION_BID_PLACED':
-        return 'eth'
-      case 'AUCTION_SETTLED':
-        return 'checkInCircle'
-      default:
-        return 'question'
-    }
-  }
-
-  return (
-    <Box className={feedItemIcon}>
-      <Icon id={getIcon()} size="md" />
-    </Box>
-  )
-}
-
-export const FeedItem: React.FC<FeedItemProps> = ({ item }) => {
+export const FeedItem: React.FC<FeedItemProps> = ({ item, hideActor = false }) => {
   const renderContent = () => {
     switch (item.type) {
       case 'PROPOSAL_CREATED':
@@ -87,26 +59,22 @@ export const FeedItem: React.FC<FeedItemProps> = ({ item }) => {
 
   return (
     <Flex className={feedItemCard}>
-      <Flex gap="x4" w="100%">
-        <FeedItemIconWrapper type={item.type} />
+      <Stack gap="x3" w="100%">
+        {renderContent()}
 
-        <Stack gap="x3" style={{ flex: 1, minWidth: 0 }}>
-          {renderContent()}
-
-          <Flex justify="space-between" align="center" mt="x2" gap="x4" wrap="wrap">
-            <Flex gap="x4" align="center" wrap="wrap">
-              <FeedItemActor address={item.actor} />
-              <FeedItemDao
-                address={item.daoId}
-                chainId={item.chainId}
-                daoName={item.daoName}
-                daoImage={item.daoImage}
-              />
-            </Flex>
-            <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
+        <Flex justify="space-between" align="center" mt="x2" gap="x4" wrap="wrap">
+          <Flex gap="x4" align="center" wrap="wrap">
+            {!hideActor && <FeedItemActor address={item.actor} />}
+            <FeedItemDao
+              address={item.daoId}
+              chainId={item.chainId}
+              daoName={item.daoName}
+              daoImage={item.daoImage}
+            />
           </Flex>
-        </Stack>
-      </Flex>
+          <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
+        </Flex>
+      </Stack>
     </Flex>
   )
 }

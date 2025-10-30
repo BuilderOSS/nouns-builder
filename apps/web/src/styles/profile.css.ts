@@ -10,7 +10,8 @@ export const daosContainer = style({
   width: '100%',
   '@media': {
     'screen and (min-width: 768px)': {
-      width: '30%',
+      width: '360px',
+      flexShrink: 0,
     },
   },
 })
@@ -20,8 +21,9 @@ export const tokenContainer = style({
   overflow: 'auto',
   '@media': {
     'screen and (min-width: 768px)': {
-      maxHeight: '80vh',
-      width: '70%',
+      flex: 1,
+      overflowY: 'auto',
+      height: '100%',
     },
   },
 })

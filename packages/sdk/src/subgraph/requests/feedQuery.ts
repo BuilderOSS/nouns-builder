@@ -7,13 +7,10 @@ import {
 
 import { SDK } from '../client'
 import {
-  FeedDataQuery,
-  FeedDataQueryVariables,
-  GlobalFeedDataQuery,
-  GlobalFeedDataQueryVariables,
+  FeedEvent_Filter,
+  FeedEventsQuery,
+  FeedEventsQueryVariables,
   ProposalVoteSupport,
-  UserActivityFeedQuery,
-  UserActivityFeedQueryVariables,
 } from '../sdk.generated'
 
 interface FeedQueryParams {
@@ -30,10 +27,7 @@ interface UserActivityQueryParams {
   actor: string
 }
 
-type FeedEvent =
-  | FeedDataQuery['feedEvents'][0]
-  | GlobalFeedDataQuery['feedEvents'][0]
-  | UserActivityFeedQuery['feedEvents'][0]
+type FeedEvent = FeedEventsQuery['feedEvents'][0]
 
 function mapProposalVoteSupport(support: ProposalVoteSupport): ProposalVoteSupportType {
   switch (support) {
@@ -71,7 +65,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
-        creator: (event.proposal as any).proposer,
+        creator: event.proposal.proposer,
       }
     }
 
@@ -92,9 +86,9 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         ...baseItem,
         type: 'PROPOSAL_UPDATED',
         proposalId: event.proposal.proposalId,
-        messageType: (event.update as any).messageType,
+        messageType: event.update.messageType,
         message: event.update.message,
-        originalMessageId: (event.update as any).originalMessageId,
+        originalMessageId: event.update.originalMessageId,
       }
     }
 
@@ -116,8 +110,8 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         tokenId: event.auction.token.tokenId.toString(),
         tokenName: event.auction.token.name,
         tokenImage: event.auction.token.image || '',
-        startTime: Number((event.auction as any).startTime),
-        endTime: Number((event.auction as any).endTime),
+        startTime: Number(event.auction.startTime),
+        endTime: Number(event.auction.endTime),
       }
     }
 
@@ -173,22 +167,23 @@ export const getFeedData = async ({
   }
 
   try {
-    const timestamp_lt = cursor?.toString()
-
     // Fetch limit + 1 to determine if there are more items
     const fetchLimit = limit + 1
 
-    // Query the appropriate feed based on whether dao is specified
-    const data = dao
-      ? await SDK.connect(chainId).feedData({
-          first: fetchLimit,
-          timestamp_lt,
-          dao: dao.toLowerCase(),
-        } as FeedDataQueryVariables)
-      : await SDK.connect(chainId).globalFeedData({
-          first: fetchLimit,
-          timestamp_lt,
-        } as GlobalFeedDataQueryVariables)
+    // Build where clause
+    const where: FeedEvent_Filter = {}
+    if (cursor !== undefined) {
+      where.timestamp_lt = cursor.toString()
+    }
+    if (dao) {
+      where.dao = dao.toLowerCase()
+    }
+
+    // Query feed events
+    const data = await SDK.connect(chainId).feedEvents({
+      first: fetchLimit,
+      where,
+    } as FeedEventsQueryVariables)
 
     const events = data.feedEvents
 
@@ -245,14 +240,20 @@ export const getUserActivityFeed = async ({
   }
 
   try {
-    const timestamp_lt = cursor?.toString()
     const fetchLimit = limit + 1
 
-    const data = await SDK.connect(chainId).userActivityFeed({
-      first: fetchLimit,
-      timestamp_lt,
+    // Build where clause
+    const where: FeedEvent_Filter = {
       actor: actor.toLowerCase(),
-    } as UserActivityFeedQueryVariables)
+    }
+    if (cursor !== undefined) {
+      where.timestamp_lt = cursor.toString()
+    }
+
+    const data = await SDK.connect(chainId).feedEvents({
+      first: fetchLimit,
+      where,
+    } as FeedEventsQueryVariables)
 
     const events = data.feedEvents
     const hasMore = events.length > limit
