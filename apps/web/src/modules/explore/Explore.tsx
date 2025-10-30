@@ -18,18 +18,19 @@ const MIN_SEARCH_LENGTH = 3
 export const Explore: React.FC = () => {
   const router = useRouter()
   const {
-    query: { page: urlPage, orderBy: urlOrderBy, search: urlSearch },
+    query: { page: urlPage, orderBy: urlOrderBy, search: rawUrlSearch },
     isReady,
   } = router
   const page = Array.isArray(urlPage) ? urlPage[0] : urlPage
   const orderBy = Array.isArray(urlOrderBy) ? urlOrderBy[0] : urlOrderBy
+  const urlSearch = Array.isArray(rawUrlSearch) ? rawUrlSearch[0] : rawUrlSearch
   const chain = useChainStore((x) => x.chain)
   const [searchInput, setSearchInput] = useState('')
   const [activeSearchQuery, setActiveSearchQuery] = useState('')
 
   // Sync search input with URL parameter on mount
   useEffect(() => {
-    if (isReady && urlSearch && typeof urlSearch === 'string') {
+    if (isReady && urlSearch) {
       setSearchInput(urlSearch)
       setActiveSearchQuery(urlSearch.length >= MIN_SEARCH_LENGTH ? urlSearch : '')
     }

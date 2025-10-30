@@ -4,8 +4,8 @@ import { ExploreDaosResponse, ExploreDaoWithChainId } from '@buildeross/sdk/subg
 import useSWR from 'swr'
 
 export interface UseExploreOptions {
-  page?: string | string[]
-  orderBy?: string | string[]
+  page?: string
+  orderBy?: string
   chainSlug: string
   enabled?: boolean
 }
