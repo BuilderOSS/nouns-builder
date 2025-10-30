@@ -27,7 +27,7 @@ export const FallbackImage = forwardRef<HTMLImageElement, FallbackImageProps>(
   ) => {
     const srcList = useMemo(() => {
       if (!srcProp || srcProp === null) return []
-      return getFetchableUrls(srcProp)
+      return getFetchableUrls(srcProp) ?? []
     }, [srcProp])
 
     const { src, handleError } = useFallbackSrc(srcList, {

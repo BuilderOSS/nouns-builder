@@ -1,6 +1,6 @@
 import { ProposalVoteSupport as Support } from '@buildeross/sdk/subgraph'
+import { render } from '@buildeross/test-fixtures'
 import { screen } from '@testing-library/react'
-import { render } from 'src/test/utils'
 import { describe, expect, it } from 'vitest'
 
 import Vote from './Vote'

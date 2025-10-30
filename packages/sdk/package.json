@@ -83,7 +83,7 @@
     "clean": "rm -rf dist .turbo",
     "codegen": "graphql-codegen",
     "generate-abis": "node ./scripts/generate-abis.js",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts"

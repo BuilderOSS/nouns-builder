@@ -364,14 +364,14 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                       width: 'x24',
                       borderRadius: 'round',
                     })}
-                    src={general.daoAvatar}
+                    src={general?.daoAvatar}
                     alt=""
                   />
                 }
               />
-              <ReviewItem label="Dao Name" value={general.daoName} />
-              <ReviewItem label="Dao Symbol" value={general.daoSymbol} />
-              <ReviewItem label="Dao Website" value={general.daoWebsite} />
+              <ReviewItem label="Dao Name" value={general?.daoName} />
+              <ReviewItem label="Dao Symbol" value={general?.daoSymbol} />
+              <ReviewItem label="Dao Website" value={general?.daoWebsite} />
             </ReviewSection>
 
             <ReviewSection subHeading="Auction Settings">

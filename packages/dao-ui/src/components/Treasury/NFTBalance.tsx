@@ -1,6 +1,5 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { skeletonAnimation } from '@buildeross/ui/styles'
@@ -88,8 +87,6 @@ export const NFTBalance: React.FC = () => {
           {nfts?.map((nft) => {
             const originalUrl = nft.image.originalUrl
             if (!originalUrl) return null
-            const fetchableUrls = getFetchableUrls(originalUrl)
-            const urls = fetchableUrls ? [originalUrl, ...fetchableUrls] : [originalUrl]
             const url =
               ETHERSCAN_BASE_URL[chain.id] +
               '/token/' +
@@ -114,7 +111,7 @@ export const NFTBalance: React.FC = () => {
               >
                 <Box aspectRatio={1} backgroundColor={'border'}>
                   <FallbackImage
-                    srcList={urls}
+                    src={originalUrl}
                     style={{
                       width: '100%',
                       height: '100%',
