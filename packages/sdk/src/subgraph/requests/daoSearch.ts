@@ -12,7 +12,6 @@ export type DaoSearchResult = {
     symbol: string
     description: string
     projectURI: string
-    contractImage: string
     tokenAddress: any
   }
   highestBid?: { amount: any; bidder: any } | null
@@ -74,7 +73,6 @@ export const searchDaosRequest = async (
             symbol: dao.symbol,
             description: dao.description,
             projectURI: dao.projectURI,
-            contractImage: dao.contractImage,
             tokenAddress: dao.tokenAddress,
           },
           chainId,
