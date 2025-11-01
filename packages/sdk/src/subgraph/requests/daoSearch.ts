@@ -6,16 +6,17 @@ import { MIN_BID_AMOUNT } from './exploreQueries'
 
 export type DaoSearchResult = {
   chainId: CHAIN_ID
-  endTime: any
+  endTime?: any
   dao: {
     name: string
     symbol: string
     description: string
     projectURI: string
+    contractImage: string
     tokenAddress: any
   }
   highestBid?: { amount: any; bidder: any } | null
-  token: { name: string; image?: string | null; tokenId: any }
+  token?: { name: string; image?: string | null; tokenId: any }
 }
 export type SearchDaosResponse = {
   daos: DaoSearchResult[]
@@ -63,17 +64,28 @@ export const searchDaosRequest = async (
     const limitedData = hasNextPage ? data.daoSearch.slice(0, limit) : data.daoSearch
 
     return {
-      daos: limitedData.map((dao) => ({
-        dao: {
-          name: dao.name,
-          symbol: dao.symbol,
-          description: dao.description,
-          projectURI: dao.projectURI,
-          tokenAddress: dao.tokenAddress,
-        },
-        chainId,
-        ...dao.currentAuction,
-      })) as Array<DaoSearchResult>,
+      daos: limitedData.map((dao) => {
+        // Get the latest auction (first item in the array, or undefined if no auctions)
+        const latestAuction = dao.auctions[0]
+
+        return {
+          dao: {
+            name: dao.name,
+            symbol: dao.symbol,
+            description: dao.description,
+            projectURI: dao.projectURI,
+            contractImage: dao.contractImage,
+            tokenAddress: dao.tokenAddress,
+          },
+          chainId,
+          // Spread auction data if it exists
+          ...(latestAuction && {
+            endTime: latestAuction.endTime,
+            highestBid: latestAuction.highestBid,
+            token: latestAuction.token,
+          }),
+        }
+      }) as Array<DaoSearchResult>,
       hasNextPage,
     }
   } catch (error) {
