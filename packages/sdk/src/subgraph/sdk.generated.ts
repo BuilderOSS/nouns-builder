@@ -3429,6 +3429,9 @@ export type ExploreDaosSearchQuery = {
   daoSearch: Array<{
     __typename?: 'DAO'
     name: string
+    symbol: string
+    description: string
+    projectURI: string
     contractImage: string
     tokenAddress: any
     currentAuction?: {
@@ -4170,6 +4173,9 @@ export const ExploreDaosSearchDocument = gql`
   query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_filter) {
     daoSearch(text: $text, first: $first, skip: $skip, where: $where) {
       name
+      symbol
+      description
+      projectURI
       contractImage
       tokenAddress
       currentAuction {

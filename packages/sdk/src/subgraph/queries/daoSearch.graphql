@@ -6,6 +6,9 @@ query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_f
     where: $where
   ) {
     name
+    symbol
+    description
+    projectURI
     contractImage
     tokenAddress
     currentAuction {
