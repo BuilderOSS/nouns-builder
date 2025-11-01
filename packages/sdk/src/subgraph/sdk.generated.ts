@@ -3432,7 +3432,6 @@ export type ExploreDaosSearchQuery = {
     symbol: string
     description: string
     projectURI: string
-    contractImage: string
     tokenAddress: any
     currentAuction?: {
       __typename?: 'Auction'
@@ -4176,7 +4175,6 @@ export const ExploreDaosSearchDocument = gql`
       symbol
       description
       projectURI
-      contractImage
       tokenAddress
       currentAuction {
         ...CurrentAuction

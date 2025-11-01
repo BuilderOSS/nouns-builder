@@ -1,6 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { type DaoSearchResult } from '@buildeross/sdk/subgraph'
+import { type DaoSearchResult, type SearchDaosResponse } from '@buildeross/sdk/subgraph'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
@@ -22,11 +22,10 @@ const DEFAULT_DEBOUNCE_MS = 300
 
 // Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
 type HttpError = Error & { status?: number; body?: unknown }
-type SearchResponse = { daos: DaoSearchResult[]; hasNextPage?: boolean }
 const searchFetcher = async (
   [, searchText, network, page]: readonly [string, string, string, string?],
   { signal }: { signal?: AbortSignal } = {}
-): Promise<SearchResponse> => {
+): Promise<SearchDaosResponse> => {
   const params = new URLSearchParams()
   params.set('search', searchText)
   params.set('network', network)
@@ -49,7 +48,7 @@ const searchFetcher = async (
     err.body = body
     throw err
   }
-  return body as SearchResponse
+  return body as SearchDaosResponse
 }
 
 /**
@@ -92,7 +91,7 @@ export function useDaoSearch(
       : null
 
   // Use SWR for data fetching with caching
-  const { data, error, isLoading, isValidating } = useSWR<SearchResponse, HttpError>(
+  const { data, error, isLoading, isValidating } = useSWR<SearchDaosResponse, HttpError>(
     swrKey,
     searchFetcher,
     {

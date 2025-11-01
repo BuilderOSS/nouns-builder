@@ -2,16 +2,16 @@ import { CHAIN_ID } from '@buildeross/types'
 
 import { SDK } from '../client'
 import { Dao_Filter } from '../sdk.generated'
-import { type ExploreDaosResponse, MIN_BID_AMOUNT } from './exploreQueries'
+import { MIN_BID_AMOUNT } from './exploreQueries'
 
 export type DaoSearchResult = {
   chainId: CHAIN_ID
   endTime: any
   dao: {
     name: string
-    symbol?: string
-    description?: string
-    projectURI?: string
+    symbol: string
+    description: string
+    projectURI: string
     tokenAddress: any
   }
   highestBid?: { amount: any; bidder: any } | null
@@ -27,7 +27,7 @@ export const searchDaosRequest = async (
   text: string,
   limit: number,
   skip: number
-): Promise<ExploreDaosResponse | undefined> => {
+): Promise<SearchDaosResponse | undefined> => {
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
     throw new Error('Limit must be an integer between 1 and 100')
   }
@@ -69,7 +69,6 @@ export const searchDaosRequest = async (
           symbol: dao.symbol,
           description: dao.description,
           projectURI: dao.projectURI,
-          contractImage: dao.contractImage,
           tokenAddress: dao.tokenAddress,
         },
         chainId,

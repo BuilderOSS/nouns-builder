@@ -1,6 +1,10 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { type DaoSearchResult, searchDaosRequest } from '@buildeross/sdk/subgraph'
+import {
+  type DaoSearchResult,
+  searchDaosRequest,
+  type SearchDaosResponse,
+} from '@buildeross/sdk/subgraph'
 import { buildSearchText } from '@buildeross/utils/search'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withCors } from 'src/utils/api/cors'
@@ -10,6 +14,36 @@ const MIN_SEARCH_LENGTH = 3
 const MAX_SEARCH_LENGTH = 100 // Prevent abuse
 const PER_PAGE_LIMIT = 30
 const MAX_PAGES = 2
+
+/**
+ * Ranking weights for DAO search results.
+ * These values control how different match types are scored.
+ */
+const RANKING_WEIGHTS = {
+  // Exact matches (highest priority)
+  EXACT_NAME: 1000,
+  EXACT_SYMBOL: 900,
+
+  // Prefix matches
+  PREFIX_NAME: 300,
+  PREFIX_SYMBOL: 250,
+
+  // Contains matches
+  CONTAINS_NAME: 200,
+  CONTAINS_SYMBOL: 150,
+  CONTAINS_DESCRIPTION: 30,
+  CONTAINS_URI: 10,
+
+  // DB rank bonus (diminishing per position)
+  DB_RANK_BASE: 100,
+  DB_RANK_DECAY: 5,
+
+  // Position penalty for name matches (max penalty for late matches)
+  POSITION_PENALTY_MAX: 50,
+
+  // Multi-term bonus (per additional term)
+  MULTI_TERM_BONUS: 20,
+} as const
 
 /**
  * Hybrid ranking without direct DB score.
@@ -31,49 +65,52 @@ export function rankDao(
   const symbol = dao.dao.symbol?.toLowerCase() || ''
   const description = dao.dao.description?.toLowerCase() || ''
   const uri = dao.dao.projectURI?.toLowerCase() || ''
+  let score = 0
 
-  // --- BASE SCORE (preserve DB FTS rank) ---
-  // Earlier items get higher initial score
-  const BASE_MAX = 700
-  const baseScore = BASE_MAX - index * 10 // Small decay per rank position
+  // DB rank bonus (diminishing returns based on position)
+  const dbRankBonus = Math.max(
+    0,
+    RANKING_WEIGHTS.DB_RANK_BASE - index * RANKING_WEIGHTS.DB_RANK_DECAY
+  )
+  score += dbRankBonus
 
-  let score = baseScore
+  // Exact matches (highest priority)
+  if (name === query) {
+    score += RANKING_WEIGHTS.EXACT_NAME
+  } else if (symbol === query) {
+    score += RANKING_WEIGHTS.EXACT_SYMBOL
+  } else {
+    // Partial matches
+    for (const term of terms) {
+      // Name matches
+      if (name.startsWith(term)) {
+        score += RANKING_WEIGHTS.PREFIX_NAME
+      } else if (name.includes(term)) {
+        const position = name.indexOf(term)
+        const positionPenalty = Math.min(RANKING_WEIGHTS.POSITION_PENALTY_MAX, position)
+        score += RANKING_WEIGHTS.CONTAINS_NAME - positionPenalty
+      }
 
-  // --- DOMAIN BOOSTS (smaller than base to avoid overriding DB rank) ---
-  const BOOST = {
-    EXACT_NAME: 150,
-    EXACT_SYMBOL: 130,
-    STARTS_NAME: 90,
-    STARTS_SYMBOL: 75,
-    CONTAINS_NAME: 55,
-    CONTAINS_SYMBOL: 45,
-    DESCRIPTION: 20,
-    URI: 10,
-    MULTI_TERM: 5,
-    POSITION_MAX: 25,
-  } as const
+      // Symbol matches
+      if (symbol.startsWith(term)) {
+        score += RANKING_WEIGHTS.PREFIX_SYMBOL
+      } else if (symbol.includes(term)) {
+        score += RANKING_WEIGHTS.CONTAINS_SYMBOL
+      }
 
-  // Exact match priority
-  if (name === query) return score + BOOST.EXACT_NAME
-  if (symbol === query) return score + BOOST.EXACT_SYMBOL
+      // Description and URI matches
+      if (description.includes(term)) {
+        score += RANKING_WEIGHTS.CONTAINS_DESCRIPTION
+      }
+      if (uri.includes(term)) {
+        score += RANKING_WEIGHTS.CONTAINS_URI
+      }
+    }
 
-  for (const term of terms) {
-    if (name.startsWith(term)) score += BOOST.STARTS_NAME
-    else if (name.includes(term)) score += BOOST.CONTAINS_NAME
-
-    if (symbol.startsWith(term)) score += BOOST.STARTS_SYMBOL
-    else if (symbol.includes(term)) score += BOOST.CONTAINS_SYMBOL
-
-    if (description.includes(term)) score += BOOST.DESCRIPTION
-    if (uri.includes(term)) score += BOOST.URI
-
-    score += BOOST.MULTI_TERM
-  }
-
-  // Positional bonus: name match earlier = higher score
-  const pos = name.indexOf(query)
-  if (pos > 0) {
-    score += Math.max(1, BOOST.POSITION_MAX - pos)
+    // Multi-term bonus
+    if (terms.length > 1) {
+      score += terms.length * RANKING_WEIGHTS.MULTI_TERM_BONUS
+    }
   }
 
   return score
@@ -85,9 +122,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
   const maxResults = PER_PAGE_LIMIT * MAX_PAGES // 60 total results (2 pages of 30)
   const { page, search, network } = req.query
-  const pageInt = Number.isFinite(Number(page))
-    ? Math.max(1, Math.min(MAX_PAGES, Number(page)))
-    : 1
+  const pageInt = Math.max(1, parseInt(page as string) || 1)
+
+  if (pageInt > MAX_PAGES) {
+    return res.status(400).json({ error: `Page cannot be greater than ${MAX_PAGES}` })
+  }
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
 
@@ -151,9 +190,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
     )
 
-    res.status(200).json({ daos: paginatedDaos, hasNextPage })
+    const result = { daos: paginatedDaos, hasNextPage } as SearchDaosResponse
+
+    return res.status(200).json(result)
   } catch (error) {
-    console.error('Search error:', error)
+    console.error('Search error:', error instanceof Error ? error.message : error)
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
