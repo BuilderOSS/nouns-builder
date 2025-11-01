@@ -2,11 +2,25 @@ import { CHAIN_ID } from '@buildeross/types'
 
 import { SDK } from '../client'
 import { Dao_Filter } from '../sdk.generated'
-import {
-  type ExploreDaosResponse,
-  type ExploreDaoWithChainId,
-  MIN_BID_AMOUNT,
-} from './exploreQueries'
+import { type ExploreDaosResponse, MIN_BID_AMOUNT } from './exploreQueries'
+
+export type DaoSearchResult = {
+  chainId: CHAIN_ID
+  endTime: any
+  dao: {
+    name: string
+    symbol?: string
+    description?: string
+    projectURI?: string
+    tokenAddress: any
+  }
+  highestBid?: { amount: any; bidder: any } | null
+  token: { name: string; image?: string | null; tokenId: any }
+}
+export type SearchDaosResponse = {
+  daos: DaoSearchResult[]
+  hasNextPage: boolean
+}
 
 export const searchDaosRequest = async (
   chainId: CHAIN_ID,
@@ -52,12 +66,15 @@ export const searchDaosRequest = async (
       daos: limitedData.map((dao) => ({
         dao: {
           name: dao.name,
+          symbol: dao.symbol,
+          description: dao.description,
+          projectURI: dao.projectURI,
           contractImage: dao.contractImage,
           tokenAddress: dao.tokenAddress,
         },
         chainId,
         ...dao.currentAuction,
-      })) as Array<ExploreDaoWithChainId>,
+      })) as Array<DaoSearchResult>,
       hasNextPage,
     }
   } catch (error) {

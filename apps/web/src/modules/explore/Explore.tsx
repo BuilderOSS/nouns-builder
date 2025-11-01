@@ -145,13 +145,14 @@ export const Explore: React.FC = () => {
 
       {/* Search Empty State */}
       {!error && showEmptySearch && (
-        <Text
-          style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}
-          variant="paragraph-md"
-          color="tertiary"
-        >
-          No DAOs found for "{activeSearchQuery}"
-        </Text>
+        <Box style={{ maxWidth: 912, minHeight: 250, padding: '150px 0px' }}>
+          <Text variant="paragraph-md" color="tertiary">
+            No DAOs found for "{activeSearchQuery}"
+          </Text>
+          <Text variant="paragraph-sm" color="tertiary" mt="x4">
+            Try using different keywords or check your spelling
+          </Text>
+        </Box>
       )}
 
       {/* Loading State */}
@@ -180,6 +181,17 @@ export const Explore: React.FC = () => {
               )
             })}
           </Grid>
+
+          {/* Search Pagination Limit Notice */}
+          {isSearching && page === '2' && !hasSearchNextPage && (
+            <Box mt="x4" mb="x4" style={{ maxWidth: 912 }}>
+              <Text variant="paragraph-sm" color="tertiary" align="center">
+                Showing top 60 results. Try narrowing your search with more specific
+                keywords for better results.
+              </Text>
+            </Box>
+          )}
+
           <Pagination hasNextPage={hasNextPageForDisplay} scroll={true} />
         </>
       )}
