@@ -1,12 +1,11 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { type ExploreDaoWithChainId } from '@buildeross/sdk/subgraph'
-import { buildSearchText } from '@buildeross/utils/search'
+import { type DaoSearchResult, type SearchDaosResponse } from '@buildeross/sdk/subgraph'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
-export interface DaoSearchResult {
-  daos: ExploreDaoWithChainId[]
+export interface UseDaoSearchResult {
+  daos: DaoSearchResult[]
   error?: HttpError
   isLoading: boolean
   isEmpty: boolean
@@ -23,11 +22,10 @@ const DEFAULT_DEBOUNCE_MS = 300
 
 // Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
 type HttpError = Error & { status?: number; body?: unknown }
-type SearchResponse = { daos: ExploreDaoWithChainId[]; hasNextPage?: boolean }
 const searchFetcher = async (
   [, searchText, network, page]: readonly [string, string, string, string?],
   { signal }: { signal?: AbortSignal } = {}
-): Promise<SearchResponse> => {
+): Promise<SearchDaosResponse> => {
   const params = new URLSearchParams()
   params.set('search', searchText)
   params.set('network', network)
@@ -50,7 +48,7 @@ const searchFetcher = async (
     err.body = body
     throw err
   }
-  return body as SearchResponse
+  return body as SearchDaosResponse
 }
 
 /**
@@ -63,7 +61,7 @@ export function useDaoSearch(
   query: string,
   network: string,
   options: UseDaoSearchOptions = {}
-): DaoSearchResult {
+): UseDaoSearchResult {
   const { debounceMs = DEFAULT_DEBOUNCE_MS, enabled = true, page } = options
 
   // Normalize page parameter
@@ -83,8 +81,8 @@ export function useDaoSearch(
     }
   }, [query, debounceMs])
 
-  // Build search text from the debounced query
-  const searchText = debouncedQuery?.trim() ? buildSearchText(debouncedQuery.trim()) : ''
+  // Trim the debounced query (transformation will happen in API endpoint)
+  const searchText = debouncedQuery?.trim() || ''
 
   // Create SWR key - only when enabled, has searchText, and has network
   const swrKey =
@@ -93,7 +91,7 @@ export function useDaoSearch(
       : null
 
   // Use SWR for data fetching with caching
-  const { data, error, isLoading, isValidating } = useSWR<SearchResponse, HttpError>(
+  const { data, error, isLoading, isValidating } = useSWR<SearchDaosResponse, HttpError>(
     swrKey,
     searchFetcher,
     {

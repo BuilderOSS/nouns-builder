@@ -2,18 +2,32 @@ import { CHAIN_ID } from '@buildeross/types'
 
 import { SDK } from '../client'
 import { Dao_Filter } from '../sdk.generated'
-import {
-  type ExploreDaosResponse,
-  type ExploreDaoWithChainId,
-  MIN_BID_AMOUNT,
-} from './exploreQueries'
+import { MIN_BID_AMOUNT } from './exploreQueries'
+
+export type DaoSearchResult = {
+  chainId: CHAIN_ID
+  endTime?: any
+  dao: {
+    name: string
+    symbol: string
+    description: string
+    projectURI: string
+    tokenAddress: any
+  }
+  highestBid?: { amount: any; bidder: any } | null
+  token?: { name: string; image?: string | null; tokenId: any }
+}
+export type SearchDaosResponse = {
+  daos: DaoSearchResult[]
+  hasNextPage: boolean
+}
 
 export const searchDaosRequest = async (
   chainId: CHAIN_ID,
   text: string,
   limit: number,
   skip: number
-): Promise<ExploreDaosResponse | undefined> => {
+): Promise<SearchDaosResponse | undefined> => {
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
     throw new Error('Limit must be an integer between 1 and 100')
   }
@@ -49,15 +63,27 @@ export const searchDaosRequest = async (
     const limitedData = hasNextPage ? data.daoSearch.slice(0, limit) : data.daoSearch
 
     return {
-      daos: limitedData.map((dao) => ({
-        dao: {
-          name: dao.name,
-          contractImage: dao.contractImage,
-          tokenAddress: dao.tokenAddress,
-        },
-        chainId,
-        ...dao.currentAuction,
-      })) as Array<ExploreDaoWithChainId>,
+      daos: limitedData.map((dao) => {
+        // Get the latest auction (first item in the array, or undefined if no auctions)
+        const latestAuction = dao.auctions[0]
+
+        return {
+          dao: {
+            name: dao.name,
+            symbol: dao.symbol,
+            description: dao.description,
+            projectURI: dao.projectURI,
+            tokenAddress: dao.tokenAddress,
+          },
+          chainId,
+          // Spread auction data if it exists
+          ...(latestAuction && {
+            endTime: latestAuction.endTime,
+            highestBid: latestAuction.highestBid,
+            token: latestAuction.token,
+          }),
+        }
+      }) as Array<DaoSearchResult>,
       hasNextPage,
     }
   } catch (error) {

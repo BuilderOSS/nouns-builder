@@ -6,9 +6,11 @@ query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_f
     where: $where
   ) {
     name
-    contractImage
+    symbol
+    description
+    projectURI
     tokenAddress
-    currentAuction {
+    auctions(first: 1, orderBy: endTime, orderDirection: desc, where: { settled: false }) {
       ...CurrentAuction
     }
   }
