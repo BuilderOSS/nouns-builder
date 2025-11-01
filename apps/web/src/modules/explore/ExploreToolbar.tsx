@@ -4,14 +4,17 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { useAccount } from 'wagmi'
 
-import ExploreSortMenu from './ExploreSortMenu'
+import { ExploreSortMenu } from './ExploreSortMenu'
 
 interface ExploreToolbarProps {
   title: string
   showSort?: boolean
 }
 
-const ExploreToolbar: React.FC<ExploreToolbarProps> = ({ title, showSort = false }) => {
+export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
+  title,
+  showSort = false,
+}) => {
   const { query, pathname } = useRouter()
   const { address } = useAccount()
 
@@ -68,5 +71,3 @@ const ExploreToolbar: React.FC<ExploreToolbarProps> = ({ title, showSort = false
     </Flex>
   )
 }
-
-export default ExploreToolbar

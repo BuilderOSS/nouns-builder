@@ -1,7 +1,7 @@
-import { SWR_KEYS } from '@buildeross/constants'
-import { getEscrowDelegate } from '@buildeross/sdk'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import useSWR, { KeyedMutator } from 'swr'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { getEscrowDelegate } from '@buildeross/sdk/subgraph'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import useSWR, { type KeyedMutator } from 'swr'
 
 export type UseEscrowDelegateProps = {
   chainId?: CHAIN_ID

@@ -7,9 +7,27 @@ export const exploreSkeleton = style({
   height: '390px',
 })
 
+// Responsive skeleton visibility
+export const skeletonTabletAndUp = style({
+  '@media': {
+    'screen and (max-width: 600px)': {
+      display: 'none',
+    },
+  },
+})
+
+export const skeletonDesktopOnly = style({
+  '@media': {
+    'screen and (max-width: 1023px)': {
+      display: 'none',
+    },
+  },
+})
+
 export const exploreGrid = style([
   atoms({
     gap: 'x4',
+    mb: 'x4',
     w: '100%',
   }),
   {
@@ -25,6 +43,22 @@ export const exploreGrid = style([
       'screen and (max-width: 600px)': {
         gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
       },
+    },
+  },
+])
+
+export const searchContainer = style([
+  atoms({
+    w: '100%',
+  }),
+  {
+    maxWidth: 912,
+    '@media': {
+      'screen and (min-width: 1024px)': {},
+      'screen and (min-width: 600px) and (max-width: 1023px)': {
+        maxWidth: 660,
+      },
+      'screen and (max-width: 600px)': {},
     },
   },
 ])

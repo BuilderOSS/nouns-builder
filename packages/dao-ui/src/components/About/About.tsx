@@ -1,6 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
@@ -89,7 +88,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
   )
 
   const treasuryBalance = React.useMemo(() => {
-    return balance ? formatCryptoVal(formatEther(balance.value)) : null
+    return balance ? `${formatCryptoVal(formatEther(balance.value))} ETH` : ''
   }, [balance])
 
   return (
@@ -103,7 +102,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
           {daoImage ? (
             <Box mr="x4">
               <FallbackImage
-                srcList={getFetchableUrls(daoImage)}
+                src={daoImage}
                 style={{
                   borderRadius: '100%',
                   objectFit: 'contain',
@@ -133,11 +132,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         wrap={'wrap'}
         className={daoInfo}
       >
-        <Statistic
-          title="Treasury"
-          content={`${treasuryBalance} ETH`}
-          onClick={onOpenTreasury}
-        />
+        <Statistic title="Treasury" content={treasuryBalance} onClick={onOpenTreasury} />
         <Statistic title="Owners" content={data?.ownerCount} />
         <Statistic title="Total supply" content={Number(totalSupply)} />
         <Statistic

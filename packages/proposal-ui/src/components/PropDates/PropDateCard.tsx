@@ -1,5 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { type PropDate } from '@buildeross/sdk/eas'
+import { type PropDate } from '@buildeross/sdk/subgraph'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -23,7 +23,7 @@ export const PropDateCard = ({
   replies?: PropDate[]
   invoiceData?: InvoiceMetadata
 }) => {
-  const { ensName, ensAvatar } = useEnsData(propDate?.attester)
+  const { ensName, ensAvatar } = useEnsData(propDate?.creator)
 
   const milestoneTitle = useMemo(
     () =>
@@ -55,8 +55,8 @@ export const PropDateCard = ({
     >
       <Flex justify="space-between" align="center" wrap="wrap" gap="x2">
         <Flex align="center" gap="x2">
-          <Avatar address={propDate.attester} src={ensAvatar} size="28" />
-          <Text fontWeight="display">{ensName || walletSnippet(propDate.attester)}</Text>
+          <Avatar address={propDate.creator} src={ensAvatar} size="28" />
+          <Text fontWeight="display">{ensName || walletSnippet(propDate.creator)}</Text>
           <Text variant="label-sm" color="text3">
             • {new Date(propDate.timeCreated * 1000).toLocaleString()}
           </Text>
@@ -94,7 +94,7 @@ export const PropDateCard = ({
       {repliesSorted && repliesSorted.length > 0 && (
         <Box mt="x4" ml="x4" style={{ borderLeft: '4px solid var(--colors-border)' }}>
           {repliesSorted.map((reply: PropDate) => (
-            <PropDateReplyCard key={reply.txid} reply={reply} />
+            <PropDateReplyCard key={reply.id} reply={reply} />
           ))}
         </Box>
       )}

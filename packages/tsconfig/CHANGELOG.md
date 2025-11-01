@@ -1,5 +1,11 @@
 # @buildeross/tsconfig
 
+## 0.2.1
+
+### Patch Changes
+
+- support propdates in our internal subgraph
+
 ## 0.2.0
 
 ### Minor Changes

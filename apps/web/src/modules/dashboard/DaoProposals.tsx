@@ -1,6 +1,5 @@
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -50,7 +49,7 @@ export const DaoProposals = ({
           {daoImage ? (
             <Box mr="x4">
               <FallbackImage
-                srcList={getFetchableUrls(daoImage)}
+                src={daoImage}
                 style={{ borderRadius: '12px', objectFit: 'contain' }}
                 alt=""
                 height={48}

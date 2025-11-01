@@ -1,10 +1,8 @@
 import { ProposalState } from '@buildeross/sdk/contract'
+import { BUILDER_DAO, FOUNDRY_CHAIN, render } from '@buildeross/test-fixtures'
 import { screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import React from 'react'
-import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
-import { BUILDER_DAO } from 'src/test/fixtures/dao'
-import { render } from 'src/test/utils'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ProposalCard } from './ProposalCard'

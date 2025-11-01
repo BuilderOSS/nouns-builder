@@ -6,7 +6,7 @@ import {
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { MessageType, type PropDate } from '@buildeross/sdk/eas'
+import { MessageType, type PropDate } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
@@ -78,10 +78,10 @@ export const PropDateForm = ({
       ({
         milestoneId: -1,
         proposalId: proposalId,
-        replyTo: replyTo?.txid ?? zeroHash,
+        replyTo: replyTo?.id ?? zeroHash,
         message: '',
       }) as PropDateFormValues,
-    [proposalId, replyTo?.txid]
+    [proposalId, replyTo?.id]
   )
   const { id: chainId } = useChainStore((x) => x.chain)
   const {
@@ -94,7 +94,7 @@ export const PropDateForm = ({
   const [isTxSuccess, setIsTxSuccess] = useState(false)
 
   const { ensName: replyToEnsName, ensAvatar: replyToEnsAvatar } = useEnsData(
-    replyTo?.attester
+    replyTo?.creator
   )
 
   const handleSubmit = useCallback(
@@ -338,9 +338,9 @@ const ReplyTo = ({
       gap="x1"
     >
       <Flex align="center" gap="x1">
-        <Avatar address={replyTo.attester} src={ensAvatar || undefined} size="16" />
+        <Avatar address={replyTo.creator} src={ensAvatar || undefined} size="16" />
         <Text variant={'label-sm'} fontWeight="label">
-          {ensName || walletSnippet(replyTo.attester)}
+          {ensName || walletSnippet(replyTo.creator)}
         </Text>
       </Flex>
       <Text

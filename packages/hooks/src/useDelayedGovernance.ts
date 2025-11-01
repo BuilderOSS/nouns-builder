@@ -1,5 +1,5 @@
-import { governorAbi, tokenAbi } from '@buildeross/sdk'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { governorAbi, tokenAbi } from '@buildeross/sdk/contract'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useReadContract } from 'wagmi'
 
 export const useDelayedGovernance = ({

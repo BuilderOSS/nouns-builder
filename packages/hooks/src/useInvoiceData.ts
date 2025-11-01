@@ -1,14 +1,15 @@
-import { SWR_KEYS } from '@buildeross/constants'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import {
   decodeEscrowData,
   decodeEscrowDataV1,
-  fetchFromURI,
   getEscrowBundlerV1,
-  getProvider,
-} from '@buildeross/utils'
+} from '@buildeross/utils/escrow'
+import { fetchFromURI } from '@buildeross/utils/fetch'
+import { getProvider } from '@buildeross/utils/provider'
 import { type InvoiceMetadata } from '@smartinvoicexyz/types'
-import _ from 'lodash'
+import find from 'lodash/find'
+import get from 'lodash/get'
 import { useMemo } from 'react'
 import useSWR from 'swr'
 import { decodeEventLog, Hex, isHex } from 'viem'
@@ -73,7 +74,8 @@ export const useInvoiceData = (
     if (!decodedTransaction || decodedTransaction.isNotDecoded) return {}
 
     const isEscrowV1 =
-      _.toLower(decodedTransaction.target) === _.toLower(getEscrowBundlerV1(chainId))
+      decodedTransaction.target.toLowerCase() ===
+      getEscrowBundlerV1(chainId).toLowerCase()
 
     const decodedTxnArgs = decodedTransaction.transaction?.args
 
@@ -114,10 +116,10 @@ export const useInvoiceData = (
         }
       })
 
-      const parsedEvent = _.find(parsedLogs, { eventName: 'LogNewInvoice' })
+      const parsedEvent = find(parsedLogs, { eventName: 'LogNewInvoice' })
 
       // find data by provided key
-      return _.get(parsedEvent, `args.invoice`) as AddressType | undefined
+      return get(parsedEvent, `args.invoice`) as AddressType | undefined
     }
   )
 

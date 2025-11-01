@@ -27,6 +27,8 @@ export const name = style([
   atoms({ overflow: 'hidden', whiteSpace: 'nowrap' }),
   {
     textOverflow: 'ellipsis',
+    display: 'flex',
+    alignItems: 'center',
   },
 ])
 

@@ -13,7 +13,7 @@ interface ExploreSortMenuProps {
   choice: string
 }
 
-const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
+export const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
   const { push, pathname, query } = useRouter()
 
   const selectionToOrderBy = React.useCallback((option: string) => {
@@ -70,5 +70,3 @@ const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
     </Flex>
   )
 }
-
-export default ExploreSortMenu

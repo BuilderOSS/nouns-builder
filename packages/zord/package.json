@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/zord",
   "description": "Design system and UI components for BuilderOSS apps",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "dependencies": {
     "@popperjs/core": "^2.11.6",
     "@vanilla-extract/css": "^1.17.2",
@@ -58,7 +58,7 @@
     "build": "tsup",
     "build-icons": "svgr --out-dir src/icons --icon --replace-attr-values '#000=currentColor' --typescript icons ",
     "clean": "rm -rf .turbo dist",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
     "type-check": "tsc --noEmit"
   },
   "sideEffects": [

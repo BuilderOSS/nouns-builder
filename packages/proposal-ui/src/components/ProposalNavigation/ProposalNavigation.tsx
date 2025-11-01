@@ -1,4 +1,3 @@
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
@@ -64,7 +63,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
           {daoImage ? (
             <Box mr="x2" flexShrink={0}>
               <FallbackImage
-                srcList={getFetchableUrls(daoImage)}
+                src={daoImage}
                 style={{ borderRadius: '100%', objectFit: 'contain' }}
                 alt={`${name} avatar`}
                 height={32}

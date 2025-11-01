@@ -1,11 +1,12 @@
 import { useFallbackSrc } from '@buildeross/hooks/useFallbackSrc'
-import React, { forwardRef } from 'react'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
+import React, { forwardRef, useMemo } from 'react'
 
 type FallbackImageProps = Omit<
   React.ImgHTMLAttributes<HTMLImageElement>,
   'src' | 'srcSet' | 'onError'
 > & {
-  srcList?: string[]
+  src?: string | null
   alt?: string
   onImageError?: () => void
   errorFallbackSrc?: string
@@ -15,7 +16,7 @@ type FallbackImageProps = Omit<
 export const FallbackImage = forwardRef<HTMLImageElement, FallbackImageProps>(
   (
     {
-      srcList = [],
+      src: srcProp,
       alt = 'image',
       onImageError,
       errorFallbackSrc,
@@ -24,6 +25,11 @@ export const FallbackImage = forwardRef<HTMLImageElement, FallbackImageProps>(
     },
     ref
   ) => {
+    const srcList = useMemo(() => {
+      if (!srcProp || srcProp === null) return []
+      return getFetchableUrls(srcProp) ?? []
+    }, [srcProp])
+
     const { src, handleError } = useFallbackSrc(srcList, {
       onImageError,
       errorFallbackSrc,

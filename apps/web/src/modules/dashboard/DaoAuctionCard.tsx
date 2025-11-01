@@ -2,7 +2,6 @@ import { overflowEllipsis } from '@buildeross/auction-ui'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -99,13 +98,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
         link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
       >
         <Box className={daoAvatarBox}>
-          {tokenImage && (
-            <FallbackImage
-              className={daoAvatar}
-              srcList={getFetchableUrls(tokenImage)}
-              alt=""
-            />
-          )}
+          {tokenImage && <FallbackImage className={daoAvatar} src={tokenImage} alt="" />}
         </Box>
         <Box>
           <Flex mb="x1" align="center">

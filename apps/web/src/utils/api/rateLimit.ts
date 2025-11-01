@@ -10,7 +10,7 @@ interface RateLimitOptions {
 
   /**
    * Time window in seconds
-   * @default 300 (5 minutes)
+   * @default 60 (1 minute)
    */
   windowSeconds?: number
 
@@ -18,7 +18,7 @@ interface RateLimitOptions {
    * Custom key prefix for this specific endpoint
    * @default "api"
    */
-  keyPrefix?: string
+  keyPrefix: string
 }
 
 /**
@@ -27,9 +27,9 @@ interface RateLimitOptions {
  */
 export const withRateLimit = ({
   maxRequests = 30,
-  windowSeconds = 300, // 5 minutes
-  keyPrefix = 'api',
-}: RateLimitOptions = {}) => {
+  windowSeconds = 60, // 1 minute
+  keyPrefix,
+}: RateLimitOptions) => {
   return <T extends NextApiHandler>(handler: T): T => {
     return (async (req: NextApiRequest, res: NextApiResponse) => {
       try {
@@ -60,11 +60,6 @@ export const withRateLimit = ({
         // Ensure key has expiry (handles first-request races)
         if (requests === 1) {
           await redisConnection.expire(rateLimitKey, windowSeconds)
-        } else {
-          const ttl = await redisConnection.ttl(rateLimitKey)
-          if (ttl === -1) {
-            await redisConnection.expire(rateLimitKey, windowSeconds)
-          }
         }
 
         // Check if rate limit exceeded

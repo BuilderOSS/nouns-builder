@@ -1,0 +1,14 @@
+query propdates($proposalId: String!, $first: Int!, $skip: Int!) {
+  proposalUpdates(
+    where: {
+      proposal: $proposalId
+      deleted: false
+    }
+    orderBy: timestamp
+    orderDirection: desc
+    first: $first
+    skip: $skip
+  ) {
+    ...ProposalUpdate
+  }
+}

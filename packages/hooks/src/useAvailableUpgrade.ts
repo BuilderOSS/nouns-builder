@@ -1,24 +1,19 @@
+import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   CONTRACT_VERSION_DETAILS,
-  PUBLIC_MANAGER_ADDRESS,
-  SWR_KEYS,
-  VersionType,
-} from '@buildeross/constants'
-import {
-  auctionAbi,
-  getProposals,
-  managerAbi,
-  Proposal,
-  ProposalState,
-} from '@buildeross/sdk'
-import {
+  type VersionType,
+} from '@buildeross/constants/versions'
+import { auctionAbi, managerAbi, ProposalState } from '@buildeross/sdk/contract'
+import { getProposals, type Proposal } from '@buildeross/sdk/subgraph'
+import type {
   AddressType,
   BuilderTransaction,
   CHAIN_ID,
   DaoContractAddresses,
   Transaction,
-  TransactionType,
 } from '@buildeross/types'
+import { TransactionType } from '@buildeross/types'
 import intersection from 'lodash/intersection'
 import isNil from 'lodash/isNil'
 import isUndefined from 'lodash/isUndefined'

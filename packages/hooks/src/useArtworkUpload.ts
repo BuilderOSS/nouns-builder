@@ -1,4 +1,5 @@
-import { getFetchableUrls, uploadDirectory } from '@buildeross/ipfs-service'
+import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
+import { uploadDirectory } from '@buildeross/ipfs-service/upload'
 import {
   ArtworkType,
   ArtworkUploadError,
@@ -6,7 +7,7 @@ import {
   ImageProps,
   IPFSUpload,
 } from '@buildeross/types'
-import { sanitizeFileName } from '@buildeross/utils'
+import { sanitizeFileName } from '@buildeross/utils/sanitize'
 import React from 'react'
 
 export interface UseArtworkUploadProps {

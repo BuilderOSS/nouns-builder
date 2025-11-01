@@ -1,11 +1,10 @@
-import { PROPDATE_SCHEMA_UID } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { fetchFromURI } from '@buildeross/utils'
-import { getAddress, Hex, isAddress, isHex } from 'viem'
+import { Hex, isAddress, isHex } from 'viem'
 
 import { SDK } from '../client'
-import { DecodedData, getDecodedValue, isChainIdSupportedByEAS } from '../helpers'
-import { AttestationFragment } from '../sdk.generated'
+import { isChainIdSupportedByEAS } from '../helpers'
+import { ProposalUpdateFragment } from '../sdk.generated'
 
 export interface PropdateMessage {
   content: string
@@ -23,7 +22,7 @@ export enum MessageType {
 
 export interface PropDate {
   id: Hex
-  attester: Hex
+  creator: Hex
   proposalId: Hex
   originalMessageId: Hex
   milestoneId: number | null
@@ -83,35 +82,33 @@ export async function getPropDates(
 
   try {
     const variables = {
-      schemaId: PROPDATE_SCHEMA_UID,
-      recipient: getAddress(tokenAddress),
+      proposalId: propId.toLowerCase(),
+      first: 1000,
+      skip: 0,
     }
 
-    const { attestations } = await SDK.connect(chainId).propdates(variables)
+    const { proposalUpdates: updates } = await SDK.connect(chainId).propdates(variables)
 
-    if (!attestations || attestations.length === 0) {
+    if (!updates || updates.length === 0) {
       return []
     }
 
-    const propdatePromises = attestations.map(
-      async (attestation: AttestationFragment): Promise<PropDate> => {
-        const decodedData = JSON.parse(attestation.decodedDataJson) as DecodedData[]
-        const messageType = Number(
-          getDecodedValue(decodedData, 'messageType') ?? 0
-        ) as MessageType
-        const message = getDecodedValue(decodedData, 'message') as string
+    const propdatePromises = updates.map(
+      async (update: ProposalUpdateFragment): Promise<PropDate> => {
+        const messageType = update.messageType as MessageType
+        const message = update.message as string
         const parsedMessage = await getPropdateMessage(messageType, message)
         const propdate: PropDate = {
-          id: attestation.id as Hex,
-          attester: attestation.attester as Hex,
-          proposalId: getDecodedValue(decodedData, 'proposalId') as Hex,
-          originalMessageId: getDecodedValue(decodedData, 'originalMessageId') as Hex,
+          id: update.id as Hex,
+          creator: update.creator as Hex,
+          proposalId: propId.toLowerCase() as Hex,
+          originalMessageId: update.originalMessageId as Hex,
           message: parsedMessage.content,
           milestoneId: !Number.isNaN(Number(parsedMessage.milestoneId))
             ? Number(parsedMessage.milestoneId)
             : null,
-          timeCreated: attestation.timeCreated,
-          txid: attestation.txid as Hex,
+          timeCreated: Number(update.timestamp),
+          txid: (update.transactionHash as string).toLowerCase() as Hex,
         }
         return propdate
       }
@@ -120,11 +117,9 @@ export async function getPropDates(
     const propdates = await Promise.all(propdatePromises)
 
     return propdates
-      .filter((p: PropDate) => p.proposalId.toLowerCase() === propId.toLowerCase())
-      .sort((a: PropDate, b: PropDate) => a.timeCreated - b.timeCreated)
   } catch (error) {
     console.error(
-      'Error fetching attestations:',
+      'Error fetching updates:',
       error instanceof Error ? error.message : String(error)
     )
     return []

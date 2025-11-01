@@ -1,13 +1,15 @@
-import { RENDERER_BASE, SWR_KEYS } from '@buildeross/constants'
-import { getProposals, metadataAbi, Proposal, ProposalState } from '@buildeross/sdk'
-import {
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { metadataAbi, ProposalState } from '@buildeross/sdk/contract'
+import { getProposals, type Proposal } from '@buildeross/sdk/subgraph'
+import type {
   AddressType,
   BuilderTransaction,
   CHAIN_ID,
   DaoContractAddresses,
   Transaction,
-  TransactionType,
 } from '@buildeross/types'
+import { TransactionType } from '@buildeross/types'
 import isUndefined from 'lodash/isUndefined'
 import pickBy from 'lodash/pickBy'
 import useSWR from 'swr'

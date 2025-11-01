@@ -4,5 +4,9 @@
     "address": "0x0ca90a96ac58f19b1f69f67103245c9263bc4bfc",
     "startBlock": 5074430
   },
+  "eas": {
+    "address": "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
+    "startBlock": 6927101
+  },
   "callHandlers": false
 }

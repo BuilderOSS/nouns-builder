@@ -1,4 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
+import { parseEther } from 'viem'
 
 import { SDK } from '../client'
 import {
@@ -15,6 +16,8 @@ export interface ExploreDaosResponse {
   daos: ExploreDaoWithChainId[]
   hasNextPage: boolean
 }
+
+export const MIN_BID_AMOUNT = parseEther('0.001')
 
 export const exploreMyDaosRequest = async (
   memberAddress: string
@@ -49,9 +52,16 @@ export const exploreMyDaosRequest = async (
 
 export const exploreDaosRequest = async (
   chainId: CHAIN_ID,
+  limit: number,
   skip: number,
   orderBy: Auction_OrderBy = Auction_OrderBy.StartTime
 ): Promise<ExploreDaosResponse | undefined> => {
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('Limit must be an integer between 1 and 100')
+  }
+  if (!Number.isInteger(skip) || skip < 0) {
+    throw new Error('Skip must be a non-negative integer')
+  }
   try {
     const orderDirection =
       orderBy === Auction_OrderBy.EndTime ? OrderDirection.Asc : OrderDirection.Desc
@@ -60,7 +70,7 @@ export const exploreDaosRequest = async (
       settled: false,
     }
 
-    const first = 30
+    const fetchLimit = limit + 1
 
     // filter spam daos from L2
     if (
@@ -69,13 +79,14 @@ export const exploreDaosRequest = async (
       chainId === CHAIN_ID.OPTIMISM
     ) {
       const activeDaos = await SDK.connect(chainId).activeDaos({
-        first,
-        where: { totalAuctionSales_gt: '1000000000000000' },
+        first: fetchLimit,
+        where: { totalAuctionSales_gt: MIN_BID_AMOUNT.toString() },
       })
 
       // If we have less than one explore page of active daos, we apply the filter
-      if (activeDaos.daos.length !== first)
+      if (activeDaos.daos.length < fetchLimit) {
         where.dao_in = activeDaos.daos.map((x) => x.id)
+      }
     }
 
     if (orderBy === Auction_OrderBy.HighestBidAmount) where.bidCount_gt = 0
@@ -87,13 +98,16 @@ export const exploreDaosRequest = async (
       orderDirection,
       where,
       skip,
-      first,
+      first: fetchLimit,
     })
 
     if (!data.auctions) return undefined
+
+    const hasNextPage = data.auctions.length > limit
+    const limitedAuctions = hasNextPage ? data.auctions.slice(0, limit) : data.auctions
     return {
-      daos: data.auctions.map((x) => ({ ...x, chainId })),
-      hasNextPage: data.auctions.length === first,
+      daos: limitedAuctions.map((x) => ({ ...x, chainId })),
+      hasNextPage: hasNextPage,
     }
   } catch (error) {
     console.error(error)

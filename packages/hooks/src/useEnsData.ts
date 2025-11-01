@@ -1,4 +1,4 @@
-import { walletSnippet } from '@buildeross/utils'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Address, getAddress, isAddress } from 'viem'
 import { useEnsAddress, useEnsAvatar, useEnsName } from 'wagmi'
 

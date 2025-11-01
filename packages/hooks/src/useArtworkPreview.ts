@@ -1,4 +1,5 @@
-import { BASE_URL, RENDERER_BASE } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import {
   ImageProps,
   ImagesByTraitProps,

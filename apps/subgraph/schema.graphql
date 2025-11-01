@@ -13,7 +13,7 @@ type DAO @entity {
   governorAddress: Bytes!
   ownerCount: Int!
   voterCount: Int!
-  tokenCount: Int!
+  tokensCount: Int!
   proposalCount: Int!
   totalAuctionSales: BigInt!
   auctionConfig: AuctionConfig!
@@ -24,7 +24,26 @@ type DAO @entity {
   tokens: [Token!]! @derivedFrom(field: "dao")
   proposals: [Proposal!]! @derivedFrom(field: "dao")
   auctions: [Auction!]! @derivedFrom(field: "dao")
+  daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
 }
+
+type _Schema_
+  @fulltext(
+    name: "daoSearch"
+    language: en
+    algorithm: rank
+    include: [
+      {
+        entity: "DAO"
+        fields: [
+          { name: "name" }
+          { name: "symbol" }
+          { name: "description" }
+          { name: "projectURI" }
+        ]
+      }
+    ]
+  )
 
 type DAOTokenOwner @entity {
   id: ID!
@@ -66,7 +85,7 @@ type Snapshot @entity {
   totalSupply: Int!
   ownerCount: Int!
   voterCount: Int!
-  tokenCount: Int!
+  tokensCount: Int!
   proposalCount: Int!
 }
 
@@ -108,6 +127,29 @@ type Proposal @entity {
   snapshotBlockNumber: BigInt!
   transactionHash: Bytes!
   votes: [ProposalVote!]! @derivedFrom(field: "proposal")
+  updates: [ProposalUpdate!]! @derivedFrom(field: "proposal")
+}
+
+type ProposalUpdate @entity {
+  id: ID!
+  transactionHash: Bytes!
+  timestamp: BigInt!
+  proposal: Proposal!
+  messageType: Int!
+  message: String!
+  creator: Bytes!
+  originalMessageId: Bytes!
+  deleted: Boolean!
+}
+
+type DaoMultisigUpdate @entity {
+  id: ID!
+  transactionHash: Bytes!
+  timestamp: BigInt!
+  daoMultisig: Bytes!
+  creator: Bytes!
+  dao: DAO!
+  deleted: Boolean!
 }
 
 enum ProposalVoteSupport {

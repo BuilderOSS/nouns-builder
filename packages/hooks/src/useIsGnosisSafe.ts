@@ -1,5 +1,5 @@
-import { CHAIN_ID } from '@buildeross/types'
-import { Address, isAddress } from 'viem'
+import type { CHAIN_ID } from '@buildeross/types'
+import { type Address, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
 export type IsGnosisSafeReturnType = {

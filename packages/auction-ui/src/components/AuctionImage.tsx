@@ -1,4 +1,3 @@
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { Box } from '@buildeross/zord'
 
@@ -21,7 +20,7 @@ export const AuctionImage = ({ image, name }: AucitonImageProps) => {
       className={tokenImage}
     >
       <FallbackImage
-        srcList={getFetchableUrls(image)}
+        src={image}
         className={auctionImg}
         alt={name || ''}
         style={{

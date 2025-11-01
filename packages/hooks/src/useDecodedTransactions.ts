@@ -1,9 +1,9 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { Proposal } from '@buildeross/sdk'
-import { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
+import type { Proposal } from '@buildeross/sdk/subgraph'
+import type { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
 import { useMemo } from 'react'
-import useSWR, { KeyedMutator } from 'swr'
+import useSWR, { type KeyedMutator } from 'swr'
 import { hexToBigInt } from 'viem'
 
 export type DecodedTransactionSuccess = {

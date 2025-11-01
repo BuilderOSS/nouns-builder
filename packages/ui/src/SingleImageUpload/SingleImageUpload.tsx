@@ -1,4 +1,4 @@
-import { getFetchableUrls, normalizeIPFSUrl, uploadFile } from '@buildeross/ipfs-service'
+import { normalizeIPFSUrl, uploadFile } from '@buildeross/ipfs-service'
 import { Box, Flex, Spinner, Stack } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ReactElement, useEffect, useState } from 'react'
@@ -85,7 +85,7 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
 
           {!isUploading && isMounted && !!value && (
             <FallbackImage
-              srcList={getFetchableUrls(value)}
+              src={value}
               alt="Avatar"
               style={{
                 objectFit: 'contain',

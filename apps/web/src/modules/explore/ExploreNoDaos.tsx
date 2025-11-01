@@ -2,7 +2,7 @@ import { Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 
-const ExploreNoDaos = () => {
+export const ExploreNoDaos = () => {
   return (
     <Flex
       direction={'column'}
@@ -33,5 +33,3 @@ const ExploreNoDaos = () => {
     </Flex>
   )
 }
-
-export default ExploreNoDaos
