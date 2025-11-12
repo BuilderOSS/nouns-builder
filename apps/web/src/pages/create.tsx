@@ -73,7 +73,7 @@ const CreatePage: NextPageWithLayout = () => {
     }
 
     const founderAllocations: CreateFormSection = {
-      title: 'Rewards & Allocation',
+      title: 'Rewards',
       heading: 'Rewards & Allocation',
       form: <AllocationForm key={'token-allocations'} title={'Rewards & Allocation'} />,
     }
