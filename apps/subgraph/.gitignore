@@ -3,3 +3,7 @@
 /data
 .env
 subgraph.yaml
+
+# Matchstick binaries
+tests/.*
+matchstick

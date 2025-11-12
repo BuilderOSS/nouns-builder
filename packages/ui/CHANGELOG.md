@@ -1,5 +1,19 @@
 # @buildeross/ui
 
+## 0.2.1
+
+### Patch Changes
+
+- support propdates in our internal subgraph
+- Updated dependencies
+  - @buildeross/hooks@0.2.1
+  - @buildeross/sdk@0.2.1
+  - @buildeross/constants@0.2.1
+  - @buildeross/ipfs-service@0.2.1
+  - @buildeross/types@0.2.1
+  - @buildeross/utils@0.2.1
+  - @buildeross/zord@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes

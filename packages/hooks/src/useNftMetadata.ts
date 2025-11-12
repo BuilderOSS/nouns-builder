@@ -5,8 +5,8 @@ import {
   NftTokenType,
   type SerializedNftMetadata,
 } from '@buildeross/types'
-import useSWR, { KeyedMutator } from 'swr'
-import { Address, isAddress } from 'viem'
+import useSWR, { type KeyedMutator } from 'swr'
+import { type Address, isAddress } from 'viem'
 
 export { NftTokenType, type SerializedNftMetadata }
 
@@ -23,8 +23,13 @@ const fetchNftMetadata = async (
   contractAddress: Address,
   tokenId: string
 ): Promise<SerializedNftMetadata | null> => {
+  const params = new URLSearchParams()
+  params.set('chainId', chainId.toString())
+  params.set('contractAddress', contractAddress)
+  params.set('tokenId', tokenId)
+
   const response = await fetch(
-    `${BASE_URL}/api/alchemy/nft-metadata?chainId=${chainId}&contractAddress=${contractAddress}&tokenId=${tokenId}`
+    `${BASE_URL}/api/alchemy/nft-metadata?${params.toString()}`
   )
   if (!response.ok) {
     throw new Error('Failed to fetch NFT metadata')

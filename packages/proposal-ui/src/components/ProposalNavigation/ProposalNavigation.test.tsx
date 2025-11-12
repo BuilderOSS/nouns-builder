@@ -1,7 +1,5 @@
+import { BUILDER_DAO, FOUNDRY_CHAIN, render } from '@buildeross/test-fixtures'
 import { screen, waitFor } from '@testing-library/react'
-import { FOUNDRY_CHAIN } from 'src/test/fixtures/chain'
-import { BUILDER_DAO } from 'src/test/fixtures/dao'
-import { render } from 'src/test/utils'
 import { vi } from 'vitest'
 
 import { ProposalNavigation } from './ProposalNavigation'

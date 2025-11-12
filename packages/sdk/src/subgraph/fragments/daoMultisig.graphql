@@ -1,0 +1,7 @@
+fragment DaoMultisigUpdate on DaoMultisigUpdate {
+  id
+  transactionHash
+  timestamp
+  daoMultisig
+  creator
+}

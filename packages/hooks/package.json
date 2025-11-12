@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/hooks",
   "description": "Shared React hooks for BuilderOSS apps",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "dependencies": {
     "@smartinvoicexyz/types": "^0.1.27",
     "dayjs": "^1.11.13"
@@ -50,11 +50,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": "0.2.0",
-    "@buildeross/ipfs-service": "0.2.0",
-    "@buildeross/sdk": "0.2.0",
-    "@buildeross/types": "0.2.0",
-    "@buildeross/utils": "0.2.0",
+    "@buildeross/constants": "0.2.1",
+    "@buildeross/ipfs-service": "0.2.1",
+    "@buildeross/sdk": "0.2.1",
+    "@buildeross/types": "0.2.1",
+    "@buildeross/utils": "0.2.1",
     "@types/lodash": "^4.17.17",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -72,7 +72,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist .turbo",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"

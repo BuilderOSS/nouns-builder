@@ -119,7 +119,7 @@ export const useWalletConnect = (): useWalletConnectType => {
             .filter(unique)
           const accounts = chains.map((chain) => `${chain}:${getAddress(treasury)}`)
           const namespaces = buildApprovedNamespaces({
-            proposal: proposal.params,
+            proposal: proposal.params ?? '',
             supportedNamespaces: {
               eip155: {
                 chains,

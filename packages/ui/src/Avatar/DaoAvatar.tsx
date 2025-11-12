@@ -1,5 +1,4 @@
 import { useDaoAuction } from '@buildeross/hooks/useDaoAuction'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { CHAIN_ID } from '@buildeross/types'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { Box, BoxProps } from '@buildeross/zord'
@@ -72,7 +71,7 @@ export function DaoAvatar({
         {!imageHasError && (
           <FallbackImage
             key={src}
-            srcList={getFetchableUrls(src)}
+            src={src}
             alt={collectionAddress || 'Avatar image'}
             style={{
               objectFit: 'cover',
@@ -99,7 +98,7 @@ export function DaoAvatar({
       {!imageHasError && (
         <FallbackImage
           key={tokenUri?.name}
-          srcList={getFetchableUrls(tokenUri?.image)}
+          src={tokenUri?.image}
           alt={collectionAddress || 'Avatar image'}
           style={{
             objectFit: 'cover',

@@ -80,6 +80,12 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0
     devDependencies:
+      assemblyscript:
+        specifier: ^0.19.20
+        version: 0.19.23
+      matchstick-as:
+        specifier: ^0.6.0
+        version: 0.6.0
       mustache:
         specifier: ^4.2.0
         version: 4.2.0
@@ -623,18 +629,24 @@ importers:
       '@sentry/nextjs':
         specifier: ^9.22.0
         version: 9.46.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@15.5.5(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)(webpack@5.102.1(esbuild@0.25.11))
+      '@smartinvoicexyz/types':
+        specifier: ^0.1.27
+        version: 0.1.28(@emotion/react@11.14.0(@types/react@19.2.2)(react@19.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.2)(react@19.2.0))(@types/react@19.2.2)(react@19.2.0))(@types/node@22.18.10)(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(framer-motion@12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(graphql-ws@6.0.6(crossws@0.3.5)(graphql@16.11.0)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(graphql@16.11.0)(react-dom@19.2.0(react@19.2.0))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
       '@vanilla-extract/css':
         specifier: ^1.17.2
         version: 1.17.4(babel-plugin-macros@3.1.0)
       '@walletconnect/core':
-        specifier: ^2.11.3
-        version: 2.21.1(bufferutil@4.0.9)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+        specifier: 2.11.3
+        version: 2.11.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)
+      '@walletconnect/types':
+        specifier: 2.11.3
+        version: 2.11.3(ioredis@5.8.1)
       '@walletconnect/utils':
-        specifier: ^2.11.3
-        version: 2.21.1(bufferutil@4.0.9)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+        specifier: 2.11.3
+        version: 2.11.3(ioredis@5.8.1)
       '@walletconnect/web3wallet':
-        specifier: ^1.10.3
-        version: 1.10.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+        specifier: 1.10.3
+        version: 1.10.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.12.2
         version: 1.12.2
@@ -1099,6 +1111,9 @@ importers:
       '@buildeross/stores':
         specifier: workspace:*
         version: link:../stores
+      '@buildeross/test-fixtures':
+        specifier: workspace:*
+        version: link:../test-fixtures
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
@@ -1117,6 +1132,15 @@ importers:
       '@smartinvoicexyz/types':
         specifier: ^0.1.27
         version: 0.1.28(@emotion/react@11.14.0(@types/react@19.2.2)(react@19.2.0))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.2)(react@19.2.0))(@types/react@19.2.2)(react@19.2.0))(@types/node@22.18.10)(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(framer-motion@12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(graphql-ws@6.0.6(crossws@0.3.5)(graphql@16.11.0)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(graphql@16.11.0)(react-dom@19.2.0(react@19.2.0))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@testing-library/jest-dom':
+        specifier: ^6.6.3
+        version: 6.9.1
+      '@testing-library/react':
+        specifier: ^16.3.0
+        version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@testing-library/user-event':
+        specifier: ^14.6.1
+        version: 14.6.1(@testing-library/dom@10.4.1)
       '@types/lodash':
         specifier: ^4.17.17
         version: 4.17.20
@@ -1132,6 +1156,9 @@ importers:
       '@vanilla-extract/esbuild-plugin':
         specifier: ^2.3.16
         version: 2.3.18(babel-plugin-macros@3.1.0)(esbuild@0.25.11)
+      '@vitejs/plugin-react':
+        specifier: ^4.5.0
+        version: 4.7.0(vite@6.3.7(@types/node@22.18.10)(jiti@2.6.1)(terser@5.44.0)(yaml@2.8.1))
       eslint:
         specifier: 8.57.1
         version: 8.57.1
@@ -1141,6 +1168,9 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
+      vitest:
+        specifier: ^3.1.4
+        version: 3.2.4(@types/debug@4.1.12)(@types/node@22.18.10)(jiti@2.6.1)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(terser@5.44.0)(yaml@2.8.1)
 
   packages/sdk:
     dependencies:
@@ -1454,6 +1484,9 @@ importers:
       wagmi:
         specifier: ^2.18.1
         version: 2.18.1(@tanstack/query-core@5.90.3)(@tanstack/react-query@5.90.3(react@19.2.0))(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12)
+      wink-porter2-stemmer:
+        specifier: ^2.0.1
+        version: 2.0.1
       yup:
         specifier: ^1.6.1
         version: 1.7.1
@@ -8624,6 +8657,9 @@ packages:
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
+  matchstick-as@0.6.0:
+    resolution: {integrity: sha512-E36fWsC1AbCkBFt05VsDDRoFvGSdcZg6oZJrtIe/YDBbuFh8SKbR5FcoqDhNWqSN+F7bN/iS2u8Md0SM+4pUpw==}
+
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
@@ -11348,6 +11384,10 @@ packages:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
 
+  wabt@1.0.24:
+    resolution: {integrity: sha512-8l7sIOd3i5GWfTWciPL0+ff/FK/deVK2Q6FN+MPz4vfUcD78i2M/49XJTwF6aml91uIiuXJEsLKWMB2cw/mtKg==}
+    hasBin: true
+
   wagmi@2.18.1:
     resolution: {integrity: sha512-u+lzv7K7R5Gvw5P8vtmwQ96+tR2UGSJ/wNRrDAZH+2ikLqc6Dt8Lj8L8MaqI0v7+gnHOGh63cgeXAEjOWydsMg==}
     peerDependencies:
@@ -11488,6 +11528,9 @@ packages:
   widest-line@3.1.0:
     resolution: {integrity: sha512-NsmoXalsWVDMGupxZ5R08ka9flZjjiLvHVAWYOKtiKM8ujtZWr9cRffak+uSE48+Ob8ObalXpwyeUiyDD6QFgg==}
     engines: {node: '>=8'}
+
+  wink-porter2-stemmer@2.0.1:
+    resolution: {integrity: sha512-0g+RkkqhRXFmSpJQStVXW5N/WsshWpJXsoDRW7DwVkGI2uDT6IBCoq3xdH5p6IHLaC6ygk7RWUsUx4alKxoagQ==}
 
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
@@ -16854,19 +16897,19 @@ snapshots:
       - react
       - use-sync-external-store
 
-  '@walletconnect/auth-client@2.1.2(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)':
+  '@walletconnect/auth-client@2.1.2(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)':
     dependencies:
       '@ethersproject/hash': 5.8.0
       '@ethersproject/transactions': 5.8.0
       '@stablelib/random': 1.0.2
       '@stablelib/sha256': 1.0.1
-      '@walletconnect/core': 2.21.1(bufferutil@4.0.9)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@walletconnect/core': 2.11.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)
       '@walletconnect/events': 1.0.1
       '@walletconnect/heartbeat': 1.2.2
       '@walletconnect/jsonrpc-utils': 1.0.8
       '@walletconnect/logger': 2.1.3
       '@walletconnect/time': 1.0.2
-      '@walletconnect/utils': 2.21.1(bufferutil@4.0.9)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@walletconnect/utils': 2.11.3(ioredis@5.8.1)
       events: 3.3.0
       isomorphic-unfetch: 3.1.0(encoding@0.1.13)
     transitivePeerDependencies:
@@ -16890,10 +16933,8 @@ snapshots:
       - db0
       - encoding
       - ioredis
-      - typescript
       - uploadthing
       - utf-8-validate
-      - zod
 
   '@walletconnect/core@2.11.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)':
     dependencies:
@@ -17604,9 +17645,9 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@walletconnect/web3wallet@1.10.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)':
+  '@walletconnect/web3wallet@1.10.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)':
     dependencies:
-      '@walletconnect/auth-client': 2.1.2(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@walletconnect/auth-client': 2.1.2(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)
       '@walletconnect/core': 2.11.3(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(utf-8-validate@5.0.10)
       '@walletconnect/jsonrpc-provider': 1.0.13
       '@walletconnect/jsonrpc-utils': 1.0.8
@@ -17635,10 +17676,8 @@ snapshots:
       - db0
       - encoding
       - ioredis
-      - typescript
       - uploadthing
       - utf-8-validate
-      - zod
 
   '@walletconnect/window-getters@1.0.1':
     dependencies:
@@ -21872,6 +21911,10 @@ snapshots:
 
   markdown-table@3.0.4: {}
 
+  matchstick-as@0.6.0:
+    dependencies:
+      wabt: 1.0.24
+
   math-intrinsics@1.1.0: {}
 
   md5.js@1.3.5:
@@ -25022,6 +25065,8 @@ snapshots:
     dependencies:
       xml-name-validator: 5.0.0
 
+  wabt@1.0.24: {}
+
   wagmi@2.18.1(@tanstack/query-core@5.90.3)(@tanstack/react-query@5.90.3(react@19.2.0))(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12):
     dependencies:
       '@tanstack/react-query': 5.90.3(react@19.2.0)
@@ -25294,6 +25339,8 @@ snapshots:
   widest-line@3.1.0:
     dependencies:
       string-width: 4.2.3
+
+  wink-porter2-stemmer@2.0.1: {}
 
   word-wrap@1.2.5: {}
 

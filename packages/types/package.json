@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/types",
   "description": "Shared TypeScript types for BuilderOSS apps",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
@@ -41,7 +41,7 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist .turbo",
-    "lint": "eslint src --fix",
+    "lint": "pnpm type-check && eslint src --fix",
     "postbuild": "cp src/globals.d.ts dist/",
     "type-check": "tsc --noEmit"
   },

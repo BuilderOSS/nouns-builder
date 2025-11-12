@@ -1,5 +1,13 @@
 # @buildeross/constants
 
+## 0.2.1
+
+### Patch Changes
+
+- support propdates in our internal subgraph
+- Updated dependencies
+  - @buildeross/types@0.2.1
+
 ## 0.2.0
 
 ### Minor Changes

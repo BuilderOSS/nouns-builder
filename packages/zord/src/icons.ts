@@ -39,6 +39,7 @@ import Plus from './assets/plus.svg'
 import Question from './assets/question.svg'
 import Refresh from './assets/refresh.svg'
 import ResumeTemplate from './assets/resume-template.svg'
+import Search from './assets/search.svg'
 import Share from './assets/share.svg'
 import Spanner from './assets/spanner.svg'
 import Trash from './assets/trash.svg'
@@ -70,34 +71,35 @@ export const icons = {
   discord: Discord,
   dots: Dots,
   download: Download,
+  eth: Eth,
+  erc20: Erc20,
+  escrow: Escrow,
   'external-16': External,
   github: Github,
-  eth: Eth,
-  handlebarCircle: HandlebarCircle,
-  'info-16': Info16,
   globe: Globe,
+  handlebarCircle: HandlebarCircle,
+  handshake: Handshake,
+  'info-16': Info16,
   migrate: Migrate,
   move: Move,
   newWindow: NewWindow,
-  walletConnect: WalletConnect,
-  walletConnectOutline: WalletConnectOutline,
+  nft: Nft,
   pause: Pause,
   pauseTemplate: PauseTemplate,
   play: Play,
   plus: Plus,
+  question: Question,
   refresh: Refresh,
   resumeTemplate: ResumeTemplate,
-  trash: Trash,
-  twitter: Twitter,
+  search: Search,
   share: Share,
   spanner: Spanner,
+  trash: Trash,
+  twitter: Twitter,
+  walletConnect: WalletConnect,
+  walletConnectOutline: WalletConnectOutline,
   warning: Warning,
   'warning-16': Warning16,
-  escrow: Escrow,
-  handshake: Handshake,
-  erc20: Erc20,
-  nft: Nft,
-  question: Question,
 }
 
 export type IconType = keyof typeof icons

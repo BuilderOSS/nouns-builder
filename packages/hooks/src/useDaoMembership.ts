@@ -1,6 +1,9 @@
-import { SWR_KEYS } from '@buildeross/constants'
-import { daoMembershipRequest, type DaoMembershipResponse } from '@buildeross/sdk'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import {
+  daoMembershipRequest,
+  type DaoMembershipResponse,
+} from '@buildeross/sdk/subgraph'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import useSWR, { KeyedMutator } from 'swr'
 
 import { type EnsData, useEnsData } from './useEnsData'

@@ -12,13 +12,13 @@ import {
 interface TextInputProps {
   id: string
   value: string | number
-  type: string
   inputLabel?: string | ReactElement
-  onChange: ChangeEventHandler
+  onChange: ChangeEventHandler<HTMLInputElement>
   formik?: FormikProps<any>
   errorMessage?: any
   placeholder?: string
   disabled?: boolean
+  style?: React.CSSProperties
 }
 
 const TextInput: React.FC<TextInputProps> = ({
@@ -29,6 +29,7 @@ const TextInput: React.FC<TextInputProps> = ({
   errorMessage,
   placeholder,
   disabled = false,
+  style,
 }) => {
   return (
     <Box as="fieldset" mb={'x8'} p={'x0'} className={defaultFieldsetStyle}>
@@ -42,6 +43,7 @@ const TextInput: React.FC<TextInputProps> = ({
         className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']}`}
         placeholder={placeholder || ''}
         disabled={disabled}
+        style={style}
       />
       {!!errorMessage && <FieldError message={errorMessage} />}
     </Box>

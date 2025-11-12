@@ -49,8 +49,8 @@ describe('Dao card', () => {
 
     expect(screen.queryByText(/Winning bid/)).toBeInTheDocument()
     expect(screen.queryByText('n/a')).toBeInTheDocument()
-    expect(screen.queryByTestId('token-name')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('collection-name')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('token-name')).toBeInTheDocument()
+    expect(screen.queryByTestId('collection-name')).toBeInTheDocument()
   })
 
   it('should render a given dao with an active auction', () => {
