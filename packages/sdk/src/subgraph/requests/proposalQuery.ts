@@ -13,8 +13,12 @@ export type Proposal = Omit<
   | 'executableFrom'
   | 'expiresAt'
   | 'calldatas'
+  | 'values'
   | 'executedAt'
+  | 'proposer'
 > & {
+  proposer: string
+  values: string[]
   calldatas: string[]
   state: ProposalState
   transactionHash: string

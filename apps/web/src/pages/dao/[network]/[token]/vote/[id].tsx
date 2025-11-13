@@ -20,6 +20,7 @@ import {
 import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
+import { getProposalWarning } from '@buildeross/utils/warnings'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -30,7 +31,7 @@ import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
 import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR, { unstable_serialize } from 'swr'
-import { getAddress, isAddress, isAddressEqual } from 'viem'
+import { getAddress, isAddress } from 'viem'
 import { useBalance } from 'wagmi'
 
 export interface VotePageProps {
@@ -40,18 +41,6 @@ export interface VotePageProps {
   ogImageURL: string
   addresses: DaoContractAddresses
   chainId: CHAIN_ID
-}
-
-const BAD_ACTORS = [
-  '0xfd637806e0D22Ca8158AB8bb5826e6fEDa82c15f',
-  '0xb8fa1f523976008e9db686fcfdb5e57f1ca43f50',
-]
-
-const checkDrain = (values: string[], treasuryBalance: bigint) => {
-  const proposalValue = values.reduce((acc, numStr) => acc + BigInt(numStr), BigInt(0))
-  const thresholdAmt = (treasuryBalance * BigInt(90)) / BigInt(100)
-
-  return proposalValue >= thresholdAmt
 }
 
 const VotePage: NextPageWithLayout<VotePageProps> = ({
@@ -125,20 +114,20 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     return sections
   }, [proposal, chainId, addresses.token, openProposalReviewPage])
 
-  const { displayActions, displayWarning } = React.useMemo(() => {
-    if (!proposal) return { displayActions: false, displayWarning: false }
-    const displayActions = isProposalOpen(proposal.state)
-    const isBadActor = BAD_ACTORS.some((baddie) =>
-      isAddressEqual(proposal.proposer, baddie as AddressType)
-    )
-    const isPossibleDrain = balance?.value
-      ? checkDrain(proposal.values, balance?.value)
-      : false
+  const displayActions = proposal ? isProposalOpen(proposal.state) : false
 
-    const displayWarning = displayActions && (isBadActor || isPossibleDrain)
-
-    return { displayActions, displayWarning }
-  }, [proposal, balance])
+  const { proposer, state, values } = proposal ?? {}
+  const treasuryBalance = balance?.value
+  const displayWarning = React.useMemo(() => {
+    if (!proposer || state == null || !values) return ''
+    return getProposalWarning({
+      proposer,
+      proposalState: state,
+      proposalValues: values,
+      treasuryBalance,
+      daoName,
+    })
+  }, [proposer, state, values, treasuryBalance, daoName])
 
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
@@ -185,9 +174,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
                 justify="center"
               >
                 <Icon fill="onWarning" id="warning" mr="x2" />
-                <Box fontWeight={'heading'}>
-                  {`Executing this proposal will transfer more than 90% of ${daoName}'s treasury.`}
-                </Box>
+                <Box fontWeight={'heading'}>{displayWarning}</Box>
               </Flex>
             )}
 

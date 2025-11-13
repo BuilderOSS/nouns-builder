@@ -8,6 +8,8 @@ import { formatTime, parseBgColor, parseState, parseTime } from './ProposalStatu
 
 export type ProposalForStatus = Pick<
   Proposal,
+  | 'proposer'
+  | 'values'
   | 'state'
   | 'voteEnd'
   | 'voteStart'

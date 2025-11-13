@@ -2,7 +2,6 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { BUILDER_DAO, FOUNDRY_CHAIN, render } from '@buildeross/test-fixtures'
 import { screen } from '@testing-library/react'
 import dayjs from 'dayjs'
-import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ProposalCard } from './ProposalCard'
@@ -21,6 +20,9 @@ describe('proposal card', () => {
   it('should render a proposal card given a succeeded propoasl', async () => {
     render(
       <ProposalCard
+        proposer="0x123"
+        treasuryAddress="0x123"
+        values={[]}
         timeCreated={1668002568}
         title="A proposal title"
         proposalNumber={1}
@@ -42,6 +44,9 @@ describe('proposal card', () => {
   it('should render a proposal card given an active proposal', async () => {
     render(
       <ProposalCard
+        proposer="0x123"
+        treasuryAddress="0x123"
+        values={[]}
         timeCreated={dayjs(date).unix()}
         title="A proposal title"
         proposalNumber={1}

@@ -1491,6 +1491,9 @@ importers:
         specifier: ^1.6.1
         version: 1.7.1
     devDependencies:
+      '@buildeross/blocklist':
+        specifier: workspace:*
+        version: link:../blocklist
       '@buildeross/constants':
         specifier: workspace:*
         version: link:../constants

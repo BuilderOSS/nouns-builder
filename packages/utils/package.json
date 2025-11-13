@@ -8,6 +8,7 @@
     "wink-porter2-stemmer": "^2.0.1"
   },
   "devDependencies": {
+    "@buildeross/blocklist": "workspace:*",
     "@buildeross/constants": "workspace:*",
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
@@ -52,6 +53,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
+    "@buildeross/blocklist": "0.2.1",
     "@buildeross/constants": "0.2.1",
     "@buildeross/ipfs-service": "0.2.1",
     "@buildeross/types": "0.2.1",
