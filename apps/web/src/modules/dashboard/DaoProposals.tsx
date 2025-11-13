@@ -16,6 +16,7 @@ export const DaoProposals = ({
   daoImage,
   tokenAddress,
   governorAddress,
+  treasuryAddress,
   name,
   proposals,
   chainId,
@@ -86,6 +87,8 @@ export const DaoProposals = ({
             userAddress={userAddress}
             chainId={chainId}
             collectionAddress={tokenAddress}
+            treasuryAddress={treasuryAddress}
+            daoName={name}
             {...proposal}
           />
         ))}

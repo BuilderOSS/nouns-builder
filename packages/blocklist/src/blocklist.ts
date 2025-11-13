@@ -20,9 +20,7 @@ function parseAddress(address: InputAddress): Address | undefined {
 }
 
 function cleanBlocklist(blocklist: InputAddress[]): Address[] {
-  return blocklist
-    .map((a) => parseAddress(a))
-    .filter((a) => typeof a === 'string') as Address[]
+  return blocklist.map(parseAddress).filter((a): a is Address => Boolean(a))
 }
 
 const blocklistMap: Record<string, Address[]> = {
@@ -30,14 +28,16 @@ const blocklistMap: Record<string, Address[]> = {
   development: cleanBlocklist(sdnlistDev.concat(badActors)),
 }
 
-const blocklist =
+const blocklistArray =
   environment in blocklistMap ? blocklistMap[environment] : blocklistMap.development
 
-export function isBlocked(address: InputAddress) {
+const blocklist = new Set(blocklistArray)
+
+export function isBlocked(address: InputAddress): boolean {
   const parsed = parseAddress(address)
-  return parsed && blocklist.includes(parsed)
+  return parsed ? blocklist.has(parsed) : false
 }
 
-export function useBlocklist(address: InputAddress) {
+export function useBlocklist(address: InputAddress): boolean {
   return useMemo(() => isBlocked(address), [address])
 }

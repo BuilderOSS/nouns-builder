@@ -6,6 +6,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   external: [
+    '@buildeross/blocklist',
     '@buildeross/constants',
     '@buildeross/ipfs-service',
     '@buildeross/types',
