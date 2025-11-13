@@ -4777,6 +4777,7 @@ export type DaoFragment = {
   name: string
   contractImage: string
   tokenAddress: any
+  treasuryAddress: any
   auctionAddress: any
   governorAddress: any
 }
@@ -5119,6 +5120,7 @@ export type DaosForDashboardQuery = {
     contractImage: string
     name: string
     tokenAddress: any
+    treasuryAddress: any
     auctionAddress: any
     governorAddress: any
     auctionConfig: {
@@ -5178,6 +5180,7 @@ export type DaosForUserQuery = {
     name: string
     contractImage: string
     tokenAddress: any
+    treasuryAddress: any
     auctionAddress: any
     governorAddress: any
   }>
@@ -5518,6 +5521,7 @@ export const DaoFragmentDoc = gql`
     name
     contractImage
     tokenAddress
+    treasuryAddress
     auctionAddress
     governorAddress
   }

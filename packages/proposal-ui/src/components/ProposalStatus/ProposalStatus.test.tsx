@@ -2,7 +2,6 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { render } from '@buildeross/test-fixtures'
 import { screen } from '@testing-library/react'
 import dayjs from 'dayjs'
-import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { ProposalStatus } from './ProposalStatus'
@@ -21,6 +20,8 @@ describe('proposal status', () => {
   it('should render a succeeded proposal', async () => {
     render(
       <ProposalStatus
+        proposer="0x123"
+        values={[]}
         title="Test proposal"
         proposalNumber={1}
         timeCreated={date}
@@ -38,6 +39,8 @@ describe('proposal status', () => {
   it('should render a defeated proposal', async () => {
     render(
       <ProposalStatus
+        proposer="0x123"
+        values={[]}
         title="Test proposal"
         proposalNumber={1}
         timeCreated={date}
@@ -55,6 +58,8 @@ describe('proposal status', () => {
   it('should render a cancelled proposal', async () => {
     render(
       <ProposalStatus
+        proposer="0x123"
+        values={[]}
         title="Test proposal"
         proposalNumber={1}
         timeCreated={date}
@@ -72,6 +77,8 @@ describe('proposal status', () => {
   it('should render a pending proposal that has not started', async () => {
     render(
       <ProposalStatus
+        proposer="0x123"
+        values={[]}
         title="Test proposal"
         proposalNumber={1}
         timeCreated={date}
@@ -89,6 +96,8 @@ describe('proposal status', () => {
   it('should render an active proposal that ends in 1 day', async () => {
     render(
       <ProposalStatus
+        proposer="0x123"
+        values={[]}
         title="Test proposal"
         proposalNumber={1}
         timeCreated={dayjs(date).subtract(4, 'day').unix()}
@@ -106,6 +115,8 @@ describe('proposal status', () => {
   it('should render a queued proposal that expires in 14 days', async () => {
     render(
       <ProposalStatus
+        proposer="0x123"
+        values={[]}
         title="Test proposal"
         proposalNumber={1}
         timeCreated={dayjs(date).subtract(7, 'day').unix()}

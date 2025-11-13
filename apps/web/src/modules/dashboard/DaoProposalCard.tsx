@@ -3,12 +3,16 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
+import { getProposalWarning } from '@buildeross/utils/warnings'
 import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
+import { useBalance } from 'wagmi'
 
 type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID
   collectionAddress: AddressType
+  treasuryAddress: AddressType
+  daoName: string
   userAddress?: AddressType
   votes: {
     voter: string
@@ -20,17 +24,38 @@ export const DaoProposalCard = ({
   votes,
   chainId,
   collectionAddress,
+  daoName,
+  treasuryAddress,
   ...proposal
 }: DaoProposalCardProps) => {
-  const { proposalNumber, title, state } = proposal
+  const { proposalNumber, title, state, proposer, values } = proposal
   const { getProposalLink } = useLinks()
+
+  const { data: balance } = useBalance({
+    address: treasuryAddress,
+    chainId: chainId,
+  })
+
+  const displayWarning = useMemo(
+    () =>
+      getProposalWarning({
+        proposer: proposer,
+        proposalState: state,
+        proposalValues: values,
+        treasuryBalance: balance?.value,
+        daoName: daoName,
+      }),
+
+    [proposer, state, values, balance, daoName]
+  )
+
   return (
     <Link
       mb={'x4'}
-      direction={{ '@initial': 'column-reverse', '@768': 'row' }}
+      direction="column"
       w={'100%'}
       align={{ '@initial': 'flex-start', '@768': 'center' }}
-      borderColor={'border'}
+      borderColor={displayWarning ? 'warning' : 'border'}
       borderStyle={'solid'}
       borderRadius={'curved'}
       borderWidth={'normal'}
@@ -39,44 +64,62 @@ export const DaoProposalCard = ({
       position={'relative'}
       link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
     >
-      <Flex align="center">
-        <Text
-          fontSize={18}
-          fontWeight="label"
-          color={'text4'}
-          mr={'x4'}
-          display={{ '@initial': 'none', '@768': 'flex' }}
-        >
-          {proposalNumber}
-        </Text>
-      </Flex>
       <Flex
-        mr={'auto'}
-        align="center"
-        mb={{ '@initial': 'x2', '@768': 'x0' }}
-        w="100%"
-        justify={{ '@initial': 'space-between' }}
+        direction={{ '@initial': 'column-reverse', '@768': 'row' }}
+        w={'100%'}
+        align={{ '@initial': 'flex-start', '@768': 'center' }}
+        position={'relative'}
       >
-        <Text fontSize={18} fontWeight="label" mr="x3">
-          {title}
-        </Text>
-        <NeedsVote userAddress={userAddress} proposalState={state} votes={votes} />
-      </Flex>
-      <Flex
-        justify={'space-between'}
-        width={{ '@initial': '100%', '@768': 'unset' }}
-        align={'center'}
-        mb={{ '@initial': 'x3', '@768': 'x0' }}
-      >
-        <Box style={{ width: '225px' }}>
-          <ProposalStatus {...proposal} flipped showTime />
-        </Box>
-        <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
-          <Text fontSize={18} fontWeight="label" color={'text4'}>
+        <Flex align="center">
+          <Text
+            fontSize={18}
+            fontWeight="label"
+            color={'text4'}
+            mr={'x4'}
+            display={{ '@initial': 'none', '@768': 'flex' }}
+          >
             {proposalNumber}
           </Text>
         </Flex>
+        <Flex
+          mr={'auto'}
+          align="center"
+          mb={{ '@initial': 'x2', '@768': 'x0' }}
+          width={{ '@initial': '100%', '@768': 'auto' }}
+          justify={{ '@initial': 'space-between' }}
+        >
+          <Text fontSize={18} fontWeight="label" mr="x3">
+            {title}
+          </Text>
+          <NeedsVote
+            userAddress={userAddress}
+            proposalState={state}
+            votes={votes}
+            hasWarning={!!displayWarning}
+          />
+        </Flex>
+        <Flex
+          justify={'space-between'}
+          width={{ '@initial': '100%', '@768': 'unset' }}
+          align={'center'}
+          mb={{ '@initial': 'x3', '@768': 'x0' }}
+        >
+          <Box style={{ width: '225px' }}>
+            <ProposalStatus {...proposal} flipped showTime />
+          </Box>
+          <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
+            <Text fontSize={18} fontWeight="label" color={'text4'}>
+              {proposalNumber}
+            </Text>
+          </Flex>
+        </Flex>
       </Flex>
+      {displayWarning && (
+        <Flex w="100%" color="warning" align="center" mt="x2">
+          <Icon fill="warning" id="warning" mr="x4" size="sm" />
+          <Box fontWeight="heading">{displayWarning}</Box>
+        </Flex>
+      )}
     </Link>
   )
 }
@@ -85,17 +128,23 @@ type NeedsVoteProps = {
   userAddress?: AddressType
   proposalState: ProposalState
   votes: { voter: string }[]
+  hasWarning?: boolean
 }
-const NeedsVote = ({ userAddress, proposalState, votes }: NeedsVoteProps) => {
+const NeedsVote = ({
+  userAddress,
+  proposalState,
+  votes,
+  hasWarning = false,
+}: NeedsVoteProps) => {
   const [showTooltip, setShowTooltip] = useState(false)
 
-  const hasVoted = useMemo(() => {
-    if (proposalState !== ProposalState.Active) return undefined
+  const hasVoted: null | boolean = useMemo(() => {
+    if (proposalState !== ProposalState.Active) return null
 
     return votes.some((vote) => vote.voter === userAddress?.toLowerCase())
   }, [proposalState, votes, userAddress])
 
-  if (hasVoted == null) return null
+  if (hasVoted === null || hasWarning) return null
 
   return (
     <Flex>

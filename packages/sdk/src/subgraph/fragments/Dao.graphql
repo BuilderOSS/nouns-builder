@@ -2,6 +2,7 @@ fragment DAO on DAO {
   name
   contractImage
   tokenAddress
+  treasuryAddress
   auctionAddress
   governorAddress
 }
