@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
-import { getAddress } from 'viem'
+import { Address, getAddress } from 'viem'
 
+import badActors from '../bad-actors.json'
 import sdnlistDev from '../sdnlist.dev.json'
 import sdnlist from '../sdnlist.json'
 
 const environment = process.env.NODE_ENV || 'development'
 
 type InputAddress = string | undefined
-type Address = string
 
 function parseAddress(address: InputAddress): Address | undefined {
   if (!address) return
@@ -26,8 +26,8 @@ function cleanBlocklist(blocklist: InputAddress[]): Address[] {
 }
 
 const blocklistMap: Record<string, Address[]> = {
-  production: cleanBlocklist(sdnlist),
-  development: cleanBlocklist(sdnlistDev),
+  production: cleanBlocklist(sdnlist.concat(badActors)),
+  development: cleanBlocklist(sdnlistDev.concat(badActors)),
 }
 
 const blocklist =
