@@ -97,7 +97,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
     component: [
       <Flex key="feed" w="100%" direction="column" align="center">
         <Box w="100%" style={{ maxWidth: '912px' }}>
-          <Feed actor={userAddress as AddressType} chainId={chain.id} />
+          <Feed actor={userAddress as AddressType} />
         </Box>
       </Flex>,
     ],

@@ -5315,6 +5315,7 @@ export type FeedEventsQuery = {
           proposalId: any
           proposalNumber: number
           title?: string | null
+          description?: string | null
         }
         dao: {
           __typename?: 'DAO'
@@ -5332,7 +5333,13 @@ export type FeedEventsQuery = {
         blockNumber: any
         transactionHash: any
         actor: any
-        proposal: { __typename?: 'Proposal'; proposalId: any; title?: string | null }
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          title?: string | null
+          description?: string | null
+        }
         update: {
           __typename?: 'ProposalUpdate'
           messageType: number
@@ -5355,7 +5362,13 @@ export type FeedEventsQuery = {
         blockNumber: any
         transactionHash: any
         actor: any
-        proposal: { __typename?: 'Proposal'; proposalId: any; title?: string | null }
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          title?: string | null
+          description?: string | null
+        }
         vote: {
           __typename?: 'ProposalVote'
           support: ProposalVoteSupport
@@ -6127,6 +6140,9 @@ export const FeedEventsDocument = gql`
       ... on ProposalVotedEvent {
         proposal {
           proposalId
+          proposalNumber
+          title
+          description
           title
         }
         vote {
@@ -6138,7 +6154,9 @@ export const FeedEventsDocument = gql`
       ... on ProposalUpdatedEvent {
         proposal {
           proposalId
+          proposalNumber
           title
+          description
         }
         update {
           messageType
@@ -6151,6 +6169,7 @@ export const FeedEventsDocument = gql`
           proposalId
           proposalNumber
           title
+          description
         }
       }
       ... on AuctionCreatedEvent {

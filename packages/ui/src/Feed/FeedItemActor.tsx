@@ -17,7 +17,7 @@ export const FeedItemActor: React.FC<FeedItemActorProps> = ({ address }) => {
   const { getProfileLink } = useLinks()
 
   return (
-    <LinkWrapper link={getProfileLink(address)} align="center" gap="x2">
+    <LinkWrapper link={getProfileLink(address)} align="center" gap="x1">
       <Avatar address={address} src={ensAvatar} size="24" />
       <Text className={feedItemActorName} variant="paragraph-sm">
         {displayName}

@@ -56,6 +56,9 @@ export type ProposalCreatedFeedItem = BaseFeedItem & {
 export type ProposalVotedFeedItem = BaseFeedItem & {
   type: 'PROPOSAL_VOTED'
   proposalId: BytesType
+  proposalNumber: string
+  proposalTitle: string
+  proposalDescription: string
   voter: AddressType
   reason?: string
   support: ProposalVoteSupportType
@@ -65,6 +68,9 @@ export type ProposalVotedFeedItem = BaseFeedItem & {
 export type ProposalUpdatePostedFeedItem = BaseFeedItem & {
   type: 'PROPOSAL_UPDATED'
   proposalId: BytesType
+  proposalNumber: string
+  proposalTitle: string
+  proposalDescription: string
   messageType: number
   message: string
   originalMessageId: BytesType
@@ -75,6 +81,7 @@ export type ProposalExecutedFeedItem = BaseFeedItem & {
   proposalId: BytesType
   proposalNumber: string
   proposalTitle: string
+  proposalDescription: string
 }
 
 export type AuctionCreatedFeedItem = BaseFeedItem & {
