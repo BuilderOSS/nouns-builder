@@ -71,3 +71,15 @@ export const tokenImage = style([
     objectFit: 'cover',
   },
 ])
+
+export const tokenImageFullWidth = style([
+  atoms({
+    borderRadius: 'curved',
+    overflow: 'hidden',
+    w: '100%',
+  }),
+  {
+    aspectRatio: '1 / 1',
+    objectFit: 'cover',
+  },
+])

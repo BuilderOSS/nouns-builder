@@ -35,41 +35,70 @@ export const Feed: React.FC<FeedProps> = ({
 
   if (error) {
     return (
-      <Flex w="100%" justify="center" align="center" py="x16">
-        <Text color="negative">Failed to load feed. Please try again later.</Text>
+      <Flex w="100%" justify="center">
+        <Flex
+          w="100%"
+          justify="center"
+          align="center"
+          py="x16"
+          style={{ maxWidth: '480px' }}
+        >
+          <Text color="negative">Failed to load feed. Please try again later.</Text>
+        </Flex>
       </Flex>
     )
   }
 
   if (isLoading) {
-    return <FeedSkeleton />
+    return (
+      <Flex w="100%" justify="center">
+        <Stack gap="x4" w="100%" style={{ maxWidth: '480px' }}>
+          <FeedSkeleton />
+        </Stack>
+      </Flex>
+    )
   }
 
   if (items.length === 0) {
     return (
-      <Flex w="100%" justify="center" align="center" py="x16">
-        <Text color="tertiary">No activity yet</Text>
+      <Flex w="100%" justify="center">
+        <Flex
+          w="100%"
+          justify="center"
+          align="center"
+          py="x16"
+          style={{ maxWidth: '480px' }}
+        >
+          <Text color="tertiary">No activity yet</Text>
+        </Flex>
       </Flex>
     )
   }
 
   return (
-    <Stack gap="x4" w="100%" pb="x4">
-      {items.map((item: FeedItemType) => (
-        <FeedItem key={item.id} item={item} hideActor={!!actor} hideDao={!!daoAddress} />
-      ))}
+    <Flex w="100%" justify="center">
+      <Stack gap="x4" w="100%" pb="x4" style={{ maxWidth: '480px' }}>
+        {items.map((item: FeedItemType) => (
+          <FeedItem
+            key={item.id}
+            item={item}
+            hideActor={!!actor}
+            hideDao={!!daoAddress}
+          />
+        ))}
 
-      {isLoadingMore && <FeedSkeleton count={3} />}
+        {isLoadingMore && <FeedSkeleton count={3} />}
 
-      {hasMore && !isLoadingMore && (
-        <LoadMoreButton onClick={fetchNextPage} isLoading={isLoadingMore} />
-      )}
+        {hasMore && !isLoadingMore && (
+          <LoadMoreButton onClick={fetchNextPage} isLoading={isLoadingMore} />
+        )}
 
-      {!hasMore && !isLoadingMore && (
-        <Flex w="100%" justify="center" align="center" py="x8">
-          <Text color="tertiary">No more feed content to show</Text>
-        </Flex>
-      )}
-    </Stack>
+        {!hasMore && !isLoadingMore && (
+          <Flex w="100%" justify="center" align="center" py="x8">
+            <Text color="tertiary">No more feed content to show</Text>
+          </Flex>
+        )}
+      </Stack>
+    </Flex>
   )
 }
