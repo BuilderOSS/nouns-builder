@@ -52,7 +52,7 @@ export const Feed: React.FC<FeedProps> = ({
   if (isLoading) {
     return (
       <Flex w="100%" justify="center">
-        <Stack gap="x4" w="100%" style={{ maxWidth: '480px' }}>
+        <Stack gap="x4" w="100%" style={{ maxWidth: '480px' }} py="x4">
           <FeedSkeleton />
         </Stack>
       </Flex>
@@ -77,7 +77,7 @@ export const Feed: React.FC<FeedProps> = ({
 
   return (
     <Flex w="100%" justify="center">
-      <Stack gap="x4" w="100%" pb="x4" style={{ maxWidth: '480px' }}>
+      <Stack gap="x4" w="100%" py="x4" style={{ maxWidth: '480px' }}>
         {items.map((item: FeedItemType) => (
           <FeedItem
             key={item.id}

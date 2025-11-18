@@ -74,6 +74,9 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         ...baseItem,
         type: 'PROPOSAL_VOTED',
         proposalId: event.proposal.proposalId,
+        proposalNumber: event.proposal.proposalNumber.toString(),
+        proposalTitle: event.proposal.title || '',
+        proposalDescription: event.proposal.description || '',
         voter: event.actor,
         reason: event.vote.reason || undefined,
         support: mapProposalVoteSupport(event.vote.support),
@@ -86,6 +89,9 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         ...baseItem,
         type: 'PROPOSAL_UPDATED',
         proposalId: event.proposal.proposalId,
+        proposalNumber: event.proposal.proposalNumber.toString(),
+        proposalTitle: event.proposal.title || '',
+        proposalDescription: event.proposal.description || '',
         messageType: event.update.messageType,
         message: event.update.message,
         originalMessageId: event.update.originalMessageId,
@@ -99,6 +105,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalId: event.proposal.proposalId,
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
+        proposalDescription: event.proposal.description || '',
       }
     }
 

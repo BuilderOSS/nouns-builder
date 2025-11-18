@@ -1,5 +1,5 @@
 import type { FeedItem as FeedItemType } from '@buildeross/types'
-import { Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
@@ -7,6 +7,7 @@ import { AuctionCreatedItem } from './AuctionCreatedItem'
 import { AuctionSettledItem } from './AuctionSettledItem'
 import { feedItemCard, feedItemMeta } from './Feed.css'
 import { FeedItemActor } from './FeedItemActor'
+import { FeedItemChain } from './FeedItemChain'
 import { FeedItemDao } from './FeedItemDao'
 import { ProposalCreatedItem } from './ProposalCreatedItem'
 import { ProposalExecutedItem } from './ProposalExecutedItem'
@@ -36,6 +37,20 @@ const formatTimestamp = (timestamp: number) => {
   })
 }
 
+const Separator = () => (
+  <Flex align="center" justify="center">
+    <Box
+      style={{
+        width: '5px',
+        height: '5px',
+        borderRadius: '50%',
+        overflow: 'hidden',
+      }}
+      backgroundColor="tertiary"
+    />
+  </Flex>
+)
+
 export const FeedItem: React.FC<FeedItemProps> = ({
   item,
   hideActor = false,
@@ -62,17 +77,21 @@ export const FeedItem: React.FC<FeedItemProps> = ({
     }
   }
 
+  // Helper to determine whether to render separators
+  const shouldShowSeparatorAfterActor = !hideActor && !hideDao
+
   return (
     <Flex className={feedItemCard}>
       <Stack gap="x3" w="100%">
-        {/* Top row: Avatars and timestamp */}
+        {/* Top row: User, DAO */}
         <Flex gap="x2" align="center" wrap="wrap">
+          {/* Actor */}
           {!hideActor && <FeedItemActor address={item.actor} />}
-          {!hideActor && !hideDao && (
-            <Text color="tertiary" fontSize="14">
-              •
-            </Text>
-          )}
+
+          {/* Separator after actor */}
+          {shouldShowSeparatorAfterActor && <Separator />}
+
+          {/* DAO */}
           {!hideDao && (
             <FeedItemDao
               address={item.daoId}
@@ -81,25 +100,28 @@ export const FeedItem: React.FC<FeedItemProps> = ({
               daoImage={item.daoImage}
             />
           )}
-          {(!hideActor || !hideDao) && (
-            <Text color="tertiary" fontSize="14">
-              •
-            </Text>
-          )}
-          <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
         </Flex>
 
         {/* Content */}
         {renderContent()}
 
-        {/* Actions section */}
+        {/* Actions section (future)
         <Flex
           gap="x4"
           align="center"
           pt="x2"
           style={{ borderTop: '1px solid var(--border)' }}
-        >
-          {/* Placeholder for actions - to be implemented */}
+        ></Flex> */}
+
+        <Flex gap="x2" align="center" w="100%" justify="flex-end" wrap="wrap">
+          {/* Chain */}
+          {<FeedItemChain chainId={item.chainId} />}
+
+          {/* Separator before timestamp */}
+          {<Separator />}
+
+          {/* Timestamp */}
+          <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
         </Flex>
       </Stack>
     </Flex>

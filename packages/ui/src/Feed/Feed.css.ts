@@ -60,19 +60,7 @@ export const feedItemActorName = style({
   },
 })
 
-export const tokenImage = style([
-  atoms({
-    borderRadius: 'curved',
-    overflow: 'hidden',
-  }),
-  {
-    width: 80,
-    height: 80,
-    objectFit: 'cover',
-  },
-])
-
-export const tokenImageFullWidth = style([
+export const feedItemImage = style([
   atoms({
     borderRadius: 'curved',
     overflow: 'hidden',

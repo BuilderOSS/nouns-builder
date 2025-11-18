@@ -23,7 +23,7 @@ export const FeedItemDao: React.FC<FeedItemDaoProps> = ({
   const { getDaoLink } = useLinks()
 
   return (
-    <LinkWrapper link={getDaoLink(chainId, address)} align="center" gap="x2">
+    <LinkWrapper link={getDaoLink(chainId, address)} align="center" gap="x1">
       <Flex
         style={{
           width: 24,

@@ -11,6 +11,7 @@ type FallbackImageProps = Omit<
   onImageError?: () => void
   errorFallbackSrc?: string
   loadingPlaceholderSrc?: string
+  loadingPlaceholder?: React.ReactNode
 }
 
 export const FallbackImage = forwardRef<HTMLImageElement, FallbackImageProps>(
@@ -21,6 +22,7 @@ export const FallbackImage = forwardRef<HTMLImageElement, FallbackImageProps>(
       onImageError,
       errorFallbackSrc,
       loadingPlaceholderSrc,
+      loadingPlaceholder,
       ...rest
     },
     ref
@@ -36,7 +38,7 @@ export const FallbackImage = forwardRef<HTMLImageElement, FallbackImageProps>(
       loadingPlaceholderSrc,
     })
 
-    if (!src) return null
+    if (!src) return loadingPlaceholder ?? null
 
     return <img ref={ref} alt={alt} src={src} onError={handleError} {...rest} />
   }
