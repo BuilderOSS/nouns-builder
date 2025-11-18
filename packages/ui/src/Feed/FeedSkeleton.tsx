@@ -11,41 +11,58 @@ interface FeedSkeletonProps {
 const FeedSkeletonItem: React.FC = () => {
   return (
     <Flex className={feedItemCard}>
-      <Flex gap="x4" w="100%">
-        <Box className={`${skeletonCircle} ${skeletonPulse}`} />
-
-        <Stack gap="x3" style={{ flex: 1, minWidth: 0 }}>
+      <Stack gap="x3" w="100%">
+        {/* Top row: Avatars and timestamp */}
+        <Flex gap="x2" align="center">
           <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: '60%', height: 24 }}
+            className={`${skeletonCircle} ${skeletonPulse}`}
+            style={{ width: 24, height: 24 }}
+          />
+          <Box
+            className={`${skeletonCircle} ${skeletonPulse}`}
+            style={{ width: 24, height: 24 }}
           />
           <Box
             className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: '80%', height: 20 }}
+            style={{ width: 60, height: 14 }}
+          />
+        </Flex>
+
+        {/* Full-width image */}
+        <Box
+          className={`${skeletonBox} ${skeletonPulse}`}
+          style={{ width: '100%', aspectRatio: '1 / 1', borderRadius: '12px' }}
+        />
+
+        {/* Content below image */}
+        <Stack gap="x2">
+          <Box
+            className={`${skeletonBox} ${skeletonPulse}`}
+            style={{ width: '50%', height: 20 }}
+          />
+          <Box
+            className={`${skeletonBox} ${skeletonPulse}`}
+            style={{ width: '70%', height: 18 }}
           />
           <Box
             className={`${skeletonBox} ${skeletonPulse}`}
             style={{ width: '40%', height: 16 }}
           />
-
-          <Flex justify="space-between" align="center" mt="x2" gap="x4">
-            <Flex align="center" gap="x2">
-              <Box
-                className={`${skeletonCircle} ${skeletonPulse}`}
-                style={{ width: 24, height: 24 }}
-              />
-              <Box
-                className={`${skeletonBox} ${skeletonPulse}`}
-                style={{ width: 80, height: 16 }}
-              />
-            </Flex>
-            <Box
-              className={`${skeletonBox} ${skeletonPulse}`}
-              style={{ width: 60, height: 14 }}
-            />
-          </Flex>
         </Stack>
-      </Flex>
+
+        {/* Actions section */}
+        <Flex
+          gap="x4"
+          align="center"
+          pt="x2"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <Box
+            className={`${skeletonBox} ${skeletonPulse}`}
+            style={{ width: 60, height: 16 }}
+          />
+        </Flex>
+      </Stack>
     </Flex>
   )
 }

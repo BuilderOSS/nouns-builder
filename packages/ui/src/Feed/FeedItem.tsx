@@ -65,21 +65,41 @@ export const FeedItem: React.FC<FeedItemProps> = ({
   return (
     <Flex className={feedItemCard}>
       <Stack gap="x3" w="100%">
+        {/* Top row: Avatars and timestamp */}
+        <Flex gap="x2" align="center" wrap="wrap">
+          {!hideActor && <FeedItemActor address={item.actor} />}
+          {!hideActor && !hideDao && (
+            <Text color="tertiary" fontSize="14">
+              •
+            </Text>
+          )}
+          {!hideDao && (
+            <FeedItemDao
+              address={item.daoId}
+              chainId={item.chainId}
+              daoName={item.daoName}
+              daoImage={item.daoImage}
+            />
+          )}
+          {(!hideActor || !hideDao) && (
+            <Text color="tertiary" fontSize="14">
+              •
+            </Text>
+          )}
+          <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
+        </Flex>
+
+        {/* Content */}
         {renderContent()}
 
-        <Flex justify="space-between" align="center" mt="x2" gap="x4" wrap="wrap">
-          <Flex gap="x4" align="center" wrap="wrap">
-            {!hideActor && <FeedItemActor address={item.actor} />}
-            {!hideDao && (
-              <FeedItemDao
-                address={item.daoId}
-                chainId={item.chainId}
-                daoName={item.daoName}
-                daoImage={item.daoImage}
-              />
-            )}
-          </Flex>
-          <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
+        {/* Actions section */}
+        <Flex
+          gap="x4"
+          align="center"
+          pt="x2"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          {/* Placeholder for actions - to be implemented */}
         </Flex>
       </Stack>
     </Flex>
