@@ -78,7 +78,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
   const [hasConfirmedRewards, setHasConfirmedRewards] = useState<boolean>(false)
   const [deploymentError, setDeploymentError] = useState<string | undefined>()
   const chain = useChainStore((x) => x.chain)
-  const { setAddresses } = useDaoStore()
+  const { addresses, setAddresses } = useDaoStore()
   const isL2 = L2_CHAINS.includes(chain.id)
   const { data: version, isLoading: isVersionLoading } = useReadContract({
     abi: managerAbi,
@@ -348,9 +348,14 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     ]
   )
 
+  const isDeployed = useMemo(
+    () => !!addresses.token && fulfilledSections.includes(title),
+    [addresses.token, fulfilledSections, title]
+  )
+
   return (
     <Box>
-      {!fulfilledSections.includes(title) ? (
+      {!isDeployed ? (
         <Box>
           <Flex direction={'column'}>
             <ReviewSection subHeading="General Info">
