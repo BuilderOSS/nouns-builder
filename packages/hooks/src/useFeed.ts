@@ -135,10 +135,13 @@ export function useFeed({
         return true
       })
   }, [data])
-  const hasMore = useMemo(() => data?.[data.length - 1]?.hasMore ?? false, [data])
+  const hasMore: boolean = useMemo(() => {
+    const lastPage = data?.[data.length - 1]
+    return lastPage?.hasMore ?? false
+  }, [data])
   const isLoading = useMemo(() => !data && !error && enabled, [data, error, enabled])
-  const isLoadingMore = useMemo(
-    () => (isValidating && data && data.length < size ? true : false),
+  const isLoadingMore: boolean = useMemo(
+    () => !!(isValidating && size > 0 && data && size > data.length),
     [isValidating, data, size]
   )
 

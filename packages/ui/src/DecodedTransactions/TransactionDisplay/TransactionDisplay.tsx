@@ -16,7 +16,11 @@ export const TransactionDisplay: React.FC<
       ? decoded.transaction
       : decoded.transaction.encodedData
 
-    return <NonDecodedDisplay {...{ chainId, target: decoded.target, calldata }} />
+    return (
+      <NonDecodedDisplay
+        {...{ chainId, target: decoded.target, calldata, value: decoded.value }}
+      />
+    )
   }
 
   return (
@@ -26,6 +30,7 @@ export const TransactionDisplay: React.FC<
         addresses,
         transaction: decoded.transaction,
         target: decoded.target,
+        value: decoded.value,
       }}
     />
   )

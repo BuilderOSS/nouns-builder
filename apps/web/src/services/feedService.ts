@@ -138,20 +138,35 @@ async function fetchWithSortedSetCache(
       const hasMore = items.length > limit
       const limitedItems = items.slice(0, limit)
 
-      log('Feed cache hit', {
-        key,
-        itemCount: limitedItems.length,
-        hasMore,
-        duration: Date.now() - startTime,
-      })
+      // If cache doesn't have enough items (less than limit + 1) and we're using a cursor,
+      // we need to check if there's actually more data beyond the cache.
+      // Only trust hasMore=false if we got fewer items than requested without a cursor,
+      // or if we're at the very beginning of the cache (no cursor).
+      const shouldTrustCache = !cursor || items.length > limit
 
-      return hasMore
-        ? {
-            items: limitedItems,
-            hasMore: true,
-            nextCursor: limitedItems[limitedItems.length - 1].timestamp,
-          }
-        : { items: limitedItems, hasMore: false, nextCursor: null }
+      if (shouldTrustCache) {
+        log('Feed cache hit', {
+          key,
+          itemCount: limitedItems.length,
+          hasMore,
+          duration: Date.now() - startTime,
+        })
+
+        return hasMore
+          ? {
+              items: limitedItems,
+              hasMore: true,
+              nextCursor: limitedItems[limitedItems.length - 1].timestamp,
+            }
+          : { items: limitedItems, hasMore: false, nextCursor: null }
+      }
+
+      // Cache is incomplete for this cursor position - fall through to fetch fresh data
+      log('Feed cache incomplete, fetching fresh data', {
+        key,
+        cachedCount: items.length,
+        cursor,
+      })
     }
   } catch (err) {
     console.warn('Redis cache read error:', err)
@@ -186,15 +201,25 @@ async function fetchWithSortedSetCache(
         const hasMore = items.length > limit
         const limitedItems = items.slice(0, limit)
 
-        log('Feed cache hit after wait', { key, itemCount: limitedItems.length })
+        const shouldTrustCache = !cursor || items.length > limit
 
-        return hasMore
-          ? {
-              items: limitedItems,
-              hasMore: true,
-              nextCursor: limitedItems[limitedItems.length - 1].timestamp,
-            }
-          : { items: limitedItems, hasMore: false, nextCursor: null }
+        if (shouldTrustCache) {
+          log('Feed cache hit after wait', { key, itemCount: limitedItems.length })
+
+          return hasMore
+            ? {
+                items: limitedItems,
+                hasMore: true,
+                nextCursor: limitedItems[limitedItems.length - 1].timestamp,
+              }
+            : { items: limitedItems, hasMore: false, nextCursor: null }
+        }
+
+        log('Feed cache incomplete after wait, proceeding to fetch', {
+          key,
+          cachedCount: items.length,
+          cursor,
+        })
       }
     } catch (err) {
       console.warn('Redis retry read error:', err)
