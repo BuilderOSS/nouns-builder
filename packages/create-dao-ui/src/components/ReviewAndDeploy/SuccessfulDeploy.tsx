@@ -158,7 +158,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
 
   return (
     <Flex direction={'column'}>
-      <Box mb={'x1'} fontWeight={700}>
+      <Box mb={'x1'} fontWeight={'heading'}>
         Successfully Deployed Contracts
       </Box>
       <Flex direction={'row'} align={'center'} mb={'x5'} height={'x6'}>
