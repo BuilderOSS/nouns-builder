@@ -16,6 +16,7 @@ import { ProposalVotedItem } from './ProposalVotedItem'
 export interface FeedItemProps {
   item: FeedItemType
   hideActor?: boolean
+  hideDao?: boolean
 }
 
 const formatTimestamp = (timestamp: number) => {
@@ -35,7 +36,11 @@ const formatTimestamp = (timestamp: number) => {
   })
 }
 
-export const FeedItem: React.FC<FeedItemProps> = ({ item, hideActor = false }) => {
+export const FeedItem: React.FC<FeedItemProps> = ({
+  item,
+  hideActor = false,
+  hideDao = false,
+}) => {
   const renderContent = () => {
     switch (item.type) {
       case 'PROPOSAL_CREATED':
@@ -65,12 +70,14 @@ export const FeedItem: React.FC<FeedItemProps> = ({ item, hideActor = false }) =
         <Flex justify="space-between" align="center" mt="x2" gap="x4" wrap="wrap">
           <Flex gap="x4" align="center" wrap="wrap">
             {!hideActor && <FeedItemActor address={item.actor} />}
-            <FeedItemDao
-              address={item.daoId}
-              chainId={item.chainId}
-              daoName={item.daoName}
-              daoImage={item.daoImage}
-            />
+            {!hideDao && (
+              <FeedItemDao
+                address={item.daoId}
+                chainId={item.chainId}
+                daoName={item.daoName}
+                daoImage={item.daoImage}
+              />
+            )}
           </Flex>
           <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
         </Flex>

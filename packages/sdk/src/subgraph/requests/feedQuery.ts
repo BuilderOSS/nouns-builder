@@ -256,6 +256,7 @@ export const getUserActivityFeed = async ({
     } as FeedEventsQueryVariables)
 
     const events = data.feedEvents
+
     const hasMore = events.length > limit
     const limitedEvents = events.slice(0, limit)
     const feedItems = limitedEvents.map((event) => transformFeedEvent(event, chainId))

@@ -56,13 +56,19 @@ export const Feed: React.FC<FeedProps> = ({
   return (
     <Stack gap="x4" w="100%" pb="x4">
       {items.map((item: FeedItemType) => (
-        <FeedItem key={item.id} item={item} hideActor={!!actor} />
+        <FeedItem key={item.id} item={item} hideActor={!!actor} hideDao={!!daoAddress} />
       ))}
 
       {isLoadingMore && <FeedSkeleton count={3} />}
 
       {hasMore && !isLoadingMore && (
         <LoadMoreButton onClick={fetchNextPage} isLoading={isLoadingMore} />
+      )}
+
+      {!hasMore && !isLoadingMore && (
+        <Flex w="100%" justify="center" align="center" py="x8">
+          <Text color="tertiary">No more feed content to show</Text>
+        </Flex>
       )}
     </Stack>
   )

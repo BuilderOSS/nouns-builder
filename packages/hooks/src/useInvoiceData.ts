@@ -71,23 +71,30 @@ export const useInvoiceData = (
   executionTransactionHash?: string
 ): InvoiceData => {
   const { invoiceCid, clientAddress, milestoneAmounts, tokenAddress } = useMemo(() => {
-    if (!decodedTransaction || decodedTransaction.isNotDecoded) return {}
+    if (
+      !decodedTransaction ||
+      decodedTransaction.isNotDecoded ||
+      !decodedTransaction.transaction.args ||
+      !decodedTransaction.transaction.args._escrowData ||
+      !decodedTransaction.transaction.args._milestoneAmounts
+    )
+      return {}
 
     const isEscrowV1 =
       decodedTransaction.target.toLowerCase() ===
       getEscrowBundlerV1(chainId).toLowerCase()
 
-    const decodedTxnArgs = decodedTransaction.transaction?.args
+    const { _escrowData, _milestoneAmounts } = decodedTransaction.transaction.args
 
     const { ipfsCid, clientAddress, tokenAddress } = isEscrowV1
-      ? decodeEscrowDataV1(decodedTxnArgs?._escrowData?.value as Hex)
-      : decodeEscrowData(decodedTxnArgs?._escrowData?.value as Hex)
+      ? decodeEscrowDataV1(_escrowData.value as Hex)
+      : decodeEscrowData(_escrowData.value as Hex)
 
     return {
       invoiceCid: ipfsCid,
       clientAddress: clientAddress as AddressType,
       tokenAddress: tokenAddress as AddressType,
-      milestoneAmounts: decodedTxnArgs['_milestoneAmounts']['value']
+      milestoneAmounts: _milestoneAmounts.value
         .toString()
         .split(',')
         .map((x: string) => BigInt(x)),

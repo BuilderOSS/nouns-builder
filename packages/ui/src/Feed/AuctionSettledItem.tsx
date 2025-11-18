@@ -1,5 +1,6 @@
 import type { AuctionSettledFeedItem } from '@buildeross/types'
-import { Box, Stack, Text } from '@buildeross/zord'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
 
@@ -27,9 +28,21 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
       <Stack gap="x2">
         <Text className={feedItemTitle}>Auction Settled</Text>
         <Text className={feedItemSubtitle}>{item.tokenName}</Text>
-        <Text className={feedItemMeta}>
-          Winning bid: {formatEther(BigInt(item.amount))} ETH
-        </Text>
+        <Flex align="center" gap="x1">
+          <Text className={feedItemMeta}>Winning bid:</Text>
+          <img
+            src="/chains/ethereum.svg"
+            alt="ETH"
+            loading="lazy"
+            decoding="async"
+            width="12px"
+            height="12px"
+            style={{ maxWidth: '12px', maxHeight: '12px', objectFit: 'contain' }}
+          />
+          <Text className={feedItemMeta}>
+            {formatCryptoVal(formatEther(BigInt(item.amount)))} ETH
+          </Text>
+        </Flex>
       </Stack>
     </LinkWrapper>
   )
