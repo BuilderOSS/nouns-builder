@@ -5212,7 +5212,7 @@ export type FeedEventsQuery = {
             image?: string | null
           }
         }
-        bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any }
+        bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any; bidder: any }
         dao: {
           __typename?: 'DAO'
           auctionAddress: any
@@ -6175,7 +6175,6 @@ export const FeedEventsDocument = gql`
           proposalNumber
           title
           description
-          title
         }
         vote {
           support
@@ -6228,6 +6227,7 @@ export const FeedEventsDocument = gql`
         bid {
           amount
           bidTime
+          bidder
         }
       }
       ... on AuctionSettledEvent {

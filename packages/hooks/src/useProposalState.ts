@@ -1,6 +1,11 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
-import type { AddressType, BytesType, CHAIN_ID, ProposalState } from '@buildeross/types'
+import {
+  type AddressType,
+  type BytesType,
+  type CHAIN_ID,
+  ProposalState,
+} from '@buildeross/types'
 import { useMemo } from 'react'
 import useSWR from 'swr'
 import { useConfig } from 'wagmi'
@@ -56,15 +61,15 @@ export const useProposalState = ({
   const proposalStateData = useMemo(() => {
     return {
       state,
-      isActive: state === 1, // ProposalState.Active
-      isPending: state === 0, // ProposalState.Pending
-      isSucceeded: state === 4, // ProposalState.Succeeded
-      isQueued: state === 5, // ProposalState.Queued
-      isExecuted: state === 7, // ProposalState.Executed
-      isDefeated: state === 3, // ProposalState.Defeated
-      isCanceled: state === 2, // ProposalState.Canceled
-      isVetoed: state === 8, // ProposalState.Vetoed
-      isExpired: state === 6, // ProposalState.Expired
+      isActive: state === ProposalState.Active,
+      isPending: state === ProposalState.Pending,
+      isSucceeded: state === ProposalState.Succeeded,
+      isQueued: state === ProposalState.Queued,
+      isExecuted: state === ProposalState.Executed,
+      isDefeated: state === ProposalState.Defeated,
+      isCanceled: state === ProposalState.Canceled,
+      isVetoed: state === ProposalState.Vetoed,
+      isExpired: state === ProposalState.Expired,
       isLoading,
       error,
     }

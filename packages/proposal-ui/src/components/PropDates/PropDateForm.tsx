@@ -116,7 +116,6 @@ export const PropDateForm = ({
 
   const handleSubmit = useCallback(
     async (values: PropDateFormValues) => {
-      console.log('values', values)
       setIsTxSuccess(false)
       setErrorMessage(null)
 
