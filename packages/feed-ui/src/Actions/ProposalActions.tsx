@@ -24,7 +24,6 @@ interface ProposalActionsProps {
   addresses: RequiredDaoContractAddresses
   isExecuted?: boolean
   updateItem?: ProposalUpdatePostedFeedItem
-  votesAvailable?: number
 }
 
 export const ProposalActions: React.FC<ProposalActionsProps> = ({
@@ -35,7 +34,6 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   proposalTitle,
   isExecuted,
   updateItem,
-  votesAvailable = 0,
 }) => {
   const { getProposalLink } = useLinks()
   const daoId = addresses.token
@@ -133,7 +131,6 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         proposalTitle={proposalTitle}
         chainId={chainId}
         addresses={addresses}
-        votesAvailable={votesAvailable}
       />
 
       {/* Propdate Modal */}

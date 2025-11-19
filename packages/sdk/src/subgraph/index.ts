@@ -20,6 +20,7 @@ export * from './requests/proposalQuery'
 export * from './requests/proposalsQuery'
 export * from './requests/sync'
 export * from './requests/tokensQuery'
+export * from './requests/userProposalVote'
 export {
   Auction_OrderBy,
   type AuctionBidFragment,

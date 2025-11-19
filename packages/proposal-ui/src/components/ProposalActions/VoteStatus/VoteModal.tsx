@@ -17,7 +17,7 @@ import {
   theme,
 } from '@buildeross/zord'
 import { Field, Formik } from 'formik'
-import React, { Fragment, useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { useSWRConfig } from 'swr'
 import { Hex } from 'viem'
 import { useConfig } from 'wagmi'
@@ -74,36 +74,33 @@ export const VoteModal: React.FC<VoteModalProps> = ({
   }, [setShowVoteModal, isCastVoteSuccess, onSuccess])
 
   return (
-    <Fragment>
-      {/* Vote Modal */}
-      <AnimatedModal
-        open={showVoteModal}
-        size={isCastVoteSuccess ? 'small' : 'medium'}
-        close={handleModalClose}
-      >
-        {isCastVoteSuccess ? (
-          <SuccessModalContent
-            success={true}
-            title={'Vote Submitted'}
-            subtitle={`You’ve successfully voted on this proposal`}
-          />
-        ) : (
-          <SubmitVoteForm
-            proposalId={proposalId}
-            votesAvailable={votesAvailable}
-            handleModalClose={handleModalClose}
-            setIsCastVoteSuccess={setIsCastVoteSuccess}
-            title={title}
-            addresses={addressesProp}
-            chainId={chainIdProp}
-          />
-        )}
-      </AnimatedModal>
-    </Fragment>
+    <AnimatedModal
+      open={showVoteModal}
+      size={isCastVoteSuccess ? 'small' : 'medium'}
+      close={handleModalClose}
+    >
+      {isCastVoteSuccess ? (
+        <SuccessModalContent
+          success={true}
+          title={'Vote Submitted'}
+          subtitle={`You’ve successfully voted on this proposal`}
+        />
+      ) : (
+        <SubmitVoteForm
+          proposalId={proposalId}
+          votesAvailable={votesAvailable}
+          handleModalClose={handleModalClose}
+          setIsCastVoteSuccess={setIsCastVoteSuccess}
+          title={title}
+          addresses={addressesProp}
+          chainId={chainIdProp}
+        />
+      )}
+    </AnimatedModal>
   )
 }
 
-const SubmitVoteForm: React.FC<{
+export const SubmitVoteForm: React.FC<{
   proposalId: string
   votesAvailable: number
   handleModalClose: () => void

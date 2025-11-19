@@ -52,10 +52,12 @@ export const useDaoMembership = ({
   chainId,
   collectionAddress,
   signerAddress,
+  enabled = true,
 }: {
   chainId: CHAIN_ID
   collectionAddress?: AddressType
   signerAddress?: AddressType
+  enabled?: boolean
 }): {
   data: DaoMembership | undefined
   isValidating: boolean
@@ -64,7 +66,7 @@ export const useDaoMembership = ({
   mutate: KeyedMutator<DaoMembershipResponse | null>
 } => {
   const { data, error, isLoading, isValidating, mutate } = useSWR(
-    !!collectionAddress && !!signerAddress
+    !!collectionAddress && !!signerAddress && enabled
       ? ([SWR_KEYS.DAO_MEMBERSHIP, chainId, collectionAddress, signerAddress] as const)
       : null,
     async ([, _chainId, _collectionAddress, _signerAddress]) =>

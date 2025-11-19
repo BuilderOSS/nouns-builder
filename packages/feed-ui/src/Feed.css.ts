@@ -1,4 +1,4 @@
-import { atoms, color, space } from '@buildeross/zord'
+import { atoms, space, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const feedItemCard = style([
@@ -14,8 +14,8 @@ export const feedItemCard = style([
   {
     transition: 'all 0.15s ease-in-out',
     ':hover': {
-      borderColor: color.border,
-      boxShadow: `0 2px 8px ${color.ghostHover}`,
+      borderColor: theme.colors.tertiary,
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
     },
   },
 ])
@@ -27,7 +27,7 @@ export const feedItemIcon = style({
   width: space.x10,
   height: space.x10,
   borderRadius: '50%',
-  backgroundColor: color.background2,
+  backgroundColor: theme.colors.background2,
   flexShrink: 0,
 })
 
@@ -49,9 +49,9 @@ export const feedItemMeta = atoms({
 
 export const feedItemActorName = style({
   textDecoration: 'none',
-  color: color.text2,
+  color: theme.colors.text2,
   ':hover': {
-    color: color.accent,
+    color: theme.colors.accent,
   },
 })
 

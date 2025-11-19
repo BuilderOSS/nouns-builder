@@ -25,8 +25,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let limit = 20 // default
   if (req.query.limit) {
     const parsed = parseInt(req.query.limit as string, 10)
-    if (isNaN(parsed) || parsed < 1 || parsed > 100) {
-      return res.status(400).json({ error: 'limit must be between 1 and 100' })
+    if (isNaN(parsed) || parsed < 1 || parsed > 33) {
+      return res.status(400).json({ error: 'limit must be between 1 and 33' })
     }
     limit = parsed
   }
