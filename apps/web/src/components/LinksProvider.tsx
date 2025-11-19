@@ -39,10 +39,12 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
     (
       chainId: CHAIN_ID,
       tokenAddress: AddressType,
-      proposalId: string | number | bigint
+      proposalId: string | number | bigint,
+      tab?: string
     ) => {
+      const baseHref = `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalId}`
       return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalId}`,
+        href: tab ? `${baseHref}?tab=${tab}` : baseHref,
       }
     },
     []

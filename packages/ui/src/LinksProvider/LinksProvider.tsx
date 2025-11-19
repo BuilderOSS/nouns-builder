@@ -45,10 +45,12 @@ const defaultGetDaoLink = (
 const defaultGetProposalLink = (
   chainId: CHAIN_ID,
   tokenAddress: AddressType,
-  proposalId: number | string | bigint
+  proposalId: number | string | bigint,
+  tab?: string
 ) => {
+  const baseHref = `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalId}`
   return {
-    href: `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalId}`,
+    href: tab ? `${baseHref}?tab=${tab}` : baseHref,
   }
 }
 

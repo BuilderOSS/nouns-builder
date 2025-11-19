@@ -7,3 +7,11 @@ export type DaoContractAddresses = {
   treasury?: AddressType
   governor?: AddressType
 }
+
+export type RequiredDaoContractAddresses = DaoContractAddresses & {
+  token: AddressType
+  auction: AddressType
+  governor: AddressType
+  metadata: AddressType
+  treasury: AddressType
+}

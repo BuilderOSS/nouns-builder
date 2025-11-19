@@ -25,7 +25,9 @@ export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) =>
 
   const proposalImage = findFirstImage(item.proposalDescription)
   return (
-    <LinkWrapper link={getProposalLink(item.chainId, item.daoId, item.proposalId)}>
+    <LinkWrapper
+      link={getProposalLink(item.chainId, item.daoId, item.proposalNumber, 'votes')}
+    >
       <Stack gap="x3" w="100%">
         {proposalImage && (
           <Box className={feedItemImage}>

@@ -1,4 +1,5 @@
 import { CHAIN_ID } from './chain'
+import { RequiredDaoContractAddresses } from './dao'
 import { AddressType, BytesType } from './hex'
 
 export const FeedItemTypes = {
@@ -34,6 +35,7 @@ export type BaseFeedItem = {
   id: string
   type: FeedItemType
   daoId: AddressType
+  addresses: RequiredDaoContractAddresses
   daoName: string
   daoSymbol: string
   daoImage: string

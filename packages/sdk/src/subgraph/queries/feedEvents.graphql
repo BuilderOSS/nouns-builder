@@ -13,7 +13,11 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
     transactionHash
     actor
     dao {
+      auctionAddress
+      governorAddress
+      metadataAddress
       tokenAddress
+      treasuryAddress
       name
       symbol
       contractImage
