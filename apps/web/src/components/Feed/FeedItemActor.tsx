@@ -1,11 +1,11 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { AddressType } from '@buildeross/types'
+import { Avatar } from '@buildeross/ui/Avatar'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { Text } from '@buildeross/zord'
 import React from 'react'
 
-import { Avatar } from '../Avatar'
-import { useLinks } from '../LinksProvider'
-import { LinkWrapper } from '../LinkWrapper'
 import { feedItemActorName } from './Feed.css'
 
 interface FeedItemActorProps {

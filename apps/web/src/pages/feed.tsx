@@ -1,5 +1,5 @@
-import { Feed } from '@buildeross/ui/Feed'
 import { Flex } from '@buildeross/zord'
+import { Feed } from 'src/components/Feed'
 import { Meta } from 'src/components/Meta'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 

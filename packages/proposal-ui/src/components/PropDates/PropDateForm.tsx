@@ -6,9 +6,9 @@ import {
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { MessageType, type PropDate } from '@buildeross/sdk/subgraph'
+import { MessageType } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
@@ -60,19 +60,33 @@ const getErrorMessage = (error: unknown): string => {
   return 'An unknown error occurred.'
 }
 
+export interface PropDateReplyTo {
+  id: Hex
+  creator: Hex
+  message: string
+}
+
+export interface PropDateFormProps {
+  closeForm: () => void
+  onSuccess: () => void
+  proposalId: string
+  replyTo?: PropDateReplyTo
+  invoiceData?: InvoiceMetadata
+  chainId?: CHAIN_ID
+  addresses?: RequiredDaoContractAddresses
+  insideModal?: boolean
+}
+
 export const PropDateForm = ({
   closeForm,
   onSuccess,
   proposalId,
   replyTo,
   invoiceData,
-}: {
-  closeForm: () => void
-  onSuccess: () => void
-  proposalId: string
-  replyTo?: PropDate
-  invoiceData?: InvoiceMetadata
-}) => {
+  chainId: chainIdProp,
+  addresses: addressesProp,
+  insideModal = false,
+}: PropDateFormProps) => {
   const initialValues = useMemo(
     () =>
       ({
@@ -83,10 +97,13 @@ export const PropDateForm = ({
       }) as PropDateFormValues,
     [proposalId, replyTo?.id]
   )
-  const { id: chainId } = useChainStore((x) => x.chain)
-  const {
-    addresses: { token },
-  } = useDaoStore()
+  const storeChain = useChainStore((x) => x.chain)
+  const storeAddresses = useDaoStore((x) => x.addresses)
+
+  // Use props if provided, otherwise fall back to store
+  const chainId = chainIdProp || storeChain.id
+  const token = addressesProp?.token || storeAddresses.token
+
   const config = useConfig()
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -99,6 +116,7 @@ export const PropDateForm = ({
 
   const handleSubmit = useCallback(
     async (values: PropDateFormValues) => {
+      console.log('values', values)
       setIsTxSuccess(false)
       setErrorMessage(null)
 
@@ -178,16 +196,20 @@ export const PropDateForm = ({
     setIsTxSuccess(false)
   }, [onSuccess])
 
+  const boxProps = insideModal
+    ? {}
+    : {
+        p: 'x6',
+        borderColor: 'border',
+        borderStyle: 'solid',
+        borderRadius: 'curved',
+        borderWidth: 'normal',
+        backgroundColor: 'background1',
+        mb: 'x6',
+      }
+
   return (
-    <Box
-      p="x6"
-      borderColor="border"
-      borderStyle="solid"
-      borderRadius="curved"
-      borderWidth="normal"
-      backgroundColor="background1"
-      mb="x6"
-    >
+    <Box {...boxProps}>
       <Flex justify="space-between" mb="x4" align="center">
         <Text fontSize={20} fontWeight="label">
           Create Propdate
@@ -209,7 +231,8 @@ export const PropDateForm = ({
                     Replying to:
                   </Text>
                   <ReplyTo
-                    replyTo={replyTo}
+                    creator={replyTo.creator}
+                    message={replyTo.message}
                     ensName={replyToEnsName}
                     ensAvatar={replyToEnsAvatar}
                   />
@@ -316,11 +339,13 @@ export const PropDateForm = ({
 }
 
 const ReplyTo = ({
-  replyTo,
+  creator,
+  message,
   ensName,
   ensAvatar,
 }: {
-  replyTo: PropDate
+  creator: Hex
+  message: string
   ensName?: string | null
   ensAvatar?: string | null
 }) => {
@@ -338,9 +363,9 @@ const ReplyTo = ({
       gap="x1"
     >
       <Flex align="center" gap="x1">
-        <Avatar address={replyTo.creator} src={ensAvatar || undefined} size="16" />
+        <Avatar address={creator} src={ensAvatar || undefined} size="16" />
         <Text variant={'label-sm'} fontWeight="label">
-          {ensName || walletSnippet(replyTo.creator)}
+          {ensName || walletSnippet(creator)}
         </Text>
       </Flex>
       <Text
@@ -351,7 +376,7 @@ const ReplyTo = ({
           paddingLeft: 'var(--space-x1)',
         }}
       >
-        {replyTo.message}
+        {message}
       </Text>
     </Flex>
   )

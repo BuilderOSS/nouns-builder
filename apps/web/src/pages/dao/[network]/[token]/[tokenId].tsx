@@ -6,7 +6,6 @@ import {
   About,
   Activity,
   Admin,
-  Feed,
   SectionHandler,
   SmartContracts,
   Treasury,
@@ -21,6 +20,7 @@ import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
+import { DaoFeed } from 'src/components/DaoFeed'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
@@ -141,7 +141,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     }
     const daoFeed = {
       title: 'Feed',
-      component: [<Feed key="feed" collectionAddress={collection} />],
+      component: [<DaoFeed key="feed" />],
     }
 
     const publicSections = [
@@ -153,7 +153,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     ]
 
     return hasThreshold ? [...publicSections, adminSection] : publicSections
-  }, [hasThreshold, collection, openTab, openProposalCreatePage, openProposalReviewPage])
+  }, [hasThreshold, openTab, openProposalCreatePage, openProposalReviewPage])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''

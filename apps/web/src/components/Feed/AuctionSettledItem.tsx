@@ -1,12 +1,13 @@
 import type { AuctionSettledFeedItem } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import Image from 'next/image'
 import React from 'react'
 import { formatEther } from 'viem'
 
-import { FallbackImage } from '../FallbackImage'
-import { useLinks } from '../LinksProvider'
-import { LinkWrapper } from '../LinkWrapper'
 import { feedItemImage, feedItemSubtitle, feedItemTitle } from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
 
@@ -35,13 +36,13 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
           <Text className={feedItemTitle}>{item.tokenName} - Auction Settled</Text>
           <Flex align="center" gap="x1">
             <Text className={feedItemSubtitle}>Winning bid:</Text>
-            <img
+            <Image
               src="/chains/ethereum.svg"
               alt="ETH"
               loading="lazy"
               decoding="async"
-              width="12px"
-              height="12px"
+              width={12}
+              height={12}
               style={{ maxWidth: '12px', maxHeight: '12px', objectFit: 'contain' }}
             />
             <Text className={feedItemSubtitle}>
