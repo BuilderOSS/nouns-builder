@@ -1,11 +1,10 @@
-import { governorAbi } from '@buildeross/sdk/contract'
+import { useVotes } from '@buildeross/hooks/useVotes'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { AddressType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React, { Fragment, useMemo } from 'react'
 import { getAddress } from 'viem'
-import { useAccount, useReadContracts } from 'wagmi'
+import { useAccount } from 'wagmi'
 
 import { CancelButton } from './CancelButton'
 import { ConnectWalletAction } from './ConnectWalletAction'
@@ -26,35 +25,17 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((state) => state.chain)
 
-  const { data, isLoading } = useReadContracts({
-    query: {
-      enabled: !!userAddress,
-    },
-    allowFailure: false,
-    contracts: [
-      {
-        abi: governorAbi,
-        address: addresses.governor as AddressType,
-        chainId: chain.id,
-        functionName: 'getVotes',
-        args: [userAddress as AddressType, BigInt(proposal.timeCreated)],
-      },
-      {
-        abi: governorAbi,
-        address: addresses.governor as AddressType,
-        chainId: chain.id,
-        functionName: 'vetoer',
-      },
-    ] as const,
+  const votesData = useVotes({
+    chainId: chain.id,
+    collectionAddress: addresses.token,
+    governorAddress: addresses.governor,
+    signerAddress: userAddress,
   })
 
   const { votesAvailable, isVetoer, isProposer, signerVote } = useMemo(() => {
-    const [votes, vetoer] = data ?? [undefined, undefined]
+    const { votes, isVetoer } = votesData
 
     const votesAvailable = !!votes ? Number(votes) : 0
-
-    const isVetoer =
-      !!userAddress && !!vetoer && getAddress(vetoer) === getAddress(userAddress)
 
     const isProposer =
       !!userAddress && getAddress(proposal.proposer) == getAddress(userAddress)
@@ -69,10 +50,10 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
       isProposer,
       signerVote,
     }
-  }, [data, userAddress, proposal.votes, proposal.proposer])
+  }, [votesData, userAddress, proposal.votes, proposal.proposer])
 
   if (!userAddress) return <ConnectWalletAction />
-  if (isLoading) return null
+  if (votesData.isLoading) return null
 
   return (
     <Fragment>

@@ -23,15 +23,19 @@ export const PropdateModalWrapper: React.FC<PropdateModalWrapperProps> = ({
 }) => {
   return (
     <AnimatedModal open={isOpen} close={onClose} size="large">
-      <PropDateForm
-        proposalId={proposalId as string}
-        chainId={chainId}
-        addresses={addresses}
-        replyTo={replyTo}
-        closeForm={onClose}
-        onSuccess={onClose}
-        insideModal
-      />
+      <>
+        {isOpen && (
+          <PropDateForm
+            proposalId={proposalId as string}
+            chainId={chainId}
+            addresses={addresses}
+            replyTo={replyTo}
+            closeForm={onClose}
+            onSuccess={onClose}
+            insideModal
+          />
+        )}
+      </>
     </AnimatedModal>
   )
 }

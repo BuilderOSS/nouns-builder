@@ -44,25 +44,28 @@ export const BidModal: React.FC<BidModalProps> = ({
 
   return (
     <AnimatedModal open={isOpen} close={handleClose} size="medium">
-      {isSuccess ? (
-        <SuccessModalContent
-          success
-          title="Bid Placed!"
-          subtitle="Your bid has been submitted successfully"
-        />
-      ) : (
-        <Stack gap="x6" p="x6" w="100%">
-          <Text variant="heading-md">Place Your Bid</Text>
-          <PlaceBid
-            chain={chain}
-            tokenId={tokenId}
-            daoName={daoName}
-            addresses={addresses}
-            highestBid={highestBid}
-            onSuccess={handleSuccess}
-          />
-        </Stack>
-      )}
+      <>
+        {isOpen &&
+          (isSuccess ? (
+            <SuccessModalContent
+              success
+              title="Bid Placed!"
+              subtitle="Your bid has been submitted successfully"
+            />
+          ) : (
+            <Stack gap="x6" p="x6" w="100%">
+              <Text variant="heading-md">Place Your Bid</Text>
+              <PlaceBid
+                chain={chain}
+                tokenId={tokenId}
+                daoName={daoName}
+                addresses={addresses}
+                highestBid={highestBid}
+                onSuccess={handleSuccess}
+              />
+            </Stack>
+          ))}
+      </>
     </AnimatedModal>
   )
 }

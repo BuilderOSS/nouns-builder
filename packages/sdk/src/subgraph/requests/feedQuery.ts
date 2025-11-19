@@ -72,7 +72,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
-        creator: event.proposal.proposer,
+        proposer: event.proposal.proposer,
       }
     }
 
@@ -84,6 +84,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
+        proposer: event.proposal.proposer,
         voter: event.actor,
         reason: event.vote.reason || undefined,
         support: mapProposalVoteSupport(event.vote.support),
@@ -99,6 +100,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
+        proposer: event.proposal.proposer,
         messageType: event.update.messageType,
         message: event.update.message,
         originalMessageId: event.update.originalMessageId,
@@ -113,6 +115,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
+        proposer: event.proposal.proposer,
       }
     }
 

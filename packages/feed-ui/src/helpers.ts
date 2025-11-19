@@ -1,6 +1,6 @@
 export const findFirstImage = (markdown = ''): string | null => {
-  // Markdown image syntax: ![alt text](image_url)
-  const imageRegex = /!\[[^\]]*\]\(([^)]+)\)/
+  // Markdown image syntax: ![alt text](image_url "optional title")
+  const imageRegex = /!\[[^\]]*]\((\S+?)(?:\s+"[^"]*")?\)/
 
   const match = markdown.match(imageRegex)
   return match ? match[1] : null

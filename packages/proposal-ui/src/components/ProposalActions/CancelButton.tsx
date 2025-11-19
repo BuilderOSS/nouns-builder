@@ -11,7 +11,7 @@ interface CancelButtonProps {
   showVeto?: boolean
 }
 
-const Cancel: React.FC<{
+export const Cancel: React.FC<{
   proposalId: string
   onSuccess: () => void
 }> = (props) => {

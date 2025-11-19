@@ -40,6 +40,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         proposalNumber
         title
         description
+        proposer
       }
       vote {
         support
@@ -54,6 +55,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         proposalNumber
         title
         description
+        proposer
       }
       update {
         messageType
@@ -68,6 +70,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         proposalNumber
         title
         description
+        proposer
       }
     }
 

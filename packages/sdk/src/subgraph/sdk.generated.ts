@@ -5332,6 +5332,7 @@ export type FeedEventsQuery = {
           proposalNumber: number
           title?: string | null
           description?: string | null
+          proposer: any
         }
         dao: {
           __typename?: 'DAO'
@@ -5359,6 +5360,7 @@ export type FeedEventsQuery = {
           proposalNumber: number
           title?: string | null
           description?: string | null
+          proposer: any
         }
         update: {
           __typename?: 'ProposalUpdate'
@@ -5392,6 +5394,7 @@ export type FeedEventsQuery = {
           proposalNumber: number
           title?: string | null
           description?: string | null
+          proposer: any
         }
         vote: {
           __typename?: 'ProposalVote'
@@ -5712,6 +5715,21 @@ export type TotalAuctionSalesQueryVariables = Exact<{
 export type TotalAuctionSalesQuery = {
   __typename?: 'Query'
   dao?: { __typename?: 'DAO'; totalAuctionSales: any } | null
+}
+
+export type UserProposalVoteQueryVariables = Exact<{
+  where?: InputMaybe<ProposalVote_Filter>
+}>
+
+export type UserProposalVoteQuery = {
+  __typename?: 'Query'
+  proposalVotes: Array<{
+    __typename?: 'ProposalVote'
+    voter: any
+    support: ProposalVoteSupport
+    weight: number
+    reason?: string | null
+  }>
 }
 
 export const AuctionFragmentDoc = gql`
@@ -6175,6 +6193,7 @@ export const FeedEventsDocument = gql`
           proposalNumber
           title
           description
+          proposer
         }
         vote {
           support
@@ -6188,6 +6207,7 @@ export const FeedEventsDocument = gql`
           proposalNumber
           title
           description
+          proposer
         }
         update {
           messageType
@@ -6201,6 +6221,7 @@ export const FeedEventsDocument = gql`
           proposalNumber
           title
           description
+          proposer
         }
       }
       ... on AuctionCreatedEvent {
@@ -6427,6 +6448,14 @@ export const TotalAuctionSalesDocument = gql`
       totalAuctionSales
     }
   }
+`
+export const UserProposalVoteDocument = gql`
+  query userProposalVote($where: ProposalVote_filter) {
+    proposalVotes(where: $where, first: 1) {
+      ...ProposalVote
+    }
+  }
+  ${ProposalVoteFragmentDoc}
 `
 
 export type SdkFunctionWrapper = <T>(
@@ -6930,6 +6959,24 @@ export function getSdk(
             signal,
           }),
         'totalAuctionSales',
+        'query',
+        variables
+      )
+    },
+    userProposalVote(
+      variables?: UserProposalVoteQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<UserProposalVoteQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<UserProposalVoteQuery>({
+            document: UserProposalVoteDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'userProposalVote',
         'query',
         variables
       )
