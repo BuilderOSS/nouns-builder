@@ -1,7 +1,7 @@
+import { Feed } from '@buildeross/feed-ui'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
-import { Feed } from 'src/components/Feed'
 
 export const DaoFeed: React.FC = () => {
   const chain = useChainStore((x) => x.chain)

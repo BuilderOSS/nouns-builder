@@ -1,21 +1,20 @@
-import type { AuctionSettledFeedItem } from '@buildeross/types'
+import type { AuctionBidPlacedFeedItem } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
-import Image from 'next/image'
 import React from 'react'
 import { formatEther } from 'viem'
 
 import { feedItemImage, feedItemSubtitle, feedItemTitle } from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
 
-interface AuctionSettledItemProps {
-  item: AuctionSettledFeedItem
+interface AuctionBidPlacedItemProps {
+  item: AuctionBidPlacedFeedItem
 }
 
-export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) => {
+export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item }) => {
   const { getAuctionLink } = useLinks()
 
   return (
@@ -33,10 +32,10 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
 
         {/* Content below image */}
         <Stack gap="x2">
-          <Text className={feedItemTitle}>{item.tokenName} - Auction Settled</Text>
+          <Text className={feedItemTitle}>{item.tokenName} - Bid Placed</Text>
           <Flex align="center" gap="x1">
-            <Text className={feedItemSubtitle}>Winning bid:</Text>
-            <Image
+            <Text className={feedItemSubtitle}>Amount:</Text>
+            <img
               src="/chains/ethereum.svg"
               alt="ETH"
               loading="lazy"
