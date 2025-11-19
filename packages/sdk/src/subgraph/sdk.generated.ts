@@ -5215,7 +5215,11 @@ export type FeedEventsQuery = {
         bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any }
         dao: {
           __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
           tokenAddress: any
+          treasuryAddress: any
           name: string
           symbol: string
           contractImage: string
@@ -5243,7 +5247,11 @@ export type FeedEventsQuery = {
         }
         dao: {
           __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
           tokenAddress: any
+          treasuryAddress: any
           name: string
           symbol: string
           contractImage: string
@@ -5271,7 +5279,11 @@ export type FeedEventsQuery = {
         }
         dao: {
           __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
           tokenAddress: any
+          treasuryAddress: any
           name: string
           symbol: string
           contractImage: string
@@ -5296,7 +5308,11 @@ export type FeedEventsQuery = {
         }
         dao: {
           __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
           tokenAddress: any
+          treasuryAddress: any
           name: string
           symbol: string
           contractImage: string
@@ -5319,7 +5335,11 @@ export type FeedEventsQuery = {
         }
         dao: {
           __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
           tokenAddress: any
+          treasuryAddress: any
           name: string
           symbol: string
           contractImage: string
@@ -5348,7 +5368,11 @@ export type FeedEventsQuery = {
         }
         dao: {
           __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
           tokenAddress: any
+          treasuryAddress: any
           name: string
           symbol: string
           contractImage: string
@@ -5377,7 +5401,11 @@ export type FeedEventsQuery = {
         }
         dao: {
           __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
           tokenAddress: any
+          treasuryAddress: any
           name: string
           symbol: string
           contractImage: string
@@ -6122,7 +6150,11 @@ export const FeedEventsDocument = gql`
       transactionHash
       actor
       dao {
+        auctionAddress
+        governorAddress
+        metadataAddress
         tokenAddress
+        treasuryAddress
         name
         symbol
         contractImage

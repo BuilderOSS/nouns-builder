@@ -51,7 +51,9 @@ export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }
   const finalImage = isLoading ? null : (propdateImage ?? proposalImage)
 
   return (
-    <LinkWrapper link={getProposalLink(item.chainId, item.daoId, item.proposalId)}>
+    <LinkWrapper
+      link={getProposalLink(item.chainId, item.daoId, item.proposalNumber, 'propdates')}
+    >
       <Stack gap="x3" w="100%">
         {proposalImage && (
           <Box className={feedItemImage}>

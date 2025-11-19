@@ -54,6 +54,13 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
     actor: event.actor,
     txHash: event.transactionHash,
     blockNumber: Number(event.blockNumber),
+    addresses: {
+      token: event.dao.tokenAddress,
+      auction: event.dao.auctionAddress,
+      treasury: event.dao.treasuryAddress,
+      metadata: event.dao.metadataAddress,
+      governor: event.dao.governorAddress,
+    },
   }
 
   switch (event.__typename) {

@@ -52,18 +52,21 @@ export const FeedSkeletonItem: React.FC = () => {
           />
         </Stack>
 
-        {/* Actions section (future)
-        <Flex
-          gap="x4"
-          align="center"
-          pt="x2"
-          style={{ borderTop: '1px solid var(--border)' }}
-        >
+        {/* Actions section */}
+        <Flex gap="x2" align="center" wrap="wrap">
           <Box
             className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: 60, height: 16 }}
+            style={{ width: 80, height: 32, borderRadius: '8px' }}
           />
-        </Flex> */}
+          <Box
+            className={`${skeletonBox} ${skeletonPulse}`}
+            style={{ width: 100, height: 32, borderRadius: '8px' }}
+          />
+          <Box
+            className={`${skeletonBox} ${skeletonPulse}`}
+            style={{ width: 100, height: 32, borderRadius: '8px' }}
+          />
+        </Flex>
 
         {/* Bottom row: Chain and timestamp */}
         <Flex gap="x2" align="center" w="100%" justify="flex-end">

@@ -2,6 +2,7 @@ import type { FeedItem as FeedItemType } from '@buildeross/types'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
+import { FeedItemActions } from './Actions/FeedItemActions'
 import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
 import { AuctionCreatedItem } from './AuctionCreatedItem'
 import { AuctionSettledItem } from './AuctionSettledItem'
@@ -105,13 +106,8 @@ export const FeedItem: React.FC<FeedItemProps> = ({
         {/* Content */}
         {renderContent()}
 
-        {/* Actions section (future)
-        <Flex
-          gap="x4"
-          align="center"
-          pt="x2"
-          style={{ borderTop: '1px solid var(--border)' }}
-        ></Flex> */}
+        {/* Actions section */}
+        <FeedItemActions item={item} />
 
         <Flex gap="x2" align="center" w="100%" justify="flex-end" wrap="wrap">
           {/* Chain */}
