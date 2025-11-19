@@ -1,7 +1,6 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import type { CHAIN_ID } from '@buildeross/types'
 import { Flex, Text } from '@buildeross/zord'
-import Image from 'next/image'
 import React from 'react'
 
 import { feedItemActorName } from './Feed.css'
@@ -25,9 +24,11 @@ export const FeedItemChain: React.FC<FeedItemChainProps> = ({ chainId }) => {
           overflow: 'hidden',
         }}
       >
-        <Image
-          priority={true}
-          quality={100}
+        <img
+          width={22}
+          height={22}
+          loading="lazy"
+          decoding="async"
           style={{ height: 22, width: 22, borderRadius: '50%', overflow: 'hidden' }}
           src={chain.icon}
           alt={chain.name}

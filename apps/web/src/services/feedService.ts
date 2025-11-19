@@ -129,7 +129,7 @@ async function fetchWithSortedSetCache(
 
   // Try to get from sorted set cache
   try {
-    const maxScore = cursor?.toString() || '+inf'
+    const maxScore = cursor !== undefined ? `(${cursor}` : '+inf'
     const cachedItems = await redis.zrevrangebyscore(
       key,
       maxScore,
@@ -192,7 +192,7 @@ async function fetchWithSortedSetCache(
     await new Promise((resolve) => setTimeout(resolve, 200))
 
     try {
-      const maxScore = cursor?.toString() || '+inf'
+      const maxScore = cursor !== undefined ? `(${cursor}` : '+inf'
       const cachedItems = await redis.zrevrangebyscore(
         key,
         maxScore,
@@ -277,6 +277,14 @@ async function fetchWithSortedSetCache(
   }
 }
 
+function isProposalFeedItem(item: FeedItem): item is ProposalCreatedFeedItem {
+  return 'proposalNumber' in item
+}
+
+function isAuctionFeedItem(item: FeedItem): item is AuctionCreatedFeedItem {
+  return 'tokenId' in item
+}
+
 /**
  * Sort and paginate feed items with deterministic ordering
  * NOTE: May return duplicates at page boundaries for items with identical timestamps
@@ -289,22 +297,13 @@ function sortAndPaginate(feeds: FeedResponse[], limit: number): FeedResponse {
   allItems.sort((a, b) => {
     if (b.timestamp !== a.timestamp) return b.timestamp - a.timestamp
     if (a.chainId !== b.chainId) return a.chainId - b.chainId
-    if (
-      (a as ProposalCreatedFeedItem).proposalNumber !== undefined &&
-      (b as ProposalCreatedFeedItem).proposalNumber !== undefined
-    ) {
-      return (a as ProposalCreatedFeedItem).proposalNumber >
-        (b as ProposalCreatedFeedItem).proposalNumber
-        ? -1
-        : 1
+    if (isProposalFeedItem(a) && isProposalFeedItem(b)) {
+      if (a.proposalNumber === b.proposalNumber) return 0
+      return a.proposalNumber > b.proposalNumber ? -1 : 1
     }
-    if (
-      (a as AuctionCreatedFeedItem).tokenId !== undefined &&
-      (b as AuctionCreatedFeedItem).tokenId !== undefined
-    ) {
-      return (a as AuctionCreatedFeedItem).tokenId > (b as AuctionCreatedFeedItem).tokenId
-        ? -1
-        : 1
+    if (isAuctionFeedItem(a) && isAuctionFeedItem(b)) {
+      if (a.tokenId === b.tokenId) return 0
+      return a.tokenId > b.tokenId ? -1 : 1
     }
     return a.id.localeCompare(b.id)
   })
@@ -399,7 +398,7 @@ export async function fetchFeedDataService({
   }
 
   // Global feed (all chains) - don't cache merged result, only individual chains
-  const perChainLimit = Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10
+  const perChainLimit = Math.min(Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10, 33)
 
   const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
     try {
@@ -452,8 +451,9 @@ export async function fetchUserActivityFeedService({
   maxConcurrentConnections = 2,
 }: UserActivityParams): Promise<FeedResponse> {
   // Validate limit
-  if (limit <= 0 || limit > 100) {
-    throw new InvalidRequestError('Limit must be between 1 and 100')
+  if (limit <= 0 || limit > 33) {
+    throw new InvalidRequestError('Limit must be between 1 and 33')
+    // NOTE: we limit to 33 here, since we fetch limit * 3 items in each chain which should be < 100 as validated in sdk
   }
 
   // Validate actor
@@ -483,7 +483,7 @@ export async function fetchUserActivityFeedService({
   }
 
   // Global user activity (all chains) - don't cache merged result
-  const perChainLimit = Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10
+  const perChainLimit = Math.min(Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10, 33)
 
   const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
     try {

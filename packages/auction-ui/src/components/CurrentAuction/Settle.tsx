@@ -114,7 +114,7 @@ export const Settle = ({
         size="lg"
         chainId={chainId}
       >
-        {isWinner ? 'Claim NFT' : 'Start next auction'}
+        {isWinner ? 'Claim NFT' : 'Start next Auction'}
       </ContractButton>
     </Flex>
   )

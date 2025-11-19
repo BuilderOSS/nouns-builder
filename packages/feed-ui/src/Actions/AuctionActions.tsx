@@ -16,7 +16,6 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import { BidModal } from '../Modals/BidModal'
 
 interface AuctionActionsProps {
-  actor: AddressType
   daoName: string
   chainId: CHAIN_ID
   tokenId: string
@@ -24,7 +23,6 @@ interface AuctionActionsProps {
 }
 
 export const AuctionActions: React.FC<AuctionActionsProps> = ({
-  actor,
   daoName,
   chainId,
   tokenId,
@@ -51,7 +49,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   })
 
   const isWinner = (() => {
-    if (account?.toLowerCase() !== actor.toLowerCase()) return false
+    if (!account) return false
     return highestBidder?.toLowerCase() === account.toLowerCase()
   })()
 
@@ -91,11 +89,16 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         {/* Active auction - show bid option */}
         {isActive && isCurrentToken && (
           <>
-            <Button size="sm" variant="outline" onClick={() => setShowBidModal(true)}>
+            <Button
+              size="sm"
+              px="x3"
+              variant="outline"
+              onClick={() => setShowBidModal(true)}
+            >
               Place Bid
             </Button>
             <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
-              <Button size="sm" variant="secondary">
+              <Button size="sm" px="x3" variant="secondary">
                 View Details
               </Button>
             </LinkWrapper>
@@ -110,11 +113,12 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
               handleClick={handleSettle}
               variant="outline"
               size="sm"
+              px="x3"
             >
-              {isWinner ? 'Claim NFT' : 'Create New Auction'}
+              {isWinner ? 'Claim NFT' : 'Start next Auction'}
             </ContractButton>
             <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
-              <Button size="sm" variant="secondary">
+              <Button size="sm" px="x3" variant="secondary">
                 View Details
               </Button>
             </LinkWrapper>
@@ -125,14 +129,18 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         {(isOldAuction || settled) && (
           <>
             <LinkWrapper
-              link={getAuctionLink(chainId, daoId, currentTokenId?.toString())}
+              link={getAuctionLink(
+                chainId,
+                daoId,
+                currentTokenId ? currentTokenId.toString() : undefined
+              )}
             >
-              <Button size="sm" variant="outline">
+              <Button size="sm" px="x3" variant="outline">
                 Go to Latest Auction
               </Button>
             </LinkWrapper>
             <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
-              <Button size="sm" variant="secondary">
+              <Button size="sm" px="x3" variant="secondary">
                 View Details
               </Button>
             </LinkWrapper>

@@ -116,6 +116,9 @@ importers:
       '@buildeross/dao-ui':
         specifier: workspace:*
         version: link:../../packages/dao-ui
+      '@buildeross/feed-ui':
+        specifier: workspace:*
+        version: link:../../packages/feed-ui
       '@buildeross/hooks':
         specifier: workspace:*
         version: link:../../packages/hooks
@@ -937,6 +940,85 @@ importers:
       eslint-plugin-unused-imports:
         specifier: 2.0.0
         version: 2.0.0(@typescript-eslint/eslint-plugin@5.62.0(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1)(typescript@5.9.3))(eslint@8.57.1)
+
+  packages/feed-ui:
+    dependencies:
+      '@vanilla-extract/css':
+        specifier: ^1.17.2
+        version: 1.17.4(babel-plugin-macros@3.1.0)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.0(react@19.2.0)
+      viem:
+        specifier: ^2.38.2
+        version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      wagmi:
+        specifier: ^2.18.1
+        version: 2.18.1(@tanstack/query-core@5.90.3)(@tanstack/react-query@5.90.3(react@19.2.0))(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(react@19.2.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12)
+    devDependencies:
+      '@buildeross/auction-ui':
+        specifier: workspace:*
+        version: link:../auction-ui
+      '@buildeross/constants':
+        specifier: workspace:*
+        version: link:../constants
+      '@buildeross/eslint-config-custom':
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      '@buildeross/hooks':
+        specifier: workspace:*
+        version: link:../hooks
+      '@buildeross/ipfs-service':
+        specifier: workspace:*
+        version: link:../ipfs-service
+      '@buildeross/proposal-ui':
+        specifier: workspace:*
+        version: link:../proposal-ui
+      '@buildeross/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      '@buildeross/stores':
+        specifier: workspace:*
+        version: link:../stores
+      '@buildeross/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
+      '@buildeross/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@buildeross/utils':
+        specifier: workspace:*
+        version: link:../utils
+      '@buildeross/zord':
+        specifier: workspace:*
+        version: link:../zord
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.18.10
+      '@types/react':
+        specifier: ^19.2.2
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: ^19.1.5
+        version: 19.2.2(@types/react@19.2.2)
+      '@vanilla-extract/esbuild-plugin':
+        specifier: ^2.3.16
+        version: 2.3.18(babel-plugin-macros@3.1.0)(esbuild@0.25.11)
+      eslint:
+        specifier: 8.57.1
+        version: 8.57.1
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.1)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
 
   packages/hooks:
     dependencies:

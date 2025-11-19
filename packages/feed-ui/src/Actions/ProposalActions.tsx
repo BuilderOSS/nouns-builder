@@ -77,7 +77,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     return (
       <Flex gap="x2" align="center" wrap="wrap">
         <LinkWrapper link={getProposalLink(chainId, daoId, proposalNumber, 'details')}>
-          <Button size="sm" variant="secondary">
+          <Button size="sm" px="x3" variant="secondary">
             View Details
           </Button>
         </LinkWrapper>
@@ -92,11 +92,21 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
       <Flex gap="x2" align="center" wrap="wrap">
         {/* Active or pending proposals show vote option */}
         {(isActive || isPending) && (
-          <Button size="sm" variant="outline" onClick={() => setShowVoteModal(true)}>
+          <Button
+            size="sm"
+            px="x3"
+            variant="outline"
+            onClick={() => setShowVoteModal(true)}
+          >
             Vote
           </Button>
         )}
-        <Button size="sm" variant="outline" onClick={() => setShowPropdateModal(true)}>
+        <Button
+          size="sm"
+          px="x3"
+          variant="outline"
+          onClick={() => setShowPropdateModal(true)}
+        >
           {isUpdate ? 'Respond' : 'Add Update'}
         </Button>
 
@@ -108,7 +118,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
             isUpdate ? 'propdates' : 'details'
           )}
         >
-          <Button size="sm" variant="secondary">
+          <Button size="sm" px="x3" variant="secondary">
             View Details
           </Button>
         </LinkWrapper>
