@@ -3,7 +3,7 @@ import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid, getBids } from '@buildeross/sdk/subgraph'
 import { useDaoStore } from '@buildeross/stores'
-import { AddressType, Chain } from '@buildeross/types'
+import { AddressType, Chain, RequiredDaoContractAddresses } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
@@ -24,6 +24,8 @@ interface PlaceBidProps {
   daoName: string
   referral?: AddressType
   highestBid?: bigint
+  addresses?: RequiredDaoContractAddresses
+  onSuccess?: () => void
 }
 
 export const PlaceBid = ({
@@ -32,11 +34,16 @@ export const PlaceBid = ({
   referral,
   tokenId,
   daoName,
+  addresses: addressesProp,
+  onSuccess,
 }: PlaceBidProps) => {
   const { address, chain: wagmiChain } = useAccount()
   const { data: balance } = useBalance({ address: address, chainId: chain.id })
   const { mutate } = useSWRConfig()
-  const { addresses } = useDaoStore()
+  const { addresses: storeAddresses } = useDaoStore()
+
+  // Use prop addresses if provided, otherwise fall back to store
+  const addresses = addressesProp || storeAddresses
 
   const config = useConfig()
 
@@ -127,6 +134,9 @@ export const PlaceBid = ({
       await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token], () =>
         averageWinningBid(chain.id, addresses.token as Address)
       )
+
+      // Call onSuccess callback if provided
+      onSuccess?.()
     } catch (error) {
       console.error(error)
     } finally {
@@ -143,6 +153,7 @@ export const PlaceBid = ({
     tokenId,
     chain.id,
     mutate,
+    onSuccess,
   ])
 
   const handleCreateBid = useCallback(async () => {

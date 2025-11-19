@@ -42,14 +42,9 @@ export const feedItemSubtitle = atoms({
   color: 'text2',
 })
 
-export const feedItemDescription = atoms({
-  color: 'text3',
-  fontSize: 14,
-})
-
 export const feedItemMeta = atoms({
-  fontSize: 14,
   color: 'text3',
+  fontSize: 14,
 })
 
 export const feedItemActorName = style({
@@ -69,5 +64,27 @@ export const feedItemImage = style([
   {
     aspectRatio: '1 / 1',
     objectFit: 'cover',
+  },
+])
+
+export const feedItemTextContentWrapper = style([
+  {
+    width: '100%',
+    containerType: 'inline-size',
+  },
+])
+
+export const feedItemTextContent = style([
+  atoms({
+    p: 'x4',
+    borderRadius: 'curved',
+    backgroundColor: 'border',
+  }),
+  {
+    width: '100%',
+    maxWidth: '100%',
+    maxHeight: '100cqw',
+    overflow: 'auto',
+    fontSize: 14,
   },
 ])

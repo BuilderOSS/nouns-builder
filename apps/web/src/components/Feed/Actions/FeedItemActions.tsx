@@ -8,9 +8,11 @@ interface FeedItemActionsProps {
   item: FeedItem
 }
 
+const ONE_MONTH = 30 * 24 * 60 * 60
+
 export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
   // Only show actions for recent items (last 30 days)
-  const isRecent = item.timestamp > Date.now() / 1000 - 30 * 24 * 60 * 60
+  const isRecent = item.timestamp > Date.now() / 1000 - ONE_MONTH
 
   if (!isRecent) {
     return null
@@ -22,6 +24,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
     case 'AUCTION_SETTLED':
       return (
         <AuctionActions
+          actor={item.actor}
           chainId={item.chainId}
           tokenId={item.tokenId}
           addresses={item.addresses}
@@ -35,6 +38,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           chainId={item.chainId}
           proposalId={item.proposalId}
           proposalNumber={item.proposalNumber}
+          proposalTitle={item.proposalTitle}
           isExecuted={false}
           addresses={item.addresses}
         />
@@ -46,8 +50,9 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           chainId={item.chainId}
           proposalId={item.proposalId}
           proposalNumber={item.proposalNumber}
+          proposalTitle={item.proposalTitle}
           isExecuted={false}
-          isUpdate={true}
+          updateItem={item}
           addresses={item.addresses}
         />
       )
@@ -58,6 +63,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           chainId={item.chainId}
           proposalId={item.proposalId}
           proposalNumber={item.proposalNumber}
+          proposalTitle={item.proposalTitle}
           addresses={item.addresses}
           isExecuted={true}
         />

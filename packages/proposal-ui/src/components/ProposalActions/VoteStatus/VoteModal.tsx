@@ -2,7 +2,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { BytesType } from '@buildeross/types'
+import { BytesType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import {
@@ -43,16 +43,35 @@ interface FormValues {
   reason: string
 }
 
-const VoteModal: React.FC<{
+export interface VoteModalProps {
   title: string
   proposalId: string
   votesAvailable: number
   showVoteModal: boolean
   setShowVoteModal: (show: boolean) => void
-}> = ({ title, proposalId, votesAvailable, showVoteModal, setShowVoteModal }) => {
+  addresses?: RequiredDaoContractAddresses
+  chainId?: CHAIN_ID
+  onSuccess?: () => void
+}
+
+export const VoteModal: React.FC<VoteModalProps> = ({
+  title,
+  proposalId,
+  votesAvailable,
+  showVoteModal,
+  setShowVoteModal,
+  addresses: addressesProp,
+  chainId: chainIdProp,
+  onSuccess,
+}) => {
   const [isCastVoteSuccess, setIsCastVoteSuccess] = React.useState<boolean>(false)
 
-  const handleModalClose = useCallback(() => setShowVoteModal(false), [setShowVoteModal])
+  const handleModalClose = useCallback(() => {
+    setShowVoteModal(false)
+    if (isCastVoteSuccess && onSuccess) {
+      onSuccess()
+    }
+  }, [setShowVoteModal, isCastVoteSuccess, onSuccess])
 
   return (
     <Fragment>
@@ -75,6 +94,8 @@ const VoteModal: React.FC<{
             handleModalClose={handleModalClose}
             setIsCastVoteSuccess={setIsCastVoteSuccess}
             title={title}
+            addresses={addressesProp}
+            chainId={chainIdProp}
           />
         )}
       </AnimatedModal>
@@ -88,9 +109,23 @@ const SubmitVoteForm: React.FC<{
   handleModalClose: () => void
   setIsCastVoteSuccess: (show: boolean) => void
   title: string
-}> = ({ proposalId, votesAvailable, handleModalClose, title, setIsCastVoteSuccess }) => {
-  const addresses = useDaoStore((state) => state.addresses)
-  const chain = useChainStore((state) => state.chain)
+  addresses?: RequiredDaoContractAddresses
+  chainId?: CHAIN_ID
+}> = ({
+  proposalId,
+  votesAvailable,
+  handleModalClose,
+  title,
+  setIsCastVoteSuccess,
+  addresses: addressesProp,
+  chainId: chainIdProp,
+}) => {
+  const storeAddresses = useDaoStore((state) => state.addresses)
+  const storeChain = useChainStore((state) => state.chain)
+
+  // Use prop values if provided, otherwise fall back to store
+  const addresses = addressesProp || storeAddresses
+  const chain = chainIdProp ? { id: chainIdProp } : storeChain
 
   const { mutate } = useSWRConfig()
   const initialValues: FormValues = useMemo(
@@ -301,5 +336,3 @@ const SubmitVoteForm: React.FC<{
     </Box>
   )
 }
-
-export default VoteModal

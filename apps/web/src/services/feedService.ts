@@ -1,6 +1,12 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS, PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { getFeedData, getUserActivityFeed } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID, FeedItem, FeedResponse } from '@buildeross/types'
+import {
+  AuctionCreatedFeedItem,
+  CHAIN_ID,
+  FeedItem,
+  FeedResponse,
+  ProposalCreatedFeedItem,
+} from '@buildeross/types'
 import { keccak256, toHex } from 'viem'
 
 import { InvalidRequestError } from './errors'
@@ -38,10 +44,10 @@ const CACHE_CONFIG = {
   USER_TTL: 300, // 5 minutes for user activity
 
   // Key prefixes
-  GLOBAL_FEED_PREFIX: 'feed:global',
-  CHAIN_FEED_PREFIX: 'feed:chain',
-  DAO_FEED_PREFIX: 'feed:dao',
-  USER_ACTIVITY_PREFIX: 'feed:user',
+  GLOBAL_FEED_PREFIX: PUBLIC_IS_TESTNET ? 'testnet:feed:global' : 'feed:global',
+  CHAIN_FEED_PREFIX: PUBLIC_IS_TESTNET ? 'testnet:feed:chain' : 'feed:chain',
+  DAO_FEED_PREFIX: PUBLIC_IS_TESTNET ? 'testnet:feed:dao' : 'feed:dao',
+  USER_ACTIVITY_PREFIX: PUBLIC_IS_TESTNET ? 'testnet:feed:user' : 'feed:user',
 } as const
 
 /**
@@ -283,6 +289,23 @@ function sortAndPaginate(feeds: FeedResponse[], limit: number): FeedResponse {
   allItems.sort((a, b) => {
     if (b.timestamp !== a.timestamp) return b.timestamp - a.timestamp
     if (a.chainId !== b.chainId) return a.chainId - b.chainId
+    if (
+      (a as ProposalCreatedFeedItem).proposalNumber !== undefined &&
+      (b as ProposalCreatedFeedItem).proposalNumber !== undefined
+    ) {
+      return (a as ProposalCreatedFeedItem).proposalNumber >
+        (b as ProposalCreatedFeedItem).proposalNumber
+        ? -1
+        : 1
+    }
+    if (
+      (a as AuctionCreatedFeedItem).tokenId !== undefined &&
+      (b as AuctionCreatedFeedItem).tokenId !== undefined
+    ) {
+      return (a as AuctionCreatedFeedItem).tokenId > (b as AuctionCreatedFeedItem).tokenId
+        ? -1
+        : 1
+    }
     return a.id.localeCompare(b.id)
   })
 

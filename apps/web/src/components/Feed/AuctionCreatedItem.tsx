@@ -1,10 +1,10 @@
 import type { AuctionCreatedFeedItem } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
-import { FallbackImage } from '../FallbackImage'
-import { useLinks } from '../LinksProvider'
-import { LinkWrapper } from '../LinkWrapper'
 import { feedItemImage, feedItemTitle } from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
 

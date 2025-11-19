@@ -1,10 +1,10 @@
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { Flex, Text } from '@buildeross/zord'
 import React from 'react'
 
-import { FallbackImage } from '../FallbackImage'
-import { useLinks } from '../LinksProvider'
-import { LinkWrapper } from '../LinkWrapper'
 import { feedItemActorName } from './Feed.css'
 
 interface FeedItemDaoProps {
