@@ -118,8 +118,8 @@ async function fetchWithSortedSetCache(
   key: string,
   fetcher: () => Promise<FeedResponse>,
   ttl: number,
-  cursor?: number,
-  limit: number = 20
+  cursor: number | undefined,
+  limit: number
 ): Promise<FeedResponse> {
   const redis = getRedisConnection()
   if (!redis) return fetcher()
@@ -353,8 +353,9 @@ export async function fetchFeedDataService({
   maxConcurrentConnections = 2,
 }: FeedServiceParams): Promise<FeedResponse> {
   // Validate limit
-  if (limit <= 0 || limit > 100) {
-    throw new InvalidRequestError('Limit must be between 1 and 100')
+  if (limit <= 0 || limit > 33) {
+    throw new InvalidRequestError('Limit must be between 1 and 33')
+    // NOTE: we limit to 33 here, since we fetch limit * 3 items in each chain which should be < 100 as validated in sdk
   }
 
   // Validate daoAddress requires chainId

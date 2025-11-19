@@ -86,12 +86,12 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   feedEvent.transactionHash = event.transaction.hash
   feedEvent.actor = event.transaction.from
   feedEvent.auction = auction.id
-  feedEvent.winner = auction.winningBid
-    ? AuctionBid.load(auction.winningBid!)!.bidder
-    : event.transaction.from
-  feedEvent.amount = auction.winningBid
-    ? AuctionBid.load(auction.winningBid!)!.amount
-    : event.params.amount
+
+  let winningBidEntity = auction.winningBid ? AuctionBid.load(auction.winningBid!) : null
+
+  feedEvent.winner = winningBidEntity ? winningBidEntity.bidder : event.transaction.from
+
+  feedEvent.amount = winningBidEntity ? winningBidEntity.amount : event.params.amount
   feedEvent.save()
 }
 

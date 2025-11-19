@@ -87,7 +87,6 @@ const decodeTx = async (
   } catch (err) {
     console.error('Error decoding transaction:', err)
 
-    // if no value return original calldata
     throw new Error('Decode failed')
   }
 }
@@ -226,7 +225,7 @@ export const useDecodedTransactionSingle = (
       isNotDecoded: true,
       value: value ?? '0',
     } as DecodedTransactionFailure
-  }, [target, calldata])
+  }, [target, calldata, value])
 
   return {
     decodedTransaction: decodedTransaction ?? fallbackData,

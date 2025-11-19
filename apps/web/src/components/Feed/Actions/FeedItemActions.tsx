@@ -24,6 +24,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
     case 'AUCTION_SETTLED':
       return (
         <AuctionActions
+          daoName={item.daoName}
           actor={item.actor}
           chainId={item.chainId}
           tokenId={item.tokenId}

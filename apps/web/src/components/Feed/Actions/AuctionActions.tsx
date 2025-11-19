@@ -17,6 +17,7 @@ import { BidModal } from '../Modals/BidModal'
 
 interface AuctionActionsProps {
   actor: AddressType
+  daoName: string
   chainId: CHAIN_ID
   tokenId: string
   addresses: RequiredDaoContractAddresses
@@ -24,6 +25,7 @@ interface AuctionActionsProps {
 
 export const AuctionActions: React.FC<AuctionActionsProps> = ({
   actor,
+  daoName,
   chainId,
   tokenId,
   addresses,
@@ -144,7 +146,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         onClose={() => setShowBidModal(false)}
         chainId={chainId}
         tokenId={tokenId}
-        daoName=""
+        daoName={daoName}
         addresses={addresses}
         highestBid={highestBid}
       />

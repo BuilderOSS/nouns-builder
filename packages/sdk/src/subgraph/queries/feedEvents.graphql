@@ -40,7 +40,6 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         proposalNumber
         title
         description
-        title
       }
       vote {
         support
@@ -97,6 +96,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       bid {
         amount
         bidTime
+        bidder
       }
     }
 
