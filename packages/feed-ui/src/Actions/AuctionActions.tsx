@@ -139,17 +139,15 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         {/* Old or settled auction */}
         {(isOldAuction || settled) && (
           <>
-            <LinkWrapper
-              link={getAuctionLink(
-                chainId,
-                daoId,
-                currentTokenId ? currentTokenId.toString() : undefined
-              )}
-            >
-              <Button size="sm" px="x3" variant="outline">
-                Go to Latest Auction
-              </Button>
-            </LinkWrapper>
+            {currentTokenId && tokenId !== currentTokenId.toString() && (
+              <LinkWrapper
+                link={getAuctionLink(chainId, daoId, currentTokenId.toString())}
+              >
+                <Button size="sm" px="x3" variant="outline">
+                  Go to Latest Auction
+                </Button>
+              </LinkWrapper>
+            )}
             <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
               <Button size="sm" px="x3" variant="secondary">
                 View Details

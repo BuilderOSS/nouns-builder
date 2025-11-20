@@ -147,7 +147,7 @@ export const SubmitVoteForm: React.FC<{
           abi: governorAbi,
           chainId: chainId,
           functionName: hasReason ? 'castVoteWithReason' : 'castVote',
-          args: hasReason ? [proposalId, choice] : [proposalId, choice, values.reason],
+          args: hasReason ? [proposalId, choice, values.reason] : [proposalId, choice],
         })
         const txHash = await writeContract(config, data.request)
 
