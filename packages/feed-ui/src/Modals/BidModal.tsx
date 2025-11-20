@@ -87,8 +87,13 @@ export const BidModal: React.FC<BidModalProps> = ({
               subtitle="Your bid has been submitted successfully"
             />
           ) : (
-            <Stack gap="x6" p="x6" w="100%">
-              <Text variant="heading-md">{tokenName} - Place Your Bid</Text>
+            <Stack p="x6" w="100%">
+              <Text variant="heading-md" mb="x4">
+                Place Your Bid
+              </Text>
+              <Text variant="paragraph-sm" color="tertiary" mb="x6">
+                Token: {tokenName}
+              </Text>
 
               <CurrentAuction
                 chainId={chain.id}
