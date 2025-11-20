@@ -57,7 +57,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     updateItem?.message
   )
 
-  const isLoading = isLoadingState || isLoadingContent
+  const isLoading = isLoadingState || Boolean(!!updateItem && isLoadingContent)
 
   // Construct replyTo object from updateItem when responding
   const replyTo = useMemo<PropDateReplyTo | undefined>(() => {
@@ -68,7 +68,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         ? updateItem.originalMessageId
         : updateItem.id) as Hex,
       creator: updateItem.actor as Hex,
-      message: parsedContent || updateItem.message,
+      message: parsedContent ?? updateItem.message,
     }
   }, [updateItem, parsedContent])
 
@@ -139,7 +139,6 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         isOpen={showVoteModal}
         onClose={() => setShowVoteModal(false)}
         proposalId={proposalId}
-        proposalNumber={proposalNumber}
         proposalTitle={proposalTitle}
         chainId={chainId}
         addresses={addresses}
@@ -150,7 +149,6 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         isOpen={showPropdateModal}
         onClose={() => setShowPropdateModal(false)}
         proposalId={proposalId}
-        proposalNumber={proposalNumber}
         chainId={chainId}
         addresses={addresses}
         replyTo={replyTo}

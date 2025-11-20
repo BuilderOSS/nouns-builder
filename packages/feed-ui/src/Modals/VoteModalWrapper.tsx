@@ -16,7 +16,6 @@ export interface VoteModalWrapperProps {
   isOpen: boolean
   onClose: () => void
   proposalId: BytesType
-  proposalNumber: string
   proposalTitle: string
   chainId: CHAIN_ID
   addresses: RequiredDaoContractAddresses

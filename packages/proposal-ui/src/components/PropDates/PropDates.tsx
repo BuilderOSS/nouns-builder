@@ -127,7 +127,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
                   setReplyingTo(undefined)
                   mutate()
                 },
-                proposalId: proposal.proposalId,
+                proposalId: proposal.proposalId as `0x${string}`,
                 invoiceData,
                 replyTo: replyingTo,
               }}
