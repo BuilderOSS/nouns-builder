@@ -9,7 +9,7 @@ import { readContracts } from 'wagmi/actions'
 
 interface UseCurrentAuctionParams {
   chainId: CHAIN_ID
-  auctionAddress: AddressType
+  auctionAddress: AddressType | undefined
 }
 
 interface CurrentAuctionData {

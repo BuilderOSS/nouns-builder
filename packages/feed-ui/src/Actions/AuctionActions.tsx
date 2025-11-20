@@ -46,6 +46,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
     highestBid,
     highestBidder,
     isLoading,
+    endTime,
     paused,
   } = useCurrentAuction({
     chainId,
@@ -172,6 +173,9 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         daoName={daoName}
         addresses={addresses}
         highestBid={highestBid}
+        paused={paused}
+        highestBidder={highestBidder}
+        endTime={endTime}
       />
     </>
   )

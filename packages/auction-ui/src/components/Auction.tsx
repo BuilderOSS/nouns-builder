@@ -128,9 +128,10 @@ export const Auction: React.FC<AuctionControllerProps> = ({
 
         {isTokenActiveAuction && !isLoading && (
           <CurrentAuction
-            chain={chain}
+            chainId={chain.id}
             tokenId={queriedTokenId}
             auctionAddress={auctionAddress as AddressType}
+            tokenAddress={collection}
             auctionPaused={paused}
             daoName={token.dao.name}
             bid={highestBid}
