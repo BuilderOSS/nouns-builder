@@ -49,7 +49,7 @@ export const Settle = ({
     } finally {
       setSettling(false)
     }
-  }, [auctionAddress, config, chainId])
+  }, [auctionAddress, config, chainId, paused])
 
   const buttonText = (() => {
     if (isWinner) return 'Claim NFT'
