@@ -17,7 +17,7 @@ export const DaoFeed: React.FC = () => {
             mt={'x4'}
             mb={'x8'}
           >
-            {token && <Feed chainId={chain.id} daoAddress={token} />}
+            {token && <Feed chainId={chain.id} daos={[token]} />}
           </Flex>
         </Box>
       </Flex>

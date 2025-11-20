@@ -1,4 +1,5 @@
 import { useFeed } from '@buildeross/hooks'
+import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem as FeedItemType } from '@buildeross/types'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
@@ -9,7 +10,8 @@ import { LoadMoreButton } from './LoadMoreButton'
 
 export interface FeedProps {
   chainId?: CHAIN_ID
-  daoAddress?: AddressType
+  daos?: AddressType[]
+  eventTypes?: FeedEventType[]
   actor?: AddressType
   limit?: number
   enabled?: boolean
@@ -18,7 +20,8 @@ export interface FeedProps {
 
 export const Feed: React.FC<FeedProps> = ({
   chainId,
-  daoAddress,
+  daos,
+  eventTypes,
   actor,
   limit,
   enabled,
@@ -26,7 +29,8 @@ export const Feed: React.FC<FeedProps> = ({
 }) => {
   const { items, hasMore, isLoading, isLoadingMore, error, fetchNextPage } = useFeed({
     chainId,
-    daoAddress,
+    daos,
+    eventTypes,
     actor,
     limit,
     enabled,
@@ -83,7 +87,7 @@ export const Feed: React.FC<FeedProps> = ({
             key={item.id}
             item={item}
             hideActor={!!actor}
-            hideDao={!!daoAddress}
+            hideDao={!!(daos && daos.length > 0)}
           />
         ))}
 

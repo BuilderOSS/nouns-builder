@@ -10,6 +10,7 @@ import {
   FeedEvent_Filter,
   FeedEventsQuery,
   FeedEventsQueryVariables,
+  FeedEventType,
   ProposalVoteSupport,
 } from '../sdk.generated'
 
@@ -17,14 +18,9 @@ interface FeedQueryParams {
   chainId: CHAIN_ID
   limit: number
   cursor?: number
-  dao?: string
-}
-
-interface UserActivityQueryParams {
-  chainId: CHAIN_ID
-  limit: number
-  cursor?: number
-  actor: string
+  daos?: string[]
+  eventTypes?: FeedEventType[]
+  actor?: string
 }
 
 type FeedEvent = FeedEventsQuery['feedEvents'][0]
@@ -170,13 +166,17 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
  * @param chainId - The chain ID to fetch from
  * @param limit - Number of items to return (1-100)
  * @param cursor - Timestamp cursor for pagination
- * @param dao - Optional DAO address to filter by
+ * @param daos - Optional array of DAO addresses to filter by
+ * @param eventTypes - Optional array of event types to filter by
+ * @param actor - Optional user address to filter by (for user activity feed)
  */
 export const getFeedData = async ({
   chainId,
   limit,
   cursor,
-  dao,
+  daos,
+  eventTypes,
+  actor,
 }: FeedQueryParams): Promise<FeedResponse> => {
   // Validate input
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
@@ -192,8 +192,22 @@ export const getFeedData = async ({
     if (cursor !== undefined) {
       where.timestamp_lt = cursor.toString()
     }
-    if (dao) {
-      where.dao = dao.toLowerCase()
+    if (actor) {
+      where.actor = actor.toLowerCase()
+    }
+    if (daos && daos.length > 0) {
+      if (daos.length === 1) {
+        where.dao = daos[0].toLowerCase()
+      } else {
+        where.dao_in = daos.map((dao) => dao.toLowerCase())
+      }
+    }
+    if (eventTypes && eventTypes.length > 0) {
+      if (eventTypes.length === 1) {
+        where.type = eventTypes[0]
+      } else {
+        where.type_in = eventTypes
+      }
     }
 
     // Query feed events
@@ -224,73 +238,9 @@ export const getFeedData = async ({
 
     return { items: feedItems, hasMore: false, nextCursor: null }
   } catch (e) {
-    console.error('Error fetching feed', { dao, chainId, limit, cursor }, e)
-
-    try {
-      const sentry = await import('@sentry/nextjs')
-      sentry.captureException(e)
-      await sentry.flush(2000)
-    } catch (sentryError) {
-      console.error('Failed to send to Sentry:', sentryError)
-    }
-
-    return { items: [], hasMore: false, nextCursor: null }
-  }
-}
-
-/**
- * Get user activity feed for a specific chain
- * @param chainId - The chain ID to fetch from
- * @param limit - Number of items to return (1-100)
- * @param cursor - Timestamp cursor for pagination
- * @param actor - User's address
- */
-export const getUserActivityFeed = async ({
-  chainId,
-  limit,
-  cursor,
-  actor,
-}: UserActivityQueryParams): Promise<FeedResponse> => {
-  // Validate input
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-    throw new Error('Limit must be an integer between 1 and 100')
-  }
-
-  try {
-    const fetchLimit = limit + 1
-
-    // Build where clause
-    const where: FeedEvent_Filter = {
-      actor: actor.toLowerCase(),
-    }
-    if (cursor !== undefined) {
-      where.timestamp_lt = cursor.toString()
-    }
-
-    const data = await SDK.connect(chainId).feedEvents({
-      first: fetchLimit,
-      where,
-    } as FeedEventsQueryVariables)
-
-    const events = data.feedEvents
-
-    const hasMore = events.length > limit
-    const limitedEvents = events.slice(0, limit)
-    const feedItems = limitedEvents.map((event) => transformFeedEvent(event, chainId))
-
-    if (hasMore && feedItems.length > 0) {
-      return {
-        items: feedItems,
-        hasMore: true,
-        nextCursor: feedItems[feedItems.length - 1].timestamp,
-      }
-    }
-
-    return { items: feedItems, hasMore: false, nextCursor: null }
-  } catch (e) {
     console.error(
-      'Error fetching user activity feed',
-      { actor, chainId, limit, cursor },
+      'Error fetching feed',
+      { actor, daos, eventTypes, chainId, limit, cursor },
       e
     )
 
