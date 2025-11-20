@@ -1,7 +1,7 @@
 import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
-import { AddressType, Chain } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import dayjs from 'dayjs'
 import { Fragment, useState } from 'react'
 import { formatEther, isAddress } from 'viem'
@@ -12,14 +12,15 @@ import { BidAmount } from '../BidAmount'
 import { ActionsWrapper } from '../BidHistory'
 import { WinningBidder } from '../WinningBidder'
 import { AuctionCountdown } from './AuctionCountdown'
-import { MemoizedPlaceBid } from './PlaceBid'
+import { PlaceBid } from './PlaceBid'
 import { RecentBids } from './RecentBids'
 import { Settle } from './Settle'
 
 export const CurrentAuction = ({
-  chain,
+  chainId,
   tokenId,
   auctionAddress,
+  tokenAddress,
   auctionPaused,
   daoName,
   bid,
@@ -27,10 +28,12 @@ export const CurrentAuction = ({
   endTime,
   bids,
   referral: referralParam,
+  onSuccess,
 }: {
-  chain: Chain
+  chainId: CHAIN_ID
   tokenId: string
   auctionAddress: AddressType
+  tokenAddress: AddressType
   auctionPaused: boolean
   daoName: string
   bid?: bigint
@@ -38,6 +41,7 @@ export const CurrentAuction = ({
   endTime?: number
   bids: AuctionBidFragment[]
   referral?: AddressType
+  onSuccess?: () => void
 }) => {
   const [isEnded, setIsEnded] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
@@ -80,7 +84,7 @@ export const CurrentAuction = ({
           <Settle
             isEnding={isEnding}
             owner={owner}
-            chainId={chain.id}
+            chainId={chainId}
             auctionAddress={auctionAddress}
             auctionPaused={auctionPaused}
           />
@@ -97,12 +101,15 @@ export const CurrentAuction = ({
       </AuctionDetails>
 
       <ActionsWrapper>
-        <MemoizedPlaceBid
+        <PlaceBid
           daoName={daoName}
-          chain={chain}
+          chainId={chainId}
           tokenId={tokenId}
           highestBid={bid}
           referral={referral}
+          auctionAddress={auctionAddress}
+          tokenAddress={tokenAddress}
+          onSuccess={onSuccess}
         />
       </ActionsWrapper>
 

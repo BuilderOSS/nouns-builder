@@ -9,7 +9,7 @@ import { readContracts } from 'wagmi/actions'
 
 interface UseCurrentAuctionParams {
   chainId: CHAIN_ID
-  auctionAddress: AddressType
+  auctionAddress: AddressType | undefined
 }
 
 interface CurrentAuctionData {
@@ -34,7 +34,7 @@ export const useCurrentAuction = ({
 
   const { data, error, isLoading } = useSWR(
     chainId && auctionAddress
-      ? ([SWR_KEYS.AUCTION, chainId, auctionAddress] as const)
+      ? ([SWR_KEYS.AUCTION, chainId, auctionAddress.toLowerCase()] as const)
       : null,
     ([, _chainId, _auctionAddress]) =>
       readContracts(config, {

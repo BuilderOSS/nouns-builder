@@ -1,17 +1,16 @@
 import { BASE_URL, SWR_KEYS } from '@buildeross/constants'
 import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { averageWinningBid, getBids } from '@buildeross/sdk/subgraph'
-import { useDaoStore } from '@buildeross/stores'
-import { AddressType, Chain, RequiredDaoContractAddresses } from '@buildeross/types'
+import { averageWinningBid } from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal } from '@buildeross/ui/Modal'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
+import { chainIdToSlug, unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { Address, formatEther, parseEther } from 'viem'
+import { formatEther, parseEther } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -19,31 +18,29 @@ import { auctionActionButtonVariants, bidForm, bidInput } from '../Auction.css'
 import { WarningModal } from './WarningModal'
 
 interface PlaceBidProps {
-  chain: Chain
+  chainId: CHAIN_ID
+  auctionAddress: AddressType
+  tokenAddress: AddressType
   tokenId: string
   daoName: string
   referral?: AddressType
   highestBid?: bigint
-  addresses?: RequiredDaoContractAddresses
   onSuccess?: () => void
 }
 
-export const PlaceBid = ({
-  chain,
+const InnerPlaceBid = ({
+  chainId,
   highestBid,
   referral,
   tokenId,
   daoName,
-  addresses: addressesProp,
+  auctionAddress,
+  tokenAddress,
   onSuccess,
 }: PlaceBidProps) => {
   const { address, chain: wagmiChain } = useAccount()
-  const { data: balance } = useBalance({ address: address, chainId: chain.id })
+  const { data: balance } = useBalance({ address: address, chainId })
   const { mutate } = useSWRConfig()
-  const { addresses: storeAddresses } = useDaoStore()
-
-  // Use prop addresses if provided, otherwise fall back to store
-  const addresses = addressesProp || storeAddresses
 
   const config = useConfig()
 
@@ -53,8 +50,8 @@ export const PlaceBid = ({
 
   const auctionContractParams = {
     abi: auctionAbi,
-    address: addresses.auction as AddressType,
-    chainId: chain.id,
+    address: auctionAddress,
+    chainId,
   }
   const { data } = useReadContracts({
     allowFailure: false,
@@ -72,10 +69,10 @@ export const PlaceBid = ({
   })
 
   const { data: averageBid } = useSWR(
-    addresses.token && chain.id
-      ? ([SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token] as const)
+    tokenAddress && chainId
+      ? ([SWR_KEYS.AVERAGE_WINNING_BID, chainId, tokenAddress.toLowerCase()] as const)
       : null,
-    ([, _chainId, _token]) => averageWinningBid(_chainId, _token)
+    ([, _chainId, _token]) => averageWinningBid(_chainId, _token as AddressType)
   )
 
   const isMinBid = useMemo(
@@ -96,7 +93,7 @@ export const PlaceBid = ({
   )
 
   const createBidTransaction = useCallback(async () => {
-    if (!isMinBid || !bidAmount) return
+    if (!isMinBid || !bidAmount || !tokenAddress || !auctionAddress) return
 
     try {
       setCreatingBid(true)
@@ -105,35 +102,35 @@ export const PlaceBid = ({
       if (referral) {
         const data = await simulateContract(config, {
           abi: auctionAbi,
-          address: addresses.auction as Address,
+          address: auctionAddress,
           functionName: 'createBidWithReferral',
           args: [BigInt(tokenId), referral],
           value: parseEther(bidAmount),
-          chainId: chain.id,
+          chainId,
         })
         txHash = await writeContract(config, data.request)
       } else {
         const data = await simulateContract(config, {
           abi: auctionAbi,
-          address: addresses.auction as Address,
+          address: auctionAddress,
           functionName: 'createBid',
           args: [BigInt(tokenId)],
           value: parseEther(bidAmount),
-          chainId: chain.id,
+          chainId,
         })
         txHash = await writeContract(config, data.request)
       }
 
-      if (txHash)
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+      if (txHash) await waitForTransactionReceipt(config, { hash: txHash, chainId })
 
-      await mutate([SWR_KEYS.AUCTION_BIDS, chain.id, addresses.token, tokenId], () =>
-        getBids(chain.id, addresses.token!, tokenId)
-      )
+      await mutate([
+        SWR_KEYS.AUCTION_BIDS,
+        chainId,
+        tokenAddress.toLowerCase(),
+        tokenId.toString(),
+      ])
 
-      await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token], () =>
-        averageWinningBid(chain.id, addresses.token as Address)
-      )
+      await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chainId, tokenAddress.toLowerCase()])
 
       // Call onSuccess callback if provided
       onSuccess?.()
@@ -148,10 +145,10 @@ export const PlaceBid = ({
     bidAmount,
     referral,
     config,
-    addresses.auction,
-    addresses.token,
+    auctionAddress,
+    tokenAddress,
     tokenId,
-    chain.id,
+    chainId,
     mutate,
     onSuccess,
   ])
@@ -174,12 +171,13 @@ export const PlaceBid = ({
   }, [showWarning])
 
   const isValidBid = bidAmount && isMinBid
-  const isValidChain = wagmiChain?.id === chain.id
+  const isValidChain = wagmiChain?.id === chainId
   const [showTooltip, setShowTooltip] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const handleShareClick = useCallback(async () => {
-    const baseUrl = `${BASE_URL}/dao/${chain.name.toLowerCase()}/${addresses.token}`
+    const chainSlug = chainIdToSlug(chainId)!
+    const baseUrl = `${BASE_URL}/dao/${chainSlug}/${tokenAddress}`
     if (address === undefined) {
       await navigator.clipboard.writeText(baseUrl)
       return
@@ -191,7 +189,7 @@ export const PlaceBid = ({
 
     await navigator.clipboard.writeText(fullUrl)
     setCopied(true)
-  }, [chain.name, addresses.token, address])
+  }, [chainId, tokenAddress, address])
 
   return (
     <Flex
@@ -234,7 +232,7 @@ export const PlaceBid = ({
           </form>
           <Flex w="100%" wrap="wrap" mt="x2">
             <ContractButton
-              chainId={chain.id}
+              chainId={chainId}
               className={auctionActionButtonVariants['bid']}
               size="lg"
               handleClick={handleCreateBid}
@@ -243,7 +241,7 @@ export const PlaceBid = ({
             >
               Place bid
             </ContractButton>
-            {chain.id !== 1 ? (
+            {chainId !== 1 ? (
               <Fragment>
                 <Box
                   cursor="pointer"
@@ -256,7 +254,7 @@ export const PlaceBid = ({
                   }}
                 >
                   <ContractButton
-                    chainId={chain.id}
+                    chainId={chainId}
                     className={auctionActionButtonVariants['share']}
                     size="lg"
                     ml="x2"
@@ -282,4 +280,4 @@ export const PlaceBid = ({
   )
 }
 
-export const MemoizedPlaceBid = memo(PlaceBid)
+export const PlaceBid = memo(InnerPlaceBid)

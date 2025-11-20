@@ -952,6 +952,9 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.0(react@19.2.0)
+      swr:
+        specifier: ^2.3.3
+        version: 2.3.6(react@19.2.0)
       viem:
         specifier: ^2.38.2
         version: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)

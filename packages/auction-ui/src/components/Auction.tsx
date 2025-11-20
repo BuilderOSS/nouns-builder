@@ -85,14 +85,19 @@ export const Auction: React.FC<AuctionControllerProps> = ({
 
   useAuctionEvents({
     chainId: chain.id,
-    collection,
-    isTokenActiveAuction,
-    onAuctionCreated,
+    auctionAddress,
+    tokenAddress: collection,
+    onAuctionCreated: isTokenActiveAuction ? onAuctionCreated : undefined,
   })
 
   const { data: bids } = useSWR(
     chain.id && queriedTokenId && collection
-      ? ([SWR_KEYS.AUCTION_BIDS, chain.id, collection, queriedTokenId] as const)
+      ? ([
+          SWR_KEYS.AUCTION_BIDS,
+          chain.id,
+          collection.toLowerCase(),
+          queriedTokenId.toString(),
+        ] as const)
       : null,
     ([, _chainId, _collection, _tokenId]) => getBids(_chainId, _collection, _tokenId)
   )
@@ -124,9 +129,10 @@ export const Auction: React.FC<AuctionControllerProps> = ({
 
         {isTokenActiveAuction && !isLoading && (
           <CurrentAuction
-            chain={chain}
+            chainId={chain.id}
             tokenId={queriedTokenId}
             auctionAddress={auctionAddress as AddressType}
+            tokenAddress={collection}
             auctionPaused={paused}
             daoName={token.dao.name}
             bid={highestBid}
