@@ -74,12 +74,12 @@ export const useVotes = ({
     }
   }
 
-  const [votes, delegates, proposalThreshold, vetoer] = data
+  const [votes, delegate, proposalThreshold, vetoer] = data
 
   return {
     isLoading,
-    isDelegating: delegates?.toLowerCase() !== signerAddress?.toLowerCase(),
-    delegatedTo: delegates,
+    isDelegating: delegate?.toLowerCase() !== signerAddress?.toLowerCase(),
+    delegatedTo: delegate,
     isOwner: votes > 0,
     isVetoer: vetoer?.toLowerCase() === signerAddress?.toLowerCase(),
     hasThreshold: votes > proposalThreshold,
