@@ -1,10 +1,10 @@
-import { getPropdateMessage } from '@buildeross/sdk/subgraph'
+import { usePropdateMessage } from '@buildeross/hooks/usePropdateMessage'
 import type { ProposalUpdatePostedFeedItem } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { Box, Stack, Text } from '@buildeross/zord'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 import {
   feedItemSubtitle,
@@ -19,27 +19,9 @@ interface ProposalUpdatedItemProps {
 
 export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
-  const [parsedContent, setParsedContent] = useState<string>('')
-  const [isLoading, setIsLoading] = useState(true)
+  const { parsedContent, isLoading } = usePropdateMessage(item.messageType, item.message)
 
-  useEffect(() => {
-    const parseMessage = async () => {
-      try {
-        setIsLoading(true)
-        const parsed = await getPropdateMessage(item.messageType, item.message)
-        setParsedContent(parsed.content || item.message)
-      } catch (error) {
-        console.error('Error parsing propdate message:', error)
-        setParsedContent(item.message)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    parseMessage()
-  }, [item.messageType, item.message])
-
-  const displayContent = isLoading ? 'Loading...' : parsedContent
+  const displayContent = isLoading ? 'Loading...' : parsedContent || item.message
 
   return (
     <LinkWrapper
