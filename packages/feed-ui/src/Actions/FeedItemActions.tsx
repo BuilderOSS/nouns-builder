@@ -27,6 +27,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           daoName={item.daoName}
           chainId={item.chainId}
           tokenId={item.tokenId}
+          tokenName={item.tokenName}
           addresses={item.addresses}
         />
       )

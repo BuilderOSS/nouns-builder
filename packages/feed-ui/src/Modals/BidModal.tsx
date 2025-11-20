@@ -1,4 +1,4 @@
-import { CurrentAuction } from '@buildeross/auction-ui'
+import { CurrentAuction, useAuctionEvents } from '@buildeross/auction-ui'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getBids } from '@buildeross/sdk/subgraph'
@@ -17,6 +17,7 @@ export interface BidModalProps {
   onClose: () => void
   chainId: CHAIN_ID
   tokenId: string
+  tokenName: string
   daoName: string
   addresses: RequiredDaoContractAddresses
   highestBid?: bigint
@@ -30,6 +31,7 @@ export const BidModal: React.FC<BidModalProps> = ({
   onClose,
   chainId,
   tokenId,
+  tokenName,
   daoName,
   addresses,
   highestBid,
@@ -65,6 +67,13 @@ export const BidModal: React.FC<BidModalProps> = ({
     ([, _chainId, _collection, _tokenId]) => getBids(_chainId, _collection, _tokenId)
   )
 
+  useAuctionEvents({
+    chainId,
+    auctionAddress: addresses.auction,
+    tokenAddress: addresses.token,
+    enabled: isOpen,
+  })
+
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
 
   return (
@@ -79,7 +88,7 @@ export const BidModal: React.FC<BidModalProps> = ({
             />
           ) : (
             <Stack gap="x6" p="x6" w="100%">
-              <Text variant="heading-md">Place Your Bid</Text>
+              <Text variant="heading-md">{tokenName} - Place Your Bid</Text>
 
               <CurrentAuction
                 chainId={chain.id}

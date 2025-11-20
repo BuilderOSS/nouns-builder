@@ -85,8 +85,9 @@ export const Auction: React.FC<AuctionControllerProps> = ({
 
   useAuctionEvents({
     chainId: chain.id,
-    isTokenActiveAuction,
-    onAuctionCreated,
+    auctionAddress,
+    tokenAddress: collection,
+    onAuctionCreated: isTokenActiveAuction ? onAuctionCreated : undefined,
   })
 
   const { data: bids } = useSWR(

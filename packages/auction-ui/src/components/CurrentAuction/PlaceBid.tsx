@@ -130,7 +130,7 @@ const InnerPlaceBid = ({
         tokenId.toString(),
       ])
 
-      await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chainId, tokenAddress])
+      await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chainId, tokenAddress.toLowerCase()])
 
       // Call onSuccess callback if provided
       onSuccess?.()
