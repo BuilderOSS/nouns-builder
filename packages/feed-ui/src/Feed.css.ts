@@ -55,6 +55,11 @@ export const feedItemActorName = style({
   },
 })
 
+export const feedItemChainName = style({
+  textDecoration: 'none',
+  color: theme.colors.text2,
+})
+
 export const feedItemImage = style([
   atoms({
     borderRadius: 'curved',
