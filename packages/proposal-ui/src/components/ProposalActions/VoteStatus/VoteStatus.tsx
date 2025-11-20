@@ -170,7 +170,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
 
       <VoteModal
         title={title}
-        proposalId={proposalId}
+        proposalId={proposalId as `0x${string}`}
         votesAvailable={votesAvailable}
         showVoteModal={showVoteModal}
         setShowVoteModal={setShowVoteModal}

@@ -3,7 +3,7 @@ import { auctionAbi } from '@buildeross/sdk/contract'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, Chain } from '@buildeross/types'
 import dayjs from 'dayjs'
-import React, { Fragment, useState } from 'react'
+import { Fragment, useState } from 'react'
 import { formatEther, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
@@ -20,6 +20,7 @@ export const CurrentAuction = ({
   chain,
   tokenId,
   auctionAddress,
+  auctionPaused,
   daoName,
   bid,
   owner,
@@ -30,6 +31,7 @@ export const CurrentAuction = ({
   chain: Chain
   tokenId: string
   auctionAddress: AddressType
+  auctionPaused: boolean
   daoName: string
   bid?: bigint
   owner?: string
@@ -80,6 +82,7 @@ export const CurrentAuction = ({
             owner={owner}
             chainId={chain.id}
             auctionAddress={auctionAddress}
+            auctionPaused={auctionPaused}
           />
         </ActionsWrapper>
       </Fragment>
