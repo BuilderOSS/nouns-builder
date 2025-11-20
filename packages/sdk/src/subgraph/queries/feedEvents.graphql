@@ -1,0 +1,119 @@
+query feedEvents($first: Int!, $where: FeedEvent_filter) {
+  feedEvents(
+    first: $first
+    where: $where
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    __typename
+    id
+    type
+    timestamp
+    blockNumber
+    transactionHash
+    actor
+    dao {
+      auctionAddress
+      governorAddress
+      metadataAddress
+      tokenAddress
+      treasuryAddress
+      name
+      symbol
+      contractImage
+    }
+
+    ... on ProposalCreatedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+        description
+        proposer
+        timeCreated
+      }
+    }
+
+    ... on ProposalVotedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+        description
+        proposer
+      }
+      vote {
+        support
+        weight
+        reason
+      }
+    }
+
+    ... on ProposalUpdatedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+        description
+        proposer
+      }
+      update {
+        messageType
+        message
+        originalMessageId
+      }
+    }
+
+    ... on ProposalExecutedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        title
+        description
+        proposer
+      }
+    }
+
+    ... on AuctionCreatedEvent {
+      auction {
+        id
+        startTime
+        endTime
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+
+    ... on AuctionBidPlacedEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      bid {
+        amount
+        bidTime
+        bidder
+      }
+    }
+
+    ... on AuctionSettledEvent {
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+      winner
+      amount
+    }
+  }
+}

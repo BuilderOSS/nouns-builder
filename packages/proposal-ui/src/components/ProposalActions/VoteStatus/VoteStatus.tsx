@@ -13,7 +13,7 @@ import { useAccount, useWatchContractEvent } from 'wagmi'
 import { proposalActionButtonVariants } from '../ProposalActions.css'
 import Pending from './Pending'
 import Vote from './Vote'
-import VoteModal from './VoteModal'
+import { VoteModal } from './VoteModal'
 
 type SupportValue = 0 | 1 | 2
 
@@ -170,7 +170,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
 
       <VoteModal
         title={title}
-        proposalId={proposalId}
+        proposalId={proposalId as `0x${string}`}
         votesAvailable={votesAvailable}
         showVoteModal={showVoteModal}
         setShowVoteModal={setShowVoteModal}

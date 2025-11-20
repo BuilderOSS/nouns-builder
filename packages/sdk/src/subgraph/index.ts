@@ -10,6 +10,7 @@ export * from './requests/daoSearch'
 export * from './requests/daoVoters'
 export * from './requests/dashboardQuery'
 export * from './requests/exploreQueries'
+export * from './requests/feedQuery'
 export * from './requests/getBids'
 export * from './requests/getEscrowDelegate'
 export * from './requests/getPropDates'
@@ -19,6 +20,7 @@ export * from './requests/proposalQuery'
 export * from './requests/proposalsQuery'
 export * from './requests/sync'
 export * from './requests/tokensQuery'
+export * from './requests/userProposalVote'
 export {
   Auction_OrderBy,
   type AuctionBidFragment,

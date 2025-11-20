@@ -1,0 +1,7 @@
+#import "../fragments/ProposalVote.graphql"
+
+query userProposalVote($where: ProposalVote_filter) {
+  proposalVotes(where: $where, first: 1) {
+    ...ProposalVote
+  }
+}

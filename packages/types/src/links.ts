@@ -20,7 +20,8 @@ export type AuctionLinkHandler = (
 export type ProposalLinkHandler = (
   chainId: CHAIN_ID,
   tokenAddress: AddressType,
-  proposalId: number | string | bigint
+  proposalId: number | string | bigint,
+  tab?: string
 ) => LinkOptions
 
 export type ProfileLinkHandler = (address: AddressType) => LinkOptions

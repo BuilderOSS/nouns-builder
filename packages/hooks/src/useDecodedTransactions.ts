@@ -4,16 +4,17 @@ import type { Proposal } from '@buildeross/sdk/subgraph'
 import type { CHAIN_ID, DecodedTransactionData } from '@buildeross/types'
 import { useMemo } from 'react'
 import useSWR, { type KeyedMutator } from 'swr'
-import { hexToBigInt } from 'viem'
 
 export type DecodedTransactionSuccess = {
   target: string
+  value: string
   transaction: DecodedTransactionData
   isNotDecoded: false
 }
 
 export type DecodedTransactionFailure = {
   target: string
+  value: string
   transaction: string
   isNotDecoded: true
 }
@@ -86,13 +87,6 @@ const decodeTx = async (
   } catch (err) {
     console.error('Error decoding transaction:', err)
 
-    // if this tx has value display it as a send eth tx
-    if (value.startsWith('0x') && hexToBigInt(value as `0x${string}`) > 0n)
-      return formatSendEth(hexToBigInt(value as `0x${string}`).toString())
-
-    if (BigInt(value) > 0n) return formatSendEth(value)
-
-    // if no value return original calldata
     throw new Error('Decode failed')
   }
 }
@@ -114,10 +108,16 @@ export const decodeTransactions = async (
           values[i],
           decodeFunc
         )
-        return { target, transaction, isNotDecoded: false } as DecodedTransactionSuccess
+        return {
+          target,
+          transaction,
+          value: values[i] ?? '0',
+          isNotDecoded: false,
+        } as DecodedTransactionSuccess
       } catch (err) {
         return {
           target,
+          value: values[i] ?? '0',
           transaction: calldatas[i],
           isNotDecoded: true,
         } as DecodedTransactionFailure
@@ -169,9 +169,10 @@ export const useDecodedTransactions = (
     return targets.map((target, i) => ({
       target,
       transaction: calldatas[i],
+      value: values[i] ?? '0',
       isNotDecoded: true,
     })) as DecodedTransactionFailure[]
-  }, [targets, calldatas])
+  }, [targets, calldatas, values])
 
   return {
     decodedTransactions: decodedTransactions ?? fallbackData,
@@ -222,8 +223,9 @@ export const useDecodedTransactionSingle = (
       target,
       transaction: calldata,
       isNotDecoded: true,
+      value: value ?? '0',
     } as DecodedTransactionFailure
-  }, [target, calldata])
+  }, [target, calldata, value])
 
   return {
     decodedTransaction: decodedTransaction ?? fallbackData,
