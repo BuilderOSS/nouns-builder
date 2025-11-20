@@ -121,12 +121,12 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
             <ContractButton
               chainId={chainId}
               handleClick={handleSettle}
-              loading={isSettling}
+              disabled={isSettling}
               variant="outline"
               size="sm"
               px="x3"
             >
-              {buttonText}
+              {isSettling ? 'Settling...' : buttonText}
             </ContractButton>
             <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
               <Button size="sm" px="x3" variant="secondary">

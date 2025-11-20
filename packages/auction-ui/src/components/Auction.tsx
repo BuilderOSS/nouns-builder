@@ -75,7 +75,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   const isTokenActiveAuction =
     !settled &&
     currentTokenId !== undefined &&
-    currentTokenId.toString() == queriedTokenId
+    Number(currentTokenId) === Number(queriedTokenId)
 
   const isLatestButNotActive =
     !isTokenActiveAuction &&

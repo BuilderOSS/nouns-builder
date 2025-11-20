@@ -1,5 +1,5 @@
 import { atoms, space, theme } from '@buildeross/zord'
-import { style } from '@vanilla-extract/css'
+import { globalStyle, style } from '@vanilla-extract/css'
 
 export const feedItemCard = style([
   atoms({
@@ -81,10 +81,65 @@ export const feedItemTextContent = style([
     backgroundColor: 'border',
   }),
   {
-    width: '100%',
+    wordWrap: 'break-word',
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
     maxWidth: '100%',
+    width: '100%',
     maxHeight: '100cqw',
     overflow: 'auto',
     fontSize: 14,
   },
 ])
+
+globalStyle(`${feedItemTextContent} :is(h1, h2, h3, h4, h5, h6)`, {
+  fontFamily: 'Londrina Solid!important',
+  marginTop: 12,
+  marginBottom: 6,
+})
+
+globalStyle(`${feedItemTextContent} > p`, {
+  marginBottom: 20,
+})
+
+globalStyle(`${feedItemTextContent} code`, {
+  backgroundColor: 'rgba(0, 0, 0, 0.17)',
+  padding: '0.2em 0.4em',
+  borderRadius: '6px',
+  fontFamily: 'monospace!important',
+})
+
+globalStyle(`${feedItemTextContent} pre`, {
+  backgroundColor: 'rgba(0, 0, 0, 0.17)',
+  padding: '1em',
+  borderRadius: '6px',
+  fontFamily: 'monospace!important',
+  display: 'block',
+  overflow: 'auto',
+  whiteSpace: 'pre-wrap',
+  maxWidth: '100%',
+})
+
+globalStyle(`${feedItemTextContent} pre code`, {
+  backgroundColor: 'transparent',
+  padding: 0,
+})
+
+globalStyle(`${feedItemTextContent} blockquote`, {
+  color: '#808080',
+  padding: '0 1em',
+  borderLeft: '0.25em solid #808080',
+  margin: 0,
+  marginBottom: 20,
+})
+
+globalStyle(`${feedItemTextContent} *`, {
+  wordWrap: 'break-word',
+  overflowWrap: 'break-word',
+  wordBreak: 'break-word',
+  maxWidth: '100%',
+})
+
+globalStyle(`${feedItemTextContent} a`, {
+  wordBreak: 'break-all',
+})

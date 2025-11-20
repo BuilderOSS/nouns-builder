@@ -11,6 +11,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
@@ -19,11 +20,13 @@ import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Field, FieldProps, Form, Formik } from 'formik'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getAddress, type Hex, zeroHash } from 'viem'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import * as Yup from 'yup'
+
+import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 
 const propDateValidationSchema = Yup.object().shape({
   milestoneId: Yup.number(),
@@ -87,6 +90,7 @@ export const PropDateForm = ({
   addresses: addressesProp,
   insideModal = false,
 }: PropDateFormProps) => {
+  const ref = useRef<HTMLDivElement | null>(null)
   const initialValues = useMemo(
     () =>
       ({
@@ -113,6 +117,12 @@ export const PropDateForm = ({
   const { ensName: replyToEnsName, ensAvatar: replyToEnsAvatar } = useEnsData(
     replyTo?.creator
   )
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [ref])
 
   const handleSubmit = useCallback(
     async (values: PropDateFormValues) => {
@@ -208,7 +218,7 @@ export const PropDateForm = ({
       }
 
   return (
-    <Box {...boxProps}>
+    <Box {...boxProps} ref={ref}>
       <Flex justify="space-between" mb="x4" align="center">
         <Text fontSize={20} fontWeight="label">
           Create Propdate
@@ -357,9 +367,10 @@ const ReplyTo = ({
       borderRadius="curved"
       mt="x2"
       style={{
-        borderLeft: 'var(--space-x2) solid var(--colors-text4)',
+        maxHeight: '200px',
+        overflow: 'auto',
       }}
-      gap="x1"
+      gap="x2"
     >
       <Flex align="center" gap="x1">
         <Avatar address={creator} src={ensAvatar || undefined} size="16" />
@@ -367,16 +378,11 @@ const ReplyTo = ({
           {ensName || walletSnippet(creator)}
         </Text>
       </Flex>
-      <Text
-        variant="paragraph-sm"
-        color="text2"
-        style={{
-          wordBreak: 'break-word',
-          paddingLeft: 'var(--space-x1)',
-        }}
-      >
-        {message}
-      </Text>
+      <Box style={{ fontSize: '14px' }} pl="x2">
+        <Box className={messageStyle}>
+          <MarkdownDisplay>{message}</MarkdownDisplay>
+        </Box>
+      </Box>
     </Flex>
   )
 }

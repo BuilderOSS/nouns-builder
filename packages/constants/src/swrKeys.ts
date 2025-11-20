@@ -12,6 +12,7 @@ export const SWR_KEYS = {
   PROFILE_TOKENS: 'profile-tokens',
   PROPOSAL: 'proposal',
   PROPDATES: 'propdates',
+  PROPDATE_MESSAGE: 'propdate-message',
   PROPOSALS: 'proposals',
   PROPOSALS_CALLDATAS: 'proposals-calldatas',
   PROPOSALS_TRANSACTIONS: 'proposal-transaction-data',

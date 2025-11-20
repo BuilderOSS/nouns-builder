@@ -1,4 +1,5 @@
-import { useProposalState } from '@buildeross/hooks'
+import { usePropdateMessage } from '@buildeross/hooks/usePropdateMessage'
+import { useProposalState } from '@buildeross/hooks/useProposalState'
 import { PropDateReplyTo } from '@buildeross/proposal-ui'
 import type {
   AddressType,
@@ -41,11 +42,22 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const [showVoteModal, setShowVoteModal] = useState(false)
   const [showPropdateModal, setShowPropdateModal] = useState(false)
 
-  const { isActive, isPending, isLoading } = useProposalState({
+  const {
+    isActive,
+    isPending,
+    isLoading: isLoadingState,
+  } = useProposalState({
     chainId,
     governorAddress: addresses.governor as AddressType,
     proposalId,
   })
+
+  const { parsedContent, isLoading: isLoadingContent } = usePropdateMessage(
+    updateItem?.messageType,
+    updateItem?.message
+  )
+
+  const isLoading = isLoadingState || isLoadingContent
 
   // Construct replyTo object from updateItem when responding
   const replyTo = useMemo<PropDateReplyTo | undefined>(() => {
@@ -56,9 +68,9 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         ? updateItem.originalMessageId
         : updateItem.id) as Hex,
       creator: updateItem.actor as Hex,
-      message: updateItem.message,
+      message: parsedContent || updateItem.message,
     }
-  }, [updateItem])
+  }, [updateItem, parsedContent])
 
   if (isLoading) {
     return (
