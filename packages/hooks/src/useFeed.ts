@@ -1,10 +1,12 @@
+import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { CHAIN_ID, FeedItem, FeedResponse } from '@buildeross/types'
 import { useCallback, useMemo } from 'react'
 import useSWRInfinite from 'swr/infinite'
 
 type UseFeedOptions = {
   chainId?: CHAIN_ID
-  daoAddress?: string
+  daos?: string[]
+  eventTypes?: FeedEventType[]
   actor?: string
   limit?: number
   enabled?: boolean
@@ -27,20 +29,24 @@ type UseFeedReturn = {
  */
 function buildFeedUrl({
   chainId,
-  daoAddress,
+  daos,
+  eventTypes,
   actor,
   limit,
   cursor,
 }: {
   chainId?: CHAIN_ID
-  daoAddress?: string
+  daos?: string[]
+  eventTypes?: FeedEventType[]
   actor?: string
   limit?: number
   cursor?: number | null
 }) {
   const params = new URLSearchParams()
   if (chainId) params.append('chainId', String(chainId))
-  if (daoAddress) params.append('daoAddress', daoAddress)
+  if (daos && daos.length > 0) params.append('daos', daos.join(','))
+  if (eventTypes && eventTypes.length > 0)
+    params.append('eventTypes', eventTypes.join(','))
   if (actor) params.append('actor', actor)
   if (limit) params.append('limit', String(limit))
   if (cursor) params.append('cursor', String(cursor))
@@ -77,10 +83,27 @@ const fetcher = async (
  *   chainId: 1,
  *   limit: 20,
  * })
+ *
+ * @example
+ * // Filter by multiple DAOs
+ * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
+ *   chainId: 1,
+ *   daos: ['0x123...', '0x456...'],
+ *   limit: 20,
+ * })
+ *
+ * @example
+ * // Filter by event types
+ * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
+ *   chainId: 1,
+ *   eventTypes: [FeedEventType.AuctionBidPlaced, FeedEventType.ProposalCreated],
+ *   limit: 20,
+ * })
  */
 export function useFeed({
   chainId,
-  daoAddress,
+  daos,
+  eventTypes,
   actor,
   limit = 20,
   enabled = true,
@@ -88,8 +111,15 @@ export function useFeed({
 }: UseFeedOptions): UseFeedReturn {
   const baseKey = useMemo(() => {
     if (!enabled) return null
-    return { chainId, daoAddress, actor, limit }
-  }, [enabled, chainId, daoAddress, actor, limit])
+    // Stringify arrays for proper memoization
+    return {
+      chainId,
+      daos: daos?.join(','),
+      eventTypes: eventTypes?.join(','),
+      actor,
+      limit,
+    }
+  }, [enabled, chainId, daos, eventTypes, actor, limit])
 
   const { data, error, isValidating, size, setSize, mutate } = useSWRInfinite<
     FeedResponse,
@@ -101,7 +131,11 @@ export function useFeed({
 
       const cursor = pageIndex === 0 ? null : (previousPageData?.nextCursor ?? null)
       return buildFeedUrl({
-        ...baseKey,
+        chainId,
+        daos,
+        eventTypes,
+        actor,
+        limit,
         cursor,
       })
     },

@@ -1,11 +1,8 @@
+import { FeedEventType } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
-import {
-  fetchFeedDataService,
-  fetchUserActivityFeedService,
-  getTtlByScope,
-} from 'src/services/feedService'
+import { fetchFeedDataService, getTtlByScope } from 'src/services/feedService'
 import { isAddress } from 'viem'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -51,18 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     chainId = parsed as CHAIN_ID
   }
 
-  // Validate and parse daoAddress
-  let daoAddress: string | undefined
-  if (req.query.daoAddress) {
-    if (typeof req.query.daoAddress !== 'string') {
-      return res.status(400).json({ error: 'daoAddress must be a string' })
-    }
-    if (!isAddress(req.query.daoAddress, { strict: false })) {
-      return res.status(400).json({ error: 'Invalid daoAddress format' })
-    }
-    daoAddress = req.query.daoAddress.toLowerCase()
-  }
-
   // Validate and parse actor
   let actor: string | undefined
   if (req.query.actor) {
@@ -75,29 +60,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     actor = req.query.actor.toLowerCase()
   }
 
-  try {
-    // Fetch data
-    let result
-    if (actor) {
-      // User activity feed
-      result = await fetchUserActivityFeedService({
-        actor,
-        chainId,
-        cursor,
-        limit,
-      })
-    } else {
-      // Global / Chain / DAO feed
-      result = await fetchFeedDataService({
-        chainId,
-        daoAddress,
-        cursor,
-        limit,
-      })
+  // Validate and parse daos (comma-separated addresses)
+  let daos: string[] | undefined
+  if (req.query.daos) {
+    if (typeof req.query.daos !== 'string') {
+      return res.status(400).json({ error: 'daos must be a comma-separated string' })
+    }
+    const daoAddresses = req.query.daos.split(',').map((d) => d.trim())
+
+    // Validate each address
+    for (const dao of daoAddresses) {
+      if (!isAddress(dao, { strict: false })) {
+        return res.status(400).json({ error: `Invalid DAO address format: ${dao}` })
+      }
     }
 
+    daos = daoAddresses.map((d) => d.toLowerCase())
+  }
+
+  // Validate and parse eventTypes (comma-separated event types)
+  let eventTypes: FeedEventType[] | undefined
+  if (req.query.eventTypes) {
+    if (typeof req.query.eventTypes !== 'string') {
+      return res
+        .status(400)
+        .json({ error: 'eventTypes must be a comma-separated string' })
+    }
+    const types = req.query.eventTypes.split(',').map((t) => t.trim())
+
+    // Validate each event type
+    const validTypes = Object.values(FeedEventType)
+    for (const type of types) {
+      if (!validTypes.includes(type as FeedEventType)) {
+        return res.status(400).json({
+          error: `Invalid event type: ${type}. Valid types: ${validTypes.join(', ')}`,
+        })
+      }
+    }
+
+    eventTypes = types as FeedEventType[]
+  }
+
+  try {
+    // Fetch data (unified function for all feed types)
+    const result = await fetchFeedDataService({
+      chainId,
+      daos,
+      eventTypes,
+      actor,
+      cursor,
+      limit,
+    })
+
     // Determine TTL based on scope
-    const ttl = getTtlByScope({ chainId, daoAddress, actor })
+    const ttl = getTtlByScope({ chainId, daos, eventTypes, actor })
 
     // Set cache headers
     res.setHeader(
@@ -111,7 +127,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // eslint-disable-next-line no-console
       console.log('Feed API success', {
         chainId,
-        daoAddress,
+        daos,
+        eventTypes,
         actor,
         cursor,
         limit,
