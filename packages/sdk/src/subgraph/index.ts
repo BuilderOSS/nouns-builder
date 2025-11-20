@@ -28,6 +28,7 @@ export {
   type AuctionHistoryQuery,
   type CurrentAuctionFragment,
   type DaoFragment,
+  FeedEventType,
   OrderDirection,
   type Proposal_Filter,
   type ProposalFragment,

@@ -376,7 +376,7 @@ export async function fetchFeedDataService({
 
     return fetchWithSortedSetCache(
       key,
-      () => getFeedData({ chainId, limit: limit * 3, cursor, dao: daoAddress }),
+      () => getFeedData({ chainId, limit: limit * 3, cursor, daos: [daoAddress] }),
       ttl,
       cursor,
       limit
