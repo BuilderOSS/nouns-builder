@@ -10,6 +10,7 @@ import {
   FeedEvent_Filter,
   FeedEventsQuery,
   FeedEventsQueryVariables,
+  FeedEventType,
   ProposalVoteSupport,
 } from '../sdk.generated'
 
@@ -17,7 +18,8 @@ interface FeedQueryParams {
   chainId: CHAIN_ID
   limit: number
   cursor?: number
-  dao?: string
+  daos?: string[]
+  eventTypes?: FeedEventType[]
 }
 
 interface UserActivityQueryParams {
@@ -25,6 +27,8 @@ interface UserActivityQueryParams {
   limit: number
   cursor?: number
   actor: string
+  daos?: string[]
+  eventTypes?: FeedEventType[]
 }
 
 type FeedEvent = FeedEventsQuery['feedEvents'][0]
@@ -170,13 +174,15 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
  * @param chainId - The chain ID to fetch from
  * @param limit - Number of items to return (1-100)
  * @param cursor - Timestamp cursor for pagination
- * @param dao - Optional DAO address to filter by
+ * @param daos - Optional array of DAO addresses to filter by
+ * @param eventTypes - Optional array of event types to filter by
  */
 export const getFeedData = async ({
   chainId,
   limit,
   cursor,
-  dao,
+  daos,
+  eventTypes,
 }: FeedQueryParams): Promise<FeedResponse> => {
   // Validate input
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
@@ -192,8 +198,19 @@ export const getFeedData = async ({
     if (cursor !== undefined) {
       where.timestamp_lt = cursor.toString()
     }
-    if (dao) {
-      where.dao = dao.toLowerCase()
+    if (daos && daos.length > 0) {
+      if (daos.length === 1) {
+        where.dao = daos[0].toLowerCase()
+      } else {
+        where.dao_in = daos.map((dao) => dao.toLowerCase())
+      }
+    }
+    if (eventTypes && eventTypes.length > 0) {
+      if (eventTypes.length === 1) {
+        where.type = eventTypes[0]
+      } else {
+        where.type_in = eventTypes
+      }
     }
 
     // Query feed events
@@ -224,7 +241,7 @@ export const getFeedData = async ({
 
     return { items: feedItems, hasMore: false, nextCursor: null }
   } catch (e) {
-    console.error('Error fetching feed', { dao, chainId, limit, cursor }, e)
+    console.error('Error fetching feed', { daos, eventTypes, chainId, limit, cursor }, e)
 
     try {
       const sentry = await import('@sentry/nextjs')
@@ -244,12 +261,16 @@ export const getFeedData = async ({
  * @param limit - Number of items to return (1-100)
  * @param cursor - Timestamp cursor for pagination
  * @param actor - User's address
+ * @param daos - Optional array of DAO addresses to filter by
+ * @param eventTypes - Optional array of event types to filter by
  */
 export const getUserActivityFeed = async ({
   chainId,
   limit,
   cursor,
   actor,
+  daos,
+  eventTypes,
 }: UserActivityQueryParams): Promise<FeedResponse> => {
   // Validate input
   if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
@@ -265,6 +286,20 @@ export const getUserActivityFeed = async ({
     }
     if (cursor !== undefined) {
       where.timestamp_lt = cursor.toString()
+    }
+    if (daos && daos.length > 0) {
+      if (daos.length === 1) {
+        where.dao = daos[0].toLowerCase()
+      } else {
+        where.dao_in = daos.map((dao) => dao.toLowerCase())
+      }
+    }
+    if (eventTypes && eventTypes.length > 0) {
+      if (eventTypes.length === 1) {
+        where.type = eventTypes[0]
+      } else {
+        where.type_in = eventTypes
+      }
     }
 
     const data = await SDK.connect(chainId).feedEvents({
@@ -290,7 +325,7 @@ export const getUserActivityFeed = async ({
   } catch (e) {
     console.error(
       'Error fetching user activity feed',
-      { actor, chainId, limit, cursor },
+      { actor, daos, eventTypes, chainId, limit, cursor },
       e
     )
 
