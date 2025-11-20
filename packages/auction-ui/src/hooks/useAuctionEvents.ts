@@ -1,48 +1,42 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { awaitSubgraphSync, getBids } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useDaoStore } from '@buildeross/stores'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID } from '@buildeross/types'
 import React from 'react'
 import { useSWRConfig } from 'swr'
-import { useConfig, useWatchContractEvent } from 'wagmi'
-import { readContract } from 'wagmi/actions'
+import { useWatchContractEvent } from 'wagmi'
 
 export const useAuctionEvents = ({
   chainId,
-  collection,
   isTokenActiveAuction,
   onAuctionCreated,
   onAuctionBidCreated,
 }: {
   chainId: CHAIN_ID
-  collection: string
   isTokenActiveAuction: boolean
   onAuctionCreated?: (tokenId: bigint) => void
   onAuctionBidCreated?: (tokenId: bigint) => void
 }) => {
   const { mutate } = useSWRConfig()
   const { auction } = useDaoStore((state) => state.addresses)
-  const config = useConfig()
 
   const refreshAuctionAndBids = React.useCallback(
     async (_blockNumber: bigint, _tokenId: bigint) => {
+      if (!auction) return
+
       await awaitSubgraphSync(chainId, _blockNumber)
 
-      await mutate([SWR_KEYS.AUCTION, chainId, auction], () =>
-        readContract(config, {
-          abi: auctionAbi,
-          address: auction as AddressType,
-          chainId,
-          functionName: 'auction',
-        })
-      )
+      await mutate([SWR_KEYS.AUCTION, chainId, auction.toLowerCase()])
 
-      await mutate([SWR_KEYS.AUCTION_BIDS, chainId, auction, _tokenId.toString()], () =>
-        getBids(chainId, collection, _tokenId.toString())
-      )
+      await mutate([
+        SWR_KEYS.AUCTION_BIDS,
+        chainId,
+        auction.toLowerCase(),
+        _tokenId.toString(),
+      ])
     },
-    [chainId, collection, auction, mutate, config]
+    [chainId, auction, mutate]
   )
 
   useWatchContractEvent({
