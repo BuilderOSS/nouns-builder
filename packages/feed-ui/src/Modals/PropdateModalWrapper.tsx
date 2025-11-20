@@ -7,7 +7,6 @@ export interface PropdateModalWrapperProps {
   isOpen: boolean
   onClose: () => void
   proposalId: BytesType
-  proposalNumber: string
   chainId: CHAIN_ID
   addresses: RequiredDaoContractAddresses
   replyTo?: PropDateReplyTo
@@ -26,7 +25,7 @@ export const PropdateModalWrapper: React.FC<PropdateModalWrapperProps> = ({
       <>
         {isOpen && (
           <PropDateForm
-            proposalId={proposalId as string}
+            proposalId={proposalId}
             chainId={chainId}
             addresses={addresses}
             replyTo={replyTo}

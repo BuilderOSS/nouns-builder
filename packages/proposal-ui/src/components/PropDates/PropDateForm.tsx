@@ -42,7 +42,7 @@ const propDateValidationSchema = Yup.object().shape({
 
 interface PropDateFormValues {
   milestoneId: number
-  proposalId: string
+  proposalId: Hex
   replyTo: string
   message: string
 }
@@ -72,7 +72,7 @@ export interface PropDateReplyTo {
 export interface PropDateFormProps {
   closeForm: () => void
   onSuccess: () => void
-  proposalId: string
+  proposalId: Hex
   replyTo?: PropDateReplyTo
   invoiceData?: InvoiceMetadata
   chainId?: CHAIN_ID
@@ -105,8 +105,8 @@ export const PropDateForm = ({
   const storeAddresses = useDaoStore((x) => x.addresses)
 
   // Use props if provided, otherwise fall back to store
-  const chainId = chainIdProp || storeChain.id
-  const token = addressesProp?.token || storeAddresses.token
+  const chainId = chainIdProp ?? storeChain.id
+  const tokenAddress = addressesProp?.token ?? storeAddresses.token
 
   const config = useConfig()
 
@@ -122,14 +122,14 @@ export const PropDateForm = ({
     if (ref.current) {
       ref.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [ref])
+  }, [])
 
   const handleSubmit = useCallback(
     async (values: PropDateFormValues) => {
       setIsTxSuccess(false)
       setErrorMessage(null)
 
-      if (!token) {
+      if (!tokenAddress) {
         return
       }
 
@@ -169,7 +169,7 @@ export const PropDateForm = ({
       const attestParams: AttestationParams = {
         schema: PROPDATE_SCHEMA_UID,
         data: {
-          recipient: getAddress(token),
+          recipient: getAddress(tokenAddress),
           expirationTime: 0n,
           revocable: true,
           refUID: zeroHash,
@@ -197,7 +197,7 @@ export const PropDateForm = ({
         setIsSubmitting(false)
       }
     },
-    [chainId, config, token]
+    [chainId, config, tokenAddress]
   )
 
   const handleCloseModal = useCallback(() => {
