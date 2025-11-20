@@ -14,7 +14,7 @@ export const feedItemCard = style([
   {
     transition: 'all 0.15s ease-in-out',
     ':hover': {
-      borderColor: theme.colors.tertiary,
+      borderColor: theme.colors.neutralHover,
       boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
     },
   },
