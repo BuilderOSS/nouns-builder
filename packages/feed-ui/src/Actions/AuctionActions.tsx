@@ -99,14 +99,15 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         {/* Active auction - show bid option */}
         {isActive && isCurrentToken && (
           <>
-            <Button
+            <ContractButton
               size="sm"
               px="x3"
               variant="outline"
-              onClick={() => setShowBidModal(true)}
+              handleClick={() => setShowBidModal(true)}
+              chainId={chainId}
             >
               Place Bid
-            </Button>
+            </ContractButton>
             <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
               <Button size="sm" px="x3" variant="secondary">
                 View Details

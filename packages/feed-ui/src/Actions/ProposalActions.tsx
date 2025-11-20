@@ -8,6 +8,7 @@ import type {
   ProposalUpdatePostedFeedItem,
   RequiredDaoContractAddresses,
 } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { Button, Flex, Text } from '@buildeross/zord'
@@ -102,23 +103,25 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
       <Flex gap="x2" align="center" wrap="wrap">
         {/* Active or pending proposals show vote option */}
         {(isActive || isPending) && (
-          <Button
+          <ContractButton
             size="sm"
             px="x3"
             variant="outline"
-            onClick={() => setShowVoteModal(true)}
+            chainId={chainId}
+            handleClick={() => setShowVoteModal(true)}
           >
             Vote
-          </Button>
+          </ContractButton>
         )}
-        <Button
+        <ContractButton
           size="sm"
           px="x3"
           variant="outline"
-          onClick={() => setShowPropdateModal(true)}
+          chainId={chainId}
+          handleClick={() => setShowPropdateModal(true)}
         >
           {isUpdate ? 'Respond' : 'Add Update'}
-        </Button>
+        </ContractButton>
 
         <LinkWrapper
           link={getProposalLink(
