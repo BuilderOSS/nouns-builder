@@ -134,7 +134,7 @@ function generateCacheKey(params: {
     chainId,
     daos: daos?.map((d) => d.toLowerCase()).sort(), // Sort for consistent hashing
     actor: actor?.toLowerCase(),
-    eventTypes: eventTypes?.sort(), // Sort for consistent hashing
+    eventTypes: eventTypes ? [...eventTypes].sort() : undefined, // Sort for consistent hashing
   })
 
   // Short prefix + hash of params
@@ -404,20 +404,15 @@ export async function fetchFeedDataService({
     // NOTE: we limit to 33 here, since we fetch limit * 3 items in each chain which should be < 100 as validated in sdk
   }
 
-  // Validate daos requires chainId
-  if (daos && daos.length > 0 && !chainId) {
-    throw new InvalidRequestError('chainId is required when daos is specified')
-  }
-
-  // Validate chainId is supported
+  // Validate chainId is supported if provided
   if (chainId && !SUPPORTED_CHAIN_IDS.includes(chainId)) {
     throw new InvalidRequestError(
       `Unsupported chainId: ${chainId}. Supported chains: ${SUPPORTED_CHAIN_IDS.join(', ')}`
     )
   }
 
-  // Filtered feed (single chain with any filter: DAO, event type, or actor)
-  if (chainId && (daos || eventTypes || actor)) {
+  // Single chain feed (with or without filters)
+  if (chainId) {
     const key = generateCacheKey({ chainId, daos, eventTypes, actor })
     const ttl = getTtlByScope({ chainId, daos, eventTypes, actor })
 
@@ -438,31 +433,25 @@ export async function fetchFeedDataService({
     )
   }
 
-  // Chain-specific feed (single chain, no filters)
-  if (chainId) {
-    const key = generateCacheKey({ chainId })
-    const ttl = getTtlByScope({ chainId })
-
-    return fetchWithSortedSetCache(
-      key,
-      () => getFeedData({ chainId, limit: limit * 3, cursor }),
-      ttl,
-      cursor,
-      limit
-    )
-  }
-
-  // Global feed (all chains) - don't cache merged result, only individual chains
+  // Multi-chain feed (with or without filters) - don't cache merged result, only individual chains
   const perChainLimit = Math.min(Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10, 33)
 
   const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
     try {
-      const key = generateCacheKey({ chainId: cid })
-      const ttl = getTtlByScope({ chainId: cid })
+      const key = generateCacheKey({ chainId: cid, daos, eventTypes, actor })
+      const ttl = getTtlByScope({ chainId: cid, daos, eventTypes, actor })
 
       return await fetchWithSortedSetCache(
         key,
-        () => getFeedData({ chainId: cid, limit: perChainLimit * 3, cursor }),
+        () =>
+          getFeedData({
+            chainId: cid,
+            limit: perChainLimit * 3,
+            cursor,
+            daos,
+            eventTypes,
+            actor,
+          }),
         ttl,
         cursor,
         perChainLimit
