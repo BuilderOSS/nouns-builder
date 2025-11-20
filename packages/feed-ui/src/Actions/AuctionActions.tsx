@@ -21,6 +21,7 @@ interface AuctionActionsProps {
   daoName: string
   chainId: CHAIN_ID
   tokenId: string
+  tokenName: string
   addresses: RequiredDaoContractAddresses
 }
 
@@ -28,6 +29,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   daoName,
   chainId,
   tokenId,
+  tokenName,
   addresses,
 }) => {
   const { getAuctionLink } = useLinks()
@@ -176,6 +178,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         paused={paused}
         highestBidder={highestBidder}
         endTime={endTime}
+        tokenName={tokenName}
       />
     </>
   )
