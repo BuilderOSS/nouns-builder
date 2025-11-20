@@ -3,7 +3,7 @@ import type { CHAIN_ID } from '@buildeross/types'
 import { Flex, Text } from '@buildeross/zord'
 import React from 'react'
 
-import { feedItemActorName } from './Feed.css'
+import { feedItemChainName } from './Feed.css'
 
 interface FeedItemChainProps {
   chainId: CHAIN_ID
@@ -34,7 +34,7 @@ export const FeedItemChain: React.FC<FeedItemChainProps> = ({ chainId }) => {
           alt={chain.name}
         />
       </Flex>
-      <Text className={feedItemActorName} variant="paragraph-sm">
+      <Text className={feedItemChainName} variant="paragraph-sm">
         {chain.name}
       </Text>
     </Flex>
