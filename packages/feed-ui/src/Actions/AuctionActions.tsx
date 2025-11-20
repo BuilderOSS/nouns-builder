@@ -1,3 +1,4 @@
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useCurrentAuction } from '@buildeross/hooks'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import type {
@@ -10,6 +11,7 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { Button, Flex, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
+import { useSWRConfig } from 'swr'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -55,6 +57,8 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
     return highestBidder?.toLowerCase() === account.toLowerCase()
   })()
 
+  const { mutate } = useSWRConfig()
+
   const handleSettle = useCallback(async () => {
     try {
       setIsSettling(true)
@@ -67,12 +71,13 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
 
       const txHash = await writeContract(config, data.request)
       await waitForTransactionReceipt(config, { hash: txHash, chainId })
+      await mutate([SWR_KEYS.AUCTION, chainId, addresses.auction.toLowerCase()])
     } catch (error) {
       console.error('Error settling auction:', error)
     } finally {
       setIsSettling(false)
     }
-  }, [config, addresses.auction, chainId, paused])
+  }, [config, addresses.auction, chainId, paused, mutate])
 
   const buttonText = (() => {
     if (isWinner) return 'Claim NFT'

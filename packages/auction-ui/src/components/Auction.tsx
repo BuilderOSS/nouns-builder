@@ -85,14 +85,18 @@ export const Auction: React.FC<AuctionControllerProps> = ({
 
   useAuctionEvents({
     chainId: chain.id,
-    collection,
     isTokenActiveAuction,
     onAuctionCreated,
   })
 
   const { data: bids } = useSWR(
     chain.id && queriedTokenId && collection
-      ? ([SWR_KEYS.AUCTION_BIDS, chain.id, collection, queriedTokenId] as const)
+      ? ([
+          SWR_KEYS.AUCTION_BIDS,
+          chain.id,
+          collection.toLowerCase(),
+          queriedTokenId.toString(),
+        ] as const)
       : null,
     ([, _chainId, _collection, _tokenId]) => getBids(_chainId, _collection, _tokenId)
   )

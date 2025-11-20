@@ -1,7 +1,7 @@
 import { BASE_URL, SWR_KEYS } from '@buildeross/constants'
 import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { averageWinningBid, getBids } from '@buildeross/sdk/subgraph'
+import { averageWinningBid } from '@buildeross/sdk/subgraph'
 import { useDaoStore } from '@buildeross/stores'
 import { AddressType, Chain, RequiredDaoContractAddresses } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -11,7 +11,7 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { Address, formatEther, parseEther } from 'viem'
+import { formatEther, parseEther } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -43,7 +43,7 @@ export const PlaceBid = ({
   const { addresses: storeAddresses } = useDaoStore()
 
   // Use prop addresses if provided, otherwise fall back to store
-  const addresses = addressesProp || storeAddresses
+  const addresses = addressesProp ?? storeAddresses
 
   const config = useConfig()
 
@@ -96,7 +96,7 @@ export const PlaceBid = ({
   )
 
   const createBidTransaction = useCallback(async () => {
-    if (!isMinBid || !bidAmount) return
+    if (!isMinBid || !bidAmount || !addresses.token || !addresses.auction) return
 
     try {
       setCreatingBid(true)
@@ -105,7 +105,7 @@ export const PlaceBid = ({
       if (referral) {
         const data = await simulateContract(config, {
           abi: auctionAbi,
-          address: addresses.auction as Address,
+          address: addresses.auction,
           functionName: 'createBidWithReferral',
           args: [BigInt(tokenId), referral],
           value: parseEther(bidAmount),
@@ -115,7 +115,7 @@ export const PlaceBid = ({
       } else {
         const data = await simulateContract(config, {
           abi: auctionAbi,
-          address: addresses.auction as Address,
+          address: addresses.auction,
           functionName: 'createBid',
           args: [BigInt(tokenId)],
           value: parseEther(bidAmount),
@@ -127,13 +127,14 @@ export const PlaceBid = ({
       if (txHash)
         await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
 
-      await mutate([SWR_KEYS.AUCTION_BIDS, chain.id, addresses.token, tokenId], () =>
-        getBids(chain.id, addresses.token!, tokenId)
-      )
+      await mutate([
+        SWR_KEYS.AUCTION_BIDS,
+        chain.id,
+        addresses.token.toLowerCase(),
+        tokenId.toString(),
+      ])
 
-      await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token], () =>
-        averageWinningBid(chain.id, addresses.token as Address)
-      )
+      await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chain.id, addresses.token])
 
       // Call onSuccess callback if provided
       onSuccess?.()
