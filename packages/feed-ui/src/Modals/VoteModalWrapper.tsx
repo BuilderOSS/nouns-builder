@@ -1,15 +1,15 @@
 import { useDaoMembership, useHasVoted, useVotes } from '@buildeross/hooks'
-import { VoteModal } from '@buildeross/proposal-ui'
+import { SubmitVoteForm } from '@buildeross/proposal-ui'
 import {
   type ProposalVoteFragment,
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
 import type { BytesType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
-import { AnimatedModal } from '@buildeross/ui/Modal'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Atoms, Box, Flex, Icon, IconType, Stack, Text } from '@buildeross/zord'
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useCallback, useState } from 'react'
 import { useAccount } from 'wagmi'
 
 export interface VoteModalWrapperProps {
@@ -80,127 +80,115 @@ const VoteStatusDisplay: React.FC<{ vote: ProposalVoteFragment }> = ({ vote }) =
   )
 }
 
-const AlreadyVotedModal: React.FC<{
-  isOpen: boolean
-  onClose: () => void
+const AlreadyVotedContent: React.FC<{
   proposalTitle: string
   vote: ProposalVoteFragment
-}> = ({ isOpen, onClose, proposalTitle, vote }) => {
+}> = ({ proposalTitle, vote }) => {
   return (
-    <AnimatedModal open={isOpen} size="medium" close={onClose}>
-      <Box p="x6">
-        <Text variant="heading-md" mb="x4">
-          Your Vote
-        </Text>
-        <Text variant="paragraph-sm" color="tertiary" mb="x6">
-          Proposal: {proposalTitle}
-        </Text>
-        <VoteStatusDisplay vote={vote} />
-        <Text variant="paragraph-sm" color="tertiary" mt="x4">
-          You have already voted on this proposal. Your vote has been recorded.
-        </Text>
-      </Box>
-    </AnimatedModal>
+    <Box p="x6">
+      <Text variant="heading-md" mb="x4">
+        Your Vote
+      </Text>
+      <Text variant="paragraph-sm" color="tertiary" mb="x6">
+        Proposal: {proposalTitle}
+      </Text>
+      <VoteStatusDisplay vote={vote} />
+      <Text variant="paragraph-sm" color="tertiary" mt="x4">
+        You have already voted on this proposal. Your vote has been recorded.
+      </Text>
+    </Box>
   )
 }
 
-const NotAMemberModal: React.FC<{
-  isOpen: boolean
-  onClose: () => void
+const NotAMemberContent: React.FC<{
   proposalTitle: string
-}> = ({ isOpen, onClose, proposalTitle }) => {
+}> = ({ proposalTitle }) => {
   return (
-    <AnimatedModal open={isOpen} size="medium" close={onClose}>
-      <Box p="x6">
-        <Text variant="heading-md" mb="x4">
-          Cannot Vote
+    <Box p="x6">
+      <Text variant="heading-md" mb="x4">
+        Cannot Vote
+      </Text>
+      <Text variant="paragraph-sm" color="tertiary" mb="x6">
+        Proposal: {proposalTitle}
+      </Text>
+      <Box p="x4" backgroundColor="background2" borderRadius="curved">
+        <Text variant="paragraph-md">
+          You are not a member of this DAO. To vote on proposals, you need to hold at
+          least one token from this DAO.
         </Text>
-        <Text variant="paragraph-sm" color="tertiary" mb="x6">
-          Proposal: {proposalTitle}
-        </Text>
-        <Box p="x4" backgroundColor="background2" borderRadius="curved">
-          <Text variant="paragraph-md">
-            You are not a member of this DAO. To vote on proposals, you need to hold at
-            least one token from this DAO.
-          </Text>
-        </Box>
       </Box>
-    </AnimatedModal>
+    </Box>
   )
 }
 
-const DelegatedVotesModal: React.FC<{
-  isOpen: boolean
-  onClose: () => void
+const DelegatedVotesContent: React.FC<{
   proposalTitle: string
   membership: NonNullable<ReturnType<typeof useDaoMembership>['data']>
-}> = ({ isOpen, onClose, proposalTitle, membership }) => {
+}> = ({ proposalTitle, membership }) => {
   return (
-    <AnimatedModal open={isOpen} size="medium" close={onClose}>
-      <Box p="x6">
-        <Text variant="heading-md" mb="x4">
-          Cannot Vote
-        </Text>
-        <Text variant="paragraph-sm" color="tertiary" mb="x6">
-          Proposal: {proposalTitle}
-        </Text>
+    <Box p="x6">
+      <Text variant="heading-md" mb="x4">
+        Cannot Vote
+      </Text>
+      <Text variant="paragraph-sm" color="tertiary" mb="x6">
+        Proposal: {proposalTitle}
+      </Text>
 
-        {membership.voteDescription && (
-          <Box mb="x4" color="text3">
-            <Text variant="paragraph-sm">{membership.voteDescription}</Text>
-          </Box>
-        )}
-
-        <Box mb="x2">
-          <Text variant="paragraph-md" fontWeight="display">
-            Current Delegate
-          </Text>
+      {membership.voteDescription && (
+        <Box mb="x4" color="text3">
+          <Text variant="paragraph-sm">{membership.voteDescription}</Text>
         </Box>
+      )}
 
-        <Flex
-          align="center"
-          height="x16"
-          mb="x4"
-          borderColor="border"
-          borderWidth="normal"
-          borderStyle="solid"
-          borderRadius="curved"
-          gap="x4"
-          px="x4"
-        >
-          <Box>
-            {membership.delegate.ensAvatar ? (
-              <img
-                src={membership.delegate.ensAvatar}
-                alt="avatar"
-                height={28}
-                width={28}
-                style={{ borderRadius: '50%' }}
-              />
-            ) : (
-              <Avatar address={membership.delegate.ethAddress} size="28" />
-            )}
-          </Box>
-
-          {membership.delegate.ensName ? (
-            <>
-              <Box>{membership.delegate.ensName}</Box>
-              <Box color="text4" ml="auto">
-                {walletSnippet(membership.delegate.ethAddress)}
-              </Box>
-            </>
-          ) : (
-            <Box>{walletSnippet(membership.delegate.ethAddress)}</Box>
-          )}
-        </Flex>
-
-        <Box p="x4" backgroundColor="background2" borderRadius="curved">
-          <Text variant="paragraph-sm" color="tertiary">
-            To vote on proposals yourself, you need to undelegate your votes first.
-          </Text>
-        </Box>
+      <Box mb="x2">
+        <Text variant="paragraph-md" fontWeight="display">
+          Current Delegate
+        </Text>
       </Box>
-    </AnimatedModal>
+
+      <Flex
+        align="center"
+        height="x16"
+        mb="x4"
+        borderColor="border"
+        borderWidth="normal"
+        borderStyle="solid"
+        borderRadius="curved"
+        gap="x4"
+        px="x4"
+      >
+        <Box>
+          {membership.delegate.ensAvatar ? (
+            <img
+              src={membership.delegate.ensAvatar}
+              alt="avatar"
+              height={28}
+              width={28}
+              style={{ borderRadius: '50%' }}
+            />
+          ) : (
+            <Avatar address={membership.delegate.ethAddress} size="28" />
+          )}
+        </Box>
+
+        {membership.delegate.ensName ? (
+          <>
+            <Box>{membership.delegate.ensName}</Box>
+            <Box color="text4" ml="auto">
+              {walletSnippet(membership.delegate.ethAddress)}
+            </Box>
+          </>
+        ) : (
+          <Box>{walletSnippet(membership.delegate.ethAddress)}</Box>
+        )}
+      </Flex>
+
+      <Box p="x4" backgroundColor="background2" borderRadius="curved">
+        <Text variant="paragraph-sm" color="tertiary">
+          To vote on proposals yourself, you need to undelegate your votes first.
+        </Text>
+      </Box>
+    </Box>
   )
 }
 
@@ -213,6 +201,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   addresses,
 }) => {
   const { address: userAddress } = useAccount()
+  const [isCastVoteSuccess, setIsCastVoteSuccess] = useState<boolean>(false)
 
   const {
     votes,
@@ -247,70 +236,85 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   const votesAvailable = votes ? Number(votes) : 0
   const isLoading = isLoadingVotes || isVoteLoading || isMembershipLoading
 
-  // Show loading state
-  if (isLoading || !isOpen) {
-    return (
-      <AnimatedModal open={isOpen} size="medium" close={onClose}>
+  const handleModalClose = useCallback(() => {
+    onClose()
+    // Reset success state when modal closes
+    if (isCastVoteSuccess) {
+      setTimeout(() => setIsCastVoteSuccess(false), 300)
+    }
+  }, [onClose, isCastVoteSuccess])
+
+  // Determine modal size based on state
+  const modalSize = isCastVoteSuccess ? 'small' : 'medium'
+
+  // Render modal content based on state
+  const renderContent = () => {
+    // Show loading state
+    if (isLoading) {
+      return (
         <Box p="x6">
           <Text>Loading...</Text>
         </Box>
-      </AnimatedModal>
-    )
-  }
+      )
+    }
 
-  // User has already voted
-  if (hasVoted && vote) {
+    // Show success state after voting
+    if (isCastVoteSuccess) {
+      return (
+        <SuccessModalContent
+          success={true}
+          title={'Vote Submitted'}
+          subtitle={`You've successfully voted on this proposal`}
+        />
+      )
+    }
+
+    // User has already voted
+    if (hasVoted && vote) {
+      return <AlreadyVotedContent proposalTitle={proposalTitle} vote={vote} />
+    }
+
+    // User is not in the DAO system at all
+    if (!membership) {
+      return <NotAMemberContent proposalTitle={proposalTitle} />
+    }
+
+    // User has no voting power available
+    if (votesAvailable === 0) {
+      // Check if they're actually in the system (own tokens or have votes)
+      if (membership.tokenCount > 0 || membership.voteCount > 0) {
+        // They're in the system but have delegated their votes
+        if (isDelegating && membership.delegate) {
+          return (
+            <DelegatedVotesContent
+              proposalTitle={proposalTitle}
+              membership={membership}
+            />
+          )
+        }
+      }
+
+      // No votes and not meaningfully in the system - not a member
+      return <NotAMemberContent proposalTitle={proposalTitle} />
+    }
+
+    // User has voting power - show the voting interface
     return (
-      <AlreadyVotedModal
-        isOpen={isOpen}
-        onClose={onClose}
-        proposalTitle={proposalTitle}
-        vote={vote}
+      <SubmitVoteForm
+        proposalId={proposalId}
+        votesAvailable={votesAvailable}
+        handleModalClose={handleModalClose}
+        setIsCastVoteSuccess={setIsCastVoteSuccess}
+        title={proposalTitle}
+        addresses={addresses}
+        chainId={chainId}
       />
     )
   }
 
-  // User is not in the DAO system at all
-  if (!membership) {
-    return (
-      <NotAMemberModal isOpen={isOpen} onClose={onClose} proposalTitle={proposalTitle} />
-    )
-  }
-
-  // User has no voting power available
-  if (votesAvailable === 0) {
-    // Check if they're actually in the system (own tokens or have votes)
-    if (membership.tokenCount > 0 || membership.voteCount > 0) {
-      // They're in the system but have delegated their votes
-      if (isDelegating && membership.delegate) {
-        return (
-          <DelegatedVotesModal
-            isOpen={isOpen}
-            onClose={onClose}
-            proposalTitle={proposalTitle}
-            membership={membership}
-          />
-        )
-      }
-    }
-
-    // No votes and not meaningfully in the system - not a member
-    return (
-      <NotAMemberModal isOpen={isOpen} onClose={onClose} proposalTitle={proposalTitle} />
-    )
-  }
-
-  // User has voting power - show the voting interface
   return (
-    <VoteModal
-      title={proposalTitle}
-      proposalId={proposalId}
-      votesAvailable={votesAvailable}
-      showVoteModal={isOpen}
-      setShowVoteModal={onClose}
-      addresses={addresses}
-      chainId={chainId}
-      onSuccess={onClose}
-    />
+    <AnimatedModal open={isOpen} size={modalSize} close={handleModalClose}>
+      {renderContent()}
+    </AnimatedModal>
   )
 }
