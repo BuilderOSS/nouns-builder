@@ -82,6 +82,7 @@ export const BidActionButton = ({
   if (isEnded || isOver) {
     return (
       <Settle
+        auctionPaused={false}
         isEnding={false}
         owner={highestBid?.bidder}
         auctionAddress={auctionAddress}

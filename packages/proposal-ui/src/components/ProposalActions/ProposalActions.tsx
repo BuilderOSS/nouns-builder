@@ -25,16 +25,14 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((state) => state.chain)
 
-  const votesData = useVotes({
+  const { isLoading, isVetoer, votes } = useVotes({
     chainId: chain.id,
     collectionAddress: addresses.token,
     governorAddress: addresses.governor,
     signerAddress: userAddress,
   })
 
-  const { votesAvailable, isVetoer, isProposer, signerVote } = useMemo(() => {
-    const { votes, isVetoer } = votesData
-
+  const { votesAvailable, isProposer, signerVote } = useMemo(() => {
     const votesAvailable = !!votes ? Number(votes) : 0
 
     const isProposer =
@@ -46,14 +44,13 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
 
     return {
       votesAvailable,
-      isVetoer,
       isProposer,
       signerVote,
     }
-  }, [votesData, userAddress, proposal.votes, proposal.proposer])
+  }, [userAddress, votes, proposal.votes, proposal.proposer])
 
   if (!userAddress) return <ConnectWalletAction />
-  if (votesData.isLoading) return null
+  if (isLoading) return null
 
   return (
     <Fragment>

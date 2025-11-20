@@ -34,6 +34,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   const { address: account } = useAccount()
 
   const [showBidModal, setShowBidModal] = useState(false)
+  const [isSettling, setIsSettling] = useState(false)
 
   const {
     isActive,
@@ -43,6 +44,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
     highestBid,
     highestBidder,
     isLoading,
+    paused,
   } = useCurrentAuction({
     chainId,
     auctionAddress: addresses.auction as AddressType,
@@ -55,10 +57,11 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
 
   const handleSettle = useCallback(async () => {
     try {
+      setIsSettling(true)
       const data = await simulateContract(config, {
         address: addresses.auction,
         abi: auctionAbi,
-        functionName: 'settleCurrentAndCreateNewAuction',
+        functionName: paused ? 'settleAuction' : 'settleCurrentAndCreateNewAuction',
         chainId,
       })
 
@@ -66,9 +69,16 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
       await waitForTransactionReceipt(config, { hash: txHash, chainId })
     } catch (error) {
       console.error('Error settling auction:', error)
-      throw error
+    } finally {
+      setIsSettling(false)
     }
-  }, [config, addresses.auction, chainId])
+  }, [config, addresses.auction, chainId, paused])
+
+  const buttonText = (() => {
+    if (isWinner) return 'Claim NFT'
+    if (paused) return 'Settle Auction'
+    return 'Start next Auction'
+  })()
 
   if (isLoading) {
     return (
@@ -111,11 +121,12 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
             <ContractButton
               chainId={chainId}
               handleClick={handleSettle}
+              loading={isSettling}
               variant="outline"
               size="sm"
               px="x3"
             >
-              {isWinner ? 'Claim NFT' : 'Start next Auction'}
+              {buttonText}
             </ContractButton>
             <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
               <Button size="sm" px="x3" variant="secondary">
