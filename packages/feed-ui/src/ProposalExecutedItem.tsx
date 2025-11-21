@@ -30,7 +30,7 @@ export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
           <Box className={feedItemTextContentWrapper}>
             <Box className={feedItemTextContent}>
-              <MarkdownDisplay>{item.proposalDescription}</MarkdownDisplay>
+              <MarkdownDisplay disableLinks>{item.proposalDescription}</MarkdownDisplay>
             </Box>
           </Box>
         </Stack>
