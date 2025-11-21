@@ -1,4 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { Feed } from '@buildeross/feed-ui'
 import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
 import {
   CurrentAuctionFragment,
@@ -8,15 +9,14 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
 import { DaoAuctionCard } from './DaoAuctionCard'
-import { DaoFeed } from './DaoFeed'
 import { DaoProposals } from './DaoProposals'
-import { DashboardLayout, DashPage } from './DashboardLayout'
+import { DashboardLayout } from './DashboardLayout'
 import { DashConnect } from './DashConnect'
 import { AuctionCardSkeleton, DAOCardSkeleton, ProposalCardSkeleton } from './Skeletons'
 
@@ -89,15 +89,20 @@ export type DashboardProps = {
 export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
   const { address } = useAccount()
 
-  const { data, error, isLoading, mutate } = useSWR(
+  const {
+    data: daos,
+    isLoading,
+    mutate,
+    error,
+  } = useSWR(
     address ? ([SWR_KEYS.DASHBOARD, address] as const) : null,
     ([, _address]) => fetchDashboardData(_address),
     { revalidateOnFocus: false }
   )
 
   const auctionCards = useMemo(() => {
-    if (!address || !data) return null
-    return data.map((dao) => (
+    if (!address || !daos) return null
+    return daos.map((dao) => (
       <DaoAuctionCard
         // React diffing wasn't catching new auctions starting, so this
         // long key is to help rerender when new auction starts
@@ -109,11 +114,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
         handleMutate={mutate}
       />
     ))
-  }, [data, address, mutate])
+  }, [daos, address, mutate])
 
   const proposalList = useMemo(() => {
-    if (!data) return null
-    const hasLiveProposals = data.some((dao) => dao.proposals.length)
+    if (!daos) return null
+    const hasLiveProposals = daos.some((dao) => dao.proposals.length)
 
     if (!hasLiveProposals)
       return (
@@ -127,6 +132,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           direction={'column'}
           justify={'center'}
           align={'center'}
+          p={'x6'}
         >
           <Text fontSize={20} fontWeight={'display'} mb="x4" color={'text3'}>
             No Active Proposals
@@ -138,7 +144,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
         </Flex>
       )
 
-    return data
+    return daos
       .filter((dao) => dao.proposals.length)
       .map((dao) => (
         <DaoProposals
@@ -148,53 +154,81 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           onOpenCreateProposal={handleOpenCreateProposal}
         />
       ))
-  }, [data, address, handleOpenCreateProposal])
+  }, [daos, address, handleOpenCreateProposal])
+
+  // Main content - always show Feed
+  const mainContent = <Feed />
+
+  // Sidebar content - varies by state
+  let sidebarContent: React.ReactNode
 
   if (error) {
-    return (
-      <DashPage>
-        <Text fontSize={18} mb={'x6'}>
-          Something went wrong.
-        </Text>
-        <DisplayPanel
-          title="Error"
-          description={
-            error?.message || 'Error fetching display data. Error message not found.'
-          }
-        />
-      </DashPage>
+    sidebarContent = (
+      <Stack gap="x8">
+        <Box>
+          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+            DAOs
+          </Text>
+          <DisplayPanel
+            title="Error fetching DAOs"
+            description={error?.message || 'Unknown error.'}
+          />
+        </Box>
+      </Stack>
     )
-  }
-  if (isLoading) {
-    return (
-      <DashboardLayout
-        auctionCards={Array.from({ length: 3 }).map((_, i) => (
-          <AuctionCardSkeleton key={`auctionCardSkeleton:${i}`} />
-        ))}
-        daoProposals={
-          <Box>
-            <DAOCardSkeleton />
-            {Array.from({ length: 2 }).map((_, i) => (
-              <ProposalCardSkeleton key={`daoCardSkeleton:${i}`} />
-            ))}
-          </Box>
-        }
-      />
+  } else if (isLoading) {
+    sidebarContent = (
+      <Stack gap="x8">
+        <Box>
+          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+            DAOs
+          </Text>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <AuctionCardSkeleton key={`auctionCardSkeleton:${i}`} />
+          ))}
+        </Box>
+        <Box>
+          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+            Proposals
+          </Text>
+          <DAOCardSkeleton />
+          {Array.from({ length: 2 }).map((_, i) => (
+            <ProposalCardSkeleton key={`daoCardSkeleton:${i}`} />
+          ))}
+        </Box>
+      </Stack>
+    )
+  } else if (!address) {
+    sidebarContent = <DashConnect />
+  } else if (!daos?.length) {
+    sidebarContent = (
+      <Stack gap="x8">
+        <Box>
+          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+            DAOs
+          </Text>
+          <Text fontSize={18}>It looks like you haven't joined any DAOs yet.</Text>
+        </Box>
+      </Stack>
+    )
+  } else {
+    sidebarContent = (
+      <Stack gap="x8">
+        <Box>
+          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+            DAOs
+          </Text>
+          {auctionCards}
+        </Box>
+        <Box>
+          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+            Proposals
+          </Text>
+          {proposalList}
+        </Box>
+      </Stack>
     )
   }
 
-  if (!address) {
-    return <DashConnect />
-  }
-
-  if (!data?.length) {
-    return (
-      <DashPage>
-        <Text fontSize={18}>It looks like you haven’t joined any DAOs yet.</Text>
-        <DaoFeed isDashboard />
-      </DashPage>
-    )
-  }
-
-  return <DashboardLayout auctionCards={auctionCards} daoProposals={proposalList} />
+  return <DashboardLayout mainContent={mainContent} sidebarContent={sidebarContent} />
 }

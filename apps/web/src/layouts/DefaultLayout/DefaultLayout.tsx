@@ -20,7 +20,7 @@ export function DefaultLayout({
       chain={chain}
       addresses={addresses}
       px={'x4'}
-      pt={{ '@initial': 'x20', '@480': 'x16' }}
+      pt={'x20'}
       footer={<Footer />}
     >
       {children}
