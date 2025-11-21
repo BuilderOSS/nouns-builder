@@ -2,10 +2,10 @@ import { useFeed } from '@buildeross/hooks'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem as FeedItemType } from '@buildeross/types'
 import { Flex, Stack, Text } from '@buildeross/zord'
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { FeedItem } from './FeedItem'
-import { FeedSkeleton } from './FeedSkeleton'
+import { FeedSkeleton, FeedSkeletonItem } from './FeedSkeleton'
 import { LoadMoreButton } from './LoadMoreButton'
 
 export interface FeedProps {
@@ -36,6 +36,37 @@ export const Feed: React.FC<FeedProps> = ({
     enabled,
     onError,
   })
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null)
+  const [loadMoreError, setLoadMoreError] = useState(false)
+
+  // Infinite scroll: automatically load more when loadMoreRef comes into view
+  useEffect(() => {
+    if (!hasMore || isLoadingMore || loadMoreError) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage().catch(() => {
+            setLoadMoreError(true)
+          })
+        }
+      },
+      { rootMargin: '200px' }
+    )
+
+    const current = loadMoreRef.current
+    if (current) observer.observe(current)
+
+    return () => {
+      if (current) observer.unobserve(current)
+    }
+  }, [hasMore, isLoadingMore, loadMoreError, fetchNextPage])
+
+  // Reset error state when filters change
+  useEffect(() => {
+    setLoadMoreError(false)
+  }, [chainId, daos, eventTypes, actor])
 
   if (error) {
     return (
@@ -93,8 +124,22 @@ export const Feed: React.FC<FeedProps> = ({
 
         {isLoadingMore && <FeedSkeleton count={3} />}
 
-        {hasMore && !isLoadingMore && (
-          <LoadMoreButton onClick={fetchNextPage} isLoading={isLoadingMore} />
+        {/* Infinite scroll sentinel */}
+        {hasMore && !isLoadingMore && !loadMoreError && (
+          <div ref={loadMoreRef}>
+            <FeedSkeletonItem />
+          </div>
+        )}
+
+        {/* Show load more button only if there's an error */}
+        {hasMore && !isLoadingMore && loadMoreError && (
+          <LoadMoreButton
+            onClick={() => {
+              setLoadMoreError(false)
+              fetchNextPage().catch(() => setLoadMoreError(true))
+            }}
+            isLoading={isLoadingMore}
+          />
         )}
 
         {!hasMore && !isLoadingMore && (
