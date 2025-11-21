@@ -8,19 +8,22 @@ export const outerAuctionCard = style([
       'screen and (max-width: 768px)': {
         gap: '16px',
       },
+      'screen and (min-width: 1024px)': {
+        gap: '16px',
+      },
     },
   },
   atoms({
     width: '100%',
-    alignItems: { '@initial': 'flex-start', '@768': 'center' },
-    flexDirection: { '@initial': 'column', '@768': 'row' },
+    alignItems: { '@initial': 'flex-start', '@768': 'center', '@1024': 'flex-start' },
+    flexDirection: { '@initial': 'column', '@768': 'row', '@1024': 'column' },
     marginBottom: 'x6',
     borderColor: 'border',
     borderStyle: 'solid',
     borderRadius: 'curved',
     borderWidth: 'normal',
-    py: { '@initial': 'x4', '@768': 'x3' },
-    px: { '@initial': 'x2', '@768': 'x6' },
+    py: { '@initial': 'x4', '@768': 'x3', '@1024': 'x4' },
+    px: { '@initial': 'x2', '@768': 'x6', '@1024': 'x8' },
   }),
   {
     transition: 'border-color 0.15s ease-in-out',
@@ -57,10 +60,13 @@ export const daoTokenName = style([
     textOverflow: 'ellipsis',
     width: '200px',
     '@media': {
+      'screen and (min-width: 1024px)': {
+        width: '220px',
+      },
       'screen and (max-width: 912px)': {
         width: '150px',
       },
-      'screen and (max-width:768px)': {
+      'screen and (max-width: 768px)': {
         width: '220px',
       },
     },
@@ -85,6 +91,9 @@ export const daoAvatarBox = style({
   width: '64px',
   height: '64px',
   '@media': {
+    'screen and (min-width: 1024px)': {
+      marginRight: '16px',
+    },
     'screen and (max-width: 768px)': {
       marginRight: '16px',
     },
@@ -95,6 +104,9 @@ export const auctionCardBrand = style([
   {
     width: '40%',
     '@media': {
+      'screen and (min-width: 1024px)': {
+        width: '100%',
+      },
       'screen and (max-width: 912px)': {
         width: '35%',
       },
@@ -114,6 +126,9 @@ export const stats = style({
 export const statsBox = style({
   width: '30%',
   '@media': {
+    'screen and (min-width: 1024px)': {
+      width: '100%',
+    },
     'screen and (max-width: 768px)': {
       width: '80%',
     },
@@ -128,6 +143,10 @@ export const bidBox = style([
     width: '250px',
     '@media': {
       'screen and (max-width: 768px)': {
+        width: '100%',
+        marginLeft: 0,
+      },
+      'screen and (min-width: 1024px)': {
         width: '100%',
         marginLeft: 0,
       },
@@ -208,6 +227,9 @@ export const daoName = style({
   textOverflow: 'ellipsis',
   maxWidth: '250px',
   '@media': {
+    'screen and (min-width: 1024px)': {
+      maxWidth: '200px',
+    },
     'screen and (max-width: 484px)': {
       maxWidth: '200px',
     },

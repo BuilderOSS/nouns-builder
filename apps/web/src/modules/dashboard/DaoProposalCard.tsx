@@ -56,20 +56,24 @@ export const DaoProposalCard = ({
       mb={'x4'}
       direction="column"
       w={'100%'}
-      align={{ '@initial': 'flex-start', '@768': 'center' }}
+      align={{ '@initial': 'flex-start', '@768': 'center', '@1024': 'flex-start' }}
       borderStyle={'solid'}
       borderRadius={'curved'}
       borderWidth={'normal'}
-      py={{ '@initial': 'x3', '@768': 'x6' }}
-      px={{ '@initial': 'x6', '@768': 'x3' }}
+      py={{ '@initial': 'x3', '@768': 'x6', '@1024': 'x3' }}
+      px={{ '@initial': 'x6', '@768': 'x3', '@1024': 'x6' }}
       position={'relative'}
       link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
       className={proposalCardVariants[displayWarning ? 'warning' : 'default']}
     >
       <Flex
-        direction={{ '@initial': 'column-reverse', '@768': 'row' }}
+        direction={{
+          '@initial': 'column-reverse',
+          '@768': 'row',
+          '@1024': 'column-reverse',
+        }}
         w={'100%'}
-        align={{ '@initial': 'flex-start', '@768': 'center' }}
+        align={{ '@initial': 'flex-start', '@768': 'center', '@1024': 'flex-start' }}
         position={'relative'}
       >
         <Flex align="center">
@@ -78,7 +82,7 @@ export const DaoProposalCard = ({
             fontWeight="label"
             color={'text4'}
             mr={'x4'}
-            display={{ '@initial': 'none', '@768': 'flex' }}
+            display={{ '@initial': 'none', '@768': 'flex', '@1024': 'none' }}
           >
             {proposalNumber}
           </Text>
@@ -86,9 +90,13 @@ export const DaoProposalCard = ({
         <Flex
           mr={'auto'}
           align="center"
-          mb={{ '@initial': 'x2', '@768': 'x0' }}
-          width={{ '@initial': '100%', '@768': 'auto' }}
-          justify={{ '@initial': 'space-between' }}
+          mb={{ '@initial': 'x2', '@768': 'x0', '@1024': 'x2' }}
+          width={{ '@initial': '100%', '@768': 'auto', '@1024': '100%' }}
+          justify={{
+            '@initial': 'space-between',
+            '@768': 'flex-start',
+            '@1024': 'space-between',
+          }}
         >
           <Text fontSize={18} fontWeight="label" mr="x3">
             {title}
@@ -102,14 +110,14 @@ export const DaoProposalCard = ({
         </Flex>
         <Flex
           justify={'space-between'}
-          width={{ '@initial': '100%', '@768': 'unset' }}
+          width={{ '@initial': '100%', '@768': 'unset', '@1024': '100%' }}
           align={'center'}
-          mb={{ '@initial': 'x3', '@768': 'x0' }}
+          mb={{ '@initial': 'x3', '@768': 'x0', '@1024': 'x3' }}
         >
           <Box style={{ width: '225px' }}>
             <ProposalStatus {...proposal} flipped showTime />
           </Box>
-          <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
+          <Flex display={{ '@initial': 'flex', '@768': 'none', '@1024': 'flex' }}>
             <Text fontSize={18} fontWeight="label" color={'text4'}>
               {proposalNumber}
             </Text>
