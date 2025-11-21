@@ -43,12 +43,6 @@ export const SWR_KEYS = {
   ESCROW_MILESTONES_IPFS_DATA: 'escrow-milestones-ipfs-data',
   ESCROW_DELEGATE: 'escrow-delegate',
   INVOICE_LOG_NEW_INVOICE: 'invoice-log-new-invoice',
-  DYNAMIC: {
-    MY_DAOS(str: string) {
-      return `my-daos-${str}`
-    },
-    MY_DAOS_PAGE(str: string) {
-      return `my-daos-page-${str}`
-    },
-  },
+  MY_DAOS: 'my-daos',
+  MY_DAOS_PAGE: 'my-daos-page',
 }

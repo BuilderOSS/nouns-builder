@@ -4,12 +4,12 @@ import { type ExploreDaoWithChainId } from '@buildeross/sdk/subgraph'
 import useSWR from 'swr'
 import { isAddress } from 'viem'
 
-export interface UseMyDaosOptions {
+export interface UseExploreUserDaosOptions {
   address?: string
   enabled?: boolean
 }
 
-export interface UseMyDaosResult {
+export interface UseExploreUserDaosResult {
   daos?: ExploreDaoWithChainId[]
   isLoading: boolean
   error?: Error
@@ -24,13 +24,15 @@ const myDaosFetcher = async ([, _address]: [string, string]) => {
  * Hook for fetching user's DAOs
  * @param options - Configuration options for the my DAOs query
  */
-export function useMyDaos(options: UseMyDaosOptions = {}): UseMyDaosResult {
+export function useExploreUserDaos(
+  options: UseExploreUserDaosOptions = {}
+): UseExploreUserDaosResult {
   const { address, enabled = true } = options
 
   // Create SWR key - only when enabled and has address
   const swrKey =
     enabled && address && isAddress(address, { strict: false })
-      ? ([SWR_KEYS.DYNAMIC.MY_DAOS_PAGE(address), address] as const)
+      ? ([SWR_KEYS.MY_DAOS_PAGE, address.toLowerCase()] as const)
       : null
 
   // Use SWR for data fetching with caching
@@ -43,6 +45,11 @@ export function useMyDaos(options: UseMyDaosOptions = {}): UseMyDaosResult {
     // Standard retry logic
     errorRetryCount: 3,
     errorRetryInterval: 1000,
+    // Custom error retry logic
+    shouldRetryOnError: (error) => {
+      // Don't retry 4xx errors
+      return !(error?.status && error.status >= 400 && error.status < 500)
+    },
   })
 
   const isLoading = data ? false : isValidating && !data && !error
