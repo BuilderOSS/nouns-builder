@@ -2,7 +2,7 @@ import { useFeed } from '@buildeross/hooks'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem as FeedItemType } from '@buildeross/types'
 import { Flex, Stack, Text } from '@buildeross/zord'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { FeedItem } from './FeedItem'
 import { FeedSkeleton, FeedSkeletonItem } from './FeedSkeleton'
@@ -16,6 +16,7 @@ export interface FeedProps {
   limit?: number
   enabled?: boolean
   onError?: (error: Error & { status?: number; body?: unknown }) => void
+  infiniteScroll?: boolean
 }
 
 export const Feed: React.FC<FeedProps> = ({
@@ -26,6 +27,7 @@ export const Feed: React.FC<FeedProps> = ({
   limit,
   enabled,
   onError,
+  infiniteScroll = true,
 }) => {
   const { items, hasMore, isLoading, isLoadingMore, error, fetchNextPage } = useFeed({
     chainId,
@@ -38,18 +40,15 @@ export const Feed: React.FC<FeedProps> = ({
   })
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
-  const [loadMoreError, setLoadMoreError] = useState(false)
 
   // Infinite scroll: automatically load more when loadMoreRef comes into view
   useEffect(() => {
-    if (!hasMore || isLoadingMore || loadMoreError) return
+    if (!hasMore || isLoadingMore) return
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          fetchNextPage().catch(() => {
-            setLoadMoreError(true)
-          })
+          fetchNextPage()
         }
       },
       { rootMargin: '200px' }
@@ -61,12 +60,7 @@ export const Feed: React.FC<FeedProps> = ({
     return () => {
       if (current) observer.unobserve(current)
     }
-  }, [hasMore, isLoadingMore, loadMoreError, fetchNextPage])
-
-  // Reset error state when filters change
-  useEffect(() => {
-    setLoadMoreError(false)
-  }, [chainId, daos, eventTypes, actor])
+  }, [hasMore, isLoadingMore, fetchNextPage])
 
   if (error) {
     return (
@@ -125,18 +119,16 @@ export const Feed: React.FC<FeedProps> = ({
         {isLoadingMore && <FeedSkeleton count={3} />}
 
         {/* Infinite scroll sentinel */}
-        {hasMore && !isLoadingMore && !loadMoreError && (
+        {hasMore && !isLoadingMore && infiniteScroll && (
           <div ref={loadMoreRef}>
             <FeedSkeletonItem />
           </div>
         )}
 
-        {/* Show load more button only if there's an error */}
-        {hasMore && !isLoadingMore && loadMoreError && (
+        {hasMore && !isLoadingMore && !infiniteScroll && (
           <LoadMoreButton
             onClick={() => {
-              setLoadMoreError(false)
-              fetchNextPage().catch(() => setLoadMoreError(true))
+              fetchNextPage()
             }}
             isLoading={isLoadingMore}
           />

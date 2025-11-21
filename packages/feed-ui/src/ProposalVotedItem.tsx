@@ -32,7 +32,7 @@ export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) =>
           {item.reason && (
             <Box className={feedItemTextContentWrapper}>
               <Box className={feedItemTextContent}>
-                <MarkdownDisplay>{item.reason}</MarkdownDisplay>
+                <MarkdownDisplay disableLinks>{item.reason}</MarkdownDisplay>
               </Box>
             </Box>
           )}
