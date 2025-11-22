@@ -9,7 +9,7 @@ import { FeedSkeleton, FeedSkeletonItem } from './FeedSkeleton'
 import { LoadMoreButton } from './LoadMoreButton'
 
 export interface FeedProps {
-  chainId?: CHAIN_ID
+  chainIds?: CHAIN_ID[]
   daos?: AddressType[]
   eventTypes?: FeedEventType[]
   actor?: AddressType
@@ -20,7 +20,7 @@ export interface FeedProps {
 }
 
 export const Feed: React.FC<FeedProps> = ({
-  chainId,
+  chainIds,
   daos,
   eventTypes,
   actor,
@@ -30,7 +30,7 @@ export const Feed: React.FC<FeedProps> = ({
   infiniteScroll = true,
 }) => {
   const { items, hasMore, isLoading, isLoadingMore, error, fetchNextPage } = useFeed({
-    chainId,
+    chainIds,
     daos,
     eventTypes,
     actor,
