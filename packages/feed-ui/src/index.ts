@@ -1,5 +1,4 @@
 export * from './Feed'
-export * from './FeedFilters'
 export * from './FeedItem'
 export * from './FeedSkeleton'
 

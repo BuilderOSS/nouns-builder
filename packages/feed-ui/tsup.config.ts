@@ -29,5 +29,6 @@ export default defineConfig({
     'react-dom',
     'viem',
     'wagmi',
+    'zustand',
   ],
 })
