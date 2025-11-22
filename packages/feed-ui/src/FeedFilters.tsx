@@ -91,7 +91,7 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
       {/* Chains Filter */}
       <PopUp
         trigger={
-          <Button variant="ghost" size="sm" className={filterButton}>
+          <Button variant="outline" size="xs" px="x3" className={filterButton}>
             {chainFilterLabel}
             <Icon id="chevronDown" size="sm" />
           </Button>
@@ -105,14 +105,25 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
             Filter by Chain
           </Text>
           {PUBLIC_DEFAULT_CHAINS.map((chain) => (
-            <Label key={chain.id} className={filterItem}>
+            <Label
+              key={chain.id}
+              className={filterItem}
+              onClick={() => toggleChain(chain.id)}
+            >
               <input
                 type="checkbox"
                 checked={chainIds.includes(chain.id)}
                 onChange={() => toggleChain(chain.id)}
+                onClick={(e) => e.stopPropagation()}
               />
               <Flex align="center" gap="x2">
-                <img src={chain.icon} alt={chain.name} width="16" height="16" />
+                <img
+                  src={chain.icon}
+                  alt={chain.name}
+                  width="16"
+                  height="16"
+                  style={{ height: '1em', width: '1em' }}
+                />
                 <Text fontSize="14">{chain.name}</Text>
               </Flex>
             </Label>
@@ -123,7 +134,7 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
       {/* Event Types Filter */}
       <PopUp
         trigger={
-          <Button variant="ghost" size="sm" className={filterButton}>
+          <Button variant="outline" size="xs" px="x3" className={filterButton}>
             {eventFilterLabel}
             <Icon id="chevronDown" size="sm" />
           </Button>
@@ -137,11 +148,16 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
             Filter by Event Type
           </Text>
           {Object.entries(EVENT_TYPE_LABELS).map(([eventType, label]) => (
-            <Label key={eventType} className={filterItem}>
+            <Label
+              key={eventType}
+              className={filterItem}
+              onClick={() => toggleEventType(eventType as FeedEventType)}
+            >
               <input
                 type="checkbox"
                 checked={eventTypes.includes(eventType as FeedEventType)}
                 onChange={() => toggleEventType(eventType as FeedEventType)}
+                onClick={(e) => e.stopPropagation()}
               />
               <Text fontSize="14">{label}</Text>
             </Label>
@@ -153,7 +169,7 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
       {memberDaos.length > 0 && (
         <PopUp
           trigger={
-            <Button variant="ghost" size="sm" className={filterButton}>
+            <Button variant="outline" size="xs" px="x3" className={filterButton}>
               {daoFilterLabel}
               <Icon id="chevronDown" size="sm" />
             </Button>
@@ -166,21 +182,29 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
             <Text fontSize="14" fontWeight="display">
               Filter by DAOs
             </Text>
-            <Label className={filterItem}>
+            <Label
+              className={filterItem}
+              onClick={() => onShowMemberDaosOnlyChange(false)}
+            >
               <input
                 type="radio"
                 name="dao-filter"
                 checked={!showMemberDaosOnly}
                 onChange={() => onShowMemberDaosOnlyChange(false)}
+                onClick={(e) => e.stopPropagation()}
               />
               <Text fontSize="14">All DAOs</Text>
             </Label>
-            <Label className={filterItem}>
+            <Label
+              className={filterItem}
+              onClick={() => onShowMemberDaosOnlyChange(true)}
+            >
               <input
                 type="radio"
                 name="dao-filter"
                 checked={showMemberDaosOnly}
                 onChange={() => onShowMemberDaosOnlyChange(true)}
+                onClick={(e) => e.stopPropagation()}
               />
               <Text fontSize="14">My DAOs ({memberDaos.length})</Text>
             </Label>
@@ -191,8 +215,9 @@ export const FeedFilters: React.FC<FeedFiltersProps> = ({
       {/* Clear filters button */}
       {hasFilters && (
         <Button
-          variant="ghost"
-          size="sm"
+          variant="outline"
+          size="xs"
+          px="x3"
           onClick={() => {
             onChainIdsChange([])
             onEventTypesChange([])
