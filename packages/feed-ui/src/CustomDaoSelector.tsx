@@ -16,6 +16,7 @@ import {
   emptyState,
   searchInput,
   sectionTitle,
+  selectButton,
   selectedChips,
   selectorContainer,
 } from './CustomDaoSelector.css'
@@ -155,7 +156,7 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
               />
               <Text fontSize="12">{dao.name}</Text>
               <div className={chipRemove} onClick={() => removeDao(dao.address)}>
-                <Text fontSize="10">×</Text>
+                <Text fontSize="12">×</Text>
               </div>
             </div>
           ))}
@@ -184,11 +185,11 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
               <Text className={sectionTitle}>My DAOs</Text>
               <button
                 type="button"
+                className={selectButton}
                 onClick={selectAllMemberDaos}
                 disabled={
                   isLoadingMemberDaos || !memberDaoItems.length || allMemberSelected
                 }
-                style={{ fontSize: 12, cursor: 'pointer' }}
               >
                 {allMemberSelected ? 'All selected' : 'Select all'}
               </button>

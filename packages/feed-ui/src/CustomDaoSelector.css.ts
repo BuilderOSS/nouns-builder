@@ -151,3 +151,19 @@ export const sectionTitle = style({
   color: vars.color.text3,
   letterSpacing: '0.5px',
 })
+
+export const selectButton = style([
+  {
+    display: 'flex',
+    fontSize: 12,
+    cursor: 'pointer',
+    backgroundColor: vars.color.background2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '4px',
+    transition: 'background-color 0.2s ease',
+    ':hover': {
+      backgroundColor: vars.color.accentHover,
+    },
+  },
+])

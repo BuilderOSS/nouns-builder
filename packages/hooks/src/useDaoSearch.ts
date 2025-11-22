@@ -86,9 +86,9 @@ export function useDaoSearch(
   // Trim the debounced query (transformation will happen in API endpoint)
   const searchText = debouncedQuery?.trim() || ''
 
-  // Create SWR key - only when enabled, has searchText, and has network
+  // Create SWR key - only when enabled, has searchText
   const swrKey =
-    enabled && searchText && network
+    enabled && searchText
       ? ([SWR_KEYS.DAO_SEARCH, searchText, network, page] as const)
       : null
 
