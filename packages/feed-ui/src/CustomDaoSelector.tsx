@@ -47,15 +47,9 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
   })
 
   // Search for DAOs across all chains
-  // We'll search on the first chain for simplicity
-  const firstChain = PUBLIC_DEFAULT_CHAINS[0]
-  const { daos: searchResults, isLoading: isSearching } = useDaoSearch(
-    searchQuery,
-    firstChain.slug,
-    {
-      enabled: searchQuery.trim().length > 0,
-    }
-  )
+  const { daos: searchResults, isLoading: isSearching } = useDaoSearch(searchQuery, {
+    enabled: searchQuery.trim().length > 0,
+  })
 
   // Convert MyDaosResponse to DaoListItem format
   const memberDaoItems: DaoListItem[] = useMemo(
@@ -110,6 +104,15 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
     [selectedDaoAddresses, onSelectedDaosChange]
   )
 
+  // NEW: select all of the user's DAOs
+  const selectAllMemberDaos = useCallback(() => {
+    const memberAddresses = memberDaoItems.map((dao) => dao.address.toLowerCase())
+    const merged = Array.from(
+      new Set([...selectedDaoAddresses.map((a) => a.toLowerCase()), ...memberAddresses])
+    )
+    onSelectedDaosChange(merged)
+  }, [memberDaoItems, selectedDaoAddresses, onSelectedDaosChange])
+
   const daosToDisplay = useMemo(() => {
     if (searchQuery.trim().length > 0) {
       return searchDaoItems.filter(
@@ -128,6 +131,13 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
     searchQuery.trim().length > 0
 
   const showMemberDaosSection = searchQuery.trim().length === 0 && memberDaos.length > 0
+
+  // Helpful: check if all member DAOs are already selected (to disable the button)
+  const allMemberSelected = useMemo(() => {
+    if (!memberDaoItems.length) return false
+    const selectedSet = new Set(selectedDaoAddresses.map((a) => a.toLowerCase()))
+    return memberDaoItems.every((dao) => selectedSet.has(dao.address.toLowerCase()))
+  }, [memberDaoItems, selectedDaoAddresses])
 
   return (
     <Stack className={selectorContainer}>
@@ -163,7 +173,28 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
 
       {/* DAO list */}
       <div className={daoList}>
-        {showMemberDaosSection && <Text className={sectionTitle}>My DAOs</Text>}
+        {showMemberDaosSection && (
+          <>
+            <Stack
+              direction="row"
+              align="center"
+              justify="space-between"
+              style={{ marginBottom: 8 }}
+            >
+              <Text className={sectionTitle}>My DAOs</Text>
+              <button
+                type="button"
+                onClick={selectAllMemberDaos}
+                disabled={
+                  isLoadingMemberDaos || !memberDaoItems.length || allMemberSelected
+                }
+                style={{ fontSize: 12, cursor: 'pointer' }}
+              >
+                {allMemberSelected ? 'All selected' : 'Select all'}
+              </button>
+            </Stack>
+          </>
+        )}
 
         {daosToDisplay.map((dao) => {
           const isSelected = selectedDaoAddresses.includes(dao.address.toLowerCase())

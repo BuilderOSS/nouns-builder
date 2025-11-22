@@ -5,6 +5,7 @@ import {
   searchDaosRequest,
   type SearchDaosResponse,
 } from '@buildeross/sdk/subgraph'
+import { Chain } from '@buildeross/types'
 import { buildSearchText } from '@buildeross/utils/search'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withCors } from 'src/utils/api/cors'
@@ -43,6 +44,11 @@ const RANKING_WEIGHTS = {
 
   // Multi-term bonus (per additional term)
   MULTI_TERM_BONUS: 20,
+
+  // Chain-based boosts
+  CHAIN_EXACT_MATCH: 500,
+  CHAIN_PREFIX_MATCH: 250,
+  CHAIN_CONTAINS_MATCH: 150,
 } as const
 
 /**
@@ -52,11 +58,14 @@ const RANKING_WEIGHTS = {
  * @param dao DAO result object
  * @param searchQuery Raw search string
  * @param index Original index from DB results (0 = top result)
+ * @param chainName Name of the chain this DAO belongs to
+ * @param chainSlug Slug of the chain this DAO belongs to
  */
 export function rankDao(
   dao: DaoSearchResult,
   searchQuery: string,
-  index: number
+  index: number,
+  chain: Chain
 ): number {
   const query = searchQuery.toLowerCase().trim()
   const terms = query.split(/\s+/).filter(Boolean)
@@ -65,6 +74,10 @@ export function rankDao(
   const symbol = dao.dao.symbol?.toLowerCase() || ''
   const description = dao.dao.description?.toLowerCase() || ''
   const uri = dao.dao.projectURI?.toLowerCase() || ''
+
+  const chainNameLower = chain.name?.toLowerCase() || ''
+  const chainSlugLower = chain.slug?.toLowerCase() || ''
+
   let score = 0
 
   // DB rank bonus (diminishing returns based on position)
@@ -74,7 +87,24 @@ export function rankDao(
   )
   score += dbRankBonus
 
-  // Exact matches (highest priority)
+  // Chain name/slug matching: if the query looks like the chain, boost it.
+  if (query.length > 0) {
+    if (query === chainNameLower || query === chainSlugLower) {
+      score += RANKING_WEIGHTS.CHAIN_EXACT_MATCH
+    } else if (
+      (chainNameLower && chainNameLower.startsWith(query)) ||
+      (chainSlugLower && chainSlugLower.startsWith(query))
+    ) {
+      score += RANKING_WEIGHTS.CHAIN_PREFIX_MATCH
+    } else if (
+      (chainNameLower && chainNameLower.includes(query)) ||
+      (chainSlugLower && chainSlugLower.includes(query))
+    ) {
+      score += RANKING_WEIGHTS.CHAIN_CONTAINS_MATCH
+    }
+  }
+
+  // Exact matches (highest priority) on DAO name/symbol
   if (name === query) {
     score += RANKING_WEIGHTS.EXACT_NAME
   } else if (symbol === query) {
@@ -120,18 +150,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
   const maxResults = PER_PAGE_LIMIT * MAX_PAGES // 60 total results (2 pages of 30)
   const { page, search, network } = req.query
   const pageInt = Math.max(1, parseInt(page as string) || 1)
 
   if (pageInt > MAX_PAGES) {
     return res.status(400).json({ error: `Page cannot be greater than ${MAX_PAGES}` })
-  }
-
-  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
-
-  if (!chain) {
-    return res.status(404).json({ error: 'Network not found' })
   }
 
   if (!search || typeof search !== 'string' || search.trim().length === 0) {
@@ -152,23 +177,60 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     })
   }
 
+  // Determine which chains to search:
+  // - If `network` is provided, search only that chain (existing behavior).
+  // - If `network` is NOT provided, search across ALL PUBLIC_DEFAULT_CHAINS.
+  let chainsToSearch = PUBLIC_DEFAULT_CHAINS
+
+  if (network) {
+    const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
+
+    if (!chain) {
+      return res.status(404).json({ error: 'Network not found' })
+    }
+
+    chainsToSearch = [chain]
+  }
+
   try {
     // Transform the search query for GraphQL fulltext search
     const transformedSearch = buildSearchText(rawSearch)
 
-    // Fetch all results up to maxResults to ensure consistent ranking across pages
-    // This is necessary because we need to rank globally before paginating
-    const searchRes = await searchDaosRequest(chain.id, transformedSearch, maxResults, 0)
+    // Fetch results for all selected chains in parallel.
+    // Each call fetches up to `maxResults` from that chain.
+    const searchResults = await Promise.all(
+      chainsToSearch.map(async (chain) => {
+        const searchRes = await searchDaosRequest(
+          chain.id,
+          transformedSearch,
+          maxResults,
+          0
+        )
 
-    if (!searchRes) {
-      return res.status(500).json({ error: 'Search failed' })
-    }
+        return {
+          chain,
+          searchRes,
+        }
+      })
+    )
 
-    // Rank and sort ALL results globally
-    const rankedDaos = searchRes.daos
-      .map((dao, index) => ({
+    // Aggregate DAOs from all successful chain responses,
+    // preserving chain metadata so we can rank by chain match.
+    const allResults: {
+      dao: DaoSearchResult
+      chain: Chain
+    }[] = searchResults.flatMap(({ chain, searchRes }) =>
+      (searchRes?.daos || []).map((dao) => ({
         dao,
-        rank: rankDao(dao, rawSearch, index),
+        chain,
+      }))
+    )
+
+    // Rank and sort ALL results globally (across chains)
+    const rankedDaos = allResults
+      .map(({ dao, chain }, index) => ({
+        dao,
+        rank: rankDao(dao, rawSearch, index, chain),
       }))
       .sort((a, b) => b.rank - a.rank)
 
@@ -180,8 +242,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const paginatedDaos = rankedDaos.slice(startIndex, endIndex).map((item) => item.dao)
 
     // Check if there's a next page
-    // We cap at maxPages (2), so page 2 never has a next page
-    // For page 1, check if there are more results in the ranked list
     const hasNextPage = pageInt < MAX_PAGES && rankedDaos.length > endIndex
 
     const { maxAge, swr } = CACHE_TIMES.EXPLORE
