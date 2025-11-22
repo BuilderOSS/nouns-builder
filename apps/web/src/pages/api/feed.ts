@@ -38,14 +38,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     cursor = parsed
   }
 
-  // Validate and parse chainId
-  let chainId: CHAIN_ID | undefined
-  if (req.query.chainId) {
-    const parsed = Number(req.query.chainId)
-    if (isNaN(parsed)) {
-      return res.status(400).json({ error: 'chainId must be a valid number' })
+  // Validate and parse chainIds (comma-separated chain IDs)
+  let chainIds: CHAIN_ID[] | undefined
+  if (req.query.chainIds) {
+    if (typeof req.query.chainIds !== 'string') {
+      return res.status(400).json({ error: 'chainIds must be a comma-separated string' })
     }
-    chainId = parsed as CHAIN_ID
+    const ids = req.query.chainIds.split(',').map((id) => id.trim())
+
+    // Validate each chain ID
+    for (const id of ids) {
+      const parsed = Number(id)
+      if (isNaN(parsed)) {
+        return res.status(400).json({ error: `Invalid chain ID format: ${id}` })
+      }
+    }
+
+    chainIds = ids.map((id) => Number(id) as CHAIN_ID)
   }
 
   // Validate and parse actor
@@ -104,7 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Fetch data (unified function for all feed types)
     const result = await fetchFeedDataService({
-      chainId,
+      chainIds,
       daos,
       eventTypes,
       actor,
@@ -113,7 +122,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
 
     // Determine TTL based on scope
-    const ttl = getTtlByScope({ chainId, daos, eventTypes, actor })
+    const ttl = getTtlByScope({ chainIds, daos, eventTypes, actor })
 
     // Set cache headers
     res.setHeader(
@@ -126,7 +135,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.log('Feed API success', {
-        chainId,
+        chainIds,
         daos,
         eventTypes,
         actor,
