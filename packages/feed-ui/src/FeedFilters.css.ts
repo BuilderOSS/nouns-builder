@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const filterButton = style([
@@ -33,9 +33,9 @@ export const filterItem = style([
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    transition: 'background-color 0.15s ease',
+    transition: 'all 0.2s ease',
     ':hover': {
-      backgroundColor: 'var(--background2)',
+      backgroundColor: vars.color.background2,
     },
   },
 ])

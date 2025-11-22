@@ -20,7 +20,7 @@ export interface UseUserDaosResult {
 type HttpError = Error & { status?: number; body?: unknown }
 const searchFetcher = async (
   [, address]: [string, string],
-  { signal }: { signal: AbortSignal }
+  { signal }: { signal?: AbortSignal } = {}
 ): Promise<MyDaosResponse> => {
   const url = `${BASE_URL}/api/daos/${address}`
 
