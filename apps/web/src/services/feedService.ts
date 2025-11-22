@@ -210,10 +210,10 @@ async function fetchWithSortedSetCache(
 
         return hasMore
           ? {
-              items: limitedItems,
-              hasMore: true,
-              nextCursor: limitedItems[limitedItems.length - 1].timestamp,
-            }
+            items: limitedItems,
+            hasMore: true,
+            nextCursor: limitedItems[limitedItems.length - 1].timestamp,
+          }
           : { items: limitedItems, hasMore: false, nextCursor: null }
       }
 
@@ -264,10 +264,10 @@ async function fetchWithSortedSetCache(
 
           return hasMore
             ? {
-                items: limitedItems,
-                hasMore: true,
-                nextCursor: limitedItems[limitedItems.length - 1].timestamp,
-              }
+              items: limitedItems,
+              hasMore: true,
+              nextCursor: limitedItems[limitedItems.length - 1].timestamp,
+            }
             : { items: limitedItems, hasMore: false, nextCursor: null }
         }
 
@@ -491,17 +491,12 @@ export async function fetchFeedDataService({
 
 /**
  * Invalidate feed cache for a specific scope
- *
- * Examples:
- * - Invalidate all caches for a DAO: { chainId: 1, daoAddress: '0x123...' }
- * - Invalidate all caches for a chain: { chainId: 1 }
- * - Invalidate all user activity for a user: { actor: '0xabc...' }
- * - Invalidate everything: {} (use with caution!)
  */
 export async function invalidateFeedCache(params: {
-  chainId?: CHAIN_ID
-  daoAddress?: string
+  chainIds?: CHAIN_ID[]
+  daos?: string[]
   actor?: string
+  eventTypes?: FeedEventType[]
 }): Promise<void> {
   const redis = getRedisConnection()
   if (!redis) return

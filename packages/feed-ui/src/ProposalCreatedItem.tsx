@@ -19,6 +19,8 @@ interface ProposalCreatedItemProps {
 export const ProposalCreatedItem: React.FC<ProposalCreatedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
 
+  const description = item.proposalDescription?.trim()
+
   return (
     <LinkWrapper
       link={getProposalLink(item.chainId, item.daoId, item.proposalNumber, 'details')}
@@ -27,11 +29,13 @@ export const ProposalCreatedItem: React.FC<ProposalCreatedItemProps> = ({ item }
         <Stack gap="x2">
           <Text className={feedItemTitle}>Proposal #{item.proposalNumber} - Created</Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
-          <Box className={feedItemTextContentWrapper}>
-            <Box className={feedItemTextContent}>
-              <MarkdownDisplay disableLinks>{item.proposalDescription}</MarkdownDisplay>
+          {description && (
+            <Box className={feedItemTextContentWrapper}>
+              <Box className={feedItemTextContent}>
+                <MarkdownDisplay disableLinks>{description}</MarkdownDisplay>
+              </Box>
             </Box>
-          </Box>
+          )}
         </Stack>
       </Stack>
     </LinkWrapper>
