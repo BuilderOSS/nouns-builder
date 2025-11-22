@@ -9,7 +9,7 @@ import React, { useMemo } from 'react'
 import { useBalance } from 'wagmi'
 
 import { ProposalForStatus, ProposalStatus } from '../ProposalStatus'
-import { statusStyle, titleStyle } from './ProposalCard.css'
+import { cardVariants, statusStyle, titleStyle } from './ProposalCard.css'
 
 type ProposalCardProps = ProposalForStatus & {
   treasuryAddress: `0x${string}`
@@ -52,12 +52,12 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
       w="100%"
       link={getProposalLink?.(chainId, token, proposalNumber)}
       direction="column"
-      borderColor={displayWarning ? 'warning' : 'border'}
       borderStyle={'solid'}
       borderRadius={'curved'}
       borderWidth={'normal'}
       p={{ '@initial': 'x4', '@768': 'x6' }}
       my={'x2'}
+      className={cardVariants[displayWarning ? 'warning' : 'default']}
     >
       <Flex
         direction={{ '@initial': 'column', '@768': 'row' }}

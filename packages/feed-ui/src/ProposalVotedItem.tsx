@@ -19,6 +19,8 @@ interface ProposalVotedItemProps {
 export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
 
+  const reason = item.reason?.trim()
+
   return (
     <LinkWrapper
       link={getProposalLink(item.chainId, item.daoId, item.proposalNumber, 'votes')}
@@ -29,10 +31,10 @@ export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) =>
             Proposal #{item.proposalNumber} - Vote Cast: {item.support} ({item.weight})
           </Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
-          {item.reason && (
+          {reason && (
             <Box className={feedItemTextContentWrapper}>
               <Box className={feedItemTextContent}>
-                <MarkdownDisplay>{item.reason}</MarkdownDisplay>
+                <MarkdownDisplay disableLinks>{reason}</MarkdownDisplay>
               </Box>
             </Box>
           )}

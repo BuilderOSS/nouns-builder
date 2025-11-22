@@ -10,7 +10,7 @@ import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 
-import { auction, daoImage, name, title } from './DaoCard.css'
+import { auction, card, daoImage, name, title } from './DaoCard.css'
 import { Detail } from './Detail'
 
 interface DaoCardProps {
@@ -58,6 +58,7 @@ export const DaoCard = ({
       borderRadius={'curved'}
       height={'100%'}
       overflow={'hidden'}
+      className={card}
     >
       <Box
         backgroundColor="background2"

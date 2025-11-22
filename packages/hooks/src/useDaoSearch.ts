@@ -16,6 +16,7 @@ interface UseDaoSearchOptions {
   debounceMs?: number
   enabled?: boolean
   page?: string
+  network?: string
 }
 
 const DEFAULT_DEBOUNCE_MS = 300
@@ -23,12 +24,14 @@ const DEFAULT_DEBOUNCE_MS = 300
 // Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
 type HttpError = Error & { status?: number; body?: unknown }
 const searchFetcher = async (
-  [, searchText, network, page]: readonly [string, string, string, string?],
+  [, searchText, network, page]: readonly [string, string, string?, string?],
   { signal }: { signal?: AbortSignal } = {}
 ): Promise<SearchDaosResponse> => {
   const params = new URLSearchParams()
   params.set('search', searchText)
-  params.set('network', network)
+  if (network) {
+    params.set('network', network)
+  }
   if (page) {
     params.set('page', page)
   }
@@ -59,10 +62,9 @@ const searchFetcher = async (
  */
 export function useDaoSearch(
   query: string,
-  network: string,
   options: UseDaoSearchOptions = {}
 ): UseDaoSearchResult {
-  const { debounceMs = DEFAULT_DEBOUNCE_MS, enabled = true, page } = options
+  const { debounceMs = DEFAULT_DEBOUNCE_MS, enabled = true, page, network } = options
 
   // Normalize page parameter
   const [debouncedQuery, setDebouncedQuery] = useState(query)
@@ -84,9 +86,9 @@ export function useDaoSearch(
   // Trim the debounced query (transformation will happen in API endpoint)
   const searchText = debouncedQuery?.trim() || ''
 
-  // Create SWR key - only when enabled, has searchText, and has network
+  // Create SWR key - only when enabled, has searchText
   const swrKey =
-    enabled && searchText && network
+    enabled && searchText
       ? ([SWR_KEYS.DAO_SEARCH, searchText, network, page] as const)
       : null
 

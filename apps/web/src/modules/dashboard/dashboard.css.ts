@@ -22,7 +22,34 @@ export const outerAuctionCard = style([
     py: { '@initial': 'x4', '@768': 'x3' },
     px: { '@initial': 'x2', '@768': 'x6' },
   }),
+  {
+    transition: 'border-color 0.15s ease-in-out',
+    borderColor: theme.colors.border,
+    ':hover': {
+      borderColor: theme.colors.neutralHover,
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
+    },
+  },
 ])
+
+export const proposalCardVariants = {
+  default: style({
+    transition: 'border-color 0.15s ease-in-out',
+    borderColor: theme.colors.border,
+    ':hover': {
+      borderColor: theme.colors.neutralHover,
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
+    },
+  }),
+  warning: style({
+    transition: 'border-color 0.15s ease-in-out',
+    borderColor: theme.colors.warning,
+    ':hover': {
+      borderColor: theme.colors.warningHover,
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
+    },
+  }),
+}
 
 export const daoTokenName = style([
   {

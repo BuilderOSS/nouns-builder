@@ -46,8 +46,9 @@ export const Explore: React.FC = () => {
     isEmpty: isSearchEmpty,
     hasNextPage: hasSearchNextPage,
     error: searchError,
-  } = useDaoSearch(activeSearchQuery, chain.slug, {
+  } = useDaoSearch(activeSearchQuery, {
     enabled: isSearching,
+    network: chain.slug,
     page: isSearching ? page : undefined,
   })
 

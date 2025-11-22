@@ -41,6 +41,7 @@ import Refresh from './assets/refresh.svg'
 import ResumeTemplate from './assets/resume-template.svg'
 import Search from './assets/search.svg'
 import Share from './assets/share.svg'
+import Sliders from './assets/sliders.svg'
 import Spanner from './assets/spanner.svg'
 import Trash from './assets/trash.svg'
 import Twitter from './assets/twitter.svg'
@@ -93,6 +94,7 @@ export const icons = {
   resumeTemplate: ResumeTemplate,
   search: Search,
   share: Share,
+  sliders: Sliders,
   spanner: Spanner,
   trash: Trash,
   twitter: Twitter,

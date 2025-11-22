@@ -1,5 +1,5 @@
 import { DaoCard } from '@buildeross/dao-ui'
-import { useMyDaos } from '@buildeross/hooks'
+import { useExploreUserDaos as useMyDaos } from '@buildeross/hooks/useExploreUserDaos'
 import { Grid } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'

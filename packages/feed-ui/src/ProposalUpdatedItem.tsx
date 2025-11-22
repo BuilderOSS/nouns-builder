@@ -21,7 +21,7 @@ export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }
   const { getProposalLink } = useLinks()
   const { parsedContent, isLoading } = usePropdateMessage(item.messageType, item.message)
 
-  const displayContent = isLoading ? 'Loading...' : parsedContent || item.message
+  const displayContent = isLoading ? '' : parsedContent
 
   return (
     <LinkWrapper
@@ -33,11 +33,13 @@ export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }
             Proposal #{item.proposalNumber} - Update Posted
           </Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
-          <Box className={feedItemTextContentWrapper}>
-            <Box className={feedItemTextContent}>
-              <MarkdownDisplay>{displayContent}</MarkdownDisplay>
+          {displayContent && (
+            <Box className={feedItemTextContentWrapper}>
+              <Box className={feedItemTextContent}>
+                <MarkdownDisplay disableLinks>{displayContent}</MarkdownDisplay>
+              </Box>
             </Box>
-          </Box>
+          )}
         </Stack>
       </Stack>
     </LinkWrapper>

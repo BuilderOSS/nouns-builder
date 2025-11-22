@@ -8,6 +8,8 @@ import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { useBalance } from 'wagmi'
 
+import { proposalCardVariants } from './dashboard.css'
+
 type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID
   collectionAddress: AddressType
@@ -55,7 +57,6 @@ export const DaoProposalCard = ({
       direction="column"
       w={'100%'}
       align={{ '@initial': 'flex-start', '@768': 'center' }}
-      borderColor={displayWarning ? 'warning' : 'border'}
       borderStyle={'solid'}
       borderRadius={'curved'}
       borderWidth={'normal'}
@@ -63,6 +64,7 @@ export const DaoProposalCard = ({
       px={{ '@initial': 'x6', '@768': 'x3' }}
       position={'relative'}
       link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
+      className={proposalCardVariants[displayWarning ? 'warning' : 'default']}
     >
       <Flex
         direction={{ '@initial': 'column-reverse', '@768': 'row' }}

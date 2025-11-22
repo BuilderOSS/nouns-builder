@@ -25,11 +25,11 @@ export const FeedItemChain: React.FC<FeedItemChainProps> = ({ chainId }) => {
         }}
       >
         <img
-          width={22}
-          height={22}
+          width={20}
+          height={20}
           loading="lazy"
           decoding="async"
-          style={{ height: 22, width: 22, borderRadius: '50%', overflow: 'hidden' }}
+          style={{ height: 20, width: 20, borderRadius: '50%', overflow: 'hidden' }}
           src={chain.icon}
           alt={chain.name}
         />
