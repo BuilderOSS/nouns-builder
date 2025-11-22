@@ -81,7 +81,7 @@ export const filterGrid = style([
       'screen and (min-width: 768px)': {
         gridTemplateColumns: 'repeat(2, 1fr)',
       },
-    }
+    },
   },
 ])
 
