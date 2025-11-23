@@ -21,7 +21,7 @@ const SUPPORTED_CHAIN_IDS: CHAIN_ID[] = PUBLIC_DEFAULT_CHAINS.map((chain) => cha
 /**
  * Execute promises with controlled concurrency
  */
-async function executeConcurrently<T>(
+export async function executeConcurrently<T>(
   tasks: (() => Promise<T>)[],
   maxConcurrent: number
 ): Promise<T[]> {
