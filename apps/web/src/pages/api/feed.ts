@@ -1,5 +1,6 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID } from '@buildeross/types'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
 import { fetchFeedDataService, getTtlByScope } from 'src/services/feedService'
@@ -38,18 +39,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     cursor = parsed
   }
 
-  // Validate and parse chainId
-  let chainId: CHAIN_ID | undefined
-  if (req.query.chainId) {
-    const parsed = Number(req.query.chainId)
-    if (isNaN(parsed)) {
-      return res.status(400).json({ error: 'chainId must be a valid number' })
+  // Validate and parse chainIds (comma-separated chain IDs)
+  let chainIds: CHAIN_ID[] | undefined
+  if (req.query.chainIds) {
+    if (typeof req.query.chainIds !== 'string') {
+      return res.status(400).json({ error: 'chainIds must be a comma-separated string' })
     }
-    chainId = parsed as CHAIN_ID
+    const ids = req.query.chainIds
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0)
+
+    // Validate each chain ID
+    const validChainIds = PUBLIC_DEFAULT_CHAINS.map((c) => c.id)
+    for (const id of ids) {
+      const parsed = Number(id)
+      if (isNaN(parsed) || !validChainIds.includes(parsed)) {
+        return res.status(400).json({ error: `Invalid chain ID format: ${id}` })
+      }
+    }
+
+    const parsedIds = ids.map((id) => Number(id) as CHAIN_ID)
+    chainIds = parsedIds.length > 0 ? parsedIds : undefined
   }
 
   // Validate and parse actor
-  let actor: string | undefined
+  let actor: AddressType | undefined
   if (req.query.actor) {
     if (typeof req.query.actor !== 'string') {
       return res.status(400).json({ error: 'actor must be a string' })
@@ -57,16 +72,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!isAddress(req.query.actor, { strict: false })) {
       return res.status(400).json({ error: 'Invalid actor address format' })
     }
-    actor = req.query.actor.toLowerCase()
+    actor = req.query.actor.toLowerCase() as AddressType
   }
 
   // Validate and parse daos (comma-separated addresses)
-  let daos: string[] | undefined
+  let daos: AddressType[] | undefined
   if (req.query.daos) {
     if (typeof req.query.daos !== 'string') {
       return res.status(400).json({ error: 'daos must be a comma-separated string' })
     }
-    const daoAddresses = req.query.daos.split(',').map((d) => d.trim())
+    const daoAddresses = req.query.daos
+      .split(',')
+      .map((d) => d.trim())
+      .filter((id) => id.length > 0)
 
     // Validate each address
     for (const dao of daoAddresses) {
@@ -75,7 +93,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    daos = daoAddresses.map((d) => d.toLowerCase())
+    daos = daoAddresses.map((d) => d.toLowerCase() as AddressType)
   }
 
   // Validate and parse eventTypes (comma-separated event types)
@@ -86,7 +104,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .status(400)
         .json({ error: 'eventTypes must be a comma-separated string' })
     }
-    const types = req.query.eventTypes.split(',').map((t) => t.trim())
+    const types = req.query.eventTypes
+      .split(',')
+      .map((t) => t.trim())
+      .filter((id) => id.length > 0)
 
     // Validate each event type
     const validTypes = Object.values(FeedEventType)
@@ -104,7 +125,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Fetch data (unified function for all feed types)
     const result = await fetchFeedDataService({
-      chainId,
+      chainIds,
       daos,
       eventTypes,
       actor,
@@ -113,7 +134,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
 
     // Determine TTL based on scope
-    const ttl = getTtlByScope({ chainId, daos, eventTypes, actor })
+    const ttl = getTtlByScope({ chainIds, daos, eventTypes, actor })
 
     // Set cache headers
     res.setHeader(
@@ -126,7 +147,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.log('Feed API success', {
-        chainId,
+        chainIds,
         daos,
         eventTypes,
         actor,

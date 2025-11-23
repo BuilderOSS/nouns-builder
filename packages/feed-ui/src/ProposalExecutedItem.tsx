@@ -18,6 +18,9 @@ interface ProposalExecutedItemProps {
 
 export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
+
+  const description = item.proposalDescription?.trim()
+
   return (
     <LinkWrapper
       link={getProposalLink(item.chainId, item.daoId, item.proposalNumber, 'details')}
@@ -28,11 +31,13 @@ export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item
             Proposal #{item.proposalNumber} - Executed
           </Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
-          <Box className={feedItemTextContentWrapper}>
-            <Box className={feedItemTextContent}>
-              <MarkdownDisplay>{item.proposalDescription}</MarkdownDisplay>
+          {description && (
+            <Box className={feedItemTextContentWrapper}>
+              <Box className={feedItemTextContent}>
+                <MarkdownDisplay disableLinks>{description}</MarkdownDisplay>
+              </Box>
             </Box>
-          </Box>
+          )}
         </Stack>
       </Stack>
     </LinkWrapper>

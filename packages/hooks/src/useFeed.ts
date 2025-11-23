@@ -4,7 +4,7 @@ import { useCallback, useMemo } from 'react'
 import useSWRInfinite from 'swr/infinite'
 
 type UseFeedOptions = {
-  chainId?: CHAIN_ID
+  chainIds?: CHAIN_ID[]
   daos?: string[]
   eventTypes?: FeedEventType[]
   actor?: string
@@ -28,14 +28,14 @@ type UseFeedReturn = {
  * Build feed query URL
  */
 function buildFeedUrl({
-  chainId,
+  chainIds,
   daos,
   eventTypes,
   actor,
   limit,
   cursor,
 }: {
-  chainId?: CHAIN_ID
+  chainIds?: CHAIN_ID[]
   daos?: string[]
   eventTypes?: FeedEventType[]
   actor?: string
@@ -43,7 +43,9 @@ function buildFeedUrl({
   cursor?: number | null
 }) {
   const params = new URLSearchParams()
-  if (chainId) params.append('chainId', String(chainId))
+  if (chainIds && chainIds.length > 0) {
+    params.append('chainIds', chainIds.join(','))
+  }
   if (daos && daos.length > 0) params.append('daos', daos.join(','))
   if (eventTypes && eventTypes.length > 0)
     params.append('eventTypes', eventTypes.join(','))
@@ -80,14 +82,14 @@ const fetcher = async (
  *
  * @example
  * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
- *   chainId: 1,
+ *   chainIds: [1],
  *   limit: 20,
  * })
  *
  * @example
  * // Filter by multiple DAOs
  * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
- *   chainId: 1,
+ *   chainIds: [1],
  *   daos: ['0x123...', '0x456...'],
  *   limit: 20,
  * })
@@ -95,13 +97,13 @@ const fetcher = async (
  * @example
  * // Filter by event types
  * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
- *   chainId: 1,
+ *   chainIds: [1],
  *   eventTypes: [FeedEventType.AuctionBidPlaced, FeedEventType.ProposalCreated],
  *   limit: 20,
  * })
  */
 export function useFeed({
-  chainId,
+  chainIds,
   daos,
   eventTypes,
   actor,
@@ -113,13 +115,13 @@ export function useFeed({
     if (!enabled) return null
     // Stringify arrays for proper memoization
     return {
-      chainId,
+      chainIds: chainIds?.join(','),
       daos: daos?.join(','),
       eventTypes: eventTypes?.join(','),
       actor,
       limit,
     }
-  }, [enabled, chainId, daos, eventTypes, actor, limit])
+  }, [enabled, chainIds, daos, eventTypes, actor, limit])
 
   const { data, error, isValidating, size, setSize, mutate } = useSWRInfinite<
     FeedResponse,
@@ -131,7 +133,7 @@ export function useFeed({
 
       const cursor = pageIndex === 0 ? null : (previousPageData?.nextCursor ?? null)
       return buildFeedUrl({
-        chainId,
+        chainIds,
         daos,
         eventTypes,
         actor,

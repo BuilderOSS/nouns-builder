@@ -1,6 +1,7 @@
 import { PUBLIC_DEFAULT_CHAINS, PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { FeedEventType, getFeedData } from '@buildeross/sdk/subgraph'
 import {
+  AddressType,
   AuctionCreatedFeedItem,
   CHAIN_ID,
   FeedItem,
@@ -20,7 +21,7 @@ const SUPPORTED_CHAIN_IDS: CHAIN_ID[] = PUBLIC_DEFAULT_CHAINS.map((chain) => cha
 /**
  * Execute promises with controlled concurrency
  */
-async function executeConcurrently<T>(
+export async function executeConcurrently<T>(
   tasks: (() => Promise<T>)[],
   maxConcurrent: number
 ): Promise<T[]> {
@@ -58,9 +59,9 @@ const CACHE_CONFIG = {
  * Determine cache key prefix based on scope
  */
 const getScopePrefix = (params: {
-  chainId?: CHAIN_ID
-  daos?: string[]
-  actor?: string
+  chainIds?: CHAIN_ID[]
+  daos?: AddressType[]
+  actor?: AddressType
   eventTypes?: FeedEventType[]
 }): string => {
   // Event type filtered queries
@@ -82,7 +83,9 @@ const getScopePrefix = (params: {
   }
 
   // Chain or global
-  if (params.chainId) return CACHE_CONFIG.CHAIN_FEED_PREFIX
+  if (params.chainIds && params.chainIds.length === 1) {
+    return CACHE_CONFIG.CHAIN_FEED_PREFIX
+  }
   return CACHE_CONFIG.GLOBAL_FEED_PREFIX
 }
 
@@ -90,9 +93,9 @@ const getScopePrefix = (params: {
  * Get TTL based on scope
  */
 export function getTtlByScope(params: {
-  chainId?: CHAIN_ID
-  daos?: string[]
-  actor?: string
+  chainIds?: CHAIN_ID[]
+  daos?: AddressType[]
+  actor?: AddressType
   eventTypes?: FeedEventType[]
 }): number {
   // Event type filtered queries
@@ -114,7 +117,9 @@ export function getTtlByScope(params: {
   }
 
   // Chain or global
-  if (params.chainId) return CACHE_CONFIG.CHAIN_TTL
+  if (params.chainIds && params.chainIds.length === 1) {
+    return CACHE_CONFIG.CHAIN_TTL
+  }
   return CACHE_CONFIG.GLOBAL_TTL
 }
 
@@ -123,15 +128,18 @@ export function getTtlByScope(params: {
  * IMPORTANT: Must include all filter parameters to avoid serving wrong data
  */
 function generateCacheKey(params: {
-  chainId?: CHAIN_ID
-  daos?: string[]
-  actor?: string
+  chainIds?: CHAIN_ID[]
+  daos?: AddressType[]
+  actor?: AddressType
   eventTypes?: FeedEventType[]
 }): string {
-  const { chainId, daos, actor, eventTypes } = params
+  const { chainIds, daos, actor, eventTypes } = params
+
+  // Use single chainId for cache key if only one chain
+  const effectiveChainId = chainIds && chainIds.length === 1 ? chainIds[0] : undefined
 
   const baseKey = JSON.stringify({
-    chainId,
+    chainId: effectiveChainId,
     daos: daos?.map((d) => d.toLowerCase()).sort(), // Sort for consistent hashing
     actor: actor?.toLowerCase(),
     eventTypes: eventTypes ? [...eventTypes].sort() : undefined, // Sort for consistent hashing
@@ -139,7 +147,7 @@ function generateCacheKey(params: {
 
   // Short prefix + hash of params
   const hash = keccak256(toHex(baseKey)).slice(0, 18) // First 8 bytes + '0x'
-  const scopePrefix = getScopePrefix({ chainId, daos, actor, eventTypes })
+  const scopePrefix = getScopePrefix({ chainIds, daos, actor, eventTypes })
 
   return `${scopePrefix}:${hash}`
 }
@@ -373,10 +381,10 @@ function sortAndPaginate(feeds: FeedResponse[], limit: number): FeedResponse {
 //
 
 type FeedServiceParams = {
-  chainId?: CHAIN_ID
-  daos?: string[]
+  chainIds?: CHAIN_ID[]
+  daos?: AddressType[]
   eventTypes?: FeedEventType[]
-  actor?: string
+  actor?: AddressType
   cursor?: number
   limit?: number
   maxConcurrentConnections?: number
@@ -385,12 +393,15 @@ type FeedServiceParams = {
 /**
  * Fetch feed data with multi-chain support and Redis caching
  *
+ * If no chainIds provided, fetches from all supported chains
+ * If chainIds provided, fetches only from specified chains
+ *
  * NOTE: Multi-chain feeds may have small duplicates at page boundaries
  * for items with identical timestamps. This is acceptable for most UIs.
  * Frontend should deduplicate by item.id if needed.
  */
 export async function fetchFeedDataService({
-  chainId,
+  chainIds,
   daos,
   eventTypes,
   actor,
@@ -404,23 +415,28 @@ export async function fetchFeedDataService({
     // NOTE: we limit to 33 here, since we fetch limit * 3 items in each chain which should be < 100 as validated in sdk
   }
 
-  // Validate chainId is supported if provided
-  if (chainId && !SUPPORTED_CHAIN_IDS.includes(chainId)) {
-    throw new InvalidRequestError(
-      `Unsupported chainId: ${chainId}. Supported chains: ${SUPPORTED_CHAIN_IDS.join(', ')}`
-    )
+  // Validate all chain IDs are supported (if provided)
+  if (chainIds && chainIds.length > 0) {
+    for (const cid of chainIds) {
+      if (!SUPPORTED_CHAIN_IDS.includes(cid)) {
+        throw new InvalidRequestError(
+          `Unsupported chainId: ${cid}. Supported chains: ${SUPPORTED_CHAIN_IDS.join(', ')}`
+        )
+      }
+    }
   }
 
   // Single chain feed (with or without filters)
-  if (chainId) {
-    const key = generateCacheKey({ chainId, daos, eventTypes, actor })
-    const ttl = getTtlByScope({ chainId, daos, eventTypes, actor })
+  if (chainIds && chainIds.length === 1) {
+    const singleChainId = chainIds[0]
+    const key = generateCacheKey({ chainIds, daos, eventTypes, actor })
+    const ttl = getTtlByScope({ chainIds, daos, eventTypes, actor })
 
     return fetchWithSortedSetCache(
       key,
       () =>
         getFeedData({
-          chainId,
+          chainId: singleChainId,
           limit: limit * 3,
           cursor,
           daos,
@@ -434,12 +450,14 @@ export async function fetchFeedDataService({
   }
 
   // Multi-chain feed (with or without filters) - don't cache merged result, only individual chains
-  const perChainLimit = Math.min(Math.ceil(limit / SUPPORTED_CHAIN_IDS.length) + 10, 33)
+  // Use specified chains or all supported chains if none specified
+  const chainsToFetch = chainIds && chainIds.length > 0 ? chainIds : SUPPORTED_CHAIN_IDS
+  const perChainLimit = Math.min(Math.ceil(limit / chainsToFetch.length) + 10, 33)
 
-  const tasks = SUPPORTED_CHAIN_IDS.map((cid) => async () => {
+  const tasks = chainsToFetch.map((cid) => async () => {
     try {
-      const key = generateCacheKey({ chainId: cid, daos, eventTypes, actor })
-      const ttl = getTtlByScope({ chainId: cid, daos, eventTypes, actor })
+      const key = generateCacheKey({ chainIds: [cid], daos, eventTypes, actor })
+      const ttl = getTtlByScope({ chainIds: [cid], daos, eventTypes, actor })
 
       return await fetchWithSortedSetCache(
         key,
@@ -474,17 +492,12 @@ export async function fetchFeedDataService({
 
 /**
  * Invalidate feed cache for a specific scope
- *
- * Examples:
- * - Invalidate all caches for a DAO: { chainId: 1, daoAddress: '0x123...' }
- * - Invalidate all caches for a chain: { chainId: 1 }
- * - Invalidate all user activity for a user: { actor: '0xabc...' }
- * - Invalidate everything: {} (use with caution!)
  */
 export async function invalidateFeedCache(params: {
-  chainId?: CHAIN_ID
-  daoAddress?: string
-  actor?: string
+  chainIds?: CHAIN_ID[]
+  daos?: AddressType[]
+  actor?: AddressType
+  eventTypes?: FeedEventType[]
 }): Promise<void> {
   const redis = getRedisConnection()
   if (!redis) return
@@ -553,8 +566,8 @@ export async function invalidateFeedCacheByScope(params: {
  */
 export async function warmupFeedCache(params: {
   chainIds?: CHAIN_ID[]
-  daoAddresses?: Array<{ chainId: CHAIN_ID; address: string }>
-  actors?: Array<{ chainId?: CHAIN_ID; address: string }>
+  daoAddresses?: Array<{ chainId: CHAIN_ID; address: AddressType }>
+  actors?: Array<{ chainId?: CHAIN_ID; address: AddressType }>
   limit?: number
   maxConcurrentConnections?: number
 }): Promise<void> {
@@ -578,7 +591,7 @@ export async function warmupFeedCache(params: {
 
       warmupTasks.push(async () => {
         try {
-          await fetchFeedDataService({ chainId, limit })
+          await fetchFeedDataService({ chainIds: [chainId], limit })
           log(`Warmed up chain feed`, { chainId })
         } catch (error) {
           console.warn(`Failed to warm up chain feed ${chainId}:`, error)
@@ -595,7 +608,7 @@ export async function warmupFeedCache(params: {
 
       warmupTasks.push(async () => {
         try {
-          await fetchFeedDataService({ chainId, daos: [address], limit })
+          await fetchFeedDataService({ chainIds: [chainId], daos: [address], limit })
           log(`Warmed up DAO feed`, { chainId, dao: address })
         } catch (error) {
           console.warn(
@@ -615,7 +628,11 @@ export async function warmupFeedCache(params: {
 
       warmupTasks.push(async () => {
         try {
-          await fetchFeedDataService({ chainId, actor: address, limit })
+          await fetchFeedDataService({
+            chainIds: chainId ? [chainId] : undefined,
+            actor: address,
+            limit,
+          })
           log(`Warmed up user activity`, { chainId, actor: address })
         } catch (error) {
           console.warn(

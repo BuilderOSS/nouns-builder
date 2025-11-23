@@ -5,8 +5,10 @@ import {
   searchDaosRequest,
   type SearchDaosResponse,
 } from '@buildeross/sdk/subgraph'
+import { Chain, CHAIN_ID } from '@buildeross/types'
 import { buildSearchText } from '@buildeross/utils/search'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { executeConcurrently } from 'src/services/feedService'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 
@@ -65,6 +67,7 @@ export function rankDao(
   const symbol = dao.dao.symbol?.toLowerCase() || ''
   const description = dao.dao.description?.toLowerCase() || ''
   const uri = dao.dao.projectURI?.toLowerCase() || ''
+
   let score = 0
 
   // DB rank bonus (diminishing returns based on position)
@@ -74,7 +77,7 @@ export function rankDao(
   )
   score += dbRankBonus
 
-  // Exact matches (highest priority)
+  // Exact matches (highest priority) on DAO name/symbol
   if (name === query) {
     score += RANKING_WEIGHTS.EXACT_NAME
   } else if (symbol === query) {
@@ -120,18 +123,20 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
+
   const maxResults = PER_PAGE_LIMIT * MAX_PAGES // 60 total results (2 pages of 30)
-  const { page, search, network } = req.query
+  const { page, search, limit } = req.query
   const pageInt = Math.max(1, parseInt(page as string) || 1)
+  const limitInt = Math.max(1, parseInt(limit as string) || PER_PAGE_LIMIT)
 
   if (pageInt > MAX_PAGES) {
     return res.status(400).json({ error: `Page cannot be greater than ${MAX_PAGES}` })
   }
 
-  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
-
-  if (!chain) {
-    return res.status(404).json({ error: 'Network not found' })
+  if (limitInt > PER_PAGE_LIMIT) {
+    return res
+      .status(400)
+      .json({ error: `Limit cannot be greater than ${PER_PAGE_LIMIT}` })
   }
 
   if (!search || typeof search !== 'string' || search.trim().length === 0) {
@@ -152,36 +157,104 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     })
   }
 
+  // Determine which chains to search:
+  // - If `chainIds` is provided, search only those chains
+  // - If `chainIds` is NOT provided, search across ALL PUBLIC_DEFAULT_CHAINS.
+  let chainsToSearch: Chain[] = [...PUBLIC_DEFAULT_CHAINS]
+
+  // Validate and parse chainIds (comma-separated chain IDs)
+  let chainIds: CHAIN_ID[] | undefined
+  if (req.query.chainIds) {
+    if (typeof req.query.chainIds !== 'string') {
+      return res.status(400).json({ error: 'chainIds must be a comma-separated string' })
+    }
+    const ids = req.query.chainIds
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0)
+
+    // Validate each chain ID
+    const validChainIds = PUBLIC_DEFAULT_CHAINS.map((c) => c.id)
+    for (const id of ids) {
+      const parsed = Number(id)
+      if (isNaN(parsed) || !validChainIds.includes(parsed)) {
+        return res.status(400).json({ error: `Invalid chain ID format: ${id}` })
+      }
+    }
+
+    const parsedIds = ids.map((id) => Number(id) as CHAIN_ID)
+    chainIds = parsedIds.length > 0 ? parsedIds : undefined
+  }
+
+  if (chainIds && chainIds.length > 0) {
+    chainsToSearch = chainIds.map((id) => PUBLIC_DEFAULT_CHAINS.find((x) => x.id === id)!)
+  }
+
   try {
     // Transform the search query for GraphQL fulltext search
     const transformedSearch = buildSearchText(rawSearch)
 
-    // Fetch all results up to maxResults to ensure consistent ranking across pages
-    // This is necessary because we need to rank globally before paginating
-    const searchRes = await searchDaosRequest(chain.id, transformedSearch, maxResults, 0)
+    type SearchResult = { chain: Chain; daos: DaoSearchResult[] }
 
-    if (!searchRes) {
-      return res.status(500).json({ error: 'Search failed' })
-    }
+    const searchTasks = chainsToSearch.map((chain) => async () => {
+      try {
+        const searchRes = await searchDaosRequest(
+          chain.id,
+          transformedSearch,
+          maxResults,
+          0
+        )
 
-    // Rank and sort ALL results globally
-    const rankedDaos = searchRes.daos
-      .map((dao, index) => ({
+        return {
+          chain,
+          daos: searchRes?.daos || [],
+        }
+      } catch (error) {
+        console.error(
+          `Failed to fetch search results for chain ${chain.id}:`,
+          error instanceof Error ? error.message : error
+        )
+        return {
+          chain,
+          daos: [],
+        }
+      }
+    })
+
+    // Fetch results for all selected chains in parallel.
+    // Each call fetches up to `maxResults` from that chain.
+    const searchResults = await executeConcurrently<SearchResult>(searchTasks, 2)
+
+    // Aggregate DAOs from all successful chain responses,
+    // preserving chain metadata so we can rank by chain match.
+    const allResults: {
+      dao: DaoSearchResult
+      chain: Chain
+      dbIndex: number
+    }[] = searchResults.flatMap(({ chain, daos }) =>
+      daos.map((dao, index) => ({
         dao,
-        rank: rankDao(dao, rawSearch, index),
+        chain,
+        dbIndex: index,
+      }))
+    )
+
+    // Rank and sort ALL results globally (across chains)
+    const rankedDaos = allResults
+      .map(({ dao, dbIndex }) => ({
+        dao,
+        rank: rankDao(dao, rawSearch, dbIndex),
       }))
       .sort((a, b) => b.rank - a.rank)
 
     // Calculate pagination indices
-    const startIndex = (pageInt - 1) * PER_PAGE_LIMIT
-    const endIndex = startIndex + PER_PAGE_LIMIT
+    const startIndex = (pageInt - 1) * limitInt
+    const endIndex = startIndex + limitInt
 
     // Extract the requested page from globally-ranked results
     const paginatedDaos = rankedDaos.slice(startIndex, endIndex).map((item) => item.dao)
 
     // Check if there's a next page
-    // We cap at maxPages (2), so page 2 never has a next page
-    // For page 1, check if there are more results in the ranked list
     const hasNextPage = pageInt < MAX_PAGES && rankedDaos.length > endIndex
 
     const { maxAge, swr } = CACHE_TIMES.EXPLORE

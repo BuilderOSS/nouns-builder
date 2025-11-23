@@ -1,6 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type DaoSearchResult, type SearchDaosResponse } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
@@ -16,21 +17,35 @@ interface UseDaoSearchOptions {
   debounceMs?: number
   enabled?: boolean
   page?: string
+  chainIds?: CHAIN_ID[]
+  limit?: number
 }
 
 const DEFAULT_DEBOUNCE_MS = 300
 
 // Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
 type HttpError = Error & { status?: number; body?: unknown }
+type SearchKey = readonly [
+  typeof SWR_KEYS.DAO_SEARCH,
+  string,
+  CHAIN_ID[] | undefined,
+  string | undefined,
+  number | undefined,
+]
 const searchFetcher = async (
-  [, searchText, network, page]: readonly [string, string, string, string?],
+  [, searchText, chainIds, page, limit]: SearchKey,
   { signal }: { signal?: AbortSignal } = {}
 ): Promise<SearchDaosResponse> => {
   const params = new URLSearchParams()
   params.set('search', searchText)
-  params.set('network', network)
+  if (chainIds && chainIds.length > 0) {
+    params.set('chainIds', chainIds.join(','))
+  }
   if (page) {
     params.set('page', page)
+  }
+  if (limit) {
+    params.set('limit', limit.toString())
   }
 
   const url = `${BASE_URL}/api/search?${params.toString()}`
@@ -59,10 +74,15 @@ const searchFetcher = async (
  */
 export function useDaoSearch(
   query: string,
-  network: string,
   options: UseDaoSearchOptions = {}
 ): UseDaoSearchResult {
-  const { debounceMs = DEFAULT_DEBOUNCE_MS, enabled = true, page } = options
+  const {
+    debounceMs = DEFAULT_DEBOUNCE_MS,
+    enabled = true,
+    page,
+    chainIds,
+    limit,
+  } = options
 
   // Normalize page parameter
   const [debouncedQuery, setDebouncedQuery] = useState(query)
@@ -84,10 +104,10 @@ export function useDaoSearch(
   // Trim the debounced query (transformation will happen in API endpoint)
   const searchText = debouncedQuery?.trim() || ''
 
-  // Create SWR key - only when enabled, has searchText, and has network
-  const swrKey =
-    enabled && searchText && network
-      ? ([SWR_KEYS.DAO_SEARCH, searchText, network, page] as const)
+  // Create SWR key - only when enabled, has searchText
+  const swrKey: SearchKey | null =
+    enabled && searchText
+      ? ([SWR_KEYS.DAO_SEARCH, searchText, chainIds, page, limit] as const)
       : null
 
   // Use SWR for data fetching with caching
