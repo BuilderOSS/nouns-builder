@@ -157,7 +157,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
   }, [daos, address, handleOpenCreateProposal])
 
   // Main content - always show Feed
-  const mainContent = <Feed />
+  const mainContent = <Feed enableFilters />
 
   // Sidebar content - varies by state
   let sidebarContent: React.ReactNode
