@@ -8,6 +8,7 @@ import {
 import { Chain, CHAIN_ID } from '@buildeross/types'
 import { buildSearchText } from '@buildeross/utils/search'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { executeConcurrently } from 'src/services/feedService'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 
@@ -44,11 +45,6 @@ const RANKING_WEIGHTS = {
 
   // Multi-term bonus (per additional term)
   MULTI_TERM_BONUS: 20,
-
-  // Chain-based boosts
-  CHAIN_EXACT_MATCH: 500,
-  CHAIN_PREFIX_MATCH: 250,
-  CHAIN_CONTAINS_MATCH: 150,
 } as const
 
 /**
@@ -198,10 +194,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // Transform the search query for GraphQL fulltext search
     const transformedSearch = buildSearchText(rawSearch)
 
-    // Fetch results for all selected chains in parallel.
-    // Each call fetches up to `maxResults` from that chain.
-    const searchResults = await Promise.all(
-      chainsToSearch.map(async (chain) => {
+    type SearchResult = { chain: Chain; daos: DaoSearchResult[] }
+
+    const searchTasks = chainsToSearch.map((chain) => async () => {
+      try {
         const searchRes = await searchDaosRequest(
           chain.id,
           transformedSearch,
@@ -211,28 +207,43 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         return {
           chain,
-          searchRes,
+          daos: searchRes?.daos || [],
         }
-      })
-    )
+      } catch (error) {
+        console.error(
+          `Failed to fetch search results for chain ${chain.id}:`,
+          error instanceof Error ? error.message : error
+        )
+        return {
+          chain,
+          daos: [],
+        }
+      }
+    })
+
+    // Fetch results for all selected chains in parallel.
+    // Each call fetches up to `maxResults` from that chain.
+    const searchResults = await executeConcurrently<SearchResult>(searchTasks, 2)
 
     // Aggregate DAOs from all successful chain responses,
     // preserving chain metadata so we can rank by chain match.
     const allResults: {
       dao: DaoSearchResult
       chain: Chain
-    }[] = searchResults.flatMap(({ chain, searchRes }) =>
-      (searchRes?.daos || []).map((dao) => ({
+      dbIndex: number
+    }[] = searchResults.flatMap(({ chain, daos }) =>
+      daos.map((dao, index) => ({
         dao,
         chain,
+        dbIndex: index,
       }))
     )
 
     // Rank and sort ALL results globally (across chains)
     const rankedDaos = allResults
-      .map(({ dao }, index) => ({
+      .map(({ dao, dbIndex }) => ({
         dao,
-        rank: rankDao(dao, rawSearch, index),
+        rank: rankDao(dao, rawSearch, dbIndex),
       }))
       .sort((a, b) => b.rank - a.rank)
 
