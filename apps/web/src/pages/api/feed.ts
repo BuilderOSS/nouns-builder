@@ -59,7 +59,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    chainIds = ids.map((id) => Number(id) as CHAIN_ID)
+    const parsedIds = ids.map((id) => Number(id) as CHAIN_ID)
+    chainIds = parsedIds.length > 0 ? parsedIds : undefined
   }
 
   // Validate and parse actor

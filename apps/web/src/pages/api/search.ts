@@ -164,7 +164,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // Determine which chains to search:
   // - If `chainIds` is provided, search only those chains
   // - If `chainIds` is NOT provided, search across ALL PUBLIC_DEFAULT_CHAINS.
-  let chainsToSearch: Chain[] = PUBLIC_DEFAULT_CHAINS
+  let chainsToSearch: Chain[] = [...PUBLIC_DEFAULT_CHAINS]
 
   // Validate and parse chainIds (comma-separated chain IDs)
   let chainIds: CHAIN_ID[] | undefined
@@ -186,10 +186,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    chainIds = ids.map((id) => Number(id) as CHAIN_ID)
+    const parsedIds = ids.map((id) => Number(id) as CHAIN_ID)
+    chainIds = parsedIds.length > 0 ? parsedIds : undefined
   }
 
-  if (chainIds) {
+  if (chainIds && chainIds.length > 0) {
     chainsToSearch = chainIds.map((id) => PUBLIC_DEFAULT_CHAINS.find((x) => x.id === id)!)
   }
 

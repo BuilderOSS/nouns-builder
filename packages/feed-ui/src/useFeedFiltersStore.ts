@@ -35,6 +35,11 @@ const storeCache = new Map<CacheAddress, StoreApi<FeedFiltersState>>()
 const NETWORK_TYPE = process.env.NEXT_PUBLIC_NETWORK_TYPE || 'testnet'
 
 function createFeedFiltersStore(address: CacheAddress): StoreApi<FeedFiltersState> {
+  const storage =
+    typeof window !== 'undefined'
+      ? createJSONStorage<FeedFiltersState>(() => localStorage)
+      : undefined
+
   return createStore<FeedFiltersState>()(
     persist(
       (set) => ({
@@ -53,7 +58,7 @@ function createFeedFiltersStore(address: CacheAddress): StoreApi<FeedFiltersStat
       }),
       {
         name: `nouns-builder-feed-filters-${NETWORK_TYPE}-${address}`,
-        storage: createJSONStorage(() => localStorage),
+        storage,
         version: 0,
       }
     )
