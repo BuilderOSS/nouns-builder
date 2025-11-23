@@ -1,6 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
-import type { CHAIN_ID } from '@buildeross/types'
+import type { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo } from 'react'
@@ -22,20 +22,22 @@ import {
 } from './FeedFiltersModal.css'
 import type { DaoFilterMode } from './useFeedFiltersStore'
 
+const chainSorter = (a: Chain, b: Chain) => a.icon.localeCompare(b.icon)
+
 export interface FeedFiltersModalProps {
   open: boolean
   onClose: () => void
   chainIds: CHAIN_ID[]
   eventTypes: FeedEventType[]
   daoFilterMode: DaoFilterMode
-  daoAddresses: string[]
+  daoAddresses: AddressType[]
   onChainIdsChange: (chainIds: CHAIN_ID[]) => void
   onEventTypesChange: (eventTypes: FeedEventType[]) => void
   onDaoFilterModeChange: (mode: DaoFilterMode) => void
-  onDaoAddressesChange: (addresses: string[]) => void
+  onDaoAddressesChange: (addresses: AddressType[]) => void
   onReset: () => void
   onApply: () => void
-  userAddress?: string
+  userAddress?: AddressType
 }
 
 const EVENT_TYPE_LABELS: Record<FeedEventType, string> = {
@@ -131,7 +133,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
           <div className={filterSection}>
             <Text className={sectionLabel}>Chains</Text>
             <div className={filterGrid}>
-              {PUBLIC_DEFAULT_CHAINS.map((chain) => (
+              {PUBLIC_DEFAULT_CHAINS.sort(chainSorter).map((chain) => (
                 <Label
                   key={chain.id}
                   className={filterItem}
@@ -203,6 +205,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
 
             {daoFilterMode === 'specific' && (
               <CustomDaoSelector
+                chainIds={chainIds}
                 selectedDaoAddresses={daoAddresses}
                 onSelectedDaosChange={onDaoAddressesChange}
                 userAddress={userAddress}

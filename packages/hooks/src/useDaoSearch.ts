@@ -1,6 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type DaoSearchResult, type SearchDaosResponse } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
@@ -16,7 +17,8 @@ interface UseDaoSearchOptions {
   debounceMs?: number
   enabled?: boolean
   page?: string
-  network?: string
+  chainIds?: CHAIN_ID[]
+  limit?: number
 }
 
 const DEFAULT_DEBOUNCE_MS = 300
@@ -24,16 +26,25 @@ const DEFAULT_DEBOUNCE_MS = 300
 // Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
 type HttpError = Error & { status?: number; body?: unknown }
 const searchFetcher = async (
-  [, searchText, network, page]: readonly [string, string, string?, string?],
+  [, searchText, chainIds, page, limit]: readonly [
+    string,
+    string,
+    CHAIN_ID[],
+    string?,
+    number?,
+  ],
   { signal }: { signal?: AbortSignal } = {}
 ): Promise<SearchDaosResponse> => {
   const params = new URLSearchParams()
   params.set('search', searchText)
-  if (network) {
-    params.set('network', network)
+  if (chainIds) {
+    params.set('chainIds', chainIds.join(','))
   }
   if (page) {
     params.set('page', page)
+  }
+  if (limit) {
+    params.set('limit', limit.toString())
   }
 
   const url = `${BASE_URL}/api/search?${params.toString()}`
@@ -64,7 +75,13 @@ export function useDaoSearch(
   query: string,
   options: UseDaoSearchOptions = {}
 ): UseDaoSearchResult {
-  const { debounceMs = DEFAULT_DEBOUNCE_MS, enabled = true, page, network } = options
+  const {
+    debounceMs = DEFAULT_DEBOUNCE_MS,
+    enabled = true,
+    page,
+    chainIds,
+    limit,
+  } = options
 
   // Normalize page parameter
   const [debouncedQuery, setDebouncedQuery] = useState(query)
@@ -89,7 +106,7 @@ export function useDaoSearch(
   // Create SWR key - only when enabled, has searchText
   const swrKey =
     enabled && searchText
-      ? ([SWR_KEYS.DAO_SEARCH, searchText, network, page] as const)
+      ? ([SWR_KEYS.DAO_SEARCH, searchText, chainIds, page, limit] as const)
       : null
 
   // Use SWR for data fetching with caching

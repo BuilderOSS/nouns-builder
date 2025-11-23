@@ -5,7 +5,7 @@ import {
   searchDaosRequest,
   type SearchDaosResponse,
 } from '@buildeross/sdk/subgraph'
-import { Chain } from '@buildeross/types'
+import { Chain, CHAIN_ID } from '@buildeross/types'
 import { buildSearchText } from '@buildeross/utils/search'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withCors } from 'src/utils/api/cors'
@@ -58,14 +58,11 @@ const RANKING_WEIGHTS = {
  * @param dao DAO result object
  * @param searchQuery Raw search string
  * @param index Original index from DB results (0 = top result)
- * @param chainName Name of the chain this DAO belongs to
- * @param chainSlug Slug of the chain this DAO belongs to
  */
 export function rankDao(
   dao: DaoSearchResult,
   searchQuery: string,
-  index: number,
-  chain: Chain
+  index: number
 ): number {
   const query = searchQuery.toLowerCase().trim()
   const terms = query.split(/\s+/).filter(Boolean)
@@ -75,9 +72,6 @@ export function rankDao(
   const description = dao.dao.description?.toLowerCase() || ''
   const uri = dao.dao.projectURI?.toLowerCase() || ''
 
-  const chainNameLower = chain.name?.toLowerCase() || ''
-  const chainSlugLower = chain.slug?.toLowerCase() || ''
-
   let score = 0
 
   // DB rank bonus (diminishing returns based on position)
@@ -86,23 +80,6 @@ export function rankDao(
     RANKING_WEIGHTS.DB_RANK_BASE - index * RANKING_WEIGHTS.DB_RANK_DECAY
   )
   score += dbRankBonus
-
-  // Chain name/slug matching: if the query looks like the chain, boost it.
-  if (query.length > 0) {
-    if (query === chainNameLower || query === chainSlugLower) {
-      score += RANKING_WEIGHTS.CHAIN_EXACT_MATCH
-    } else if (
-      (chainNameLower && chainNameLower.startsWith(query)) ||
-      (chainSlugLower && chainSlugLower.startsWith(query))
-    ) {
-      score += RANKING_WEIGHTS.CHAIN_PREFIX_MATCH
-    } else if (
-      (chainNameLower && chainNameLower.includes(query)) ||
-      (chainSlugLower && chainSlugLower.includes(query))
-    ) {
-      score += RANKING_WEIGHTS.CHAIN_CONTAINS_MATCH
-    }
-  }
 
   // Exact matches (highest priority) on DAO name/symbol
   if (name === query) {
@@ -152,11 +129,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   const maxResults = PER_PAGE_LIMIT * MAX_PAGES // 60 total results (2 pages of 30)
-  const { page, search, network } = req.query
+  const { page, search, limit } = req.query
   const pageInt = Math.max(1, parseInt(page as string) || 1)
+  const limitInt = Math.max(1, parseInt(limit as string) || PER_PAGE_LIMIT)
 
   if (pageInt > MAX_PAGES) {
     return res.status(400).json({ error: `Page cannot be greater than ${MAX_PAGES}` })
+  }
+
+  if (limitInt > PER_PAGE_LIMIT) {
+    return res
+      .status(400)
+      .json({ error: `Limit cannot be greater than ${PER_PAGE_LIMIT}` })
   }
 
   if (!search || typeof search !== 'string' || search.trim().length === 0) {
@@ -178,18 +162,35 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   // Determine which chains to search:
-  // - If `network` is provided, search only that chain (existing behavior).
-  // - If `network` is NOT provided, search across ALL PUBLIC_DEFAULT_CHAINS.
-  let chainsToSearch = PUBLIC_DEFAULT_CHAINS
+  // - If `chainIds` is provided, search only those chains
+  // - If `chainIds` is NOT provided, search across ALL PUBLIC_DEFAULT_CHAINS.
+  let chainsToSearch: Chain[] = PUBLIC_DEFAULT_CHAINS
 
-  if (network) {
-    const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
+  // Validate and parse chainIds (comma-separated chain IDs)
+  let chainIds: CHAIN_ID[] | undefined
+  if (req.query.chainIds) {
+    if (typeof req.query.chainIds !== 'string') {
+      return res.status(400).json({ error: 'chainIds must be a comma-separated string' })
+    }
+    const ids = req.query.chainIds
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0)
 
-    if (!chain) {
-      return res.status(404).json({ error: 'Network not found' })
+    // Validate each chain ID
+    const validChainIds = PUBLIC_DEFAULT_CHAINS.map((c) => c.id)
+    for (const id of ids) {
+      const parsed = Number(id)
+      if (isNaN(parsed) || !validChainIds.includes(parsed)) {
+        return res.status(400).json({ error: `Invalid chain ID format: ${id}` })
+      }
     }
 
-    chainsToSearch = [chain]
+    chainIds = ids.map((id) => Number(id) as CHAIN_ID)
+  }
+
+  if (chainIds) {
+    chainsToSearch = chainIds.map((id) => PUBLIC_DEFAULT_CHAINS.find((x) => x.id === id)!)
   }
 
   try {
@@ -228,15 +229,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Rank and sort ALL results globally (across chains)
     const rankedDaos = allResults
-      .map(({ dao, chain }, index) => ({
+      .map(({ dao }, index) => ({
         dao,
-        rank: rankDao(dao, rawSearch, index, chain),
+        rank: rankDao(dao, rawSearch, index),
       }))
       .sort((a, b) => b.rank - a.rank)
 
     // Calculate pagination indices
-    const startIndex = (pageInt - 1) * PER_PAGE_LIMIT
-    const endIndex = startIndex + PER_PAGE_LIMIT
+    const startIndex = (pageInt - 1) * limitInt
+    const endIndex = startIndex + limitInt
 
     // Extract the requested page from globally-ranked results
     const paginatedDaos = rankedDaos.slice(startIndex, endIndex).map((item) => item.dao)

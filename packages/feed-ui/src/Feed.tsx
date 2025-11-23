@@ -18,10 +18,10 @@ interface InternalFilterMode {
   eventTypes?: never
   actor?: never
   limit?: number
-  enabled?: boolean
   onError?: (error: Error & { status?: number; body?: unknown }) => void
-  infiniteScroll?: boolean
-  enableFilters: true
+  enableFeed?: boolean
+  enableFilters?: boolean
+  enableInfiniteScroll?: boolean
 }
 
 // External filter mode - Feed accepts filters from parent
@@ -31,10 +31,10 @@ interface ExternalFilterMode {
   eventTypes?: FeedEventType[]
   actor?: AddressType
   limit?: number
-  enabled?: boolean
   onError?: (error: Error & { status?: number; body?: unknown }) => void
-  infiniteScroll?: boolean
+  enableFeed?: boolean
   enableFilters?: never
+  enableInfiniteScroll?: boolean
 }
 
 export type FeedProps = InternalFilterMode | ExternalFilterMode
@@ -50,7 +50,7 @@ function isExternalFilterMode(props: FeedProps): props is ExternalFilterMode {
 }
 
 export const Feed: React.FC<FeedProps> = (props) => {
-  const { actor, limit, enabled, onError, infiniteScroll = true } = props
+  const { actor, limit, enableFeed, onError, enableInfiniteScroll = true } = props
 
   // Determine if we're in external filter mode
   const externalFilterMode = isExternalFilterMode(props)
@@ -85,7 +85,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
     eventTypes: actualEventTypes,
     actor,
     limit,
-    enabled,
+    enabled: enableFeed,
     onError,
   })
 
@@ -104,7 +104,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
 
   // Infinite scroll: automatically load more when loadMoreRef comes into view
   useEffect(() => {
-    if (!hasMore || isLoadingMore) return
+    if (!hasMore || isLoadingMore || !enableInfiniteScroll) return
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -121,7 +121,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
     return () => {
       if (current) observer.unobserve(current)
     }
-  }, [hasMore, isLoadingMore, fetchNextPage])
+  }, [hasMore, isLoadingMore, fetchNextPage, enableInfiniteScroll])
 
   if (error) {
     return (
@@ -195,13 +195,13 @@ export const Feed: React.FC<FeedProps> = (props) => {
         {isLoadingMore && <FeedSkeleton count={3} />}
 
         {/* Infinite scroll sentinel */}
-        {hasMore && !isLoadingMore && infiniteScroll && (
+        {hasMore && !isLoadingMore && enableInfiniteScroll && (
           <div ref={loadMoreRef}>
             <FeedSkeletonItem />
           </div>
         )}
 
-        {hasMore && !isLoadingMore && !infiniteScroll && (
+        {hasMore && !isLoadingMore && !enableInfiniteScroll && (
           <LoadMoreButton
             onClick={() => {
               fetchNextPage()
