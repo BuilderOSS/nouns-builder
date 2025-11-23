@@ -1,6 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
-import type { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo } from 'react'
@@ -21,8 +21,6 @@ import {
   summaryChip,
 } from './FeedFiltersModal.css'
 import type { DaoFilterMode } from './useFeedFiltersStore'
-
-const chainSorter = (a: Chain, b: Chain) => a.icon.localeCompare(b.icon)
 
 export interface FeedFiltersModalProps {
   open: boolean
@@ -133,7 +131,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
           <div className={filterSection}>
             <Text className={sectionLabel}>Chains</Text>
             <div className={filterGrid}>
-              {PUBLIC_DEFAULT_CHAINS.sort(chainSorter).map((chain) => (
+              {PUBLIC_DEFAULT_CHAINS.map((chain) => (
                 <Label
                   key={chain.id}
                   className={filterItem}

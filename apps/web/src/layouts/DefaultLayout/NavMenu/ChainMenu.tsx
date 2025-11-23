@@ -1,7 +1,7 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { useChainStore } from '@buildeross/stores'
-import { Chain, CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
@@ -10,8 +10,6 @@ import { useAccount, useSwitchChain } from 'wagmi'
 
 import { chainPopUpButton, navButton, wrongNetworkButton } from '../Nav.styles.css'
 import { MenuType } from './types'
-
-const chainSorter = (a: Chain, b: Chain) => a.icon.localeCompare(b.icon)
 
 interface ChainMenuProps {
   activeDropdown: MenuType | undefined
@@ -185,7 +183,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
               {`Switch to ${selectedChain.name}`}
             </Flex>
           )}
-          {[...PUBLIC_DEFAULT_CHAINS].sort(chainSorter).map((chain, i, chains) => (
+          {PUBLIC_DEFAULT_CHAINS.map((chain, i, chains) => (
             <Flex
               key={chain.id}
               className={chainPopUpButton}

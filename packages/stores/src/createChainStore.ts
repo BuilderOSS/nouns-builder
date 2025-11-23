@@ -11,7 +11,10 @@ export type ChainStoreProps = {
 }
 
 export const createChainStore = (init?: Chain) => {
-  const storage = createJSONStorage<ChainStoreProps>(() => localStorage)
+  const storage =
+    typeof window !== 'undefined'
+      ? createJSONStorage<ChainStoreProps>(() => localStorage)
+      : undefined
 
   if (typeof window !== 'undefined' && init && storage) {
     const item = storage.getItem(CHAIN_STORE_IDENTIFIER) as StorageValue<ChainStoreProps>

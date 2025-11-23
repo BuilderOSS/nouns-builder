@@ -25,19 +25,20 @@ const DEFAULT_DEBOUNCE_MS = 300
 
 // Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
 type HttpError = Error & { status?: number; body?: unknown }
+type SearchKey = readonly [
+  typeof SWR_KEYS.DAO_SEARCH,
+  string,
+  CHAIN_ID[] | undefined,
+  string | undefined,
+  number | undefined,
+]
 const searchFetcher = async (
-  [, searchText, chainIds, page, limit]: readonly [
-    string,
-    string,
-    CHAIN_ID[],
-    string?,
-    number?,
-  ],
+  [, searchText, chainIds, page, limit]: SearchKey,
   { signal }: { signal?: AbortSignal } = {}
 ): Promise<SearchDaosResponse> => {
   const params = new URLSearchParams()
   params.set('search', searchText)
-  if (chainIds) {
+  if (chainIds && chainIds.length > 0) {
     params.set('chainIds', chainIds.join(','))
   }
   if (page) {
@@ -104,7 +105,7 @@ export function useDaoSearch(
   const searchText = debouncedQuery?.trim() || ''
 
   // Create SWR key - only when enabled, has searchText
-  const swrKey =
+  const swrKey: SearchKey | null =
     enabled && searchText
       ? ([SWR_KEYS.DAO_SEARCH, searchText, chainIds, page, limit] as const)
       : null
