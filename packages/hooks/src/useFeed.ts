@@ -82,14 +82,14 @@ const fetcher = async (
  *
  * @example
  * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
- *   chainId: 1,
+ *   chainIds: [1],
  *   limit: 20,
  * })
  *
  * @example
  * // Filter by multiple DAOs
  * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
- *   chainId: 1,
+ *   chainIds: [1],
  *   daos: ['0x123...', '0x456...'],
  *   limit: 20,
  * })
@@ -97,7 +97,7 @@ const fetcher = async (
  * @example
  * // Filter by event types
  * const { items, hasMore, isLoading, fetchNextPage } = useFeed({
- *   chainId: 1,
+ *   chainIds: [1],
  *   eventTypes: [FeedEventType.AuctionBidPlaced, FeedEventType.ProposalCreated],
  *   limit: 20,
  * })

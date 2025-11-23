@@ -1,6 +1,7 @@
 import { PUBLIC_DEFAULT_CHAINS, PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
 import { FeedEventType, getFeedData } from '@buildeross/sdk/subgraph'
 import {
+  AddressType,
   AuctionCreatedFeedItem,
   CHAIN_ID,
   FeedItem,
@@ -59,8 +60,8 @@ const CACHE_CONFIG = {
  */
 const getScopePrefix = (params: {
   chainIds?: CHAIN_ID[]
-  daos?: string[]
-  actor?: string
+  daos?: AddressType[]
+  actor?: AddressType
   eventTypes?: FeedEventType[]
 }): string => {
   // Event type filtered queries
@@ -93,8 +94,8 @@ const getScopePrefix = (params: {
  */
 export function getTtlByScope(params: {
   chainIds?: CHAIN_ID[]
-  daos?: string[]
-  actor?: string
+  daos?: AddressType[]
+  actor?: AddressType
   eventTypes?: FeedEventType[]
 }): number {
   // Event type filtered queries
@@ -128,8 +129,8 @@ export function getTtlByScope(params: {
  */
 function generateCacheKey(params: {
   chainIds?: CHAIN_ID[]
-  daos?: string[]
-  actor?: string
+  daos?: AddressType[]
+  actor?: AddressType
   eventTypes?: FeedEventType[]
 }): string {
   const { chainIds, daos, actor, eventTypes } = params
@@ -210,10 +211,10 @@ async function fetchWithSortedSetCache(
 
         return hasMore
           ? {
-            items: limitedItems,
-            hasMore: true,
-            nextCursor: limitedItems[limitedItems.length - 1].timestamp,
-          }
+              items: limitedItems,
+              hasMore: true,
+              nextCursor: limitedItems[limitedItems.length - 1].timestamp,
+            }
           : { items: limitedItems, hasMore: false, nextCursor: null }
       }
 
@@ -264,10 +265,10 @@ async function fetchWithSortedSetCache(
 
           return hasMore
             ? {
-              items: limitedItems,
-              hasMore: true,
-              nextCursor: limitedItems[limitedItems.length - 1].timestamp,
-            }
+                items: limitedItems,
+                hasMore: true,
+                nextCursor: limitedItems[limitedItems.length - 1].timestamp,
+              }
             : { items: limitedItems, hasMore: false, nextCursor: null }
         }
 
@@ -381,9 +382,9 @@ function sortAndPaginate(feeds: FeedResponse[], limit: number): FeedResponse {
 
 type FeedServiceParams = {
   chainIds?: CHAIN_ID[]
-  daos?: string[]
+  daos?: AddressType[]
   eventTypes?: FeedEventType[]
-  actor?: string
+  actor?: AddressType
   cursor?: number
   limit?: number
   maxConcurrentConnections?: number
@@ -494,8 +495,8 @@ export async function fetchFeedDataService({
  */
 export async function invalidateFeedCache(params: {
   chainIds?: CHAIN_ID[]
-  daos?: string[]
-  actor?: string
+  daos?: AddressType[]
+  actor?: AddressType
   eventTypes?: FeedEventType[]
 }): Promise<void> {
   const redis = getRedisConnection()
@@ -565,8 +566,8 @@ export async function invalidateFeedCacheByScope(params: {
  */
 export async function warmupFeedCache(params: {
   chainIds?: CHAIN_ID[]
-  daoAddresses?: Array<{ chainId: CHAIN_ID; address: string }>
-  actors?: Array<{ chainId?: CHAIN_ID; address: string }>
+  daoAddresses?: Array<{ chainId: CHAIN_ID; address: AddressType }>
+  actors?: Array<{ chainId?: CHAIN_ID; address: AddressType }>
   limit?: number
   maxConcurrentConnections?: number
 }): Promise<void> {

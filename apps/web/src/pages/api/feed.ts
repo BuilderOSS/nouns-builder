@@ -1,5 +1,6 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID } from '@buildeross/types'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
 import { fetchFeedDataService, getTtlByScope } from 'src/services/feedService'
@@ -44,12 +45,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (typeof req.query.chainIds !== 'string') {
       return res.status(400).json({ error: 'chainIds must be a comma-separated string' })
     }
-    const ids = req.query.chainIds.split(',').map((id) => id.trim())
+    const ids = req.query.chainIds
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0)
 
     // Validate each chain ID
+    const validChainIds = PUBLIC_DEFAULT_CHAINS.map((c) => c.id)
     for (const id of ids) {
       const parsed = Number(id)
-      if (isNaN(parsed)) {
+      if (isNaN(parsed) || !validChainIds.includes(parsed)) {
         return res.status(400).json({ error: `Invalid chain ID format: ${id}` })
       }
     }
@@ -58,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Validate and parse actor
-  let actor: string | undefined
+  let actor: AddressType | undefined
   if (req.query.actor) {
     if (typeof req.query.actor !== 'string') {
       return res.status(400).json({ error: 'actor must be a string' })
@@ -66,16 +71,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!isAddress(req.query.actor, { strict: false })) {
       return res.status(400).json({ error: 'Invalid actor address format' })
     }
-    actor = req.query.actor.toLowerCase()
+    actor = req.query.actor.toLowerCase() as AddressType
   }
 
   // Validate and parse daos (comma-separated addresses)
-  let daos: string[] | undefined
+  let daos: AddressType[] | undefined
   if (req.query.daos) {
     if (typeof req.query.daos !== 'string') {
       return res.status(400).json({ error: 'daos must be a comma-separated string' })
     }
-    const daoAddresses = req.query.daos.split(',').map((d) => d.trim())
+    const daoAddresses = req.query.daos
+      .split(',')
+      .map((d) => d.trim())
+      .filter((id) => id.length > 0)
 
     // Validate each address
     for (const dao of daoAddresses) {
@@ -84,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    daos = daoAddresses.map((d) => d.toLowerCase())
+    daos = daoAddresses.map((d) => d.toLowerCase() as AddressType)
   }
 
   // Validate and parse eventTypes (comma-separated event types)
@@ -95,7 +103,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .status(400)
         .json({ error: 'eventTypes must be a comma-separated string' })
     }
-    const types = req.query.eventTypes.split(',').map((t) => t.trim())
+    const types = req.query.eventTypes
+      .split(',')
+      .map((t) => t.trim())
+      .filter((id) => id.length > 0)
 
     // Validate each event type
     const validTypes = Object.values(FeedEventType)

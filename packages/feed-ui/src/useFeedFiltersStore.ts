@@ -1,5 +1,5 @@
 import { FeedEventType } from '@buildeross/sdk/subgraph'
-import type { CHAIN_ID } from '@buildeross/types'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useMemo } from 'react'
 import type { StoreApi } from 'zustand'
 import { createStore, useStore } from 'zustand'
@@ -9,11 +9,11 @@ export type DaoFilterMode = 'all' | 'specific'
 
 export interface FeedFiltersState {
   chainIds: CHAIN_ID[]
-  daoAddresses: string[]
+  daoAddresses: AddressType[]
   eventTypes: FeedEventType[]
   daoFilterMode: DaoFilterMode
   setChainIds: (chainIds: CHAIN_ID[]) => void
-  setDaoAddresses: (daoAddresses: string[]) => void
+  setDaoAddresses: (daoAddresses: AddressType[]) => void
   setEventTypes: (eventTypes: FeedEventType[]) => void
   setDaoFilterMode: (mode: DaoFilterMode) => void
   resetFilters: () => void
@@ -26,13 +26,15 @@ const initialState = {
   daoFilterMode: 'all' as DaoFilterMode,
 }
 
+type CacheAddress = AddressType | 'disconnected'
+
 // Cache stores by address to prevent recreation
-const storeCache = new Map<string, StoreApi<FeedFiltersState>>()
+const storeCache = new Map<CacheAddress, StoreApi<FeedFiltersState>>()
 
 // Get the network type from environment
 const NETWORK_TYPE = process.env.NEXT_PUBLIC_NETWORK_TYPE || 'testnet'
 
-function createFeedFiltersStore(address: string): StoreApi<FeedFiltersState> {
+function createFeedFiltersStore(address: CacheAddress): StoreApi<FeedFiltersState> {
   return createStore<FeedFiltersState>()(
     persist(
       (set) => ({
@@ -63,8 +65,10 @@ function createFeedFiltersStore(address: string): StoreApi<FeedFiltersState> {
  * Each wallet address gets its own localStorage key for filter preferences
  * @param address - Wallet address (optional, defaults to 'disconnected')
  */
-export function useFeedFiltersStore(address?: string): FeedFiltersState {
-  const normalizedAddress = address?.toLowerCase() || 'disconnected'
+export function useFeedFiltersStore(address?: AddressType): FeedFiltersState {
+  const normalizedAddress: CacheAddress = address
+    ? (address.toLowerCase() as AddressType)
+    : 'disconnected'
 
   const store = useMemo(() => {
     if (!storeCache.has(normalizedAddress)) {

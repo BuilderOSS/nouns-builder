@@ -37,8 +37,6 @@ export const daoList = style([
   {
     display: 'flex',
     flexDirection: 'column',
-    maxHeight: '300px',
-    overflowY: 'auto',
   },
 ])
 
@@ -163,6 +161,10 @@ export const selectButton = style([
     borderRadius: '4px',
     transition: 'background-color 0.2s ease',
     ':hover': {
+      backgroundColor: vars.color.accentHover,
+    },
+    ':focus': {
+      outline: 'none',
       backgroundColor: vars.color.accentHover,
     },
   },

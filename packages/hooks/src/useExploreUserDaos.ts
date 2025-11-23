@@ -11,6 +11,7 @@ export interface UseExploreUserDaosOptions {
 
 export interface UseExploreUserDaosResult {
   daos?: ExploreDaoWithChainId[]
+  isEmpty: boolean
   isLoading: boolean
   error?: Error
 }
@@ -54,8 +55,12 @@ export function useExploreUserDaos(
 
   const isLoading = data ? false : isValidating && !data && !error
 
+  const isEmpty =
+    !!swrKey && !isLoading && !isValidating && !error && (!data || data.daos.length === 0)
+
   return {
-    daos: data?.daos,
+    daos: data?.daos ?? [],
+    isEmpty,
     isLoading,
     error,
   }
