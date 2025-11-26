@@ -3,7 +3,8 @@ import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
-import React, { useCallback, useMemo } from 'react'
+import { useFormik } from 'formik'
+import React, { useMemo } from 'react'
 
 import { CustomDaoSelector } from './CustomDaoSelector'
 import {
@@ -29,12 +30,12 @@ export interface FeedFiltersModalProps {
   eventTypes: FeedEventType[]
   daoFilterMode: DaoFilterMode
   daoAddresses: AddressType[]
-  onChainIdsChange: (chainIds: CHAIN_ID[]) => void
-  onEventTypesChange: (eventTypes: FeedEventType[]) => void
-  onDaoFilterModeChange: (mode: DaoFilterMode) => void
-  onDaoAddressesChange: (addresses: AddressType[]) => void
-  onReset: () => void
-  onApply: () => void
+  onApply: (values: {
+    chainIds: CHAIN_ID[]
+    eventTypes: FeedEventType[]
+    daoFilterMode: DaoFilterMode
+    daoAddresses: AddressType[]
+  }) => void
   userAddress?: AddressType
 }
 
@@ -55,171 +56,221 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   eventTypes,
   daoFilterMode,
   daoAddresses,
-  onChainIdsChange,
-  onEventTypesChange,
-  onDaoFilterModeChange,
-  onDaoAddressesChange,
-  onReset,
   onApply,
   userAddress,
 }) => {
-  const toggleChain = useCallback(
-    (chainId: CHAIN_ID) => {
-      if (chainIds.includes(chainId)) {
-        onChainIdsChange(chainIds.filter((id) => id !== chainId))
-      } else {
-        onChainIdsChange([...chainIds, chainId])
-      }
+  const formik = useFormik({
+    initialValues: {
+      chainIds,
+      eventTypes,
+      daoFilterMode,
+      daoAddresses,
     },
-    [chainIds, onChainIdsChange]
-  )
-
-  const toggleEventType = useCallback(
-    (eventType: FeedEventType) => {
-      if (eventTypes.includes(eventType)) {
-        onEventTypesChange(eventTypes.filter((type) => type !== eventType))
-      } else {
-        onEventTypesChange([...eventTypes, eventType])
-      }
+    onSubmit: (values) => {
+      onApply(values)
+      onClose()
     },
-    [eventTypes, onEventTypesChange]
-  )
+  })
 
-  // Generate filter summary
+  const toggleChain = (chainId: CHAIN_ID) => {
+    const currentChainIds = formik.values.chainIds
+    if (currentChainIds.includes(chainId)) {
+      formik.setFieldValue(
+        'chainIds',
+        currentChainIds.filter((id) => id !== chainId)
+      )
+    } else {
+      formik.setFieldValue('chainIds', [...currentChainIds, chainId])
+    }
+  }
+
+  const toggleEventType = (eventType: FeedEventType) => {
+    const currentEventTypes = formik.values.eventTypes
+    if (currentEventTypes.includes(eventType)) {
+      formik.setFieldValue(
+        'eventTypes',
+        currentEventTypes.filter((type) => type !== eventType)
+      )
+    } else {
+      formik.setFieldValue('eventTypes', [...currentEventTypes, eventType])
+    }
+  }
+
+  const handleCancel = () => {
+    formik.resetForm()
+    onClose()
+  }
+
+  const handleResetToDefaults = () => {
+    formik.setValues({
+      chainIds: [],
+      eventTypes: [],
+      daoFilterMode: 'all',
+      daoAddresses: [],
+    })
+  }
+
+  // Generate filter summary based on form values
   const filterSummary = useMemo(() => {
     const parts: string[] = []
-    if (chainIds.length > 0) {
-      parts.push(`${chainIds.length} chain${chainIds.length > 1 ? 's' : ''}`)
+    if (formik.values.chainIds.length > 0) {
+      parts.push(
+        `${formik.values.chainIds.length} chain${formik.values.chainIds.length > 1 ? 's' : ''}`
+      )
     }
-    if (eventTypes.length > 0) {
-      parts.push(`${eventTypes.length} event${eventTypes.length > 1 ? 's' : ''}`)
+    if (formik.values.eventTypes.length > 0) {
+      parts.push(
+        `${formik.values.eventTypes.length} event${formik.values.eventTypes.length > 1 ? 's' : ''}`
+      )
     }
-    if (daoFilterMode === 'specific' && daoAddresses.length > 0) {
-      parts.push(`${daoAddresses.length} DAO${daoAddresses.length > 1 ? 's' : ''}`)
+    if (
+      formik.values.daoFilterMode === 'specific' &&
+      formik.values.daoAddresses.length > 0
+    ) {
+      parts.push(
+        `${formik.values.daoAddresses.length} DAO${formik.values.daoAddresses.length > 1 ? 's' : ''}`
+      )
     }
     return parts
-  }, [chainIds, eventTypes, daoFilterMode, daoAddresses])
+  }, [formik.values])
 
   const hasFilters =
-    chainIds.length > 0 ||
-    eventTypes.length > 0 ||
-    (daoFilterMode === 'specific' && daoAddresses.length > 0)
+    formik.values.chainIds.length > 0 ||
+    formik.values.eventTypes.length > 0 ||
+    (formik.values.daoFilterMode === 'specific' && formik.values.daoAddresses.length > 0)
 
   return (
-    <AnimatedModal open={open} close={onClose} size="large">
-      <Stack>
-        {/* Header */}
-        <div className={modalHeader}>
-          <Text className={modalTitle}>Customize Feed</Text>
-          {hasFilters && (
-            <div className={filterSummaryStyles}>
-              <Text fontSize="14" color="text3">
-                Active filters:
-              </Text>
-              {filterSummary.map((part, idx) => (
-                <span key={idx} className={summaryChip}>
-                  {part}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Body */}
-        <div className={modalBody}>
-          {/* Chains Filter */}
-          <div className={filterSection}>
-            <Text className={sectionLabel}>Chains</Text>
-            <div className={filterGrid}>
-              {PUBLIC_DEFAULT_CHAINS.map((chain) => (
-                <Label
-                  key={chain.id}
-                  className={filterItem}
-                  onClick={() => toggleChain(chain.id)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={chainIds.includes(chain.id)}
-                    onChange={() => toggleChain(chain.id)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <img src={chain.icon} alt={chain.name} className={chainIcon} />
-                  <Text fontSize="14">{chain.name}</Text>
-                </Label>
-              ))}
-            </div>
-          </div>
-
-          {/* Event Types Filter */}
-          <div className={filterSection}>
-            <Text className={sectionLabel}>Event Types</Text>
-            <div className={filterGrid}>
-              {Object.entries(EVENT_TYPE_LABELS).map(([eventType, label]) => (
-                <Label
-                  key={eventType}
-                  className={filterItem}
-                  onClick={() => toggleEventType(eventType as FeedEventType)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={eventTypes.includes(eventType as FeedEventType)}
-                    onChange={() => toggleEventType(eventType as FeedEventType)}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <Text fontSize="14">{label}</Text>
-                </Label>
-              ))}
-            </div>
-          </div>
-
-          {/* DAOs Filter */}
-          <div className={filterSection}>
-            <Text className={sectionLabel}>DAOs</Text>
-            <div className={radioGroup}>
-              <Label className={filterItem} onClick={() => onDaoFilterModeChange('all')}>
-                <input
-                  type="radio"
-                  name="dao-filter-mode"
-                  checked={daoFilterMode === 'all'}
-                  onChange={() => onDaoFilterModeChange('all')}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <Text fontSize="14">All DAOs</Text>
-              </Label>
-              <Label
-                className={filterItem}
-                onClick={() => onDaoFilterModeChange('specific')}
-              >
-                <input
-                  type="radio"
-                  name="dao-filter-mode"
-                  checked={daoFilterMode === 'specific'}
-                  onChange={() => onDaoFilterModeChange('specific')}
-                  onClick={(e) => e.stopPropagation()}
-                />
-                <Text fontSize="14">Specific DAOs</Text>
-              </Label>
-            </div>
-
-            {daoFilterMode === 'specific' && (
-              <CustomDaoSelector
-                chainIds={chainIds}
-                selectedDaoAddresses={daoAddresses}
-                onSelectedDaosChange={onDaoAddressesChange}
-                userAddress={userAddress}
-              />
+    <AnimatedModal open={open} close={handleCancel} size="large">
+      <form onSubmit={formik.handleSubmit}>
+        <Stack>
+          {/* Header */}
+          <div className={modalHeader}>
+            <Text className={modalTitle}>Customize Feed</Text>
+            {hasFilters && (
+              <div className={filterSummaryStyles}>
+                <Text fontSize="14" color="text3">
+                  Active filters:
+                </Text>
+                {filterSummary.map((part, idx) => (
+                  <span key={idx} className={summaryChip}>
+                    {part}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Footer */}
-        <Flex className={modalFooter}>
-          <Button variant="outline" onClick={onReset} disabled={!hasFilters}>
-            Reset
-          </Button>
-          <Button onClick={onApply}>Apply Filters</Button>
-        </Flex>
-      </Stack>
+          {/* Body */}
+          <div className={modalBody}>
+            {/* Chains Filter */}
+            <div className={filterSection}>
+              <Text className={sectionLabel}>Chains</Text>
+              <div className={filterGrid}>
+                {PUBLIC_DEFAULT_CHAINS.map((chain) => (
+                  <Label
+                    key={chain.id}
+                    className={filterItem}
+                    onClick={() => toggleChain(chain.id)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formik.values.chainIds.includes(chain.id)}
+                      onChange={() => toggleChain(chain.id)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <img src={chain.icon} alt={chain.name} className={chainIcon} />
+                    <Text fontSize="14">{chain.name}</Text>
+                  </Label>
+                ))}
+              </div>
+            </div>
+
+            {/* Event Types Filter */}
+            <div className={filterSection}>
+              <Text className={sectionLabel}>Event Types</Text>
+              <div className={filterGrid}>
+                {Object.entries(EVENT_TYPE_LABELS).map(([eventType, label]) => (
+                  <Label
+                    key={eventType}
+                    className={filterItem}
+                    onClick={() => toggleEventType(eventType as FeedEventType)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formik.values.eventTypes.includes(
+                        eventType as FeedEventType
+                      )}
+                      onChange={() => toggleEventType(eventType as FeedEventType)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <Text fontSize="14">{label}</Text>
+                  </Label>
+                ))}
+              </div>
+            </div>
+
+            {/* DAOs Filter */}
+            <div className={filterSection}>
+              <Text className={sectionLabel}>DAOs</Text>
+              <div className={radioGroup}>
+                <Label
+                  className={filterItem}
+                  onClick={() => formik.setFieldValue('daoFilterMode', 'all')}
+                >
+                  <input
+                    type="radio"
+                    name="dao-filter-mode"
+                    checked={formik.values.daoFilterMode === 'all'}
+                    onChange={() => formik.setFieldValue('daoFilterMode', 'all')}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Text fontSize="14">All DAOs</Text>
+                </Label>
+                <Label
+                  className={filterItem}
+                  onClick={() => formik.setFieldValue('daoFilterMode', 'specific')}
+                >
+                  <input
+                    type="radio"
+                    name="dao-filter-mode"
+                    checked={formik.values.daoFilterMode === 'specific'}
+                    onChange={() => formik.setFieldValue('daoFilterMode', 'specific')}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Text fontSize="14">Specific DAOs</Text>
+                </Label>
+              </div>
+
+              {formik.values.daoFilterMode === 'specific' && (
+                <CustomDaoSelector
+                  chainIds={formik.values.chainIds}
+                  selectedDaoAddresses={formik.values.daoAddresses}
+                  onSelectedDaosChange={(addresses) =>
+                    formik.setFieldValue('daoAddresses', addresses)
+                  }
+                  userAddress={userAddress}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <Flex className={modalFooter}>
+            <Button variant="ghost" onClick={handleCancel} type="button">
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleResetToDefaults}
+              type="button"
+              disabled={!hasFilters}
+            >
+              Reset to Defaults
+            </Button>
+            <Button type="submit">Apply Filters</Button>
+          </Flex>
+        </Stack>
+      </form>
     </AnimatedModal>
   )
 }
