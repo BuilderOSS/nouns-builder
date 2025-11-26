@@ -90,15 +90,22 @@ export const Feed: React.FC<FeedProps> = (props) => {
   })
 
   // Filter modal handlers (only used in internal mode)
-  const handleApplyFilters = useCallback(() => {
-    setIsFilterModalOpen(false)
-  }, [])
-
-  const handleResetFilters = useCallback(() => {
-    if (!externalFilterMode) {
-      filterStore.resetFilters()
-    }
-  }, [externalFilterMode, filterStore])
+  const handleApplyFilters = useCallback(
+    (values: {
+      chainIds: CHAIN_ID[]
+      eventTypes: FeedEventType[]
+      daoFilterMode: 'all' | 'specific'
+      daoAddresses: AddressType[]
+    }) => {
+      if (!externalFilterMode) {
+        filterStore.setChainIds(values.chainIds)
+        filterStore.setEventTypes(values.eventTypes)
+        filterStore.setDaoFilterMode(values.daoFilterMode)
+        filterStore.setDaoAddresses(values.daoAddresses)
+      }
+    },
+    [externalFilterMode, filterStore]
+  )
 
   const loadMoreRef = useRef<HTMLDivElement | null>(null)
 
@@ -149,27 +156,11 @@ export const Feed: React.FC<FeedProps> = (props) => {
     )
   }
 
-  if (items.length === 0) {
-    return (
-      <Flex w="100%" justify="center">
-        <Flex
-          w="100%"
-          justify="center"
-          align="center"
-          py="x16"
-          style={{ maxWidth: '480px' }}
-        >
-          <Text color="tertiary">No activity yet</Text>
-        </Flex>
-      </Flex>
-    )
-  }
-
   return (
     <Flex w="100%" justify="center" direction="column" align="center">
       {/* Customize Feed button - only shown in internal filter mode */}
       {!externalFilterMode && (
-        <Flex w="100%" justify="flex-end" style={{ maxWidth: '480px' }} px="x4" pb="x4">
+        <Flex w="100%" justify="flex-end" style={{ maxWidth: '480px' }} pb="x4">
           <Button
             variant="outline"
             size="sm"
@@ -183,37 +174,47 @@ export const Feed: React.FC<FeedProps> = (props) => {
       )}
 
       <Stack gap="x4" w="100%" py="x4" style={{ maxWidth: '480px' }}>
-        {items.map((item: FeedItemType) => (
-          <FeedItem
-            key={item.id}
-            item={item}
-            hideActor={!!actor}
-            hideDao={!!(actualDaos && actualDaos.length > 0)}
-          />
-        ))}
-
-        {isLoadingMore && <FeedSkeleton count={3} />}
-
-        {/* Infinite scroll sentinel */}
-        {hasMore && !isLoadingMore && enableInfiniteScroll && (
-          <div ref={loadMoreRef}>
-            <FeedSkeletonItem />
-          </div>
+        {items.length === 0 && (
+          <Text color="tertiary" textAlign="center" w="100%">
+            No activity yet
+          </Text>
         )}
 
-        {hasMore && !isLoadingMore && !enableInfiniteScroll && (
-          <LoadMoreButton
-            onClick={() => {
-              fetchNextPage()
-            }}
-            isLoading={isLoadingMore}
-          />
-        )}
+        {items.length > 0 && (
+          <>
+            {items.map((item: FeedItemType) => (
+              <FeedItem
+                key={item.id}
+                item={item}
+                hideActor={!!actor}
+                hideDao={!!(actualDaos && actualDaos.length > 0)}
+              />
+            ))}
 
-        {!hasMore && !isLoadingMore && (
-          <Flex w="100%" justify="center" align="center" py="x8">
-            <Text color="tertiary">No more feed content to show</Text>
-          </Flex>
+            {isLoadingMore && <FeedSkeleton count={3} />}
+
+            {/* Infinite scroll sentinel */}
+            {hasMore && !isLoadingMore && enableInfiniteScroll && (
+              <div ref={loadMoreRef}>
+                <FeedSkeletonItem />
+              </div>
+            )}
+
+            {hasMore && !isLoadingMore && !enableInfiniteScroll && (
+              <LoadMoreButton
+                onClick={() => {
+                  fetchNextPage()
+                }}
+                isLoading={isLoadingMore}
+              />
+            )}
+
+            {!hasMore && !isLoadingMore && (
+              <Flex w="100%" justify="center" align="center" py="x8">
+                <Text color="tertiary">No more feed content to show</Text>
+              </Flex>
+            )}
+          </>
         )}
       </Stack>
 
@@ -226,11 +227,6 @@ export const Feed: React.FC<FeedProps> = (props) => {
           eventTypes={filterStore.eventTypes}
           daoFilterMode={filterStore.daoFilterMode}
           daoAddresses={filterStore.daoAddresses}
-          onChainIdsChange={filterStore.setChainIds}
-          onEventTypesChange={filterStore.setEventTypes}
-          onDaoFilterModeChange={filterStore.setDaoFilterMode}
-          onDaoAddressesChange={filterStore.setDaoAddresses}
-          onReset={handleResetFilters}
           onApply={handleApplyFilters}
           userAddress={address}
         />
