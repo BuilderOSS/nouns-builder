@@ -6,7 +6,7 @@ import {
   defaultFormButtonWithPrev,
 } from '@buildeross/ui/styles'
 import { isEmpty } from '@buildeross/utils/helpers'
-import { Button, Flex, Icon, Stack } from '@buildeross/zord'
+import { Button, Flex, Heading, Icon, Stack } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent } from 'react'
@@ -50,32 +50,34 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
     auctionDuration: {
       seconds: auctionSettings?.auctionDuration?.seconds,
       minutes: auctionSettings?.auctionDuration?.minutes,
-      days: auctionSettings?.auctionDuration?.days || 1,
+      days: auctionSettings?.auctionDuration?.days ?? 1,
       hours: auctionSettings?.auctionDuration?.hours,
     },
     auctionReservePrice: auctionSettings?.auctionReservePrice,
     proposalThreshold:
       auctionSettings?.proposalThreshold === 0
         ? 0
-        : auctionSettings?.proposalThreshold || 0.5,
+        : (auctionSettings?.proposalThreshold ?? 0.5),
     quorumThreshold:
-      auctionSettings?.quorumThreshold === 0 ? 0 : auctionSettings?.quorumThreshold || 10,
+      auctionSettings?.quorumThreshold === 0
+        ? 0
+        : (auctionSettings?.quorumThreshold ?? 10),
     votingDelay: {
       seconds: auctionSettings?.votingDelay?.seconds,
       minutes: auctionSettings?.votingDelay?.minutes,
-      days: auctionSettings?.votingDelay?.days || 1,
+      days: auctionSettings?.votingDelay?.days ?? 1,
       hours: auctionSettings?.votingDelay?.hours,
     },
     votingPeriod: {
       seconds: auctionSettings?.votingPeriod?.seconds,
       minutes: auctionSettings?.votingPeriod?.minutes,
-      days: auctionSettings?.votingPeriod?.days || 4,
+      days: auctionSettings?.votingPeriod?.days ?? 4,
       hours: auctionSettings?.votingPeriod?.hours,
     },
     timelockDelay: {
       seconds: auctionSettings?.timelockDelay?.seconds,
       minutes: auctionSettings?.timelockDelay?.minutes,
-      days: auctionSettings?.timelockDelay?.days || 2,
+      days: auctionSettings?.timelockDelay?.days ?? 2,
       hours: auctionSettings?.timelockDelay?.hours,
     },
   }
@@ -150,7 +152,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               py={'x3'}
               mb={'x8'}
             >
-              Advanced
+              Advanced Settings
               <Icon id={showAdvanced ? 'chevronUp' : 'chevronDown'} />
             </Button>
             <motion.div
@@ -159,6 +161,9 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               initial={'init'}
               animate={showAdvanced ? 'open' : 'init'}
             >
+              <Heading as={'h3'} mt={'x0'} mb={'x8'} fontSize={40}>
+                Governance Settings
+              </Heading>
               <SmartInput
                 {...formik.getFieldProps('proposalThreshold')}
                 inputLabel={'Proposal Threshold'}
