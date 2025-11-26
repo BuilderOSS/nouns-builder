@@ -176,7 +176,9 @@ export const Feed: React.FC<FeedProps> = (props) => {
       <Stack gap="x4" w="100%" py="x4" style={{ maxWidth: '480px' }}>
         {items.length === 0 && (
           <Text color="tertiary" textAlign="center" w="100%">
-            No activity yet
+            {!externalFilterMode && filterStore.hasActiveFilters()
+              ? 'No results match your current filters'
+              : 'No activity yet'}
           </Text>
         )}
 
