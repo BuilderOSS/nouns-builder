@@ -6,6 +6,7 @@ const flowTitleBase = style({
   fontWeight: 700,
   color: '#FFF',
   top: 30,
+  opacity: 0.8,
   '@media': {
     '(max-width: 768px)': {
       display: 'none',
