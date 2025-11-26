@@ -17,6 +17,7 @@ export interface FeedFiltersState {
   setEventTypes: (eventTypes: FeedEventType[]) => void
   setDaoFilterMode: (mode: DaoFilterMode) => void
   resetFilters: () => void
+  hasActiveFilters: () => boolean
 }
 
 const initialState = {
@@ -42,7 +43,7 @@ function createFeedFiltersStore(address: CacheAddress): StoreApi<FeedFiltersStat
 
   return createStore<FeedFiltersState>()(
     persist(
-      (set) => ({
+      (set, get) => ({
         ...initialState,
         setChainIds: (chainIds) => set({ chainIds }),
         setDaoAddresses: (daoAddresses) => set({ daoAddresses }),
@@ -55,6 +56,14 @@ function createFeedFiltersStore(address: CacheAddress): StoreApi<FeedFiltersStat
             eventTypes: [],
             daoFilterMode: 'all',
           }),
+        hasActiveFilters: () => {
+          const state = get()
+          return (
+            state.chainIds.length > 0 ||
+            state.eventTypes.length > 0 ||
+            (state.daoFilterMode === 'specific' && state.daoAddresses.length > 0)
+          )
+        },
       }),
       {
         name: `nouns-builder-feed-filters-${NETWORK_TYPE}-${address}`,
