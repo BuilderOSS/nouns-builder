@@ -8,7 +8,7 @@ import { animatedModal, animatedModalContent, animatedModalTrigger } from './Mod
 export interface AnimatedModalProps {
   children: ReactElement
   open?: boolean
-  close?: any
+  close?: (() => void) | boolean
   size?: 'small' | 'medium' | 'large' | 'auto'
   trigger?: ReactElement<any>
 }
@@ -22,15 +22,15 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
 }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false)
   const handleClose = React.useCallback(() => {
-    close && typeof close === 'function' && close()
+    if (close && typeof close === 'function') {
+      close()
+    }
     setIsOpen(false)
   }, [close])
 
   React.useEffect(() => {
-    if (typeof close === 'boolean') {
-      if (close) {
-        handleClose()
-      }
+    if (typeof close === 'boolean' && close) {
+      handleClose()
     }
   }, [close, handleClose])
 
