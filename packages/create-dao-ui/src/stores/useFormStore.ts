@@ -43,6 +43,8 @@ export interface FormStoreState {
   setFounderRewardRecipient: (founderRewardRecipient: string) => void
   founderRewardBps: number
   setFounderRewardBps: (founderRewardBps: number) => void
+  reservedUntilTokenId: string
+  setReservedUntilTokenId: (reservedUntilTokenId: string) => void
   resetForm: () => void
 }
 
@@ -84,6 +86,7 @@ const initialState = {
       minutes: undefined,
     },
   },
+  reservedUntilTokenId: '0',
   founderAllocation: [],
   contributionAllocation: [],
   vetoPower: undefined,
@@ -134,6 +137,8 @@ export const useFormStore = create(
       setFounderRewardRecipient: (founderRewardRecipient: string) =>
         set({ founderRewardRecipient }),
       setFounderRewardBps: (founderRewardBps: number) => set({ founderRewardBps }),
+      setReservedUntilTokenId: (reservedUntilTokenId: string) =>
+        set({ reservedUntilTokenId }),
       setSetUpArtwork: (artwork: ArtworkFormValues) => set({ setUpArtwork: artwork }),
       setIpfsUpload: (ipfsUpload: IPFSUpload[]) => set({ ipfsUpload }),
       setOrderedLayers: (orderedLayers: OrderedTraits) => {

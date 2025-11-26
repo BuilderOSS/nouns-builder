@@ -16,6 +16,7 @@ import {
   decodeEventLog,
   encodeAbiParameters,
   getAddress,
+  isAddress,
   parseAbiParameters,
   parseEther,
 } from 'viem'
@@ -105,6 +106,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     vetoerAddress,
     founderRewardRecipient,
     founderRewardBps,
+    reservedUntilTokenId: storedReservedUntilTokenId,
   } = useFormStore()
 
   const handlePrev = useCallback(() => {
@@ -133,8 +135,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
           sanitizeStringForJSON(general?.daoName),
           general?.daoSymbol.replace('$', ''),
           sanitizeStringForJSON(setUpArtwork?.projectDescription),
-          general?.daoAvatar || '',
-          sanitizeStringForJSON(general?.daoWebsite || ''),
+          general?.daoAvatar ?? '',
+          sanitizeStringForJSON(general?.daoWebsite ?? ''),
           RENDERER_BASE,
         ]
       ),
@@ -152,6 +154,11 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     [tokenParamsHex]
   )
 
+  const reservedUntilTokenId = useMemo(
+    () => BigInt(storedReservedUntilTokenId ?? '0'),
+    [storedReservedUntilTokenId]
+  )
+
   const auctionParams = useMemo(
     () => ({
       reservePrice:
@@ -163,7 +170,9 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         : auctionSettings?.auctionDuration
           ? BigInt(toSeconds(auctionSettings?.auctionDuration))
           : BigInt('86400'),
-      founderRewardRecipient: (founderRewardRecipient || NULL_ADDRESS) as AddressType,
+      founderRewardRecipient: (isAddress(founderRewardRecipient, { strict: false })
+        ? founderRewardRecipient
+        : NULL_ADDRESS) as AddressType,
       founderRewardBps: founderRewardBps,
     }),
     [
@@ -248,7 +257,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
           functionName: 'deploy',
           args: [
             founderParams,
-            { ...tokenParams, reservedUntilTokenId: 0n, metadataRenderer: NULL_ADDRESS },
+            { ...tokenParams, reservedUntilTokenId, metadataRenderer: NULL_ADDRESS },
             auctionParams,
             govParams,
           ],
@@ -288,8 +297,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
       parsedEvent = decodeEventLog({
         abi: managerAbi,
         eventName: 'DAODeployed',
-        topics: deployEvent?.topics || [],
-        data: deployEvent?.data || '0x',
+        topics: deployEvent?.topics ?? [],
+        data: deployEvent?.data ?? '0x',
       })
     } catch {}
 
@@ -327,6 +336,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     setDeployedDao,
     setFulfilledSections,
     title,
+    reservedUntilTokenId,
   ])
 
   const isDisabled = useMemo(
@@ -444,7 +454,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               </ReviewSection>
             )}
 
-            <ReviewSection subHeading="Token Allocation">
+            <ReviewSection subHeading="Token Allocations">
               {[...founderAllocation, ...contributionAllocation].map((value, i) => (
                 <ReviewItem
                   label="Founder Allocation"
@@ -452,6 +462,12 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                   key={i}
                 />
               ))}
+              {version?.startsWith('2') && reservedUntilTokenId !== 0n && (
+                <ReviewItem
+                  label="Reserved Tokens"
+                  value={`0 to ${reservedUntilTokenId.toString()}`}
+                />
+              )}
             </ReviewSection>
 
             <ReviewSection subHeading="Set Up Artwork">

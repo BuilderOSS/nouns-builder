@@ -1,16 +1,25 @@
+import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
+import { managerAbi } from '@buildeross/sdk/contract'
 import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID, type TokenAllocation } from '@buildeross/types'
-import { defaultBackButton, defaultFormButtonWithPrev } from '@buildeross/ui/styles'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
+import {
+  defaultBackButton,
+  defaultFormAdvancedToggle,
+  defaultFormAdvancedWrapper,
+  defaultFormButtonWithPrev,
+} from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
-import { Button, Flex, Icon } from '@buildeross/zord'
+import { Button, Flex, Heading, Icon, Paragraph } from '@buildeross/zord'
 import { FieldArray, Form, Formik, FormikProps } from 'formik'
+import { motion } from 'framer-motion'
 import sum from 'lodash/sum'
-import React, { useRef, useState } from 'react'
-import { useAccount } from 'wagmi'
+import React, { BaseSyntheticEvent, useRef, useState } from 'react'
+import { useAccount, useReadContract } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 import { useFormStore } from '../../stores'
-import { validationSchemaFounderAllocation } from './AllocationForm.schema'
+import { validationSchemaAllocations } from './AllocationForm.schema'
 import { ContributionAllocation } from './ContributionAllocation'
 import { FounderAllocationFields } from './FounderAllocationFields'
 import { FounderRewardsFields } from './FounderRewardsFields'
@@ -21,16 +30,33 @@ interface AllocationFormProps {
   title: string
 }
 
+const animation = {
+  init: {
+    height: 0,
+  },
+  open: {
+    height: 'auto',
+  },
+}
+
 export interface FounderAllocationFormValues {
   founderAllocation: TokenAllocation[]
   founderRewardRecipient: string
   founderRewardBps: number
+  reservedUntilTokenId: string
 }
 
 export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
   const formRef = useRef<FormikProps<FounderAllocationFormValues>>(null)
   const [allocationError, setAllocationError] = useState(false)
   const chain = useChainStore((x) => x.chain)
+  const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false)
+  const { data: version, isLoading: isVersionLoading } = useReadContract({
+    abi: managerAbi,
+    address: PUBLIC_MANAGER_ADDRESS[chain.id],
+    functionName: 'contractVersion',
+    chainId: chain.id,
+  })
   const {
     founderAllocation,
     contributionAllocation,
@@ -45,6 +71,8 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
     founderRewardBps,
     setFounderRewardRecipient,
     setFounderRewardBps,
+    reservedUntilTokenId,
+    setReservedUntilTokenId,
   } = useFormStore(
     useShallow((state) => ({
       founderAllocation: state.founderAllocation,
@@ -60,6 +88,8 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
       founderRewardBps: state.founderRewardBps,
       setFounderRewardRecipient: state.setFounderRewardRecipient,
       setFounderRewardBps: state.setFounderRewardBps,
+      reservedUntilTokenId: state.reservedUntilTokenId,
+      setReservedUntilTokenId: state.setReservedUntilTokenId,
     }))
   )
 
@@ -94,6 +124,7 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
     founderAllocation,
     founderRewardRecipient,
     founderRewardBps,
+    reservedUntilTokenId,
   }: FounderAllocationFormValues) => {
     setAllocationError(false)
 
@@ -130,6 +161,7 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
     setFounderRewardBps(
       Number.isFinite(Number(founderRewardBps)) ? Number(founderRewardBps) : 0
     )
+    setReservedUntilTokenId(reservedUntilTokenId)
 
     setFulfilledSections(title)
     setActiveSection(activeSection + 1)
@@ -144,13 +176,14 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
           founderAllocation: initialFounderValues,
           founderRewardRecipient: founderRewardRecipient || '',
           founderRewardBps: founderRewardBps || 0,
+          reservedUntilTokenId: reservedUntilTokenId ?? '0',
         }}
         enableReinitialize
         validateOnBlur={false}
         innerRef={formRef}
         validateOnMount={true}
         validateOnChange={true}
-        validationSchema={validationSchemaFounderAllocation(address)}
+        validationSchema={validationSchemaAllocations(address)}
         onSubmit={handleSubmit}
       >
         {(formik) => (
@@ -190,6 +223,55 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
                 />
               )}
             </FieldArray>
+            {!isVersionLoading && version?.startsWith('2') && (
+              <>
+                <Flex w="100%" align={'center'} justify={'center'}>
+                  <Button
+                    align={'center'}
+                    justify={'center'}
+                    alignSelf={'center'}
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className={defaultFormAdvancedToggle}
+                    gap={'x3'}
+                    py={'x3'}
+                    mt={'x8'}
+                    mb={'x8'}
+                  >
+                    Advanced Settings
+                    <Icon id={showAdvanced ? 'chevronUp' : 'chevronDown'} />
+                  </Button>
+                </Flex>
+                <motion.div
+                  className={defaultFormAdvancedWrapper}
+                  variants={animation}
+                  initial={'init'}
+                  animate={showAdvanced ? 'open' : 'init'}
+                >
+                  <Heading size="xs">Reserve Tokens for Airdrops or Manual Mints</Heading>
+                  <Paragraph color="text3" mb={'x6'}>
+                    Token IDs below this number are reserved for DAO minting. Auctions
+                    start at this ID. Cannot be lowered after minting begins.
+                  </Paragraph>
+                  <SmartInput
+                    {...formik.getFieldProps('reservedUntilTokenId')}
+                    inputLabel={'Reserve Tokens Until'}
+                    type={FIELD_TYPES.NUMBER}
+                    formik={formik}
+                    id={'reservedUntilTokenId'}
+                    onChange={({ target }: BaseSyntheticEvent) => {
+                      formik.setFieldValue('reservedUntilTokenId', target.value)
+                    }}
+                    onBlur={formik.handleBlur}
+                    errorMessage={
+                      formik.touched['reservedUntilTokenId'] &&
+                      formik.errors['reservedUntilTokenId']
+                        ? formik.errors['reservedUntilTokenId']
+                        : undefined
+                    }
+                  />
+                </motion.div>
+              </>
+            )}
           </Form>
         )}
       </Formik>
@@ -223,6 +305,7 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
           ml={'x2'}
           minH={'x15'}
           className={defaultFormButtonWithPrev}
+          disabled={isVersionLoading}
           type="submit"
           onClick={() => formRef.current?.handleSubmit()}
         >

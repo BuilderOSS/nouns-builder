@@ -6,7 +6,7 @@ import { flowWrapper } from './CreateNavigation.css'
 import { NavSection } from './NavSection'
 
 export const CreateNavigation: React.FC<{
-  sections: any[]
+  sections: CreateFormSection[]
 }> = ({ sections }) => (
   <Flex direction={'column'} width={'100%'}>
     <Box className={flowWrapper}>
