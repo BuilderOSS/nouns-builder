@@ -9,16 +9,18 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
+import { CreateActions } from './CreateActions'
 import { DaoAuctionCard } from './DaoAuctionCard'
 import { DaoProposals } from './DaoProposals'
 import { DashboardLayout } from './DashboardLayout'
 import { DashConnect } from './DashConnect'
 import { AuctionCardSkeleton, DAOCardSkeleton, ProposalCardSkeleton } from './Skeletons'
+import { UserProfileCard } from './UserProfileCard'
 
 const ACTIVE_PROPOSAL_STATES = [
   ProposalState.Pending,
@@ -122,26 +124,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
 
     if (!hasLiveProposals)
       return (
-        <Flex
-          borderRadius={'phat'}
+        <Box
+          borderRadius={'curved'}
           borderStyle={'solid'}
-          height={'x32'}
           width={'100%'}
           borderWidth={'normal'}
           borderColor={'border'}
-          direction={'column'}
-          justify={'center'}
-          align={'center'}
-          p={'x6'}
+          p={'x4'}
         >
-          <Text fontSize={20} fontWeight={'display'} mb="x4" color={'text3'}>
-            No Active Proposals
+          <Text fontSize={14} color={'text3'}>
+            No active proposals at the moment.
           </Text>
-          <Text color={'text3'}>
-            Currently, none of your DAOs have proposals that are in active, queue, or
-            pending states. Check back later!
-          </Text>
-        </Flex>
+        </Box>
       )
 
     return daos
@@ -164,9 +158,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
 
   if (error) {
     sidebarContent = (
-      <Stack gap="x8">
+      <Stack gap="x4">
+        {address && (
+          <>
+            <UserProfileCard address={address} daoCount={0} />
+            <CreateActions userAddress={address} />
+          </>
+        )}
         <Box>
-          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
             DAOs
           </Text>
           <DisplayPanel
@@ -178,9 +178,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
     )
   } else if (isLoading) {
     sidebarContent = (
-      <Stack gap="x8">
+      <Stack gap="x4">
+        {address && (
+          <>
+            <UserProfileCard address={address} daoCount={0} />
+            <CreateActions userAddress={address} />
+          </>
+        )}
         <Box>
-          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
             DAOs
           </Text>
           {Array.from({ length: 3 }).map((_, i) => (
@@ -188,7 +194,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           ))}
         </Box>
         <Box>
-          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
             Proposals
           </Text>
           <DAOCardSkeleton />
@@ -202,26 +208,32 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
     sidebarContent = <DashConnect />
   } else if (!daos?.length) {
     sidebarContent = (
-      <Stack gap="x8">
+      <Stack gap="x4">
+        <UserProfileCard address={address} daoCount={0} />
+        <CreateActions userAddress={address} />
         <Box>
-          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
             DAOs
           </Text>
-          <Text fontSize={18}>It looks like you haven't joined any DAOs yet.</Text>
+          <Text fontSize={14} color="text3">
+            It looks like you haven't joined any DAOs yet.
+          </Text>
         </Box>
       </Stack>
     )
   } else {
     sidebarContent = (
-      <Stack gap="x8">
+      <Stack gap="x4">
+        <UserProfileCard address={address} daoCount={daos.length} />
+        <CreateActions userAddress={address} />
         <Box>
-          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
             DAOs
           </Text>
           {auctionCards}
         </Box>
         <Box>
-          <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
+          <Text fontSize={16} fontWeight={'display'} mb={'x3'}>
             Proposals
           </Text>
           {proposalList}
@@ -230,5 +242,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
     )
   }
 
-  return <DashboardLayout mainContent={mainContent} sidebarContent={sidebarContent} />
+  // Get unique chain IDs from user's DAOs
+  const userChainIds = useMemo(() => {
+    if (!daos) return []
+    return Array.from(new Set(daos.map((dao) => dao.chainId)))
+  }, [daos])
+
+  return (
+    <DashboardLayout
+      mainContent={mainContent}
+      sidebarContent={sidebarContent}
+      chainIds={userChainIds}
+    />
+  )
 }

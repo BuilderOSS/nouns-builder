@@ -69,8 +69,25 @@ export const feedItemImage = style([
   {
     aspectRatio: '1 / 1',
     objectFit: 'cover',
+    '@media': {
+      '(min-width: 480px)': {
+        width: '240px',
+        flexShrink: 0,
+      },
+    },
   },
 ])
+
+export const feedItemContentHorizontal = style({
+  '@media': {
+    '(min-width: 480px)': {
+      display: 'flex',
+      flexDirection: 'row',
+      gap: space.x4,
+      alignItems: 'flex-start',
+    },
+  },
+})
 
 export const feedItemTextContentWrapper = style([
   {

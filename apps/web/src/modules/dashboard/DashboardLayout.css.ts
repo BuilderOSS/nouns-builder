@@ -1,22 +1,8 @@
-import * as layers from '@buildeross/constants/layers'
-import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const sidebar = style({
   width: '100%',
   '@media': {
-    '(max-width: 1023px)': {
-      position: 'fixed',
-      height: 'calc(100vh - 80px)',
-      top: 80,
-      left: 0,
-      right: 0,
-      backgroundColor: vars.color.background1,
-      padding: vars.space['x6'],
-      paddingTop: vars.space['x8'],
-      overflowY: 'auto',
-      zIndex: layers.DASHBOARD_SIDEBAR_LAYER,
-    },
     '(min-width: 1024px)': {
       position: 'relative',
       maxWidth: 360,
@@ -27,20 +13,27 @@ export const sidebar = style({
   },
 })
 
-export const sidebarToggle = style({
-  display: 'block',
+export const desktopOnly = style({
+  display: 'none',
   '@media': {
     '(min-width: 1024px)': {
-      display: 'none',
+      display: 'flex',
     },
   },
 })
 
-export const reversedSidebarToggle = style({
-  position: 'absolute',
-  top: 24,
-  right: 24,
+export const desktopLayout = style({
+  display: 'none',
+  '@media': {
+    '(min-width: 1024px)': {
+      display: 'flex',
+    },
+  },
+})
+
+export const mobileLayout = style({
   display: 'block',
+  paddingBottom: '80px', // Space for bottom nav
   '@media': {
     '(min-width: 1024px)': {
       display: 'none',

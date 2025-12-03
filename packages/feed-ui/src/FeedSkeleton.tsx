@@ -2,19 +2,20 @@ import { Box, Flex, Stack } from '@buildeross/zord'
 import React from 'react'
 
 import { feedItemCard } from './Feed.css'
-import { skeletonBox, skeletonCircle, skeletonPulse } from './FeedSkeleton.css'
+import {
+  skeletonBox,
+  skeletonCircle,
+  skeletonContentHorizontal,
+  skeletonImage,
+  skeletonPulse,
+} from './FeedSkeleton.css'
 
 interface FeedSkeletonProps {
   count?: number
 }
 
 export const ImageSkeleton: React.FC = () => {
-  return (
-    <Box
-      className={`${skeletonBox} ${skeletonPulse}`}
-      style={{ width: '100%', aspectRatio: '1 / 1', borderRadius: '12px' }}
-    />
-  )
+  return <Box className={`${skeletonBox} ${skeletonPulse} ${skeletonImage}`} />
 }
 
 export const FeedSkeletonItem: React.FC = () => {
@@ -33,23 +34,26 @@ export const FeedSkeletonItem: React.FC = () => {
           />
         </Flex>
 
-        {/* Full-width image */}
-        <ImageSkeleton />
+        {/* Content - horizontal on desktop, vertical on mobile */}
+        <Stack gap="x3" w="100%" className={skeletonContentHorizontal}>
+          {/* Image - full-width on mobile, fixed width on desktop */}
+          <ImageSkeleton />
 
-        {/* Content below image */}
-        <Stack gap="x2">
-          <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: '50%', height: 20 }}
-          />
-          <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: '70%', height: 18 }}
-          />
-          <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: '40%', height: 16 }}
-          />
+          {/* Content - below image on mobile, to the right on desktop */}
+          <Stack gap="x2" style={{ flex: 1 }}>
+            <Box
+              className={`${skeletonBox} ${skeletonPulse}`}
+              style={{ width: '50%', height: 20 }}
+            />
+            <Box
+              className={`${skeletonBox} ${skeletonPulse}`}
+              style={{ width: '70%', height: 18 }}
+            />
+            <Box
+              className={`${skeletonBox} ${skeletonPulse}`}
+              style={{ width: '40%', height: 16 }}
+            />
+          </Stack>
         </Stack>
 
         {/* Actions section */}

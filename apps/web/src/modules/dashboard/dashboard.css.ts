@@ -6,24 +6,24 @@ export const outerAuctionCard = style([
   {
     '@media': {
       'screen and (max-width: 768px)': {
-        gap: '16px',
+        gap: '12px',
       },
       'screen and (min-width: 1024px)': {
-        gap: '16px',
+        gap: '12px',
       },
     },
   },
   atoms({
     width: '100%',
-    alignItems: { '@initial': 'flex-start', '@768': 'center', '@1024': 'flex-start' },
-    flexDirection: { '@initial': 'column', '@768': 'row', '@1024': 'column' },
-    marginBottom: 'x6',
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 'x3',
     borderColor: 'border',
     borderStyle: 'solid',
     borderRadius: 'curved',
     borderWidth: 'normal',
-    py: { '@initial': 'x4', '@768': 'x3', '@1024': 'x4' },
-    px: { '@initial': 'x2', '@768': 'x6', '@1024': 'x8' },
+    py: 'x3',
+    px: 'x3',
   }),
   {
     transition: 'border-color 0.15s ease-in-out',
@@ -58,23 +58,11 @@ export const daoTokenName = style([
   {
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-    width: '200px',
-    '@media': {
-      'screen and (min-width: 1024px)': {
-        width: '220px',
-      },
-      'screen and (max-width: 912px)': {
-        width: '150px',
-      },
-      'screen and (max-width: 768px)': {
-        width: '220px',
-      },
-    },
   },
   atoms({
     overflow: 'hidden',
     fontWeight: 'label',
-    fontSize: 20,
+    fontSize: 16,
   }),
 ])
 
@@ -82,38 +70,20 @@ export const daoAvatar = style([
   atoms({
     objectFit: 'contain',
     borderRadius: 'curved',
-    height: 'x16',
-    width: 'x16',
+    height: 'x12',
+    width: 'x12',
   }),
 ])
 export const daoAvatarBox = style({
-  marginRight: '24px',
-  width: '64px',
-  height: '64px',
-  '@media': {
-    'screen and (min-width: 1024px)': {
-      marginRight: '16px',
-    },
-    'screen and (max-width: 768px)': {
-      marginRight: '16px',
-    },
-  },
+  marginRight: '12px',
+  width: '48px',
+  height: '48px',
 })
 
 export const auctionCardBrand = style([
   {
-    width: '40%',
-    '@media': {
-      'screen and (min-width: 1024px)': {
-        width: '100%',
-      },
-      'screen and (max-width: 912px)': {
-        width: '35%',
-      },
-      'screen and (max-width: 768px)': {
-        width: '100%',
-      },
-    },
+    flex: 1,
+    minWidth: 0,
   },
   atoms({
     alignItems: 'center',
@@ -140,17 +110,7 @@ export const statsBox = style({
 
 export const bidBox = style([
   {
-    width: '250px',
-    '@media': {
-      'screen and (max-width: 768px)': {
-        width: '100%',
-        marginLeft: 0,
-      },
-      'screen and (min-width: 1024px)': {
-        width: '100%',
-        marginLeft: 0,
-      },
-    },
+    flexShrink: 0,
   },
   atoms({
     marginLeft: 'auto',

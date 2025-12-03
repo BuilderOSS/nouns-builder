@@ -1,4 +1,3 @@
-import { overflowEllipsis } from '@buildeross/auction-ui'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
@@ -24,8 +23,6 @@ import {
   daoAvatarBox,
   daoTokenName,
   outerAuctionCard,
-  stats,
-  statsBox,
 } from './dashboard.css'
 
 type DaoAuctionCardProps = DashboardDaoProps & {
@@ -87,7 +84,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
 
   const bidText = currentAuction.highestBid?.amount
     ? `${formatEther(BigInt(currentAuction.highestBid.amount))} ETH`
-    : 'N/A'
+    : ''
 
   const tokenImage = currentAuction?.token?.image
 
@@ -100,45 +97,44 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
         <Box className={daoAvatarBox}>
           {tokenImage && <FallbackImage className={daoAvatar} src={tokenImage} alt="" />}
         </Box>
-        <Box>
-          <Flex mb="x1" align="center">
+        <Box style={{ flex: 1, minWidth: 0 }}>
+          <Flex mb="x0" align="center" gap="x1">
             {chain.icon && (
               <Image
                 src={chain.icon}
                 style={{
-                  borderRadius: '12px',
-                  maxHeight: '22px',
-                  maxWidth: '22px',
+                  borderRadius: '50%',
+                  maxHeight: '12px',
+                  maxWidth: '12px',
                   objectFit: 'contain',
                 }}
                 alt={chain.name}
-                height={22}
-                width={22}
+                height={12}
+                width={12}
               />
             )}
-            <Text fontSize={16} color="text3" ml={'x1'}>
+            <Text fontSize={12} color="text3">
               {chain.name}
             </Text>
           </Flex>
           <Text className={daoTokenName}>{currentAuction.token.name}</Text>
+          {bidText && (
+            <Flex gap="x2" mt="x1" align="center">
+              <Text fontSize={14} color="text3">
+                {bidText}
+              </Text>
+              {endTime && !isOver && (
+                <>
+                  <Text fontSize={14} color="text3">
+                    •
+                  </Text>
+                  <DashCountdown endTime={endTime} onEnd={onEnd} isOver={isOver} />{' '}
+                </>
+              )}
+            </Flex>
+          )}
         </Box>
       </Link>
-      <Flex className={statsBox}>
-        <Box className={stats}>
-          <Text fontSize={16} color="text3" mb={'x1'}>
-            Current Bid
-          </Text>
-          <Text fontSize={18} fontWeight="label" className={overflowEllipsis}>
-            {bidText}
-          </Text>
-        </Box>
-        <Box className={stats}>
-          <Text fontSize={16} color="text3" mb={'x1'}>
-            Ends In
-          </Text>
-          <DashCountdown endTime={endTime} onEnd={onEnd} isOver={isOver} />
-        </Box>
-      </Flex>
       <Flex className={bidBox}>
         <BidActionButton {...props} isOver={isOver} isEnded={isEnded} />
       </Flex>
@@ -160,7 +156,7 @@ const DashCountdown = ({
   const countdownText = !endTime || isOver ? 'N/A' : countdownString
   if (!isMounted) return null
   return (
-    <Text fontSize={18} fontWeight="label">
+    <Text fontSize={14} color="text3">
       {countdownText}
     </Text>
   )

@@ -26,3 +26,26 @@ export const skeletonCircle = style([
     flexShrink: 0,
   },
 ])
+
+export const skeletonContentHorizontal = style({
+  '@media': {
+    '(min-width: 480px)': {
+      display: 'flex',
+      flexDirection: 'row',
+      gap: space.x4,
+      alignItems: 'flex-start',
+    },
+  },
+})
+
+export const skeletonImage = style({
+  width: '100%',
+  aspectRatio: '1 / 1',
+  borderRadius: '12px',
+  '@media': {
+    '(min-width: 480px)': {
+      width: '240px',
+      flexShrink: 0,
+    },
+  },
+})

@@ -7,7 +7,12 @@ import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
 
-import { feedItemImage, feedItemSubtitle, feedItemTitle } from './Feed.css'
+import {
+  feedItemContentHorizontal,
+  feedItemImage,
+  feedItemSubtitle,
+  feedItemTitle,
+} from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
 
 interface AuctionBidPlacedItemProps {
@@ -19,8 +24,8 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
 
   return (
     <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
-      <Stack gap="x3" w="100%">
-        {/* Full-width image */}
+      <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
+        {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>
           <FallbackImage
             src={item.tokenImage}
@@ -30,8 +35,8 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
           />
         </Box>
 
-        {/* Content below image */}
-        <Stack gap="x2">
+        {/* Content - below image on mobile, to the right on desktop */}
+        <Stack gap="x2" style={{ flex: 1 }}>
           <Text className={feedItemTitle}>{item.tokenName} - Bid Placed</Text>
           <Flex align="center" gap="x1">
             <Text className={feedItemSubtitle}>Amount:</Text>

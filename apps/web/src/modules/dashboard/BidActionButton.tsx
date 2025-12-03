@@ -131,6 +131,7 @@ export const BidActionButton = ({
         position={'relative'}
         className={bidButton}
         chainId={chainId}
+        size="xs"
       >
         Bid
       </ContractButton>
