@@ -17,6 +17,7 @@ import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
 import { EscrowArgumentDisplay } from './EscrowArgumentDisplay'
 import { NFTArgumentDisplay } from './NFTArgumentDisplay'
 import { DecodedStreamBatch, StreamArgumentDisplay } from './StreamArgumentDisplay'
+import { PoolConfigArgumentDisplay } from './PoolConfigArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 
@@ -91,6 +92,14 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
         streamData={streamData}
       />
     )
+  }
+
+  // Check if this is a pool config argument for deploy functions
+  if (
+    (functionName === 'deploy' || functionName === 'deployCreatorCoin') &&
+    arg.name === 'poolConfig'
+  ) {
+    return <PoolConfigArgumentDisplay arg={arg} />
   }
 
   // Check if this is an escrow argument

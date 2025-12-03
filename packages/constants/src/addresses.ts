@@ -146,3 +146,15 @@ export const WETH_ADDRESS = {
 // Special address used to represent native ETH in some contexts (e.g., Escrow)
 export const NATIVE_TOKEN_ADDRESS: AddressType =
   '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' as AddressType
+
+// Currency addresses for creator coins
+export const ETH_ADDRESS: AddressType = '0x0000000000000000000000000000000000000000'
+export const ZORA_ADDRESS: AddressType = '0x1111111111166b7fe7bd91427724b487980afc69'
+export const TEST0_ADDRESS: AddressType = '0x0b0fdb7a0615726edc4f4436fbca96d36e0b87a6'
+export const TEST1_ADDRESS: AddressType = '0x00a7835d5a28f7fff70560d334ace7b2e5bfe3bf'
+
+// Builder Treasury addresses by chain (used as referral address)
+export const BUILDER_TREASURY_ADDRESS = {
+  [CHAIN_ID.BASE]: '0xcF325a4C78912216249B818521b0798A0f904C10' as AddressType,
+  [CHAIN_ID.BASE_SEPOLIA]: '0xc89e4075D630351355b8c0fEe452B414b77582Df' as AddressType,
+}

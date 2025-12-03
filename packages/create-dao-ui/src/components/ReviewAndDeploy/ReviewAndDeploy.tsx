@@ -7,7 +7,7 @@ import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { formatDuration } from '@buildeross/utils/formatDuration'
-import { isTestnetChain, toSeconds } from '@buildeross/utils/helpers'
+import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { atoms, Box, Flex, Icon } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -560,32 +560,29 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               </Flex>
             )}
 
-            {isTestnetChain(chain.id) && (
-              <Flex mt="x4">
-                <Flex align={'center'} justify={'center'} gap={'x4'}>
-                  <Flex
-                    align={'center'}
-                    justify={'center'}
-                    className={
-                      deployCheckboxStyleVariants[enableFastDAO ? 'confirmed' : 'default']
-                    }
-                    onClick={() => setEnableFastDAO((bool) => !bool)}
-                  >
-                    {enableFastDAO && <Icon fill="background1" id="check" />}
-                  </Flex>
+            <Flex mt="x4">
+              <Flex align={'center'} justify={'center'} gap={'x4'}>
+                <Flex
+                  align={'center'}
+                  justify={'center'}
+                  className={
+                    deployCheckboxStyleVariants[enableFastDAO ? 'confirmed' : 'default']
+                  }
+                  onClick={() => setEnableFastDAO((bool) => !bool)}
+                >
+                  {enableFastDAO && <Icon fill="background1" id="check" />}
+                </Flex>
 
-                  <Flex className={deployCheckboxHelperText}>
-                    <strong>Enable Fast DAO (testnet only):</strong> ultra-short timings
-                    for testing - {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)}{' '}
-                    auction (0 ETH reserve),{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period.{' '}
-                    <strong>Not for production.</strong>
-                  </Flex>
+                <Flex className={deployCheckboxHelperText}>
+                  <strong>Enable Fast DAO (testnet only):</strong> ultra-short timings for
+                  testing - {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0
+                  ETH reserve), {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)}{' '}
+                  timelock, {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
+                  {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period.{' '}
+                  <strong>Not for production.</strong>
                 </Flex>
               </Flex>
-            )}
+            </Flex>
 
             {deploymentError && (
               <Flex mt={'x4'} color="negative">

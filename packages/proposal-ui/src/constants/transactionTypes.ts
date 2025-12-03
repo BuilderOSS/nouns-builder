@@ -130,4 +130,16 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     icon: 'sablier',
     iconBackdrop: 'rgba(243, 139, 0, 0.1)',
   },
+  [TransactionType.CREATOR_COIN]: {
+    title: 'Creator Coin',
+    subTitle: 'Create a proposal to mint Creator Coin',
+    icon: 'collection',
+    iconBackdrop: 'rgba(0, 163, 255, 0.1)',
+  },
+  [TransactionType.CONTENT_COIN]: {
+    title: 'Content Coin',
+    subTitle: 'Create a proposal to mint Content Coin',
+    icon: 'collection',
+    iconBackdrop: 'rgba(0, 163, 255, 0.1)',
+  },
 }

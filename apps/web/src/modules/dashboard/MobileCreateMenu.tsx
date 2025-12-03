@@ -24,6 +24,11 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
 
+  const handleCreatePost = () => {
+    setActionType('post')
+    setSelectorOpen(true)
+  }
+
   const handleCreateProposal = () => {
     setActionType('proposal')
     setSelectorOpen(true)
@@ -35,6 +40,16 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
         <Text className={createMenuTitle}>What would you like to create?</Text>
 
         <div className={createMenuGrid}>
+          <button className={createMenuCard} onClick={handleCreatePost} type="button">
+            <Icon id="brush" className={createMenuCardIcon} />
+            <Text fontSize="18" fontWeight="label">
+              Create Post
+            </Text>
+            <Text fontSize="14" color="text3">
+              Share updates and content with your DAO community
+            </Text>
+          </button>
+
           <button className={createMenuCard} onClick={handleCreateProposal} type="button">
             <Icon id="checkInCircle" className={createMenuCardIcon} />
             <Text fontSize="18" fontWeight="label">
