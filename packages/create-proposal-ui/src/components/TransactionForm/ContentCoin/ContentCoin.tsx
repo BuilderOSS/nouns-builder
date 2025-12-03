@@ -31,18 +31,18 @@ const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 // Default minimum Fully Diluted Valuation (FDV) in USD for pool config calculations
 const DEFAULT_MIN_FDV_USD = 10000 // $10k minimum FDV
 
-export interface CreatorCoinProps {
+export interface ContentCoinProps {
   initialValues?: Partial<CoinFormValues>
   onSubmitSuccess?: () => void
   showMediaUpload?: boolean
   showProperties?: boolean
 }
 
-export const CreatorCoin: React.FC<CreatorCoinProps> = ({
+export const ContentCoin: React.FC<ContentCoinProps> = ({
   initialValues: providedInitialValues,
   onSubmitSuccess,
-  showMediaUpload = false,
-  showProperties = false,
+  showMediaUpload = true,
+  showProperties = true,
 }) => {
   const { treasury } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
@@ -94,7 +94,7 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
 
     if (!factoryAddress) {
       setSubmitError(
-        `Creator coins are only supported on Base and Base Sepolia. Current chain: ${chain.name}`
+        `Content coins are only supported on Base and Base Sepolia. Current chain: ${chain.name}`
       )
       actions.setSubmitting(false)
       return
@@ -164,10 +164,10 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
         BUILDER_TREASURY_ADDRESS[chain.id as keyof typeof BUILDER_TREASURY_ADDRESS] ||
         zeroAddress
 
-      // 7. Encode the contract call using Zora's ABI
+      // 7. Encode the contract call using Zora's ABI with deploy function
       const calldata = encodeFunctionData({
         abi: coinFactoryConfig.abi,
-        functionName: 'deployCreatorCoin',
+        functionName: 'deploy',
         args: [
           treasury as Address, // payoutRecipient
           [treasury as Address], // owners array
@@ -176,6 +176,8 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
           values.symbol, // symbol
           encodedPoolConfig, // poolConfig
           builderTreasuryAddress as Address, // platformReferrer (Builder treasury for referral, or zero address)
+          zeroAddress, // postDeployHook (no hook for content coins)
+          '0x', // postDeployHookData (empty bytes)
           zeroHash, // coinSalt (can be customized if needed)
         ],
       })
@@ -184,15 +186,15 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
       const transaction = {
         target: factoryAddress,
         functionSignature:
-          'deployCreatorCoin(address,address[],string,string,string,bytes,address,bytes32)',
+          'deploy(address,address[],string,string,string,bytes,address,address,bytes,bytes32)',
         calldata,
         value: '0',
       }
 
       // 9. Add transaction to proposal queue
       addTransaction({
-        type: TransactionType.CREATOR_COIN,
-        summary: `Create ${values.symbol} Creator Coin`,
+        type: TransactionType.CONTENT_COIN,
+        summary: `Create ${values.symbol} Content Coin`,
         transactions: [transaction],
       })
 
@@ -204,7 +206,7 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
         onSubmitSuccess()
       }
     } catch (error) {
-      console.error('Error creating creator coin transaction:', error)
+      console.error('Error creating content coin transaction:', error)
       setSubmitError(
         error instanceof Error ? error.message : 'Failed to create transaction'
       )
@@ -226,8 +228,8 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
-              Creator coins are currently only supported on Base and Base Sepolia
-              networks. Please switch to a supported network to create a creator coin.
+              Content coins are currently only supported on Base and Base Sepolia
+              networks. Please switch to a supported network to create a content coin.
             </Text>
           </Stack>
         </Box>
@@ -257,9 +259,9 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
             >
               <Flex as={Form} direction="column" gap="x6">
                 <Stack gap="x4">
-                  <Text variant="heading-sm">Create Creator Coin</Text>
+                  <Text variant="heading-sm">Create Content Coin</Text>
                   <Text variant="paragraph-md" color="text3">
-                    Configure your creator coin metadata and add the transaction to the
+                    Configure your content coin metadata and add the transaction to the
                     proposal queue.
                   </Text>
                 </Stack>
