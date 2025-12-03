@@ -3,6 +3,7 @@ import { ReactNode } from 'react'
 
 import { AddArtwork } from './AddArtwork'
 import { Airdrop } from './Airdrop'
+import { ContentCoin } from './ContentCoin'
 import { CreatorCoin } from './CreatorCoin'
 import { CustomTransaction } from './CustomTransaction'
 import { Droposal } from './Droposal'
@@ -62,7 +63,7 @@ export const TransactionForm = ({ type }: TransactionFormProps) => {
     [TransactionType.REPLACE_ARTWORK]: <ReplaceArtwork />,
     [TransactionType.MIGRATION]: <Migration />,
     [TransactionType.CREATOR_COIN]: <CreatorCoin />,
-    [TransactionType.CONTENT_COIN]: <CustomTransaction />,
+    [TransactionType.CONTENT_COIN]: <ContentCoin />,
   }
 
   return <>{FORMS[type]}</>
