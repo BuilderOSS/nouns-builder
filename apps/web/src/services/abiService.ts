@@ -147,15 +147,19 @@ export const decodeTransaction = async (
   contract: string,
   calldata: string
 ): Promise<DecodedTransactionData> => {
-  const { abi: abiJsonString } = await getContractABIByAddress(chainId, contract, {
-    skipImplementationCheck: true,
-  })
-
-  let abi = JSON.parse(abiJsonString) as Abi
+  let abi: Abi | undefined = undefined
+  try {
+    const { abi: abiJsonString } = await getContractABIByAddress(chainId, contract, {
+      skipImplementationCheck: true,
+    })
+    abi = JSON.parse(abiJsonString) as Abi
+  } catch (error) {
+    console.error(`Error fetching ABI for ${contract} without implementation check`)
+  }
 
   const functionSelector = calldata.slice(0, 10)
 
-  const abiHasSig = abi.some(
+  const abiHasSig = abi?.some(
     (item) => item.type === 'function' && toFunctionSelector(item) === functionSelector
   )
 
@@ -166,7 +170,11 @@ export const decodeTransaction = async (
     abi = JSON.parse(implAbiJsonString) as Abi
   }
 
-  let decodeResult: DecodeFunctionDataReturnType<typeof abi>
+  if (!abi) {
+    throw new NotFoundError('ABI not found')
+  }
+
+  let decodeResult: DecodeFunctionDataReturnType<Abi>
   try {
     decodeResult = decodeFunctionData({ abi, data: calldata as Hex })
   } catch (error) {

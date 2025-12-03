@@ -417,7 +417,7 @@ export const getCachedTokenMetadatas = async (
   }
 }
 
-const getCachedTokenPrices = async (
+export const getCachedTokenPrices = async (
   chainId: CHAIN_ID,
   addresses: AddressType[]
 ): Promise<CachedResult<TokenPrice[]> | null> => {

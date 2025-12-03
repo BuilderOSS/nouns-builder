@@ -56,7 +56,10 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   }
 
   const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = (e) => {
-    if (e.key === 'Enter') triggerSearch()
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      triggerSearch()
+    }
   }
 
   return (
