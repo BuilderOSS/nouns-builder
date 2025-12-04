@@ -1,4 +1,7 @@
-import { addressValidationSchema } from '@buildeross/utils/yup'
+import {
+  addressValidationSchema,
+  bigIntStringValidationSchema,
+} from '@buildeross/utils/yup'
 import * as Yup from 'yup'
 
 export const allocationSchema = Yup.object({
@@ -32,7 +35,7 @@ export const validationSchemaContributions = Yup.object({
   }),
 })
 
-export const validationSchemaFounderAllocation = (signerAddress: string | null) =>
+export const validationSchemaAllocations = (signerAddress: string | null) =>
   Yup.object({
     founderAllocation: Yup.array()
       .of(allocationSchema)
@@ -68,4 +71,5 @@ export const validationSchemaFounderAllocation = (signerAddress: string | null) 
       .min(0, 'Percentage must be at least 0%')
       .max(1000, 'Percentage must be at most 10%')
       .default(0),
+    reservedUntilTokenId: bigIntStringValidationSchema,
   })
