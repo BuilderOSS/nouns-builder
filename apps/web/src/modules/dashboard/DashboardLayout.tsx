@@ -1,6 +1,6 @@
 import type { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useState } from 'react'
 import { useAccount } from 'wagmi'
 
 import { MobileBottomNav, type MobileTab } from '../../components/MobileBottomNav'
@@ -20,8 +20,20 @@ export const DashboardLayout = ({
   const [activeTab, setActiveTab] = useState<MobileTab>('feed')
   const { address } = useAccount()
 
+  // Reset to feed view when user disconnects
+  useEffect(() => {
+    if (!address) {
+      setActiveTab('feed')
+    }
+  }, [address])
+
   // Determine what to show on mobile based on active tab
   const mobileContent = () => {
+    // Always show feed if not connected
+    if (!address) {
+      return mainContent
+    }
+
     switch (activeTab) {
       case 'feed':
         return mainContent
@@ -71,8 +83,8 @@ export const DashboardLayout = ({
         {/* Mobile: Tab-based content */}
         <Box className={styles.mobileLayout}>{mobileContent()}</Box>
 
-        {/* Mobile bottom navigation */}
-        <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Mobile bottom navigation - only show when connected */}
+        {address && <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />}
       </Box>
     </Flex>
   )

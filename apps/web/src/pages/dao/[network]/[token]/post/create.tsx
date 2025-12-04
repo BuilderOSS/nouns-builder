@@ -1,12 +1,30 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 
 import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
 
-export default function CreatePostPage() {
+interface CreatePostPageProps {
+  daoName: string
+  collectionAddress: AddressType
+  auctionAddress: AddressType
+  chainId: CHAIN_ID
+  network: string
+}
+
+export default function CreatePostPage({
+  daoName,
+  collectionAddress,
+  auctionAddress,
+  chainId,
+  network,
+}: CreatePostPageProps) {
   const router = useRouter()
-  const { network, token } = router.query
   const [postContent, setPostContent] = useState('')
 
   const handleCancel = () => {
@@ -17,7 +35,7 @@ export default function CreatePostPage() {
     e.preventDefault()
     // TODO: Implement post creation logic
     // eslint-disable-next-line no-console
-    console.log('Create post:', { network, token, postContent })
+    console.log('Create post:', { network, collectionAddress, postContent })
   }
 
   return (
@@ -35,7 +53,7 @@ export default function CreatePostPage() {
               </Text>
             </Box>
 
-            {/* DAO Context - TODO: Fetch and display actual DAO info */}
+            {/* DAO Context */}
             <Box
               borderRadius="curved"
               borderStyle="solid"
@@ -43,9 +61,22 @@ export default function CreatePostPage() {
               borderColor="border"
               p="x4"
             >
-              <Text fontSize="14" color="text3">
-                Posting to: <strong>{token as string}</strong> on {network as string}
-              </Text>
+              <Flex align="center" gap="x3">
+                <DaoAvatar
+                  collectionAddress={collectionAddress}
+                  auctionAddress={auctionAddress}
+                  chainId={chainId}
+                  size="48"
+                />
+                <Stack gap="x1">
+                  <Text fontSize="16" fontWeight="label">
+                    Posting to {daoName}
+                  </Text>
+                  <Text fontSize="14" color="text3">
+                    {network}
+                  </Text>
+                </Stack>
+              </Flex>
             </Box>
 
             {/* Form */}
@@ -118,4 +149,37 @@ export default function CreatePostPage() {
       </Flex>
     </DefaultLayout>
   )
+}
+
+export const getServerSideProps: GetServerSideProps<CreatePostPageProps> = async ({
+  params,
+}) => {
+  const token = params?.token as AddressType
+  const network = params?.network as string
+
+  try {
+    const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
+    if (!chain) throw new Error('Invalid network')
+
+    // Fetch DAO metadata using the daoOGMetadata query
+    const dao = await daoOGMetadataRequest(chain.id, token)
+
+    if (!dao) throw new Error('DAO not found')
+
+    const props: CreatePostPageProps = {
+      daoName: dao.name,
+      collectionAddress: token,
+      auctionAddress: dao.auctionAddress as AddressType,
+      chainId: chain.id,
+      network: chain.name,
+    }
+
+    return {
+      props,
+    }
+  } catch (e) {
+    return {
+      notFound: true,
+    }
+  }
 }

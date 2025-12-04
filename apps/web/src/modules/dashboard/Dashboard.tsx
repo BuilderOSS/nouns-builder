@@ -1,5 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { Feed } from '@buildeross/feed-ui'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
 import {
   CurrentAuctionFragment,
@@ -90,6 +91,7 @@ export type DashboardProps = {
 
 export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
   const { address } = useAccount()
+  const { displayName, ensAvatar } = useEnsData(address || '')
 
   const {
     data: daos,
@@ -161,7 +163,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
       <Stack gap="x4">
         {address && (
           <>
-            <UserProfileCard address={address} daoCount={0} />
+            <UserProfileCard
+              address={address}
+              daoCount={0}
+              ensName={displayName}
+              ensAvatar={ensAvatar}
+            />
             <CreateActions userAddress={address} />
           </>
         )}
@@ -181,7 +188,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
       <Stack gap="x4">
         {address && (
           <>
-            <UserProfileCard address={address} daoCount={0} />
+            <UserProfileCard
+              address={address}
+              daoCount={0}
+              ensName={displayName}
+              ensAvatar={ensAvatar}
+            />
             <CreateActions userAddress={address} />
           </>
         )}
@@ -209,7 +221,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
   } else if (!daos?.length) {
     sidebarContent = (
       <Stack gap="x4">
-        <UserProfileCard address={address} daoCount={0} />
+        <UserProfileCard
+          address={address}
+          daoCount={0}
+          ensName={displayName}
+          ensAvatar={ensAvatar}
+        />
         <CreateActions userAddress={address} />
         <Box>
           <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
@@ -224,7 +241,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
   } else {
     sidebarContent = (
       <Stack gap="x4">
-        <UserProfileCard address={address} daoCount={daos.length} />
+        <UserProfileCard
+          address={address}
+          daoCount={daos.length}
+          ensName={displayName}
+          ensAvatar={ensAvatar}
+        />
         <CreateActions userAddress={address} />
         <Box>
           <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
