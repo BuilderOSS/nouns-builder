@@ -22,7 +22,7 @@ interface AuctionBidPlacedItemProps {
 
 export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item }) => {
   const { getAuctionLink } = useLinks()
-  const { displayName } = useEnsData(item.actor)
+  const { displayName } = useEnsData(item.bidder)
 
   const formattedAmount = formatCryptoVal(formatEther(BigInt(item.amount)))
 

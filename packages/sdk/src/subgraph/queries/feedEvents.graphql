@@ -108,11 +108,11 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         id
         token {
           tokenId
+          owner
           name
           image
         }
       }
-      winner
       amount
     }
   }

@@ -149,7 +149,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         tokenId: event.auction.token.tokenId.toString(),
         tokenName: event.auction.token.name,
         tokenImage: event.auction.token.image || '',
-        winner: event.winner,
+        winner: event.auction.token.owner,
         amount: event.amount.toString(),
       }
     }

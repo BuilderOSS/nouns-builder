@@ -6,7 +6,7 @@ import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import { formatEther } from 'viem'
+import { formatEther, zeroAddress } from 'viem'
 
 import { feedItemContentHorizontal, feedItemImage, feedItemTitle } from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
@@ -21,6 +21,13 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
 
   const formattedAmount =
     BigInt(item.amount) > 0n ? formatCryptoVal(formatEther(BigInt(item.amount))) : null
+
+  const winnerTitle = formattedAmount
+    ? `${displayName} won ${item.tokenName} for ${formattedAmount} ETH`
+    : `${displayName} won ${item.tokenName}`
+
+  const title =
+    item.winner === zeroAddress ? `Auction for ${item.tokenName} settled` : winnerTitle
 
   return (
     <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
@@ -37,10 +44,7 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
 
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
-          <Text className={feedItemTitle}>
-            {displayName} won {item.tokenName}{' '}
-            {formattedAmount && `for ${formattedAmount} ETH`}
-          </Text>
+          <Text className={feedItemTitle}>{title}</Text>
         </Stack>
       </Stack>
     </LinkWrapper>

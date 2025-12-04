@@ -19,7 +19,7 @@ interface ProposalVotedItemProps {
 
 export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
-  const { displayName } = useEnsData(item.actor)
+  const { displayName } = useEnsData(item.voter)
 
   const reason = item.reason?.trim()
 

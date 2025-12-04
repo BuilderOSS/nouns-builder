@@ -19,7 +19,7 @@ interface ProposalCreatedItemProps {
 
 export const ProposalCreatedItem: React.FC<ProposalCreatedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
-  const { displayName } = useEnsData(item.actor)
+  const { displayName } = useEnsData(item.proposer)
 
   const description = item.proposalDescription?.trim()
 
