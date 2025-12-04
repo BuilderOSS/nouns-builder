@@ -30,7 +30,7 @@ export const AuctionCreatedItem: React.FC<AuctionCreatedItemProps> = ({ item }) 
 
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
-          <Text className={feedItemTitle}>{item.tokenName} - Auction Started</Text>
+          <Text className={feedItemTitle}>New auction for {item.tokenName}</Text>
         </Stack>
       </Stack>
     </LinkWrapper>

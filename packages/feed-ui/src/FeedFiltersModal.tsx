@@ -6,7 +6,7 @@ import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import { useFormik } from 'formik'
 import React, { useMemo } from 'react'
 
-import { CustomDaoSelector } from './CustomDaoSelector'
+import { CustomDaoSelector, type SelectedDaoMetadata } from './CustomDaoSelector'
 import {
   chainIcon,
   filterGrid,
@@ -30,11 +30,13 @@ export interface FeedFiltersModalProps {
   eventTypes: FeedEventType[]
   daoFilterMode: DaoFilterMode
   daoAddresses: AddressType[]
+  selectedDaos: SelectedDaoMetadata[]
   onApply: (values: {
     chainIds: CHAIN_ID[]
     eventTypes: FeedEventType[]
     daoFilterMode: DaoFilterMode
     daoAddresses: AddressType[]
+    selectedDaos: SelectedDaoMetadata[]
   }) => void
   userAddress?: AddressType
 }
@@ -56,6 +58,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   eventTypes,
   daoFilterMode,
   daoAddresses,
+  selectedDaos,
   onApply,
   userAddress,
 }) => {
@@ -65,7 +68,9 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
       eventTypes,
       daoFilterMode,
       daoAddresses,
+      selectedDaos,
     },
+    enableReinitialize: true,
     onSubmit: (values) => {
       onApply(values)
       onClose()
@@ -107,6 +112,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
       eventTypes: [],
       daoFilterMode: 'all',
       daoAddresses: [],
+      selectedDaos: [],
     })
   }
 
@@ -245,9 +251,11 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
                 <CustomDaoSelector
                   chainIds={formik.values.chainIds}
                   selectedDaoAddresses={formik.values.daoAddresses}
-                  onSelectedDaosChange={(addresses) =>
+                  selectedDaosMetadata={formik.values.selectedDaos}
+                  onSelectedDaosChange={(addresses, metadata) => {
                     formik.setFieldValue('daoAddresses', addresses)
-                  }
+                    formik.setFieldValue('selectedDaos', metadata)
+                  }}
                   userAddress={userAddress}
                 />
               )}

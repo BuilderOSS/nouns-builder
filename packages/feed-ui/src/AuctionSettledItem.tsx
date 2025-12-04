@@ -1,18 +1,14 @@
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { AuctionSettledFeedItem } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
 
-import {
-  feedItemContentHorizontal,
-  feedItemImage,
-  feedItemSubtitle,
-  feedItemTitle,
-} from './Feed.css'
+import { feedItemContentHorizontal, feedItemImage, feedItemTitle } from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
 
 interface AuctionSettledItemProps {
@@ -21,6 +17,10 @@ interface AuctionSettledItemProps {
 
 export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) => {
   const { getAuctionLink } = useLinks()
+  const { displayName } = useEnsData(item.winner)
+
+  const formattedAmount =
+    BigInt(item.amount) > 0n ? formatCryptoVal(formatEther(BigInt(item.amount))) : null
 
   return (
     <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
@@ -37,22 +37,10 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
 
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
-          <Text className={feedItemTitle}>{item.tokenName} - Auction Settled</Text>
-          <Flex align="center" gap="x1">
-            <Text className={feedItemSubtitle}>Winning bid:</Text>
-            <img
-              src="/chains/ethereum.svg"
-              alt="ETH"
-              loading="lazy"
-              decoding="async"
-              width={12}
-              height={12}
-              style={{ maxWidth: '12px', maxHeight: '12px', objectFit: 'contain' }}
-            />
-            <Text className={feedItemSubtitle}>
-              {formatCryptoVal(formatEther(BigInt(item.amount)))} ETH
-            </Text>
-          </Flex>
+          <Text className={feedItemTitle}>
+            {displayName} won {item.tokenName}{' '}
+            {formattedAmount && `for ${formattedAmount} ETH`}
+          </Text>
         </Stack>
       </Stack>
     </LinkWrapper>

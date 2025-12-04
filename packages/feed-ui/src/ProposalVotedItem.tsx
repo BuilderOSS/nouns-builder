@@ -1,8 +1,9 @@
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { ProposalVotedFeedItem } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { Box, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import {
@@ -18,8 +19,23 @@ interface ProposalVotedItemProps {
 
 export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
+  const { displayName } = useEnsData(item.actor)
 
   const reason = item.reason?.trim()
+
+  // Color mapping for vote support
+  const getVoteColor = (support: string) => {
+    switch (support) {
+      case 'FOR':
+        return 'positive'
+      case 'AGAINST':
+        return 'negative'
+      case 'ABSTAIN':
+        return 'tertiary'
+      default:
+        return 'text1'
+    }
+  }
 
   return (
     <LinkWrapper
@@ -27,9 +43,11 @@ export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) =>
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
-          <Text className={feedItemTitle}>
-            Proposal #{item.proposalNumber} - Vote Cast: {item.support} ({item.weight})
-          </Text>
+          <Flex className={feedItemTitle} gap="x1" align="center" wrap="wrap">
+            <Text>{displayName} voted</Text>
+            <Text color={getVoteColor(item.support)}>{item.support}</Text>
+            <Text>with {item.weight} votes</Text>
+          </Flex>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
           {reason && (
             <Box className={feedItemTextContentWrapper}>

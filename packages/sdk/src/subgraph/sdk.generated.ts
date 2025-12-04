@@ -5079,11 +5079,17 @@ export type ExploreDaosSearchQuery = {
     description: string
     projectURI: string
     tokenAddress: any
-    auctions: Array<{
-      __typename?: 'Auction'
-      endTime: any
-      highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
-      token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
+    tokens: Array<{
+      __typename?: 'Token'
+      tokenId: any
+      name: string
+      image?: string | null
+      auction?: {
+        __typename?: 'Auction'
+        endTime: any
+        settled: boolean
+        highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+      } | null
     }>
   }>
 }
@@ -6071,17 +6077,21 @@ export const ExploreDaosSearchDocument = gql`
       description
       projectURI
       tokenAddress
-      auctions(
-        first: 1
-        orderBy: endTime
-        orderDirection: desc
-        where: { settled: false }
-      ) {
-        ...CurrentAuction
+      tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
+        tokenId
+        name
+        image
+        auction {
+          endTime
+          settled
+          highestBid {
+            amount
+            bidder
+          }
+        }
       }
     }
   }
-  ${CurrentAuctionFragmentDoc}
 `
 export const DaoVotersDocument = gql`
   query daoVoters(

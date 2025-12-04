@@ -10,8 +10,18 @@ query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_f
     description
     projectURI
     tokenAddress
-    auctions(first: 1, orderBy: endTime, orderDirection: desc, where: { settled: false }) {
-      ...CurrentAuction
+    tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
+      tokenId
+      name
+      image
+      auction {
+        endTime
+        settled
+        highestBid {
+          amount
+          bidder
+        }
+      }
     }
   }
 }

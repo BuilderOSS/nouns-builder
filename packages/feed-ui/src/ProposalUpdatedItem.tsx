@@ -1,3 +1,4 @@
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { usePropdateMessage } from '@buildeross/hooks/usePropdateMessage'
 import type { ProposalUpdatePostedFeedItem } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -19,6 +20,7 @@ interface ProposalUpdatedItemProps {
 
 export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
+  const { displayName } = useEnsData(item.actor)
   const { parsedContent, isLoading } = usePropdateMessage(item.messageType, item.message)
 
   const displayContent = isLoading ? '' : parsedContent
@@ -29,9 +31,7 @@ export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
-          <Text className={feedItemTitle}>
-            Proposal #{item.proposalNumber} - Update Posted
-          </Text>
+          <Text className={feedItemTitle}>{displayName} posted an update</Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
           {displayContent && (
             <Box className={feedItemTextContentWrapper}>

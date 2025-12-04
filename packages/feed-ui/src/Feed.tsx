@@ -96,12 +96,19 @@ export const Feed: React.FC<FeedProps> = (props) => {
       eventTypes: FeedEventType[]
       daoFilterMode: 'all' | 'specific'
       daoAddresses: AddressType[]
+      selectedDaos: Array<{
+        address: AddressType
+        name: string
+        image: string
+        chainId: CHAIN_ID
+      }>
     }) => {
       if (!externalFilterMode) {
         filterStore.setChainIds(values.chainIds)
         filterStore.setEventTypes(values.eventTypes)
         filterStore.setDaoFilterMode(values.daoFilterMode)
         filterStore.setDaoAddresses(values.daoAddresses)
+        filterStore.setSelectedDaos(values.selectedDaos)
       }
     },
     [externalFilterMode, filterStore]
@@ -158,8 +165,8 @@ export const Feed: React.FC<FeedProps> = (props) => {
 
   return (
     <Flex w="100%" justify="center" direction="column" align="center">
-      {/* Customize Feed button - only shown in internal filter mode */}
-      {!externalFilterMode && (
+      {/* Customize Feed button - only shown in internal filter mode and when user is connected */}
+      {!externalFilterMode && address && (
         <Flex w="100%" justify="flex-end" style={{ maxWidth: '1440px' }} pb="x4">
           <Button
             variant="outline"
@@ -229,6 +236,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
           eventTypes={filterStore.eventTypes}
           daoFilterMode={filterStore.daoFilterMode}
           daoAddresses={filterStore.daoAddresses}
+          selectedDaos={filterStore.selectedDaos}
           onApply={handleApplyFilters}
           userAddress={address}
         />
