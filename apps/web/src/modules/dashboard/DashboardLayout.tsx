@@ -41,8 +41,8 @@ export const DashboardLayout = ({
         <Flex
           justify="space-between"
           align="center"
-          mb={'x12'}
-          px={{ '@initial': 'x4', '@1024': 'x12' }}
+          mb={'x8'}
+          px={{ '@initial': 'x0', '@1024': 'x8' }}
           className={styles.desktopOnly}
         >
           <Text fontSize={35} fontWeight={'display'}>
@@ -54,6 +54,7 @@ export const DashboardLayout = ({
         <Flex
           gap="x8"
           direction={{ '@initial': 'column', '@1024': 'row' }}
+          px={{ '@initial': 'x0', '@1024': 'x8' }}
           className={styles.desktopLayout}
         >
           {/* Main content */}

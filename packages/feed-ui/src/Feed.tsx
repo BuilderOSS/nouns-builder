@@ -149,7 +149,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
   if (isLoading) {
     return (
       <Flex w="100%" justify="center">
-        <Stack gap="x4" w="100%" style={{ maxWidth: '1440px' }} py="x4">
+        <Stack gap="x4" w="100%" style={{ maxWidth: '1440px' }} pb="x4">
           <FeedSkeleton />
         </Stack>
       </Flex>
@@ -173,7 +173,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
         </Flex>
       )}
 
-      <Stack gap="x4" w="100%" py="x4" style={{ maxWidth: '1440px' }}>
+      <Stack gap="x4" w="100%" pb="x4" style={{ maxWidth: '1440px' }}>
         {items.length === 0 && (
           <Text color="tertiary" textAlign="center" w="100%">
             {!externalFilterMode && filterStore.hasActiveFilters()

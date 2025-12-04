@@ -27,7 +27,7 @@ export default function CreatePostPage() {
           <Stack gap="x6">
             {/* Header */}
             <Box>
-              <Text fontSize="32" fontWeight="display" mb="x2">
+              <Text fontSize="35" fontWeight="display" mb="x2">
                 Create Post
               </Text>
               <Text fontSize="16" color="text3">
