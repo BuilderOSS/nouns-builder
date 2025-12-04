@@ -158,7 +158,7 @@ export const useFormStore = create(
     {
       name: `nouns-builder-create-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`,
       storage: createJSONStorage(() => localStorage),
-      version: 0,
+      version: 1,
     }
   )
 )
