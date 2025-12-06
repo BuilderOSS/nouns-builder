@@ -33,7 +33,6 @@ export const desktopLayout = style({
 
 export const mobileLayout = style({
   display: 'block',
-  paddingBottom: '80px', // Space for bottom nav
   '@media': {
     '(min-width: 1024px)': {
       display: 'none',

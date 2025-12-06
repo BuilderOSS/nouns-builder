@@ -3,20 +3,8 @@ import { atoms, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const outerAuctionCard = style([
-  {
-    '@media': {
-      'screen and (max-width: 768px)': {
-        gap: '12px',
-      },
-      'screen and (min-width: 1024px)': {
-        gap: '12px',
-      },
-    },
-  },
   atoms({
     width: '100%',
-    alignItems: 'center',
-    flexDirection: 'row',
     marginBottom: 'x3',
     borderColor: 'border',
     borderStyle: 'solid',
@@ -80,19 +68,10 @@ export const daoAvatarBox = style({
   height: '48px',
 })
 
-export const auctionCardBrand = style([
-  {
-    flex: 1,
-    minWidth: 0,
-  },
-  atoms({
-    alignItems: 'center',
-  }),
-])
-
 export const stats = style({
   width: '50%',
 })
+
 export const statsBox = style({
   width: '30%',
   '@media': {
@@ -108,22 +87,10 @@ export const statsBox = style({
   },
 })
 
-export const bidBox = style([
-  {
-    flexShrink: 0,
-  },
-  atoms({
-    marginLeft: 'auto',
-  }),
-])
-
-export const bidForm = style({
-  width: '75%',
+export const bidBox = style({
+  width: '100%',
 })
 
-export const bidButton = style({
-  width: '25%',
-})
 export const bidInput = style([
   {
     outline: 'none',
@@ -138,10 +105,10 @@ export const bidInput = style([
   atoms({
     borderWidth: 'none',
     borderRadius: 'curved',
-    height: 'x12',
+    height: 'x10',
     width: '100%',
-    paddingLeft: 'x4',
-    paddingRight: 'x11',
+    paddingLeft: 'x3',
+    paddingRight: 'x10',
     backgroundColor: 'background2',
     fontSize: 14,
     lineHeight: 24,

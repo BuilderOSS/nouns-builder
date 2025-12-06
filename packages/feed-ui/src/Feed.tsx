@@ -89,6 +89,9 @@ export const Feed: React.FC<FeedProps> = (props) => {
     onError,
   })
 
+  const hideActor = !!actor
+  const hideDao = externalFilterMode && !!(actualDaos && actualDaos.length > 0)
+
   // Filter modal handlers (only used in internal mode)
   const handleApplyFilters = useCallback(
     (values: {
@@ -180,7 +183,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
         </Flex>
       )}
 
-      <Stack gap="x4" w="100%" pb="x4" style={{ maxWidth: '1440px' }}>
+      <Stack gap="x6" w="100%" pb="x4" style={{ maxWidth: '1440px' }}>
         {items.length === 0 && (
           <Text color="tertiary" textAlign="center" w="100%">
             {!externalFilterMode && filterStore.hasActiveFilters()
@@ -195,8 +198,8 @@ export const Feed: React.FC<FeedProps> = (props) => {
               <FeedItem
                 key={item.id}
                 item={item}
-                hideActor={!!actor}
-                hideDao={!!(actualDaos && actualDaos.length > 0)}
+                hideActor={hideActor}
+                hideDao={hideDao}
               />
             ))}
 

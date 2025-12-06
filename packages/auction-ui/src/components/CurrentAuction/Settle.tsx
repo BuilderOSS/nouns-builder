@@ -64,6 +64,7 @@ export const Settle = ({
           disabled
           className={auctionActionButtonVariants['settling']}
           size={compact ? 'sm' : 'lg'}
+          px={compact ? 'x2' : undefined}
         >
           Auction ending
         </Button>
@@ -83,6 +84,7 @@ export const Settle = ({
           }
           variant={compact ? 'outline' : 'primary'}
           size={compact ? 'sm' : 'lg'}
+          px={compact ? 'x2' : undefined}
         >
           Settling
         </Button>
@@ -101,6 +103,7 @@ export const Settle = ({
         }
         variant={compact ? 'outline' : 'primary'}
         size={compact ? 'sm' : 'lg'}
+        px={compact ? 'x2' : undefined}
         chainId={chainId}
       >
         {buttonText}

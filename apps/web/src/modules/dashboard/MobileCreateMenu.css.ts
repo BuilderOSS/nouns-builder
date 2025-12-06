@@ -5,10 +5,6 @@ export const createMenuContainer = style([
   atoms({
     padding: 'x6',
   }),
-  {
-    height: '100%',
-    overflowY: 'auto',
-  },
 ])
 
 export const createMenuTitle = style({

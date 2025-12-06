@@ -4,7 +4,7 @@ import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { maxChar } from '@buildeross/utils/helpers'
-import { Box, Button } from '@buildeross/zord'
+import { Box, Button, Flex } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Address, parseEther } from 'viem'
@@ -12,7 +12,7 @@ import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { DashboardDaoProps } from './Dashboard'
-import { bidButton, bidForm, bidInput, minButton } from './dashboard.css'
+import { bidInput, minButton } from './dashboard.css'
 
 export const BidActionButton = ({
   chainId,
@@ -93,9 +93,9 @@ export const BidActionButton = ({
   }
 
   return (
-    <>
-      <form className={bidForm}>
-        <Box position="relative" mr={'x2'}>
+    <Flex align="center" gap="x2">
+      <form>
+        <Box position="relative">
           <input
             className={bidInput}
             placeholder={maxChar(`${minBidAmount} ETH`, 12)}
@@ -124,17 +124,16 @@ export const BidActionButton = ({
         </Box>
       </form>
       <ContractButton
-        borderRadius={'curved'}
         disabled={!isValidBid}
         loading={isLoading}
         handleClick={handleCreateBid}
-        position={'relative'}
-        className={bidButton}
         chainId={chainId}
-        size="xs"
+        size="sm"
+        px="x4"
+        style={{ minWidth: 0 }}
       >
         Bid
       </ContractButton>
-    </>
+    </Flex>
   )
 }

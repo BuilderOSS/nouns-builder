@@ -10,10 +10,12 @@ export function DefaultLayout({
   children,
   chain,
   addresses,
+  hideFooterOnMobile = false,
 }: {
   children: ReactNode
   chain?: Chain
   addresses?: DaoContractAddresses
+  hideFooterOnMobile?: boolean
 }) {
   return (
     <BaseLayout
@@ -21,7 +23,7 @@ export function DefaultLayout({
       addresses={addresses}
       px={'x4'}
       pt={'x20'}
-      footer={<Footer />}
+      footer={<Footer hideOnMobile={hideFooterOnMobile} />}
     >
       {children}
     </BaseLayout>

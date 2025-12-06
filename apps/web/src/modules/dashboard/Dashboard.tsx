@@ -1,3 +1,4 @@
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { Feed } from '@buildeross/feed-ui'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
@@ -9,6 +10,7 @@ import {
   ProposalFragment,
 } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AccordionItem } from '@buildeross/ui/Accordion'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
@@ -104,9 +106,19 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
     { revalidateOnFocus: false }
   )
 
+  const sortedDaos = useMemo(() => {
+    if (!daos) return []
+    return [...daos].sort((a, b) => {
+      const aIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === a.chainId)
+      const bIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === b.chainId)
+      return aIndex - bIndex
+    })
+  }, [daos])
+
   const auctionCards = useMemo(() => {
-    if (!address || !daos) return null
-    return daos.map((dao) => (
+    if (!address || !sortedDaos.length) return null
+
+    return sortedDaos.map((dao) => (
       <DaoAuctionCard
         // React diffing wasn't catching new auctions starting, so this
         // long key is to help rerender when new auction starts
@@ -118,11 +130,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
         handleMutate={mutate}
       />
     ))
-  }, [daos, address, mutate])
+  }, [sortedDaos, address, mutate])
 
   const proposalList = useMemo(() => {
-    if (!daos) return null
-    const hasLiveProposals = daos.some((dao) => dao.proposals.length)
+    if (!sortedDaos.length) return null
+    const hasLiveProposals = sortedDaos.some((dao) => dao.proposals.length)
 
     if (!hasLiveProposals)
       return (
@@ -140,7 +152,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
         </Box>
       )
 
-    return daos
+    return sortedDaos
       .filter((dao) => dao.proposals.length)
       .map((dao) => (
         <DaoProposals
@@ -150,7 +162,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           onOpenCreateProposal={handleOpenCreateProposal}
         />
       ))
-  }, [daos, address, handleOpenCreateProposal])
+  }, [sortedDaos, address, handleOpenCreateProposal])
 
   // Main content - always show Feed
   const mainContent = <Feed enableFilters />
@@ -160,7 +172,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
 
   if (error) {
     sidebarContent = (
-      <Stack gap="x4">
+      <Stack gap="x6">
         {address && (
           <>
             <UserProfileCard
@@ -172,20 +184,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
             <CreateActions userAddress={address} />
           </>
         )}
-        <Box>
-          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
-            DAOs
-          </Text>
-          <DisplayPanel
-            title="Error fetching DAOs"
-            description={error?.message || 'Unknown error.'}
-          />
-        </Box>
+        <AccordionItem
+          title="DAOs"
+          summary="Error loading"
+          description={
+            <DisplayPanel
+              title="Error fetching DAOs"
+              description={error?.message || 'Unknown error.'}
+            />
+          }
+          defaultOpen={false}
+          titleFontSize={18}
+          mb={'x0'}
+        />
       </Stack>
     )
   } else if (isLoading) {
     sidebarContent = (
-      <Stack gap="x4">
+      <Stack gap="x6">
         {address && (
           <>
             <UserProfileCard
@@ -197,30 +213,42 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
             <CreateActions userAddress={address} />
           </>
         )}
-        <Box>
-          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
-            DAOs
-          </Text>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <AuctionCardSkeleton key={`auctionCardSkeleton:${i}`} />
-          ))}
-        </Box>
-        <Box>
-          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
-            Proposals
-          </Text>
-          <DAOCardSkeleton />
-          {Array.from({ length: 2 }).map((_, i) => (
-            <ProposalCardSkeleton key={`daoCardSkeleton:${i}`} />
-          ))}
-        </Box>
+        <AccordionItem
+          title="DAOs"
+          summary="Loading..."
+          description={
+            <Stack gap="x1">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <AuctionCardSkeleton key={`auctionCardSkeleton:${i}`} />
+              ))}
+            </Stack>
+          }
+          defaultOpen={false}
+          titleFontSize={18}
+          mb={'x0'}
+        />
+        <AccordionItem
+          title="Proposals"
+          summary="Loading..."
+          description={
+            <Stack gap="x1">
+              <DAOCardSkeleton />
+              {Array.from({ length: 2 }).map((_, i) => (
+                <ProposalCardSkeleton key={`daoCardSkeleton:${i}`} />
+              ))}
+            </Stack>
+          }
+          defaultOpen={false}
+          titleFontSize={18}
+          mb={'x0'}
+        />
       </Stack>
     )
   } else if (!address) {
     sidebarContent = <DashConnect />
   } else if (!daos?.length) {
     sidebarContent = (
-      <Stack gap="x4">
+      <Stack gap="x6">
         <UserProfileCard
           address={address}
           daoCount={0}
@@ -228,53 +256,72 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           ensAvatar={ensAvatar}
         />
         <CreateActions userAddress={address} />
-        <Box>
-          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
-            DAOs
-          </Text>
-          <Text fontSize={14} color="text3">
-            It looks like you haven't joined any DAOs yet.
-          </Text>
-        </Box>
+        <AccordionItem
+          title="DAOs"
+          summary="0 DAOs"
+          description={
+            <Text fontSize={14} color="text3">
+              It looks like you haven't joined any DAOs yet.
+            </Text>
+          }
+          defaultOpen={false}
+          titleFontSize={18}
+          mb={'x0'}
+        />
       </Stack>
     )
   } else {
+    const hasLiveProposals = sortedDaos.some((dao) => dao.proposals.length)
+    const totalProposals = sortedDaos.reduce((acc, dao) => acc + dao.proposals.length, 0)
+
     sidebarContent = (
-      <Stack gap="x4">
+      <Stack gap="x6">
         <UserProfileCard
           address={address}
-          daoCount={daos.length}
+          daoCount={sortedDaos.length}
           ensName={displayName}
           ensAvatar={ensAvatar}
         />
         <CreateActions userAddress={address} />
-        <Box>
-          <Text fontSize={18} fontWeight={'display'} mb={'x3'}>
-            DAOs
-          </Text>
-          {auctionCards}
-        </Box>
-        <Box>
-          <Text fontSize={16} fontWeight={'display'} mb={'x3'}>
-            Proposals
-          </Text>
-          {proposalList}
-        </Box>
+
+        <AccordionItem
+          title="DAOs"
+          summary={`${sortedDaos.length} DAO${sortedDaos.length !== 1 ? 's' : ''}`}
+          description={<Stack gap="x1">{auctionCards}</Stack>}
+          defaultOpen={false}
+          titleFontSize={18}
+          mb={'x0'}
+        />
+
+        <AccordionItem
+          title="Proposals"
+          summary={
+            hasLiveProposals
+              ? `${totalProposals} active proposal${totalProposals !== 1 ? 's' : ''}`
+              : 'No active proposals'
+          }
+          description={<Stack gap="x1">{proposalList}</Stack>}
+          defaultOpen={false}
+          titleFontSize={18}
+          mb={'x0'}
+        />
       </Stack>
     )
   }
 
   // Get unique chain IDs from user's DAOs
   const userChainIds = useMemo(() => {
-    if (!daos) return []
-    return Array.from(new Set(daos.map((dao) => dao.chainId)))
-  }, [daos])
+    if (!sortedDaos.length) return []
+    return Array.from(new Set(sortedDaos.map((dao) => dao.chainId)))
+  }, [sortedDaos])
 
   return (
     <DashboardLayout
       mainContent={mainContent}
       sidebarContent={sidebarContent}
       chainIds={userChainIds}
+      address={address}
+      ensAvatar={ensAvatar}
     />
   )
 }

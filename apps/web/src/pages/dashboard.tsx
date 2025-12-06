@@ -3,7 +3,8 @@ import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { Meta } from 'src/components/Meta'
-import { getDefaultLayout } from 'src/layouts/DefaultLayout'
+import { DefaultLayout } from 'src/layouts/DefaultLayout'
+import { LayoutWrapper } from 'src/layouts/LayoutWrapper'
 import { Dashboard } from 'src/modules/dashboard'
 
 const DashboardPage = () => {
@@ -27,6 +28,12 @@ const DashboardPage = () => {
   )
 }
 
-DashboardPage.getLayout = getDefaultLayout
+DashboardPage.getLayout = (page: React.ReactElement) => {
+  return (
+    <LayoutWrapper>
+      <DefaultLayout hideFooterOnMobile={true}>{page}</DefaultLayout>
+    </LayoutWrapper>
+  )
+}
 
 export default DashboardPage

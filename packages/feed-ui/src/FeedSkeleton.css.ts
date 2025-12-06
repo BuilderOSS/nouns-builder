@@ -49,3 +49,18 @@ export const skeletonImage = style({
     },
   },
 })
+
+export const skeletonMetaRow = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: space.x3,
+  width: '100%',
+  '@media': {
+    '(min-width: 768px)': {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: space.x4,
+    },
+  },
+})

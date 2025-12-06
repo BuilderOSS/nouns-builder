@@ -5,7 +5,7 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { DaoProposalCard } from './DaoProposalCard'
@@ -44,7 +44,7 @@ export const DaoProposals = ({
   const isLoading = isLoadingDelayedGovernance || isLoadingVotes
 
   return (
-    <Box mb={'x4'}>
+    <Box>
       <Flex justify={'space-between'} mb={'x3'} align="center">
         <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
           {daoImage ? (
@@ -80,7 +80,7 @@ export const DaoProposals = ({
           </Button>
         )}
       </Flex>
-      <Box>
+      <Stack gap="x2">
         {proposals.map((proposal) => (
           <DaoProposalCard
             key={proposal.proposalNumber}
@@ -92,7 +92,7 @@ export const DaoProposals = ({
             {...proposal}
           />
         ))}
-      </Box>
+      </Stack>
     </Box>
   )
 }

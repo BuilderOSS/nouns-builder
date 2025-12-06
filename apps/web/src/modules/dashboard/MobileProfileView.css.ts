@@ -5,11 +5,6 @@ export const mobileProfileContainer = style([
   atoms({
     padding: 'x4',
   }),
-  {
-    height: '100%',
-    overflowY: 'auto',
-    paddingBottom: '80px', // Extra space for bottom nav
-  },
 ])
 
 export const viewProfileButton = style({

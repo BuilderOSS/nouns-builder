@@ -17,7 +17,6 @@ import { AuctionPaused } from './AuctionPaused'
 import { BidActionButton } from './BidActionButton'
 import { DashboardDaoProps } from './Dashboard'
 import {
-  auctionCardBrand,
   bidBox,
   daoAvatar,
   daoAvatarBox,
@@ -89,51 +88,57 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const tokenImage = currentAuction?.token?.image
 
   return (
-    <Flex className={outerAuctionCard}>
+    <Flex className={outerAuctionCard} direction="column" align="stretch">
       <Link
-        className={auctionCardBrand}
         link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
+        style={{ width: '100%' }}
       >
-        <Box className={daoAvatarBox}>
-          {tokenImage && <FallbackImage className={daoAvatar} src={tokenImage} alt="" />}
-        </Box>
-        <Box style={{ flex: 1, minWidth: 0 }}>
-          <Flex mb="x0" align="center" gap="x1">
-            {chain.icon && (
-              <Image
-                src={chain.icon}
-                style={{
-                  borderRadius: '50%',
-                  maxHeight: '12px',
-                  maxWidth: '12px',
-                  objectFit: 'contain',
-                }}
-                alt={chain.name}
-                height={12}
-                width={12}
-              />
+        <Flex align="center" gap="x3" mb="x3" w="100%">
+          <Box className={daoAvatarBox}>
+            {tokenImage && (
+              <FallbackImage className={daoAvatar} src={tokenImage} alt="" />
             )}
-            <Text fontSize={12} color="text3">
-              {chain.name}
-            </Text>
-          </Flex>
-          <Text className={daoTokenName}>{currentAuction.token.name}</Text>
-          {bidText && (
-            <Flex gap="x2" mt="x1" align="center">
-              <Text fontSize={14} color="text3">
-                {bidText}
-              </Text>
-              {endTime && !isOver && (
-                <>
+          </Box>
+          <Flex align="center" justify="space-between" flex="1" style={{ minWidth: 0 }}>
+            <Box style={{ minWidth: 0 }}>
+              <Text className={daoTokenName}>{currentAuction.token.name}</Text>
+              {bidText && (
+                <Flex gap="x2" mt="x1" align="center">
                   <Text fontSize={14} color="text3">
-                    •
+                    {bidText}
                   </Text>
-                  <DashCountdown endTime={endTime} onEnd={onEnd} isOver={isOver} />{' '}
-                </>
+                  {endTime && !isOver && (
+                    <>
+                      <Text fontSize={14} color="text3">
+                        •
+                      </Text>
+                      <DashCountdown endTime={endTime} onEnd={onEnd} isOver={isOver} />
+                    </>
+                  )}
+                </Flex>
               )}
+            </Box>
+            <Flex align="center" gap="x1">
+              {chain.icon && (
+                <Image
+                  src={chain.icon}
+                  style={{
+                    borderRadius: '50%',
+                    maxHeight: '16px',
+                    maxWidth: '16px',
+                    objectFit: 'contain',
+                  }}
+                  alt={chain.name}
+                  height={16}
+                  width={16}
+                />
+              )}
+              <Text fontSize={12} color="text3">
+                {chain.name}
+              </Text>
             </Flex>
-          )}
-        </Box>
+          </Flex>
+        </Flex>
       </Link>
       <Flex className={bidBox}>
         <BidActionButton {...props} isOver={isOver} isEnded={isEnded} />

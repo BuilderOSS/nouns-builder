@@ -2,11 +2,20 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 
-import { footerContent, footerLink, footerWrapper } from './Nav.styles.css'
+import {
+  footerContent,
+  footerHiddenOnMobile,
+  footerLink,
+  footerWrapper,
+} from './Nav.styles.css'
 
-export const Footer = () => {
+export const Footer = ({ hideOnMobile = false }: { hideOnMobile?: boolean }) => {
   return (
-    <Box w="100%" as="footer" className={footerWrapper}>
+    <Box
+      w="100%"
+      as="footer"
+      className={hideOnMobile ? footerHiddenOnMobile : footerWrapper}
+    >
       <Box className={footerContent} w="100%" m="auto">
         <Box
           m="auto"

@@ -54,7 +54,6 @@ export const DaoProposalCard = ({
   return (
     <>
       <Link
-        mb={'x2'}
         direction="row"
         w={'100%'}
         align="center"

@@ -32,6 +32,7 @@ import Migrate from './assets/migrate.svg'
 import Move from './assets/move.svg'
 import NewWindow from './assets/new-window.svg'
 import Nft from './assets/nft.svg'
+import Noggles from './assets/noggles.svg'
 import Pause from './assets/pause.svg'
 import PauseTemplate from './assets/pause-template.svg'
 import Play from './assets/play.svg'
@@ -85,6 +86,7 @@ export const icons = {
   move: Move,
   newWindow: NewWindow,
   nft: Nft,
+  noggles: Noggles,
   pause: Pause,
   pauseTemplate: PauseTemplate,
   play: Play,

@@ -1,3 +1,5 @@
+import type { AddressType } from '@buildeross/types'
+import { Avatar } from '@buildeross/ui'
 import { Icon } from '@buildeross/zord'
 import React from 'react'
 
@@ -14,11 +16,15 @@ export type MobileTab = 'feed' | 'create' | 'profile'
 export interface MobileBottomNavProps {
   activeTab: MobileTab
   onTabChange: (tab: MobileTab) => void
+  address?: AddressType
+  ensAvatar?: string
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   activeTab,
   onTabChange,
+  address,
+  ensAvatar,
 }) => {
   return (
     <nav className={bottomNav}>
@@ -27,7 +33,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         onClick={() => onTabChange('feed')}
         type="button"
       >
-        <Icon id="collection" className={navItemIcon} />
+        <Icon id="noggles" className={navItemIcon} />
         <span className={navItemLabel}>Home</span>
       </button>
 
@@ -45,7 +51,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         onClick={() => onTabChange('profile')}
         type="button"
       >
-        <Icon id="sliders" className={navItemIcon} />
+        <Avatar address={address} src={ensAvatar} size="24" className={navItemIcon} />
         <span className={navItemLabel}>Profile</span>
       </button>
     </nav>

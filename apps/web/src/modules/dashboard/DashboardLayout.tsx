@@ -1,10 +1,9 @@
-import type { CHAIN_ID } from '@buildeross/types'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { ReactNode, useEffect, useState } from 'react'
-import { useAccount } from 'wagmi'
 
-import { MobileBottomNav, type MobileTab } from '../../components/MobileBottomNav'
 import * as styles from './DashboardLayout.css'
+import { MobileBottomNav, type MobileTab } from './MobileBottomNav'
 import { MobileCreateMenu } from './MobileCreateMenu'
 import { MobileProfileView } from './MobileProfileView'
 
@@ -12,13 +11,16 @@ export const DashboardLayout = ({
   mainContent,
   sidebarContent,
   chainIds,
+  address,
+  ensAvatar,
 }: {
   mainContent: ReactNode
   sidebarContent: ReactNode
   chainIds?: CHAIN_ID[]
+  address?: AddressType
+  ensAvatar?: string
 }) => {
   const [activeTab, setActiveTab] = useState<MobileTab>('feed')
-  const { address } = useAccount()
 
   // Reset to feed view when user disconnects
   useEffect(() => {
@@ -47,7 +49,7 @@ export const DashboardLayout = ({
   }
 
   return (
-    <Flex minH={'100vh'} py={'x6'} w={'100%'} justify="center">
+    <Flex py={{ '@initial': 'x0', '@1024': 'x6' }} w={'100%'} justify="center">
       <Box w="100%" style={{ maxWidth: 1440 }}>
         {/* Header - only show on desktop */}
         <Flex
@@ -64,7 +66,7 @@ export const DashboardLayout = ({
 
         {/* Desktop: Two-column layout */}
         <Flex
-          gap="x8"
+          gap="x12"
           direction={{ '@initial': 'column', '@1024': 'row' }}
           px={{ '@initial': 'x0', '@1024': 'x8' }}
           className={styles.desktopLayout}
@@ -84,7 +86,14 @@ export const DashboardLayout = ({
         <Box className={styles.mobileLayout}>{mobileContent()}</Box>
 
         {/* Mobile bottom navigation - only show when connected */}
-        {address && <MobileBottomNav activeTab={activeTab} onTabChange={setActiveTab} />}
+        {address && (
+          <MobileBottomNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            address={address}
+            ensAvatar={ensAvatar}
+          />
+        )}
       </Box>
     </Flex>
   )

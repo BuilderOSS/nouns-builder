@@ -7,6 +7,7 @@ import {
   skeletonCircle,
   skeletonContentHorizontal,
   skeletonImage,
+  skeletonMetaRow,
   skeletonPulse,
 } from './FeedSkeleton.css'
 
@@ -56,33 +57,36 @@ export const FeedSkeletonItem: React.FC = () => {
           </Stack>
         </Stack>
 
-        {/* Actions section */}
-        <Flex gap="x2" align="center" wrap="wrap">
-          <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: 80, height: 32, borderRadius: '8px' }}
-          />
-          <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: 100, height: 32, borderRadius: '8px' }}
-          />
-          <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: 100, height: 32, borderRadius: '8px' }}
-          />
-        </Flex>
+        {/* Actions and metadata row - same row on desktop, different rows on mobile */}
+        <Box className={skeletonMetaRow}>
+          {/* Actions section */}
+          <Flex gap="x2" align="center" wrap="wrap">
+            <Box
+              className={`${skeletonBox} ${skeletonPulse}`}
+              style={{ width: 80, height: 32, borderRadius: '8px' }}
+            />
+            <Box
+              className={`${skeletonBox} ${skeletonPulse}`}
+              style={{ width: 100, height: 32, borderRadius: '8px' }}
+            />
+            <Box
+              className={`${skeletonBox} ${skeletonPulse}`}
+              style={{ width: 100, height: 32, borderRadius: '8px' }}
+            />
+          </Flex>
 
-        {/* Bottom row: Chain and timestamp */}
-        <Flex gap="x2" align="center" w="100%" justify="flex-end">
-          <Box
-            className={`${skeletonCircle} ${skeletonPulse}`}
-            style={{ width: 24, height: 24 }}
-          />
-          <Box
-            className={`${skeletonBox} ${skeletonPulse}`}
-            style={{ width: 60, height: 14 }}
-          />
-        </Flex>
+          {/* Bottom row: Chain and timestamp */}
+          <Flex gap="x2" align="center" justify="flex-end">
+            <Box
+              className={`${skeletonCircle} ${skeletonPulse}`}
+              style={{ width: 24, height: 24 }}
+            />
+            <Box
+              className={`${skeletonBox} ${skeletonPulse}`}
+              style={{ width: 60, height: 14 }}
+            />
+          </Flex>
+        </Box>
       </Stack>
     </Flex>
   )

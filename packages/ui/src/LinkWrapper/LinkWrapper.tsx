@@ -43,7 +43,14 @@ export const LinkWrapper: React.FC<LinkWrapperProps> = ({
   if (link.href) {
     // Link navigation
     return (
-      <Flex as={Link} href={link.href} style={style} {...flexProps}>
+      <Flex
+        as={Link}
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={style}
+        {...flexProps}
+      >
         {children}
       </Flex>
     )

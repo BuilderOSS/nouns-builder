@@ -23,14 +23,13 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
 
-  const handleCreatePost = () => {
-    setActionType('post')
-    setSelectorOpen(true)
-  }
-
   const handleCreateProposal = () => {
     setActionType('proposal')
     setSelectorOpen(true)
+  }
+
+  const handleCreateDao = () => {
+    window.open('https://nouns.build/create', '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -39,16 +38,6 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
         <Text className={createMenuTitle}>What would you like to create?</Text>
 
         <div className={createMenuGrid}>
-          <button className={createMenuCard} onClick={handleCreatePost} type="button">
-            <Icon id="brush" className={createMenuCardIcon} />
-            <Text fontSize="18" fontWeight="label">
-              Create Post
-            </Text>
-            <Text fontSize="14" color="text3">
-              Share an update or announcement with a DAO community
-            </Text>
-          </button>
-
           <button className={createMenuCard} onClick={handleCreateProposal} type="button">
             <Icon id="checkInCircle" className={createMenuCardIcon} />
             <Text fontSize="18" fontWeight="label">
@@ -56,6 +45,16 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
             </Text>
             <Text fontSize="14" color="text3">
               Submit a governance proposal for DAO members to vote on
+            </Text>
+          </button>
+
+          <button className={createMenuCard} onClick={handleCreateDao} type="button">
+            <Icon id="plus" className={createMenuCardIcon} />
+            <Text fontSize="18" fontWeight="label">
+              Create a DAO
+            </Text>
+            <Text fontSize="14" color="text3">
+              Launch your own DAO on Nouns Builder
             </Text>
           </button>
         </div>
