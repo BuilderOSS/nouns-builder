@@ -22,8 +22,6 @@ export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
       <Link link={getDaoLink(chain.id, tokenAddress)} style={{ width: '100%' }}>
         <Flex align="center" gap="x3" mb="x3">
           <Flex
-            width="x16"
-            height="x16"
             position="relative"
             overflow="hidden"
             align="center"

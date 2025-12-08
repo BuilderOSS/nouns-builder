@@ -207,39 +207,19 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
       new Set([...selectedDaoAddresses, ...memberAddresses])
     )
 
-    // Build metadata for all member DAOs
-    const memberMetadataMap = new Map<string, SelectedDaoMetadata>()
-    memberDaoItems.forEach((dao) => {
-      memberMetadataMap.set(dao.address.toLowerCase(), {
+    // Merge existing metadata with new member DAO metadata in a single pass
+    const existingAddresses = new Set(
+      selectedDaosMetadata.map((dao) => dao.address.toLowerCase())
+    )
+    const newMemberMetadata = memberDaoItems
+      .filter((dao) => !existingAddresses.has(dao.address.toLowerCase()))
+      .map((dao) => ({
         address: dao.address,
         name: dao.name,
         image: dao.image,
         chainId: dao.chainId,
-      })
-    })
-
-    // Merge existing metadata with new member DAO metadata
-    const mergedMetadata: SelectedDaoMetadata[] = []
-    const addedAddresses = new Set<string>()
-
-    // Add existing metadata
-    selectedDaosMetadata.forEach((dao) => {
-      mergedMetadata.push(dao)
-      addedAddresses.add(dao.address.toLowerCase())
-    })
-
-    // Add new member DAO metadata
-    memberDaoItems.forEach((dao) => {
-      const lowerAddr = dao.address.toLowerCase()
-      if (!addedAddresses.has(lowerAddr)) {
-        mergedMetadata.push({
-          address: dao.address,
-          name: dao.name,
-          image: dao.image,
-          chainId: dao.chainId,
-        })
-      }
-    })
+      }))
+    const mergedMetadata = [...selectedDaosMetadata, ...newMemberMetadata]
 
     onSelectedDaosChange(mergedAddresses, mergedMetadata)
   }, [memberDaoItems, selectedDaoAddresses, selectedDaosMetadata, onSelectedDaosChange])

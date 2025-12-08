@@ -1,6 +1,7 @@
 import type { AddressType } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui'
-import { Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import Link from 'next/link'
 import React from 'react'
 
 import { profileCard, profileInfo, statsRow } from './UserProfileCard.css'
@@ -20,12 +21,13 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 }) => {
   const displayName = ensName || `${address.slice(0, 6)}...${address.slice(-4)}`
 
-  const handleClick = () => {
-    window.open(`/profile/${address}`, '_blank')
-  }
-
   return (
-    <div className={profileCard} onClick={handleClick} style={{ cursor: 'pointer' }}>
+    <Box
+      as={Link}
+      className={profileCard}
+      style={{ cursor: 'pointer' }}
+      href={`/profile/${address}`}
+    >
       <Flex gap="x3" align="center">
         <Avatar address={address} src={ensAvatar} size="48" />
         <Stack className={profileInfo} gap="x1">
@@ -37,6 +39,6 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
           </Text>
         </Stack>
       </Flex>
-    </div>
+    </Box>
   )
 }

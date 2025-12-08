@@ -1,6 +1,6 @@
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
-import React, { ReactNode, useEffect, useState } from 'react'
+import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 
 import * as styles from './DashboardLayout.css'
 import { MobileBottomNav, type MobileTab } from './MobileBottomNav'
@@ -30,7 +30,7 @@ export const DashboardLayout = ({
   }, [address])
 
   // Determine what to show on mobile based on active tab
-  const mobileContent = () => {
+  const mobileContent = useMemo(() => {
     // Always show feed if not connected
     if (!address) {
       return mainContent
@@ -46,7 +46,7 @@ export const DashboardLayout = ({
       default:
         return mainContent
     }
-  }
+  }, [activeTab, address, chainIds, mainContent, sidebarContent])
 
   return (
     <Flex py={{ '@initial': 'x0', '@1024': 'x6' }} w={'100%'} justify="center">
@@ -57,7 +57,7 @@ export const DashboardLayout = ({
           align="center"
           mb={'x8'}
           px={{ '@initial': 'x0', '@1024': 'x8' }}
-          className={styles.desktopOnly}
+          className={styles.desktopLayout}
         >
           <Text fontSize={35} fontWeight={'display'}>
             Dashboard
@@ -83,7 +83,7 @@ export const DashboardLayout = ({
         </Flex>
 
         {/* Mobile: Tab-based content */}
-        <Box className={styles.mobileLayout}>{mobileContent()}</Box>
+        <Box className={styles.mobileLayout}>{mobileContent}</Box>
 
         {/* Mobile bottom navigation - only show when connected */}
         {address && (

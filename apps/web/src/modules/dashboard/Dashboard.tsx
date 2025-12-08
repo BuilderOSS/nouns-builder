@@ -132,9 +132,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
     ))
   }, [sortedDaos, address, mutate])
 
+  const hasLiveProposals = useMemo(() => {
+    if (!sortedDaos.length) return false
+    return sortedDaos.some((dao) => dao.proposals.length)
+  }, [sortedDaos])
+
+  const totalProposals = useMemo(() => {
+    if (!sortedDaos.length) return 0
+    return sortedDaos.reduce((acc, dao) => acc + dao.proposals.length, 0)
+  }, [sortedDaos])
+
   const proposalList = useMemo(() => {
     if (!sortedDaos.length) return null
-    const hasLiveProposals = sortedDaos.some((dao) => dao.proposals.length)
 
     if (!hasLiveProposals)
       return (
@@ -162,7 +171,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           onOpenCreateProposal={handleOpenCreateProposal}
         />
       ))
-  }, [sortedDaos, address, handleOpenCreateProposal])
+  }, [sortedDaos, address, handleOpenCreateProposal, hasLiveProposals])
 
   // Main content - always show Feed
   const mainContent = <Feed enableFilters />
@@ -271,9 +280,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
       </Stack>
     )
   } else {
-    const hasLiveProposals = sortedDaos.some((dao) => dao.proposals.length)
-    const totalProposals = sortedDaos.reduce((acc, dao) => acc + dao.proposals.length, 0)
-
     sidebarContent = (
       <Stack gap="x6">
         <UserProfileCard

@@ -13,15 +13,6 @@ export const sidebar = style({
   },
 })
 
-export const desktopOnly = style({
-  display: 'none',
-  '@media': {
-    '(min-width: 1024px)': {
-      display: 'flex',
-    },
-  },
-})
-
 export const desktopLayout = style({
   display: 'none',
   '@media': {

@@ -17,20 +17,22 @@ import {
   selectorContainer,
 } from './SingleDaoSelector.css'
 
-export interface SingleDaoSelectorProps {
-  chainIds?: CHAIN_ID[]
-  selectedDaoAddress?: AddressType
-  onSelectedDaoChange: (address: AddressType | undefined) => void
-  userAddress?: AddressType
-  showSearch?: boolean
-}
-
-interface DaoListItem {
+export interface DaoListItem {
   name: string
   image: string
   address: AddressType
   chainId: CHAIN_ID
 }
+
+export interface SingleDaoSelectorProps {
+  chainIds?: CHAIN_ID[]
+  selectedDaoAddress?: AddressType
+  onSelectedDaoChange: (dao: DaoListItem | undefined) => void
+  userAddress?: AddressType
+  showSearch?: boolean
+}
+
+const MIN_SEARCH_LENGTH = 3
 
 export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
   chainIds,
@@ -41,8 +43,6 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
 }) => {
   const [searchInput, setSearchInput] = useState('')
   const [activeSearchQuery, setActiveSearchQuery] = useState('')
-
-  const MIN_SEARCH_LENGTH = 3
 
   // Fetch user's DAOs
   const { daos: memberDaos, isLoading: isLoadingMemberDaos } = useUserDaos({
@@ -88,12 +88,12 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
     [searchResults]
   )
 
-  const handleDaoClick = (address: AddressType) => {
+  const handleDaoClick = (dao: DaoListItem) => {
     // If clicking the same DAO, deselect it
-    if (selectedDaoAddress === address) {
+    if (selectedDaoAddress === dao.address) {
       onSelectedDaoChange(undefined)
     } else {
-      onSelectedDaoChange(address)
+      onSelectedDaoChange(dao)
     }
   }
 
@@ -105,7 +105,7 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
     } else {
       setActiveSearchQuery('')
     }
-  }, [searchInput, MIN_SEARCH_LENGTH])
+  }, [searchInput])
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
@@ -119,7 +119,7 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
       return searchDaoItems
     }
     return memberDaoItems
-  }, [showSearch, activeSearchQuery, searchDaoItems, memberDaoItems, MIN_SEARCH_LENGTH])
+  }, [showSearch, activeSearchQuery, searchDaoItems, memberDaoItems])
 
   const showEmptyState =
     !isSearching && !isLoadingMemberDaos && daosToDisplay.length === 0
@@ -162,12 +162,12 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
             <Label
               key={dao.address}
               className={daoItem}
-              onClick={() => handleDaoClick(dao.address)}
+              onClick={() => handleDaoClick(dao)}
             >
               <input
                 type="radio"
                 checked={isSelected}
-                onChange={() => handleDaoClick(dao.address)}
+                onChange={() => handleDaoClick(dao)}
                 onClick={(e) => e.stopPropagation()}
               />
               <FallbackImage

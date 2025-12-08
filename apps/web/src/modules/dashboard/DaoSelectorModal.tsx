@@ -1,13 +1,12 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
-import { useUserDaos } from '@buildeross/hooks'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Button, Flex, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 
 import { modalBody, modalFooter, modalHeader, modalTitle } from './DaoSelectorModal.css'
-import { SingleDaoSelector } from './SingleDaoSelector'
+import { type DaoListItem, SingleDaoSelector } from './SingleDaoSelector'
 
 export interface DaoSelectorModalProps {
   open: boolean
@@ -25,40 +24,19 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   chainIds = [],
 }) => {
   const router = useRouter()
-  const [selectedDao, setSelectedDao] = useState<AddressType | undefined>()
+  const [selectedDao, setSelectedDao] = useState<DaoListItem | undefined>()
 
-  // Fetch user's DAOs to get chain info for routing
-  const { daos: userDaos } = useUserDaos({
-    address: userAddress,
-    enabled: !!userAddress,
-  })
-
-  const title = useMemo(() => {
-    return actionType === 'post' ? 'Select DAO for Post' : 'Select DAO for Proposal'
-  }, [actionType])
-
-  const description = useMemo(() => {
-    if (actionType === 'post') {
-      return 'Choose which DAO you want to create a post for'
-    }
-    return 'Choose which DAO you want to create a proposal for (members only)'
-  }, [actionType])
+  const title = actionType === 'post' ? 'Select DAO for Post' : 'Select DAO for Proposal'
+  const description =
+    actionType === 'post'
+      ? 'Choose which DAO you want to create a post for'
+      : 'Choose which DAO you want to create a proposal for (members only)'
 
   const handleContinue = async () => {
     if (!selectedDao) return
 
-    // Find the DAO details from user's DAOs
-    const selectedDaoData = userDaos.find(
-      (dao) => dao.collectionAddress.toLowerCase() === selectedDao.toLowerCase()
-    )
-
-    if (!selectedDaoData) {
-      console.error('Selected DAO not found in user DAOs')
-      return
-    }
-
     // Get the chain name from chain ID
-    const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === selectedDaoData.chainId)
+    const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === selectedDao.chainId)
     if (!chain) {
       console.error('Chain not found for DAO')
       return
@@ -68,14 +46,10 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
     if (actionType === 'post') {
       // Route: /dao/{network}/{token}/post/create
-      await router.push(
-        `/dao/${network}/${selectedDaoData.collectionAddress}/post/create`
-      )
+      await router.push(`/dao/${network}/${selectedDao.address}/post/create`)
     } else {
       // Route: /dao/{network}/{token}/proposal/create (existing route)
-      await router.push(
-        `/dao/${network}/${selectedDaoData.collectionAddress}/proposal/create`
-      )
+      await router.push(`/dao/${network}/${selectedDao.address}/proposal/create`)
     }
 
     onClose()
@@ -102,7 +76,7 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
         <div className={modalBody}>
           <SingleDaoSelector
             chainIds={chainIds}
-            selectedDaoAddress={selectedDao}
+            selectedDaoAddress={selectedDao?.address}
             onSelectedDaoChange={setSelectedDao}
             userAddress={userAddress}
             showSearch={showSearch}

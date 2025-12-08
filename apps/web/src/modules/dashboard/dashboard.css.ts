@@ -68,25 +68,6 @@ export const daoAvatarBox = style({
   height: '48px',
 })
 
-export const stats = style({
-  width: '50%',
-})
-
-export const statsBox = style({
-  width: '30%',
-  '@media': {
-    'screen and (min-width: 1024px)': {
-      width: '100%',
-    },
-    'screen and (max-width: 768px)': {
-      width: '80%',
-    },
-    'screen and (max-width: 484px)': {
-      width: '100%',
-    },
-  },
-})
-
 export const bidBox = style({
   width: '100%',
 })
