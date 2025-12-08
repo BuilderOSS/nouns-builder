@@ -254,7 +254,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     return null
   }
 
-  const isOwner = owner === signerAddress || true
+  const isOwner = owner === signerAddress
 
   if (!isOwner) {
     return (
