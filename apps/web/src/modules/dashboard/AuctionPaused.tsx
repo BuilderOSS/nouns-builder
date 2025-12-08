@@ -20,52 +20,58 @@ export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
   return (
     <Flex className={outerAuctionCard} direction="column" align="stretch">
       <Link link={getDaoLink(chain.id, tokenAddress)} style={{ width: '100%' }}>
-        <Flex align="center" gap="x3" mb="x3">
-          <Flex
-            position="relative"
-            overflow="hidden"
-            align="center"
-            justify="center"
-            borderRadius="curved"
-            backgroundColor="background2"
-            className={daoAvatarBox}
-          >
-            <Paused
-              height={'24px'}
-              width={'24px'}
-              style={{ position: 'absolute' }}
-              fill="grey"
-            />
-          </Flex>
-          <Flex align="center" justify="space-between" flex="1" style={{ minWidth: 0 }}>
-            <Box style={{ minWidth: 0 }}>
-              <Text className={daoTokenName}>{name}</Text>
-            </Box>
-            <Flex align="center" gap="x1">
-              {chain.icon && (
-                <Image
-                  src={chain.icon}
-                  style={{
-                    borderRadius: '50%',
-                    maxHeight: '16px',
-                    maxWidth: '16px',
-                    objectFit: 'contain',
-                  }}
-                  alt={chain.name}
-                  height={16}
-                  width={16}
-                />
-              )}
-              <Text fontSize={12} color="text3">
-                {chain.name}
-              </Text>
+        <Flex align="center" gap="x2" mb="x3" w="100%" justify="space-between">
+          <Flex align="center" gap="x2">
+            <Flex
+              position="relative"
+              overflow="hidden"
+              align="center"
+              justify="center"
+              borderRadius="curved"
+              backgroundColor="background2"
+              className={daoAvatarBox}
+            >
+              <Paused
+                height={'24px'}
+                width={'24px'}
+                style={{ position: 'absolute' }}
+                fill="grey"
+              />
             </Flex>
+            <Flex align="center" flex="1" style={{ minWidth: 0 }}>
+              <Text className={daoTokenName}>{name}</Text>
+            </Flex>
+          </Flex>
+          <Flex align="center" gap="x1">
+            {chain.icon && (
+              <Image
+                src={chain.icon}
+                style={{
+                  borderRadius: '50%',
+                  maxHeight: '16px',
+                  maxWidth: '16px',
+                  objectFit: 'contain',
+                }}
+                alt={chain.name}
+                height={16}
+                width={16}
+              />
+            )}
+            <Text fontSize={12} color="text3">
+              {chain.name}
+            </Text>
           </Flex>
         </Flex>
       </Link>
-      <Flex className={bidBox} direction="column" gap="x2">
+      <Flex
+        className={bidBox}
+        gap="x2"
+        direction="row"
+        justify="space-between"
+        align="center"
+      >
         <Flex align="center">
-          <Icon id="warning" fill="text3" />
+          <Icon id="warning" fill="text3" size="sm" />
           <Text color="text3" fontSize={14} ml="x1">
             Auctions are paused.
           </Text>

@@ -93,7 +93,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
         link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
         style={{ width: '100%' }}
       >
-        <Flex align="center" gap="x3" mb="x3" w="100%">
+        <Flex align="center" gap="x2" mb="x3" w="100%">
           <Box className={daoAvatarBox}>
             {tokenImage && (
               <FallbackImage className={daoAvatar} src={tokenImage} alt="" />

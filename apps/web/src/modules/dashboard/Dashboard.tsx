@@ -200,9 +200,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
             <DisplayPanel
               title="Error fetching DAOs"
               description={error?.message || 'Unknown error.'}
+              compact
             />
           }
-          defaultOpen={false}
+          defaultOpen={true}
           titleFontSize={18}
           mb={'x0'}
         />
