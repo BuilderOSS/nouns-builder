@@ -41,13 +41,16 @@ export const searchDaosRequest = async (
     }
     let where: Dao_Filter | undefined = undefined
 
-    // filter spam daos from L2
+    // Filter DAOs with at least one token minted
+    where = { totalSupply_gt: 0 }
+
+    // Additionally filter spam DAOs from L2
     if (
       chainId === CHAIN_ID.BASE ||
       chainId === CHAIN_ID.ZORA ||
       chainId === CHAIN_ID.OPTIMISM
     ) {
-      where = { totalAuctionSales_gt: MIN_BID_AMOUNT.toString() }
+      where = { totalSupply_gt: 0, totalAuctionSales_gt: MIN_BID_AMOUNT.toString() }
     }
 
     const fetchLimit = limit + 1
@@ -64,8 +67,8 @@ export const searchDaosRequest = async (
 
     return {
       daos: limitedData.map((dao) => {
-        // Get the latest auction (first item in the array, or undefined if no auctions)
-        const latestAuction = dao.auctions[0]
+        // Get the latest token (highest tokenId)
+        const latestToken = dao.tokens[0]
 
         return {
           dao: {
@@ -76,11 +79,18 @@ export const searchDaosRequest = async (
             tokenAddress: dao.tokenAddress,
           },
           chainId,
-          // Spread auction data if it exists
-          ...(latestAuction && {
-            endTime: latestAuction.endTime,
-            highestBid: latestAuction.highestBid,
-            token: latestAuction.token,
+          // Spread token and auction data if it exists
+          ...(latestToken && {
+            token: {
+              name: latestToken.name,
+              image: latestToken.image,
+              tokenId: latestToken.tokenId,
+            },
+            // Include auction data if auction exists (regardless of settled status)
+            ...(latestToken.auction && {
+              endTime: latestToken.auction.endTime,
+              highestBid: latestToken.auction.highestBid,
+            }),
           }),
         }
       }) as Array<DaoSearchResult>,

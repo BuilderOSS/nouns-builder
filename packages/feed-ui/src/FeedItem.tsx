@@ -6,7 +6,7 @@ import { FeedItemActions } from './Actions/FeedItemActions'
 import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
 import { AuctionCreatedItem } from './AuctionCreatedItem'
 import { AuctionSettledItem } from './AuctionSettledItem'
-import { feedItemCard, feedItemMeta } from './Feed.css'
+import { feedItemCard, feedItemMeta, feedItemMetaRow } from './Feed.css'
 import { FeedItemActor } from './FeedItemActor'
 import { FeedItemChain } from './FeedItemChain'
 import { FeedItemDao } from './FeedItemDao'
@@ -106,19 +106,23 @@ export const FeedItem: React.FC<FeedItemProps> = ({
         {/* Content */}
         {renderContent()}
 
-        {/* Actions section */}
-        <FeedItemActions item={item} />
+        {/* Actions and metadata row - same row on desktop, different rows on mobile */}
+        <Box className={feedItemMetaRow}>
+          {/* Actions section */}
+          <FeedItemActions item={item} />
 
-        <Flex gap="x2" align="center" w="100%" justify="flex-end" wrap="wrap">
-          {/* Chain */}
-          {<FeedItemChain chainId={item.chainId} />}
+          {/* Chain and timestamp */}
+          <Flex gap="x2" align="center" justify="flex-end" wrap="wrap">
+            {/* Chain */}
+            <FeedItemChain chainId={item.chainId} />
 
-          {/* Separator before timestamp */}
-          {<Separator />}
+            {/* Separator before timestamp */}
+            <Separator />
 
-          {/* Timestamp */}
-          <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
-        </Flex>
+            {/* Timestamp */}
+            <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
+          </Flex>
+        </Box>
       </Stack>
     </Flex>
   )

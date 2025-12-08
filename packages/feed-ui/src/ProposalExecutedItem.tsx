@@ -1,3 +1,4 @@
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { ProposalExecutedFeedItem } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
@@ -18,6 +19,7 @@ interface ProposalExecutedItemProps {
 
 export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
+  const { displayName } = useEnsData(item.actor)
 
   const description = item.proposalDescription?.trim()
 
@@ -27,9 +29,7 @@ export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
-          <Text className={feedItemTitle}>
-            Proposal #{item.proposalNumber} - Executed
-          </Text>
+          <Text className={feedItemTitle}>{displayName} executed this proposal</Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
           {description && (
             <Box className={feedItemTextContentWrapper}>

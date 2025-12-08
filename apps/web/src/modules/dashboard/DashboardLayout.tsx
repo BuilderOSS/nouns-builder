@@ -1,44 +1,99 @@
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+
+import * as styles from './DashboardLayout.css'
+import { MobileBottomNav, type MobileTab } from './MobileBottomNav'
+import { MobileCreateMenu } from './MobileCreateMenu'
+import { MobileProfileView } from './MobileProfileView'
 
 export const DashboardLayout = ({
-  auctionCards,
-  daoProposals,
+  mainContent,
+  sidebarContent,
+  chainIds,
+  address,
+  ensAvatar,
 }: {
-  auctionCards: ReactNode
-  daoProposals: ReactNode
+  mainContent: ReactNode
+  sidebarContent: ReactNode
+  chainIds?: CHAIN_ID[]
+  address?: AddressType
+  ensAvatar?: string
 }) => {
-  return (
-    <DashPage>
-      <Box mb={'x12'}>
-        <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
-          DAOs
-        </Text>
-        {auctionCards}
-      </Box>
-      <Box>
-        <Text fontSize={28} fontWeight={'display'} mb={'x6'}>
-          Proposals
-        </Text>
-        {daoProposals}
-      </Box>
-    </DashPage>
-  )
-}
+  const [activeTab, setActiveTab] = useState<MobileTab>('feed')
 
-export const DashPage = ({ children }: { children: ReactNode }) => {
+  // Reset to feed view when user disconnects
+  useEffect(() => {
+    if (!address) {
+      setActiveTab('feed')
+    }
+  }, [address])
+
+  // Determine what to show on mobile based on active tab
+  const mobileContent = useMemo(() => {
+    // Always show feed if not connected
+    if (!address) {
+      return mainContent
+    }
+
+    switch (activeTab) {
+      case 'feed':
+        return mainContent
+      case 'create':
+        return <MobileCreateMenu userAddress={address} chainIds={chainIds} />
+      case 'profile':
+        return <MobileProfileView sidebarContent={sidebarContent} />
+      default:
+        return mainContent
+    }
+  }, [activeTab, address, chainIds, mainContent, sidebarContent])
+
   return (
-    <Flex
-      minH={'100vh'}
-      py={{ '@initial': 'x6', '@480': 'x20' }}
-      w={'100%'}
-      justify="center"
-    >
-      <Box w="100%" style={{ maxWidth: 912 }}>
-        <Text fontSize={35} fontWeight={'display'} mb={'x12'}>
-          Dashboard
-        </Text>
-        {children}
+    <Flex py={{ '@initial': 'x0', '@1024': 'x6' }} w={'100%'} justify="center">
+      <Box w="100%" style={{ maxWidth: 1440 }}>
+        {/* Header - only show on desktop */}
+        <Flex
+          justify="space-between"
+          align="center"
+          mb={'x8'}
+          px={{ '@initial': 'x0', '@1024': 'x8' }}
+          className={styles.desktopLayout}
+        >
+          <Text fontSize={35} fontWeight={'display'}>
+            Dashboard
+          </Text>
+        </Flex>
+
+        {/* Desktop: Two-column layout */}
+        <Flex
+          gap="x12"
+          direction={{ '@initial': 'column', '@1024': 'row' }}
+          px={{ '@initial': 'x0', '@1024': 'x8' }}
+          className={styles.desktopLayout}
+        >
+          {/* Main content */}
+          <Box flex="1" minW="x0">
+            {mainContent}
+          </Box>
+
+          {/* Sidebar - desktop only */}
+          <Box position="relative" className={styles.sidebar}>
+            {sidebarContent}
+          </Box>
+        </Flex>
+
+        {/* Mobile: Tab-based content */}
+        <Box className={styles.mobileLayout}>{mobileContent}</Box>
+
+        {/* Mobile bottom navigation - only show when connected */}
+        {address && (
+          <MobileBottomNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            address={address}
+            ensAvatar={ensAvatar}
+          />
+        )}
       </Box>
     </Flex>
   )

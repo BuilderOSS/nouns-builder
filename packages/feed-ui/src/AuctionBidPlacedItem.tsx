@@ -1,13 +1,19 @@
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { AuctionBidPlacedFeedItem } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
 
-import { feedItemImage, feedItemSubtitle, feedItemTitle } from './Feed.css'
+import {
+  feedItemContentHorizontal,
+  feedItemImage,
+  feedItemSubtitle,
+  feedItemTitle,
+} from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
 
 interface AuctionBidPlacedItemProps {
@@ -16,11 +22,14 @@ interface AuctionBidPlacedItemProps {
 
 export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item }) => {
   const { getAuctionLink } = useLinks()
+  const { displayName } = useEnsData(item.bidder)
+
+  const formattedAmount = formatCryptoVal(formatEther(BigInt(item.amount)))
 
   return (
     <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
-      <Stack gap="x3" w="100%">
-        {/* Full-width image */}
+      <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
+        {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>
           <FallbackImage
             src={item.tokenImage}
@@ -30,24 +39,12 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
           />
         </Box>
 
-        {/* Content below image */}
-        <Stack gap="x2">
-          <Text className={feedItemTitle}>{item.tokenName} - Bid Placed</Text>
-          <Flex align="center" gap="x1">
-            <Text className={feedItemSubtitle}>Amount:</Text>
-            <img
-              src="/chains/ethereum.svg"
-              alt="ETH"
-              loading="lazy"
-              decoding="async"
-              width={12}
-              height={12}
-              style={{ maxWidth: '12px', maxHeight: '12px', objectFit: 'contain' }}
-            />
-            <Text className={feedItemSubtitle}>
-              {formatCryptoVal(formatEther(BigInt(item.amount)))} ETH
-            </Text>
-          </Flex>
+        {/* Content - below image on mobile, to the right on desktop */}
+        <Stack gap="x2" style={{ flex: 1 }}>
+          <Text className={feedItemTitle}>
+            {displayName} bid {formattedAmount} ETH
+          </Text>
+          <Text className={feedItemSubtitle}>{item.tokenName}</Text>
         </Stack>
       </Stack>
     </LinkWrapper>

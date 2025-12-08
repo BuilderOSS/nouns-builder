@@ -53,6 +53,14 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
   const { daos } = useUserDaos({ address })
 
+  const sortedDaos = React.useMemo(() => {
+    return [...daos].sort((a, b) => {
+      const aIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === a.chainId)
+      const bIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === b.chainId)
+      return aIndex - bIndex
+    })
+  }, [daos])
+
   const handleOpenMenu = React.useCallback(
     (open: boolean) => {
       onOpenMenu(open, MenuType.PROFILE_MENU)
@@ -97,7 +105,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           Create a DAO
         </Button>
       </Link>
-      {daos.length > 0 && (
+      {sortedDaos.length > 0 && (
         <>
           <Box color="border" borderStyle="solid" borderWidth="thin" />
           <Flex
@@ -118,7 +126,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   }
             }
           >
-            {daos.map((dao, index) => {
+            {sortedDaos.map((dao, index) => {
               const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
               return (
                 <Link
@@ -217,13 +225,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           <Flex align="center" justify={'center'} py={'x2'}>
             <Text cursor={'pointer'} fontWeight={'display'}>
               Dashboard
-            </Text>
-          </Flex>
-        </Link>
-        <Link href={'/feed'}>
-          <Flex align="center" justify={'center'} py={'x2'}>
-            <Text cursor={'pointer'} fontWeight={'display'}>
-              Feed
             </Text>
           </Flex>
         </Link>

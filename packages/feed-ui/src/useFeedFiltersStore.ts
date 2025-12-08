@@ -7,13 +7,22 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 export type DaoFilterMode = 'all' | 'specific'
 
+export interface SelectedDao {
+  address: AddressType
+  name: string
+  image: string
+  chainId: CHAIN_ID
+}
+
 export interface FeedFiltersState {
   chainIds: CHAIN_ID[]
   daoAddresses: AddressType[]
+  selectedDaos: SelectedDao[]
   eventTypes: FeedEventType[]
   daoFilterMode: DaoFilterMode
   setChainIds: (chainIds: CHAIN_ID[]) => void
   setDaoAddresses: (daoAddresses: AddressType[]) => void
+  setSelectedDaos: (selectedDaos: SelectedDao[]) => void
   setEventTypes: (eventTypes: FeedEventType[]) => void
   setDaoFilterMode: (mode: DaoFilterMode) => void
   resetFilters: () => void
@@ -23,6 +32,7 @@ export interface FeedFiltersState {
 const initialState = {
   chainIds: [],
   daoAddresses: [],
+  selectedDaos: [],
   eventTypes: [],
   daoFilterMode: 'all' as DaoFilterMode,
 }
@@ -47,12 +57,14 @@ function createFeedFiltersStore(address: CacheAddress): StoreApi<FeedFiltersStat
         ...initialState,
         setChainIds: (chainIds) => set({ chainIds }),
         setDaoAddresses: (daoAddresses) => set({ daoAddresses }),
+        setSelectedDaos: (selectedDaos) => set({ selectedDaos }),
         setEventTypes: (eventTypes) => set({ eventTypes }),
         setDaoFilterMode: (mode) => set({ daoFilterMode: mode }),
         resetFilters: () =>
           set({
             chainIds: [],
             daoAddresses: [],
+            selectedDaos: [],
             eventTypes: [],
             daoFilterMode: 'all',
           }),
@@ -68,7 +80,7 @@ function createFeedFiltersStore(address: CacheAddress): StoreApi<FeedFiltersStat
       {
         name: `nouns-builder-feed-filters-${NETWORK_TYPE}-${address}`,
         storage,
-        version: 0,
+        version: 1,
       }
     )
   )

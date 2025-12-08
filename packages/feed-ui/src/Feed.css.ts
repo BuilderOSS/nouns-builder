@@ -69,8 +69,25 @@ export const feedItemImage = style([
   {
     aspectRatio: '1 / 1',
     objectFit: 'cover',
+    '@media': {
+      '(min-width: 480px)': {
+        width: '240px',
+        flexShrink: 0,
+      },
+    },
   },
 ])
+
+export const feedItemContentHorizontal = style({
+  '@media': {
+    '(min-width: 480px)': {
+      display: 'flex',
+      flexDirection: 'row',
+      gap: space.x4,
+      alignItems: 'flex-start',
+    },
+  },
+})
 
 export const feedItemTextContentWrapper = style([
   {
@@ -147,4 +164,19 @@ globalStyle(`${feedItemTextContent} *`, {
 
 globalStyle(`${feedItemTextContent} a`, {
   wordBreak: 'break-all',
+})
+
+export const feedItemMetaRow = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: space.x3,
+  width: '100%',
+  '@media': {
+    '(min-width: 768px)': {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: space.x4,
+    },
+  },
 })

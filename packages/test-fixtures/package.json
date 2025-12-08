@@ -30,8 +30,8 @@
   "peerDependencies": {
     "@buildeross/stores": "0.2.1",
     "@buildeross/types": "0.2.1",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "viem": "^2.38.2",
     "wagmi": "^2.18.1"
   },

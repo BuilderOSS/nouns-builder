@@ -5,7 +5,7 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { DaoProposalCard } from './DaoProposalCard'
@@ -44,25 +44,25 @@ export const DaoProposals = ({
   const isLoading = isLoadingDelayedGovernance || isLoadingVotes
 
   return (
-    <Box mb={'x10'}>
-      <Flex justify={'space-between'} mb={'x6'} align="center">
+    <Box>
+      <Flex justify={'space-between'} mb={'x3'} align="center">
         <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
           {daoImage ? (
-            <Box mr="x4">
+            <Box mr="x2">
               <FallbackImage
                 src={daoImage}
-                style={{ borderRadius: '12px', objectFit: 'contain' }}
+                style={{ borderRadius: '8px', objectFit: 'contain' }}
                 alt=""
-                height={48}
-                width={48}
+                height={32}
+                width={32}
               />
             </Box>
           ) : (
-            <Box mr="x4" borderRadius="phat">
-              <Avatar address={tokenAddress ?? undefined} size="52" />
+            <Box mr="x2" borderRadius="phat">
+              <Avatar address={tokenAddress ?? undefined} size="32" />
             </Box>
           )}
-          <Text fontSize={20} fontWeight="label" className={daoName} mr={'x2'}>
+          <Text fontSize={16} fontWeight="label" className={daoName} mr={'x2'}>
             {name}
           </Text>
         </Link>
@@ -80,7 +80,7 @@ export const DaoProposals = ({
           </Button>
         )}
       </Flex>
-      <Box>
+      <Stack gap="x2">
         {proposals.map((proposal) => (
           <DaoProposalCard
             key={proposal.proposalNumber}
@@ -92,7 +92,7 @@ export const DaoProposals = ({
             {...proposal}
           />
         ))}
-      </Box>
+      </Stack>
     </Box>
   )
 }

@@ -9,3 +9,4 @@ export const MOBILE_PROFILE_MENU_LAYER = 35
 export const HERO_CONTENT_LAYER = 30
 export const HERO_NOUNS_GLASSES_LAYER = 20
 export const HERO_LAYER = 10
+export const DASHBOARD_SIDEBAR_LAYER = 25

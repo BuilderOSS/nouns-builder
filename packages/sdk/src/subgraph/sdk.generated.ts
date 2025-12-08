@@ -5079,11 +5079,17 @@ export type ExploreDaosSearchQuery = {
     description: string
     projectURI: string
     tokenAddress: any
-    auctions: Array<{
-      __typename?: 'Auction'
-      endTime: any
-      highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
-      token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
+    tokens: Array<{
+      __typename?: 'Token'
+      tokenId: any
+      name: string
+      image?: string | null
+      auction?: {
+        __typename?: 'Auction'
+        endTime: any
+        settled: boolean
+        highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+      } | null
     }>
   }>
 }
@@ -5259,7 +5265,6 @@ export type FeedEventsQuery = {
       }
     | {
         __typename: 'AuctionSettledEvent'
-        winner: any
         amount: any
         id: string
         type: FeedEventType
@@ -5273,6 +5278,7 @@ export type FeedEventsQuery = {
           token: {
             __typename?: 'Token'
             tokenId: any
+            owner: any
             name: string
             image?: string | null
           }
@@ -6071,17 +6077,21 @@ export const ExploreDaosSearchDocument = gql`
       description
       projectURI
       tokenAddress
-      auctions(
-        first: 1
-        orderBy: endTime
-        orderDirection: desc
-        where: { settled: false }
-      ) {
-        ...CurrentAuction
+      tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
+        tokenId
+        name
+        image
+        auction {
+          endTime
+          settled
+          highestBid {
+            amount
+            bidder
+          }
+        }
       }
     }
   }
-  ${CurrentAuctionFragmentDoc}
 `
 export const DaoVotersDocument = gql`
   query daoVoters(
@@ -6256,11 +6266,11 @@ export const FeedEventsDocument = gql`
           id
           token {
             tokenId
+            owner
             name
             image
           }
         }
-        winner
         amount
       }
     }

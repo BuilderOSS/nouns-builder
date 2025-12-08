@@ -22,10 +22,21 @@ import {
 } from './CustomDaoSelector.css'
 import { SearchInput } from './SearchInput'
 
+export interface SelectedDaoMetadata {
+  address: AddressType
+  name: string
+  image: string
+  chainId: CHAIN_ID
+}
+
 export interface CustomDaoSelectorProps {
   chainIds: CHAIN_ID[]
   selectedDaoAddresses: AddressType[]
-  onSelectedDaosChange: (addresses: AddressType[]) => void
+  selectedDaosMetadata?: SelectedDaoMetadata[]
+  onSelectedDaosChange: (
+    addresses: AddressType[],
+    metadata: SelectedDaoMetadata[]
+  ) => void
   userAddress?: AddressType
 }
 
@@ -39,6 +50,7 @@ interface DaoListItem {
 export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
   chainIds,
   selectedDaoAddresses: inputSelectedDaoAddresses,
+  selectedDaosMetadata = [],
   onSelectedDaosChange,
   userAddress,
 }) => {
@@ -52,6 +64,15 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
     () => inputSelectedDaoAddresses.map((addr) => addr.toLowerCase() as AddressType),
     [inputSelectedDaoAddresses]
   )
+
+  // Build a map of DAO metadata from props for quick lookup
+  const metadataMap = useMemo(() => {
+    const map = new Map<string, SelectedDaoMetadata>()
+    selectedDaosMetadata.forEach((dao) => {
+      map.set(dao.address.toLowerCase(), dao)
+    })
+    return map
+  }, [selectedDaosMetadata])
 
   // Fetch user's DAOs
   const { daos: memberDaos, isLoading: isLoadingMemberDaos } = useUserDaos({
@@ -93,32 +114,69 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
   )
 
   // Get selected DAO details for chips
+  // Priority: 1. member DAOs, 2. search results, 3. metadata from props (persisted)
   const selectedDaos = useMemo(() => {
     const allDaos = [...memberDaoItems, ...searchDaoItems]
     return selectedDaoAddresses
-      .map((addr) => allDaos.find((dao) => dao.address === addr.toLowerCase()))
+      .map((addr) => {
+        const lowerAddr = addr.toLowerCase()
+        // Try to find in current DAOs (member or search)
+        const foundDao = allDaos.find((dao) => dao.address === lowerAddr)
+        if (foundDao) return foundDao
+        // Fall back to metadata from props (persisted)
+        const metadata = metadataMap.get(lowerAddr)
+        if (metadata) {
+          return {
+            name: metadata.name,
+            image: metadata.image,
+            address: metadata.address,
+            chainId: metadata.chainId,
+          }
+        }
+        return undefined
+      })
       .filter((dao): dao is DaoListItem => dao !== undefined)
-  }, [selectedDaoAddresses, memberDaoItems, searchDaoItems])
+  }, [selectedDaoAddresses, memberDaoItems, searchDaoItems, metadataMap])
 
   const toggleDao = useCallback(
-    (address: string) => {
+    (address: string, daoItem: DaoListItem) => {
       const normalized = address.toLowerCase() as AddressType
       if (selectedDaoAddresses.includes(normalized)) {
-        onSelectedDaosChange(selectedDaoAddresses.filter((addr) => addr !== normalized))
+        // Remove DAO
+        const newAddresses = selectedDaoAddresses.filter((addr) => addr !== normalized)
+        const newMetadata = selectedDaosMetadata.filter(
+          (dao) => dao.address.toLowerCase() !== normalized
+        )
+        onSelectedDaosChange(newAddresses, newMetadata)
       } else {
-        onSelectedDaosChange([...selectedDaoAddresses, normalized])
+        // Add DAO
+        const newAddresses = [...selectedDaoAddresses, normalized]
+        // Add metadata if we have DAO info
+        const newMetadata = [
+          ...selectedDaosMetadata,
+          {
+            address: normalized,
+            name: daoItem.name,
+            image: daoItem.image,
+            chainId: daoItem.chainId,
+          },
+        ]
+        onSelectedDaosChange(newAddresses, newMetadata)
       }
     },
-    [selectedDaoAddresses, onSelectedDaosChange]
+    [selectedDaoAddresses, selectedDaosMetadata, onSelectedDaosChange]
   )
 
   const removeDao = useCallback(
     (address: string) => {
-      onSelectedDaosChange(
-        selectedDaoAddresses.filter((addr) => addr !== address.toLowerCase())
+      const normalized = address.toLowerCase()
+      const newAddresses = selectedDaoAddresses.filter((addr) => addr !== normalized)
+      const newMetadata = selectedDaosMetadata.filter(
+        (dao) => dao.address.toLowerCase() !== normalized
       )
+      onSelectedDaosChange(newAddresses, newMetadata)
     },
-    [selectedDaoAddresses, onSelectedDaosChange]
+    [selectedDaoAddresses, selectedDaosMetadata, onSelectedDaosChange]
   )
 
   // Handle search execution
@@ -142,9 +200,26 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
     const memberAddresses = memberDaoItems.map(
       (dao) => dao.address.toLowerCase() as AddressType
     )
-    const merged = Array.from(new Set([...selectedDaoAddresses, ...memberAddresses]))
-    onSelectedDaosChange(merged)
-  }, [memberDaoItems, selectedDaoAddresses, onSelectedDaosChange])
+    const mergedAddresses = Array.from(
+      new Set([...selectedDaoAddresses, ...memberAddresses])
+    )
+
+    // Merge existing metadata with new member DAO metadata in a single pass
+    const existingAddresses = new Set(
+      selectedDaosMetadata.map((dao) => dao.address.toLowerCase())
+    )
+    const newMemberMetadata = memberDaoItems
+      .filter((dao) => !existingAddresses.has(dao.address.toLowerCase()))
+      .map((dao) => ({
+        address: dao.address,
+        name: dao.name,
+        image: dao.image,
+        chainId: dao.chainId,
+      }))
+    const mergedMetadata = [...selectedDaosMetadata, ...newMemberMetadata]
+
+    onSelectedDaosChange(mergedAddresses, mergedMetadata)
+  }, [memberDaoItems, selectedDaoAddresses, selectedDaosMetadata, onSelectedDaosChange])
 
   const daosToDisplay = useMemo(() => {
     if (activeSearchQuery.trim().length >= MIN_SEARCH_LENGTH) {
@@ -177,7 +252,7 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
       {selectedDaos.length > 0 && (
         <div className={selectedChips}>
           {selectedDaos.map((dao) => (
-            <div key={dao.address} className={chip}>
+            <div key={`${dao.address}-${dao.chainId}`} className={chip}>
               <FallbackImage
                 src={dao.image}
                 alt={dao.name}
@@ -240,14 +315,14 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
 
           return (
             <Label
-              key={dao.address}
+              key={`${dao.address}-${dao.chainId}`}
               className={daoItem}
-              onClick={() => toggleDao(dao.address)}
+              onClick={() => toggleDao(dao.address, dao)}
             >
               <input
                 type="checkbox"
                 checked={isSelected}
-                onChange={() => toggleDao(dao.address)}
+                onChange={() => toggleDao(dao.address, dao)}
                 onClick={(e) => e.stopPropagation()}
               />
               <FallbackImage

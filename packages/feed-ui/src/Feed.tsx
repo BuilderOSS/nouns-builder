@@ -89,6 +89,9 @@ export const Feed: React.FC<FeedProps> = (props) => {
     onError,
   })
 
+  const hideActor = !!actor
+  const hideDao = externalFilterMode && !!(actualDaos && actualDaos.length > 0)
+
   // Filter modal handlers (only used in internal mode)
   const handleApplyFilters = useCallback(
     (values: {
@@ -96,12 +99,19 @@ export const Feed: React.FC<FeedProps> = (props) => {
       eventTypes: FeedEventType[]
       daoFilterMode: 'all' | 'specific'
       daoAddresses: AddressType[]
+      selectedDaos: Array<{
+        address: AddressType
+        name: string
+        image: string
+        chainId: CHAIN_ID
+      }>
     }) => {
       if (!externalFilterMode) {
         filterStore.setChainIds(values.chainIds)
         filterStore.setEventTypes(values.eventTypes)
         filterStore.setDaoFilterMode(values.daoFilterMode)
         filterStore.setDaoAddresses(values.daoAddresses)
+        filterStore.setSelectedDaos(values.selectedDaos)
       }
     },
     [externalFilterMode, filterStore]
@@ -138,7 +148,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
           justify="center"
           align="center"
           py="x16"
-          style={{ maxWidth: '480px' }}
+          style={{ maxWidth: '1440px' }}
         >
           <Text color="negative">Failed to load feed. Please try again later.</Text>
         </Flex>
@@ -149,7 +159,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
   if (isLoading) {
     return (
       <Flex w="100%" justify="center">
-        <Stack gap="x4" w="100%" style={{ maxWidth: '480px' }} py="x4">
+        <Stack gap="x4" w="100%" style={{ maxWidth: '1440px' }} pb="x4">
           <FeedSkeleton />
         </Stack>
       </Flex>
@@ -158,9 +168,9 @@ export const Feed: React.FC<FeedProps> = (props) => {
 
   return (
     <Flex w="100%" justify="center" direction="column" align="center">
-      {/* Customize Feed button - only shown in internal filter mode */}
-      {!externalFilterMode && (
-        <Flex w="100%" justify="flex-end" style={{ maxWidth: '480px' }} pb="x4">
+      {/* Customize Feed button - only shown in internal filter mode and when user is connected */}
+      {!externalFilterMode && address && (
+        <Flex w="100%" justify="flex-end" style={{ maxWidth: '1440px' }} pb="x4">
           <Button
             variant="outline"
             size="sm"
@@ -173,7 +183,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
         </Flex>
       )}
 
-      <Stack gap="x4" w="100%" py="x4" style={{ maxWidth: '480px' }}>
+      <Stack gap="x6" w="100%" pb="x4" style={{ maxWidth: '1440px' }}>
         {items.length === 0 && (
           <Text color="tertiary" textAlign="center" w="100%">
             {!externalFilterMode && filterStore.hasActiveFilters()
@@ -188,8 +198,8 @@ export const Feed: React.FC<FeedProps> = (props) => {
               <FeedItem
                 key={item.id}
                 item={item}
-                hideActor={!!actor}
-                hideDao={!!(actualDaos && actualDaos.length > 0)}
+                hideActor={hideActor}
+                hideDao={hideDao}
               />
             ))}
 
@@ -229,6 +239,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
           eventTypes={filterStore.eventTypes}
           daoFilterMode={filterStore.daoFilterMode}
           daoAddresses={filterStore.daoAddresses}
+          selectedDaos={filterStore.selectedDaos}
           onApply={handleApplyFilters}
           userAddress={address}
         />
