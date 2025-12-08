@@ -39,7 +39,7 @@
     "flatpickr": "^4.6.13",
     "framer-motion": "^12.12.1",
     "ioredis": "^5.8.1",
-    "next": "^15.3.6",
+    "next": "^15.5.7",
     "nextjs-progressbar": "^0.0.16",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",

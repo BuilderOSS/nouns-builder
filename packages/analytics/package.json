@@ -30,7 +30,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "next": "^15.3.6",
+    "next": "^15.5.7",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
