@@ -87,6 +87,10 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
     }
   )
 
+  const ownerCount = data?.ownerCount || '0'
+  const totalSupplyDisplay =
+    totalSupply && Number(totalSupply) > 0 ? Number(totalSupply).toString() : '0'
+
   const treasuryBalance = React.useMemo(() => {
     return balance ? `${formatCryptoVal(formatEther(balance.value))} ETH` : ''
   }, [balance])
@@ -133,14 +137,20 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         className={daoInfo}
       >
         <Statistic title="Treasury" content={treasuryBalance} onClick={onOpenTreasury} />
-        <Statistic title="Owners" content={data?.ownerCount} />
-        <Statistic title="Total supply" content={Number(totalSupply)} />
+        <Statistic title="Owners" content={ownerCount} />
+        <Statistic title="Total supply" content={totalSupplyDisplay} />
         <Statistic
           title="Chain"
           content={
             <Flex align={'center'} mt={{ '@initial': 'x1', '@768': 'x3' }} pr="x2">
               <Box mr="x2">
-                <img src={chain.icon} alt={chain.name} height={28} width={28} />
+                <img
+                  src={chain.icon}
+                  alt={chain.name}
+                  height={28}
+                  width={28}
+                  style={{ height: '28px', width: '28px' }}
+                />
               </Box>
               <Text fontWeight={'display'} className={statisticContent}>
                 {chain.name}
@@ -182,7 +192,9 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
           No founders allocation set.
         </Text>
       )}
-      <MembersList totalSupply={Number(totalSupply)} />
+      {!!totalSupply && Number(totalSupply) > 0 && (
+        <MembersList totalSupply={Number(totalSupply)} />
+      )}
     </Box>
   )
 }
