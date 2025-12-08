@@ -59,3 +59,30 @@ export const preAuctionHelperText = style({
   fontSize: 16,
   lineHeight: '24px',
 })
+
+export const reserveInfoBox = style({
+  padding: '16px 24px',
+  borderRadius: '12px',
+  background: vars.color.background2,
+  marginBottom: 16,
+  maxWidth: 448,
+  width: '100%',
+  textAlign: 'center',
+  '@media': {
+    'screen and (max-width: 768px)': {
+      width: 'calc(100% - 50px)',
+    },
+  },
+})
+
+export const reserveCount = style({
+  fontSize: 24,
+  fontWeight: 600,
+  color: '#000',
+  marginBottom: 4,
+})
+
+export const reserveLabel = style({
+  fontSize: 14,
+  color: '#808080',
+})

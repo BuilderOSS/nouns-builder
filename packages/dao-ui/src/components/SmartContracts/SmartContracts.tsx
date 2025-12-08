@@ -2,9 +2,8 @@ import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { Box, Flex, Grid, Text, vars } from '@buildeross/zord'
-import React from 'react'
 
-import { about, contractItemGrid } from '../styles/About.css'
+import { about, contractItemGrid } from '../../styles/About.css'
 
 const Contract = ({ title, address }: { title: string; address: string }) => {
   const chain = useChainStore((x) => x.chain)

@@ -11,6 +11,9 @@ import {
   preAuctionButtonVariants,
   preAuctionHelperText,
   preAuctionWrapper,
+  reserveCount,
+  reserveInfoBox,
+  reserveLabel,
   wrapper,
 } from './PreAuction.css'
 
@@ -19,24 +22,36 @@ interface PreAuctionProps {
   collectionAddress: string
   onOpenAuction: (tokenId: number) => void
   onOpenSettings: () => void
+  remainingTokensInReserve?: bigint
+  shouldShowMinterModal?: boolean
+  openMinterModal?: () => void
 }
 
 export const PreAuction: React.FC<PreAuctionProps> = ({
   chain,
   onOpenAuction,
   onOpenSettings,
+  remainingTokensInReserve,
+  shouldShowMinterModal = false,
+  openMinterModal,
 }) => {
   const { address } = useAccount()
-  const { addresses } = useDaoStore()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
   const config = useConfig()
+  const { addresses } = useDaoStore()
 
-  const { data, isError } = useSimulateContract({
+  const [isUnPausing, setIsUnPausing] = useState<boolean>(false)
+
+  const {
+    data: unpauseData,
+    isError: unpauseIsError,
+    isLoading: unpauseIsLoading,
+  } = useSimulateContract({
     query: {
       enabled: !!addresses.auction,
     },
     abi: auctionAbi,
     address: addresses.auction,
+    account: address,
     functionName: 'unpause',
     chainId: chain.id,
   })
@@ -45,17 +60,15 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
 
   /* handle start of auction  */
   const handleStartAuction = async () => {
-    if (!data) return
-    setIsLoading(true)
+    if (!unpauseData) return
+    setIsUnPausing(true)
     try {
-      const txHash = await writeContractAsync(data.request)
-      if (txHash)
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
-      setIsLoading(false)
+      const txHash = await writeContractAsync(unpauseData.request)
+      await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
     } catch (e) {
       console.error(e)
-      setIsLoading(false)
-      return
+    } finally {
+      setIsUnPausing(false)
     }
 
     const auction = await readContract(config, {
@@ -72,9 +85,27 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
   return (
     <Flex className={wrapper}>
       <Flex direction={'column'} justify={'center'} className={preAuctionWrapper}>
+        {remainingTokensInReserve && remainingTokensInReserve > 0n && (
+          <Box className={reserveInfoBox}>
+            <Box className={reserveCount}>{remainingTokensInReserve.toString()}</Box>
+            <Box className={reserveLabel}>Tokens Remaining in Reserve</Box>
+            {shouldShowMinterModal && !!openMinterModal && (
+              <Button
+                variant="outline"
+                onClick={openMinterModal}
+                size="sm"
+                width="100%"
+                mt="x4"
+              >
+                Setup Custom Minter
+              </Button>
+            )}
+          </Box>
+        )}
+
         <Button
-          disabled={isLoading || !address || isError}
-          loading={isLoading}
+          disabled={isUnPausing || !address || unpauseIsError || unpauseIsLoading}
+          loading={isUnPausing}
           onClick={handleStartAuction}
           className={preAuctionButtonVariants['start']}
         >
