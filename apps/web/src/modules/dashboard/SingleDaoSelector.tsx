@@ -160,7 +160,7 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
 
           return (
             <Label
-              key={dao.address}
+              key={`${dao.address}-${dao.chainId}`}
               className={daoItem}
               onClick={() => handleDaoClick(dao)}
             >

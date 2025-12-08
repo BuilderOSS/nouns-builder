@@ -139,7 +139,7 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
   }, [selectedDaoAddresses, memberDaoItems, searchDaoItems, metadataMap])
 
   const toggleDao = useCallback(
-    (address: string, daoItem?: DaoListItem) => {
+    (address: string, daoItem: DaoListItem) => {
       const normalized = address.toLowerCase() as AddressType
       if (selectedDaoAddresses.includes(normalized)) {
         // Remove DAO
@@ -152,18 +152,15 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
         // Add DAO
         const newAddresses = [...selectedDaoAddresses, normalized]
         // Add metadata if we have DAO info
-        let newMetadata = [...selectedDaosMetadata]
-        if (daoItem) {
-          newMetadata = [
-            ...selectedDaosMetadata,
-            {
-              address: normalized,
-              name: daoItem.name,
-              image: daoItem.image,
-              chainId: daoItem.chainId,
-            },
-          ]
-        }
+        const newMetadata = [
+          ...selectedDaosMetadata,
+          {
+            address: normalized,
+            name: daoItem.name,
+            image: daoItem.image,
+            chainId: daoItem.chainId,
+          },
+        ]
         onSelectedDaosChange(newAddresses, newMetadata)
       }
     },
@@ -255,7 +252,7 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
       {selectedDaos.length > 0 && (
         <div className={selectedChips}>
           {selectedDaos.map((dao) => (
-            <div key={dao.address} className={chip}>
+            <div key={`${dao.address}-${dao.chainId}`} className={chip}>
               <FallbackImage
                 src={dao.image}
                 alt={dao.name}
@@ -318,7 +315,7 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
 
           return (
             <Label
-              key={dao.address}
+              key={`${dao.address}-${dao.chainId}`}
               className={daoItem}
               onClick={() => toggleDao(dao.address, dao)}
             >

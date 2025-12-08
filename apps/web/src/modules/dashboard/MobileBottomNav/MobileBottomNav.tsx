@@ -33,7 +33,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         onClick={() => onTabChange('feed')}
         type="button"
         aria-label="Home"
-        aria-current={activeTab === 'feed'}
+        aria-current={activeTab === 'feed' ? 'page' : undefined}
       >
         <Icon id="noggles" className={navItemIcon} />
         <span className={navItemLabel}>Home</span>
@@ -44,7 +44,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         onClick={() => onTabChange('create')}
         type="button"
         aria-label="Create"
-        aria-current={activeTab === 'create'}
+        aria-current={activeTab === 'create' ? 'page' : undefined}
       >
         <Icon id="plus" className={navItemIcon} />
         <span className={navItemLabel}>Create</span>
@@ -55,7 +55,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         onClick={() => onTabChange('profile')}
         type="button"
         aria-label="Profile"
-        aria-current={activeTab === 'profile'}
+        aria-current={activeTab === 'profile' ? 'page' : undefined}
       >
         <Avatar address={address} src={ensAvatar} size="24" className={navItemIcon} />
         <span className={navItemLabel}>Profile</span>

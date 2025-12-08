@@ -11,8 +11,8 @@
     "husky": "^8.0.3",
     "ioredis": "^5.8.1",
     "prettier": "3.5.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "syncpack": "^13.0.4",
     "turbo": "2.5.5",
     "viem": "^2.38.2",
@@ -22,8 +22,8 @@
   "packageManager": "pnpm@10.13.1",
   "pnpm": {
     "overrides": {
-      "react": "^19.2.0",
-      "react-dom": "^19.2.0",
+      "react": "^19.2.1",
+      "react-dom": "^19.2.1",
       "@types/react": "^19.2.2",
       "wagmi": "^2.18.1",
       "viem": "^2.38.2",

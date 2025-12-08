@@ -93,7 +93,7 @@ export type DashboardProps = {
 
 export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
   const { address } = useAccount()
-  const { displayName, ensAvatar } = useEnsData(address || '')
+  const { displayName, ensAvatar } = useEnsData(address)
 
   const {
     data: daos,

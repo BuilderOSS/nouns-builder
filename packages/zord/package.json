@@ -23,8 +23,8 @@
     "esbuild-plugin-svgr": "^3.1.1",
     "eslint": "8.57.1",
     "lodash-es": "^4.17.21",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3"
   },
@@ -43,8 +43,8 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "publishConfig": {
     "access": "public"
