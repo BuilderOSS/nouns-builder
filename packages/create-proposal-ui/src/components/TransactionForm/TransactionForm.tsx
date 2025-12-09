@@ -1,8 +1,10 @@
 import { TransactionType } from '@buildeross/types'
-import React, { ReactNode } from 'react'
+import { ReactNode } from 'react'
 
 import { AddArtwork } from './AddArtwork'
 import { Airdrop } from './Airdrop'
+import { ContentCoin } from './ContentCoin'
+import { CreatorCoin } from './CreatorCoin'
 import { CustomTransaction } from './CustomTransaction'
 import { Droposal } from './Droposal'
 import { Escrow } from './Escrow'
@@ -39,6 +41,8 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.DROPOSAL,
   TransactionType.MIGRATION,
   TransactionType.CUSTOM,
+  TransactionType.CREATOR_COIN,
+  TransactionType.CONTENT_COIN,
 ] as const
 
 export const TransactionForm = ({ type }: TransactionFormProps) => {
@@ -58,6 +62,8 @@ export const TransactionForm = ({ type }: TransactionFormProps) => {
     [TransactionType.ADD_ARTWORK]: <AddArtwork />,
     [TransactionType.REPLACE_ARTWORK]: <ReplaceArtwork />,
     [TransactionType.MIGRATION]: <Migration />,
+    [TransactionType.CREATOR_COIN]: <CreatorCoin />,
+    [TransactionType.CONTENT_COIN]: <ContentCoin />,
   }
 
   return <>{FORMS[type]}</>

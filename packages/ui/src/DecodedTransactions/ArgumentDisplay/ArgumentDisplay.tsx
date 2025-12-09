@@ -15,6 +15,7 @@ import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
 import { EscrowArgumentDisplay } from './EscrowArgumentDisplay'
 import { NFTArgumentDisplay } from './NFTArgumentDisplay'
+import { PoolConfigArgumentDisplay } from './PoolConfigArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 
@@ -54,6 +55,14 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   // Check if this is an ERC20 transfer/approve function
   if (functionName === 'transfer' || functionName === 'approve') {
     return <ERC20ArgumentDisplay arg={arg} tokenMetadata={tokenMetadata} />
+  }
+
+  // Check if this is a pool config argument for deploy functions
+  if (
+    (functionName === 'deploy' || functionName === 'deployCreatorCoin') &&
+    arg.name === 'poolConfig'
+  ) {
+    return <PoolConfigArgumentDisplay arg={arg} />
   }
 
   // Check if this is an escrow argument
