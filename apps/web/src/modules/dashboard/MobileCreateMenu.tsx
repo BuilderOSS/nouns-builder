@@ -45,7 +45,7 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
             </Text>
           </button>
 
-          <Link href="/create" passHref>
+          <Link href="/create" style={{ textDecoration: 'none', width: '100%' }}>
             <button className={createMenuCard} type="button">
               <Icon id="plus" className={createMenuCardIcon} />
               <Text fontSize="18" fontWeight="label">

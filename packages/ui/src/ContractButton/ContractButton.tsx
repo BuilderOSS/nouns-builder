@@ -1,7 +1,7 @@
 import { L2_CHAINS, PUBLIC_ALL_CHAINS, PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, ButtonProps, Flex, Icon, PopUp, Text } from '@buildeross/zord'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount, useBalance, useSwitchChain } from 'wagmi'
 
 import { useConnectModal } from '../ConnectModalProvider'
@@ -17,6 +17,13 @@ export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type' | 'ref'> 
   zeroBalanceHint?: React.ReactNode | string
   // Optional function to open connect modal - provided by parent component
   onConnectWallet?: () => void
+}
+
+type ErrorType = 'not_connected' | 'wrong_chain' | 'insufficient_balance'
+
+type ErrorState = {
+  type: ErrorType
+  message: React.ReactNode
 }
 
 export const ContractButton = ({
@@ -48,60 +55,123 @@ export const ContractButton = ({
   }, [chainId, userBalance?.value, zeroBalanceHint])
 
   const { switchChain } = useSwitchChain()
-  const [buttonError, setButtonError] = useState<string | null>(null)
+  const [popupOpen, setPopupOpen] = useState(false)
+  const [switchError, setSwitchError] = useState<string | null>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // Detect validation errors
+  const errorState = useMemo((): ErrorState | null => {
+    if (!userAddress) {
+      return {
+        type: 'not_connected',
+        message: 'Please connect your wallet to continue.',
+      }
+    }
+    if (userChain?.id !== chainId) {
+      return {
+        type: 'wrong_chain',
+        message: `Please switch to ${chainName} to continue.`,
+      }
+    }
+    if (userBalance?.value === 0n) {
+      const message = shouldShowCustomHint ? zeroBalanceHint : INSUFFICIENT_BALANCE_ERROR
+      return {
+        type: 'insufficient_balance',
+        message,
+      }
+    }
+    return null
+  }, [
+    userAddress,
+    userChain?.id,
+    chainId,
+    userBalance?.value,
+    chainName,
+    shouldShowCustomHint,
+    zeroBalanceHint,
+  ])
+
+  // Auto-close popup when error resolves (e.g., user manually switches chain)
+  useEffect(() => {
+    if (!errorState && popupOpen) {
+      setPopupOpen(false)
+      setSwitchError(null)
+    }
+  }, [errorState, popupOpen])
+
   const handleClickWithValidation = useCallback(
     (e?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e?.preventDefault()
-      setButtonError(null) // Clear any previous errors
+      setSwitchError(null) // Clear any previous switch errors
 
-      if (!userAddress) {
-        if (onConnectWallet) {
-          return onConnectWallet()
-        } else if (openConnectModal) {
-          return openConnectModal()
-        } else {
-          setButtonError('Please connect your wallet to continue.')
-          return
-        }
-      }
-      if (userBalance?.value === 0n) {
-        setButtonError(INSUFFICIENT_BALANCE_ERROR)
+      // If there's a validation error, show popup instead of proceeding
+      if (errorState) {
+        setPopupOpen(true)
         return
       }
-      if (userChain?.id !== chainId) {
-        return switchChain?.(
-          { chainId: chainId },
-          {
-            onSuccess: () => {
-              handleClick(e)
-            },
-            onError: (error) => {
-              console.error('ContractButton: switchChain error', error)
-              setButtonError(
-                'Failed to switch network. Please switch to ' +
-                  chainName +
-                  ' manually in your wallet.'
-              )
-            },
-          }
-        )
-      }
 
+      // All validation passed, proceed with the action
       handleClick(e)
     },
-    [
-      userAddress,
-      userChain,
-      switchChain,
-      chainId,
-      chainName,
-      userBalance,
-      handleClick,
-      onConnectWallet,
-      openConnectModal,
-    ]
+    [errorState, handleClick]
   )
+
+  const handleFixError = useCallback(() => {
+    if (!errorState) return
+
+    if (errorState.type === 'not_connected') {
+      setPopupOpen(false)
+      if (onConnectWallet) {
+        onConnectWallet()
+      } else if (openConnectModal) {
+        openConnectModal()
+      }
+    } else if (errorState.type === 'wrong_chain') {
+      switchChain?.(
+        { chainId: chainId },
+        {
+          onSuccess: () => {
+            setPopupOpen(false)
+            setSwitchError(null)
+          },
+          onError: (error) => {
+            console.error('ContractButton: switchChain error', error)
+            setSwitchError(
+              'Failed to switch network. Please switch to ' +
+                chainName +
+                ' manually in your wallet.'
+            )
+          },
+        }
+      )
+    } else if (errorState.type === 'insufficient_balance') {
+      // For insufficient balance, user needs to add funds externally
+      setPopupOpen(false)
+    }
+  }, [errorState, onConnectWallet, openConnectModal, switchChain, chainId, chainName])
+
+  const getActionButtonText = () => {
+    if (!errorState) return null
+    switch (errorState.type) {
+      case 'not_connected':
+        return 'Connect Wallet'
+      case 'wrong_chain':
+        return `Switch to ${chainName}`
+      case 'insufficient_balance':
+        return 'Close'
+      default:
+        return null
+    }
+  }
+
+  // Extract style from rest and merge with error state styling
+  const { style: userStyle, ...restProps } = rest
+  const mergedStyle = {
+    ...userStyle,
+    ...(errorState && {
+      boxShadow: '0 0 0 2px #EF4444',
+    }),
+  }
 
   return (
     <>
@@ -112,26 +182,37 @@ export const ContractButton = ({
         onClick={handleClickWithValidation}
         disabled={disabled || loading}
         loading={loading}
-        {...rest}
+        style={mergedStyle}
+        {...restProps}
       >
         {children}
       </Button>
       <PopUp
         triggerRef={buttonRef.current}
-        open={!!buttonError}
-        onOpenChange={(open) => !open && setButtonError(null)}
+        open={popupOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPopupOpen(false)
+            setSwitchError(null)
+          }
+        }}
         placement="top"
       >
         <Box p="x4" maxWidth="x64">
-          <Flex align="flex-start" gap="x3">
-            <Icon id="warning" size="md" fill="negative" />
-            <Box>
-              <Text variant="paragraph-sm" color="text2">
-                {buttonError === INSUFFICIENT_BALANCE_ERROR && shouldShowCustomHint
-                  ? zeroBalanceHint
-                  : buttonError}
-              </Text>
-            </Box>
+          <Flex direction="column" gap="x3">
+            <Flex align="flex-start" gap="x3">
+              <Icon id="warning" size="md" fill="negative" />
+              <Box>
+                <Text variant="paragraph-sm" color="text2">
+                  {switchError || errorState?.message}
+                </Text>
+              </Box>
+            </Flex>
+            {!switchError && errorState && (
+              <Button size="sm" onClick={handleFixError} style={{ width: '100%' }}>
+                {getActionButtonText()}
+              </Button>
+            )}
           </Flex>
         </Box>
       </PopUp>
