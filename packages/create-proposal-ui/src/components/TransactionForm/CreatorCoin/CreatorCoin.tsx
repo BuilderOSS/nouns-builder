@@ -15,7 +15,6 @@ import { createCreatorPoolConfigFromMinFdv } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
 import {
-  coinFactoryAddress,
   coinFactoryConfig,
   encodeMultiCurvePoolConfig,
 } from '@zoralabs/protocol-deployments'
@@ -24,6 +23,17 @@ import { useState } from 'react'
 import { type Address, encodeFunctionData, zeroAddress, zeroHash } from 'viem'
 
 import { IPFSUploader } from './ipfsUploader'
+
+//export const coinFactoryAddress = {
+//  8453: '0x777777751622c0d3258f214F9DF38E35BF45baF3',
+//  84532: '0xaF88840cb637F2684A9E460316b1678AD6245e4a',
+//} as const
+
+// The following are custom factories deployed by BuilderDAO to deploy creator coins based on ANY currency
+export const coinFactoryAddress = {
+  8453: '0x8227b9868e00B8eE951F17B480D369b84Cd17c20',
+  84532: '0x200Cde9047f4D94BE4f9143af637F3808F121E20',
+}
 
 // Supported chain IDs from Zora's deployment
 const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
