@@ -97,7 +97,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
                 width="100%"
                 mt="x4"
               >
-                Setup Custom Minter
+                Manage Minters
               </Button>
             )}
           </Box>

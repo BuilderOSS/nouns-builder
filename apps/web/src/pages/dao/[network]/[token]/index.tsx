@@ -4,8 +4,10 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   About,
   Activity,
+  CustomMinterForm,
   ERC721RedeemMinterForm,
   MerkleReserveMinterForm,
+  MinterManagementModal,
   PreAuction,
   PreAuctionForm,
   SectionHandler,
@@ -15,11 +17,9 @@ import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { ContractButton } from '@buildeross/ui/ContractButton'
-import { AnimatedModal } from '@buildeross/ui/Modal'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
-import { atoms, Flex, Heading, Stack, Text, theme } from '@buildeross/zord'
+import { atoms, Flex, Text, theme } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -27,20 +27,15 @@ import { Meta } from 'src/components/Meta'
 import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { isAddress, zeroAddress } from 'viem'
-import { useAccount, useConfig, useReadContracts, useWriteContract } from 'wagmi'
-import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
+import { isAddress } from 'viem'
+import { useAccount, useReadContract, useReadContracts } from 'wagmi'
+import { readContract } from 'wagmi/actions'
 
 interface DaoPageProps {
   chainId: CHAIN_ID
   addresses: DaoContractAddresses
   collectionAddress: AddressType
 }
-
-const ENABLE_MERKLE_MINTER = false
-
-const isValidAddress = (address: AddressType | undefined) =>
-  !!address && isAddress(address, { strict: false }) && address !== zeroAddress
 
 const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress }) => {
   const { query, pathname, push } = useRouter()
@@ -82,30 +77,24 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   const [owner, remainingTokensInReserve, isMerkleReserveMinter, isERC721RedeemMinter] =
     unpackOptionalArray(contractData, 4)
 
+  // Separate read for signer minter status
+  const { data: isSignerMinter } = useReadContract({
+    ...tokenContractParams,
+    functionName: 'minter',
+    args: [signerAddress!],
+    query: {
+      enabled: !!signerAddress,
+    },
+  })
+
+  // Check if signer address is a minter - show custom minter tab if true
+  const isSignerCustomMinter = !!signerAddress && !!isSignerMinter
+
   const [showMinterModal, setShowMinterModal] = React.useState(false)
-  const [isSettingUpMinter, setIsSettingUpMinter] = React.useState(false)
-
-  const config = useConfig()
-  const { writeContractAsync } = useWriteContract()
-
-  const merkleMinter = MERKLE_RESERVE_MINTER[chain.id]
-  const redeemMinter = ERC721_REDEEM_MINTER[chain.id]
 
   const shouldShowMinterModal = React.useMemo(
-    () =>
-      !!remainingTokensInReserve &&
-      remainingTokensInReserve > 0n &&
-      !isMerkleReserveMinter &&
-      !isERC721RedeemMinter &&
-      ((isValidAddress(merkleMinter) && ENABLE_MERKLE_MINTER) ||
-        isValidAddress(redeemMinter)),
-    [
-      remainingTokensInReserve,
-      isMerkleReserveMinter,
-      isERC721RedeemMinter,
-      merkleMinter,
-      redeemMinter,
-    ]
+    () => !!remainingTokensInReserve && remainingTokensInReserve > 0n,
+    [remainingTokensInReserve]
   )
 
   const openTab = React.useCallback(
@@ -125,45 +114,16 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     [push, pathname, query]
   )
 
-  const handleSetupMinter = React.useCallback(
-    async (minterType: 'merkle' | 'redeem') => {
-      try {
-        setIsSettingUpMinter(true)
-        const minterAddr =
-          minterType === 'merkle'
-            ? MERKLE_RESERVE_MINTER[chain.id]
-            : ERC721_REDEEM_MINTER[chain.id]
-
-        if (!isValidAddress(minterAddr)) {
-          throw new Error('Invalid minter address')
-        }
-
-        // Directly simulate and write
-        const txHash = await writeContractAsync({
-          abi: tokenAbi,
-          address: addresses.token!,
-          functionName: 'updateMinters',
-          args: [[{ minter: minterAddr, allowed: true }]],
-          chainId: chain.id,
-        })
-
-        if (txHash) {
-          await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
-        }
-
-        setIsSettingUpMinter(false)
-        setShowMinterModal(false)
-
-        // Navigate to the appropriate tab
-        const tab = minterType === 'merkle' ? 'merkle-reserve' : 'erc721-redeem'
-        await openTab(tab)
-      } catch (e) {
-        console.error(`Error setting up minter: ${e}`)
-      } finally {
-        setIsSettingUpMinter(false)
+  const handleMinterEnabled = React.useCallback(
+    async (minterAddress: AddressType) => {
+      // Navigate to appropriate tab when minter is enabled
+      if (minterAddress === MERKLE_RESERVE_MINTER[chain.id]) {
+        await openTab('merkle-reserve')
+      } else if (minterAddress === ERC721_REDEEM_MINTER[chain.id]) {
+        await openTab('erc721-redeem')
       }
     },
-    [chain.id, addresses.token, config, writeContractAsync, openTab]
+    [chain.id, openTab]
   )
 
   const openTokenPage = React.useCallback(
@@ -239,6 +199,13 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
       })
     }
 
+    if (isSignerCustomMinter) {
+      minterSections.push({
+        title: 'Custom Minter',
+        component: [<CustomMinterForm key={'custom_minter'} />],
+      })
+    }
+
     return [
       ...baseSections,
       ...minterSections,
@@ -250,6 +217,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   }, [
     isMerkleReserveMinter,
     isERC721RedeemMinter,
+    isSignerCustomMinter,
     openProposalCreatePage,
     openProposalReviewPage,
   ])
@@ -299,49 +267,14 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
         onTabChange={(tab) => openTab(tab, false)}
       />
 
-      <AnimatedModal
+      <MinterManagementModal
         open={showMinterModal}
         close={() => setShowMinterModal(false)}
-        size="medium"
-      >
-        <Flex direction="column" p="x6" gap="x4">
-          <Heading size="lg">Setup Custom Minter</Heading>
-          <Text color="text3">
-            You have {remainingTokensInReserve?.toString()} tokens in reserve. Choose a
-            minter to configure how these tokens will be distributed.
-          </Text>
-          <Text color="text4" fontSize="14" mt="x2">
-            This will enable the selected minter contract to mint tokens from your
-            reserve.
-          </Text>
-          <Stack gap="x3" mt="x4">
-            {isValidAddress(redeemMinter) && (
-              <ContractButton
-                chainId={chain.id}
-                handleClick={() => handleSetupMinter('redeem')}
-                disabled={isSettingUpMinter || !signerAddress}
-                loading={isSettingUpMinter}
-                variant="secondary"
-                style={{ width: '100%' }}
-              >
-                Setup ERC721 Redeem Minter
-              </ContractButton>
-            )}
-            {isValidAddress(merkleMinter) && ENABLE_MERKLE_MINTER && (
-              <ContractButton
-                chainId={chain.id}
-                handleClick={() => handleSetupMinter('merkle')}
-                disabled={isSettingUpMinter || !signerAddress}
-                loading={isSettingUpMinter}
-                style={{ width: '100%' }}
-                variant="secondary"
-              >
-                Setup Merkle Reserve Minter
-              </ContractButton>
-            )}
-          </Stack>
-        </Flex>
-      </AnimatedModal>
+        remainingTokensInReserve={remainingTokensInReserve}
+        isMerkleReserveMinter={isMerkleReserveMinter}
+        isERC721RedeemMinter={isERC721RedeemMinter}
+        onMinterEnabled={handleMinterEnabled}
+      />
     </Flex>
   )
 }

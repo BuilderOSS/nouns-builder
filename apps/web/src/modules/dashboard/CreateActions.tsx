@@ -1,5 +1,6 @@
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
+import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { actionButtons } from './CreateActions.css'
@@ -22,17 +23,13 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
     setSelectorOpen(true)
   }
 
-  const handleCreateDao = () => {
-    window.open('https://nouns.build/create', '_blank', 'noopener,noreferrer')
-  }
-
   return (
     <>
       <Flex className={actionButtons} gap="x3">
         <Button onClick={handleCreateProposal} style={{ flex: 1 }}>
           Create Proposal
         </Button>
-        <Button onClick={handleCreateDao} variant="outline" style={{ flex: 1 }}>
+        <Button variant="outline" style={{ flex: 1 }} as={Link} href="/create">
           Create a DAO
         </Button>
       </Flex>
