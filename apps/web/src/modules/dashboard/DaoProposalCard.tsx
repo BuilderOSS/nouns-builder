@@ -8,6 +8,8 @@ import { Box, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { useBalance } from 'wagmi'
 
+import { proposalCardVariants } from './dashboard.css'
+
 type DaoProposalCardProps = ProposalForStatus & {
   chainId: CHAIN_ID
   collectionAddress: AddressType
@@ -50,47 +52,46 @@ export const DaoProposalCard = ({
   )
 
   return (
-    <Link
-      mb={'x4'}
-      direction="column"
-      w={'100%'}
-      align={{ '@initial': 'flex-start', '@768': 'center' }}
-      borderColor={displayWarning ? 'warning' : 'border'}
-      borderStyle={'solid'}
-      borderRadius={'curved'}
-      borderWidth={'normal'}
-      py={{ '@initial': 'x3', '@768': 'x6' }}
-      px={{ '@initial': 'x6', '@768': 'x3' }}
-      position={'relative'}
-      link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
-    >
-      <Flex
-        direction={{ '@initial': 'column-reverse', '@768': 'row' }}
+    <>
+      <Link
+        direction="row"
         w={'100%'}
-        align={{ '@initial': 'flex-start', '@768': 'center' }}
+        align="center"
+        borderStyle={'solid'}
+        borderRadius={'curved'}
+        borderWidth={'normal'}
+        py={'x2'}
+        px={'x3'}
         position={'relative'}
+        link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
+        className={proposalCardVariants[displayWarning ? 'warning' : 'default']}
       >
-        <Flex align="center">
-          <Text
-            fontSize={18}
-            fontWeight="label"
-            color={'text4'}
-            mr={'x4'}
-            display={{ '@initial': 'none', '@768': 'flex' }}
-          >
-            {proposalNumber}
-          </Text>
-        </Flex>
-        <Flex
-          mr={'auto'}
-          align="center"
-          mb={{ '@initial': 'x2', '@768': 'x0' }}
-          width={{ '@initial': '100%', '@768': 'auto' }}
-          justify={{ '@initial': 'space-between' }}
+        <Text
+          fontSize={14}
+          fontWeight="label"
+          color={'text4'}
+          mr={'x3'}
+          style={{ flexShrink: 0 }}
         >
-          <Text fontSize={18} fontWeight="label" mr="x3">
-            {title}
-          </Text>
+          #{proposalNumber}
+        </Text>
+        <Text
+          fontSize={14}
+          fontWeight="label"
+          mr="x3"
+          style={{
+            flex: 1,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {title}
+        </Text>
+        <Flex align="center" gap="x2" style={{ flexShrink: 0 }}>
+          <Box style={{ fontSize: '12px' }}>
+            <ProposalStatus {...proposal} />
+          </Box>
           <NeedsVote
             userAddress={userAddress}
             proposalState={state}
@@ -98,29 +99,14 @@ export const DaoProposalCard = ({
             hasWarning={!!displayWarning}
           />
         </Flex>
-        <Flex
-          justify={'space-between'}
-          width={{ '@initial': '100%', '@768': 'unset' }}
-          align={'center'}
-          mb={{ '@initial': 'x3', '@768': 'x0' }}
-        >
-          <Box style={{ width: '225px' }}>
-            <ProposalStatus {...proposal} flipped showTime />
-          </Box>
-          <Flex display={{ '@initial': 'flex', '@768': 'none' }}>
-            <Text fontSize={18} fontWeight="label" color={'text4'}>
-              {proposalNumber}
-            </Text>
-          </Flex>
-        </Flex>
-      </Flex>
+      </Link>
       {displayWarning && (
-        <Flex w="100%" color="warning" align="center" mt="x2">
-          <Icon fill="warning" id="warning" mr="x4" size="sm" />
-          <Box fontWeight="heading">{displayWarning}</Box>
+        <Flex w="100%" color="warning" align="center" mb="x2" px="x3">
+          <Icon fill="warning" id="warning" mr="x2" size="sm" />
+          <Text fontSize={12}>{displayWarning}</Text>
         </Flex>
       )}
-    </Link>
+    </>
   )
 }
 

@@ -5,7 +5,13 @@ import {
   EAS,
   Revoked as RevokedEvent,
 } from '../generated/EAS/EAS'
-import { DAO, DaoMultisigUpdate, Proposal, ProposalUpdate } from '../generated/schema'
+import {
+  DAO,
+  DaoMultisigUpdate,
+  Proposal,
+  ProposalUpdate,
+  ProposalUpdatedEvent as ProposalUpdatedFeedEvent,
+} from '../generated/schema'
 import {
   DAO_MULTISIG_SCHEMA_UID,
   decodeDaoMultisig,
@@ -50,6 +56,19 @@ function handlePropdateAttestation(event: AttestedEvent): void {
   update.originalMessageId = propdate.originalMessageId
   update.deleted = false
   update.save()
+
+  // Create feed event
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new ProposalUpdatedFeedEvent(feedEventId)
+  feedEvent.type = 'PROPOSAL_UPDATED'
+  feedEvent.dao = proposal.dao
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = update.creator
+  feedEvent.proposal = update.proposal
+  feedEvent.update = update.id
+  feedEvent.save()
 }
 
 function handleDaoMultisigAttestation(event: AttestedEvent): void {

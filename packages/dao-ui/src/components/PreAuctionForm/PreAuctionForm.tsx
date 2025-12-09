@@ -23,8 +23,8 @@ import { formatEther, isAddressEqual, parseEther } from 'viem'
 import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { adminSection } from '../styles/Section.css'
-import { Section } from './AdminForm/Section'
+import { adminSection } from '../../styles/Section.css'
+import { Section } from '../AdminForm/Section'
 import { PreAuctionFormValues, preAuctionValidationSchema } from './PreAuctionForm.schema'
 
 interface PreAuctionFormSettingsProps {

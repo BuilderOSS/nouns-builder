@@ -17,4 +17,9 @@ describe('Slugify a given string', () => {
     const result = unslugify('$smArT-CONt^%#()ractS')
     assert.equal(result, '$Smart Cont^%#()racts')
   })
+
+  it('should handle numbers', () => {
+    const result = unslugify('erc721-redeem')
+    assert.equal(result, 'Erc721 Redeem')
+  })
 })

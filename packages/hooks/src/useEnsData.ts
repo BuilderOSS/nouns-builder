@@ -21,6 +21,7 @@ export const useEnsData = (addressOrName?: string): EnsData => {
     chainId: 1,
     query: {
       enabled: !!inputAddress,
+      staleTime: Infinity,
     },
   })
 
@@ -29,6 +30,7 @@ export const useEnsData = (addressOrName?: string): EnsData => {
     chainId: 1,
     query: {
       enabled: !!inputName,
+      staleTime: Infinity,
     },
   })
 
@@ -37,6 +39,7 @@ export const useEnsData = (addressOrName?: string): EnsData => {
     chainId: 1,
     query: {
       enabled: !!ensName || !!inputName,
+      staleTime: Infinity,
     },
   })
 

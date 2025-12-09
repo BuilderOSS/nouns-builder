@@ -1,20 +1,18 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constants/layers'
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
-import { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
-import axios from 'axios'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
-import useSWR from 'swr'
+import { formatUnits } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
@@ -49,19 +47,19 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     chainId: selectedChain.id,
   })
 
-  const userBalance = balance?.formatted
-    ? `${formatCryptoVal(balance?.formatted)} ETH`
+  const userBalance = balance
+    ? `${formatCryptoVal(formatUnits(balance.value, balance.decimals))} ETH`
     : undefined
 
-  const { data: userDaos } = useSWR(
-    address ? [selectedChain.slug, SWR_KEYS.DYNAMIC.MY_DAOS(address)] : null,
-    () => axios.get<MyDaosResponse>(`/api/daos/${address}`).then((x) => x.data),
-    {
-      revalidateOnFocus: false,
-    }
-  )
+  const { daos } = useUserDaos({ address })
 
-  const viewableDaos = userDaos || []
+  const sortedDaos = React.useMemo(() => {
+    return [...daos].sort((a, b) => {
+      const aIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === a.chainId)
+      const bIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === b.chainId)
+      return aIndex - bIndex
+    })
+  }, [daos])
 
   const handleOpenMenu = React.useCallback(
     (open: boolean) => {
@@ -107,7 +105,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           Create a DAO
         </Button>
       </Link>
-      {viewableDaos.length > 0 && (
+      {sortedDaos.length > 0 && (
         <>
           <Box color="border" borderStyle="solid" borderWidth="thin" />
           <Flex
@@ -128,7 +126,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   }
             }
           >
-            {viewableDaos.map((dao, index) => {
+            {sortedDaos.map((dao, index) => {
               const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
               return (
                 <Link

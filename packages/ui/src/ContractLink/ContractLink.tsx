@@ -9,10 +9,16 @@ import { CopyButton } from '../CopyButton'
 export type ContractLinkProps = {
   address: string
   size?: 'xs' | 'sm' | 'md'
+  noBorder?: boolean
   chainId: CHAIN_ID
 }
 
-export const ContractLink = ({ address, size = 'md', chainId }: ContractLinkProps) => {
+export const ContractLink = ({
+  address,
+  size = 'md',
+  chainId,
+  noBorder = false,
+}: ContractLinkProps) => {
   const { py, px } = React.useMemo(() => {
     let px: FlexProps['px'] = { '@initial': 'x4', '@768': 'x6' }
     let py: FlexProps['py'] = { '@initial': 'x4', '@768': 'x5' }
@@ -34,14 +40,14 @@ export const ContractLink = ({ address, size = 'md', chainId }: ContractLinkProp
       px={px}
       justify={'space-between'}
       align={'center'}
-      borderRadius={'curved'}
-      borderColor={'border'}
-      borderStyle={'solid'}
-      borderWidth={'normal'}
-      style={{ backgroundColor: '#fafafa' }}
+      borderRadius={noBorder ? undefined : 'curved'}
+      borderColor={noBorder ? undefined : 'border'}
+      borderStyle={noBorder ? undefined : 'solid'}
+      borderWidth={noBorder ? undefined : 'normal'}
+      style={noBorder ? undefined : { backgroundColor: '#fafafa' }}
       gap={size === 'xs' ? 'x1' : 'x2'}
     >
-      {/* Mobile Layout - Always show snippet */}
+      {/* MobnoBorder ? undefined : ile Layout - Always show snippet */}
       <Text fontSize={16} display={{ '@initial': 'block', '@768': 'none' }}>
         {walletSnippet(address, 8)}
       </Text>

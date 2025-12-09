@@ -3,45 +3,54 @@ import { atoms, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const outerAuctionCard = style([
-  {
-    '@media': {
-      'screen and (max-width: 768px)': {
-        gap: '16px',
-      },
-    },
-  },
   atoms({
     width: '100%',
-    alignItems: { '@initial': 'flex-start', '@768': 'center' },
-    flexDirection: { '@initial': 'column', '@768': 'row' },
-    marginBottom: 'x6',
+    marginBottom: 'x3',
     borderColor: 'border',
     borderStyle: 'solid',
     borderRadius: 'curved',
     borderWidth: 'normal',
-    py: { '@initial': 'x4', '@768': 'x3' },
-    px: { '@initial': 'x2', '@768': 'x6' },
+    py: 'x3',
+    px: 'x3',
   }),
+  {
+    transition: 'border-color 0.15s ease-in-out',
+    borderColor: theme.colors.border,
+    ':hover': {
+      borderColor: theme.colors.neutralHover,
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
+    },
+  },
 ])
+
+export const proposalCardVariants = {
+  default: style({
+    transition: 'border-color 0.15s ease-in-out',
+    borderColor: theme.colors.border,
+    ':hover': {
+      borderColor: theme.colors.neutralHover,
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
+    },
+  }),
+  warning: style({
+    transition: 'border-color 0.15s ease-in-out',
+    borderColor: theme.colors.warning,
+    ':hover': {
+      borderColor: theme.colors.warningHover,
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
+    },
+  }),
+}
 
 export const daoTokenName = style([
   {
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-    width: '200px',
-    '@media': {
-      'screen and (max-width: 912px)': {
-        width: '150px',
-      },
-      'screen and (max-width:768px)': {
-        width: '220px',
-      },
-    },
   },
   atoms({
     overflow: 'hidden',
     fontWeight: 'label',
-    fontSize: 20,
+    fontSize: 16,
   }),
 ])
 
@@ -49,75 +58,20 @@ export const daoAvatar = style([
   atoms({
     objectFit: 'contain',
     borderRadius: 'curved',
-    height: 'x16',
-    width: 'x16',
+    height: 'x12',
+    width: 'x12',
   }),
 ])
 export const daoAvatarBox = style({
-  marginRight: '24px',
-  width: '64px',
-  height: '64px',
-  '@media': {
-    'screen and (max-width: 768px)': {
-      marginRight: '16px',
-    },
-  },
+  marginRight: '12px',
+  width: '48px',
+  height: '48px',
 })
 
-export const auctionCardBrand = style([
-  {
-    width: '40%',
-    '@media': {
-      'screen and (max-width: 912px)': {
-        width: '35%',
-      },
-      'screen and (max-width: 768px)': {
-        width: '100%',
-      },
-    },
-  },
-  atoms({
-    alignItems: 'center',
-  }),
-])
-
-export const stats = style({
-  width: '50%',
-})
-export const statsBox = style({
-  width: '30%',
-  '@media': {
-    'screen and (max-width: 768px)': {
-      width: '80%',
-    },
-    'screen and (max-width: 484px)': {
-      width: '100%',
-    },
-  },
+export const bidBox = style({
+  width: '100%',
 })
 
-export const bidBox = style([
-  {
-    width: '250px',
-    '@media': {
-      'screen and (max-width: 768px)': {
-        width: '100%',
-        marginLeft: 0,
-      },
-    },
-  },
-  atoms({
-    marginLeft: 'auto',
-  }),
-])
-
-export const bidForm = style({
-  width: '75%',
-})
-
-export const bidButton = style({
-  width: '25%',
-})
 export const bidInput = style([
   {
     outline: 'none',
@@ -132,10 +86,10 @@ export const bidInput = style([
   atoms({
     borderWidth: 'none',
     borderRadius: 'curved',
-    height: 'x12',
+    height: 'x10',
     width: '100%',
-    paddingLeft: 'x4',
-    paddingRight: 'x11',
+    paddingLeft: 'x3',
+    paddingRight: 'x10',
     backgroundColor: 'background2',
     fontSize: 14,
     lineHeight: 24,
@@ -181,6 +135,9 @@ export const daoName = style({
   textOverflow: 'ellipsis',
   maxWidth: '250px',
   '@media': {
+    'screen and (min-width: 1024px)': {
+      maxWidth: '200px',
+    },
     'screen and (max-width: 484px)': {
       maxWidth: '200px',
     },

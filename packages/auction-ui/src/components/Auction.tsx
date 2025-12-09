@@ -1,18 +1,15 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { L1_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { auctionAbi } from '@buildeross/sdk/contract'
+import { useCurrentAuction } from '@buildeross/hooks/useCurrentAuction'
 import { getBids, TokenWithDaoQuery } from '@buildeross/sdk/subgraph'
 import { useDaoStore } from '@buildeross/stores'
 import { AddressType, Chain, L2MigratedResponse } from '@buildeross/types'
-import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Flex, Grid } from '@buildeross/zord'
 import axios from 'axios'
 import React, { Fragment, ReactNode } from 'react'
 import useSWR from 'swr'
 import { formatEther } from 'viem'
-import { useConfig } from 'wagmi'
-import { readContract } from 'wagmi/actions'
 
 import { useAuctionEvents } from '../hooks/useAuctionEvents'
 import { auctionGrid, auctionWrapper } from './Auction.css'
@@ -51,7 +48,6 @@ export const Auction: React.FC<AuctionControllerProps> = ({
   const mintDate = mintedAt * 1000
   const bidAmount = token.auction?.winningBid?.amount
   const tokenPrice = bidAmount ? formatEther(bidAmount) : undefined
-  const config = useConfig()
 
   const { treasury } = useDaoStore((x) => x.addresses)
 
@@ -65,43 +61,43 @@ export const Auction: React.FC<AuctionControllerProps> = ({
         .then((x) => x.data)
   )
 
-  const { data: auction } = useSWR(
-    chain.id && auctionAddress
-      ? ([SWR_KEYS.AUCTION, chain.id, auctionAddress] as const)
-      : null,
-    ([, _chainId, _auctionAddress]) =>
-      readContract(config, {
-        abi: auctionAbi,
-        address: _auctionAddress as AddressType,
-        functionName: 'auction',
-        chainId: _chainId,
-      }),
-    { revalidateOnFocus: true }
-  )
-
-  const [currentTokenId, highestBid, highestBidder, _, endTime, settled] =
-    unpackOptionalArray(auction, 6)
-
-  const hasEnded = endTime && endTime < Date.now() / 1000
+  const {
+    isLoading,
+    paused,
+    currentTokenId,
+    highestBid,
+    highestBidder,
+    endTime,
+    settled,
+    hasEnded,
+  } = useCurrentAuction({ chainId: chain.id, auctionAddress: auctionAddress })
 
   const isTokenActiveAuction =
     !settled &&
     currentTokenId !== undefined &&
-    currentTokenId.toString() == queriedTokenId
+    Number(currentTokenId) === Number(queriedTokenId)
 
   const isLatestButNotActive =
-    !isTokenActiveAuction && Number(queriedTokenId) > Number(currentTokenId) && hasEnded
+    !isTokenActiveAuction &&
+    currentTokenId !== undefined &&
+    Number(queriedTokenId) > Number(currentTokenId) &&
+    hasEnded
 
   useAuctionEvents({
     chainId: chain.id,
-    collection,
-    isTokenActiveAuction,
-    onAuctionCreated,
+    auctionAddress,
+    tokenAddress: collection,
+    onAuctionCreated: isTokenActiveAuction ? onAuctionCreated : undefined,
   })
 
   const { data: bids } = useSWR(
     chain.id && queriedTokenId && collection
-      ? ([SWR_KEYS.AUCTION_BIDS, chain.id, collection, queriedTokenId] as const)
+      ? ([
+          SWR_KEYS.AUCTION_BIDS,
+          chain.id,
+          collection.toLowerCase(),
+          queriedTokenId.toString(),
+        ] as const)
       : null,
     ([, _chainId, _collection, _tokenId]) => getBids(_chainId, _collection, _tokenId)
   )
@@ -111,7 +107,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
       <AuctionImage
         key={`auction-${collection}-image-${queriedTokenId}`}
         image={image || ''}
-        isLoading={!auction}
+        isLoading={isLoading}
       />
       <Flex
         direction={'column'}
@@ -131,11 +127,13 @@ export const Auction: React.FC<AuctionControllerProps> = ({
           }
         />
 
-        {isTokenActiveAuction && !!auction && (
+        {isTokenActiveAuction && !isLoading && (
           <CurrentAuction
-            chain={chain}
+            chainId={chain.id}
             tokenId={queriedTokenId}
             auctionAddress={auctionAddress as AddressType}
+            tokenAddress={collection}
+            auctionPaused={paused}
             daoName={token.dao.name}
             bid={highestBid}
             owner={highestBidder}
@@ -145,7 +143,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
           />
         )}
 
-        {!isTokenActiveAuction && !!auction && (
+        {!isTokenActiveAuction && !isLoading && (
           <Fragment>
             <AuctionDetails>
               <BidAmount isOver bid={tokenPrice ?? undefined} />
@@ -158,6 +156,7 @@ export const Auction: React.FC<AuctionControllerProps> = ({
                   owner={tokenOwner}
                   chainId={chain.id}
                   auctionAddress={auctionAddress}
+                  auctionPaused={paused}
                 />
               )}
               {(!isLatestButNotActive || (!!bids && bids.length > 0)) && (

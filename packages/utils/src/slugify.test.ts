@@ -17,4 +17,9 @@ describe('Slugify a given string', () => {
     const result = slugify('$smArT CONt^%#()ractS')
     assert.equal(result, 'smart-contracts')
   })
+
+  it('should handle numbers', () => {
+    const result = slugify('ERC721 Redeem')
+    assert.equal(result, 'erc721-redeem')
+  })
 })

@@ -2,7 +2,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getProposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { BytesType } from '@buildeross/types'
+import { BytesType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import {
@@ -17,9 +17,8 @@ import {
   theme,
 } from '@buildeross/zord'
 import { Field, Formik } from 'formik'
-import React, { Fragment, useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { useSWRConfig } from 'swr'
-import { Hex } from 'viem'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -43,54 +42,86 @@ interface FormValues {
   reason: string
 }
 
-const VoteModal: React.FC<{
+export interface VoteModalProps {
   title: string
-  proposalId: string
+  proposalId: BytesType
   votesAvailable: number
   showVoteModal: boolean
   setShowVoteModal: (show: boolean) => void
-}> = ({ title, proposalId, votesAvailable, showVoteModal, setShowVoteModal }) => {
+  addresses?: RequiredDaoContractAddresses
+  chainId?: CHAIN_ID
+  onSuccess?: () => void
+}
+
+export const VoteModal: React.FC<VoteModalProps> = ({
+  title,
+  proposalId,
+  votesAvailable,
+  showVoteModal,
+  setShowVoteModal,
+  addresses: addressesProp,
+  chainId: chainIdProp,
+  onSuccess,
+}) => {
   const [isCastVoteSuccess, setIsCastVoteSuccess] = React.useState<boolean>(false)
 
-  const handleModalClose = useCallback(() => setShowVoteModal(false), [setShowVoteModal])
+  const handleModalClose = useCallback(() => {
+    setShowVoteModal(false)
+    if (isCastVoteSuccess && onSuccess) {
+      onSuccess()
+    }
+  }, [setShowVoteModal, isCastVoteSuccess, onSuccess])
 
   return (
-    <Fragment>
-      {/* Vote Modal */}
-      <AnimatedModal
-        open={showVoteModal}
-        size={isCastVoteSuccess ? 'small' : 'medium'}
-        close={handleModalClose}
-      >
-        {isCastVoteSuccess ? (
-          <SuccessModalContent
-            success={true}
-            title={'Vote Submitted'}
-            subtitle={`You’ve successfully voted on this proposal`}
-          />
-        ) : (
-          <SubmitVoteForm
-            proposalId={proposalId}
-            votesAvailable={votesAvailable}
-            handleModalClose={handleModalClose}
-            setIsCastVoteSuccess={setIsCastVoteSuccess}
-            title={title}
-          />
-        )}
-      </AnimatedModal>
-    </Fragment>
+    <AnimatedModal
+      open={showVoteModal}
+      size={isCastVoteSuccess ? 'small' : 'medium'}
+      close={handleModalClose}
+    >
+      {isCastVoteSuccess ? (
+        <SuccessModalContent
+          success={true}
+          title={'Vote Submitted'}
+          subtitle={`You’ve successfully voted on this proposal`}
+        />
+      ) : (
+        <SubmitVoteForm
+          proposalId={proposalId}
+          votesAvailable={votesAvailable}
+          handleModalClose={handleModalClose}
+          setIsCastVoteSuccess={setIsCastVoteSuccess}
+          title={title}
+          addresses={addressesProp}
+          chainId={chainIdProp}
+        />
+      )}
+    </AnimatedModal>
   )
 }
 
-const SubmitVoteForm: React.FC<{
-  proposalId: string
+export const SubmitVoteForm: React.FC<{
+  proposalId: BytesType
   votesAvailable: number
   handleModalClose: () => void
   setIsCastVoteSuccess: (show: boolean) => void
   title: string
-}> = ({ proposalId, votesAvailable, handleModalClose, title, setIsCastVoteSuccess }) => {
-  const addresses = useDaoStore((state) => state.addresses)
-  const chain = useChainStore((state) => state.chain)
+  addresses?: RequiredDaoContractAddresses
+  chainId?: CHAIN_ID
+}> = ({
+  proposalId,
+  votesAvailable,
+  handleModalClose,
+  title,
+  setIsCastVoteSuccess,
+  addresses: addressesProp,
+  chainId: chainIdProp,
+}) => {
+  const storeAddresses = useDaoStore((state) => state.addresses)
+  const storeChain = useChainStore((state) => state.chain)
+
+  // Use prop values if provided, otherwise fall back to store
+  const { governor: governorAddress } = addressesProp ?? storeAddresses ?? {}
+  const chainId = chainIdProp ?? storeChain?.id
 
   const { mutate } = useSWRConfig()
   const initialValues: FormValues = useMemo(
@@ -105,41 +136,26 @@ const SubmitVoteForm: React.FC<{
 
   const handleSubmit = useCallback(
     async (values: FormValues) => {
-      if (!addresses.governor) return
+      if (!governorAddress || values.choice === undefined) return
 
       try {
-        const governorContractParams = {
-          address: addresses.governor,
+        const hasReason = values.reason.length > 0
+        const choice = BigInt(values.choice)
+
+        const data = await simulateContract(config, {
+          address: governorAddress,
           abi: governorAbi,
-          chainId: chain.id,
-        }
+          chainId: chainId,
+          functionName: hasReason ? 'castVoteWithReason' : 'castVote',
+          args: hasReason ? [proposalId, choice, values.reason] : [proposalId, choice],
+        })
+        const txHash = await writeContract(config, data.request)
 
-        let txHash: Hex
-        if (values.reason.length > 0) {
-          const data = await simulateContract(config, {
-            ...governorContractParams,
-            functionName: 'castVoteWithReason',
-            args: [
-              proposalId as BytesType,
-              BigInt(values.choice as Choice),
-              values.reason,
-            ],
-          })
-          txHash = await writeContract(config, data.request)
-        } else {
-          const data = await simulateContract(config, {
-            ...governorContractParams,
-            functionName: 'castVote',
-            args: [proposalId as BytesType, BigInt(values.choice!)],
-          })
-          txHash = await writeContract(config, data.request)
-        }
-
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+        await waitForTransactionReceipt(config, { hash: txHash, chainId: chainId })
 
         await mutate(
-          [SWR_KEYS.PROPOSAL, chain.id, proposalId],
-          getProposal(chain.id, proposalId)
+          [SWR_KEYS.PROPOSAL, chainId, proposalId],
+          getProposal(chainId, proposalId)
         )
 
         setIsCastVoteSuccess(true)
@@ -147,7 +163,7 @@ const SubmitVoteForm: React.FC<{
         console.error('Error casting vote:', err)
       }
     },
-    [addresses.governor, chain.id, proposalId, config, mutate, setIsCastVoteSuccess]
+    [governorAddress, chainId, proposalId, config, mutate, setIsCastVoteSuccess]
   )
 
   const voteOptions = useMemo(
@@ -283,7 +299,7 @@ const SubmitVoteForm: React.FC<{
               </Box>
 
               <ContractButton
-                chainId={chain.id}
+                chainId={chainId}
                 loading={isSubmitting}
                 disabled={!values.choice}
                 w="100%"
@@ -301,5 +317,3 @@ const SubmitVoteForm: React.FC<{
     </Box>
   )
 }
-
-export default VoteModal

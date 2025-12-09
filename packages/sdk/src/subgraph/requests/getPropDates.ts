@@ -31,7 +31,7 @@ export interface PropDate {
   timeCreated: number
 }
 
-const getPropdateMessage = async (
+export const getPropdateMessage = async (
   messageType: number,
   message: string
 ): Promise<PropdateMessage> => {

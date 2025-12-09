@@ -1,13 +1,11 @@
 import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { CAST_ENABLED } from '@buildeross/constants/farcasterEnabled'
 import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import {
   About,
   Activity,
   Admin,
-  Feed,
   SectionHandler,
   SmartContracts,
   Treasury,
@@ -22,6 +20,7 @@ import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
+import { DaoFeed } from 'src/components/DaoFeed'
 import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
@@ -142,21 +141,19 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     }
     const daoFeed = {
       title: 'Feed',
-      component: [<Feed key="feed" collectionAddress={collection} />],
+      component: [<DaoFeed key="feed" />],
     }
 
     const publicSections = [
       aboutSection,
+      daoFeed,
       treasurySection,
       proposalsSection,
       smartContractsSection,
     ]
 
-    const baseSections = hasThreshold ? [...publicSections, adminSection] : publicSections
-    return CAST_ENABLED.includes(collection)
-      ? [...baseSections.slice(0, 1), daoFeed, ...baseSections.slice(1)]
-      : baseSections
-  }, [hasThreshold, collection, openTab, openProposalCreatePage, openProposalReviewPage])
+    return hasThreshold ? [...publicSections, adminSection] : publicSections
+  }, [hasThreshold, openTab, openProposalCreatePage, openProposalReviewPage])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''

@@ -1,6 +1,13 @@
 import { Address, BigInt, Bytes, dataSource, log } from '@graphprotocol/graph-ts'
 
-import { DAO, Proposal, ProposalVote } from '../generated/schema'
+import {
+  DAO,
+  Proposal,
+  ProposalCreatedEvent as ProposalCreatedFeedEvent,
+  ProposalExecutedEvent as ProposalExecutedFeedEvent,
+  ProposalVote,
+  ProposalVotedEvent as ProposalVotedFeedEvent,
+} from '../generated/schema'
 import {
   ProposalCanceled as ProposalCanceledEvent,
   ProposalCreated as ProposalCreatedEvent,
@@ -68,6 +75,18 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
 
   dao.save()
   proposal.save()
+
+  // Create feed event
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new ProposalCreatedFeedEvent(feedEventId)
+  feedEvent.type = 'PROPOSAL_CREATED'
+  feedEvent.dao = dao.id
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = proposal.proposer
+  feedEvent.proposal = proposal.id
+  feedEvent.save()
 }
 
 export function handleProposalQueued(event: ProposalQueuedEvent): void {
@@ -95,6 +114,18 @@ export function handleProposalExecuted(event: ProposalExecutedEvent): void {
   proposal.executionTransactionHash = event.transaction.hash
   proposal.queued = false
   proposal.save()
+
+  // Create feed event
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new ProposalExecutedFeedEvent(feedEventId)
+  feedEvent.type = 'PROPOSAL_EXECUTED'
+  feedEvent.dao = proposal.dao
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = event.transaction.from
+  feedEvent.proposal = proposal.id
+  feedEvent.save()
 }
 
 export function handleProposalCanceled(event: ProposalCanceledEvent): void {
@@ -157,4 +188,17 @@ export function handleVoteCast(event: VoteCastEvent): void {
 
   proposal.save()
   proposalVote.save()
+
+  // Create feed event
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new ProposalVotedFeedEvent(feedEventId)
+  feedEvent.type = 'PROPOSAL_VOTED'
+  feedEvent.dao = proposal.dao
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = proposalVote.voter
+  feedEvent.proposal = proposalVote.proposal
+  feedEvent.vote = proposalVote.id
+  feedEvent.save()
 }

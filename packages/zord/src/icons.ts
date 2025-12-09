@@ -32,6 +32,7 @@ import Migrate from './assets/migrate.svg'
 import Move from './assets/move.svg'
 import NewWindow from './assets/new-window.svg'
 import Nft from './assets/nft.svg'
+import Noggles from './assets/noggles.svg'
 import Pause from './assets/pause.svg'
 import PauseTemplate from './assets/pause-template.svg'
 import Play from './assets/play.svg'
@@ -41,6 +42,7 @@ import Refresh from './assets/refresh.svg'
 import ResumeTemplate from './assets/resume-template.svg'
 import Search from './assets/search.svg'
 import Share from './assets/share.svg'
+import Sliders from './assets/sliders.svg'
 import Spanner from './assets/spanner.svg'
 import Trash from './assets/trash.svg'
 import Twitter from './assets/twitter.svg'
@@ -84,6 +86,7 @@ export const icons = {
   move: Move,
   newWindow: NewWindow,
   nft: Nft,
+  noggles: Noggles,
   pause: Pause,
   pauseTemplate: PauseTemplate,
   play: Play,
@@ -93,6 +96,7 @@ export const icons = {
   resumeTemplate: ResumeTemplate,
   search: Search,
   share: Share,
+  sliders: Sliders,
   spanner: Spanner,
   trash: Trash,
   twitter: Twitter,

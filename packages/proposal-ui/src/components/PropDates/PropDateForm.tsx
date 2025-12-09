@@ -6,11 +6,12 @@ import {
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { MessageType, type PropDate } from '@buildeross/sdk/subgraph'
+import { MessageType } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { CHAIN_ID } from '@buildeross/types'
+import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
@@ -19,11 +20,13 @@ import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Field, FieldProps, Form, Formik } from 'formik'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getAddress, type Hex, zeroHash } from 'viem'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import * as Yup from 'yup'
+
+import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 
 const propDateValidationSchema = Yup.object().shape({
   milestoneId: Yup.number(),
@@ -39,7 +42,7 @@ const propDateValidationSchema = Yup.object().shape({
 
 interface PropDateFormValues {
   milestoneId: number
-  proposalId: string
+  proposalId: Hex
   replyTo: string
   message: string
 }
@@ -60,19 +63,34 @@ const getErrorMessage = (error: unknown): string => {
   return 'An unknown error occurred.'
 }
 
+export interface PropDateReplyTo {
+  id: Hex
+  creator: Hex
+  message: string
+}
+
+export interface PropDateFormProps {
+  closeForm: () => void
+  onSuccess: () => void
+  proposalId: Hex
+  replyTo?: PropDateReplyTo
+  invoiceData?: InvoiceMetadata
+  chainId?: CHAIN_ID
+  addresses?: RequiredDaoContractAddresses
+  insideModal?: boolean
+}
+
 export const PropDateForm = ({
   closeForm,
   onSuccess,
   proposalId,
   replyTo,
   invoiceData,
-}: {
-  closeForm: () => void
-  onSuccess: () => void
-  proposalId: string
-  replyTo?: PropDate
-  invoiceData?: InvoiceMetadata
-}) => {
+  chainId: chainIdProp,
+  addresses: addressesProp,
+  insideModal = false,
+}: PropDateFormProps) => {
+  const ref = useRef<HTMLDivElement | null>(null)
   const initialValues = useMemo(
     () =>
       ({
@@ -83,10 +101,13 @@ export const PropDateForm = ({
       }) as PropDateFormValues,
     [proposalId, replyTo?.id]
   )
-  const { id: chainId } = useChainStore((x) => x.chain)
-  const {
-    addresses: { token },
-  } = useDaoStore()
+  const storeChain = useChainStore((x) => x.chain)
+  const storeAddresses = useDaoStore((x) => x.addresses)
+
+  // Use props if provided, otherwise fall back to store
+  const chainId = chainIdProp ?? storeChain.id
+  const tokenAddress = addressesProp?.token ?? storeAddresses.token
+
   const config = useConfig()
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -97,12 +118,18 @@ export const PropDateForm = ({
     replyTo?.creator
   )
 
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [])
+
   const handleSubmit = useCallback(
     async (values: PropDateFormValues) => {
       setIsTxSuccess(false)
       setErrorMessage(null)
 
-      if (!token) {
+      if (!tokenAddress) {
         return
       }
 
@@ -142,7 +169,7 @@ export const PropDateForm = ({
       const attestParams: AttestationParams = {
         schema: PROPDATE_SCHEMA_UID,
         data: {
-          recipient: getAddress(token),
+          recipient: getAddress(tokenAddress),
           expirationTime: 0n,
           revocable: true,
           refUID: zeroHash,
@@ -170,7 +197,7 @@ export const PropDateForm = ({
         setIsSubmitting(false)
       }
     },
-    [chainId, config, token]
+    [chainId, config, tokenAddress]
   )
 
   const handleCloseModal = useCallback(() => {
@@ -178,16 +205,20 @@ export const PropDateForm = ({
     setIsTxSuccess(false)
   }, [onSuccess])
 
+  const boxProps = insideModal
+    ? {}
+    : {
+        p: 'x6',
+        borderColor: 'border',
+        borderStyle: 'solid',
+        borderRadius: 'curved',
+        borderWidth: 'normal',
+        backgroundColor: 'background1',
+        mb: 'x6',
+      }
+
   return (
-    <Box
-      p="x6"
-      borderColor="border"
-      borderStyle="solid"
-      borderRadius="curved"
-      borderWidth="normal"
-      backgroundColor="background1"
-      mb="x6"
-    >
+    <Box {...boxProps} ref={ref}>
       <Flex justify="space-between" mb="x4" align="center">
         <Text fontSize={20} fontWeight="label">
           Create Propdate
@@ -209,7 +240,8 @@ export const PropDateForm = ({
                     Replying to:
                   </Text>
                   <ReplyTo
-                    replyTo={replyTo}
+                    creator={replyTo.creator}
+                    message={replyTo.message}
                     ensName={replyToEnsName}
                     ensAvatar={replyToEnsAvatar}
                   />
@@ -316,11 +348,13 @@ export const PropDateForm = ({
 }
 
 const ReplyTo = ({
-  replyTo,
+  creator,
+  message,
   ensName,
   ensAvatar,
 }: {
-  replyTo: PropDate
+  creator: Hex
+  message: string
   ensName?: string | null
   ensAvatar?: string | null
 }) => {
@@ -333,26 +367,22 @@ const ReplyTo = ({
       borderRadius="curved"
       mt="x2"
       style={{
-        borderLeft: 'var(--space-x2) solid var(--colors-text4)',
+        maxHeight: '200px',
+        overflow: 'auto',
       }}
-      gap="x1"
+      gap="x2"
     >
       <Flex align="center" gap="x1">
-        <Avatar address={replyTo.creator} src={ensAvatar || undefined} size="16" />
+        <Avatar address={creator} src={ensAvatar || undefined} size="16" />
         <Text variant={'label-sm'} fontWeight="label">
-          {ensName || walletSnippet(replyTo.creator)}
+          {ensName || walletSnippet(creator)}
         </Text>
       </Flex>
-      <Text
-        variant="paragraph-sm"
-        color="text2"
-        style={{
-          wordBreak: 'break-word',
-          paddingLeft: 'var(--space-x1)',
-        }}
-      >
-        {replyTo.message}
-      </Text>
+      <Box style={{ fontSize: '14px' }} pl="x2">
+        <Box className={messageStyle}>
+          <MarkdownDisplay>{message}</MarkdownDisplay>
+        </Box>
+      </Box>
     </Flex>
   )
 }

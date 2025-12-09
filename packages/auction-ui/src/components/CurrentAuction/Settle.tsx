@@ -2,15 +2,9 @@ import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Button, Flex } from '@buildeross/zord'
-import React, { useCallback, useState } from 'react'
-import {
-  useAccount,
-  useConfig,
-  useReadContract,
-  useSimulateContract,
-  useWriteContract,
-} from 'wagmi'
-import { waitForTransactionReceipt } from 'wagmi/actions'
+import { useCallback, useState } from 'react'
+import { useAccount, useConfig } from 'wagmi'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { auctionActionButtonVariants } from '../Auction.css'
 
@@ -18,6 +12,7 @@ interface SettleProps {
   isEnding: boolean
   owner?: string | undefined
   auctionAddress: AddressType
+  auctionPaused: boolean
   compact?: boolean
   chainId: CHAIN_ID
 }
@@ -27,54 +22,50 @@ export const Settle = ({
   isEnding,
   owner,
   auctionAddress,
+  auctionPaused: paused,
   compact = false,
 }: SettleProps) => {
   const config = useConfig()
-
   const { address } = useAccount()
-  const isWinner = owner != undefined && address == owner
 
-  const { data: paused } = useReadContract({
-    query: {
-      enabled: !!auctionAddress,
-    },
-    address: auctionAddress,
-    chainId: chainId,
-    abi: auctionAbi,
-    functionName: 'paused',
-  })
-
-  const { data, error } = useSimulateContract({
-    chainId: chainId,
-    query: {
-      enabled: !!auctionAddress && paused !== undefined,
-    },
-    address: auctionAddress,
-    abi: auctionAbi,
-    functionName: paused ? 'settleAuction' : 'settleCurrentAndCreateNewAuction',
-  })
-
-  const { writeContractAsync } = useWriteContract()
+  const isWinner = owner != undefined && address?.toLowerCase() == owner?.toLowerCase()
 
   const [settling, setSettling] = useState(false)
 
   const handleSettle = useCallback(async () => {
-    if (!!error || !data) return
-
-    setSettling(true)
     try {
-      const txHash = await writeContractAsync?.(data.request)
-      if (txHash) await waitForTransactionReceipt(config, { hash: txHash, chainId })
-      setSettling(false)
+      setSettling(true)
+      const data = await simulateContract(config, {
+        address: auctionAddress,
+        abi: auctionAbi,
+        functionName: paused ? 'settleAuction' : 'settleCurrentAndCreateNewAuction',
+        chainId,
+      })
+
+      const txHash = await writeContract(config, data.request)
+      await waitForTransactionReceipt(config, { hash: txHash, chainId })
     } catch (error) {
+      console.error('Error settling auction', error)
+    } finally {
       setSettling(false)
     }
-  }, [error, data, writeContractAsync, config, chainId, setSettling])
+  }, [auctionAddress, config, chainId, paused])
+
+  const buttonText = (() => {
+    if (isWinner) return 'Claim NFT'
+    if (paused) return 'Settle Auction'
+    return 'Start next Auction'
+  })()
 
   if (isEnding && !settling) {
     return (
       <Flex direction="column" align="center" width={'100%'}>
-        <Button disabled className={auctionActionButtonVariants['settling']} size="lg">
+        <Button
+          disabled
+          className={auctionActionButtonVariants['settling']}
+          size={compact ? 'sm' : 'lg'}
+          px={compact ? 'x2' : undefined}
+        >
           Auction ending
         </Button>
       </Flex>
@@ -92,7 +83,8 @@ export const Settle = ({
               : auctionActionButtonVariants['settling']
           }
           variant={compact ? 'outline' : 'primary'}
-          size="lg"
+          size={compact ? 'sm' : 'lg'}
+          px={compact ? 'x2' : undefined}
         >
           Settling
         </Button>
@@ -103,7 +95,6 @@ export const Settle = ({
   return (
     <Flex direction="column" align="center" width={'100%'}>
       <ContractButton
-        disabled={!!error || !data}
         handleClick={handleSettle}
         className={
           compact
@@ -111,10 +102,11 @@ export const Settle = ({
             : auctionActionButtonVariants['settle']
         }
         variant={compact ? 'outline' : 'primary'}
-        size="lg"
+        size={compact ? 'sm' : 'lg'}
+        px={compact ? 'x2' : undefined}
         chainId={chainId}
       >
-        {isWinner ? 'Claim NFT' : 'Start next auction'}
+        {buttonText}
       </ContractButton>
     </Flex>
   )

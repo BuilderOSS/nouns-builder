@@ -9,8 +9,10 @@ import {
   getEscrowBundlerV1,
 } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { atoms, Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
+import { formatEther } from 'viem'
 
 import { ArgumentDisplay } from '../ArgumentDisplay'
 
@@ -27,7 +29,8 @@ export const DecodedDisplay: React.FC<{
   addresses: DaoContractAddresses
   transaction: DecodedTransactionData
   target: string
-}> = ({ chainId, addresses, transaction, target }) => {
+  value: string
+}> = ({ chainId, addresses, transaction, target, value }) => {
   const sortedArgs = React.useMemo(() => {
     const keys = Object.keys(transaction.args)
     const inOrder = (transaction.argOrder as string[]).filter((k) => keys.includes(k))
@@ -158,8 +161,24 @@ export const DecodedDisplay: React.FC<{
           </a>
         </Box>
 
-        <Flex pl={'x2'}>
-          {`.${transaction.functionName}(`}
+        <Flex pl={'x2'} align="center" gap="x0">
+          {`.${transaction.functionName}`}
+          {value !== '0' && transaction.functionName !== 'send' && (
+            <Flex align="center" gap="x1">
+              <Text color="accent">{`{ value:`}</Text>
+              <img
+                src="/chains/ethereum.svg"
+                alt="ETH"
+                loading="lazy"
+                decoding="async"
+                width="16px"
+                height="16px"
+                style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
+              />
+              <Text color="accent">{`${formatCryptoVal(formatEther(BigInt(value)))} ETH }`}</Text>
+            </Flex>
+          )}
+          {`(`}
           {sortedArgs.length === 0 ? `)` : null}
         </Flex>
 

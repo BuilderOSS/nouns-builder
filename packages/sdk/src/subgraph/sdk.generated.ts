@@ -5079,11 +5079,17 @@ export type ExploreDaosSearchQuery = {
     description: string
     projectURI: string
     tokenAddress: any
-    auctions: Array<{
-      __typename?: 'Auction'
-      endTime: any
-      highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
-      token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
+    tokens: Array<{
+      __typename?: 'Token'
+      tokenId: any
+      name: string
+      image?: string | null
+      auction?: {
+        __typename?: 'Auction'
+        endTime: any
+        settled: boolean
+        highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+      } | null
     }>
   }>
 }
@@ -5184,6 +5190,237 @@ export type DaosForUserQuery = {
     auctionAddress: any
     governorAddress: any
   }>
+}
+
+export type FeedEventsQueryVariables = Exact<{
+  first: Scalars['Int']['input']
+  where?: InputMaybe<FeedEvent_Filter>
+}>
+
+export type FeedEventsQuery = {
+  __typename?: 'Query'
+  feedEvents: Array<
+    | {
+        __typename: 'AuctionBidPlacedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        auction: {
+          __typename?: 'Auction'
+          id: string
+          token: {
+            __typename?: 'Token'
+            tokenId: any
+            name: string
+            image?: string | null
+          }
+        }
+        bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any; bidder: any }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'AuctionCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        auction: {
+          __typename?: 'Auction'
+          id: string
+          startTime: any
+          endTime: any
+          token: {
+            __typename?: 'Token'
+            tokenId: any
+            name: string
+            image?: string | null
+          }
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'AuctionSettledEvent'
+        amount: any
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        auction: {
+          __typename?: 'Auction'
+          id: string
+          token: {
+            __typename?: 'Token'
+            tokenId: any
+            owner: any
+            name: string
+            image?: string | null
+          }
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          title?: string | null
+          description?: string | null
+          proposer: any
+          timeCreated: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalExecutedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          title?: string | null
+          description?: string | null
+          proposer: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalUpdatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          title?: string | null
+          description?: string | null
+          proposer: any
+        }
+        update: {
+          __typename?: 'ProposalUpdate'
+          messageType: number
+          message: string
+          originalMessageId: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalVotedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          title?: string | null
+          description?: string | null
+          proposer: any
+        }
+        vote: {
+          __typename?: 'ProposalVote'
+          support: ProposalVoteSupport
+          weight: number
+          reason?: string | null
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+  >
 }
 
 export type FindAuctionsQueryVariables = Exact<{
@@ -5484,6 +5721,21 @@ export type TotalAuctionSalesQueryVariables = Exact<{
 export type TotalAuctionSalesQuery = {
   __typename?: 'Query'
   dao?: { __typename?: 'DAO'; totalAuctionSales: any } | null
+}
+
+export type UserProposalVoteQueryVariables = Exact<{
+  where?: InputMaybe<ProposalVote_Filter>
+}>
+
+export type UserProposalVoteQuery = {
+  __typename?: 'Query'
+  proposalVotes: Array<{
+    __typename?: 'ProposalVote'
+    voter: any
+    support: ProposalVoteSupport
+    weight: number
+    reason?: string | null
+  }>
 }
 
 export const AuctionFragmentDoc = gql`
@@ -5825,17 +6077,21 @@ export const ExploreDaosSearchDocument = gql`
       description
       projectURI
       tokenAddress
-      auctions(
-        first: 1
-        orderBy: endTime
-        orderDirection: desc
-        where: { settled: false }
-      ) {
-        ...CurrentAuction
+      tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
+        tokenId
+        name
+        image
+        auction {
+          endTime
+          settled
+          highestBid {
+            amount
+            bidder
+          }
+        }
       }
     }
   }
-  ${CurrentAuctionFragmentDoc}
 `
 export const DaoVotersDocument = gql`
   query daoVoters(
@@ -5910,6 +6166,115 @@ export const DaosForUserDocument = gql`
     }
   }
   ${DaoFragmentDoc}
+`
+export const FeedEventsDocument = gql`
+  query feedEvents($first: Int!, $where: FeedEvent_filter) {
+    feedEvents(first: $first, where: $where, orderBy: timestamp, orderDirection: desc) {
+      __typename
+      id
+      type
+      timestamp
+      blockNumber
+      transactionHash
+      actor
+      dao {
+        auctionAddress
+        governorAddress
+        metadataAddress
+        tokenAddress
+        treasuryAddress
+        name
+        symbol
+        contractImage
+      }
+      ... on ProposalCreatedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          title
+          description
+          proposer
+          timeCreated
+        }
+      }
+      ... on ProposalVotedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          title
+          description
+          proposer
+        }
+        vote {
+          support
+          weight
+          reason
+        }
+      }
+      ... on ProposalUpdatedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          title
+          description
+          proposer
+        }
+        update {
+          messageType
+          message
+          originalMessageId
+        }
+      }
+      ... on ProposalExecutedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          title
+          description
+          proposer
+        }
+      }
+      ... on AuctionCreatedEvent {
+        auction {
+          id
+          startTime
+          endTime
+          token {
+            tokenId
+            name
+            image
+          }
+        }
+      }
+      ... on AuctionBidPlacedEvent {
+        auction {
+          id
+          token {
+            tokenId
+            name
+            image
+          }
+        }
+        bid {
+          amount
+          bidTime
+          bidder
+        }
+      }
+      ... on AuctionSettledEvent {
+        auction {
+          id
+          token {
+            tokenId
+            owner
+            name
+            image
+          }
+        }
+        amount
+      }
+    }
+  }
 `
 export const FindAuctionsDocument = gql`
   query findAuctions(
@@ -6093,6 +6458,14 @@ export const TotalAuctionSalesDocument = gql`
       totalAuctionSales
     }
   }
+`
+export const UserProposalVoteDocument = gql`
+  query userProposalVote($where: ProposalVote_filter) {
+    proposalVotes(where: $where, first: 1) {
+      ...ProposalVote
+    }
+  }
+  ${ProposalVoteFragmentDoc}
 `
 
 export type SdkFunctionWrapper = <T>(
@@ -6384,6 +6757,24 @@ export function getSdk(
         variables
       )
     },
+    feedEvents(
+      variables: FeedEventsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<FeedEventsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<FeedEventsQuery>({
+            document: FeedEventsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'feedEvents',
+        'query',
+        variables
+      )
+    },
     findAuctions(
       variables?: FindAuctionsQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -6578,6 +6969,24 @@ export function getSdk(
             signal,
           }),
         'totalAuctionSales',
+        'query',
+        variables
+      )
+    },
+    userProposalVote(
+      variables?: UserProposalVoteQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<UserProposalVoteQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<UserProposalVoteQuery>({
+            document: UserProposalVoteDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'userProposalVote',
         'query',
         variables
       )

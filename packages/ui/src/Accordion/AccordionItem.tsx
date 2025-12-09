@@ -7,8 +7,21 @@ import { accordionItem, accordionName } from './Accordion.css'
 export const AccordionItem: React.FC<{
   title: string | ReactElement
   description: ReactElement
-}> = ({ title, description }) => {
-  const [isOpen, setIsOpen] = React.useState<boolean>(false)
+  summary?: string | ReactElement
+  defaultOpen?: boolean
+  titleFontSize?: number
+  summaryFontSize?: number
+  mb?: any
+}> = ({
+  title,
+  description,
+  summary,
+  defaultOpen = false,
+  titleFontSize = 28,
+  summaryFontSize = 14,
+  mb = 'x4',
+}) => {
+  const [isOpen, setIsOpen] = React.useState<boolean>(defaultOpen)
   const variants = {
     initial: {
       height: 0,
@@ -23,7 +36,7 @@ export const AccordionItem: React.FC<{
   return (
     <Stack
       px={'x6'}
-      mb={'x4'}
+      mb={mb}
       borderColor={'border'}
       borderStyle={'solid'}
       borderRadius={'curved'}
@@ -32,15 +45,27 @@ export const AccordionItem: React.FC<{
     >
       <Flex
         onClick={() => setIsOpen((bool) => !bool)}
-        fontSize={28}
-        fontWeight={'label'}
         pb={'x6'}
         pt={'x6'}
         align={'center'}
         justify={'space-between'}
+        gap={'x4'}
         className={accordionName}
       >
-        {title}
+        {summary ? (
+          <Stack gap={'x1'} style={{ flex: 1 }}>
+            <Text fontSize={titleFontSize} fontWeight={'display'}>
+              {title}
+            </Text>
+            <Text fontSize={summaryFontSize} color={'text3'}>
+              {summary}
+            </Text>
+          </Stack>
+        ) : (
+          <Text fontSize={titleFontSize} fontWeight={'label'}>
+            {title}
+          </Text>
+        )}
         {(isOpen && <Icon id="chevronUp" cursor={'pointer'} />) || (
           <Icon id="chevronDown" cursor={'pointer'} />
         )}

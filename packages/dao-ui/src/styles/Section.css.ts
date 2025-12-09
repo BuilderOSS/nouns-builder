@@ -6,4 +6,5 @@ export const activitySection = style({
 
 export const adminSection = style({
   maxWidth: 566,
+  margin: '0 auto',
 })
