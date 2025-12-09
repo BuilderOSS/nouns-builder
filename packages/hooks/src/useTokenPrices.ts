@@ -1,6 +1,7 @@
 import {
-  BUILDER_ADDRESS,
   ETH_ADDRESS,
+  TEST0_ADDRESS,
+  TEST1_ADDRESS,
   ZORA_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { BASE_URL } from '@buildeross/constants/baseUrl'
@@ -118,7 +119,11 @@ export const getTokenPriceByAddress = (address: string): number | null => {
     return 0.5 // $0.50 per ZORA (placeholder)
   }
 
-  if (lowerAddress === BUILDER_ADDRESS.toLowerCase()) {
+  if (lowerAddress === TEST0_ADDRESS.toLowerCase()) {
+    return 1.0 // $1.00 per BUILDER (placeholder)
+  }
+
+  if (lowerAddress === TEST1_ADDRESS.toLowerCase()) {
     return 1.0 // $1.00 per BUILDER (placeholder)
   }
 
