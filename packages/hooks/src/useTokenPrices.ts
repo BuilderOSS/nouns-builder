@@ -116,15 +116,15 @@ export const getTokenPriceByAddress = (address: string): number | null => {
   }
 
   if (lowerAddress === ZORA_ADDRESS.toLowerCase()) {
-    return 0.5 // $0.50 per ZORA (placeholder)
+    return 0.05 // $0.050 per ZORA (placeholder)
   }
 
   if (lowerAddress === TEST0_ADDRESS.toLowerCase()) {
-    return 1.0 // $1.00 per BUILDER (placeholder)
+    return 0.00001 // $0.00001 per TEST0 (placeholder)
   }
 
   if (lowerAddress === TEST1_ADDRESS.toLowerCase()) {
-    return 1.0 // $1.00 per BUILDER (placeholder)
+    return 0.0000005 // $0.0000005 per TEST1 (placeholder)
   }
 
   return null

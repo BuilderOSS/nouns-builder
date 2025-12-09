@@ -46,6 +46,6 @@ export const coinFormSchema = yup.object({
   minFdvUsd: yup
     .number()
     .positive('Minimum FDV must be a positive number')
-    .min(1000, 'Minimum FDV must be at least $1,000')
+    .min(49, 'Minimum FDV must be at least $49')
     .typeError('Minimum FDV must be a valid number'),
 })
