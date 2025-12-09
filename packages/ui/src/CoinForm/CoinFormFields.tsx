@@ -19,12 +19,16 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
   showProperties = false,
   chainId,
   showCurrencyInput = true,
+  currencyOptions: defaultCurrencyOptions,
 }) => {
   // Determine available currency options based on chain
   const isBaseSepolia = chainId === BASE_SEPOLIA_CHAIN_ID
   const isBaseMainnet = chainId === BASE_MAINNET_CHAIN_ID
 
   const currencyOptions = React.useMemo(() => {
+    if (defaultCurrencyOptions) {
+      return defaultCurrencyOptions
+    }
     if (isBaseSepolia) {
       return [{ value: ETH_ADDRESS, label: 'ETH' }]
     }
@@ -32,11 +36,11 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
       return [
         { value: ETH_ADDRESS, label: 'ETH' },
         { value: ZORA_ADDRESS, label: 'ZORA' },
-        { value: BUILDER_ADDRESS, label: 'BUILDER (Coming Soon)', disabled: true },
+        { value: BUILDER_ADDRESS, label: 'BUILDER' },
       ]
     }
     return [{ value: ETH_ADDRESS, label: 'ETH' }]
-  }, [isBaseSepolia, isBaseMainnet])
+  }, [isBaseSepolia, isBaseMainnet, defaultCurrencyOptions])
 
   // Handle media upload to store mime type
   const handleMediaUploadStart = React.useCallback(
