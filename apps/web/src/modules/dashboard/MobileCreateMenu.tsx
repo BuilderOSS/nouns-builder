@@ -1,5 +1,6 @@
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Icon, Stack, Text } from '@buildeross/zord'
+import Link from 'next/link'
 import React, { useState } from 'react'
 
 import { DaoSelectorModal } from './DaoSelectorModal'
@@ -28,10 +29,6 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
     setSelectorOpen(true)
   }
 
-  const handleCreateDao = () => {
-    window.open('https://nouns.build/create', '_blank', 'noopener,noreferrer')
-  }
-
   return (
     <>
       <Stack className={createMenuContainer}>
@@ -48,15 +45,17 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
             </Text>
           </button>
 
-          <button className={createMenuCard} onClick={handleCreateDao} type="button">
-            <Icon id="plus" className={createMenuCardIcon} />
-            <Text fontSize="18" fontWeight="label">
-              Create a DAO
-            </Text>
-            <Text fontSize="14" color="text3">
-              Launch your own DAO on Nouns Builder
-            </Text>
-          </button>
+          <Link href="/create" passHref>
+            <button className={createMenuCard} type="button">
+              <Icon id="plus" className={createMenuCardIcon} />
+              <Text fontSize="18" fontWeight="label">
+                Create a DAO
+              </Text>
+              <Text fontSize="14" color="text3">
+                Launch your own DAO on Nouns Builder
+              </Text>
+            </button>
+          </Link>
         </div>
       </Stack>
 
