@@ -1,4 +1,9 @@
-import { BUILDER_ADDRESS, ETH_ADDRESS, ZORA_ADDRESS } from '@buildeross/constants'
+import {
+  ETH_ADDRESS,
+  TEST0_ADDRESS,
+  TEST1_ADDRESS,
+  ZORA_ADDRESS,
+} from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
@@ -36,7 +41,8 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
       return [
         { value: ETH_ADDRESS, label: 'ETH' },
         { value: ZORA_ADDRESS, label: 'ZORA' },
-        { value: BUILDER_ADDRESS, label: 'BUILDER' },
+        { value: TEST0_ADDRESS, label: 'TEST0' },
+        { value: TEST1_ADDRESS, label: 'TEST1' },
       ]
     }
     return [{ value: ETH_ADDRESS, label: 'ETH' }]
