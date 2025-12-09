@@ -10,7 +10,12 @@ import {
 } from '@buildeross/hooks'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
-import { CoinFormFields, coinFormSchema, type CoinFormValues } from '@buildeross/ui'
+import {
+  CoinFormFields,
+  coinFormSchema,
+  type CoinFormValues,
+  ContentPostPreview,
+} from '@buildeross/ui'
 import { createCreatorPoolConfigFromMinFdv } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
@@ -19,10 +24,11 @@ import {
   coinFactoryConfig,
   encodeMultiCurvePoolConfig,
 } from '@zoralabs/protocol-deployments'
-import { Form, Formik, type FormikHelpers } from 'formik'
-import { useState } from 'react'
+import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
+import React, { useEffect, useState } from 'react'
 import { type Address, encodeFunctionData, zeroAddress, zeroHash } from 'viem'
 
+import * as styles from './ContentCoin.css'
 import { IPFSUploader } from './ipfsUploader'
 
 // Supported chain IDs from Zora's deployment
@@ -30,6 +36,23 @@ const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
 // Default minimum Fully Diluted Valuation (FDV) in USD for pool config calculations
 const DEFAULT_MIN_FDV_USD = 10000 // $10k minimum FDV
+
+/**
+ * FormObserver component to watch form values and trigger callback
+ */
+interface FormObserverProps {
+  onChange: (values: CoinFormValues) => void
+}
+
+const FormObserver: React.FC<FormObserverProps> = ({ onChange }) => {
+  const { values } = useFormikContext<CoinFormValues>()
+
+  useEffect(() => {
+    onChange(values)
+  }, [values, onChange])
+
+  return null
+}
 
 export interface ContentCoinProps {
   initialValues?: Partial<CoinFormValues>
@@ -49,6 +72,14 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
   const { chain } = useChainStore()
 
   const [submitError, setSubmitError] = useState<string | undefined>()
+  const [previewData, setPreviewData] = useState<CoinFormValues>({
+    name: '',
+    symbol: '',
+    description: '',
+    imageUrl: '',
+    mediaUrl: '',
+    mediaMimeType: '',
+  })
 
   // Check if the current chain is supported
   const isChainSupported = SUPPORTED_CHAIN_IDS.includes(chain.id)
@@ -258,60 +289,73 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Flex as={Form} direction="column" gap="x6">
-                <Stack gap="x4">
-                  <Text variant="heading-sm">Create Content Coin</Text>
-                  <Text variant="paragraph-md" color="text3">
-                    Configure your content coin metadata and add the transaction to the
-                    proposal queue.
-                  </Text>
-                </Stack>
+                {/* Observer to trigger preview updates */}
+                <FormObserver onChange={setPreviewData} />
 
-                <CoinFormFields
-                  formik={formik}
-                  showMediaUpload={showMediaUpload}
-                  showProperties={showProperties}
-                  initialValues={initialValues}
-                  chainId={chain.id}
-                  showCurrencyInput={true}
-                />
+                {/* Two-column layout: Form on left, Preview on right */}
+                <Box className={styles.contentCoinGrid}>
+                  {/* Left column: Form */}
+                  <Stack gap="x6">
+                    <Stack gap="x4">
+                      <Text variant="heading-sm">Create Content Coin</Text>
+                      <Text variant="paragraph-md" color="text3">
+                        Configure your content coin metadata and add the transaction to
+                        the proposal queue.
+                      </Text>
+                    </Stack>
 
-                {submitError && (
-                  <Box
-                    p="x4"
-                    borderRadius="curved"
-                    backgroundColor="negative"
-                    style={{ opacity: 0.1 }}
-                  >
-                    <Text variant="paragraph-sm" color="negative">
-                      {submitError}
-                    </Text>
+                    <CoinFormFields
+                      formik={formik}
+                      showMediaUpload={showMediaUpload}
+                      showProperties={showProperties}
+                      chainId={chain.id}
+                      showCurrencyInput={true}
+                    />
+
+                    {submitError && (
+                      <Box
+                        p="x4"
+                        borderRadius="curved"
+                        backgroundColor="negative"
+                        style={{ opacity: 0.1 }}
+                      >
+                        <Text variant="paragraph-sm" color="negative">
+                          {submitError}
+                        </Text>
+                      </Box>
+                    )}
+
+                    {!treasury && (
+                      <Box
+                        p="x4"
+                        borderRadius="curved"
+                        backgroundColor="warning"
+                        style={{ opacity: 0.1 }}
+                      >
+                        <Text variant="paragraph-sm" color="warning">
+                          Treasury address not found. Please connect to a DAO.
+                        </Text>
+                      </Box>
+                    )}
+
+                    <Button
+                      variant="outline"
+                      borderRadius="curved"
+                      w="100%"
+                      type="submit"
+                      disabled={isDisabled || !formik.isValid}
+                    >
+                      {formik.isSubmitting
+                        ? 'Adding Transaction to Queue...'
+                        : 'Add Transaction to Queue'}
+                    </Button>
+                  </Stack>
+
+                  {/* Right column: Preview (hidden on mobile) */}
+                  <Box className={styles.previewColumn}>
+                    <ContentPostPreview {...previewData} chainId={chain.id} />
                   </Box>
-                )}
-
-                {!treasury && (
-                  <Box
-                    p="x4"
-                    borderRadius="curved"
-                    backgroundColor="warning"
-                    style={{ opacity: 0.1 }}
-                  >
-                    <Text variant="paragraph-sm" color="warning">
-                      Treasury address not found. Please connect to a DAO.
-                    </Text>
-                  </Box>
-                )}
-
-                <Button
-                  variant="outline"
-                  borderRadius="curved"
-                  w="100%"
-                  type="submit"
-                  disabled={isDisabled || !formik.isValid}
-                >
-                  {formik.isSubmitting
-                    ? 'Adding Transaction to Queue...'
-                    : 'Add Transaction to Queue'}
-                </Button>
+                </Box>
               </Flex>
             </Box>
           )

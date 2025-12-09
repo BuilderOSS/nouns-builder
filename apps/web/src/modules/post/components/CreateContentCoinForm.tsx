@@ -22,9 +22,9 @@ import {
   coinFactoryConfig,
   encodeMultiCurvePoolConfig,
 } from '@zoralabs/protocol-deployments'
-import { Form, Formik, type FormikHelpers } from 'formik'
+import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
 import { useRouter } from 'next/router'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { type Address, zeroAddress, zeroHash } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
@@ -34,6 +34,23 @@ const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
 // Default minimum Fully Diluted Valuation (FDV) in USD for pool config calculations
 const DEFAULT_MIN_FDV_USD = 10000 // $10k minimum FDV
+
+/**
+ * FormObserver component to watch form values and trigger callback
+ */
+interface FormObserverProps {
+  onChange: (values: CoinFormValues) => void
+}
+
+const FormObserver: React.FC<FormObserverProps> = ({ onChange }) => {
+  const { values } = useFormikContext<CoinFormValues>()
+
+  useEffect(() => {
+    onChange(values)
+  }, [values, onChange])
+
+  return null
+}
 
 /**
  * Custom IPFS uploader that wraps uploadFile from ipfs-service
@@ -54,11 +71,13 @@ class IPFSUploader implements Uploader {
 export interface CreateContentCoinFormProps {
   chainId: CHAIN_ID
   treasury: AddressType
+  onFormChange?: (values: CoinFormValues) => void
 }
 
 export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   chainId,
   treasury,
+  onFormChange,
 }) => {
   const router = useRouter()
   const config = useConfig()
@@ -305,6 +324,9 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Flex as={Form} direction="column" gap="x6">
+                {/* Observer to trigger onFormChange callback */}
+                {onFormChange && <FormObserver onChange={onFormChange} />}
+
                 <CoinFormFields
                   formik={formik}
                   showMediaUpload={true}

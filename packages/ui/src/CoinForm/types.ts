@@ -1,3 +1,5 @@
+import type { AddressType } from '@buildeross/types'
+
 export interface CoinFormValues {
   name: string
   symbol: string
@@ -17,4 +19,9 @@ export interface CoinFormFieldsProps {
   initialValues?: Partial<CoinFormValues>
   chainId?: number
   showCurrencyInput?: boolean
+  currencyOptions?: {
+    value: AddressType
+    label: string
+    disabled?: boolean
+  }[]
 }

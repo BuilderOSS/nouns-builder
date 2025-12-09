@@ -1,13 +1,15 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { type CoinFormValues, ContentPostPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
-import React from 'react'
+import React, { useState } from 'react'
 
 import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
 import { CreateContentCoinForm } from '../../../../../modules/post/components/CreateContentCoinForm'
+import * as styles from '../../../../../modules/post/styles/postCreate.css'
 
 interface CreatePostPageProps {
   daoName: string
@@ -26,10 +28,20 @@ export default function CreatePostPage({
   chainId,
   network,
 }: CreatePostPageProps) {
+  // State to track form values for preview
+  const [previewData, setPreviewData] = useState<CoinFormValues>({
+    name: '',
+    symbol: '',
+    description: '',
+    imageUrl: '',
+    mediaUrl: '',
+    mediaMimeType: '',
+  })
+
   return (
     <DefaultLayout>
       <Flex justify="center" py="x12" px="x4">
-        <Box style={{ maxWidth: 640, width: '100%' }}>
+        <Box style={{ maxWidth: 1280, width: '100%' }}>
           <Stack gap="x6">
             {/* Header */}
             <Box>
@@ -67,8 +79,26 @@ export default function CreatePostPage({
               </Flex>
             </Box>
 
-            {/* Content Coin Form */}
-            <CreateContentCoinForm chainId={chainId} treasury={treasuryAddress} />
+            {/* Two-column layout: Form on left, Preview on right */}
+            <Box className={styles.twoColumnGrid}>
+              {/* Left column: Form */}
+              <Box>
+                <CreateContentCoinForm
+                  chainId={chainId}
+                  treasury={treasuryAddress}
+                  onFormChange={setPreviewData}
+                />
+              </Box>
+
+              {/* Right column: Preview (hidden on mobile) */}
+              <Box className={styles.previewColumn}>
+                <ContentPostPreview
+                  {...previewData}
+                  chainId={chainId}
+                  daoName={daoName}
+                />
+              </Box>
+            </Box>
           </Stack>
         </Box>
       </Flex>

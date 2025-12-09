@@ -17,6 +17,11 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
 
+  const handleCreatePost = () => {
+    setActionType('post')
+    setSelectorOpen(true)
+  }
+
   const handleCreateProposal = () => {
     setActionType('proposal')
     setSelectorOpen(true)
@@ -28,11 +33,16 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
 
   return (
     <>
-      <Flex className={actionButtons} gap="x3">
-        <Button onClick={handleCreateProposal} style={{ flex: 1 }}>
-          Create Proposal
-        </Button>
-        <Button onClick={handleCreateDao} variant="outline" style={{ flex: 1 }}>
+      <Flex direction="column" className={actionButtons} gap="x3">
+        <Flex gap="x3">
+          <Button onClick={handleCreatePost} style={{ flex: 1 }}>
+            Create Post
+          </Button>
+          <Button onClick={handleCreateProposal} variant="outline" style={{ flex: 1 }}>
+            Create Proposal
+          </Button>
+        </Flex>
+        <Button onClick={handleCreateDao} variant="ghost">
           Create a DAO
         </Button>
       </Flex>

@@ -134,7 +134,7 @@ export const PROTOCOL_REWARDS_MANAGER: AddressType =
 // Currency addresses for creator coins
 export const ETH_ADDRESS: AddressType = '0x0000000000000000000000000000000000000000'
 export const ZORA_ADDRESS: AddressType = '0x1111111111166b7fe7bd91427724b487980afc69'
-export const BUILDER_ADDRESS: AddressType = '0x0000000000000000000000000000000000000002' // Placeholder - token not deployed yet
+export const BUILDER_ADDRESS: AddressType = '0x0b0fdb7a0615726edc4f4436fbca96d36e0b87a6' // Placeholder - token not deployed yet
 
 // Builder Treasury addresses by chain (used as referral address)
 export const BUILDER_TREASURY_ADDRESS = {
