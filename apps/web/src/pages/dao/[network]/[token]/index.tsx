@@ -15,10 +15,11 @@ import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { AnimatedModal } from '@buildeross/ui'
+import { ContractButton } from '@buildeross/ui/ContractButton'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
-import { atoms, Button, Flex, Heading, Stack, Text, theme } from '@buildeross/zord'
+import { atoms, Flex, Heading, Stack, Text, theme } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
@@ -35,6 +36,8 @@ interface DaoPageProps {
   addresses: DaoContractAddresses
   collectionAddress: AddressType
 }
+
+const ENABLE_MERKLE_MINTER = false
 
 const isValidAddress = (address: AddressType | undefined) =>
   !!address && isAddress(address, { strict: false }) && address !== zeroAddress
@@ -94,7 +97,8 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
       remainingTokensInReserve > 0n &&
       !isMerkleReserveMinter &&
       !isERC721RedeemMinter &&
-      (isValidAddress(merkleMinter) || isValidAddress(redeemMinter)),
+      ((isValidAddress(merkleMinter) && ENABLE_MERKLE_MINTER) ||
+        isValidAddress(redeemMinter)),
     [
       remainingTokensInReserve,
       isMerkleReserveMinter,
@@ -123,9 +127,8 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
 
   const handleSetupMinter = React.useCallback(
     async (minterType: 'merkle' | 'redeem') => {
-      setIsSettingUpMinter(true)
-
       try {
+        setIsSettingUpMinter(true)
         const minterAddr =
           minterType === 'merkle'
             ? MERKLE_RESERVE_MINTER[chain.id]
@@ -155,7 +158,8 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
         const tab = minterType === 'merkle' ? 'merkle-reserve' : 'erc721-redeem'
         await openTab(tab)
       } catch (e) {
-        console.error(e)
+        console.error(`Error setting up minter: ${e}`)
+      } finally {
         setIsSettingUpMinter(false)
       }
     },
@@ -312,26 +316,28 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
           </Text>
           <Stack gap="x3" mt="x4">
             {isValidAddress(redeemMinter) && (
-              <Button
-                onClick={() => handleSetupMinter('redeem')}
+              <ContractButton
+                chainId={chain.id}
+                handleClick={() => handleSetupMinter('redeem')}
                 disabled={isSettingUpMinter || !signerAddress}
                 loading={isSettingUpMinter}
                 variant="secondary"
                 style={{ width: '100%' }}
               >
                 Setup ERC721 Redeem Minter
-              </Button>
+              </ContractButton>
             )}
-            {isValidAddress(merkleMinter) && (
-              <Button
-                onClick={() => handleSetupMinter('merkle')}
+            {isValidAddress(merkleMinter) && ENABLE_MERKLE_MINTER && (
+              <ContractButton
+                chainId={chain.id}
+                handleClick={() => handleSetupMinter('merkle')}
                 disabled={isSettingUpMinter || !signerAddress}
                 loading={isSettingUpMinter}
                 style={{ width: '100%' }}
                 variant="secondary"
               >
                 Setup Merkle Reserve Minter
-              </Button>
+              </ContractButton>
             )}
           </Stack>
         </Flex>
