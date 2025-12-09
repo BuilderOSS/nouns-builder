@@ -29,6 +29,7 @@ export const createMenuCard = style([
   }),
   {
     display: 'flex',
+    width: '100%',
     flexDirection: 'column',
     alignItems: 'flex-start',
     gap: space.x3,
