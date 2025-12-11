@@ -155,7 +155,7 @@ export const CustomMinterForm: React.FC = () => {
           handleClick={handleMint}
           disabled={!recipient || !tokenId || !signerAddress || isMinting}
           loading={isMinting}
-          variant="secondary"
+          variant="primary"
           style={{ width: '100%' }}
         >
           Mint Token

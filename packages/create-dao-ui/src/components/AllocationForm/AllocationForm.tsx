@@ -269,6 +269,14 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
                         : undefined
                     }
                   />
+                  {formik.values.reservedUntilTokenId &&
+                    Number(formik.values.reservedUntilTokenId) > 0 && (
+                      <Paragraph color="text3" mt={'x2'} fontSize={14}>
+                        Reserving tokens 0 -{' '}
+                        {Number(formik.values.reservedUntilTokenId) - 1} (Total{' '}
+                        {formik.values.reservedUntilTokenId} tokens)
+                      </Paragraph>
+                    )}
                 </motion.div>
               </>
             )}
