@@ -92,11 +92,6 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
 
   const [showMinterModal, setShowMinterModal] = React.useState(false)
 
-  const shouldShowMinterModal = React.useMemo(
-    () => !!remainingTokensInReserve && remainingTokensInReserve > 0n,
-    [remainingTokensInReserve]
-  )
-
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
       const nextQuery = { ...query } // Get existing query params
@@ -257,7 +252,6 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
         onOpenAuction={openTokenPage}
         onOpenSettings={() => openTab('admin')}
         remainingTokensInReserve={remainingTokensInReserve}
-        shouldShowMinterModal={shouldShowMinterModal}
         openMinterModal={() => setShowMinterModal(true)}
       />
 
