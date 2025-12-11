@@ -465,7 +465,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               {version?.startsWith('2') && reservedUntilTokenId !== 0n && (
                 <ReviewItem
                   label="Reserved Tokens"
-                  value={`0 to ${reservedUntilTokenId.toString()}`}
+                  value={`0 - ${(reservedUntilTokenId - 1n).toString()} (Total ${reservedUntilTokenId.toString()} token${reservedUntilTokenId === 1n ? '' : 's'})`}
                 />
               )}
             </ReviewSection>

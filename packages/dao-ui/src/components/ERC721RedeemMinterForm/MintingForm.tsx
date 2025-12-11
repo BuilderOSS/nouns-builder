@@ -150,6 +150,7 @@ export const MintingForm: React.FC<MintingFormProps> = ({
         handleClick={handleMint}
         disabled={!isValid || tokenIds.length === 0 || !address || isMinting}
         style={{ width: '100%', marginTop: '16px' }}
+        variant="primary"
         chainId={chain.id}
       >
         {isMinting

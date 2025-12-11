@@ -164,6 +164,7 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
                 disabled={!formik.dirty && changes === 0}
                 loading={formik.isSubmitting}
                 chainId={chain.id}
+                variant="primary"
                 style={{
                   flex: onCancel ? 1 : undefined,
                   width: onCancel ? undefined : '100%',
