@@ -67,6 +67,7 @@ export const Meta: React.FC<MetaProps> = ({ title, type, path, image, descriptio
       <meta name="twitter:image" content={m.imageUrl} />
 
       <meta name="fc:frame" content={`${JSON.stringify(m)}`} />
+      <meta name="base:app_id" content="693becf88a7c4e55fec73f6f" />
     </Head>
   )
 }
