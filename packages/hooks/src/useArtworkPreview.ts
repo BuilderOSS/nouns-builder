@@ -191,7 +191,7 @@ export const useArtworkPreview = ({
         .reverse() // Reverse to match the stacking order
 
       const hasLocalFiles = traits.some(
-        (trait) => trait.content && trait.content?.webkitRelativePath?.length > 0,
+        (trait) => trait.content && trait.content?.webkitRelativePath?.length > 0
       )
 
       // If there are no local files, try to use the renderer service for single URL
@@ -215,7 +215,7 @@ export const useArtworkPreview = ({
         layers,
       }
     },
-    [],
+    []
   )
 
   const generateStackedImage = React.useCallback(

@@ -3,6 +3,7 @@ import { uploadDirectory } from '@buildeross/ipfs-service/upload'
 import {
   ArtworkType,
   ArtworkUploadError,
+  CollectionFile,
   FileInfo,
   ImageProps,
   IPFSUpload,
@@ -28,13 +29,6 @@ export interface UseArtworkUploadReturn {
   uploadArtworkError: ArtworkUploadError | undefined
   setUploadArtworkError: (error: ArtworkUploadError | undefined) => void
   ipfsUploadError: string | undefined
-}
-
-export type CollectionFile = {
-  collection: string
-  trait: string
-  traitProperty: string
-  file: File
 }
 
 export const useArtworkUpload = ({
@@ -228,7 +222,7 @@ export const useArtworkUpload = ({
 
         return acc
       },
-      [],
+      []
     )
 
     return {
