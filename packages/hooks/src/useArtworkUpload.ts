@@ -3,6 +3,7 @@ import { uploadDirectory } from '@buildeross/ipfs-service/upload'
 import {
   ArtworkType,
   ArtworkUploadError,
+  CollectionFile,
   FileInfo,
   ImageProps,
   IPFSUpload,
@@ -51,7 +52,7 @@ export const useArtworkUpload = ({
     try {
       if (Array.isArray(ipfsUpload) && artwork.length) {
         return ipfsUpload.reduce((acc: ImageProps[] = [], upload) => {
-          const index = artwork?.map((e: any) => e.trait).indexOf(upload.trait)
+          const index = artwork?.map((e: ArtworkType) => e.trait).indexOf(upload.trait)
           const childIndex = artwork[index]?.properties.indexOf(upload.name)
           const childName = artwork[index]?.properties[childIndex]
           const fetchableUrl = getFetchableUrls(upload?.ipfs?.uri)?.[0] ?? ''
@@ -92,7 +93,7 @@ export const useArtworkUpload = ({
 
     setIsProcessing(true)
     const filesArray = Array.from(files).filter((file) => file.name !== '.DS_Store')
-    const acceptableMIME = ['image/png', 'image/svg+xml']
+    const acceptableMIME = ['image/png', 'image/svg+xml', 'image/gif']
 
     let collectionName: string = ''
     let fileType: string = ''
@@ -101,138 +102,141 @@ export const useArtworkUpload = ({
       properties: string[]
     }[] = []
 
-    const reduced = filesArray.reduce((acc: any = [], cv, index) => {
-      const paths = cv.webkitRelativePath.split('/')
+    const reduced = filesArray.reduce(
+      (acc: CollectionFile[] = [], cv: File, index: number) => {
+        const paths = cv.webkitRelativePath.split('/')
 
-      if (paths.length !== 3 || !paths) {
-        if (paths.length > 3) {
+        if (paths.length !== 3 || !paths) {
+          if (paths.length > 3) {
+            setUploadArtworkError({
+              directory: `file or folder naming incorrect. must not include back slashes.`,
+            })
+            return
+          }
+
           setUploadArtworkError({
-            directory: `file or folder naming incorrect. must not include back slashes.`,
+            directory: `folder structure is incorrect. download the demo folder to compare.`,
           })
           return
         }
 
-        setUploadArtworkError({
-          directory: `folder structure is incorrect. download the demo folder to compare.`,
-        })
-        return
-      }
+        const collection = paths[0]
+        const currentTrait = sanitizeFileName(paths[1])
+        const currentProperty = sanitizeFileName(paths[2])
 
-      const collection = paths[0]
-      const currentTrait = sanitizeFileName(paths[1])
-      const currentProperty = sanitizeFileName(paths[2])
+        /*  set collection name and file type */
+        if (!collectionName) {
+          collectionName = paths[0]
+        }
 
-      /*  set collection name and file type */
-      if (!collectionName) {
-        collectionName = paths[0]
-      }
+        if (!fileType) {
+          fileType = cv.type
+        }
 
-      if (!fileType) {
-        fileType = cv.type
-      }
+        /*  construct traits and properties  */
+        if (traits.filter((trait) => trait.trait === currentTrait).length === 0) {
+          traits.push({ trait: currentTrait, properties: [] })
+        }
 
-      /*  construct traits and properties  */
-      if (traits.filter((trait) => trait.trait === currentTrait).length === 0) {
-        traits.push({ trait: currentTrait, properties: [] })
-      }
+        if (!!traits) {
+          traits
+            .filter((trait) => trait.trait === currentTrait)[0]
+            ?.properties?.push(currentProperty)
+        }
 
-      if (!!traits) {
-        traits
-          .filter((trait) => trait.trait === currentTrait)[0]
-          ?.properties?.push(currentProperty)
-      }
+        /* handle errors */
 
-      /* handle errors */
+        // forward slashes seem to be converted to `:`
+        // check for both folder and file name
+        if (
+          cv.name.includes(':') ||
+          paths[2]?.includes(':') ||
+          cv.name.split('.').length !== 2 ||
+          paths[1].split('.').length !== 1
+        ) {
+          setUploadArtworkError({
+            directory: `file or folder naming incorrect. must not include forward slashes or periods.`,
+          })
+          return
+        }
 
-      // forward slashes seem to be converted to `:`
-      // check for both folder and file name
-      if (
-        cv.name.includes(':') ||
-        paths[2]?.includes(':') ||
-        cv.name.split('.').length !== 2 ||
-        paths[1].split('.').length !== 1
-      ) {
-        setUploadArtworkError({
-          directory: `file or folder naming incorrect. must not include forward slashes or periods.`,
-        })
-        return
-      }
+        if (cv.type.length && !acceptableMIME.includes(cv.type)) {
+          setUploadArtworkError({
+            mime: `${cv.type} is an unsupported file type - file: ${cv.name}`,
+          })
+          return
+        }
 
-      if (cv.type.length && !acceptableMIME.includes(cv.type)) {
-        setUploadArtworkError({
-          mime: `${cv.type} is an unsupported file type - file: ${cv.name}`,
-        })
-        return
-      }
+        if (traits.length > 10) {
+          setUploadArtworkError({
+            maxTraits: `Maximum of 10 traits per collection. Your upload includes ${traits.length} traits.`,
+          })
+          return
+        }
 
-      if (traits.length > 10) {
-        setUploadArtworkError({
-          maxTraits: `Maximum of 10 traits per collection. Your upload includes ${traits.length} traits.`,
-        })
-        return
-      }
+        if (index > 0 && filesArray[index - 1].type !== cv.type) {
+          setUploadArtworkError({
+            mime: `All file types must be the same.`,
+          })
+          return
+        }
 
-      if (filesArray[index - 1 > 0 ? index - 1 : 0].type !== cv.type) {
-        setUploadArtworkError({
-          mime: `All file types must be the same.`,
-        })
-        return
-      }
+        /* get image size */
+        const fr = new FileReader()
+        fr.readAsDataURL(cv)
+        const getImageSize = (fr: FileReader, count: number) => {
+          let img = new Image()
+          img.src = fr.result?.toString() || ''
+          img.onload = function () {
+            let height = img.height
+            let width = img.width
+            let min = 600
 
-      /* get image size */
-      const fr = new FileReader()
-      fr.readAsDataURL(cv)
-      const getImageSize = (fr: FileReader, count: number) => {
-        let img = new Image()
-        img.src = fr.result?.toString() || ''
-        img.onload = function () {
-          let height = img.height
-          let width = img.width
-          let min = 600
+            if ((height < min || width < min) && cv.type !== 'image/svg+xml') {
+              setUploadArtworkError({
+                dimensions: `we recommend images of min, 600px width x height, your images are width: ${width} x ${height} px`,
+              })
+              return
+            }
 
-          if ((height < min || width < min) && cv.type !== 'image/svg+xml') {
-            setUploadArtworkError({
-              dimensions: `we recommend images of min, 600px width x height, your images are width: ${width} x ${height} px`,
-            })
-            return
-          }
+            if (height !== width) {
+              setUploadArtworkError({
+                dimensions: `images must be of equal height and width, your images are width: ${width} x ${height} px`,
+              })
+              return
+            }
 
-          if (height !== width) {
-            setUploadArtworkError({
-              dimensions: `images must be of equal height and width, your images are width: ${width} x ${height} px`,
-            })
-            return
-          }
-
-          if (count === filesArray?.length - 1) {
-            setIsProcessing(false)
+            if (count === filesArray?.length - 1) {
+              setIsProcessing(false)
+            }
           }
         }
-      }
-      fr.onload = () => getImageSize(fr, filesArray.indexOf(cv))
+        fr.onload = () => getImageSize(fr, filesArray.indexOf(cv))
 
-      acc.push({
-        collection,
-        trait: currentTrait,
-        traitProperty: currentProperty,
-        file: cv,
-      })
+        acc.push({
+          collection,
+          trait: currentTrait,
+          traitProperty: currentProperty,
+          file: cv,
+        })
 
-      return acc
-    }, [])
+        return acc
+      },
+      []
+    )
 
     return {
       filesLength: files.length,
       fileType,
       collectionName,
       traits,
-      fileArray: reduced,
+      fileArray: reduced as CollectionFile[],
     }
   }, [files])
 
   React.useEffect(() => {
-    if (isProcessing === false) {
-      const filesArray = fileInfo?.fileArray.reduce((acc: any[], cv: { file: File }) => {
+    if (isProcessing === false && !!fileInfo?.fileArray) {
+      const filesArray = fileInfo.fileArray.reduce((acc: File[], cv: CollectionFile) => {
         acc.push(cv.file)
 
         return acc

@@ -223,6 +223,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     if (!fileInfo || !filesArray || !fileInfo.traits || !formik || uploadArtworkError)
       return
 
+    setOrderedLayers([])
     setSetUpArtwork({
       ...formik.values,
       artwork: fileInfo.traits,

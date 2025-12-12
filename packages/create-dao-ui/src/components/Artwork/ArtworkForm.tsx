@@ -80,7 +80,7 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             helperText={
-              'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG and SVG'
+              'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG, SVG, and GIF'
             }
             errorMessage={
               formik.touched.artwork && formik.errors?.artwork

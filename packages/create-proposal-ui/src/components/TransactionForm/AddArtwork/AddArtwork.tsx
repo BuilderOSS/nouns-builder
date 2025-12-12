@@ -1,19 +1,75 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack } from '@buildeross/zord'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
 import { AddArtworkForm } from './AddArtworkForm'
 
+const getFileExtensionFromUri = (uri: string): string => {
+  const parts = uri.split('.')
+  return parts.length > 1 ? `.${parts[parts.length - 1]}` : ''
+}
+
+const getImageDimensions = (
+  imageUrl: string
+): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      resolve({ width: img.width, height: img.height })
+    }
+    img.onerror = () => {
+      reject(new Error(`Failed to load image: ${imageUrl}`))
+    }
+    img.src = imageUrl
+  })
+}
+
+const getImageDimensionsFromFile = (
+  file: File
+): Promise<{ width: number; height: number }> => {
+  return new Promise((resolve, reject) => {
+    if (file.type === 'image/svg+xml') {
+      // SVG files don't need dimension validation
+      resolve({ width: 0, height: 0 })
+      return
+    }
+
+    const fr = new FileReader()
+    fr.readAsDataURL(file)
+    fr.onload = () => {
+      const img = new Image()
+      img.onload = () => {
+        resolve({ width: img.width, height: img.height })
+      }
+      img.onerror = () => {
+        reject(new Error(`Failed to load image from file: ${file.name}`))
+      }
+      img.src = fr.result?.toString() || ''
+    }
+    fr.onerror = () => {
+      reject(new Error(`Failed to read file: ${file.name}`))
+    }
+  })
+}
+
 export const AddArtwork = () => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
+  const [existingFileExtension, setExistingFileExtension] = useState<string | null>(null)
+  const [existingDimensions, setExistingDimensions] = useState<{
+    width: number
+    height: number
+  } | null>(null)
+  const [fileExtensionMismatch, setFileExtensionMismatch] = useState<string | null>(null)
+  const [dimensionMismatch, setDimensionMismatch] = useState<string | null>(null)
   const addresses = useDaoStore((x) => x.addresses)
   const chain = useChainStore((x) => x.chain)
   const addTransaction = useProposalStore((state) => state.addTransaction)
@@ -35,6 +91,42 @@ export const AddArtwork = () => {
   }, [resetForm])
 
   const { propertiesCount, propertyItemsCount, properties } = data || {}
+
+  // Extract existing file extension and dimensions
+  useEffect(() => {
+    if (!properties || properties.length === 0) {
+      setExistingFileExtension(null)
+      setExistingDimensions(null)
+      return
+    }
+
+    const firstProperty = properties[0]
+    if (!firstProperty.items || firstProperty.items.length === 0) {
+      setExistingFileExtension(null)
+      setExistingDimensions(null)
+      return
+    }
+
+    const firstUri = firstProperty.items[0].uri
+    const extension = getFileExtensionFromUri(firstUri)
+    setExistingFileExtension(extension)
+
+    // Get dimensions from the first existing image
+    const fetchableUrls = getFetchableUrls(firstUri)
+    if (fetchableUrls && fetchableUrls.length > 0) {
+      getImageDimensions(fetchableUrls[0])
+        .then((dimensions) => {
+          setExistingDimensions(dimensions)
+        })
+        .catch((error) => {
+          console.error('Failed to get existing artwork dimensions:', error)
+          setExistingDimensions(null)
+        })
+    } else {
+      console.error('Failed to get fetchable URLs for IPFS URI:', firstUri)
+      setExistingDimensions(null)
+    }
+  }, [properties])
 
   const isPropertyCountValid = useMemo(() => {
     if (!propertiesCount) return false
@@ -89,12 +181,16 @@ export const AddArtwork = () => {
       isPropertyCountValid &&
       !invalidProperty &&
       !invalidPropertyOrder &&
+      !fileExtensionMismatch &&
+      !dimensionMismatch &&
       !isUploadingToIPFS &&
       ipfsUpload.length !== 0,
     [
       isPropertyCountValid,
       invalidProperty,
       invalidPropertyOrder,
+      fileExtensionMismatch,
+      dimensionMismatch,
       isUploadingToIPFS,
       ipfsUpload,
     ]
@@ -104,6 +200,75 @@ export const AddArtwork = () => {
     if (!properties) return []
     return properties.map((x) => x.name)
   }, [properties])
+
+  // Validate uploaded artwork file extension
+  useEffect(() => {
+    if (!ipfsUpload || ipfsUpload.length === 0 || !existingFileExtension) {
+      setFileExtensionMismatch(null)
+      return
+    }
+
+    const uploadedFileType = ipfsUpload[0]?.type
+    let expectedExtension = ''
+    switch (uploadedFileType) {
+      case 'image/png':
+        expectedExtension = '.png'
+        break
+      case 'image/svg+xml':
+        expectedExtension = '.svg'
+        break
+      case 'image/gif':
+        expectedExtension = '.gif'
+        break
+    }
+
+    if (expectedExtension && expectedExtension !== existingFileExtension) {
+      setFileExtensionMismatch(
+        `Uploaded file type (${expectedExtension}) does not match existing artwork file type (${existingFileExtension})`
+      )
+    } else {
+      setFileExtensionMismatch(null)
+    }
+  }, [ipfsUpload, existingFileExtension])
+
+  // Validate uploaded artwork dimensions
+  useEffect(() => {
+    if (
+      !ipfsUpload ||
+      ipfsUpload.length === 0 ||
+      !existingDimensions ||
+      !ipfsUpload[0]?.content
+    ) {
+      setDimensionMismatch(null)
+      return
+    }
+
+    const uploadedFileType = ipfsUpload[0]?.type
+
+    // Skip dimension validation for SVG files
+    if (uploadedFileType === 'image/svg+xml') {
+      setDimensionMismatch(null)
+      return
+    }
+
+    getImageDimensionsFromFile(ipfsUpload[0].content)
+      .then((uploadedDimensions) => {
+        if (
+          uploadedDimensions.width !== existingDimensions.width ||
+          uploadedDimensions.height !== existingDimensions.height
+        ) {
+          setDimensionMismatch(
+            `Uploaded artwork dimensions (${uploadedDimensions.width}x${uploadedDimensions.height}) do not match existing artwork dimensions (${existingDimensions.width}x${existingDimensions.height})`
+          )
+        } else {
+          setDimensionMismatch(null)
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to get uploaded file dimensions:', error)
+        setDimensionMismatch('Failed to validate uploaded artwork dimensions')
+      })
+  }, [ipfsUpload, existingDimensions])
 
   const transactions = useMemo(() => {
     if (!orderedLayers || !ipfsUpload) return
@@ -144,6 +309,8 @@ export const AddArtwork = () => {
         properties={properties || []}
         invalidProperty={invalidProperty}
         invalidPropertyOrder={invalidPropertyOrder}
+        fileExtensionMismatch={fileExtensionMismatch}
+        dimensionMismatch={dimensionMismatch}
         handleSubmit={handleAddArtworkTransaction}
       />
     </Stack>

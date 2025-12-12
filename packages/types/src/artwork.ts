@@ -42,12 +42,19 @@ export type Trait = {
   ipfs?: {}[]
 }
 
+export type CollectionFile = {
+  collection: string
+  trait: string
+  traitProperty: string
+  file: File
+}
+
 export type FileInfo = {
   filesLength: number
   fileType: string
   collectionName: string
   traits: Trait[]
-  fileArray: File[]
+  fileArray: CollectionFile[]
 }
 
 export type OrderedTraits = Array<Trait>
