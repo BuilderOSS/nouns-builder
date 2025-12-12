@@ -8,6 +8,9 @@ export type MyDaosResponse = Array<{
   name: string
   contractImage: string
   collectionAddress: string
+  metadataAddress: string
+  treasuryAddress: string
+  governorAddress: string
   auctionAddress: string
   chainId: CHAIN_ID
 }>
@@ -37,7 +40,10 @@ export const myDaosRequest = async (memberAddress: string): Promise<MyDaosRespon
           name: dao.name || '',
           contractImage: dao.contractImage || '',
           collectionAddress: dao.tokenAddress,
-          auctionAddress: dao?.auctionAddress || '',
+          metadataAddress: dao.metadataAddress,
+          treasuryAddress: dao.treasuryAddress,
+          governorAddress: dao.governorAddress,
+          auctionAddress: dao.auctionAddress,
           chainId: queries.chainId,
         }))
       )
