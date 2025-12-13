@@ -11,7 +11,7 @@ export const selectorWrapper = style([
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 'calc(100vh - 168px)',
+    minHeight: 'calc(100vh - 170px)',
   },
 ])
 
