@@ -10,6 +10,10 @@ query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_f
     description
     projectURI
     tokenAddress
+    treasuryAddress
+    auctionAddress
+    governorAddress
+    metadataAddress
     tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
       tokenId
       name

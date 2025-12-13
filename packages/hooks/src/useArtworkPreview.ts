@@ -103,7 +103,7 @@ export const useArtworkPreview = ({
         usedBlobUrls.current.push(blobUrl)
         return blobUrl
       }
-      return trait.url
+      return trait.uri
     })
 
     const imageLayerStack = stack.reverse()

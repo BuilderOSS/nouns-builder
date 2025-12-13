@@ -235,6 +235,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             </Text>
           </Flex>
         </Link>
+        <Link href={'/playground'}>
+          <Flex align="center" justify={'center'} py={'x2'}>
+            <Text cursor={'pointer'} fontWeight={'display'}>
+              Playground
+            </Text>
+          </Flex>
+        </Link>
         <Link href={'/about'}>
           <Flex align="center" justify={'center'} py={'x2'}>
             <Text cursor={'pointer'} fontWeight={'display'}>

@@ -1,9 +1,13 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { SearchInput } from '@buildeross/feed-ui'
 import { useDaoSearch, useUserDaos } from '@buildeross/hooks'
-import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import type {
+  AddressType,
+  CHAIN_ID,
+  RequiredDaoContractAddresses,
+} from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { Label, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import {
@@ -21,6 +25,7 @@ export interface DaoListItem {
   name: string
   image: string
   address: AddressType
+  addresses: RequiredDaoContractAddresses
   chainId: CHAIN_ID
 }
 
@@ -65,6 +70,13 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
       name: dao.name,
       image: dao.contractImage,
       address: dao.collectionAddress.toLowerCase() as AddressType,
+      addresses: {
+        token: dao.collectionAddress.toLowerCase() as AddressType,
+        treasury: dao.treasuryAddress.toLowerCase() as AddressType,
+        auction: dao.auctionAddress.toLowerCase() as AddressType,
+        governor: dao.governorAddress.toLowerCase() as AddressType,
+        metadata: dao.metadataAddress.toLowerCase() as AddressType,
+      },
       chainId: dao.chainId,
     }))
 
@@ -83,6 +95,13 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
         name: result.dao.name,
         image: result.token?.image || '',
         address: result.dao.tokenAddress.toLowerCase() as AddressType,
+        addresses: {
+          token: result.dao.tokenAddress.toLowerCase() as AddressType,
+          treasury: result.dao.treasuryAddress.toLowerCase() as AddressType,
+          auction: result.dao.auctionAddress.toLowerCase() as AddressType,
+          governor: result.dao.governorAddress.toLowerCase() as AddressType,
+          metadata: result.dao.metadataAddress.toLowerCase() as AddressType,
+        },
         chainId: result.chainId,
       })),
     [searchResults]
@@ -128,22 +147,43 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
     !showSearch || activeSearchQuery.trim().length < MIN_SEARCH_LENGTH
 
   return (
-    <Stack className={selectorContainer}>
+    <Stack className={selectorContainer} gap="x6">
       {/* Search input - only show if showSearch is true */}
       {showSearch && (
-        <SearchInput
-          id="dao-search"
-          placeholder="Search DAOs..."
-          value={searchInput}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setSearchInput(e.target.value)
-          }
-          onSearch={handleSearch}
-          onClear={handleClearSearch}
-          showClear={searchInput.trim().length > 0}
-          minSearchLength={MIN_SEARCH_LENGTH}
-          isLoading={isSearching}
-        />
+        <Stack gap="x4">
+          <SearchInput
+            id="dao-search"
+            placeholder="Search DAOs..."
+            value={searchInput}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchInput(e.target.value)
+            }
+            onSearch={handleSearch}
+            onClear={handleClearSearch}
+            showClear={searchInput.trim().length > 0}
+            minSearchLength={MIN_SEARCH_LENGTH}
+            isLoading={isSearching}
+          />
+          <Flex gap="x2">
+            <Button
+              onClick={handleSearch}
+              disabled={searchInput.trim().length < MIN_SEARCH_LENGTH || isSearching}
+              flex="1"
+            >
+              Search
+            </Button>
+            <Button
+              onClick={handleClearSearch}
+              variant="secondary"
+              disabled={
+                searchInput.trim().length === 0 && activeSearchQuery.trim().length === 0
+              }
+              flex="1"
+            >
+              Reset
+            </Button>
+          </Flex>
+        </Stack>
       )}
 
       {/* DAO list */}

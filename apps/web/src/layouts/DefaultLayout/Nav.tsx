@@ -57,6 +57,9 @@ export const Nav = () => {
             <Link href={'/explore'}>
               <Label className={navMenuItem}>Explore</Label>
             </Link>
+            <Link href={'/playground'}>
+              <Label className={navMenuItem}>Playground</Label>
+            </Link>
             <a href="https://docs.nouns.build/" target="_blank" rel="noreferrer noopener">
               <Label className={navMenuItem}>Docs</Label>
             </a>

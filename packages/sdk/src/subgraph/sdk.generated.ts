@@ -4777,6 +4777,7 @@ export type DaoFragment = {
   name: string
   contractImage: string
   tokenAddress: any
+  metadataAddress: any
   treasuryAddress: any
   auctionAddress: any
   governorAddress: any
@@ -5079,6 +5080,10 @@ export type ExploreDaosSearchQuery = {
     description: string
     projectURI: string
     tokenAddress: any
+    treasuryAddress: any
+    auctionAddress: any
+    governorAddress: any
+    metadataAddress: any
     tokens: Array<{
       __typename?: 'Token'
       tokenId: any
@@ -5126,6 +5131,7 @@ export type DaosForDashboardQuery = {
     contractImage: string
     name: string
     tokenAddress: any
+    metadataAddress: any
     treasuryAddress: any
     auctionAddress: any
     governorAddress: any
@@ -5186,6 +5192,7 @@ export type DaosForUserQuery = {
     name: string
     contractImage: string
     tokenAddress: any
+    metadataAddress: any
     treasuryAddress: any
     auctionAddress: any
     governorAddress: any
@@ -5773,6 +5780,7 @@ export const DaoFragmentDoc = gql`
     name
     contractImage
     tokenAddress
+    metadataAddress
     treasuryAddress
     auctionAddress
     governorAddress
@@ -6077,6 +6085,10 @@ export const ExploreDaosSearchDocument = gql`
       description
       projectURI
       tokenAddress
+      treasuryAddress
+      auctionAddress
+      governorAddress
+      metadataAddress
       tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
         tokenId
         name

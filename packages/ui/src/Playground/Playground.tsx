@@ -35,6 +35,7 @@ export const Playground: React.FC<PlaygroundProps> = ({ images, orderedLayers })
           className={previewLayerSelectorWrapperStyle}
           direction={'column'}
           justify="flex-start"
+          gap={'x6'}
         >
           {layers && (
             <LayerMenu
