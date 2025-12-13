@@ -15,19 +15,7 @@ export const ImageGrid: React.FC<{ generatedImages: string[] }> = ({
     <Grid gap="x4" className={imageGridWrapperStyle}>
       {generatedImages &&
         generatedImages.map((image: string) => (
-          <Box
-            className={previewGeneratedImageStyle}
-            key={image.toString()}
-            position="relative"
-          >
-            <Box
-              position="absolute"
-              top="x0"
-              right="x0"
-              bottom="x0"
-              left="x0"
-              className={loadingImage}
-            />
+          <Box className={previewGeneratedImageStyle} key={image} position="relative">
             <FallbackImage
               src={image}
               alt=""
@@ -35,11 +23,21 @@ export const ImageGrid: React.FC<{ generatedImages: string[] }> = ({
               width={'100%'}
               style={{
                 position: 'absolute',
-                top: 'x0',
-                left: 'x0',
+                top: '0',
+                left: '0',
                 width: '100%',
                 height: '100%',
               }}
+              loadingPlaceholder={
+                <Box
+                  position="absolute"
+                  top="x0"
+                  right="x0"
+                  bottom="x0"
+                  left="x0"
+                  className={loadingImage}
+                />
+              }
             />
           </Box>
         ))}

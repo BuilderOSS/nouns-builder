@@ -21,6 +21,6 @@ export const loadingContainer = style([
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: '100vh',
+    minHeight: 'calc(100vh - 248px)',
   },
 ])

@@ -36,15 +36,11 @@ interface UsePlaygroundDataReturn {
 const transformToImageProps = (properties: Property[]): ImageProps[] => {
   return properties.flatMap((property) =>
     property.items.map((item) => {
-      const cid = item.uri.replace('ipfs://', '').split('/')[0]
       return {
         name: item.name,
         trait: property.name,
         uri: item.uri,
-        url:
-          getFetchableUrls(item.uri)?.[0] ||
-          item.uri.replace('ipfs://', 'https://ipfs.io/ipfs/'),
-        cid,
+        url: getFetchableUrls(item.uri)?.[0] ?? item.uri,
       }
     })
   )

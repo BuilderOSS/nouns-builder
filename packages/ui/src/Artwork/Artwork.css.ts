@@ -126,12 +126,6 @@ export const previewGeneratedImageStyle = style({
   borderRadius: '16px',
   overflow: 'hidden',
   boxShadow: '2px 2px 2px rgba(0, 0, 0, 0.25)',
-  // '@media': {
-  //   'screen and (max-width: 768px)': {
-  //     height: 120,
-  //     width: 120,
-  //   },
-  // },
 })
 
 export const previewModalWrapperStyle = style({
