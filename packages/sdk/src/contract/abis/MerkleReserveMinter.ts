@@ -134,4 +134,4 @@ export const merkleReserveMinterAbi = [
     stateMutability: 'view',
     type: 'function',
   },
-]
+] as const

@@ -538,4 +538,4 @@ export const merklePropertyMetadataAbi = [
     stateMutability: 'payable',
     type: 'function',
   },
-]
+] as const

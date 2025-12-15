@@ -1,7 +1,6 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { getProvider, serverConfig } from '@buildeross/utils'
+import { executeConcurrently, getProvider, serverConfig } from '@buildeross/utils'
 import {
-  Abi,
   encodeAbiParameters,
   Hex,
   hexToBigInt,
@@ -11,9 +10,10 @@ import {
 } from 'viem'
 import { readContract, readContracts } from 'wagmi/actions'
 
-import { merklePropertyMetadataAbi, metadataAbi as metadataRendererAbi } from '../abis'
-
-const propertyIpfsAbi = merklePropertyMetadataAbi as Abi
+import {
+  merklePropertyMetadataAbi as propertyIpfsAbi,
+  metadataAbi as metadataRendererAbi,
+} from '../abis'
 
 export type GetPropertyItemsResponse = {
   propertiesCount: number
@@ -48,13 +48,10 @@ export type Property = {
 
 type RendererKind = 'MetadataRenderer' | 'PropertyIPFS'
 
-/**
- * PropertyIPFS (EIP-7201) storage namespace slot from your contract:
- * bytes32 private constant PropertyIPFSStorageLocation =
- * 0x6e86adc91987cfd0c2727f2061f4e6022e5e9212736e682f4eb1f6949f6a7b00;
- */
 const PROPERTY_IPFS_STORAGE_LOCATION =
   0x6e86adc91987cfd0c2727f2061f4e6022e5e9212736e682f4eb1f6949f6a7b00n
+
+const METADATA_RENDERER_PROPERTIES_SLOT = 6n
 
 // -----------------------
 // Interface detection
@@ -66,12 +63,12 @@ async function detectRendererKindByInterface(
   chainId: CHAIN_ID,
   metadataAddress: AddressType
 ): Promise<RendererKind> {
-  // supportsInterface is on PropertyIPFS (via BaseMetadata) and also likely on MetadataRenderer
-  // If MetadataRenderer doesn’t implement it, the call may revert -> treat as false.
+  // Determine renderer type by checking if the contract supports the PropertyIPFS interface (EIP-165)
+  // If supportsInterface is not implemented or returns false, default to MetadataRenderer
   try {
     const ok = await readContract(serverConfig, {
       address: metadataAddress,
-      abi: propertyIpfsAbi, // has supportsInterface in it
+      abi: propertyIpfsAbi,
       chainId,
       functionName: 'supportsInterface',
       args: [I_PROPERTY_IPFS_INTERFACE_ID],
@@ -87,7 +84,7 @@ async function detectRendererKindByInterface(
 // -----------------------
 
 function normalizeIpfsGroup(data: any): IPFSGroup {
-  // tuple: [baseUri, extension]
+  // Handle tuple format: [baseUri, extension]
   if (Array.isArray(data) && data.length >= 2) {
     const baseUri = data[0]
     const extension = data[1]
@@ -96,7 +93,7 @@ function normalizeIpfsGroup(data: any): IPFSGroup {
     }
   }
 
-  // object: { baseUri, extension } OR {0:...,1:...}
+  // Handle object format with named or indexed properties
   if (data && typeof data === 'object') {
     if (typeof data.baseUri === 'string' && typeof data.extension === 'string') {
       return { baseUri: data.baseUri, extension: data.extension }
@@ -113,7 +110,7 @@ function normalizePropertyFromPropertyIPFS(ret: any): {
   name: string
   items: { referenceSlot: number; name: string }[]
 } {
-  // Expected from PropertyIPFS: { name: string, items: Item[] } or tuple-like
+  // Parse PropertyIPFS struct return value in either object or tuple format
   const name: unknown = ret?.name ?? ret?.[0]
   const items: unknown = ret?.items ?? ret?.[1]
 
@@ -126,7 +123,7 @@ function normalizePropertyFromPropertyIPFS(ret: any): {
     const nm = it?.name ?? it?.[1]
     if (typeof nm !== 'string')
       throw new Error(`Invalid item name: ${JSON.stringify(it)}`)
-    // referenceSlot is uint16 so wagmi might give bigint or number
+    // Convert referenceSlot from bigint (uint16) to number
     const refNum =
       typeof ref === 'bigint'
         ? Number(ref)
@@ -190,7 +187,7 @@ export const getPropertyItems = async (
 
     return { propertiesCount, propertyItemsCount, properties }
   } catch (e) {
-    // This PropertyIPFS does not have getters.
+    // Fallback to storage reading for PropertyIPFS contracts without getter functions
     const properties = await getPropertiesFromStorageForPropertyIPFS(
       chainId,
       metadataAddress,
@@ -209,16 +206,16 @@ const getPropertiesFromStorageForPropertyIPFS = async (
   propertyItemsCount: number[]
 ): Promise<Property[]> => {
   const propertiesBaseSlot = PROPERTY_IPFS_STORAGE_LOCATION + 1n
-  const propsWithRef: PropertyWithReferenceSlot[] = await Promise.all(
-    Array.from({ length: propertiesCount }, async (_, i) => {
+  const propsWithRef: PropertyWithReferenceSlot[] = await executeConcurrently(
+    Array.from({ length: propertiesCount }, (_, i) => async () => {
       const name = await getPropertyNameFromStorage(
         chainId,
         metadataAddress,
         i,
         propertiesBaseSlot
       )
-      const items = await Promise.all(
-        Array.from({ length: propertyItemsCount[i] }, async (_, j) => {
+      const items = await executeConcurrently(
+        Array.from({ length: propertyItemsCount[i] }, (_, j) => async () => {
           return await getItemFromStorage(
             chainId,
             metadataAddress,
@@ -266,52 +263,58 @@ async function getIpfsGroupsFromStorage(
   referenceSlots: number[],
   ipfsDataSlot: bigint
 ): Promise<Record<number, IPFSGroup>> {
-  // PropertyIPFS: read from storage
+  // Read IPFS group data directly from contract storage for PropertyIPFS
   const publicClient = getProvider(chainId)
 
-  // ipfsBase = keccak256(abi.encode(ipfsDataSlot))
+  // Calculate base storage location for IPFS data array
   const ipfsBase = keccak256(
     encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [ipfsDataSlot])
   )
   const ipfsBaseBN = hexToBigInt(ipfsBase)
 
-  const out: Record<number, IPFSGroup> = {}
+  const results = await executeConcurrently(
+    referenceSlots.map((idx) => async () => {
+      // Each IPFSGroup struct occupies 2 storage slots (baseUri and extension)
+      const elementSlot = ipfsBaseBN + BigInt(idx) * 2n
 
-  for (const idx of referenceSlots) {
-    // IPFSGroup struct span assumed = 2 slots: [baseUri, extension]
-    const elementSlot = ipfsBaseBN + BigInt(idx) * 2n
+      const baseUriPtr = await publicClient.getStorageAt({
+        address: metadataAddress,
+        slot: toHex(elementSlot, { size: 32 }),
+      })
+      const extPtr = await publicClient.getStorageAt({
+        address: metadataAddress,
+        slot: toHex(elementSlot + 1n, { size: 32 }),
+      })
 
-    const baseUriPtr = await publicClient.getStorageAt({
-      address: metadataAddress,
-      slot: toHex(elementSlot, { size: 32 }),
+      const baseUri = baseUriPtr
+        ? await decodeStringFromStorage(
+            chainId,
+            metadataAddress,
+            toHex(elementSlot, { size: 32 }),
+            baseUriPtr as Hex
+          )
+        : ''
+
+      const extension = extPtr
+        ? await decodeStringFromStorage(
+            chainId,
+            metadataAddress,
+            toHex(elementSlot + 1n, { size: 32 }),
+            extPtr as Hex
+          )
+        : ''
+
+      return { idx, ipfsGroup: { baseUri, extension } }
     })
-    const extPtr = await publicClient.getStorageAt({
-      address: metadataAddress,
-      slot: toHex(elementSlot + 1n, { size: 32 }),
-    })
+  )
 
-    const baseUri = baseUriPtr
-      ? await decodeStringFromStorage(
-          chainId,
-          metadataAddress,
-          toHex(elementSlot, { size: 32 }),
-          baseUriPtr as Hex
-        )
-      : ''
-
-    const extension = extPtr
-      ? await decodeStringFromStorage(
-          chainId,
-          metadataAddress,
-          toHex(elementSlot + 1n, { size: 32 }),
-          extPtr as Hex
-        )
-      : ''
-
-    out[idx] = { baseUri, extension }
-  }
-
-  return out
+  return results.reduce(
+    (acc, { idx, ipfsGroup }) => {
+      acc[idx] = ipfsGroup
+      return acc
+    },
+    {} as Record<number, IPFSGroup>
+  )
 }
 
 const getPropertyNameFromStorage = async (
@@ -320,16 +323,16 @@ const getPropertyNameFromStorage = async (
   propertyIndex: number,
   propertiesSlot: bigint
 ): Promise<string> => {
-  // PropertyIPFS: storage read
+  // Read property name directly from contract storage for PropertyIPFS
   const publicClient = getProvider(chainId)
 
-  // propertiesBase = keccak256(abi.encode(propertiesSlot))
+  // Calculate base storage location for properties array
   const propertiesBase = keccak256(
     encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [propertiesSlot])
   )
   const propertiesBaseBN = hexToBigInt(propertiesBase)
 
-  // Property struct assumed: [string name, Item[] items] => 2 slots
+  // Each Property struct occupies 2 storage slots (name string and items array)
   const propertySlot = propertiesBaseBN + BigInt(propertyIndex) * 2n
 
   const namePtr = await publicClient.getStorageAt({
@@ -348,7 +351,7 @@ const getPropertyNameFromStorage = async (
 }
 
 // -----------------------
-// Properties - PropertyIPFS path (use properties(i) that returns full struct)
+// Properties - PropertyIPFS path
 // -----------------------
 
 async function getPropertiesFromPropertyIPFS(
@@ -356,7 +359,7 @@ async function getPropertiesFromPropertyIPFS(
   metadataAddress: AddressType,
   propertiesCount: number
 ): Promise<Property[]> {
-  // 1) Fetch all Property structs via properties(i)
+  // Fetch all Property structs using the properties(i) getter function
   const propsRaw = await readContracts(serverConfig, {
     allowFailure: false,
     contracts: Array.from({ length: propertiesCount }, (_, i) => ({
@@ -370,12 +373,12 @@ async function getPropertiesFromPropertyIPFS(
 
   const props = (propsRaw as any[]).map(normalizePropertyFromPropertyIPFS)
 
-  // 2) Collect unique referenceSlots
+  // Collect unique reference slots from all property items
   const allReferenceSlots = Array.from(
     new Set(props.flatMap((p) => p.items.map((it) => it.referenceSlot)))
   )
 
-  // 3) Fetch ipfs groups via ipfsData(slot)
+  // Fetch IPFS metadata for each unique reference slot
   const ipfsDataMap = await getIpfsGroupsViaGetter(
     chainId,
     metadataAddress,
@@ -383,7 +386,7 @@ async function getPropertiesFromPropertyIPFS(
     'PropertyIPFS'
   )
 
-  // 4) Build final output
+  // Combine property data with IPFS URIs
   return props.map((p) => ({
     name: p.name,
     items: p.items.map((it) => {
@@ -399,10 +402,7 @@ async function getPropertiesFromPropertyIPFS(
 }
 
 // -----------------------
-// Properties - MetadataRenderer path (properties(i) returns string only; items are storage-driven?)
-// If your MetadataRenderer does NOT expose items, you must already have a working method.
-// Here I keep your existing approach: get property name via getter and items via your itemsCount + storage reader
-// But if MetadataRenderer also exposes items via a getter, switch to that.
+// Properties - MetadataRenderer path
 // -----------------------
 
 async function getPropertiesFromMetadataRenderer(
@@ -411,10 +411,7 @@ async function getPropertiesFromMetadataRenderer(
   propertiesCount: number,
   propertyItemsCount: number[]
 ): Promise<Property[]> {
-  // You said MetadataRenderer path is already flawless.
-  // Keep it simple: use properties(i) for name and your existing getItemFromStorage() for items.
-  // If you actually have an items getter on MetadataRenderer, tell me and I’ll remove storage reads.
-
+  // Fetch property names using the properties(i) getter function
   const names = await readContracts(serverConfig, {
     allowFailure: false,
     contracts: Array.from({ length: propertiesCount }, (_, i) => ({
@@ -426,13 +423,13 @@ async function getPropertiesFromMetadataRenderer(
     })),
   })
 
-  const propsWithRef = await Promise.all(
-    Array.from({ length: propertiesCount }, async (_, i) => {
+  const propsWithRef = await executeConcurrently(
+    Array.from({ length: propertiesCount }, (_, i) => async () => {
       const name = names[i] as string
 
-      // NOTE: this calls your existing storage-based item reader (since that path works today for MetadataRenderer)
-      const items = await Promise.all(
-        Array.from({ length: propertyItemsCount[i] }, async (_, j) => {
+      // Read property items from contract storage
+      const items = await executeConcurrently(
+        Array.from({ length: propertyItemsCount[i] }, (_, j) => async () => {
           return await getItemFromStorage(chainId, metadataAddress, i, j)
         })
       )
@@ -503,38 +500,38 @@ async function getItemFromStorage(
   contractAddress: `0x${string}`,
   propertyIndex: number,
   itemIndex: number,
-  propertiesBaseSlot: bigint = 6n
+  propertiesBaseSlot: bigint = METADATA_RENDERER_PROPERTIES_SLOT
 ): Promise<ItemWithReferenceSlot> {
   const publicClient = getProvider(chainId)
 
-  // Step 1: keccak256(slot of 'properties' = 6)
+  // Calculate base storage location for properties array
   const baseSlot = keccak256(
     encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [propertiesBaseSlot])
   )
 
   const baseSlotBN = hexToBigInt(baseSlot)
-  const propertySlot = baseSlotBN + BigInt(propertyIndex) * 2n // struct span = 2
-  const itemsSlot = propertySlot + 1n // 'items' is second member
+  const propertySlot = baseSlotBN + BigInt(propertyIndex) * 2n // Each Property struct occupies 2 slots
+  const itemsSlot = propertySlot + 1n // Items array is the second member of Property struct
 
-  // Step 2: keccak256(itemsSlot) gives base of dynamic array
+  // Calculate base storage location for items dynamic array
   const itemsBase = keccak256(
     encodeAbiParameters([{ name: 'slot', type: 'uint256' }], [itemsSlot])
   )
 
   const itemsBaseBN = hexToBigInt(itemsBase)
-  const itemBaseSlot = itemsBaseBN + BigInt(itemIndex) * 2n // each Item spans 2 slots
+  const itemBaseSlot = itemsBaseBN + BigInt(itemIndex) * 2n // Each Item struct occupies 2 slots
 
-  // Slot 1: referenceSlot (uint16)
+  // Read referenceSlot (uint16) from first slot
   const refSlotHex = await publicClient.getStorageAt({
     address: contractAddress,
     slot: toHex(itemBaseSlot, { size: 32 }),
   })
 
   const referenceSlot = refSlotHex
-    ? hexToBigInt(refSlotHex) & 0xffffn // mask lower 2 bytes
+    ? hexToBigInt(refSlotHex) & 0xffffn // Extract lower 2 bytes for uint16
     : 0n
 
-  // Slot 2: name (string pointer)
+  // Read item name string from second slot
   const nameSlot = itemBaseSlot + 1n
   const namePointer = await publicClient.getStorageAt({
     address: contractAddress,
@@ -567,24 +564,24 @@ async function decodeStringFromStorage(
   const publicClient = getProvider(chainId)
   const v = hexToBigInt(rawValue)
 
-  // Short (<=31 bytes) if lowest bit is 0
+  // Strings <=31 bytes are stored inline with length in lowest bit (0 for short strings)
   const isShort = (v & 1n) === 0n
 
   if (isShort) {
     const lastByte = Number(v & 0xffn)
-    const len = lastByte / 2 // 0..31
+    const len = lastByte / 2 // Length range: 0-31 bytes
 
-    // data is stored in the high-order bytes of the slot
+    // String data is stored in the high-order bytes of the slot
     const hexBody = rawValue.slice(2, 2 + len * 2)
     return len > 0 ? hexToString(`0x${hexBody}`) : ''
   }
 
-  // Long (>=32 bytes): length is (v - 1) / 2
+  // Strings >=32 bytes: length is encoded as (actualLength * 2 + 1)
   const strLenBig = (v - 1n) / 2n
   const strLen = Number(strLenBig)
   if (strLen === 0) return ''
 
-  // data starts at keccak256(slot)
+  // String data starts at keccak256(slot) for long strings
   const dataStartHex = keccak256(slotHex)
   const dataStart = hexToBigInt(dataStartHex)
 
