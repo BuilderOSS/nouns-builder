@@ -188,4 +188,4 @@ export const protocolRewardsAbi = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-]
+] as const

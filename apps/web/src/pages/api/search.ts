@@ -6,9 +6,9 @@ import {
   type SearchDaosResponse,
 } from '@buildeross/sdk/subgraph'
 import { Chain, CHAIN_ID } from '@buildeross/types'
+import { executeConcurrently } from '@buildeross/utils/concurrent'
 import { buildSearchText } from '@buildeross/utils/search'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { executeConcurrently } from 'src/services/feedService'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 
@@ -223,7 +223,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // Fetch results for all selected chains in parallel.
     // Each call fetches up to `maxResults` from that chain.
-    const searchResults = await executeConcurrently<SearchResult>(searchTasks, 2)
+    const searchResults = await executeConcurrently<SearchResult>(searchTasks)
 
     // Aggregate DAOs from all successful chain responses,
     // preserving chain metadata so we can rank by chain match.

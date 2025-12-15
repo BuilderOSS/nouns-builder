@@ -131,4 +131,4 @@ export const erc721RedeemMinterAbi = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-]
+] as const

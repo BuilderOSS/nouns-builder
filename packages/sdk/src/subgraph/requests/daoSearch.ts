@@ -12,7 +12,11 @@ export type DaoSearchResult = {
     symbol: string
     description: string
     projectURI: string
-    tokenAddress: any
+    tokenAddress: string
+    metadataAddress: string
+    treasuryAddress: string
+    governorAddress: string
+    auctionAddress: string
   }
   highestBid?: { amount: any; bidder: any } | null
   token?: { name: string; image?: string | null; tokenId: any }
@@ -77,6 +81,10 @@ export const searchDaosRequest = async (
             description: dao.description,
             projectURI: dao.projectURI,
             tokenAddress: dao.tokenAddress,
+            metadataAddress: dao.metadataAddress,
+            treasuryAddress: dao.treasuryAddress,
+            governorAddress: dao.governorAddress,
+            auctionAddress: dao.auctionAddress,
           },
           chainId,
           // Spread token and auction data if it exists
