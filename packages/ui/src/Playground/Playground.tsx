@@ -1,6 +1,6 @@
 import { useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
 import { ImageProps, OrderedTraits, SelectedTraitsProps } from '@buildeross/types'
-import { Button, Flex } from '@buildeross/zord'
+import { Button, Flex, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent } from 'react'
 
 import {
@@ -29,7 +29,9 @@ export const Playground: React.FC<PlaygroundProps> = ({ images, orderedLayers })
 
   return (
     <Flex direction={'column'} className={previewModalWrapperStyle}>
-      <h3 className={previewHeadingStyle}>Preview Artwork</h3>
+      <Text variant="heading-md" className={previewHeadingStyle}>
+        Preview Artwork
+      </Text>
       <Flex direction={'row'} gap={'x6'} className={previewWrapperInnerStyle}>
         <Flex
           className={previewLayerSelectorWrapperStyle}

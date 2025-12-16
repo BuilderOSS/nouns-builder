@@ -4,17 +4,28 @@ import React from 'react'
 import type { DaoListItem } from 'src/modules/dashboard/SingleDaoSelector'
 
 import { usePlaygroundData } from '../hooks/usePlaygroundData'
+import type { PlaygroundView } from '../PlaygroundPage'
+import { CustomArtworkUpload } from './CustomArtworkUpload'
 import { contentWrapper, loadingContainer } from './PlaygroundContent.css'
 
 interface PlaygroundContentProps {
-  dao: DaoListItem
+  dao: DaoListItem | undefined
+  view: PlaygroundView
 }
 
-export const PlaygroundContent: React.FC<PlaygroundContentProps> = ({ dao }) => {
+export const PlaygroundContent: React.FC<PlaygroundContentProps> = ({ dao, view }) => {
+  // Always call the hook to avoid conditional hook call (only when we have a DAO)
   const { images, orderedLayers, isLoading, error } = usePlaygroundData({
-    chainId: dao.chainId,
-    metadataAddress: dao.addresses.metadata,
+    chainId: dao?.chainId,
+    metadataAddress: dao?.addresses.metadata,
   })
+
+  // Show custom upload mode
+  if (view === 'custom') {
+    return <CustomArtworkUpload />
+  }
+
+  // Show DAO artwork mode (only when DAO is selected)
 
   if (isLoading) {
     return (

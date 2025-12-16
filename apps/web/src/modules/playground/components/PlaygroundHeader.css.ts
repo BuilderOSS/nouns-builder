@@ -4,14 +4,14 @@ import { style } from '@vanilla-extract/css'
 export const headerContainer = style([
   atoms({
     w: '100%',
-    borderColor: 'border',
     backgroundColor: 'background1',
   }),
   {
     position: 'sticky',
     top: 0,
     zIndex: 10,
-    borderBottom: '1px solid',
+    maxWidth: '872px',
+    margin: '0 auto',
   },
 ])
 
@@ -23,6 +23,12 @@ export const headerContent = style([
   {
     maxWidth: '1200px',
     margin: '0 auto',
+    '@media': {
+      'screen and (max-width: 768px)': {
+        flexWrap: 'wrap',
+        gap: '16px',
+      },
+    },
   },
 ])
 

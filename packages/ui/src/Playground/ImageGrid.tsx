@@ -1,4 +1,4 @@
-import { Box, Grid } from '@buildeross/zord'
+import { Box, Flex, Grid, Spinner } from '@buildeross/zord'
 import React from 'react'
 
 import {
@@ -29,14 +29,18 @@ export const ImageGrid: React.FC<{ generatedImages: string[] }> = ({
                 height: '100%',
               }}
               loadingPlaceholder={
-                <Box
+                <Flex
                   position="absolute"
                   top="x0"
                   right="x0"
                   bottom="x0"
                   left="x0"
                   className={loadingImage}
-                />
+                  align="center"
+                  justify="center"
+                >
+                  <Spinner />
+                </Flex>
               }
             />
           </Box>
