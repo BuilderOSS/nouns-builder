@@ -1,8 +1,8 @@
 import { ImageProps, OrderedTraits } from '@buildeross/types'
-import { Box } from '@buildeross/zord'
+import { Box, Text } from '@buildeross/zord'
 import React from 'react'
 
-import { defaultFormHeading } from '../styles'
+import { previewHeadingStyle } from './Artwork.css'
 import { DragAndDropProps, LayerBox } from './LayerBox'
 
 interface LayerOrderingProps {
@@ -25,7 +25,9 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
 
   return (
     <Box>
-      <h3 className={defaultFormHeading}>{title}</h3>
+      <Text variant="heading-md" className={previewHeadingStyle}>
+        {title}
+      </Text>
       {orderedLayers && (
         <Box>
           {orderedLayers.map(({ trait, properties }, index) => (

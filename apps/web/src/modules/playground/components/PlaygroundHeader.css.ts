@@ -23,6 +23,12 @@ export const headerContent = style([
   {
     maxWidth: '1200px',
     margin: '0 auto',
+    '@media': {
+      'screen and (max-width: 768px)': {
+        flexWrap: 'wrap',
+        gap: '16px',
+      },
+    },
   },
 ])
 
