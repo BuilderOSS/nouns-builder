@@ -1,165 +1,63 @@
 export const merklePropertyMetadataAbi = [
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '_manager',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: '_manager', type: 'address' }],
     stateMutability: 'nonpayable',
     type: 'constructor',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'target',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: 'target', type: 'address' }],
     name: 'AddressEmptyCode',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'implementation',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: 'implementation', type: 'address' }],
     name: 'ERC1967InvalidImplementation',
     type: 'error',
   },
-  {
-    inputs: [],
-    name: 'ERC1967NonPayable',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'FailedInnerCall',
-    type: 'error',
-  },
+  { inputs: [], name: 'ERC1967NonPayable', type: 'error' },
+  { inputs: [], name: 'FailedInnerCall', type: 'error' },
   {
     inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-      {
-        internalType: 'bytes32[]',
-        name: '',
-        type: 'bytes32[]',
-      },
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
+      { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+      { internalType: 'bytes32[]', name: 'proof', type: 'bytes32[]' },
+      { internalType: 'bytes32', name: 'merkleRoot', type: 'bytes32' },
     ],
     name: 'INVALID_MERKLE_PROOF',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'selectedPropertyId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: 'selectedPropertyId', type: 'uint256' }],
     name: 'INVALID_PROPERTY_SELECTED',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'impl',
-        type: 'address',
-      },
-    ],
+    inputs: [{ internalType: 'address', name: 'impl', type: 'address' }],
     name: 'INVALID_UPGRADE',
     type: 'error',
   },
-  {
-    inputs: [],
-    name: 'InvalidInitialization',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'NotInitializing',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'ONE_PROPERTY_AND_ITEM_REQUIRED',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'ONLY_MANAGER',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'ONLY_OWNER',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'ONLY_TOKEN',
-    type: 'error',
-  },
+  { inputs: [], name: 'InvalidInitialization', type: 'error' },
+  { inputs: [], name: 'NotInitializing', type: 'error' },
+  { inputs: [], name: 'ONE_PROPERTY_AND_ITEM_REQUIRED', type: 'error' },
+  { inputs: [], name: 'ONLY_MANAGER', type: 'error' },
+  { inputs: [], name: 'ONLY_OWNER', type: 'error' },
+  { inputs: [], name: 'ONLY_TOKEN', type: 'error' },
   {
     inputs: [
-      {
-        internalType: 'uint256',
-        name: 'value',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'length',
-        type: 'uint256',
-      },
+      { internalType: 'uint256', name: 'value', type: 'uint256' },
+      { internalType: 'uint256', name: 'length', type: 'uint256' },
     ],
     name: 'StringsInsufficientHexLength',
     type: 'error',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: 'tokenId', type: 'uint256' }],
     name: 'TOKEN_NOT_MINTED',
     type: 'error',
   },
+  { inputs: [], name: 'TOO_MANY_PROPERTIES', type: 'error' },
+  { inputs: [], name: 'UUPSUnauthorizedCallContext', type: 'error' },
   {
-    inputs: [],
-    name: 'TOO_MANY_PROPERTIES',
-    type: 'error',
-  },
-  {
-    inputs: [],
-    name: 'UUPSUnauthorizedCallContext',
-    type: 'error',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'slot',
-        type: 'bytes32',
-      },
-    ],
+    inputs: [{ internalType: 'bytes32', name: 'slot', type: 'bytes32' }],
     name: 'UUPSUnsupportedProxiableUUID',
     type: 'error',
   },
@@ -168,21 +66,9 @@ export const merklePropertyMetadataAbi = [
     inputs: [
       {
         components: [
-          {
-            internalType: 'string',
-            name: 'key',
-            type: 'string',
-          },
-          {
-            internalType: 'string',
-            name: 'value',
-            type: 'string',
-          },
-          {
-            internalType: 'bool',
-            name: 'quote',
-            type: 'bool',
-          },
+          { internalType: 'string', name: 'key', type: 'string' },
+          { internalType: 'string', name: 'value', type: 'string' },
+          { internalType: 'bool', name: 'quote', type: 'bool' },
         ],
         indexed: false,
         internalType: 'struct IBaseMetadata.AdditionalTokenProperty[]',
@@ -196,18 +82,17 @@ export const merklePropertyMetadataAbi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'prevImage',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'newImage',
-        type: 'string',
-      },
+      { indexed: false, internalType: 'uint256', name: '_fromTokenId', type: 'uint256' },
+      { indexed: false, internalType: 'uint256', name: '_toTokenId', type: 'uint256' },
+    ],
+    name: 'BatchMetadataUpdate',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: 'string', name: 'prevImage', type: 'string' },
+      { indexed: false, internalType: 'string', name: 'newImage', type: 'string' },
     ],
     name: 'ContractImageUpdated',
     type: 'event',
@@ -215,50 +100,31 @@ export const merklePropertyMetadataAbi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'prevDescription',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'newDescription',
-        type: 'string',
-      },
+      { indexed: false, internalType: 'string', name: 'prevDescription', type: 'string' },
+      { indexed: false, internalType: 'string', name: 'newDescription', type: 'string' },
     ],
     name: 'DescriptionUpdated',
     type: 'event',
   },
   {
     anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'uint64',
-        name: 'version',
-        type: 'uint64',
-      },
-    ],
+    inputs: [{ indexed: false, internalType: 'uint64', name: 'version', type: 'uint64' }],
     name: 'Initialized',
     type: 'event',
   },
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'name',
-        type: 'string',
-      },
+      { indexed: false, internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+    ],
+    name: 'MetadataUpdate',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: false, internalType: 'uint256', name: 'id', type: 'uint256' },
+      { indexed: false, internalType: 'string', name: 'name', type: 'string' },
     ],
     name: 'PropertyAdded',
     type: 'event',
@@ -272,12 +138,7 @@ export const merklePropertyMetadataAbi = [
         name: 'prevRendererBase',
         type: 'string',
       },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'newRendererBase',
-        type: 'string',
-      },
+      { indexed: false, internalType: 'string', name: 'newRendererBase', type: 'string' },
     ],
     name: 'RendererBaseUpdated',
     type: 'event',
@@ -285,12 +146,7 @@ export const merklePropertyMetadataAbi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: true,
-        internalType: 'address',
-        name: 'implementation',
-        type: 'address',
-      },
+      { indexed: true, internalType: 'address', name: 'implementation', type: 'address' },
     ],
     name: 'Upgraded',
     type: 'event',
@@ -298,18 +154,8 @@ export const merklePropertyMetadataAbi = [
   {
     anonymous: false,
     inputs: [
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'lastURI',
-        type: 'string',
-      },
-      {
-        indexed: false,
-        internalType: 'string',
-        name: 'newURI',
-        type: 'string',
-      },
+      { indexed: false, internalType: 'string', name: 'lastURI', type: 'string' },
+      { indexed: false, internalType: 'string', name: 'newURI', type: 'string' },
     ],
     name: 'WebsiteURIUpdated',
     type: 'event',
@@ -317,40 +163,18 @@ export const merklePropertyMetadataAbi = [
   {
     inputs: [],
     name: 'UPGRADE_INTERFACE_VERSION',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'string[]',
-        name: '_names',
-        type: 'string[]',
-      },
+      { internalType: 'string[]', name: '_names', type: 'string[]' },
       {
         components: [
-          {
-            internalType: 'uint256',
-            name: 'propertyId',
-            type: 'uint256',
-          },
-          {
-            internalType: 'string',
-            name: 'name',
-            type: 'string',
-          },
-          {
-            internalType: 'bool',
-            name: 'isNewProperty',
-            type: 'bool',
-          },
+          { internalType: 'uint256', name: 'propertyId', type: 'uint256' },
+          { internalType: 'string', name: 'name', type: 'string' },
+          { internalType: 'bool', name: 'isNewProperty', type: 'bool' },
         ],
         internalType: 'struct IPropertyIPFS.ItemParam[]',
         name: '_items',
@@ -358,16 +182,8 @@ export const merklePropertyMetadataAbi = [
       },
       {
         components: [
-          {
-            internalType: 'string',
-            name: 'baseUri',
-            type: 'string',
-          },
-          {
-            internalType: 'string',
-            name: 'extension',
-            type: 'string',
-          },
+          { internalType: 'string', name: 'baseUri', type: 'string' },
+          { internalType: 'string', name: 'extension', type: 'string' },
         ],
         internalType: 'struct IPropertyIPFS.IPFSGroup',
         name: '_ipfsGroup',
@@ -382,66 +198,49 @@ export const merklePropertyMetadataAbi = [
   {
     inputs: [],
     name: 'attributeMerkleRoot',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: 'root',
-        type: 'bytes32',
-      },
+    outputs: [{ internalType: 'bytes32', name: 'root', type: 'bytes32' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '_tokenId', type: 'uint256' },
+      { internalType: 'uint256', name: '_attributeId', type: 'uint256' },
     ],
+    name: 'attributes',
+    outputs: [{ internalType: 'uint16', name: '', type: 'uint16' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'contractImage',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'contractURI',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
+    inputs: [],
+    name: 'contractVersion',
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
+    stateMutability: 'pure',
+    type: 'function',
+  },
+  {
     inputs: [
-      {
-        internalType: 'string[]',
-        name: '_names',
-        type: 'string[]',
-      },
+      { internalType: 'string[]', name: '_names', type: 'string[]' },
       {
         components: [
-          {
-            internalType: 'uint256',
-            name: 'propertyId',
-            type: 'uint256',
-          },
-          {
-            internalType: 'string',
-            name: 'name',
-            type: 'string',
-          },
-          {
-            internalType: 'bool',
-            name: 'isNewProperty',
-            type: 'bool',
-          },
+          { internalType: 'uint256', name: 'propertyId', type: 'uint256' },
+          { internalType: 'string', name: 'name', type: 'string' },
+          { internalType: 'bool', name: 'isNewProperty', type: 'bool' },
         ],
         internalType: 'struct IPropertyIPFS.ItemParam[]',
         name: '_items',
@@ -449,16 +248,8 @@ export const merklePropertyMetadataAbi = [
       },
       {
         components: [
-          {
-            internalType: 'string',
-            name: 'baseUri',
-            type: 'string',
-          },
-          {
-            internalType: 'string',
-            name: 'extension',
-            type: 'string',
-          },
+          { internalType: 'string', name: 'baseUri', type: 'string' },
+          { internalType: 'string', name: 'extension', type: 'string' },
         ],
         internalType: 'struct IPropertyIPFS.IPFSGroup',
         name: '_ipfsGroup',
@@ -473,13 +264,7 @@ export const merklePropertyMetadataAbi = [
   {
     inputs: [],
     name: 'description',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
     stateMutability: 'view',
     type: 'function',
   },
@@ -489,21 +274,9 @@ export const merklePropertyMetadataAbi = [
     outputs: [
       {
         components: [
-          {
-            internalType: 'string',
-            name: 'key',
-            type: 'string',
-          },
-          {
-            internalType: 'string',
-            name: 'value',
-            type: 'string',
-          },
-          {
-            internalType: 'bool',
-            name: 'quote',
-            type: 'bool',
-          },
+          { internalType: 'string', name: 'key', type: 'string' },
+          { internalType: 'string', name: 'value', type: 'string' },
+          { internalType: 'bool', name: 'quote', type: 'bool' },
         ],
         internalType: 'struct IBaseMetadata.AdditionalTokenProperty[]',
         name: '_additionalTokenProperties',
@@ -514,60 +287,26 @@ export const merklePropertyMetadataAbi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '_tokenId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: '_tokenId', type: 'uint256' }],
     name: 'getAttributes',
     outputs: [
-      {
-        internalType: 'string',
-        name: 'resultAttributes',
-        type: 'string',
-      },
-      {
-        internalType: 'string',
-        name: 'queryString',
-        type: 'string',
-      },
+      { internalType: 'string', name: 'resultAttributes', type: 'string' },
+      { internalType: 'string', name: 'queryString', type: 'string' },
     ],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '_tokenId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: '_tokenId', type: 'uint256' }],
     name: 'getRawAttributes',
-    outputs: [
-      {
-        internalType: 'uint16[16]',
-        name: 'attributes',
-        type: 'uint16[16]',
-      },
-    ],
+    outputs: [{ internalType: 'uint16[16]', name: '', type: 'uint16[16]' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [
-      {
-        internalType: 'bytes',
-        name: '_initStrings',
-        type: 'bytes',
-      },
-      {
-        internalType: 'address',
-        name: '_token',
-        type: 'address',
-      },
+      { internalType: 'bytes', name: '_initStrings', type: 'bytes' },
+      { internalType: 'address', name: '_token', type: 'address' },
     ],
     name: 'initialize',
     outputs: [],
@@ -575,77 +314,77 @@ export const merklePropertyMetadataAbi = [
     type: 'function',
   },
   {
+    inputs: [{ internalType: 'uint256', name: '_ipfsDataId', type: 'uint256' }],
+    name: 'ipfsData',
+    outputs: [
+      {
+        components: [
+          { internalType: 'string', name: 'baseUri', type: 'string' },
+          { internalType: 'string', name: 'extension', type: 'string' },
+        ],
+        internalType: 'struct IPropertyIPFS.IPFSGroup',
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     inputs: [],
     name: 'ipfsDataCount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '_propertyId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: '_propertyId', type: 'uint256' }],
     name: 'itemsCount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '_tokenId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: '_tokenId', type: 'uint256' }],
     name: 'onMinted',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
     inputs: [],
     name: 'owner',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'projectURI',
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'uint256', name: '_propertyId', type: 'uint256' }],
+    name: 'properties',
     outputs: [
       {
-        internalType: 'string',
+        components: [
+          { internalType: 'string', name: 'name', type: 'string' },
+          {
+            components: [
+              { internalType: 'uint16', name: 'referenceSlot', type: 'uint16' },
+              { internalType: 'string', name: 'name', type: 'string' },
+            ],
+            internalType: 'struct IPropertyIPFS.Item[]',
+            name: 'items',
+            type: 'tuple[]',
+          },
+        ],
+        internalType: 'struct IPropertyIPFS.Property',
         name: '',
-        type: 'string',
+        type: 'tuple',
       },
     ],
     stateMutability: 'view',
@@ -654,39 +393,21 @@ export const merklePropertyMetadataAbi = [
   {
     inputs: [],
     name: 'propertiesCount',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'proxiableUUID',
-    outputs: [
-      {
-        internalType: 'bytes32',
-        name: '',
-        type: 'bytes32',
-      },
-    ],
+    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'rendererBase',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
     stateMutability: 'view',
     type: 'function',
   },
@@ -694,21 +415,9 @@ export const merklePropertyMetadataAbi = [
     inputs: [
       {
         components: [
-          {
-            internalType: 'string',
-            name: 'key',
-            type: 'string',
-          },
-          {
-            internalType: 'string',
-            name: 'value',
-            type: 'string',
-          },
-          {
-            internalType: 'bool',
-            name: 'quote',
-            type: 'bool',
-          },
+          { internalType: 'string', name: 'key', type: 'string' },
+          { internalType: 'string', name: 'value', type: 'string' },
+          { internalType: 'bool', name: 'quote', type: 'bool' },
         ],
         internalType: 'struct IBaseMetadata.AdditionalTokenProperty[]',
         name: '_additionalTokenProperties',
@@ -721,13 +430,7 @@ export const merklePropertyMetadataAbi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'bytes32',
-        name: 'attributeMerkleRoot_',
-        type: 'bytes32',
-      },
-    ],
+    inputs: [{ internalType: 'bytes32', name: 'attributeMerkleRoot_', type: 'bytes32' }],
     name: 'setAttributeMerkleRoot',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -737,21 +440,9 @@ export const merklePropertyMetadataAbi = [
     inputs: [
       {
         components: [
-          {
-            internalType: 'uint256',
-            name: 'tokenId',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint16[16]',
-            name: 'attributes',
-            type: 'uint16[16]',
-          },
-          {
-            internalType: 'bytes32[]',
-            name: 'proof',
-            type: 'bytes32[]',
-          },
+          { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+          { internalType: 'uint16[16]', name: 'attributes', type: 'uint16[16]' },
+          { internalType: 'bytes32[]', name: 'proof', type: 'bytes32[]' },
         ],
         internalType: 'struct IMerklePropertyIPFS.SetAttributeParams',
         name: '_params',
@@ -767,21 +458,9 @@ export const merklePropertyMetadataAbi = [
     inputs: [
       {
         components: [
-          {
-            internalType: 'uint256',
-            name: 'tokenId',
-            type: 'uint256',
-          },
-          {
-            internalType: 'uint16[16]',
-            name: 'attributes',
-            type: 'uint16[16]',
-          },
-          {
-            internalType: 'bytes32[]',
-            name: 'proof',
-            type: 'bytes32[]',
-          },
+          { internalType: 'uint256', name: 'tokenId', type: 'uint256' },
+          { internalType: 'uint16[16]', name: 'attributes', type: 'uint16[16]' },
+          { internalType: 'bytes32[]', name: 'proof', type: 'bytes32[]' },
         ],
         internalType: 'struct IMerklePropertyIPFS.SetAttributeParams[]',
         name: '_params',
@@ -794,120 +473,65 @@ export const merklePropertyMetadataAbi = [
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'bytes4',
-        name: '_interfaceId',
-        type: 'bytes4',
-      },
-    ],
+    inputs: [{ internalType: 'bytes4', name: '_interfaceId', type: 'bytes4' }],
     name: 'supportsInterface',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
     stateMutability: 'pure',
     type: 'function',
   },
   {
     inputs: [],
     name: 'token',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '_tokenId',
-        type: 'uint256',
-      },
-    ],
+    inputs: [{ internalType: 'uint256', name: '_tokenId', type: 'uint256' }],
     name: 'tokenURI',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
+    outputs: [{ internalType: 'string', name: '', type: 'string' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'string',
-        name: '_newContractImage',
-        type: 'string',
-      },
-    ],
+    inputs: [{ internalType: 'string', name: '_newContractImage', type: 'string' }],
     name: 'updateContractImage',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'string',
-        name: '_newDescription',
-        type: 'string',
-      },
-    ],
+    inputs: [{ internalType: 'string', name: '_newDescription', type: 'string' }],
     name: 'updateDescription',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'string',
-        name: '_newProjectURI',
-        type: 'string',
-      },
-    ],
+    inputs: [{ internalType: 'string', name: '_newProjectURI', type: 'string' }],
     name: 'updateProjectURI',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [
-      {
-        internalType: 'string',
-        name: '_newRendererBase',
-        type: 'string',
-      },
-    ],
+    inputs: [{ internalType: 'string', name: '_newRendererBase', type: 'string' }],
     name: 'updateRendererBase',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
+    inputs: [{ internalType: 'address', name: '_newImpl', type: 'address' }],
+    name: 'upgradeTo',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [
-      {
-        internalType: 'address',
-        name: 'newImplementation',
-        type: 'address',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
+      { internalType: 'address', name: 'newImplementation', type: 'address' },
+      { internalType: 'bytes', name: 'data', type: 'bytes' },
     ],
     name: 'upgradeToAndCall',
     outputs: [],

@@ -8,6 +8,7 @@ import {
   FeedResponse,
   ProposalCreatedFeedItem,
 } from '@buildeross/types'
+import { executeConcurrently } from '@buildeross/utils/concurrent'
 import { keccak256, toHex } from 'viem'
 
 import { InvalidRequestError } from './errors'
@@ -17,22 +18,6 @@ import { getRedisConnection } from './redisConnection'
  * Supported chain IDs
  */
 const SUPPORTED_CHAIN_IDS: CHAIN_ID[] = PUBLIC_DEFAULT_CHAINS.map((chain) => chain.id)
-
-/**
- * Execute promises with controlled concurrency
- */
-export async function executeConcurrently<T>(
-  tasks: (() => Promise<T>)[],
-  maxConcurrent: number
-): Promise<T[]> {
-  const results: T[] = []
-  for (let i = 0; i < tasks.length; i += maxConcurrent) {
-    const batch = tasks.slice(i, i + maxConcurrent)
-    const batchResults = await Promise.all(batch.map((t) => t()))
-    results.push(...batchResults)
-  }
-  return results
-}
 
 /**
  * Redis cache configuration

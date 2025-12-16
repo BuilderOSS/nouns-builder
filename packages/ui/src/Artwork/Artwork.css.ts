@@ -1,5 +1,5 @@
-import { atoms } from '@buildeross/zord'
-import { style } from '@vanilla-extract/css'
+import { atoms, vars } from '@buildeross/zord'
+import { keyframes, style } from '@vanilla-extract/css'
 
 export const artworkSettingsBox = style({
   border: '2px solid #F2F2F2',
@@ -95,8 +95,14 @@ export const previewHeadingStyle = style([
     mb: 'x6',
   }),
   {
-    fontSize: 36,
-    fontWeight: 400,
+    lineHeight: 1,
+    fontWeight: 500,
+    fontSize: '20px',
+    '@media': {
+      '(min-width: 768px)': {
+        fontSize: '28px',
+      },
+    },
   },
 ])
 
@@ -125,16 +131,13 @@ export const previewGeneratedImageStyle = style({
   width: 175,
   borderRadius: '16px',
   overflow: 'hidden',
-  '@media': {
-    'screen and (max-width: 768px)': {
-      height: 120,
-      width: 120,
-    },
-  },
+  boxShadow: '2px 2px 2px rgba(0, 0, 0, 0.25)',
 })
 
 export const previewModalWrapperStyle = style({
   borderRadius: '24px',
+  width: '100%',
+  maxWidth: '832px',
 })
 
 export const previewLayerSelectorWrapperStyle = style({
@@ -167,7 +170,7 @@ export const previewGridWrapperStyle = style({
   '@media': {
     'screen and (max-width: 768px)': {
       width: '100%',
-      maxHeight: 300,
+      maxHeight: 'calc(60vh)',
     },
   },
 })
@@ -239,4 +242,14 @@ export const artworkPreviewGenerateButton = style({
       cursor: 'pointer',
     },
   },
+})
+
+const pulse = keyframes({
+  '0%, 100%': { opacity: 1 },
+  '50%': { opacity: 0.5 },
+})
+
+export const loadingImage = style({
+  animation: `${pulse} 2s cubic-bezier(0.4, 0, 0.6, 1) infinite`,
+  backgroundColor: vars.color.background2,
 })
