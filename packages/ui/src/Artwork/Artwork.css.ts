@@ -95,8 +95,14 @@ export const previewHeadingStyle = style([
     mb: 'x6',
   }),
   {
-    fontSize: 36,
-    fontWeight: 400,
+    lineHeight: 1,
+    fontWeight: 500,
+    fontSize: '20px',
+    '@media': {
+      '(min-width: 768px)': {
+        fontSize: '28px',
+      },
+    },
   },
 ])
 
