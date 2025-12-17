@@ -4,7 +4,6 @@ import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID, type TokenAllocation } from '@buildeross/types'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
-  defaultBackButton,
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
   defaultFormButtonWithPrev,
@@ -303,7 +302,7 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
           minW={'x15'}
           type="button"
           onClick={handlePrev}
-          className={defaultBackButton}
+          variant="secondary"
           aria-label="Back"
         >
           <Icon id="arrowLeft" />

@@ -130,22 +130,44 @@ export const CustomArtworkUpload: React.FC = () => {
         direction="column"
         w="100%"
         gap="x8"
-        p="x6"
-        style={{ maxWidth: '872px', margin: '0 auto' }}
+        py="x6"
+        style={{ minHeight: 'calc(100vh - 250px)', maxWidth: '880px', margin: '0 auto' }}
       >
-        <Flex justify="flex-end">
+        <Flex justify={{ '@initial': 'center', '@768': 'flex-end' }}>
           <Button variant="secondary" onClick={handleClear}>
             Clear Artwork
           </Button>
         </Flex>
         <Stack gap="x8">
-          <LayerOrdering
-            title="Layer Order"
-            images={images}
-            orderedLayers={orderedLayers}
-            setOrderedLayers={setOrderedLayers}
-          />
-          <Playground images={images} orderedLayers={orderedLayers} />
+          <Flex
+            direction="column"
+            align="stretch"
+            width="100%"
+            p={'x6'}
+            borderColor={'border'}
+            borderStyle={'solid'}
+            borderRadius={'curved'}
+            borderWidth={'normal'}
+          >
+            <LayerOrdering
+              title="Layer Order"
+              images={images}
+              orderedLayers={orderedLayers}
+              setOrderedLayers={setOrderedLayers}
+            />
+          </Flex>
+          <Flex
+            direction="column"
+            align="stretch"
+            width="100%"
+            p={'x6'}
+            borderColor={'border'}
+            borderStyle={'solid'}
+            borderRadius={'curved'}
+            borderWidth={'normal'}
+          >
+            <Playground images={images} orderedLayers={orderedLayers} />
+          </Flex>
         </Stack>
       </Flex>
     )
@@ -157,59 +179,72 @@ export const CustomArtworkUpload: React.FC = () => {
       align="center"
       justify="center"
       gap="x6"
-      p="x8"
-      style={{ minHeight: '60vh', maxWidth: '872px', margin: '0 auto' }}
+      py="x6"
+      style={{ minHeight: 'calc(100vh - 250px)', maxWidth: '880px', margin: '0 auto' }}
     >
-      <Stack align="center" gap="x4">
-        <Text fontSize={28} fontWeight="display">
-          Upload Custom Artwork
-        </Text>
-        <Text color="text3" align="center" style={{ maxWidth: '600px' }}>
-          Upload a folder containing subfolders for each trait. Each subfolder should
-          contain every variant for that trait.
-        </Text>
-        <Text color="text3" size="sm">
-          Supported formats: PNG and SVG
-        </Text>
-      </Stack>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        id="artwork-upload"
-        // @ts-ignore - webkitdirectory is not in the types but is supported
-        webkitdirectory=""
-        directory=""
-        multiple
-        accept="image/png,image/svg+xml"
-        onChange={handleUpload}
-        style={{ display: 'none' }}
-      />
-
-      <Button
-        as="label"
-        htmlFor="artwork-upload"
-        style={{ cursor: 'pointer', borderRadius: '16px' }}
-        size="lg"
-      >
-        Choose Folder
-      </Button>
-
-      {error && (
-        <Stack align="center" gap="x2">
-          <Text color="negative">{error}</Text>
-        </Stack>
-      )}
-
       <Flex
+        direction="column"
         align="center"
-        as="a"
-        href="/nouns.zip"
-        download
-        style={{ textDecoration: 'none' }}
+        width="100%"
+        px={'x6'}
+        py={'x12'}
+        gap="x6"
+        borderColor={'border'}
+        borderStyle={'solid'}
+        borderRadius={'curved'}
+        borderWidth={'normal'}
       >
-        <Icon id="download" mr="x2" />
-        <Text>Download Sample Folder</Text>
+        <Stack align="center" gap="x4">
+          <Text fontSize={28} fontWeight="display">
+            Upload Custom Artwork
+          </Text>
+          <Text color="text3" align="center" style={{ maxWidth: '600px' }}>
+            Upload a folder containing subfolders for each trait. Each subfolder should
+            contain every variant for that trait.
+          </Text>
+          <Text color="text3" size="sm">
+            Supported formats: PNG and SVG
+          </Text>
+        </Stack>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          id="artwork-upload"
+          // @ts-ignore - webkitdirectory is not in the types but is supported
+          webkitdirectory=""
+          directory=""
+          multiple
+          accept="image/png,image/svg+xml"
+          onChange={handleUpload}
+          style={{ display: 'none' }}
+        />
+
+        <Button
+          as="label"
+          htmlFor="artwork-upload"
+          style={{ cursor: 'pointer', borderRadius: '16px' }}
+          size="lg"
+        >
+          Choose Folder
+        </Button>
+
+        {error && (
+          <Stack align="center" gap="x2">
+            <Text color="negative">{error}</Text>
+          </Stack>
+        )}
+
+        <Flex
+          align="center"
+          as="a"
+          href="/nouns.zip"
+          download
+          style={{ textDecoration: 'none' }}
+        >
+          <Icon id="download" mr="x2" />
+          <Text>Download Sample Folder</Text>
+        </Flex>
       </Flex>
     </Flex>
   )

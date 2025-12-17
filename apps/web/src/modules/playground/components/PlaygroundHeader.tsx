@@ -26,34 +26,42 @@ export const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
   return (
     <Box className={headerContainer}>
       <Flex align="center" justify="space-between" className={headerContent}>
-        {dao && !isCustomView ? (
-          <Flex
-            as={Link}
-            align="center"
-            gap="x4"
-            href={`/dao/${chainIdToSlug(dao.chainId)}/${dao.address}`}
-          >
-            <FallbackImage className={daoImageStyle} src={dao.image} alt={dao.name} />
-            <Text fontSize={28} fontWeight={'display'}>
-              {dao.name}
-            </Text>
-          </Flex>
-        ) : (
-          <Text fontSize={28} fontWeight={'display'}>
-            Custom Artwork
-          </Text>
-        )}
-        <Flex gap="x2">
+        <Flex gap="x4" align="center">
           <Button variant="secondary" onClick={onBack}>
             <Flex gap="x1" align="center">
               <Icon id="arrowLeft" />
-              <Text fontSize={16}>Back</Text>
+              <Text fontSize={16} display={{ '@initial': 'none', '@768': 'block' }}>
+                Back
+              </Text>
             </Flex>
           </Button>
-          <Button variant="secondary" onClick={onToggleView}>
-            {isCustomView ? 'DAO Artwork' : 'Custom Upload'}
-          </Button>
+          {isCustomView && (
+            <Text fontSize={28} fontWeight={'display'}>
+              Custom Artwork
+            </Text>
+          )}
+          {!isCustomView &&
+            (dao ? (
+              <Flex
+                as={Link}
+                align="center"
+                gap="x4"
+                href={`/dao/${chainIdToSlug(dao.chainId)}/${dao.address}`}
+              >
+                <FallbackImage className={daoImageStyle} src={dao.image} alt={dao.name} />
+                <Text fontSize={28} fontWeight={'display'}>
+                  {dao.name}
+                </Text>
+              </Flex>
+            ) : (
+              <Text fontSize={28} fontWeight={'display'}>
+                DAO Artwork
+              </Text>
+            ))}
         </Flex>
+        <Button variant="secondary" onClick={onToggleView}>
+          {isCustomView ? 'DAO Artwork' : 'Custom Upload'}
+        </Button>
       </Flex>
     </Box>
   )

@@ -10,14 +10,13 @@ export const headerContainer = style([
     position: 'sticky',
     top: 0,
     zIndex: 10,
-    maxWidth: '872px',
+    maxWidth: '880px',
     margin: '0 auto',
   },
 ])
 
 export const headerContent = style([
   atoms({
-    px: 'x6',
     py: 'x4',
   }),
   {

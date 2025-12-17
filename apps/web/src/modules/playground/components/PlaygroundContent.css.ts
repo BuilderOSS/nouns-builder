@@ -4,12 +4,14 @@ import { style } from '@vanilla-extract/css'
 export const contentWrapper = style([
   atoms({
     w: '100%',
-    py: 'x6',
-    px: 'x6',
   }),
   {
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 'calc(100vh - 250px)',
+    maxWidth: '880px',
+    margin: '0 auto',
   },
 ])
 

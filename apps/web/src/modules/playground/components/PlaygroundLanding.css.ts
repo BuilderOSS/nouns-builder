@@ -4,13 +4,12 @@ import { style } from '@vanilla-extract/css'
 export const landingContainer = style([
   atoms({
     w: '100%',
-    px: 'x6',
     py: 'x10',
   }),
   {
     maxWidth: '1200px',
     margin: '0 auto',
-    minHeight: '60vh',
+    minHeight: 'calc(100vh - 170px)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
