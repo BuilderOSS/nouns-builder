@@ -60,6 +60,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
           ...getInitialEscrowFormState(),
           clientAddress: escrowDelegate || treasury || '',
         }}
+        enableReinitialize={true}
         validationSchema={EscrowFormSchema}
         onSubmit={onSubmit}
         validateOnMount={false}
