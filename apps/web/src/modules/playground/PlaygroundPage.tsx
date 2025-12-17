@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react'
 import type { DaoListItem } from 'src/modules/dashboard/SingleDaoSelector'
 import { useAccount } from 'wagmi'
 
+import { CustomArtworkUpload } from './components/CustomArtworkUpload'
 import { DaoSelector } from './components/DaoSelector'
 import { PlaygroundContent } from './components/PlaygroundContent'
 import { PlaygroundHeader } from './components/PlaygroundHeader'
@@ -45,32 +46,8 @@ export const PlaygroundPage: React.FC = () => {
     )
   }
 
-  // DAO artwork view
-  if (view === 'dao') {
-    return (
-      <Box w="100%">
-        {selectedDao ? (
-          <>
-            <PlaygroundHeader
-              dao={selectedDao}
-              view={view}
-              onBack={handleBackToLanding}
-              onToggleView={handleToggleView}
-            />
-            <PlaygroundContent dao={selectedDao} view={view} />
-          </>
-        ) : (
-          <DaoSelector
-            selectedDao={selectedDao}
-            onSelectedDaoChange={setSelectedDao}
-            userAddress={address}
-          />
-        )}
-      </Box>
-    )
-  }
+  const isCustomView = view === 'custom'
 
-  // Custom upload view
   return (
     <Box w="100%">
       <PlaygroundHeader
@@ -79,7 +56,17 @@ export const PlaygroundPage: React.FC = () => {
         onBack={handleBackToLanding}
         onToggleView={handleToggleView}
       />
-      <PlaygroundContent dao={selectedDao} view={view} />
+      {isCustomView ? (
+        <CustomArtworkUpload />
+      ) : selectedDao ? (
+        <PlaygroundContent dao={selectedDao} />
+      ) : (
+        <DaoSelector
+          selectedDao={selectedDao}
+          onSelectedDaoChange={setSelectedDao}
+          userAddress={address}
+        />
+      )}
     </Box>
   )
 }

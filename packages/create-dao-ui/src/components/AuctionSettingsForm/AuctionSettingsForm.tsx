@@ -1,6 +1,5 @@
 import { DaysHoursMinsSecs, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
-  defaultBackButton,
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
   defaultFormButtonWithPrev,
@@ -260,7 +259,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                 minH={'x15'}
                 minW={'x15'}
                 onClick={() => handlePrev()}
-                className={defaultBackButton}
+                variant={'secondary'}
                 aria-label="Back"
               >
                 <Icon id="arrowLeft" />

@@ -23,7 +23,18 @@ export const DaoSelector: React.FC<DaoSelectorProps> = ({
 }) => {
   return (
     <Box className={selectorWrapper}>
-      <Stack className={selectorContent} gap="x6">
+      <Stack
+        className={selectorContent}
+        gap="x6"
+        direction="column"
+        align="center"
+        width="100%"
+        p={'x6'}
+        borderColor={'border'}
+        borderStyle={'solid'}
+        borderRadius={'curved'}
+        borderWidth={'normal'}
+      >
         <Stack gap="x2">
           <Heading size="lg">Select a DAO</Heading>
           <Text color="text3">
