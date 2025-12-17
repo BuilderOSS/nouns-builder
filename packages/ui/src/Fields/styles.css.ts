@@ -1,4 +1,4 @@
-import { atoms, theme } from '@buildeross/zord'
+import { atoms } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const defaultFormAdvancedWrapper = style({
@@ -115,19 +115,6 @@ export const inputStyleVariants = styleVariants({
   default: [defaultInputStyle],
   error: [defaultInputErrorStyle],
 })
-
-export const defaultBackButton = style([
-  atoms({ color: 'accent' }),
-  {
-    background: theme.colors.background2,
-    borderRadius: '10px',
-    selectors: {
-      '&:hover': {
-        cursor: 'pointer',
-      },
-    },
-  },
-])
 
 export const defaultFormButtonWithPrev = style({
   width: 'calc(100% - 68px)',

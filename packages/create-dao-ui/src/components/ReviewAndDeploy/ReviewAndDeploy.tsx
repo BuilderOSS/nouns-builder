@@ -6,7 +6,6 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { defaultBackButton } from '@buildeross/ui/styles'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { isTestnetChain, toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
@@ -605,7 +604,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                 minH={'x15'}
                 minW={'x15'}
                 onClick={() => handlePrev()}
-                className={defaultBackButton}
+                variant="secondary"
               >
                 <Icon id="arrowLeft" />
               </Flex>

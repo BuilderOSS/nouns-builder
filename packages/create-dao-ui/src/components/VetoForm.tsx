@@ -1,5 +1,5 @@
 import { Radio, SmartInput } from '@buildeross/ui/Fields'
-import { defaultBackButton, defaultFormButtonWithPrev } from '@buildeross/ui/styles'
+import { defaultFormButtonWithPrev } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { addressValidationSchema } from '@buildeross/utils/yup'
@@ -123,7 +123,7 @@ export const VetoForm: React.FC<VetoFormProps> = ({ title }) => {
                 minH={'x15'}
                 minW={'x15'}
                 onClick={() => handlePrev()}
-                className={defaultBackButton}
+                variant="secondary"
                 aria-label="Back"
               >
                 <Icon id="arrowLeft" />
