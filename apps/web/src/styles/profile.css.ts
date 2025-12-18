@@ -12,6 +12,7 @@ export const daosContainer = style({
     'screen and (min-width: 768px)': {
       width: '360px',
       flexShrink: 0,
+      overflow: 'auto',
     },
   },
 })

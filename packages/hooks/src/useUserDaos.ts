@@ -1,4 +1,5 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type MyDaosResponse } from '@buildeross/sdk/subgraph'
 import useSWR from 'swr'
@@ -18,7 +19,7 @@ export interface UseUserDaosResult {
 
 // Fetcher function defined outside the hook (SWR v2 passes an AbortSignal as 2nd arg)
 type HttpError = Error & { status?: number; body?: unknown }
-const searchFetcher = async (
+const daosFetcher = async (
   [, address]: [string, string],
   { signal }: { signal?: AbortSignal } = {}
 ): Promise<MyDaosResponse> => {
@@ -37,7 +38,13 @@ const searchFetcher = async (
     err.body = body
     throw err
   }
-  return body as MyDaosResponse
+  const daos = body as MyDaosResponse
+
+  return daos?.sort((a, b) => {
+    const aIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === a.chainId)
+    const bIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === b.chainId)
+    return aIndex - bIndex
+  })
 }
 
 /**
@@ -55,7 +62,7 @@ export function useUserDaos(options: UseUserDaosOptions = {}): UseUserDaosResult
   // Use SWR for data fetching with caching
   const { data, error, isLoading, isValidating } = useSWR<MyDaosResponse, HttpError>(
     swrKey,
-    searchFetcher,
+    daosFetcher,
     {
       // Don't revalidate on focus for my DAOs
       revalidateOnFocus: false,
