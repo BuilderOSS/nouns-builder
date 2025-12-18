@@ -59,15 +59,42 @@ export const searchDaosRequest = async (
 
     const fetchLimit = limit + 1
 
+    // Build the simple where clause for case-insensitive substring matching
+    const whereSimple: Dao_Filter = {
+      and: [
+        where,
+        {
+          or: [
+            { name_contains_nocase: queryText },
+            { symbol_contains_nocase: queryText },
+            { description_contains_nocase: queryText },
+          ],
+        },
+      ],
+    }
+
     const data = await SDK.connect(chainId).exploreDaosSearch({
       text: queryText,
       skip,
       first: fetchLimit,
       where,
+      whereSimple,
     })
 
-    const hasNextPage = data.daoSearch.length > limit
-    const limitedData = hasNextPage ? data.daoSearch.slice(0, limit) : data.daoSearch
+    // Combine results from both daoSearch and daos queries
+    const combinedDaos = [...data.daoSearch, ...data.daos]
+
+    // Deduplicate by tokenAddress (unique identifier for DAOs)
+    const uniqueDaosMap = new Map()
+    for (const dao of combinedDaos) {
+      if (!uniqueDaosMap.has(dao.tokenAddress)) {
+        uniqueDaosMap.set(dao.tokenAddress, dao)
+      }
+    }
+
+    const uniqueDaos = Array.from(uniqueDaosMap.values())
+    const hasNextPage = uniqueDaos.length > limit
+    const limitedData = hasNextPage ? uniqueDaos.slice(0, limit) : uniqueDaos
 
     return {
       daos: limitedData.map((dao) => {

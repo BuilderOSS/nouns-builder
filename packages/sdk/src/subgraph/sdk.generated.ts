@@ -4074,412 +4074,6 @@ export enum Snapshot_OrderBy {
   VoterCount = 'voterCount',
 }
 
-export type Subscription = {
-  __typename?: 'Subscription'
-  /** Access to subgraph metadata */
-  _meta?: Maybe<_Meta_>
-  auction?: Maybe<Auction>
-  auctionBid?: Maybe<AuctionBid>
-  auctionBidPlacedEvent?: Maybe<AuctionBidPlacedEvent>
-  auctionBidPlacedEvents: Array<AuctionBidPlacedEvent>
-  auctionBids: Array<AuctionBid>
-  auctionConfig?: Maybe<AuctionConfig>
-  auctionConfigs: Array<AuctionConfig>
-  auctionCreatedEvent?: Maybe<AuctionCreatedEvent>
-  auctionCreatedEvents: Array<AuctionCreatedEvent>
-  auctionSettledEvent?: Maybe<AuctionSettledEvent>
-  auctionSettledEvents: Array<AuctionSettledEvent>
-  auctions: Array<Auction>
-  dao?: Maybe<Dao>
-  daoMultisigUpdate?: Maybe<DaoMultisigUpdate>
-  daoMultisigUpdates: Array<DaoMultisigUpdate>
-  daos: Array<Dao>
-  daotokenOwner?: Maybe<DaoTokenOwner>
-  daotokenOwners: Array<DaoTokenOwner>
-  daovoter?: Maybe<DaoVoter>
-  daovoters: Array<DaoVoter>
-  feedEvent?: Maybe<FeedEvent>
-  feedEvents: Array<FeedEvent>
-  metadataItem?: Maybe<MetadataItem>
-  metadataItems: Array<MetadataItem>
-  metadataProperties: Array<MetadataProperty>
-  metadataProperty?: Maybe<MetadataProperty>
-  proposal?: Maybe<Proposal>
-  proposalCreatedEvent?: Maybe<ProposalCreatedEvent>
-  proposalCreatedEvents: Array<ProposalCreatedEvent>
-  proposalExecutedEvent?: Maybe<ProposalExecutedEvent>
-  proposalExecutedEvents: Array<ProposalExecutedEvent>
-  proposalUpdate?: Maybe<ProposalUpdate>
-  proposalUpdatedEvent?: Maybe<ProposalUpdatedEvent>
-  proposalUpdatedEvents: Array<ProposalUpdatedEvent>
-  proposalUpdates: Array<ProposalUpdate>
-  proposalVote?: Maybe<ProposalVote>
-  proposalVotedEvent?: Maybe<ProposalVotedEvent>
-  proposalVotedEvents: Array<ProposalVotedEvent>
-  proposalVotes: Array<ProposalVote>
-  proposals: Array<Proposal>
-  snapshot?: Maybe<Snapshot>
-  snapshots: Array<Snapshot>
-  token?: Maybe<Token>
-  tokens: Array<Token>
-}
-
-export type Subscription_MetaArgs = {
-  block?: InputMaybe<Block_Height>
-}
-
-export type SubscriptionAuctionArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionAuctionBidArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionAuctionBidPlacedEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionAuctionBidPlacedEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<AuctionBidPlacedEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<AuctionBidPlacedEvent_Filter>
-}
-
-export type SubscriptionAuctionBidsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<AuctionBid_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<AuctionBid_Filter>
-}
-
-export type SubscriptionAuctionConfigArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionAuctionConfigsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<AuctionConfig_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<AuctionConfig_Filter>
-}
-
-export type SubscriptionAuctionCreatedEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionAuctionCreatedEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<AuctionCreatedEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<AuctionCreatedEvent_Filter>
-}
-
-export type SubscriptionAuctionSettledEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionAuctionSettledEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<AuctionSettledEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<AuctionSettledEvent_Filter>
-}
-
-export type SubscriptionAuctionsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<Auction_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<Auction_Filter>
-}
-
-export type SubscriptionDaoArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionDaoMultisigUpdateArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionDaoMultisigUpdatesArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<DaoMultisigUpdate_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<DaoMultisigUpdate_Filter>
-}
-
-export type SubscriptionDaosArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<Dao_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<Dao_Filter>
-}
-
-export type SubscriptionDaotokenOwnerArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionDaotokenOwnersArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<DaoTokenOwner_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<DaoTokenOwner_Filter>
-}
-
-export type SubscriptionDaovoterArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionDaovotersArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<DaoVoter_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<DaoVoter_Filter>
-}
-
-export type SubscriptionFeedEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionFeedEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<FeedEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<FeedEvent_Filter>
-}
-
-export type SubscriptionMetadataItemArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionMetadataItemsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<MetadataItem_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<MetadataItem_Filter>
-}
-
-export type SubscriptionMetadataPropertiesArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<MetadataProperty_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<MetadataProperty_Filter>
-}
-
-export type SubscriptionMetadataPropertyArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalCreatedEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalCreatedEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<ProposalCreatedEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<ProposalCreatedEvent_Filter>
-}
-
-export type SubscriptionProposalExecutedEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalExecutedEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<ProposalExecutedEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<ProposalExecutedEvent_Filter>
-}
-
-export type SubscriptionProposalUpdateArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalUpdatedEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalUpdatedEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<ProposalUpdatedEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<ProposalUpdatedEvent_Filter>
-}
-
-export type SubscriptionProposalUpdatesArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<ProposalUpdate_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<ProposalUpdate_Filter>
-}
-
-export type SubscriptionProposalVoteArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalVotedEventArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionProposalVotedEventsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<ProposalVotedEvent_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<ProposalVotedEvent_Filter>
-}
-
-export type SubscriptionProposalVotesArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<ProposalVote_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<ProposalVote_Filter>
-}
-
-export type SubscriptionProposalsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<Proposal_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<Proposal_Filter>
-}
-
-export type SubscriptionSnapshotArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionSnapshotsArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<Snapshot_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<Snapshot_Filter>
-}
-
-export type SubscriptionTokenArgs = {
-  block?: InputMaybe<Block_Height>
-  id: Scalars['ID']['input']
-  subgraphError?: _SubgraphErrorPolicy_
-}
-
-export type SubscriptionTokensArgs = {
-  block?: InputMaybe<Block_Height>
-  first?: InputMaybe<Scalars['Int']['input']>
-  orderBy?: InputMaybe<Token_OrderBy>
-  orderDirection?: InputMaybe<OrderDirection>
-  skip?: InputMaybe<Scalars['Int']['input']>
-  subgraphError?: _SubgraphErrorPolicy_
-  where?: InputMaybe<Token_Filter>
-}
-
 export type Token = {
   __typename?: 'Token'
   auction?: Maybe<Auction>
@@ -4737,7 +4331,6 @@ export type _Meta_ = {
    * will be null if the _meta field has a block constraint that asks for
    * a block number. It will be filled if the _meta field has no block constraint
    * and therefore asks for the latest  block
-   *
    */
   block: _Block_
   /** The deployment ID */
@@ -5069,17 +4662,42 @@ export type ExploreDaosSearchQueryVariables = Exact<{
   first: Scalars['Int']['input']
   skip: Scalars['Int']['input']
   where?: InputMaybe<Dao_Filter>
+  whereSimple?: InputMaybe<Dao_Filter>
 }>
 
 export type ExploreDaosSearchQuery = {
   __typename?: 'Query'
   daoSearch: Array<{
     __typename?: 'DAO'
+    tokenAddress: any
     name: string
     symbol: string
     description: string
     projectURI: string
+    treasuryAddress: any
+    auctionAddress: any
+    governorAddress: any
+    metadataAddress: any
+    tokens: Array<{
+      __typename?: 'Token'
+      tokenId: any
+      name: string
+      image?: string | null
+      auction?: {
+        __typename?: 'Auction'
+        endTime: any
+        settled: boolean
+        highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+      } | null
+    }>
+  }>
+  daos: Array<{
+    __typename?: 'DAO'
     tokenAddress: any
+    name: string
+    symbol: string
+    description: string
+    projectURI: string
     treasuryAddress: any
     auctionAddress: any
     governorAddress: any
@@ -6078,13 +5696,43 @@ export const DaoOgMetadataDocument = gql`
   }
 `
 export const ExploreDaosSearchDocument = gql`
-  query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_filter) {
+  query exploreDaosSearch(
+    $text: String!
+    $first: Int!
+    $skip: Int!
+    $where: DAO_filter
+    $whereSimple: DAO_filter
+  ) {
     daoSearch(text: $text, first: $first, skip: $skip, where: $where) {
+      tokenAddress
       name
       symbol
       description
       projectURI
+      treasuryAddress
+      auctionAddress
+      governorAddress
+      metadataAddress
+      tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
+        tokenId
+        name
+        image
+        auction {
+          endTime
+          settled
+          highestBid {
+            amount
+            bidder
+          }
+        }
+      }
+    }
+    daos(first: $first, skip: $skip, where: $whereSimple) {
       tokenAddress
+      name
+      symbol
+      description
+      projectURI
       treasuryAddress
       auctionAddress
       governorAddress

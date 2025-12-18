@@ -1,15 +1,43 @@
-query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_filter) {
+query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_filter, $whereSimple: DAO_filter) {
   daoSearch(
     text: $text
     first: $first
     skip: $skip
     where: $where
   ) {
+    tokenAddress
     name
     symbol
     description
     projectURI
+    treasuryAddress
+    auctionAddress
+    governorAddress
+    metadataAddress
+    tokens(first: 1, orderBy: tokenId, orderDirection: desc) {
+      tokenId
+      name
+      image
+      auction {
+        endTime
+        settled
+        highestBid {
+          amount
+          bidder
+        }
+      }
+    }
+  }
+  daos(
+    first: $first
+    skip: $skip
+    where: $whereSimple
+  ) {
     tokenAddress
+    name
+    symbol
+    description
+    projectURI
     treasuryAddress
     auctionAddress
     governorAddress
