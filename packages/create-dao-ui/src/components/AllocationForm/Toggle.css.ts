@@ -15,7 +15,6 @@ export const toggleStyle = style([
         cursor: 'pointer',
       },
     },
-    // width: '42px',
   },
 ])
 
@@ -34,3 +33,13 @@ export const allocationToggleButtonVariants = styleVariants({
   off: [allocationToggleButton, { marginLeft: '-2px' }],
   on: [allocationToggleButton, { marginRight: '-2px' }],
 })
+
+export const plainToggleButton = style([
+  {
+    border: '2px solid #000',
+    background: '#F2F2F2',
+    marginTop: '-2px',
+    marginLeft: '-2px',
+    marginRight: '-2px',
+  },
+])
