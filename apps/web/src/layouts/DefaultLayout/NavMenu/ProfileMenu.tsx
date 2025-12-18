@@ -53,14 +53,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
   const { daos } = useUserDaos({ address })
 
-  const sortedDaos = React.useMemo(() => {
-    return [...daos].sort((a, b) => {
-      const aIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === a.chainId)
-      const bIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === b.chainId)
-      return aIndex - bIndex
-    })
-  }, [daos])
-
   const handleOpenMenu = React.useCallback(
     (open: boolean) => {
       onOpenMenu(open, MenuType.PROFILE_MENU)
@@ -105,7 +97,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           Create a DAO
         </Button>
       </Link>
-      {sortedDaos.length > 0 && (
+      {daos.length > 0 && (
         <>
           <Box color="border" borderStyle="solid" borderWidth="thin" />
           <Flex
@@ -126,7 +118,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   }
             }
           >
-            {sortedDaos.map((dao, index) => {
+            {daos.map((dao, index) => {
               const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
               return (
                 <Link

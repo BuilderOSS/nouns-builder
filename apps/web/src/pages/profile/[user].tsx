@@ -3,6 +3,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SectionHandler } from '@buildeross/dao-ui'
 import { Feed } from '@buildeross/feed-ui'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
@@ -75,13 +76,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
       tokensQuery(_chainId, _userAddress, _page ? parseInt(_page) : undefined)
   )
 
-  const { data: daos, isValidating: isLoadingDaos } = useSWR(
-    userAddress
-      ? ([SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()] as const)
-      : undefined,
-    ([, _userAddress]) => myDaosRequest(_userAddress)
-  )
-
+  const { daos, isLoading: isLoadingDaos } = useUserDaos({ address: userAddress })
   const isLoading = isLoadingTokens || isLoadingDaos
   const hasDaos = !!daos && daos.length > 0
 
@@ -372,6 +367,13 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
   const userName = isAddress(ensName) ? walletSnippet(userAddress) : ensName
 
   const daos = await myDaosRequest(userAddress)
+
+  const sortedDaos = daos?.sort((a, b) => {
+    const aIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === a.chainId)
+    const bIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === b.chainId)
+    return aIndex - bIndex
+  })
+
   const topDaos = daos?.slice(0, 3) ?? []
 
   const data = {
@@ -385,7 +387,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
   const ogImageURL = `${protocol}://${req.headers.host}/api/og/profile?address=${userAddress}&data=${encodeURIComponent(JSON.stringify(data))}`
 
   const fallback = {
-    [unstable_serialize([SWR_KEYS.PROFILE_DAOS, userAddress.toLowerCase()])]: daos,
+    [unstable_serialize([SWR_KEYS.MY_DAOS, userAddress.toLowerCase()])]: sortedDaos,
   }
 
   return {
