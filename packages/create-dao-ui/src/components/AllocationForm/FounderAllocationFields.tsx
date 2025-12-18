@@ -1,9 +1,8 @@
 import { Duration } from '@buildeross/types'
 import { DatePicker, SmartInput } from '@buildeross/ui/Fields'
 import { calculateMaxAllocation } from '@buildeross/utils'
-import { Button, Flex, Heading, Icon, Paragraph, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { FormikErrors, FormikProps, FormikTouched } from 'formik'
-import React from 'react'
 
 import { FounderAllocationFormValues, TokenAllocation } from '../AllocationForm'
 
@@ -32,12 +31,6 @@ export const FounderAllocationFields = ({
 }: FounderAllocationFieldsProps) => {
   return (
     <Flex position={'relative'} direction={'column'} w={'100%'}>
-      <Heading size="xs">Token Allocation</Heading>
-
-      <Paragraph color="text3" mb={'x6'}>
-        A Founder Address will receive x% of tokens until the specified end date.
-      </Paragraph>
-
       <Stack>
         {values.founderAllocation.map((founder, index) => {
           const isFounder = index === 0
