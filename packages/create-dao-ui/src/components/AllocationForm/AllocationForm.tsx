@@ -22,6 +22,7 @@ import { validationSchemaAllocations } from './AllocationForm.schema'
 import { ContributionAllocation } from './ContributionAllocation'
 import { FounderAllocationFields } from './FounderAllocationFields'
 import { FounderRewardsFields } from './FounderRewardsFields'
+import { Toggle } from './Toggle'
 
 export type { TokenAllocation }
 
@@ -50,6 +51,14 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
   const [allocationError, setAllocationError] = useState(false)
   const chain = useChainStore((x) => x.chain)
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false)
+
+  // Helper function to get date one month from now in YYYY-MM-DD format
+  const getOneMonthFromNow = () => {
+    const date = new Date()
+    date.setMonth(date.getMonth() + 1)
+    return date.toISOString().split('T')[0]
+  }
+
   const { data: version, isLoading: isVersionLoading } = useReadContract({
     abi: managerAbi,
     address: PUBLIC_MANAGER_ADDRESS[chain.id],
@@ -94,6 +103,16 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
 
   const { address } = useAccount()
 
+  // Determine if founder allocation is enabled based on existing values
+  // Enable if there's more than one founder OR if the first founder has non-zero allocation
+  const hasExistingAllocation =
+    founderAllocation.length > 1 ||
+    (founderAllocation.length === 1 &&
+      Number(founderAllocation[0].allocationPercentage) > 0)
+
+  const [hasFounderAllocation, setHasFounderAllocation] =
+    useState<boolean>(hasExistingAllocation)
+
   // should always default to the current signer address given this field is disabled
   const initialFounderValues =
     founderAllocation.length === 0
@@ -117,6 +136,34 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
 
   const handlePrev = () => {
     setActiveSection(activeSection - 1)
+  }
+
+  const handleToggleFounderAllocation = () => {
+    const newState = !hasFounderAllocation
+    setHasFounderAllocation(newState)
+
+    // If toggling OFF, set form values to single founder with 0% allocation
+    if (!newState && formRef.current) {
+      formRef.current.setFieldValue('founderAllocation', [
+        {
+          founderAddress: address || '',
+          allocationPercentage: 0,
+          endDate: getOneMonthFromNow(),
+          admin: true,
+        },
+      ])
+    }
+    // If toggling ON, reset to initial values (empty allocation to force user input)
+    else if (newState && formRef.current) {
+      formRef.current.setFieldValue('founderAllocation', [
+        {
+          founderAddress: address || '',
+          allocationPercentage: '',
+          endDate: '',
+          admin: true,
+        },
+      ])
+    }
   }
 
   const handleSubmit = async ({
@@ -205,23 +252,46 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
               }
             />
 
-            <FieldArray name="founderAllocation">
-              {({ remove, push }) => (
-                <FounderAllocationFields
-                  formik={formik}
-                  auctionDuration={auctionDuration!}
-                  vetoPower={vetoPower}
-                  vetoerAddress={vetoerAddress}
-                  touched={formik.touched}
-                  values={formik.values}
-                  errors={formik.errors}
-                  removeFounderAddress={remove}
-                  addFounderAddress={() =>
-                    push({ founderAddress: '', allocation: '', endDate: '' })
-                  }
-                />
-              )}
-            </FieldArray>
+            <Flex
+              justify={'space-between'}
+              align={'center'}
+              mb={'x2'}
+              mt={'x6'}
+              pr={'x2'}
+            >
+              <Heading size="xs">Token Allocation</Heading>
+              <Toggle
+                on={hasFounderAllocation}
+                onToggle={handleToggleFounderAllocation}
+                variant="plain"
+              />
+            </Flex>
+
+            <Paragraph color="text3" mb={'x6'}>
+              Allocate a percentage of minted tokens to founder addresses. Founders
+              automatically receive their share of tokens as they are minted until the
+              specified end date. Toggle off to create a DAO with no founder allocation.
+            </Paragraph>
+
+            {hasFounderAllocation && (
+              <FieldArray name="founderAllocation">
+                {({ remove, push }) => (
+                  <FounderAllocationFields
+                    formik={formik}
+                    auctionDuration={auctionDuration!}
+                    vetoPower={vetoPower}
+                    vetoerAddress={vetoerAddress}
+                    touched={formik.touched}
+                    values={formik.values}
+                    errors={formik.errors}
+                    removeFounderAddress={remove}
+                    addFounderAddress={() =>
+                      push({ founderAddress: '', allocationPercentage: '', endDate: '' })
+                    }
+                  />
+                )}
+              </FieldArray>
+            )}
             {!isVersionLoading && version?.startsWith('2') && (
               <>
                 <Flex w="100%" align={'center'} justify={'center'}>
