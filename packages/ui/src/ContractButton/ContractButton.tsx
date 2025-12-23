@@ -1,25 +1,20 @@
-import { L2_CHAINS, PUBLIC_ALL_CHAINS, PUBLIC_IS_TESTNET } from '@buildeross/constants'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, ButtonProps, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAccount, useBalance, useSwitchChain } from 'wagmi'
+import { useAccount, useSwitchChain } from 'wagmi'
 
 import { useConnectModal } from '../ConnectModalProvider'
-
-export const INSUFFICIENT_BALANCE_ERROR =
-  'Insufficient balance. Please add ETH to your wallet to complete the transaction.'
 
 export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type' | 'ref'> & {
   // Accept an optional click event; callers may also pass a 0-arg handler.
   handleClick: (e?: any) => void | Promise<void>
   chainId: CHAIN_ID
-  // Custom hint to show when user has zero balance, overrides default message
-  zeroBalanceHint?: React.ReactNode | string
   // Optional function to open connect modal - provided by parent component
   onConnectWallet?: () => void
 }
 
-type ErrorType = 'not_connected' | 'wrong_chain' | 'insufficient_balance'
+type ErrorType = 'not_connected' | 'wrong_chain'
 
 type ErrorState = {
   type: ErrorType
@@ -32,27 +27,16 @@ export const ContractButton = ({
   disabled = false,
   loading = false,
   chainId,
-  zeroBalanceHint,
   onConnectWallet,
   ...rest
 }: ContractButtonProps) => {
   const { address: userAddress, chain: userChain } = useAccount()
-  const { data: userBalance } = useBalance({
-    address: userAddress,
-    chainId: chainId,
-  })
   const { openConnectModal } = useConnectModal()
 
   const chainName = useMemo(() => {
     const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
     return chain?.name ?? 'Unknown Chain (ID: ' + chainId + ')'
   }, [chainId])
-
-  const shouldShowCustomHint = useMemo(() => {
-    if (PUBLIC_IS_TESTNET) return false
-    const isL2 = L2_CHAINS.includes(chainId)
-    return isL2 && userBalance?.value === 0n && !!zeroBalanceHint
-  }, [chainId, userBalance?.value, zeroBalanceHint])
 
   const { switchChain } = useSwitchChain()
   const [popupOpen, setPopupOpen] = useState(false)
@@ -73,23 +57,8 @@ export const ContractButton = ({
         message: `Please switch to ${chainName} to continue.`,
       }
     }
-    if (userBalance?.value === 0n) {
-      const message = shouldShowCustomHint ? zeroBalanceHint : INSUFFICIENT_BALANCE_ERROR
-      return {
-        type: 'insufficient_balance',
-        message,
-      }
-    }
     return null
-  }, [
-    userAddress,
-    userChain?.id,
-    chainId,
-    userBalance?.value,
-    chainName,
-    shouldShowCustomHint,
-    zeroBalanceHint,
-  ])
+  }, [userAddress, userChain?.id, chainId, chainName])
 
   // Auto-close popup when error resolves (e.g., user manually switches chain)
   useEffect(() => {
@@ -144,9 +113,6 @@ export const ContractButton = ({
           },
         }
       )
-    } else if (errorState.type === 'insufficient_balance') {
-      // For insufficient balance, user needs to add funds externally
-      setPopupOpen(false)
     }
   }, [errorState, onConnectWallet, openConnectModal, switchChain, chainId, chainName])
 
@@ -157,8 +123,6 @@ export const ContractButton = ({
         return 'Connect Wallet'
       case 'wrong_chain':
         return `Switch to ${chainName}`
-      case 'insufficient_balance':
-        return 'Close'
       default:
         return null
     }
