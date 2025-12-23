@@ -26,3 +26,19 @@ export const loadingContainer = style([
     minHeight: 'calc(100vh - 250px)',
   },
 ])
+
+export const exploreHeadingStyle = style([
+  atoms({
+    mb: 'x6',
+  }),
+  {
+    lineHeight: 1,
+    fontWeight: 500,
+    fontSize: '20px',
+    '@media': {
+      '(min-width: 768px)': {
+        fontSize: '28px',
+      },
+    },
+  },
+])
