@@ -196,34 +196,41 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     type SearchResult = { chain: Chain; daos: DaoSearchResult[] }
 
-    const searchTasks = chainsToSearch.map((chain) => async () => {
-      try {
-        const searchRes = await searchDaosRequest(
-          chain.id,
-          transformedSearch,
-          maxResults,
-          0
-        )
+    const performSearch = async (searchQuery: string) => {
+      const searchTasks = chainsToSearch.map((chain) => async () => {
+        try {
+          const searchRes = await searchDaosRequest(chain.id, searchQuery, maxResults, 0)
 
-        return {
-          chain,
-          daos: searchRes?.daos || [],
+          return {
+            chain,
+            daos: searchRes?.daos || [],
+          }
+        } catch (error) {
+          console.error(
+            `Failed to fetch search results for chain ${chain.id}:`,
+            error instanceof Error ? error.message : error
+          )
+          return {
+            chain,
+            daos: [],
+          }
         }
-      } catch (error) {
-        console.error(
-          `Failed to fetch search results for chain ${chain.id}:`,
-          error instanceof Error ? error.message : error
-        )
-        return {
-          chain,
-          daos: [],
-        }
-      }
-    })
+      })
 
-    // Fetch results for all selected chains in parallel.
-    // Each call fetches up to `maxResults` from that chain.
-    const searchResults = await executeConcurrently<SearchResult>(searchTasks)
+      // Fetch results for all selected chains in parallel.
+      // Each call fetches up to `maxResults` from that chain.
+      return await executeConcurrently<SearchResult>(searchTasks)
+    }
+
+    // First try with the transformed search
+    let searchResults = await performSearch(transformedSearch)
+
+    // If no results found and transformed search differs from raw search,
+    // fallback to raw search
+    const hasResults = searchResults.some((result) => result.daos.length > 0)
+    if (!hasResults && transformedSearch !== rawSearch) {
+      searchResults = await performSearch(rawSearch)
+    }
 
     // Aggregate DAOs from all successful chain responses,
     // preserving chain metadata so we can rank by chain match.
