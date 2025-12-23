@@ -17,6 +17,7 @@ import {
   Twitter,
   VisitAlternate,
 } from 'src/modules/home'
+import { container } from 'src/styles/dashboard.css'
 import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
@@ -29,7 +30,9 @@ function ConditionalLayout({ children }: { children: ReactNode }) {
   if (address) {
     return (
       <LayoutWrapper>
-        <DefaultLayout>{children}</DefaultLayout>
+        <DefaultLayout hideFooterOnMobile={true} className={container}>
+          {children}
+        </DefaultLayout>
       </LayoutWrapper>
     )
   }
