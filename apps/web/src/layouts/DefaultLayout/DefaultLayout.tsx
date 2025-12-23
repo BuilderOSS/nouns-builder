@@ -1,22 +1,28 @@
 import type { DaoContractAddresses } from '@buildeross/types'
 import { Chain } from '@buildeross/types'
+import { Box } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 
 import { BaseLayout } from '../BaseLayout'
 import { LayoutWrapper } from '../LayoutWrapper'
 import { Footer } from './Footer'
 
+type BoxProps = React.ComponentProps<typeof Box>
+
+type DefaultLayoutProps = {
+  children: ReactNode
+  chain?: Chain
+  addresses?: DaoContractAddresses
+  hideFooterOnMobile?: boolean
+} & BoxProps
+
 export function DefaultLayout({
   children,
   chain,
   addresses,
   hideFooterOnMobile = false,
-}: {
-  children: ReactNode
-  chain?: Chain
-  addresses?: DaoContractAddresses
-  hideFooterOnMobile?: boolean
-}) {
+  ...props
+}: DefaultLayoutProps) {
   return (
     <BaseLayout
       chain={chain}
@@ -24,6 +30,7 @@ export function DefaultLayout({
       px={'x4'}
       pt={'x20'}
       footer={<Footer hideOnMobile={hideFooterOnMobile} />}
+      {...props}
     >
       {children}
     </BaseLayout>

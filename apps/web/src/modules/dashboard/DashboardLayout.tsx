@@ -1,5 +1,6 @@
+import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Box, Flex } from '@buildeross/zord'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 
 import * as styles from './DashboardLayout.css'
@@ -21,6 +22,11 @@ export const DashboardLayout = ({
   ensAvatar?: string
 }) => {
   const [activeTab, setActiveTab] = useState<MobileTab>('feed')
+  const scrollDirection = useScrollDirection()
+
+  // Calculate sidebar top offset based on header visibility
+  // Header is 80px tall and hidden when scrollDirection is 'down'
+  const sidebarTopOffset = scrollDirection === 'down' ? 24 : 104 // 24px + 80px header
 
   // Reset to feed view when user disconnects
   useEffect(() => {
@@ -51,7 +57,7 @@ export const DashboardLayout = ({
   return (
     <Flex py={{ '@initial': 'x0', '@1024': 'x6' }} w={'100%'} justify="center">
       <Box w="100%" style={{ maxWidth: 1440 }}>
-        {/* Header - only show on desktop */}
+        {/* Header - only show on desktop
         <Flex
           justify="space-between"
           align="center"
@@ -62,7 +68,7 @@ export const DashboardLayout = ({
           <Text fontSize={35} fontWeight={'display'}>
             Dashboard
           </Text>
-        </Flex>
+        </Flex> */}
 
         {/* Desktop: Two-column layout */}
         <Flex
@@ -77,7 +83,12 @@ export const DashboardLayout = ({
           </Box>
 
           {/* Sidebar - desktop only */}
-          <Box position="relative" className={styles.sidebar}>
+          <Box
+            position="relative"
+            className={styles.sidebar}
+            style={{ top: `${sidebarTopOffset}px` }}
+            data-header-visible={scrollDirection !== 'down'}
+          >
             {sidebarContent}
           </Box>
         </Flex>

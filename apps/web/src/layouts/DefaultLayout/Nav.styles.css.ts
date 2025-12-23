@@ -137,7 +137,7 @@ export const footerHiddenOnMobile = style([
     borderTop: `2px solid ${color.border}`,
     '@media': {
       '(max-width: 1023px)': {
-        display: 'none',
+        display: 'none !important',
       },
     },
   },
