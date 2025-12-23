@@ -1,5 +1,3 @@
-import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
-import { useVotes } from '@buildeross/hooks/useVotes'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -15,7 +13,6 @@ import { daoName } from './dashboard.css'
 export const DaoProposals = ({
   daoImage,
   tokenAddress,
-  governorAddress,
   treasuryAddress,
   name,
   proposals,
@@ -27,21 +24,6 @@ export const DaoProposals = ({
   onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
 }) => {
   const { getDaoLink } = useLinks()
-  const { isGovernanceDelayed, isLoading: isLoadingDelayedGovernance } =
-    useDelayedGovernance({
-      tokenAddress: tokenAddress,
-      governorAddress: governorAddress,
-      chainId,
-    })
-
-  const { hasThreshold, isLoading: isLoadingVotes } = useVotes({
-    chainId,
-    governorAddress,
-    signerAddress: userAddress,
-    collectionAddress: tokenAddress,
-  })
-
-  const isLoading = isLoadingDelayedGovernance || isLoadingVotes
 
   return (
     <Box>
@@ -72,9 +54,7 @@ export const DaoProposals = ({
             variant="outline"
             borderRadius="curved"
             size={'sm'}
-            disabled={!hasThreshold || isGovernanceDelayed}
             onClick={() => onOpenCreateProposal(chainId, tokenAddress)}
-            loading={isLoading}
           >
             Create Proposal
           </Button>

@@ -94,6 +94,9 @@ export type DashboardProps = {
 export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
   const { address } = useAccount()
   const { displayName, ensAvatar } = useEnsData(address)
+  const [openAccordion, setOpenAccordion] = React.useState<'daos' | 'proposals' | null>(
+    null
+  )
 
   const {
     data: daos,
@@ -141,6 +144,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
     if (!sortedDaos.length) return 0
     return sortedDaos.reduce((acc, dao) => acc + dao.proposals.length, 0)
   }, [sortedDaos])
+
+  const hasProposalsNeedingVote = useMemo(() => {
+    if (!sortedDaos.length || !address) return false
+
+    return sortedDaos.some((dao) =>
+      dao.proposals.some(
+        (proposal) =>
+          proposal.state === ProposalState.Active &&
+          !proposal.votes.some((vote) => vote.voter === address.toLowerCase())
+      )
+    )
+  }, [sortedDaos, address])
 
   const proposalList = useMemo(() => {
     if (!sortedDaos.length) return null
@@ -295,9 +310,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           title="DAOs"
           summary={`${sortedDaos.length} DAO${sortedDaos.length !== 1 ? 's' : ''}`}
           description={<Stack gap="x1">{auctionCards}</Stack>}
-          defaultOpen={false}
           titleFontSize={18}
           mb={'x0'}
+          isOpen={openAccordion === 'daos'}
+          onToggle={() => setOpenAccordion(openAccordion === 'daos' ? null : 'daos')}
         />
 
         <AccordionItem
@@ -308,9 +324,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
               : 'No active proposals'
           }
           description={<Stack gap="x1">{proposalList}</Stack>}
-          defaultOpen={false}
           titleFontSize={18}
           mb={'x0'}
+          showWarning={hasProposalsNeedingVote}
+          isOpen={openAccordion === 'proposals'}
+          onToggle={() =>
+            setOpenAccordion(openAccordion === 'proposals' ? null : 'proposals')
+          }
         />
       </Stack>
     )
