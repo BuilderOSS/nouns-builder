@@ -2,8 +2,6 @@ import { atoms, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactElement } from 'react'
 
-import { accordionItem, accordionName } from './Accordion.css'
-
 export const AccordionItem: React.FC<{
   title: string | ReactElement
   description: ReactElement
@@ -12,6 +10,9 @@ export const AccordionItem: React.FC<{
   titleFontSize?: number
   summaryFontSize?: number
   mb?: any
+  showWarning?: boolean
+  isOpen?: boolean
+  onToggle?: () => void
 }> = ({
   title,
   description,
@@ -20,8 +21,22 @@ export const AccordionItem: React.FC<{
   titleFontSize = 28,
   summaryFontSize = 14,
   mb = 'x4',
+  showWarning = false,
+  isOpen: controlledIsOpen,
+  onToggle,
 }) => {
-  const [isOpen, setIsOpen] = React.useState<boolean>(defaultOpen)
+  const [internalIsOpen, setInternalIsOpen] = React.useState<boolean>(defaultOpen)
+
+  // Use controlled state if provided, otherwise use internal state
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
+
+  const handleToggle = () => {
+    if (onToggle) {
+      onToggle()
+    } else {
+      setInternalIsOpen((bool) => !bool)
+    }
+  }
   const variants = {
     initial: {
       height: 0,
@@ -35,22 +50,22 @@ export const AccordionItem: React.FC<{
 
   return (
     <Stack
-      px={'x6'}
       mb={mb}
       borderColor={'border'}
       borderStyle={'solid'}
       borderRadius={'curved'}
       borderWidth={'thin'}
-      className={accordionItem}
+      // className={accordionItem}
     >
       <Flex
-        onClick={() => setIsOpen((bool) => !bool)}
+        onClick={handleToggle}
         pb={'x6'}
         pt={'x6'}
         align={'center'}
         justify={'space-between'}
         gap={'x4'}
-        className={accordionName}
+        px={'x6'}
+        // className={accordionName}
       >
         {summary ? (
           <Stack gap={'x1'} style={{ flex: 1 }}>
@@ -66,9 +81,12 @@ export const AccordionItem: React.FC<{
             {title}
           </Text>
         )}
-        {(isOpen && <Icon id="chevronUp" cursor={'pointer'} />) || (
-          <Icon id="chevronDown" cursor={'pointer'} />
-        )}
+        <Flex align="center" gap="x2">
+          {showWarning && <Icon id="warning-16" fill="warning" size="sm" />}
+          {(isOpen && <Icon id="chevronUp" cursor={'pointer'} />) || (
+            <Icon id="chevronDown" cursor={'pointer'} />
+          )}
+        </Flex>
       </Flex>
       <motion.div
         variants={variants}
@@ -77,7 +95,10 @@ export const AccordionItem: React.FC<{
         className={atoms({
           height: 'x0',
           overflow: 'hidden',
+          paddingLeft: 'x6',
+          paddingRight: 'x6',
         })}
+        data-accordion-content
       >
         <Text variant={'paragraph-md'}>{description}</Text>
       </motion.div>
