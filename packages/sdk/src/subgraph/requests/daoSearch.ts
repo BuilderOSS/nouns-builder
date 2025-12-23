@@ -2,7 +2,7 @@ import { CHAIN_ID } from '@buildeross/types'
 
 import { SDK } from '../client'
 import { Dao_Filter } from '../sdk.generated'
-import { MIN_BID_AMOUNT } from './exploreQueries'
+// import { MIN_BID_AMOUNT } from './exploreQueries'
 
 export type DaoSearchResult = {
   chainId: CHAIN_ID
@@ -48,14 +48,14 @@ export const searchDaosRequest = async (
     // Filter DAOs with at least one token minted
     where = { totalSupply_gt: 0 }
 
-    // Additionally filter spam DAOs from L2
-    if (
-      chainId === CHAIN_ID.BASE ||
-      chainId === CHAIN_ID.ZORA ||
-      chainId === CHAIN_ID.OPTIMISM
-    ) {
-      where = { totalSupply_gt: 0, totalAuctionSales_gt: MIN_BID_AMOUNT.toString() }
-    }
+    // // Additionally filter spam DAOs from L2
+    // if (
+    //   chainId === CHAIN_ID.BASE ||
+    //   chainId === CHAIN_ID.ZORA ||
+    //   chainId === CHAIN_ID.OPTIMISM
+    // ) {
+    //   where = { totalSupply_gt: 0, totalAuctionSales_gt: MIN_BID_AMOUNT.toString() }
+    // }
 
     const fetchLimit = limit + 1
 
