@@ -1,3 +1,4 @@
+import { type DashboardDaoWithState } from '@buildeross/hooks'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -7,11 +8,10 @@ import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { DaoProposalCard } from './DaoProposalCard'
-import { DashboardDaoProps } from './Dashboard'
 import { daoName } from './dashboard.css'
 
 export const DaoProposals = ({
-  daoImage,
+  contractImage,
   tokenAddress,
   treasuryAddress,
   name,
@@ -19,7 +19,7 @@ export const DaoProposals = ({
   chainId,
   userAddress,
   onOpenCreateProposal,
-}: DashboardDaoProps & {
+}: DashboardDaoWithState & {
   userAddress?: AddressType
   onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
 }) => {
@@ -29,10 +29,10 @@ export const DaoProposals = ({
     <Box>
       <Flex justify={'space-between'} mb={'x3'} align="center">
         <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
-          {daoImage ? (
+          {contractImage ? (
             <Box mr="x2">
               <FallbackImage
-                src={daoImage}
+                src={contractImage}
                 style={{ borderRadius: '8px', objectFit: 'contain' }}
                 alt=""
                 height={32}

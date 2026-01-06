@@ -1,9 +1,17 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
+import { CHAIN_ID } from '@buildeross/types'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
+import type { DaosForDashboardQuery } from '../sdk.generated'
 
-export const dashboardRequest = async (memberAddress: string) => {
+export type DashboardDao = DaosForDashboardQuery['daos'][number] & {
+  chainId: CHAIN_ID
+}
+
+export const dashboardRequest = async (
+  memberAddress: string
+): Promise<DashboardDao[]> => {
   try {
     if (!memberAddress) throw new Error('No user address provided')
 
@@ -24,13 +32,7 @@ export const dashboardRequest = async (memberAddress: string) => {
       .map((queries) =>
         queries.daos.map((dao) => ({
           ...dao,
-          name: dao.name || '',
-          tokenAddress: dao.tokenAddress,
-          auctionAddress: dao?.auctionAddress || '',
-          proposals: dao.proposals,
-          currentAuction: dao.currentAuction,
           chainId: queries.chainId,
-          daoImage: dao.contractImage,
         }))
       )
       .flat()
