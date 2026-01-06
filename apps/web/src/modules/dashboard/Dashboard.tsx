@@ -1,20 +1,16 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { Feed } from '@buildeross/feed-ui'
-import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { getProposalState, ProposalState } from '@buildeross/sdk/contract'
 import {
-  CurrentAuctionFragment,
-  DaoFragment,
-  dashboardRequest,
-  ProposalFragment,
-} from '@buildeross/sdk/subgraph'
+  type DashboardDaoWithState,
+  useDashboardData,
+  useEnsData,
+} from '@buildeross/hooks'
+import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
-import useSWR from 'swr'
 import { useAccount } from 'wagmi'
 
 import { CreateActions } from './CreateActions'
@@ -25,67 +21,7 @@ import { DashConnect } from './DashConnect'
 import { AuctionCardSkeleton, DAOCardSkeleton, ProposalCardSkeleton } from './Skeletons'
 import { UserProfileCard } from './UserProfileCard'
 
-const ACTIVE_PROPOSAL_STATES = [
-  ProposalState.Pending,
-  ProposalState.Active,
-  ProposalState.Succeeded,
-  ProposalState.Queued,
-]
-
-export type DashboardDaoProps = DaoFragment & {
-  chainId: CHAIN_ID
-  daoImage: string
-  auctionConfig: {
-    minimumBidIncrement: string
-    reservePrice: string
-  }
-  proposals: (ProposalFragment & {
-    state: ProposalState
-    votes: {
-      voter: string
-    }[]
-  })[]
-  currentAuction?: CurrentAuctionFragment | null
-}
-
-const fetchDaoProposalState = async (dao: DashboardDaoProps) => {
-  try {
-    const proposals = await Promise.all(
-      dao.proposals.map(async (proposal) => {
-        const proposalState = await getProposalState(
-          dao.chainId,
-          proposal.dao.governorAddress,
-          proposal.proposalId
-        )
-        return { ...proposal, state: proposalState }
-      })
-    )
-    return {
-      ...dao,
-      proposals: proposals.filter((proposal) =>
-        ACTIVE_PROPOSAL_STATES.includes(proposal.state)
-      ),
-    }
-  } catch (error: any) {
-    throw new Error(
-      error?.message
-        ? `RPC Error: ${error.message}`
-        : 'Error fetch Dashboard data from RPC'
-    )
-  }
-}
-
-const fetchDashboardData = async (address: string) => {
-  try {
-    const userDaos = (await dashboardRequest(address)) as unknown as DashboardDaoProps[]
-    if (!userDaos) throw new Error('Dashboard DAO query returned undefined')
-    const resolved = await Promise.all(userDaos.map(fetchDaoProposalState))
-
-    return resolved
-  } catch (error: any) {
-    throw new Error(error?.message || 'Error fetching dashboard data')
-  }
-}
+export type DashboardDaoProps = DashboardDaoWithState
 
 export type DashboardProps = {
   handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
@@ -99,17 +35,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
   )
 
   const {
-    data: daos,
+    daos,
     isLoading,
-    mutate,
     error,
-  } = useSWR(
-    address ? ([SWR_KEYS.DASHBOARD, address] as const) : null,
-    ([, _address]) => fetchDashboardData(_address),
-    { revalidateOnFocus: false }
-  )
+    refresh: mutate,
+  } = useDashboardData({
+    address,
+    enabled: !!address,
+  })
 
-  const sortedDaos = useMemo(() => {
+  const sortedDaos = useMemo<DashboardDaoWithState[]>(() => {
     if (!daos) return []
     return [...daos].sort((a, b) => {
       const aIndex = PUBLIC_DEFAULT_CHAINS.findIndex((chain) => chain.id === a.chainId)
@@ -148,7 +83,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
   const hasProposalsNeedingVote = useMemo(() => {
     if (!sortedDaos.length || !address) return false
 
-    return sortedDaos.some((dao) =>
+    return sortedDaos.some((dao: DashboardDaoWithState) =>
       dao.proposals.some(
         (proposal) =>
           proposal.state === ProposalState.Active &&
