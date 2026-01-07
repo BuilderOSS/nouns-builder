@@ -12,7 +12,7 @@ import TextArea from '../Fields/TextArea'
 import TextInput from '../Fields/TextInput'
 import { SingleImageUpload } from '../SingleImageUpload/SingleImageUpload'
 import { SingleMediaUpload } from '../SingleMediaUpload/SingleMediaUpload'
-import type { CoinFormFieldsProps } from './types'
+import type { CoinFormFieldsProps, CurrencyOption } from './types'
 
 // Currency options based on chain
 const BASE_MAINNET_CHAIN_ID = CHAIN_ID.BASE
@@ -30,7 +30,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
   const isBaseSepolia = chainId === BASE_SEPOLIA_CHAIN_ID
   const isBaseMainnet = chainId === BASE_MAINNET_CHAIN_ID
 
-  const currencyOptions = React.useMemo(() => {
+  const currencyOptions: CurrencyOption[] = React.useMemo(() => {
     if (defaultCurrencyOptions) {
       return defaultCurrencyOptions
     }
@@ -62,9 +62,22 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
       <TextInput
         id="name"
         value={formik.values.name}
-        onChange={formik.handleChange}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          const name = e.target.value
+          formik.handleChange(e)
+
+          // Auto-generate symbol if it's empty or hasn't been manually touched
+          if (!formik.touched.symbol || !formik.values.symbol) {
+            const generatedSymbol = `$${name
+              .toUpperCase()
+              .replace(/[AEIOU\s]/g, '')
+              .slice(0, 4)}`
+            formik.setFieldValue('symbol', generatedSymbol)
+          }
+        }}
         inputLabel="Coin Name"
         placeholder="My Creator Coin"
+        helperText="The display name for your coin (1-100 characters)"
         errorMessage={
           formik.touched.name && formik.errors.name ? formik.errors.name : undefined
         }
@@ -81,6 +94,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         }}
         inputLabel="Symbol"
         placeholder="COIN"
+        helperText="A short ticker symbol for your coin (1-10 uppercase letters/numbers). Auto-generated from name but you can customize it."
         errorMessage={
           formik.touched.symbol && formik.errors.symbol ? formik.errors.symbol : undefined
         }
@@ -104,38 +118,64 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         formik={formik}
       />
 
-      {/* Currency Selection - only show on Base Mainnet */}
-      {showCurrencyInput && !isBaseSepolia && (
-        <Box>
-          <Text as="label" htmlFor="currency" variant="label-md" mb="x2">
-            Base Currency
-          </Text>
-          <Text variant="paragraph-sm" color="text3" mb="x2">
-            Select the currency for the creator coin pool
-          </Text>
-          <Box
-            as="select"
-            id="currency"
-            value={formik.values.currency || ETH_ADDRESS}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              formik.setFieldValue('currency', e.target.value)
-            }}
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '1px solid #e5e5e5',
-              borderRadius: '8px',
-              fontSize: '16px',
-              backgroundColor: 'white',
-            }}
-          >
-            {currencyOptions.map((option) => (
-              <option key={option.value} value={option.value} disabled={option.disabled}>
-                {option.label}
-              </option>
-            ))}
+      {/* Currency Selection */}
+      {showCurrencyInput && (
+        <Stack gap="x4">
+          <Box>
+            <Text as="label" htmlFor="currency" variant="label-md" mb="x2">
+              Base Currency
+            </Text>
+            <Text variant="paragraph-sm" color="text3" mb="x2">
+              Select the currency for the creator coin pool
+            </Text>
+            <Box
+              as="select"
+              id="currency"
+              value={formik.values.currency || ETH_ADDRESS}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                formik.setFieldValue('currency', e.target.value)
+              }}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #e5e5e5',
+                borderRadius: '8px',
+                fontSize: '16px',
+                backgroundColor: 'white',
+              }}
+            >
+              {currencyOptions.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                >
+                  {option.label}
+                </option>
+              ))}
+            </Box>
           </Box>
-        </Box>
+
+          {/* Custom Currency Address Input - show when "custom" is selected */}
+          {formik.values.currency === '0xcustom' && (
+            <Box>
+              <TextInput
+                id="customCurrency"
+                value={formik.values.customCurrency || ''}
+                onChange={formik.handleChange}
+                inputLabel="Custom Token Address"
+                placeholder="0x..."
+                helperText="Enter the ERC20 token contract address to use as base currency"
+                errorMessage={
+                  formik.touched.customCurrency && formik.errors.customCurrency
+                    ? formik.errors.customCurrency
+                    : undefined
+                }
+                formik={formik}
+              />
+            </Box>
+          )}
+        </Stack>
       )}
 
       {/* Minimum FDV Input */}
@@ -143,8 +183,9 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         id="minFdvUsd"
         value={formik.values.minFdvUsd || ''}
         onChange={formik.handleChange}
-        inputLabel="Minimum FDV (USD)"
+        inputLabel="Initial Market Cap (USD)"
         placeholder="10000"
+        helperText="The minimum fully diluted valuation in USD. This determines the initial price curve. Default: $10,000"
         errorMessage={
           formik.touched.minFdvUsd && formik.errors.minFdvUsd
             ? formik.errors.minFdvUsd
@@ -160,6 +201,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         inputLabel="Coin Image"
         helperText="Upload an image for your coin (JPG, PNG, SVG, WebP)"
         value={formik.values.imageUrl}
+        size="lg"
       />
 
       {/* Optional Media Upload */}
@@ -168,6 +210,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
           formik={formik}
           id="mediaUrl"
           inputLabel="Media (Optional)"
+          helperText="Upload additional media content (video, audio, etc.)"
           value={formik.values.mediaUrl || ''}
           onUploadStart={handleMediaUploadStart}
         />

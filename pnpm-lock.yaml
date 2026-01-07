@@ -674,6 +674,9 @@ importers:
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
+      clanker-sdk:
+        specifier: ^4.2.8
+        version: 4.2.8(@types/node@22.18.10)(typescript@5.9.3)(viem@2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -6355,6 +6358,12 @@ packages:
 
   cjs-module-lexer@1.4.3:
     resolution: {integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==}
+
+  clanker-sdk@4.2.8:
+    resolution: {integrity: sha512-j3fX5I7QctLO5ZVNn5bhpZFHIug+JFXXPSam4QEa6KeOsrn4mlwuwF6gCkDDwp/VLImEF5LukVT6PLS1AnQGjg==}
+    hasBin: true
+    peerDependencies:
+      viem: ^2.38.2
 
   clean-stack@2.2.0:
     resolution: {integrity: sha512-4diC9HaTE+KRAMWhDhrGOECgWZxoevMc5TlkObMqNSsVU62PYzXZ/SMTjzyGAFF1YusgxGcSWTEXBhp0CPwQ1A==}
@@ -19264,6 +19273,18 @@ snapshots:
       to-buffer: 1.2.2
 
   cjs-module-lexer@1.4.3: {}
+
+  clanker-sdk@4.2.8(@types/node@22.18.10)(typescript@5.9.3)(viem@2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)):
+    dependencies:
+      '@openzeppelin/merkle-tree': 1.0.8
+      abitype: 1.1.1(typescript@5.9.3)(zod@4.1.12)
+      inquirer: 8.2.7(@types/node@22.18.10)
+      viem: 2.38.2(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      zod: 4.1.12
+    transitivePeerDependencies:
+      - '@types/node'
+      - supports-color
+      - typescript
 
   clean-stack@2.2.0: {}
 

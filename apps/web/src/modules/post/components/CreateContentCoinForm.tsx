@@ -68,6 +68,12 @@ class IPFSUploader implements Uploader {
   }
 }
 
+type CurrencyOption = {
+  value: AddressType
+  label: string
+  disabled?: boolean
+}
+
 export interface CreateContentCoinFormProps {
   chainId: CHAIN_ID
   treasury: AddressType
@@ -84,6 +90,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const { address: userAddress } = useAccount()
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [isDeploying, setIsDeploying] = useState(false)
+  const [priceWarning, setPriceWarning] = useState<string | undefined>()
 
   // Check if the current chain is supported
   const isChainSupported = SUPPORTED_CHAIN_IDS.includes(chainId)
@@ -103,6 +110,19 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     isChainSupported ? chainId : undefined,
     currenciesToFetch
   )
+
+  // Define currency options with custom option
+  const currencyOptions: CurrencyOption[] =
+    chainId === CHAIN_ID.BASE_SEPOLIA
+      ? [
+          { value: ETH_ADDRESS, label: 'ETH' },
+          { value: '0xcustom', label: 'Custom Token Address' },
+        ]
+      : [
+          { value: ETH_ADDRESS, label: 'ETH' },
+          { value: ZORA_ADDRESS, label: 'ZORA' },
+          { value: '0xcustom', label: 'Custom Token Address' },
+        ]
 
   // Initial values
   const initialValues: CoinFormValues = {
@@ -186,6 +206,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     }
 
     setSubmitError(undefined)
+    setPriceWarning(undefined)
     setIsDeploying(true)
 
     try {
@@ -215,7 +236,11 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       const { url: metadataUri } = await metadataBuilder.upload(uploader)
 
       // 3. Get token price for the selected currency
-      const currency = (values.currency || ETH_ADDRESS) as AddressType
+      // Use customCurrency if currency is "0xcustom", otherwise use the selected currency
+      const currency =
+        values.currency === '0xcustom' && values.customCurrency
+          ? (values.customCurrency as AddressType)
+          : ((values.currency || ETH_ADDRESS) as AddressType)
 
       // Try to get price from fetched data first, fallback to placeholder
       let quoteTokenUsd = getTokenPriceFromMap(tokenPrices, currency)
@@ -225,8 +250,13 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
         quoteTokenUsd = getTokenPriceByAddress(currency)
       }
 
+      // For custom tokens or test tokens, use a default price if none available
       if (!quoteTokenUsd) {
-        throw new Error(`Unable to get price for selected currency: ${currency}`)
+        const warningMessage = `No price data available for token ${currency}. Using $1 as default price for market cap calculations. This is normal for custom or test tokens.`
+        console.warn(warningMessage)
+        setPriceWarning(warningMessage)
+        // Use $1 as default price for custom/test tokens
+        quoteTokenUsd = 1
       }
 
       // 4. Create pool config using the utility with form values
@@ -334,7 +364,28 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                   initialValues={initialValues}
                   chainId={chainId}
                   showCurrencyInput={true}
+                  currencyOptions={currencyOptions}
                 />
+
+                {priceWarning && (
+                  <Box
+                    p="x4"
+                    borderRadius="curved"
+                    borderStyle="solid"
+                    borderWidth="normal"
+                    borderColor="warning"
+                    backgroundColor="background2"
+                  >
+                    <Stack gap="x2">
+                      <Text fontSize="14" fontWeight="label" color="warning">
+                        ⚠️ Price Data Unavailable
+                      </Text>
+                      <Text fontSize="14" color="text3">
+                        {priceWarning}
+                      </Text>
+                    </Stack>
+                  </Box>
+                )}
 
                 {submitError && (
                   <Box

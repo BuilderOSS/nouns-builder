@@ -4,7 +4,7 @@ import {
 } from '@buildeross/constants/addresses'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useChainStore } from '@buildeross/stores'
-import { DatePicker, SmartInput } from '@buildeross/ui/Fields'
+import { DatePicker, SmartInput, Toggle } from '@buildeross/ui'
 import { yearsAhead } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
@@ -13,7 +13,6 @@ import { TokenAllocation } from './AllocationForm'
 import { validationSchemaContributions } from './AllocationForm.schema'
 import { ContributionChain } from './ContributionAllocation'
 import { DaoCopyAddress } from './DaoCopyAddress'
-import { Toggle } from './Toggle'
 
 export interface ContributionAllocationFormValues {
   builderAllocation?: TokenAllocation

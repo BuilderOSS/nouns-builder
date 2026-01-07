@@ -4,9 +4,16 @@ import { useCallback, useRef, useState } from 'react'
 export interface AudioPreviewProps {
   src: string
   cover?: string
+  width?: string | number
+  height?: string | number
 }
 
-export const AudioPreview: React.FC<AudioPreviewProps> = ({ src, cover }) => {
+export const AudioPreview: React.FC<AudioPreviewProps> = ({
+  src,
+  cover,
+  width = 400,
+  height = 400,
+}) => {
   const [playing, setPlaying] = useState(false)
   const audioRef = useRef<HTMLAudioElement>(null)
 
@@ -23,14 +30,14 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({ src, cover }) => {
       ) : (
         <img
           src={cover}
-          width={400}
-          height={400}
+          width={width}
+          height={height}
           alt="Preview"
           style={{
             objectFit: 'cover',
             borderRadius: '10px',
-            height: '400px',
-            width: '400px',
+            height: typeof height === 'number' ? `${height}px` : height,
+            width: typeof width === 'number' ? `${width}px` : width,
           }}
         />
       )}

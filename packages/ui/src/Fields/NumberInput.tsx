@@ -15,6 +15,7 @@ interface NumberInputProps extends InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string
   hasError?: boolean
   disableWheelEvent?: boolean
+  useTextInput?: boolean // Use text input with inputMode for better decimal support
 }
 
 const NumberInput = ({
@@ -24,8 +25,18 @@ const NumberInput = ({
   hasError,
   value,
   disableWheelEvent = true,
+  useTextInput = false,
   ...rest
 }: NumberInputProps) => {
+  // For text-based numeric input, ensure value is always a string
+  const displayValue = useTextInput
+    ? value === null || value === undefined
+      ? ''
+      : String(value)
+    : Number.isNaN(value)
+      ? ''
+      : value
+
   return (
     <Box as="fieldset" className={defaultFieldsetStyle}>
       {errorMessage && (
@@ -40,8 +51,9 @@ const NumberInput = ({
       )}
       <input
         {...rest}
-        type="number"
-        value={Number.isNaN(value) ? '' : value}
+        type={useTextInput ? 'text' : 'number'}
+        inputMode={useTextInput ? 'decimal' : undefined}
+        value={displayValue}
         className={hasError ? numberInputErrorStyle : numberInputStyle}
         onWheel={
           disableWheelEvent

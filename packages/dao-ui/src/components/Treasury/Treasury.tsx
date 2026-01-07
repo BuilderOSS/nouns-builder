@@ -56,7 +56,7 @@ export const Treasury = () => {
   }, [balance, ethUsd])
 
   const treasuryBalance = React.useMemo(() => {
-    return balance?.value ? formatCryptoVal(formatEther(balance?.value)) : null
+    return balance?.value ? formatCryptoVal(formatEther(balance?.value)) : '0'
   }, [balance])
 
   return (
@@ -129,7 +129,7 @@ export const Treasury = () => {
           align={{ '@initial': 'start', '@768': 'center' }}
         >
           <Text className={statisticContent} fontWeight={'display'}>
-            ${ethToUsd ? ethToUsd : ' '}
+            ${ethToUsd ? ethToUsd : '0'}
           </Text>
           <Text
             variant="paragraph-md"

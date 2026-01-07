@@ -39,9 +39,11 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
             Create Proposal
           </Button>
         </Flex>
-        <Button variant="outline" style={{ flex: 1 }} as={Link} href="/create">
-          Create a DAO
-        </Button>
+        <Link href="/create" style={{ width: '100%', flex: 1 }}>
+          <Button variant="ghost" style={{ flex: 1, width: '100%' }}>
+            Create a DAO
+          </Button>
+        </Link>
       </Flex>
 
       <DaoSelectorModal

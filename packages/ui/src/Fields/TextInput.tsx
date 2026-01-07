@@ -5,6 +5,7 @@ import React, { ChangeEventHandler, ReactElement } from 'react'
 import FieldError from './FieldError'
 import {
   defaultFieldsetStyle,
+  defaultHelperTextStyle,
   defaultInputLabelStyle,
   inputStyleVariants,
 } from './styles.css'
@@ -19,6 +20,7 @@ interface TextInputProps {
   placeholder?: string
   disabled?: boolean
   style?: React.CSSProperties
+  helperText?: string
 }
 
 const TextInput: React.FC<TextInputProps> = ({
@@ -30,6 +32,7 @@ const TextInput: React.FC<TextInputProps> = ({
   placeholder,
   disabled = false,
   style,
+  helperText,
 }) => {
   return (
     <Box as="fieldset" mb={'x8'} p={'x0'} className={defaultFieldsetStyle}>
@@ -45,6 +48,9 @@ const TextInput: React.FC<TextInputProps> = ({
         disabled={disabled}
         style={style}
       />
+      {helperText && !errorMessage && (
+        <Box className={defaultHelperTextStyle}>{helperText}</Box>
+      )}
       {!!errorMessage && <FieldError message={errorMessage} />}
     </Box>
   )
