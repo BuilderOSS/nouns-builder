@@ -3,7 +3,7 @@ import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ReactElement, useEffect, useState } from 'react'
 
-import { defaultInputLabelStyle } from '../styles'
+import { defaultHelperTextStyle, defaultInputLabelStyle } from '../styles'
 import {
   defaultUploadStyle,
   singleMediaUploadWrapper,
@@ -15,6 +15,7 @@ export type SingleMediaUploadProps = {
   id: string
   inputLabel: string | ReactElement
   value: string
+  helperText?: string
   onUploadStart?: (value: File) => void
   onUploadSettled?: () => void
 }
@@ -23,6 +24,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   id,
   formik,
   inputLabel,
+  helperText,
   onUploadStart,
   onUploadSettled,
   value,
@@ -90,6 +92,9 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
     <Flex mb={'x8'}>
       <Stack width={'100%'}>
         <label className={defaultInputLabelStyle}>{inputLabel}</label>
+        {helperText && !uploadMediaError && (
+          <Box className={defaultHelperTextStyle}>{helperText}</Box>
+        )}
         <Flex
           as={'label'}
           direction={'column'}

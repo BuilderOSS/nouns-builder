@@ -1,5 +1,6 @@
 export * from './allocation'
 export * from './basename'
+export * from './clankerConfig'
 export * from './concurrent'
 export * from './eas'
 export * from './encodePageNumToEndCursor'
