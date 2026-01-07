@@ -1,18 +1,21 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { type CoinFormValues, ContentPostPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
-import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 
 import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
+import { CreateContentCoinForm } from '../../../../../modules/post/components/CreateContentCoinForm'
+import * as styles from '../../../../../modules/post/styles/postCreate.css'
 
 interface CreatePostPageProps {
   daoName: string
   collectionAddress: AddressType
   auctionAddress: AddressType
+  treasuryAddress: AddressType
   chainId: CHAIN_ID
   network: string
 }
@@ -21,35 +24,32 @@ export default function CreatePostPage({
   daoName,
   collectionAddress,
   auctionAddress,
+  treasuryAddress,
   chainId,
   network,
 }: CreatePostPageProps) {
-  const router = useRouter()
-  const [postContent, setPostContent] = useState('')
-
-  const handleCancel = () => {
-    router.back()
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // TODO: Implement post creation logic
-    // eslint-disable-next-line no-console
-    console.log('Create post:', { network, collectionAddress, postContent })
-  }
+  // State to track form values for preview
+  const [previewData, setPreviewData] = useState<CoinFormValues>({
+    name: '',
+    symbol: '',
+    description: '',
+    imageUrl: '',
+    mediaUrl: '',
+    mediaMimeType: '',
+  })
 
   return (
     <DefaultLayout>
       <Flex justify="center" py="x12" px="x4">
-        <Box style={{ maxWidth: 640, width: '100%' }}>
+        <Box style={{ maxWidth: 1280, width: '100%' }}>
           <Stack gap="x6">
             {/* Header */}
             <Box>
               <Text fontSize="35" fontWeight="display" mb="x2">
-                Create Post
+                Publish Post
               </Text>
               <Text fontSize="16" color="text3">
-                Share an update or announcement with the DAO community
+                Share your content on-chain and enable supporters to collect and trade
               </Text>
             </Box>
 
@@ -70,7 +70,7 @@ export default function CreatePostPage({
                 />
                 <Stack gap="x1">
                   <Text fontSize="16" fontWeight="label">
-                    Posting to {daoName}
+                    Creating for {daoName}
                   </Text>
                   <Text fontSize="14" color="text3">
                     {network}
@@ -79,71 +79,26 @@ export default function CreatePostPage({
               </Flex>
             </Box>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit}>
-              <Stack gap="x4">
-                {/* Content textarea */}
-                <Box>
-                  <Text fontSize="14" fontWeight="label" mb="x2">
-                    Post Content
-                  </Text>
-                  <textarea
-                    value={postContent}
-                    onChange={(e) => setPostContent(e.target.value)}
-                    placeholder="Share your thoughts..."
-                    rows={8}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--colors-border)',
-                      backgroundColor: 'var(--colors-background2)',
-                      color: 'var(--colors-text1)',
-                      fontSize: '16px',
-                      fontFamily: 'inherit',
-                      resize: 'vertical',
-                    }}
-                  />
-                </Box>
+            {/* Two-column layout: Form on left, Preview on right */}
+            <Box className={styles.twoColumnGrid}>
+              {/* Left column: Form */}
+              <Box>
+                <CreateContentCoinForm
+                  chainId={chainId}
+                  treasury={treasuryAddress}
+                  onFormChange={setPreviewData}
+                />
+              </Box>
 
-                {/* Image upload placeholder */}
-                <Box>
-                  <Text fontSize="14" fontWeight="label" mb="x2">
-                    Image (Optional)
-                  </Text>
-                  <Box
-                    borderRadius="curved"
-                    borderStyle="dashed"
-                    borderWidth="normal"
-                    borderColor="border"
-                    p="x8"
-                    style={{
-                      textAlign: 'center',
-                      cursor: 'not-allowed',
-                      opacity: 0.6,
-                    }}
-                  >
-                    <Text fontSize="14" color="text3">
-                      Image upload coming soon
-                    </Text>
-                  </Box>
-                </Box>
-
-                {/* Action buttons */}
-                <Flex gap="x3" justify="flex-end">
-                  <Button variant="ghost" onClick={handleCancel} type="button">
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={!postContent.trim()}
-                    style={{ cursor: 'not-allowed', opacity: 0.6 }}
-                  >
-                    Publish Post (Coming Soon)
-                  </Button>
-                </Flex>
-              </Stack>
-            </form>
+              {/* Right column: Preview (hidden on mobile) */}
+              <Box className={styles.previewColumn}>
+                <ContentPostPreview
+                  {...previewData}
+                  chainId={chainId}
+                  daoName={daoName}
+                />
+              </Box>
+            </Box>
           </Stack>
         </Box>
       </Flex>
@@ -170,6 +125,7 @@ export const getServerSideProps: GetServerSideProps<CreatePostPageProps> = async
       daoName: dao.name,
       collectionAddress: token,
       auctionAddress: dao.auctionAddress as AddressType,
+      treasuryAddress: dao.treasuryAddress as AddressType,
       chainId: chain.id,
       network: chain.name,
     }

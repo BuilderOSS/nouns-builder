@@ -19,6 +19,8 @@ export enum TransactionType {
   MIGRATION = 'migration',
   WALLET_CONNECT = 'wallet-connect',
   ADD_ARTWORK = 'add-artwork',
+  CREATOR_COIN = 'creator-coin',
+  CONTENT_COIN = 'content-coin',
 }
 
 export type Transaction = {

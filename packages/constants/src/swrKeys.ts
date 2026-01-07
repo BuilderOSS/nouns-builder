@@ -33,6 +33,7 @@ export const SWR_KEYS = {
   DAO_MEMBERSHIP: 'dao-membership',
   TOKEN_BALANCES: 'token-balances',
   TOKEN_METADATA: 'token-metadata',
+  TOKEN_PRICES: 'token-prices',
   NFT_BALANCES: 'nft-balances',
   NFT_METADATA: 'nft-metadata',
   METADATA_ATTRIBUTES_MERKLE_ROOT: 'metadata-attributes-merkle-root',
