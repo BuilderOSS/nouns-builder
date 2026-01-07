@@ -6,7 +6,7 @@ import React, { ReactElement, useEffect, useState } from 'react'
 import { FallbackImage } from '../FallbackImage'
 import {
   defaultUploadStyle,
-  singleImageUploadWrapper,
+  singleImageUploadWrapperVariants,
   uploadErrorBox,
 } from './SingleImageUpload.css'
 
@@ -16,6 +16,7 @@ export type SingleImageUploadProps = {
   inputLabel: string | ReactElement
   helperText: string | undefined
   value: string
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
@@ -24,6 +25,7 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
   inputLabel,
   helperText,
   value,
+  size = 'md',
 }) => {
   const acceptableMIME = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp']
 
@@ -78,7 +80,7 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
           position={'relative'}
           align={'center'}
           justify={'center'}
-          className={singleImageUploadWrapper}
+          className={singleImageUploadWrapperVariants[size]}
           htmlFor="file-upload"
         >
           {isUploading && <Spinner alignSelf={'center'} m={'x0'} />}
@@ -97,10 +99,12 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
 
           {!isUploading && isMounted && !value && (
             <>
-              <Flex color="text4" mb={'x2'}>
+              <Flex color="text4" mb={'x2'} style={{ textAlign: 'center' }}>
                 {inputLabel}
               </Flex>
-              <Flex fontWeight={'display'}>{helperText}</Flex>
+              <Flex fontWeight={'display'} style={{ textAlign: 'center' }}>
+                {helperText}
+              </Flex>
             </>
           )}
 
