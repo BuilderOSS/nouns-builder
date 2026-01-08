@@ -1,6 +1,12 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { Address, getAddress, isAddress, PublicClient } from 'viem'
 
+import {
+  getBasename,
+  getBasenameAddress,
+  getBasenameAvatar,
+  isBasename,
+} from './basename'
 import { getProvider } from './provider'
 
 const defaultProvider = getProvider(CHAIN_ID.ETHEREUM)
@@ -48,6 +54,16 @@ export async function getEnsAddress(
   }
 
   try {
+    // Priority 1: Check if it's a basename
+    if (isBasename(nameOrAddress)) {
+      const basenameAddress = await getBasenameAddress(nameOrAddress)
+      if (basenameAddress) {
+        ensAddressCache.set(nameOrAddress, basenameAddress)
+        return basenameAddress
+      }
+    }
+
+    // Priority 2: Fall back to ENS resolution
     const resolved = await provider.getEnsAddress({ name: nameOrAddress })
     const result = resolved ?? nameOrAddress
     ensAddressCache.set(nameOrAddress, result)
@@ -75,6 +91,14 @@ export async function getEnsName(
   }
 
   try {
+    // Priority 1: Check for basename on Base L2
+    const basename = await getBasename(checksummedAddress)
+    if (basename) {
+      ensNameCache.set(checksummedAddress, basename)
+      return basename
+    }
+
+    // Priority 2: Fall back to ENS resolution on mainnet
     const name = await provider.getEnsName({ address: checksummedAddress })
     const result = name ?? checksummedAddress
     ensNameCache.set(checksummedAddress, result)
@@ -100,6 +124,16 @@ export async function getEnsAvatar(
   }
 
   try {
+    // Priority 1: Check if it's a basename
+    if (isBasename(name)) {
+      const basenameAvatar = await getBasenameAvatar(name)
+      if (basenameAvatar) {
+        avatarCache.set(name, basenameAvatar)
+        return basenameAvatar
+      }
+    }
+
+    // Priority 2: Fall back to ENS avatar resolution
     const avatar = await provider.getEnsAvatar({ name })
     const result = avatar ?? null
     avatarCache.set(name, result)
