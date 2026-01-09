@@ -45,6 +45,7 @@ import Search from './assets/search.svg'
 import Share from './assets/share.svg'
 import Sliders from './assets/sliders.svg'
 import Spanner from './assets/spanner.svg'
+import Swap from './assets/swap.svg'
 import Trash from './assets/trash.svg'
 import Twitter from './assets/twitter.svg'
 import WalletConnect from './assets/wallet-connect.svg'
@@ -100,6 +101,7 @@ export const icons = {
   share: Share,
   sliders: Sliders,
   spanner: Spanner,
+  swap: Swap,
   trash: Trash,
   twitter: Twitter,
   walletConnect: WalletConnect,
