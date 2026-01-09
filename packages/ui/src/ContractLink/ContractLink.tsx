@@ -38,7 +38,7 @@ export const ContractLink = ({
     return { py, px }
   }, [size])
 
-  // Display name with proper hierarchy: basename > ENS > address snippet
+  // Display name with proper hierarchy: basename > ENS > address/snippet
   const displayName = ensName ?? address
 
   return (
@@ -54,11 +54,11 @@ export const ContractLink = ({
       style={noBorder ? undefined : { backgroundColor: '#fafafa' }}
       gap={size === 'xs' ? 'x1' : 'x2'}
     >
-      {/* Mobile Layout - Always show snippet */}
+      {/* Mobile Layout - Show ens name if available, otherwise snippet address */}
       <Text fontSize={16} display={{ '@initial': 'block', '@768': 'none' }}>
         {ensName ?? walletSnippet(address, 8)}
       </Text>
-      {/* Desktop Layout - Show full name/address for 'md', snippet for smaller sizes */}
+      {/* Desktop Layout - Show full name/address for 'md', name/snippet for smaller sizes */}
       <Text fontSize={16} display={{ '@initial': 'none', '@768': 'block' }}>
         {size !== 'md' ? (ensName ?? walletSnippet(address, 8)) : displayName}
       </Text>

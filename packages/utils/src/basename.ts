@@ -7,54 +7,53 @@ import {
   keccak256,
   namehash,
   PublicClient,
+  zeroAddress,
 } from 'viem'
+import { parseAvatarRecord } from 'viem/ens'
 
 import L2ResolverAbi from './abis/L2ResolverAbi'
+import L2ReverseRegistrarAbi from './abis/L2ReverseRegistrarAbi'
 import { getProvider } from './provider'
 
 export const BASENAME_L2_RESOLVER_ADDRESS = '0xC6d566A56A1aFf6508b41f6c90ff131615583BCD'
+export const BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY =
+  '0x426fA03fB86E510d0Dd9F70335Cf102a98b10875'
+export const L2_REVERSE_REGISTRAR_ADDRESS = '0x0000000000D8e504002cC26E3Ec46D81971C1664'
 
 const baseProvider = getProvider(CHAIN_ID.BASE)
 
 /**
+ * Convert an chainId to a coinType hex for reverse chain resolution
  * Converts a chain ID to its coin type for ENS resolution
  * Following ENSIP-19 specification for L2 name resolution
  */
-export function convertChainIdToCoinType(chainId: number): string {
-  // For mainnet (chainId 1), use 'addr' field
+export const convertChainIdToCoinType = (chainId: CHAIN_ID): string => {
+  // L1 resolvers to addr
   if (chainId === CHAIN_ID.ETHEREUM) {
     return 'addr'
   }
 
-  // For L2s, use the ENSIP-11 coin type encoding:
-  // coinType = 0x80000000 | chainId
-  const coinType = (0x80000000 | chainId) >>> 0
-  return `0x${coinType.toString(16)}`
+  const cointype = (0x80000000 | chainId) >>> 0
+  return cointype.toString(16).toUpperCase()
 }
 
 /**
+ * Convert an address to a reverse node for ENS resolution
  * Converts an address and chain ID to a reverse node for ENS resolution
  * This creates the namehash for reverse resolution lookups
  */
-export function convertReverseNodeToBytes(
+export const convertReverseNodeToBytes = (
   address: Address,
   chainId: number = CHAIN_ID.BASE
-): `0x${string}` {
-  // Normalize address to lowercase without 0x prefix
-  const addressFormatted = address.toLowerCase().replace('0x', '') as `0x${string}`
-
-  // Generate the reverse record namehash
-  const addressHash = keccak256(`0x${addressFormatted}`)
-  const coinType = convertChainIdToCoinType(chainId)
-
-  // Build the reverse resolution node
-  // Format: keccak256(namehash(reverse) + keccak256(coinType) + keccak256(address))
-  const reverseNode = namehash(`${coinType}.reverse`)
-  const addressNode = keccak256(
-    encodePacked(['bytes32', 'bytes32'], [reverseNode, addressHash])
+) => {
+  const addressFormatted = address.toLowerCase() as Address
+  const addressNode = keccak256(addressFormatted)
+  const chainCoinType = convertChainIdToCoinType(chainId)
+  const baseReverseNode = namehash(`${chainCoinType.toUpperCase()}.reverse`)
+  const addressReverseNode = keccak256(
+    encodePacked(['bytes32', 'bytes32'], [baseReverseNode, addressNode])
   )
-
-  return addressNode
+  return addressReverseNode
 }
 
 // In-memory basename cache
@@ -83,6 +82,21 @@ export async function getBasename(
       CHAIN_ID.BASE
     )
 
+    // Priority 1: Upgradeable Proxy
+    const proxyBasename = await provider.readContract({
+      abi: L2ResolverAbi,
+      address: BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY,
+      functionName: 'name',
+      args: [addressReverseNode],
+    })
+
+    if (proxyBasename) {
+      const result = proxyBasename as string
+      basenameCache.set(checksummedAddress, result)
+      return result
+    }
+
+    // Priority 2: L2 Resolver
     const basename = (await provider.readContract({
       abi: L2ResolverAbi,
       address: BASENAME_L2_RESOLVER_ADDRESS,
@@ -96,6 +110,43 @@ export async function getBasename(
   } catch (e) {
     console.error('Error getting basename:', e)
     basenameCache.set(checksummedAddress, null)
+    return null
+  }
+}
+
+const basenameReverseNameCache = new Map<string, string | null>()
+
+/**
+ * Resolves a wallet address to its reverse basename on Base L2
+ * Returns the reverse basename string (e.g., "username.base.eth") or null if not found
+ */
+export async function getReverseBasename(
+  address: Address,
+  provider: PublicClient | undefined = baseProvider
+): Promise<string | null> {
+  if (!address || !isAddress(address, { strict: false })) return null
+
+  const checksummedAddress = getAddress(address)
+
+  // Check cache
+  if (basenameReverseNameCache.has(checksummedAddress)) {
+    return basenameReverseNameCache.get(checksummedAddress)!
+  }
+
+  try {
+    const reverseBasename = (await provider.readContract({
+      abi: L2ReverseRegistrarAbi,
+      address: L2_REVERSE_REGISTRAR_ADDRESS,
+      functionName: 'nameForAddr',
+      args: [checksummedAddress],
+    })) as string
+
+    const result = reverseBasename || null
+    basenameReverseNameCache.set(checksummedAddress, result)
+    return result
+  } catch (e) {
+    console.error('Error getting reverse basename:', e)
+    basenameReverseNameCache.set(checksummedAddress, null)
     return null
   }
 }
@@ -121,13 +172,40 @@ export async function getBasenameAddress(
   }
 
   try {
-    // Get the address for the basename using viem's built-in ENS resolution
-    // Basenames work through ENSIP-10 and are compatible with ENS resolution
-    const resolved = await provider.getEnsAddress({ name: normalizedBasename })
+    // Priority 1: Upgradeable Proxy
+    const proxyAddress = await provider.readContract({
+      abi: L2ResolverAbi,
+      address: BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY,
+      functionName: 'addr',
+      args: [namehash(normalizedBasename)],
+    })
 
-    const result = resolved ? getAddress(resolved) : null
-    basenameAddressCache.set(normalizedBasename, result)
-    return result
+    if (
+      proxyAddress &&
+      isAddress(proxyAddress, { strict: false }) &&
+      proxyAddress !== zeroAddress
+    ) {
+      const result = getAddress(proxyAddress)
+      basenameAddressCache.set(normalizedBasename, result)
+      return result
+    }
+
+    // Priority 2: L2 Resolver
+    const resolved = (await provider.readContract({
+      abi: L2ResolverAbi,
+      address: BASENAME_L2_RESOLVER_ADDRESS,
+      args: [namehash(normalizedBasename)],
+      functionName: 'addr',
+    })) as string
+
+    if (resolved && isAddress(resolved, { strict: false }) && resolved !== zeroAddress) {
+      const result = getAddress(resolved)
+      basenameAddressCache.set(normalizedBasename, result)
+      return result
+    }
+
+    basenameAddressCache.set(normalizedBasename, null)
+    return null
   } catch (e) {
     console.error('Error getting basename address:', e)
     basenameAddressCache.set(normalizedBasename, null)
@@ -156,11 +234,38 @@ export async function getBasenameAvatar(
   }
 
   try {
-    // Use viem's getEnsAvatar which works with basenames via ENSIP-10
-    const avatar = await provider.getEnsAvatar({ name: normalizedBasename })
+    // Priority 1: Upgradeable Proxy
+    const proxyAvatarRecord = await provider.readContract({
+      abi: L2ResolverAbi,
+      address: BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY,
+      functionName: 'text',
+      args: [namehash(normalizedBasename), 'avatar'],
+    })
 
-    const result = avatar ?? null
+    if (proxyAvatarRecord) {
+      const avatar = await parseAvatarRecord(provider, { record: proxyAvatarRecord })
+      const result = avatar || null
+      basenameAvatarCache.set(normalizedBasename, result)
+      return result
+    }
+
+    // Priority 2: L2 Resolver
+    const avatarRecord = (await provider.readContract({
+      abi: L2ResolverAbi,
+      address: BASENAME_L2_RESOLVER_ADDRESS,
+      args: [namehash(normalizedBasename), 'avatar'],
+      functionName: 'text',
+    })) as string
+
+    if (!avatarRecord) {
+      basenameAvatarCache.set(normalizedBasename, null)
+      return null
+    }
+
+    const avatar = await parseAvatarRecord(provider, { record: avatarRecord })
+    const result = avatar || null
     basenameAvatarCache.set(normalizedBasename, result)
+
     return result
   } catch (e) {
     console.error('Error getting basename avatar:', e)
