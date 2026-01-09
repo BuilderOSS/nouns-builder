@@ -19,6 +19,7 @@ import Dash from './assets/dash.svg'
 import Discord from './assets/discord.svg'
 import Dots from './assets/dots.svg'
 import Download from './assets/download.svg'
+import Ellipsis from './assets/ellipsis.svg'
 import Erc20 from './assets/erc20.svg'
 import Escrow from './assets/escrow.svg'
 import Eth from './assets/eth.svg'
@@ -73,6 +74,7 @@ export const icons = {
   discord: Discord,
   dots: Dots,
   download: Download,
+  ellipsis: Ellipsis,
   eth: Eth,
   erc20: Erc20,
   escrow: Escrow,
