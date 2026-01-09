@@ -19,6 +19,7 @@ import Dash from './assets/dash.svg'
 import Discord from './assets/discord.svg'
 import Dots from './assets/dots.svg'
 import Download from './assets/download.svg'
+import Ellipsis from './assets/ellipsis.svg'
 import Erc20 from './assets/erc20.svg'
 import Escrow from './assets/escrow.svg'
 import Eth from './assets/eth.svg'
@@ -44,6 +45,7 @@ import Search from './assets/search.svg'
 import Share from './assets/share.svg'
 import Sliders from './assets/sliders.svg'
 import Spanner from './assets/spanner.svg'
+import Swap from './assets/swap.svg'
 import Trash from './assets/trash.svg'
 import Twitter from './assets/twitter.svg'
 import WalletConnect from './assets/wallet-connect.svg'
@@ -73,6 +75,7 @@ export const icons = {
   discord: Discord,
   dots: Dots,
   download: Download,
+  ellipsis: Ellipsis,
   eth: Eth,
   erc20: Erc20,
   escrow: Escrow,
@@ -98,6 +101,7 @@ export const icons = {
   share: Share,
   sliders: Sliders,
   spanner: Spanner,
+  swap: Swap,
   trash: Trash,
   twitter: Twitter,
   walletConnect: WalletConnect,
