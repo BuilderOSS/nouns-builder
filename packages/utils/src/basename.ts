@@ -34,7 +34,7 @@ export const convertChainIdToCoinType = (chainId: CHAIN_ID): string => {
   }
 
   const cointype = (0x80000000 | chainId) >>> 0
-  return cointype.toString(16).toUpperCase()
+  return cointype.toString(16)
 }
 
 /**
@@ -49,7 +49,7 @@ export const convertReverseNodeToBytes = (
   const addressFormatted = address.toLowerCase() as Address
   const addressNode = keccak256(addressFormatted)
   const chainCoinType = convertChainIdToCoinType(chainId)
-  const baseReverseNode = namehash(`${chainCoinType.toUpperCase()}.reverse`)
+  const baseReverseNode = namehash(`${chainCoinType}.reverse`)
   const addressReverseNode = keccak256(
     encodePacked(['bytes32', 'bytes32'], [baseReverseNode, addressNode])
   )

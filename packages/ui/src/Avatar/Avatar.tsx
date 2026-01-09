@@ -1,6 +1,6 @@
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { Box, BoxProps } from '@buildeross/zord'
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 
 import { FallbackImage } from '../FallbackImage'
 import { avatar, avatarVariants } from './Avatar.css'
@@ -12,14 +12,14 @@ export interface AvatarProps extends Omit<BoxProps, 'size'> {
   src?: string | null
 }
 
-export function Avatar({
+const AvatarComponent = ({
   address,
   className,
   size,
   variant,
   src,
   ...props
-}: AvatarProps) {
+}: AvatarProps) => {
   const [imageHasError, setImageHasError] = useState(false)
 
   // Pass null as src to bgForAddress when image fails, so it shows gradient
@@ -41,7 +41,6 @@ export function Avatar({
     >
       {src && !imageHasError && (
         <FallbackImage
-          key={src}
           src={src}
           alt={address || 'Avatar image'}
           style={{
@@ -55,3 +54,5 @@ export function Avatar({
     </Box>
   )
 }
+
+export const Avatar = memo(AvatarComponent)

@@ -1,6 +1,6 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { isEmpty } from '@buildeross/utils/helpers'
-import { Box, Flex, Icon } from '@buildeross/zord'
+import { Box, Flex, Icon, Spinner } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
 import React, { ChangeEventHandler, WheelEvent } from 'react'
@@ -77,7 +77,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
 }) => {
   const addrOrName: string | undefined =
     isAddress && typeof value === 'string' && value.length > 0 ? value : undefined
-  const { ensName, ensAvatar, ethAddress } = useEnsData(addrOrName)
+  const { ensName, ensAvatar, ethAddress, isLoading } = useEnsData(addrOrName)
 
   /*
     toggle between address and ENS name display
@@ -213,8 +213,11 @@ const SmartInput: React.FC<SmartInputProps> = ({
             justify={'center'}
             position={'absolute'}
             className={inputCheckIcon['default']}
+            style={isLoading ? { backgroundColor: 'transparent' } : undefined}
           >
-            {ensAvatar && ethAddress ? (
+            {isLoading ? (
+              <Spinner size="sm" />
+            ) : ensAvatar && ethAddress ? (
               <Avatar address={ethAddress} src={ensAvatar} size="32" />
             ) : (
               <Icon fill="background1" id="check" style={{ width: 24, height: 24 }} />

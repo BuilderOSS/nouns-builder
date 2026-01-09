@@ -29,8 +29,9 @@ export const useEnsAddress = (name?: string): UseEnsAddressResult => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      // No dedupingInterval - rely on in-memory cache in utils
-      // SWR will cache for the page session, and utils cache handles deduplication
+      revalidateIfStale: false,
+      revalidateOnMount: false,
+      dedupingInterval: Infinity,
     }
   )
 
