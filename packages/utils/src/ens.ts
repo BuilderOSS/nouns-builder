@@ -1,6 +1,12 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { Address, getAddress, isAddress, PublicClient } from 'viem'
+import { Address, getAddress, isAddress, PublicClient, zeroAddress } from 'viem'
 
+import {
+  getBasename,
+  getBasenameAddress,
+  getBasenameAvatar,
+  getReverseBasename,
+} from './basename'
 import { getProvider } from './provider'
 
 const defaultProvider = getProvider(CHAIN_ID.ETHEREUM)
@@ -48,10 +54,24 @@ export async function getEnsAddress(
   }
 
   try {
+    // Priority 1: Check for basename on Base L2
+    const baseAddress = await getBasenameAddress(nameOrAddress)
+    if (
+      baseAddress &&
+      isAddress(baseAddress, { strict: false }) &&
+      baseAddress !== zeroAddress
+    ) {
+      ensAddressCache.set(nameOrAddress, baseAddress)
+      return baseAddress as Address
+    }
+
+    // Priority 2: Fall back to ENS resolution on mainnet
     const resolved = await provider.getEnsAddress({ name: nameOrAddress })
-    const result = resolved ?? nameOrAddress
-    ensAddressCache.set(nameOrAddress, result)
-    return result as Address
+    if (resolved && isAddress(resolved, { strict: false }) && resolved !== zeroAddress) {
+      ensAddressCache.set(nameOrAddress, resolved)
+      return resolved as Address
+    }
+    return nameOrAddress as Address
   } catch (e) {
     console.error('Error getting ENS address:', e)
     return nameOrAddress as Address
@@ -75,6 +95,21 @@ export async function getEnsName(
   }
 
   try {
+    // Priority 1: Check for basename on Base L2
+    const basename = await getBasename(checksummedAddress)
+    if (basename) {
+      ensNameCache.set(checksummedAddress, basename)
+      return basename
+    }
+
+    // Priority 2: Check for reverse resolution on Base L2
+    const reverse = await getReverseBasename(checksummedAddress)
+    if (reverse) {
+      ensNameCache.set(checksummedAddress, reverse)
+      return reverse
+    }
+
+    // Priority 3: Fall back to ENS resolution on mainnet
     const name = await provider.getEnsName({ address: checksummedAddress })
     const result = name ?? checksummedAddress
     ensNameCache.set(checksummedAddress, result)
@@ -100,6 +135,14 @@ export async function getEnsAvatar(
   }
 
   try {
+    // Priority 1: Check for avatar on Base L2
+    const baseAvatar = await getBasenameAvatar(name)
+    if (baseAvatar) {
+      avatarCache.set(name, baseAvatar)
+      return baseAvatar
+    }
+
+    // Priority 2: Fall back to ENS resolution on mainnet
     const avatar = await provider.getEnsAvatar({ name })
     const result = avatar ?? null
     avatarCache.set(name, result)

@@ -1,4 +1,5 @@
 export * from './allocation'
+export * from './basename'
 export * from './concurrent'
 export * from './encodePageNumToEndCursor'
 export * from './ens'

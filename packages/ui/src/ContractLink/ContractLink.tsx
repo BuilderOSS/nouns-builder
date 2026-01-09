@@ -1,4 +1,5 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useEnsName } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Flex, FlexProps, Icon, Text } from '@buildeross/zord'
@@ -19,6 +20,9 @@ export const ContractLink = ({
   chainId,
   noBorder = false,
 }: ContractLinkProps) => {
+  // Resolve address to basename/ENS name if available
+  const { ensName } = useEnsName(address)
+
   const { py, px } = React.useMemo(() => {
     let px: FlexProps['px'] = { '@initial': 'x4', '@768': 'x6' }
     let py: FlexProps['py'] = { '@initial': 'x4', '@768': 'x5' }
@@ -34,6 +38,9 @@ export const ContractLink = ({
     return { py, px }
   }, [size])
 
+  // Display name with proper hierarchy: basename > ENS > address/snippet
+  const displayName = ensName ?? address
+
   return (
     <Flex
       py={py}
@@ -47,13 +54,13 @@ export const ContractLink = ({
       style={noBorder ? undefined : { backgroundColor: '#fafafa' }}
       gap={size === 'xs' ? 'x1' : 'x2'}
     >
-      {/* MobnoBorder ? undefined : ile Layout - Always show snippet */}
+      {/* Mobile Layout - Show ens name if available, otherwise snippet address */}
       <Text fontSize={16} display={{ '@initial': 'block', '@768': 'none' }}>
-        {walletSnippet(address, 8)}
+        {ensName ?? walletSnippet(address, 8)}
       </Text>
-      {/* Desktop Layout - Show snippet only for 'sm' size */}
+      {/* Desktop Layout - Show full name/address for 'md', name/snippet for smaller sizes */}
       <Text fontSize={16} display={{ '@initial': 'none', '@768': 'block' }}>
-        {size !== 'md' ? walletSnippet(address, 8) : address}
+        {size !== 'md' ? (ensName ?? walletSnippet(address, 8)) : displayName}
       </Text>
       <Flex justify={'center'} align={'center'} gap={size === 'xs' ? 'x1' : 'x2'}>
         <a

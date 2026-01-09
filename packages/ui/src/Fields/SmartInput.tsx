@@ -1,6 +1,6 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { isEmpty } from '@buildeross/utils/helpers'
-import { atoms, Box, Flex, Icon } from '@buildeross/zord'
+import { Box, Flex, Icon, Spinner } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import { motion } from 'framer-motion'
 import React, { ChangeEventHandler, WheelEvent } from 'react'
@@ -75,9 +75,27 @@ const SmartInput: React.FC<SmartInputProps> = ({
   isAddress,
   tooltip,
 }) => {
-  const addrForEns: string | undefined =
+  const addrOrName: string | undefined =
     isAddress && typeof value === 'string' && value.length > 0 ? value : undefined
-  const { ensName, ensAvatar, ethAddress } = useEnsData(addrForEns)
+  const { ensName, ensAvatar, ethAddress, isLoading } = useEnsData(addrOrName)
+
+  /*
+    toggle between address and ENS name display
+  */
+  const [showAddress, setShowAddress] = React.useState<boolean>(false)
+  const shouldShowToggle = isAddress && ensName && ethAddress
+
+  /*
+    track previous value to detect external changes
+  */
+  const prevValueRef = React.useRef(value)
+  React.useEffect(() => {
+    // Only reset toggle if value actually changed from external source
+    if (prevValueRef.current !== value) {
+      setShowAddress(false)
+      prevValueRef.current = value
+    }
+  }, [value])
 
   /*
     add autocomplete to refs (autocomplete not supported ref in types)
@@ -133,11 +151,19 @@ const SmartInput: React.FC<SmartInputProps> = ({
           onBlur={handleBlur}
           onFocus={handleFocus}
           value={
-            ensName ? ensName : typeof value === 'number' && isNaN(value) ? '' : value
+            showAddress && ethAddress
+              ? ethAddress
+              : ensName
+                ? ensName
+                : typeof value === 'number' && isNaN(value)
+                  ? ''
+                  : value
           }
-          className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']} ${
-            isAddress ? atoms({ pr: 'x13' }) : ''
-          }`}
+          className={inputStyleVariants[!!errorMessage ? 'error' : 'default']}
+          style={{
+            ...(shouldShowToggle && { paddingLeft: '42px' }),
+            ...(isAddress && { paddingRight: '52px' }),
+          }}
           min={type === 'number' && typeof min === 'number' ? min : undefined}
           max={type === 'number' && typeof max === 'number' ? max : undefined}
           step={step}
@@ -161,14 +187,37 @@ const SmartInput: React.FC<SmartInputProps> = ({
             {errorMessage}
           </Box>
         )}
+        {shouldShowToggle && !errorMessage && (
+          <Flex
+            align={'center'}
+            justify={'center'}
+            position={'absolute'}
+            style={{
+              left: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              cursor: 'pointer',
+            }}
+            onClick={(e: any) => {
+              e.stopPropagation()
+              e.preventDefault()
+              setShowAddress(!showAddress)
+            }}
+          >
+            <Icon id="swap" style={{ width: 20, height: 20 }} />
+          </Flex>
+        )}
         {isAddress && !!value.toString().length && !errorMessage && (
           <Flex
             align={'center'}
             justify={'center'}
             position={'absolute'}
             className={inputCheckIcon['default']}
+            style={isLoading ? { backgroundColor: 'transparent' } : undefined}
           >
-            {ensAvatar && ethAddress ? (
+            {isLoading ? (
+              <Spinner size="sm" />
+            ) : ensAvatar && ethAddress ? (
               <Avatar address={ethAddress} src={ensAvatar} size="32" />
             ) : (
               <Icon fill="background1" id="check" style={{ width: 24, height: 24 }} />
