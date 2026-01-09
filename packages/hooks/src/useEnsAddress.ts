@@ -29,9 +29,7 @@ export const useEnsAddress = (name?: string): UseEnsAddressResult => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      revalidateIfStale: false,
-      revalidateOnMount: false,
-      dedupingInterval: Infinity,
+      dedupingInterval: 60_000,
     }
   )
 

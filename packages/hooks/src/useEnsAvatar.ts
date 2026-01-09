@@ -26,9 +26,7 @@ export const useEnsAvatar = (name?: string): UseEnsAvatarResult => {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
-      revalidateIfStale: false,
-      revalidateOnMount: false,
-      dedupingInterval: Infinity,
+      dedupingInterval: 60_000,
     }
   )
 

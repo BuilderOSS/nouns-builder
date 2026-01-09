@@ -146,7 +146,6 @@ export async function getReverseBasename(
     return result
   } catch (e) {
     console.error('Error getting reverse basename:', e)
-    basenameReverseNameCache.set(checksummedAddress, null)
     return null
   }
 }
@@ -208,7 +207,6 @@ export async function getBasenameAddress(
     return null
   } catch (e) {
     console.error('Error getting basename address:', e)
-    basenameAddressCache.set(normalizedBasename, null)
     return null
   }
 }
@@ -269,7 +267,6 @@ export async function getBasenameAvatar(
     return result
   } catch (e) {
     console.error('Error getting basename avatar:', e)
-    basenameAvatarCache.set(normalizedBasename, null)
     return null
   }
 }
