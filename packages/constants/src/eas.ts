@@ -21,14 +21,20 @@ export const EAS_GRAPHQL_URL: Partial<Record<CHAIN_ID, string>> = {
 }
 
 export const PROPDATE_SCHEMA_UID =
-  '0x8bd0d42901ce3cd9898dbea6ae2fbf1e796ef0923e7cbb0a1cecac2e42d47cb3'
+  `0x8bd0d42901ce3cd9898dbea6ae2fbf1e796ef0923e7cbb0a1cecac2e42d47cb3`
 
 export const PROPDATE_SCHEMA =
-  'bytes32 proposalId, bytes32 originalMessageId, uint8 messageType, string message'
+  `bytes32 proposalId, bytes32 originalMessageId, uint8 messageType, string message`
 
 export const ESCROW_DELEGATE_SCHEMA_UID = `0x1289c5f988998891af7416d83820c40ba1c6f5ba31467f2e611172334dc53a0e`
 
 export const ESCROW_DELEGATE_SCHEMA = `address daoMultiSig`
+
+export const TREASURY_ASSET_PIN_SCHEMA_UID =
+  `0xc384fd4fdacb670667c07759423132a193053742b58d5a056b61d72ba1a09e26`
+
+export const TREASURY_ASSET_PIN_SCHEMA =
+  `uint8 tokenType, address token, bool isCollection, uint256 tokenId`
 
 export type AttestationParams = {
   schema: `0x${string}`
