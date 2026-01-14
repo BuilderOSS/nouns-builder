@@ -30,7 +30,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   // Validate pinned assets structure
   for (const asset of pinnedAssets as PinnedAssetInput[]) {
-    if (typeof asset.tokenType !== 'number' || asset.tokenType > 2) {
+    if (
+      typeof asset.tokenType !== 'number' ||
+      asset.tokenType > 2 ||
+      asset.tokenType < 0
+    ) {
       return res.status(400).json({ error: 'Invalid tokenType' })
     }
     if (!isAddress(asset.token)) {
@@ -60,7 +64,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withCors()(
+export default withCors({
+  allowedMethods: ['POST'],
+})(
   withRateLimit({
     keyPrefix: 'alchemy:pinnedAssets',
   })(handler)

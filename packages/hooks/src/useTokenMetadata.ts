@@ -9,7 +9,7 @@ import { Address, isAddress } from 'viem'
 export type { TokenMetadata }
 
 export type TokenMetadataReturnType = {
-  metadata?: TokenMetadata[]
+  metadata?: TokenMetadata[] | null
   isValidating: boolean
   isLoading: boolean
   error: Error | undefined
@@ -74,7 +74,9 @@ export const useTokenMetadata = (
 export const useTokenMetadataSingle = (
   chainId?: CHAIN_ID,
   address?: Address
-): Omit<TokenMetadataReturnType, 'metadata'> & { tokenMetadata?: TokenMetadata } => {
+): Omit<TokenMetadataReturnType, 'metadata'> & {
+  tokenMetadata?: TokenMetadata
+} => {
   const result = useTokenMetadata(chainId, address ? [address] : undefined)
 
   return {

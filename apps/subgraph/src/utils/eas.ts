@@ -110,6 +110,11 @@ export function decodeTreasuryAssetPin(data: Bytes): TreasuryAssetPin | null {
   const tokenId = tuple[3].toBigInt()
 
   // Validate canonical rules
+  // Rule 0: tokenType must be 0 (ERC20), 1 (ERC721), or 2 (ERC1155)
+  if (tokenType < 0 || tokenType > 2) {
+    return null
+  }
+
   // Rule 1: token != address(0)
   if (token.toHexString() == '0x0000000000000000000000000000000000000000') {
     return null

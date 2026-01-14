@@ -167,9 +167,7 @@ export type EnrichedPinnedAsset = {
   valueInUSD?: string
   // NFT fields
   nftName?: string
-  image?: string
-  collectionName?: string
-  nftBalance?: string
+  nftImage?: string
   // Metadata
   isPinned: true
 }
@@ -771,10 +769,8 @@ export const getEnrichedPinnedAssets = async (
             token: asset.token,
             isCollection: false,
             tokenId: asset.tokenId,
-            name: metadata.data.name || undefined,
-            image: metadata.data.image || undefined,
-            collectionName: undefined, // Could fetch from contract metadata if needed
-            balance: '1', // Simplified, could check actual balance for ERC1155
+            nftName: metadata.data.name || undefined,
+            nftImage: metadata.data.image || undefined,
             isPinned: true,
           } as EnrichedPinnedAsset
         }

@@ -1,21 +1,9 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { type PinnedAsset } from '@buildeross/sdk/subgraph'
 import type { CHAIN_ID } from '@buildeross/types'
 import useSWR, { type KeyedMutator } from 'swr'
 import { type Address, isAddress } from 'viem'
-
-export type PinnedAsset = {
-  id: string
-  tokenType: 0 | 1 | 2 // 0=ERC20, 1=ERC721, 2=ERC1155
-  token: string
-  isCollection: boolean
-  tokenId: string
-  creator: string
-  timestamp: number
-  revoked: boolean
-  revokedAt?: number
-  revokedBy?: string
-}
 
 export type PinnedAssetsReturnType = {
   pinnedAssets: undefined | PinnedAsset[]

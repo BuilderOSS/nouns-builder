@@ -247,7 +247,7 @@ export const PinTreasuryAssetForm = ({ formik }: PinTreasuryAssetFormProps) => {
               )}
 
               {/* Invalid token */}
-              {!isValidatingErc20 && erc20Metadata === null && (
+              {!isValidatingErc20 && !erc20Metadata && (
                 <Box
                   p="x4"
                   backgroundColor="background2"

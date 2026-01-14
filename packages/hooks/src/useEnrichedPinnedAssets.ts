@@ -26,9 +26,7 @@ export type EnrichedPinnedAsset = {
   valueInUSD?: string
   // NFT fields
   nftName?: string
-  image?: string
-  collectionName?: string
-  nftBalance?: string
+  nftImage?: string
   // Metadata
   isPinned: true
 }

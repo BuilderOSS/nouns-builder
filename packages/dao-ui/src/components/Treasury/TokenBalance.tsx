@@ -38,12 +38,7 @@ export const TokenBalance: React.FC = () => {
   const { enrichedPinnedAssets, isLoading: enrichedLoading } = useEnrichedPinnedAssets(
     chain.id,
     addresses.treasury,
-    pinnedERC20.map((p) => ({
-      tokenType: p.tokenType as 0 | 1 | 2,
-      token: p.token as `0x${string}`,
-      isCollection: p.isCollection,
-      tokenId: p.tokenId,
-    }))
+    pinnedERC20
   )
 
   // Combine and dedupe balances with pinned assets
@@ -84,7 +79,7 @@ export const TokenBalance: React.FC = () => {
   // Sort: pinned first, then by USD value
   const sortedBalances = useMemo(
     () =>
-      allTokens.sort((a, b) => {
+      [...allTokens].sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1
         if (!a.isPinned && b.isPinned) return 1
         return parseFloat(b.valueInUSD) - parseFloat(a.valueInUSD)

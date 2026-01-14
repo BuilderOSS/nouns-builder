@@ -23,7 +23,7 @@ interface ArgumentDisplayProps {
   arg: DecodedArg
   target: string
   functionName: string
-  tokenMetadata?: TokenMetadata
+  tokenMetadata?: TokenMetadata | null
   nftMetadata?: SerializedNftMetadata | null
   escrowData?: DecodedEscrowData | null
 }

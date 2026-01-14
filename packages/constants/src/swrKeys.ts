@@ -50,4 +50,4 @@ export const SWR_KEYS = {
   INVOICE_LOG_NEW_INVOICE: 'invoice-log-new-invoice',
   MY_DAOS: 'my-daos',
   MY_DAOS_PAGE: 'my-daos-page',
-}
+} as const

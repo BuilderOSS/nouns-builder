@@ -35,12 +35,7 @@ export const NFTBalance: React.FC = () => {
   const { enrichedPinnedAssets, isLoading: enrichedLoading } = useEnrichedPinnedAssets(
     chain.id,
     addresses.treasury,
-    pinnedNFTs.map((p) => ({
-      tokenType: p.tokenType as 0 | 1 | 2,
-      token: p.token as `0x${string}`,
-      isCollection: p.isCollection,
-      tokenId: p.tokenId,
-    }))
+    pinnedNFTs
   )
 
   // Combine and dedupe NFTs with pinned assets
@@ -62,10 +57,9 @@ export const NFTBalance: React.FC = () => {
     enrichedPinnedAssets?.forEach((asset) => {
       if (asset.isCollection) {
         // For collection pins, mark all NFTs from that collection as pinned
-        // But don't add new entries, just mark existing ones
-        nftMap.forEach((nft) => {
+        nftMap.forEach((nft, key) => {
           if (nft.contract.address.toLowerCase() === asset.token.toLowerCase()) {
-            nft.isPinned = true
+            nftMap.set(key, { ...nft, isPinned: true })
           }
         })
       } else {
@@ -74,19 +68,19 @@ export const NFTBalance: React.FC = () => {
         const existing = nftMap.get(key)
 
         nftMap.set(key, {
-          name: asset.name || existing?.name || '',
+          name: asset.nftName || existing?.name || '',
           tokenId: asset.tokenId || existing?.tokenId || '',
           contract: {
             address: asset.token,
           },
           collection: {
-            name: existing?.collection?.name || asset.name || '',
+            name: existing?.collection?.name || '',
           },
           image: {
-            originalUrl: asset.image || existing?.image?.originalUrl || '',
+            originalUrl: existing?.image?.originalUrl || asset.nftImage || '',
           },
           tokenType: asset.tokenType === 1 ? 'ERC721' : 'ERC1155',
-          balance: asset.balance || existing?.balance || '1',
+          balance: existing?.balance || '1',
           isPinned: true,
         })
       }
@@ -98,7 +92,7 @@ export const NFTBalance: React.FC = () => {
   // Sort: pinned first, then original order
   const sortedNfts = useMemo(
     () =>
-      allNftsWithPinned.sort((a, b) => {
+      [...allNftsWithPinned].sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1
         if (!a.isPinned && b.isPinned) return 1
         return 0
