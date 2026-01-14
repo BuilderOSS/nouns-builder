@@ -11,12 +11,15 @@ import {
   Proposal,
   ProposalUpdate,
   ProposalUpdatedEvent as ProposalUpdatedFeedEvent,
+  TreasuryAssetPin,
 } from '../generated/schema'
 import {
   DAO_MULTISIG_SCHEMA_UID,
   decodeDaoMultisig,
   decodePropdate,
+  decodeTreasuryAssetPin,
   PROPDATE_SCHEMA_UID,
+  TREASURY_ASSET_PIN_SCHEMA_UID,
 } from './utils/eas'
 
 function getAttestation(address: Address, uid: Bytes): Bytes | null {
@@ -114,11 +117,67 @@ function handleDaoMultisigAttestationRevoked(event: RevokedEvent): void {
   update.save()
 }
 
+function handleTreasuryAssetPinAttestation(event: AttestedEvent): void {
+  const data = getAttestation(event.address, event.params.uid)
+  if (!data) {
+    return
+  }
+  const dao = DAO.load(event.params.recipient.toHexString())
+  if (!dao) {
+    // ensure the dao token is the recipient
+    return
+  }
+  // ensure the dao treasury is the attester
+  if (event.params.attester != dao.treasuryAddress) {
+    return
+  }
+
+  const assetPin = decodeTreasuryAssetPin(data)
+  if (!assetPin) {
+    return
+  }
+
+  const pin = new TreasuryAssetPin(event.params.uid.toHexString())
+  pin.dao = dao.id
+  pin.transactionHash = event.transaction.hash
+  pin.timestamp = event.block.timestamp
+  pin.tokenType = assetPin.tokenType
+  pin.token = assetPin.token
+  pin.isCollection = assetPin.isCollection
+  pin.tokenId = assetPin.tokenId
+  pin.creator = event.params.attester
+  pin.revoked = false
+  pin.save()
+}
+
+function handleTreasuryAssetPinRevoked(event: RevokedEvent): void {
+  const dao = DAO.load(event.params.recipient.toHexString())
+  if (!dao) {
+    // ensure the dao token is the recipient
+    return
+  }
+  // ensure the dao treasury is the attester
+  if (event.params.attester != dao.treasuryAddress) {
+    return
+  }
+  const pin = TreasuryAssetPin.load(event.params.uid.toHexString())
+  if (!pin) {
+    return
+  }
+  pin.revoked = true
+  pin.revokedAt = event.block.timestamp
+  pin.revokedBy = event.params.attester
+  pin.revokedTxHash = event.transaction.hash
+  pin.save()
+}
+
 export function handleAttested(event: AttestedEvent): void {
   if (event.params.schema == DAO_MULTISIG_SCHEMA_UID) {
     handleDaoMultisigAttestation(event)
   } else if (event.params.schema == PROPDATE_SCHEMA_UID) {
     handlePropdateAttestation(event)
+  } else if (event.params.schema == TREASURY_ASSET_PIN_SCHEMA_UID) {
+    handleTreasuryAssetPinAttestation(event)
   }
 }
 
@@ -127,5 +186,7 @@ export function handleRevoked(event: RevokedEvent): void {
     handleDaoMultisigAttestationRevoked(event)
   } else if (event.params.schema == PROPDATE_SCHEMA_UID) {
     handlePropdateAttestationRevoked(event)
+  } else if (event.params.schema == TREASURY_ASSET_PIN_SCHEMA_UID) {
+    handleTreasuryAssetPinRevoked(event)
   }
 }

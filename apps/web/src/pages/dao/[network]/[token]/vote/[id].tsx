@@ -11,14 +11,10 @@ import {
   ProposalVotes,
 } from '@buildeross/proposal-ui'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
-import {
-  formatAndFetchState,
-  getProposal,
-  isChainIdSupportedByEAS,
-  SubgraphSDK,
-} from '@buildeross/sdk/subgraph'
+import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { getProposalWarning } from '@buildeross/utils/warnings'
 import { Box, Flex, Icon } from '@buildeross/zord'

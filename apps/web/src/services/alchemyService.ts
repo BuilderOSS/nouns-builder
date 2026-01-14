@@ -145,6 +145,35 @@ export type EnrichedTokenBalance = TokenBalance &
     valueInUSD: string
   }
 
+export type PinnedAssetInput = {
+  tokenType: 0 | 1 | 2 // 0=ERC20, 1=ERC721, 2=ERC1155
+  token: AddressType
+  isCollection: boolean
+  tokenId?: string
+}
+
+export type EnrichedPinnedAsset = {
+  tokenType: 0 | 1 | 2
+  token: AddressType
+  isCollection: boolean
+  tokenId?: string
+  // ERC20 fields
+  balance?: string
+  name?: string
+  symbol?: string
+  decimals?: number
+  logo?: string
+  price?: string
+  valueInUSD?: string
+  // NFT fields
+  nftName?: string
+  image?: string
+  collectionName?: string
+  nftBalance?: string
+  // Metadata
+  isPinned: true
+}
+
 // Helper to create Alchemy instance
 const createAlchemyInstance = (chainId: CHAIN_ID): Alchemy | null => {
   const network = ALCHEMY_NETWORKS[chainId]
@@ -637,4 +666,128 @@ export const getCachedNftMetadata = async (
     console.error('getCachedNftMetadata error:', error)
     throw new BackendFailedError('Failed to fetch NFT metadata')
   }
+}
+
+export const getEnrichedPinnedAssets = async (
+  chainId: CHAIN_ID,
+  treasuryAddress: AddressType,
+  pinnedAssets: PinnedAssetInput[]
+): Promise<EnrichedPinnedAsset[]> => {
+  if (pinnedAssets.length === 0) return []
+
+  const alchemy = createAlchemyInstance(chainId)
+  if (!alchemy) {
+    throw new BackendFailedError('Failed to create Alchemy instance')
+  }
+
+  // Separate by token type
+  const erc20Assets = pinnedAssets.filter((a) => a.tokenType === 0)
+  const nftAssets = pinnedAssets.filter((a) => a.tokenType === 1 || a.tokenType === 2)
+
+  const results: EnrichedPinnedAsset[] = []
+
+  // ===== BATCH FETCH ERC20 TOKENS =====
+  if (erc20Assets.length > 0) {
+    try {
+      const erc20Addresses = erc20Assets.map((a) => a.token)
+
+      // Step 1: Get balances for specific tokens using contractAddresses parameter
+      const tokenBalancesResponse = await alchemy.core.getTokenBalances(
+        treasuryAddress,
+        erc20Addresses
+      )
+
+      // Step 2: Batch fetch metadata (reuse existing method)
+      const metadataResult = await getCachedTokenMetadatas(chainId, erc20Addresses)
+
+      // Step 3: Batch fetch prices (reuse existing method)
+      const pricesResult = await getCachedTokenPrices(chainId, erc20Addresses)
+
+      // Step 4: Combine data
+      for (const asset of erc20Assets) {
+        const balance = tokenBalancesResponse.tokenBalances.find(
+          (b) => b.contractAddress.toLowerCase() === asset.token.toLowerCase()
+        )
+        const metadata = metadataResult?.data.find(
+          (m) => m.address.toLowerCase() === asset.token.toLowerCase()
+        )
+        const price = pricesResult?.data.find(
+          (p) => p.address.toLowerCase() === asset.token.toLowerCase()
+        )
+
+        const balanceAmount =
+          balance?.tokenBalance && balance.tokenBalance !== zeroHash
+            ? fromHex(balance.tokenBalance as Hex, 'bigint').toString()
+            : '0'
+
+        const valueInUSD =
+          metadata && price && balanceAmount !== '0'
+            ? (
+                parseFloat(formatUnits(BigInt(balanceAmount), metadata.decimals)) *
+                parseFloat(price.price)
+              ).toFixed(2)
+            : '0'
+
+        results.push({
+          tokenType: 0,
+          token: asset.token,
+          isCollection: asset.isCollection,
+          balance: balanceAmount,
+          name: metadata?.name || '',
+          symbol: metadata?.symbol || '',
+          decimals: metadata?.decimals || 18,
+          logo: metadata?.logo || '',
+          price: price?.price || '0',
+          valueInUSD,
+          isPinned: true,
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching ERC20 pinned assets:', error)
+      // Continue with partial results instead of throwing
+    }
+  }
+
+  // ===== BATCH FETCH NFTs =====
+  if (nftAssets.length > 0) {
+    const nftPromises = nftAssets.map(async (asset) => {
+      try {
+        if (asset.isCollection) {
+          // For collections, return basic info without specific NFT data
+          return {
+            tokenType: asset.tokenType,
+            token: asset.token,
+            isCollection: true,
+            isPinned: true,
+          } as EnrichedPinnedAsset
+        } else if (asset.tokenId) {
+          // Fetch specific NFT
+          const metadata = await getCachedNftMetadata(chainId, asset.token, asset.tokenId)
+
+          if (!metadata) return null
+
+          return {
+            tokenType: asset.tokenType,
+            token: asset.token,
+            isCollection: false,
+            tokenId: asset.tokenId,
+            name: metadata.data.name || undefined,
+            image: metadata.data.image || undefined,
+            collectionName: undefined, // Could fetch from contract metadata if needed
+            balance: '1', // Simplified, could check actual balance for ERC1155
+            isPinned: true,
+          } as EnrichedPinnedAsset
+        }
+        return null
+      } catch (error) {
+        console.error(`Error fetching NFT ${asset.token}:${asset.tokenId}:`, error)
+        return null
+      }
+    })
+
+    const nftResults = await Promise.all(nftPromises)
+    results.push(...(nftResults.filter(Boolean) as EnrichedPinnedAsset[]))
+  }
+
+  return results
 }

@@ -36,6 +36,7 @@ import Nft from './assets/nft.svg'
 import Noggles from './assets/noggles.svg'
 import Pause from './assets/pause.svg'
 import PauseTemplate from './assets/pause-template.svg'
+import Pin from './assets/pin.svg'
 import Play from './assets/play.svg'
 import Plus from './assets/plus.svg'
 import Question from './assets/question.svg'
@@ -92,6 +93,7 @@ export const icons = {
   noggles: Noggles,
   pause: Pause,
   pauseTemplate: PauseTemplate,
+  pin: Pin,
   play: Play,
   plus: Plus,
   question: Question,

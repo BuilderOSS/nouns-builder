@@ -1,10 +1,12 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useEnrichedPinnedAssets } from '@buildeross/hooks/useEnrichedPinnedAssets'
 import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
+import { usePinnedAssets } from '@buildeross/hooks/usePinnedAssets'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { skeletonAnimation } from '@buildeross/ui/styles'
-import { Box, Flex, Grid, Text } from '@buildeross/zord'
-import React from 'react'
+import { Box, Flex, Grid, Icon, Text } from '@buildeross/zord'
+import React, { useMemo } from 'react'
 
 import { erc721AssetsWrapper } from './Treasury.css'
 
@@ -12,10 +14,102 @@ export const NFTBalance: React.FC = () => {
   const { addresses } = useDaoStore()
   const owner = addresses.treasury
   const chain = useChainStore((x) => x.chain)
-  const { nfts: allNfts, isLoading } = useNFTBalance(chain.id, owner)
-  const numNfts = allNfts?.length ?? 0
+  const { nfts: allNfts, isLoading: nftsLoading } = useNFTBalance(chain.id, owner)
 
-  const nfts = allNfts
+  // Fetch pinned assets
+  const { pinnedAssets, isLoading: pinnedLoading } = usePinnedAssets(
+    chain.id,
+    addresses.token
+  )
+
+  // Filter NFT pinned assets (ERC721 and ERC1155)
+  const pinnedNFTs = useMemo(
+    () =>
+      pinnedAssets?.filter(
+        (p) => (p.tokenType === 1 || p.tokenType === 2) && !p.revoked
+      ) || [],
+    [pinnedAssets]
+  )
+
+  // Fetch enriched pinned NFTs
+  const { enrichedPinnedAssets, isLoading: enrichedLoading } = useEnrichedPinnedAssets(
+    chain.id,
+    addresses.treasury,
+    pinnedNFTs.map((p) => ({
+      tokenType: p.tokenType as 0 | 1 | 2,
+      token: p.token as `0x${string}`,
+      isCollection: p.isCollection,
+      tokenId: p.tokenId,
+    }))
+  )
+
+  // Combine and dedupe NFTs with pinned assets
+  const allNftsWithPinned = useMemo(() => {
+    if (!allNfts && !enrichedPinnedAssets) return []
+
+    const nftMap = new Map<string, any>()
+
+    // Add standard NFTs
+    allNfts?.forEach((nft) => {
+      const key = `${nft.contract.address.toLowerCase()}-${nft.tokenId}`
+      nftMap.set(key, {
+        ...nft,
+        isPinned: false,
+      })
+    })
+
+    // Add/override with pinned NFTs (ensures low-value pinned NFTs appear)
+    enrichedPinnedAssets?.forEach((asset) => {
+      if (asset.isCollection) {
+        // For collection pins, mark all NFTs from that collection as pinned
+        // But don't add new entries, just mark existing ones
+        nftMap.forEach((nft) => {
+          if (nft.contract.address.toLowerCase() === asset.token.toLowerCase()) {
+            nft.isPinned = true
+          }
+        })
+      } else {
+        // For individual NFT pins
+        const key = `${asset.token.toLowerCase()}-${asset.tokenId}`
+        const existing = nftMap.get(key)
+
+        nftMap.set(key, {
+          name: asset.name || existing?.name || '',
+          tokenId: asset.tokenId || existing?.tokenId || '',
+          contract: {
+            address: asset.token,
+          },
+          collection: {
+            name: existing?.collection?.name || asset.name || '',
+          },
+          image: {
+            originalUrl: asset.image || existing?.image?.originalUrl || '',
+          },
+          tokenType: asset.tokenType === 1 ? 'ERC721' : 'ERC1155',
+          balance: asset.balance || existing?.balance || '1',
+          isPinned: true,
+        })
+      }
+    })
+
+    return Array.from(nftMap.values())
+  }, [allNfts, enrichedPinnedAssets])
+
+  // Sort: pinned first, then original order
+  const sortedNfts = useMemo(
+    () =>
+      allNftsWithPinned.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        return 0
+      }),
+    [allNftsWithPinned]
+  )
+
+  const numNfts = sortedNfts?.length ?? 0
+  const isLoading = nftsLoading || pinnedLoading || enrichedLoading
+
+  const nfts = sortedNfts
 
   return (
     <>
@@ -125,21 +219,24 @@ export const NFTBalance: React.FC = () => {
                     justify={'space-between'}
                     px="x2"
                     gap="x4"
-                    align="stretch"
+                    align="center"
                     style={{ maxWidth: '100%', overflow: 'hidden' }}
                   >
-                    <Text
-                      fontSize={16}
-                      fontWeight={'display'}
-                      style={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        minWidth: '0px',
-                      }}
-                    >
-                      {nft.name ?? '‎ '}
-                    </Text>
+                    <Flex align={'center'} gap="x1" style={{ minWidth: 0, flex: 1 }}>
+                      <Text
+                        fontSize={16}
+                        fontWeight={'display'}
+                        style={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          minWidth: '0px',
+                        }}
+                      >
+                        {nft.name ?? '‎ '}
+                      </Text>
+                      {nft.isPinned && <Icon id="pin" size="sm" color="text3" />}
+                    </Flex>
                     {nft.tokenType === 'ERC1155' && (
                       <Text
                         fontSize={12}

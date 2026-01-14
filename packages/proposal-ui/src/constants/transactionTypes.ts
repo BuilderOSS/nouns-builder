@@ -1,5 +1,5 @@
 import { TransactionType } from '@buildeross/types'
-import { color, IconType } from '@buildeross/zord'
+import { Atoms, color, IconType } from '@buildeross/zord'
 
 export { TransactionType }
 
@@ -8,7 +8,7 @@ export interface TransactionTypeProps {
   subTitle: string
   icon: IconType
   iconBackdrop: string
-  iconBorder?: boolean
+  iconFill?: Atoms['color']
 }
 
 export type TransactionTypesPropsMap = Record<TransactionType, TransactionTypeProps>
@@ -110,6 +110,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     subTitle: 'Create any other kind of transaction',
     icon: 'plus',
     iconBackdrop: color.ghostHover,
+    iconFill: 'icon1',
   },
   [TransactionType.MIGRATION]: {
     title: 'Migration',
@@ -122,5 +123,12 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     subTitle: 'Connect to dApps and create transactions via WalletConnect',
     icon: 'walletConnectOutline',
     iconBackdrop: 'rgba(59, 130, 246, 0.1)',
+  },
+  [TransactionType.PIN_TREASURY_ASSET]: {
+    title: 'Pin Treasury Asset',
+    subTitle: 'Whitelist a token or NFT for prominent display in treasury',
+    icon: 'pin',
+    iconBackdrop: 'rgba(236, 113, 75, 0.1)',
+    iconFill: 'warning',
   },
 }
