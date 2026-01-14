@@ -10,6 +10,7 @@ export const TransactionTypeIcon: React.FC<TransactionTypeIconProps> = ({
   transactionType,
   large,
 }) => {
+  const metadata = TRANSACTION_TYPES[transactionType]
   return (
     <Flex
       align={'center'}
@@ -18,17 +19,13 @@ export const TransactionTypeIcon: React.FC<TransactionTypeIconProps> = ({
       w={large ? 'x13' : 'x10'}
       borderRadius={'round'}
       style={{
-        backgroundColor:
-          TRANSACTION_TYPES[transactionType]?.iconBackdrop ?? color.ghostHover,
+        backgroundColor: metadata?.iconBackdrop ?? color.ghostHover,
       }}
       my={'x4'}
       minH={large ? 'x13' : 'x10'}
       minW={large ? 'x13' : 'x10'}
     >
-      <Icon
-        id={TRANSACTION_TYPES[transactionType]?.icon ?? 'plus'}
-        fill={'transparent'}
-      />
+      <Icon id={metadata?.icon ?? 'plus'} fill={metadata?.iconFill ?? 'transparent'} />
     </Flex>
   )
 }

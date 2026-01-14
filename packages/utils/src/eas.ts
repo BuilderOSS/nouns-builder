@@ -1,6 +1,6 @@
+import { EAS_SUPPORTED_CHAIN_IDS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 
-// NOTE: Zora is not supported by EAS yet
 export const isChainIdSupportedByEAS = (chainId: CHAIN_ID): boolean => {
-  return !(chainId === CHAIN_ID.ZORA || chainId === CHAIN_ID.ZORA_SEPOLIA)
+  return EAS_SUPPORTED_CHAIN_IDS.includes(chainId)
 }

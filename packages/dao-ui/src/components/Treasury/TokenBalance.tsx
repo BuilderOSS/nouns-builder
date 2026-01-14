@@ -1,11 +1,13 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useEnrichedPinnedAssets } from '@buildeross/hooks/useEnrichedPinnedAssets'
+import { usePinnedAssets } from '@buildeross/hooks/usePinnedAssets'
 import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Avatar, NameAvatar } from '@buildeross/ui/Avatar'
 import { skeletonAnimation } from '@buildeross/ui/styles'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Flex, Grid, Text } from '@buildeross/zord'
-import React from 'react'
+import { Box, Flex, Grid, Icon, Text } from '@buildeross/zord'
+import React, { useMemo } from 'react'
 import { formatUnits } from 'viem'
 
 import { statisticContent } from '../../styles/About.css'
@@ -15,17 +17,82 @@ export const TokenBalance: React.FC = () => {
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const owner = addresses.treasury
-  const { balances, isLoading } = useTokenBalances(chain.id, addresses.treasury)
+  const { balances, isLoading: balancesLoading } = useTokenBalances(
+    chain.id,
+    addresses.treasury
+  )
 
-  const totalUSD = balances
+  // Fetch pinned assets
+  const { pinnedAssets, isLoading: pinnedLoading } = usePinnedAssets(
+    chain.id,
+    addresses.token
+  )
+
+  // Filter ERC20 pinned assets
+  const pinnedERC20 = useMemo(
+    () => pinnedAssets?.filter((p) => p.tokenType === 0 && !p.revoked) || [],
+    [pinnedAssets]
+  )
+
+  // Fetch enriched pinned assets
+  const { enrichedPinnedAssets, isLoading: enrichedLoading } = useEnrichedPinnedAssets(
+    chain.id,
+    addresses.treasury,
+    pinnedERC20
+  )
+
+  // Combine and dedupe balances with pinned assets
+  const allTokens = useMemo(() => {
+    if (!balances && !enrichedPinnedAssets) return []
+
+    const tokenMap = new Map()
+
+    // Add standard balances
+    balances?.forEach((token) => {
+      tokenMap.set(token.address.toLowerCase(), {
+        ...token,
+        isPinned: false,
+      })
+    })
+
+    // Add/override with pinned assets (ensures low-value pinned assets appear)
+    enrichedPinnedAssets?.forEach((asset) => {
+      const key = asset.token.toLowerCase()
+      const existing = tokenMap.get(key)
+
+      tokenMap.set(key, {
+        address: asset.token,
+        balance: asset.balance || existing?.balance || '0',
+        name: asset.name || existing?.name || '',
+        symbol: asset.symbol || existing?.symbol || '',
+        decimals: asset.decimals || existing?.decimals || 18,
+        logo: asset.logo || existing?.logo || '',
+        price: asset.price || existing?.price || '0',
+        valueInUSD: asset.valueInUSD || existing?.valueInUSD || '0',
+        isPinned: true,
+      })
+    })
+
+    return Array.from(tokenMap.values())
+  }, [balances, enrichedPinnedAssets])
+
+  // Sort: pinned first, then by USD value
+  const sortedBalances = useMemo(
+    () =>
+      [...allTokens].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        return parseFloat(b.valueInUSD) - parseFloat(a.valueInUSD)
+      }),
+    [allTokens]
+  )
+
+  const totalUSD = sortedBalances
     ?.reduce((acc, balance) => acc + parseFloat(balance.valueInUSD), 0)
     .toFixed(2)
 
-  const sortedBalances = balances?.sort(
-    (a, b) => parseFloat(b.valueInUSD) - parseFloat(a.valueInUSD)
-  )
-
-  const numBalances = balances?.length ?? 0
+  const numBalances = sortedBalances?.length ?? 0
+  const isLoading = balancesLoading || pinnedLoading || enrichedLoading
 
   return (
     <>
@@ -146,7 +213,10 @@ export const TokenBalance: React.FC = () => {
                 ) : (
                   <NameAvatar name={tokenBalance.name} />
                 )}
-                <Text>{tokenBalance.name}</Text>
+                <Flex align={'center'} gap="x1">
+                  <Text>{tokenBalance.name}</Text>
+                  {tokenBalance.isPinned && <Icon id="pin" size="sm" color="text3" />}
+                </Flex>
               </Flex>
             )
             return (

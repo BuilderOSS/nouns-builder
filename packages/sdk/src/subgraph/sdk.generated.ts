@@ -920,6 +920,7 @@ export type Dao = {
   name: Scalars['String']['output']
   ownerCount: Scalars['Int']['output']
   owners: Array<DaoTokenOwner>
+  pinnedAssets: Array<TreasuryAssetPin>
   projectURI: Scalars['String']['output']
   proposalCount: Scalars['Int']['output']
   proposals: Array<Proposal>
@@ -972,6 +973,14 @@ export type DaoOwnersArgs = {
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<DaoTokenOwner_Filter>
+}
+
+export type DaoPinnedAssetsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<TreasuryAssetPin_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<TreasuryAssetPin_Filter>
 }
 
 export type DaoProposalsArgs = {
@@ -1368,6 +1377,7 @@ export type Dao_Filter = {
   ownerCount_not?: InputMaybe<Scalars['Int']['input']>
   ownerCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
   owners_?: InputMaybe<DaoTokenOwner_Filter>
+  pinnedAssets_?: InputMaybe<TreasuryAssetPin_Filter>
   projectURI?: InputMaybe<Scalars['String']['input']>
   projectURI_contains?: InputMaybe<Scalars['String']['input']>
   projectURI_contains_nocase?: InputMaybe<Scalars['String']['input']>
@@ -1501,6 +1511,7 @@ export enum Dao_OrderBy {
   Name = 'name',
   OwnerCount = 'ownerCount',
   Owners = 'owners',
+  PinnedAssets = 'pinnedAssets',
   ProjectUri = 'projectURI',
   ProposalCount = 'proposalCount',
   Proposals = 'proposals',
@@ -3573,6 +3584,8 @@ export type Query = {
   snapshots: Array<Snapshot>
   token?: Maybe<Token>
   tokens: Array<Token>
+  treasuryAssetPin?: Maybe<TreasuryAssetPin>
+  treasuryAssetPins: Array<TreasuryAssetPin>
 }
 
 export type Query_MetaArgs = {
@@ -3938,6 +3951,22 @@ export type QueryTokensArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<Token_Filter>
+}
+
+export type QueryTreasuryAssetPinArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryTreasuryAssetPinsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<TreasuryAssetPin_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<TreasuryAssetPin_Filter>
 }
 
 export type Snapshot = {
@@ -4309,6 +4338,182 @@ export enum Token_OrderBy {
   VoterInfoDaoTokenCount = 'voterInfo__daoTokenCount',
   VoterInfoId = 'voterInfo__id',
   VoterInfoVoter = 'voterInfo__voter',
+}
+
+export type TreasuryAssetPin = {
+  __typename?: 'TreasuryAssetPin'
+  creator: Scalars['Bytes']['output']
+  dao: Dao
+  id: Scalars['ID']['output']
+  isCollection: Scalars['Boolean']['output']
+  revoked: Scalars['Boolean']['output']
+  revokedAt?: Maybe<Scalars['BigInt']['output']>
+  revokedBy?: Maybe<Scalars['Bytes']['output']>
+  revokedTxHash?: Maybe<Scalars['Bytes']['output']>
+  timestamp: Scalars['BigInt']['output']
+  token: Scalars['Bytes']['output']
+  tokenId: Scalars['BigInt']['output']
+  tokenType: Scalars['Int']['output']
+  transactionHash: Scalars['Bytes']['output']
+}
+
+export type TreasuryAssetPin_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<TreasuryAssetPin_Filter>>>
+  creator?: InputMaybe<Scalars['Bytes']['input']>
+  creator_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  creator_lt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_lte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  isCollection?: InputMaybe<Scalars['Boolean']['input']>
+  isCollection_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  isCollection_not?: InputMaybe<Scalars['Boolean']['input']>
+  isCollection_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  or?: InputMaybe<Array<InputMaybe<TreasuryAssetPin_Filter>>>
+  revoked?: InputMaybe<Scalars['Boolean']['input']>
+  revokedAt?: InputMaybe<Scalars['BigInt']['input']>
+  revokedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  revokedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  revokedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  revokedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  revokedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  revokedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  revokedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  revokedBy?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_contains?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_gt?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_gte?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  revokedBy_lt?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_lte?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_not?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  revokedBy_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  revokedTxHash?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  revokedTxHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  revokedTxHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  revoked_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  revoked_not?: InputMaybe<Scalars['Boolean']['input']>
+  revoked_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  token?: InputMaybe<Scalars['Bytes']['input']>
+  tokenId?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_gt?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_gte?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  tokenId_lt?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_lte?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_not?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  tokenType?: InputMaybe<Scalars['Int']['input']>
+  tokenType_gt?: InputMaybe<Scalars['Int']['input']>
+  tokenType_gte?: InputMaybe<Scalars['Int']['input']>
+  tokenType_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  tokenType_lt?: InputMaybe<Scalars['Int']['input']>
+  tokenType_lte?: InputMaybe<Scalars['Int']['input']>
+  tokenType_not?: InputMaybe<Scalars['Int']['input']>
+  tokenType_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  token_contains?: InputMaybe<Scalars['Bytes']['input']>
+  token_gt?: InputMaybe<Scalars['Bytes']['input']>
+  token_gte?: InputMaybe<Scalars['Bytes']['input']>
+  token_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  token_lt?: InputMaybe<Scalars['Bytes']['input']>
+  token_lte?: InputMaybe<Scalars['Bytes']['input']>
+  token_not?: InputMaybe<Scalars['Bytes']['input']>
+  token_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  token_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum TreasuryAssetPin_OrderBy {
+  Creator = 'creator',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  IsCollection = 'isCollection',
+  Revoked = 'revoked',
+  RevokedAt = 'revokedAt',
+  RevokedBy = 'revokedBy',
+  RevokedTxHash = 'revokedTxHash',
+  Timestamp = 'timestamp',
+  Token = 'token',
+  TokenId = 'tokenId',
+  TokenType = 'tokenType',
+  TransactionHash = 'transactionHash',
 }
 
 export type _Block_ = {
@@ -5348,6 +5553,31 @@ export type TotalAuctionSalesQuery = {
   dao?: { __typename?: 'DAO'; totalAuctionSales: any } | null
 }
 
+export type TreasuryAssetPinsQueryVariables = Exact<{
+  daoId: Scalars['String']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
+}>
+
+export type TreasuryAssetPinsQuery = {
+  __typename?: 'Query'
+  treasuryAssetPins: Array<{
+    __typename?: 'TreasuryAssetPin'
+    id: string
+    transactionHash: any
+    timestamp: any
+    tokenType: number
+    token: any
+    isCollection: boolean
+    tokenId: any
+    creator: any
+    revoked: boolean
+    revokedAt?: any | null
+    revokedBy?: any | null
+    revokedTxHash?: any | null
+  }>
+}
+
 export type UserProposalVoteQueryVariables = Exact<{
   where?: InputMaybe<ProposalVote_Filter>
 }>
@@ -6119,6 +6349,30 @@ export const TotalAuctionSalesDocument = gql`
     }
   }
 `
+export const TreasuryAssetPinsDocument = gql`
+  query treasuryAssetPins($daoId: String!, $first: Int!, $skip: Int!) {
+    treasuryAssetPins(
+      where: { dao: $daoId }
+      orderBy: timestamp
+      orderDirection: desc
+      first: $first
+      skip: $skip
+    ) {
+      id
+      transactionHash
+      timestamp
+      tokenType
+      token
+      isCollection
+      tokenId
+      creator
+      revoked
+      revokedAt
+      revokedBy
+      revokedTxHash
+    }
+  }
+`
 export const UserProposalVoteDocument = gql`
   query userProposalVote($where: ProposalVote_filter) {
     proposalVotes(where: $where, first: 1) {
@@ -6629,6 +6883,24 @@ export function getSdk(
             signal,
           }),
         'totalAuctionSales',
+        'query',
+        variables
+      )
+    },
+    treasuryAssetPins(
+      variables: TreasuryAssetPinsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<TreasuryAssetPinsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<TreasuryAssetPinsQuery>({
+            document: TreasuryAssetPinsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'treasuryAssetPins',
         'query',
         variables
       )

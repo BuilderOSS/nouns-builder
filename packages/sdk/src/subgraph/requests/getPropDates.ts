@@ -1,9 +1,8 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { fetchFromURI } from '@buildeross/utils'
+import { fetchFromURI, isChainIdSupportedByEAS } from '@buildeross/utils'
 import { Hex, isAddress, isHex } from 'viem'
 
 import { SDK } from '../client'
-import { isChainIdSupportedByEAS } from '../helpers'
 import { ProposalUpdateFragment } from '../sdk.generated'
 
 export interface PropdateMessage {

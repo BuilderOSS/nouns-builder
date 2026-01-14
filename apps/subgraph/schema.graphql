@@ -25,6 +25,7 @@ type DAO @entity {
   proposals: [Proposal!]! @derivedFrom(field: "dao")
   auctions: [Auction!]! @derivedFrom(field: "dao")
   daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
+  pinnedAssets: [TreasuryAssetPin!]! @derivedFrom(field: "dao")
   feedEvents: [FeedEvent!]! @derivedFrom(field: "dao")
 }
 
@@ -151,6 +152,22 @@ type DaoMultisigUpdate @entity {
   creator: Bytes!
   dao: DAO!
   deleted: Boolean!
+}
+
+type TreasuryAssetPin @entity {
+  id: ID!
+  transactionHash: Bytes!
+  timestamp: BigInt!
+  dao: DAO!
+  tokenType: Int!
+  token: Bytes!
+  isCollection: Boolean!
+  tokenId: BigInt!
+  creator: Bytes!
+  revoked: Boolean!
+  revokedAt: BigInt
+  revokedBy: Bytes
+  revokedTxHash: Bytes
 }
 
 enum ProposalVoteSupport {
