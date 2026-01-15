@@ -1,3 +1,4 @@
+import { MOBILE_BOTTOM_NAV_LAYER } from '@buildeross/constants/layers'
 import { atoms, color } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
@@ -17,7 +18,7 @@ export const bottomNav = style([
     alignItems: 'center',
     height: '64px',
     borderTop: '1px solid',
-    zIndex: 100,
+    zIndex: MOBILE_BOTTOM_NAV_LAYER,
     paddingBottom: 'env(safe-area-inset-bottom)',
 
     '@media': {

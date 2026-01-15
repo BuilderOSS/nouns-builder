@@ -1,0 +1,24 @@
+query treasuryAssetPins($daoId: String!, $first: Int!, $skip: Int!) {
+  treasuryAssetPins(
+    where: {
+      dao: $daoId
+    }
+    orderBy: timestamp
+    orderDirection: desc
+    first: $first
+    skip: $skip
+  ) {
+    id
+    transactionHash
+    timestamp
+    tokenType
+    token
+    isCollection
+    tokenId
+    creator
+    revoked
+    revokedAt
+    revokedBy
+    revokedTxHash
+  }
+}

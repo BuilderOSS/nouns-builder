@@ -13,7 +13,7 @@ const toLower = (str: string) => str.toLowerCase()
 
 interface EscrowArgumentDisplayProps {
   arg: DecodedArg
-  tokenMetadata?: TokenMetadata
+  tokenMetadata?: TokenMetadata | null
   escrowData?: DecodedEscrowData | null
 }
 

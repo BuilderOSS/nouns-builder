@@ -1,6 +1,7 @@
 export * from './allocation'
 export * from './basename'
 export * from './concurrent'
+export * from './eas'
 export * from './encodePageNumToEndCursor'
 export * from './ens'
 export * from './escrow'

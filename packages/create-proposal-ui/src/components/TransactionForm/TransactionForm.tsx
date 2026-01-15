@@ -10,6 +10,7 @@ import { FixRendererBase } from './FixRendererBase'
 import { Migration } from './Migration'
 import { NominateEscrowDelegate } from './NominateEscrowDelegate'
 import { PauseAuctions } from './PauseAuctions'
+import { PinTreasuryAsset } from './PinTreasuryAsset'
 import { ReplaceArtwork } from './ReplaceArtwork'
 import { ResumeAuctions } from './ResumeAuctions'
 import { SendErc20 } from './SendErc20'
@@ -31,6 +32,7 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.AIRDROP,
   TransactionType.ESCROW,
   TransactionType.ESCROW_DELEGATE,
+  TransactionType.PIN_TREASURY_ASSET,
   TransactionType.PAUSE_AUCTIONS,
   TransactionType.FIX_RENDERER_BASE,
   TransactionType.RESUME_AUCTIONS,
@@ -52,6 +54,7 @@ export const TransactionForm = ({ type }: TransactionFormProps) => {
     [TransactionType.SEND_ERC20]: <SendErc20 />,
     [TransactionType.SEND_NFT]: <SendNft />,
     [TransactionType.WALLET_CONNECT]: <WalletConnect />,
+    [TransactionType.PIN_TREASURY_ASSET]: <PinTreasuryAsset />,
     [TransactionType.PAUSE_AUCTIONS]: <PauseAuctions />,
     [TransactionType.FIX_RENDERER_BASE]: <FixRendererBase />,
     [TransactionType.RESUME_AUCTIONS]: <ResumeAuctions />,

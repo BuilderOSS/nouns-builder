@@ -8,7 +8,7 @@ import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 
 interface ERC20ArgumentDisplayProps {
   arg: DecodedArg
-  tokenMetadata?: TokenMetadata
+  tokenMetadata?: TokenMetadata | null
 }
 
 export const ERC20ArgumentDisplay: React.FC<ERC20ArgumentDisplayProps> = ({

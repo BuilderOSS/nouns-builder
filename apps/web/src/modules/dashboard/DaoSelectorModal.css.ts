@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css'
 
 export const modalHeader = style([
   atoms({
-    padding: 'x6',
+    padding: 'x4',
     borderColor: 'border',
   }),
   {
@@ -18,17 +18,13 @@ export const modalTitle = style({
 
 export const modalBody = style([
   atoms({
-    padding: 'x6',
+    padding: 'x4',
   }),
-  {
-    maxHeight: '60vh',
-    overflowY: 'auto',
-  },
 ])
 
 export const modalFooter = style([
   atoms({
-    padding: 'x6',
+    padding: 'x4',
     borderColor: 'border',
   }),
   {

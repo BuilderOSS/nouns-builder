@@ -90,16 +90,51 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
   const onDisconnect = useWalletDisconnect()
 
+  const renderConnectedUser = () => (
+    <>
+      <Flex direction={'column'} align={'stretch'} gap={'x2'}>
+        <Flex direction={'row'} align={'center'} justify={'space-between'} w={'100%'}>
+          <Link
+            href={`/profile/${address}`}
+            passHref
+            style={{ textDecoration: 'none', flex: 1 }}
+          >
+            <Flex
+              direction={'row'}
+              align={'center'}
+              className={profileRow}
+              aria-label="Open profile"
+            >
+              <Avatar address={address!} src={ensAvatar} size={'40'} />
+              <Flex direction={'column'} ml={'x2'}>
+                <Text fontWeight={'display'}>{displayName}</Text>
+                <Text variant={'paragraph-md'} color={'tertiary'}>
+                  {userBalance}
+                </Text>
+              </Flex>
+            </Flex>
+          </Link>
+          <CopyButton text={address!} />
+        </Flex>
+
+        <Button
+          className={disconnectButton}
+          variant={'outline'}
+          color="negative"
+          onClick={onDisconnect}
+          id={'close-modal'}
+        >
+          Disconnect
+        </Button>
+      </Flex>
+      <Box color="border" borderStyle="solid" borderWidth="thin" />
+    </>
+  )
+
   const renderUserContent = (isMobileFullscreen = false) => (
     <>
-      <Link href="/create" passHref style={{ width: '100%' }}>
-        <Button id={'close-modal'} w={'100%'}>
-          Create a DAO
-        </Button>
-      </Link>
       {daos.length > 0 && (
         <>
-          <Box color="border" borderStyle="solid" borderWidth="thin" />
           <Flex
             direction={'column'}
             align={'center'}
@@ -171,48 +206,20 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
               )
             })}
           </Flex>
+          <Box color="border" borderStyle="solid" borderWidth="thin" />
         </>
       )}
-      <Box color="border" borderStyle="solid" borderWidth="thin" />
-      <Flex direction={'row'} align={'center'} justify={'space-between'} w={'100%'}>
-        <Link
-          href={`/profile/${address}`}
-          passHref
-          style={{ textDecoration: 'none', flex: 1 }}
-        >
-          <Flex
-            direction={'row'}
-            align={'center'}
-            className={profileRow}
-            aria-label="Open profile"
-          >
-            <Avatar address={address!} src={ensAvatar} size={'40'} />
-            <Flex direction={'column'} ml={'x2'}>
-              <Text fontWeight={'display'}>{displayName}</Text>
-              <Text variant={'paragraph-md'} color={'tertiary'}>
-                {userBalance}
-              </Text>
-            </Flex>
-          </Flex>
-        </Link>
-        <CopyButton text={address!} />
-      </Flex>
-
-      <Button
-        className={disconnectButton}
-        variant={'outline'}
-        color="negative"
-        onClick={onDisconnect}
-        id={'close-modal'}
-      >
-        Disconnect
-      </Button>
+      <Link href="/create" passHref style={{ width: '100%' }}>
+        <Button id={'close-modal'} w={'100%'}>
+          Create a DAO
+        </Button>
+      </Link>
     </>
   )
 
   const renderNavLinks = () => (
     <>
-      <Flex direction={'column'} gap={'x2'}>
+      <Flex direction={'column'} gap={'x0'}>
         <Link href={'/dashboard'}>
           <Flex align="center" justify={'center'} py={'x2'}>
             <Text cursor={'pointer'} fontWeight={'display'}>
@@ -295,6 +302,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           </Flex>
         </NetworkController.Mainnet>
       </Flex>
+      <Box color="border" borderStyle="solid" borderWidth="thin" />
     </>
   )
 
@@ -409,7 +417,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         direction={'column'}
         py={'x4'}
         px={'x8'}
-        gap={'x4'}
+        gap={'x3'}
         backgroundColor="background1"
         className={mobileMenuSlideIn}
         style={{
@@ -423,7 +431,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           shadow: 'medium',
         }}
       >
-        {!address && <ConnectButton />}
+        {address ? renderConnectedUser() : <ConnectButton />}
         {renderNavLinks()}
         {address && renderUserContent(true)}
       </Flex>
@@ -467,7 +475,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           onOpenChange={handleOpenMenu}
         >
           <Flex direction={'column'} p={'x4'} gap={'x4'} style={{ width: 320 }}>
-            {!address && <ConnectButton />}
+            {address ? renderConnectedUser() : <ConnectButton />}
             {address && renderUserContent()}
             {renderNetworkSwitch()}
           </Flex>

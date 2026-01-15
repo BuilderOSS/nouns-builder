@@ -38,6 +38,8 @@ export const SWR_KEYS = {
   TOKEN_METADATA: 'token-metadata',
   NFT_BALANCES: 'nft-balances',
   NFT_METADATA: 'nft-metadata',
+  PINNED_ASSETS: 'pinned-assets',
+  ENRICHED_PINNED_ASSETS: 'enriched-pinned-assets',
   METADATA_ATTRIBUTES_MERKLE_ROOT: 'metadata-attributes-merkle-root',
   TOKEN_HOLDERS_MERKLE_ROOT: 'token-holders-merkle-root',
   ENCODED_DAO_METADATA: 'encoded-dao-metadata',
@@ -48,4 +50,4 @@ export const SWR_KEYS = {
   INVOICE_LOG_NEW_INVOICE: 'invoice-log-new-invoice',
   MY_DAOS: 'my-daos',
   MY_DAOS_PAGE: 'my-daos-page',
-}
+} as const

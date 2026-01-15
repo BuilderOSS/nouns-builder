@@ -1,20 +1,11 @@
 import type { AddressType } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { fetchDashboardDataService, getDashboardTtl } from 'src/services/dashboardService'
+import { withCors } from 'src/utils/api/cors'
 import { isAddress } from 'viem'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const startTime = Date.now()
-
-  // Handle OPTIONS preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end()
-  }
-
-  // Only allow GET
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' })
-  }
 
   // Validate address parameter
   const { address } = req.query
@@ -73,3 +64,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
   }
 }
+
+export default withCors()(handler)

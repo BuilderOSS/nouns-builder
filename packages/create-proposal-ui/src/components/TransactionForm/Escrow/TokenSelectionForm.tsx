@@ -46,7 +46,12 @@ const computeTokenMetadata = ({
 }: {
   selectedTokenOption: TokenOption
   treasuryBalance?: bigint
-  tokenMetadata?: { name: string; symbol: string; decimals: number; address: string }
+  tokenMetadata?: {
+    name: string
+    symbol: string
+    decimals: number
+    address: string
+  } | null
   tokenBalance?: bigint
   currentTokenAddress?: AddressType
   isLoading: boolean
