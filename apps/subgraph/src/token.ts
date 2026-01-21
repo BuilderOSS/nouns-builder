@@ -21,9 +21,19 @@ function voterEntityId(dao: string, voter: Address): string {
   return `${dao}:${voter.toHexString()}`
 }
 
-function ensureOwner(dao: DAO, daoAddr: string, owner: Address): DAOTokenOwner | null {
-  if (owner.equals(ADDRESS_ZERO)) return null
-
+/**
+ * Ensures a DAOTokenOwner entity exists for the given owner address.
+ * Creates a new entity if it doesn't exist, including for ADDRESS_ZERO (burn sentinel).
+ *
+ * Note: This function increments dao.ownerCount but does NOT save the DAO entity.
+ * Callers are responsible for calling dao.save() after all modifications.
+ *
+ * @param dao - The DAO entity (will be modified but not saved)
+ * @param daoAddr - The DAO address string
+ * @param owner - The owner address (can be ADDRESS_ZERO)
+ * @returns The DAOTokenOwner entity (always non-null)
+ */
+function ensureOwner(dao: DAO, daoAddr: string, owner: Address): DAOTokenOwner {
   let id = ownerEntityId(daoAddr, owner)
   let ent = DAOTokenOwner.load(id)
   if (!ent) {
@@ -33,14 +43,27 @@ function ensureOwner(dao: DAO, daoAddr: string, owner: Address): DAOTokenOwner |
     ent.delegate = ADDRESS_ZERO
     ent.daoTokenCount = 0
     ent.save()
-    dao.ownerCount += 1
+    // Only increment ownerCount for non-zero addresses
+    if (!owner.equals(ADDRESS_ZERO)) {
+      dao.ownerCount += 1
+    }
   }
   return ent
 }
 
-function ensureVoter(dao: DAO, daoAddr: string, voter: Address): DAOVoter | null {
-  if (voter.equals(ADDRESS_ZERO)) return null
-
+/**
+ * Ensures a DAOVoter entity exists for the given voter address.
+ * Creates a new entity if it doesn't exist, including for ADDRESS_ZERO (burn sentinel).
+ *
+ * Note: This function increments dao.voterCount but does NOT save the DAO entity.
+ * Callers are responsible for calling dao.save() after all modifications.
+ *
+ * @param dao - The DAO entity (will be modified but not saved)
+ * @param daoAddr - The DAO address string
+ * @param voter - The voter address (can be ADDRESS_ZERO)
+ * @returns The DAOVoter entity (always non-null)
+ */
+function ensureVoter(dao: DAO, daoAddr: string, voter: Address): DAOVoter {
   let id = voterEntityId(daoAddr, voter)
   let ent = DAOVoter.load(id)
   if (!ent) {
@@ -49,7 +72,10 @@ function ensureVoter(dao: DAO, daoAddr: string, voter: Address): DAOVoter | null
     ent.voter = voter
     ent.daoTokenCount = 0
     ent.save()
-    dao.voterCount += 1
+    // Only increment voterCount for non-zero addresses
+    if (!voter.equals(ADDRESS_ZERO)) {
+      dao.voterCount += 1
+    }
   }
   return ent
 }
@@ -60,8 +86,11 @@ function recomputeOwnerCount(dao: DAO, ownerId: string): void {
 
   let n = o.daoTokens.load().length
   if (n == 0) {
-    store.remove('DAOTokenOwner', ownerId)
-    if (dao.ownerCount > 0) dao.ownerCount -= 1
+    // Never remove the ADDRESS_ZERO sentinel entity
+    if (!o.owner.equals(ADDRESS_ZERO)) {
+      store.remove('DAOTokenOwner', ownerId)
+      if (dao.ownerCount > 0) dao.ownerCount -= 1
+    }
     return
   }
 
@@ -75,8 +104,11 @@ function recomputeVoterCount(dao: DAO, voterId: string): void {
 
   let n = v.daoTokens.load().length
   if (n == 0) {
-    store.remove('DAOVoter', voterId)
-    if (dao.voterCount > 0) dao.voterCount -= 1
+    // Never remove the ADDRESS_ZERO sentinel entity
+    if (!v.voter.equals(ADDRESS_ZERO)) {
+      store.remove('DAOVoter', voterId)
+      if (dao.voterCount > 0) dao.voterCount -= 1
+    }
     return
   }
 
@@ -93,15 +125,17 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
   let prevDelegate = event.params.from
   let newDelegate = event.params.to
 
+  // Skip if delegator is ADDRESS_ZERO (shouldn't happen in practice)
+  if (delegator.equals(ADDRESS_ZERO)) return
+
   // Ensure owner exists
   let ownerEnt = ensureOwner(dao, daoAddr, delegator)
-  if (!ownerEnt) return
 
   // Persist current delegate on owner
   ownerEnt.delegate = newDelegate
   ownerEnt.save()
 
-  // Ensure involved voters exist (non-zero)
+  // Ensure involved voters exist (including zero address)
   ensureVoter(dao, daoAddr, prevDelegate)
   ensureVoter(dao, daoAddr, newDelegate)
 
@@ -152,10 +186,14 @@ export function handleTransfer(event: TransferEvent): void {
 
   // Always set owner + ownerInfo (non-null relationship)
   token.owner = event.params.to
-  token.ownerInfo = ownerEntityId(daoAddr, event.params.to)
 
-  // Burn: must still set voterInfo (non-null), but do NOT call delegates(0x0)
+  // Burn: must still set ownerInfo and voterInfo (non-null), but do NOT call delegates(0x0)
   if (event.params.to.equals(ADDRESS_ZERO)) {
+    // Ensure burn sentinel entities exist
+    ensureOwner(dao, daoAddr, ADDRESS_ZERO)
+    ensureVoter(dao, daoAddr, ADDRESS_ZERO)
+
+    token.ownerInfo = ownerEntityId(daoAddr, ADDRESS_ZERO)
     token.voterInfo = voterEntityId(daoAddr, ADDRESS_ZERO)
     token.save()
 
@@ -172,6 +210,10 @@ export function handleTransfer(event: TransferEvent): void {
       recomputeVoterCount(dao, voterEntityId(daoAddr, fromDelegate))
     }
 
+    // Recompute ADDRESS_ZERO sentinel counts to track burned tokens
+    recomputeOwnerCount(dao, ownerEntityId(daoAddr, ADDRESS_ZERO))
+    recomputeVoterCount(dao, voterEntityId(daoAddr, ADDRESS_ZERO))
+
     dao.save()
     saveSnapshot(event)
     return
@@ -179,12 +221,14 @@ export function handleTransfer(event: TransferEvent): void {
 
   // Normal transfer/mint: link voterInfo to recipient's delegate (your contract emits prevDelegate correctly)
   let toDelegate = tokenContract.delegates(event.params.to)
-  token.voterInfo = voterEntityId(daoAddr, toDelegate)
-  token.save()
 
-  // Ensure entities exist (non-zero)
+  // Ensure entities exist first
   ensureOwner(dao, daoAddr, event.params.to)
   ensureVoter(dao, daoAddr, toDelegate)
+
+  token.ownerInfo = ownerEntityId(daoAddr, event.params.to)
+  token.voterInfo = voterEntityId(daoAddr, toDelegate)
+  token.save()
 
   if (!event.params.from.equals(ADDRESS_ZERO)) {
     ensureOwner(dao, daoAddr, event.params.from)
@@ -194,6 +238,12 @@ export function handleTransfer(event: TransferEvent): void {
 
     recomputeOwnerCount(dao, ownerEntityId(daoAddr, event.params.from))
     recomputeVoterCount(dao, voterEntityId(daoAddr, fromDelegate))
+  } else {
+    // Minting from ADDRESS_ZERO - recompute the burn sentinel counts
+    ensureOwner(dao, daoAddr, ADDRESS_ZERO)
+    ensureVoter(dao, daoAddr, ADDRESS_ZERO)
+    recomputeOwnerCount(dao, ownerEntityId(daoAddr, ADDRESS_ZERO))
+    recomputeVoterCount(dao, voterEntityId(daoAddr, ADDRESS_ZERO))
   }
 
   recomputeOwnerCount(dao, ownerEntityId(daoAddr, event.params.to))
