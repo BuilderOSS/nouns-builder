@@ -22,6 +22,9 @@ export const myDaosRequest = async (memberAddress: string): Promise<MyDaosRespon
 
   if (!isAddress(memberAddress)) throw new Error('Invalid user address')
 
+  if (memberAddress.toLowerCase() === '0x0000000000000000000000000000000000000000')
+    throw new Error('Zero address not allowed')
+
   try {
     const data = await Promise.all(
       PUBLIC_DEFAULT_CHAINS.map((chain) =>
