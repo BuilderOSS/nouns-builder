@@ -1,4 +1,5 @@
 import { Address, ethereum, store } from '@graphprotocol/graph-ts'
+
 import { DAO, DAOTokenOwner, DAOVoter, Snapshot, Token } from '../generated/schema'
 import {
   DelegateChanged as DelegateChangedEvent,
@@ -90,6 +91,10 @@ function recomputeOwnerCount(dao: DAO, ownerId: string): void {
     if (!o.owner.equals(ADDRESS_ZERO)) {
       store.remove('DAOTokenOwner', ownerId)
       if (dao.ownerCount > 0) dao.ownerCount -= 1
+    } else {
+      // Update daoTokenCount for ADDRESS_ZERO sentinel
+      o.daoTokenCount = 0
+      o.save()
     }
     return
   }
@@ -108,6 +113,10 @@ function recomputeVoterCount(dao: DAO, voterId: string): void {
     if (!v.voter.equals(ADDRESS_ZERO)) {
       store.remove('DAOVoter', voterId)
       if (dao.voterCount > 0) dao.voterCount -= 1
+    } else {
+      // Update daoTokenCount for ADDRESS_ZERO sentinel
+      v.daoTokenCount = 0
+      v.save()
     }
     return
   }

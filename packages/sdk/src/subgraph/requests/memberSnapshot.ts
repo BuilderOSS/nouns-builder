@@ -21,6 +21,7 @@ export const memberSnapshotRequest = async (
   const data = await SDK.connect(chainId).daoMembersList({
     where: {
       dao: collectionAddress.toLowerCase(),
+      owner_not: '0x0000000000000000000000000000000000000000',
     },
     first: 1000,
     orderBy: DaoTokenOwner_OrderBy.DaoTokenCount,
@@ -41,7 +42,7 @@ export const memberSnapshotRequest = async (
         owner: member.owner as Address,
         delegate: member.delegate as Address,
         tokens: member.daoTokens.map((token) => Number(token.tokenId)) as number[],
-        tokenCount: Number(member.daoTokenCount),
+        tokenCount: Number(member.daoTokens.length),
         timeJoined: member.daoTokens
           .map((daoToken) => Number(daoToken.mintedAt))
           .sort((a, b) => a - b)[0] as number,
@@ -49,5 +50,5 @@ export const memberSnapshotRequest = async (
     })
   )
 
-  return formattedMembers
+  return formattedMembers.filter((member) => member.tokenCount > 0)
 }
