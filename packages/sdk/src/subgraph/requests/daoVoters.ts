@@ -30,14 +30,16 @@ export const votersRequest = async (
 
     if (!data.daovoters) return undefined
 
-    return data.daovoters.map((member) => ({
-      voter: member.voter as Address,
-      tokens: member.daoTokens.map((token) => Number(token.tokenId)) as number[],
-      tokenCount: Number(member.daoTokenCount),
-      timeJoined: member.daoTokens
-        .map((daoToken) => Number(daoToken.mintedAt))
-        .sort((a, b) => a - b)[0] as number,
-    }))
+    return data.daovoters
+      .map((member) => ({
+        voter: member.voter as Address,
+        tokens: member.daoTokens.map((token) => Number(token.tokenId)) as number[],
+        tokenCount: Number(member.daoTokens.length),
+        timeJoined: member.daoTokens
+          .map((daoToken) => Number(daoToken.mintedAt))
+          .sort((a, b) => a - b)[0] as number,
+      }))
+      .filter((member) => member.tokenCount > 0)
   } catch (error) {
     console.error(error)
     try {
