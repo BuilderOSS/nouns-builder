@@ -17,6 +17,11 @@ export const daoMembershipRequest = async (
   collectionAddress: string,
   memberAddress: string
 ): Promise<DaoMembershipResponse | null> => {
+  // Return null if zero address is provided
+  if (memberAddress.toLowerCase() === '0x0000000000000000000000000000000000000000') {
+    return null
+  }
+
   const data = await SDK.connect(chainId).daoMembership({
     voterId: `${collectionAddress.toLowerCase()}:${memberAddress.toLowerCase()}`,
     ownerId: `${collectionAddress.toLowerCase()}:${memberAddress.toLowerCase()}`,
@@ -27,8 +32,8 @@ export const daoMembershipRequest = async (
   return {
     member: data.daotokenOwner?.owner ?? data.daovoter?.voter,
     delegate: data.daotokenOwner?.delegate ?? data.daovoter?.voter,
-    tokenCount: data.daotokenOwner?.daoTokenCount ?? 0,
-    voteCount: data.daovoter?.daoTokenCount ?? 0,
+    tokenCount: data.daotokenOwner?.daoTokens?.length ?? 0,
+    voteCount: data.daovoter?.daoTokens?.length ?? 0,
     voteDistribution:
       data.daovoter?.daoTokens?.reduce(
         (acc, token) => {

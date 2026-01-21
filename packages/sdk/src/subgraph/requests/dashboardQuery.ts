@@ -17,6 +17,9 @@ export const dashboardRequest = async (
 
     if (!isAddress(memberAddress)) throw new Error('Invalid user address')
 
+    if (memberAddress.toLowerCase() === '0x0000000000000000000000000000000000000000')
+      throw new Error('Zero address not allowed')
+
     const data = await Promise.all(
       PUBLIC_DEFAULT_CHAINS.map((chain) =>
         SDK.connect(chain.id)
