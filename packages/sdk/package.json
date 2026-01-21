@@ -20,6 +20,7 @@
     "@types/node": "^22.15.21",
     "eslint": "8.57.1",
     "tsup": "^8.3.5",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   },
   "exports": {
@@ -83,6 +84,7 @@
     "clean": "rm -rf dist .turbo",
     "codegen": "graphql-codegen",
     "generate-abis": "node ./scripts/generate-abis.js",
+    "parse-events": "tsx ./scripts/parse-events.ts",
     "lint": "pnpm type-check && eslint src --fix",
     "type-check": "tsc --noEmit"
   },
