@@ -60,12 +60,14 @@ export const ContentPostPreview: React.FC<ContentPostPreviewProps> = ({
               borderRadius="curved"
               overflow="hidden"
               backgroundColor="background2"
-              style={{ width: '100%', aspectRatio: '16 / 9' }}
+              style={{ width: '100%', aspectRatio: '1 / 1' }}
             >
               <MediaPreview
                 mediaUrl={displayMediaUrl}
                 mediaType={displayMediaType}
                 coverUrl={imageUrl}
+                width="100%"
+                height="100%"
               />
             </Box>
           )}
