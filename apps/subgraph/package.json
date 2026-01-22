@@ -17,6 +17,7 @@
     "build:subgraph": "pnpm clean && pnpm build:only",
     "clean": "rm -rf ./generated ./build subgraph.yaml",
     "create:local": "graph local http://localhost:8020/ nouns-builder",
+    "deploy:all": "bash ./scripts/deploy-all.sh",
     "deploy:local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 nouns-builder",
     "deploy:only": "bash ./scripts/deploy.sh",
     "deploy:subgraph": "pnpm clean && pnpm deploy:only",
