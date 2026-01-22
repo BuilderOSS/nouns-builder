@@ -19,14 +19,15 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
 
   let tokenOwnerId = `${event.address.toHexString()}:${owner.toHexString()}`
 
+  let tokenContract = TokenContract.bind(event.address)
   let tokenOwner = DAOTokenOwner.load(tokenOwnerId)
   if (!tokenOwner) {
     tokenOwner = new DAOTokenOwner(tokenOwnerId)
-    tokenOwner.daoTokenCount = 0
     tokenOwner.dao = event.address.toHexString()
     tokenOwner.owner = owner
   }
 
+  tokenOwner.daoTokenCount = tokenContract.balanceOf(owner).toI32()
   tokenOwner.delegate = newDelegate
   tokenOwner.save()
 
@@ -40,22 +41,9 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
     newDelegateVoter.voter = newDelegate
   }
 
-  newDelegateVoter.daoTokenCount =
-    newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
+  let newTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
+  newDelegateVoter.daoTokenCount = newTokenCount
   newDelegateVoter.save()
-
-  let prevDelegateVoterId = `${event.address.toHexString()}:${prevDelegate.toHexString()}`
-  let prevDelegateVoter = DAOVoter.load(prevDelegateVoterId)
-  if (prevDelegateVoter) {
-    let daoTokenCount = prevDelegateVoter.daoTokenCount - tokenOwner.daoTokenCount
-
-    if (daoTokenCount > 0) {
-      prevDelegateVoter.daoTokenCount = daoTokenCount
-      prevDelegateVoter.save()
-    } else {
-      store.remove('DAOVoter', prevDelegateVoterId)
-    }
-  }
 
   let tokens = tokenOwner.daoTokens.load()
 
@@ -63,6 +51,18 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
     let token = tokens[i]
     token.voterInfo = newDelegateVoterId
     token.save()
+  }
+
+  let prevDelegateVoterId = `${event.address.toHexString()}:${prevDelegate.toHexString()}`
+  let prevDelegateVoter = DAOVoter.load(prevDelegateVoterId)
+  if (prevDelegateVoter) {
+    let prevTokenCount = prevDelegateVoter.daoTokenCount - tokenOwner.daoTokenCount
+    prevDelegateVoter.daoTokenCount = prevTokenCount
+    prevDelegateVoter.save()
+
+    if (prevTokenCount == 0) {
+      store.remove('DAOVoter', prevDelegateVoterId)
+    }
   }
 
   saveSnapshot(event)
@@ -145,13 +145,14 @@ export function handleTransfer(event: TransferEvent): void {
     let fromOwnerId = `${event.address.toHexString()}:${event.params.from.toHexString()}`
     let fromOwner = DAOTokenOwner.load(fromOwnerId)
     if (fromOwner) {
-      if (fromOwner.daoTokenCount == 1) {
+      let fromOwnerTokenCount = fromOwner.daoTokenCount - 1
+      fromOwner.daoTokenCount = fromOwnerTokenCount
+      fromOwner.delegate = fromDelegate
+      fromOwner.save()
+
+      if (fromOwnerTokenCount == 0) {
         store.remove('DAOTokenOwner', fromOwnerId)
         dao.ownerCount = dao.ownerCount - 1
-      } else {
-        fromOwner.daoTokenCount = fromOwner.daoTokenCount - 1
-        fromOwner.delegate = fromDelegate
-        fromOwner.save()
       }
     }
   }
@@ -160,12 +161,13 @@ export function handleTransfer(event: TransferEvent): void {
     let fromVoterId = `${event.address.toHexString()}:${fromDelegate.toHexString()}`
     let fromVoter = DAOVoter.load(fromVoterId)
     if (fromVoter) {
-      if (fromVoter.daoTokenCount == 1) {
+      let fromDelegateTokenCount = fromVoter.daoTokenCount - 1
+      fromVoter.daoTokenCount = fromDelegateTokenCount
+      fromVoter.save()
+
+      if (fromDelegateTokenCount == 0) {
         store.remove('DAOVoter', fromVoterId)
         dao.voterCount = dao.voterCount - 1
-      } else {
-        fromVoter.daoTokenCount = fromVoter.daoTokenCount - 1
-        fromVoter.save()
       }
     }
   }
