@@ -10,6 +10,7 @@ export type CoinFormValues = {
   mediaMimeType?: string
   properties?: Record<string, string>
   currency?: string
+  customCurrency?: string // Custom ERC20 token address when currency is "custom"
   minFdvUsd?: number
   // Clanker-specific fields
   poolConfig?: string

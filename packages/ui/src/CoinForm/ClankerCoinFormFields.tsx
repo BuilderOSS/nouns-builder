@@ -2,8 +2,8 @@ import { FEE_CONFIG_OPTIONS, POOL_POSITION_OPTIONS } from '@buildeross/utils'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
+import NumberInput from '../Fields/NumberInput'
 import SmartInput from '../Fields/SmartInput'
-import TextInput from '../Fields/TextInput'
 import { FIELD_TYPES } from '../Fields/types'
 import { Toggle } from '../Toggle'
 import { CoinFormFields } from './CoinFormFields'
@@ -107,20 +107,28 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
         </Box>
 
         {/* Dev Buy Amount */}
-        <TextInput
-          id="devBuyEthAmount"
-          value={formik.values.devBuyEthAmount || ''}
-          onChange={formik.handleChange}
-          inputLabel="Initial Purchase (ETH)"
-          placeholder="0.1"
-          helperText="Optional: Amount of ETH to automatically purchase on deployment (e.g., 0.1 ETH)"
-          errorMessage={
-            formik.touched.devBuyEthAmount && formik.errors.devBuyEthAmount
-              ? formik.errors.devBuyEthAmount
-              : undefined
-          }
-          formik={formik}
-        />
+        <Box>
+          <Text as="label" htmlFor="devBuyEthAmount" variant="label-md" mb="x2">
+            Initial Purchase (ETH)
+          </Text>
+          <Text variant="paragraph-sm" color="text3" mb="x2">
+            Optional: Amount of ETH to automatically purchase on deployment (e.g., 0.1
+            ETH)
+          </Text>
+          <NumberInput
+            id="devBuyEthAmount"
+            value={formik.values.devBuyEthAmount ?? ''}
+            onChange={formik.handleChange}
+            placeholder="0.1"
+            useTextInput={true}
+            errorMessage={
+              formik.touched.devBuyEthAmount && formik.errors.devBuyEthAmount
+                ? formik.errors.devBuyEthAmount
+                : undefined
+            }
+            hasError={!!(formik.touched.devBuyEthAmount && formik.errors.devBuyEthAmount)}
+          />
+        </Box>
       </Box>
 
       {/* Vault Settings Section */}
@@ -142,52 +150,86 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
             </Text>
 
             {/* Vault Percentage */}
-            <TextInput
-              id="vaultPercentage"
-              value={formik.values.vaultPercentage ?? 10}
-              onChange={formik.handleChange}
-              inputLabel="Vault Allocation (%)"
-              placeholder="10"
-              helperText="Percentage of token supply locked in vault for the DAO (1-90%). Default: 10%"
-              errorMessage={
-                formik.touched.vaultPercentage && formik.errors.vaultPercentage
-                  ? formik.errors.vaultPercentage
-                  : undefined
-              }
-              formik={formik}
-            />
+            <Box>
+              <Text as="label" htmlFor="vaultPercentage" variant="label-md" mb="x2">
+                Vault Allocation (%)
+              </Text>
+              <Text variant="paragraph-sm" color="text3" mb="x2">
+                Percentage of token supply locked in vault for the DAO (1-90%). Default:
+                10%
+              </Text>
+              <NumberInput
+                id="vaultPercentage"
+                value={formik.values.vaultPercentage ?? 10}
+                onChange={formik.handleChange}
+                placeholder="10"
+                step="1"
+                min="1"
+                max="90"
+                errorMessage={
+                  formik.touched.vaultPercentage && formik.errors.vaultPercentage
+                    ? formik.errors.vaultPercentage
+                    : undefined
+                }
+                hasError={
+                  !!(formik.touched.vaultPercentage && formik.errors.vaultPercentage)
+                }
+              />
+            </Box>
 
             {/* Lockup Duration */}
-            <TextInput
-              id="lockupDuration"
-              value={formik.values.lockupDuration ?? 30}
-              onChange={formik.handleChange}
-              inputLabel="Lockup Period (days)"
-              placeholder="30"
-              helperText="How long tokens are locked before vesting begins (minimum 7 days). Default: 30 days"
-              errorMessage={
-                formik.touched.lockupDuration && formik.errors.lockupDuration
-                  ? formik.errors.lockupDuration
-                  : undefined
-              }
-              formik={formik}
-            />
+            <Box>
+              <Text as="label" htmlFor="lockupDuration" variant="label-md" mb="x2">
+                Lockup Period (days)
+              </Text>
+              <Text variant="paragraph-sm" color="text3" mb="x2">
+                How long tokens are locked before vesting begins (minimum 7 days).
+                Default: 30 days
+              </Text>
+              <NumberInput
+                id="lockupDuration"
+                value={formik.values.lockupDuration ?? 30}
+                onChange={formik.handleChange}
+                placeholder="30"
+                step="1"
+                min="7"
+                errorMessage={
+                  formik.touched.lockupDuration && formik.errors.lockupDuration
+                    ? formik.errors.lockupDuration
+                    : undefined
+                }
+                hasError={
+                  !!(formik.touched.lockupDuration && formik.errors.lockupDuration)
+                }
+              />
+            </Box>
 
             {/* Vesting Duration */}
-            <TextInput
-              id="vestingDuration"
-              value={formik.values.vestingDuration ?? 30}
-              onChange={formik.handleChange}
-              inputLabel="Vesting Period (days)"
-              placeholder="30"
-              helperText="How long tokens take to fully vest after lockup (can be 0 for instant). Default: 30 days"
-              errorMessage={
-                formik.touched.vestingDuration && formik.errors.vestingDuration
-                  ? formik.errors.vestingDuration
-                  : undefined
-              }
-              formik={formik}
-            />
+            <Box>
+              <Text as="label" htmlFor="vestingDuration" variant="label-md" mb="x2">
+                Vesting Period (days)
+              </Text>
+              <Text variant="paragraph-sm" color="text3" mb="x2">
+                How long tokens take to fully vest after lockup (can be 0 for instant).
+                Default: 30 days
+              </Text>
+              <NumberInput
+                id="vestingDuration"
+                value={formik.values.vestingDuration ?? 30}
+                onChange={formik.handleChange}
+                placeholder="30"
+                step="1"
+                min="0"
+                errorMessage={
+                  formik.touched.vestingDuration && formik.errors.vestingDuration
+                    ? formik.errors.vestingDuration
+                    : undefined
+                }
+                hasError={
+                  !!(formik.touched.vestingDuration && formik.errors.vestingDuration)
+                }
+              />
+            </Box>
 
             {/* Vault Recipient (Optional) */}
             <SmartInput

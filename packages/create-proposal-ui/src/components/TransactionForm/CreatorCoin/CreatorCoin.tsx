@@ -16,6 +16,7 @@ import { Clanker } from 'clanker-sdk/v4'
 import { Form, Formik, type FormikHelpers } from 'formik'
 import { useMemo, useState } from 'react'
 import { type Address, encodeFunctionData } from 'viem'
+import { ZodError } from 'zod'
 
 // Supported chain IDs for Clanker deployment
 const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
@@ -25,6 +26,51 @@ const DEFAULT_MIN_FDV_USD = 10000 // $10k minimum FDV
 const DEFAULT_VAULT_PERCENTAGE = 10 // 10% of supply
 const DEFAULT_LOCKUP_DAYS = 30 // 30 days
 const DEFAULT_VESTING_DAYS = 30 // 30 days
+
+/**
+ * Parse error into a user-friendly message
+ * Handles ZodError, Error objects, and other error types
+ */
+function parseErrorMessage(error: unknown): string {
+  // Handle ZodError
+  if (error instanceof ZodError) {
+    const issues = error.issues.map((issue) => {
+      const path = issue.path.join('.')
+      return `${path}: ${issue.message}`
+    })
+    return issues.length > 0
+      ? `Validation error: ${issues.join(', ')}`
+      : 'Validation error occurred'
+  }
+
+  // Handle standard Error
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  // Handle error objects with message property
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message
+  }
+
+  // Try toString() as fallback
+  try {
+    const stringified = String(error)
+    if (stringified && stringified !== '[object Object]') {
+      return stringified
+    }
+  } catch {
+    // ignore
+  }
+
+  // Last resort
+  return 'Failed to create transaction'
+}
 
 export interface CreatorCoinProps {
   initialValues?: Partial<CoinFormValues>
@@ -140,10 +186,10 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
           ),
           recipient: values.vaultRecipient as Address | undefined,
         },
-        ...(values.devBuyEthAmount && values.devBuyEthAmount > 0
+        ...(values.devBuyEthAmount && Number(values.devBuyEthAmount) > 0
           ? {
               devBuy: {
-                ethAmount: values.devBuyEthAmount,
+                ethAmount: Number(values.devBuyEthAmount),
               },
             }
           : {}),
@@ -182,17 +228,7 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
       }
     } catch (error) {
       console.error('Error creating creator coin transaction:', error)
-      let errorMessage = error instanceof Error ? error.message : ''
-      // try .toString() on error
-      if (!errorMessage.length) {
-        try {
-          errorMessage = (error as any).toString()
-        } catch {}
-      }
-      if (!errorMessage.length) {
-        errorMessage = 'Failed to create transaction'
-      }
-      setSubmitError(errorMessage)
+      setSubmitError(parseErrorMessage(error))
     } finally {
       actions.setSubmitting(false)
     }

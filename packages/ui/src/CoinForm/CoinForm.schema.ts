@@ -46,8 +46,23 @@ export const coinFormSchema = yup.object({
       }
     ),
   currency: yup.string(),
+  customCurrency: yup
+    .string()
+    .test('is-address', 'Must be a valid Ethereum address', function (value) {
+      // Only validate if currency is set to "custom"
+      if (this.parent.currency !== 'custom') return true
+      if (!value) return this.createError({ message: 'Custom token address is required' })
+      return /^0x[a-fA-F0-9]{40}$/.test(value)
+    }),
   minFdvUsd: yup
     .number()
+    .transform((value, originalValue) => {
+      if (originalValue === '' || originalValue === null || originalValue === undefined) {
+        return 10000 // default value
+      }
+      const num = Number(originalValue)
+      return isNaN(num) ? originalValue : num
+    })
     .positive('Minimum FDV must be a positive number')
     .min(49, 'Minimum FDV must be at least $49')
     .default(10000)
@@ -57,17 +72,38 @@ export const coinFormSchema = yup.object({
   feeConfig: yup.string(),
   vaultPercentage: yup
     .number()
+    .transform((value, originalValue) => {
+      if (originalValue === '' || originalValue === null || originalValue === undefined) {
+        return 10 // default value
+      }
+      const num = Number(originalValue)
+      return isNaN(num) ? originalValue : num
+    })
     .min(1, 'Vault percentage must be at least 1%')
     .max(90, 'Vault percentage cannot exceed 90%')
     .default(10)
     .typeError('Vault percentage must be a valid number'),
   lockupDuration: yup
     .number()
+    .transform((value, originalValue) => {
+      if (originalValue === '' || originalValue === null || originalValue === undefined) {
+        return 30 // default value
+      }
+      const num = Number(originalValue)
+      return isNaN(num) ? originalValue : num
+    })
     .min(7, 'Lockup duration must be at least 7 days')
     .default(30)
     .typeError('Lockup duration must be a valid number'),
   vestingDuration: yup
     .number()
+    .transform((value, originalValue) => {
+      if (originalValue === '' || originalValue === null || originalValue === undefined) {
+        return 30 // default value
+      }
+      const num = Number(originalValue)
+      return isNaN(num) ? originalValue : num
+    })
     .min(0, 'Vesting duration cannot be negative')
     .default(30)
     .typeError('Vesting duration must be a valid number'),
@@ -79,6 +115,15 @@ export const coinFormSchema = yup.object({
     }),
   devBuyEthAmount: yup
     .number()
+    .transform((value, originalValue) => {
+      // Convert empty string to undefined
+      if (originalValue === '' || originalValue === null || originalValue === undefined) {
+        return undefined
+      }
+      // Convert string to number
+      const num = Number(originalValue)
+      return isNaN(num) ? originalValue : num
+    })
     .min(0, 'Dev buy amount cannot be negative')
     .typeError('Dev buy amount must be a valid number'),
 })

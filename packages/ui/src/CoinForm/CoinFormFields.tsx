@@ -118,38 +118,64 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         formik={formik}
       />
 
-      {/* Currency Selection - only show on Base Mainnet */}
-      {showCurrencyInput && !isBaseSepolia && (
-        <Box>
-          <Text as="label" htmlFor="currency" variant="label-md" mb="x2">
-            Base Currency
-          </Text>
-          <Text variant="paragraph-sm" color="text3" mb="x2">
-            Select the currency for the creator coin pool
-          </Text>
-          <Box
-            as="select"
-            id="currency"
-            value={formik.values.currency || ETH_ADDRESS}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              formik.setFieldValue('currency', e.target.value)
-            }}
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '1px solid #e5e5e5',
-              borderRadius: '8px',
-              fontSize: '16px',
-              backgroundColor: 'white',
-            }}
-          >
-            {currencyOptions.map((option) => (
-              <option key={option.value} value={option.value} disabled={option.disabled}>
-                {option.label}
-              </option>
-            ))}
+      {/* Currency Selection */}
+      {showCurrencyInput && (
+        <Stack gap="x4">
+          <Box>
+            <Text as="label" htmlFor="currency" variant="label-md" mb="x2">
+              Base Currency
+            </Text>
+            <Text variant="paragraph-sm" color="text3" mb="x2">
+              Select the currency for the creator coin pool
+            </Text>
+            <Box
+              as="select"
+              id="currency"
+              value={formik.values.currency || ETH_ADDRESS}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                formik.setFieldValue('currency', e.target.value)
+              }}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #e5e5e5',
+                borderRadius: '8px',
+                fontSize: '16px',
+                backgroundColor: 'white',
+              }}
+            >
+              {currencyOptions.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                >
+                  {option.label}
+                </option>
+              ))}
+            </Box>
           </Box>
-        </Box>
+
+          {/* Custom Currency Address Input - show when "custom" is selected */}
+          {formik.values.currency === 'custom' && (
+            <Box>
+              <TextInput
+                id="customCurrency"
+                value={formik.values.customCurrency || ''}
+                onChange={formik.handleChange}
+                inputLabel="Custom Token Address"
+                placeholder="0x..."
+                helperText="Enter the ERC20 token contract address to use as base currency"
+                errorMessage={
+                  formik.touched.customCurrency && formik.errors.customCurrency
+                    ? formik.errors.customCurrency
+                    : undefined
+                }
+                formik={formik}
+              />
+            </Box>
+          )}
+        </Stack>
       )}
 
       {/* Minimum FDV Input */}
