@@ -10,6 +10,37 @@ import { setTokenMetadata } from './utils/setTokenMetadata'
 
 let ADDRESS_ZERO = Bytes.fromHexString('0x0000000000000000000000000000000000000000')
 
+function getOrCreateZeroAddressOwner(daoAddress: Bytes): DAOTokenOwner {
+  let zeroOwnerId = `${daoAddress.toHexString()}:${ADDRESS_ZERO.toHexString()}`
+  let zeroOwner = DAOTokenOwner.load(zeroOwnerId)
+
+  if (!zeroOwner) {
+    zeroOwner = new DAOTokenOwner(zeroOwnerId)
+    zeroOwner.dao = daoAddress.toHexString()
+    zeroOwner.owner = ADDRESS_ZERO
+    zeroOwner.delegate = ADDRESS_ZERO
+    zeroOwner.daoTokenCount = 0
+    zeroOwner.save()
+  }
+
+  return zeroOwner
+}
+
+function getOrCreateZeroAddressVoter(daoAddress: Bytes): DAOVoter {
+  let zeroVoterId = `${daoAddress.toHexString()}:${ADDRESS_ZERO.toHexString()}`
+  let zeroVoter = DAOVoter.load(zeroVoterId)
+
+  if (!zeroVoter) {
+    zeroVoter = new DAOVoter(zeroVoterId)
+    zeroVoter.dao = daoAddress.toHexString()
+    zeroVoter.voter = ADDRESS_ZERO
+    zeroVoter.daoTokenCount = 0
+    zeroVoter.save()
+  }
+
+  return zeroVoter
+}
+
 export function handleDelegateChanged(event: DelegateChangedEvent): void {
   if (event.params.from.equals(event.params.to)) return
 
@@ -101,10 +132,6 @@ export function handleTransfer(event: TransferEvent): void {
   }
 
   token.owner = event.params.to
-  token.ownerInfo = `${event.address.toHexString()}:${event.params.to.toHexString()}`
-  token.voterInfo = `${event.address.toHexString()}:${toDelegate.toHexString()}`
-
-  token.save()
 
   // Handle loading to owner
   if (event.params.to.notEqual(ADDRESS_ZERO)) {
@@ -120,8 +147,12 @@ export function handleTransfer(event: TransferEvent): void {
 
     toOwner.delegate = toDelegate
     toOwner.save()
+
+    token.ownerInfo = toOwnerId
   } else {
-    // Handle burning
+    // Handle burning - point to zero address owner
+    let zeroOwner = getOrCreateZeroAddressOwner(event.address)
+    token.ownerInfo = zeroOwner.id
     dao.totalSupply = dao.totalSupply - 1
     // totalSupply decreases but tokensCount stays the same
   }
@@ -138,7 +169,15 @@ export function handleTransfer(event: TransferEvent): void {
     } else toVoter.daoTokenCount = toVoter.daoTokenCount + 1
 
     toVoter.save()
+
+    token.voterInfo = toVoterId
+  } else {
+    // Handle burning - point to zero address voter
+    let zeroVoter = getOrCreateZeroAddressVoter(event.address)
+    token.voterInfo = zeroVoter.id
   }
+
+  token.save()
 
   // Handle loading from owner
   if (event.params.from.notEqual(ADDRESS_ZERO)) {
