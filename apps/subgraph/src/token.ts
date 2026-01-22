@@ -48,6 +48,11 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
   let prevDelegate = event.params.from
   let newDelegate = event.params.to
 
+  let dao = DAO.load(event.address.toHexString())
+  if (dao == null) {
+    return
+  }
+
   let tokenOwnerId = `${event.address.toHexString()}:${owner.toHexString()}`
 
   let tokenContract = TokenContract.bind(event.address)
@@ -65,11 +70,13 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
   let newDelegateVoterId = `${event.address.toHexString()}:${newDelegate.toHexString()}`
 
   let newDelegateVoter = DAOVoter.load(newDelegateVoterId)
+  let isNewVoter = false
   if (!newDelegateVoter) {
     newDelegateVoter = new DAOVoter(newDelegateVoterId)
     newDelegateVoter.daoTokenCount = 0
     newDelegateVoter.dao = event.address.toHexString()
     newDelegateVoter.voter = newDelegate
+    isNewVoter = true
   }
 
   let newTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
@@ -86,6 +93,7 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
 
   let prevDelegateVoterId = `${event.address.toHexString()}:${prevDelegate.toHexString()}`
   let prevDelegateVoter = DAOVoter.load(prevDelegateVoterId)
+  let isVoterRemoved = false
   if (prevDelegateVoter) {
     let prevTokenCount = prevDelegateVoter.daoTokenCount - tokenOwner.daoTokenCount
     prevDelegateVoter.daoTokenCount = prevTokenCount
@@ -93,9 +101,19 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
 
     if (prevTokenCount == 0) {
       store.remove('DAOVoter', prevDelegateVoterId)
+      isVoterRemoved = true
     }
   }
 
+  // Update voterCount: net change = new voters created - old voters removed
+  if (isNewVoter && !isVoterRemoved) {
+    dao.voterCount = dao.voterCount + 1
+  } else if (!isNewVoter && isVoterRemoved) {
+    dao.voterCount = dao.voterCount - 1
+  }
+  // If both created and removed, or neither, voterCount stays the same
+
+  dao.save()
   saveSnapshot(event)
 }
 
