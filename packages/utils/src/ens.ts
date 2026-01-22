@@ -1,5 +1,6 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { Address, getAddress, isAddress, PublicClient, zeroAddress } from 'viem'
+import { normalize } from 'viem/ens'
 
 import {
   getBasename,
@@ -27,7 +28,7 @@ export async function isValidAddress(
   try {
     if (isAddress(input, { strict: false })) return { data: true }
 
-    const resolved = await provider?.getEnsAddress({ name: input })
+    const resolved = await getEnsAddress(input, provider)
     return {
       data: !!resolved,
       error: resolved ? undefined : errorMessage,
@@ -37,8 +38,15 @@ export async function isValidAddress(
   }
 }
 
+/**
+ * Checks if an address is valid and not the zero address
+ */
+function isValidNonZeroAddress(address: string | null | undefined): address is Address {
+  return !!address && isAddress(address, { strict: false }) && address !== zeroAddress
+}
+
 // In-memory ENS resolution cache
-const ensAddressCache = new Map<string, string>()
+const ensAddressCache = new Map<string, string | null>()
 
 export async function getEnsAddress(
   nameOrAddress: string,
@@ -48,38 +56,61 @@ export async function getEnsAddress(
 
   if (isAddress(nameOrAddress, { strict: false })) return getAddress(nameOrAddress)
 
+  const normalizedName = normalize(nameOrAddress)
+
   // Check cache
-  if (ensAddressCache.has(nameOrAddress)) {
-    return ensAddressCache.get(nameOrAddress)! as Address
+  if (ensAddressCache.has(normalizedName)) {
+    return ensAddressCache.get(normalizedName)! as Address
   }
 
   try {
     // Priority 1: Check for basename on Base L2
-    const baseAddress = await getBasenameAddress(nameOrAddress)
-    if (
-      baseAddress &&
-      isAddress(baseAddress, { strict: false }) &&
-      baseAddress !== zeroAddress
-    ) {
-      ensAddressCache.set(nameOrAddress, baseAddress)
+    const baseAddress = await getBasenameAddress(normalizedName)
+    if (isValidNonZeroAddress(baseAddress)) {
+      ensAddressCache.set(normalizedName, baseAddress)
       return baseAddress as Address
     }
 
     // Priority 2: Fall back to ENS resolution on mainnet
-    const resolved = await provider.getEnsAddress({ name: nameOrAddress })
-    if (resolved && isAddress(resolved, { strict: false }) && resolved !== zeroAddress) {
-      ensAddressCache.set(nameOrAddress, resolved)
+    const resolved = await provider.getEnsAddress({ name: normalizedName })
+    if (isValidNonZeroAddress(resolved)) {
+      ensAddressCache.set(normalizedName, resolved)
       return resolved as Address
     }
-    return nameOrAddress as Address
-  } catch (e) {
-    console.error('Error getting ENS address:', e)
-    return nameOrAddress as Address
+
+    // Cache failure to avoid re-querying
+    ensAddressCache.set(normalizedName, null)
+    return normalizedName as Address
+  } catch {
+    // Cache failure to avoid re-querying
+    ensAddressCache.set(normalizedName, null)
+    return normalizedName as Address
   }
 }
 
 // In-memory reverse ENS cache
 const ensNameCache = new Map<Address, string | null>()
+
+/**
+ * Verifies that a name resolves to the expected address
+ */
+async function verifyNameForAddress(
+  name: string | null,
+  expectedAddress: Address,
+  provider: PublicClient | undefined
+): Promise<boolean> {
+  if (!name) return false
+
+  try {
+    const resolvedAddress = await getEnsAddress(name, provider)
+    return (
+      isValidNonZeroAddress(resolvedAddress) &&
+      getAddress(resolvedAddress) === expectedAddress
+    )
+  } catch {
+    return false
+  }
+}
 
 export async function getEnsName(
   address: Address,
@@ -95,27 +126,33 @@ export async function getEnsName(
   }
 
   try {
-    // Priority 1: Check for basename on Base L2
+    // Priority 1: Try reverse name from L2 resolver
     const basename = await getBasename(checksummedAddress)
-    if (basename) {
-      ensNameCache.set(checksummedAddress, basename)
-      return basename
+    if (await verifyNameForAddress(basename, checksummedAddress, provider)) {
+      ensNameCache.set(checksummedAddress, basename!)
+      return basename!
     }
 
-    // Priority 2: Check for reverse resolution on Base L2
-    const reverse = await getReverseBasename(checksummedAddress)
-    if (reverse) {
-      ensNameCache.set(checksummedAddress, reverse)
-      return reverse
+    // Priority 2: Try reverse name from L2 reverse registrar mapping
+    const reverseBasename = await getReverseBasename(checksummedAddress)
+    if (await verifyNameForAddress(reverseBasename, checksummedAddress, provider)) {
+      ensNameCache.set(checksummedAddress, reverseBasename!)
+      return reverseBasename!
     }
 
     // Priority 3: Fall back to ENS resolution on mainnet
-    const name = await provider.getEnsName({ address: checksummedAddress })
-    const result = name ?? checksummedAddress
-    ensNameCache.set(checksummedAddress, result)
-    return result
-  } catch (e) {
-    console.error('Error getting ENS name:', e)
+    const ensName = await provider.getEnsName({ address: checksummedAddress })
+    if (await verifyNameForAddress(ensName, checksummedAddress, provider)) {
+      ensNameCache.set(checksummedAddress, ensName!)
+      return ensName!
+    }
+
+    // Cache failure to avoid re-querying
+    ensNameCache.set(checksummedAddress, null)
+    return checksummedAddress
+  } catch {
+    // Cache failure to avoid re-querying
+    ensNameCache.set(checksummedAddress, null)
     return checksummedAddress
   }
 }
@@ -147,8 +184,7 @@ export async function getEnsAvatar(
     const result = avatar ?? null
     avatarCache.set(name, result)
     return result
-  } catch (e) {
-    console.error('Error getting avatar:', e)
+  } catch {
     return null
   }
 }

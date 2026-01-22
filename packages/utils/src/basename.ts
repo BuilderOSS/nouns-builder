@@ -9,11 +9,18 @@ import {
   PublicClient,
   zeroAddress,
 } from 'viem'
-import { parseAvatarRecord } from 'viem/ens'
+import { normalize, parseAvatarRecord } from 'viem/ens'
 
 import L2ResolverAbi from './abis/L2ResolverAbi'
 import L2ReverseRegistrarAbi from './abis/L2ReverseRegistrarAbi'
 import { getProvider } from './provider'
+
+/**
+ * Checks if an address is valid and not the zero address
+ */
+function isValidNonZeroAddress(address: string | null | undefined): address is Address {
+  return !!address && isAddress(address, { strict: false }) && address !== zeroAddress
+}
 
 export const BASENAME_L2_RESOLVER_ADDRESS = '0xC6d566A56A1aFf6508b41f6c90ff131615583BCD'
 export const BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY =
@@ -23,12 +30,10 @@ export const L2_REVERSE_REGISTRAR_ADDRESS = '0x0000000000D8e504002cC26E3Ec46D819
 const baseProvider = getProvider(CHAIN_ID.BASE)
 
 /**
- * Convert an chainId to a coinType hex for reverse chain resolution
  * Converts a chain ID to its coin type for ENS resolution
  * Following ENSIP-19 specification for L2 name resolution
  */
 export const convertChainIdToCoinType = (chainId: CHAIN_ID): string => {
-  // L1 resolvers to addr
   if (chainId === CHAIN_ID.ETHEREUM) {
     return 'addr'
   }
@@ -38,7 +43,6 @@ export const convertChainIdToCoinType = (chainId: CHAIN_ID): string => {
 }
 
 /**
- * Convert an address to a reverse node for ENS resolution
  * Converts an address and chain ID to a reverse node for ENS resolution
  * This creates the namehash for reverse resolution lookups
  */
@@ -56,7 +60,7 @@ export const convertReverseNodeToBytes = (
   return addressReverseNode
 }
 
-// In-memory basename cache
+// Cache for basename lookups
 const basenameCache = new Map<Address, string | null>()
 
 /**
@@ -107,13 +111,13 @@ export async function getBasename(
     const result = basename || null
     basenameCache.set(checksummedAddress, result)
     return result
-  } catch (e) {
-    console.error('Error getting basename:', e)
+  } catch {
     basenameCache.set(checksummedAddress, null)
     return null
   }
 }
 
+// Cache for reverse basename lookups
 const basenameReverseNameCache = new Map<string, string | null>()
 
 /**
@@ -144,13 +148,12 @@ export async function getReverseBasename(
     const result = reverseBasename || null
     basenameReverseNameCache.set(checksummedAddress, result)
     return result
-  } catch (e) {
-    console.error('Error getting reverse basename:', e)
+  } catch {
     return null
   }
 }
 
-// In-memory basename address cache
+// Cache for basename to address lookups
 const basenameAddressCache = new Map<string, Address | null>()
 
 /**
@@ -163,7 +166,7 @@ export async function getBasenameAddress(
 ): Promise<Address | null> {
   if (!basename) return null
 
-  const normalizedBasename = basename.toLowerCase()
+  const normalizedBasename = normalize(basename)
 
   // Check cache
   if (basenameAddressCache.has(normalizedBasename)) {
@@ -179,11 +182,7 @@ export async function getBasenameAddress(
       args: [namehash(normalizedBasename)],
     })
 
-    if (
-      proxyAddress &&
-      isAddress(proxyAddress, { strict: false }) &&
-      proxyAddress !== zeroAddress
-    ) {
+    if (isValidNonZeroAddress(proxyAddress)) {
       const result = getAddress(proxyAddress)
       basenameAddressCache.set(normalizedBasename, result)
       return result
@@ -197,7 +196,7 @@ export async function getBasenameAddress(
       functionName: 'addr',
     })) as string
 
-    if (resolved && isAddress(resolved, { strict: false }) && resolved !== zeroAddress) {
+    if (isValidNonZeroAddress(resolved)) {
       const result = getAddress(resolved)
       basenameAddressCache.set(normalizedBasename, result)
       return result
@@ -205,13 +204,12 @@ export async function getBasenameAddress(
 
     basenameAddressCache.set(normalizedBasename, null)
     return null
-  } catch (e) {
-    console.error('Error getting basename address:', e)
+  } catch {
     return null
   }
 }
 
-// In-memory basename avatar cache
+// Cache for basename avatar lookups
 const basenameAvatarCache = new Map<string, string | null>()
 
 /**
@@ -224,7 +222,7 @@ export async function getBasenameAvatar(
 ): Promise<string | null> {
   if (!basename) return null
 
-  const normalizedBasename = basename.toLowerCase()
+  const normalizedBasename = normalize(basename)
 
   // Check cache
   if (basenameAvatarCache.has(normalizedBasename)) {
@@ -263,10 +261,8 @@ export async function getBasenameAvatar(
     const avatar = await parseAvatarRecord(provider, { record: avatarRecord })
     const result = avatar || null
     basenameAvatarCache.set(normalizedBasename, result)
-
     return result
-  } catch (e) {
-    console.error('Error getting basename avatar:', e)
+  } catch {
     return null
   }
 }
@@ -275,5 +271,22 @@ export async function getBasenameAvatar(
  * Checks if a string is a basename (ends with .base.eth)
  */
 export function isBasename(name: string): boolean {
-  return name.toLowerCase().endsWith('.base.eth')
+  return normalize(name).toLowerCase().endsWith('.base.eth')
+}
+
+export async function verifyBasenameForAddress(
+  address: Address,
+  candidateName: string
+): Promise<string | null> {
+  try {
+    const normalized = normalize(candidateName)
+    if (!isBasename(normalized)) return null
+
+    const resolved = await getBasenameAddress(normalized)
+    if (!resolved) return null
+
+    return getAddress(resolved) === getAddress(address) ? normalized : null
+  } catch {
+    return null
+  }
 }
