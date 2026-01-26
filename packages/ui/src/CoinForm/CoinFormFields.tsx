@@ -157,7 +157,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
           </Box>
 
           {/* Custom Currency Address Input - show when "custom" is selected */}
-          {formik.values.currency === 'custom' && (
+          {formik.values.currency === '0xcustom' && (
             <Box>
               <TextInput
                 id="customCurrency"

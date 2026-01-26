@@ -236,9 +236,9 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       const { url: metadataUri } = await metadataBuilder.upload(uploader)
 
       // 3. Get token price for the selected currency
-      // Use customCurrency if currency is "custom", otherwise use the selected currency
+      // Use customCurrency if currency is "0xcustom", otherwise use the selected currency
       const currency =
-        values.currency === 'custom' && values.customCurrency
+        values.currency === '0xcustom' && values.customCurrency
           ? (values.customCurrency as AddressType)
           : ((values.currency || ETH_ADDRESS) as AddressType)
 

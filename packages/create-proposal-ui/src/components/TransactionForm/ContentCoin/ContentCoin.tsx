@@ -155,7 +155,11 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
       const { url: metadataUri } = await metadataBuilder.upload(uploader)
 
       // 3. Get token price for the selected currency
-      const currency = (values.currency || ETH_ADDRESS) as AddressType
+      // Use customCurrency if currency is "0xcustom", otherwise use the selected currency
+      const currency =
+        values.currency === '0xcustom' && values.customCurrency
+          ? (values.customCurrency as AddressType)
+          : ((values.currency || ETH_ADDRESS) as AddressType)
 
       // Try to get price from fetched data first, fallback to placeholder
       let quoteTokenUsd = getTokenPriceFromMap(tokenPrices, currency)
