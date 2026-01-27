@@ -8,10 +8,12 @@ import { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
+import NumberInput from '../Fields/NumberInput'
 import TextArea from '../Fields/TextArea'
 import TextInput from '../Fields/TextInput'
 import { SingleImageUpload } from '../SingleImageUpload/SingleImageUpload'
 import { SingleMediaUpload } from '../SingleMediaUpload/SingleMediaUpload'
+import { Toggle } from '../Toggle'
 import type { CoinFormFieldsProps, CurrencyOption } from './types'
 
 // Currency options based on chain
@@ -22,10 +24,12 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
   formik,
   showMediaUpload = false,
   showProperties = false,
+  showTargetFdv = false,
   chainId,
   showCurrencyInput = true,
   currencyOptions: defaultCurrencyOptions,
 }) => {
+  const [showAdvancedFdv, setShowAdvancedFdv] = React.useState(false)
   // Determine available currency options based on chain
   const isBaseSepolia = chainId === BASE_SEPOLIA_CHAIN_ID
   const isBaseMainnet = chainId === BASE_MAINNET_CHAIN_ID
@@ -178,22 +182,6 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         </Stack>
       )}
 
-      {/* Minimum FDV Input */}
-      <TextInput
-        id="minFdvUsd"
-        value={formik.values.minFdvUsd || ''}
-        onChange={formik.handleChange}
-        inputLabel="Initial Market Cap (USD)"
-        placeholder="10000"
-        helperText="The minimum fully diluted valuation in USD. This determines the initial price curve. Default: $10,000"
-        errorMessage={
-          formik.touched.minFdvUsd && formik.errors.minFdvUsd
-            ? formik.errors.minFdvUsd
-            : undefined
-        }
-        formik={formik}
-      />
-
       {/* Image Upload */}
       <SingleImageUpload
         formik={formik}
@@ -271,6 +259,72 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
               + Add Property
             </Box>
           </Flex>
+        </Box>
+      )}
+
+      {/* Advanced Pool Settings Section */}
+      {showTargetFdv && (
+        <Box mt="x8">
+          <Flex justify="space-between" align="center" mb="x4">
+            <Text as="h3" variant="heading-sm">
+              Advanced Pool Settings
+            </Text>
+            <Toggle
+              on={showAdvancedFdv}
+              onToggle={() => setShowAdvancedFdv(!showAdvancedFdv)}
+            />
+          </Flex>
+
+          {showAdvancedFdv && (
+            <Stack gap="x4">
+              <Text variant="paragraph-sm" color="text3" mb="x2">
+                Configure the target market cap for your token's liquidity pool. The pool
+                will distribute liquidity geometrically around this central value.
+              </Text>
+
+              {/* Target FDV */}
+              <Box>
+                <Text as="label" htmlFor="targetFdvUsd" variant="label-md" mb="x2">
+                  Target Market Cap (USD)
+                </Text>
+                <Text variant="paragraph-sm" color="text3" mb="x2">
+                  The geometric center for liquidity distribution. Default: $6,364,000
+                  (spreads to $27K-$1.5B range)
+                </Text>
+                <NumberInput
+                  id="targetFdvUsd"
+                  value={formik.values.targetFdvUsd ?? 6364000}
+                  onChange={formik.handleChange}
+                  placeholder="6364000"
+                  step="100000"
+                  min="1000"
+                  useTextInput={true}
+                  errorMessage={
+                    formik.touched.targetFdvUsd && formik.errors.targetFdvUsd
+                      ? formik.errors.targetFdvUsd
+                      : undefined
+                  }
+                  hasError={!!(formik.touched.targetFdvUsd && formik.errors.targetFdvUsd)}
+                />
+
+                {/* Display calculated range */}
+                {formik.values.targetFdvUsd && (
+                  <Box mt="x2">
+                    <Text variant="paragraph-sm" color="text3">
+                      Liquidity Range: $
+                      {Math.round(
+                        (formik.values.targetFdvUsd ?? 6364000) / 235.7
+                      ).toLocaleString('en-US')}{' '}
+                      - $
+                      {Math.round(
+                        (formik.values.targetFdvUsd ?? 6364000) * 235.7
+                      ).toLocaleString('en-US')}
+                    </Text>
+                  </Box>
+                )}
+              </Box>
+            </Stack>
+          )}
         </Box>
       )}
     </Stack>

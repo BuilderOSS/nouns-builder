@@ -54,19 +54,19 @@ export const coinFormSchema = yup.object({
       if (!value) return this.createError({ message: 'Custom token address is required' })
       return /^0x[a-fA-F0-9]{40}$/.test(value)
     }),
-  minFdvUsd: yup
+  targetFdvUsd: yup
     .number()
     .transform((value, originalValue) => {
       if (originalValue === '' || originalValue === null || originalValue === undefined) {
-        return 10000 // default value
+        return 6364000 // default value (geometric center of $27K-$1.5B)
       }
       const num = Number(originalValue)
       return isNaN(num) ? originalValue : num
     })
-    .positive('Minimum FDV must be a positive number')
-    .min(49, 'Minimum FDV must be at least $49')
-    .default(10000)
-    .typeError('Minimum FDV must be a valid number'),
+    .positive('Target FDV must be a positive number')
+    .min(1000, 'Target FDV must be at least $1,000')
+    .default(6364000)
+    .typeError('Target FDV must be a valid number'),
   // Clanker-specific fields
   poolConfig: yup.string(),
   feeConfig: yup.string(),

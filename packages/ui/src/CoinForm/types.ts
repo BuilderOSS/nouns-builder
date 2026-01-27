@@ -11,7 +11,7 @@ export type CoinFormValues = {
   properties?: Record<string, string>
   currency?: string
   customCurrency?: string // Custom ERC20 token address when currency is "custom"
-  minFdvUsd?: number
+  targetFdvUsd?: number // Target fully diluted valuation for pool configuration
   // Clanker-specific fields
   poolConfig?: string
   feeConfig?: string
@@ -32,6 +32,7 @@ export type CoinFormFieldsProps = {
   formik: any // FormikProps<CoinFormValues>
   showMediaUpload?: boolean
   showProperties?: boolean
+  showTargetFdv?: boolean
   initialValues?: Partial<CoinFormValues>
   chainId?: number
   showCurrencyInput?: boolean

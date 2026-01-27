@@ -30,6 +30,7 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
         formik={formik}
         showMediaUpload={showMediaUpload}
         showProperties={showProperties}
+        showTargetFdv={true}
         chainId={chainId}
         showCurrencyInput={showCurrencyInput}
         currencyOptions={currencyOptions}

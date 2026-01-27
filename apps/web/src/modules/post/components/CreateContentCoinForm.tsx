@@ -12,7 +12,7 @@ import { uploadFile } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { CoinFormFields, coinFormSchema, type CoinFormValues } from '@buildeross/ui'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { createCreatorPoolConfigFromMinFdv } from '@buildeross/utils'
+import { createContentPoolConfigFromTargetFdv } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import type { Uploader, UploadResult } from '@zoralabs/coins-sdk'
@@ -32,8 +32,8 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 // Supported chain IDs from Zora's deployment
 const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
-// Default minimum Fully Diluted Valuation (FDV) in USD for pool config calculations
-const DEFAULT_MIN_FDV_USD = 10000 // $10k minimum FDV
+// Default target Fully Diluted Valuation (FDV) in USD for pool config calculations
+const DEFAULT_TARGET_FDV_USD = 50000 // $50k target FDV
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -134,7 +134,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     mediaMimeType: '',
     properties: {},
     currency: ETH_ADDRESS,
-    minFdvUsd: DEFAULT_MIN_FDV_USD,
+    targetFdvUsd: DEFAULT_TARGET_FDV_USD,
   }
 
   const handleDeploy = useCallback(
@@ -260,10 +260,10 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       }
 
       // 4. Create pool config using the utility with form values
-      const poolConfig = createCreatorPoolConfigFromMinFdv({
+      const poolConfig = createContentPoolConfigFromTargetFdv({
         currency,
         quoteTokenUsd,
-        minFdvUsd: values.minFdvUsd || DEFAULT_MIN_FDV_USD,
+        targetFdvUsd: values.targetFdvUsd || DEFAULT_TARGET_FDV_USD,
       })
 
       // 5. Encode pool config using Zora's function
