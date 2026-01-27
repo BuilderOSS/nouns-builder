@@ -1,3 +1,4 @@
+import { useEthUsdPrice } from '@buildeross/hooks'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import {
@@ -5,13 +6,15 @@ import {
   coinFormSchema,
   type CoinFormValues,
 } from '@buildeross/ui'
-import { convertDaysToSeconds, FEE_CONFIGS, POOL_POSITIONS } from '@buildeross/utils'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import {
-  type ClankerTokenV4,
-  FEE_CONFIGS as SDK_FEE_CONFIGS,
-  POOL_POSITIONS as SDK_POOL_POSITIONS,
-} from 'clanker-sdk'
+  convertDaysToSeconds,
+  createClankerPoolPositionsFromTargetFdv,
+  DEFAULT_CLANKER_TARGET_FDV,
+  FEE_CONFIGS,
+  POOL_POSITIONS,
+} from '@buildeross/utils'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { type ClankerTokenV4, FEE_CONFIGS as SDK_FEE_CONFIGS } from 'clanker-sdk'
 import { Clanker } from 'clanker-sdk/v4'
 import { Form, Formik, type FormikHelpers } from 'formik'
 import { useMemo, useState } from 'react'
@@ -22,7 +25,6 @@ import { ZodError } from 'zod'
 const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
 // Default values for Clanker deployment
-const DEFAULT_MIN_FDV_USD = 10000 // $10k minimum FDV
 const DEFAULT_VAULT_PERCENTAGE = 10 // 10% of supply
 const DEFAULT_LOCKUP_DAYS = 30 // 30 days
 const DEFAULT_VESTING_DAYS = 30 // 30 days
@@ -91,6 +93,13 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
 
   const [submitError, setSubmitError] = useState<string | undefined>()
 
+  // Fetch current ETH/USD price
+  const {
+    price: ethUsdPrice,
+    isLoading: isPriceLoading,
+    error: priceError,
+  } = useEthUsdPrice()
+
   // Check if the current chain is supported
   const isChainSupported = SUPPORTED_CHAIN_IDS.includes(chain.id)
 
@@ -110,7 +119,7 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
     mediaMimeType: providedInitialValues?.mediaMimeType || '',
     properties: providedInitialValues?.properties || {},
     currency: providedInitialValues?.currency || 'WETH',
-    minFdvUsd: providedInitialValues?.minFdvUsd || DEFAULT_MIN_FDV_USD,
+    targetFdvUsd: providedInitialValues?.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV,
     // Clanker-specific defaults
     poolConfig: providedInitialValues?.poolConfig || POOL_POSITIONS.Project,
     feeConfig: providedInitialValues?.feeConfig || FEE_CONFIGS.DynamicBasic,
@@ -139,6 +148,12 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
       return
     }
 
+    if (!ethUsdPrice) {
+      setSubmitError('Unable to fetch ETH/USD price. Please try again.')
+      actions.setSubmitting(false)
+      return
+    }
+
     setSubmitError(undefined)
 
     try {
@@ -156,12 +171,10 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
           interface: 'Builder DAO Proposal',
         },
         pool: {
-          positions:
-            values.poolConfig === 'Custom'
-              ? SDK_POOL_POSITIONS.Project
-              : SDK_POOL_POSITIONS[
-                  values.poolConfig as keyof typeof SDK_POOL_POSITIONS
-                ] || SDK_POOL_POSITIONS.Project,
+          positions: createClankerPoolPositionsFromTargetFdv({
+            targetFdvUsd: values.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV,
+            quoteTokenUsd: ethUsdPrice,
+          }),
         },
         fees:
           SDK_FEE_CONFIGS[values.feeConfig as keyof typeof SDK_FEE_CONFIGS] ||
@@ -316,6 +329,84 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
                   >
                     <Text variant="paragraph-sm" color="warning">
                       Treasury address not found. Please connect to a DAO.
+                    </Text>
+                  </Box>
+                )}
+
+                {/* Estimated Launch Parameters */}
+                {ethUsdPrice && !isDisabled && (
+                  <Box
+                    p="x4"
+                    borderRadius="curved"
+                    backgroundColor="secondary"
+                    style={{ opacity: 0.1 }}
+                  >
+                    <Stack gap="x2">
+                      <Text variant="label-md" fontWeight="bold">
+                        Estimated Launch Parameters
+                      </Text>
+                      <Text variant="paragraph-sm" color="text3">
+                        Current ETH Price: $
+                        {ethUsdPrice.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                      <Text variant="paragraph-sm" color="text3">
+                        Target Market Cap: $
+                        {(
+                          formik.values.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV
+                        ).toLocaleString('en-US')}
+                      </Text>
+                      <Text variant="paragraph-sm" color="text3">
+                        Liquidity Range: $
+                        {Math.round(
+                          (formik.values.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV) /
+                            235.7
+                        ).toLocaleString('en-US')}{' '}
+                        - $
+                        {Math.round(
+                          (formik.values.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV) *
+                            235.7
+                        ).toLocaleString('en-US')}
+                      </Text>
+                      <Text variant="paragraph-sm" color="text3">
+                        Initial Price per Token: $
+                        {(
+                          (formik.values.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV) /
+                          235.7 /
+                          1_000_000_000
+                        ).toFixed(8)}
+                      </Text>
+                    </Stack>
+                  </Box>
+                )}
+
+                {/* Loading State */}
+                {isPriceLoading && (
+                  <Box
+                    p="x4"
+                    borderRadius="curved"
+                    backgroundColor="warning"
+                    style={{ opacity: 0.1 }}
+                  >
+                    <Text variant="paragraph-sm" color="warning">
+                      Fetching current ETH price...
+                    </Text>
+                  </Box>
+                )}
+
+                {/* Price Error */}
+                {priceError && (
+                  <Box
+                    p="x4"
+                    borderRadius="curved"
+                    backgroundColor="negative"
+                    style={{ opacity: 0.1 }}
+                  >
+                    <Text variant="paragraph-sm" color="negative">
+                      Unable to fetch ETH price: {priceError.message}. Please refresh the
+                      page.
                     </Text>
                   </Box>
                 )}

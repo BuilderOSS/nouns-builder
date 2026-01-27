@@ -16,8 +16,8 @@ import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
 import { EscrowArgumentDisplay } from './EscrowArgumentDisplay'
 import { NFTArgumentDisplay } from './NFTArgumentDisplay'
-import { DecodedStreamBatch, StreamArgumentDisplay } from './StreamArgumentDisplay'
 import { PoolConfigArgumentDisplay } from './PoolConfigArgumentDisplay'
+import { DecodedStreamBatch, StreamArgumentDisplay } from './StreamArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 

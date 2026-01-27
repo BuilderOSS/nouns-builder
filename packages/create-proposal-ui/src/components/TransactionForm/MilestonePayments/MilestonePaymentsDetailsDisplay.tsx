@@ -1,7 +1,7 @@
 import { Box, Stack, Text } from '@buildeross/zord'
 
-import { link } from './MilestonePaymentsDetailsDisplay.css'
 import { StickyPreviewContainer } from '../../StickyPreviewContainer'
+import { link } from './MilestonePaymentsDetailsDisplay.css'
 
 export const MilestonePaymentsDetailsDisplay: React.FC<{
   escrowAmountError?: string

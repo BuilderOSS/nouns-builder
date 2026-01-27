@@ -1,7 +1,14 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/*.ts', 'src/sablier/*.ts', 'src/wagmi/*.ts', 'src/yup/*.ts', '!src/*.test.ts'],
+  entry: [
+    'src/*.ts',
+    'src/sablier/*.ts',
+    'src/poolConfig/*.ts',
+    'src/wagmi/*.ts',
+    'src/yup/*.ts',
+    '!src/*.test.ts',
+  ],
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,

@@ -11,7 +11,7 @@ import {
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
 import { CoinFormFields, coinFormSchema, type CoinFormValues } from '@buildeross/ui'
-import { createCreatorPoolConfigFromMinFdv } from '@buildeross/utils'
+import { createContentPoolConfigFromTargetFdv } from '@buildeross/utils/poolConfig'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
 import {
@@ -29,8 +29,8 @@ import { IPFSUploader } from './ipfsUploader'
 // Supported chain IDs from Zora's deployment
 const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
-// Default minimum Fully Diluted Valuation (FDV) in USD for pool config calculations
-const DEFAULT_MIN_FDV_USD = 10000 // $10k minimum FDV
+// Default target Fully Diluted Valuation (FDV) in USD for pool config calculations
+const DEFAULT_TARGET_FDV_USD = 50000 // $50k target FDV
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -105,7 +105,6 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
     mediaMimeType: providedInitialValues?.mediaMimeType || '',
     properties: providedInitialValues?.properties || {},
     currency: providedInitialValues?.currency || ETH_ADDRESS,
-    minFdvUsd: providedInitialValues?.minFdvUsd || DEFAULT_MIN_FDV_USD,
   }
 
   const handleSubmit = async (
@@ -173,11 +172,11 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
         throw new Error(`Unable to get price for selected currency: ${currency}`)
       }
 
-      // 4. Create pool config using the utility with form values
-      const poolConfig = createCreatorPoolConfigFromMinFdv({
+      // 4. Create pool config using the utility with constant FDV
+      const poolConfig = createContentPoolConfigFromTargetFdv({
         currency,
         quoteTokenUsd,
-        minFdvUsd: values.minFdvUsd || DEFAULT_MIN_FDV_USD,
+        targetFdvUsd: DEFAULT_TARGET_FDV_USD, // Always use constant $10K for ContentCoin
       })
 
       // 5. Encode pool config using Zora's function
@@ -311,6 +310,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
                     formik={formik}
                     showMediaUpload={showMediaUpload}
                     showProperties={showProperties}
+                    showTargetFdv={true}
                     chainId={chain.id}
                     showCurrencyInput={true}
                   />
