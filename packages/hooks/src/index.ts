@@ -16,6 +16,7 @@ export * from './useEnsAvatar'
 export * from './useEnsData'
 export * from './useEnsName'
 export * from './useEscrowDelegate'
+export * from './useEthUsdPrice' // exports useEthUsdPrice and useCurrencyUsdPrice
 export * from './useExplore'
 export * from './useExploreUserDaos'
 export * from './useFallbackSrc'
