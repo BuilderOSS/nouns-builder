@@ -5,18 +5,17 @@ import { AddArtwork } from './AddArtwork'
 import { Airdrop } from './Airdrop'
 import { CustomTransaction } from './CustomTransaction'
 import { Droposal } from './Droposal'
-import { Escrow } from './Escrow'
 import { FixRendererBase } from './FixRendererBase'
 import { Migration } from './Migration'
+import { MilestonePayments } from './MilestonePayments'
 import { NominateEscrowDelegate } from './NominateEscrowDelegate'
 import { PauseAuctions } from './PauseAuctions'
 import { PinTreasuryAsset } from './PinTreasuryAsset'
 import { ReplaceArtwork } from './ReplaceArtwork'
 import { ResumeAuctions } from './ResumeAuctions'
-import { SablierStream } from './SablierStream'
-import { SendErc20 } from './SendErc20'
-import { SendEth } from './SendEth'
 import { SendNft } from './SendNft'
+import { SendTokens } from './SendTokens'
+import { StreamTokens } from './StreamTokens'
 import { WalletConnect } from './WalletConnect'
 
 interface TransactionFormProps {
@@ -26,37 +25,35 @@ interface TransactionFormProps {
 export type TransactionFormType = (typeof TRANSACTION_FORM_OPTIONS)[number]
 
 export const TRANSACTION_FORM_OPTIONS = [
-  TransactionType.SEND_ETH,
-  TransactionType.SEND_ERC20,
+  TransactionType.SEND_TOKENS,
   TransactionType.SEND_NFT,
-  TransactionType.WALLET_CONNECT,
+  TransactionType.STREAM_TOKENS,
+  TransactionType.MILESTONE_PAYMENTS,
   TransactionType.AIRDROP,
-  TransactionType.ESCROW,
-  TransactionType.ESCROW_DELEGATE,
-  TransactionType.SABLIER_STREAM,
+  TransactionType.WALLET_CONNECT,
+  TransactionType.NOMINATE_DELEGATE,
   TransactionType.PIN_TREASURY_ASSET,
+  TransactionType.CUSTOM,
+  TransactionType.DROPOSAL,
   TransactionType.PAUSE_AUCTIONS,
   TransactionType.FIX_RENDERER_BASE,
   TransactionType.RESUME_AUCTIONS,
   TransactionType.ADD_ARTWORK,
   TransactionType.REPLACE_ARTWORK,
-  TransactionType.DROPOSAL,
   TransactionType.MIGRATION,
-  TransactionType.CUSTOM,
 ] as const
 
 export const TransactionForm = ({ type }: TransactionFormProps) => {
   const FORMS: { [key in TransactionFormType]: ReactNode } = {
     [TransactionType.CUSTOM]: <CustomTransaction />,
     [TransactionType.AIRDROP]: <Airdrop />,
-    [TransactionType.ESCROW]: <Escrow />,
-    [TransactionType.ESCROW_DELEGATE]: <NominateEscrowDelegate />,
     [TransactionType.DROPOSAL]: <Droposal />,
-    [TransactionType.SEND_ETH]: <SendEth />,
-    [TransactionType.SEND_ERC20]: <SendErc20 />,
     [TransactionType.SEND_NFT]: <SendNft />,
+    [TransactionType.SEND_TOKENS]: <SendTokens />,
+    [TransactionType.STREAM_TOKENS]: <StreamTokens />,
+    [TransactionType.MILESTONE_PAYMENTS]: <MilestonePayments />,
+    [TransactionType.NOMINATE_DELEGATE]: <NominateEscrowDelegate />,
     [TransactionType.WALLET_CONNECT]: <WalletConnect />,
-    [TransactionType.SABLIER_STREAM]: <SablierStream />,
     [TransactionType.PIN_TREASURY_ASSET]: <PinTreasuryAsset />,
     [TransactionType.PAUSE_AUCTIONS]: <PauseAuctions />,
     [TransactionType.FIX_RENDERER_BASE]: <FixRendererBase />,

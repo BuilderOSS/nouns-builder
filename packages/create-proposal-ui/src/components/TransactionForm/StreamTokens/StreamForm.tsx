@@ -3,7 +3,7 @@ import { Button, Stack } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React from 'react'
 
-import { SablierStreamValues, StreamFormValues } from './SablierStream.schema'
+import { StreamFormValues, StreamTokensValues } from './StreamTokens.schema'
 
 interface StreamFormProps {
   index: number
@@ -11,7 +11,7 @@ interface StreamFormProps {
 }
 
 export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) => {
-  const formik = useFormikContext<SablierStreamValues>()
+  const formik = useFormikContext<StreamTokensValues>()
   const durationType = formik.values.durationType
 
   // Helper to get error message for a field

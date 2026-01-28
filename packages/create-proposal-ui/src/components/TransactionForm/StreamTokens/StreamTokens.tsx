@@ -34,11 +34,12 @@ import {
 } from 'viem'
 
 import { TokenSelectionForm } from '../../shared'
-import sablierStreamSchema, {
-  SablierStreamValues,
-  StreamFormValues,
-} from './SablierStream.schema'
 import { StreamForm } from './StreamForm'
+import streamTokensSchema, {
+  StreamFormValues,
+  StreamTokensValues,
+} from './StreamTokens.schema'
+import { StreamTokensDetailsDisplay } from './StreamTokensDetailsDisplay'
 
 const SECONDS_PER_DAY = 86400
 
@@ -47,7 +48,7 @@ const truncateAddress = (addr: string) => {
   return truncate(snippet, { length: 20 })
 }
 
-export const SablierStream = () => {
+export const StreamTokens = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
@@ -71,7 +72,7 @@ export const SablierStream = () => {
     treasuryAddress: addresses.treasury,
   })
 
-  const initialValues: SablierStreamValues = {
+  const initialValues: StreamTokensValues = {
     senderAddress: escrowDelegate || addresses.treasury || '',
     tokenAddress: undefined,
     tokenMetadata: undefined,
@@ -98,8 +99,8 @@ export const SablierStream = () => {
   }, [])
 
   const handleSubmit = async (
-    values: SablierStreamValues,
-    actions: FormikHelpers<SablierStreamValues>
+    values: StreamTokensValues,
+    actions: FormikHelpers<StreamTokensValues>
   ) => {
     if (!values.tokenMetadata || !values.streams.length) {
       return
@@ -400,7 +401,7 @@ export const SablierStream = () => {
 
     try {
       addTransaction({
-        type: TransactionType.SABLIER_STREAM,
+        type: TransactionType.STREAM_TOKENS,
         summary,
         transactions,
       })
@@ -446,7 +447,7 @@ export const SablierStream = () => {
       <Formik
         initialValues={initialValues}
         enableReinitialize={true}
-        validationSchema={sablierStreamSchema()}
+        validationSchema={streamTokensSchema()}
         onSubmit={handleSubmit}
         validateOnBlur
         validateOnMount={false}
@@ -509,39 +510,23 @@ export const SablierStream = () => {
 
           return (
             <Box
-              data-testid="sablier-stream-form"
+              data-testid="stream-tokens-form"
               as={'fieldset'}
               disabled={formik.isValidating || formik.isSubmitting}
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Form>
                 <Stack gap={'x5'}>
+                  <StreamTokensDetailsDisplay
+                    balanceError={balanceError}
+                    totalStreamAmountWithSymbol={totalAmountString}
+                    streamCount={formik.values.streams.length}
+                  />
+
                   <Text variant="paragraph-sm" color="text3">
                     Create token streams using Sablier protocol. Configure duration type,
                     cancelability, and transferability for all streams.
                   </Text>
-
-                  {isValid && totalAmountString && (
-                    <Box
-                      p={'x4'}
-                      backgroundColor={balanceError ? 'negative' : 'background2'}
-                      borderRadius={'curved'}
-                      borderWidth={'normal'}
-                      borderStyle={'solid'}
-                      borderColor={balanceError ? 'negative' : 'border'}
-                    >
-                      <Flex direction={'column'} gap={'x1'}>
-                        <Text fontSize={14} fontWeight={'label'}>
-                          Total Stream Amount: {totalAmountString}
-                        </Text>
-                        {balanceError && (
-                          <Text fontSize={14} color="negative">
-                            {balanceError}
-                          </Text>
-                        )}
-                      </Flex>
-                    </Box>
-                  )}
 
                   <TokenSelectionForm />
 
@@ -674,6 +659,7 @@ export const SablierStream = () => {
                             <Accordion
                               items={formik.values.streams.map((stream, index) => ({
                                 title: `Stream #${index + 1}${stream.recipientAddress ? ` - ${truncateAddress(stream.recipientAddress)}` : ''}`,
+                                titleFontSize: 20,
                                 description: (
                                   <StreamForm
                                     key={index}

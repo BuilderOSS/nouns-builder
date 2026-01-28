@@ -97,7 +97,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
         if (x === TransactionType.RESUME_AUCTIONS && !paused) return false
         if (x === TransactionType.FIX_RENDERER_BASE && !shouldFixRendererBase)
           return false
-        if (x === TransactionType.ESCROW_DELEGATE && !isEASSupported) return false
+        if (x === TransactionType.NOMINATE_DELEGATE && !isEASSupported) return false
         return true
       }),
     [isL1Chain, isAllowedMigrationDao, paused, shouldFixRendererBase, isEASSupported]

@@ -7,7 +7,7 @@ import { TokenMetadataFormValidated } from '../../shared'
 
 export { type TokenMetadataFormValidated }
 
-export const getInitialEscrowFormState = (): EscrowFormValues => ({
+export const getInitialMilestonePaymentsFormState = (): MilestonePaymentsFormValues => ({
   tokenAddress: undefined,
   tokenMetadata: undefined,
   clientAddress: '',
@@ -40,7 +40,7 @@ export interface MilestoneFormValues {
   description: string
 }
 
-export interface EscrowFormValues {
+export interface MilestonePaymentsFormValues {
   clientAddress: string | AddressType
   recipientAddress: string | AddressType
   safetyValveDate: Date | number | string
@@ -49,8 +49,11 @@ export interface EscrowFormValues {
   tokenMetadata?: TokenMetadataFormValidated
 }
 
-export interface EscrowFormProps {
-  onSubmit: (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => void
+export interface MilestonePaymentsFormProps {
+  onSubmit: (
+    values: MilestonePaymentsFormValues,
+    actions: FormikHelpers<MilestonePaymentsFormValues>
+  ) => void
   isSubmitting: boolean
 }
 export const MilestoneSchema = yup.object({
@@ -100,7 +103,7 @@ export const TokenMetadataSchema = yup.object({
   ),
 })
 
-export const EscrowFormSchema = yup.object({
+export const MilestonePaymentsFormSchema = yup.object({
   clientAddress: addressValidationSchemaWithError(
     'Delegate address is invalid.',
     'Delegate address is required.'

@@ -9,10 +9,10 @@ import {
 } from '@buildeross/utils/escrow'
 import { Address, encodeAbiParameters } from 'viem'
 
-import { EscrowFormValues } from './EscrowForm.schema'
+import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
 
 export function encodeEscrowData(
-  values: EscrowFormValues,
+  values: MilestonePaymentsFormValues,
   treasuryAddress: Address,
   ipfsCID: string,
   chainId: string | number

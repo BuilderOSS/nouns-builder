@@ -10,16 +10,19 @@ import { useCallback, useState } from 'react'
 import { formatUnits, parseUnits } from 'viem'
 
 import { TokenSelectionForm } from '../../shared'
-import { EscrowDetailsDisplay } from './EscrowDetailsDisplay'
-import {
-  EscrowFormProps,
-  EscrowFormSchema,
-  getInitialEscrowFormState,
-  MilestoneFormValues,
-} from './EscrowForm.schema'
 import { MilestoneForm } from './MilestoneForm'
+import {
+  getInitialMilestonePaymentsFormState,
+  MilestoneFormValues,
+  MilestonePaymentsFormProps,
+  MilestonePaymentsFormSchema,
+} from './MilestonePayments.schema'
+import { MilestonePaymentsDetailsDisplay } from './MilestonePaymentsDetailsDisplay'
 
-const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
+const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
+  onSubmit,
+  isSubmitting,
+}) => {
   const [isMediaUploading, setIsMediaUploading] = useState(false)
 
   const {
@@ -57,11 +60,11 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
     <Box>
       <Formik
         initialValues={{
-          ...getInitialEscrowFormState(),
+          ...getInitialMilestonePaymentsFormState(),
           clientAddress: escrowDelegate || treasury || '',
         }}
         enableReinitialize={true}
-        validationSchema={EscrowFormSchema}
+        validationSchema={MilestonePaymentsFormSchema}
         onSubmit={onSubmit}
         validateOnMount={false}
         validateOnChange={false}
@@ -106,10 +109,17 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
             >
               <Form>
                 <Stack gap={'x5'}>
-                  <EscrowDetailsDisplay
+                  <MilestonePaymentsDetailsDisplay
                     escrowAmountError={escrowAmountError}
                     totalEscrowAmountWithSymbol={totalAmountString}
+                    milestoneCount={formik.values.milestones.length}
                   />
+
+                  <Text variant="paragraph-sm" color="text3">
+                    Create milestone-based payments with Smart Invoice. Lock tokens in
+                    escrow and release them as deliverables are completed.
+                  </Text>
+
                   <TokenSelectionForm />
                   <SmartInput
                     type={FIELD_TYPES.TEXT}
@@ -167,6 +177,7 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                                   length: 32,
                                   separator: '...',
                                 }),
+                                titleFontSize: 20,
                                 description: (
                                   <MilestoneForm
                                     key={index}
@@ -265,4 +276,4 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
   )
 }
 
-export default EscrowForm
+export default MilestonePaymentsForm

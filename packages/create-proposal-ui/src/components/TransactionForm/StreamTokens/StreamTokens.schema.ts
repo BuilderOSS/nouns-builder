@@ -13,7 +13,7 @@ export interface StreamFormValues {
   cliffDays?: number // Optional cliff period in days
 }
 
-export interface SablierStreamValues {
+export interface StreamTokensValues {
   senderAddress: string | AddressType // Delegate who can cancel streams
   tokenAddress?: AddressType
   tokenMetadata?: TokenMetadataFormValidated
@@ -81,7 +81,7 @@ export const StreamFormSchema = yup.object({
     ),
 })
 
-const sablierStreamSchema = () =>
+const streamTokensSchema = () =>
   yup.object({
     senderAddress: addressValidationSchemaWithError(
       'Sender address is invalid.',
@@ -162,4 +162,4 @@ const sablierStreamSchema = () =>
       }),
   })
 
-export default sablierStreamSchema
+export default streamTokensSchema
