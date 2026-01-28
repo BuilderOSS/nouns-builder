@@ -156,11 +156,6 @@ export const batchLockupCreateWithTimestampsLLAbi = [
                 internalType: 'uint40',
               },
               {
-                name: 'cliff',
-                type: 'uint40',
-                internalType: 'uint40',
-              },
-              {
                 name: 'end',
                 type: 'uint40',
                 internalType: 'uint40',
@@ -231,14 +226,16 @@ export interface CreateWithTimestampsLLParams {
 export function encodeCreateWithDurationsLL(
   lockupLinearAddress: Address,
   tokenAddress: Address,
-  streams: CreateWithDurationsLLParams[]
+  streams: CreateWithDurationsLLParams[],
+  cancelable: boolean = true,
+  transferable: boolean = false
 ): string {
   const batch = streams.map((stream) => ({
     sender: stream.sender,
     recipient: stream.recipient,
     depositAmount: stream.depositAmount,
-    cancelable: true,
-    transferable: false,
+    cancelable,
+    transferable,
     durations: {
       cliff: stream.cliffDuration,
       total: stream.totalDuration,
@@ -263,17 +260,18 @@ export function encodeCreateWithDurationsLL(
 export function encodeCreateWithTimestampsLL(
   lockupLinearAddress: Address,
   tokenAddress: Address,
-  streams: CreateWithTimestampsLLParams[]
+  streams: CreateWithTimestampsLLParams[],
+  cancelable: boolean = true,
+  transferable: boolean = false
 ): string {
   const batch = streams.map((stream) => ({
     sender: stream.sender,
     recipient: stream.recipient,
     depositAmount: stream.depositAmount,
-    cancelable: true,
-    transferable: false,
+    cancelable,
+    transferable,
     timestamps: {
       start: stream.startTime,
-      cliff: stream.cliffTime,
       end: stream.endTime,
     },
     cliffTime: stream.cliffTime,

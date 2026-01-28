@@ -1,5 +1,5 @@
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Button, Stack } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React from 'react'
 
@@ -12,12 +12,7 @@ interface StreamFormProps {
 
 export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) => {
   const formik = useFormikContext<SablierStreamValues>()
-  const stream = formik.values.streams[index]
-
-  const handleDurationTypeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newType = e.target.value as 'days' | 'dates'
-    formik.setFieldValue(`streams.${index}.durationType`, newType)
-  }
+  const durationType = formik.values.durationType
 
   // Helper to get error message for a field
   const getFieldError = (fieldName: keyof StreamFormValues): string | undefined => {
@@ -49,58 +44,15 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
         {...formik.getFieldProps(`streams.${index}.amount`)}
         inputLabel="Amount"
         id={`streams.${index}.amount`}
-        type={FIELD_TYPES.NUMBER}
+        type={FIELD_TYPES.TEXT}
         placeholder={'100'}
-        min={0}
         errorMessage={
           formik.touched.streams?.[index]?.amount ? getFieldError('amount') : undefined
         }
         helperText="Amount of tokens to stream to this recipient"
       />
 
-      <Box>
-        <Text variant="label-sm" mb="x2">
-          Duration Type
-        </Text>
-        <Flex gap="x4" mb="x4">
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            <input
-              type="radio"
-              name={`streams.${index}.durationType`}
-              value="days"
-              checked={stream?.durationType === 'days'}
-              onChange={handleDurationTypeChange}
-            />
-            <Text>Days from now</Text>
-          </label>
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            <input
-              type="radio"
-              name={`streams.${index}.durationType`}
-              value="dates"
-              checked={stream?.durationType === 'dates'}
-              onChange={handleDurationTypeChange}
-            />
-            <Text>Start & End Dates</Text>
-          </label>
-        </Flex>
-      </Box>
-
-      {stream?.durationType === 'days' ? (
+      {durationType === 'days' ? (
         <>
           <SmartInput
             {...formik.getFieldProps(`streams.${index}.durationDays`)}
@@ -187,6 +139,7 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
           borderRadius="curved"
           onClick={removeStream}
           style={{ alignSelf: 'flex-start' }}
+          icon="cross"
         >
           Remove Stream
         </Button>

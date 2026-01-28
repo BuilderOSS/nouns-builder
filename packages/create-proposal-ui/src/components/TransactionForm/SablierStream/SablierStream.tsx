@@ -5,6 +5,7 @@ import { TransactionType } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { getProvider } from '@buildeross/utils/provider'
 import {
@@ -23,7 +24,14 @@ import type { FormikHelpers } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
 import { truncate } from 'lodash'
 import { useCallback, useEffect, useState } from 'react'
-import { Address, encodeFunctionData, formatUnits, getAddress, parseUnits } from 'viem'
+import {
+  Address,
+  encodeFunctionData,
+  formatUnits,
+  getAddress,
+  isAddress,
+  parseUnits,
+} from 'viem'
 
 import { TokenSelectionForm } from '../../shared'
 import sablierStreamSchema, {
@@ -34,14 +42,19 @@ import { StreamForm } from './StreamForm'
 
 const SECONDS_PER_DAY = 86400
 
+const truncateAddress = (addr: string) => {
+  const snippet = isAddress(addr, { strict: false }) ? walletSnippet(addr) : addr
+  return truncate(snippet, { length: 20 })
+}
+
 export const SablierStream = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const [contractAddresses, setContractAddresses] = useState<{
     batchLockup: Address | null
-    lockupLinear: Address | null
-  }>({ batchLockup: null, lockupLinear: null })
+    lockup: Address | null
+  }>({ batchLockup: null, lockup: null })
 
   const chainSupported = isSablierSupported(chain.id)
 
@@ -62,11 +75,13 @@ export const SablierStream = () => {
     senderAddress: escrowDelegate || addresses.treasury || '',
     tokenAddress: undefined,
     tokenMetadata: undefined,
+    durationType: 'days',
+    cancelable: true,
+    transferable: false,
     streams: [
       {
         recipientAddress: '',
-        amount: 0,
-        durationType: 'days',
+        amount: '',
         durationDays: 30,
         cliffDays: 0,
       },
@@ -76,8 +91,7 @@ export const SablierStream = () => {
   const handleAddStream = useCallback((push: (obj: StreamFormValues) => void) => {
     push({
       recipientAddress: '',
-      amount: 0,
-      durationType: 'days',
+      amount: '',
       durationDays: 30,
       cliffDays: 0,
     })
@@ -91,7 +105,7 @@ export const SablierStream = () => {
       return
     }
 
-    if (!contractAddresses.batchLockup || !contractAddresses.lockupLinear) {
+    if (!contractAddresses.batchLockup || !contractAddresses.lockup) {
       console.error('Sablier contract addresses not loaded')
       return
     }
@@ -107,36 +121,126 @@ export const SablierStream = () => {
         tokenAddress = getWrappedTokenAddress(chain.id)
       } catch (error) {
         console.error('WETH address not found for this chain:', error)
-        alert('WETH is not available on this network')
+        actions.setErrors({
+          tokenAddress: 'WETH is not available on this network',
+        } as any)
         return
       }
     }
 
-    // Resolve ENS names
-    const senderAddress = await getEnsAddress(values.senderAddress, getProvider(chain.id))
+    // Resolve sender ENS name with error handling
+    let senderAddress: string
+    try {
+      const resolved = await getEnsAddress(values.senderAddress, getProvider(chain.id))
+      if (!resolved) {
+        actions.setErrors({
+          senderAddress:
+            'Could not resolve sender address. Please enter a valid address or ENS name.',
+        } as any)
+        return
+      }
+      senderAddress = resolved
+    } catch (error) {
+      console.error('Error resolving sender address:', error)
+      actions.setErrors({
+        senderAddress:
+          'Failed to resolve sender address. Please check your network connection and try again.',
+      } as any)
+      return
+    }
 
-    // Determine if we're using durations or timestamps
-    const useDurations = values.streams[0].durationType === 'days'
+    // Validate sender address is valid Ethereum address
+    let normalizedSender: Address
+    try {
+      normalizedSender = getAddress(senderAddress) as Address
+    } catch (error) {
+      console.error('Invalid sender address:', error)
+      actions.setErrors({
+        senderAddress: 'Invalid sender address format.',
+      } as any)
+      return
+    }
+
+    // Determine if we're using durations or timestamps from form-level setting
+    const useDurations = values.durationType === 'days'
+
+    // Validate required fields based on duration type before processing
+    if (!useDurations) {
+      // Check all streams have valid start and end dates
+      const missingDates = values.streams.some(
+        (stream) => !stream.startDate || !stream.endDate
+      )
+      if (missingDates) {
+        actions.setErrors({
+          streams:
+            'All streams must have start and end dates when using date-based duration',
+        } as any)
+        return
+      }
+    }
 
     const now = Math.floor(Date.now() / 1000)
 
-    // Build batch parameters and validate
-    const batchParams = await Promise.all(
-      values.streams.map(async (stream) => {
-        const recipientAddress = await getEnsAddress(
-          stream.recipientAddress,
-          getProvider(chain.id)
-        )
-        const depositAmount = parseUnits(stream.amount.toString(), tokenDecimals)
+    // Build batch parameters with error handling for each stream
+    const batchParams: Array<{
+      sender: Address
+      recipient: Address
+      depositAmount: bigint
+      cliffDuration?: number
+      totalDuration?: number
+      startTime: number
+      endTime: number
+      cliffTime: number
+    }> = []
+
+    try {
+      for (let i = 0; i < values.streams.length; i++) {
+        const stream = values.streams[i]
+
+        // Resolve recipient ENS name
+        let recipientAddress: string
+        try {
+          const resolved = await getEnsAddress(
+            stream.recipientAddress,
+            getProvider(chain.id)
+          )
+          if (!resolved) {
+            actions.setErrors({
+              streams: `Stream #${i + 1}: Could not resolve recipient address. Please enter a valid address or ENS name.`,
+            } as any)
+            return
+          }
+          recipientAddress = resolved
+        } catch (error) {
+          console.error(`Error resolving recipient address for stream #${i + 1}:`, error)
+          actions.setErrors({
+            streams: `Stream #${i + 1}: Failed to resolve recipient address. Please check your network connection and try again.`,
+          } as any)
+          return
+        }
+
+        // Validate recipient address
+        let normalizedRecipient: Address
+        try {
+          normalizedRecipient = getAddress(recipientAddress) as Address
+        } catch (error) {
+          console.error(`Invalid recipient address for stream #${i + 1}:`, error)
+          actions.setErrors({
+            streams: `Stream #${i + 1}: Invalid recipient address format.`,
+          } as any)
+          return
+        }
+
+        const depositAmount = parseUnits(stream.amount, tokenDecimals)
 
         if (useDurations) {
           // Days from now
           const cliffDuration = (stream.cliffDays || 0) * SECONDS_PER_DAY
           const totalDuration = (stream.durationDays || 0) * SECONDS_PER_DAY
 
-          return {
-            sender: getAddress(senderAddress) as Address,
-            recipient: getAddress(recipientAddress) as Address,
+          batchParams.push({
+            sender: normalizedSender,
+            recipient: normalizedRecipient,
             depositAmount,
             cliffDuration,
             totalDuration,
@@ -144,25 +248,31 @@ export const SablierStream = () => {
             startTime: now,
             endTime: now + totalDuration,
             cliffTime: cliffDuration > 0 ? now + cliffDuration : 0,
-          }
+          })
         } else {
-          // Start/end dates
+          // Start/end dates - safe to use non-null assertion after validation above
           const startTime = Math.floor(new Date(stream.startDate!).getTime() / 1000)
           const endTime = Math.floor(new Date(stream.endDate!).getTime() / 1000)
           const cliffDuration = (stream.cliffDays || 0) * SECONDS_PER_DAY
           const cliffTime = cliffDuration > 0 ? startTime + cliffDuration : 0
 
-          return {
-            sender: getAddress(senderAddress) as Address,
-            recipient: getAddress(recipientAddress) as Address,
+          batchParams.push({
+            sender: normalizedSender,
+            recipient: normalizedRecipient,
             depositAmount,
             startTime,
             endTime,
             cliffTime,
-          }
+          })
         }
-      })
-    )
+      }
+    } catch (error) {
+      console.error('Error building batch parameters:', error)
+      actions.setErrors({
+        streams: 'Failed to process stream data. Please check all fields and try again.',
+      } as any)
+      return
+    }
 
     // Validate all streams
     const validationParams = batchParams.map((params) => ({
@@ -181,7 +291,10 @@ export const SablierStream = () => {
     const validationResult = validateBatchStreams(validationParams)
     if (!validationResult.isValid) {
       console.error('Stream validation failed:', validationResult.errors)
-      alert('Stream validation failed:\n' + validationResult.errors.join('\n'))
+      // Set form-level error for validation failures
+      actions.setErrors({
+        streams: validationResult.errors.join('; '),
+      } as any)
       return
     }
 
@@ -240,7 +353,7 @@ export const SablierStream = () => {
     let calldata: string
     if (useDurations) {
       calldata = encodeCreateWithDurationsLL(
-        contractAddresses.lockupLinear,
+        contractAddresses.lockup,
         getAddress(tokenAddress),
         batchParams.map((params) => ({
           sender: params.sender,
@@ -248,11 +361,13 @@ export const SablierStream = () => {
           depositAmount: params.depositAmount,
           cliffDuration: params.cliffDuration!,
           totalDuration: params.totalDuration!,
-        }))
+        })),
+        values.cancelable,
+        values.transferable
       )
     } else {
       calldata = encodeCreateWithTimestampsLL(
-        contractAddresses.lockupLinear,
+        contractAddresses.lockup,
         getAddress(tokenAddress),
         batchParams.map((params) => ({
           sender: params.sender,
@@ -261,7 +376,9 @@ export const SablierStream = () => {
           startTime: params.startTime,
           cliffTime: params.cliffTime,
           endTime: params.endTime,
-        }))
+        })),
+        values.cancelable,
+        values.transferable
       )
     }
 
@@ -343,7 +460,31 @@ export const SablierStream = () => {
 
           // Calculate total amount across all streams
           const totalInUnits = formik.values.streams
-            .map((stream) => parseUnits(stream.amount.toString(), decimals))
+            .map((stream) => {
+              // Guard against empty/invalid amounts during typing
+              const amount = stream.amount
+              if (!amount || typeof amount !== 'string' || amount.trim() === '') {
+                return 0n
+              }
+
+              // Validate decimal format (reject scientific notation)
+              const decimalRegex = /^(\d+\.?\d*|\.\d+)$/
+              if (!decimalRegex.test(amount)) {
+                return 0n
+              }
+
+              const num = parseFloat(amount)
+              if (isNaN(num) || !isFinite(num) || num <= 0) {
+                return 0n
+              }
+
+              try {
+                return parseUnits(amount, decimals)
+              } catch (error) {
+                // If parseUnits fails, treat as 0
+                return 0n
+              }
+            })
             .reduce((acc, x) => acc + x, 0n)
 
           const totalAmountString = isValid
@@ -376,8 +517,8 @@ export const SablierStream = () => {
               <Form>
                 <Stack gap={'x5'}>
                   <Text variant="paragraph-sm" color="text3">
-                    Create token streams using Sablier protocol. All streams will be
-                    cancelable and non-transferable.
+                    Create token streams using Sablier protocol. Configure duration type,
+                    cancelability, and transferability for all streams.
                   </Text>
 
                   {isValid && totalAmountString && (
@@ -421,13 +562,118 @@ export const SablierStream = () => {
                   />
 
                   {formik.values.tokenMetadata?.isValid && (
+                    <Box>
+                      <Text variant="label-sm" mb="x2">
+                        Duration Type (applies to all streams)
+                      </Text>
+                      <Flex gap="x4" mb="x4">
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="durationType"
+                            value="days"
+                            checked={formik.values.durationType === 'days'}
+                            onChange={() => formik.setFieldValue('durationType', 'days')}
+                          />
+                          <Text>Days from now</Text>
+                        </label>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="durationType"
+                            value="dates"
+                            checked={formik.values.durationType === 'dates'}
+                            onChange={() => formik.setFieldValue('durationType', 'dates')}
+                          />
+                          <Text>Start & End Dates</Text>
+                        </label>
+                      </Flex>
+                      <Text variant="paragraph-sm" color="text3" mb="x4">
+                        {formik.values.durationType === 'days'
+                          ? 'All streams will start now and last for a specified number of days.'
+                          : 'All streams will use specific start and end dates.'}
+                      </Text>
+                    </Box>
+                  )}
+
+                  {formik.values.tokenMetadata?.isValid && (
+                    <Box>
+                      <Text variant="label-sm" mb="x2">
+                        Stream Options (applies to all streams)
+                      </Text>
+                      <Stack gap="x3">
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formik.values.cancelable}
+                            onChange={(e) =>
+                              formik.setFieldValue('cancelable', e.target.checked)
+                            }
+                          />
+                          <Box>
+                            <Text fontWeight="label">Cancelable</Text>
+                            <Text variant="paragraph-sm" color="text3">
+                              Allow the sender to cancel streams and reclaim unstreamed
+                              tokens
+                            </Text>
+                          </Box>
+                        </label>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formik.values.transferable}
+                            onChange={(e) =>
+                              formik.setFieldValue('transferable', e.target.checked)
+                            }
+                          />
+                          <Box>
+                            <Text fontWeight="label">Transferable</Text>
+                            <Text variant="paragraph-sm" color="text3">
+                              Allow recipients to transfer their stream NFT to another
+                              address
+                            </Text>
+                          </Box>
+                        </label>
+                      </Stack>
+                    </Box>
+                  )}
+
+                  {formik.values.tokenMetadata?.isValid && (
                     <Box mt={'x5'}>
                       <FieldArray name="streams">
                         {({ push, remove }) => (
                           <>
                             <Accordion
                               items={formik.values.streams.map((stream, index) => ({
-                                title: `Stream #${index + 1}${stream.recipientAddress ? ` - ${truncate(stream.recipientAddress, { length: 20 })}` : ''}`,
+                                title: `Stream #${index + 1}${stream.recipientAddress ? ` - ${truncateAddress(stream.recipientAddress)}` : ''}`,
                                 description: (
                                   <StreamForm
                                     key={index}
@@ -444,8 +690,8 @@ export const SablierStream = () => {
                                 variant="secondary"
                                 width={'auto'}
                                 onClick={() => handleAddStream(push)}
+                                icon="plus"
                               >
-                                <Icon id="plus" />
                                 Add New Stream
                               </Button>
                             </Flex>
@@ -461,13 +707,13 @@ export const SablierStream = () => {
                     borderRadius={'curved'}
                     type="submit"
                     disabled={
-                      !formik.isValid ||
                       formik.isSubmitting ||
                       !formik.values.tokenMetadata?.isValid ||
                       formik.values.streams.length === 0 ||
                       !!balanceError ||
                       !contractAddresses.batchLockup ||
-                      !contractAddresses.lockupLinear
+                      !contractAddresses.lockup ||
+                      Object.keys(allErrors).length > 0
                     }
                   >
                     {formik.isSubmitting

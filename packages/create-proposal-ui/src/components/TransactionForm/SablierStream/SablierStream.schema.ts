@@ -6,8 +6,7 @@ import { TokenMetadataFormValidated } from '../../shared'
 
 export interface StreamFormValues {
   recipientAddress: string | AddressType
-  amount: number
-  durationType: 'days' | 'dates' // Toggle between days from now vs start/end dates
+  amount: string
   durationDays?: number // When durationType is 'days'
   startDate?: string | Date // When durationType is 'dates'
   endDate?: string | Date // When durationType is 'dates'
@@ -18,6 +17,9 @@ export interface SablierStreamValues {
   senderAddress: string | AddressType // Delegate who can cancel streams
   tokenAddress?: AddressType
   tokenMetadata?: TokenMetadataFormValidated
+  durationType: 'days' | 'dates' // Toggle between days from now vs start/end dates (applies to all streams)
+  cancelable: boolean // Whether streams can be cancelled (applies to all streams)
+  transferable: boolean // Whether stream NFTs can be transferred (applies to all streams)
   streams: StreamFormValues[]
 }
 
@@ -48,49 +50,27 @@ export const StreamFormSchema = yup.object({
     'Recipient address is required.'
   ),
   amount: yup
-    .number()
+    .string()
     .required('Amount is required.')
     .test(
-      'is-greater-than-0',
-      'Must stream more than 0 tokens',
-      (value) => !!value && value > 0
-    ),
-  durationType: yup
-    .string()
-    .oneOf(['days', 'dates'])
-    .required('Duration type is required.'),
-  durationDays: yup.number().when('durationType', {
-    is: 'days',
-    then: (schema) =>
-      schema
-        .required('Duration in days is required.')
-        .test(
-          'is-greater-than-0',
-          'Duration must be greater than 0',
-          (value) => !!value && value > 0
-        ),
-    otherwise: (schema) => schema.optional(),
-  }),
-  startDate: yup.date().when('durationType', {
-    is: 'dates',
-    then: (schema) =>
-      schema
-        .required('Start date is required.')
-        .min(new Date(), 'Start date must be in the future.'),
-    otherwise: (schema) => schema.optional(),
-  }),
-  endDate: yup.date().when('durationType', {
-    is: 'dates',
-    then: (schema) =>
-      schema
-        .required('End date is required.')
-        .test('is-after-start', 'End date must be after start date.', function (value) {
-          const { startDate } = this.parent
-          if (!startDate || !value) return true
-          return new Date(value) > new Date(startDate)
-        }),
-    otherwise: (schema) => schema.optional(),
-  }),
+      'is-valid-decimal',
+      'Amount must be a valid decimal number (no scientific notation)',
+      (value) => {
+        if (!value) return false
+        // Reject scientific notation, only allow standard decimal format
+        // Matches: "1", "1.5", "0.001", ".5" but rejects "1e10", "1E-5"
+        const decimalRegex = /^(\d+\.?\d*|\.\d+)$/
+        return decimalRegex.test(value)
+      }
+    )
+    .test('is-greater-than-0', 'Must stream more than 0 tokens', (value) => {
+      if (!value) return false
+      const num = parseFloat(value)
+      return !isNaN(num) && num > 0
+    }),
+  durationDays: yup.number().optional(),
+  startDate: yup.date().optional(),
+  endDate: yup.date().optional(),
   cliffDays: yup
     .number()
     .optional()
@@ -112,7 +92,74 @@ const sablierStreamSchema = () =>
       'Token address is required.'
     ).optional(),
     tokenMetadata: TokenMetadataSchema.optional(),
-    streams: yup.array().of(StreamFormSchema).min(1, 'At least one stream is required.'),
+    durationType: yup
+      .string()
+      .oneOf(['days', 'dates'])
+      .required('Duration type is required.'),
+    cancelable: yup.boolean().required('Cancelable setting is required.'),
+    transferable: yup.boolean().required('Transferable setting is required.'),
+    streams: yup
+      .array()
+      .of(StreamFormSchema)
+      .min(1, 'At least one stream is required.')
+      .test('validate-stream-fields', 'Stream fields validation', function (streams) {
+        const durationType = this.parent.durationType
+        if (!streams || streams.length === 0) return true
+
+        const errors: yup.ValidationError[] = []
+        streams.forEach((stream: StreamFormValues, index: number) => {
+          if (durationType === 'days') {
+            if (!stream.durationDays || stream.durationDays <= 0) {
+              errors.push(
+                this.createError({
+                  path: `streams[${index}].durationDays`,
+                  message: 'Duration must be greater than 0',
+                })
+              )
+            }
+          } else if (durationType === 'dates') {
+            if (!stream.startDate) {
+              errors.push(
+                this.createError({
+                  path: `streams[${index}].startDate`,
+                  message: 'Start date is required',
+                })
+              )
+            } else if (new Date(stream.startDate) <= new Date()) {
+              errors.push(
+                this.createError({
+                  path: `streams[${index}].startDate`,
+                  message: 'Start date must be in the future',
+                })
+              )
+            }
+
+            if (!stream.endDate) {
+              errors.push(
+                this.createError({
+                  path: `streams[${index}].endDate`,
+                  message: 'End date is required',
+                })
+              )
+            } else if (
+              stream.startDate &&
+              new Date(stream.endDate) <= new Date(stream.startDate)
+            ) {
+              errors.push(
+                this.createError({
+                  path: `streams[${index}].endDate`,
+                  message: 'End date must be after start date',
+                })
+              )
+            }
+          }
+        })
+
+        if (errors.length > 0) {
+          throw new yup.ValidationError(errors)
+        }
+        return true
+      }),
   })
 
 export default sablierStreamSchema

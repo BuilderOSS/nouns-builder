@@ -39,9 +39,9 @@ export async function getSablierBatchLockupAddress(
 }
 
 /**
- * Get the SablierLockupLinear contract address for a given chain
+ * Get the SablierLockup contract address for a given chain
  */
-export async function getSablierLockupLinearAddress(
+export async function getSablierLockupAddress(
   chainId: CHAIN_ID
 ): Promise<Address | null> {
   try {
@@ -58,21 +58,18 @@ export async function getSablierLockupLinearAddress(
     // Get the SablierLockupLinear contract
     const contract = sablier.contracts.get({
       chainId,
-      contractName: 'SablierLockupLinear',
+      contractName: 'SablierLockup',
       release: latestRelease,
     })
 
     if (!contract?.address) {
-      console.error(`SablierLockupLinear not found for chain ${chainId}`)
+      console.error(`SablierLockup not found for chain ${chainId}`)
       return null
     }
 
     return contract.address as Address
   } catch (error) {
-    console.error(
-      `Error getting SablierLockupLinear address for chain ${chainId}:`,
-      error
-    )
+    console.error(`Error getting SablierLockup address for chain ${chainId}:`, error)
     return null
   }
 }
@@ -82,15 +79,15 @@ export async function getSablierLockupLinearAddress(
  */
 export async function getSablierContracts(chainId: CHAIN_ID): Promise<{
   batchLockup: Address | null
-  lockupLinear: Address | null
+  lockup: Address | null
 }> {
-  const [batchLockup, lockupLinear] = await Promise.all([
+  const [batchLockup, lockup] = await Promise.all([
     getSablierBatchLockupAddress(chainId),
-    getSablierLockupLinearAddress(chainId),
+    getSablierLockupAddress(chainId),
   ])
 
   return {
     batchLockup,
-    lockupLinear,
+    lockup,
   }
 }
