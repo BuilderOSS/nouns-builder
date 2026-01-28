@@ -2,7 +2,7 @@ import type { AddressType } from '@buildeross/types'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import * as yup from 'yup'
 
-import { TokenMetadataFormValidated } from '../../shared'
+import { TokenMetadataFormValidated, TokenMetadataSchema } from '../../shared'
 
 export interface RecipientFormValues {
   recipientAddress: string | AddressType
@@ -14,27 +14,6 @@ export interface SendTokensValues {
   tokenMetadata?: TokenMetadataFormValidated
   recipients: RecipientFormValues[]
 }
-
-const bigintSchema = yup
-  .mixed()
-  .transform((value) => {
-    if (typeof value === 'string' && /^\d+$/.test(value)) return BigInt(value)
-    if (typeof value === 'number' && Number.isInteger(value)) return BigInt(value)
-    return value
-  })
-  .test('is-bigint', '${path} must be a BigInt', (value) => typeof value === 'bigint')
-
-export const TokenMetadataSchema = yup.object({
-  name: yup.string().required('Token name is required.'),
-  symbol: yup.string().required('Token symbol is required.'),
-  decimals: yup.number().required('Token decimals is required.'),
-  balance: bigintSchema.required('Token balance is required.'),
-  isValid: yup.boolean().required('Token is valid is required.'),
-  address: addressValidationSchemaWithError(
-    'Token address is invalid.',
-    'Token address is required.'
-  ),
-})
 
 export const RecipientFormSchema = yup.object({
   recipientAddress: addressValidationSchemaWithError(

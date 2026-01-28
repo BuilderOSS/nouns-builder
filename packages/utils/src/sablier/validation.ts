@@ -143,9 +143,16 @@ export function validateSablierStream(params: StreamValidationParams): Validatio
   }
 
   // Shape validation
-  const shape = params.shape.trim()
-  if (shape.length > MAX_SHAPE_LENGTH) {
-    errors.push(`Shape must be less than ${MAX_SHAPE_LENGTH} characters`)
+  if (typeof params.shape !== 'string') {
+    errors.push('Shape must be a string')
+  } else {
+    const trimmedShape = params.shape.trim()
+    const byteLen = new TextEncoder().encode(trimmedShape).length
+    if (byteLen > MAX_SHAPE_LENGTH) {
+      errors.push(
+        `Shape must be less than ${MAX_SHAPE_LENGTH} bytes (currently ${byteLen} bytes)`
+      )
+    }
   }
 
   // Combined start and cliff unlock amounts cannot exceed the deposit amount

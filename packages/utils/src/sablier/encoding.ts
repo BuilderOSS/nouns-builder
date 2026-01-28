@@ -1,4 +1,4 @@
-import { Address, encodeFunctionData } from 'viem'
+import { Address, encodeFunctionData, Hex } from 'viem'
 
 // Sablier BatchLockup ABI - createWithDurationsLL function
 export const batchLockupCreateWithDurationsLLAbi = [
@@ -229,7 +229,7 @@ export function encodeCreateWithDurationsLL(
   streams: CreateWithDurationsLLParams[],
   cancelable: boolean = true,
   transferable: boolean = false
-): string {
+): Hex {
   const batch = streams.map((stream) => ({
     sender: stream.sender,
     recipient: stream.recipient,
@@ -263,7 +263,7 @@ export function encodeCreateWithTimestampsLL(
   streams: CreateWithTimestampsLLParams[],
   cancelable: boolean = true,
   transferable: boolean = false
-): string {
+): Hex {
   const batch = streams.map((stream) => ({
     sender: stream.sender,
     recipient: stream.recipient,

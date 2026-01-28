@@ -3,10 +3,11 @@ import { sablier } from 'sablier'
 import { Address } from 'viem'
 
 /**
- * Get the SablierBatchLockup contract address for a given chain
+ * Shared helper to get a Sablier contract address for a given chain
  */
-export async function getSablierBatchLockupAddress(
-  chainId: CHAIN_ID
+async function getSablierContractAddress(
+  chainId: CHAIN_ID,
+  contractName: string
 ): Promise<Address | null> {
   try {
     // Get the latest release first
@@ -19,23 +20,32 @@ export async function getSablierBatchLockupAddress(
       return null
     }
 
-    // Get the SablierBatchLockup contract
+    // Get the contract
     const contract = sablier.contracts.get({
       chainId,
-      contractName: 'SablierBatchLockup',
+      contractName,
       release: latestRelease,
     })
 
     if (!contract?.address) {
-      console.error(`SablierBatchLockup not found for chain ${chainId}`)
+      console.error(`${contractName} not found for chain ${chainId}`)
       return null
     }
 
     return contract.address as Address
   } catch (error) {
-    console.error(`Error getting SablierBatchLockup address for chain ${chainId}:`, error)
+    console.error(`Error getting ${contractName} address for chain ${chainId}:`, error)
     return null
   }
+}
+
+/**
+ * Get the SablierBatchLockup contract address for a given chain
+ */
+export async function getSablierBatchLockupAddress(
+  chainId: CHAIN_ID
+): Promise<Address | null> {
+  return getSablierContractAddress(chainId, 'SablierBatchLockup')
 }
 
 /**
@@ -44,34 +54,7 @@ export async function getSablierBatchLockupAddress(
 export async function getSablierLockupAddress(
   chainId: CHAIN_ID
 ): Promise<Address | null> {
-  try {
-    // Get the latest release first
-    const latestRelease = sablier.releases.getLatest({
-      protocol: 'lockup',
-    })
-
-    if (!latestRelease) {
-      console.error('No latest Sablier lockup release found')
-      return null
-    }
-
-    // Get the SablierLockupLinear contract
-    const contract = sablier.contracts.get({
-      chainId,
-      contractName: 'SablierLockup',
-      release: latestRelease,
-    })
-
-    if (!contract?.address) {
-      console.error(`SablierLockup not found for chain ${chainId}`)
-      return null
-    }
-
-    return contract.address as Address
-  } catch (error) {
-    console.error(`Error getting SablierLockup address for chain ${chainId}:`, error)
-    return null
-  }
+  return getSablierContractAddress(chainId, 'SablierLockup')
 }
 
 /**

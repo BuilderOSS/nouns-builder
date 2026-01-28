@@ -29,6 +29,7 @@ import {
   encodeFunctionData,
   formatUnits,
   getAddress,
+  Hex,
   isAddress,
   parseUnits,
 } from 'viem'
@@ -351,7 +352,7 @@ export const StreamTokens = () => {
     transactions.push(approveTransaction)
 
     // Create the batch stream transaction
-    let calldata: string
+    let calldata: Hex
     if (useDurations) {
       calldata = encodeCreateWithDurationsLL(
         contractAddresses.lockup,
