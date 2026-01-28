@@ -1,9 +1,11 @@
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants'
+import { CHAIN_ID } from '@buildeross/types'
 import bs58 from 'bs58'
 import { Address, decodeAbiParameters, Hex, toBytes, toHex } from 'viem'
 
-export const NULL_ADDRESS: AddressType =
-  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase() as AddressType
+import { getWrappedTokenAddress } from './weth'
+
+// Re-export for backwards compatibility
 export const SMART_INVOICE_ARBITRATION_PROVIDER =
   '0x18542245cA523DFF96AF766047fE9423E0BED3C0' as Address
 export const ESCROW_RESOLVER_TYPE = 0
@@ -21,30 +23,6 @@ export function convertByte32ToIpfsCidV0(str: Hex) {
     newStr = str.slice(2)
   }
   return bs58.encode(Buffer.from(`1220${newStr}`, 'hex'))
-}
-
-function getWrappedTokenAddress(chainId: number | string): Address {
-  chainId = Number(chainId)
-  switch (chainId) {
-    case CHAIN_ID.ETHEREUM:
-      return '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address
-    case CHAIN_ID.OPTIMISM:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.BASE:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.ZORA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.SEPOLIA:
-      return '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14' as Address
-    case CHAIN_ID.OPTIMISM_SEPOLIA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.BASE_SEPOLIA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.ZORA_SEPOLIA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    default:
-      throw new Error(`Unsupported chain ID: ${chainId}`)
-  }
 }
 
 function getEscrowFactory(chainId: number | string): Address {
@@ -255,4 +233,5 @@ export {
   getEscrowBundlerV1,
   getEscrowFactory,
   getWrappedTokenAddress,
+  NATIVE_TOKEN_ADDRESS,
 }

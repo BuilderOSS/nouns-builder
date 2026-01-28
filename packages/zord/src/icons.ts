@@ -42,6 +42,7 @@ import Plus from './assets/plus.svg'
 import Question from './assets/question.svg'
 import Refresh from './assets/refresh.svg'
 import ResumeTemplate from './assets/resume-template.svg'
+import Sablier from './assets/sablier.svg'
 import Search from './assets/search.svg'
 import Share from './assets/share.svg'
 import Sliders from './assets/sliders.svg'
@@ -99,6 +100,7 @@ export const icons = {
   question: Question,
   refresh: Refresh,
   resumeTemplate: ResumeTemplate,
+  sablier: Sablier,
   search: Search,
   share: Share,
   sliders: Sliders,

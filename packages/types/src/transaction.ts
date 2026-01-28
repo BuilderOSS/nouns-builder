@@ -20,6 +20,7 @@ export enum TransactionType {
   WALLET_CONNECT = 'wallet-connect',
   ADD_ARTWORK = 'add-artwork',
   PIN_TREASURY_ASSET = 'pin-treasury-asset',
+  SABLIER_STREAM = 'sablier-stream',
 }
 
 export type Transaction = {

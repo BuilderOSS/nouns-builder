@@ -9,7 +9,7 @@ import {
   deployEscrowAbi,
   ESCROW_TYPE,
   getEscrowBundler,
-  NULL_ADDRESS,
+  NATIVE_TOKEN_ADDRESS,
 } from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Stack } from '@buildeross/zord'
@@ -56,7 +56,8 @@ export const Escrow: React.FC = () => {
       setIpfsUploadError(null)
 
       // Determine if this is ETH or ERC20
-      const isEthEscrow = values.tokenAddress.toLowerCase() === NULL_ADDRESS.toLowerCase()
+      const isEthEscrow =
+        values.tokenAddress.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
 
       // Use token metadata for decimals and symbol
       const tokenDecimals = values.tokenMetadata.decimals

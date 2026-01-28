@@ -3,6 +3,10 @@ import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
 
+import { TokenMetadataFormValidated } from '../../shared'
+
+export { type TokenMetadataFormValidated }
+
 export const getInitialEscrowFormState = (): EscrowFormValues => ({
   tokenAddress: undefined,
   tokenMetadata: undefined,
@@ -34,15 +38,6 @@ export interface MilestoneFormValues {
   mediaType: string | undefined
   mediaFileName: string
   description: string
-}
-
-export interface TokenMetadataFormValidated {
-  name: string
-  symbol: string
-  decimals: number
-  balance: bigint
-  isValid: boolean
-  address: AddressType
 }
 
 export interface EscrowFormValues {

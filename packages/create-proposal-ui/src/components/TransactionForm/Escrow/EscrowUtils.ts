@@ -4,7 +4,7 @@ import {
   ESCROW_RESOLVER_TYPE,
   getEscrowFactory,
   getWrappedTokenAddress,
-  NULL_ADDRESS,
+  NATIVE_TOKEN_ADDRESS,
   SMART_INVOICE_ARBITRATION_PROVIDER,
 } from '@buildeross/utils/escrow'
 import { Address, encodeAbiParameters } from 'viem'
@@ -20,7 +20,7 @@ export function encodeEscrowData(
   const wrappedTokenAddress = getWrappedTokenAddress(chainId)
   const selectedTokenAddress = values.tokenAddress as Address
   const tokenAddress =
-    selectedTokenAddress.toLowerCase() === NULL_ADDRESS
+    selectedTokenAddress.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
       ? wrappedTokenAddress
       : selectedTokenAddress
 

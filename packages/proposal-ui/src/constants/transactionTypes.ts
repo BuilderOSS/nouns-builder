@@ -131,4 +131,10 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     iconBackdrop: 'rgba(236, 113, 75, 0.1)',
     iconFill: 'warning',
   },
+  [TransactionType.SABLIER_STREAM]: {
+    title: 'Sablier Streams',
+    subTitle: 'Create a proposal to stream tokens using Sablier',
+    icon: 'sablier',
+    iconBackdrop: 'rgba(243, 139, 0, 0.1)',
+  },
 }

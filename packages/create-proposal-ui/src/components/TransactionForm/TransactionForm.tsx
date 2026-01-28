@@ -13,6 +13,7 @@ import { PauseAuctions } from './PauseAuctions'
 import { PinTreasuryAsset } from './PinTreasuryAsset'
 import { ReplaceArtwork } from './ReplaceArtwork'
 import { ResumeAuctions } from './ResumeAuctions'
+import { SablierStream } from './SablierStream'
 import { SendErc20 } from './SendErc20'
 import { SendEth } from './SendEth'
 import { SendNft } from './SendNft'
@@ -32,6 +33,7 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.AIRDROP,
   TransactionType.ESCROW,
   TransactionType.ESCROW_DELEGATE,
+  TransactionType.SABLIER_STREAM,
   TransactionType.PIN_TREASURY_ASSET,
   TransactionType.PAUSE_AUCTIONS,
   TransactionType.FIX_RENDERER_BASE,
@@ -54,6 +56,7 @@ export const TransactionForm = ({ type }: TransactionFormProps) => {
     [TransactionType.SEND_ERC20]: <SendErc20 />,
     [TransactionType.SEND_NFT]: <SendNft />,
     [TransactionType.WALLET_CONNECT]: <WalletConnect />,
+    [TransactionType.SABLIER_STREAM]: <SablierStream />,
     [TransactionType.PIN_TREASURY_ASSET]: <PinTreasuryAsset />,
     [TransactionType.PAUSE_AUCTIONS]: <PauseAuctions />,
     [TransactionType.FIX_RENDERER_BASE]: <FixRendererBase />,

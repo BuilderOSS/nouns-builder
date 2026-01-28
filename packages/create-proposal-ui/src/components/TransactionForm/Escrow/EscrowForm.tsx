@@ -9,6 +9,7 @@ import { truncate } from 'lodash'
 import { useCallback, useState } from 'react'
 import { formatUnits, parseUnits } from 'viem'
 
+import { TokenSelectionForm } from '../../shared'
 import { EscrowDetailsDisplay } from './EscrowDetailsDisplay'
 import {
   EscrowFormProps,
@@ -17,7 +18,6 @@ import {
   MilestoneFormValues,
 } from './EscrowForm.schema'
 import { MilestoneForm } from './MilestoneForm'
-import { TokenSelectionForm } from './TokenSelectionForm'
 
 const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
   const [isMediaUploading, setIsMediaUploading] = useState(false)
