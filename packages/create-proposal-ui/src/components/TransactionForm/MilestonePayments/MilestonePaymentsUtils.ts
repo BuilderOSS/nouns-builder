@@ -4,15 +4,15 @@ import {
   ESCROW_RESOLVER_TYPE,
   getEscrowFactory,
   getWrappedTokenAddress,
-  NULL_ADDRESS,
+  NATIVE_TOKEN_ADDRESS,
   SMART_INVOICE_ARBITRATION_PROVIDER,
 } from '@buildeross/utils/escrow'
 import { Address, encodeAbiParameters } from 'viem'
 
-import { EscrowFormValues } from './EscrowForm.schema'
+import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
 
 export function encodeEscrowData(
-  values: EscrowFormValues,
+  values: MilestonePaymentsFormValues,
   treasuryAddress: Address,
   ipfsCID: string,
   chainId: string | number
@@ -20,7 +20,7 @@ export function encodeEscrowData(
   const wrappedTokenAddress = getWrappedTokenAddress(chainId)
   const selectedTokenAddress = values.tokenAddress as Address
   const tokenAddress =
-    selectedTokenAddress.toLowerCase() === NULL_ADDRESS
+    selectedTokenAddress.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
       ? wrappedTokenAddress
       : selectedTokenAddress
 

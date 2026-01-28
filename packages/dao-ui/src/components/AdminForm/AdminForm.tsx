@@ -1,4 +1,3 @@
-import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import {
   auctionAbi,
   governorAbi,
@@ -33,7 +32,7 @@ import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
-import { Address, encodeFunctionData, formatEther } from 'viem'
+import { Address, encodeFunctionData, formatEther, zeroAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 import {
@@ -160,7 +159,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
         allocationPercentage: x.ownershipPct,
         endDate: new Date(x.vestExpiry * 1000).toISOString(),
       })) || [],
-    vetoPower: !!vetoer && vetoer !== NULL_ADDRESS,
+    vetoPower: !!vetoer && vetoer !== zeroAddress,
     vetoer: vetoer || '',
 
     /* auction */

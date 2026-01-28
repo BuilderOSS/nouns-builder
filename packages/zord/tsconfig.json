@@ -7,7 +7,7 @@
     "outDir": "dist",
     "lib": [
       "dom",
-      "es2019"
+      "ES2022"
     ]
   }
 }

@@ -1,4 +1,4 @@
-import { ERC721_REDEEM_MINTER, NULL_ADDRESS } from '@buildeross/constants'
+import { ERC721_REDEEM_MINTER } from '@buildeross/constants'
 import { erc721RedeemMinterAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
@@ -6,7 +6,7 @@ import { ContractLink } from '@buildeross/ui/ContractLink'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
-import { formatEther, isAddressEqual } from 'viem'
+import { formatEther, isAddressEqual, zeroAddress } from 'viem'
 import { useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -46,7 +46,7 @@ export const ERC721RedeemMinterForm: React.FC = () => {
     ? unpackOptionalArray(settingsData as [bigint, bigint, bigint, AddressType], 4)
     : [undefined, undefined, undefined, undefined]
 
-  const hasSettings = redeemToken && !isAddressEqual(redeemToken, NULL_ADDRESS)
+  const hasSettings = redeemToken && !isAddressEqual(redeemToken, zeroAddress)
 
   const handleResetSettings = useCallback(async () => {
     setIsResetting(true)

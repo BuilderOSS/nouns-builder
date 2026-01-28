@@ -4,14 +4,14 @@ import { Button, Flex, Icon, Stack } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React, { useCallback } from 'react'
 
-import { EscrowFormValues } from './EscrowForm.schema'
+import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
 
 export const MilestoneForm: React.FC<{
   index: number
   setIsMediaUploading: React.Dispatch<React.SetStateAction<boolean>>
   removeMilestone: () => void
 }> = ({ index, removeMilestone, setIsMediaUploading }) => {
-  const formik = useFormikContext<EscrowFormValues>()
+  const formik = useFormikContext<MilestonePaymentsFormValues>()
 
   const handleMediaUploadStart = useCallback(
     (media: File) => {

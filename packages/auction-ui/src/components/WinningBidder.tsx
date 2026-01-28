@@ -1,7 +1,7 @@
-import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Flex, Icon } from '@buildeross/zord'
+import { zeroAddress } from 'viem'
 
 import { AuctionDetail } from './AuctionDetail'
 
@@ -10,7 +10,7 @@ export const WinningBidder = ({ owner }: { owner?: string }) => {
 
   return (
     <AuctionDetail title="Held by">
-      {!owner || owner === NULL_ADDRESS ? (
+      {!owner || owner === zeroAddress ? (
         'n/a'
       ) : (
         <Flex direction={'row'} align={'center'}>

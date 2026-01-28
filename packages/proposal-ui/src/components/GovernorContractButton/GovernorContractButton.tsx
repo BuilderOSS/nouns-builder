@@ -63,7 +63,7 @@ export function GovernorContractButton({
 
     try {
       setIsPending(true)
-      const hash = await writeContractAsync(data.request)
+      const hash = await writeContractAsync(data.request as any)
       await waitForTransactionReceipt(config, { hash, chainId: chain.id })
 
       await mutate(

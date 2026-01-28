@@ -3,7 +3,11 @@ import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
 
-export const getInitialEscrowFormState = (): EscrowFormValues => ({
+import { TokenMetadataFormValidated, TokenMetadataSchema } from '../../shared'
+
+export { type TokenMetadataFormValidated }
+
+export const getInitialMilestonePaymentsFormState = (): MilestonePaymentsFormValues => ({
   tokenAddress: undefined,
   tokenMetadata: undefined,
   clientAddress: '',
@@ -36,16 +40,7 @@ export interface MilestoneFormValues {
   description: string
 }
 
-export interface TokenMetadataFormValidated {
-  name: string
-  symbol: string
-  decimals: number
-  balance: bigint
-  isValid: boolean
-  address: AddressType
-}
-
-export interface EscrowFormValues {
+export interface MilestonePaymentsFormValues {
   clientAddress: string | AddressType
   recipientAddress: string | AddressType
   safetyValveDate: Date | number | string
@@ -54,8 +49,11 @@ export interface EscrowFormValues {
   tokenMetadata?: TokenMetadataFormValidated
 }
 
-export interface EscrowFormProps {
-  onSubmit: (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => void
+export interface MilestonePaymentsFormProps {
+  onSubmit: (
+    values: MilestonePaymentsFormValues,
+    actions: FormikHelpers<MilestonePaymentsFormValues>
+  ) => void
   isSubmitting: boolean
 }
 export const MilestoneSchema = yup.object({
@@ -84,28 +82,7 @@ export const MilestoneSchema = yup.object({
   description: yup.string(),
 })
 
-const bigintSchema = yup
-  .mixed()
-  .transform((value) => {
-    if (typeof value === 'string' && /^\d+$/.test(value)) return BigInt(value)
-    if (typeof value === 'number' && Number.isInteger(value)) return BigInt(value)
-    return value
-  })
-  .test('is-bigint', '${path} must be a BigInt', (value) => typeof value === 'bigint')
-
-export const TokenMetadataSchema = yup.object({
-  name: yup.string().required('Token name is required.'),
-  symbol: yup.string().required('Token symbol is required.'),
-  decimals: yup.number().required('Token decimals is required.'),
-  balance: bigintSchema.required('Token balance is required.'),
-  isValid: yup.boolean().required('Token is valid is required.'),
-  address: addressValidationSchemaWithError(
-    'Token address is invalid.',
-    'Token address is required.'
-  ),
-})
-
-export const EscrowFormSchema = yup.object({
+export const MilestonePaymentsFormSchema = yup.object({
   clientAddress: addressValidationSchemaWithError(
     'Delegate address is invalid.',
     'Delegate address is required.'

@@ -57,7 +57,7 @@ export const CustomTransaction: React.FC = () => {
 
     if (customTransaction?.function?.name === 'sendEth(address)') {
       return {
-        type: TransactionType.SEND_ETH,
+        type: TransactionType.SEND_TOKENS,
         transactions: [
           {
             functionSignature: 'sendEth(address)',

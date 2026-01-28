@@ -12,8 +12,9 @@
     "noUnusedParameters": false,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
-    "module": "es2020",
-    "target": "es2020",
+    "module": "es2022",
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
     "strict": true
   },
   "exclude": ["node_modules"]

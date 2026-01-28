@@ -14,6 +14,7 @@ export default defineConfig({
     }),
   ],
   external: [
+    'sablier',
     '@buildeross/ipfs-service',
     '@buildeross/constants',
     '@buildeross/hooks',

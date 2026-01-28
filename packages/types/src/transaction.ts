@@ -1,15 +1,14 @@
 import { AddressType } from './hex'
 
 export enum TransactionType {
-  SEND_ETH = 'send-eth',
-  SEND_ERC20 = 'send-erc20',
+  SEND_TOKENS = 'send-tokens',
   SEND_NFT = 'send-nft',
   AIRDROP = 'airdrop',
   DROPOSAL = 'droposal',
   CUSTOM = 'custom',
   UPGRADE = 'upgrade',
-  ESCROW = 'escrow',
-  ESCROW_DELEGATE = 'escrow-delegate',
+  MILESTONE_PAYMENTS = 'milestone-payments',
+  NOMINATE_DELEGATE = 'nominate-delegate',
   PAUSE_AUCTIONS = 'pause-auctions',
   FIX_RENDERER_BASE = 'fix-renderer-base',
   RESUME_AUCTIONS = 'resume-auctions',
@@ -20,6 +19,7 @@ export enum TransactionType {
   WALLET_CONNECT = 'wallet-connect',
   ADD_ARTWORK = 'add-artwork',
   PIN_TREASURY_ASSET = 'pin-treasury-asset',
+  STREAM_TOKENS = 'stream-tokens',
 }
 
 export type Transaction = {

@@ -1,4 +1,4 @@
-import { NULL_ADDRESS, PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
+import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
@@ -18,6 +18,7 @@ import {
   isAddress,
   parseAbiParameters,
   parseEther,
+  zeroAddress,
 } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
@@ -171,7 +172,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
           : BigInt('86400'),
       founderRewardRecipient: (isAddress(founderRewardRecipient, { strict: false })
         ? founderRewardRecipient
-        : NULL_ADDRESS) as AddressType,
+        : zeroAddress) as AddressType,
       founderRewardBps: founderRewardBps,
     }),
     [
@@ -200,10 +201,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
       quorumThresholdBps: auctionSettings?.quorumThreshold
         ? BigInt(Number((Number(auctionSettings?.quorumThreshold) * 100).toFixed(2)))
         : BigInt('0'),
-      vetoer:
-        vetoPower === true
-          ? getAddress(vetoerAddress as AddressType)
-          : getAddress(NULL_ADDRESS),
+      vetoer: vetoPower === true ? getAddress(vetoerAddress as AddressType) : zeroAddress,
     }),
     [
       auctionSettings?.timelockDelay,
@@ -256,7 +254,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
           functionName: 'deploy',
           args: [
             founderParams,
-            { ...tokenParams, reservedUntilTokenId, metadataRenderer: NULL_ADDRESS },
+            { ...tokenParams, reservedUntilTokenId, metadataRenderer: zeroAddress },
             auctionParams,
             govParams,
           ],
@@ -440,7 +438,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               />
             </ReviewSection>
 
-            {founderRewardRecipient && founderRewardRecipient !== NULL_ADDRESS && (
+            {founderRewardRecipient && founderRewardRecipient !== zeroAddress && (
               <ReviewSection subHeading="Auction Rewards">
                 <ReviewItem
                   label="Founder Reward Recipient"

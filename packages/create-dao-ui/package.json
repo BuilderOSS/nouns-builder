@@ -70,7 +70,7 @@
     "@sentry/nextjs": "^9.22.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "viem": "^2.38.2",
+    "viem": "^2.44.2",
     "wagmi": "^2.18.1"
   },
   "peerDependenciesMeta": {

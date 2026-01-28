@@ -1,7 +1,7 @@
 {
   "extends": "@buildeross/tsconfig/react-library.json",
   "compilerOptions": {
-    "lib": ["dom", "ES2020"],
+    "lib": ["dom", "ES2022"],
     "types": ["node"]
   },
   "include": ["."],

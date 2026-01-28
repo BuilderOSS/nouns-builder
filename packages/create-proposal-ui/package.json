@@ -18,6 +18,7 @@
     "lanyard": "^1.1.2",
     "lodash": "^4.17.21",
     "papaparse": "^5.5.3",
+    "sablier": "^2.0.1",
     "swr": "^2.3.3",
     "yup": "^1.6.1",
     "zustand": "^5.0.4"
@@ -83,7 +84,7 @@
     "@sentry/nextjs": "^9.22.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "viem": "^2.38.2",
+    "viem": "^2.44.2",
     "wagmi": "^2.18.1"
   },
   "peerDependenciesMeta": {
