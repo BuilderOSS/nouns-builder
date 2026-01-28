@@ -1,4 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { useEthUsdPrice } from '@buildeross/hooks'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractLink } from '@buildeross/ui/ContractLink'
@@ -24,13 +25,7 @@ export const Treasury = () => {
     chainId: chain.id,
   })
 
-  const { data: ethUsd } = useSWR(SWR_KEYS.ETH_USD, async () => {
-    const response = await fetch(
-      'https://api.coinbase.com/v2/exchange-rates?currency=ETH'
-    )
-    const json = await response.json()
-    return json.data.rates.USD
-  })
+  const { price: ethUsd } = useEthUsdPrice()
 
   const { data: earnings } = useSWR(
     chain && addresses.token
@@ -47,16 +42,16 @@ export const Treasury = () => {
   const formattedEarnings = earnings && formatCryptoVal(earnings)
 
   const ethToUsd = React.useMemo(() => {
-    if (!balance) return 0
+    if (!balance || !ethUsd) return 0
     const wei = balance.value
     const eth = formatEther(wei)
-    const usd = ((eth as any) * ethUsd).toFixed(2)
+    const usd = (Number(eth) * ethUsd).toFixed(2)
     const usdFormatted = numberFormatter(usd)
     return usdFormatted
   }, [balance, ethUsd])
 
   const treasuryBalance = React.useMemo(() => {
-    return balance?.value ? formatCryptoVal(formatEther(balance?.value)) : null
+    return balance?.value ? formatCryptoVal(formatEther(balance?.value)) : '0'
   }, [balance])
 
   return (
@@ -129,7 +124,7 @@ export const Treasury = () => {
           align={{ '@initial': 'start', '@768': 'center' }}
         >
           <Text className={statisticContent} fontWeight={'display'}>
-            ${ethToUsd ? ethToUsd : ' '}
+            ${ethToUsd ? ethToUsd : '0'}
           </Text>
           <Text
             variant="paragraph-md"

@@ -253,12 +253,16 @@ export async function uploadFile(
 ): Promise<IPFSUploadResponse> {
   console.info('ipfs-service/uploadFile: file:', file)
 
-  const { onProgress, cache, type } = {
+  const {
+    onProgress,
+    cache = true,
+    type = 'file',
+  } = {
     ...defaultOptions,
     ...options,
   }
 
-  const uploadType = (type ?? 'file') as UploadType
+  const uploadType = type as UploadType
   const uploadOptions = pinataOptions[uploadType]
 
   if (file.size > uploadOptions.max_file_size) {

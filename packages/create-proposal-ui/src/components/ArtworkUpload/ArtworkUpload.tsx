@@ -1,5 +1,6 @@
 import { useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
 import { useArtworkUpload } from '@buildeross/hooks/useArtworkUpload'
+import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { type Property } from '@buildeross/sdk/contract'
 import { ImageProps, IPFSUpload, Trait } from '@buildeross/types'
@@ -138,6 +139,11 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     setOrderedLayers,
   } = useArtworkStore()
   const { artwork } = setUpArtwork
+  const scrollDirection = useScrollDirection()
+
+  // Calculate top offset based on header visibility
+  // Header is 80px tall and hidden when scrollDirection is 'down'
+  const topOffset = scrollDirection === 'down' ? 24 : 104 // 24px + 80px header
 
   const handleUploadStart = useCallback(() => {
     setIsUploadingToIPFS(true)
@@ -286,13 +292,21 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
           animate={'open'}
           className={artworkPreviewPanel}
         >
-          <ArtworkPreview
-            canvas={canvas}
-            generateStackedImage={generateStackedImage}
-            images={mergedImages}
-            generatedImages={generatedImages}
-            orderedLayers={orderedLayers}
-          />
+          <div
+            style={{
+              position: 'sticky',
+              top: `${topOffset}px`,
+              transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <ArtworkPreview
+              canvas={canvas}
+              generateStackedImage={generateStackedImage}
+              images={mergedImages}
+              generatedImages={generatedImages}
+              orderedLayers={orderedLayers}
+            />
+          </div>
         </motion.div>
       )}
     </>
