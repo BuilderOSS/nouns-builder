@@ -5,8 +5,8 @@ import { useTransactionSummary } from '@buildeross/hooks/useTransactionSummary'
 import { CHAIN_ID, DaoContractAddresses, DecodedTransactionData } from '@buildeross/types'
 import {
   decodeEscrowData,
-  decodeEscrowDataV1,
-  getEscrowBundlerV1,
+  decodeEscrowDataLegacy,
+  getEscrowBundlerLegacy,
 } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -44,8 +44,8 @@ export const DecodedDisplay: React.FC<{
     const raw = arg?.value
     if (!raw || typeof raw !== 'string' || !raw.startsWith('0x')) return null
     const decoder =
-      target.toLowerCase() === getEscrowBundlerV1(chainId).toLowerCase()
-        ? decodeEscrowDataV1
+      target.toLowerCase() === getEscrowBundlerLegacy(chainId).toLowerCase()
+        ? decodeEscrowDataLegacy
         : decodeEscrowData
 
     try {

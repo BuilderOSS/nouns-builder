@@ -4,7 +4,7 @@ import { CHAIN_ID, DecodedArg } from '@buildeross/types'
 import {
   DecodedEscrowData,
   getEscrowBundler,
-  getEscrowBundlerV1,
+  getEscrowBundlerLegacy,
 } from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Flex, Text } from '@buildeross/zord'
@@ -59,7 +59,7 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   // Check if this is an escrow argument
   const isEscrowTarget =
     toLower(target) === toLower(getEscrowBundler(chainId)) ||
-    toLower(target) === toLower(getEscrowBundlerV1(chainId))
+    toLower(target) === toLower(getEscrowBundlerLegacy(chainId))
 
   const isEscrowArgument =
     isEscrowTarget &&

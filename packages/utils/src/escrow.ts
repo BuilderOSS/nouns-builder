@@ -73,7 +73,7 @@ function getEscrowBundler(chainId: number | string): Address {
   }
 }
 
-function getEscrowBundlerV1(chainId: number | string): Address {
+function getEscrowBundlerLegacy(chainId: number | string): Address {
   chainId = Number(chainId)
   switch (chainId) {
     case CHAIN_ID.ETHEREUM:
@@ -147,7 +147,7 @@ const decodeEscrowData = (data: Hex): DecodedEscrowData => {
   }
 }
 
-const decodeEscrowDataV1 = (data: Hex): DecodedEscrowData => {
+const decodeEscrowDataLegacy = (data: Hex): DecodedEscrowData => {
   try {
     const decodedAbiData = decodeAbiParameters(
       [
@@ -178,7 +178,7 @@ const decodeEscrowDataV1 = (data: Hex): DecodedEscrowData => {
       escrowType: decodedAbiData[9],
     } as DecodedEscrowData
   } catch (e) {
-    console.error('error decoding escrow data v1', e)
+    console.error('error decoding escrow data legacy', e)
     return {} as DecodedEscrowData
   }
 }
@@ -225,12 +225,46 @@ const deployEscrowAbi = [
   },
 ]
 
+// Older escrow contract ABI (without _provider parameter)
+const deployEscrowAbiLegacy = [
+  {
+    inputs: [
+      {
+        internalType: 'uint256[]',
+        name: '_milestoneAmounts',
+        type: 'uint256[]',
+      },
+      {
+        internalType: 'bytes',
+        name: '_escrowData',
+        type: 'bytes',
+      },
+      {
+        internalType: 'uint256',
+        name: '_fundAmount',
+        type: 'uint256',
+      },
+    ],
+    name: 'deployEscrow',
+    outputs: [
+      {
+        internalType: 'address',
+        name: 'escrow',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+]
+
 export {
   decodeEscrowData,
-  decodeEscrowDataV1,
+  decodeEscrowDataLegacy,
   deployEscrowAbi,
+  deployEscrowAbiLegacy,
   getEscrowBundler,
-  getEscrowBundlerV1,
+  getEscrowBundlerLegacy,
   getEscrowFactory,
   getWrappedTokenAddress,
   NATIVE_TOKEN_ADDRESS,

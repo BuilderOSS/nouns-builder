@@ -11,7 +11,7 @@ import {
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
+import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
 import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
@@ -54,12 +54,12 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
     if (!proposal.targets) return false
 
     const escrowBundler = getEscrowBundler(chain.id)
-    const escrowBundlerV1 = getEscrowBundlerV1(chain.id)
+    const escrowBundlerLegacy = getEscrowBundlerLegacy(chain.id)
 
     return proposal.targets.some(
       (target) =>
         toLower(target) === toLower(escrowBundler) ||
-        toLower(target) === toLower(escrowBundlerV1)
+        toLower(target) === toLower(escrowBundlerLegacy)
     )
   }, [proposal.targets, chain.id])
 

@@ -3,10 +3,11 @@ import type { Proposal } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import {
   decodeEscrowData,
-  decodeEscrowDataV1,
+  decodeEscrowDataLegacy,
   deployEscrowAbi,
+  deployEscrowAbiLegacy,
   getEscrowBundler,
-  getEscrowBundlerV1,
+  getEscrowBundlerLegacy,
 } from '@buildeross/utils/escrow'
 import { fetchFromURI } from '@buildeross/utils/fetch'
 import { getProvider } from '@buildeross/utils/provider'
@@ -73,12 +74,12 @@ export const useInvoiceData = (chainId: CHAIN_ID, proposal: Proposal): InvoiceDa
     if (!proposal.targets) return -1
 
     const escrowBundler = getEscrowBundler(chainId)
-    const escrowBundlerV1 = getEscrowBundlerV1(chainId)
+    const escrowBundlerLegacy = getEscrowBundlerLegacy(chainId)
 
     return proposal.targets.findIndex(
       (target) =>
         toLower(target) === toLower(escrowBundler) ||
-        toLower(target) === toLower(escrowBundlerV1)
+        toLower(target) === toLower(escrowBundlerLegacy)
     )
   }, [proposal.targets, chainId])
 
@@ -92,34 +93,41 @@ export const useInvoiceData = (chainId: CHAIN_ID, proposal: Proposal): InvoiceDa
 
     if (!calldata || !target) return {}
 
+    // Determine if it's legacy escrow based on target address
+    const isEscrowLegacy = toLower(target) === toLower(getEscrowBundlerLegacy(chainId))
+
+    // Use the appropriate ABI and decoder based on contract version
+    const abi = isEscrowLegacy ? deployEscrowAbiLegacy : deployEscrowAbi
+    const decodeEscrowFn = isEscrowLegacy ? decodeEscrowDataLegacy : decodeEscrowData
+
     try {
-      // Decode the deployEscrow function call
       const decoded = decodeFunctionData({
-        abi: deployEscrowAbi,
+        abi,
         data: calldata as Hex,
       })
 
       if (decoded.functionName !== 'deployEscrow' || !decoded.args) return {}
 
-      const [, _milestoneAmounts, _escrowData] = decoded.args as readonly [
-        unknown,
-        bigint[],
-        Hex,
-      ]
+      // Extract parameters based on ABI structure
+      let milestoneAmounts: bigint[]
+      let escrowData: Hex
 
-      // Determine if it's V1 based on target address
-      const isEscrowV1 = toLower(target) === toLower(getEscrowBundlerV1(chainId))
+      if (isEscrowLegacy) {
+        // Legacy ABI: deployEscrow(_milestoneAmounts, _escrowData, _fundAmount)
+        ;[milestoneAmounts, escrowData] = decoded.args as readonly [bigint[], Hex]
+      } else {
+        // Modern ABI: deployEscrow(_provider, _milestoneAmounts, _escrowData, _escrowType, _fundAmount)
+        ;[, milestoneAmounts, escrowData] = decoded.args as readonly [Hex, bigint[], Hex]
+      }
 
-      // Decode the escrow data
-      const { ipfsCid, clientAddress, tokenAddress } = isEscrowV1
-        ? decodeEscrowDataV1(_escrowData as Hex)
-        : decodeEscrowData(_escrowData as Hex)
+      // Decode the escrow data with the appropriate decoder
+      const { ipfsCid, clientAddress, tokenAddress } = decodeEscrowFn(escrowData)
 
       return {
         invoiceCid: ipfsCid,
         clientAddress: clientAddress as AddressType,
         tokenAddress: tokenAddress as AddressType,
-        milestoneAmounts: (_milestoneAmounts as bigint[]).map((x) => BigInt(x)),
+        milestoneAmounts: milestoneAmounts.map((x) => BigInt(x)),
       }
     } catch (error) {
       console.error('Failed to decode escrow calldata:', error)
