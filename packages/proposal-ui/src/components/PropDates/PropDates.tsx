@@ -1,12 +1,9 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useInvoiceData } from '@buildeross/hooks/useInvoiceData'
 import { getPropDates, type PropDate, type Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { skeletonAnimation } from '@buildeross/ui/styles'
-import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
-import { toLower } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { zeroHash } from 'viem'
@@ -34,19 +31,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
     { revalidateOnMount: true, refreshInterval: 1000 * 5 }
   )
 
-  const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
-
-  const decodedEscrowTxn = useMemo(
-    () =>
-      decodedTransactions?.find(
-        (t) =>
-          toLower(t.target) === toLower(getEscrowBundler(chain.id)) ||
-          toLower(t.target) === toLower(getEscrowBundlerV1(chain.id))
-      ),
-    [chain.id, decodedTransactions]
-  )
-
-  const { invoiceData } = useInvoiceData(chain.id, decodedEscrowTxn)
+  const { invoiceData } = useInvoiceData(chain.id, proposal)
 
   const [showOnlyDaoMembers, setShowOnlyDaoMembers] = useState(false)
   const [replyingTo, setReplyingTo] = useState<PropDate | undefined>(undefined)

@@ -1,12 +1,12 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
-import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useInvoiceData } from '@buildeross/hooks/useInvoiceData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
@@ -44,14 +44,12 @@ const createSafeUrl = (chainId: CHAIN_ID, safeAddress: Hex) => {
 }
 
 interface MilestoneDetailsProps {
-  decodedTransaction: DecodedTransaction
-  executionTransactionHash?: string
+  proposal: Proposal
   onOpenProposalReview: () => Promise<void>
 }
 
 export const MilestoneDetails = ({
-  decodedTransaction,
-  executionTransactionHash,
+  proposal,
   onOpenProposalReview,
 }: MilestoneDetailsProps) => {
   const { chain } = useChainStore()
@@ -74,7 +72,7 @@ export const MilestoneDetails = ({
     milestoneAmounts,
     invoiceData,
     isLoadingInvoice,
-  } = useInvoiceData(chain.id, decodedTransaction, executionTransactionHash)
+  } = useInvoiceData(chain.id, proposal)
 
   const { tokenMetadata } = useTokenMetadataSingle(chain.id, tokenAddress)
 

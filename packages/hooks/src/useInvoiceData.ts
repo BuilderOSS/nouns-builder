@@ -1,8 +1,11 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import type { Proposal } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import {
   decodeEscrowData,
   decodeEscrowDataV1,
+  deployEscrowAbi,
+  getEscrowBundler,
   getEscrowBundlerV1,
 } from '@buildeross/utils/escrow'
 import { fetchFromURI } from '@buildeross/utils/fetch'
@@ -10,11 +13,10 @@ import { getProvider } from '@buildeross/utils/provider'
 import { type InvoiceMetadata } from '@smartinvoicexyz/types'
 import find from 'lodash/find'
 import get from 'lodash/get'
+import toLower from 'lodash/toLower'
 import { useMemo } from 'react'
 import useSWR from 'swr'
-import { decodeEventLog, Hex, isHex } from 'viem'
-
-import { DecodedTransaction } from './useDecodedTransactions'
+import { decodeEventLog, decodeFunctionData, Hex, isHex } from 'viem'
 
 type InvoiceData = {
   invoiceAddress: Hex | undefined
@@ -65,45 +67,73 @@ const LOG_NEW_INVOICE_EVENT_ABI = [
   },
 ]
 
-export const useInvoiceData = (
-  chainId: CHAIN_ID,
-  decodedTransaction?: DecodedTransaction,
-  executionTransactionHash?: string
-): InvoiceData => {
-  const { invoiceCid, clientAddress, milestoneAmounts, tokenAddress } = useMemo(() => {
-    if (
-      !decodedTransaction ||
-      decodedTransaction.isNotDecoded ||
-      !decodedTransaction.transaction.args ||
-      !decodedTransaction.transaction.args._escrowData ||
-      !decodedTransaction.transaction.args._milestoneAmounts
+export const useInvoiceData = (chainId: CHAIN_ID, proposal: Proposal): InvoiceData => {
+  // Find escrow transaction in proposal
+  const escrowTransactionIndex = useMemo(() => {
+    if (!proposal.targets) return -1
+
+    const escrowBundler = getEscrowBundler(chainId)
+    const escrowBundlerV1 = getEscrowBundlerV1(chainId)
+
+    return proposal.targets.findIndex(
+      (target) =>
+        toLower(target) === toLower(escrowBundler) ||
+        toLower(target) === toLower(escrowBundlerV1)
     )
+  }, [proposal.targets, chainId])
+
+  // Extract invoice data from calldata
+  const { invoiceCid, clientAddress, milestoneAmounts, tokenAddress } = useMemo(() => {
+    if (escrowTransactionIndex === -1 || !proposal.calldatas || !proposal.targets)
       return {}
 
-    const isEscrowV1 =
-      decodedTransaction.target.toLowerCase() ===
-      getEscrowBundlerV1(chainId).toLowerCase()
+    const calldata = proposal.calldatas[escrowTransactionIndex]
+    const target = proposal.targets[escrowTransactionIndex]
 
-    const { _escrowData, _milestoneAmounts } = decodedTransaction.transaction.args
+    if (!calldata || !target) return {}
 
-    const { ipfsCid, clientAddress, tokenAddress } = isEscrowV1
-      ? decodeEscrowDataV1(_escrowData.value as Hex)
-      : decodeEscrowData(_escrowData.value as Hex)
+    try {
+      // Decode the deployEscrow function call
+      const decoded = decodeFunctionData({
+        abi: deployEscrowAbi,
+        data: calldata as Hex,
+      })
 
-    return {
-      invoiceCid: ipfsCid,
-      clientAddress: clientAddress as AddressType,
-      tokenAddress: tokenAddress as AddressType,
-      milestoneAmounts: _milestoneAmounts.value
-        .toString()
-        .split(',')
-        .map((x: string) => BigInt(x)),
+      if (decoded.functionName !== 'deployEscrow' || !decoded.args) return {}
+
+      const [, _milestoneAmounts, _escrowData] = decoded.args as readonly [
+        unknown,
+        bigint[],
+        Hex,
+      ]
+
+      // Determine if it's V1 based on target address
+      const isEscrowV1 = toLower(target) === toLower(getEscrowBundlerV1(chainId))
+
+      // Decode the escrow data
+      const { ipfsCid, clientAddress, tokenAddress } = isEscrowV1
+        ? decodeEscrowDataV1(_escrowData as Hex)
+        : decodeEscrowData(_escrowData as Hex)
+
+      return {
+        invoiceCid: ipfsCid,
+        clientAddress: clientAddress as AddressType,
+        tokenAddress: tokenAddress as AddressType,
+        milestoneAmounts: (_milestoneAmounts as bigint[]).map((x) => BigInt(x)),
+      }
+    } catch (error) {
+      console.error('Failed to decode escrow calldata:', error)
+      return {}
     }
-  }, [decodedTransaction, chainId])
+  }, [escrowTransactionIndex, proposal.calldatas, proposal.targets, chainId])
 
   const { data: invoiceAddress, isValidating: isLoadingInvoiceAddress } = useSWR(
-    executionTransactionHash && isHex(executionTransactionHash)
-      ? ([SWR_KEYS.INVOICE_LOG_NEW_INVOICE, chainId, executionTransactionHash] as const)
+    proposal.executionTransactionHash && isHex(proposal.executionTransactionHash)
+      ? ([
+          SWR_KEYS.INVOICE_LOG_NEW_INVOICE,
+          chainId,
+          proposal.executionTransactionHash,
+        ] as const)
       : null,
     async ([, _chainId, _txHash]) => {
       const provider = getProvider(_chainId)

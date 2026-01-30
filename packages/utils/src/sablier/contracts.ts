@@ -5,10 +5,10 @@ import { Address } from 'viem'
 /**
  * Shared helper to get a Sablier contract address for a given chain
  */
-async function getSablierContractAddress(
+function getSablierContractAddress(
   chainId: CHAIN_ID,
   contractName: string
-): Promise<Address | null> {
+): Address | null {
   try {
     // Get the latest release first
     const latestRelease = sablier.releases.getLatest({
@@ -42,32 +42,28 @@ async function getSablierContractAddress(
 /**
  * Get the SablierBatchLockup contract address for a given chain
  */
-export async function getSablierBatchLockupAddress(
-  chainId: CHAIN_ID
-): Promise<Address | null> {
+export function getSablierBatchLockupAddress(chainId: CHAIN_ID): Address | null {
   return getSablierContractAddress(chainId, 'SablierBatchLockup')
 }
 
 /**
  * Get the SablierLockup contract address for a given chain
  */
-export async function getSablierLockupAddress(
-  chainId: CHAIN_ID
-): Promise<Address | null> {
+export function getSablierLockupAddress(chainId: CHAIN_ID): Address | null {
   return getSablierContractAddress(chainId, 'SablierLockup')
 }
 
 /**
  * Get both Sablier contract addresses needed for batch stream creation
  */
-export async function getSablierContracts(chainId: CHAIN_ID): Promise<{
+export function getSablierContracts(chainId: CHAIN_ID): {
   batchLockup: Address | null
   lockup: Address | null
-}> {
-  const [batchLockup, lockup] = await Promise.all([
+} {
+  const [batchLockup, lockup] = [
     getSablierBatchLockupAddress(chainId),
     getSablierLockupAddress(chainId),
-  ])
+  ]
 
   return {
     batchLockup,

@@ -23,7 +23,7 @@ import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
 import { truncate } from 'lodash'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import {
   Address,
   encodeFunctionData,
@@ -53,19 +53,17 @@ export const StreamTokens = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
-  const [contractAddresses, setContractAddresses] = useState<{
-    batchLockup: Address | null
-    lockup: Address | null
-  }>({ batchLockup: null, lockup: null })
 
   const chainSupported = isSablierSupported(chain.id)
 
-  // Fetch Sablier contract addresses on mount
-  useEffect(() => {
-    if (chainSupported) {
-      getSablierContracts(chain.id).then(setContractAddresses)
-    }
-  }, [chain.id, chainSupported])
+  // Get Sablier contract addresses (synchronous)
+  const contractAddresses = useMemo(
+    () =>
+      chainSupported
+        ? getSablierContracts(chain.id)
+        : { batchLockup: null, lockup: null },
+    [chain.id, chainSupported]
+  )
 
   const { escrowDelegate } = useEscrowDelegate({
     chainId: chain.id,
