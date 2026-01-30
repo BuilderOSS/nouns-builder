@@ -10,6 +10,7 @@ import {
 } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
 import { atoms, Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
@@ -56,6 +57,47 @@ export const DecodedDisplay: React.FC<{
     }
   }, [transaction.args, target, chainId])
 
+  // Prepare stream data once
+  const streamData = React.useMemo(() => {
+    const sablierContracts = getSablierContracts(chainId)
+    const isSablierTarget =
+      (sablierContracts.batchLockup &&
+        target.toLowerCase() === sablierContracts.batchLockup.toLowerCase()) ||
+      (sablierContracts.lockup &&
+        target.toLowerCase() === sablierContracts.lockup.toLowerCase())
+
+    if (!isSablierTarget) return null
+
+    // Check if this is a createWithDurationsLL or createWithTimestampsLL function
+    if (
+      transaction.functionName !== 'createWithDurationsLL' &&
+      transaction.functionName !== 'createWithTimestampsLL'
+    ) {
+      return null
+    }
+
+    // Extract calldata - we need to reconstruct it from the transaction
+    // The transaction already has decoded args, but we need the raw calldata
+    // Since we don't have direct access to calldata here, we'll extract from args
+    try {
+      // Get lockup, asset, and batch from args
+      const lockupArg = transaction.args['lockup'] || transaction.args['_lockup']
+      const assetArg = transaction.args['asset'] || transaction.args['_asset']
+      const batchArg = transaction.args['batch'] || transaction.args['_batch']
+
+      if (!lockupArg || !assetArg || !batchArg) return null
+
+      return {
+        lockupAddress: lockupArg.value as string,
+        tokenAddress: assetArg.value as string,
+        streams: Array.isArray(batchArg.value) ? batchArg.value : [],
+      }
+    } catch (e) {
+      console.warn('Failed to extract stream data', e)
+      return null
+    }
+  }, [transaction.args, transaction.functionName, target, chainId])
+
   // Determine single token address for ERC20 operations
   const tokenAddress = React.useMemo(() => {
     // For ERC20 transfer/approve, use target
@@ -68,9 +110,14 @@ export const DecodedDisplay: React.FC<{
       return target
     }
 
+    // For stream operations, get token from stream data
+    if (streamData?.tokenAddress) {
+      return streamData.tokenAddress
+    }
+
     // For escrow operations, get token from escrow data
     return escrowData?.tokenAddress || null
-  }, [transaction.functionName, target, escrowData])
+  }, [transaction.functionName, target, escrowData, streamData])
 
   // Determine single NFT contract and token ID
   // TODO: add erc1155 support later
@@ -196,6 +243,7 @@ export const DecodedDisplay: React.FC<{
                 tokenMetadata={tokenMetadata}
                 nftMetadata={nftMetadata}
                 escrowData={escrowData}
+                streamData={streamData}
               />
             )
           })}

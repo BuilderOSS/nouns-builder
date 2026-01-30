@@ -101,6 +101,7 @@ const EscrowInstance = ({
   escrowIndex,
   totalEscrows,
   onOpenProposalReview,
+  hasThreshold,
 }: EscrowInstanceProps) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
