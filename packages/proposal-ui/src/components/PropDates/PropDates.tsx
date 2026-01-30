@@ -31,7 +31,11 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
     { revalidateOnMount: true, refreshInterval: 1000 * 5 }
   )
 
-  const { invoiceData } = useInvoiceData(chain.id, proposal)
+  const { escrows } = useInvoiceData(chain.id, proposal)
+
+  // For backward compatibility, use the first escrow's invoice data
+  // Most proposals will only have one escrow
+  const invoiceData = escrows[0]?.invoiceData
 
   const [showOnlyDaoMembers, setShowOnlyDaoMembers] = useState(false)
   const [replyingTo, setReplyingTo] = useState<PropDate | undefined>(undefined)

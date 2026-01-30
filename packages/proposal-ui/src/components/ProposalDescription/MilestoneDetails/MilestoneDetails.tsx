@@ -1,7 +1,7 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { useInvoiceData } from '@buildeross/hooks/useInvoiceData'
+import { type EscrowInstanceData, useInvoiceData } from '@buildeross/hooks/useInvoiceData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { useVotes } from '@buildeross/hooks/useVotes'
@@ -54,9 +54,7 @@ export const MilestoneDetails = ({
 }: MilestoneDetailsProps) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { addTransaction } = useProposalStore()
   const { address } = useAccount()
-  const config = useConfig()
 
   const { hasThreshold } = useVotes({
     chainId: chain.id,
@@ -65,14 +63,53 @@ export const MilestoneDetails = ({
     collectionAddress: addresses.token,
   })
 
-  const {
-    invoiceAddress,
-    clientAddress,
-    tokenAddress,
-    milestoneAmounts,
-    invoiceData,
-    isLoadingInvoice,
-  } = useInvoiceData(chain.id, proposal)
+  const { escrows, isLoadingInvoice } = useInvoiceData(chain.id, proposal)
+
+  const isLoading = isLoadingInvoice && escrows.length === 0
+
+  return (
+    <>
+      {isLoading && <Spinner size="md" />}
+
+      {!isLoading &&
+        escrows.map((escrow: EscrowInstanceData, escrowIndex: number) => (
+          <EscrowInstance
+            key={escrowIndex}
+            escrow={escrow}
+            escrowIndex={escrowIndex}
+            totalEscrows={escrows.length}
+            proposal={proposal}
+            onOpenProposalReview={onOpenProposalReview}
+            hasThreshold={hasThreshold}
+          />
+        ))}
+    </>
+  )
+}
+
+interface EscrowInstanceProps {
+  escrow: EscrowInstanceData
+  escrowIndex: number
+  totalEscrows: number
+  proposal: Proposal
+  onOpenProposalReview: () => Promise<void>
+  hasThreshold: boolean
+}
+
+const EscrowInstance = ({
+  escrow,
+  escrowIndex,
+  totalEscrows,
+  onOpenProposalReview,
+}: EscrowInstanceProps) => {
+  const { chain } = useChainStore()
+  const { addresses } = useDaoStore()
+  const { addTransaction } = useProposalStore()
+  const { address } = useAccount()
+  const config = useConfig()
+
+  const { invoiceAddress, clientAddress, tokenAddress, milestoneAmounts, invoiceData } =
+    escrow
 
   const { tokenMetadata } = useTokenMetadataSingle(chain.id, tokenAddress)
 
@@ -186,10 +223,16 @@ export const MilestoneDetails = ({
     [config, chain.id, invoiceAddress]
   )
 
-  const isLoading = !invoiceData && (isLoadingInvoice || isLoadingMilestone)
+  const isLoading = !invoiceData && isLoadingMilestone
 
   return (
     <>
+      {totalEscrows > 1 && (
+        <Box mb="x4">
+          <Text variant="heading-sm">Escrow #{escrowIndex + 1}</Text>
+        </Box>
+      )}
+
       {isLoading && <Spinner size="md" />}
 
       {!isLoading && !!invoiceData?.milestones && (

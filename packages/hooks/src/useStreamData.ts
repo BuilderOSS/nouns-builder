@@ -18,10 +18,14 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 import { Address, decodeEventLog, Hex, isHex } from 'viem'
 
-type StreamDataResult = {
-  streamData: StreamData | null
+export type StreamBatchData = {
+  streamData: StreamData
   streamIds: bigint[] | null
   liveStreams: (StreamLiveData | null)[] | null
+}
+
+export type StreamDataResult = {
+  streamBatches: StreamBatchData[]
   lockupLinearAddress: Address | null
   isLoadingStreamIds: boolean
   isLoadingLiveData: boolean
@@ -34,35 +38,46 @@ export const useStreamData = (
   // Get Sablier contract addresses for this chain (synchronous)
   const sablierContracts = useMemo(() => getSablierContracts(chainId), [chainId])
 
-  // Find Sablier transaction in proposal calldatas
-  const sablierTransactionIndex = useMemo(() => {
-    if (!proposal.targets) return -1
+  // Find all Sablier transaction indices in proposal calldatas
+  const sablierTransactionIndices = useMemo(() => {
+    if (!proposal.targets) return []
 
-    return proposal.targets.findIndex(
-      (target) =>
+    const indices: number[] = []
+    proposal.targets.forEach((target, index) => {
+      if (
         (sablierContracts.batchLockup &&
           toLower(target) === toLower(sablierContracts.batchLockup)) ||
         (sablierContracts.lockup && toLower(target) === toLower(sablierContracts.lockup))
-    )
+      ) {
+        indices.push(index)
+      }
+    })
+
+    return indices
   }, [proposal.targets, sablierContracts])
 
-  // Extract static stream configuration from proposal calldata
-  const streamData = useMemo(() => {
-    if (sablierTransactionIndex === -1 || !proposal.calldatas) return null
+  // Extract static stream configuration from all Sablier calldatas
+  const streamsStaticData = useMemo(() => {
+    if (sablierTransactionIndices.length === 0 || !proposal.calldatas) return []
 
-    const calldata = proposal.calldatas[sablierTransactionIndex]
-    if (!calldata) return null
+    return sablierTransactionIndices
+      .map((index) => {
+        const calldata = proposal.calldatas?.[index]
+        if (!calldata) return null
 
-    return extractStreamData(calldata as Hex)
-  }, [sablierTransactionIndex, proposal.calldatas])
+        return extractStreamData(calldata as Hex)
+      })
+      .filter((data): data is StreamData => data !== null)
+  }, [sablierTransactionIndices, proposal.calldatas])
 
   const lockupLinearAddress = sablierContracts.lockup
 
-  // Fetch stream IDs from execution transaction logs (if executed)
-  const { data: streamIds, isValidating: isLoadingStreamIds } = useSWR(
+  // Fetch all stream IDs from execution transaction logs (if executed)
+  const { data: allStreamIds, isValidating: isLoadingStreamIds } = useSWR(
     proposal.executionTransactionHash &&
       isHex(proposal.executionTransactionHash) &&
-      lockupLinearAddress
+      lockupLinearAddress &&
+      streamsStaticData.length > 0
       ? ([
           SWR_KEYS.SABLIER_STREAM_IDS,
           chainId,
@@ -94,13 +109,30 @@ export const useStreamData = (
     }
   )
 
-  // Fetch live stream data for each stream ID (if executed)
-  const { data: liveStreams, isValidating: isLoadingLiveData } = useSWR(
-    streamIds && streamIds.length > 0 && lockupLinearAddress
+  // Group stream IDs by batch based on expected stream counts
+  const streamIdsByBatch = useMemo(() => {
+    if (!allStreamIds || allStreamIds.length === 0) return []
+
+    const batches: bigint[][] = []
+    let currentIndex = 0
+
+    streamsStaticData.forEach((streamData) => {
+      const batchSize = streamData.streams.length
+      const batchStreamIds = allStreamIds.slice(currentIndex, currentIndex + batchSize)
+      batches.push(batchStreamIds)
+      currentIndex += batchSize
+    })
+
+    return batches
+  }, [allStreamIds, streamsStaticData])
+
+  // Fetch live stream data for all stream IDs (if executed)
+  const { data: allLiveStreams, isValidating: isLoadingLiveData } = useSWR(
+    allStreamIds && allStreamIds.length > 0 && lockupLinearAddress
       ? ([
           SWR_KEYS.SABLIER_LIVE_STREAMS,
           chainId,
-          streamIds,
+          allStreamIds,
           lockupLinearAddress,
         ] as const)
       : null,
@@ -180,10 +212,37 @@ export const useStreamData = (
     }
   )
 
+  // Group live streams by batch
+  const liveStreamsByBatch = useMemo(() => {
+    if (!allLiveStreams || allLiveStreams.length === 0) return []
+
+    const batches: (StreamLiveData | null)[][] = []
+    let currentIndex = 0
+
+    streamsStaticData.forEach((streamData) => {
+      const batchSize = streamData.streams.length
+      const batchLiveStreams = allLiveStreams.slice(
+        currentIndex,
+        currentIndex + batchSize
+      )
+      batches.push(batchLiveStreams)
+      currentIndex += batchSize
+    })
+
+    return batches
+  }, [allLiveStreams, streamsStaticData])
+
+  // Combine static data with fetched data into stream batches
+  const streamBatches = useMemo(() => {
+    return streamsStaticData.map((streamData, index) => ({
+      streamData,
+      streamIds: streamIdsByBatch[index] ?? null,
+      liveStreams: liveStreamsByBatch[index] ?? null,
+    }))
+  }, [streamsStaticData, streamIdsByBatch, liveStreamsByBatch])
+
   return {
-    streamData,
-    streamIds: streamIds ?? null,
-    liveStreams: liveStreams ?? null,
+    streamBatches,
     lockupLinearAddress,
     isLoadingStreamIds,
     isLoadingLiveData,
