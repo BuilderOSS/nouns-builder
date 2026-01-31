@@ -49,52 +49,63 @@ function getEscrowFactory(chainId: number | string): Address {
   }
 }
 
+// Shared map of escrow bundler addresses keyed by {chainId, version}
+// This reduces drift risk when addresses change across chains
+type EscrowBundlerVersion = 'v2' | 'legacy'
+
+const ESCROW_BUNDLER_ADDRESSES: Partial<
+  Record<CHAIN_ID, Record<EscrowBundlerVersion, Address>>
+> = {
+  [CHAIN_ID.ETHEREUM]: {
+    v2: '0x8f2cbf3a281092e48e0d79e0466604833e6cfa23',
+    legacy: '0xb4cdef4aa610c046864467592fae456a58d3443a',
+  },
+  [CHAIN_ID.OPTIMISM]: {
+    v2: '0x52c04330c9d38638b5d38e685f13ca744b84155b',
+    legacy: '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e',
+  },
+  [CHAIN_ID.BASE]: {
+    v2: '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e',
+    legacy: '0xf4640751e7363a0572d4ba93a9b049b956b33c17',
+  },
+  [CHAIN_ID.ZORA]: {
+    v2: '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a',
+    legacy: '0x0325e1b676c4cf59e0b690a05e0181be862193d4',
+  },
+  [CHAIN_ID.SEPOLIA]: {
+    v2: '0xcf933e48b5677e15b49ab69821bb7b7b8ad109bb',
+    legacy: '0x9c1E057B37605B7f6ed6f4c8E2826C3d84ddC08D',
+  },
+  [CHAIN_ID.OPTIMISM_SEPOLIA]: {
+    v2: '0xd8e1f218021550fadda4b1e353578b80a1ce1a94',
+    legacy: '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a',
+  },
+  [CHAIN_ID.BASE_SEPOLIA]: {
+    v2: '0x189a535b05faf9ab537868589fa935705a1893a5',
+    legacy: '0x3add1d027116a5406ced10411945cf2d4d9ed68e',
+  },
+  [CHAIN_ID.ZORA_SEPOLIA]: {
+    v2: '0xc99391cf03f85f81419f0771c543e80c5616e6bc',
+    legacy: '0x851e59a39571e599954702f0e4996bf838d9c863',
+  },
+}
+
 function getEscrowBundler(chainId: number | string): Address {
-  chainId = Number(chainId)
-  switch (chainId) {
-    case CHAIN_ID.ETHEREUM:
-      return '0x8f2cbf3a281092e48e0d79e0466604833e6cfa23' as Address
-    case CHAIN_ID.OPTIMISM:
-      return '0x52c04330c9d38638b5d38e685f13ca744b84155b' as Address
-    case CHAIN_ID.BASE:
-      return '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e' as Address
-    case CHAIN_ID.ZORA:
-      return '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a' as Address
-    case CHAIN_ID.SEPOLIA:
-      return '0xcf933e48b5677e15b49ab69821bb7b7b8ad109bb' as Address
-    case CHAIN_ID.OPTIMISM_SEPOLIA:
-      return '0xd8e1f218021550fadda4b1e353578b80a1ce1a94' as Address
-    case CHAIN_ID.BASE_SEPOLIA:
-      return '0x189a535b05faf9ab537868589fa935705a1893a5' as Address
-    case CHAIN_ID.ZORA_SEPOLIA:
-      return '0xc99391cf03f85f81419f0771c543e80c5616e6bc' as Address
-    default:
-      throw new Error(`Unsupported chain ID: ${chainId}`)
+  const numChainId = Number(chainId) as CHAIN_ID
+  const address = ESCROW_BUNDLER_ADDRESSES[numChainId]?.v2
+  if (!address) {
+    throw new Error(`Unsupported chain ID: ${chainId}`)
   }
+  return address
 }
 
 function getEscrowBundlerLegacy(chainId: number | string): Address {
-  chainId = Number(chainId)
-  switch (chainId) {
-    case CHAIN_ID.ETHEREUM:
-      return '0xb4cdef4aa610c046864467592fae456a58d3443a' as Address
-    case CHAIN_ID.OPTIMISM:
-      return '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e' as Address
-    case CHAIN_ID.BASE:
-      return '0xf4640751e7363a0572d4ba93a9b049b956b33c17' as Address
-    case CHAIN_ID.ZORA:
-      return '0x0325e1b676c4cf59e0b690a05e0181be862193d4' as Address
-    case CHAIN_ID.SEPOLIA:
-      return '0x9c1E057B37605B7f6ed6f4c8E2826C3d84ddC08D' as Address
-    case CHAIN_ID.OPTIMISM_SEPOLIA:
-      return '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a' as Address
-    case CHAIN_ID.BASE_SEPOLIA:
-      return '0x3add1d027116a5406ced10411945cf2d4d9ed68e' as Address
-    case CHAIN_ID.ZORA_SEPOLIA:
-      return '0x851e59a39571e599954702f0e4996bf838d9c863' as Address
-    default:
-      throw new Error(`Unsupported chain ID: ${chainId}`)
+  const numChainId = Number(chainId) as CHAIN_ID
+  const address = ESCROW_BUNDLER_ADDRESSES[numChainId]?.legacy
+  if (!address) {
+    throw new Error(`Unsupported chain ID: ${chainId}`)
   }
+  return address
 }
 
 export type DecodedEscrowData = Partial<{

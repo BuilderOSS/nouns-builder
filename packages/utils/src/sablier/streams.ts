@@ -1,9 +1,6 @@
 import { Address, decodeFunctionData, Hex } from 'viem'
 
-import {
-  batchLockupCreateWithDurationsLLAbi,
-  batchLockupCreateWithTimestampsLLAbi,
-} from './encoding'
+import { batchLockupAbi } from './constants'
 
 export interface StreamConfigDurations {
   sender: Address
@@ -40,10 +37,12 @@ export interface StreamConfigTimestamps {
   shape: string
 }
 
+export type StreamConfig = StreamConfigDurations | StreamConfigTimestamps
+
 export interface StreamData {
   lockupAddress: Address
   tokenAddress: Address
-  streams: (StreamConfigDurations | StreamConfigTimestamps)[]
+  streams: StreamConfig[]
   isDurationsMode: boolean
 }
 
@@ -63,7 +62,48 @@ export interface StreamLiveData {
   isTransferable: boolean
   isDepleted: boolean
   asset: Address
+  minFeeWei: bigint
+  streamedAmount: bigint
 }
+
+export const parseStreamDataConfigDurations = (streamData: any): StreamConfigDurations =>
+  ({
+    sender: streamData.sender as Address,
+    recipient: streamData.recipient as Address,
+    depositAmount: BigInt(streamData.depositAmount),
+    cancelable: streamData.cancelable as boolean,
+    transferable: streamData.transferable as boolean,
+    durations: {
+      cliff: Number(streamData.durations.cliff),
+      total: Number(streamData.durations.total),
+    },
+    unlockAmounts: {
+      start: BigInt(streamData.unlockAmounts.start),
+      cliff: BigInt(streamData.unlockAmounts.cliff),
+    },
+    shape: streamData.shape as string,
+  }) as StreamConfigDurations
+
+export const parseStreamDataConfigTimestamps = (
+  streamData: any
+): StreamConfigTimestamps =>
+  ({
+    sender: streamData.sender as Address,
+    recipient: streamData.recipient as Address,
+    depositAmount: BigInt(streamData.depositAmount),
+    cancelable: streamData.cancelable as boolean,
+    transferable: streamData.transferable as boolean,
+    timestamps: {
+      start: Number(streamData.timestamps.start),
+      end: Number(streamData.timestamps.end),
+    },
+    cliffTime: Number(streamData.cliffTime),
+    unlockAmounts: {
+      start: BigInt(streamData.unlockAmounts.start),
+      cliff: BigInt(streamData.unlockAmounts.cliff),
+    },
+    shape: streamData.shape as string,
+  }) as StreamConfigTimestamps
 
 /**
  * Extract stream configuration from calldata
@@ -72,80 +112,41 @@ export function extractStreamData(calldata: Hex): StreamData | null {
   if (!calldata) return null
 
   try {
-    // Try decoding with durations ABI first
-    try {
-      const decoded = decodeFunctionData({
-        abi: batchLockupCreateWithDurationsLLAbi,
-        data: calldata,
-      })
-
-      if (decoded.functionName === 'createWithDurationsLL') {
-        const [lockupAddress, tokenAddress, batchArray] = decoded.args
-
-        const streams = batchArray.map((streamData: any) => ({
-          sender: streamData.sender as Address,
-          recipient: streamData.recipient as Address,
-          depositAmount: BigInt(streamData.depositAmount),
-          cancelable: streamData.cancelable as boolean,
-          transferable: streamData.transferable as boolean,
-          durations: {
-            cliff: Number(streamData.durations.cliff),
-            total: Number(streamData.durations.total),
-          },
-          unlockAmounts: {
-            start: BigInt(streamData.unlockAmounts.start),
-            cliff: BigInt(streamData.unlockAmounts.cliff),
-          },
-          shape: streamData.shape as string,
-        })) as StreamConfigDurations[]
-
-        return {
-          lockupAddress,
-          tokenAddress,
-          streams,
-          isDurationsMode: true,
-        }
-      }
-    } catch {
-      // Not durations mode, try timestamps
-    }
-
-    // Try decoding with timestamps ABI
     const decoded = decodeFunctionData({
-      abi: batchLockupCreateWithTimestampsLLAbi,
+      abi: batchLockupAbi,
       data: calldata,
     })
 
-    if (decoded.functionName === 'createWithTimestampsLL') {
-      const [lockupAddress, tokenAddress, batchArray] = decoded.args
-
-      const streams = batchArray.map((streamData: any) => ({
-        sender: streamData.sender as Address,
-        recipient: streamData.recipient as Address,
-        depositAmount: BigInt(streamData.depositAmount),
-        cancelable: streamData.cancelable as boolean,
-        transferable: streamData.transferable as boolean,
-        timestamps: {
-          start: Number(streamData.timestamps.start),
-          end: Number(streamData.timestamps.end),
-        },
-        cliffTime: Number(streamData.cliffTime),
-        unlockAmounts: {
-          start: BigInt(streamData.unlockAmounts.start),
-          cliff: BigInt(streamData.unlockAmounts.cliff),
-        },
-        shape: streamData.shape as string,
-      })) as StreamConfigTimestamps[]
-
-      return {
-        lockupAddress,
-        tokenAddress,
-        streams,
-        isDurationsMode: false,
-      }
+    if (
+      decoded.functionName !== 'createWithDurationsLL' &&
+      decoded.functionName !== 'createWithTimestampsLL'
+    ) {
+      throw new Error('unknown function name: ' + decoded.functionName)
     }
 
-    return null
+    if (!decoded.args) {
+      throw new Error('no args')
+    }
+
+    const [lockupAddress, tokenAddress, batchArray] = decoded.args as [
+      Hex,
+      Hex,
+      unknown[],
+    ]
+
+    const isDurationsMode = decoded.functionName === 'createWithDurationsLL'
+    const parser: (_data: any) => StreamConfig = isDurationsMode
+      ? parseStreamDataConfigDurations
+      : parseStreamDataConfigTimestamps
+
+    const streams = batchArray.map(parser)
+
+    return {
+      lockupAddress,
+      tokenAddress,
+      streams,
+      isDurationsMode,
+    }
   } catch (error) {
     console.error('Failed to decode stream calldata:', error)
     return null
@@ -206,5 +207,5 @@ export function getStatusLabel(status: number): string {
  * Create Sablier app URL for a stream
  */
 export function createSablierStreamUrl(chainId: number, streamId: bigint): string {
-  return `https://app.sablier.com/stream/${chainId}/${streamId}`
+  return `https://app.sablier.com/vesting/stream/LK2-${chainId}-${streamId}`
 }

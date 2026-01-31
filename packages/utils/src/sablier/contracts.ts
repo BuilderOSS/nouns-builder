@@ -2,6 +2,8 @@ import { CHAIN_ID } from '@buildeross/types'
 import { sablier } from 'sablier'
 import { Address } from 'viem'
 
+import { LATEST_LOCKUP_RELEASE } from './constants.js'
+
 /**
  * Shared helper to get a Sablier contract address for a given chain
  */
@@ -10,12 +12,8 @@ function getSablierContractAddress(
   contractName: string
 ): Address | null {
   try {
-    // Get the latest release first
-    const latestRelease = sablier.releases.getLatest({
-      protocol: 'lockup',
-    })
-
-    if (!latestRelease) {
+    // Use the shared latest release from constants
+    if (!LATEST_LOCKUP_RELEASE) {
       console.error('No latest Sablier lockup release found')
       return null
     }
@@ -24,7 +22,7 @@ function getSablierContractAddress(
     const contract = sablier.contracts.get({
       chainId,
       contractName,
-      release: latestRelease,
+      release: LATEST_LOCKUP_RELEASE,
     })
 
     if (!contract?.address) {

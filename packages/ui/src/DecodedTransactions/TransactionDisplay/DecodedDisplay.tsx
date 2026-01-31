@@ -10,7 +10,12 @@ import {
 } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
+import {
+  getSablierContracts,
+  parseStreamDataConfigDurations,
+  parseStreamDataConfigTimestamps,
+  type StreamConfig,
+} from '@buildeross/utils/sablier'
 import { atoms, Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
@@ -66,40 +71,50 @@ export const DecodedDisplay: React.FC<{
       (sablierContracts.lockup &&
         target.toLowerCase() === sablierContracts.lockup.toLowerCase())
 
-    if (!isSablierTarget) return null
+    if (!isSablierTarget) return undefined
 
     // Check if this is a createWithDurationsLL or createWithTimestampsLL function
     if (
       transaction.functionName !== 'createWithDurationsLL' &&
       transaction.functionName !== 'createWithTimestampsLL'
     ) {
-      return null
+      return undefined
     }
+
+    if (!transaction.args) return undefined
 
     // Extract calldata - we need to reconstruct it from the transaction
     // The transaction already has decoded args, but we need the raw calldata
     // Since we don't have direct access to calldata here, we'll extract from args
     try {
-      // Get lockup, asset, and batch from args
+      // Get lockup, token, and batch from args
       const lockupArg = transaction.args['lockup'] || transaction.args['_lockup']
-      const assetArg = transaction.args['asset'] || transaction.args['_asset']
+      const tokenArg = transaction.args['token'] || transaction.args['_token']
       const batchArg = transaction.args['batch'] || transaction.args['_batch']
 
-      if (!lockupArg || !assetArg || !batchArg) return null
+      if (!lockupArg || !tokenArg || !batchArg) return undefined
+
+      const isDurationsMode = transaction.functionName === 'createWithDurationsLL'
+      const parser: (_data: any) => StreamConfig = isDurationsMode
+        ? parseStreamDataConfigDurations
+        : parseStreamDataConfigTimestamps
+
+      const streams = (Array.isArray(batchArg.value) ? batchArg.value : []).map(parser)
 
       return {
-        lockupAddress: lockupArg.value as string,
-        tokenAddress: assetArg.value as string,
-        streams: Array.isArray(batchArg.value) ? batchArg.value : [],
+        lockupAddress: lockupArg.value as `0x${string}`,
+        tokenAddress: tokenArg.value as `0x${string}`,
+        streams,
+        isDurationsMode,
       }
     } catch (e) {
       console.warn('Failed to extract stream data', e)
-      return null
+      return undefined
     }
   }, [transaction.args, transaction.functionName, target, chainId])
 
   // Determine single token address for ERC20 operations
-  const tokenAddress = React.useMemo(() => {
+  const tokenAddress: `0x${string}` | undefined = React.useMemo(() => {
     // For ERC20 transfer/approve, use target
     if (
       transaction.functionName === 'transfer' ||
@@ -107,7 +122,7 @@ export const DecodedDisplay: React.FC<{
       transaction.functionName === 'increaseAllowance' ||
       transaction.functionName === 'decreaseAllowance'
     ) {
-      return target
+      return target as `0x${string}`
     }
 
     // For stream operations, get token from stream data
@@ -116,7 +131,10 @@ export const DecodedDisplay: React.FC<{
     }
 
     // For escrow operations, get token from escrow data
-    return escrowData?.tokenAddress || null
+    if (escrowData?.tokenAddress) {
+      return escrowData.tokenAddress
+    }
+    return undefined
   }, [transaction.functionName, target, escrowData, streamData])
 
   // Determine single NFT contract and token ID
@@ -142,7 +160,7 @@ export const DecodedDisplay: React.FC<{
   // Fetch token metadata only if we have a token address
   const { tokenMetadata, isLoading: isTokenLoading } = useTokenMetadataSingle(
     chainId,
-    tokenAddress as `0x${string}` | undefined
+    tokenAddress
   )
 
   // Fetch NFT metadata only if we have NFT info
@@ -169,6 +187,7 @@ export const DecodedDisplay: React.FC<{
       tokenMetadata: tokenMetadata || undefined,
       nftMetadata: nftMetadata || undefined,
       escrowData: escrowData || undefined,
+      streamData: streamData || undefined,
     }
   }, [
     transaction,
@@ -178,6 +197,7 @@ export const DecodedDisplay: React.FC<{
     tokenMetadata,
     nftMetadata,
     escrowData,
+    streamData,
     isLoadingMetadata,
   ])
 

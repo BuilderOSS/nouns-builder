@@ -82,7 +82,7 @@
     "vitest": "^3.1.4"
   },
   "license": "MIT",
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.28.2",
   "private": true,
   "scripts": {
     "analyze": "ANALYZE=true next build",

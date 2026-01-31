@@ -1,10 +1,12 @@
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { SAFE_APP_URL } from '@buildeross/constants/safe'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { AddressType, TransactionType } from '@buildeross/types'
+import { AddressType, CHAIN_ID, TokenMetadata, TransactionType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { lockupLinearAbi, StreamStatus } from '@buildeross/utils/sablier/constants'
+import { walletSnippet } from '@buildeross/utils/helpers'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { lockupAbi, StreamStatus } from '@buildeross/utils/sablier/constants'
 import {
   calculateStreamTimes,
   createSablierStreamUrl,
@@ -16,9 +18,17 @@ import {
 } from '@buildeross/utils/sablier/streams'
 import { atoms, Box, Button, Icon, Stack, Text } from '@buildeross/zord'
 import { useCallback, useMemo } from 'react'
-import { Address, encodeFunctionData, formatUnits } from 'viem'
+import { Address, encodeFunctionData, formatUnits, isAddressEqual } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+
+import { linkStyle } from './StreamItem.css'
+
+const createSafeAppUrl = (chainId: CHAIN_ID, safeAddress: Address, appUrl: string) => {
+  const safeUrl = SAFE_APP_URL[chainId]
+  const encodedUrl = encodeURIComponent(appUrl)
+  return `${safeUrl}:${safeAddress}&appUrl=${encodedUrl}`
+}
 
 interface StreamItemProps {
   stream: StreamConfigDurations | StreamConfigTimestamps
@@ -27,16 +37,27 @@ interface StreamItemProps {
   liveData: StreamLiveData | null
   streamId: bigint | null
   isExecuted: boolean
-  tokenMetadata?: any
-  lockupLinearAddress: Address | null
+  tokenMetadata?: TokenMetadata
+  lockupAddress: Address | null
   withdrawingStreamId: bigint | null
   setWithdrawingStreamId: (id: bigint | null) => void
   cancelingStreamId: bigint | null
   setCancelingStreamId: (id: bigint | null) => void
   onOpenProposalReview: () => Promise<void>
+  refetchLiveData: () => Promise<unknown>
+  isSenderAGnosisSafe: boolean
 }
 
-export const StreamItem = ({
+/**
+ * Factory function that creates an accordion item configuration for a Sablier stream.
+ *
+ * Note: Although this uses React hooks, it is NOT a traditional React component.
+ * It returns a plain object with { title, description } to be used in the Accordion
+ * component's items prop. The name starts with uppercase to satisfy React's rules of hooks.
+ *
+ * @returns Accordion item config object with title and description JSX
+ */
+export const CreateStreamItem = ({
   stream,
   index,
   isDurationsMode,
@@ -44,13 +65,15 @@ export const StreamItem = ({
   streamId,
   isExecuted,
   tokenMetadata,
-  lockupLinearAddress,
+  lockupAddress,
   withdrawingStreamId,
   setWithdrawingStreamId,
   cancelingStreamId,
   setCancelingStreamId,
   onOpenProposalReview,
-}: StreamItemProps) => {
+  refetchLiveData,
+  isSenderAGnosisSafe,
+}: StreamItemProps): { title: React.ReactElement; description: React.ReactElement } => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { addTransaction } = useProposalStore()
@@ -65,7 +88,6 @@ export const StreamItem = ({
   })
 
   const { displayName: recipientName } = useEnsData(stream.recipient)
-  const { displayName: senderName } = useEnsData(liveData?.sender || stream.sender)
 
   const { startTime, cliffTime, endTime } = useMemo(
     () =>
@@ -80,59 +102,68 @@ export const StreamItem = ({
   )
 
   const decimals = tokenMetadata?.decimals ?? 18
-  const totalAmount = stream.depositAmount
-  const totalAmountDisplay = tokenMetadata?.symbol
-    ? `${formatUnits(totalAmount, decimals)} ${tokenMetadata.symbol}`
-    : totalAmount.toString()
+  const depositAmount = stream.depositAmount
+  const depositAmountDisplay = tokenMetadata?.symbol
+    ? `${formatCryptoVal(formatUnits(depositAmount, decimals))} ${tokenMetadata.symbol}`
+    : depositAmount.toString()
 
   const duration = endTime - startTime
   const hasCliff = cliffTime > 0
 
-  const isRecipient = address && stream.recipient.toLowerCase() === address.toLowerCase()
+  const isRecipient = address && isAddressEqual(stream.recipient, address)
+
   const isSender =
     address &&
-    (liveData?.sender.toLowerCase() === address.toLowerCase() ||
-      stream.sender.toLowerCase() === address.toLowerCase())
+    (isAddressEqual(liveData?.sender ?? stream.sender, address) ||
+      isAddressEqual(stream.sender, address))
+
   const isSenderTreasury =
     addresses.treasury &&
-    (liveData?.sender.toLowerCase() === addresses.treasury.toLowerCase() ||
-      stream.sender.toLowerCase() === addresses.treasury.toLowerCase())
+    (isAddressEqual(liveData?.sender ?? stream.sender, addresses.treasury) ||
+      isAddressEqual(stream.sender, addresses.treasury))
 
-  const handleWithdraw = useCallback(
-    async (withdrawableAmount: bigint) => {
-      if (!lockupLinearAddress || !address || !liveData) return
+  const handleWithdraw = useCallback(async () => {
+    if (!lockupAddress || !address || !liveData) return
 
-      try {
-        setWithdrawingStreamId(liveData.streamId)
-        const data = await simulateContract(config, {
-          address: lockupLinearAddress,
-          abi: lockupLinearAbi,
-          functionName: 'withdraw',
-          args: [liveData.streamId, address, withdrawableAmount],
-        })
+    try {
+      setWithdrawingStreamId(liveData.streamId)
+      const data = await simulateContract(config, {
+        address: lockupAddress,
+        abi: lockupAbi,
+        functionName: 'withdrawMax',
+        args: [liveData.streamId, address],
+        value: liveData.minFeeWei,
+      })
 
-        const txHash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, {
-          hash: txHash,
-          chainId: chain.id,
-        })
-      } catch (error) {
-        console.error('Error withdrawing from stream:', error)
-      } finally {
-        setWithdrawingStreamId(null)
-      }
-    },
-    [config, chain.id, lockupLinearAddress, address, liveData, setWithdrawingStreamId]
-  )
+      const txHash = await writeContract(config, data.request)
+      await waitForTransactionReceipt(config, {
+        hash: txHash,
+        chainId: chain.id,
+      })
+      refetchLiveData()
+    } catch (error) {
+      console.error('Error withdrawing from stream:', error)
+    } finally {
+      setWithdrawingStreamId(null)
+    }
+  }, [
+    config,
+    chain.id,
+    lockupAddress,
+    address,
+    liveData,
+    setWithdrawingStreamId,
+    refetchLiveData,
+  ])
 
   const handleCancelDirect = useCallback(async () => {
-    if (!lockupLinearAddress || !liveData) return
+    if (!lockupAddress || !liveData) return
 
     try {
       setCancelingStreamId(liveData.streamId)
       const data = await simulateContract(config, {
-        address: lockupLinearAddress,
-        abi: lockupLinearAbi,
+        address: lockupAddress,
+        abi: lockupAbi,
         functionName: 'cancel',
         args: [liveData.streamId],
       })
@@ -147,16 +178,16 @@ export const StreamItem = ({
     } finally {
       setCancelingStreamId(null)
     }
-  }, [config, chain.id, lockupLinearAddress, liveData, setCancelingStreamId])
+  }, [config, chain.id, lockupAddress, liveData, setCancelingStreamId])
 
   const handleCancelAsProposal = useCallback(async () => {
-    if (!lockupLinearAddress || !liveData) return
+    if (!lockupAddress || !liveData) return
 
     const cancelTransaction = {
-      target: lockupLinearAddress as AddressType,
+      target: lockupAddress as AddressType,
       functionSignature: 'cancel(uint256)',
       calldata: encodeFunctionData({
-        abi: lockupLinearAbi,
+        abi: lockupAbi,
         functionName: 'cancel',
         args: [liveData.streamId],
       }),
@@ -171,52 +202,54 @@ export const StreamItem = ({
 
     addTransaction(cancelTxnData)
     onOpenProposalReview()
-  }, [onOpenProposalReview, addTransaction, lockupLinearAddress, liveData])
+  }, [onOpenProposalReview, addTransaction, lockupAddress, liveData])
+
+  const recipientDisplay = recipientName || walletSnippet(stream.recipient)
+
+  const sablierUrl = useMemo(() => {
+    if (!isExecuted || !streamId) return null
+    return createSablierStreamUrl(chain.id, streamId)
+  }, [isExecuted, streamId, chain.id])
 
   return {
-    title: <Text>{`Stream ${index + 1}: ${recipientName || stream.recipient}`}</Text>,
+    title: <Text>{`Stream ${index + 1}: ${recipientDisplay}`}</Text>,
     description: (
-      <Stack gap="x5">
+      <Stack gap="x3">
         <Stack direction="row" align="center" justify="space-between">
+          <Stack direction="row" align="center" gap="x2">
+            <Text variant="label-xs" color="tertiary">
+              Recipient:
+            </Text>
+            <Box color={'secondary'} className={atoms({ textDecoration: 'underline' })}>
+              <a href={`/profile/${stream.recipient}`}>
+                <Text variant="label-xs">{recipientDisplay}</Text>
+              </a>
+            </Box>
+          </Stack>
           <Text variant="label-xs" color="tertiary">
-            Total Amount: {totalAmountDisplay}
+            Deposit Amount: {depositAmountDisplay}
           </Text>
+        </Stack>
+        <Stack direction="row" align="center" justify="space-between">
+          {hasCliff && (
+            <Text variant="label-xs" color="tertiary">
+              Cliff: {new Date(cliffTime * 1000).toLocaleDateString()}
+            </Text>
+          )}
           <Text variant="label-xs" color="tertiary">
             Duration: {formatStreamDuration(duration)}
           </Text>
         </Stack>
-
-        <Stack direction="row" align="center" justify="space-between">
-          <Text variant="label-xs" color="tertiary">
-            Start: {new Date(startTime * 1000).toLocaleDateString()}
-          </Text>
-          <Text variant="label-xs" color="tertiary">
-            End: {new Date(endTime * 1000).toLocaleDateString()}
-          </Text>
-        </Stack>
-
-        {hasCliff && (
-          <Text variant="label-xs" color="tertiary">
-            Cliff: {new Date(cliffTime * 1000).toLocaleDateString()}
-          </Text>
+        {(!isDurationsMode || isExecuted) && (
+          <Stack direction="row" align="center" justify="space-between">
+            <Text variant="label-xs" color="tertiary">
+              Start: {new Date(startTime * 1000).toLocaleDateString()}
+            </Text>
+            <Text variant="label-xs" color="tertiary">
+              End: {new Date(endTime * 1000).toLocaleDateString()}
+            </Text>
+          </Stack>
         )}
-
-        <Stack direction="row" gap="x2">
-          {stream.cancelable && (
-            <Box backgroundColor="background2" px="x2" py="x1" borderRadius="curved">
-              <Text variant="label-xs">Cancelable</Text>
-            </Box>
-          )}
-          {stream.transferable && (
-            <Box backgroundColor="background2" px="x2" py="x1" borderRadius="curved">
-              <Text variant="label-xs">Transferable</Text>
-            </Box>
-          )}
-        </Stack>
-
-        <Text variant="label-xs" color="tertiary">
-          Sender: {senderName || liveData?.sender || stream.sender}
-        </Text>
 
         {liveData && (
           <>
@@ -248,7 +281,7 @@ export const StreamItem = ({
                   Total Deposited:
                 </Text>
                 <Text variant="label-xs">
-                  {formatUnits(liveData.depositedAmount, decimals)}{' '}
+                  {formatCryptoVal(formatUnits(liveData.depositedAmount, decimals))}{' '}
                   {tokenMetadata?.symbol}
                 </Text>
               </Stack>
@@ -257,7 +290,7 @@ export const StreamItem = ({
                   Already Withdrawn:
                 </Text>
                 <Text variant="label-xs">
-                  {formatUnits(liveData.withdrawnAmount, decimals)}{' '}
+                  {formatCryptoVal(formatUnits(liveData.withdrawnAmount, decimals))}{' '}
                   {tokenMetadata?.symbol}
                 </Text>
               </Stack>
@@ -266,7 +299,7 @@ export const StreamItem = ({
                   Currently Withdrawable:
                 </Text>
                 <Text variant="label-xs" fontWeight="heading">
-                  {formatUnits(liveData.withdrawableAmount, decimals)}{' '}
+                  {formatCryptoVal(formatUnits(liveData.withdrawableAmount, decimals))}{' '}
                   {tokenMetadata?.symbol}
                 </Text>
               </Stack>
@@ -275,9 +308,11 @@ export const StreamItem = ({
                   Remaining:
                 </Text>
                 <Text variant="label-xs">
-                  {formatUnits(
-                    liveData.depositedAmount - liveData.withdrawnAmount,
-                    decimals
+                  {formatCryptoVal(
+                    formatUnits(
+                      liveData.depositedAmount - liveData.withdrawnAmount,
+                      decimals
+                    )
                   )}{' '}
                   {tokenMetadata?.symbol}
                 </Text>
@@ -292,7 +327,7 @@ export const StreamItem = ({
                 <ContractButton
                   chainId={chain.id}
                   variant="primary"
-                  handleClick={() => handleWithdraw(liveData.withdrawableAmount)}
+                  handleClick={() => handleWithdraw()}
                   disabled={withdrawingStreamId === liveData.streamId}
                   loading={withdrawingStreamId === liveData.streamId}
                 >
@@ -341,17 +376,50 @@ export const StreamItem = ({
               )}
 
             {/* Link to Sablier app */}
-            {streamId && (
-              <a
-                href={createSablierStreamUrl(chain.id, streamId)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Button variant="secondary" size="sm">
-                  View on Sablier
-                  <Icon id="arrowTopRight" />
-                </Button>
-              </a>
+            {!!sablierUrl && !!liveData.sender && (
+              <Stack direction="column" gap="x2">
+                {isSenderTreasury ? (
+                  <a
+                    href={sablierUrl}
+                    rel="noreferrer"
+                    target="_blank"
+                    className={linkStyle}
+                  >
+                    <Button variant="secondary" size="sm">
+                      View Stream on Sablier
+                      <Icon id="arrowTopRight" />
+                    </Button>
+                  </a>
+                ) : (
+                  <>
+                    {isSenderAGnosisSafe ? (
+                      <a
+                        href={createSafeAppUrl(chain.id, liveData.sender, sablierUrl)}
+                        rel="noreferrer"
+                        target="_blank"
+                        className={linkStyle}
+                      >
+                        <Button variant="secondary" size="sm">
+                          View Stream on Sablier As Safe App
+                          <Icon id="arrowTopRight" />
+                        </Button>
+                      </a>
+                    ) : (
+                      <a
+                        href={sablierUrl}
+                        rel="noreferrer"
+                        target="_blank"
+                        className={linkStyle}
+                      >
+                        <Button variant="secondary" size="sm">
+                          View Stream on Sablier
+                          <Icon id="arrowTopRight" />
+                        </Button>
+                      </a>
+                    )}
+                  </>
+                )}
+              </Stack>
             )}
           </>
         )}
@@ -362,15 +430,6 @@ export const StreamItem = ({
             <Text variant="label-sm" color="tertiary">
               Stream will be created when proposal is executed
             </Text>
-            <Box color={'secondary'} className={atoms({ textDecoration: 'underline' })}>
-              <a
-                href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${stream.recipient}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <Text variant="label-sm">View Recipient on Etherscan</Text>
-              </a>
-            </Box>
           </Stack>
         )}
       </Stack>

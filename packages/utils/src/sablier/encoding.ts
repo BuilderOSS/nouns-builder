@@ -1,207 +1,6 @@
 import { Address, encodeFunctionData, Hex } from 'viem'
 
-// Sablier BatchLockup ABI - createWithDurationsLL function
-export const batchLockupCreateWithDurationsLLAbi = [
-  {
-    type: 'function',
-    name: 'createWithDurationsLL',
-    inputs: [
-      {
-        name: 'lockup',
-        type: 'address',
-        internalType: 'contract ISablierLockup',
-      },
-      {
-        name: 'token',
-        type: 'address',
-        internalType: 'contract IERC20',
-      },
-      {
-        name: 'batch',
-        type: 'tuple[]',
-        internalType: 'struct BatchLockup.CreateWithDurationsLL[]',
-        components: [
-          {
-            name: 'sender',
-            type: 'address',
-            internalType: 'address',
-          },
-          {
-            name: 'recipient',
-            type: 'address',
-            internalType: 'address',
-          },
-          {
-            name: 'depositAmount',
-            type: 'uint128',
-            internalType: 'uint128',
-          },
-          {
-            name: 'cancelable',
-            type: 'bool',
-            internalType: 'bool',
-          },
-          {
-            name: 'transferable',
-            type: 'bool',
-            internalType: 'bool',
-          },
-          {
-            name: 'durations',
-            type: 'tuple',
-            internalType: 'struct LockupLinear.Durations',
-            components: [
-              {
-                name: 'cliff',
-                type: 'uint40',
-                internalType: 'uint40',
-              },
-              {
-                name: 'total',
-                type: 'uint40',
-                internalType: 'uint40',
-              },
-            ],
-          },
-          {
-            name: 'unlockAmounts',
-            type: 'tuple',
-            internalType: 'struct LockupLinear.UnlockAmounts',
-            components: [
-              {
-                name: 'start',
-                type: 'uint128',
-                internalType: 'uint128',
-              },
-              {
-                name: 'cliff',
-                type: 'uint128',
-                internalType: 'uint128',
-              },
-            ],
-          },
-          {
-            name: 'shape',
-            type: 'string',
-            internalType: 'string',
-          },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        name: 'streamIds',
-        type: 'uint256[]',
-        internalType: 'uint256[]',
-      },
-    ],
-    stateMutability: 'nonpayable',
-  },
-] as const
-
-// Sablier BatchLockup ABI - createWithTimestampsLL function
-export const batchLockupCreateWithTimestampsLLAbi = [
-  {
-    type: 'function',
-    name: 'createWithTimestampsLL',
-    inputs: [
-      {
-        name: 'lockup',
-        type: 'address',
-        internalType: 'contract ISablierLockup',
-      },
-      {
-        name: 'token',
-        type: 'address',
-        internalType: 'contract IERC20',
-      },
-      {
-        name: 'batch',
-        type: 'tuple[]',
-        internalType: 'struct BatchLockup.CreateWithTimestampsLL[]',
-        components: [
-          {
-            name: 'sender',
-            type: 'address',
-            internalType: 'address',
-          },
-          {
-            name: 'recipient',
-            type: 'address',
-            internalType: 'address',
-          },
-          {
-            name: 'depositAmount',
-            type: 'uint128',
-            internalType: 'uint128',
-          },
-          {
-            name: 'cancelable',
-            type: 'bool',
-            internalType: 'bool',
-          },
-          {
-            name: 'transferable',
-            type: 'bool',
-            internalType: 'bool',
-          },
-          {
-            name: 'timestamps',
-            type: 'tuple',
-            internalType: 'struct Lockup.Timestamps',
-            components: [
-              {
-                name: 'start',
-                type: 'uint40',
-                internalType: 'uint40',
-              },
-              {
-                name: 'end',
-                type: 'uint40',
-                internalType: 'uint40',
-              },
-            ],
-          },
-          {
-            name: 'cliffTime',
-            type: 'uint40',
-            internalType: 'uint40',
-          },
-          {
-            name: 'unlockAmounts',
-            type: 'tuple',
-            internalType: 'struct LockupLinear.UnlockAmounts',
-            components: [
-              {
-                name: 'start',
-                type: 'uint128',
-                internalType: 'uint128',
-              },
-              {
-                name: 'cliff',
-                type: 'uint128',
-                internalType: 'uint128',
-              },
-            ],
-          },
-          {
-            name: 'shape',
-            type: 'string',
-            internalType: 'string',
-          },
-        ],
-      },
-    ],
-    outputs: [
-      {
-        name: 'streamIds',
-        type: 'uint256[]',
-        internalType: 'uint256[]',
-      },
-    ],
-    stateMutability: 'nonpayable',
-  },
-] as const
+import { batchLockupAbi } from './constants'
 
 export interface CreateWithDurationsLLParams {
   sender: Address
@@ -248,7 +47,7 @@ export function encodeCreateWithDurationsLL(
   }))
 
   return encodeFunctionData({
-    abi: batchLockupCreateWithDurationsLLAbi,
+    abi: batchLockupAbi,
     functionName: 'createWithDurationsLL',
     args: [lockupLinearAddress, tokenAddress, batch],
   })
@@ -283,7 +82,7 @@ export function encodeCreateWithTimestampsLL(
   }))
 
   return encodeFunctionData({
-    abi: batchLockupCreateWithTimestampsLLAbi,
+    abi: batchLockupAbi,
     functionName: 'createWithTimestampsLL',
     args: [lockupLinearAddress, tokenAddress, batch],
   })

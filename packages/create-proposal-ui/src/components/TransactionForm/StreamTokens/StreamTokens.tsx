@@ -121,9 +121,7 @@ export const StreamTokens = () => {
         tokenAddress = getWrappedTokenAddress(chain.id)
       } catch (error) {
         console.error('WETH address not found for this chain:', error)
-        actions.setErrors({
-          tokenAddress: 'WETH is not available on this network',
-        } as any)
+        actions.setFieldError('tokenAddress', 'WETH is not available on this network')
         return
       }
     }
@@ -133,19 +131,19 @@ export const StreamTokens = () => {
     try {
       const resolved = await getEnsAddress(values.senderAddress, getProvider(chain.id))
       if (!resolved) {
-        actions.setErrors({
-          senderAddress:
-            'Could not resolve sender address. Please enter a valid address or ENS name.',
-        } as any)
+        actions.setFieldError(
+          'senderAddress',
+          'Could not resolve sender address. Please enter a valid address or ENS name.'
+        )
         return
       }
       senderAddress = resolved
     } catch (error) {
       console.error('Error resolving sender address:', error)
-      actions.setErrors({
-        senderAddress:
-          'Failed to resolve sender address. Please check your network connection and try again.',
-      } as any)
+      actions.setFieldError(
+        'senderAddress',
+        'Failed to resolve sender address. Please check your network connection and try again.'
+      )
       return
     }
 
@@ -155,9 +153,7 @@ export const StreamTokens = () => {
       normalizedSender = getAddress(senderAddress) as Address
     } catch (error) {
       console.error('Invalid sender address:', error)
-      actions.setErrors({
-        senderAddress: 'Invalid sender address format.',
-      } as any)
+      actions.setFieldError('senderAddress', 'Invalid sender address format.')
       return
     }
 
@@ -171,10 +167,10 @@ export const StreamTokens = () => {
         (stream) => !stream.startDate || !stream.endDate
       )
       if (missingDates) {
-        actions.setErrors({
-          streams:
-            'All streams must have start and end dates when using date-based duration',
-        } as any)
+        actions.setFieldError(
+          'streams',
+          'All streams must have start and end dates when using date-based duration'
+        )
         return
       }
     }
@@ -205,17 +201,19 @@ export const StreamTokens = () => {
             getProvider(chain.id)
           )
           if (!resolved) {
-            actions.setErrors({
-              streams: `Stream #${i + 1}: Could not resolve recipient address. Please enter a valid address or ENS name.`,
-            } as any)
+            actions.setFieldError(
+              'streams',
+              `Stream #${i + 1}: Could not resolve recipient address. Please enter a valid address or ENS name.`
+            )
             return
           }
           recipientAddress = resolved
         } catch (error) {
           console.error(`Error resolving recipient address for stream #${i + 1}:`, error)
-          actions.setErrors({
-            streams: `Stream #${i + 1}: Failed to resolve recipient address. Please check your network connection and try again.`,
-          } as any)
+          actions.setFieldError(
+            'streams',
+            `Stream #${i + 1}: Failed to resolve recipient address. Please check your network connection and try again.`
+          )
           return
         }
 
@@ -225,13 +223,61 @@ export const StreamTokens = () => {
           normalizedRecipient = getAddress(recipientAddress) as Address
         } catch (error) {
           console.error(`Invalid recipient address for stream #${i + 1}:`, error)
-          actions.setErrors({
-            streams: `Stream #${i + 1}: Invalid recipient address format.`,
-          } as any)
+          actions.setFieldError(
+            'streams',
+            `Stream #${i + 1}: Invalid recipient address format.`
+          )
           return
         }
 
-        const depositAmount = parseUnits(stream.amount, tokenDecimals)
+        // Validate amount before parsing
+        // Guard against empty/invalid amounts
+        if (
+          !stream.amount ||
+          typeof stream.amount !== 'string' ||
+          stream.amount.trim() === ''
+        ) {
+          actions.setFieldError('streams', `Stream #${i + 1}: Amount is required.`)
+          return
+        }
+
+        // Validate decimal format (reject scientific notation)
+        const decimalRegex = /^(\d+\.?\d*|\.\d+)$/
+        if (!decimalRegex.test(stream.amount)) {
+          actions.setFieldError(
+            'streams',
+            `Stream #${i + 1}: Invalid amount format. Please use decimal notation.`
+          )
+          return
+        }
+
+        const num = parseFloat(stream.amount)
+        if (isNaN(num) || !isFinite(num) || num <= 0) {
+          actions.setFieldError(
+            'streams',
+            `Stream #${i + 1}: Amount must be a positive number.`
+          )
+          return
+        }
+
+        // Validate tokenDecimals is defined
+        if (tokenDecimals === undefined) {
+          actions.setFieldError(
+            'tokenAddress',
+            'Token decimals not available. Please select a valid token.'
+          )
+          return
+        }
+
+        // Parse amount with validation
+        let depositAmount: bigint
+        try {
+          depositAmount = parseUnits(stream.amount, tokenDecimals)
+        } catch (error) {
+          console.error(`Failed to parse amount for stream #${i + 1}:`, error)
+          actions.setFieldError('streams', `Stream #${i + 1}: Invalid amount format.`)
+          return
+        }
 
         if (useDurations) {
           // Days from now
@@ -251,8 +297,25 @@ export const StreamTokens = () => {
           })
         } else {
           // Start/end dates - safe to use non-null assertion after validation above
-          const startTime = Math.floor(new Date(stream.startDate!).getTime() / 1000)
-          const endTime = Math.floor(new Date(stream.endDate!).getTime() / 1000)
+          const startMs = new Date(stream.startDate!).getTime()
+          const endMs = new Date(stream.endDate!).getTime()
+          if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+            actions.setFieldError(
+              'streams',
+              `Stream #${i + 1}: Invalid start or end date.`
+            )
+            return
+          }
+          const startTime = Math.floor(startMs / 1000)
+          const endTime = Math.floor(endMs / 1000)
+          if (endTime <= startTime) {
+            actions.setFieldError(
+              'streams',
+              `Stream #${i + 1}: End date must be after start date.`
+            )
+            return
+          }
+
           const cliffDuration = (stream.cliffDays || 0) * SECONDS_PER_DAY
           const cliffTime = cliffDuration > 0 ? startTime + cliffDuration : 0
 
@@ -502,9 +565,9 @@ export const StreamTokens = () => {
 
           const allErrors = balanceError
             ? {
-                ...formik.errors,
-                totalAmount: balanceError,
-              }
+              ...formik.errors,
+              totalAmount: balanceError,
+            }
             : formik.errors
 
           return (

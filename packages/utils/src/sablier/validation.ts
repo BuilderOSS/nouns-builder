@@ -113,11 +113,7 @@ export function validateSablierStream(params: StreamValidationParams): Validatio
   }
 
   // When cliff time is non-zero
-  if (
-    Number.isFinite(params.cliffTime) &&
-    params.cliffTime >= 0 &&
-    params.cliffTime > 0
-  ) {
+  if (Number.isFinite(params.cliffTime) && params.cliffTime > 0) {
     // Start time must be strictly less than cliff time
     if (
       Number.isFinite(params.startTime) &&
@@ -150,7 +146,7 @@ export function validateSablierStream(params: StreamValidationParams): Validatio
     const byteLen = new TextEncoder().encode(trimmedShape).length
     if (byteLen > MAX_SHAPE_LENGTH) {
       errors.push(
-        `Shape must be less than ${MAX_SHAPE_LENGTH} bytes (currently ${byteLen} bytes)`
+        `Shape must not exceed ${MAX_SHAPE_LENGTH} bytes (currently ${byteLen} bytes)`
       )
     }
   }

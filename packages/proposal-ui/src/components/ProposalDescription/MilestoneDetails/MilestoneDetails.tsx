@@ -78,7 +78,6 @@ export const MilestoneDetails = ({
             escrow={escrow}
             escrowIndex={escrowIndex}
             totalEscrows={escrows.length}
-            proposal={proposal}
             onOpenProposalReview={onOpenProposalReview}
             hasThreshold={hasThreshold}
           />
@@ -91,7 +90,6 @@ interface EscrowInstanceProps {
   escrow: EscrowInstanceData
   escrowIndex: number
   totalEscrows: number
-  proposal: Proposal
   onOpenProposalReview: () => Promise<void>
   hasThreshold: boolean
 }

@@ -73,8 +73,8 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
       functionName === 'createWithTimestampsLL') &&
     (arg.name === 'lockup' ||
       arg.name === '_lockup' ||
-      arg.name === 'asset' ||
-      arg.name === '_asset' ||
+      arg.name === 'token' ||
+      arg.name === '_token' ||
       arg.name === 'batch' ||
       arg.name === '_batch')
 

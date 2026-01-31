@@ -96,6 +96,21 @@ const streamTokensSchema = () =>
                 })
               )
             }
+
+            // Validate cliff doesn't exceed duration (for days mode)
+            if (
+              stream.cliffDays !== undefined &&
+              stream.cliffDays > 0 &&
+              stream.durationDays !== undefined &&
+              stream.cliffDays > stream.durationDays
+            ) {
+              errors.push(
+                this.createError({
+                  path: `streams[${index}].cliffDays`,
+                  message: 'Cliff period cannot exceed stream duration',
+                })
+              )
+            }
           } else if (durationType === 'dates') {
             if (!stream.startDate) {
               errors.push(
@@ -130,6 +145,27 @@ const streamTokensSchema = () =>
                   message: 'End date must be after start date',
                 })
               )
+            }
+
+            // Validate cliff doesn't exceed duration (for dates mode)
+            if (
+              stream.cliffDays !== undefined &&
+              stream.cliffDays > 0 &&
+              stream.startDate &&
+              stream.endDate
+            ) {
+              const startTime = new Date(stream.startDate).getTime()
+              const endTime = new Date(stream.endDate).getTime()
+              const durationInDays = (endTime - startTime) / (1000 * 60 * 60 * 24)
+
+              if (stream.cliffDays > durationInDays) {
+                errors.push(
+                  this.createError({
+                    path: `streams[${index}].cliffDays`,
+                    message: 'Cliff period cannot exceed stream duration',
+                  })
+                )
+              }
             }
           }
         })
