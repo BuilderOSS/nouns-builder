@@ -2,11 +2,11 @@ import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import type { Sablier } from 'sablier'
 import { sablier } from 'sablier'
-import { Abi } from 'viem'
+import { Abi, type Chain } from 'viem'
 
 // Build a Set of Sablier-supported chain IDs for fast lookup
 const SABLIER_CHAIN_IDS = new Set(
-  Object.values(sablier.evm.chains).map((chain: any) => chain.id as number)
+  sablier.evm.chains.getAll().map((chain: Chain) => chain.id as number)
 )
 
 // Whitelist of chains we support that are also supported by Sablier
