@@ -250,13 +250,16 @@ const EscrowInstance = ({
               const amountDisplay = tokenMetadata?.symbol
                 ? `${formatCryptoVal(formatUnits(amount, decimals))} ${tokenMetadata.symbol}`
                 : amount.toString()
+
+              const amountPart = tokenMetadata?.symbol ? `: ${amountDisplay}` : ''
               return {
-                title: (
-                  <Text>{`${index + 1}. ${milestone.title}: ${amountDisplay}`}</Text>
-                ),
+                title: <Text>{`${index + 1}. ${milestone.title}${amountPart}`}</Text>,
                 description: (
                   <Stack gap="x5">
                     <Stack direction="row" align="center" justify="space-between">
+                      <Text variant="label-xs" color="tertiary" mr="x2">
+                        {`Amount: ${amountDisplay}`}
+                      </Text>
                       <Text variant="label-xs" color="tertiary">
                         {`Due by: ${new Date(
                           (milestone?.endDate as number) * 1000

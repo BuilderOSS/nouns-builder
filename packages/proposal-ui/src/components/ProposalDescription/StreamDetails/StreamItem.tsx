@@ -212,8 +212,10 @@ export const CreateStreamItem = ({
     ? `${formatCryptoVal(formatUnits(totalAmount, decimals))} ${tokenMetadata.symbol}`
     : formatUnits(totalAmount, decimals)
 
+  const amountPart = tokenMetadata?.symbol ? `: ${amountDisplay}` : ''
+
   return {
-    title: <Text>{`Stream ${index + 1}: ${amountDisplay} - ${recipientDisplay}`}</Text>,
+    title: <Text>{`Stream ${index + 1}${amountPart} - ${recipientDisplay}`}</Text>,
     description: (
       <Stack gap="x3">
         <Stack
