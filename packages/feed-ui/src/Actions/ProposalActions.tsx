@@ -43,11 +43,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const [showVoteModal, setShowVoteModal] = useState(false)
   const [showPropdateModal, setShowPropdateModal] = useState(false)
 
-  const {
-    isActive,
-    isPending,
-    isLoading: isLoadingState,
-  } = useProposalState({
+  const { isActive, isLoading: isLoadingState } = useProposalState({
     chainId,
     governorAddress: addresses.governor as AddressType,
     proposalId,
@@ -101,8 +97,8 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   return (
     <>
       <Flex gap="x2" align="center" wrap="wrap">
-        {/* Active or pending proposals show vote option */}
-        {(isActive || isPending) && (
+        {/* Active proposals show vote option */}
+        {isActive && (
           <ContractButton
             size="sm"
             px="x3"
