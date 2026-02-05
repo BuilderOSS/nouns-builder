@@ -288,11 +288,18 @@ export const useStreamData = (
     return out
   }, [streamsStaticData, executedAt])
 
-  // Build array of all contract calls (2 calls per stream) for useReadContracts
+  // Build array of all contract calls (4 calls per stream) for useReadContracts
   const contractCalls = useMemo(() => {
     if (!allStreamIds || allStreamIds.length === 0 || !lockupAddress) return []
 
     return allStreamIds.flatMap((streamId) => [
+      {
+        address: lockupAddress,
+        abi: lockupAbi as Abi,
+        functionName: 'withdrawableAmountOf' as const,
+        args: [streamId] as const,
+        chainId,
+      },
       {
         address: lockupAddress,
         abi: lockupAbi as Abi,
@@ -346,10 +353,11 @@ export const useStreamData = (
     if (!flattenedStaticStreams.length) return null
 
     return allStreamIds.map((streamId, index) => {
-      const offset = index * 3
-      const withdrawnAmount = contractResults[offset]
-      const status = contractResults[offset + 1]
-      const minFeeWei = contractResults[offset + 2]
+      const offset = index * 4
+      const withdrawableAmountFromContract = contractResults[offset]
+      const withdrawnAmount = contractResults[offset + 1]
+      const status = contractResults[offset + 2]
+      const minFeeWei = contractResults[offset + 3]
 
       const staticStream = flattenedStaticStreams[index]
       if (!staticStream) {
@@ -359,39 +367,56 @@ export const useStreamData = (
         return null
       }
 
-      if (withdrawnAmount === undefined || status === undefined) {
+      if (
+        withdrawableAmountFromContract === undefined ||
+        withdrawnAmount === undefined ||
+        status === undefined
+      ) {
         console.error(`Failed to fetch complete data for stream ${streamId}`)
         return null
       }
 
       try {
         const depositedAmount = staticStream.depositAmount
-        const streamedAmount = calculateStreamedAmountLL({
-          now,
-          cliffTime: staticStream.cliffTime,
-          depositedAmount,
-          endTime: staticStream.endTime,
-          startTime: staticStream.startTime,
-          unlockStart: staticStream.unlockStart,
-          unlockCliff: staticStream.unlockCliff,
-          withdrawnAmount: withdrawnAmount as bigint,
-        })
-
-        const withdrawableAmount = clampSub(streamedAmount, withdrawnAmount as bigint)
-
         const numericStatus = status as number
         const wasCanceled = numericStatus === StreamStatus.CANCELED
         const isDepleted = numericStatus === StreamStatus.DEPLETED
 
-        // StreamLiveData type compatibility: we provide the same fields as before,
-        // but now they're sourced from static config + computed amounts.
-        // We also add `streamedAmount` (extra field is OK in TS structural typing).
+        // Use different calculation strategies based on stream status:
+        // - CANCELED/DEPLETED: Use contract's withdrawableAmountOf (frozen at cancellation/depletion)
+        // - Others: Calculate locally for real-time updates
+        let streamedAmount: bigint
+        let withdrawableAmount: bigint
+
+        if (wasCanceled || isDepleted) {
+          // For canceled/depleted streams, use the contract's frozen withdrawableAmount
+          // and calculate streamed amount from it
+          withdrawableAmount = withdrawableAmountFromContract as bigint
+          streamedAmount = (withdrawnAmount as bigint) + withdrawableAmount
+        } else {
+          // For active/settled/pending streams, calculate based on time for real-time updates
+          streamedAmount = calculateStreamedAmountLL({
+            now,
+            cliffTime: staticStream.cliffTime,
+            depositedAmount,
+            endTime: staticStream.endTime,
+            startTime: staticStream.startTime,
+            unlockStart: staticStream.unlockStart,
+            unlockCliff: staticStream.unlockCliff,
+            withdrawnAmount: withdrawnAmount as bigint,
+          })
+          withdrawableAmount = clampSub(streamedAmount, withdrawnAmount as bigint)
+        }
+
+        // StreamLiveData type compatibility: hybrid approach for accurate withdrawable amounts.
+        // For canceled/depleted streams, we use the contract's frozen value.
+        // For active streams, we calculate locally for real-time updates.
         return {
           streamId,
           depositedAmount,
           withdrawnAmount: withdrawnAmount as bigint,
           withdrawableAmount,
-          streamedAmount, // <-- new
+          streamedAmount,
           status: numericStatus,
           sender: staticStream.sender,
           recipient: staticStream.recipient,

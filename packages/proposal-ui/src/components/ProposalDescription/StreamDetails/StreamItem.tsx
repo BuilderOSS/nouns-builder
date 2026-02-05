@@ -282,13 +282,20 @@ export const CreateStreamItem = ({
                 borderRadius="curved"
                 borderWidth="normal"
                 borderStyle="solid"
-                borderColor={liveData.withdrawableAmount > 0n ? 'positive' : 'border'}
+                borderColor={
+                  liveData.status === StreamStatus.STREAMING &&
+                  liveData.withdrawableAmount > 0n
+                    ? 'positive'
+                    : 'border'
+                }
               >
                 <Text variant="label-xs" color="tertiary" mb="x2">
                   Available to Withdraw
                 </Text>
                 <Text fontSize={28} fontWeight="heading">
-                  {formatCryptoVal(formatUnits(liveData.withdrawableAmount, decimals))}
+                  {liveData.withdrawableAmount > 0n
+                    ? formatCryptoVal(formatUnits(liveData.withdrawableAmount, decimals))
+                    : '0'}
                 </Text>
                 <Text variant="label-sm" color="tertiary">
                   {tokenMetadata?.symbol}
