@@ -13,6 +13,7 @@ import { useMemo, useState } from 'react'
 import { Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 
+import { Section } from '../Section'
 import { CreateStreamItem } from './StreamItem'
 
 const createSafeAppUrl = (chainId: CHAIN_ID, safeAddress: Address, appUrl: string) => {
@@ -40,6 +41,7 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
     isLoadingStreamIds,
     isLoadingLiveData,
     refetchLiveData,
+    isCreateTx,
   } = useStreamData(chain.id, proposal)
 
   const isLoading = isLoadingStreamIds || isLoadingLiveData
@@ -47,8 +49,10 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
   const [withdrawingStreamId, setWithdrawingStreamId] = useState<bigint | null>(null)
   const [cancelingStreamId, setCancelingStreamId] = useState<bigint | null>(null)
 
+  if (!isCreateTx) return null
+
   return (
-    <>
+    <Section title="Sablier Streams">
       {isLoading && <Spinner size="md" />}
 
       {!isLoading &&
@@ -68,7 +72,7 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
             refetchLiveData={refetchLiveData}
           />
         ))}
-    </>
+    </Section>
   )
 }
 

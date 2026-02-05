@@ -27,6 +27,7 @@ export type EscrowInstanceData = {
 }
 
 export type InvoiceData = {
+  isDeployTx: boolean
   escrows: EscrowInstanceData[]
   isLoadingInvoice: boolean
 }
@@ -231,6 +232,7 @@ export const useInvoiceData = (chainId: CHAIN_ID, proposal: Proposal): InvoiceDa
   }, [escrowsStaticData, invoiceAddresses, invoiceDatas])
 
   return {
+    isDeployTx: escrowsStaticData.length > 0,
     escrows,
     isLoadingInvoice: isLoadingInvoiceAddresses || isLoadingInvoiceDatas,
   }

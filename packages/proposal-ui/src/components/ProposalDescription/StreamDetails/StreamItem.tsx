@@ -102,10 +102,7 @@ export const CreateStreamItem = ({
   )
 
   const decimals = tokenMetadata?.decimals ?? 18
-  const depositAmount = stream.depositAmount
-  const depositAmountDisplay = tokenMetadata?.symbol
-    ? `${formatCryptoVal(formatUnits(depositAmount, decimals))} ${tokenMetadata.symbol}`
-    : depositAmount.toString()
+  const totalAmount = stream.depositAmount
 
   const duration = endTime - startTime
   const hasCliff = cliffTime > 0
@@ -211,11 +208,21 @@ export const CreateStreamItem = ({
     return createSablierStreamUrl(chain.id, streamId)
   }, [isExecuted, streamId, chain.id])
 
+  const amountDisplay = tokenMetadata?.symbol
+    ? `${formatCryptoVal(formatUnits(totalAmount, decimals))} ${tokenMetadata.symbol}`
+    : formatUnits(totalAmount, decimals)
+
   return {
-    title: <Text>{`Stream ${index + 1}: ${recipientDisplay}`}</Text>,
+    title: <Text>{`Stream ${index + 1}: ${amountDisplay} - ${recipientDisplay}`}</Text>,
     description: (
       <Stack gap="x3">
-        <Stack direction="row" align="center" justify="space-between">
+        <Stack
+          direction="row"
+          align="center"
+          justify="space-between"
+          flexWrap="wrap"
+          gap="x2"
+        >
           <Stack direction="row" align="center" gap="x2">
             <Text variant="label-xs" color="tertiary">
               Recipient:
@@ -227,10 +234,16 @@ export const CreateStreamItem = ({
             </Box>
           </Stack>
           <Text variant="label-xs" color="tertiary">
-            Deposit Amount: {depositAmountDisplay}
+            Total: {amountDisplay}
           </Text>
         </Stack>
-        <Stack direction="row" align="center" justify="space-between">
+        <Stack
+          direction="row"
+          align="center"
+          justify="space-between"
+          flexWrap="wrap"
+          gap="x2"
+        >
           {hasCliff && (
             <Text variant="label-xs" color="tertiary">
               Cliff: {new Date(cliffTime * 1000).toLocaleDateString()}
@@ -241,7 +254,13 @@ export const CreateStreamItem = ({
           </Text>
         </Stack>
         {(!isDurationsMode || isExecuted) && (
-          <Stack direction="row" align="center" justify="space-between">
+          <Stack
+            direction="row"
+            align="center"
+            justify="space-between"
+            flexWrap="wrap"
+            gap="x2"
+          >
             <Text variant="label-xs" color="tertiary">
               Start: {new Date(startTime * 1000).toLocaleDateString()}
             </Text>
@@ -253,8 +272,53 @@ export const CreateStreamItem = ({
 
         {liveData && (
           <>
+            {/* Prominent withdrawal info cards */}
+            <Stack direction={{ '@initial': 'column', '@768': 'row' }} gap="x3" mt="x4">
+              {/* Currently Withdrawable - Most Important */}
+              <Box
+                flex="1"
+                backgroundColor="background2"
+                p="x4"
+                borderRadius="curved"
+                borderWidth="normal"
+                borderStyle="solid"
+                borderColor={liveData.withdrawableAmount > 0n ? 'positive' : 'border'}
+              >
+                <Text variant="label-xs" color="tertiary" mb="x2">
+                  Available to Withdraw
+                </Text>
+                <Text fontSize={28} fontWeight="heading">
+                  {formatCryptoVal(formatUnits(liveData.withdrawableAmount, decimals))}
+                </Text>
+                <Text variant="label-sm" color="tertiary">
+                  {tokenMetadata?.symbol}
+                </Text>
+              </Box>
+
+              {/* Already Withdrawn */}
+              <Box
+                flex="1"
+                backgroundColor="background2"
+                p="x4"
+                borderRadius="curved"
+                borderWidth="normal"
+                borderStyle="solid"
+                borderColor="border"
+              >
+                <Text variant="label-xs" color="tertiary" mb="x2">
+                  Already Withdrawn
+                </Text>
+                <Text fontSize={28} fontWeight="heading">
+                  {formatCryptoVal(formatUnits(liveData.withdrawnAmount, decimals))}
+                </Text>
+                <Text variant="label-sm" color="tertiary">
+                  {tokenMetadata?.symbol}
+                </Text>
+              </Box>
+            </Stack>
+
+            {/* Status and remaining details */}
             <Stack direction="column" gap="x2" mt="x3">
-              <Text fontWeight="heading">Stream Status</Text>
               <Stack direction="row" align="center" justify="space-between">
                 <Text variant="label-xs" color="tertiary">
                   Status:
@@ -287,25 +351,7 @@ export const CreateStreamItem = ({
               </Stack>
               <Stack direction="row" align="center" justify="space-between">
                 <Text variant="label-xs" color="tertiary">
-                  Already Withdrawn:
-                </Text>
-                <Text variant="label-xs">
-                  {formatCryptoVal(formatUnits(liveData.withdrawnAmount, decimals))}{' '}
-                  {tokenMetadata?.symbol}
-                </Text>
-              </Stack>
-              <Stack direction="row" align="center" justify="space-between">
-                <Text variant="label-xs" color="tertiary">
-                  Currently Withdrawable:
-                </Text>
-                <Text variant="label-xs" fontWeight="heading">
-                  {formatCryptoVal(formatUnits(liveData.withdrawableAmount, decimals))}{' '}
-                  {tokenMetadata?.symbol}
-                </Text>
-              </Stack>
-              <Stack direction="row" align="center" justify="space-between">
-                <Text variant="label-xs" color="tertiary">
-                  Remaining:
+                  Remaining in Stream:
                 </Text>
                 <Text variant="label-xs">
                   {formatCryptoVal(

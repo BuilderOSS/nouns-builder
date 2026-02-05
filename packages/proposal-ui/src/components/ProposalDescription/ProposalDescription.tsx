@@ -15,22 +15,14 @@ import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escr
 import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
-import React, { ReactNode, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import useSWR from 'swr'
 
 import { propPageWrapper } from '../styles.css'
 import { MilestoneDetails } from './MilestoneDetails'
 import { proposalDescription } from './ProposalDescription.css'
+import { Section } from './Section'
 import { StreamDetails } from './StreamDetails'
-
-const Section = ({ children, title }: { children: ReactNode; title: string }) => (
-  <Box mb={{ '@initial': 'x6', '@768': 'x13' }}>
-    <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight={'display'}>
-      {title}
-    </Box>
-    {children}
-  </Box>
-)
 
 type ProposalDescriptionProps = {
   proposal: Proposal
@@ -100,21 +92,17 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
     <Flex className={propPageWrapper}>
       <Flex direction={'column'} mt={{ '@initial': 'x6', '@768': 'x13' }}>
         {hasEscrowMilestone && (
-          <Section title="Escrow Milestones">
-            <MilestoneDetails
-              proposal={proposal}
-              onOpenProposalReview={onOpenProposalReview}
-            />
-          </Section>
+          <MilestoneDetails
+            proposal={proposal}
+            onOpenProposalReview={onOpenProposalReview}
+          />
         )}
 
         {hasSablierStream && (
-          <Section title="Sablier Streams">
-            <StreamDetails
-              proposal={proposal}
-              onOpenProposalReview={onOpenProposalReview}
-            />
-          </Section>
+          <StreamDetails
+            proposal={proposal}
+            onOpenProposalReview={onOpenProposalReview}
+          />
         )}
 
         <Section title="Description">

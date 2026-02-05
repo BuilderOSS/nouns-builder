@@ -11,12 +11,15 @@ import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores
 import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { useCallback, useMemo, useState } from 'react'
 import { encodeFunctionData, formatUnits, Hex } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+
+import { Section } from '../Section'
 
 const RELEASE_FUNCTION_ABI = [
   {
@@ -63,12 +66,14 @@ export const MilestoneDetails = ({
     collectionAddress: addresses.token,
   })
 
-  const { escrows, isLoadingInvoice } = useInvoiceData(chain.id, proposal)
+  const { escrows, isLoadingInvoice, isDeployTx } = useInvoiceData(chain.id, proposal)
 
   const isLoading = isLoadingInvoice && escrows.length === 0
 
+  if (!isDeployTx) return null
+
   return (
-    <>
+    <Section title="Escrow Milestones">
       {isLoading && <Spinner size="md" />}
 
       {!isLoading &&
@@ -82,7 +87,7 @@ export const MilestoneDetails = ({
             hasThreshold={hasThreshold}
           />
         ))}
-    </>
+    </Section>
   )
 }
 
@@ -243,16 +248,15 @@ const EscrowInstance = ({
               const amount = milestoneAmounts?.[index] ?? 0n
               const decimals = tokenMetadata?.decimals ?? 18
               const amountDisplay = tokenMetadata?.symbol
-                ? `${formatUnits(amount, decimals)} ${tokenMetadata.symbol}`
+                ? `${formatCryptoVal(formatUnits(amount, decimals))} ${tokenMetadata.symbol}`
                 : amount.toString()
               return {
-                title: <Text>{`${index + 1}. ${milestone.title}`}</Text>,
+                title: (
+                  <Text>{`${index + 1}. ${milestone.title}: ${amountDisplay}`}</Text>
+                ),
                 description: (
                   <Stack gap="x5">
                     <Stack direction="row" align="center" justify="space-between">
-                      <Text variant="label-xs" color="tertiary">
-                        {`Amount: ${amountDisplay}`}
-                      </Text>
                       <Text variant="label-xs" color="tertiary">
                         {`Due by: ${new Date(
                           (milestone?.endDate as number) * 1000

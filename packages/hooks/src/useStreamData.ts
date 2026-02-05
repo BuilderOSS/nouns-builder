@@ -29,6 +29,7 @@ export type StreamBatchData = {
 }
 
 export type StreamDataResult = {
+  isCreateTx: boolean
   streamBatches: StreamBatchData[]
   lockupAddress: Address | null
   isLoadingStreamIds: boolean
@@ -441,6 +442,7 @@ export const useStreamData = (
   }, [streamsStaticData, streamIdsByBatch, liveStreamsByBatch])
 
   return {
+    isCreateTx: streamsStaticData.length > 0,
     streamBatches,
     lockupAddress,
     isLoadingStreamIds,
