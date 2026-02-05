@@ -565,9 +565,9 @@ export const StreamTokens = () => {
 
           const allErrors = balanceError
             ? {
-              ...formik.errors,
-              totalAmount: balanceError,
-            }
+                ...formik.errors,
+                totalAmount: balanceError,
+              }
             : formik.errors
 
           return (
@@ -719,19 +719,37 @@ export const StreamTokens = () => {
                         {({ push, remove }) => (
                           <>
                             <Accordion
-                              items={formik.values.streams.map((stream, index) => ({
-                                title: `Stream #${index + 1}${stream.recipientAddress ? ` - ${truncateAddress(stream.recipientAddress)}` : ''}`,
-                                titleFontSize: 20,
-                                description: (
-                                  <StreamForm
-                                    key={index}
-                                    index={index}
-                                    removeStream={() =>
-                                      formik.values.streams.length !== 1 && remove(index)
-                                    }
-                                  />
-                                ),
-                              }))}
+                              items={formik.values.streams.map((stream, index) => {
+                                let amountDisplay = '0 ' + symbol
+                                if (stream.amount && stream.amount.trim() !== '') {
+                                  try {
+                                    const amountInUnits = parseUnits(
+                                      stream.amount,
+                                      decimals
+                                    )
+                                    amountDisplay = `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
+                                  } catch {
+                                    amountDisplay = stream.amount + ' ' + symbol
+                                  }
+                                }
+                                const recipientPart = stream.recipientAddress
+                                  ? ` - ${truncateAddress(stream.recipientAddress)}`
+                                  : ''
+                                return {
+                                  title: `Stream #${index + 1}: ${amountDisplay}${recipientPart}`,
+                                  titleFontSize: 20,
+                                  description: (
+                                    <StreamForm
+                                      key={index}
+                                      index={index}
+                                      removeStream={() =>
+                                        formik.values.streams.length !== 1 &&
+                                        remove(index)
+                                      }
+                                    />
+                                  ),
+                                }
+                              })}
                             />
                             <Flex align="center" justify="center" mt="x4">
                               <Button

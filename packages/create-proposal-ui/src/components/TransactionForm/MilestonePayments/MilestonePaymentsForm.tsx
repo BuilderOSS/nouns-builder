@@ -172,24 +172,34 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
                         {({ push, remove }) => (
                           <>
                             <Accordion
-                              items={formik.values.milestones.map((_, index) => ({
-                                title: truncate(formik.values.milestones[index].title, {
-                                  length: 32,
+                              items={formik.values.milestones.map((milestone, index) => {
+                                const amountInUnits = parseUnits(
+                                  milestone.amount.toString(),
+                                  decimals
+                                )
+                                const amountDisplay = milestone.amount
+                                  ? `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
+                                  : '0 ' + symbol
+                                const titlePart = truncate(milestone.title, {
+                                  length: 24,
                                   separator: '...',
-                                }),
-                                titleFontSize: 20,
-                                description: (
-                                  <MilestoneForm
-                                    key={index}
-                                    index={index}
-                                    setIsMediaUploading={setIsMediaUploading}
-                                    removeMilestone={() =>
-                                      formik.values.milestones.length !== 1 &&
-                                      remove(index)
-                                    }
-                                  />
-                                ),
-                              }))}
+                                })
+                                return {
+                                  title: `${titlePart}: ${amountDisplay}`,
+                                  titleFontSize: 20,
+                                  description: (
+                                    <MilestoneForm
+                                      key={index}
+                                      index={index}
+                                      setIsMediaUploading={setIsMediaUploading}
+                                      removeMilestone={() =>
+                                        formik.values.milestones.length !== 1 &&
+                                        remove(index)
+                                      }
+                                    />
+                                  ),
+                                }
+                              })}
                             />
                             <Flex align="center" justify="center">
                               <Button
