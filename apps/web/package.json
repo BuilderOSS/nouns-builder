@@ -44,9 +44,10 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-mde": "^11.5.0",
+    "sablier": "^2.0.1",
     "sharp": "^0.34.2",
     "swr": "^2.3.3",
-    "viem": "^2.38.2",
+    "viem": "^2.44.2",
     "wagmi": "^2.18.1"
   },
   "devDependencies": {
@@ -80,7 +81,7 @@
     "vitest": "^3.1.4"
   },
   "license": "MIT",
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.28.2",
   "private": true,
   "scripts": {
     "analyze": "ANALYZE=true next build",

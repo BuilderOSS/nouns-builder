@@ -1,9 +1,11 @@
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants'
+import { CHAIN_ID } from '@buildeross/types'
 import bs58 from 'bs58'
 import { Address, decodeAbiParameters, Hex, toBytes, toHex } from 'viem'
 
-export const NULL_ADDRESS: AddressType =
-  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'.toLowerCase() as AddressType
+import { getWrappedTokenAddress } from './weth'
+
+// Re-export for backwards compatibility
 export const SMART_INVOICE_ARBITRATION_PROVIDER =
   '0x18542245cA523DFF96AF766047fE9423E0BED3C0' as Address
 export const ESCROW_RESOLVER_TYPE = 0
@@ -21,30 +23,6 @@ export function convertByte32ToIpfsCidV0(str: Hex) {
     newStr = str.slice(2)
   }
   return bs58.encode(Buffer.from(`1220${newStr}`, 'hex'))
-}
-
-function getWrappedTokenAddress(chainId: number | string): Address {
-  chainId = Number(chainId)
-  switch (chainId) {
-    case CHAIN_ID.ETHEREUM:
-      return '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as Address
-    case CHAIN_ID.OPTIMISM:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.BASE:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.ZORA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.SEPOLIA:
-      return '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14' as Address
-    case CHAIN_ID.OPTIMISM_SEPOLIA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.BASE_SEPOLIA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    case CHAIN_ID.ZORA_SEPOLIA:
-      return '0x4200000000000000000000000000000000000006' as Address
-    default:
-      throw new Error(`Unsupported chain ID: ${chainId}`)
-  }
 }
 
 function getEscrowFactory(chainId: number | string): Address {
@@ -71,52 +49,63 @@ function getEscrowFactory(chainId: number | string): Address {
   }
 }
 
-function getEscrowBundler(chainId: number | string): Address {
-  chainId = Number(chainId)
-  switch (chainId) {
-    case CHAIN_ID.ETHEREUM:
-      return '0x8f2cbf3a281092e48e0d79e0466604833e6cfa23' as Address
-    case CHAIN_ID.OPTIMISM:
-      return '0x52c04330c9d38638b5d38e685f13ca744b84155b' as Address
-    case CHAIN_ID.BASE:
-      return '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e' as Address
-    case CHAIN_ID.ZORA:
-      return '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a' as Address
-    case CHAIN_ID.SEPOLIA:
-      return '0xcf933e48b5677e15b49ab69821bb7b7b8ad109bb' as Address
-    case CHAIN_ID.OPTIMISM_SEPOLIA:
-      return '0xd8e1f218021550fadda4b1e353578b80a1ce1a94' as Address
-    case CHAIN_ID.BASE_SEPOLIA:
-      return '0x189a535b05faf9ab537868589fa935705a1893a5' as Address
-    case CHAIN_ID.ZORA_SEPOLIA:
-      return '0xc99391cf03f85f81419f0771c543e80c5616e6bc' as Address
-    default:
-      throw new Error(`Unsupported chain ID: ${chainId}`)
-  }
+// Shared map of escrow bundler addresses keyed by {chainId, version}
+// This reduces drift risk when addresses change across chains
+type EscrowBundlerVersion = 'v2' | 'legacy'
+
+const ESCROW_BUNDLER_ADDRESSES: Partial<
+  Record<CHAIN_ID, Record<EscrowBundlerVersion, Address>>
+> = {
+  [CHAIN_ID.ETHEREUM]: {
+    v2: '0x8f2cbf3a281092e48e0d79e0466604833e6cfa23',
+    legacy: '0xb4cdef4aa610c046864467592fae456a58d3443a',
+  },
+  [CHAIN_ID.OPTIMISM]: {
+    v2: '0x52c04330c9d38638b5d38e685f13ca744b84155b',
+    legacy: '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e',
+  },
+  [CHAIN_ID.BASE]: {
+    v2: '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e',
+    legacy: '0xf4640751e7363a0572d4ba93a9b049b956b33c17',
+  },
+  [CHAIN_ID.ZORA]: {
+    v2: '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a',
+    legacy: '0x0325e1b676c4cf59e0b690a05e0181be862193d4',
+  },
+  [CHAIN_ID.SEPOLIA]: {
+    v2: '0xcf933e48b5677e15b49ab69821bb7b7b8ad109bb',
+    legacy: '0x9c1E057B37605B7f6ed6f4c8E2826C3d84ddC08D',
+  },
+  [CHAIN_ID.OPTIMISM_SEPOLIA]: {
+    v2: '0xd8e1f218021550fadda4b1e353578b80a1ce1a94',
+    legacy: '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a',
+  },
+  [CHAIN_ID.BASE_SEPOLIA]: {
+    v2: '0x189a535b05faf9ab537868589fa935705a1893a5',
+    legacy: '0x3add1d027116a5406ced10411945cf2d4d9ed68e',
+  },
+  [CHAIN_ID.ZORA_SEPOLIA]: {
+    v2: '0xc99391cf03f85f81419f0771c543e80c5616e6bc',
+    legacy: '0x851e59a39571e599954702f0e4996bf838d9c863',
+  },
 }
 
-function getEscrowBundlerV1(chainId: number | string): Address {
-  chainId = Number(chainId)
-  switch (chainId) {
-    case CHAIN_ID.ETHEREUM:
-      return '0xb4cdef4aa610c046864467592fae456a58d3443a' as Address
-    case CHAIN_ID.OPTIMISM:
-      return '0xdafeb89f713e25a02e4ec21a18e3757d7a76d19e' as Address
-    case CHAIN_ID.BASE:
-      return '0xf4640751e7363a0572d4ba93a9b049b956b33c17' as Address
-    case CHAIN_ID.ZORA:
-      return '0x0325e1b676c4cf59e0b690a05e0181be862193d4' as Address
-    case CHAIN_ID.SEPOLIA:
-      return '0x9c1E057B37605B7f6ed6f4c8E2826C3d84ddC08D' as Address
-    case CHAIN_ID.OPTIMISM_SEPOLIA:
-      return '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a' as Address
-    case CHAIN_ID.BASE_SEPOLIA:
-      return '0x3add1d027116a5406ced10411945cf2d4d9ed68e' as Address
-    case CHAIN_ID.ZORA_SEPOLIA:
-      return '0x851e59a39571e599954702f0e4996bf838d9c863' as Address
-    default:
-      throw new Error(`Unsupported chain ID: ${chainId}`)
+function getEscrowBundler(chainId: number | string): Address {
+  const numChainId = Number(chainId) as CHAIN_ID
+  const address = ESCROW_BUNDLER_ADDRESSES[numChainId]?.v2
+  if (!address) {
+    throw new Error(`Unsupported chain ID: ${chainId}`)
   }
+  return address
+}
+
+function getEscrowBundlerLegacy(chainId: number | string): Address {
+  const numChainId = Number(chainId) as CHAIN_ID
+  const address = ESCROW_BUNDLER_ADDRESSES[numChainId]?.legacy
+  if (!address) {
+    throw new Error(`Unsupported chain ID: ${chainId}`)
+  }
+  return address
 }
 
 export type DecodedEscrowData = Partial<{
@@ -169,7 +158,7 @@ const decodeEscrowData = (data: Hex): DecodedEscrowData => {
   }
 }
 
-const decodeEscrowDataV1 = (data: Hex): DecodedEscrowData => {
+const decodeEscrowDataLegacy = (data: Hex): DecodedEscrowData => {
   try {
     const decodedAbiData = decodeAbiParameters(
       [
@@ -200,7 +189,7 @@ const decodeEscrowDataV1 = (data: Hex): DecodedEscrowData => {
       escrowType: decodedAbiData[9],
     } as DecodedEscrowData
   } catch (e) {
-    console.error('error decoding escrow data v1', e)
+    console.error('error decoding escrow data legacy', e)
     return {} as DecodedEscrowData
   }
 }
@@ -247,12 +236,47 @@ const deployEscrowAbi = [
   },
 ]
 
+// Older escrow contract ABI (without _provider parameter)
+const deployEscrowAbiLegacy = [
+  {
+    inputs: [
+      {
+        internalType: 'uint256[]',
+        name: '_milestoneAmounts',
+        type: 'uint256[]',
+      },
+      {
+        internalType: 'bytes',
+        name: '_escrowData',
+        type: 'bytes',
+      },
+      {
+        internalType: 'uint256',
+        name: '_fundAmount',
+        type: 'uint256',
+      },
+    ],
+    name: 'deployEscrow',
+    outputs: [
+      {
+        internalType: 'address',
+        name: 'escrow',
+        type: 'address',
+      },
+    ],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+]
+
 export {
   decodeEscrowData,
-  decodeEscrowDataV1,
+  decodeEscrowDataLegacy,
   deployEscrowAbi,
+  deployEscrowAbiLegacy,
   getEscrowBundler,
-  getEscrowBundlerV1,
+  getEscrowBundlerLegacy,
   getEscrowFactory,
   getWrappedTokenAddress,
+  NATIVE_TOKEN_ADDRESS,
 }

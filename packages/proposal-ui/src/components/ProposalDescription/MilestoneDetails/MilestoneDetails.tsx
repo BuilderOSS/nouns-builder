@@ -1,22 +1,25 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
-import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { useInvoiceData } from '@buildeross/hooks/useInvoiceData'
+import { type EscrowInstanceData, useInvoiceData } from '@buildeross/hooks/useInvoiceData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { Milestone as MilestoneMetadata } from '@smartinvoicexyz/types'
 import { useCallback, useMemo, useState } from 'react'
 import { encodeFunctionData, formatUnits, Hex } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+
+import { Section } from '../Section'
 
 const RELEASE_FUNCTION_ABI = [
   {
@@ -44,21 +47,17 @@ const createSafeUrl = (chainId: CHAIN_ID, safeAddress: Hex) => {
 }
 
 interface MilestoneDetailsProps {
-  decodedTransaction: DecodedTransaction
-  executionTransactionHash?: string
+  proposal: Proposal
   onOpenProposalReview: () => Promise<void>
 }
 
 export const MilestoneDetails = ({
-  decodedTransaction,
-  executionTransactionHash,
+  proposal,
   onOpenProposalReview,
 }: MilestoneDetailsProps) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { addTransaction } = useProposalStore()
   const { address } = useAccount()
-  const config = useConfig()
 
   const { hasThreshold } = useVotes({
     chainId: chain.id,
@@ -67,14 +66,54 @@ export const MilestoneDetails = ({
     collectionAddress: addresses.token,
   })
 
-  const {
-    invoiceAddress,
-    clientAddress,
-    tokenAddress,
-    milestoneAmounts,
-    invoiceData,
-    isLoadingInvoice,
-  } = useInvoiceData(chain.id, decodedTransaction, executionTransactionHash)
+  const { escrows, isLoadingInvoice, isDeployTx } = useInvoiceData(chain.id, proposal)
+
+  const isLoading = isLoadingInvoice && escrows.length === 0
+
+  if (!isDeployTx) return null
+
+  return (
+    <Section title="Escrow Milestones">
+      {isLoading && <Spinner size="md" />}
+
+      {!isLoading &&
+        escrows.map((escrow: EscrowInstanceData, escrowIndex: number) => (
+          <EscrowInstance
+            key={escrowIndex}
+            escrow={escrow}
+            escrowIndex={escrowIndex}
+            totalEscrows={escrows.length}
+            onOpenProposalReview={onOpenProposalReview}
+            hasThreshold={hasThreshold}
+          />
+        ))}
+    </Section>
+  )
+}
+
+interface EscrowInstanceProps {
+  escrow: EscrowInstanceData
+  escrowIndex: number
+  totalEscrows: number
+  onOpenProposalReview: () => Promise<void>
+  hasThreshold: boolean
+}
+
+const EscrowInstance = ({
+  escrow,
+  escrowIndex,
+  totalEscrows,
+  onOpenProposalReview,
+  hasThreshold,
+}: EscrowInstanceProps) => {
+  const { chain } = useChainStore()
+  const { addresses } = useDaoStore()
+  const { addTransaction } = useProposalStore()
+  const { address } = useAccount()
+  const config = useConfig()
+
+  const { invoiceAddress, clientAddress, tokenAddress, milestoneAmounts, invoiceData } =
+    escrow
 
   const { tokenMetadata } = useTokenMetadataSingle(chain.id, tokenAddress)
 
@@ -188,10 +227,16 @@ export const MilestoneDetails = ({
     [config, chain.id, invoiceAddress]
   )
 
-  const isLoading = !invoiceData && (isLoadingInvoice || isLoadingMilestone)
+  const isLoading = !invoiceData && isLoadingMilestone
 
   return (
     <>
+      {totalEscrows > 1 && (
+        <Box mb="x4">
+          <Text variant="heading-sm">Escrow #{escrowIndex + 1}</Text>
+        </Box>
+      )}
+
       {isLoading && <Spinner size="md" />}
 
       {!isLoading && !!invoiceData?.milestones && (
@@ -203,16 +248,15 @@ export const MilestoneDetails = ({
               const amount = milestoneAmounts?.[index] ?? 0n
               const decimals = tokenMetadata?.decimals ?? 18
               const amountDisplay = tokenMetadata?.symbol
-                ? `${formatUnits(amount, decimals)} ${tokenMetadata.symbol}`
+                ? `${formatCryptoVal(formatUnits(amount, decimals))} ${tokenMetadata.symbol}`
                 : amount.toString()
               return {
-                title: <Text>{`${index + 1}. ${milestone.title}`}</Text>,
+                title: (
+                  <Text>{`${index + 1}. ${milestone.title}: ${amountDisplay}`}</Text>
+                ),
                 description: (
                   <Stack gap="x5">
                     <Stack direction="row" align="center" justify="space-between">
-                      <Text variant="label-xs" color="tertiary">
-                        {`Amount: ${amountDisplay}`}
-                      </Text>
                       <Text variant="label-xs" color="tertiary">
                         {`Due by: ${new Date(
                           (milestone?.endDate as number) * 1000
@@ -273,8 +317,11 @@ export const MilestoneDetails = ({
                                 }
                                 disabled={isClientConnected ? isReleasing : !hasThreshold}
                                 loading={isReleasing}
+                                fontSize={isClientConnected ? 16 : 12}
                               >
-                                Release Milestone
+                                {isClientConnected
+                                  ? `Release Milestone #${index + 1}`
+                                  : `Create Proposal to Release Milestone #${index + 1}`}
                               </ContractButton>
                               {!hasThreshold && !isClientConnected && (
                                 <Text variant="label-xs" color="negative">

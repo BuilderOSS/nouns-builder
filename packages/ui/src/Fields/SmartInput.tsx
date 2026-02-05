@@ -26,6 +26,7 @@ interface SmartInputProps {
   secondaryLabel?: string
   onChange: ChangeEventHandler
   onBlur?: ChangeEventHandler
+  onFocus?: React.FocusEventHandler<HTMLInputElement>
   formik?: FormikProps<any>
   errorMessage?: any
   helperText?: string
@@ -60,6 +61,7 @@ const SmartInput: React.FC<SmartInputProps> = ({
   secondaryLabel,
   onChange,
   onBlur,
+  onFocus,
   autoSubmit,
   formik,
   errorMessage,
@@ -123,8 +125,9 @@ const SmartInput: React.FC<SmartInputProps> = ({
     onBlur?.(e)
   }
 
-  const handleFocus = () => {
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocus(true)
+    onFocus?.(e)
   }
 
   return (

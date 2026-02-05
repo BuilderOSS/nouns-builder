@@ -9,7 +9,7 @@ import {
   deployEscrowAbi,
   ESCROW_TYPE,
   getEscrowBundler,
-  NULL_ADDRESS,
+  NATIVE_TOKEN_ADDRESS,
 } from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Stack } from '@buildeross/zord'
@@ -17,16 +17,16 @@ import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexy
 import { FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
 import useSWR from 'swr'
-import { Address, encodeFunctionData, formatUnits, parseUnits } from 'viem'
+import { Address, encodeFunctionData, formatUnits, isAddress, parseUnits } from 'viem'
 
-import EscrowForm from './EscrowForm'
-import { EscrowFormValues } from './EscrowForm.schema'
-import { encodeEscrowData } from './EscrowUtils'
+import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
+import MilestonePaymentsForm from './MilestonePaymentsForm'
+import { encodeEscrowData } from './MilestonePaymentsUtils'
 
 const LIMIT = 20
 const PAGE = 1
 
-export const Escrow: React.FC = () => {
+export const MilestonePayments: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ipfsUploadError, setIpfsUploadError] = useState<Error | null>(null)
 
@@ -47,7 +47,10 @@ export const Escrow: React.FC = () => {
   const lastProposalId = data?.proposals?.[0]?.proposalNumber ?? 0
 
   const handleEscrowTransaction = useCallback(
-    async (values: EscrowFormValues, actions: FormikHelpers<EscrowFormValues>) => {
+    async (
+      values: MilestonePaymentsFormValues,
+      actions: FormikHelpers<MilestonePaymentsFormValues>
+    ) => {
       if (!addresses.treasury || !values.tokenAddress || !values.tokenMetadata) {
         return
       }
@@ -56,7 +59,8 @@ export const Escrow: React.FC = () => {
       setIpfsUploadError(null)
 
       // Determine if this is ETH or ERC20
-      const isEthEscrow = values.tokenAddress.toLowerCase() === NULL_ADDRESS.toLowerCase()
+      const isEthEscrow =
+        values.tokenAddress.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
 
       // Use token metadata for decimals and symbol
       const tokenDecimals = values.tokenMetadata.decimals
@@ -131,8 +135,23 @@ export const Escrow: React.FC = () => {
         return
       }
 
-      values.clientAddress = await getEnsAddress(values.clientAddress)
-      values.recipientAddress = await getEnsAddress(values.recipientAddress)
+      const clientAddress = await getEnsAddress(values.clientAddress)
+      const recipientAddress = await getEnsAddress(values.recipientAddress)
+
+      // Validate that the resolved values are actually valid addresses
+      if (!clientAddress || !isAddress(clientAddress, { strict: false })) {
+        console.error('Failed to resolve valid client address')
+        setIsSubmitting(false)
+        return
+      }
+      if (!recipientAddress || !isAddress(recipientAddress, { strict: false })) {
+        console.error('Failed to resolve valid recipient address')
+        setIsSubmitting(false)
+        return
+      }
+
+      values.clientAddress = clientAddress
+      values.recipientAddress = recipientAddress
 
       // create bundler transaction data
       const escrowData = encodeEscrowData(values, addresses.treasury, cid, chain.id)
@@ -198,7 +217,7 @@ export const Escrow: React.FC = () => {
 
       try {
         addTransaction({
-          type: TransactionType.ESCROW,
+          type: TransactionType.MILESTONE_PAYMENTS,
           summary: `Create and fund new Escrow with ${formattedAmount} ${tokenSymbol}`,
           transactions,
         })
@@ -214,7 +233,10 @@ export const Escrow: React.FC = () => {
 
   return (
     <Stack>
-      <EscrowForm onSubmit={handleEscrowTransaction} isSubmitting={isSubmitting} />
+      <MilestonePaymentsForm
+        onSubmit={handleEscrowTransaction}
+        isSubmitting={isSubmitting}
+      />
       {ipfsUploadError?.message && <div>Error: {ipfsUploadError.message}</div>}
     </Stack>
   )

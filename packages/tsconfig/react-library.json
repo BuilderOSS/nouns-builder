@@ -5,9 +5,9 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "lib": ["dom", "ES2015"],
+    "lib": ["dom", "ES2022"],
     "module": "ESNext",
-    "target": "es2020",
+    "target": "es2022",
     "jsxImportSource": "react",
     "resolveJsonModule": true
   }

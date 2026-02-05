@@ -1,4 +1,3 @@
-import { NULL_ADDRESS } from '@buildeross/constants/addresses'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
@@ -19,7 +18,7 @@ import { Box, Flex, Stack } from '@buildeross/zord'
 import { Formik, FormikValues } from 'formik'
 import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
-import { formatEther, isAddressEqual, parseEther } from 'viem'
+import { formatEther, isAddressEqual, parseEther, zeroAddress } from 'viem'
 import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -68,7 +67,7 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
       ? parseFloat(formatEther(auctionReservePrice?.result))
       : 0,
     auctionRewardRecipient:
-      founderRewardRecipient && !isAddressEqual(founderRewardRecipient, NULL_ADDRESS)
+      founderRewardRecipient && !isAddressEqual(founderRewardRecipient, zeroAddress)
         ? founderRewardRecipient
         : '',
     auctionRewardPercentage: founderRewardBPS ? founderRewardBPS / 100 : 0,
@@ -109,11 +108,11 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
       if (supportsFounderReward) {
         const newAuctionRewardRecipient = values.auctionRewardRecipient
           ? await getEnsAddress(values.auctionRewardRecipient as AddressType)
-          : NULL_ADDRESS
+          : zeroAddress
 
         const initalAuctionRewardRecipient = initialValues['auctionRewardRecipient']
           ? await getEnsAddress(initialValues['auctionRewardRecipient'] as AddressType)
-          : NULL_ADDRESS
+          : zeroAddress
 
         const isRewardRecipientEqual = isAddressEqual(
           newAuctionRewardRecipient,

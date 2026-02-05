@@ -9,7 +9,7 @@ import { Stack, Text } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import gte from 'lodash/gte'
 import React from 'react'
-import { Address, encodeFunctionData } from 'viem'
+import { Address, encodeFunctionData, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { UpgradeInProgress, UpgradeRequired } from '../Upgrade'
@@ -100,6 +100,15 @@ export const Airdrop: React.FC = () => {
         recipient.address,
         getProvider(chainToQuery)
       )
+
+      // Validate that the resolved value is actually a valid address
+      if (
+        !resolvedRecipientAddress ||
+        !isAddress(resolvedRecipientAddress, { strict: false })
+      ) {
+        console.error(`Failed to resolve valid recipient address: ${recipient.address}`)
+        return
+      }
 
       airdropTransactions.push({
         functionSignature: 'mintBatchTo',

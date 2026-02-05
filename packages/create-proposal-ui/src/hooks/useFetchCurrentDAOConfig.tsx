@@ -1,7 +1,6 @@
 import {
   L2_MIGRATION_DEPLOYER,
   MERKLE_METADATA_RENDERER,
-  NULL_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import {
@@ -15,7 +14,7 @@ import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import useSWRImmutable from 'swr/immutable'
-import { encodeAbiParameters, parseAbiParameters } from 'viem'
+import { encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 import { applyL1ToL2Alias } from '../utils/applyL1ToL2Alias'
@@ -132,7 +131,7 @@ export const useFetchCurrentDAOConfig = ({
   const auctionParams = {
     reservePrice: reservePrice!,
     duration: BigInt(duration!),
-    founderRewardRecipent: NULL_ADDRESS,
+    founderRewardRecipent: zeroAddress,
     founderRewardBps: 0,
   }
 

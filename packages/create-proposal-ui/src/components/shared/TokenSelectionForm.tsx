@@ -6,7 +6,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
-import { NULL_ADDRESS } from '@buildeross/utils/escrow'
+import { NATIVE_TOKEN_ADDRESS } from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
@@ -14,7 +14,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatEther, formatUnits, getAddress, isAddress } from 'viem'
 import { useBalance, useReadContract } from 'wagmi'
 
-import { EscrowFormValues, TokenMetadataFormValidated } from './EscrowForm.schema'
+export interface TokenMetadataFormValidated {
+  name: string
+  symbol: string
+  decimals: number
+  balance: bigint
+  isValid: boolean
+  address: AddressType
+}
+
+export interface TokenSelectionFormValues {
+  tokenAddress?: AddressType
+  tokenMetadata?: TokenMetadataFormValidated
+}
 
 type TokenOption = '' | 'eth' | AddressType | 'custom'
 
@@ -38,11 +50,11 @@ const toFingerprint = (m?: TokenMetadataFormValidated | null) =>
 
 const computeTokenMetadata = ({
   selectedTokenOption,
-  treasuryBalance, // bigint | undefined
-  tokenMetadata, // on-chain ERC20 metadata (may be undefined while loading)
-  tokenBalance, // bigint | undefined while loading
-  currentTokenAddress, // AddressType | undefined
-  isLoading, // boolean
+  treasuryBalance,
+  tokenMetadata,
+  tokenBalance,
+  currentTokenAddress,
+  isLoading,
 }: {
   selectedTokenOption: TokenOption
   treasuryBalance?: bigint
@@ -64,11 +76,11 @@ const computeTokenMetadata = ({
       decimals: 18,
       balance: treasuryBalance ?? 0n,
       isValid: true,
-      address: NULL_ADDRESS,
+      address: normalizeAddr(NATIVE_TOKEN_ADDRESS) as AddressType,
     }
   }
 
-  // If we’re still validating, don’t produce an invalid “shell” yet → return null
+  // If we're still validating, don't produce an invalid "shell" yet → return null
   if (isLoading || !currentTokenAddress) {
     return null
   }
@@ -101,7 +113,7 @@ const computeTokenMetadata = ({
 }
 
 export const TokenSelectionForm: React.FC = () => {
-  const formik = useFormikContext<EscrowFormValues>()
+  const formik = useFormikContext<TokenSelectionFormValues>()
   const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const [selectedTokenOption, setSelectedTokenOption] = useState<TokenOption>('')
@@ -113,7 +125,7 @@ export const TokenSelectionForm: React.FC = () => {
       return
     }
 
-    if (addr === NULL_ADDRESS) {
+    if (addr === normalizeAddr(NATIVE_TOKEN_ADDRESS)) {
       setSelectedTokenOption('eth')
       return
     }
@@ -189,7 +201,7 @@ export const TokenSelectionForm: React.FC = () => {
       }),
     [
       selectedTokenOption,
-      treasuryBalance?.value, // only depend on the bigint value
+      treasuryBalance?.value,
       tokenMetadata,
       tokenBalance,
       currentTokenAddress,
@@ -264,7 +276,7 @@ export const TokenSelectionForm: React.FC = () => {
       // Clear existing metadata when changing selection
       if (option === 'eth') {
         // Set null address for ETH
-        setFieldValue('tokenAddress', NULL_ADDRESS)
+        setFieldValue('tokenAddress', NATIVE_TOKEN_ADDRESS)
       } else if (typeof option === 'string' && isAddress(option)) {
         // Set the token address in formik when selecting from treasury tokens
         setFieldValue('tokenAddress', option)
@@ -335,7 +347,7 @@ export const TokenSelectionForm: React.FC = () => {
         <Box
           as="a"
           href={
-            fullTokenMetadata.address === NULL_ADDRESS
+            fullTokenMetadata.address === normalizeAddr(NATIVE_TOKEN_ADDRESS)
               ? `${ETHERSCAN_BASE_URL[chain.id]}/address/${treasury}`
               : `${ETHERSCAN_BASE_URL[chain.id]}/token/${fullTokenMetadata.address}?a=${treasury}`
           }

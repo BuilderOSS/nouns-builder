@@ -13,7 +13,7 @@ export const NonDecodedDisplay: React.FC<{
   value: string
 }> = ({ target, chainId, calldata, value }) => {
   return (
-    <Stack gap={'x1'}>
+    <Stack gap={'x1'} px={'x3'} py={'x2'}>
       <Box
         color={'secondary'}
         fontWeight={'heading'}

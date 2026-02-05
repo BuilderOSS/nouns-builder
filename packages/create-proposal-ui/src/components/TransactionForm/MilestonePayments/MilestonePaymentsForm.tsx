@@ -9,17 +9,20 @@ import { truncate } from 'lodash'
 import { useCallback, useState } from 'react'
 import { formatUnits, parseUnits } from 'viem'
 
-import { EscrowDetailsDisplay } from './EscrowDetailsDisplay'
-import {
-  EscrowFormProps,
-  EscrowFormSchema,
-  getInitialEscrowFormState,
-  MilestoneFormValues,
-} from './EscrowForm.schema'
+import { TokenSelectionForm } from '../../shared'
 import { MilestoneForm } from './MilestoneForm'
-import { TokenSelectionForm } from './TokenSelectionForm'
+import {
+  getInitialMilestonePaymentsFormState,
+  MilestoneFormValues,
+  MilestonePaymentsFormProps,
+  MilestonePaymentsFormSchema,
+} from './MilestonePayments.schema'
+import { MilestonePaymentsDetailsDisplay } from './MilestonePaymentsDetailsDisplay'
 
-const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
+const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
+  onSubmit,
+  isSubmitting,
+}) => {
   const [isMediaUploading, setIsMediaUploading] = useState(false)
 
   const {
@@ -57,11 +60,11 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
     <Box>
       <Formik
         initialValues={{
-          ...getInitialEscrowFormState(),
+          ...getInitialMilestonePaymentsFormState(),
           clientAddress: escrowDelegate || treasury || '',
         }}
         enableReinitialize={true}
-        validationSchema={EscrowFormSchema}
+        validationSchema={MilestonePaymentsFormSchema}
         onSubmit={onSubmit}
         validateOnMount={false}
         validateOnChange={false}
@@ -73,8 +76,23 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
           const isValid = formik.values.tokenMetadata?.isValid ?? false
           const symbol = formik.values.tokenMetadata?.symbol ?? ''
 
+          // Normalize amount to prevent parseUnits errors
+          const normalizeAmount = (amount: any): string => {
+            if (!amount || amount === '' || amount === null || amount === undefined) {
+              return '0'
+            }
+            const str = amount.toString()
+            // Check for scientific notation and convert to fixed decimal
+            if (str.includes('e') || str.includes('E')) {
+              const num = Number(str)
+              if (isNaN(num)) return '0'
+              return num.toFixed(decimals)
+            }
+            return str
+          }
+
           const totalInUnits = formik.values.milestones
-            .map((x) => parseUnits(x.amount.toString(), decimals))
+            .map((x) => parseUnits(normalizeAmount(x.amount), decimals))
             .reduce((acc, x) => acc + x, 0n)
 
           const totalAmountString = isValid
@@ -106,10 +124,17 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
             >
               <Form>
                 <Stack gap={'x5'}>
-                  <EscrowDetailsDisplay
+                  <MilestonePaymentsDetailsDisplay
                     escrowAmountError={escrowAmountError}
                     totalEscrowAmountWithSymbol={totalAmountString}
+                    milestoneCount={formik.values.milestones.length}
                   />
+
+                  <Text variant="paragraph-sm" color="text3">
+                    Create milestone-based payments with Smart Invoice. Lock tokens in
+                    escrow and release them as deliverables are completed.
+                  </Text>
+
                   <TokenSelectionForm />
                   <SmartInput
                     type={FIELD_TYPES.TEXT}
@@ -162,23 +187,57 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
                         {({ push, remove }) => (
                           <>
                             <Accordion
-                              items={formik.values.milestones.map((_, index) => ({
-                                title: truncate(formik.values.milestones[index].title, {
-                                  length: 32,
-                                  separator: '...',
-                                }),
-                                description: (
-                                  <MilestoneForm
-                                    key={index}
-                                    index={index}
-                                    setIsMediaUploading={setIsMediaUploading}
-                                    removeMilestone={() =>
-                                      formik.values.milestones.length !== 1 &&
-                                      remove(index)
-                                    }
-                                  />
-                                ),
-                              }))}
+                              items={formik.values.milestones.map((milestone, index) => {
+                                // Normalize amount to prevent parseUnits errors
+                                const normalizeAmount = (amount: any): string => {
+                                  if (
+                                    !amount ||
+                                    amount === '' ||
+                                    amount === null ||
+                                    amount === undefined
+                                  ) {
+                                    return '0'
+                                  }
+                                  const str = amount.toString()
+                                  // Check for scientific notation and convert to fixed decimal
+                                  if (str.includes('e') || str.includes('E')) {
+                                    const num = Number(str)
+                                    if (isNaN(num)) return '0'
+                                    return num.toFixed(decimals)
+                                  }
+                                  return str
+                                }
+
+                                const normalizedAmount = normalizeAmount(milestone.amount)
+                                const amountInUnits = parseUnits(
+                                  normalizedAmount,
+                                  decimals
+                                )
+                                const amountDisplay =
+                                  normalizedAmount && normalizedAmount !== '0'
+                                    ? `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
+                                    : '0 ' + symbol
+                                const titlePart = truncate(milestone.title, {
+                                  length: 24,
+                                  separator: '…',
+                                  omission: '…',
+                                })
+                                return {
+                                  title: `${titlePart}: ${amountDisplay}`,
+                                  titleFontSize: 20,
+                                  description: (
+                                    <MilestoneForm
+                                      key={index}
+                                      index={index}
+                                      setIsMediaUploading={setIsMediaUploading}
+                                      removeMilestone={() =>
+                                        formik.values.milestones.length !== 1 &&
+                                        remove(index)
+                                      }
+                                    />
+                                  ),
+                                }
+                              })}
                             />
                             <Flex align="center" justify="center">
                               <Button
@@ -265,4 +324,4 @@ const EscrowForm: React.FC<EscrowFormProps> = ({ onSubmit, isSubmitting }) => {
   )
 }
 
-export default EscrowForm
+export default MilestonePaymentsForm

@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "declaration": true,
     "declarationMap": true,
+    "moduleResolution": "bundler",
     "types": [
       "vitest/globals"
     ],

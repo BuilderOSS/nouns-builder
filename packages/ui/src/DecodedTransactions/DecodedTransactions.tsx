@@ -17,14 +17,24 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
   decodedTransactions,
 }) => {
   return (
-    <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-      <ol>
-        {decodedTransactions?.map((decoded, i) => (
-          <li className={atoms({ paddingBottom: 'x4' })} key={`${decoded.target}-${i}`}>
-            <TransactionDisplay chainId={chainId} addresses={addresses} {...decoded} />
-          </li>
-        ))}
-      </ol>
+    <Stack
+      as="ol"
+      style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}
+      gap="x4"
+    >
+      {decodedTransactions?.map((decoded, i) => (
+        <li
+          className={atoms({
+            borderColor: 'border',
+            borderStyle: 'solid',
+            borderWidth: 'normal',
+            borderRadius: 'curved',
+          })}
+          key={`${decoded.target}-${i}`}
+        >
+          <TransactionDisplay chainId={chainId} addresses={addresses} {...decoded} />
+        </li>
+      ))}
     </Stack>
   )
 }

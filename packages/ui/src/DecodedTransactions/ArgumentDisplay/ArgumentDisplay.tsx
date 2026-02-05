@@ -4,9 +4,10 @@ import { CHAIN_ID, DecodedArg } from '@buildeross/types'
 import {
   DecodedEscrowData,
   getEscrowBundler,
-  getEscrowBundlerV1,
+  getEscrowBundlerLegacy,
 } from '@buildeross/utils/escrow'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
 import { Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
@@ -15,6 +16,7 @@ import { BaseArgumentDisplay } from './BaseArgumentDisplay'
 import { ERC20ArgumentDisplay } from './ERC20ArgumentDisplay'
 import { EscrowArgumentDisplay } from './EscrowArgumentDisplay'
 import { NFTArgumentDisplay } from './NFTArgumentDisplay'
+import { DecodedStreamBatch, StreamArgumentDisplay } from './StreamArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 
@@ -26,6 +28,7 @@ interface ArgumentDisplayProps {
   tokenMetadata?: TokenMetadata | null
   nftMetadata?: SerializedNftMetadata | null
   escrowData?: DecodedEscrowData | null
+  streamData?: DecodedStreamBatch | null
 }
 
 export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
@@ -36,6 +39,7 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
   tokenMetadata,
   nftMetadata,
   escrowData,
+  streamData,
 }) => {
   if (!arg) return null
 
@@ -56,10 +60,38 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
     return <ERC20ArgumentDisplay arg={arg} tokenMetadata={tokenMetadata} />
   }
 
+  // Check if this is a Sablier stream argument
+  const sablierContracts = getSablierContracts(chainId)
+  const isSablierTarget =
+    (sablierContracts.batchLockup &&
+      toLower(target) === toLower(sablierContracts.batchLockup)) ||
+    (sablierContracts.lockup && toLower(target) === toLower(sablierContracts.lockup))
+
+  const isSablierArgument =
+    isSablierTarget &&
+    (functionName === 'createWithDurationsLL' ||
+      functionName === 'createWithTimestampsLL') &&
+    (arg.name === 'lockup' ||
+      arg.name === '_lockup' ||
+      arg.name === 'token' ||
+      arg.name === '_token' ||
+      arg.name === 'batch' ||
+      arg.name === '_batch')
+
+  if (isSablierArgument) {
+    return (
+      <StreamArgumentDisplay
+        arg={arg}
+        tokenMetadata={tokenMetadata}
+        streamData={streamData}
+      />
+    )
+  }
+
   // Check if this is an escrow argument
   const isEscrowTarget =
     toLower(target) === toLower(getEscrowBundler(chainId)) ||
-    toLower(target) === toLower(getEscrowBundlerV1(chainId))
+    toLower(target) === toLower(getEscrowBundlerLegacy(chainId))
 
   const isEscrowArgument =
     isEscrowTarget &&

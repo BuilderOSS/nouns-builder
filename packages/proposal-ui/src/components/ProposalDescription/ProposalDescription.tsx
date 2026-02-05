@@ -11,24 +11,18 @@ import {
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { getEscrowBundler, getEscrowBundlerV1 } from '@buildeross/utils/escrow'
+import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
+import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
 import { toLower } from 'lodash'
-import React, { ReactNode, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import useSWR from 'swr'
 
 import { propPageWrapper } from '../styles.css'
 import { MilestoneDetails } from './MilestoneDetails'
 import { proposalDescription } from './ProposalDescription.css'
-
-const Section = ({ children, title }: { children: ReactNode; title: string }) => (
-  <Box mb={{ '@initial': 'x6', '@768': 'x13' }}>
-    <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight={'display'}>
-      {title}
-    </Box>
-    {children}
-  </Box>
-)
+import { Section } from './Section'
+import { StreamDetails } from './StreamDetails'
 
 type ProposalDescriptionProps = {
   proposal: Proposal
@@ -41,31 +35,50 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   collection,
   onOpenProposalReview,
 }) => {
-  const { description, proposer, executionTransactionHash } = proposal
-
-  const { displayName } = useEnsData(proposer)
+  const { displayName } = useEnsData(proposal.proposer)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
 
   const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
 
-  const decodedEscrowTxn = useMemo(
-    () =>
-      decodedTransactions?.find(
-        (t) =>
-          toLower(t.target) === toLower(getEscrowBundler(chain.id)) ||
-          toLower(t.target) === toLower(getEscrowBundlerV1(chain.id))
-      ),
-    [chain.id, decodedTransactions]
-  )
+  // Check if proposal has escrow milestone transactions
+  const hasEscrowMilestone = useMemo(() => {
+    if (!proposal.targets) return false
+
+    const escrowBundler = getEscrowBundler(chain.id)
+    const escrowBundlerLegacy = getEscrowBundlerLegacy(chain.id)
+
+    return proposal.targets.some(
+      (target) =>
+        toLower(target) === toLower(escrowBundler) ||
+        toLower(target) === toLower(escrowBundlerLegacy)
+    )
+  }, [proposal.targets, chain.id])
+
+  // Check if proposal has Sablier stream transactions
+  const hasSablierStream = useMemo(() => {
+    if (!proposal.targets) return false
+
+    const sablierContracts = getSablierContracts(chain.id)
+
+    return proposal.targets.some(
+      (target) =>
+        (sablierContracts.batchLockup &&
+          toLower(target) === toLower(sablierContracts.batchLockup)) ||
+        (sablierContracts.lockup && toLower(target) === toLower(sablierContracts.lockup))
+    )
+  }, [proposal.targets, chain.id])
 
   const { data: tokenImage, error } = useSWR(
-    !!collection && !!proposer
-      ? ([SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposer] as const)
+    !!collection && !!proposal.proposer
+      ? ([SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposal.proposer] as const)
       : null,
-    async ([_key, chainId, collection, proposer]) => {
-      const data = await SubgraphSDK.connect(chainId).tokens({
-        where: { owner: proposer.toLowerCase(), tokenContract: collection.toLowerCase() },
+    async ([_key, _chainId, _collection, _proposer]) => {
+      const data = await SubgraphSDK.connect(_chainId).tokens({
+        where: {
+          owner: _proposer.toLowerCase(),
+          tokenContract: _collection.toLowerCase(),
+        },
         first: 1,
         orderBy: Token_OrderBy.MintedAt,
         orderDirection: OrderDirection.Asc,
@@ -78,21 +91,25 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   return (
     <Flex className={propPageWrapper}>
       <Flex direction={'column'} mt={{ '@initial': 'x6', '@768': 'x13' }}>
-        {!!decodedEscrowTxn && (
-          <Section title="Escrow Milestones">
-            <MilestoneDetails
-              decodedTransaction={decodedEscrowTxn}
-              executionTransactionHash={executionTransactionHash}
-              onOpenProposalReview={onOpenProposalReview}
-            />
-          </Section>
+        {hasEscrowMilestone && (
+          <MilestoneDetails
+            proposal={proposal}
+            onOpenProposalReview={onOpenProposalReview}
+          />
+        )}
+
+        {hasSablierStream && (
+          <StreamDetails
+            proposal={proposal}
+            onOpenProposalReview={onOpenProposalReview}
+          />
         )}
 
         <Section title="Description">
           <Paragraph overflow={'auto'}>
-            {description && (
+            {proposal.description && (
               <Box className={proposalDescription}>
-                <MarkdownDisplay>{description}</MarkdownDisplay>
+                <MarkdownDisplay>{proposal.description}</MarkdownDisplay>
               </Box>
             )}
           </Paragraph>
@@ -120,7 +137,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
 
             <Box>
               <a
-                href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposer}`}
+                href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.proposer}`}
                 rel="noreferrer"
                 target="_blank"
               >

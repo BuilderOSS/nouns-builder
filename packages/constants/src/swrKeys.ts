@@ -50,4 +50,7 @@ export const SWR_KEYS = {
   INVOICE_LOG_NEW_INVOICE: 'invoice-log-new-invoice',
   MY_DAOS: 'my-daos',
   MY_DAOS_PAGE: 'my-daos-page',
+  SABLIER_LOCKUP_ADDRESS: 'sablier-lockup-address',
+  SABLIER_STREAM_IDS: 'sablier-stream-ids',
+  SABLIER_LIVE_STREAMS: 'sablier-live-streams',
 } as const

@@ -1,4 +1,4 @@
-import { L2_MIGRATION_DEPLOYER, NULL_ADDRESS } from '@buildeross/constants/addresses'
+import { L2_MIGRATION_DEPLOYER } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { l2DeployerAbi } from '@buildeross/sdk/contract'
 import { AddressType, L2MigratedResponse } from '@buildeross/types'
@@ -6,6 +6,7 @@ import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withCors } from 'src/utils/api/cors'
+import { zeroAddress } from 'viem'
 import { readContract } from 'wagmi/actions'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -15,7 +16,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     L2_CHAINS.map((chainId) => {
       const deployer = L2_MIGRATION_DEPLOYER[chainId]
 
-      if (deployer === NULL_ADDRESS) return []
+      if (deployer === zeroAddress) return []
       return readContract(serverConfig, {
         address: deployer,
         chainId: chainId,
@@ -35,7 +36,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     })
     .find((x) => {
-      return x.l2TokenAddress !== NULL_ADDRESS && x.l2TokenAddress !== undefined
+      return x.l2TokenAddress !== zeroAddress && x.l2TokenAddress !== undefined
     })
 
   if (!migrated) {
