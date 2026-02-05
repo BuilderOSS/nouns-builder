@@ -285,6 +285,21 @@ export const StreamTokens = () => {
           const cliffDuration = (stream.cliffDays || 0) * SECONDS_PER_DAY
           const totalDuration = (stream.durationDays || 0) * SECONDS_PER_DAY
 
+          if (!Number.isFinite(totalDuration) || totalDuration <= 0) {
+            actions.setFieldError(
+              'streams',
+              `Stream #${i + 1}: Duration must be greater than 0 days.`
+            )
+            return
+          }
+          if (cliffDuration < 0 || cliffDuration > totalDuration) {
+            actions.setFieldError(
+              'streams',
+              `Stream #${i + 1}: Cliff must be within the total duration.`
+            )
+            return
+          }
+
           batchParams.push({
             sender: normalizedSender,
             recipient: normalizedRecipient,

@@ -141,10 +141,12 @@ export const MilestonePayments: React.FC = () => {
       // Validate that the resolved values are actually valid addresses
       if (!clientAddress || !isAddress(clientAddress, { strict: false })) {
         console.error('Failed to resolve valid client address')
+        setIsSubmitting(false)
         return
       }
       if (!recipientAddress || !isAddress(recipientAddress, { strict: false })) {
         console.error('Failed to resolve valid recipient address')
+        setIsSubmitting(false)
         return
       }
 

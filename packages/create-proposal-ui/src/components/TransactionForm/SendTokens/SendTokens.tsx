@@ -294,20 +294,38 @@ export const SendTokens = () => {
                         {({ push, remove }) => (
                           <>
                             <Accordion
-                              items={formik.values.recipients.map((recipient, index) => ({
-                                title: `Recipient #${index + 1}${recipient.recipientAddress ? ` - ${truncateAddress(recipient.recipientAddress)}` : ''}`,
-                                titleFontSize: 20,
-                                description: (
-                                  <RecipientForm
-                                    key={index}
-                                    index={index}
-                                    removeRecipient={() =>
-                                      formik.values.recipients.length !== 1 &&
-                                      remove(index)
-                                    }
-                                  />
-                                ),
-                              }))}
+                              items={formik.values.recipients.map((recipient, index) => {
+                                let amountDisplay = '0 ' + symbol
+                                if (recipient.amount && recipient.amount.trim() !== '') {
+                                  try {
+                                    const amountInUnits = parseUnits(
+                                      recipient.amount,
+                                      decimals
+                                    )
+                                    amountDisplay = `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
+                                  } catch {
+                                    amountDisplay = recipient.amount + ' ' + symbol
+                                  }
+                                }
+                                const recipientPart = recipient.recipientAddress
+                                  ? ` - ${truncateAddress(recipient.recipientAddress)}`
+                                  : ''
+
+                                return {
+                                  title: `Recipient #${index + 1}: ${amountDisplay}${recipientPart}`,
+                                  titleFontSize: 20,
+                                  description: (
+                                    <RecipientForm
+                                      key={index}
+                                      index={index}
+                                      removeRecipient={() =>
+                                        formik.values.recipients.length !== 1 &&
+                                        remove(index)
+                                      }
+                                    />
+                                  ),
+                                }
+                              })}
                             />
                             <Flex align="center" justify="center" mt="x4">
                               <Button
