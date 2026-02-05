@@ -313,8 +313,11 @@ const EscrowInstance = ({
                                 }
                                 disabled={isClientConnected ? isReleasing : !hasThreshold}
                                 loading={isReleasing}
+                                fontSize={isClientConnected ? 16 : 12}
                               >
-                                Release Milestone
+                                {isClientConnected
+                                  ? `Release Milestone #${index + 1}`
+                                  : `Create Proposal to Release Milestone #${index + 1}`}
                               </ContractButton>
                               {!hasThreshold && !isClientConnected && (
                                 <Text variant="label-xs" color="negative">

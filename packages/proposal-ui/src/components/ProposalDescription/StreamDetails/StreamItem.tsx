@@ -362,8 +362,9 @@ export const CreateStreamItem = ({
                         variant="destructive"
                         handleClick={handleCancelAsProposal}
                         disabled={!hasThreshold}
+                        fontSize={12}
                       >
-                        Create Proposal to Cancel
+                        Create Proposal to Cancel Stream
                       </ContractButton>
                       {!hasThreshold && (
                         <Text variant="label-xs" color="negative">

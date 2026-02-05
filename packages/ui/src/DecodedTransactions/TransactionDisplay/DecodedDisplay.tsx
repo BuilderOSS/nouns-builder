@@ -210,7 +210,7 @@ export const DecodedDisplay: React.FC<{
 
   return (
     <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-      <Stack gap={'x1'}>
+      <Stack gap={'x1'} px={'x3'} py={'x3'}>
         <Box
           color={'secondary'}
           fontWeight={'heading'}
@@ -227,8 +227,7 @@ export const DecodedDisplay: React.FC<{
             <Text display={{ '@initial': 'none', '@768': 'flex' }}>{target}</Text>
           </a>
         </Box>
-
-        <Flex pl={'x2'} align="center" gap="x0">
+        <Flex align="center" gap="x0">
           {`.${transaction.functionName}`}
           {value !== '0' && transaction.functionName !== 'send' && (
             <Flex align="center" gap="x1">
@@ -270,51 +269,50 @@ export const DecodedDisplay: React.FC<{
         </Stack>
 
         {sortedArgs.length > 0 ? `)` : null}
+      </Stack>
 
-        {!isLoadingMetadata &&
-          !DISABLE_AI_SUMMARY &&
-          !errorSummary &&
-          !isGeneratingSummary && (
-            <Box
-              px="x4"
-              pt="x3"
-              pb="x4"
-              backgroundColor="background2"
-              borderRadius="curved"
-              border="1px solid"
-              borderColor="border"
-              mt="x4"
+      {!isLoadingMetadata &&
+        !DISABLE_AI_SUMMARY &&
+        !errorSummary &&
+        !isGeneratingSummary && (
+          <Box
+            px="x3"
+            py="x2"
+            backgroundColor="background2"
+            borderBottomRadius="curved"
+            border="1px solid"
+            borderColor="border"
+          >
+            <Text
+              style={{
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+              }}
             >
-              <Flex gap="x4" align="center" mb="x2" style={{ height: '32px' }}>
-                <Text fontWeight="heading" color="accent">
-                  🤖 AI Summary
-                </Text>
-                {!isGeneratingSummary && !aiSummary && errorSummary && (
-                  <Button
-                    onClick={() => regenerateSummary()}
-                    variant="outline"
-                    size="sm"
-                    px="x2"
-                    style={{ height: '32px' }}
-                  >
-                    Regenerate
-                  </Button>
-                )}
-              </Flex>
-              {isGeneratingSummary && (
-                <Text style={{ whiteSpace: 'pre-wrap' }}>Generating summary...</Text>
-              )}
-              {!isGeneratingSummary && aiSummary && (
-                <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
-              )}
+              <Text as="span" fontWeight="heading" color="accent">
+                🤖 AI Summary:{' '}
+              </Text>
               {!isGeneratingSummary && !aiSummary && errorSummary && (
-                <Text color="negative" style={{ whiteSpace: 'pre-wrap' }}>
+                <Button
+                  onClick={() => regenerateSummary()}
+                  variant="outline"
+                  size="sm"
+                  px="x2"
+                >
+                  Regenerate
+                </Button>
+              )}
+              {isGeneratingSummary && <Text as="span">Generating summary...</Text>}
+              {!isGeneratingSummary && aiSummary && <Text as="span">{aiSummary}</Text>}
+              {!isGeneratingSummary && !aiSummary && errorSummary && (
+                <Text color="negative" as="span">
                   Error generating summary: {getErrorMessage(errorSummary)}
                 </Text>
               )}
-            </Box>
-          )}
-      </Stack>
+            </Text>
+          </Box>
+        )}
     </Stack>
   )
 }
