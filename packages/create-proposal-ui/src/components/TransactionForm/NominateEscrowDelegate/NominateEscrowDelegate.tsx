@@ -39,6 +39,10 @@ const escrowDelegateFormSchema = (_escrowDelegate: string | undefined) =>
           return false
         }
         const valueAsAddress = await getEnsAddress(value)
+        // Validate that the resolved value is actually a valid address
+        if (!valueAsAddress || !isAddress(valueAsAddress, { strict: false })) {
+          return false
+        }
         return valueAsAddress?.toLowerCase() !== _escrowDelegate?.toLowerCase()
       }
     ),
@@ -63,6 +67,11 @@ export const NominateEscrowDelegate = () => {
         return
       }
       const newEscrowDelegate = await getEnsAddress(values.escrowDelegate)
+      // Validate that the resolved value is actually a valid address
+      if (!newEscrowDelegate || !isAddress(newEscrowDelegate, { strict: false })) {
+        console.error('Failed to resolve valid escrow delegate address')
+        return
+      }
       const encodedData = schemaEncoder.encodeData([
         { name: 'daoMultiSig', type: 'address', value: newEscrowDelegate },
       ]) as Hex

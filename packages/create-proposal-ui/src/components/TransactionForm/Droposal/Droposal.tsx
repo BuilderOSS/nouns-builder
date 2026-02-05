@@ -5,7 +5,7 @@ import { AddressType, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
-import { encodeFunctionData, parseEther } from 'viem'
+import { encodeFunctionData, isAddress, parseEther } from 'viem'
 
 import { DroposalForm } from './DroposalForm'
 import { DroposalFormValues } from './DroposalForm.schema'
@@ -58,6 +58,16 @@ export const Droposal: React.FC = () => {
 
     const recipient = await getEnsAddress(fundsRecipient)
     const admin = await getEnsAddress(defaultAdmin)
+
+    // Validate that the resolved values are actually valid addresses
+    if (!recipient || !isAddress(recipient, { strict: false })) {
+      console.error('Failed to resolve valid funds recipient address')
+      return
+    }
+    if (!admin || !isAddress(admin, { strict: false })) {
+      console.error('Failed to resolve valid admin address')
+      return
+    }
 
     const createEdition = {
       target: PUBLIC_ZORA_NFT_CREATOR[chain.id] as AddressType,

@@ -129,7 +129,8 @@ export const StreamTokens = () => {
     let senderAddress: string
     try {
       const resolved = await getEnsAddress(values.senderAddress, getProvider(chain.id))
-      if (!resolved) {
+      // Validate that the resolved value is actually a valid address
+      if (!resolved || !isAddress(resolved, { strict: false })) {
         actions.setFieldError(
           'senderAddress',
           'Could not resolve sender address. Please enter a valid address or ENS name.'
@@ -199,7 +200,8 @@ export const StreamTokens = () => {
             stream.recipientAddress,
             getProvider(chain.id)
           )
-          if (!resolved) {
+          // Validate that the resolved value is actually a valid address
+          if (!resolved || !isAddress(resolved, { strict: false })) {
             actions.setFieldError(
               'streams',
               `Stream #${i + 1}: Could not resolve recipient address. Please enter a valid address or ENS name.`

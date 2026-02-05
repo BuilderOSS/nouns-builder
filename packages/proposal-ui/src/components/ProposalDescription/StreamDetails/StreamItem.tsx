@@ -347,6 +347,8 @@ export const CreateStreamItem = ({
                   </Text>
                 </Box>
               </Stack>
+              {/* TODO: When stream is canceled, display link to cancel transaction or proposal */}
+              {/* TODO: Add withdrawal transaction history display/links for this stream */}
               <Stack direction="row" align="center" justify="space-between">
                 <Text variant="label-xs" color="tertiary">
                   Total Deposited:

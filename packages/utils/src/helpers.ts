@@ -1,6 +1,6 @@
 import { PUBLIC_ALL_CHAINS, TESTNET_CHAINS } from '@buildeross/constants'
 import { CHAIN_ID, Duration } from '@buildeross/types'
-import { isAddress } from 'viem'
+import { getAddress, isAddress } from 'viem'
 
 /**
  *
@@ -145,13 +145,16 @@ export const walletSnippet = (addr: string | number | undefined, chars: number =
   if (!addr) {
     return ''
   }
-  let _addr = addr.toString()
 
-  return isAddress(_addr)
-    ? _addr.substring(0, chars) +
-        '...' +
-        _addr.substring(_addr.length - chars, _addr.length)
-    : _addr
+  if (!isAddress(addr.toString(), { strict: false })) {
+    return addr.toString()
+  }
+
+  let _addr = getAddress(addr.toString())
+
+  return (
+    _addr.substring(0, chars) + '…' + _addr.substring(_addr.length - chars, _addr.length)
+  )
 }
 
 /**

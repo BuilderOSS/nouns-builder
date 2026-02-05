@@ -88,7 +88,8 @@ export const SendTokens = () => {
             recipient.recipientAddress,
             getProvider(chain.id)
           )
-          if (!resolved) {
+          // Validate that the resolved value is actually a valid address
+          if (!resolved || !isAddress(resolved, { strict: false })) {
             actions.setErrors({
               recipients: `Recipient #${i + 1}: Could not resolve address. Please enter a valid address or ENS name.`,
             } as any)

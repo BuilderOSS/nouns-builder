@@ -195,11 +195,16 @@ export const useInvoiceData = (chainId: CHAIN_ID, proposal: Proposal): InvoiceDa
   )
 
   // Fetch invoice metadata for all escrows
+  // Deduplicate CIDs to avoid fetching the same data multiple times
   const invoiceCids = useMemo(
     () =>
-      escrowsStaticData
-        .map((escrow) => escrow.invoiceCid)
-        .filter((cid): cid is string => !!cid),
+      Array.from(
+        new Set(
+          escrowsStaticData
+            .map((escrow) => escrow.invoiceCid)
+            .filter((cid): cid is string => !!cid)
+        )
+      ),
     [escrowsStaticData]
   )
 
@@ -222,14 +227,30 @@ export const useInvoiceData = (chainId: CHAIN_ID, proposal: Proposal): InvoiceDa
     }
   )
 
-  // Combine static data with fetched data
+  // Build a Map from CID to fetched InvoiceMetadata for O(1) lookup
+  const invoiceDataMap = useMemo(() => {
+    if (!invoiceDatas) return new Map<string, InvoiceMetadata>()
+
+    const map = new Map<string, InvoiceMetadata>()
+    invoiceCids.forEach((cid, index) => {
+      const data = invoiceDatas[index]
+      if (data) {
+        map.set(cid, data)
+      }
+    })
+    return map
+  }, [invoiceCids, invoiceDatas])
+
+  // Combine static data with fetched data using Map lookup
   const escrows = useMemo(() => {
     return escrowsStaticData.map((staticData, index) => ({
       ...staticData,
       invoiceAddress: invoiceAddresses?.[index],
-      invoiceData: invoiceDatas?.[index],
+      invoiceData: staticData.invoiceCid
+        ? invoiceDataMap.get(staticData.invoiceCid)
+        : undefined,
     }))
-  }, [escrowsStaticData, invoiceAddresses, invoiceDatas])
+  }, [escrowsStaticData, invoiceAddresses, invoiceDataMap])
 
   return {
     isDeployTx: escrowsStaticData.length > 0,

@@ -17,7 +17,7 @@ import { InvoiceMetadata, Milestone as MilestoneMetadata } from '@smartinvoicexy
 import { FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
 import useSWR from 'swr'
-import { Address, encodeFunctionData, formatUnits, parseUnits } from 'viem'
+import { Address, encodeFunctionData, formatUnits, isAddress, parseUnits } from 'viem'
 
 import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
 import MilestonePaymentsForm from './MilestonePaymentsForm'
@@ -135,8 +135,21 @@ export const MilestonePayments: React.FC = () => {
         return
       }
 
-      values.clientAddress = await getEnsAddress(values.clientAddress)
-      values.recipientAddress = await getEnsAddress(values.recipientAddress)
+      const clientAddress = await getEnsAddress(values.clientAddress)
+      const recipientAddress = await getEnsAddress(values.recipientAddress)
+
+      // Validate that the resolved values are actually valid addresses
+      if (!clientAddress || !isAddress(clientAddress, { strict: false })) {
+        console.error('Failed to resolve valid client address')
+        return
+      }
+      if (!recipientAddress || !isAddress(recipientAddress, { strict: false })) {
+        console.error('Failed to resolve valid recipient address')
+        return
+      }
+
+      values.clientAddress = clientAddress
+      values.recipientAddress = recipientAddress
 
       // create bundler transaction data
       const escrowData = encodeEscrowData(values, addresses.treasury, cid, chain.id)

@@ -76,8 +76,23 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
           const isValid = formik.values.tokenMetadata?.isValid ?? false
           const symbol = formik.values.tokenMetadata?.symbol ?? ''
 
+          // Normalize amount to prevent parseUnits errors
+          const normalizeAmount = (amount: any): string => {
+            if (!amount || amount === '' || amount === null || amount === undefined) {
+              return '0'
+            }
+            const str = amount.toString()
+            // Check for scientific notation and convert to fixed decimal
+            if (str.includes('e') || str.includes('E')) {
+              const num = Number(str)
+              if (isNaN(num)) return '0'
+              return num.toFixed(decimals)
+            }
+            return str
+          }
+
           const totalInUnits = formik.values.milestones
-            .map((x) => parseUnits(x.amount.toString(), decimals))
+            .map((x) => parseUnits(normalizeAmount(x.amount), decimals))
             .reduce((acc, x) => acc + x, 0n)
 
           const totalAmountString = isValid
@@ -173,13 +188,35 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
                           <>
                             <Accordion
                               items={formik.values.milestones.map((milestone, index) => {
+                                // Normalize amount to prevent parseUnits errors
+                                const normalizeAmount = (amount: any): string => {
+                                  if (
+                                    !amount ||
+                                    amount === '' ||
+                                    amount === null ||
+                                    amount === undefined
+                                  ) {
+                                    return '0'
+                                  }
+                                  const str = amount.toString()
+                                  // Check for scientific notation and convert to fixed decimal
+                                  if (str.includes('e') || str.includes('E')) {
+                                    const num = Number(str)
+                                    if (isNaN(num)) return '0'
+                                    return num.toFixed(decimals)
+                                  }
+                                  return str
+                                }
+
+                                const normalizedAmount = normalizeAmount(milestone.amount)
                                 const amountInUnits = parseUnits(
-                                  milestone.amount.toString(),
+                                  normalizedAmount,
                                   decimals
                                 )
-                                const amountDisplay = milestone.amount
-                                  ? `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
-                                  : '0 ' + symbol
+                                const amountDisplay =
+                                  normalizedAmount && normalizedAmount !== '0'
+                                    ? `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
+                                    : '0 ' + symbol
                                 const titlePart = truncate(milestone.title, {
                                   length: 24,
                                   separator: '…',

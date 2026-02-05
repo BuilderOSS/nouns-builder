@@ -49,8 +49,13 @@ export const DecodedDisplay: React.FC<{
     const arg = transaction.args['_escrowData']
     const raw = arg?.value
     if (!raw || typeof raw !== 'string' || !raw.startsWith('0x')) return null
+
+    // Store legacy bundler address first to check for null/undefined
+    const legacy = getEscrowBundlerLegacy(chainId)
+
+    // Safe comparison: only use legacy decoder if legacy is truthy and matches target
     const decoder =
-      target.toLowerCase() === getEscrowBundlerLegacy(chainId).toLowerCase()
+      legacy && target.toLowerCase() === legacy.toLowerCase()
         ? decodeEscrowDataLegacy
         : decodeEscrowData
 
@@ -273,7 +278,7 @@ export const DecodedDisplay: React.FC<{
 
       {!isLoadingMetadata &&
         !DISABLE_AI_SUMMARY &&
-        !errorSummary &&
+        !errorSummary && /* TODO: remove this condition and display error summary instead when AI summaries are more reliable */
         !isGeneratingSummary && (
           <Box
             px="x3"
