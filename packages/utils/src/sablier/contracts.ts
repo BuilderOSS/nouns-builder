@@ -1,16 +1,18 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { sablier } from 'sablier'
+import { type Sablier, sablier } from 'sablier'
 import { Address } from 'viem'
 
-import { LATEST_LOCKUP_RELEASE } from './constants.js'
+import { LATEST_LOCKUP_RELEASE } from './constants'
 
 /**
- * Shared helper to get a Sablier contract address for a given chain
+ * Shared helper to get a Sablier contract info for a given chain
  */
-function getSablierContractAddress(
-  chainId: CHAIN_ID,
-  contractName: string
-): Address | null {
+export function getSablierContract(opts: {
+  chainId: CHAIN_ID
+  contractAddress?: string
+  contractName?: string
+}): Sablier.Contract | null {
+  const { chainId, contractAddress, contractName } = opts
   try {
     // Use the shared latest release from constants
     if (!LATEST_LOCKUP_RELEASE) {
@@ -19,22 +21,39 @@ function getSablierContractAddress(
     }
 
     // Get the contract
-    const contract = sablier.contracts.get({
-      chainId,
-      contractName,
-      release: LATEST_LOCKUP_RELEASE,
-    })
+    const contract = sablier.contracts.get({ ...opts, release: LATEST_LOCKUP_RELEASE })
 
-    if (!contract?.address) {
-      console.error(`${contractName} not found for chain ${chainId}`)
+    if (!contract) {
+      console.error(
+        `Contract address ${contractName || contractAddress} not found for chain ${chainId}`
+      )
       return null
     }
 
-    return contract.address as Address
+    return contract
   } catch (error) {
-    console.error(`Error getting ${contractName} address for chain ${chainId}:`, error)
+    console.error(
+      `Error getting contract ${contractName || contractAddress} for chain ${chainId}:`,
+      error
+    )
     return null
   }
+}
+
+/**
+ * Shared helper to get a Sablier contract address for a given chain
+ */
+function getSablierContractAddress(
+  chainId: CHAIN_ID,
+  contractName: string
+): Address | null {
+  const contract = getSablierContract({ chainId, contractName })
+
+  if (!contract) {
+    return null
+  }
+
+  return contract.address
 }
 
 /**

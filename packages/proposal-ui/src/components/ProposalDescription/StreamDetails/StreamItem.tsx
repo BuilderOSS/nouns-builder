@@ -204,9 +204,13 @@ export const CreateStreamItem = ({
   const recipientDisplay = recipientName || walletSnippet(stream.recipient)
 
   const sablierUrl = useMemo(() => {
-    if (!isExecuted || !streamId) return null
-    return createSablierStreamUrl(chain.id, streamId)
-  }, [isExecuted, streamId, chain.id])
+    if (!isExecuted || !streamId || !lockupAddress) return null
+    return createSablierStreamUrl({
+      chainId: chain.id,
+      streamId,
+      contractAddress: lockupAddress,
+    })
+  }, [isExecuted, streamId, chain.id, lockupAddress])
 
   const amountDisplay = tokenMetadata?.symbol
     ? `${formatCryptoVal(formatUnits(totalAmount, decimals))} ${tokenMetadata.symbol}`

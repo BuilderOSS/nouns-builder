@@ -278,7 +278,7 @@ export const DecodedDisplay: React.FC<{
 
       {!isLoadingMetadata &&
         !DISABLE_AI_SUMMARY &&
-        !errorSummary && /* TODO: remove this condition and display error summary instead when AI summaries are more reliable */
+        !errorSummary /* TODO: remove this condition and display error summary instead when AI summaries are more reliable */ &&
         !isGeneratingSummary && (
           <Box
             px="x3"

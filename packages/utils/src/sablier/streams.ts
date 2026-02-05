@@ -1,6 +1,8 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { Address, decodeFunctionData, Hex } from 'viem'
 
 import { batchLockupAbi } from './constants'
+import { getSablierContract } from './contracts'
 
 export interface StreamConfigDurations {
   sender: Address
@@ -206,6 +208,13 @@ export function getStatusLabel(status: number): string {
 /**
  * Create Sablier app URL for a stream
  */
-export function createSablierStreamUrl(chainId: number, streamId: bigint): string {
-  return `https://app.sablier.com/vesting/stream/LK2-${chainId}-${streamId}`
+export function createSablierStreamUrl(opts: {
+  chainId: CHAIN_ID
+  streamId: bigint
+  contractAddress?: Address
+  contractName?: string
+}): string {
+  const contract = getSablierContract(opts)
+  if (!contract?.alias) return ''
+  return `https://app.sablier.com/vesting/stream/${contract.alias}-${opts.chainId}-${opts.streamId}`
 }
