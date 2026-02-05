@@ -164,7 +164,7 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
                         ? formik.errors.clientAddress
                         : undefined
                     }
-                    helperText={`This wallet will control the escrow and release funds. It can be your DAO’s treasury or a working group’s multisig`}
+                    helperText={`This wallet will control the escrow and release milestone funds. It can be your DAO's treasury or a working group's multisig`}
                   />
 
                   <DatePicker

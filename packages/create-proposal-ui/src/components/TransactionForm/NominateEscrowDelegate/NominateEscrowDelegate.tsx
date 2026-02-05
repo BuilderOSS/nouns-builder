@@ -132,7 +132,7 @@ export const NominateEscrowDelegate = () => {
               formik={formik}
               {...formik.getFieldProps('escrowDelegate')}
               id="escrowDelegate"
-              inputLabel={'Escrow Delegate'}
+              inputLabel={'Delegate'}
               placeholder={'0x... or .eth'}
               isAddress={true}
               errorMessage={
@@ -140,7 +140,7 @@ export const NominateEscrowDelegate = () => {
                   ? formik.errors.escrowDelegate
                   : undefined
               }
-              helperText={`This wallet will control the escrow and release funds.`}
+              helperText={`This wallet will have delegated permissions to control escrows and token streams on behalf of the DAO.`}
             />
             <Button
               variant={'outline'}

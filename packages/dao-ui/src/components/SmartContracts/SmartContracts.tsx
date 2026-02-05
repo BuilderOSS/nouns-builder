@@ -66,9 +66,7 @@ export const SmartContracts = () => {
           {addresses.metadata && (
             <Contract title="Metadata" address={addresses.metadata} />
           )}
-          {escrowDelegate && (
-            <Contract title="Escrow Delegate" address={escrowDelegate} />
-          )}
+          {escrowDelegate && <Contract title="Delegate" address={escrowDelegate} />}
         </Flex>
       </Flex>
     </Box>
