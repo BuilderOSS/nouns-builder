@@ -182,7 +182,7 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
                                   : '0 ' + symbol
                                 const titlePart = truncate(milestone.title, {
                                   length: 24,
-                                  separator: '...',
+                                  separator: '…',
                                 })
                                 return {
                                   title: `${titlePart}: ${amountDisplay}`,

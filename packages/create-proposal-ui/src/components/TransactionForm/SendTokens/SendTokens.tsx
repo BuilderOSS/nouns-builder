@@ -10,7 +10,6 @@ import { isNativeEth } from '@buildeross/utils/sablier'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
-import { truncate } from 'lodash'
 import { useCallback } from 'react'
 import {
   Address,
@@ -32,7 +31,7 @@ import { SendTokensDetailsDisplay } from './SendTokensDetailsDisplay'
 
 const truncateAddress = (addr: string) => {
   const snippet = isAddress(addr, { strict: false }) ? walletSnippet(addr) : addr
-  return truncate(snippet, { length: 20 })
+  return snippet
 }
 
 export const SendTokens = () => {

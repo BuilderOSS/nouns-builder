@@ -82,6 +82,17 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
                 : undefined
             }
             helperText="Tokens will start streaming after this many days (0 = immediate)"
+            onChange={(e) => {
+              formik.handleChange(e)
+              formik.setFieldTouched(`streams.${index}.cliffDays`, true, false)
+            }}
+            onBlur={(e) => {
+              formik.handleBlur(e)
+              formik.setFieldTouched(`streams.${index}.cliffDays`, true, true)
+            }}
+            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+              e.target.select()
+            }}
           />
         </>
       ) : (
@@ -129,6 +140,17 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
                 : undefined
             }
             helperText="Tokens will start streaming after this many days from start"
+            onChange={(e) => {
+              formik.handleChange(e)
+              formik.setFieldTouched(`streams.${index}.cliffDays`, true, false)
+            }}
+            onBlur={(e) => {
+              formik.handleBlur(e)
+              formik.setFieldTouched(`streams.${index}.cliffDays`, true, true)
+            }}
+            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+              e.target.select()
+            }}
           />
         </>
       )}

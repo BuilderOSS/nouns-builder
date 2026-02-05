@@ -22,7 +22,6 @@ import {
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
-import { truncate } from 'lodash'
 import { useCallback, useMemo } from 'react'
 import {
   Address,
@@ -46,7 +45,7 @@ const SECONDS_PER_DAY = 86400
 
 const truncateAddress = (addr: string) => {
   const snippet = isAddress(addr, { strict: false }) ? walletSnippet(addr) : addr
-  return truncate(snippet, { length: 20 })
+  return snippet
 }
 
 export const StreamTokens = () => {
