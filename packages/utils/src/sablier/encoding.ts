@@ -29,22 +29,28 @@ export function encodeCreateWithDurationsLL(
   cancelable: boolean = true,
   transferable: boolean = false
 ): Hex {
-  const batch = streams.map((stream) => ({
-    sender: stream.sender,
-    recipient: stream.recipient,
-    depositAmount: stream.depositAmount,
-    cancelable,
-    transferable,
-    durations: {
-      cliff: stream.cliffDuration,
-      total: stream.totalDuration,
-    },
-    unlockAmounts: {
-      start: 0n,
-      cliff: 0n,
-    },
-    shape: '',
-  }))
+  const batch = streams.map((stream) => {
+    // Determine shape based on whether there's a cliff
+    // Using Sablier's Lockup enum values for proper display in their UI
+    const shape = stream.cliffDuration > 0 ? 'cliff' : 'linear'
+
+    return {
+      sender: stream.sender,
+      recipient: stream.recipient,
+      depositAmount: stream.depositAmount,
+      cancelable,
+      transferable,
+      durations: {
+        cliff: stream.cliffDuration,
+        total: stream.totalDuration,
+      },
+      unlockAmounts: {
+        start: 0n,
+        cliff: 0n,
+      },
+      shape,
+    }
+  })
 
   return encodeFunctionData({
     abi: batchLockupAbi,
@@ -63,23 +69,29 @@ export function encodeCreateWithTimestampsLL(
   cancelable: boolean = true,
   transferable: boolean = false
 ): Hex {
-  const batch = streams.map((stream) => ({
-    sender: stream.sender,
-    recipient: stream.recipient,
-    depositAmount: stream.depositAmount,
-    cancelable,
-    transferable,
-    timestamps: {
-      start: stream.startTime,
-      end: stream.endTime,
-    },
-    cliffTime: stream.cliffTime,
-    unlockAmounts: {
-      start: 0n,
-      cliff: 0n,
-    },
-    shape: '',
-  }))
+  const batch = streams.map((stream) => {
+    // Determine shape based on whether there's a cliff
+    // Using Sablier's Lockup enum values for proper display in their UI
+    const shape = stream.cliffTime > 0 ? 'cliff' : 'linear'
+
+    return {
+      sender: stream.sender,
+      recipient: stream.recipient,
+      depositAmount: stream.depositAmount,
+      cancelable,
+      transferable,
+      timestamps: {
+        start: stream.startTime,
+        end: stream.endTime,
+      },
+      cliffTime: stream.cliffTime,
+      unlockAmounts: {
+        start: 0n,
+        cliff: 0n,
+      },
+      shape,
+    }
+  })
 
   return encodeFunctionData({
     abi: batchLockupAbi,

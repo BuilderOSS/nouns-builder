@@ -347,7 +347,8 @@ export const StreamTokens = () => {
       startUnlockAmount: 0n,
       cliffUnlockAmount: 0n,
       tokenAddress: getAddress(tokenAddress),
-      shape: '', // Empty shape string (as per Sablier requirements)
+      // Use appropriate shape based on cliff presence for better Sablier UI display
+      shape: params.cliffTime > 0 ? 'cliff' : 'linear',
     }))
 
     const validationResult = validateBatchStreams(validationParams)
