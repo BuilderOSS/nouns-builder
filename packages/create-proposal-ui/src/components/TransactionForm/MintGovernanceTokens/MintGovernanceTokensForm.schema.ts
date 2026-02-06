@@ -1,11 +1,11 @@
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import * as yup from 'yup'
 
-export interface AirdropFormValues {
+export interface MintGovernanceTokensFormValues {
   recipients: Array<{ address: string; amount: number }>
 }
 
-const airdropFormSchema = yup.object({
+const mintGovernanceTokensFormSchema = yup.object({
   recipients: yup
     .array()
     .of(
@@ -31,4 +31,4 @@ const airdropFormSchema = yup.object({
     .required(),
 })
 
-export default airdropFormSchema
+export default mintGovernanceTokensFormSchema

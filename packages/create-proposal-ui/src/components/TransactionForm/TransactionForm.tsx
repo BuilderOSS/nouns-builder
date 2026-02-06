@@ -1,13 +1,13 @@
 import { TransactionType } from '@buildeross/types'
-import React, { ReactNode } from 'react'
+import { ReactNode } from 'react'
 
 import { AddArtwork } from './AddArtwork'
-import { Airdrop } from './Airdrop'
 import { CustomTransaction } from './CustomTransaction'
 import { Droposal } from './Droposal'
 import { FixRendererBase } from './FixRendererBase'
 import { Migration } from './Migration'
 import { MilestonePayments } from './MilestonePayments'
+import { MintGovernanceTokens } from './MintGovernanceTokens'
 import { NominateEscrowDelegate } from './NominateEscrowDelegate'
 import { PauseAuctions } from './PauseAuctions'
 import { PinTreasuryAsset } from './PinTreasuryAsset'
@@ -29,7 +29,7 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.SEND_NFT,
   TransactionType.STREAM_TOKENS,
   TransactionType.MILESTONE_PAYMENTS,
-  TransactionType.AIRDROP,
+  TransactionType.MINT_GOVERNANCE_TOKENS,
   TransactionType.WALLET_CONNECT,
   TransactionType.NOMINATE_DELEGATE,
   TransactionType.PIN_TREASURY_ASSET,
@@ -46,7 +46,7 @@ export const TRANSACTION_FORM_OPTIONS = [
 export const TransactionForm = ({ type }: TransactionFormProps) => {
   const FORMS: { [key in TransactionFormType]: ReactNode } = {
     [TransactionType.CUSTOM]: <CustomTransaction />,
-    [TransactionType.AIRDROP]: <Airdrop />,
+    [TransactionType.MINT_GOVERNANCE_TOKENS]: <MintGovernanceTokens />,
     [TransactionType.DROPOSAL]: <Droposal />,
     [TransactionType.SEND_NFT]: <SendNft />,
     [TransactionType.SEND_TOKENS]: <SendTokens />,

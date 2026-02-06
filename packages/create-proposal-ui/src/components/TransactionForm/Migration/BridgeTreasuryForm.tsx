@@ -80,7 +80,7 @@ export const BridgeTreasuryForm = ({
         >
           {({ errors, touched, isValid, isValidating, setFieldValue }) => (
             <Box
-              data-testid="airdrop-form"
+              data-testid="bridge-treasury-form"
               as={'fieldset'}
               disabled={isValidating}
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}

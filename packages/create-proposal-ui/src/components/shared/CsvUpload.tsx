@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import Papa from 'papaparse'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 export interface CsvRecord {
   address: string
@@ -11,11 +11,40 @@ export interface CsvUploadProps {
   onCsvParsed: (records: CsvRecord[]) => void
   onError: (error: string) => void
   disabled?: boolean
+  templateFilename?: string
+  templateContent?: string
+  maxRecords?: number
+  title?: string
+  validateAmount?: (amount: string, rowIndex: number) => string | null
 }
 
-export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) => {
+export const CsvUpload = ({
+  onCsvParsed,
+  onError,
+  disabled,
+  templateFilename = 'template.csv',
+  templateContent = 'address,amount\n0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e,10\n0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe,25',
+  maxRecords = 100,
+  title = 'Upload CSV File',
+  validateAmount,
+}: CsvUploadProps) => {
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  const defaultValidateAmount = useCallback(
+    (amount: string, rowIndex: number): string | null => {
+      if (!amount || !/^\d+$/.test(amount)) {
+        return `Row ${rowIndex + 1}: Invalid amount (must be a positive integer)`
+      }
+      return null
+    },
+    []
+  )
+
+  const amountValidator = useMemo(
+    () => validateAmount || defaultValidateAmount,
+    [validateAmount, defaultValidateAmount]
+  )
 
   const validateAndParseCSV = useCallback(
     (file: File) => {
@@ -50,8 +79,10 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
               return
             }
 
-            if (data.length > 100) {
-              onError('CSV file contains too many rows. Maximum 100 recipients allowed.')
+            if (data.length > maxRecords) {
+              onError(
+                `CSV file contains too many rows. Maximum ${maxRecords} recipients allowed.`
+              )
               return
             }
 
@@ -92,10 +123,10 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
               }
               seen.add(key)
 
-              if (!amount || !/^\d+$/.test(amount)) {
-                errors.push(
-                  `Row ${index + 1}: Invalid amount (must be a positive integer)`
-                )
+              // Use custom amount validator
+              const amountError = amountValidator(amount, index)
+              if (amountError) {
+                errors.push(amountError)
                 return
               }
 
@@ -132,7 +163,7 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
         },
       })
     },
-    [onCsvParsed, onError]
+    [onCsvParsed, onError, maxRecords, amountValidator]
   )
 
   const handleFileSelect = useCallback(
@@ -173,16 +204,14 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
   }, [])
 
   const downloadTemplate = useCallback(() => {
-    const csvContent =
-      'address,amount\n0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e,10\n0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe,25'
-    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const blob = new Blob([templateContent], { type: 'text/csv' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'airdrop_template.csv'
+    a.download = templateFilename
     a.click()
     window.URL.revokeObjectURL(url)
-  }, [])
+  }, [templateContent, templateFilename])
 
   const handleClick = useCallback(() => {
     const input = document.createElement('input')
@@ -199,7 +228,7 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
     <Box w="100%">
       <Flex direction="column" gap="x3">
         <Flex justify="space-between" align="center">
-          <Text fontWeight="display">Upload CSV File</Text>
+          <Text fontWeight="display">{title}</Text>
           <Button
             variant="ghost"
             size="sm"
@@ -249,7 +278,7 @@ export const CsvUpload = ({ onCsvParsed, onError, disabled }: CsvUploadProps) =>
                   : 'Drag and drop CSV file or click to browse'}
             </Text>
             <Text color="text3" fontSize="14" textAlign="center">
-              Maximum 100 recipients
+              Maximum {maxRecords} recipients
             </Text>
           </Flex>
         </Box>

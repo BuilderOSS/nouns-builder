@@ -8,9 +8,9 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { getProvider } from '@buildeross/utils/provider'
 import { isNativeEth } from '@buildeross/utils/sablier'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
-import type { FormikHelpers } from 'formik'
+import type { FormikHelpers, FormikProps } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Address,
   encodeFunctionData,
@@ -21,13 +21,15 @@ import {
   parseUnits,
 } from 'viem'
 
-import { TokenSelectionForm } from '../../shared'
+import { CsvRecord, CsvUpload, TokenSelectionForm } from '../../shared'
 import { RecipientForm } from './RecipientForm'
 import sendTokensSchema, {
   RecipientFormValues,
   SendTokensValues,
 } from './SendTokens.schema'
 import { SendTokensDetailsDisplay } from './SendTokensDetailsDisplay'
+
+const DECIMAL_REGEX = /^(\d+\.?\d*|\.\d+)$/
 
 const truncateAddress = (addr: string) => {
   const snippet = isAddress(addr, { strict: false }) ? walletSnippet(addr) : addr
@@ -37,6 +39,7 @@ const truncateAddress = (addr: string) => {
 export const SendTokens = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
+  const [csvError, setCsvError] = useState<string>('')
 
   const initialValues: SendTokensValues = {
     tokenAddress: undefined,
@@ -48,6 +51,22 @@ export const SendTokens = () => {
       },
     ],
   }
+
+  const handleCsvParsed = useCallback(
+    (records: CsvRecord[], formik: FormikProps<SendTokensValues>) => {
+      setCsvError('')
+      const recipients = records.map((record) => ({
+        recipientAddress: record.address,
+        amount: record.amount,
+      }))
+      formik.setFieldValue('recipients', recipients)
+    },
+    []
+  )
+
+  const handleCsvError = useCallback((error: string) => {
+    setCsvError(error)
+  }, [])
 
   const handleAddRecipient = useCallback((push: (obj: RecipientFormValues) => void) => {
     push({
@@ -228,8 +247,7 @@ export const SendTokens = () => {
               }
 
               // Validate decimal format (reject scientific notation)
-              const decimalRegex = /^(\d+\.?\d*|\.\d+)$/
-              if (!decimalRegex.test(amount)) {
+              if (!DECIMAL_REGEX.test(amount)) {
                 return 0n
               }
 
@@ -290,53 +308,108 @@ export const SendTokens = () => {
 
                   {formik.values.tokenMetadata?.isValid && (
                     <Box mt={'x5'}>
+                      {/* CSV Upload Section */}
+                      <CsvUpload
+                        onCsvParsed={(records) => handleCsvParsed(records, formik)}
+                        onError={handleCsvError}
+                        disabled={formik.isValidating || formik.isSubmitting}
+                        templateFilename="send_tokens_template.csv"
+                        templateContent="address,amount&#10;0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e,10.5&#10;0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe,25.75"
+                        maxRecords={100}
+                        validateAmount={(amount, rowIndex) => {
+                          if (!amount) {
+                            return `Row ${rowIndex + 1}: Missing amount`
+                          }
+                          // Allow decimal format, reject scientific notation
+                          if (!DECIMAL_REGEX.test(amount)) {
+                            return `Row ${rowIndex + 1}: Invalid amount format (use decimal, no scientific notation)`
+                          }
+                          const num = parseFloat(amount)
+                          if (isNaN(num) || num <= 0) {
+                            return `Row ${rowIndex + 1}: Amount must be greater than 0`
+                          }
+                          return null
+                        }}
+                      />
+
+                      {csvError && (
+                        <Box
+                          mt="x3"
+                          p="x3"
+                          backgroundColor="negative"
+                          borderRadius="curved"
+                        >
+                          <Text
+                            color="onNegative"
+                            fontSize="14"
+                            style={{ whiteSpace: 'pre-line' }}
+                          >
+                            {csvError}
+                          </Text>
+                        </Box>
+                      )}
+
                       <FieldArray name="recipients">
                         {({ push, remove }) => (
                           <>
-                            <Accordion
-                              items={formik.values.recipients.map((recipient, index) => {
-                                let amountDisplay = '0 ' + symbol
-                                if (recipient.amount && recipient.amount.trim() !== '') {
-                                  try {
-                                    const amountInUnits = parseUnits(
-                                      recipient.amount,
-                                      decimals
-                                    )
-                                    amountDisplay = `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
-                                  } catch {
-                                    amountDisplay = recipient.amount + ' ' + symbol
-                                  }
-                                }
-                                const recipientPart = recipient.recipientAddress
-                                  ? ` - ${truncateAddress(recipient.recipientAddress)}`
-                                  : ''
-
-                                return {
-                                  title: `Recipient #${index + 1}: ${amountDisplay}${recipientPart}`,
-                                  titleFontSize: 20,
-                                  description: (
-                                    <RecipientForm
-                                      key={index}
-                                      index={index}
-                                      removeRecipient={() =>
-                                        formik.values.recipients.length !== 1 &&
-                                        remove(index)
+                            <Box mt="x6">
+                              <Flex justify="space-between" align="center" mb="x4">
+                                <Text fontWeight="display">Recipients</Text>
+                                <Text fontSize="14" color="text3">
+                                  {formik.values.recipients.length} recipient
+                                  {formik.values.recipients.length === 1 ? '' : 's'}
+                                </Text>
+                              </Flex>
+                              <Accordion
+                                items={formik.values.recipients.map(
+                                  (recipient, index) => {
+                                    let amountDisplay = '0 ' + symbol
+                                    if (
+                                      recipient.amount &&
+                                      recipient.amount.trim() !== ''
+                                    ) {
+                                      try {
+                                        const amountInUnits = parseUnits(
+                                          recipient.amount,
+                                          decimals
+                                        )
+                                        amountDisplay = `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
+                                      } catch {
+                                        amountDisplay = recipient.amount + ' ' + symbol
                                       }
-                                    />
-                                  ),
-                                }
-                              })}
-                            />
-                            <Flex align="center" justify="center" mt="x4">
-                              <Button
-                                variant="secondary"
-                                width={'auto'}
-                                onClick={() => handleAddRecipient(push)}
-                                icon="plus"
-                              >
-                                Add Recipient
-                              </Button>
-                            </Flex>
+                                    }
+                                    const recipientPart = recipient.recipientAddress
+                                      ? ` - ${truncateAddress(recipient.recipientAddress)}`
+                                      : ''
+
+                                    return {
+                                      title: `Recipient #${index + 1}: ${amountDisplay}${recipientPart}`,
+                                      titleFontSize: 20,
+                                      description: (
+                                        <RecipientForm
+                                          key={index}
+                                          index={index}
+                                          removeRecipient={() =>
+                                            formik.values.recipients.length !== 1 &&
+                                            remove(index)
+                                          }
+                                        />
+                                      ),
+                                    }
+                                  }
+                                )}
+                              />
+                              <Flex align="center" justify="center" mt="x4">
+                                <Button
+                                  variant="secondary"
+                                  width={'auto'}
+                                  onClick={() => handleAddRecipient(push)}
+                                  icon="plus"
+                                >
+                                  Add Recipient
+                                </Button>
+                              </Flex>
+                            </Box>
                           </>
                         )}
                       </FieldArray>
@@ -353,6 +426,7 @@ export const SendTokens = () => {
                       !formik.values.tokenMetadata?.isValid ||
                       formik.values.recipients.length === 0 ||
                       !!balanceError ||
+                      !!csvError ||
                       Object.keys(allErrors).length > 0
                     }
                   >
