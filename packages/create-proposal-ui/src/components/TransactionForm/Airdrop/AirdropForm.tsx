@@ -5,8 +5,8 @@ import { FieldArray, Form, Formik } from 'formik'
 import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 
+import { CsvRecord, CsvUpload } from '../../shared'
 import airdropFormSchema, { AirdropFormValues } from './AirdropForm.schema'
-import { CsvRecord, CsvUpload } from './CsvUpload'
 
 export interface AirdropFormProps {
   onSubmit?: (
@@ -71,6 +71,15 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
                   onCsvParsed={(records) => handleCsvParsed(records, formik)}
                   onError={handleCsvError}
                   disabled={disabled}
+                  templateFilename="airdrop_template.csv"
+                  templateContent="address,amount&#10;0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e,10&#10;0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe,25"
+                  maxRecords={100}
+                  validateAmount={(amount, rowIndex) => {
+                    if (!amount || !/^\d+$/.test(amount)) {
+                      return `Row ${rowIndex + 1}: Invalid amount (must be a positive integer)`
+                    }
+                    return null
+                  }}
                 />
 
                 {csvError && (
