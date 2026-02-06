@@ -1,13 +1,13 @@
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { useChainStore, useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
-import { Accordion } from '@buildeross/ui/Accordion'
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { getProvider } from '@buildeross/utils/provider'
 import { isNativeEth } from '@buildeross/utils/sablier'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
 import { useCallback, useState } from 'react'
@@ -22,7 +22,6 @@ import {
 } from 'viem'
 
 import { CsvRecord, CsvUpload, TokenSelectionForm } from '../../shared'
-import { RecipientForm } from './RecipientForm'
 import sendTokensSchema, {
   RecipientFormValues,
   SendTokensValues,
@@ -30,11 +29,6 @@ import sendTokensSchema, {
 import { SendTokensDetailsDisplay } from './SendTokensDetailsDisplay'
 
 const DECIMAL_REGEX = /^(\d+\.?\d*|\.\d+)$/
-
-const truncateAddress = (addr: string) => {
-  const snippet = isAddress(addr, { strict: false }) ? walletSnippet(addr) : addr
-  return snippet
-}
 
 export const SendTokens = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
@@ -357,55 +351,121 @@ export const SendTokens = () => {
                                 <Text fontWeight="display">Recipients</Text>
                                 <Text fontSize="14" color="text3">
                                   {formik.values.recipients.length} recipient
-                                  {formik.values.recipients.length === 1 ? '' : 's'}
+                                  {formik.values.recipients.length === 1
+                                    ? ''
+                                    : 's'} • {totalAmountString || '0'}
                                 </Text>
                               </Flex>
-                              <Accordion
-                                items={formik.values.recipients.map(
-                                  (recipient, index) => {
-                                    let amountDisplay = '0 ' + symbol
-                                    if (
-                                      recipient.amount &&
-                                      recipient.amount.trim() !== ''
-                                    ) {
-                                      try {
-                                        const amountInUnits = parseUnits(
-                                          recipient.amount,
-                                          decimals
-                                        )
-                                        amountDisplay = `${formatCryptoVal(formatUnits(amountInUnits, decimals))} ${symbol}`
-                                      } catch {
-                                        amountDisplay = recipient.amount + ' ' + symbol
-                                      }
-                                    }
-                                    const recipientPart = recipient.recipientAddress
-                                      ? ` - ${truncateAddress(recipient.recipientAddress)}`
-                                      : ''
 
-                                    return {
-                                      title: `Recipient #${index + 1}: ${amountDisplay}${recipientPart}`,
-                                      titleFontSize: 20,
-                                      description: (
-                                        <RecipientForm
-                                          key={index}
-                                          index={index}
-                                          removeRecipient={() =>
-                                            formik.values.recipients.length !== 1 &&
-                                            remove(index)
-                                          }
-                                        />
-                                      ),
-                                    }
+                              <Flex direction="column" gap="x4">
+                                {formik.values.recipients.map((_recipient, index) => {
+                                  // Helper to get error message for a field
+                                  const getFieldError = (
+                                    fieldName: keyof RecipientFormValues
+                                  ): string | undefined => {
+                                    const recipientError =
+                                      formik.errors.recipients?.[index]
+                                    if (
+                                      !recipientError ||
+                                      typeof recipientError === 'string'
+                                    )
+                                      return undefined
+                                    const error = (recipientError as any)[fieldName]
+                                    return error ? String(error) : undefined
                                   }
-                                )}
-                              />
-                              <Flex align="center" justify="center" mt="x4">
+
+                                  return (
+                                    <Box
+                                      key={index}
+                                      p="x4"
+                                      borderRadius="curved"
+                                      borderStyle="solid"
+                                      borderWidth="thin"
+                                      borderColor="border"
+                                      backgroundColor="background1"
+                                    >
+                                      <Flex align="center" gap="x3">
+                                        <Box flex="2" style={{ marginBottom: '-32px' }}>
+                                          <SmartInput
+                                            type={FIELD_TYPES.TEXT}
+                                            formik={formik}
+                                            {...formik.getFieldProps(
+                                              `recipients.${index}.recipientAddress`
+                                            )}
+                                            id={`recipients.${index}.recipientAddress`}
+                                            inputLabel={
+                                              index === 0 ? 'Recipient Address' : ''
+                                            }
+                                            placeholder={'0x... or ENS name'}
+                                            isAddress={true}
+                                            errorMessage={
+                                              formik.touched.recipients?.[index]
+                                                ?.recipientAddress
+                                                ? getFieldError('recipientAddress')
+                                                : undefined
+                                            }
+                                          />
+                                        </Box>
+
+                                        <Box flex="1" style={{ marginBottom: '-32px' }}>
+                                          <SmartInput
+                                            id={`recipients.${index}.amount`}
+                                            inputLabel={index === 0 ? 'Amount' : ''}
+                                            type={FIELD_TYPES.TEXT}
+                                            formik={formik}
+                                            {...formik.getFieldProps(
+                                              `recipients.${index}.amount`
+                                            )}
+                                            placeholder={'0'}
+                                            errorMessage={
+                                              formik.touched.recipients?.[index]?.amount
+                                                ? getFieldError('amount')
+                                                : undefined
+                                            }
+                                          />
+                                        </Box>
+
+                                        {formik.values.recipients.length > 1 && (
+                                          <Flex h="100%" align="center" justify="center">
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => remove(index)}
+                                              disabled={
+                                                formik.isValidating || formik.isSubmitting
+                                              }
+                                              style={{
+                                                alignSelf:
+                                                  index === 0 ? 'flex-end' : 'center',
+                                                paddingRight: '4px',
+                                                paddingLeft: '4px',
+                                                minWidth: '32px',
+                                                marginTop: index === 0 ? '32px' : '0',
+                                              }}
+                                            >
+                                              <Icon id="cross" />
+                                            </Button>
+                                          </Flex>
+                                        )}
+                                      </Flex>
+                                    </Box>
+                                  )
+                                })}
+
                                 <Button
-                                  variant="secondary"
-                                  width={'auto'}
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
                                   onClick={() => handleAddRecipient(push)}
-                                  icon="plus"
+                                  disabled={
+                                    formik.isValidating ||
+                                    formik.isSubmitting ||
+                                    formik.values.recipients.length >= 100
+                                  }
+                                  style={{ alignSelf: 'flex-start' }}
                                 >
+                                  <Icon id="plus" />
                                   Add Recipient
                                 </Button>
                               </Flex>
