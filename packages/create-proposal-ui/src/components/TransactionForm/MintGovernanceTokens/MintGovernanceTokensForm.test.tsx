@@ -2,7 +2,7 @@ import { FOUNDRY_CHAIN, render } from '@buildeross/test-fixtures'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { describe, expect, vi } from 'vitest'
 
-import AirdropForm from './AirdropForm'
+import MintGovernanceTokensForm from './MintGovernanceTokensForm'
 
 // Mock Papa Parse to avoid issues in tests
 vi.mock('papaparse', () => ({
@@ -11,9 +11,9 @@ vi.mock('papaparse', () => ({
   },
 }))
 
-describe('Airdrop form', () => {
-  it('should render airdrop form with default values', () => {
-    render(<AirdropForm />, {
+describe('MintGovernanceTokens form', () => {
+  it('should render mint governance tokens form with default values', () => {
+    render(<MintGovernanceTokensForm />, {
       chain: FOUNDRY_CHAIN,
     })
 
@@ -26,7 +26,7 @@ describe('Airdrop form', () => {
   })
 
   it('should allow adding and removing recipients', async () => {
-    render(<AirdropForm />, {
+    render(<MintGovernanceTokensForm />, {
       chain: FOUNDRY_CHAIN,
     })
 

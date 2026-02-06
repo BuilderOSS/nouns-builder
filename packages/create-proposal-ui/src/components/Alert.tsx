@@ -1,5 +1,4 @@
 import { Stack, Text } from '@buildeross/zord'
-import React from 'react'
 
 export const Alert = () => {
   return (
@@ -8,7 +7,7 @@ export const Alert = () => {
         Action required
       </Text>
       <Text variant={'label-lg'} mb={'x5'}>
-        Upgrade Contracts to Unlock Airdrop Feature
+        Upgrade Contracts to Unlock New Features
       </Text>
     </Stack>
   )

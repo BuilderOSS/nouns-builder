@@ -13,12 +13,12 @@ import { Address, encodeFunctionData, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { UpgradeInProgress, UpgradeRequired } from '../Upgrade'
-import AirdropForm from './AirdropForm'
-import { AirdropFormValues } from './AirdropForm.schema'
+import MintGovernanceTokensForm from './MintGovernanceTokensForm'
+import { MintGovernanceTokensFormValues } from './MintGovernanceTokensForm.schema'
 
-const AIRDROP_CONTRACT_VERSION = '1.2.0'
+const CONTRACT_VERSION = '1.2.0'
 
-export const Airdrop: React.FC = () => {
+export const MintGovernanceTokens: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
   const transactions = useProposalStore((state) => state.transactions)
   const addTransaction = useProposalStore((state) => state.addTransaction)
@@ -35,7 +35,7 @@ export const Airdrop: React.FC = () => {
   } = useAvailableUpgrade({
     chainId: chain.id,
     addresses,
-    contractVersion: AIRDROP_CONTRACT_VERSION,
+    contractVersion: CONTRACT_VERSION,
   })
 
   const { data: auctionOwner } = useReadContract({
@@ -48,7 +48,7 @@ export const Airdrop: React.FC = () => {
   const { data: isMinter } = useReadContract({
     // can only check minter on contracts where version >= 1.2.0
     query: {
-      enabled: gte(currentVersions?.token, AIRDROP_CONTRACT_VERSION),
+      enabled: gte(currentVersions?.token, CONTRACT_VERSION),
     },
     abi: tokenAbi,
     address: addresses.token,
@@ -57,9 +57,9 @@ export const Airdrop: React.FC = () => {
     args: [addresses.treasury as AddressType],
   })
 
-  const handleAirdropTransaction = async (
-    values: AirdropFormValues,
-    actions: FormikHelpers<AirdropFormValues>
+  const handleMintGovernanceTokensTransaction = async (
+    values: MintGovernanceTokensFormValues,
+    actions: FormikHelpers<MintGovernanceTokensFormValues>
   ) => {
     if (!addresses.treasury || !values.recipients?.length) return
 
@@ -94,7 +94,7 @@ export const Airdrop: React.FC = () => {
     }
 
     // Process each recipient
-    const airdropTransactions = []
+    const mintTransactions = []
     for (const recipient of recipients) {
       const resolvedRecipientAddress = await getEnsAddress(
         recipient.address,
@@ -110,7 +110,7 @@ export const Airdrop: React.FC = () => {
         return
       }
 
-      airdropTransactions.push({
+      mintTransactions.push({
         functionSignature: 'mintBatchTo',
         target: addresses.token as AddressType,
         value: '',
@@ -124,13 +124,13 @@ export const Airdrop: React.FC = () => {
 
     const summary =
       recipients.length === 1
-        ? `Airdrop ${recipients[0].amount} ${recipients[0].amount > 1 ? 'tokens' : 'token'} to ${walletSnippet(recipients[0].address)}`
-        : `Bulk airdrop ${totalTokens} tokens to ${recipients.length} recipients`
+        ? `Mint ${recipients[0].amount} governance ${recipients[0].amount > 1 ? 'tokens' : 'token'} to ${walletSnippet(recipients[0].address)}`
+        : `Bulk mint ${totalTokens} governance tokens to ${recipients.length} recipients`
 
     addTransaction({
-      type: TransactionType.AIRDROP,
+      type: TransactionType.MINT_GOVERNANCE_TOKENS,
       summary,
-      transactions: airdropTransactions,
+      transactions: mintTransactions,
     })
 
     actions.resetForm()
@@ -141,7 +141,8 @@ export const Airdrop: React.FC = () => {
     return (
       <Stack>
         <Text color="negative">
-          Oops, you need to have run an auction in order to access airdrops.
+          Oops, you need to have run an auction in order to access minting governance
+          tokens
         </Text>
       </Stack>
     )
@@ -154,14 +155,14 @@ export const Airdrop: React.FC = () => {
   const upgradeInProgress = !!activeUpgradeProposalId
 
   return (
-    <Stack data-testid="airdrop">
+    <Stack data-testid="mint-governance-tokens">
       {upgradeRequired && (
         <UpgradeRequired {...{ transaction, latest, date, totalContractUpgrades }} />
       )}
       {upgradeInProgress && <UpgradeInProgress proposalId={activeUpgradeProposalId} />}
       <Stack>
-        <AirdropForm
-          onSubmit={handleAirdropTransaction}
+        <MintGovernanceTokensForm
+          onSubmit={handleMintGovernanceTokensTransaction}
           disabled={upgradeRequired || upgradeInProgress}
         />
       </Stack>

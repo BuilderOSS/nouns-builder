@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import Papa from 'papaparse'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 
 export interface CsvRecord {
   address: string
@@ -41,7 +41,10 @@ export const CsvUpload = ({
     []
   )
 
-  const amountValidator = validateAmount || defaultValidateAmount
+  const amountValidator = useMemo(
+    () => validateAmount || defaultValidateAmount,
+    [validateAmount, defaultValidateAmount]
+  )
 
   const validateAndParseCSV = useCallback(
     (file: File) => {

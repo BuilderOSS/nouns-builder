@@ -3,7 +3,7 @@ import { AddressType } from './hex'
 export enum TransactionType {
   SEND_TOKENS = 'send-tokens',
   SEND_NFT = 'send-nft',
-  AIRDROP = 'airdrop',
+  MINT_GOVERNANCE_TOKENS = 'mint-governance-tokens',
   DROPOSAL = 'droposal',
   CUSTOM = 'custom',
   UPGRADE = 'upgrade',

@@ -6,25 +6,33 @@ import type { FC } from 'react'
 import { useCallback, useState } from 'react'
 
 import { CsvRecord, CsvUpload } from '../../shared'
-import airdropFormSchema, { AirdropFormValues } from './AirdropForm.schema'
+import mintGovernanceTokensFormSchema, {
+  MintGovernanceTokensFormValues,
+} from './MintGovernanceTokensForm.schema'
 
-export interface AirdropFormProps {
+export interface MintGovernanceTokensFormProps {
   onSubmit?: (
-    values: AirdropFormValues,
-    actions: FormikHelpers<AirdropFormValues>
+    values: MintGovernanceTokensFormValues,
+    actions: FormikHelpers<MintGovernanceTokensFormValues>
   ) => void
   disabled?: boolean
 }
 
-const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
+const MintGovernanceTokensForm: FC<MintGovernanceTokensFormProps> = ({
+  onSubmit,
+  disabled,
+}) => {
   const [csvError, setCsvError] = useState<string>('')
 
-  const initialValues: AirdropFormValues = {
+  const initialValues: MintGovernanceTokensFormValues = {
     recipients: [{ address: '', amount: 0 }],
   }
 
   const handleSubmit = useCallback(
-    (values: AirdropFormValues, actions: FormikHelpers<AirdropFormValues>) => {
+    (
+      values: MintGovernanceTokensFormValues,
+      actions: FormikHelpers<MintGovernanceTokensFormValues>
+    ) => {
       onSubmit?.(values, actions)
     },
     [onSubmit]
@@ -47,7 +55,7 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
     <Box w={'100%'}>
       <Formik
         initialValues={initialValues}
-        validationSchema={airdropFormSchema}
+        validationSchema={mintGovernanceTokensFormSchema}
         onSubmit={handleSubmit}
         validateOnBlur
         validateOnMount={false}
@@ -60,7 +68,7 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
 
           return (
             <Box
-              data-testid="airdrop-form"
+              data-testid="mint-governance-tokens-form"
               as={'fieldset'}
               disabled={formik.isValidating || disabled}
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
@@ -71,15 +79,9 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
                   onCsvParsed={(records) => handleCsvParsed(records, formik)}
                   onError={handleCsvError}
                   disabled={disabled}
-                  templateFilename="airdrop_template.csv"
+                  templateFilename="mint_governance_tokens_template.csv"
                   templateContent="address,amount&#10;0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e,10&#10;0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe,25"
                   maxRecords={100}
-                  validateAmount={(amount, rowIndex) => {
-                    if (!amount || !/^\d+$/.test(amount)) {
-                      return `Row ${rowIndex + 1}: Invalid amount (must be a positive integer)`
-                    }
-                    return null
-                  }}
                 />
 
                 {csvError && (
@@ -226,4 +228,4 @@ const AirdropForm: FC<AirdropFormProps> = ({ onSubmit, disabled }) => {
   )
 }
 
-export default AirdropForm
+export default MintGovernanceTokensForm

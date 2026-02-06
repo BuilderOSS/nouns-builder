@@ -26,9 +26,9 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     icon: 'nft',
     iconBackdrop: 'rgba(138, 43, 226, 0.1)',
   },
-  [TransactionType.AIRDROP]: {
-    title: 'Airdrop',
-    subTitle: 'Airdrop governance tokens to selected addresses',
+  [TransactionType.MINT_GOVERNANCE_TOKENS]: {
+    title: 'Mint Governance Tokens',
+    subTitle: 'Mint governance tokens to selected addresses',
     icon: 'airdrop',
     iconBackdrop: 'rgba(28, 182, 135, 0.1)',
   },

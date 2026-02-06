@@ -8,7 +8,7 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { getProvider } from '@buildeross/utils/provider'
 import { isNativeEth } from '@buildeross/utils/sablier'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
-import type { FormikHelpers } from 'formik'
+import type { FormikHelpers, FormikProps } from 'formik'
 import { FieldArray, Form, Formik } from 'formik'
 import { useCallback, useState } from 'react'
 import {
@@ -28,6 +28,8 @@ import sendTokensSchema, {
   SendTokensValues,
 } from './SendTokens.schema'
 import { SendTokensDetailsDisplay } from './SendTokensDetailsDisplay'
+
+const DECIMAL_REGEX = /^(\d+\.?\d*|\.\d+)$/
 
 const truncateAddress = (addr: string) => {
   const snippet = isAddress(addr, { strict: false }) ? walletSnippet(addr) : addr
@@ -50,14 +52,17 @@ export const SendTokens = () => {
     ],
   }
 
-  const handleCsvParsed = useCallback((records: CsvRecord[], formik: any) => {
-    setCsvError('')
-    const recipients = records.map((record) => ({
-      recipientAddress: record.address,
-      amount: record.amount,
-    }))
-    formik.setFieldValue('recipients', recipients)
-  }, [])
+  const handleCsvParsed = useCallback(
+    (records: CsvRecord[], formik: FormikProps<SendTokensValues>) => {
+      setCsvError('')
+      const recipients = records.map((record) => ({
+        recipientAddress: record.address,
+        amount: record.amount,
+      }))
+      formik.setFieldValue('recipients', recipients)
+    },
+    []
+  )
 
   const handleCsvError = useCallback((error: string) => {
     setCsvError(error)
@@ -242,8 +247,7 @@ export const SendTokens = () => {
               }
 
               // Validate decimal format (reject scientific notation)
-              const decimalRegex = /^(\d+\.?\d*|\.\d+)$/
-              if (!decimalRegex.test(amount)) {
+              if (!DECIMAL_REGEX.test(amount)) {
                 return 0n
               }
 
@@ -317,8 +321,7 @@ export const SendTokens = () => {
                             return `Row ${rowIndex + 1}: Missing amount`
                           }
                           // Allow decimal format, reject scientific notation
-                          const decimalRegex = /^(\d+\.?\d*|\.\d+)$/
-                          if (!decimalRegex.test(amount)) {
+                          if (!DECIMAL_REGEX.test(amount)) {
                             return `Row ${rowIndex + 1}: Invalid amount format (use decimal, no scientific notation)`
                           }
                           const num = parseFloat(amount)

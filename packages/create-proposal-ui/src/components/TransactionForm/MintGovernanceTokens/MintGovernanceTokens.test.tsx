@@ -2,7 +2,7 @@ import { BUILDER_DAO, FOUNDRY_CHAIN, render } from '@buildeross/test-fixtures'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { vi } from 'vitest'
 
-import { Airdrop } from './Airdrop'
+import { MintGovernanceTokens } from './MintGovernanceTokens'
 
 vi.mock('@buildeross/sdk/subgraph', async () => {
   const mod = await vi.importActual<typeof import('@buildeross/sdk/subgraph')>(
@@ -23,13 +23,13 @@ vi.mock('papaparse', () => ({
   },
 }))
 
-describe('Airdrop', () => {
+describe('MintGovernanceTokens', () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('should render initially disabled airdrop form given a required upgrade', async () => {
-    render(<Airdrop />, {
+  it('should render initially disabled mint-governance-tokens form given a required upgrade', async () => {
+    render(<MintGovernanceTokens />, {
       chain: FOUNDRY_CHAIN,
       addresses: BUILDER_DAO,
     })
@@ -39,7 +39,7 @@ describe('Airdrop', () => {
       { timeout: 5000 }
     )
     expect(screen.queryByTestId('upgrade-in-progress')).not.toBeInTheDocument()
-    expect(screen.getByTestId('airdrop-form')).toBeDisabled()
+    expect(screen.getByTestId('mint-governance-tokens-form')).toBeDisabled()
 
     // queue upgrade
     const upgradeBtn = screen.getByTestId('upgrade-btn')
@@ -47,9 +47,9 @@ describe('Airdrop', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('upgrade-card')).not.toBeInTheDocument()
     })
-    expect(screen.getByTestId('airdrop-form')).toBeEnabled()
+    expect(screen.getByTestId('mint-governance-tokens-form')).toBeEnabled()
 
-    // fill in airdrop form and submit
+    // fill in mint-governance-tokens form and submit
     const recipient = screen.getByPlaceholderText('0x... or ENS name') as HTMLInputElement
     const amount = screen.getByDisplayValue(0) as HTMLInputElement
     const addTransactionBtn = screen.getByText(/Add Transaction to Queue/)
