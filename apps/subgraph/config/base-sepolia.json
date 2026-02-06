@@ -8,5 +8,13 @@
     "address": "0x4200000000000000000000000000000000000021",
     "startBlock": 25948922
   },
+  "clanker": {
+    "address": "0xE85A59c628F7d27878ACeB4bf3b35733630083a9",
+    "startBlock": 34505000
+  },
+  "zoraFactory": {
+    "address": "0xaF88840cb637F2684A9E460316b1678AD6245e4a",
+    "startBlock": 34505000
+  },
   "callHandlers": false
 }

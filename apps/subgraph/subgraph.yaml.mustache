@@ -57,7 +57,7 @@ dataSources:
         - name: EAS
           file: ./abis/EAS.json
         - name: Token
-          file: ./abis/Token.json 
+          file: ./abis/Token.json
         - name: Governor
           file: ./abis/Governor.json
         - name: Treasury
@@ -77,6 +77,58 @@ dataSources:
           handler: handleRevoked
       file: ./src/eas.ts
 {{/eas}}
+{{#clanker}}
+  - kind: ethereum
+    name: Clanker
+    network: {{network}}
+    source:
+      address: '{{clanker.address}}'
+      abi: Clanker
+      startBlock: {{clanker.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ClankerToken
+        - DAO
+      abis:
+        - name: Clanker
+          file: ./abis/Clanker.json
+        - name: Treasury
+          file: ./abis/Treasury.json
+        - name: Governor
+          file: ./abis/Governor.json
+      eventHandlers:
+        - event: TokenCreated(address,indexed address,indexed address,string,string,string,string,string,int24,address,bytes32,address,address,address,uint256,address[])
+          handler: handleTokenCreated
+      file: ./src/clanker.ts
+{{/clanker}}
+{{#zoraFactory}}
+  - kind: ethereum
+    name: ZoraFactory
+    network: {{network}}
+    source:
+      address: '{{zoraFactory.address}}'
+      abi: ZoraFactory
+      startBlock: {{zoraFactory.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ZoraCoin
+        - DAO
+      abis:
+        - name: ZoraFactory
+          file: ./abis/ZoraFactory.json
+        - name: Token
+          file: ./abis/Token.json
+      eventHandlers:
+        - event: CoinCreatedV4(indexed address,indexed address,indexed address,address,string,string,string,address,(address,address,uint24,int24,address),bytes32,string)
+          handler: handleCoinCreatedV4
+      file: ./src/zoraFactory.ts
+{{/zoraFactory}}
 templates:
   - kind: ethereum
     name: Token
