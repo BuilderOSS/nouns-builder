@@ -49,6 +49,8 @@ const EVENT_TYPE_LABELS: Record<FeedEventType, string> = {
   [FeedEventType.ProposalVoted]: 'Proposal Vote',
   [FeedEventType.ProposalExecuted]: 'Proposal Executed',
   [FeedEventType.ProposalUpdated]: 'Proposal Update',
+  [FeedEventType.ClankerTokenCreated]: 'Creator Coin Created',
+  [FeedEventType.ZoraCoinCreated]: 'Post Published',
 }
 
 export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({

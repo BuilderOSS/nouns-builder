@@ -9,11 +9,9 @@ export type CoinFormValues = {
   mediaUrl?: string
   mediaMimeType?: string
   properties?: Record<string, string>
-  currency?: string
-  customCurrency?: string // Custom ERC20 token address when currency is "custom"
+  currency?: AddressType
   targetFdvUsd?: number // Target fully diluted valuation for pool configuration
   // Clanker-specific fields
-  poolConfig?: string
   feeConfig?: string
   vaultPercentage?: number
   lockupDuration?: number // in days
@@ -34,7 +32,6 @@ export type CoinFormFieldsProps = {
   showProperties?: boolean
   showTargetFdv?: boolean
   initialValues?: Partial<CoinFormValues>
-  chainId?: number
   showCurrencyInput?: boolean
-  currencyOptions?: CurrencyOption[]
+  currencyOptions: CurrencyOption[]
 }

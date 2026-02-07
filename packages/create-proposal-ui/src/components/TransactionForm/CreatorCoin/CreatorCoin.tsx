@@ -1,6 +1,7 @@
-import { useEthUsdPrice } from '@buildeross/hooks'
+import { BUILDER_TOKEN_ADDRESS, WETH_ADDRESS } from '@buildeross/constants'
+import { useClankerTokens, useEthUsdPrice } from '@buildeross/hooks'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { CHAIN_ID, TransactionType } from '@buildeross/types'
+import { type AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
 import {
   ClankerCoinFormFields,
   coinFormSchema,
@@ -10,15 +11,15 @@ import {
   convertDaysToSeconds,
   createClankerPoolPositionsFromTargetFdv,
   DEFAULT_CLANKER_TARGET_FDV,
+  DEFAULT_CLANKER_TICK_SPACING,
   FEE_CONFIGS,
-  POOL_POSITIONS,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { type ClankerTokenV4, FEE_CONFIGS as SDK_FEE_CONFIGS } from 'clanker-sdk'
 import { Clanker } from 'clanker-sdk/v4'
 import { Form, Formik, type FormikHelpers } from 'formik'
 import { useMemo, useState } from 'react'
-import { type Address, encodeFunctionData } from 'viem'
+import { type Address, encodeFunctionData, getAddress, isAddressEqual } from 'viem'
 import { ZodError } from 'zod'
 
 // Supported chain IDs for Clanker deployment
@@ -29,6 +30,7 @@ const DEFAULT_VAULT_PERCENTAGE = 10 // 10% of supply
 const DEFAULT_LOCKUP_DAYS = 30 // 30 days
 const DEFAULT_VESTING_DAYS = 30 // 30 days
 
+export const DYNAMIC_FEE_FLAG: number = 0x800000
 /**
  * Parse error into a user-friendly message
  * Handles ZodError, Error objects, and other error types
@@ -103,6 +105,23 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
   // Check if the current chain is supported
   const isChainSupported = SUPPORTED_CHAIN_IDS.includes(chain.id)
 
+  // Fetch the latest ClankerToken for Builder DAO
+  const builderTokenAddress =
+    BUILDER_TOKEN_ADDRESS[chain.id as keyof typeof BUILDER_TOKEN_ADDRESS]
+  const { data: builderClankerTokens } = useClankerTokens({
+    chainId: chain.id,
+    collectionAddress: builderTokenAddress as AddressType,
+    enabled: isChainSupported && !!builderTokenAddress,
+    first: 1,
+  })
+
+  // Get the latest Builder ClankerToken (first item in array)
+  const latestBuilderClankerToken = useMemo(() => {
+    return builderClankerTokens && builderClankerTokens.length > 0
+      ? builderClankerTokens[0]
+      : null
+  }, [builderClankerTokens])
+
   // Create Clanker SDK instance
   const clanker = useMemo(() => {
     if (!isChainSupported) return null
@@ -110,25 +129,35 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
   }, [isChainSupported])
 
   // Initial values from props with Clanker defaults
-  const initialValues: CoinFormValues = {
-    name: providedInitialValues?.name || '',
-    symbol: providedInitialValues?.symbol || '',
-    description: providedInitialValues?.description || '',
-    imageUrl: providedInitialValues?.imageUrl || '',
-    mediaUrl: providedInitialValues?.mediaUrl || '',
-    mediaMimeType: providedInitialValues?.mediaMimeType || '',
-    properties: providedInitialValues?.properties || {},
-    currency: providedInitialValues?.currency || 'WETH',
-    targetFdvUsd: providedInitialValues?.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV,
-    // Clanker-specific defaults
-    poolConfig: providedInitialValues?.poolConfig || POOL_POSITIONS.Project,
-    feeConfig: providedInitialValues?.feeConfig || FEE_CONFIGS.DynamicBasic,
-    vaultPercentage: providedInitialValues?.vaultPercentage ?? DEFAULT_VAULT_PERCENTAGE,
-    lockupDuration: providedInitialValues?.lockupDuration ?? DEFAULT_LOCKUP_DAYS,
-    vestingDuration: providedInitialValues?.vestingDuration ?? DEFAULT_VESTING_DAYS,
-    vaultRecipient: providedInitialValues?.vaultRecipient || undefined,
-    devBuyEthAmount: providedInitialValues?.devBuyEthAmount || undefined,
-  }
+  const initialValues: CoinFormValues = useMemo(() => {
+    const wethAddress = WETH_ADDRESS[chain.id as keyof typeof WETH_ADDRESS]
+    // Prefer Builder token, fallback to WETH
+    const defaultCurrency =
+      providedInitialValues?.currency ||
+      (latestBuilderClankerToken
+        ? (latestBuilderClankerToken.tokenAddress as AddressType)
+        : wethAddress) ||
+      ''
+
+    return {
+      name: providedInitialValues?.name || '',
+      symbol: providedInitialValues?.symbol || '',
+      description: providedInitialValues?.description || '',
+      imageUrl: providedInitialValues?.imageUrl || '',
+      mediaUrl: providedInitialValues?.mediaUrl || '',
+      mediaMimeType: providedInitialValues?.mediaMimeType || '',
+      properties: providedInitialValues?.properties || {},
+      currency: defaultCurrency,
+      targetFdvUsd: providedInitialValues?.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV,
+      // Clanker-specific defaults
+      feeConfig: providedInitialValues?.feeConfig || FEE_CONFIGS.DynamicBasic,
+      vaultPercentage: providedInitialValues?.vaultPercentage ?? DEFAULT_VAULT_PERCENTAGE,
+      lockupDuration: providedInitialValues?.lockupDuration ?? DEFAULT_LOCKUP_DAYS,
+      vestingDuration: providedInitialValues?.vestingDuration ?? DEFAULT_VESTING_DAYS,
+      vaultRecipient: providedInitialValues?.vaultRecipient || undefined,
+      devBuyEthAmount: providedInitialValues?.devBuyEthAmount || undefined,
+    }
+  }, [providedInitialValues, chain.id, latestBuilderClankerToken])
 
   const handleSubmit = async (
     values: CoinFormValues,
@@ -154,6 +183,45 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
       return
     }
 
+    if (!values.currency) {
+      setSubmitError('Please select a currency')
+      actions.setSubmitting(false)
+      return
+    }
+
+    const wethAddress = WETH_ADDRESS[chain.id as keyof typeof WETH_ADDRESS]
+    const isWethSelected = isAddressEqual(values.currency, wethAddress)
+
+    if (
+      !latestBuilderClankerToken ||
+      (!isWethSelected &&
+        !isAddressEqual(values.currency, latestBuilderClankerToken.tokenAddress))
+    ) {
+      setSubmitError('Please select a valid currency')
+      actions.setSubmitting(false)
+      return
+    }
+
+    let clankerPoolKey: NonNullable<ClankerTokenV4['devBuy']>['poolKey'] | undefined =
+      undefined
+
+    if (!isWethSelected && latestBuilderClankerToken) {
+      // Normalize paired token address once
+      const normalizedAddress = getAddress(latestBuilderClankerToken.tokenAddress)
+      const pairedTokenAddress = getAddress(latestBuilderClankerToken.pairedToken)
+
+      // Determine token order in the pool using BigInt comparison
+      const isToken0 = BigInt(normalizedAddress) < BigInt(pairedTokenAddress)
+
+      clankerPoolKey = {
+        currency0: isToken0 ? normalizedAddress : pairedTokenAddress,
+        currency1: isToken0 ? pairedTokenAddress : normalizedAddress,
+        fee: DYNAMIC_FEE_FLAG,
+        tickSpacing: DEFAULT_CLANKER_TICK_SPACING,
+        hooks: latestBuilderClankerToken.poolHook,
+      }
+    }
+
     setSubmitError(undefined)
 
     try {
@@ -171,6 +239,8 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
           interface: 'Builder DAO Proposal',
         },
         pool: {
+          pairedToken: values.currency as AddressType,
+          tickSpacing: DEFAULT_CLANKER_TICK_SPACING,
           positions: createClankerPoolPositionsFromTargetFdv({
             targetFdvUsd: values.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV,
             quoteTokenUsd: ethUsdPrice,
@@ -203,6 +273,8 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
           ? {
               devBuy: {
                 ethAmount: Number(values.devBuyEthAmount),
+                recipient: treasury as Address,
+                poolKey: clankerPoolKey,
               },
             }
           : {}),
@@ -246,6 +318,30 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
       actions.setSubmitting(false)
     }
   }
+
+  // Define currency options: Builder ClankerToken first, then WETH
+  const currencyOptions = useMemo(() => {
+    const options = []
+
+    // Add latest Builder ClankerToken first if available
+    if (latestBuilderClankerToken) {
+      options.push({
+        value: latestBuilderClankerToken.tokenAddress as AddressType,
+        label: `${latestBuilderClankerToken.tokenSymbol} (${latestBuilderClankerToken.tokenName}) - Builder DAO`,
+      })
+    }
+
+    // Add WETH as second option
+    const wethAddress = WETH_ADDRESS[chain.id as keyof typeof WETH_ADDRESS]
+    if (wethAddress) {
+      options.push({
+        value: wethAddress,
+        label: `WETH (Wrapped Ether)`,
+      })
+    }
+
+    return options
+  }, [chain.id, latestBuilderClankerToken])
 
   // If chain is not supported, show message and don't render form
   if (!isChainSupported) {
@@ -303,8 +399,9 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
                   showMediaUpload={showMediaUpload}
                   showProperties={showProperties}
                   initialValues={initialValues}
-                  chainId={chain.id}
-                  showCurrencyInput={false}
+                  showCurrencyInput={true}
+                  showTargetFdv={true}
+                  currencyOptions={currencyOptions}
                 />
 
                 {submitError && (

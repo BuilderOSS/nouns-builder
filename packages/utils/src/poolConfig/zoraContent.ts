@@ -105,7 +105,7 @@ const MAX_FDV = 2_500_000 // hard ceiling
 /**
  * Estimate a Zora-like target FDV for a creator / DAO token.
  */
-export function estimateTargetFdvUsd(params: { marketCapUsd: number }): number {
+function estimateTargetFdvUsd(params: { marketCapUsd: number }): number {
   const { marketCapUsd } = params
 
   if (!Number.isFinite(marketCapUsd) || marketCapUsd <= 0) {

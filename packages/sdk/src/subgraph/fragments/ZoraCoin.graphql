@@ -1,0 +1,11 @@
+fragment ZoraCoin on ZoraCoin {
+  id
+  coinAddress
+  name
+  symbol
+  uri
+  currency
+  createdAt
+  createdAtBlock
+  transactionHash
+}

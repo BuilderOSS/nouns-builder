@@ -1,13 +1,28 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import useSWR, { type KeyedMutator } from 'swr'
 
-export type CurrencyUsdPriceReturnType = {
-  price: number | undefined
-  isValidating: boolean
-  isLoading: boolean
-  error: Error | undefined
-  mutate: KeyedMutator<number>
-}
+export type CurrencyUsdPriceReturnType =
+  | {
+      price: number
+      isValidating: boolean
+      isLoading: false
+      error: undefined
+      mutate: KeyedMutator<number>
+    }
+  | {
+      price: undefined
+      isValidating: boolean
+      isLoading: true
+      error: undefined
+      mutate: KeyedMutator<number>
+    }
+  | {
+      price: undefined
+      isValidating: boolean
+      isLoading: boolean
+      error: Error
+      mutate: KeyedMutator<number>
+    }
 
 const fetchCurrencyUsdPrice = async (currency: string): Promise<number> => {
   const response = await fetch(
@@ -55,11 +70,31 @@ export const useCurrencyUsdPrice = (
     }
   )
 
+  if (error) {
+    return {
+      price: undefined,
+      isLoading,
+      isValidating,
+      error,
+      mutate,
+    }
+  }
+
+  if (isLoading) {
+    return {
+      price: undefined,
+      isLoading,
+      isValidating,
+      error: undefined,
+      mutate,
+    }
+  }
+
   return {
-    price: data,
+    price: data!,
     isLoading,
     isValidating,
-    error,
+    error: undefined,
     mutate,
   }
 }

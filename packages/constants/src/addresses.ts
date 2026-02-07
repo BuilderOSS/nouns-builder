@@ -147,14 +147,18 @@ export const WETH_ADDRESS = {
 export const NATIVE_TOKEN_ADDRESS: AddressType =
   '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' as AddressType
 
-// Currency addresses for creator coins
-export const ETH_ADDRESS: AddressType = '0x0000000000000000000000000000000000000000'
-export const ZORA_ADDRESS: AddressType = '0x1111111111166b7fe7bd91427724b487980afc69'
-export const TEST0_ADDRESS: AddressType = '0x0b0fdb7a0615726edc4f4436fbca96d36e0b87a6'
-export const TEST1_ADDRESS: AddressType = '0x00a7835d5a28f7fff70560d334ace7b2e5bfe3bf'
-
 // Builder Treasury addresses by chain (used as referral address)
 export const BUILDER_TREASURY_ADDRESS = {
   [CHAIN_ID.BASE]: '0xcF325a4C78912216249B818521b0798A0f904C10' as AddressType,
   [CHAIN_ID.BASE_SEPOLIA]: '0xc89e4075D630351355b8c0fEe452B414b77582Df' as AddressType,
+}
+
+export const BUILDER_TOKEN_ADDRESS = {
+  [CHAIN_ID.BASE]: '0xe8af882f2f5c79580230710ac0e2344070099432' as AddressType,
+  [CHAIN_ID.BASE_SEPOLIA]: '0x7abbff2931822011c86759e55a3eb0142af08688' as AddressType,
+}
+
+export const UNISWAP_STATE_VIEW_ADDRESS = {
+  [CHAIN_ID.BASE]: '0xa3c0c9b65bad0b08107aa264b0f3db444b867a71' as AddressType,
+  [CHAIN_ID.BASE_SEPOLIA]: '0x571291b572ed32ce6751a2cb2486ebee8defb9b4' as AddressType,
 }

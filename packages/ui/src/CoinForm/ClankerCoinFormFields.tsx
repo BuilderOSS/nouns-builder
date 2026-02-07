@@ -1,4 +1,4 @@
-import { FEE_CONFIG_OPTIONS, POOL_POSITION_OPTIONS } from '@buildeross/utils'
+import { FEE_CONFIG_OPTIONS } from '@buildeross/utils'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -17,7 +17,6 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
   formik,
   showMediaUpload = false,
   showProperties = false,
-  chainId,
   showCurrencyInput = true,
   currencyOptions,
 }) => {
@@ -31,7 +30,6 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
         showMediaUpload={showMediaUpload}
         showProperties={showProperties}
         showTargetFdv={true}
-        chainId={chainId}
         showCurrencyInput={showCurrencyInput}
         currencyOptions={currencyOptions}
       />
@@ -41,39 +39,6 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
         <Text as="h3" variant="heading-sm" mb="x4">
           Pool Configuration
         </Text>
-
-        {/* Pool Configuration Dropdown */}
-        <Box mb="x6">
-          <Text as="label" htmlFor="poolConfig" variant="label-md" mb="x2">
-            Pool Type
-          </Text>
-          <Text variant="paragraph-sm" color="text3" mb="x2">
-            Choose a preset pool configuration or customize based on market cap. Project
-            pools are optimized for long-term projects.
-          </Text>
-          <Box
-            as="select"
-            id="poolConfig"
-            value={formik.values.poolConfig || POOL_POSITION_OPTIONS[0].value}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              formik.setFieldValue('poolConfig', e.target.value)
-            }}
-            style={{
-              width: '100%',
-              padding: '12px',
-              border: '1px solid #e5e5e5',
-              borderRadius: '8px',
-              fontSize: '16px',
-              backgroundColor: 'white',
-            }}
-          >
-            {POOL_POSITION_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label} - {option.description}
-              </option>
-            ))}
-          </Box>
-        </Box>
 
         {/* Fee Configuration Dropdown */}
         <Box mb="x6">

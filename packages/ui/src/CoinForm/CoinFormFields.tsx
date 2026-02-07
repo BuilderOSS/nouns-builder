@@ -1,10 +1,3 @@
-import {
-  ETH_ADDRESS,
-  TEST0_ADDRESS,
-  TEST1_ADDRESS,
-  ZORA_ADDRESS,
-} from '@buildeross/constants'
-import { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -14,43 +7,17 @@ import TextInput from '../Fields/TextInput'
 import { SingleImageUpload } from '../SingleImageUpload/SingleImageUpload'
 import { SingleMediaUpload } from '../SingleMediaUpload/SingleMediaUpload'
 import { Toggle } from '../Toggle'
-import type { CoinFormFieldsProps, CurrencyOption } from './types'
-
-// Currency options based on chain
-const BASE_MAINNET_CHAIN_ID = CHAIN_ID.BASE
-const BASE_SEPOLIA_CHAIN_ID = CHAIN_ID.BASE_SEPOLIA
+import type { CoinFormFieldsProps } from './types'
 
 export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
   formik,
   showMediaUpload = false,
   showProperties = false,
   showTargetFdv = false,
-  chainId,
   showCurrencyInput = true,
-  currencyOptions: defaultCurrencyOptions,
+  currencyOptions,
 }) => {
   const [showAdvancedFdv, setShowAdvancedFdv] = React.useState(false)
-  // Determine available currency options based on chain
-  const isBaseSepolia = chainId === BASE_SEPOLIA_CHAIN_ID
-  const isBaseMainnet = chainId === BASE_MAINNET_CHAIN_ID
-
-  const currencyOptions: CurrencyOption[] = React.useMemo(() => {
-    if (defaultCurrencyOptions) {
-      return defaultCurrencyOptions
-    }
-    if (isBaseSepolia) {
-      return [{ value: ETH_ADDRESS, label: 'ETH' }]
-    }
-    if (isBaseMainnet) {
-      return [
-        { value: ETH_ADDRESS, label: 'ETH' },
-        { value: ZORA_ADDRESS, label: 'ZORA' },
-        { value: TEST0_ADDRESS, label: 'TEST0' },
-        { value: TEST1_ADDRESS, label: 'TEST1' },
-      ]
-    }
-    return [{ value: ETH_ADDRESS, label: 'ETH' }]
-  }, [isBaseSepolia, isBaseMainnet, defaultCurrencyOptions])
 
   // Handle media upload to store mime type
   const handleMediaUploadStart = React.useCallback(
@@ -123,63 +90,68 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
       />
 
       {/* Currency Selection */}
-      {showCurrencyInput && (
-        <Stack gap="x4">
-          <Box>
-            <Text as="label" htmlFor="currency" variant="label-md" mb="x2">
-              Base Currency
-            </Text>
-            <Text variant="paragraph-sm" color="text3" mb="x2">
-              Select the currency for the creator coin pool
-            </Text>
-            <Box
-              as="select"
-              id="currency"
-              value={formik.values.currency || ETH_ADDRESS}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                formik.setFieldValue('currency', e.target.value)
-              }}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #e5e5e5',
-                borderRadius: '8px',
-                fontSize: '16px',
-                backgroundColor: 'white',
-              }}
-            >
-              {currencyOptions.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                  disabled={option.disabled}
-                >
-                  {option.label}
-                </option>
-              ))}
-            </Box>
-          </Box>
-
-          {/* Custom Currency Address Input - show when "custom" is selected */}
-          {formik.values.currency === '0xcustom' && (
-            <Box>
-              <TextInput
-                id="customCurrency"
-                value={formik.values.customCurrency || ''}
-                onChange={formik.handleChange}
-                inputLabel="Custom Token Address"
-                placeholder="0x..."
-                helperText="Enter the ERC20 token contract address to use as base currency"
-                errorMessage={
-                  formik.touched.customCurrency && formik.errors.customCurrency
-                    ? formik.errors.customCurrency
-                    : undefined
-                }
-                formik={formik}
-              />
-            </Box>
+      {showCurrencyInput && currencyOptions.length > 0 && (
+        <Box>
+          <Text as="label" htmlFor="currency" variant="label-md" mb="x2">
+            Base Currency
+          </Text>
+          {currencyOptions.length === 1 ? (
+            // Single option: Show as read-only display
+            <>
+              <Text variant="paragraph-sm" color="text3" mb="x2">
+                Your content coin will be paired with this creator coin
+              </Text>
+              <Box
+                p="x4"
+                borderRadius="curved"
+                borderStyle="solid"
+                borderWidth="normal"
+                borderColor="border"
+                backgroundColor="background2"
+              >
+                <Text variant="paragraph-md" fontWeight="medium">
+                  {currencyOptions[0].label}
+                </Text>
+                <Text variant="paragraph-sm" color="text3" mt="x2">
+                  {currencyOptions[0].value}
+                </Text>
+              </Box>
+            </>
+          ) : (
+            // Multiple options: Show as dropdown
+            <>
+              <Text variant="paragraph-sm" color="text3" mb="x2">
+                Select the currency for the creator coin pool
+              </Text>
+              <Box
+                as="select"
+                id="currency"
+                value={formik.values.currency}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                  formik.setFieldValue('currency', e.target.value)
+                }}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #e5e5e5',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  backgroundColor: 'white',
+                }}
+              >
+                {currencyOptions.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                    disabled={option.disabled}
+                  >
+                    {option.label}
+                  </option>
+                ))}
+              </Box>
+            </>
           )}
-        </Stack>
+        </Box>
       )}
 
       {/* Image Upload */}

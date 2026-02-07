@@ -123,5 +123,25 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       }
       amount
     }
+
+    ... on ClankerTokenCreatedEvent {
+      clankerToken {
+        tokenAddress
+        tokenName
+        tokenSymbol
+        tokenImage
+        poolId
+      }
+    }
+
+    ... on ZoraCoinCreatedEvent {
+      zoraCoin {
+        coinAddress
+        name
+        symbol
+        uri
+        currency
+      }
+    }
   }
 }

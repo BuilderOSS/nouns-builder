@@ -6,6 +6,7 @@ import { FeedItemActions } from './Actions/FeedItemActions'
 import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
 import { AuctionCreatedItem } from './AuctionCreatedItem'
 import { AuctionSettledItem } from './AuctionSettledItem'
+import { ClankerTokenCreatedItem } from './ClankerTokenCreatedItem'
 import { feedItemCard, feedItemMeta, feedItemMetaRow } from './Feed.css'
 import { FeedItemActor } from './FeedItemActor'
 import { FeedItemChain } from './FeedItemChain'
@@ -14,6 +15,7 @@ import { ProposalCreatedItem } from './ProposalCreatedItem'
 import { ProposalExecutedItem } from './ProposalExecutedItem'
 import { ProposalUpdatedItem } from './ProposalUpdatedItem'
 import { ProposalVotedItem } from './ProposalVotedItem'
+import { ZoraCoinCreatedItem } from './ZoraCoinCreatedItem'
 
 export interface FeedItemProps {
   item: FeedItemType
@@ -73,6 +75,10 @@ export const FeedItem: React.FC<FeedItemProps> = ({
         return <AuctionBidPlacedItem item={item} />
       case 'AUCTION_SETTLED':
         return <AuctionSettledItem item={item} />
+      case 'CLANKER_TOKEN_CREATED':
+        return <ClankerTokenCreatedItem item={item} />
+      case 'ZORA_COIN_CREATED':
+        return <ZoraCoinCreatedItem item={item} />
       default:
         return <Text color="text3">Unknown feed item type</Text>
     }

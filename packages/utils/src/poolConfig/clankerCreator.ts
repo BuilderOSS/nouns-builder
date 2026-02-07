@@ -3,7 +3,7 @@ import { clamp, fdvToTick, snapToTickSpacing } from './shared'
 // Clanker Creator Coin constants
 export const DEFAULT_CLANKER_TARGET_FDV = 6_364_000 // Geometric center of $27K-$1.5B
 export const DEFAULT_CLANKER_TOTAL_SUPPLY = 100_000_000_000 // 100B tokens
-const DEFAULT_CLANKER_TICK_SPACING = 200
+export const DEFAULT_CLANKER_TICK_SPACING = 200
 
 // ---- Clanker-specific pool position generation ----
 

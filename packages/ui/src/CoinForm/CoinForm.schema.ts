@@ -46,14 +46,6 @@ export const coinFormSchema = yup.object({
       }
     ),
   currency: yup.string(),
-  customCurrency: yup
-    .string()
-    .test('is-address', 'Must be a valid Ethereum address', function (value) {
-      // Only validate if currency is set to "custom"
-      if (this.parent.currency !== 'custom') return true
-      if (!value) return this.createError({ message: 'Custom token address is required' })
-      return /^0x[a-fA-F0-9]{40}$/.test(value)
-    }),
   targetFdvUsd: yup
     .number()
     .transform((value, originalValue) => {

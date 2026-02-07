@@ -1,17 +1,5 @@
 import type { Address } from 'viem'
 
-// Clanker SDK types and constants based on the reference implementation
-
-/**
- * Pool position presets from Clanker SDK
- * These are standard configurations for different types of token launches
- */
-export enum POOL_POSITIONS {
-  Project = 'Project',
-  Creator = 'Creator',
-  // Add other presets as they become available in the SDK
-}
-
 /**
  * Fee configuration presets from Clanker SDK
  * These determine the fee structure for trading
@@ -48,11 +36,6 @@ export interface RewardRecipient {
 export interface DevBuyConfig {
   ethAmount: number // ETH amount to purchase on deployment
 }
-
-/**
- * Pool configuration options
- */
-export type ClankerPoolConfig = POOL_POSITIONS | 'Custom'
 
 /**
  * Helper function to generate symbol from name
@@ -109,27 +92,6 @@ export function createDefaultVaultConfig(): VaultConfig {
     vestingDuration: convertDaysToSeconds(30),
   }
 }
-
-/**
- * Pool configuration options for UI dropdown
- */
-export const POOL_POSITION_OPTIONS = [
-  {
-    value: POOL_POSITIONS.Project,
-    label: 'Project',
-    description: 'Optimized for long-term projects',
-  },
-  {
-    value: POOL_POSITIONS.Creator,
-    label: 'Creator',
-    description: 'Optimized for creator coins',
-  },
-  {
-    value: 'Custom',
-    label: 'Custom',
-    description: 'Custom configuration based on market cap',
-  },
-]
 
 /**
  * Fee configuration options for UI dropdown

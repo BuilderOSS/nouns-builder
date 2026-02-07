@@ -86,6 +86,7 @@ export default function CreatePostPage({
                 <CreateContentCoinForm
                   chainId={chainId}
                   treasury={treasuryAddress}
+                  collectionAddress={collectionAddress}
                   onFormChange={setPreviewData}
                 />
               </Box>

@@ -1,18 +1,10 @@
-import {
-  BUILDER_TREASURY_ADDRESS,
-  ETH_ADDRESS,
-  ZORA_ADDRESS,
-} from '@buildeross/constants'
-import {
-  getTokenPriceByAddress,
-  getTokenPriceFromMap,
-  useTokenPrices,
-} from '@buildeross/hooks'
+import { BUILDER_TREASURY_ADDRESS } from '@buildeross/constants'
+import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { CoinFormFields, coinFormSchema, type CoinFormValues } from '@buildeross/ui'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { createContentPoolConfigFromTargetFdv } from '@buildeross/utils'
+import { createContentPoolConfigWithClankerTokenAsCurrency } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
 import type { Uploader, UploadResult } from '@zoralabs/coins-sdk'
@@ -77,12 +69,14 @@ type CurrencyOption = {
 export interface CreateContentCoinFormProps {
   chainId: CHAIN_ID
   treasury: AddressType
+  collectionAddress: AddressType
   onFormChange?: (values: CoinFormValues) => void
 }
 
 export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   chainId,
   treasury,
+  collectionAddress,
   onFormChange,
 }) => {
   const router = useRouter()
@@ -98,44 +92,60 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     ? (coinFactoryAddress[chainId as keyof typeof coinFactoryAddress] as AddressType)
     : undefined
 
-  // Determine which currencies to fetch prices for based on chain
-  const currenciesToFetch = isChainSupported
-    ? chainId === CHAIN_ID.BASE_SEPOLIA
-      ? [ETH_ADDRESS as `0x${string}`] // Base Sepolia only supports ETH
-      : [ETH_ADDRESS as `0x${string}`, ZORA_ADDRESS as `0x${string}`] // Base mainnet supports ETH and ZORA
-    : undefined
+  // Fetch the latest ClankerToken for this DAO
+  const { data: clankerTokens } = useClankerTokens({
+    chainId,
+    collectionAddress,
+    enabled: isChainSupported,
+    first: 1, // Only fetch the latest token
+  })
 
-  // Fetch token prices for available currencies
-  const { prices: tokenPrices } = useTokenPrices(
-    isChainSupported ? chainId : undefined,
-    currenciesToFetch
+  // Get the latest ClankerToken (first item in array)
+  const latestClankerToken = React.useMemo(() => {
+    return clankerTokens && clankerTokens.length > 0 ? clankerTokens[0] : null
+  }, [clankerTokens])
+
+  // Fetch the ClankerToken price
+  const {
+    priceUsd: clankerTokenPriceUsd,
+    isLoading: clankerTokenPriceLoading,
+    error: clankerTokenPriceError,
+  } = useClankerTokenPrice({
+    clankerToken: latestClankerToken,
+    chainId,
+    enabled: isChainSupported && !!latestClankerToken,
+  })
+
+  // Define currency options with only the latest ClankerToken
+  const currencyOptions: CurrencyOption[] = React.useMemo(() => {
+    if (!latestClankerToken) {
+      return []
+    }
+
+    // Only show the latest ClankerToken as currency option
+    return [
+      {
+        value: latestClankerToken.tokenAddress as AddressType,
+        label: `${latestClankerToken.tokenSymbol} (${latestClankerToken.tokenName})`,
+      },
+    ]
+  }, [latestClankerToken])
+
+  // Initial values - automatically set currency if only one option
+  const initialValues: CoinFormValues = React.useMemo(
+    () => ({
+      name: '',
+      symbol: '',
+      description: '',
+      imageUrl: '',
+      mediaUrl: '',
+      mediaMimeType: '',
+      properties: {},
+      currency: currencyOptions[0]?.value,
+      targetFdvUsd: DEFAULT_TARGET_FDV_USD,
+    }),
+    [currencyOptions]
   )
-
-  // Define currency options with custom option
-  const currencyOptions: CurrencyOption[] =
-    chainId === CHAIN_ID.BASE_SEPOLIA
-      ? [
-          { value: ETH_ADDRESS, label: 'ETH' },
-          { value: '0xcustom', label: 'Custom Token Address' },
-        ]
-      : [
-          { value: ETH_ADDRESS, label: 'ETH' },
-          { value: ZORA_ADDRESS, label: 'ZORA' },
-          { value: '0xcustom', label: 'Custom Token Address' },
-        ]
-
-  // Initial values
-  const initialValues: CoinFormValues = {
-    name: '',
-    symbol: '',
-    description: '',
-    imageUrl: '',
-    mediaUrl: '',
-    mediaMimeType: '',
-    properties: {},
-    currency: ETH_ADDRESS,
-    targetFdvUsd: DEFAULT_TARGET_FDV_USD,
-  }
 
   const handleDeploy = useCallback(
     async (
@@ -235,35 +245,38 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       const uploader = new IPFSUploader()
       const { url: metadataUri } = await metadataBuilder.upload(uploader)
 
-      // 3. Get token price for the selected currency
-      // Use customCurrency if currency is "0xcustom", otherwise use the selected currency
-      const currency =
-        values.currency === '0xcustom' && values.customCurrency
-          ? (values.customCurrency as AddressType)
-          : ((values.currency || ETH_ADDRESS) as AddressType)
+      // 3. Get token price for the selected currency (ClankerToken address)
+      const currency = values.currency as AddressType
 
-      // Try to get price from fetched data first, fallback to placeholder
-      let quoteTokenUsd = getTokenPriceFromMap(tokenPrices, currency)
+      // Use the ClankerToken price
+      let quoteTokenUsd = clankerTokenPriceUsd
 
-      if (!quoteTokenUsd) {
-        // Fallback to placeholder prices
-        quoteTokenUsd = getTokenPriceByAddress(currency)
+      // Handle price loading or error
+      if (clankerTokenPriceLoading) {
+        setSubmitError('Still loading token price. Please wait...')
+        actions.setSubmitting(false)
+        setIsDeploying(false)
+        return
       }
 
-      // For custom tokens or test tokens, use a default price if none available
-      if (!quoteTokenUsd) {
-        const warningMessage = `No price data available for token ${currency}. Using $1 as default price for market cap calculations. This is normal for custom or test tokens.`
+      if (clankerTokenPriceError) {
+        const warningMessage = `Error fetching token price: ${clankerTokenPriceError.message}. Using $1 as default price for market cap calculations.`
         console.warn(warningMessage)
         setPriceWarning(warningMessage)
-        // Use $1 as default price for custom/test tokens
+        quoteTokenUsd = 1
+      }
+
+      if (!quoteTokenUsd) {
+        const warningMessage = `No price data available for token ${currency}. Using $1 as default price for market cap calculations.`
+        console.warn(warningMessage)
+        setPriceWarning(warningMessage)
         quoteTokenUsd = 1
       }
 
       // 4. Create pool config using the utility with form values
-      const poolConfig = createContentPoolConfigFromTargetFdv({
+      const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
         currency,
         quoteTokenUsd,
-        targetFdvUsd: values.targetFdvUsd || DEFAULT_TARGET_FDV_USD,
       })
 
       // 5. Encode pool config using Zora's function
@@ -333,6 +346,33 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     )
   }
 
+  // If no ClankerToken exists, show warning and don't render form
+  if (!latestClankerToken) {
+    return (
+      <Box w="100%">
+        <Box
+          p="x6"
+          borderRadius="curved"
+          borderStyle="solid"
+          borderWidth="normal"
+          borderColor="warning"
+          backgroundColor="background2"
+        >
+          <Stack gap="x2">
+            <Text fontSize="16" fontWeight="label">
+              No Creator Coin Found
+            </Text>
+            <Text fontSize="14" color="text3">
+              This DAO needs to create a Creator Coin before publishing posts. Creator
+              Coins are used as the base currency for content posts. Please create a
+              Creator Coin proposal first.
+            </Text>
+          </Stack>
+        </Box>
+      </Box>
+    )
+  }
+
   return (
     <Box w="100%">
       <Formik
@@ -362,9 +402,9 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                   showMediaUpload={true}
                   showProperties={true}
                   initialValues={initialValues}
-                  chainId={chainId}
                   showCurrencyInput={true}
                   currencyOptions={currencyOptions}
+                  showTargetFdv={false}
                 />
 
                 {priceWarning && (

@@ -54,4 +54,6 @@ export const SWR_KEYS = {
   SABLIER_LOCKUP_ADDRESS: 'sablier-lockup-address',
   SABLIER_STREAM_IDS: 'sablier-stream-ids',
   SABLIER_LIVE_STREAMS: 'sablier-live-streams',
+  CLANKER_TOKENS: 'clanker-tokens',
+  ZORA_COINS: 'zora-coins',
 } as const

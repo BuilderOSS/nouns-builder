@@ -1,0 +1,10 @@
+#import "../fragments/ClankerToken.graphql"
+
+query daoClankerTokens($daoId: ID!, $first: Int = 10, $orderBy: ClankerToken_orderBy = createdAt, $orderDirection: OrderDirection = desc) {
+  dao(id: $daoId) {
+    id
+    clankerTokens(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
+      ...ClankerToken
+    }
+  }
+}

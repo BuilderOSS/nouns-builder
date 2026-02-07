@@ -158,6 +158,30 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
       }
     }
 
+    case 'ClankerTokenCreatedEvent': {
+      return {
+        ...baseItem,
+        type: 'CLANKER_TOKEN_CREATED',
+        tokenAddress: event.clankerToken.tokenAddress,
+        tokenName: event.clankerToken.tokenName,
+        tokenSymbol: event.clankerToken.tokenSymbol,
+        tokenImage: event.clankerToken.tokenImage,
+        poolId: event.clankerToken.poolId,
+      }
+    }
+
+    case 'ZoraCoinCreatedEvent': {
+      return {
+        ...baseItem,
+        type: 'ZORA_COIN_CREATED',
+        coinAddress: event.zoraCoin.coinAddress,
+        coinName: event.zoraCoin.name,
+        coinSymbol: event.zoraCoin.symbol,
+        coinUri: event.zoraCoin.uri,
+        currency: event.zoraCoin.currency,
+      }
+    }
+
     default: {
       const _exhaustive: never = event
       throw new Error(`Unknown event type: ${(_exhaustive as any).__typename}`)

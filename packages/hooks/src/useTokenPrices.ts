@@ -1,9 +1,3 @@
-import {
-  ETH_ADDRESS,
-  TEST0_ADDRESS,
-  TEST1_ADDRESS,
-  ZORA_ADDRESS,
-} from '@buildeross/constants/addresses'
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import type { CHAIN_ID } from '@buildeross/types'
@@ -99,33 +93,4 @@ export const getTokenPriceFromMap = (
 ): number | null => {
   if (!prices) return null
   return prices[address.toLowerCase()] ?? null
-}
-
-/**
- * Placeholder function for getting token price by address
- * Used for backwards compatibility and SSR contexts
- *
- * @param address - The token address
- * @returns Placeholder price or null
- */
-export const getTokenPriceByAddress = (address: string): number | null => {
-  const lowerAddress = address.toLowerCase()
-
-  if (lowerAddress === ETH_ADDRESS.toLowerCase()) {
-    return 3000 // $3,000 per ETH (placeholder)
-  }
-
-  if (lowerAddress === ZORA_ADDRESS.toLowerCase()) {
-    return 0.05 // $0.050 per ZORA (placeholder)
-  }
-
-  if (lowerAddress === TEST0_ADDRESS.toLowerCase()) {
-    return 0.00001 // $0.00001 per TEST0 (placeholder)
-  }
-
-  if (lowerAddress === TEST1_ADDRESS.toLowerCase()) {
-    return 0.0000005 // $0.0000005 per TEST1 (placeholder)
-  }
-
-  return null
 }
