@@ -27,10 +27,10 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       proposal {
         proposalId
         proposalNumber
+        timeCreated
         title
         description
         proposer
-        timeCreated
       }
     }
 
@@ -38,6 +38,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       proposal {
         proposalId
         proposalNumber
+        timeCreated
         title
         description
         proposer
@@ -53,6 +54,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       proposal {
         proposalId
         proposalNumber
+        timeCreated
         title
         description
         proposer
@@ -68,6 +70,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       proposal {
         proposalId
         proposalNumber
+        timeCreated
         title
         description
         proposer
@@ -90,8 +93,11 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
     ... on AuctionBidPlacedEvent {
       auction {
         id
+        startTime
+        endTime
         token {
           tokenId
+          owner
           name
           image
         }
@@ -106,6 +112,8 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
     ... on AuctionSettledEvent {
       auction {
         id
+        startTime
+        endTime
         token {
           tokenId
           owner
