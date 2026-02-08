@@ -1,9 +1,7 @@
 import { CHAIN_ID } from './chain'
 import { AddressType } from './hex'
 
-export type LinkOptions =
-  | { href: string; onClick?: never }
-  | { onClick: () => void; href?: never }
+export type LinkOptions = { href: string }
 
 export type DaoLinkHandler = (
   chainId: CHAIN_ID,

@@ -47,16 +47,23 @@ export const StreamFormSchema = yup.object({
       const num = parseFloat(value)
       return !isNaN(num) && num > 0
     }),
-  durationDays: yup.number().optional(),
+  durationDays: yup
+    .number()
+    .optional()
+    .test(
+      'is-positive-integer',
+      'Duration must be a positive whole number',
+      (value) => value === undefined || (Number.isInteger(value) && value > 0)
+    ),
   startDate: yup.date().optional(),
   endDate: yup.date().optional(),
   cliffDays: yup
     .number()
     .optional()
     .test(
-      'is-non-negative',
-      'Cliff period cannot be negative',
-      (value) => value === undefined || value >= 0
+      'is-non-negative-integer',
+      'Cliff period must be a non-negative whole number',
+      (value) => value === undefined || (Number.isInteger(value) && value >= 0)
     ),
 })
 

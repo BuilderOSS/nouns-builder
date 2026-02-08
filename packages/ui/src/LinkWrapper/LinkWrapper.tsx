@@ -1,4 +1,3 @@
-import { LinkOptions } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React from 'react'
 
@@ -6,8 +5,18 @@ import { useLinkComponent } from '../LinkComponentProvider'
 
 type FlexProps = React.ComponentProps<typeof Flex>
 
+type LinkWrapperOptions =
+  | {
+      href: string
+      onClick?: never
+    }
+  | {
+      onClick: () => void
+      href?: never
+    }
+
 export type LinkWrapperProps = FlexProps & {
-  link?: LinkOptions
+  link?: LinkWrapperOptions
   enabled?: boolean
   children: React.ReactNode
 }

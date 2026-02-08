@@ -41,6 +41,7 @@
     "changeset": "changeset",
     "ci": "turbo run lint test",
     "clean": "rm -rf .turbo && turbo run clean",
+    "clean:all": "pnpm clean && find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +",
     "dev": "turbo run dev",
     "eslint": "eslint --fix . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
