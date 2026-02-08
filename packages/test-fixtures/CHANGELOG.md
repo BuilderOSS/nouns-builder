@@ -1,5 +1,14 @@
 # @buildeross/test-fixtures
 
+## 0.2.2
+
+### Patch Changes
+
+- Sablier streams support, revamped Send Tokens (CSV + unified flow), fully redesigned Dashboard Feed with filters + actions, improved DAO search, playground upgrades, new proposal types, and tons of UX, performance & subgraph fixes.
+- Updated dependencies
+  - @buildeross/stores@0.2.2
+  - @buildeross/types@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes
