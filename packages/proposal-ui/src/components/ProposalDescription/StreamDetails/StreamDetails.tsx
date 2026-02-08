@@ -3,7 +3,7 @@ import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { type StreamBatchData, useStreamData } from '@buildeross/hooks/useStreamData'
-import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
+import { useTokenMetadata } from '@buildeross/hooks/useTokenMetadata'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
@@ -34,6 +34,8 @@ interface StreamDetailsProps {
 
 export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsProps) => {
   const { chain } = useChainStore()
+  const { addresses } = useDaoStore()
+  const { address } = useAccount()
 
   const {
     streamBatches,
@@ -49,19 +51,53 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
   const [withdrawingStreamId, setWithdrawingStreamId] = useState<bigint | null>(null)
   const [cancelingStreamId, setCancelingStreamId] = useState<bigint | null>(null)
 
+  // Check if all senders are the same across all streams in all batches
+  const { allSendersSame, commonSender } = useMemo(() => {
+    if (streamBatches.length === 0) return { allSendersSame: true, commonSender: null }
+
+    const senders: Address[] = []
+
+    streamBatches.forEach((batch) => {
+      if (!batch.streamData?.streams) return
+
+      batch.streamData.streams.forEach((stream, streamIdx) => {
+        const liveData = batch.liveStreams?.[streamIdx]
+        const sender = liveData?.sender || stream?.sender
+        if (sender) senders.push(sender)
+      })
+    })
+
+    if (senders.length === 0) return { allSendersSame: true, commonSender: null }
+
+    const first = senders[0]
+    const allSame = senders.every((s) => isAddressEqual(s, first))
+
+    return { allSendersSame: allSame, commonSender: allSame ? first : null }
+  }, [streamBatches])
+
+  const { displayName: commonSenderDisplayName } = useEnsData(commonSender ?? undefined)
+
+  const { isGnosisSafe: isCommonSenderAGnosisSafe } = useIsGnosisSafe(
+    commonSender ?? undefined,
+    chain.id
+  )
+
+  const isCommonSenderTreasury =
+    commonSender && addresses.treasury && isAddressEqual(commonSender, addresses.treasury)
+
+  const isCommonSenderConnected =
+    commonSender && address && isAddressEqual(commonSender, address)
+
   if (!isCreateTx) return null
 
   return (
     <Section title="Sablier Streams">
       {isLoading && <Spinner size="md" />}
 
-      {!isLoading &&
-        streamBatches.map((batch: StreamBatchData, batchIndex: number) => (
-          <StreamBatch
-            key={batchIndex}
-            batch={batch}
-            batchIndex={batchIndex}
-            totalBatches={streamBatches.length}
+      {!isLoading && (
+        <>
+          <FlattenedStreams
+            streamBatches={streamBatches}
             lockupAddress={lockupAddress}
             withdrawingStreamId={withdrawingStreamId}
             setWithdrawingStreamId={setWithdrawingStreamId}
@@ -70,16 +106,69 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
             onOpenProposalReview={onOpenProposalReview}
             proposal={proposal}
             refetchLiveData={refetchLiveData}
+            showIndividualSenders={!allSendersSame}
           />
-        ))}
+          {allSendersSame && !!commonSender && !isCommonSenderTreasury && (
+            <>
+              <Stack direction="row" align="center" mt="x4">
+                <Text variant="label-sm" color="primary" mr="x2">
+                  Stream Delegated to
+                </Text>
+                <Box
+                  color={'secondary'}
+                  className={atoms({ textDecoration: 'underline' })}
+                >
+                  <a
+                    href={
+                      isCommonSenderAGnosisSafe
+                        ? createSafeUrl(chain.id, commonSender)
+                        : `${ETHERSCAN_BASE_URL[chain.id]}/address/${commonSender}`
+                    }
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    <Text variant="label-sm">
+                      {commonSenderDisplayName || commonSender}
+                    </Text>
+                  </a>
+                </Box>
+              </Stack>
+              {isCommonSenderAGnosisSafe &&
+                !isCommonSenderConnected &&
+                !isCommonSenderTreasury && (
+                  <Stack
+                    direction="column"
+                    fontWeight={'heading'}
+                    mt="x2"
+                    ml="x4"
+                    gap="x2"
+                  >
+                    <a
+                      href={createSafeAppUrl(
+                        chain.id,
+                        commonSender,
+                        window.location.href
+                      )}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <Button variant="secondary" size="sm">
+                        View Proposal As Safe App
+                        <Icon id="arrowTopRight" />
+                      </Button>
+                    </a>
+                  </Stack>
+                )}
+            </>
+          )}
+        </>
+      )}
     </Section>
   )
 }
 
-interface StreamBatchProps {
-  batch: StreamBatchData
-  batchIndex: number
-  totalBatches: number
+interface FlattenedStreamsProps {
+  streamBatches: StreamBatchData[]
   lockupAddress: Address | null
   withdrawingStreamId: bigint | null
   setWithdrawingStreamId: (id: bigint | null) => void
@@ -88,12 +177,11 @@ interface StreamBatchProps {
   onOpenProposalReview: () => Promise<void>
   proposal: Proposal
   refetchLiveData: () => Promise<unknown>
+  showIndividualSenders: boolean
 }
 
-const StreamBatch = ({
-  batch,
-  batchIndex,
-  totalBatches,
+const FlattenedStreams = ({
+  streamBatches,
   lockupAddress,
   withdrawingStreamId,
   setWithdrawingStreamId,
@@ -102,120 +190,111 @@ const StreamBatch = ({
   onOpenProposalReview,
   proposal,
   refetchLiveData,
-}: StreamBatchProps) => {
+  showIndividualSenders,
+}: FlattenedStreamsProps) => {
   const { chain } = useChainStore()
-  const { addresses } = useDaoStore()
-  const { address } = useAccount()
 
-  const { streamData, streamIds, liveStreams } = batch
+  const isExecuted = !!proposal.executionTransactionHash
 
-  const { tokenMetadata } = useTokenMetadataSingle(chain.id, streamData?.tokenAddress)
+  // Flatten all streams from all batches into a single array
+  const flattenedStreams = useMemo(() => {
+    const streams: Array<{
+      stream: any
+      liveData: any
+      streamId: bigint | null
+      tokenAddress: Address | null
+      isDurationsMode: boolean
+      senderAddress: Address | null
+    }> = []
 
-  const isExecuted =
-    !!proposal.executionTransactionHash && !!streamIds && streamIds.length > 0
+    streamBatches.forEach((batch) => {
+      if (!batch.streamData?.streams) return
 
-  // Get sender from first stream (all streams in a batch have the same sender)
-  const senderAddress = useMemo(() => {
-    if (!streamData?.streams || streamData.streams.length === 0) return null
+      batch.streamData.streams.forEach((stream, streamIdx) => {
+        const liveData =
+          isExecuted && batch.liveStreams ? batch.liveStreams[streamIdx] : null
+        const streamId = isExecuted && batch.streamIds ? batch.streamIds[streamIdx] : null
 
-    // Try to get sender from live data first, then fall back to stream config
-    const firstLiveData = isExecuted && liveStreams ? liveStreams[0] : null
-    return firstLiveData?.sender || streamData.streams[0]?.sender || null
-  }, [streamData, liveStreams, isExecuted])
+        // Get sender for this specific stream
+        const senderAddress = liveData?.sender || stream?.sender || null
 
-  const { displayName: senderDisplayName } = useEnsData(senderAddress ?? undefined)
+        streams.push({
+          stream,
+          liveData,
+          streamId,
+          tokenAddress: batch.streamData.tokenAddress,
+          isDurationsMode: batch.streamData.isDurationsMode,
+          senderAddress,
+        })
+      })
+    })
 
-  const { isGnosisSafe: isSenderAGnosisSafe } = useIsGnosisSafe(
-    senderAddress ?? undefined,
-    chain.id
+    return streams
+  }, [streamBatches, isExecuted])
+
+  // Fetch token metadata for all unique token addresses
+  const uniqueTokenAddresses = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          flattenedStreams.map((s) => s.tokenAddress).filter((t): t is Address => !!t)
+        )
+      ),
+    [flattenedStreams]
   )
 
-  const isSenderTreasury =
-    senderAddress &&
-    addresses.treasury &&
-    isAddressEqual(senderAddress, addresses.treasury)
+  // Fetch metadata for all unique tokens in a single call
+  const { metadata: tokenMetadataArray } = useTokenMetadata(
+    chain.id,
+    uniqueTokenAddresses
+  )
 
-  const isSenderConnected =
-    senderAddress && address && isAddressEqual(senderAddress, address)
+  // Map token metadata to streams
+  const streamsWithMetadata = useMemo(
+    () =>
+      flattenedStreams.map((streamData) => {
+        // Find the corresponding token metadata by matching addresses
+        const tokenMeta = streamData.tokenAddress
+          ? tokenMetadataArray?.find(
+              (meta) =>
+                meta.address &&
+                isAddressEqual(
+                  meta.address as Address,
+                  streamData.tokenAddress as Address
+                )
+            )
+          : undefined
 
-  if (!streamData) {
-    return null
-  }
+        return {
+          ...streamData,
+          tokenMetadata: tokenMeta,
+        }
+      }),
+    [flattenedStreams, tokenMetadataArray]
+  )
 
   return (
-    <>
-      {totalBatches > 1 && (
-        <Box mb="x4">
-          <Text variant="heading-sm">Stream Batch #{batchIndex + 1}</Text>
-        </Box>
+    <Accordion
+      items={streamsWithMetadata.map((streamData, index) =>
+        CreateStreamItem({
+          stream: streamData.stream,
+          index,
+          isDurationsMode: streamData.isDurationsMode,
+          liveData: streamData.liveData,
+          streamId: streamData.streamId,
+          isExecuted,
+          tokenMetadata: streamData.tokenMetadata,
+          lockupAddress,
+          withdrawingStreamId,
+          setWithdrawingStreamId,
+          cancelingStreamId,
+          setCancelingStreamId,
+          onOpenProposalReview,
+          refetchLiveData,
+          senderAddress: streamData.senderAddress,
+          showIndividualSenders,
+        })
       )}
-
-      {streamData.streams && (
-        <Accordion
-          items={streamData.streams.map((stream: any, index: number) => {
-            const liveData = isExecuted && liveStreams ? liveStreams[index] : null
-            const streamId = isExecuted && streamIds ? streamIds[index] : null
-
-            // CreateStreamItem is a factory function that returns { title, description }
-            // for the Accordion component, not a traditional React component
-            return CreateStreamItem({
-              stream,
-              index,
-              isDurationsMode: streamData.isDurationsMode,
-              liveData,
-              streamId,
-              isExecuted,
-              tokenMetadata,
-              lockupAddress,
-              withdrawingStreamId,
-              setWithdrawingStreamId,
-              cancelingStreamId,
-              setCancelingStreamId,
-              onOpenProposalReview,
-              refetchLiveData,
-              isSenderAGnosisSafe,
-            })
-          })}
-        />
-      )}
-
-      {!!senderAddress && !isSenderTreasury && (
-        <Stack direction="row" align="center">
-          <Text variant="label-sm" color="primary" mr="x2">
-            Stream Delegated to
-          </Text>
-          <Box color={'secondary'} className={atoms({ textDecoration: 'underline' })}>
-            <a
-              href={
-                isSenderAGnosisSafe
-                  ? createSafeUrl(chain.id, senderAddress)
-                  : `${ETHERSCAN_BASE_URL[chain.id]}/address/${senderAddress}`
-              }
-              rel="noreferrer"
-              target="_blank"
-            >
-              <Text variant="label-sm">{senderDisplayName || senderAddress}</Text>
-            </a>
-          </Box>
-        </Stack>
-      )}
-      {!!senderAddress &&
-        isSenderAGnosisSafe &&
-        !isSenderConnected &&
-        !isSenderTreasury && (
-          <Stack direction="column" fontWeight={'heading'} mt="x2" ml="x4" gap="x2">
-            <a
-              href={createSafeAppUrl(chain.id, senderAddress, window.location.href)}
-              rel="noreferrer"
-              target="_blank"
-            >
-              <Button variant="secondary" size="sm">
-                View Proposal As Safe App
-                <Icon id="arrowTopRight" />
-              </Button>
-            </a>
-          </Stack>
-        )}
-    </>
+    />
   )
 }

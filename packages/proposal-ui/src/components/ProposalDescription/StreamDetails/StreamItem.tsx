@@ -1,5 +1,7 @@
-import { SAFE_APP_URL } from '@buildeross/constants/safe'
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, TokenMetadata, TransactionType } from '@buildeross/types'
@@ -30,6 +32,11 @@ const createSafeAppUrl = (chainId: CHAIN_ID, safeAddress: Address, appUrl: strin
   return `${safeUrl}:${safeAddress}&appUrl=${encodedUrl}`
 }
 
+const createSafeUrl = (chainId: CHAIN_ID, safeAddress: Address) => {
+  const safeUrl = SAFE_HOME_URL[chainId]
+  return `${safeUrl}:${safeAddress}`
+}
+
 interface StreamItemProps {
   stream: StreamConfigDurations | StreamConfigTimestamps
   index: number
@@ -45,7 +52,8 @@ interface StreamItemProps {
   setCancelingStreamId: (id: bigint | null) => void
   onOpenProposalReview: () => Promise<void>
   refetchLiveData: () => Promise<unknown>
-  isSenderAGnosisSafe: boolean
+  senderAddress: Address | null
+  showIndividualSenders: boolean
 }
 
 /**
@@ -72,7 +80,8 @@ export const CreateStreamItem = ({
   setCancelingStreamId,
   onOpenProposalReview,
   refetchLiveData,
-  isSenderAGnosisSafe,
+  senderAddress,
+  showIndividualSenders,
 }: StreamItemProps): { title: React.ReactElement; description: React.ReactElement } => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -88,6 +97,21 @@ export const CreateStreamItem = ({
   })
 
   const { displayName: recipientName } = useEnsData(stream.recipient)
+
+  // Sender info hooks (called at top level)
+  const { displayName: senderDisplayName } = useEnsData(senderAddress ?? undefined)
+  const { isGnosisSafe: isSenderAGnosisSafe } = useIsGnosisSafe(
+    senderAddress ?? undefined,
+    chain.id
+  )
+
+  const isSenderTreasury =
+    senderAddress &&
+    addresses.treasury &&
+    isAddressEqual(senderAddress, addresses.treasury)
+
+  const isSenderConnected =
+    senderAddress && address && isAddressEqual(senderAddress, address)
 
   const { startTime, cliffTime, endTime } = useMemo(
     () =>
@@ -109,15 +133,7 @@ export const CreateStreamItem = ({
 
   const isRecipient = address && isAddressEqual(stream.recipient, address)
 
-  const isSender =
-    address &&
-    (isAddressEqual(liveData?.sender ?? stream.sender, address) ||
-      isAddressEqual(stream.sender, address))
-
-  const isSenderTreasury =
-    addresses.treasury &&
-    (isAddressEqual(liveData?.sender ?? stream.sender, addresses.treasury) ||
-      isAddressEqual(stream.sender, addresses.treasury))
+  const isSender = address && senderAddress && isAddressEqual(senderAddress, address)
 
   const handleWithdraw = useCallback(async () => {
     if (!lockupAddress || !address || !liveData) return
@@ -257,6 +273,20 @@ export const CreateStreamItem = ({
           )}
           <Text variant="label-xs" color="tertiary">
             Duration: {formatStreamDuration(duration)}
+          </Text>
+        </Stack>
+        <Stack
+          direction="row"
+          align="center"
+          justify="space-between"
+          flexWrap="wrap"
+          gap="x2"
+        >
+          <Text variant="label-xs" color="tertiary">
+            Cancelable: {stream.cancelable ? 'Yes' : 'No'}
+          </Text>
+          <Text variant="label-xs" color="tertiary">
+            Transferable: {stream.transferable ? 'Yes' : 'No'}
           </Text>
         </Stack>
         {(!isDurationsMode || isExecuted) && (
@@ -493,6 +523,44 @@ export const CreateStreamItem = ({
               Stream will be created when proposal is executed
             </Text>
           </Stack>
+        )}
+
+        {/* Individual sender display - shown when senders differ across streams */}
+        {showIndividualSenders && senderAddress && !isSenderTreasury && (
+          <>
+            <Stack direction="row" align="center" mt="x4">
+              <Text variant="label-sm" color="primary" mr="x2">
+                Delegated to
+              </Text>
+              <Box color={'secondary'} className={atoms({ textDecoration: 'underline' })}>
+                <a
+                  href={
+                    isSenderAGnosisSafe
+                      ? createSafeUrl(chain.id, senderAddress)
+                      : `${ETHERSCAN_BASE_URL[chain.id]}/address/${senderAddress}`
+                  }
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <Text variant="label-sm">{senderDisplayName || senderAddress}</Text>
+                </a>
+              </Box>
+            </Stack>
+            {isSenderAGnosisSafe && !isSenderConnected && !isSenderTreasury && (
+              <Stack direction="column" fontWeight={'heading'} mt="x2" ml="x4" gap="x2">
+                <a
+                  href={createSafeAppUrl(chain.id, senderAddress, window.location.href)}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <Button variant="secondary" size="sm">
+                    View Proposal As Safe App
+                    <Icon id="arrowTopRight" />
+                  </Button>
+                </a>
+              </Stack>
+            )}
+          </>
         )}
       </Stack>
     ),

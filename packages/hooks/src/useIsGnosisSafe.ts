@@ -25,6 +25,7 @@ export const useIsGnosisSafe = (
   const { data, error, isLoading } = useReadContract({
     query: {
       enabled: !!address && !!chainId && isAddress(address),
+      staleTime: 60_000,
     },
     address: address,
     abi: GET_OWNERS_FUNCTION_ABI,

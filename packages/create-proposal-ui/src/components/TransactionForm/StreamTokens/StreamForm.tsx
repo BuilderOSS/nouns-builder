@@ -60,7 +60,8 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
             id={`streams.${index}.durationDays`}
             type={FIELD_TYPES.NUMBER}
             placeholder={'30'}
-            min={0}
+            min={1}
+            step={1}
             errorMessage={
               formik.touched.streams?.[index]?.durationDays
                 ? getFieldError('durationDays')
@@ -71,11 +72,12 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
 
           <SmartInput
             {...formik.getFieldProps(`streams.${index}.cliffDays`)}
-            inputLabel="Cliff Period (in days, optional)"
+            inputLabel="Cliff Period (optional, in days)"
             id={`streams.${index}.cliffDays`}
             type={FIELD_TYPES.NUMBER}
             placeholder={'0'}
             min={0}
+            step={1}
             errorMessage={
               formik.touched.streams?.[index]?.cliffDays
                 ? getFieldError('cliffDays')
@@ -129,11 +131,12 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
 
           <SmartInput
             {...formik.getFieldProps(`streams.${index}.cliffDays`)}
-            inputLabel="Cliff Period (in days, optional)"
+            inputLabel="Cliff Period (optional, in days)"
             id={`streams.${index}.cliffDays`}
             type={FIELD_TYPES.NUMBER}
             placeholder={'0'}
             min={0}
+            step={1}
             errorMessage={
               formik.touched.streams?.[index]?.cliffDays
                 ? getFieldError('cliffDays')
