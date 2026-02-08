@@ -23,6 +23,7 @@ interface ProposalActionsProps {
   proposalId: BytesType
   proposalNumber: string
   proposalTitle: string
+  proposalTimeCreated: string
   addresses: RequiredDaoContractAddresses
   isExecuted?: boolean
   updateItem?: ProposalUpdatePostedFeedItem
@@ -34,6 +35,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   proposalId,
   proposalNumber,
   proposalTitle,
+  proposalTimeCreated,
   isExecuted,
   updateItem,
 }) => {
@@ -139,6 +141,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         onClose={() => setShowVoteModal(false)}
         proposalId={proposalId}
         proposalTitle={proposalTitle}
+        proposalTimeCreated={proposalTimeCreated}
         chainId={chainId}
         addresses={addresses}
       />

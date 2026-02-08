@@ -5041,9 +5041,12 @@ export type FeedEventsQuery = {
         auction: {
           __typename?: 'Auction'
           id: string
+          startTime: any
+          endTime: any
           token: {
             __typename?: 'Token'
             tokenId: any
+            owner: any
             name: string
             image?: string | null
           }
@@ -5105,6 +5108,8 @@ export type FeedEventsQuery = {
         auction: {
           __typename?: 'Auction'
           id: string
+          startTime: any
+          endTime: any
           token: {
             __typename?: 'Token'
             tokenId: any
@@ -5137,10 +5142,10 @@ export type FeedEventsQuery = {
           __typename?: 'Proposal'
           proposalId: any
           proposalNumber: number
+          timeCreated: any
           title?: string | null
           description?: string | null
           proposer: any
-          timeCreated: any
         }
         dao: {
           __typename?: 'DAO'
@@ -5166,6 +5171,7 @@ export type FeedEventsQuery = {
           __typename?: 'Proposal'
           proposalId: any
           proposalNumber: number
+          timeCreated: any
           title?: string | null
           description?: string | null
           proposer: any
@@ -5194,6 +5200,7 @@ export type FeedEventsQuery = {
           __typename?: 'Proposal'
           proposalId: any
           proposalNumber: number
+          timeCreated: any
           title?: string | null
           description?: string | null
           proposer: any
@@ -5228,6 +5235,7 @@ export type FeedEventsQuery = {
           __typename?: 'Proposal'
           proposalId: any
           proposalNumber: number
+          timeCreated: any
           title?: string | null
           description?: string | null
           proposer: any
@@ -6081,16 +6089,17 @@ export const FeedEventsDocument = gql`
         proposal {
           proposalId
           proposalNumber
+          timeCreated
           title
           description
           proposer
-          timeCreated
         }
       }
       ... on ProposalVotedEvent {
         proposal {
           proposalId
           proposalNumber
+          timeCreated
           title
           description
           proposer
@@ -6105,6 +6114,7 @@ export const FeedEventsDocument = gql`
         proposal {
           proposalId
           proposalNumber
+          timeCreated
           title
           description
           proposer
@@ -6119,6 +6129,7 @@ export const FeedEventsDocument = gql`
         proposal {
           proposalId
           proposalNumber
+          timeCreated
           title
           description
           proposer
@@ -6139,8 +6150,11 @@ export const FeedEventsDocument = gql`
       ... on AuctionBidPlacedEvent {
         auction {
           id
+          startTime
+          endTime
           token {
             tokenId
+            owner
             name
             image
           }
@@ -6154,6 +6168,8 @@ export const FeedEventsDocument = gql`
       ... on AuctionSettledEvent {
         auction {
           id
+          startTime
+          endTime
           token {
             tokenId
             owner
