@@ -10,12 +10,13 @@ import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores
 import { Transaction, TransactionType } from '@buildeross/types'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { Box, Button } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
-import { encodeFunctionData, getAddress, Hex, zeroHash } from 'viem'
+import { encodeFunctionData, getAddress, Hex, isAddress, zeroHash } from 'viem'
 import * as yup from 'yup'
 
 interface EscrowDelegateFormValues {
@@ -38,6 +39,10 @@ const escrowDelegateFormSchema = (_escrowDelegate: string | undefined) =>
           return false
         }
         const valueAsAddress = await getEnsAddress(value)
+        // Validate that the resolved value is actually a valid address
+        if (!valueAsAddress || !isAddress(valueAsAddress, { strict: false })) {
+          return false
+        }
         return valueAsAddress?.toLowerCase() !== _escrowDelegate?.toLowerCase()
       }
     ),
@@ -62,6 +67,11 @@ export const NominateEscrowDelegate = () => {
         return
       }
       const newEscrowDelegate = await getEnsAddress(values.escrowDelegate)
+      // Validate that the resolved value is actually a valid address
+      if (!newEscrowDelegate || !isAddress(newEscrowDelegate, { strict: false })) {
+        console.error('Failed to resolve valid escrow delegate address')
+        return
+      }
       const encodedData = schemaEncoder.encodeData([
         { name: 'daoMultiSig', type: 'address', value: newEscrowDelegate },
       ]) as Hex
@@ -90,9 +100,13 @@ export const NominateEscrowDelegate = () => {
         value: '',
       }
 
+      const displayName = isAddress(values.escrowDelegate, { strict: false })
+        ? walletSnippet(values.escrowDelegate)
+        : values.escrowDelegate
+
       addTransaction({
-        type: TransactionType.ESCROW_DELEGATE,
-        summary: 'Nominate Escrow Delegate',
+        type: TransactionType.NOMINATE_DELEGATE,
+        summary: `Nominate ${displayName} as the delegate`,
         transactions: [attest],
       })
     },
@@ -118,7 +132,7 @@ export const NominateEscrowDelegate = () => {
               formik={formik}
               {...formik.getFieldProps('escrowDelegate')}
               id="escrowDelegate"
-              inputLabel={'Escrow Delegate'}
+              inputLabel={'Delegate'}
               placeholder={'0x... or .eth'}
               isAddress={true}
               errorMessage={
@@ -126,7 +140,7 @@ export const NominateEscrowDelegate = () => {
                   ? formik.errors.escrowDelegate
                   : undefined
               }
-              helperText={`This wallet will control the escrow and release funds.`}
+              helperText={`This wallet will have delegated permissions to control escrows and token streams on behalf of the DAO.`}
             />
             <Button
               variant={'outline'}

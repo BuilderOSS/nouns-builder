@@ -8,7 +8,7 @@ import {
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Button, Flex, Stack } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { encodeFunctionData } from 'viem'
+import { encodeFunctionData, isAddress } from 'viem'
 
 import { useCustomTransactionStore } from '../../../../../stores/useCustomTransactionStore'
 import {
@@ -101,6 +101,12 @@ export const Summary: React.FC<SummaryProps> = ({ setIsOpen }) => {
     setIsSubmitting(true)
     try {
       const address = await getEnsAddress(customTransaction.address)
+      // Validate that the resolved value is actually a valid address
+      if (!address || !isAddress(address, { strict: false })) {
+        console.error('Failed to resolve valid transaction address')
+        setIsSubmitting(false)
+        return
+      }
       if (!calldata) {
         if (customTransaction.address && customTransaction.value) {
           composeCustomTransaction({

@@ -483,6 +483,11 @@ export const SendNft = () => {
         values.recipientAddress,
         getProvider(chainToQuery)
       )
+      // Validate that the resolved value is actually a valid address
+      if (!recipient || !isAddress(recipient, { strict: false })) {
+        console.error('Failed to resolve valid recipient address')
+        return
+      }
       const contractAddress = getAddress(values.contractAddress)
       const tokenId = BigInt(values.tokenId)
 

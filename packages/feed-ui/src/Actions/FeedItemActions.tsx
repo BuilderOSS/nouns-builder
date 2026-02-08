@@ -40,6 +40,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           proposalId={item.proposalId}
           proposalNumber={item.proposalNumber}
           proposalTitle={item.proposalTitle}
+          proposalTimeCreated={item.proposalTimeCreated}
           isExecuted={false}
           addresses={item.addresses}
         />
@@ -52,6 +53,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           proposalId={item.proposalId}
           proposalNumber={item.proposalNumber}
           proposalTitle={item.proposalTitle}
+          proposalTimeCreated={item.proposalTimeCreated}
           isExecuted={false}
           updateItem={item}
           addresses={item.addresses}
@@ -65,6 +67,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           proposalId={item.proposalId}
           proposalNumber={item.proposalNumber}
           proposalTitle={item.proposalTitle}
+          proposalTimeCreated={item.proposalTimeCreated}
           addresses={item.addresses}
           isExecuted={true}
         />

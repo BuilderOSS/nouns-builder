@@ -19,7 +19,7 @@ interface FrameContextType {
 
 const FrameContext = React.createContext<FrameContextType | undefined>(undefined)
 
-export function useFrame() {
+function useFrameInternal() {
   const [isSDKLoaded, setIsSDKLoaded] = useState(false)
   const [context, setContext] = useState<Context.FrameContext>()
   const [added, setAdded] = useState(false)
@@ -58,7 +58,7 @@ export function useFrame() {
       }
       setAddFrameResult(
         result.notificationDetails
-          ? `Added, got notificaton token ${result.notificationDetails.token} and url ${result.notificationDetails.url}`
+          ? `Added, got notification token ${result.notificationDetails.token} and url ${result.notificationDetails.url}`
           : 'Added, got no notification details'
       )
     } catch (error) {
@@ -115,11 +115,10 @@ export function useFrame() {
     }
 
     if (sdk && !isSDKLoaded) {
-      setIsSDKLoaded(true)
       load()
-      return () => {
-        sdk.removeAllListeners()
-      }
+    }
+    return () => {
+      sdk?.removeAllListeners()
     }
   }, [isSDKLoaded])
 
@@ -137,7 +136,7 @@ export function useFrame() {
 }
 
 export function FrameProvider({ children }: { children: React.ReactNode }) {
-  const frameContext = useFrame()
+  const frameContext = useFrameInternal()
 
   return <FrameContext.Provider value={frameContext}>{children}</FrameContext.Provider>
 }

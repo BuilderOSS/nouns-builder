@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/blocklist",
   "description": "OFAC sanctions blocklist utilities for BuilderOSS apps",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
@@ -29,7 +29,7 @@
   "peerDependencies": {
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
-    "viem": "^2.38.2"
+    "viem": "^2.44.2"
   },
   "publishConfig": {
     "access": "public"

@@ -52,6 +52,7 @@ export type ProposalCreatedFeedItem = BaseFeedItem & {
   proposalNumber: string
   proposalTitle: string
   proposalDescription: string
+  proposalTimeCreated: string
   proposer: AddressType
 }
 
@@ -61,6 +62,7 @@ export type ProposalVotedFeedItem = BaseFeedItem & {
   proposalNumber: string
   proposalTitle: string
   proposalDescription: string
+  proposalTimeCreated: string
   proposer: AddressType
   voter: AddressType
   reason?: string
@@ -74,6 +76,7 @@ export type ProposalUpdatePostedFeedItem = BaseFeedItem & {
   proposalNumber: string
   proposalTitle: string
   proposalDescription: string
+  proposalTimeCreated: string
   proposer: AddressType
   messageType: number
   message: string
@@ -86,6 +89,7 @@ export type ProposalExecutedFeedItem = BaseFeedItem & {
   proposalNumber: string
   proposalTitle: string
   proposalDescription: string
+  proposalTimeCreated: string
   proposer: AddressType
 }
 

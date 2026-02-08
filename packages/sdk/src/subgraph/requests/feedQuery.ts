@@ -68,6 +68,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
+        proposalTimeCreated: String(event.proposal.timeCreated),
         proposer: event.proposal.proposer,
       }
     }
@@ -80,6 +81,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
+        proposalTimeCreated: String(event.proposal.timeCreated),
         proposer: event.proposal.proposer,
         voter: event.actor,
         reason: event.vote.reason || undefined,
@@ -96,6 +98,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
+        proposalTimeCreated: String(event.proposal.timeCreated),
         proposer: event.proposal.proposer,
         messageType: event.update.messageType,
         message: event.update.message,
@@ -111,6 +114,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         proposalNumber: event.proposal.proposalNumber.toString(),
         proposalTitle: event.proposal.title || '',
         proposalDescription: event.proposal.description || '',
+        proposalTimeCreated: String(event.proposal.timeCreated),
         proposer: event.proposal.proposer,
       }
     }

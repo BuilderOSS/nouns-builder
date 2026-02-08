@@ -23,6 +23,7 @@ interface ProposalActionsProps {
   proposalId: BytesType
   proposalNumber: string
   proposalTitle: string
+  proposalTimeCreated: string
   addresses: RequiredDaoContractAddresses
   isExecuted?: boolean
   updateItem?: ProposalUpdatePostedFeedItem
@@ -34,6 +35,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   proposalId,
   proposalNumber,
   proposalTitle,
+  proposalTimeCreated,
   isExecuted,
   updateItem,
 }) => {
@@ -43,11 +45,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const [showVoteModal, setShowVoteModal] = useState(false)
   const [showPropdateModal, setShowPropdateModal] = useState(false)
 
-  const {
-    isActive,
-    isPending,
-    isLoading: isLoadingState,
-  } = useProposalState({
+  const { isActive, isLoading: isLoadingState } = useProposalState({
     chainId,
     governorAddress: addresses.governor as AddressType,
     proposalId,
@@ -101,8 +99,8 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   return (
     <>
       <Flex gap="x2" align="center" wrap="wrap">
-        {/* Active or pending proposals show vote option */}
-        {(isActive || isPending) && (
+        {/* Active proposals show vote option */}
+        {isActive && (
           <ContractButton
             size="sm"
             px="x3"
@@ -143,6 +141,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         onClose={() => setShowVoteModal(false)}
         proposalId={proposalId}
         proposalTitle={proposalTitle}
+        proposalTimeCreated={proposalTimeCreated}
         chainId={chainId}
         addresses={addresses}
       />

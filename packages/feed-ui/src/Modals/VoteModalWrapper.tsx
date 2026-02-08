@@ -17,6 +17,7 @@ export interface VoteModalWrapperProps {
   onClose: () => void
   proposalId: BytesType
   proposalTitle: string
+  proposalTimeCreated: string
   chainId: CHAIN_ID
   addresses: RequiredDaoContractAddresses
 }
@@ -197,6 +198,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   onClose,
   proposalId,
   proposalTitle,
+  proposalTimeCreated,
   chainId,
   addresses,
 }) => {
@@ -212,6 +214,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
     collectionAddress: addresses.token,
     governorAddress: addresses.governor,
     signerAddress: userAddress,
+    timestamp: BigInt(proposalTimeCreated),
     enabled: isOpen,
   })
 

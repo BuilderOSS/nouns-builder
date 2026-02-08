@@ -18,12 +18,14 @@ export const useVotes = ({
   collectionAddress,
   governorAddress,
   signerAddress,
+  timestamp,
   enabled = true,
 }: {
   chainId: CHAIN_ID
   collectionAddress?: AddressType
   governorAddress?: AddressType
   signerAddress?: AddressType
+  timestamp?: bigint
   enabled?: boolean
 }): UseVotesReturnType => {
   const { data, isLoading } = useReadContracts({
@@ -35,8 +37,10 @@ export const useVotes = ({
       {
         address: collectionAddress as AddressType,
         abi: tokenAbi,
-        functionName: 'getVotes',
-        args: [signerAddress as AddressType],
+        functionName: timestamp ? 'getPastVotes' : 'getVotes',
+        args: timestamp
+          ? [signerAddress as AddressType, timestamp]
+          : [signerAddress as AddressType],
         chainId,
       },
       {

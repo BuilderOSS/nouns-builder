@@ -30,6 +30,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     collectionAddress: addresses.token,
     governorAddress: addresses.governor,
     signerAddress: userAddress,
+    timestamp: BigInt(proposal.timeCreated),
   })
 
   const { votesAvailable, isProposer, signerVote } = useMemo(() => {

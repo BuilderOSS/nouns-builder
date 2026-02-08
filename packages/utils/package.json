@@ -1,9 +1,10 @@
 {
   "name": "@buildeross/utils",
   "description": "Shared utilities and helper functions for BuilderOSS apps",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "dependencies": {
     "bignumber.js": "^9.3.0",
+    "sablier": "^2.0.1",
     "tinycolor2": "^1.4.2",
     "wink-porter2-stemmer": "^2.0.1"
   },
@@ -27,6 +28,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
+    },
+    "./sablier": {
+      "types": "./dist/sablier/index.d.ts",
+      "import": "./dist/sablier/index.mjs",
+      "require": "./dist/sablier/index.js"
     },
     "./wagmi": {
       "types": "./dist/wagmi/index.d.ts",
@@ -53,11 +59,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/blocklist": "0.2.1",
-    "@buildeross/constants": "0.2.1",
-    "@buildeross/ipfs-service": "0.2.1",
-    "@buildeross/types": "0.2.1",
-    "viem": "^2.38.2",
+    "@buildeross/blocklist": "0.2.2",
+    "@buildeross/constants": "0.2.2",
+    "@buildeross/ipfs-service": "0.2.2",
+    "@buildeross/types": "0.2.2",
+    "viem": "^2.44.2",
     "wagmi": "^2.18.1",
     "yup": "^1.6.1"
   },

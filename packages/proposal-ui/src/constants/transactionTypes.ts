@@ -14,100 +14,93 @@ export interface TransactionTypeProps {
 export type TransactionTypesPropsMap = Record<TransactionType, TransactionTypeProps>
 
 export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
-  [TransactionType.SEND_ETH]: {
-    title: 'Send ETH',
-    subTitle: 'Create a proposal to send ETH from the treasury',
-    icon: 'eth',
-    iconBackdrop: 'rgba(115, 17, 255, 0.1)',
-  },
-  [TransactionType.SEND_ERC20]: {
+  [TransactionType.SEND_TOKENS]: {
     title: 'Send Tokens',
-    subTitle: 'Create a proposal to send ERC20 tokens from the treasury',
-    icon: 'erc20',
+    subTitle: 'Send ETH or ERC20 tokens to one or more recipients',
+    icon: 'eth',
     iconBackdrop: 'rgba(0, 163, 255, 0.1)',
   },
   [TransactionType.SEND_NFT]: {
     title: 'Send NFTs',
-    subTitle: 'Create a proposal to send NFTs from the treasury',
+    subTitle: 'Send NFTs from the treasury',
     icon: 'nft',
     iconBackdrop: 'rgba(138, 43, 226, 0.1)',
   },
-  [TransactionType.AIRDROP]: {
-    title: 'Create an Airdrop',
-    subTitle: 'Create a free Airdrop for selected addresses',
+  [TransactionType.MINT_GOVERNANCE_TOKENS]: {
+    title: 'Mint Governance Tokens',
+    subTitle: 'Mint governance tokens to selected addresses',
     icon: 'airdrop',
     iconBackdrop: 'rgba(28, 182, 135, 0.1)',
   },
-  [TransactionType.ESCROW]: {
-    title: 'Escrow Milestones',
-    subTitle: 'Create a proposal and escrow milestones ',
+  [TransactionType.MILESTONE_PAYMENTS]: {
+    title: 'Milestone Payments',
+    subTitle: 'Schedule token releases in milestones',
     icon: 'escrow',
     iconBackdrop: 'rgba(255, 155, 155, 0.102)',
   },
   [TransactionType.RELEASE_ESCROW_MILESTONE]: {
-    title: 'Release Escrow Milestone',
-    subTitle: 'Create a proposal to release escrow milestone',
+    title: 'Release Milestone Payment',
+    subTitle: 'Release a scheduled milestone payment',
     icon: 'escrow',
     iconBackdrop: 'rgba(255, 155, 155, 0.102)',
   },
-  [TransactionType.ESCROW_DELEGATE]: {
-    title: 'Nominate Escrow Delegate',
-    subTitle: 'Create a proposal to nominate an escrow delegate',
+  [TransactionType.NOMINATE_DELEGATE]: {
+    title: 'Nominate Delegate',
+    subTitle: 'Nominate a delegate for milestone payments or token streams',
     icon: 'handshake',
     iconBackdrop: 'rgba(0, 163, 255, 0.1)',
   },
   [TransactionType.DROPOSAL]: {
-    title: 'Droposal: Single edition',
-    subTitle: 'Create a droposal for a Single-edition ERC721 collection',
+    title: 'Droposal: Single Edition',
+    subTitle: 'Single-edition ERC721 collection droposal',
     icon: 'collection',
     iconBackdrop: 'rgba(0, 163, 255, 0.1)',
   },
   [TransactionType.UPGRADE]: {
     title: 'Upgrade Proposal',
-    subTitle: 'Create a proposal to upgrade',
+    subTitle: 'Upgrade dao contracts',
     icon: 'plus',
     iconBackdrop: color.ghostHover,
   },
   [TransactionType.UPDATE_MINTER]: {
     title: 'Update Minter',
-    subTitle: 'Create a proposal to update the minter',
+    subTitle: 'Update token minter',
     icon: 'plus',
     iconBackdrop: color.ghostHover,
   },
   [TransactionType.PAUSE_AUCTIONS]: {
     title: 'Pause Auctions',
-    subTitle: 'Create a proposal to pause auctions',
+    subTitle: 'Pause auctions',
     icon: 'pauseTemplate',
     iconBackdrop: 'rgba(236, 113, 75, 0.1)',
   },
   [TransactionType.FIX_RENDERER_BASE]: {
     title: 'Fix Metadata Renderer Base',
-    subTitle:
-      'Create a proposal to restore NFT image visibility on external marketplaces.',
+    subTitle: 'Restore NFT image visibility on external marketplaces',
     icon: 'spanner',
     iconBackdrop: color.ghostHover,
   },
   [TransactionType.RESUME_AUCTIONS]: {
     title: 'Resume Auctions',
-    subTitle: 'Create a proposal to resume auctions',
+    subTitle: 'Resume paused auctions',
     icon: 'resumeTemplate',
     iconBackdrop: 'rgba(236, 113, 75, 0.1)',
   },
   [TransactionType.REPLACE_ARTWORK]: {
     title: 'Replace Artwork',
-    subTitle: 'Create a proposal to replace your artwork',
+    subTitle: 'Replace existing artwork in your collection',
     icon: 'brush',
     iconBackdrop: 'rgba(236, 113, 75, 0.1)',
   },
   [TransactionType.ADD_ARTWORK]: {
     title: 'Add Artwork',
-    subTitle: 'Create a proposal to add new artwork',
+    subTitle: 'Add new artwork to your collection',
     icon: 'brush',
     iconBackdrop: 'rgba(236, 113, 75, 0.1)',
   },
   [TransactionType.CUSTOM]: {
     title: 'Custom Transaction',
-    subTitle: 'Create any other kind of transaction',
+    subTitle: 'Any other type of transaction',
     icon: 'plus',
     iconBackdrop: color.ghostHover,
     iconFill: 'icon1',
@@ -120,7 +113,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
   },
   [TransactionType.WALLET_CONNECT]: {
     title: 'WalletConnect',
-    subTitle: 'Connect to dApps and create transactions via WalletConnect',
+    subTitle: 'Connect to dApps and execute transactions via WalletConnect',
     icon: 'walletConnectOutline',
     iconBackdrop: 'rgba(59, 130, 246, 0.1)',
   },
@@ -130,5 +123,11 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     icon: 'pin',
     iconBackdrop: 'rgba(236, 113, 75, 0.1)',
     iconFill: 'warning',
+  },
+  [TransactionType.STREAM_TOKENS]: {
+    title: 'Stream Tokens',
+    subTitle: 'Continuous token payments over time',
+    icon: 'sablier',
+    iconBackdrop: 'rgba(243, 139, 0, 0.1)',
   },
 }

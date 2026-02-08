@@ -5,11 +5,17 @@ import { useTransactionSummary } from '@buildeross/hooks/useTransactionSummary'
 import { CHAIN_ID, DaoContractAddresses, DecodedTransactionData } from '@buildeross/types'
 import {
   decodeEscrowData,
-  decodeEscrowDataV1,
-  getEscrowBundlerV1,
+  decodeEscrowDataLegacy,
+  getEscrowBundlerLegacy,
 } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
+import {
+  getSablierContracts,
+  parseStreamDataConfigDurations,
+  parseStreamDataConfigTimestamps,
+  type StreamConfig,
+} from '@buildeross/utils/sablier'
 import { atoms, Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
@@ -43,9 +49,14 @@ export const DecodedDisplay: React.FC<{
     const arg = transaction.args['_escrowData']
     const raw = arg?.value
     if (!raw || typeof raw !== 'string' || !raw.startsWith('0x')) return null
+
+    // Store legacy bundler address first to check for null/undefined
+    const legacy = getEscrowBundlerLegacy(chainId)
+
+    // Safe comparison: only use legacy decoder if legacy is truthy and matches target
     const decoder =
-      target.toLowerCase() === getEscrowBundlerV1(chainId).toLowerCase()
-        ? decodeEscrowDataV1
+      legacy && target.toLowerCase() === legacy.toLowerCase()
+        ? decodeEscrowDataLegacy
         : decodeEscrowData
 
     try {
@@ -56,8 +67,59 @@ export const DecodedDisplay: React.FC<{
     }
   }, [transaction.args, target, chainId])
 
+  // Prepare stream data once
+  const streamData = React.useMemo(() => {
+    const sablierContracts = getSablierContracts(chainId)
+    const isSablierTarget =
+      (sablierContracts.batchLockup &&
+        target.toLowerCase() === sablierContracts.batchLockup.toLowerCase()) ||
+      (sablierContracts.lockup &&
+        target.toLowerCase() === sablierContracts.lockup.toLowerCase())
+
+    if (!isSablierTarget) return undefined
+
+    // Check if this is a createWithDurationsLL or createWithTimestampsLL function
+    if (
+      transaction.functionName !== 'createWithDurationsLL' &&
+      transaction.functionName !== 'createWithTimestampsLL'
+    ) {
+      return undefined
+    }
+
+    if (!transaction.args) return undefined
+
+    // Extract calldata - we need to reconstruct it from the transaction
+    // The transaction already has decoded args, but we need the raw calldata
+    // Since we don't have direct access to calldata here, we'll extract from args
+    try {
+      // Get lockup, token, and batch from args
+      const lockupArg = transaction.args['lockup'] || transaction.args['_lockup']
+      const tokenArg = transaction.args['token'] || transaction.args['_token']
+      const batchArg = transaction.args['batch'] || transaction.args['_batch']
+
+      if (!lockupArg || !tokenArg || !batchArg) return undefined
+
+      const isDurationsMode = transaction.functionName === 'createWithDurationsLL'
+      const parser: (_data: any) => StreamConfig = isDurationsMode
+        ? parseStreamDataConfigDurations
+        : parseStreamDataConfigTimestamps
+
+      const streams = (Array.isArray(batchArg.value) ? batchArg.value : []).map(parser)
+
+      return {
+        lockupAddress: lockupArg.value as `0x${string}`,
+        tokenAddress: tokenArg.value as `0x${string}`,
+        streams,
+        isDurationsMode,
+      }
+    } catch (e) {
+      console.warn('Failed to extract stream data', e)
+      return undefined
+    }
+  }, [transaction.args, transaction.functionName, target, chainId])
+
   // Determine single token address for ERC20 operations
-  const tokenAddress = React.useMemo(() => {
+  const tokenAddress: `0x${string}` | undefined = React.useMemo(() => {
     // For ERC20 transfer/approve, use target
     if (
       transaction.functionName === 'transfer' ||
@@ -65,12 +127,20 @@ export const DecodedDisplay: React.FC<{
       transaction.functionName === 'increaseAllowance' ||
       transaction.functionName === 'decreaseAllowance'
     ) {
-      return target
+      return target as `0x${string}`
+    }
+
+    // For stream operations, get token from stream data
+    if (streamData?.tokenAddress) {
+      return streamData.tokenAddress
     }
 
     // For escrow operations, get token from escrow data
-    return escrowData?.tokenAddress || null
-  }, [transaction.functionName, target, escrowData])
+    if (escrowData?.tokenAddress) {
+      return escrowData.tokenAddress
+    }
+    return undefined
+  }, [transaction.functionName, target, escrowData, streamData])
 
   // Determine single NFT contract and token ID
   // TODO: add erc1155 support later
@@ -95,7 +165,7 @@ export const DecodedDisplay: React.FC<{
   // Fetch token metadata only if we have a token address
   const { tokenMetadata, isLoading: isTokenLoading } = useTokenMetadataSingle(
     chainId,
-    tokenAddress as `0x${string}` | undefined
+    tokenAddress
   )
 
   // Fetch NFT metadata only if we have NFT info
@@ -122,6 +192,7 @@ export const DecodedDisplay: React.FC<{
       tokenMetadata: tokenMetadata || undefined,
       nftMetadata: nftMetadata || undefined,
       escrowData: escrowData || undefined,
+      streamData: streamData || undefined,
     }
   }, [
     transaction,
@@ -131,6 +202,7 @@ export const DecodedDisplay: React.FC<{
     tokenMetadata,
     nftMetadata,
     escrowData,
+    streamData,
     isLoadingMetadata,
   ])
 
@@ -143,7 +215,7 @@ export const DecodedDisplay: React.FC<{
 
   return (
     <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-      <Stack gap={'x1'}>
+      <Stack gap={'x1'} px={'x3'} py={'x3'}>
         <Box
           color={'secondary'}
           fontWeight={'heading'}
@@ -160,8 +232,7 @@ export const DecodedDisplay: React.FC<{
             <Text display={{ '@initial': 'none', '@768': 'flex' }}>{target}</Text>
           </a>
         </Box>
-
-        <Flex pl={'x2'} align="center" gap="x0">
+        <Flex align="center" gap="x0">
           {`.${transaction.functionName}`}
           {value !== '0' && transaction.functionName !== 'send' && (
             <Flex align="center" gap="x1">
@@ -196,57 +267,57 @@ export const DecodedDisplay: React.FC<{
                 tokenMetadata={tokenMetadata}
                 nftMetadata={nftMetadata}
                 escrowData={escrowData}
+                streamData={streamData}
               />
             )
           })}
         </Stack>
 
         {sortedArgs.length > 0 ? `)` : null}
+      </Stack>
 
-        {!isLoadingMetadata &&
-          !DISABLE_AI_SUMMARY &&
-          !errorSummary &&
-          !isGeneratingSummary && (
-            <Box
-              px="x4"
-              pt="x3"
-              pb="x4"
-              backgroundColor="background2"
-              borderRadius="curved"
-              border="1px solid"
-              borderColor="border"
-              mt="x4"
+      {!isLoadingMetadata &&
+        !DISABLE_AI_SUMMARY &&
+        !errorSummary /* TODO: remove this condition and display error summary instead when AI summaries are more reliable */ &&
+        !isGeneratingSummary && (
+          <Box
+            px="x3"
+            py="x2"
+            backgroundColor="background2"
+            borderBottomRadius="curved"
+            border="1px solid"
+            borderColor="border"
+          >
+            <Text
+              style={{
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+              }}
             >
-              <Flex gap="x4" align="center" mb="x2" style={{ height: '32px' }}>
-                <Text fontWeight="heading" color="accent">
-                  🤖 AI Summary
-                </Text>
-                {!isGeneratingSummary && !aiSummary && errorSummary && (
-                  <Button
-                    onClick={() => regenerateSummary()}
-                    variant="outline"
-                    size="sm"
-                    px="x2"
-                    style={{ height: '32px' }}
-                  >
-                    Regenerate
-                  </Button>
-                )}
-              </Flex>
-              {isGeneratingSummary && (
-                <Text style={{ whiteSpace: 'pre-wrap' }}>Generating summary...</Text>
-              )}
-              {!isGeneratingSummary && aiSummary && (
-                <Text style={{ whiteSpace: 'pre-wrap' }}>{aiSummary}</Text>
-              )}
+              <Text as="span" fontWeight="heading" color="accent">
+                🤖 AI Summary:{' '}
+              </Text>
               {!isGeneratingSummary && !aiSummary && errorSummary && (
-                <Text color="negative" style={{ whiteSpace: 'pre-wrap' }}>
+                <Button
+                  onClick={() => regenerateSummary()}
+                  variant="outline"
+                  size="sm"
+                  px="x2"
+                >
+                  Regenerate
+                </Button>
+              )}
+              {isGeneratingSummary && <Text as="span">Generating summary...</Text>}
+              {!isGeneratingSummary && aiSummary && <Text as="span">{aiSummary}</Text>}
+              {!isGeneratingSummary && !aiSummary && errorSummary && (
+                <Text color="negative" as="span">
                   Error generating summary: {getErrorMessage(errorSummary)}
                 </Text>
               )}
-            </Box>
-          )}
-      </Stack>
+            </Text>
+          </Box>
+        )}
     </Stack>
   )
 }

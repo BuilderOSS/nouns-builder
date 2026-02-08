@@ -19,6 +19,7 @@ import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores
 import { AddressType } from '@buildeross/types'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
+import { isSablierSupported as isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -88,6 +89,11 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const isEASSupported = useMemo(() => isChainIdSupportedByEAS(chain.id), [chain.id])
 
+  const isSablierSupported = useMemo(
+    () => isChainIdSupportedBySablier(chain.id),
+    [chain.id]
+  )
+
   const TRANSACTION_FORM_OPTIONS_FILTERED = useMemo(
     () =>
       TRANSACTION_FORM_OPTIONS.filter((x) => {
@@ -97,10 +103,19 @@ const CreateProposalPage: NextPageWithLayout = () => {
         if (x === TransactionType.RESUME_AUCTIONS && !paused) return false
         if (x === TransactionType.FIX_RENDERER_BASE && !shouldFixRendererBase)
           return false
-        if (x === TransactionType.ESCROW_DELEGATE && !isEASSupported) return false
+        if (x === TransactionType.NOMINATE_DELEGATE && !isEASSupported) return false
+        if (x === TransactionType.PIN_TREASURY_ASSET && !isEASSupported) return false
+        if (x === TransactionType.STREAM_TOKENS && !isSablierSupported) return false
         return true
       }),
-    [isL1Chain, isAllowedMigrationDao, paused, shouldFixRendererBase, isEASSupported]
+    [
+      isL1Chain,
+      isAllowedMigrationDao,
+      paused,
+      shouldFixRendererBase,
+      isEASSupported,
+      isSablierSupported,
+    ]
   )
 
   const options = useMemo(() => {

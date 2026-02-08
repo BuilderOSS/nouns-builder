@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/ipfs-service",
   "description": "IPFS client and utilities for BuilderOSS apps",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "dependencies": {
     "sha.js": "^2.4.12"
   },
@@ -36,7 +36,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": "0.2.1"
+    "@buildeross/constants": "0.2.2"
   },
   "publishConfig": {
     "access": "public"
