@@ -1,5 +1,16 @@
 # @buildeross/utils
 
+## 0.2.2
+
+### Patch Changes
+
+- Sablier streams support, revamped Send Tokens (CSV + unified flow), fully redesigned Dashboard Feed with filters + actions, improved DAO search, playground upgrades, new proposal types, and tons of UX, performance & subgraph fixes.
+- Updated dependencies
+  - @buildeross/blocklist@0.2.2
+  - @buildeross/constants@0.2.2
+  - @buildeross/ipfs-service@0.2.2
+  - @buildeross/types@0.2.2
+
 ## 0.2.1
 
 ### Patch Changes
