@@ -1,31 +1,20 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { SAFE_APP_URL, SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { type StreamBatchData, useStreamData } from '@buildeross/hooks/useStreamData'
 import { useTokenMetadata } from '@buildeross/hooks/useTokenMetadata'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { CHAIN_ID } from '@buildeross/types'
-import { Accordion } from '@buildeross/ui/Accordion'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { createSafeAppUrl, createSafeUrl } from '@buildeross/utils'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { Address, isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { Section } from '../Section'
-import { CreateStreamItem } from './StreamItem'
-
-const createSafeAppUrl = (chainId: CHAIN_ID, safeAddress: Address, appUrl: string) => {
-  const safeUrl = SAFE_APP_URL[chainId]
-  const encodedUrl = encodeURIComponent(appUrl)
-  return `${safeUrl}:${safeAddress}&appUrl=${encodedUrl}`
-}
-
-const createSafeUrl = (chainId: CHAIN_ID, safeAddress: Address) => {
-  const safeUrl = SAFE_HOME_URL[chainId]
-  return `${safeUrl}:${safeAddress}`
-}
+import { StreamItem } from './StreamItem'
 
 interface StreamDetailsProps {
   proposal: Proposal
@@ -36,6 +25,7 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { address } = useAccount()
+  const { getProposalLink } = useLinks()
 
   const {
     streamBatches,
@@ -87,6 +77,16 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
 
   const isCommonSenderConnected =
     commonSender && address && isAddressEqual(commonSender, address)
+
+  // Get proposal link for Safe app integration
+  const proposalUrl = useMemo(() => {
+    if (!addresses.token || !proposal.proposalId) return ''
+    const proposalLink = getProposalLink(chain.id, addresses.token, proposal.proposalId)
+    // Add BASE_URL if the href is a relative path
+    return proposalLink.href.startsWith('http')
+      ? proposalLink.href
+      : `${BASE_URL}${proposalLink.href}`
+  }, [chain.id, addresses.token, proposal.proposalId])
 
   if (!isCreateTx) return null
 
@@ -144,11 +144,7 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
                     gap="x2"
                   >
                     <a
-                      href={createSafeAppUrl(
-                        chain.id,
-                        commonSender,
-                        window.location.href
-                      )}
+                      href={createSafeAppUrl(chain.id, commonSender, proposalUrl)}
                       rel="noreferrer"
                       target="_blank"
                     >
@@ -274,27 +270,29 @@ const FlattenedStreams = ({
   )
 
   return (
-    <Accordion
-      items={streamsWithMetadata.map((streamData, index) =>
-        CreateStreamItem({
-          stream: streamData.stream,
-          index,
-          isDurationsMode: streamData.isDurationsMode,
-          liveData: streamData.liveData,
-          streamId: streamData.streamId,
-          isExecuted,
-          tokenMetadata: streamData.tokenMetadata,
-          lockupAddress,
-          withdrawingStreamId,
-          setWithdrawingStreamId,
-          cancelingStreamId,
-          setCancelingStreamId,
-          onOpenProposalReview,
-          refetchLiveData,
-          senderAddress: streamData.senderAddress,
-          showIndividualSenders,
-        })
-      )}
-    />
+    <Stack>
+      {streamsWithMetadata.map((streamData, index) => (
+        <StreamItem
+          key={index}
+          stream={streamData.stream}
+          index={index}
+          isDurationsMode={streamData.isDurationsMode}
+          liveData={streamData.liveData}
+          streamId={streamData.streamId}
+          isExecuted={isExecuted}
+          tokenMetadata={streamData.tokenMetadata}
+          lockupAddress={lockupAddress}
+          withdrawingStreamId={withdrawingStreamId}
+          setWithdrawingStreamId={setWithdrawingStreamId}
+          cancelingStreamId={cancelingStreamId}
+          setCancelingStreamId={setCancelingStreamId}
+          onOpenProposalReview={onOpenProposalReview}
+          refetchLiveData={refetchLiveData}
+          senderAddress={streamData.senderAddress}
+          showIndividualSenders={showIndividualSenders}
+          proposalId={proposal.proposalId}
+        />
+      ))}
+    </Stack>
   )
 }
