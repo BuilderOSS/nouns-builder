@@ -2,6 +2,10 @@ import type { Address } from 'viem'
 
 const LN_1_0001 = Math.log(1.0001)
 
+// Uniswap v3/v4 tick constraints
+const MIN_TICK = -887272
+const MAX_TICK = 887272
+
 // ---- Types ----
 
 export type DiscoveryPoolConfig = {
@@ -51,5 +55,9 @@ export function fdvToTick(params: {
   const currencyPerCoin = usdPerCoin / quoteTokenUsd
 
   let tick = Math.log(currencyPerCoin) / LN_1_0001
+
+  // Clamp to valid Uniswap tick range before snapping
+  tick = clamp(tick, MIN_TICK, MAX_TICK)
+
   return snapToTickSpacing(tick, tickSpacing)
 }

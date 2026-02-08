@@ -109,9 +109,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
                 borderColor="border"
                 backgroundColor="background2"
               >
-                <Text variant="paragraph-md" fontWeight="medium">
-                  {currencyOptions[0].label}
-                </Text>
+                <Text variant="label-md">{currencyOptions[0].label}</Text>
                 <Text variant="paragraph-sm" color="text3" mt="x2">
                   {currencyOptions[0].value}
                 </Text>

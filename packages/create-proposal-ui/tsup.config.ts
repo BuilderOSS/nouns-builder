@@ -29,6 +29,7 @@ export default defineConfig({
     '@walletconnect/core',
     '@walletconnect/utils',
     '@walletconnect/web3wallet',
+    '@uniswap/v3-sdk',
     'formik',
     'framer-motion',
     'lanyard',

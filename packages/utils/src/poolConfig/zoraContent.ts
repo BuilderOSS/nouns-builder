@@ -3,8 +3,8 @@ import type { Address } from 'viem'
 import { DEFAULT_CLANKER_TOTAL_SUPPLY } from './clankerCreator'
 import { clamp, type DiscoveryPoolConfig, fdvToTick } from './shared'
 
-const DEFAULT_ZORA_TOTAL_SUPPLY = 1_000_000_000 // 1B tokens
-const DEFAULT_ZORA_TICK_SPACING = 200
+export const DEFAULT_ZORA_TOTAL_SUPPLY = 1_000_000_000 // 1B tokens
+export const DEFAULT_ZORA_TICK_SPACING = 200
 
 // Zora-derived constants
 const TICK_HALF_RANGE = 11_000 // ±11k ticks
@@ -105,7 +105,7 @@ const MAX_FDV = 2_500_000 // hard ceiling
 /**
  * Estimate a Zora-like target FDV for a creator / DAO token.
  */
-function estimateTargetFdvUsd(params: { marketCapUsd: number }): number {
+export function estimateTargetFdvUsd(params: { marketCapUsd: number }): number {
   const { marketCapUsd } = params
 
   if (!Number.isFinite(marketCapUsd) || marketCapUsd <= 0) {

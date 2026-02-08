@@ -6,8 +6,7 @@ import type { Address } from 'viem'
  */
 export enum FEE_CONFIGS {
   DynamicBasic = 'DynamicBasic',
-  Fixed = 'Fixed',
-  // Add other presets as they become available in the SDK
+  StaticBasic = 'StaticBasic',
 }
 
 /**
@@ -99,13 +98,13 @@ export function createDefaultVaultConfig(): VaultConfig {
 export const FEE_CONFIG_OPTIONS = [
   {
     value: FEE_CONFIGS.DynamicBasic,
-    label: 'Dynamic Basic',
-    description: 'Fees adjust based on trading volume',
+    label: 'Dynamic',
+    description: 'Fees adjust from 1% to 5% based on trading volume',
   },
   {
-    value: FEE_CONFIGS.Fixed,
-    label: 'Fixed',
-    description: 'Fixed fee percentage for all trades',
+    value: FEE_CONFIGS.StaticBasic,
+    label: 'Static',
+    description: 'Fixed fee percentage for all trades at 1%',
   },
 ]
 

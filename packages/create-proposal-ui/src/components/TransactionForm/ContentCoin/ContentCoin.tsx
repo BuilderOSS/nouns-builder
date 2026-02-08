@@ -1,9 +1,26 @@
 import { BUILDER_TREASURY_ADDRESS } from '@buildeross/constants'
+import {
+  type COIN_SUPPORTED_CHAIN_ID,
+  COIN_SUPPORTED_CHAIN_IDS,
+  COIN_SUPPORTED_CHAINS,
+} from '@buildeross/constants'
 import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
-import { CoinFormFields, coinFormSchema, type CoinFormValues } from '@buildeross/ui'
-import { createContentPoolConfigWithClankerTokenAsCurrency } from '@buildeross/utils'
+import { AddressType, TransactionType } from '@buildeross/types'
+import {
+  CoinFormFields,
+  coinFormSchema,
+  type CoinFormValues,
+  LaunchEconomicsPreview,
+} from '@buildeross/ui'
+import {
+  createContentPoolConfigWithClankerTokenAsCurrency,
+  DEFAULT_CLANKER_TOTAL_SUPPLY,
+  DEFAULT_ZORA_TICK_SPACING,
+  DEFAULT_ZORA_TOTAL_SUPPLY,
+  estimateTargetFdvUsd,
+  getChainNamesString,
+} from '@buildeross/utils'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
 import {
@@ -14,12 +31,12 @@ import {
 import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
 import React, { useEffect, useMemo, useState } from 'react'
 import { type Address, encodeFunctionData, zeroAddress, zeroHash } from 'viem'
+import { useReadContract } from 'wagmi'
 
 import { ContentCoinPreviewDisplay } from './ContentCoinPreviewDisplay'
 import { IPFSUploader } from './ipfsUploader'
 
-// Supported chain IDs from Zora's deployment
-const SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
+const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -36,6 +53,130 @@ const FormObserver: React.FC<FormObserverProps> = ({ onChange }) => {
   }, [values, onChange])
 
   return null
+}
+
+interface ContentCoinEconomicsPreviewProps {
+  treasury: Address
+  factoryAddress: Address
+  chainId: number
+  latestClankerToken: any
+  clankerTokenPriceUsd: number | undefined
+}
+
+const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = ({
+  treasury,
+  factoryAddress,
+  chainId,
+  latestClankerToken,
+  clankerTokenPriceUsd,
+}) => {
+  const formik = useFormikContext<CoinFormValues>()
+
+  // Prepare arguments for coinAddress call
+  const { encodedPoolConfig, shouldFetch } = useMemo(() => {
+    if (
+      !formik.values.name ||
+      !formik.values.symbol ||
+      !formik.values.currency ||
+      !clankerTokenPriceUsd
+    ) {
+      return { encodedPoolConfig: null, shouldFetch: false }
+    }
+
+    try {
+      const currency = formik.values.currency as AddressType
+      const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
+        currency,
+        quoteTokenUsd: clankerTokenPriceUsd,
+      })
+
+      const encoded = encodeMultiCurvePoolConfig({
+        currency: poolConfig.currency,
+        tickLower: poolConfig.lowerTicks,
+        tickUpper: poolConfig.upperTicks,
+        numDiscoveryPositions: poolConfig.numDiscoveryPositions,
+        maxDiscoverySupplyShare: poolConfig.maxDiscoverySupplyShares,
+      })
+
+      return { encodedPoolConfig: encoded, shouldFetch: true }
+    } catch (error) {
+      console.warn('Could not encode pool config:', error)
+      return { encodedPoolConfig: null, shouldFetch: false }
+    }
+  }, [
+    formik.values.name,
+    formik.values.symbol,
+    formik.values.currency,
+    clankerTokenPriceUsd,
+  ])
+
+  const builderTreasuryAddress =
+    BUILDER_TREASURY_ADDRESS[chainId as keyof typeof BUILDER_TREASURY_ADDRESS]
+
+  // Call coinAddress view function on ZoraFactory
+  const { data: predictedAddress } = useReadContract({
+    address: factoryAddress,
+    abi: coinFactoryConfig.abi,
+    functionName: 'coinAddress',
+    args:
+      shouldFetch && encodedPoolConfig
+        ? [
+            treasury,
+            formik.values.name!,
+            formik.values.symbol!,
+            encodedPoolConfig,
+            builderTreasuryAddress as Address,
+            zeroHash,
+          ]
+        : undefined,
+    chainId,
+    query: {
+      enabled: shouldFetch && !!encodedPoolConfig,
+    },
+  })
+
+  if (!predictedAddress || !latestClankerToken || !clankerTokenPriceUsd) {
+    return null
+  }
+
+  try {
+    const currency = formik.values.currency as AddressType
+    const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
+      currency,
+      quoteTokenUsd: clankerTokenPriceUsd,
+    })
+
+    const marketCapUsd = clankerTokenPriceUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
+    const targetFdvUsd = estimateTargetFdvUsd({
+      marketCapUsd,
+    })
+
+    const lowerTick = Math.min(...poolConfig.lowerTicks)
+    const upperTick = Math.max(...poolConfig.upperTicks)
+
+    const totalSupplyBigInt = BigInt(DEFAULT_ZORA_TOTAL_SUPPLY) * 10n ** 18n
+
+    return (
+      <LaunchEconomicsPreview
+        chainId={chainId}
+        totalSupply={totalSupplyBigInt}
+        baseTokenAddress={predictedAddress}
+        baseTokenSymbol={formik.values.symbol || 'CONTENT'}
+        baseTokenDecimals={18}
+        quoteTokenAddress={formik.values.currency as AddressType}
+        quoteTokenSymbol={latestClankerToken.tokenSymbol}
+        quoteTokenDecimals={18}
+        lowerTick={lowerTick}
+        upperTick={upperTick}
+        tickSpacing={DEFAULT_ZORA_TICK_SPACING}
+        targetMarketCapUsd={targetFdvUsd}
+        quoteTokenUsdPrice={clankerTokenPriceUsd}
+      />
+    )
+  } catch (error) {
+    console.error('Error rendering LaunchEconomicsPreview:', error)
+    return null
+  }
 }
 
 export interface ContentCoinProps {
@@ -66,7 +207,9 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
   })
 
   // Check if the current chain is supported
-  const isChainSupported = SUPPORTED_CHAIN_IDS.includes(chain.id)
+  const isChainSupported = COIN_SUPPORTED_CHAIN_IDS.includes(
+    chain.id as COIN_SUPPORTED_CHAIN_ID
+  )
   const factoryAddress = isChainSupported
     ? (coinFactoryAddress[chain.id as keyof typeof coinFactoryAddress] as AddressType)
     : undefined
@@ -137,7 +280,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
 
     if (!factoryAddress) {
       setSubmitError(
-        `Content coins are only supported on Base and Base Sepolia. Current chain: ${chain.name}`
+        `Content coins are only supported on ${chainNamesString}. Current chain: ${chain.name}`
       )
       actions.setSubmitting(false)
       return
@@ -274,14 +417,13 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
         <Box
           p="x6"
           borderRadius="curved"
-          backgroundColor="warning"
-          style={{ opacity: 0.1 }}
+          style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
         >
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
-              Content coins are currently only supported on Base and Base Sepolia
-              networks. Please switch to a supported network to create a content coin.
+              Content coins are currently only supported on {chainNamesString}. Please
+              switch to a supported network to create a content coin.
             </Text>
           </Stack>
         </Box>
@@ -296,8 +438,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
         <Box
           p="x6"
           borderRadius="curved"
-          backgroundColor="warning"
-          style={{ opacity: 0.1 }}
+          style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
         >
           <Stack gap="x2">
             <Text variant="heading-sm">No Creator Coin Found</Text>
@@ -362,12 +503,27 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
                     currencyOptions={currencyOptions}
                   />
 
+                  {/* Launch Economics Preview */}
+                  {clankerTokenPriceUsd &&
+                    latestClankerToken &&
+                    formik.values.currency &&
+                    !isDisabled &&
+                    treasury &&
+                    factoryAddress && (
+                      <ContentCoinEconomicsPreview
+                        treasury={treasury}
+                        factoryAddress={factoryAddress}
+                        chainId={chain.id}
+                        latestClankerToken={latestClankerToken}
+                        clankerTokenPriceUsd={clankerTokenPriceUsd}
+                      />
+                    )}
+
                   {submitError && (
                     <Box
                       p="x4"
                       borderRadius="curved"
-                      backgroundColor="negative"
-                      style={{ opacity: 0.1 }}
+                      style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
                     >
                       <Text variant="paragraph-sm" color="negative">
                         {submitError}
@@ -379,8 +535,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
                     <Box
                       p="x4"
                       borderRadius="curved"
-                      backgroundColor="warning"
-                      style={{ opacity: 0.1 }}
+                      style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
                     >
                       <Text variant="paragraph-sm" color="warning">
                         Treasury address not found. Please connect to a DAO.

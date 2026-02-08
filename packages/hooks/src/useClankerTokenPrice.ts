@@ -346,8 +346,8 @@ async function fetchTokenUsdPrice(
       // Normalize paired token address once
       const pairedTokenAddress = getAddress(clankerToken.pairedToken)
 
-      // Determine token order in the pool using BigInt comparison
-      const isToken0 = BigInt(normalizedAddress) < BigInt(pairedTokenAddress)
+      // Determine token order in the pool using lowercase string comparison
+      const isToken0 = normalizedAddress.toLowerCase() < pairedTokenAddress.toLowerCase()
 
       // Calculate the price in terms of the paired token
       const priceInPairedToken = calculatePriceFromSqrtPriceX96(sqrtPriceX96, isToken0)
@@ -452,7 +452,7 @@ export const useClankerTokenPrice = ({
         return
       }
 
-      if (!clankerToken || !enabled || !publicClient) {
+      if (!clankerToken?.tokenAddress || !enabled || !publicClient) {
         if (isCurrent()) {
           setPriceUsd(null)
           setIsLoading(false)

@@ -36,6 +36,8 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.NOMINATE_DELEGATE,
   TransactionType.PIN_TREASURY_ASSET,
   TransactionType.CUSTOM,
+  TransactionType.CREATOR_COIN,
+  TransactionType.CONTENT_COIN,
   TransactionType.DROPOSAL,
   TransactionType.PAUSE_AUCTIONS,
   TransactionType.FIX_RENDERER_BASE,
@@ -43,9 +45,6 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.ADD_ARTWORK,
   TransactionType.REPLACE_ARTWORK,
   TransactionType.MIGRATION,
-  TransactionType.CUSTOM,
-  TransactionType.CREATOR_COIN,
-  TransactionType.CONTENT_COIN,
 ] as const
 
 export const TransactionForm = ({ type }: TransactionFormProps) => {
