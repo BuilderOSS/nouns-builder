@@ -8,11 +8,13 @@ export const createSafeAppUrl = (
   appUrl: string
 ) => {
   const safeUrl = SAFE_APP_URL[chainId]
+  if (!safeUrl) return ''
   const encodedUrl = encodeURIComponent(appUrl)
   return `${safeUrl}:${safeAddress}&appUrl=${encodedUrl}`
 }
 
 export const createSafeUrl = (chainId: CHAIN_ID, safeAddress: Address) => {
   const safeUrl = SAFE_HOME_URL[chainId]
+  if (!safeUrl) return ''
   return `${safeUrl}:${safeAddress}`
 }

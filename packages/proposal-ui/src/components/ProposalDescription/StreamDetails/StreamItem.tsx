@@ -1,5 +1,4 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useVotes } from '@buildeross/hooks/useVotes'
@@ -20,13 +19,14 @@ import {
   StreamConfigTimestamps,
   StreamLiveData,
 } from '@buildeross/utils/sablier/streams'
-import { createSafeAppUrl, createSafeUrl } from '@buildeross/utils/safe'
+import { createSafeAppUrl } from '@buildeross/utils/safe'
 import { atoms, Box, Button, Icon, Stack, Text } from '@buildeross/zord'
 import { useCallback, useMemo } from 'react'
 import { Address, encodeFunctionData, formatUnits, isAddressEqual } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
+import { SenderDelegation } from './SenderDelegation'
 import { linkStyle } from './StreamItem.css'
 
 interface StreamItemProps {
@@ -88,7 +88,6 @@ export const StreamItem = ({
   const { displayName: recipientName } = useEnsData(stream.recipient)
 
   // Sender info hooks (called at top level)
-  const { displayName: senderDisplayName } = useEnsData(senderAddress ?? undefined)
   const { isGnosisSafe: isSenderAGnosisSafe } = useIsGnosisSafe(
     senderAddress ?? undefined,
     chain.id
@@ -98,9 +97,6 @@ export const StreamItem = ({
     senderAddress &&
     addresses.treasury &&
     isAddressEqual(senderAddress, addresses.treasury)
-
-  const isSenderConnected =
-    senderAddress && address && isAddressEqual(senderAddress, address)
 
   const { startTime, cliffTime, endTime } = useMemo(
     () =>
@@ -231,7 +227,7 @@ export const StreamItem = ({
     return proposalLink.href.startsWith('http')
       ? proposalLink.href
       : `${BASE_URL}${proposalLink.href}`
-  }, [chain.id, addresses.token, proposalId])
+  }, [chain.id, addresses.token, proposalId, getProposalLink])
 
   const title = <Text>{`Stream ${index + 1}${amountPart} - ${recipientDisplay}`}</Text>
 
@@ -467,9 +463,21 @@ export const StreamItem = ({
             )}
 
           {/* Link to Sablier app */}
-          {!!sablierUrl && !!liveData.sender && (
+          {!!sablierUrl && !!senderAddress && (
             <Stack direction="column" gap="x2">
-              {isSenderTreasury ? (
+              {isSenderAGnosisSafe ? (
+                <a
+                  href={createSafeAppUrl(chain.id, senderAddress, sablierUrl)}
+                  rel="noreferrer"
+                  target="_blank"
+                  className={linkStyle}
+                >
+                  <Button variant="secondary" size="sm">
+                    View Stream As Safe App
+                    <Icon id="arrowTopRight" />
+                  </Button>
+                </a>
+              ) : (
                 <a
                   href={sablierUrl}
                   rel="noreferrer"
@@ -481,34 +489,6 @@ export const StreamItem = ({
                     <Icon id="arrowTopRight" />
                   </Button>
                 </a>
-              ) : (
-                <>
-                  {isSenderAGnosisSafe ? (
-                    <a
-                      href={createSafeAppUrl(chain.id, liveData.sender, proposalUrl)}
-                      rel="noreferrer"
-                      target="_blank"
-                      className={linkStyle}
-                    >
-                      <Button variant="secondary" size="sm">
-                        View Proposal As Safe App
-                        <Icon id="arrowTopRight" />
-                      </Button>
-                    </a>
-                  ) : (
-                    <a
-                      href={sablierUrl}
-                      rel="noreferrer"
-                      target="_blank"
-                      className={linkStyle}
-                    >
-                      <Button variant="secondary" size="sm">
-                        View Stream on Sablier
-                        <Icon id="arrowTopRight" />
-                      </Button>
-                    </a>
-                  )}
-                </>
               )}
             </Stack>
           )}
@@ -526,40 +506,11 @@ export const StreamItem = ({
 
       {/* Individual sender display - shown when senders differ across streams */}
       {showIndividualSenders && senderAddress && !isSenderTreasury && (
-        <>
-          <Stack direction="row" align="center" mt="x4">
-            <Text variant="label-sm" color="primary" mr="x2">
-              Delegated to
-            </Text>
-            <Box color={'secondary'} className={atoms({ textDecoration: 'underline' })}>
-              <a
-                href={
-                  isSenderAGnosisSafe
-                    ? createSafeUrl(chain.id, senderAddress)
-                    : `${ETHERSCAN_BASE_URL[chain.id]}/address/${senderAddress}`
-                }
-                rel="noreferrer"
-                target="_blank"
-              >
-                <Text variant="label-sm">{senderDisplayName || senderAddress}</Text>
-              </a>
-            </Box>
-          </Stack>
-          {isSenderAGnosisSafe && !isSenderConnected && !isSenderTreasury && (
-            <Stack direction="column" fontWeight={'heading'} mt="x2" ml="x4" gap="x2">
-              <a
-                href={createSafeAppUrl(chain.id, senderAddress, proposalUrl)}
-                rel="noreferrer"
-                target="_blank"
-              >
-                <Button variant="secondary" size="sm">
-                  View Proposal As Safe App
-                  <Icon id="arrowTopRight" />
-                </Button>
-              </a>
-            </Stack>
-          )}
-        </>
+        <SenderDelegation
+          chainId={chain.id}
+          senderAddress={senderAddress}
+          proposalUrl={proposalUrl}
+        />
       )}
     </Stack>
   )

@@ -51,6 +51,52 @@ export const MilestoneItem = ({
     ? `${formatCryptoVal(formatUnits(amount, decimals))} ${tokenMetadata.symbol}`
     : amount.toString()
 
+  const renderReleaseButton = () => {
+    if (isReleased) {
+      return (
+        <Button variant="secondary" disabled>
+          <Icon id="checkInCircle" />
+          Milestone Released
+        </Button>
+      )
+    }
+
+    if (isClientConnected || isClientTreasury) {
+      return (
+        <Stack direction="column" gap="x1">
+          <Text variant="label-xs" color="tertiary">
+            {isNext
+              ? 'Release funds for the next milestone'
+              : `Release funds for all milestones up to Milestone ${index + 1}`}
+          </Text>
+          <ContractButton
+            chainId={chain.id}
+            variant="primary"
+            handleClick={() =>
+              isClientConnected
+                ? handleReleaseMilestoneDirect(index)
+                : handleReleaseMilestoneAsProposal(index)
+            }
+            disabled={isClientConnected ? isReleasing : !hasThreshold}
+            loading={isReleasing}
+            fontSize={isClientConnected ? 16 : 12}
+          >
+            {isClientConnected
+              ? `Release Milestone #${index + 1}`
+              : `Create Proposal to Release Milestone #${index + 1}`}
+          </ContractButton>
+          {!hasThreshold && !isClientConnected && (
+            <Text variant="label-xs" color="negative">
+              You do not have enough votes to create a proposal
+            </Text>
+          )}
+        </Stack>
+      )
+    }
+
+    return null
+  }
+
   const amountPart = tokenMetadata?.symbol ? `: ${amountDisplay}` : ''
 
   const title = <Text>{`${index + 1}. ${milestone.title}${amountPart}`}</Text>
@@ -61,9 +107,11 @@ export const MilestoneItem = ({
         <Text variant="label-xs" color="tertiary" mr="x2">
           {`Amount: ${amountDisplay}`}
         </Text>
-        <Text variant="label-xs" color="tertiary">
-          {`Due by: ${new Date((milestone?.endDate as number) * 1000).toLocaleDateString()}`}
-        </Text>
+        {milestone?.endDate ? (
+          <Text variant="label-xs" color="tertiary">
+            {`Due by: ${new Date(Number(milestone.endDate) * 1000).toLocaleDateString()}`}
+          </Text>
+        ) : null}
       </Stack>
 
       <Text>{milestone.description || 'No Description'}</Text>
@@ -84,52 +132,7 @@ export const MilestoneItem = ({
         })}
       </Stack>
 
-      {!!invoiceAddress &&
-        (() => {
-          if (isReleased) {
-            return (
-              <Button variant="secondary" disabled>
-                <Icon id="checkInCircle" />
-                Milestone Released
-              </Button>
-            )
-          }
-
-          if (isClientConnected || isClientTreasury) {
-            return (
-              <Stack direction="column" gap="x1">
-                <Text variant="label-xs" color="tertiary">
-                  {isNext
-                    ? 'Release funds for the next milestone'
-                    : `Release funds for all milestones up to Milestone ${index + 1}`}
-                </Text>
-                <ContractButton
-                  chainId={chain.id}
-                  variant="primary"
-                  handleClick={() =>
-                    isClientConnected
-                      ? handleReleaseMilestoneDirect(index)
-                      : handleReleaseMilestoneAsProposal(index)
-                  }
-                  disabled={isClientConnected ? isReleasing : !hasThreshold}
-                  loading={isReleasing}
-                  fontSize={isClientConnected ? 16 : 12}
-                >
-                  {isClientConnected
-                    ? `Release Milestone #${index + 1}`
-                    : `Create Proposal to Release Milestone #${index + 1}`}
-                </ContractButton>
-                {!hasThreshold && !isClientConnected && (
-                  <Text variant="label-xs" color="negative">
-                    You do not have enough votes to create a proposal
-                  </Text>
-                )}
-              </Stack>
-            )
-          }
-
-          return null
-        })()}
+      {!!invoiceAddress && renderReleaseButton()}
     </Stack>
   )
 

@@ -1,19 +1,15 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { type StreamBatchData, useStreamData } from '@buildeross/hooks/useStreamData'
 import { useTokenMetadata } from '@buildeross/hooks/useTokenMetadata'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { useLinks } from '@buildeross/ui/LinksProvider'
-import { createSafeAppUrl, createSafeUrl } from '@buildeross/utils'
-import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
+import { Spinner, Stack } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
-import { Address, isAddressEqual } from 'viem'
-import { useAccount } from 'wagmi'
+import { Address, getAddress, isAddressEqual } from 'viem'
 
 import { Section } from '../Section'
+import { SenderDelegation } from './SenderDelegation'
 import { StreamItem } from './StreamItem'
 
 interface StreamDetailsProps {
@@ -24,7 +20,6 @@ interface StreamDetailsProps {
 export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsProps) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { address } = useAccount()
   const { getProposalLink } = useLinks()
 
   const {
@@ -65,18 +60,8 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
     return { allSendersSame: allSame, commonSender: allSame ? first : null }
   }, [streamBatches])
 
-  const { displayName: commonSenderDisplayName } = useEnsData(commonSender ?? undefined)
-
-  const { isGnosisSafe: isCommonSenderAGnosisSafe } = useIsGnosisSafe(
-    commonSender ?? undefined,
-    chain.id
-  )
-
   const isCommonSenderTreasury =
     commonSender && addresses.treasury && isAddressEqual(commonSender, addresses.treasury)
-
-  const isCommonSenderConnected =
-    commonSender && address && isAddressEqual(commonSender, address)
 
   // Get proposal link for Safe app integration
   const proposalUrl = useMemo(() => {
@@ -86,7 +71,7 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
     return proposalLink.href.startsWith('http')
       ? proposalLink.href
       : `${BASE_URL}${proposalLink.href}`
-  }, [chain.id, addresses.token, proposal.proposalId])
+  }, [chain.id, addresses.token, proposal.proposalId, getProposalLink])
 
   if (!isCreateTx) return null
 
@@ -109,53 +94,11 @@ export const StreamDetails = ({ proposal, onOpenProposalReview }: StreamDetailsP
             showIndividualSenders={!allSendersSame}
           />
           {allSendersSame && !!commonSender && !isCommonSenderTreasury && (
-            <>
-              <Stack direction="row" align="center" mt="x4">
-                <Text variant="label-sm" color="primary" mr="x2">
-                  Stream Delegated to
-                </Text>
-                <Box
-                  color={'secondary'}
-                  className={atoms({ textDecoration: 'underline' })}
-                >
-                  <a
-                    href={
-                      isCommonSenderAGnosisSafe
-                        ? createSafeUrl(chain.id, commonSender)
-                        : `${ETHERSCAN_BASE_URL[chain.id]}/address/${commonSender}`
-                    }
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    <Text variant="label-sm">
-                      {commonSenderDisplayName || commonSender}
-                    </Text>
-                  </a>
-                </Box>
-              </Stack>
-              {isCommonSenderAGnosisSafe &&
-                !isCommonSenderConnected &&
-                !isCommonSenderTreasury && (
-                  <Stack
-                    direction="column"
-                    fontWeight={'heading'}
-                    mt="x2"
-                    ml="x4"
-                    gap="x2"
-                  >
-                    <a
-                      href={createSafeAppUrl(chain.id, commonSender, proposalUrl)}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      <Button variant="secondary" size="sm">
-                        View Proposal As Safe App
-                        <Icon id="arrowTopRight" />
-                      </Button>
-                    </a>
-                  </Stack>
-                )}
-            </>
+            <SenderDelegation
+              chainId={chain.id}
+              senderAddress={commonSender}
+              proposalUrl={proposalUrl}
+            />
           )}
         </>
       )}
@@ -233,7 +176,9 @@ const FlattenedStreams = ({
     () =>
       Array.from(
         new Set(
-          flattenedStreams.map((s) => s.tokenAddress).filter((t): t is Address => !!t)
+          flattenedStreams
+            .map((s) => (s.tokenAddress ? getAddress(s.tokenAddress) : null))
+            .filter((t): t is Address => !!t)
         )
       ),
     [flattenedStreams]
@@ -273,7 +218,7 @@ const FlattenedStreams = ({
     <Stack>
       {streamsWithMetadata.map((streamData, index) => (
         <StreamItem
-          key={index}
+          key={index + '-' + streamData.streamId}
           stream={streamData.stream}
           index={index}
           isDurationsMode={streamData.isDurationsMode}

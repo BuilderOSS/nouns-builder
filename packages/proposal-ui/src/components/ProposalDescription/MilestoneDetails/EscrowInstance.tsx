@@ -24,7 +24,17 @@ const RELEASE_FUNCTION_ABI = [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-]
+] as const
+
+const READ_MILESTONE_ABI = [
+  {
+    inputs: [],
+    name: 'milestone',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+] as const
 
 const createSmartInvoiceUrl = (chainId: CHAIN_ID, invoiceAddress: Hex) => {
   return `https://app.smartinvoice.xyz/invoice/${chainId}/${invoiceAddress}`
@@ -70,22 +80,14 @@ export const EscrowInstance = ({
     return proposalLink.href.startsWith('http')
       ? proposalLink.href
       : `${BASE_URL}${proposalLink.href}`
-  }, [chain.id, addresses.token, proposalId])
+  }, [chain.id, addresses.token, proposalId, getProposalLink])
 
   const { data: currentMilestoneData, isLoading: isLoadingMilestone } = useReadContract({
     address: invoiceAddress,
     query: {
       enabled: !!invoiceAddress,
     },
-    abi: [
-      {
-        inputs: [],
-        name: 'milestone',
-        outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ],
+    abi: READ_MILESTONE_ABI,
     functionName: 'milestone',
     chainId: chain.id,
   })
@@ -126,7 +128,7 @@ export const EscrowInstance = ({
         calldata: encodeFunctionData({
           abi: RELEASE_FUNCTION_ABI,
           functionName: 'release',
-          args: [milestone],
+          args: [BigInt(milestone)],
         }),
         value: '',
       }
@@ -161,7 +163,7 @@ export const EscrowInstance = ({
           address: invoiceAddress,
           abi: RELEASE_FUNCTION_ABI,
           functionName: 'release',
-          args: [milestone],
+          args: [BigInt(milestone)],
         })
 
         const txHash = await writeContract(config, data.request)
@@ -181,7 +183,7 @@ export const EscrowInstance = ({
   const isLoading = !invoiceData && isLoadingMilestone
 
   return (
-    <>
+    <Stack gap="x2">
       {totalEscrows > 1 && (
         <Box mb="x4">
           <Text variant="heading-sm">Escrow #{escrowIndex + 1}</Text>
@@ -279,6 +281,6 @@ export const EscrowInstance = ({
           )}
         </Stack>
       )}
-    </>
+    </Stack>
   )
 }
