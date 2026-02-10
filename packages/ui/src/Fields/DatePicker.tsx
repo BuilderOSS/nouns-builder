@@ -42,32 +42,68 @@ const DatePicker: React.FC<DatePickerProps> = ({
   dateFormat = 'Y-m-d',
   disabled = false,
 }) => {
-  const ref = React.useRef(null)
+  const inputRef = React.useRef<HTMLInputElement | null>(null)
+  const fpRef = React.useRef<flatpickr.Instance | null>(null)
 
+  // Keep latest formik without forcing flatpickr re-init
+  const formikRef = React.useRef<FormikProps<any>>(formik)
   React.useEffect(() => {
-    if (!ref.current) return
+    formikRef.current = formik
+  }, [formik])
 
-    const fpInstance = flatpickr(ref.current, {
+  // Timer for autoSubmit to avoid submitting after unmount
+  const submitTimerRef = React.useRef<number | null>(null)
+  React.useEffect(() => {
+    return () => {
+      if (submitTimerRef.current != null) {
+        window.clearTimeout(submitTimerRef.current)
+        submitTimerRef.current = null
+      }
+    }
+  }, [])
+
+  // Init flatpickr once (or when config truly changes)
+  React.useEffect(() => {
+    if (!inputRef.current) return
+
+    fpRef.current = flatpickr(inputRef.current, {
       enableTime,
       dateFormat,
       altInput: !!altFormat,
       altFormat,
-      onChange: (_selectedDates, dateStr, _instance) => {
-        formik.setFieldValue(id, dateStr)
+      allowInput: false,
+      disableMobile: true,
+      clickOpens: !disabled,
 
-        if (autoSubmit && formik) {
-          setTimeout(() => {
-            formik.submitForm()
+      onChange: (_selectedDates, dateStr) => {
+        formikRef.current.setFieldValue(id, dateStr)
+
+        if (autoSubmit) {
+          // clear any pending submit
+          if (submitTimerRef.current != null) {
+            window.clearTimeout(submitTimerRef.current)
+          }
+          submitTimerRef.current = window.setTimeout(() => {
+            formikRef.current.submitForm()
           }, 100)
         }
       },
     })
 
     return () => {
-      // Clean up flatpickr instance on unmount
-      fpInstance.destroy()
+      fpRef.current?.destroy()
+      fpRef.current = null
     }
-  }, [autoSubmit, formik, id, altFormat, dateFormat, enableTime])
+  }, [autoSubmit, id, altFormat, dateFormat, enableTime, disabled])
+
+  // Sync external value -> flatpickr without firing change callbacks
+  React.useEffect(() => {
+    const fp = fpRef.current
+    if (!fp) return
+
+    if (value) fp.setDate(value, false)
+    else fp.clear(false) // IMPORTANT: suppress onChange
+  }, [value])
 
   return (
     <Box as="fieldset" mb={'x8'} p={'x0'} className={defaultFieldsetStyle}>
@@ -75,12 +111,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
       <Box position="relative">
         <input
           className={!!errorMessage ? defaultInputErrorStyle : defaultInputStyle}
-          ref={ref}
-          type={'text'}
-          data-input={true}
-          value={value || ''}
+          ref={inputRef}
+          type="text"
+          data-input
           placeholder={placeholder}
-          readOnly={true}
           disabled={disabled}
         />
         {errorMessage && (
