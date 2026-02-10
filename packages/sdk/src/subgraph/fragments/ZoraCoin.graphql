@@ -5,7 +5,20 @@ fragment ZoraCoin on ZoraCoin {
   symbol
   uri
   currency
+  poolKeyHash
+  poolHooks
+  poolFee
+  poolTickSpacing
   createdAt
   createdAtBlock
   transactionHash
+  dao {
+    id
+    name
+  }
+  clankerToken {
+    tokenAddress
+    tokenName
+    tokenSymbol
+  }
 }

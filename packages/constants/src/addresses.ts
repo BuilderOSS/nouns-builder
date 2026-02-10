@@ -164,3 +164,40 @@ export const UNISWAP_STATE_VIEW_ADDRESS: Record<COIN_SUPPORTED_CHAIN_ID, Address
   [CHAIN_ID.BASE]: '0xa3c0c9b65bad0b08107aa264b0f3db444b867a71' as AddressType,
   [CHAIN_ID.BASE_SEPOLIA]: '0x571291b572ed32ce6751a2cb2486ebee8defb9b4' as AddressType,
 }
+
+// Uniswap V4 Pool Manager
+export const UNISWAP_V4_POOL_MANAGER_ADDRESS: Record<
+  COIN_SUPPORTED_CHAIN_ID,
+  AddressType
+> = {
+  [CHAIN_ID.BASE]: '0x498581ff718922c3f8e6a244956af099b2652b2b' as AddressType,
+  [CHAIN_ID.BASE_SEPOLIA]: '0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408' as AddressType,
+}
+
+// Uniswap V4 Quoter
+export const UNISWAP_V4_QUOTER_ADDRESS: Record<COIN_SUPPORTED_CHAIN_ID, AddressType> = {
+  [CHAIN_ID.BASE]: '0x0d5e0f971ed27fbff6c2837bf31316121532048d' as AddressType,
+  [CHAIN_ID.BASE_SEPOLIA]: '0x4a6513c898fe1b2d0e78d3b0e0a4a151589b1cba' as AddressType,
+}
+
+// Uniswap V4 Position Manager
+export const UNISWAP_V4_POSITION_MANAGER_ADDRESS: Record<
+  COIN_SUPPORTED_CHAIN_ID,
+  AddressType
+> = {
+  [CHAIN_ID.BASE]: '0x7c5f5a4bbd8fd63184577525326123b519429bdc' as AddressType,
+  [CHAIN_ID.BASE_SEPOLIA]: '0x4b2c77d209d3405f41a037ec6c77f7f5b8e2ca80' as AddressType,
+}
+
+// Uniswap Universal Router
+export const UNISWAP_UNIVERSAL_ROUTER_ADDRESS: Record<
+  COIN_SUPPORTED_CHAIN_ID,
+  AddressType
+> = {
+  [CHAIN_ID.BASE]: '0x6ff5693b99212da76ad316178a184ab56d299b43' as AddressType,
+  [CHAIN_ID.BASE_SEPOLIA]: '0x492e6456d9528771018deb9e87ef7750ef184104' as AddressType,
+}
+
+// Permit2 (same across chains)
+export const PERMIT2_ADDRESS: AddressType =
+  '0x000000000022D473030F116dDEE9F6B43aC78BA3' as AddressType

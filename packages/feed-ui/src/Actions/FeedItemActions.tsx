@@ -2,6 +2,7 @@ import type { FeedItem } from '@buildeross/types'
 import React from 'react'
 
 import { AuctionActions } from './AuctionActions'
+import { CoinActions } from './CoinActions'
 import { ProposalActions } from './ProposalActions'
 
 interface FeedItemActionsProps {
@@ -72,6 +73,12 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           isExecuted={true}
         />
       )
+
+    case 'CLANKER_TOKEN_CREATED':
+      return <CoinActions chainId={item.chainId} coinAddress={item.tokenAddress} />
+
+    case 'ZORA_COIN_CREATED':
+      return <CoinActions chainId={item.chainId} coinAddress={item.coinAddress} />
 
     default:
       return null

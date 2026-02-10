@@ -46,7 +46,7 @@ export const DecodedDisplay: React.FC<{
   chainId: CHAIN_ID
   addresses: DaoContractAddresses
   transaction: DecodedTransactionData
-  target: string
+  target: `0x${string}`
   value: string
   index: number
 }> = ({ chainId, addresses, transaction, target, value, index }) => {

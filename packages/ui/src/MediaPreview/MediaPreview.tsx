@@ -12,6 +12,8 @@ export interface MediaPreviewProps {
   coverUrl?: string
   width?: string | number
   height?: string | number
+  /** Force a specific aspect ratio (width/height). Examples: 1, 16/9, "16/9", "1:1" */
+  aspectRatio?: number | string
 }
 
 export const MediaPreview: React.FC<MediaPreviewProps> = ({
@@ -20,6 +22,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
   coverUrl,
   width,
   height,
+  aspectRatio,
 }) => {
   const fetchableMediaURL = useMemo(
     () => getFetchableUrls(mediaUrl)?.[0] || '',
@@ -32,12 +35,25 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
 
   if (fetchableMediaURL && mediaType?.startsWith('image')) {
     return (
-      <ImagePreview src={fetchableMediaURL} alt="Preview" width={width} height={height} />
+      <ImagePreview
+        src={fetchableMediaURL}
+        alt="Preview"
+        width={width}
+        height={height}
+        aspectRatio={aspectRatio}
+      />
     )
   }
 
   if (fetchableMediaURL && mediaType?.startsWith('video')) {
-    return <VideoPreview src={fetchableMediaURL} width={width} height={height} />
+    return (
+      <VideoPreview
+        src={fetchableMediaURL}
+        width={width}
+        height={height}
+        aspectRatio={aspectRatio}
+      />
+    )
   }
 
   if (fetchableMediaURL && mediaType?.startsWith('audio')) {

@@ -6,16 +6,16 @@ import { useMemo } from 'react'
 import useSWR, { type KeyedMutator } from 'swr'
 
 export type DecodedTransactionSuccess = {
-  target: string
+  target: `0x${string}`
   value: string
   transaction: DecodedTransactionData
   isNotDecoded: false
 }
 
 export type DecodedTransactionFailure = {
-  target: string
+  target: `0x${string}`
   value: string
-  transaction: string
+  transaction: `0x${string}`
   isNotDecoded: true
 }
 

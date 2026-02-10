@@ -45,7 +45,7 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
       {sections && sections.length > 1 && (
         <Box position={'relative'} className={sectionNavigationWrapper}>
           <Flex
-            px={'x2'}
+            px={'x6'}
             mx={{ '@initial': 'x0', '@768': 'auto' }}
             justify={'center'}
             w={'100%'}

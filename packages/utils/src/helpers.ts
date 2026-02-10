@@ -131,6 +131,33 @@ export const flatten = (object: object) => {
   )
 }
 
+export const truncateHex = (
+  hex: `0x${string}` | undefined,
+  chars: number = 5
+): string => {
+  if (!hex) {
+    return ''
+  }
+
+  if (!hex.startsWith('0x')) {
+    return hex
+  }
+
+  return hex.substring(0, chars) + '…' + hex.substring(hex.length - chars, hex.length)
+}
+
+export const truncateAddress = (addr: string | undefined, chars: number = 5): string => {
+  if (!addr) {
+    return ''
+  }
+
+  if (!isAddress(addr, { strict: false })) {
+    return addr
+  }
+
+  return truncateHex(getAddress(addr), chars)
+}
+
 /**
  * Create snippet of wallet address or
  * return address if it is not a "address"
@@ -138,24 +165,9 @@ export const flatten = (object: object) => {
  *
  * @param addr
  * @param chars
- * @returns {string || null}
+ * @returns {string}
  */
-
-export const walletSnippet = (addr: string | number | undefined, chars: number = 5) => {
-  if (!addr) {
-    return ''
-  }
-
-  if (!isAddress(addr.toString(), { strict: false })) {
-    return addr.toString()
-  }
-
-  let _addr = getAddress(addr.toString())
-
-  return (
-    _addr.substring(0, chars) + '…' + _addr.substring(_addr.length - chars, _addr.length)
-  )
-}
+export const walletSnippet = truncateAddress
 
 /**
  * Pass a normal function in to have it return a promise with its valud

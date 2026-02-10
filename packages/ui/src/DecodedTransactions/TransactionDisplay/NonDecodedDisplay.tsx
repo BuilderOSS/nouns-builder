@@ -7,7 +7,7 @@ import React from 'react'
 import { formatEther } from 'viem'
 
 export const NonDecodedDisplay: React.FC<{
-  target: string
+  target: `0x${string}`
   chainId: CHAIN_ID
   calldata: string
   value: string

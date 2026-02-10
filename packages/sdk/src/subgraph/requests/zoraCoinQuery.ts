@@ -31,3 +31,27 @@ export const daoZoraCoinsRequest = async (
     return []
   }
 }
+
+export const zoraCoinRequest = async (
+  coinAddress: string,
+  chainId: CHAIN_ID
+): Promise<ZoraCoinFragment | null> => {
+  if (!coinAddress) throw new Error('No coin address provided')
+  if (!isAddress(coinAddress)) throw new Error('Invalid coin address')
+
+  try {
+    const data = await SDK.connect(chainId).zoraCoin({
+      coinAddress: coinAddress.toLowerCase(),
+    })
+
+    return data.zoraCoin || null
+  } catch (e: any) {
+    console.error('Error fetching ZoraCoin:', e)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(e)
+      sentry.flush(2000).catch(() => {})
+    } catch (_) {}
+    return null
+  }
+}

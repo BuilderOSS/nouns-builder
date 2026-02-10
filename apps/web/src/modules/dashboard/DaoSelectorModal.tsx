@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { COIN_SUPPORTED_CHAIN_IDS, PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -63,6 +63,11 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   // For posts: show search, For proposals: no search (members only)
   const showSearch = actionType === 'post'
 
+  // For posts: filter to coin-supported chains
+  const effectiveChainIds = (
+    actionType === 'post' ? COIN_SUPPORTED_CHAIN_IDS : chainIds
+  ) as CHAIN_ID[]
+
   return (
     <AnimatedModal open={open} close={handleCancel} size="large">
       <Stack>
@@ -75,11 +80,12 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
         <div className={modalBody}>
           <SingleDaoSelector
-            chainIds={chainIds}
+            chainIds={effectiveChainIds}
             selectedDaoAddress={selectedDao?.address}
             onSelectedDaoChange={setSelectedDao}
             userAddress={userAddress}
             showSearch={showSearch}
+            actionType={actionType}
           />
         </div>
 

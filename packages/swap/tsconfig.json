@@ -1,0 +1,13 @@
+{
+  "extends": "@buildeross/tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": false,
+    "moduleResolution": "bundler",
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+}

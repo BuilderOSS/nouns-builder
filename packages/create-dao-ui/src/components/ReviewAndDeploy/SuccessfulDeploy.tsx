@@ -28,7 +28,7 @@ const DEPLOYMENT_ERROR = {
     'Oops! It looks like there was a problem. Please ensure that your input data is correct',
 }
 
-const DisplayAddress: React.FC<{ address: string }> = ({ address }) => {
+const DisplayAddress: React.FC<{ address: `0x${string}` }> = ({ address }) => {
   return (
     <Flex align={'center'} fontSize={18} className={infoSectionValueVariants['default']}>
       <Text

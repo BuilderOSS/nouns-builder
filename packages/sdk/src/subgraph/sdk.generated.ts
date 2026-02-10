@@ -5669,6 +5669,7 @@ export type ClankerTokenFragment = {
   createdAt: any
   createdAtBlock: any
   transactionHash: any
+  dao?: { __typename?: 'DAO'; id: string; name: string } | null
 }
 
 export type CurrentAuctionFragment = {
@@ -5766,9 +5767,20 @@ export type ZoraCoinFragment = {
   symbol: string
   uri: string
   currency: any
+  poolKeyHash: any
+  poolHooks: any
+  poolFee: any
+  poolTickSpacing: number
   createdAt: any
   createdAtBlock: any
   transactionHash: any
+  dao?: { __typename?: 'DAO'; id: string; name: string } | null
+  clankerToken?: {
+    __typename?: 'ClankerToken'
+    tokenAddress: any
+    tokenName: string
+    tokenSymbol: string
+  } | null
 }
 
 export type DaoMultisigUpdateFragment = {
@@ -5873,6 +5885,7 @@ export type ClankerTokenQuery = {
     createdAt: any
     createdAtBlock: any
     transactionHash: any
+    dao?: { __typename?: 'DAO'; id: string; name: string } | null
   } | null
 }
 
@@ -5902,6 +5915,7 @@ export type DaoClankerTokensQuery = {
       createdAt: any
       createdAtBlock: any
       transactionHash: any
+      dao?: { __typename?: 'DAO'; id: string; name: string } | null
     }>
   } | null
 }
@@ -6135,9 +6149,20 @@ export type DaoZoraCoinsQuery = {
       symbol: string
       uri: string
       currency: any
+      poolKeyHash: any
+      poolHooks: any
+      poolFee: any
+      poolTickSpacing: number
       createdAt: any
       createdAtBlock: any
       transactionHash: any
+      dao?: { __typename?: 'DAO'; id: string; name: string } | null
+      clankerToken?: {
+        __typename?: 'ClankerToken'
+        tokenAddress: any
+        tokenName: string
+        tokenSymbol: string
+      } | null
     }>
   } | null
 }
@@ -6220,6 +6245,19 @@ export type DaosForUserQuery = {
     treasuryAddress: any
     auctionAddress: any
     governorAddress: any
+  }>
+}
+
+export type DaosWithClankerTokensQueryVariables = Exact<{
+  daoIds: Array<Scalars['ID']['input']> | Scalars['ID']['input']
+}>
+
+export type DaosWithClankerTokensQuery = {
+  __typename?: 'Query'
+  daos: Array<{
+    __typename?: 'DAO'
+    id: string
+    clankerTokens: Array<{ __typename?: 'ClankerToken'; id: string }>
   }>
 }
 
@@ -6858,6 +6896,37 @@ export type UserProposalVoteQuery = {
   }>
 }
 
+export type ZoraCoinQueryVariables = Exact<{
+  coinAddress: Scalars['ID']['input']
+}>
+
+export type ZoraCoinQuery = {
+  __typename?: 'Query'
+  zoraCoin?: {
+    __typename?: 'ZoraCoin'
+    id: string
+    coinAddress: any
+    name: string
+    symbol: string
+    uri: string
+    currency: any
+    poolKeyHash: any
+    poolHooks: any
+    poolFee: any
+    poolTickSpacing: number
+    createdAt: any
+    createdAtBlock: any
+    transactionHash: any
+    dao?: { __typename?: 'DAO'; id: string; name: string } | null
+    clankerToken?: {
+      __typename?: 'ClankerToken'
+      tokenAddress: any
+      tokenName: string
+      tokenSymbol: string
+    } | null
+  } | null
+}
+
 export const AuctionFragmentDoc = gql`
   fragment Auction on Auction {
     dao {
@@ -6888,6 +6957,10 @@ export const ClankerTokenFragmentDoc = gql`
     createdAt
     createdAtBlock
     transactionHash
+    dao {
+      id
+      name
+    }
   }
 `
 export const CurrentAuctionFragmentDoc = gql`
@@ -7010,9 +7083,22 @@ export const ZoraCoinFragmentDoc = gql`
     symbol
     uri
     currency
+    poolKeyHash
+    poolHooks
+    poolFee
+    poolTickSpacing
     createdAt
     createdAtBlock
     transactionHash
+    dao {
+      id
+      name
+    }
+    clankerToken {
+      tokenAddress
+      tokenName
+      tokenSymbol
+    }
   }
 `
 export const DaoMultisigUpdateFragmentDoc = gql`
@@ -7391,6 +7477,16 @@ export const DaosForUserDocument = gql`
   }
   ${DaoFragmentDoc}
 `
+export const DaosWithClankerTokensDocument = gql`
+  query daosWithClankerTokens($daoIds: [ID!]!) {
+    daos(where: { id_in: $daoIds }) {
+      id
+      clankerTokens(first: 1) {
+        id
+      }
+    }
+  }
+`
 export const FeedEventsDocument = gql`
   query feedEvents($first: Int!, $where: FeedEvent_filter) {
     feedEvents(first: $first, where: $where, orderBy: timestamp, orderDirection: desc) {
@@ -7741,6 +7837,14 @@ export const UserProposalVoteDocument = gql`
   }
   ${ProposalVoteFragmentDoc}
 `
+export const ZoraCoinDocument = gql`
+  query zoraCoin($coinAddress: ID!) {
+    zoraCoin(id: $coinAddress) {
+      ...ZoraCoin
+    }
+  }
+  ${ZoraCoinFragmentDoc}
+`
 
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -8085,6 +8189,24 @@ export function getSdk(
         variables
       )
     },
+    daosWithClankerTokens(
+      variables: DaosWithClankerTokensQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaosWithClankerTokensQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaosWithClankerTokensQuery>({
+            document: DaosWithClankerTokensDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daosWithClankerTokens',
+        'query',
+        variables
+      )
+    },
     feedEvents(
       variables: FeedEventsQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -8333,6 +8455,24 @@ export function getSdk(
             signal,
           }),
         'userProposalVote',
+        'query',
+        variables
+      )
+    },
+    zoraCoin(
+      variables: ZoraCoinQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraCoinQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraCoinQuery>({
+            document: ZoraCoinDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'zoraCoin',
         'query',
         variables
       )

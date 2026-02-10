@@ -15,6 +15,7 @@
     "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/proposal-ui": "workspace:*",
     "@buildeross/sdk": "workspace:*",
+    "@buildeross/swap": "workspace:*",
     "@buildeross/stores": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/ui": "workspace:*",

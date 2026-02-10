@@ -34,7 +34,7 @@ import {
 import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { type Address, zeroAddress, zeroHash } from 'viem'
+import { type Address, decodeEventLog, zeroAddress, zeroHash } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -216,6 +216,9 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const { address: userAddress } = useAccount()
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [isDeploying, setIsDeploying] = useState(false)
+  const [deploymentStage, setDeploymentStage] = useState<
+    'idle' | 'deploying' | 'processing'
+  >('idle')
   const [priceWarning, setPriceWarning] = useState<string | undefined>()
 
   // Check if the current chain is supported
@@ -351,6 +354,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     setSubmitError(undefined)
     setPriceWarning(undefined)
     setIsDeploying(true)
+    setDeploymentStage('deploying')
 
     try {
       // 1. Create metadata builder and configure metadata
@@ -435,12 +439,67 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
         builderTreasuryAddress
       )
 
-      // Success! Navigate back or show success message
+      // Success! Parse transaction and navigate to coin page
       if (txHash) {
-        // Reset form
-        actions.resetForm()
-        // Navigate back to DAO page
-        router.back()
+        try {
+          // Update stage to show we're processing
+          setDeploymentStage('processing')
+
+          // Wait for transaction receipt to get logs
+          const receipt = await waitForTransactionReceipt(config, {
+            hash: txHash,
+            chainId,
+          })
+
+          // Parse logs to find the coin address from CoinCreatedV4 event
+          let coinAddress: Address | null = null
+
+          for (const log of receipt.logs) {
+            try {
+              // Decode the log using the coinFactory ABI
+              const decodedLog = decodeEventLog({
+                abi: coinFactoryConfig.abi,
+                data: log.data,
+                topics: log.topics,
+              })
+
+              // Check if this is the CoinCreatedV4 event
+              if (decodedLog.eventName === 'CoinCreatedV4') {
+                // Extract the coin address from the event args
+                // The event structure should have the coin address in args
+                const args = decodedLog.args as any
+                if (args.coin) {
+                  coinAddress = args.coin as Address
+                  break
+                }
+              }
+            } catch (e) {
+              // Continue to next log if parsing fails (might be a different event)
+              continue
+            }
+          }
+
+          // Reset form
+          actions.resetForm()
+
+          // Navigate to coin page if we found the address, otherwise go back
+          if (coinAddress) {
+            const chain = COIN_SUPPORTED_CHAINS.find((c) => c.id === chainId)
+            if (chain) {
+              router.push(`/coin/${chain.slug}/${coinAddress}`)
+            } else {
+              router.back()
+            }
+          } else {
+            // Fallback: navigate back if we couldn't parse the coin address
+            router.back()
+          }
+        } catch (error) {
+          console.error('Error parsing transaction or navigating:', error)
+          // Fallback: navigate back on error
+          actions.resetForm()
+          router.back()
+        }
       }
     } catch (error) {
       console.error('Error publishing post:', error)
@@ -449,6 +508,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       setSubmitError(error instanceof Error ? error.message : 'Failed to publish post')
     } finally {
       setIsDeploying(false)
+      setDeploymentStage('idle')
       actions.setSubmitting(false)
     }
   }
@@ -642,7 +702,11 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                     handleClick={formik.handleSubmit}
                     chainId={chainId}
                   >
-                    {isDeploying ? 'Publishing...' : 'Publish Post'}
+                    {deploymentStage === 'processing'
+                      ? 'Processing transaction...'
+                      : deploymentStage === 'deploying'
+                        ? 'Publishing...'
+                        : 'Publish Post'}
                   </ContractButton>
                 </Flex>
               </Flex>
