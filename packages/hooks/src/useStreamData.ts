@@ -8,6 +8,7 @@ import {
   StreamStatus,
 } from '@buildeross/utils/sablier/constants'
 import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
+import { calculateStreamedAmountLL } from '@buildeross/utils/sablier/math'
 import {
   extractStreamData,
   StreamData,
@@ -35,74 +36,6 @@ export type StreamDataResult = {
   isLoadingStreamIds: boolean
   isLoadingLiveData: boolean
   refetchLiveData: () => Promise<unknown>
-}
-
-/**
- * Port of calculateStreamedAmountLL() to TypeScript bigint arithmetic.
- *
- * Notes:
- * - Uses integer division (floor) for the percentage multiplication.
- * - Mirrors the Solidity branching and safety checks.
- */
-function calculateStreamedAmountLL(params: {
-  now: number
-  cliffTime: number
-  depositedAmount: bigint
-  endTime: number
-  startTime: number
-  unlockStart: bigint
-  unlockCliff: bigint
-  withdrawnAmount: bigint
-}): bigint {
-  const {
-    now,
-    cliffTime,
-    depositedAmount,
-    endTime,
-    startTime,
-    unlockStart,
-    unlockCliff,
-    withdrawnAmount,
-  } = params
-
-  // If the start time is in the future, return zero.
-  if (startTime > now) return 0n
-
-  // If the cliff time is in the future, return the start unlock amount.
-  if (cliffTime > now) return unlockStart
-
-  // If the end time is not in the future, return the deposited amount.
-  if (endTime <= now) return depositedAmount
-
-  const unlockSum = unlockStart + unlockCliff
-
-  // Safety: if unlock sum >= deposited, streamed is deposited.
-  if (unlockSum >= depositedAmount) return depositedAmount
-
-  // Determine elapsed time + range depending on whether cliffTime is "disabled" (0)
-  let elapsed: bigint
-  let range: bigint
-
-  if (cliffTime === 0) {
-    elapsed = BigInt(now - startTime)
-    range = BigInt(endTime - startTime)
-  } else {
-    elapsed = BigInt(now - cliffTime)
-    range = BigInt(endTime - cliffTime)
-  }
-
-  // Defensive: avoid division by zero (shouldn’t happen if times are valid)
-  if (range <= 0n) return unlockSum
-
-  const streamableAmount = depositedAmount - unlockSum
-
-  // unlockSum + (elapsed/range) * streamableAmount  (all integer math)
-  const streamed = unlockSum + (elapsed * streamableAmount) / range
-
-  // Solidity safety: if streamed > deposited, return withdrawnAmount (freeze)
-  if (streamed > depositedAmount) return withdrawnAmount
-
-  return streamed
 }
 
 function clampSub(a: bigint, b: bigint): bigint {

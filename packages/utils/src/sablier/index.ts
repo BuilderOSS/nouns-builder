@@ -1,6 +1,7 @@
 export * from './constants'
 export * from './contracts'
 export * from './encoding'
+export * from './math'
 export * from './streams'
 export * from './validation'
 
