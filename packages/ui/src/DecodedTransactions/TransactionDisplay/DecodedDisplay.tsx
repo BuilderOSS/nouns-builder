@@ -13,7 +13,9 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import {
   getSablierContracts,
   parseStreamDataConfigDurations,
+  parseStreamDataConfigDurationsLD,
   parseStreamDataConfigTimestamps,
+  parseStreamDataConfigTimestampsLD,
   type StreamConfig,
 } from '@buildeross/utils/sablier'
 import { atoms, Box, Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -28,6 +30,16 @@ const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) return error.message
   if (typeof error === 'string') return error
   return JSON.stringify(error)
+}
+
+const getParserFromFunctionName = (
+  functionName: string
+): ((_data: any) => StreamConfig) | null => {
+  if (functionName === 'createWithDurationsLL') return parseStreamDataConfigDurations
+  if (functionName === 'createWithTimestampsLL') return parseStreamDataConfigTimestamps
+  if (functionName === 'createWithDurationsLD') return parseStreamDataConfigDurationsLD
+  if (functionName === 'createWithTimestampsLD') return parseStreamDataConfigTimestampsLD
+  return null
 }
 
 export const DecodedDisplay: React.FC<{
@@ -81,7 +93,9 @@ export const DecodedDisplay: React.FC<{
     // Check if this is a createWithDurationsLL or createWithTimestampsLL function
     if (
       transaction.functionName !== 'createWithDurationsLL' &&
-      transaction.functionName !== 'createWithTimestampsLL'
+      transaction.functionName !== 'createWithTimestampsLL' &&
+      transaction.functionName !== 'createWithDurationsLD' &&
+      transaction.functionName !== 'createWithTimestampsLD'
     ) {
       return undefined
     }
@@ -99,10 +113,13 @@ export const DecodedDisplay: React.FC<{
 
       if (!lockupArg || !tokenArg || !batchArg) return undefined
 
-      const isDurationsMode = transaction.functionName === 'createWithDurationsLL'
-      const parser: (_data: any) => StreamConfig = isDurationsMode
-        ? parseStreamDataConfigDurations
-        : parseStreamDataConfigTimestamps
+      const isDurationsMode =
+        transaction.functionName === 'createWithDurationsLL' ||
+        transaction.functionName === 'createWithDurationsLD'
+
+      const parser = getParserFromFunctionName(transaction.functionName)
+
+      if (!parser) return undefined
 
       const streams = (Array.isArray(batchArg.value) ? batchArg.value : []).map(parser)
 

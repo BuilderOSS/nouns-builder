@@ -6,6 +6,7 @@ import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores
 import { AddressType, TokenMetadata, TransactionType } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { StreamGraph } from '@buildeross/ui/Graph'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -15,8 +16,7 @@ import {
   createSablierStreamUrl,
   formatStreamDuration,
   getStatusLabel,
-  StreamConfigDurations,
-  StreamConfigTimestamps,
+  StreamConfig,
   StreamLiveData,
 } from '@buildeross/utils/sablier/streams'
 import { createSafeAppUrl } from '@buildeross/utils/safe'
@@ -30,7 +30,7 @@ import { SenderDelegation } from './SenderDelegation'
 import { linkStyle } from './StreamItem.css'
 
 interface StreamItemProps {
-  stream: StreamConfigDurations | StreamConfigTimestamps
+  stream: StreamConfig
   index: number
   isDurationsMode: boolean
   liveData: StreamLiveData | null
@@ -115,6 +115,16 @@ export const StreamItem = ({
 
   const duration = endTime - startTime
   const hasCliff = cliffTime > 0
+
+  // Check if stream is exponential (from LockupDynamic config or liveData)
+  const exponent = useMemo(() => {
+    if (liveData?.exponent) return liveData.exponent
+    if ('exponent' in stream) return stream.exponent
+    return undefined
+  }, [liveData, stream])
+
+  const isExponential =
+    exponent !== undefined && exponent !== null ? exponent >= 2 : false
 
   const isRecipient = address && isAddressEqual(stream.recipient, address)
 
@@ -300,6 +310,42 @@ export const StreamItem = ({
           </Text>
         </Stack>
       )}
+
+      {/* Stream Visualization Graph */}
+      <Box mt="x4" p="x4" borderRadius="curved" backgroundColor="background2">
+        <Stack direction="row" align="center" justify="space-between" mb="x2">
+          <Text variant="label-sm">Stream Curve</Text>
+          {isExponential && exponent && (
+            <Text variant="label-xs" color="text3">
+              Exponential (exp: {exponent})
+            </Text>
+          )}
+          {!isExponential && (
+            <Text variant="label-xs" color="text3">
+              Linear
+            </Text>
+          )}
+        </Stack>
+        {/*
+          Responsive SVG: width/height props define viewBox coordinates for tooltip positioning.
+          SVG scales to fill container via w="100%" and aspectRatio matching 500:220 (≈2.27:1).
+          Tooltip positions are calculated in viewBox space, ensuring correct alignment at all sizes.
+          Accordion allows overflow when open, enabling tooltips to extend beyond bounds.
+        */}
+        <Box w="100%" style={{ aspectRatio: '2.27/1' }}>
+          <StreamGraph
+            depositAmount={totalAmount}
+            decimals={decimals}
+            symbol={tokenMetadata?.symbol ?? ''}
+            startTime={startTime}
+            endTime={endTime}
+            cliffTime={hasCliff ? cliffTime : 0}
+            exponent={exponent}
+            width={500}
+            height={220}
+          />
+        </Box>
+      </Box>
 
       {liveData && (
         <>

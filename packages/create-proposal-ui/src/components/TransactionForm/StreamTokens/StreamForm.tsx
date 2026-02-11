@@ -1,9 +1,13 @@
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
-import { Button, Stack } from '@buildeross/zord'
+import { StreamGraph } from '@buildeross/ui/Graph'
+import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
-import React from 'react'
+import React, { useMemo } from 'react'
+import { parseUnits } from 'viem'
 
 import { StreamFormValues, StreamTokensValues } from './StreamTokens.schema'
+
+const SECONDS_PER_DAY = 86400
 
 interface StreamFormProps {
   index: number
@@ -13,6 +17,10 @@ interface StreamFormProps {
 export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) => {
   const formik = useFormikContext<StreamTokensValues>()
   const durationType = formik.values.durationType
+  const useExponential = formik.values.useExponential || false
+  const stream = formik.values.streams[index]
+  const decimals = formik.values.tokenMetadata?.decimals ?? 18
+  const symbol = formik.values.tokenMetadata?.symbol ?? ''
 
   // Helper to get error message for a field
   const getFieldError = (fieldName: keyof StreamFormValues): string | undefined => {
@@ -22,8 +30,64 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
     return error ? String(error) : undefined
   }
 
+  // Calculate stream times and amount for graph preview
+  const streamPreviewData = useMemo(() => {
+    if (!stream.amount || stream.amount.trim() === '') return null
+
+    try {
+      const depositAmount = parseUnits(stream.amount, decimals)
+      if (depositAmount <= 0n) return null
+
+      let startTime: number
+      let endTime: number
+      let cliffTime = 0
+
+      if (durationType === 'days') {
+        if (!stream.durationDays || stream.durationDays <= 0) return null
+        const now = Math.floor(Date.now() / 1000)
+        startTime = now
+        endTime = now + stream.durationDays * SECONDS_PER_DAY
+        if (!useExponential && stream.cliffDays && stream.cliffDays > 0) {
+          cliffTime = now + stream.cliffDays * SECONDS_PER_DAY
+        }
+      } else {
+        // dates mode
+        if (!stream.startDate || !stream.endDate) return null
+        startTime = Math.floor(new Date(stream.startDate).getTime() / 1000)
+        endTime = Math.floor(new Date(stream.endDate).getTime() / 1000)
+        if (endTime <= startTime) return null
+        if (!useExponential && stream.cliffDays && stream.cliffDays > 0) {
+          cliffTime = startTime + stream.cliffDays * SECONDS_PER_DAY
+        }
+      }
+
+      return {
+        depositAmount,
+        decimals,
+        symbol,
+        startTime,
+        endTime,
+        cliffTime,
+        exponent: useExponential ? formik.values.exponent : undefined,
+      }
+    } catch (error) {
+      return null
+    }
+  }, [
+    stream.amount,
+    stream.durationDays,
+    stream.startDate,
+    stream.endDate,
+    stream.cliffDays,
+    durationType,
+    decimals,
+    symbol,
+    useExponential,
+    formik.values.exponent,
+  ])
+
   return (
-    <Stack gap={'x4'}>
+    <Stack>
       <SmartInput
         type={FIELD_TYPES.TEXT}
         formik={formik}
@@ -70,32 +134,34 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
             helperText="How many days the stream will last from now"
           />
 
-          <SmartInput
-            {...formik.getFieldProps(`streams.${index}.cliffDays`)}
-            inputLabel="Cliff Period (optional, in days)"
-            id={`streams.${index}.cliffDays`}
-            type={FIELD_TYPES.NUMBER}
-            placeholder={'0'}
-            min={0}
-            step={1}
-            errorMessage={
-              formik.touched.streams?.[index]?.cliffDays
-                ? getFieldError('cliffDays')
-                : undefined
-            }
-            helperText="Tokens will start streaming after this many days (0 = immediate)"
-            onChange={(e) => {
-              formik.handleChange(e)
-              formik.setFieldTouched(`streams.${index}.cliffDays`, true, false)
-            }}
-            onBlur={(e) => {
-              formik.handleBlur(e)
-              formik.setFieldTouched(`streams.${index}.cliffDays`, true, true)
-            }}
-            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-              e.target.select()
-            }}
-          />
+          {!useExponential && (
+            <SmartInput
+              {...formik.getFieldProps(`streams.${index}.cliffDays`)}
+              inputLabel="Cliff Period (optional, in days)"
+              id={`streams.${index}.cliffDays`}
+              type={FIELD_TYPES.NUMBER}
+              placeholder={'0'}
+              min={0}
+              step={1}
+              errorMessage={
+                formik.touched.streams?.[index]?.cliffDays
+                  ? getFieldError('cliffDays')
+                  : undefined
+              }
+              helperText="Tokens will start streaming after this many days (0 = immediate)"
+              onChange={(e) => {
+                formik.handleChange(e)
+                formik.setFieldTouched(`streams.${index}.cliffDays`, true, false)
+              }}
+              onBlur={(e) => {
+                formik.handleBlur(e)
+                formik.setFieldTouched(`streams.${index}.cliffDays`, true, true)
+              }}
+              onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                e.target.select()
+              }}
+            />
+          )}
         </>
       ) : (
         <>
@@ -129,33 +195,62 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
             helperText="When the stream will end"
           />
 
-          <SmartInput
-            {...formik.getFieldProps(`streams.${index}.cliffDays`)}
-            inputLabel="Cliff Period (optional, in days)"
-            id={`streams.${index}.cliffDays`}
-            type={FIELD_TYPES.NUMBER}
-            placeholder={'0'}
-            min={0}
-            step={1}
-            errorMessage={
-              formik.touched.streams?.[index]?.cliffDays
-                ? getFieldError('cliffDays')
-                : undefined
-            }
-            helperText="Tokens will start streaming after this many days from start"
-            onChange={(e) => {
-              formik.handleChange(e)
-              formik.setFieldTouched(`streams.${index}.cliffDays`, true, false)
-            }}
-            onBlur={(e) => {
-              formik.handleBlur(e)
-              formik.setFieldTouched(`streams.${index}.cliffDays`, true, true)
-            }}
-            onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
-              e.target.select()
-            }}
-          />
+          {!useExponential && (
+            <SmartInput
+              {...formik.getFieldProps(`streams.${index}.cliffDays`)}
+              inputLabel="Cliff Period (optional, in days)"
+              id={`streams.${index}.cliffDays`}
+              type={FIELD_TYPES.NUMBER}
+              placeholder={'0'}
+              min={0}
+              step={1}
+              errorMessage={
+                formik.touched.streams?.[index]?.cliffDays
+                  ? getFieldError('cliffDays')
+                  : undefined
+              }
+              helperText="Tokens will start streaming after this many days from start"
+              onChange={(e) => {
+                formik.handleChange(e)
+                formik.setFieldTouched(`streams.${index}.cliffDays`, true, false)
+              }}
+              onBlur={(e) => {
+                formik.handleBlur(e)
+                formik.setFieldTouched(`streams.${index}.cliffDays`, true, true)
+              }}
+              onFocus={(e: React.FocusEvent<HTMLInputElement>) => {
+                e.target.select()
+              }}
+            />
+          )}
         </>
+      )}
+
+      {/* Stream Preview Graph */}
+      {streamPreviewData && (
+        <Box mt="x4" p="x4" borderRadius="curved" backgroundColor="background2">
+          <Text variant="label-sm" mb="x2">
+            Stream Preview
+            {useExponential && formik.values.exponent && (
+              <Text as="span" color="text3" ml="x2">
+                (Exponential, exponent: {formik.values.exponent})
+              </Text>
+            )}
+          </Text>
+          <Box w="100%" style={{ aspectRatio: '2.27/1' }}>
+            <StreamGraph
+              depositAmount={streamPreviewData.depositAmount}
+              decimals={streamPreviewData.decimals}
+              symbol={streamPreviewData.symbol}
+              startTime={streamPreviewData.startTime}
+              endTime={streamPreviewData.endTime}
+              cliffTime={streamPreviewData.cliffTime}
+              exponent={streamPreviewData.exponent}
+              width={500}
+              height={220}
+            />
+          </Box>
+        </Box>
       )}
 
       {formik.values.streams.length > 1 && (
