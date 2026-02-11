@@ -122,6 +122,7 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
                 {stream.transferable !== undefined && (
                   <Flex>transferable: {stream.transferable ? 'true' : 'false'}</Flex>
                 )}
+                {stream.shape !== undefined && <Flex>shape: {stream.shape}</Flex>}
               </Stack>
             </Stack>
           ))}
