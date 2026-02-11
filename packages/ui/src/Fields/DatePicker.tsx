@@ -77,6 +77,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
       onChange: (_selectedDates, dateStr) => {
         formikRef.current.setFieldValue(id, dateStr)
+        window.setTimeout(() => {
+          formikRef.current.setFieldTouched(id, true, true)
+        }, 100)
 
         if (autoSubmit) {
           // clear any pending submit
