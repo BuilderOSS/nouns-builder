@@ -119,8 +119,8 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
       ? [
           {
             founderAddress: address || '',
-            allocationPercentage: '',
-            endDate: '',
+            allocationPercentage: 0,
+            endDate: getOneMonthFromNow(),
             admin: true,
           },
         ]
@@ -353,7 +353,6 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
           </Form>
         )}
       </Formik>
-
       {chain.id === CHAIN_ID.ETHEREUM && <ContributionAllocation />}
 
       {allocationError && (
