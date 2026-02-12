@@ -1,4 +1,4 @@
-import { WETH_ADDRESS } from '@buildeross/constants/addresses'
+import { NATIVE_TOKEN_ADDRESS, WETH_ADDRESS } from '@buildeross/constants/addresses'
 import { clankerTokenRequest, zoraCoinRequest } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import {
@@ -17,6 +17,15 @@ export async function getCoinInfo(
   tokenAddress: Address
 ): Promise<CoinInfo | null> {
   const wethAddress = WETH_ADDRESS[chainId]
+
+  // Check if it's native ETH
+  if (tokenAddress.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()) {
+    return {
+      address: NATIVE_TOKEN_ADDRESS,
+      type: 'eth',
+      symbol: 'ETH',
+    }
+  }
 
   // Check if it's WETH
   if (tokenAddress.toLowerCase() === wethAddress?.toLowerCase()) {

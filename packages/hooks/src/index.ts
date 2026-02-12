@@ -1,6 +1,7 @@
 export * from './useArtworkPreview'
 export * from './useArtworkUpload'
 export * from './useAuctionRewards'
+export * from './useAvailablePaymentTokens'
 export * from './useAvailableUpgrade'
 export * from './useClankerTokenPrice'
 export * from './useClankerTokens'

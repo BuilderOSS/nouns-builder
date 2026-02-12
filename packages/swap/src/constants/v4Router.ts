@@ -1,9 +1,13 @@
+import { Address } from 'viem'
+
 /**
  * Universal Router command constants
  * @see https://github.com/Uniswap/universal-router/blob/main/contracts/libraries/Commands.sol
  */
 export const Commands = {
   V4_SWAP: 0x10,
+  WRAP_ETH: 0x0b,
+  UNWRAP_WETH: 0x0c,
   // Add other commands as needed
 } as const
 
@@ -23,4 +27,20 @@ export const Actions = {
   SWAP_EXACT_IN: 0x07,
   SWAP_EXACT_OUT_SINGLE: 0x08,
   SWAP_EXACT_OUT: 0x09,
+  WRAP: 0x15,
+  UNWRAP: 0x16,
 } as const
+
+/**
+ * OPEN_DELTA sentinel value
+ * When used as amount in TAKE, it means "take the full open delta"
+ * @see https://github.com/Uniswap/v4-periphery
+ */
+export const OPEN_DELTA = 0n
+
+/**
+ * Address constants
+ */
+export const ADDRESS_THIS: Address = '0x0000000000000000000000000000000000000002'
+
+export const MSG_SENDER: Address = '0x0000000000000000000000000000000000000001'

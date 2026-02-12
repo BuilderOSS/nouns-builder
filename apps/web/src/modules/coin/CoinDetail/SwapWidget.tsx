@@ -1,10 +1,17 @@
-import { WETH_ADDRESS } from '@buildeross/constants/addresses'
+import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants/addresses'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { useExecuteSwap, useSwapPath, useSwapQuote } from '@buildeross/hooks'
+import {
+  useAvailablePaymentTokens,
+  useExecuteSwap,
+  useSwapPath,
+  useSwapQuote,
+  useTokenMetadata,
+} from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
+import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { truncateHex } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Address, erc20Abi, formatEther, parseEther } from 'viem'
 import {
   useAccount,
@@ -26,34 +33,76 @@ interface SwapWidgetProps {
 export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) => {
   const [amountIn, setAmountIn] = useState('')
   const [isBuying, setIsBuying] = useState(true) // true = buy coin, false = sell coin
+  const [selectedPaymentToken, setSelectedPaymentToken] =
+    useState<Address>(NATIVE_TOKEN_ADDRESS) // Default to native ETH
   const [successTxHash, setSuccessTxHash] = useState<`0x${string}` | null>(null)
+  const [pendingTxHash, setPendingTxHash] = useState<`0x${string}` | null>(null)
+  const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false)
 
   const { address: userAddress } = useAccount()
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient({ chainId })
 
-  const wethAddress = WETH_ADDRESS[chainId as keyof typeof WETH_ADDRESS]
+  // Fetch available payment tokens for this coin
+  const { tokens: availableTokens, isLoading: isLoadingTokens } =
+    useAvailablePaymentTokens(chainId, coinAddress)
+
+  // Get token metadata for ERC20 tokens (not ETH)
+  const erc20Addresses = availableTokens
+    .filter((t) => t.address.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase())
+    .map((t) => t.address)
+
+  const { metadata: tokenMetadataList } = useTokenMetadata(chainId, erc20Addresses)
 
   // Determine tokenIn and tokenOut based on buy/sell
-  const tokenIn = isBuying ? wethAddress : coinAddress
-  const tokenOut = isBuying ? coinAddress : wethAddress
+  const tokenIn = isBuying ? selectedPaymentToken : coinAddress
+  const tokenOut = isBuying ? coinAddress : selectedPaymentToken
 
-  // Get user's balance for the input token
-  const { data: wethBalance, refetch: refreshWethBalance } = useBalance({
+  // Check if selected payment token is native ETH
+  const isNativeEth =
+    selectedPaymentToken.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
+
+  // Get balance for native ETH (always fetch for dropdown display)
+  const { data: nativeEthBalance, refetch: refreshNativeEthBalance } = useBalance({
     address: userAddress,
-    token: wethAddress,
     chainId,
   })
 
+  // Get WETH address for balance fetch
+  const wethToken = availableTokens.find(
+    (t) =>
+      t.type === 'weth' && t.address.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase()
+  )
+
+  // Get balance for WETH (always fetch for dropdown display)
+  const { data: wethBalance, refetch: refreshWethBalance } = useReadContract({
+    address: wethToken?.address,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: userAddress ? [userAddress] : undefined,
+    chainId,
+    query: {
+      enabled: !!wethToken && !!userAddress,
+    },
+  })
+
+  // Get balance for the coin (when selling)
   const { data: coinBalance, refetch: refreshCoinBalance } = useReadContract({
     address: coinAddress,
     abi: erc20Abi,
     functionName: 'balanceOf',
     args: userAddress ? [userAddress] : undefined,
     chainId,
+    query: {
+      enabled: !isBuying,
+    },
   })
 
-  const inputBalance = isBuying ? wethBalance?.value : coinBalance
+  const inputBalance = isBuying
+    ? isNativeEth
+      ? nativeEthBalance?.value
+      : wethBalance
+    : coinBalance
 
   // Build swap path
   const { path, isLoading: isLoadingPath } = useSwapPath({
@@ -98,11 +147,13 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
       !amountInBigInt ||
       amountInBigInt === 0n ||
       !amountOut ||
-      amountOut === 0n
+      amountOut === 0n ||
+      !publicClient
     )
       return
 
     setSuccessTxHash(null)
+    setPendingTxHash(null)
 
     try {
       const txHash = await execute({
@@ -113,13 +164,50 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
         slippage: 0.01,
       })
 
-      refreshWethBalance()
-      refreshCoinBalance()
+      // Show pending transaction with link
+      setPendingTxHash(txHash)
+      setIsWaitingForConfirmation(true)
 
-      // Reset form on success
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash: txHash,
+        confirmations: 1,
+      })
+
+      setPendingTxHash(null)
+      setIsWaitingForConfirmation(false)
+
+      // Check if transaction was successful
+      if (receipt.status === 'reverted') {
+        throw new Error('Transaction reverted')
+      }
+
+      // Refresh appropriate balances based on transaction type
+      if (isBuying) {
+        // Refresh payment token balance (what we spent)
+        if (isNativeEth) {
+          refreshNativeEthBalance()
+        } else {
+          refreshWethBalance()
+        }
+        // Refresh coin balance (what we received)
+        refreshCoinBalance()
+      } else {
+        // Refresh coin balance (what we spent)
+        refreshCoinBalance()
+        // Refresh payment token balance (what we received)
+        if (isNativeEth) {
+          refreshNativeEthBalance()
+        } else {
+          refreshWethBalance()
+        }
+      }
+
+      // Reset form and show success only after confirmation
       setAmountIn('')
       setSuccessTxHash(txHash)
     } catch (err) {
+      setPendingTxHash(null)
+      setIsWaitingForConfirmation(false)
       console.error('Swap failed:', err)
     }
   }
@@ -130,13 +218,19 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     }
   }
 
-  const isLoading = isLoadingPath || isLoadingQuote || isExecuting
+  const isLoading =
+    isLoadingPath || isLoadingQuote || isExecuting || isWaitingForConfirmation
   const error = quoteError || executeError
 
   // Better error messages
   const getErrorMessage = (): string | null => {
     if (exceedsBalance) {
-      return `Insufficient ${isBuying ? 'WETH' : symbol} balance`
+      const tokenSymbol = isBuying
+        ? availableTokens.find(
+            (t) => t.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+          )?.symbol || 'ETH'
+        : symbol
+      return `Insufficient ${tokenSymbol} balance`
     }
     if (!userAddress) {
       return 'Please connect your wallet'
@@ -168,6 +262,35 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     !isLoading &&
     !exceedsBalance
 
+  // Create dropdown options for payment tokens with balances
+  const tokenOptions: SelectOption<Address>[] = useMemo(() => {
+    return availableTokens.map((token) => {
+      const isNative = token.address.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
+      const balance = isNative ? nativeEthBalance?.value : wethBalance
+
+      // Get token metadata for ERC20 tokens
+      const metadata = isNative
+        ? null
+        : tokenMetadataList?.find(
+            (m) => m.address.toLowerCase() === token.address.toLowerCase()
+          )
+
+      // Format: "Token Name (123 SYMBOL)" or "ETH (123 ETH)"
+      let label = isNative ? 'ETH' : metadata?.name || token.symbol
+
+      if (balance !== undefined) {
+        const formattedBalance = parseFloat(formatEther(balance)).toFixed(4)
+        const symbol = isNative ? 'ETH' : metadata?.symbol || token.symbol
+        label = `${label} (${formattedBalance} ${symbol})`
+      }
+
+      return {
+        value: token.address,
+        label,
+      }
+    })
+  }, [availableTokens, nativeEthBalance?.value, wethBalance, tokenMetadataList])
+
   return (
     <Box>
       {/* Buy/Sell Toggle */}
@@ -178,6 +301,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
             setIsBuying(true)
             setAmountIn('')
             setSuccessTxHash(null)
+            setPendingTxHash(null)
           }}
           style={{ flex: 1 }}
         >
@@ -189,12 +313,30 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
             setIsBuying(false)
             setAmountIn('')
             setSuccessTxHash(null)
+            setPendingTxHash(null)
           }}
           style={{ flex: 1 }}
         >
           Sell {symbol}
         </Button>
       </Flex>
+
+      {/* Payment Token Selector (show for both buying and selling) */}
+      {availableTokens.length > 0 && !isLoadingTokens && (
+        <Box mb="x4">
+          <DropdownSelect
+            value={selectedPaymentToken}
+            onChange={(newToken: Address) => {
+              setSelectedPaymentToken(newToken)
+              setAmountIn('')
+              setSuccessTxHash(null)
+              setPendingTxHash(null)
+            }}
+            options={tokenOptions}
+            inputLabel={isBuying ? 'Pay with' : 'Receive'}
+          />
+        </Box>
+      )}
 
       {/* Input Section */}
       <Box className={swapInputContainer}>
@@ -216,6 +358,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
               setAmountIn(e.target.value)
               setSuccessTxHash(null)
+              setPendingTxHash(null)
             }}
             className={swapInput}
             style={{ flex: 1 }}
@@ -225,7 +368,11 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
           </Button>
         </Flex>
         <Text variant="paragraph-sm" color="text4" mt="x1">
-          {isBuying ? 'WETH' : symbol}
+          {isBuying
+            ? availableTokens.find(
+                (t) => t.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+              )?.symbol || 'ETH'
+            : symbol}
         </Text>
       </Box>
 
@@ -239,13 +386,34 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
             {parseFloat(formatEther(amountOut)).toFixed(6)}
           </Text>
           <Text variant="paragraph-sm" color="text4" mt="x1">
-            {isBuying ? symbol : 'WETH'}
+            {isBuying
+              ? symbol
+              : availableTokens.find(
+                  (t) => t.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+                )?.symbol || 'ETH'}
+          </Text>
+        </Box>
+      )}
+
+      {/* Pending Transaction Message */}
+      {pendingTxHash && (
+        <Box mt="x4" p="x3" backgroundColor="background2" borderRadius="curved">
+          <Text variant="paragraph-sm" color="text3">
+            Transaction pending... View transaction:{' '}
+            <a
+              style={{ display: 'inline-block' }}
+              href={`${ETHERSCAN_BASE_URL[chainId]}/tx/${pendingTxHash}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Text>{truncateHex(pendingTxHash)}</Text>
+            </a>
           </Text>
         </Box>
       )}
 
       {/* Success Message */}
-      {successTxHash && (
+      {successTxHash && !pendingTxHash && (
         <Box mt="x4" p="x3" backgroundColor="positiveHover" borderRadius="curved">
           <Text variant="paragraph-sm">
             Swap successful! View transaction:{' '}
@@ -278,19 +446,21 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
         mt="x4"
         style={{ width: '100%' }}
       >
-        {isExecuting
-          ? 'Swapping...'
-          : isLoadingPath
-            ? 'Finding route...'
-            : isLoadingQuote
-              ? 'Getting quote...'
-              : !userAddress
-                ? 'Connect Wallet'
-                : !path && amountInBigInt > 0n
-                  ? 'No route available'
-                  : exceedsBalance
-                    ? 'Insufficient Balance'
-                    : 'Swap'}
+        {isWaitingForConfirmation
+          ? 'Waiting for confirmation...'
+          : isExecuting
+            ? 'Swapping...'
+            : isLoadingPath
+              ? 'Finding route...'
+              : isLoadingQuote
+                ? 'Getting quote...'
+                : !userAddress
+                  ? 'Connect Wallet'
+                  : !path && amountInBigInt > 0n
+                    ? 'No route available'
+                    : exceedsBalance
+                      ? 'Insufficient Balance'
+                      : 'Swap'}
       </Button>
 
       {/* Path Info */}

@@ -160,7 +160,7 @@ export type PostQuoteResponse = {
 /**
  * Coin type for routing
  */
-export type CoinType = 'zora-coin' | 'clanker-token' | 'weth'
+export type CoinType = 'zora-coin' | 'clanker-token' | 'weth' | 'eth'
 
 /**
  * Coin info for building swap paths

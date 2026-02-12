@@ -1,4 +1,4 @@
-import { WETH_ADDRESS } from '@buildeross/constants/addresses'
+import { NATIVE_TOKEN_ADDRESS, WETH_ADDRESS } from '@buildeross/constants/addresses'
 import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 
@@ -7,6 +7,13 @@ import { CoinInfo, SwapPath, SwapPathHop } from './types'
 
 const addrEq = (a?: Address, b?: Address) =>
   !!a && !!b && a.toLowerCase() === b.toLowerCase()
+
+/**
+ * Check if address is a valid payment currency (ETH or WETH)
+ */
+const isValidPaymentCurrency = (addr: Address, weth: Address): boolean => {
+  return addrEq(addr, weth) || addrEq(addr, NATIVE_TOKEN_ADDRESS)
+}
 
 function hopFromPairingSide(
   pairingSide: CoinInfo,
@@ -73,7 +80,9 @@ async function buildChainToWeth(
 
 /**
  * buildSwapPath constraint:
- * - tokenIn === WETH OR tokenOut === WETH
+ * - tokenIn === WETH/ETH OR tokenOut === WETH/ETH
+ * - ETH (NATIVE_TOKEN_ADDRESS) and WETH are both valid payment currencies
+ * - Routing still goes through WETH pools (executeSwap handles ETH wrapping)
  */
 export async function buildSwapPath(
   chainId: CHAIN_ID,
@@ -83,12 +92,14 @@ export async function buildSwapPath(
   const weth = WETH_ADDRESS[chainId]
   if (!weth) return null
 
-  const tokenInIsWeth = addrEq(tokenIn, weth)
-  const tokenOutIsWeth = addrEq(tokenOut, weth)
+  const tokenInIsValid = isValidPaymentCurrency(tokenIn, weth)
+  const tokenOutIsValid = isValidPaymentCurrency(tokenOut, weth)
 
-  // Enforce your constraint (or allow WETH->WETH as a no-op)
-  if (!tokenInIsWeth && !tokenOutIsWeth) return null
-  if (tokenInIsWeth && tokenOutIsWeth) return { hops: [], isOptimal: true }
+  // Enforce constraint: one side must be a valid payment currency (ETH or WETH)
+  if (!tokenInIsValid && !tokenOutIsValid) return null
+
+  // No-op swap between payment currencies (ETH<->WETH or ETH<->ETH or WETH<->WETH)
+  if (tokenInIsValid && tokenOutIsValid) return { hops: [], isOptimal: true }
 
   // Cache per call to avoid repeated subgraph requests
   const cache = new Map<string, Promise<CoinInfo | null>>()
@@ -98,14 +109,17 @@ export async function buildSwapPath(
     return cache.get(key)!
   }
 
-  const nonWeth = (tokenInIsWeth ? tokenOut : tokenIn) as Address
-  const chainToWeth = await buildChainToWeth(nonWeth, weth, getCoinInfo, 4)
+  // Determine the non-payment-currency side (the coin we're swapping)
+  // Note: If tokenIn is ETH/WETH, we're buying the coin (tokenOut)
+  //       If tokenOut is ETH/WETH, we're selling the coin (tokenIn)
+  const nonPaymentCurrency = (tokenInIsValid ? tokenOut : tokenIn) as Address
+  const chainToWeth = await buildChainToWeth(nonPaymentCurrency, weth, getCoinInfo, 4)
   if (!chainToWeth) return null
 
   // Convert chain to hops:
-  // - If swapping nonWeth -> WETH: use chain order
-  // - If swapping WETH -> nonWeth: reverse chain
-  const ordered = tokenOutIsWeth ? chainToWeth : [...chainToWeth].reverse()
+  // - If swapping coin -> ETH/WETH: use chain order
+  // - If swapping ETH/WETH -> coin: reverse chain
+  const ordered = tokenOutIsValid ? chainToWeth : [...chainToWeth].reverse()
 
   const hops: SwapPathHop[] = []
   for (let i = 0; i < ordered.length - 1; i++) {
@@ -114,6 +128,30 @@ export async function buildSwapPath(
     const hop = makeDirectHop(a, b)
     if (!hop) return null // inconsistent pairing info vs expected adjacency
     hops.push(hop)
+  }
+
+  // Important: If user selected ETH (not WETH), replace WETH with NATIVE_TOKEN_ADDRESS
+  // in the first or last hop to preserve their currency choice
+  if (hops.length > 0) {
+    const isTokenInEth = addrEq(tokenIn, NATIVE_TOKEN_ADDRESS)
+    const isTokenOutEth = addrEq(tokenOut, NATIVE_TOKEN_ADDRESS)
+
+    // Replace WETH with ETH in the appropriate hop
+    if (isTokenInEth) {
+      // User is buying with ETH - replace WETH in first hop's tokenIn
+      const firstHop = hops[0]
+      if (addrEq(firstHop.tokenIn, weth)) {
+        hops[0] = { ...firstHop, tokenIn: NATIVE_TOKEN_ADDRESS }
+      }
+    }
+
+    if (isTokenOutEth) {
+      // User is selling for ETH - replace WETH in last hop's tokenOut
+      const lastHop = hops[hops.length - 1]
+      if (addrEq(lastHop.tokenOut, weth)) {
+        hops[hops.length - 1] = { ...lastHop, tokenOut: NATIVE_TOKEN_ADDRESS }
+      }
+    }
   }
 
   return { hops, isOptimal: true }

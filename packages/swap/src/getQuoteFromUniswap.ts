@@ -4,6 +4,7 @@ import { Address, encodeAbiParameters, keccak256, PublicClient } from 'viem'
 
 import { uniswapV4QuoterAbi } from './abis/uniswapV4Quoter'
 import { SwapPath } from './types'
+import { normalizeForPoolKey } from './utils/normalizeAddresses'
 
 export interface PoolKey {
   currency0: Address
@@ -77,10 +78,16 @@ export async function getQuoteFromUniswap({
       )
     }
 
-    // Build PoolKey
+    // Normalize addresses: pools use WETH, but hops may have NATIVE_TOKEN_ADDRESS
+    const normalizedTokenIn = normalizeForPoolKey(hop.tokenIn, chainId)
+    const normalizedTokenOut = normalizeForPoolKey(hop.tokenOut, chainId)
+
+    // Build PoolKey with normalized addresses
     const poolKey: PoolKey = {
-      currency0: hop.tokenIn < hop.tokenOut ? hop.tokenIn : hop.tokenOut,
-      currency1: hop.tokenIn < hop.tokenOut ? hop.tokenOut : hop.tokenIn,
+      currency0:
+        normalizedTokenIn < normalizedTokenOut ? normalizedTokenIn : normalizedTokenOut,
+      currency1:
+        normalizedTokenIn < normalizedTokenOut ? normalizedTokenOut : normalizedTokenIn,
       fee: Number(hop.fee), // Convert bigint to number
       tickSpacing: hop.tickSpacing,
       hooks: hop.hooks,
@@ -98,15 +105,23 @@ export async function getQuoteFromUniswap({
         '\nExpected:',
         expectedHash,
         '\nPoolKey:',
-        poolKey
+        poolKey,
+        '\nOriginal hop tokenIn:',
+        hop.tokenIn,
+        '\nOriginal hop tokenOut:',
+        hop.tokenOut,
+        '\nNormalized tokenIn:',
+        normalizedTokenIn,
+        '\nNormalized tokenOut:',
+        normalizedTokenOut
       )
       throw new Error(
         `PoolKey validation failed for hop ${i}: hash mismatch (computed: ${computedHash}, expected: ${expectedHash})`
       )
     }
 
-    // Determine if this is a zeroForOne swap
-    const zeroForOne = hop.tokenIn === poolKey.currency0
+    // Determine if this is a zeroForOne swap (using normalized addresses)
+    const zeroForOne = normalizedTokenIn === poolKey.currency0
 
     try {
       // Build the QuoteExactSingleParams structure
