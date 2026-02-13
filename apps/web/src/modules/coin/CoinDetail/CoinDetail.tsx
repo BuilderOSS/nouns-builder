@@ -2,6 +2,7 @@ import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { type IpfsMetadata } from '@buildeross/ipfs-service'
 import { ProposalNavigation } from '@buildeross/proposal-ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
+import { SwapWidget } from '@buildeross/ui/SwapWidget'
 import { Box, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import { Address } from 'viem'
@@ -13,7 +14,6 @@ import {
   swapPanel,
 } from './CoinDetail.css'
 import { CoinInfo } from './CoinInfo'
-import { SwapWidget } from './SwapWidget'
 
 interface CoinDetailProps {
   // Coin data
@@ -55,7 +55,6 @@ export const CoinDetail = ({
   uri,
   metadata,
   createdAt,
-  isClankerToken,
 }: CoinDetailProps) => {
   const router = useRouter()
   const { getDaoLink } = useLinks()
@@ -114,12 +113,7 @@ export const CoinDetail = ({
           <Text variant="heading-sm" mb="x4">
             Trade {symbol}
           </Text>
-          <SwapWidget
-            coinAddress={coinAddress}
-            symbol={symbol}
-            chainId={chainId}
-            isClankerToken={isClankerToken}
-          />
+          <SwapWidget coinAddress={coinAddress} symbol={symbol} chainId={chainId} />
         </Box>
       </Box>
     </Box>

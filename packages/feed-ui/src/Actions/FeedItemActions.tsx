@@ -75,10 +75,22 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
       )
 
     case 'CLANKER_TOKEN_CREATED':
-      return <CoinActions chainId={item.chainId} coinAddress={item.tokenAddress} />
+      return (
+        <CoinActions
+          chainId={item.chainId}
+          coinAddress={item.tokenAddress}
+          symbol={item.tokenSymbol}
+        />
+      )
 
     case 'ZORA_COIN_CREATED':
-      return <CoinActions chainId={item.chainId} coinAddress={item.coinAddress} />
+      return (
+        <CoinActions
+          chainId={item.chainId}
+          coinAddress={item.coinAddress}
+          symbol={item.coinSymbol}
+        />
+      )
 
     default:
       return null

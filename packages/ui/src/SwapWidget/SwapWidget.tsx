@@ -2,7 +2,6 @@ import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants/addresses'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useExecuteSwap, useSwapOptions, useSwapQuote } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
-import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { truncateHex } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
@@ -15,13 +14,14 @@ import {
   useWalletClient,
 } from 'wagmi'
 
-import { maxButton, swapButton, swapInput, swapInputContainer } from './CoinDetail.css'
+import { ContractButton } from '../ContractButton'
+import { DropdownSelect, SelectOption } from '../DropdownSelect'
+import { maxButton, swapButton, swapInput, swapInputContainer } from './SwapWidget.css'
 
 interface SwapWidgetProps {
   coinAddress: Address
   symbol: string
   chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
-  isClankerToken?: boolean
 }
 
 export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) => {
@@ -65,6 +65,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     if (!userAddress) return []
 
     const contracts: {
+      chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
       address: Address
       abi: typeof erc20Abi
       functionName: 'balanceOf'
@@ -75,6 +76,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     swapOptions.forEach((opt) => {
       if (opt.token.address.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase()) {
         contracts.push({
+          chainId,
           address: opt.token.address,
           abi: erc20Abi,
           functionName: 'balanceOf',
@@ -88,6 +90,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     const alreadyIncluded = contracts.some((c) => c.address.toLowerCase() === coinLower)
     if (!alreadyIncluded) {
       contracts.push({
+        chainId,
         address: coinAddress,
         abi: erc20Abi,
         functionName: 'balanceOf',
@@ -96,7 +99,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     }
 
     return contracts
-  }, [swapOptions, coinAddress, userAddress])
+  }, [swapOptions, coinAddress, userAddress, chainId])
 
   // Fetch all ERC20 balances at once
   const { data: erc20Balances, refetch: refreshErc20Balances } = useReadContracts({
@@ -447,8 +450,9 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
       )}
 
       {/* Swap Button */}
-      <Button
-        onClick={handleSwap}
+      <ContractButton
+        chainId={chainId}
+        handleClick={handleSwap}
         disabled={!canSwap}
         className={swapButton}
         mt="x4"
@@ -469,7 +473,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
                     : exceedsBalance
                       ? 'Insufficient Balance'
                       : 'Swap'}
-      </Button>
+      </ContractButton>
 
       {/* Path Info */}
       {path && (
