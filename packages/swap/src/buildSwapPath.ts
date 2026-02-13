@@ -2,7 +2,7 @@ import { NATIVE_TOKEN_ADDRESS, WETH_ADDRESS } from '@buildeross/constants/addres
 import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 
-import { getCoinInfo as getCoinInfoUncached } from './getCoinInfo'
+import { getCoinInfo } from './getCoinInfo'
 import { CoinInfo, SwapPath, SwapPathHop } from './types'
 
 const addrEq = (a?: Address, b?: Address) =>
@@ -49,9 +49,9 @@ function makeDirectHop(a: CoinInfo, b: CoinInfo): SwapPathHop | null {
  * Example: Z2 -> C2 -> C1 -> WETH
  */
 async function buildChainToWeth(
+  chainId: CHAIN_ID,
   start: Address,
   weth: Address,
-  getCoinInfo: (a: Address) => Promise<CoinInfo | null>,
   maxSteps = 4
 ): Promise<CoinInfo[] | null> {
   const chain: CoinInfo[] = []
@@ -60,7 +60,7 @@ async function buildChainToWeth(
   let cur: Address = start
 
   for (let i = 0; i < maxSteps; i++) {
-    const info = await getCoinInfo(cur)
+    const info = await getCoinInfo(chainId, cur)
     if (!info) return null
 
     const key = info.address.toLowerCase()
@@ -101,19 +101,11 @@ export async function buildSwapPath(
   // No-op swap between payment currencies (ETH<->WETH or ETH<->ETH or WETH<->WETH)
   if (tokenInIsValid && tokenOutIsValid) return { hops: [], isOptimal: true }
 
-  // Cache per call to avoid repeated subgraph requests
-  const cache = new Map<string, Promise<CoinInfo | null>>()
-  const getCoinInfo = (addr: Address) => {
-    const key = addr.toLowerCase()
-    if (!cache.has(key)) cache.set(key, getCoinInfoUncached(chainId, addr))
-    return cache.get(key)!
-  }
-
   // Determine the non-payment-currency side (the coin we're swapping)
   // Note: If tokenIn is ETH/WETH, we're buying the coin (tokenOut)
   //       If tokenOut is ETH/WETH, we're selling the coin (tokenIn)
   const nonPaymentCurrency = (tokenInIsValid ? tokenOut : tokenIn) as Address
-  const chainToWeth = await buildChainToWeth(nonPaymentCurrency, weth, getCoinInfo, 4)
+  const chainToWeth = await buildChainToWeth(chainId, nonPaymentCurrency, weth, 4)
   if (!chainToWeth) return null
 
   // Convert chain to hops:

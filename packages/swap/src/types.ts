@@ -169,6 +169,7 @@ export type CoinInfo = {
   address: Address
   type: CoinType
   symbol: string
+  name?: string
   /** For Zora coins: the clanker token it's paired with */
   pairedToken?: Address
   /** Pool ID for Uniswap V4 */

@@ -1,12 +1,6 @@
 import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants/addresses'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import {
-  useAvailablePaymentTokens,
-  useExecuteSwap,
-  useSwapPath,
-  useSwapQuote,
-  useTokenMetadata,
-} from '@buildeross/hooks'
+import { useExecuteSwap, useSwapOptions, useSwapQuote } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { truncateHex } from '@buildeross/utils/helpers'
@@ -17,7 +11,7 @@ import {
   useAccount,
   useBalance,
   usePublicClient,
-  useReadContract,
+  useReadContracts,
   useWalletClient,
 } from 'wagmi'
 
@@ -43,74 +37,102 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient({ chainId })
 
-  // Fetch available payment tokens for this coin
-  const { tokens: availableTokens, isLoading: isLoadingTokens } =
-    useAvailablePaymentTokens(chainId, coinAddress)
+  // Fetch available swap options (tokens + paths) for this coin
+  const { options: swapOptions, isLoading: isLoadingOptions } = useSwapOptions(
+    chainId,
+    coinAddress,
+    isBuying
+  )
 
-  // Get token metadata for ERC20 tokens (not ETH)
-  const erc20Addresses = availableTokens
-    .filter((t) => t.address.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase())
-    .map((t) => t.address)
-
-  const { metadata: tokenMetadataList } = useTokenMetadata(chainId, erc20Addresses)
-
-  // Determine tokenIn and tokenOut based on buy/sell
-  const tokenIn = isBuying ? selectedPaymentToken : coinAddress
-  const tokenOut = isBuying ? coinAddress : selectedPaymentToken
+  // Get the selected swap option
+  const selectedOption = swapOptions.find(
+    (opt) => opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+  )
 
   // Check if selected payment token is native ETH
   const isNativeEth =
     selectedPaymentToken.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
 
-  // Get balance for native ETH (always fetch for dropdown display)
+  // Get balance for native ETH
   const { data: nativeEthBalance, refetch: refreshNativeEthBalance } = useBalance({
     address: userAddress,
     chainId,
   })
 
-  // Get WETH address for balance fetch
-  const wethToken = availableTokens.find(
-    (t) =>
-      t.type === 'weth' && t.address.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase()
-  )
+  // Prepare contracts for batch balance fetching
+  // Get all ERC20 tokens (swap options + coin itself for selling)
+  const erc20Contracts = useMemo(() => {
+    if (!userAddress) return []
 
-  // Get balance for WETH (always fetch for dropdown display)
-  const { data: wethBalance, refetch: refreshWethBalance } = useReadContract({
-    address: wethToken?.address,
-    abi: erc20Abi,
-    functionName: 'balanceOf',
-    args: userAddress ? [userAddress] : undefined,
-    chainId,
+    const contracts: {
+      address: Address
+      abi: typeof erc20Abi
+      functionName: 'balanceOf'
+      args: [Address]
+    }[] = []
+
+    // Add all swap option tokens (except ETH)
+    swapOptions.forEach((opt) => {
+      if (opt.token.address.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase()) {
+        contracts.push({
+          address: opt.token.address,
+          abi: erc20Abi,
+          functionName: 'balanceOf',
+          args: [userAddress],
+        })
+      }
+    })
+
+    // Add the coin itself (for selling and for displaying balance)
+    const coinLower = coinAddress.toLowerCase()
+    const alreadyIncluded = contracts.some((c) => c.address.toLowerCase() === coinLower)
+    if (!alreadyIncluded) {
+      contracts.push({
+        address: coinAddress,
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [userAddress],
+      })
+    }
+
+    return contracts
+  }, [swapOptions, coinAddress, userAddress])
+
+  // Fetch all ERC20 balances at once
+  const { data: erc20Balances, refetch: refreshErc20Balances } = useReadContracts({
+    contracts: erc20Contracts,
+    allowFailure: false,
     query: {
-      enabled: !!wethToken && !!userAddress,
+      enabled: erc20Contracts.length > 0,
     },
   })
 
-  // Get balance for the coin (when selling)
-  const { data: coinBalance, refetch: refreshCoinBalance } = useReadContract({
-    address: coinAddress,
-    abi: erc20Abi,
-    functionName: 'balanceOf',
-    args: userAddress ? [userAddress] : undefined,
-    chainId,
-    query: {
-      enabled: !isBuying,
-    },
-  })
+  // Create a map of address -> balance for easy lookup
+  const balanceMap = useMemo(() => {
+    const map = new Map<string, bigint>()
 
+    // Add ETH balance
+    if (nativeEthBalance?.value !== undefined) {
+      map.set(NATIVE_TOKEN_ADDRESS.toLowerCase(), nativeEthBalance.value)
+    }
+
+    // Add ERC20 balances
+    erc20Balances?.forEach((result, index) => {
+      const address = erc20Contracts[index].address.toLowerCase()
+      map.set(address, result as bigint)
+    })
+
+    return map
+  }, [nativeEthBalance?.value, erc20Balances, erc20Contracts])
+
+  // Get balance for input token
   const inputBalance = isBuying
-    ? isNativeEth
-      ? nativeEthBalance?.value
-      : wethBalance
-    : coinBalance
+    ? balanceMap.get(selectedPaymentToken.toLowerCase())
+    : balanceMap.get(coinAddress.toLowerCase())
 
-  // Build swap path
-  const { path, isLoading: isLoadingPath } = useSwapPath({
-    chainId,
-    tokenIn,
-    tokenOut,
-    enabled: !!tokenIn && !!tokenOut,
-  })
+  // Use the path from the selected option
+  const path = selectedOption?.path ?? null
+  const isLoadingPath = isLoadingOptions
 
   // Parse amount
   const amountInBigInt = amountIn ? parseEther(amountIn) : 0n
@@ -181,26 +203,11 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
         throw new Error('Transaction reverted')
       }
 
-      // Refresh appropriate balances based on transaction type
-      if (isBuying) {
-        // Refresh payment token balance (what we spent)
-        if (isNativeEth) {
-          refreshNativeEthBalance()
-        } else {
-          refreshWethBalance()
-        }
-        // Refresh coin balance (what we received)
-        refreshCoinBalance()
-      } else {
-        // Refresh coin balance (what we spent)
-        refreshCoinBalance()
-        // Refresh payment token balance (what we received)
-        if (isNativeEth) {
-          refreshNativeEthBalance()
-        } else {
-          refreshWethBalance()
-        }
+      // Refresh all balances after swap
+      if (isNativeEth) {
+        refreshNativeEthBalance()
       }
+      refreshErc20Balances()
 
       // Reset form and show success only after confirmation
       setAmountIn('')
@@ -226,9 +233,10 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
   const getErrorMessage = (): string | null => {
     if (exceedsBalance) {
       const tokenSymbol = isBuying
-        ? availableTokens.find(
-            (t) => t.address.toLowerCase() === selectedPaymentToken.toLowerCase()
-          )?.symbol || 'ETH'
+        ? swapOptions.find(
+            (opt) =>
+              opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+          )?.token.symbol || 'ETH'
         : symbol
       return `Insufficient ${tokenSymbol} balance`
     }
@@ -264,24 +272,22 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
 
   // Create dropdown options for payment tokens with balances
   const tokenOptions: SelectOption<Address>[] = useMemo(() => {
-    return availableTokens.map((token) => {
-      const isNative = token.address.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
-      const balance = isNative ? nativeEthBalance?.value : wethBalance
+    return swapOptions.map((option) => {
+      const token = option.token
 
-      // Get token metadata for ERC20 tokens
-      const metadata = isNative
-        ? null
-        : tokenMetadataList?.find(
-            (m) => m.address.toLowerCase() === token.address.toLowerCase()
-          )
+      // Get balance from balanceMap (works for all tokens now)
+      const balance = balanceMap.get(token.address.toLowerCase())
 
-      // Format: "Token Name (123 SYMBOL)" or "ETH (123 ETH)"
-      let label = isNative ? 'ETH' : metadata?.name || token.symbol
+      // Use token name if available, otherwise fall back to symbol
+      const displayName = token.name || token.symbol
 
+      // Format label with balance if available
+      let label: string
       if (balance !== undefined) {
         const formattedBalance = parseFloat(formatEther(balance)).toFixed(4)
-        const symbol = isNative ? 'ETH' : metadata?.symbol || token.symbol
-        label = `${label} (${formattedBalance} ${symbol})`
+        label = `${displayName} (${formattedBalance} ${token.symbol})`
+      } else {
+        label = displayName
       }
 
       return {
@@ -289,7 +295,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
         label,
       }
     })
-  }, [availableTokens, nativeEthBalance?.value, wethBalance, tokenMetadataList])
+  }, [swapOptions, balanceMap])
 
   return (
     <Box>
@@ -322,7 +328,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
       </Flex>
 
       {/* Payment Token Selector (show for both buying and selling) */}
-      {availableTokens.length > 0 && !isLoadingTokens && (
+      {swapOptions.length > 0 && !isLoadingOptions && (
         <Box mb="x4">
           <DropdownSelect
             value={selectedPaymentToken}
@@ -369,9 +375,10 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
         </Flex>
         <Text variant="paragraph-sm" color="text4" mt="x1">
           {isBuying
-            ? availableTokens.find(
-                (t) => t.address.toLowerCase() === selectedPaymentToken.toLowerCase()
-              )?.symbol || 'ETH'
+            ? swapOptions.find(
+                (opt) =>
+                  opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+              )?.token.symbol || 'ETH'
             : symbol}
         </Text>
       </Box>
@@ -388,9 +395,10 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
           <Text variant="paragraph-sm" color="text4" mt="x1">
             {isBuying
               ? symbol
-              : availableTokens.find(
-                  (t) => t.address.toLowerCase() === selectedPaymentToken.toLowerCase()
-                )?.symbol || 'ETH'}
+              : swapOptions.find(
+                  (opt) =>
+                    opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+                )?.token.symbol || 'ETH'}
           </Text>
         </Box>
       )}

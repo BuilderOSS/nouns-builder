@@ -10,9 +10,22 @@ import { Address } from 'viem'
 import { CoinInfo } from './types'
 
 /**
- * Fetches coin information from the subgraph
+ * In-memory cache for coin info
+ * Key format: `${chainId}-${tokenAddress.toLowerCase()}`
  */
-export async function getCoinInfo(
+const coinInfoCache = new Map<string, Promise<CoinInfo | null>>()
+
+/**
+ * Clear the coin info cache (useful for testing or forcing refresh)
+ */
+export function clearCoinInfoCache(): void {
+  coinInfoCache.clear()
+}
+
+/**
+ * Internal implementation that fetches coin info without caching
+ */
+async function getCoinInfoUncached(
   chainId: CHAIN_ID,
   tokenAddress: Address
 ): Promise<CoinInfo | null> {
@@ -24,6 +37,7 @@ export async function getCoinInfo(
       address: NATIVE_TOKEN_ADDRESS,
       type: 'eth',
       symbol: 'ETH',
+      name: 'Ethereum',
     }
   }
 
@@ -33,6 +47,7 @@ export async function getCoinInfo(
       address: wethAddress,
       type: 'weth',
       symbol: 'WETH',
+      name: 'Wrapped Ether',
     }
   }
 
@@ -44,6 +59,7 @@ export async function getCoinInfo(
         address: coin.coinAddress as Address,
         type: 'zora-coin',
         symbol: coin.symbol,
+        name: coin.name,
         pairedToken: coin.currency as Address,
         poolKeyHash: coin.poolKeyHash as string,
         hooks: coin.poolHooks as Address,
@@ -63,6 +79,7 @@ export async function getCoinInfo(
         address: token.tokenAddress as Address,
         type: 'clanker-token',
         symbol: token.tokenSymbol,
+        name: token.tokenName,
         pairedToken: token.pairedToken as Address,
         poolId: token.poolId as string,
         hooks: token.poolHook as Address,
@@ -76,4 +93,27 @@ export async function getCoinInfo(
   }
 
   return null
+}
+
+/**
+ * Fetches coin information from the subgraph with caching
+ * Caches results in memory to avoid duplicate API calls
+ */
+export async function getCoinInfo(
+  chainId: CHAIN_ID,
+  tokenAddress: Address
+): Promise<CoinInfo | null> {
+  const cacheKey = `${chainId}-${tokenAddress.toLowerCase()}`
+
+  // Check cache first
+  if (coinInfoCache.has(cacheKey)) {
+    return coinInfoCache.get(cacheKey)!
+  }
+
+  // Fetch and cache the promise (not just the result)
+  // This prevents multiple concurrent requests for the same token
+  const promise = getCoinInfoUncached(chainId, tokenAddress)
+  coinInfoCache.set(cacheKey, promise)
+
+  return promise
 }
