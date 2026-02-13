@@ -123,3 +123,37 @@ export const maxButton = style([
     },
   },
 ])
+
+export const statsGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: 24,
+  '@media': {
+    'screen and (max-width: 600px)': {
+      gridTemplateColumns: '1fr',
+      gap: 16,
+    },
+  },
+})
+
+export const sectionDivider = style([
+  atoms({
+    my: 'x6',
+  }),
+  {
+    height: 1,
+    backgroundColor: 'var(--border)',
+  },
+])
+
+export const linksContainer = style({
+  flexWrap: 'wrap',
+})
+
+export const swapPanelDesktopOnly = style({
+  '@media': {
+    'screen and (max-width: 1023px)': {
+      display: 'none',
+    },
+  },
+})

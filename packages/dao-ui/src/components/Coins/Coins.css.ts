@@ -93,3 +93,14 @@ export const emptyState = style([
     color: 'text3',
   }),
 ])
+
+export const priceBadgeOverlay = style({
+  position: 'absolute',
+  top: 12,
+  right: 12,
+  zIndex: 10,
+})
+
+export const tradeButtonContainer = style({
+  marginTop: 8,
+})

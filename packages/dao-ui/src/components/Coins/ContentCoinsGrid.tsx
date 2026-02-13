@@ -1,25 +1,47 @@
+import { useZoraCoinWithPrice } from '@buildeross/hooks/useCoinsWithPrices'
+import { type ZoraCoinFragment } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
+import React from 'react'
 import { Address } from 'viem'
 
 import { CoinCard } from './CoinCard'
 import { coinsGrid, emptyState } from './Coins.css'
 
-interface ContentCoin {
-  coinAddress: Address
-  name: string
-  symbol: string
-  uri?: string
-  // Add more fields as needed from ZoraCoin entity
-}
-
 interface ContentCoinsGridProps {
   chainId: CHAIN_ID
   daoAddress: Address
-  coins: ContentCoin[]
+  coins: ZoraCoinFragment[]
   isLoading?: boolean
+}
+
+// Wrapper component to fetch price for individual coin
+const CoinCardWithPrice: React.FC<{
+  coin: ZoraCoinFragment
+  chainId: CHAIN_ID
+}> = ({ coin, chainId }) => {
+  const coinWithPrice = useZoraCoinWithPrice({
+    zoraCoin: coin,
+    chainId,
+    enabled: true,
+  })
+
+  return (
+    <CoinCard
+      chainId={chainId}
+      coinAddress={coin.coinAddress}
+      name={coin.name}
+      symbol={coin.symbol}
+      image={coin.uri}
+      priceUsd={coinWithPrice.priceUsd}
+      marketCap={coinWithPrice.marketCap}
+      isLoadingPrice={coinWithPrice.isLoadingPrice}
+      createdAt={coin.createdAt}
+      isClankerToken={false}
+    />
+  )
 }
 
 export const ContentCoinsGrid = ({
@@ -58,15 +80,7 @@ export const ContentCoinsGrid = ({
       </Flex>
       <Box className={coinsGrid}>
         {coins.map((coin) => (
-          <CoinCard
-            key={coin.coinAddress}
-            chainId={chainId}
-            coinAddress={coin.coinAddress}
-            name={coin.name}
-            symbol={coin.symbol}
-            image={coin.uri}
-            // TODO: Calculate price and priceUsd in Phase 6
-          />
+          <CoinCardWithPrice key={coin.coinAddress} coin={coin} chainId={chainId} />
         ))}
       </Box>
     </>

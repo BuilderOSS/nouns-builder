@@ -6,7 +6,11 @@ import {
 } from '@buildeross/constants/chains'
 import { fetchIpfsMetadata, type IpfsMetadata } from '@buildeross/ipfs-service'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
-import { SubgraphSDK } from '@buildeross/sdk/subgraph'
+import {
+  type ClankerTokenFragment,
+  SubgraphSDK,
+  type ZoraCoinFragment,
+} from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { GetServerSideProps } from 'next'
@@ -37,8 +41,12 @@ interface CoinPageProps {
   uri: string | null
   metadata: IpfsMetadata | null
   createdAt: string | null
+  creatorAddress: AddressType | null
   // Type
   isClankerToken: boolean
+  // Full coin/token data for price fetching
+  clankerToken?: ClankerTokenFragment | null
+  zoraCoin?: ZoraCoinFragment | null
 }
 
 const CoinPage: NextPageWithLayout<CoinPageProps> = ({
@@ -57,7 +65,10 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
   uri,
   metadata,
   createdAt,
+  creatorAddress,
   isClankerToken,
+  clankerToken,
+  zoraCoin,
 }) => {
   const path = `/coin/${chainSlug}/${coinAddress}`
 
@@ -84,7 +95,10 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
         uri={uri}
         metadata={metadata}
         createdAt={createdAt}
+        creatorAddress={creatorAddress}
         isClankerToken={isClankerToken}
+        clankerToken={clankerToken}
+        zoraCoin={zoraCoin}
       />
     </>
   )
@@ -177,16 +191,19 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           symbol: coin.symbol ?? '',
           image: metadata?.image ?? metadata?.imageUrl ?? null,
           daoAddress,
-          daoName: daoName ?? null,
+          daoName,
           addresses,
           pairedToken: coin.currency ? (coin.currency as AddressType) : null,
-          pairedTokenSymbol: pairedTokenSymbol ?? null,
+          pairedTokenSymbol,
           poolFee: coin.poolFee ? `${(Number(coin.poolFee) / 10000).toFixed(2)}%` : null,
           description: metadata?.description ?? null,
           uri: coin.uri ?? null,
           metadata: metadata ?? null,
           createdAt: coin.createdAt ?? null,
+          creatorAddress: coin.caller ? (coin.caller as AddressType) : null,
           isClankerToken: false,
+          zoraCoin: coin,
+          clankerToken: null,
         },
       }
     }
@@ -234,16 +251,19 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           symbol: token.tokenSymbol ?? '',
           image: token.tokenImage ?? null,
           daoAddress,
-          daoName: daoName ?? null,
+          daoName,
           addresses,
           pairedToken: token.pairedToken ? (token.pairedToken as AddressType) : null,
           pairedTokenSymbol: null, // Would need to look up paired token
           poolFee: null, // ClankerToken doesn't store pool fee directly
-          description: description ?? null,
+          description,
           uri: null, // ClankerToken doesn't store IPFS URI
           metadata: null, // ClankerToken doesn't have IPFS metadata
           createdAt: token.createdAt ?? null,
+          creatorAddress: token.msgSender ? (token.msgSender as AddressType) : null,
           isClankerToken: true,
+          clankerToken: token,
+          zoraCoin: null,
         },
       }
     }

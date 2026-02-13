@@ -1,5 +1,6 @@
 import { COIN_SUPPORTED_CHAIN_IDS } from '@buildeross/constants/chains'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
+import { useClankerTokenWithPrice } from '@buildeross/hooks/useCoinsWithPrices'
 import { useZoraCoins } from '@buildeross/hooks/useZoraCoins'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Box, Text } from '@buildeross/zord'
@@ -48,6 +49,16 @@ export const Coins: React.FC = () => {
     first: 100, // Fetch up to 100 content coins
   })
 
+  const creatorCoin = clankerTokens?.[0]
+  const contentCoins = zoraCoins || []
+
+  // Fetch price data for creator coin - must be called before early returns
+  const creatorCoinWithPrice = useClankerTokenWithPrice({
+    clankerToken: creatorCoin,
+    chainId: chain.id,
+    enabled: !!creatorCoin && isChainSupported,
+  })
+
   if (!isChainSupported) {
     return (
       <Box className={emptyState}>
@@ -72,9 +83,6 @@ export const Coins: React.FC = () => {
     )
   }
 
-  const creatorCoin = clankerTokens?.[0]
-  const contentCoins = zoraCoins || []
-
   return (
     <Box className={coinsContainer}>
       {/* Creator Coin Section */}
@@ -90,7 +98,9 @@ export const Coins: React.FC = () => {
           symbol={creatorCoin.tokenSymbol}
           image={creatorCoin.tokenImage}
           pairedToken={creatorCoin.pairedToken}
-          // TODO: Add price and market cap in Phase 6
+          priceUsd={creatorCoinWithPrice.priceUsd}
+          marketCap={creatorCoinWithPrice.marketCap}
+          isLoadingPrice={creatorCoinWithPrice.isLoadingPrice}
         />
       ) : (
         <Box className={emptyState} mb="x6">
@@ -106,12 +116,7 @@ export const Coins: React.FC = () => {
         <ContentCoinsGrid
           chainId={chain.id}
           daoAddress={token}
-          coins={contentCoins.map((coin) => ({
-            coinAddress: coin.coinAddress,
-            name: coin.name,
-            symbol: coin.symbol,
-            uri: coin.uri,
-          }))}
+          coins={contentCoins}
           isLoading={zoraLoading}
         />
       )}

@@ -12,6 +12,7 @@ fragment ZoraCoin on ZoraCoin {
   createdAt
   createdAtBlock
   transactionHash
+  caller
   dao {
     id
     name

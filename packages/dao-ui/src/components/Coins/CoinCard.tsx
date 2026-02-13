@@ -4,10 +4,21 @@ import { CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { AnimatedModal } from '@buildeross/ui/Modal'
+import { StatBadge } from '@buildeross/ui/StatBadge'
+import { SwapWidget } from '@buildeross/ui/SwapWidget'
+import { formatMarketCap, formatPrice } from '@buildeross/utils/formatMarketCap'
+import { Box, Button, Flex, Spinner, Text } from '@buildeross/zord'
+import React, { useState } from 'react'
 import { Address } from 'viem'
 
-import { card, coinImage, coinInfo } from './Coins.css'
+import {
+  card,
+  coinImage,
+  coinInfo,
+  priceBadgeOverlay,
+  tradeButtonContainer,
+} from './Coins.css'
 
 interface CoinCardProps {
   chainId: CHAIN_ID
@@ -15,8 +26,11 @@ interface CoinCardProps {
   name: string
   symbol: string
   image?: string // This is the IPFS URI
-  price?: string
-  priceUsd?: string
+  priceUsd?: number | null
+  marketCap?: number | null
+  isLoadingPrice?: boolean
+  createdAt?: string
+  isClankerToken?: boolean
 }
 
 export const CoinCard = ({
@@ -25,9 +39,12 @@ export const CoinCard = ({
   name,
   symbol,
   image,
-  price,
   priceUsd,
+  marketCap,
+  isLoadingPrice,
+  createdAt,
 }: CoinCardProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
   const coinHref = chain ? `/coin/${chain.slug}/${coinAddress}` : '#'
 
@@ -45,74 +62,139 @@ export const CoinCard = ({
   const shouldUseMediaPreview = animationUrl && mediaType && animationFetchableUrl
   const displayImageUrl = imageUrl
 
+  // Check if coin is new (less than 7 days old)
+  const isNew = createdAt
+    ? Date.now() / 1000 - parseInt(createdAt) < 7 * 24 * 60 * 60
+    : false
+
+  // Only show Trade button for Base chains
+  const showTradeButton = chainId === CHAIN_ID.BASE || chainId === CHAIN_ID.BASE_SEPOLIA
+
+  const handleTradeClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsModalOpen(true)
+  }
+
   return (
-    <Link
-      direction="column"
-      link={{ href: coinHref }}
-      borderRadius={'curved'}
-      height={'100%'}
-      overflow={'hidden'}
-      className={card}
-    >
-      <Box
-        backgroundColor="background2"
-        width={'100%'}
-        height={'auto'}
-        aspectRatio={1 / 1}
-        position="relative"
+    <>
+      <Link
+        direction="column"
+        link={{ href: coinHref }}
+        borderRadius={'curved'}
+        height={'100%'}
         overflow={'hidden'}
-        className={coinImage}
+        className={card}
       >
-        {isLoading ||
-        isMediaTypeLoading ||
-        (!shouldUseMediaPreview && !displayImageUrl) ? (
-          <Box backgroundColor="background2" w="100%" h="100%" />
-        ) : shouldUseMediaPreview ? (
-          <MediaPreview
-            mediaUrl={animationFetchableUrl}
-            mediaType={mediaType}
-            coverUrl={displayImageUrl || undefined}
-            width="100%"
-            height="100%"
-            aspectRatio={1}
-          />
-        ) : (
-          <FallbackImage
-            src={displayImageUrl!}
-            sizes="100vw"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            alt={`${name} image`}
-          />
-        )}
-      </Box>
+        <Box
+          backgroundColor="background2"
+          width={'100%'}
+          height={'auto'}
+          aspectRatio={1 / 1}
+          position="relative"
+          overflow={'hidden'}
+          className={coinImage}
+        >
+          {isLoading ||
+          isMediaTypeLoading ||
+          (!shouldUseMediaPreview && !displayImageUrl) ? (
+            <Box backgroundColor="background2" w="100%" h="100%" />
+          ) : shouldUseMediaPreview ? (
+            <MediaPreview
+              mediaUrl={animationFetchableUrl}
+              mediaType={mediaType}
+              coverUrl={displayImageUrl || undefined}
+              width="100%"
+              height="100%"
+              aspectRatio={1}
+            />
+          ) : (
+            <FallbackImage
+              src={displayImageUrl!}
+              sizes="100vw"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              alt={`${name} image`}
+            />
+          )}
 
-      <Box pt="x4" position={'relative'} overflow={'hidden'} className={coinInfo}>
-        <Flex justify={'space-between'} align={'center'} pb="x2">
-          <Text variant="label-md" color="text1">
-            {name}
-          </Text>
-          <Text variant="paragraph-sm" color="text3">
-            {symbol}
-          </Text>
-        </Flex>
+          {/* Price Badge Overlay */}
+          {(priceUsd !== null && priceUsd !== undefined) || isLoadingPrice ? (
+            <Box className={priceBadgeOverlay}>
+              {isLoadingPrice ? (
+                <StatBadge variant="default">
+                  <Spinner size="sm" />
+                </StatBadge>
+              ) : (
+                <StatBadge variant="accent">{formatPrice(priceUsd)}</StatBadge>
+              )}
+            </Box>
+          ) : null}
 
-        {price && (
-          <Flex justify={'space-between'} align={'center'}>
-            <Text variant="paragraph-sm" color="text3">
-              Price
+          {/* New Badge */}
+          {isNew && (
+            <Box position="absolute" top="x3" left="x3">
+              <StatBadge variant="positive">New</StatBadge>
+            </Box>
+          )}
+        </Box>
+
+        <Box pt="x4" position={'relative'} overflow={'hidden'} className={coinInfo}>
+          <Flex justify={'space-between'} align={'center'} pb="x2">
+            <Text variant="label-md" color="text1">
+              {name}
             </Text>
-            <Text variant="paragraph-sm" color="text1">
-              {price}
+            <Text variant="paragraph-sm" color="text3">
+              {symbol}
             </Text>
           </Flex>
-        )}
 
-        {priceUsd && (
-          <Text variant="paragraph-sm" color="text3">
-            ${priceUsd}
-          </Text>
-        )}
-      </Box>
-    </Link>
+          {/* Market Cap */}
+          {(marketCap !== null && marketCap !== undefined) || isLoadingPrice ? (
+            <Flex justify={'space-between'} align={'center'} pb="x3">
+              <Text variant="paragraph-sm" color="text3">
+                Market Cap
+              </Text>
+              <Text variant="paragraph-sm" color="text1">
+                {isLoadingPrice ? <Spinner size="sm" /> : formatMarketCap(marketCap)}
+              </Text>
+            </Flex>
+          ) : null}
+
+          {/* Trade Button */}
+          {showTradeButton && (
+            <Box className={tradeButtonContainer}>
+              <Button
+                size="sm"
+                variant="primary"
+                style={{ width: '100%' }}
+                onClick={handleTradeClick}
+              >
+                Trade
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Link>
+
+      {/* Trade Modal */}
+      {showTradeButton && (
+        <AnimatedModal
+          open={isModalOpen}
+          close={() => setIsModalOpen(false)}
+          size="medium"
+        >
+          <Box p="x6">
+            <Text variant="heading-md" mb="x4">
+              Trade {symbol}
+            </Text>
+            <SwapWidget
+              coinAddress={coinAddress}
+              symbol={symbol}
+              chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+            />
+          </Box>
+        </AnimatedModal>
+      )}
+    </>
   )
 }

@@ -5669,6 +5669,7 @@ export type ClankerTokenFragment = {
   createdAt: any
   createdAtBlock: any
   transactionHash: any
+  msgSender: any
   dao?: { __typename?: 'DAO'; id: string; name: string } | null
 }
 
@@ -5774,6 +5775,7 @@ export type ZoraCoinFragment = {
   createdAt: any
   createdAtBlock: any
   transactionHash: any
+  caller: any
   dao?: { __typename?: 'DAO'; id: string; name: string } | null
   clankerToken?: {
     __typename?: 'ClankerToken'
@@ -5885,6 +5887,7 @@ export type ClankerTokenQuery = {
     createdAt: any
     createdAtBlock: any
     transactionHash: any
+    msgSender: any
     dao?: { __typename?: 'DAO'; id: string; name: string } | null
   } | null
 }
@@ -5915,6 +5918,7 @@ export type DaoClankerTokensQuery = {
       createdAt: any
       createdAtBlock: any
       transactionHash: any
+      msgSender: any
       dao?: { __typename?: 'DAO'; id: string; name: string } | null
     }>
   } | null
@@ -6156,6 +6160,7 @@ export type DaoZoraCoinsQuery = {
       createdAt: any
       createdAtBlock: any
       transactionHash: any
+      caller: any
       dao?: { __typename?: 'DAO'; id: string; name: string } | null
       clankerToken?: {
         __typename?: 'ClankerToken'
@@ -6917,6 +6922,7 @@ export type ZoraCoinQuery = {
     createdAt: any
     createdAtBlock: any
     transactionHash: any
+    caller: any
     dao?: { __typename?: 'DAO'; id: string; name: string } | null
     clankerToken?: {
       __typename?: 'ClankerToken'
@@ -6957,6 +6963,7 @@ export const ClankerTokenFragmentDoc = gql`
     createdAt
     createdAtBlock
     transactionHash
+    msgSender
     dao {
       id
       name
@@ -7090,6 +7097,7 @@ export const ZoraCoinFragmentDoc = gql`
     createdAt
     createdAtBlock
     transactionHash
+    caller
     dao {
       id
       name
