@@ -3,6 +3,29 @@ import { Address, encodeFunctionData, Hex } from 'viem'
 import { batchLockupAbi } from './constants'
 import { toUD2x18 } from './math'
 
+/**
+ * Validates that exponent is within valid UD2x18 range
+ * UD2x18 is backed by uint64 with 18 decimals, max value is ~18.446744073709551615
+ * @throws Error if exponent is out of range
+ */
+function validateExponent(exponent: number): void {
+  const UD2X18_MAX = 18.446744073709551615
+
+  if (!Number.isFinite(exponent)) {
+    throw new Error(`Exponent must be a finite number, got ${exponent}`)
+  }
+
+  if (exponent < 0) {
+    throw new Error(`Exponent must be non-negative (UD2x18 is unsigned), got ${exponent}`)
+  }
+
+  if (exponent > UD2X18_MAX) {
+    throw new Error(
+      `Exponent must not exceed ${UD2X18_MAX} (UD2x18 maximum), got ${exponent}`
+    )
+  }
+}
+
 export interface CreateWithDurationsLLParams {
   sender: Address
   recipient: Address
@@ -16,7 +39,7 @@ export interface CreateWithDurationsLDParams {
   recipient: Address
   depositAmount: bigint
   totalDuration: number // in seconds
-  exponent: number // Exponent for exponential curve (2-100)
+  exponent: number // Exponent for exponential curve (UD2x18: 0 to ~18.446744073709551615)
 }
 
 export interface CreateWithTimestampsLLParams {
@@ -34,7 +57,7 @@ export interface CreateWithTimestampsLDParams {
   depositAmount: bigint
   startTime: number // unix timestamp
   endTime: number // unix timestamp
-  exponent: number // Exponent for exponential curve (2-100)
+  exponent: number // Exponent for exponential curve (UD2x18: 0 to ~18.446744073709551615)
 }
 
 /**
@@ -129,6 +152,9 @@ export function encodeCreateWithDurationsLD(
   transferable: boolean = false
 ): Hex {
   const batch = streams.map((stream) => {
+    // Validate exponent is within UD2x18 range before encoding
+    validateExponent(stream.exponent)
+
     // Convert exponent to UD2x18 format
     const exponentUD2x18 = toUD2x18(stream.exponent)
 
@@ -171,6 +197,9 @@ export function encodeCreateWithTimestampsLD(
   transferable: boolean = false
 ): Hex {
   const batch = streams.map((stream) => {
+    // Validate exponent is within UD2x18 range before encoding
+    validateExponent(stream.exponent)
+
     // Convert exponent to UD2x18 format
     const exponentUD2x18 = toUD2x18(stream.exponent)
 

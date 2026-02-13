@@ -59,7 +59,7 @@ export interface StreamConfigDurationsLD {
   transferable: boolean
   segmentsWithDuration: StreamSegmentWithDuration[]
   shape: string
-  exponent?: number // Decoded exponent value (2-100)
+  exponent?: number // Decoded exponent value (UD2x18: 0 to ~18.446)
 }
 
 export interface StreamConfigTimestampsLD {
@@ -71,7 +71,7 @@ export interface StreamConfigTimestampsLD {
   startTime: number // unix timestamp
   segments: StreamSegmentWithTimestamp[]
   shape: string
-  exponent?: number // Decoded exponent value (2-100)
+  exponent?: number // Decoded exponent value (UD2x18: 0 to ~18.446)
 }
 
 export type StreamConfig =
@@ -105,7 +105,7 @@ export interface StreamLiveData {
   asset: Address
   minFeeWei: bigint
   streamedAmount: bigint
-  exponent?: number // Exponent value for exponential streams (2-100)
+  exponent?: number // Exponent value for exponential streams (UD2x18: 0 to ~18.446)
   shape?: string // Stream shape (e.g., 'linear', 'cliff', 'dynamicExponential')
 }
 
@@ -161,8 +161,8 @@ export const parseStreamDataConfigDurationsLD = (
   // Extract exponent value from segments (convert from UD2x18 to number)
   const exponentUD2x18 =
     segmentsWithDuration.length > 0 ? segmentsWithDuration[0].exponent : 0n
-  const exponent =
-    exponentUD2x18 > 0n ? Number(exponentUD2x18 / BigInt(10 ** 18)) : undefined
+  // Use floating-point division to preserve decimal precision for fractional exponents
+  const exponent = exponentUD2x18 > 0n ? Number(exponentUD2x18) / 10 ** 18 : undefined
 
   return {
     sender: streamData.sender as Address,
@@ -187,8 +187,8 @@ export const parseStreamDataConfigTimestampsLD = (
 
   // Extract exponent value from segments (convert from UD2x18 to number)
   const exponentUD2x18 = segments.length > 0 ? segments[0].exponent : 0n
-  const exponent =
-    exponentUD2x18 > 0n ? Number(exponentUD2x18 / BigInt(10 ** 18)) : undefined
+  // Use floating-point division to preserve decimal precision for fractional exponents
+  const exponent = exponentUD2x18 > 0n ? Number(exponentUD2x18) / 10 ** 18 : undefined
 
   return {
     sender: streamData.sender as Address,

@@ -50,29 +50,6 @@ export const BaseGraph: React.FC<BaseGraphProps> = ({
   const lineRef = useRef<SVGPolylineElement | null>(null)
   const filterId = useId()
 
-  // Animation effect for line drawing
-  useEffect(() => {
-    if (!lineRef.current) return
-
-    const length = lineRef.current.getTotalLength()
-    lineRef.current.style.strokeDasharray = `${length} ${length}`
-    lineRef.current.style.strokeDashoffset = length.toString()
-    lineRef.current.style.opacity = '0'
-
-    const timerId = setTimeout(() => {
-      if (lineRef.current) {
-        lineRef.current.style.transition =
-          'stroke-dashoffset 1.5s ease-in-out, opacity 1.5s ease-in-out'
-        lineRef.current.style.strokeDashoffset = '0'
-        lineRef.current.style.opacity = '1'
-      }
-    }, 100)
-
-    return () => {
-      clearTimeout(timerId)
-    }
-  }, [animationKey])
-
   // Keep visibleIndex in bounds when data changes
   useEffect(() => {
     if (data.length === 0) {
@@ -105,6 +82,29 @@ export const BaseGraph: React.FC<BaseGraphProps> = ({
       })
       .join(' ')
   }, [data, chartWidth, chartHeight, maximumY])
+
+  // Animation effect for line drawing
+  useEffect(() => {
+    if (!lineRef.current) return
+
+    const length = lineRef.current.getTotalLength()
+    lineRef.current.style.strokeDasharray = `${length} ${length}`
+    lineRef.current.style.strokeDashoffset = length.toString()
+    lineRef.current.style.opacity = '0'
+
+    const timerId = setTimeout(() => {
+      if (lineRef.current) {
+        lineRef.current.style.transition =
+          'stroke-dashoffset 1.5s ease-in-out, opacity 1.5s ease-in-out'
+        lineRef.current.style.strokeDashoffset = '0'
+        lineRef.current.style.opacity = '1'
+      }
+    }, 100)
+
+    return () => {
+      clearTimeout(timerId)
+    }
+  }, [animationKey, data.length, points])
 
   // Mouse/touch event handlers
   const handleMouseMove = (

@@ -61,6 +61,14 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
         }
       }
 
+      // Compute final exponent for preview (invert if checkbox is checked)
+      const finalExponent =
+        useExponential && formik.values.exponent
+          ? formik.values.invertExponent
+            ? 1 / formik.values.exponent
+            : formik.values.exponent
+          : undefined
+
       return {
         depositAmount,
         decimals,
@@ -68,7 +76,7 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
         startTime,
         endTime,
         cliffTime,
-        exponent: useExponential ? formik.values.exponent : undefined,
+        exponent: finalExponent,
       }
     } catch (error) {
       return null
@@ -84,6 +92,7 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
     symbol,
     useExponential,
     formik.values.exponent,
+    formik.values.invertExponent,
   ])
 
   return (
@@ -233,7 +242,9 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
             Stream Preview
             {useExponential && formik.values.exponent && (
               <Text as="span" color="text3" ml="x2">
-                (Exponential, exponent: {formik.values.exponent})
+                {formik.values.invertExponent
+                  ? `(Exponential Frontloaded, exp: 1/${formik.values.exponent} = ${(1 / formik.values.exponent).toFixed(3)})`
+                  : `(Exponential Backloaded, exp: ${formik.values.exponent})`}
               </Text>
             )}
           </Text>

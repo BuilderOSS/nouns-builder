@@ -21,7 +21,8 @@ export interface StreamTokensValues {
   cancelable: boolean // Whether streams can be cancelled (applies to all streams)
   transferable: boolean // Whether stream NFTs can be transferred (applies to all streams)
   useExponential?: boolean // Whether to use exponential curve (LockupDynamic) instead of linear (applies to all streams)
-  exponent?: number // Exponent for exponential curve (2-100, only when useExponential=true)
+  exponent?: number // Exponent for exponential curve (2-18, only when useExponential=true)
+  invertExponent?: boolean // Whether to invert the exponent (e.g., 2 → 1/2 for frontloaded curve)
   streams: StreamFormValues[]
 }
 
@@ -87,6 +88,7 @@ const streamTokensSchema = () =>
     cancelable: yup.boolean().required('Cancelable setting is required.'),
     transferable: yup.boolean().required('Transferable setting is required.'),
     useExponential: yup.boolean().optional(),
+    invertExponent: yup.boolean().optional(),
     exponent: yup
       .number()
       .optional()
@@ -97,7 +99,7 @@ const streamTokensSchema = () =>
             .required('Exponent is required when using exponential curve')
             .integer('Exponent must be a whole number')
             .min(2, 'Exponent must be at least 2')
-            .max(100, 'Exponent cannot exceed 100'),
+            .max(18, 'Exponent cannot exceed 18 (UD2x18 maximum)'),
         otherwise: (schema) => schema,
       }),
     streams: yup

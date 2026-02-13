@@ -80,6 +80,7 @@ export const StreamTokens = () => {
     cancelable: true,
     transferable: false,
     useExponential: false,
+    invertExponent: false,
     exponent: undefined,
     streams: [
       {
@@ -444,6 +445,9 @@ export const StreamTokens = () => {
 
     // Use LockupDynamic (LD) for exponential curves, LockupLinear (LL) for linear
     if (values.useExponential && values.exponent) {
+      // Compute final exponent: invert if checkbox is checked
+      const finalExponent = values.invertExponent ? 1 / values.exponent : values.exponent
+
       if (useDurations) {
         calldata = encodeCreateWithDurationsLD(
           contractAddresses.lockup,
@@ -453,7 +457,7 @@ export const StreamTokens = () => {
             recipient: params.recipient,
             depositAmount: params.depositAmount,
             totalDuration: params.totalDuration!,
-            exponent: values.exponent!,
+            exponent: finalExponent,
           })),
           values.cancelable,
           values.transferable
@@ -469,7 +473,7 @@ export const StreamTokens = () => {
             depositAmount: params.depositAmount,
             startTime: params.startTime,
             endTime: params.endTime,
-            exponent: values.exponent!,
+            exponent: finalExponent,
           })),
           values.cancelable,
           values.transferable
@@ -526,7 +530,9 @@ export const StreamTokens = () => {
     const displaySymbol = isEth ? 'ETH (wrapped to WETH)' : tokenSymbol
     const streamType =
       values.useExponential && values.exponent
-        ? `exponential (exp: ${values.exponent})`
+        ? values.invertExponent
+          ? 'exponential frontloaded'
+          : 'exponential backloaded'
         : 'linear'
     const summary = `Create ${streamCount} ${streamType} Sablier stream${streamCount > 1 ? 's' : ''} totaling ${formattedAmount} ${displaySymbol}`
 
@@ -814,15 +820,45 @@ export const StreamTokens = () => {
                               inputLabel="Exponent"
                               placeholder="2"
                               min={2}
-                              max={100}
+                              max={18}
                               step={1}
                               errorMessage={
                                 formik.touched.exponent && formik.errors.exponent
                                   ? formik.errors.exponent
                                   : undefined
                               }
-                              helperText="Curve steepness (2-100). Higher values = more tokens unlocked near the end."
+                              helperText="Exponent value (2-18). Check 'Invert' below for frontloaded curves (1/2 to 1/18)."
                             />
+                            <Box mt="x2">
+                              <label
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={formik.values.invertExponent || false}
+                                  onChange={(e) =>
+                                    formik.setFieldValue(
+                                      'invertExponent',
+                                      e.target.checked
+                                    )
+                                  }
+                                />
+                                <Box>
+                                  <Text fontWeight="label">
+                                    Invert Exponent (Frontloaded)
+                                  </Text>
+                                  <Text variant="paragraph-sm" color="text3">
+                                    {formik.values.invertExponent
+                                      ? `Frontloaded: 1/${formik.values.exponent || 2} (more tokens unlock early)`
+                                      : `Backloaded: ${formik.values.exponent || 2} (more tokens unlock late)`}
+                                  </Text>
+                                </Box>
+                              </label>
+                            </Box>
                           </Box>
                         )}
                       </Stack>

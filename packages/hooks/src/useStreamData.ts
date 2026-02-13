@@ -213,7 +213,8 @@ export const useStreamData = (
             // Extract exponent from first segment (convert from UD2x18)
             if (segments.length > 0 && segments[0].exponent) {
               const exponentUD2x18 = BigInt(segments[0].exponent)
-              exponent = Number(exponentUD2x18 / BigInt(10 ** 18))
+              // Use floating-point division to preserve decimal precision for fractional exponents
+              exponent = Number(exponentUD2x18) / 10 ** 18
             }
           } else {
             // LD with timestamps
@@ -228,7 +229,8 @@ export const useStreamData = (
             // Extract exponent from first segment (convert from UD2x18)
             if (segments.length > 0 && segments[0].exponent) {
               const exponentUD2x18 = BigInt(segments[0].exponent)
-              exponent = Number(exponentUD2x18 / BigInt(10 ** 18))
+              // Use floating-point division to preserve decimal precision for fractional exponents
+              exponent = Number(exponentUD2x18) / 10 ** 18
             }
           }
         } else {
@@ -376,14 +378,14 @@ export const useStreamData = (
           streamedAmount = (withdrawnAmount as bigint) + withdrawableAmount
         } else {
           // For active/settled/pending streams, calculate based on time for real-time updates
-          if (staticStream.exponent && staticStream.exponent >= 2) {
-            // Exponential (LockupDynamic) stream - use LD calculation
+          if (staticStream.exponent && staticStream.exponent > 0) {
+            // Exponential (LockupDynamic) stream - use LD calculation (supports fractional exponents)
             // Build single segment with full amount at end
             const segments: Segment[] = [
               {
                 timestamp: staticStream.endTime,
                 amount: depositedAmount,
-                exponent: staticStream.exponent, // Regular number (2-100), NOT UD2x18
+                exponent: staticStream.exponent, // Regular number (supports fractional), NOT UD2x18
               },
             ]
 
@@ -434,7 +436,7 @@ export const useStreamData = (
           minFeeWei: minFeeWei as bigint,
           exponent: staticStream.exponent,
           shape:
-            staticStream.exponent && staticStream.exponent >= 2
+            staticStream.exponent && staticStream.exponent > 0
               ? 'dynamicExponential'
               : staticStream.cliffTime > 0
                 ? 'cliff'

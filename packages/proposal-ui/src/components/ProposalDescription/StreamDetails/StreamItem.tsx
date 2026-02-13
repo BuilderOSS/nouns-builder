@@ -123,8 +123,7 @@ export const StreamItem = ({
     return undefined
   }, [liveData, stream])
 
-  const isExponential =
-    exponent !== undefined && exponent !== null ? exponent >= 2 : false
+  const isExponential = exponent !== undefined && exponent !== null ? exponent > 0 : false
 
   const isRecipient = address && isAddressEqual(stream.recipient, address)
 

@@ -31,6 +31,19 @@ const formatTimestamp = (timestamp: any) =>
     year: 'numeric',
   })
 
+const formatExponent = (exponentUD2x18: any): string => {
+  if (!exponentUD2x18) return 'N/A'
+  try {
+    // Convert UD2x18 bigint to decimal number
+    const exponentValue = Number(BigInt(exponentUD2x18)) / 10 ** 18
+    // Round to max 3 decimal places and remove trailing zeros
+    const rounded = Math.round(exponentValue * 1000) / 1000
+    return rounded.toString()
+  } catch (error) {
+    return exponentUD2x18.toString()
+  }
+}
+
 export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
   arg,
   tokenMetadata,
@@ -157,7 +170,9 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
                               <Text>{formatAmount(BigInt(segment.amount))}</Text>
                             </Flex>
                           )}
-                          {segment.exponent && <Flex>exponent: {segment.exponent}</Flex>}
+                          {segment.exponent && (
+                            <Flex>exponent: {formatExponent(segment.exponent)}</Flex>
+                          )}
                           {segment.duration && (
                             <Flex>
                               duration: {formatStreamDuration(segment.duration)}
@@ -194,7 +209,9 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
                             <Text>{formatAmount(BigInt(segment.amount))}</Text>
                           </Flex>
                         )}
-                        {segment.exponent && <Flex>exponent: {segment.exponent}</Flex>}
+                        {segment.exponent && (
+                          <Flex>exponent: {formatExponent(segment.exponent)}</Flex>
+                        )}
                         {segment.timestamp && (
                           <Flex>timestamp: {formatTimestamp(segment.timestamp)}</Flex>
                         )}

@@ -23,7 +23,41 @@ interface StreamGraphProps {
   unlockCliff?: bigint
 }
 
-const POINTS_COUNT = 50
+const POINTS_COUNT_REGULAR = 100
+const POINTS_COUNT_FRONTLOADED = 200 // More points for frontloaded curves
+
+/**
+ * Generate timestamp samples with non-uniform distribution
+ * For frontloaded curves (exp < 1), concentrate more points at the beginning
+ * For backloaded curves (exp > 1), use uniform distribution
+ */
+function generateTimestamps(
+  startTime: number,
+  duration: number,
+  pointsCount: number,
+  exponent?: number
+): number[] {
+  const timestamps: number[] = []
+  const isFrontloaded = exponent !== undefined && exponent < 1 && exponent > 0
+
+  for (let i = 0; i <= pointsCount; i++) {
+    let progress: number
+
+    if (isFrontloaded) {
+      // For frontloaded curves, use quadratic distribution to concentrate points at start
+      // This ensures we capture the rapid initial change
+      const linearProgress = i / pointsCount
+      progress = 1 - Math.pow(1 - linearProgress, 2) // More points early, fewer later
+    } else {
+      // For backloaded curves, uniform distribution is fine
+      progress = i / pointsCount
+    }
+
+    timestamps.push(Math.floor(startTime + duration * progress))
+  }
+
+  return timestamps
+}
 
 /**
  * Format value with dynamic decimal precision based on magnitude
@@ -74,13 +108,18 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({
       return points
     }
 
-    for (let i = 0; i <= POINTS_COUNT; i++) {
-      const progress = i / POINTS_COUNT
-      const timestamp = Math.floor(startTime + duration * progress)
+    // Use more points for frontloaded curves to capture rapid initial changes
+    const isFrontloaded = exponent !== undefined && exponent < 1 && exponent > 0
+    const pointsCount = isFrontloaded ? POINTS_COUNT_FRONTLOADED : POINTS_COUNT_REGULAR
 
+    // Generate timestamps with appropriate distribution
+    const timestamps = generateTimestamps(startTime, duration, pointsCount, exponent)
+
+    for (const timestamp of timestamps) {
       let streamedAmount: bigint
 
-      const isExponential = exponent !== undefined && exponent >= 2
+      // Use exponential calculation for any valid exponent (supports both > 1 and < 1)
+      const isExponential = exponent !== undefined && exponent > 0
 
       if (isExponential && exponent) {
         // Build segments for exponential calculation
