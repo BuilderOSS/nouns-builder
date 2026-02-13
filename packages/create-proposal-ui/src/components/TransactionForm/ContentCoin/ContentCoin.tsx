@@ -87,7 +87,7 @@ const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = 
       const currency = formik.values.currency as AddressType
       const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
         currency,
-        quoteTokenUsd: clankerTokenPriceUsd,
+        clankerTokenPriceUsd,
       })
 
       const encoded = encodeMultiCurvePoolConfig({
@@ -143,12 +143,12 @@ const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = 
     const currency = formik.values.currency as AddressType
     const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
       currency,
-      quoteTokenUsd: clankerTokenPriceUsd,
+      clankerTokenPriceUsd,
     })
 
-    const marketCapUsd = clankerTokenPriceUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
+    const creatorFdvUsd = clankerTokenPriceUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
     const targetFdvUsd = estimateTargetFdvUsd({
-      marketCapUsd,
+      creatorFdvUsd,
     })
 
     const lowerTick = Math.min(...poolConfig.lowerTicks)
@@ -317,9 +317,6 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
       // 3. Get token price for the selected currency (ClankerToken address)
       const currency = values.currency as AddressType
 
-      // Use the ClankerToken price
-      let quoteTokenUsd = clankerTokenPriceUsd
-
       // Handle price loading or error
       if (clankerTokenPriceLoading) {
         setSubmitError('Still loading token price. Please wait...')
@@ -333,7 +330,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
         )
       }
 
-      if (!quoteTokenUsd) {
+      if (!clankerTokenPriceUsd) {
         throw new Error(
           `Unable to get price for selected currency: ${currency}. Cannot create content coin without token price.`
         )
@@ -342,7 +339,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
       // 4. Create pool config using the utility with constant FDV
       const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
         currency,
-        quoteTokenUsd,
+        clankerTokenPriceUsd,
       })
 
       // 5. Encode pool config using Zora's function

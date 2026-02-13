@@ -372,6 +372,18 @@ export const LaunchEconomicsPreview: React.FC<LaunchEconomicsPreviewProps> = ({
             </Text>
             <Text variant="paragraph-sm" color="text3">
               1 {baseTokenSymbol} = {economics.currentPriceStr} {quoteTokenSymbol}
+              {quoteTokenUsdPrice &&
+                quoteTokenUsdPrice > 0 &&
+                (() => {
+                  // Parse currentPriceStr back to number and multiply by quote USD price
+                  const currentPrice = parseFloat(economics.currentPriceStr)
+                  const usdPrice = currentPrice * quoteTokenUsdPrice
+
+                  // Convert to rational for adaptive formatting
+                  const scale = 1_000_000_000_000_000_000n // 18 decimals precision
+                  const scaled = BigInt(Math.floor(usdPrice * 1e18))
+                  return ` ≈ $${formatUsdFromRational(scaled, scale)}`
+                })()}
             </Text>
             <Text variant="paragraph-sm" color="text3">
               1 {quoteTokenSymbol} = {economics.inversePriceStr} {baseTokenSymbol}
@@ -444,7 +456,7 @@ export const LaunchEconomicsPreview: React.FC<LaunchEconomicsPreviewProps> = ({
           </Box>
 
           {/* Target Market Cap */}
-          {economics.targetPriceStr && (
+          {economics.targetPriceStr && targetMarketCapUsd && (
             <Box
               p="x4"
               borderRadius="curved"
@@ -458,6 +470,18 @@ export const LaunchEconomicsPreview: React.FC<LaunchEconomicsPreviewProps> = ({
               </Text>
               <Text variant="paragraph-sm" color="text3">
                 Target Price: {economics.targetPriceStr} {quoteTokenSymbol}
+                {quoteTokenUsdPrice &&
+                  quoteTokenUsdPrice > 0 &&
+                  (() => {
+                    // Parse targetPriceStr back to number and multiply by quote USD price
+                    const targetPrice = parseFloat(economics.targetPriceStr)
+                    const usdPrice = targetPrice * quoteTokenUsdPrice
+
+                    // Convert to rational for adaptive formatting
+                    const scale = 1_000_000_000_000_000_000n // 18 decimals precision
+                    const scaled = BigInt(Math.floor(usdPrice * 1e18))
+                    return ` ≈ $${formatUsdFromRational(scaled, scale)}`
+                  })()}
               </Text>
               <Text variant="paragraph-sm" color="text3">
                 Target Tick: {economics.targetTickUsable} (spacing: {tickSpacing})

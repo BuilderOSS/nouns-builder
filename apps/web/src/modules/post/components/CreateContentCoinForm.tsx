@@ -107,7 +107,7 @@ const CreateContentCoinEconomicsPreview: React.FC<
       const currency = formik.values.currency as AddressType
       const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
         currency,
-        quoteTokenUsd: clankerTokenPriceUsd,
+        clankerTokenPriceUsd,
       })
 
       const encoded = encodeMultiCurvePoolConfig({
@@ -163,11 +163,11 @@ const CreateContentCoinEconomicsPreview: React.FC<
     const currency = formik.values.currency as AddressType
     const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
       currency,
-      quoteTokenUsd: clankerTokenPriceUsd,
+      clankerTokenPriceUsd,
     })
 
-    const marketCapUsd = clankerTokenPriceUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
-    const targetFdvUsd = estimateTargetFdvUsd({ marketCapUsd })
+    const creatorFdvUsd = clankerTokenPriceUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
+    const targetFdvUsd = estimateTargetFdvUsd({ creatorFdvUsd })
 
     // Find the absolute lowest and highest ticks across all bands
     const lowestTick = Math.min(...poolConfig.lowerTicks)
@@ -385,9 +385,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       // 3. Get token price for the selected currency (ClankerToken address)
       const currency = values.currency as AddressType
 
-      // Use the ClankerToken price
-      let quoteTokenUsd = clankerTokenPriceUsd
-
       // Handle price loading or error
       if (clankerTokenPriceLoading) {
         setSubmitError('Still loading token price. Please wait...')
@@ -400,20 +397,20 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
         const warningMessage = `Error fetching token price: ${clankerTokenPriceError.message}. Using $1 as default price for market cap calculations.`
         console.warn(warningMessage)
         setPriceWarning(warningMessage)
-        quoteTokenUsd = 1
+        return
       }
 
-      if (!quoteTokenUsd) {
+      if (!clankerTokenPriceUsd) {
         const warningMessage = `No price data available for token ${currency}. Using $1 as default price for market cap calculations.`
         console.warn(warningMessage)
         setPriceWarning(warningMessage)
-        quoteTokenUsd = 1
+        return
       }
 
       // 4. Create pool config using the utility with form values
       const poolConfig = createContentPoolConfigWithClankerTokenAsCurrency({
         currency,
-        quoteTokenUsd,
+        clankerTokenPriceUsd,
       })
 
       // 5. Encode pool config using Zora's function

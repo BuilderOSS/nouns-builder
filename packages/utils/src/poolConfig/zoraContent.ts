@@ -1,7 +1,7 @@
 import type { Address } from 'viem'
 
 import { DEFAULT_CLANKER_TOTAL_SUPPLY } from './clankerCreator'
-import { clamp, type DiscoveryPoolConfig, fdvToTick } from './shared'
+import { type DiscoveryPoolConfig, fdvToTick } from './shared'
 
 export const DEFAULT_ZORA_TOTAL_SUPPLY = 1_000_000_000 // 1B tokens
 export const DEFAULT_ZORA_TICK_SPACING = 200
@@ -93,44 +93,40 @@ export function createContentPoolConfigFromTargetFdv(params: {
   }
 }
 
-// ---- Anchor model constants ----
+const MIN_FDV = 10_000
+const MAX_FDV = 100_000
 
-const BASE_MC = 10_000 // USD
-const BASE_FDV = 120_000 // USD
-const ALPHA = 0.5 // sqrt scaling
+// FDV where you're halfway from min → max
+const PIVOT_FDV = 500_000 // creator FDV where curve is meaningfully "mid"
+// Steepness (0.5 = very gentle, 1 = moderate, 2 = steep)
+const K = 1.2 // steepness (higher = reaches cap faster)
 
-const MIN_FDV = 25_000 // hard floor
-const MAX_FDV = 2_500_000 // hard ceiling
-
-/**
- * Estimate a Zora-like target FDV for a creator / DAO token.
- */
-export function estimateTargetFdvUsd(params: { marketCapUsd: number }): number {
-  const { marketCapUsd } = params
-
-  if (!Number.isFinite(marketCapUsd) || marketCapUsd <= 0) {
-    throw new Error('marketCapUsd must be a finite positive number')
+export function estimateTargetFdvUsd(params: { creatorFdvUsd: number }): number {
+  const { creatorFdvUsd } = params
+  if (!Number.isFinite(creatorFdvUsd) || creatorFdvUsd <= 0) {
+    throw new Error('creatorFdvUsd must be a finite positive number')
   }
 
-  const raw = BASE_FDV * Math.pow(marketCapUsd / BASE_MC, ALPHA)
+  const x = Math.pow(creatorFdvUsd / PIVOT_FDV, K)
+  const y = MIN_FDV + (MAX_FDV - MIN_FDV) * (x / (1 + x)) // saturating curve
 
-  return clamp(raw, MIN_FDV, MAX_FDV)
+  return y
 }
 
 export function createContentPoolConfigWithClankerTokenAsCurrency(params: {
   currency: Address
-  quoteTokenUsd: number
+  clankerTokenPriceUsd: number
   tickSpacing?: number
 }): DiscoveryPoolConfig {
-  const { currency, quoteTokenUsd, tickSpacing } = params
+  const { currency, clankerTokenPriceUsd, tickSpacing } = params
 
-  const marketCapUsd = quoteTokenUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
+  const creatorFdvUsd = clankerTokenPriceUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
 
-  const targetFdvUsd = estimateTargetFdvUsd({ marketCapUsd })
+  const targetFdvUsd = estimateTargetFdvUsd({ creatorFdvUsd: creatorFdvUsd })
 
   return createContentPoolConfigFromTargetFdv({
     currency,
-    quoteTokenUsd,
+    quoteTokenUsd: clankerTokenPriceUsd,
     targetFdvUsd,
     tickSpacing,
   })
