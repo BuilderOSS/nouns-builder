@@ -2,6 +2,7 @@ import { TokenMetadata } from '@buildeross/hooks/useTokenMetadata'
 import { DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils'
 import {
+  convertToInvertedFraction,
   formatStreamDuration,
   type StreamConfig,
 } from '@buildeross/utils/sablier/streams'
@@ -31,12 +32,17 @@ const formatTimestamp = (timestamp: any) =>
     year: 'numeric',
   })
 
-const formatExponent = (exponentUD2x18: any): string => {
+const formatExponentUD2x18 = (exponentUD2x18: any): string => {
   if (!exponentUD2x18) return 'N/A'
   try {
     // Convert UD2x18 bigint to decimal number
     const exponentValue = Number(BigInt(exponentUD2x18)) / 10 ** 18
-    // Round to max 3 decimal places and remove trailing zeros
+
+    // Try to convert to inverted fraction if in range (0, 1)
+    const invertedFraction = convertToInvertedFraction(exponentValue)
+    if (invertedFraction) return invertedFraction
+
+    // Otherwise round to max 3 decimal places and remove trailing zeros
     const rounded = Math.round(exponentValue * 1000) / 1000
     return rounded.toString()
   } catch (error) {
@@ -171,7 +177,9 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
                             </Flex>
                           )}
                           {segment.exponent && (
-                            <Flex>exponent: {formatExponent(segment.exponent)}</Flex>
+                            <Flex>
+                              exponent: {formatExponentUD2x18(segment.exponent)}
+                            </Flex>
                           )}
                           {segment.duration && (
                             <Flex>
@@ -210,7 +218,7 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
                           </Flex>
                         )}
                         {segment.exponent && (
-                          <Flex>exponent: {formatExponent(segment.exponent)}</Flex>
+                          <Flex>exponent: {formatExponentUD2x18(segment.exponent)}</Flex>
                         )}
                         {segment.timestamp && (
                           <Flex>timestamp: {formatTimestamp(segment.timestamp)}</Flex>

@@ -341,6 +341,41 @@ export function formatStreamDuration(seconds: number): string {
 }
 
 /**
+ * Converts decimal exponents between 0 and 1 to inverted fraction format (1/x)
+ * For example: 0.5 -> "1/2", 0.333 -> "1/3", 0.25 -> "1/4"
+ * Supports denominators from 2 to 18
+ */
+export function convertToInvertedFraction(value: number): string | null {
+  // Only convert if 0 < value < 1
+  if (value <= 0 || value >= 1) return null
+
+  const tolerance = 0.0001 // Tolerance for floating point comparison
+
+  // Try denominators from 2 to 18
+  for (let denominator = 2; denominator <= 18; denominator++) {
+    const fraction = 1 / denominator
+    if (Math.abs(value - fraction) < tolerance) {
+      return `1/${denominator}`
+    }
+  }
+
+  return null
+}
+
+/**
+ * Format exponent value for display, converting fractional exponents to inverted notation
+ * For example: 0.5 -> "1/2", 2 -> "2", 0.333 -> "1/3"
+ */
+export function formatExponent(value: number): string {
+  const invertedFraction = convertToInvertedFraction(value)
+  if (invertedFraction) return invertedFraction
+
+  // Round to max 3 decimal places and remove trailing zeros
+  const rounded = Math.round(value * 1000) / 1000
+  return rounded.toString()
+}
+
+/**
  * Get status label from status enum
  */
 export function getStatusLabel(status: number): string {

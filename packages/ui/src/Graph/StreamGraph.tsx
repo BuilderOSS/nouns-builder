@@ -189,12 +189,32 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({
       const maxY = data.reduce((max, p) => (p.y > max ? p.y : max), 0)
       const maximumY = maxY > 0 ? maxY : 1
 
-      // Calculate position with text offset for better visual alignment
-      const TEXT_OFFSET = 12
-      const x =
-        index * (chartWidth / Math.max(1, parts - 1)) + GRAPH_PADDING_X - TEXT_OFFSET
-      const y =
-        chartHeight - (point.y / maximumY) * chartHeight + GRAPH_PADDING_Y - TEXT_OFFSET
+      // Calculate cursor position as a percentage (0 to 1)
+      const progress = index / Math.max(1, parts - 1)
+
+      // Determine text anchor and offset based on position
+      // Left third: show tooltip to the right (anchor at start)
+      // Right third: show tooltip to the left (anchor at end)
+      // Middle: show tooltip centered (anchor at middle)
+      let textAnchor: 'start' | 'middle' | 'end'
+      let xOffset: number
+
+      if (progress < 0.33) {
+        // Left side - tooltip to the right
+        textAnchor = 'start'
+        xOffset = 12
+      } else if (progress > 0.67) {
+        // Right side - tooltip to the left
+        textAnchor = 'end'
+        xOffset = -12
+      } else {
+        // Middle - tooltip centered
+        textAnchor = 'middle'
+        xOffset = 0
+      }
+
+      const x = index * (chartWidth / Math.max(1, parts - 1)) + GRAPH_PADDING_X + xOffset
+      const y = chartHeight - (point.y / maximumY) * chartHeight + GRAPH_PADDING_Y - 12
 
       // Format timestamp as date
       const timestamp = new Date(point.x * 1000).toLocaleDateString('en-US', {
@@ -207,24 +227,26 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({
         <>
           <Text
             style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
-            fontSize={{ '@initial': 20, '@768': 16 }}
+            fontSize={16}
             key={`${index}-amount`}
             as="text"
             variant="eyebrow"
             x={x}
             y={y - 10}
+            textAnchor={textAnchor}
             backgroundColor={'accent'}
           >
             {formatDynamicDecimals(point.y)} {symbol}
           </Text>
           <Text
             style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
-            fontSize={{ '@initial': 16, '@768': 12 }}
+            fontSize={12}
             key={`${index}-date`}
             as="text"
             variant="eyebrow"
             x={x}
             y={y - 28}
+            textAnchor={textAnchor}
             backgroundColor={'accent'}
           >
             {timestamp}

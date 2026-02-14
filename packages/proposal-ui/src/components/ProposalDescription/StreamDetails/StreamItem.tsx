@@ -5,6 +5,7 @@ import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, TokenMetadata, TransactionType } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { StreamGraph } from '@buildeross/ui/Graph'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -14,20 +15,21 @@ import { lockupAbi, StreamStatus } from '@buildeross/utils/sablier/constants'
 import {
   calculateStreamTimes,
   createSablierStreamUrl,
+  formatExponent,
   formatStreamDuration,
   getStatusLabel,
   StreamConfig,
   StreamLiveData,
 } from '@buildeross/utils/sablier/streams'
 import { createSafeAppUrl } from '@buildeross/utils/safe'
-import { atoms, Box, Button, Icon, Stack, Text } from '@buildeross/zord'
+import { atoms, Box, Button, Grid, Icon, Stack, Text } from '@buildeross/zord'
 import { useCallback, useMemo } from 'react'
 import { Address, encodeFunctionData, formatUnits, isAddressEqual } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { SenderDelegation } from './SenderDelegation'
-import { linkStyle } from './StreamItem.css'
+import { gridStyle, linkStyle } from './StreamItem.css'
 
 interface StreamItemProps {
   stream: StreamConfig
@@ -85,7 +87,9 @@ export const StreamItem = ({
     collectionAddress: addresses.token,
   })
 
-  const { displayName: recipientName } = useEnsData(stream.recipient)
+  const { displayName: recipientName, ensAvatar: recipientAvatar } = useEnsData(
+    stream.recipient
+  )
 
   // Sender info hooks (called at top level)
   const { isGnosisSafe: isSenderAGnosisSafe } = useIsGnosisSafe(
@@ -241,115 +245,188 @@ export const StreamItem = ({
   const title = <Text>{`Stream ${index + 1}${amountPart} - ${recipientDisplay}`}</Text>
 
   const description = (
-    <Stack gap="x3">
-      <Stack
-        direction="row"
-        align="center"
-        justify="space-between"
-        flexWrap="wrap"
-        gap="x2"
-      >
-        <Stack direction="row" align="center" gap="x2">
-          <Text variant="label-xs" color="tertiary">
-            Recipient:
-          </Text>
-          <Box color={'secondary'} className={atoms({ textDecoration: 'underline' })}>
-            <a href={`/profile/${stream.recipient}`}>
-              <Text variant="label-xs">{recipientDisplay}</Text>
-            </a>
-          </Box>
-        </Stack>
-        <Text variant="label-xs" color="tertiary">
-          Total: {amountDisplay}
-        </Text>
-      </Stack>
-      <Stack
-        direction="row"
-        align="center"
-        justify="space-between"
-        flexWrap="wrap"
-        gap="x2"
-      >
-        {hasCliff && (
-          <Text variant="label-xs" color="tertiary">
-            Cliff: {new Date(cliffTime * 1000).toLocaleDateString()}
-          </Text>
-        )}
-        <Text variant="label-xs" color="tertiary">
-          Duration: {formatStreamDuration(duration)}
-        </Text>
-      </Stack>
-      <Stack
-        direction="row"
-        align="center"
-        justify="space-between"
-        flexWrap="wrap"
-        gap="x2"
-      >
-        <Text variant="label-xs" color="tertiary">
-          Cancelable: {stream.cancelable ? 'Yes' : 'No'}
-        </Text>
-        <Text variant="label-xs" color="tertiary">
-          Transferable: {stream.transferable ? 'Yes' : 'No'}
-        </Text>
-      </Stack>
-      {(!isDurationsMode || isExecuted) && (
-        <Stack
-          direction="row"
-          align="center"
-          justify="space-between"
-          flexWrap="wrap"
-          gap="x2"
-        >
-          <Text variant="label-xs" color="tertiary">
-            Start: {new Date(startTime * 1000).toLocaleDateString()}
-          </Text>
-          <Text variant="label-xs" color="tertiary">
-            End: {new Date(endTime * 1000).toLocaleDateString()}
-          </Text>
-        </Stack>
-      )}
+    <Stack gap="x2">
+      {/* Two-column layout: Info on left, Graph on right for desktop */}
+      <Grid gap="x3" className={gridStyle}>
+        {/* Left column: Stream Information */}
+        <Stack gap="x2" flex="1">
+          <Stack
+            direction="row"
+            align="center"
+            justify="space-between"
+            flexWrap="wrap"
+            gap="x2"
+          >
+            <Stack direction="row" align="center" gap="x2">
+              <Text variant="label-sm" color="tertiary">
+                Recipient:
+              </Text>
+              <Avatar address={stream.recipient} src={recipientAvatar} size="24" />
+              <Box className={atoms({ textDecoration: 'underline' })}>
+                <a href={`/profile/${stream.recipient}`}>
+                  <Text variant="label-sm">{recipientDisplay}</Text>
+                </a>
+              </Box>
+            </Stack>
+          </Stack>
+          <Stack
+            direction="row"
+            align="center"
+            justify="space-between"
+            flexWrap="wrap"
+            gap="x2"
+          >
+            <Stack direction="row" align="center" gap="x2">
+              <Text variant="label-sm" color="tertiary">
+                Cancelable:
+              </Text>
+              <Text variant="label-sm">{stream.cancelable ? 'Yes' : 'No'}</Text>
+            </Stack>
+            <Stack direction="row" align="center" gap="x2">
+              <Text variant="label-sm" color="tertiary">
+                Transferable:
+              </Text>
+              <Text variant="label-sm">{stream.transferable ? 'Yes' : 'No'}</Text>
+            </Stack>
+          </Stack>
+          <Stack
+            direction="row"
+            align="center"
+            justify="space-between"
+            flexWrap="wrap"
+            gap="x2"
+          >
+            {hasCliff && (
+              <Stack direction="row" align="center" gap="x2">
+                <Text variant="label-sm" color="tertiary">
+                  Cliff:
+                </Text>
+                <Text variant="label-sm">
+                  {new Date(cliffTime * 1000).toLocaleDateString()}
+                </Text>
+              </Stack>
+            )}
+            <Stack direction="row" align="center" gap="x2">
+              <Text variant="label-sm" color="tertiary">
+                Duration:
+              </Text>
+              <Text variant="label-sm">{formatStreamDuration(duration)}</Text>
+            </Stack>
+          </Stack>
+          {(!isDurationsMode || isExecuted) && (
+            <Stack
+              direction="row"
+              align="center"
+              justify="space-between"
+              flexWrap="wrap"
+              gap="x2"
+            >
+              <Stack direction="row" align="center" gap="x2">
+                <Text variant="label-sm" color="tertiary">
+                  Start:
+                </Text>
+                <Text variant="label-sm">
+                  {new Date(startTime * 1000).toLocaleDateString()}
+                </Text>
+              </Stack>
+              <Stack direction="row" align="center" gap="x2">
+                <Text variant="label-sm" color="tertiary">
+                  End:
+                </Text>
+                <Text variant="label-sm">
+                  {new Date(endTime * 1000).toLocaleDateString()}
+                </Text>
+              </Stack>
+            </Stack>
+          )}
 
-      {/* Stream Visualization Graph */}
-      <Box mt="x4" p="x4" borderRadius="curved" backgroundColor="background2">
-        <Stack direction="row" align="center" justify="space-between" mb="x2">
-          <Text variant="label-sm">Stream Curve</Text>
-          {isExponential && exponent && (
-            <Text variant="label-xs" color="text3">
-              Exponential (exp: {exponent})
-            </Text>
-          )}
-          {!isExponential && (
-            <Text variant="label-xs" color="text3">
-              Linear
-            </Text>
+          {/* Status and remaining details (shown on desktop in left column) */}
+          {liveData && (
+            <Stack gap="x2" display={{ '@initial': 'none', '@768': 'flex' }}>
+              <Stack direction="row" align="center" justify="space-between">
+                <Text variant="label-sm" color="tertiary">
+                  Status:
+                </Text>
+                <Box
+                  backgroundColor={
+                    liveData.status === StreamStatus.STREAMING
+                      ? 'positive'
+                      : liveData.status === StreamStatus.CANCELED
+                        ? 'negative'
+                        : 'background2'
+                  }
+                  px="x2"
+                  py="x1"
+                  borderRadius="curved"
+                >
+                  <Text variant="label-sm" color="primary">
+                    {getStatusLabel(liveData.status)}
+                  </Text>
+                </Box>
+              </Stack>
+              <Stack direction="row" align="center" justify="space-between">
+                <Text variant="label-sm" color="tertiary">
+                  Total Deposited:
+                </Text>
+                <Text variant="label-sm">
+                  {formatCryptoVal(formatUnits(liveData.depositedAmount, decimals))}{' '}
+                  {tokenMetadata?.symbol}
+                </Text>
+              </Stack>
+              <Stack direction="row" align="center" justify="space-between">
+                <Text variant="label-sm" color="tertiary">
+                  Remaining in Stream:
+                </Text>
+                <Text variant="label-sm">
+                  {formatCryptoVal(
+                    formatUnits(
+                      liveData.depositedAmount - liveData.withdrawnAmount,
+                      decimals
+                    )
+                  )}{' '}
+                  {tokenMetadata?.symbol}
+                </Text>
+              </Stack>
+            </Stack>
           )}
         </Stack>
-        {/*
-          Responsive SVG: width/height props define viewBox coordinates for tooltip positioning.
-          SVG scales to fill container via w="100%" and aspectRatio matching 500:220 (≈2.27:1).
-          Tooltip positions are calculated in viewBox space, ensuring correct alignment at all sizes.
-          Accordion allows overflow when open, enabling tooltips to extend beyond bounds.
-        */}
-        <Box w="100%" style={{ aspectRatio: '2.27/1' }}>
-          <StreamGraph
-            depositAmount={totalAmount}
-            decimals={decimals}
-            symbol={tokenMetadata?.symbol ?? ''}
-            startTime={startTime}
-            endTime={endTime}
-            cliffTime={hasCliff ? cliffTime : 0}
-            exponent={exponent}
-            width={500}
-            height={220}
-          />
+
+        {/* Right column: Stream Visualization Graph */}
+        <Box flex="1" p="x3" borderRadius="curved" backgroundColor="background2">
+          <Text variant="label-sm" mb="x2">
+            Stream Preview
+            {isExponential && exponent && (
+              <Text as="span" color="text3" ml="x2">
+                (Exponential, exp: {formatExponent(exponent)})
+              </Text>
+            )}
+          </Text>
+          {/*
+            Responsive SVG: width/height props define viewBox coordinates for tooltip positioning.
+            SVG scales to fill container via w="100%" and aspectRatio matching 500:220 (≈2.27:1).
+            Tooltip positions are calculated in viewBox space, ensuring correct alignment at all sizes.
+            Accordion allows overflow when open, enabling tooltips to extend beyond bounds.
+          */}
+          <Box w="100%" style={{ aspectRatio: '2.27/1' }}>
+            <StreamGraph
+              depositAmount={totalAmount}
+              decimals={decimals}
+              symbol={tokenMetadata?.symbol ?? ''}
+              startTime={startTime}
+              endTime={endTime}
+              cliffTime={hasCliff ? cliffTime : 0}
+              exponent={exponent}
+              width={500}
+              height={220}
+            />
+          </Box>
         </Box>
-      </Box>
+      </Grid>
 
       {liveData && (
         <>
           {/* Prominent withdrawal info cards */}
-          <Stack direction={{ '@initial': 'column', '@768': 'row' }} gap="x3" mt="x4">
+          <Stack direction={{ '@initial': 'column', '@768': 'row' }} gap="x3" mt="x2">
             {/* Currently Withdrawable - Most Important */}
             <Box
               flex="1"
@@ -365,7 +442,7 @@ export const StreamItem = ({
                   : 'border'
               }
             >
-              <Text variant="label-xs" color="tertiary" mb="x2">
+              <Text variant="label-sm" color="tertiary" mb="x2">
                 Available to Withdraw
               </Text>
               <Text fontSize={28} fontWeight="heading">
@@ -388,7 +465,7 @@ export const StreamItem = ({
               borderStyle="solid"
               borderColor="border"
             >
-              <Text variant="label-xs" color="tertiary" mb="x2">
+              <Text variant="label-sm" color="tertiary" mb="x2">
                 Already Withdrawn
               </Text>
               <Text fontSize={28} fontWeight="heading">
@@ -400,10 +477,15 @@ export const StreamItem = ({
             </Box>
           </Stack>
 
-          {/* Status and remaining details */}
-          <Stack direction="column" gap="x2" mt="x3">
+          {/* Status and remaining details (shown on mobile only, desktop has this in left column) */}
+          <Stack
+            direction="column"
+            gap="x2"
+            mt="x2"
+            display={{ '@initial': 'flex', '@768': 'none' }}
+          >
             <Stack direction="row" align="center" justify="space-between">
-              <Text variant="label-xs" color="tertiary">
+              <Text variant="label-sm" color="tertiary">
                 Status:
               </Text>
               <Box
@@ -418,7 +500,7 @@ export const StreamItem = ({
                 py="x1"
                 borderRadius="curved"
               >
-                <Text variant="label-xs" color="primary">
+                <Text variant="label-sm" color="primary">
                   {getStatusLabel(liveData.status)}
                 </Text>
               </Box>
@@ -426,19 +508,19 @@ export const StreamItem = ({
             {/* TODO: When stream is canceled, display link to cancel transaction or proposal */}
             {/* TODO: Add withdrawal transaction history display/links for this stream */}
             <Stack direction="row" align="center" justify="space-between">
-              <Text variant="label-xs" color="tertiary">
+              <Text variant="label-sm" color="tertiary">
                 Total Deposited:
               </Text>
-              <Text variant="label-xs">
+              <Text variant="label-sm">
                 {formatCryptoVal(formatUnits(liveData.depositedAmount, decimals))}{' '}
                 {tokenMetadata?.symbol}
               </Text>
             </Stack>
             <Stack direction="row" align="center" justify="space-between">
-              <Text variant="label-xs" color="tertiary">
+              <Text variant="label-sm" color="tertiary">
                 Remaining in Stream:
               </Text>
-              <Text variant="label-xs">
+              <Text variant="label-sm">
                 {formatCryptoVal(
                   formatUnits(
                     liveData.depositedAmount - liveData.withdrawnAmount,
@@ -485,7 +567,7 @@ export const StreamItem = ({
                 )}
                 {isSenderTreasury && !isSender && (
                   <Stack direction="column" gap="x1">
-                    <Text variant="label-xs" color="tertiary">
+                    <Text variant="label-sm" color="tertiary">
                       Create a proposal to cancel this stream
                     </Text>
                     <ContractButton
@@ -498,7 +580,7 @@ export const StreamItem = ({
                       Create Proposal to Cancel Stream
                     </ContractButton>
                     {!hasThreshold && (
-                      <Text variant="label-xs" color="negative">
+                      <Text variant="label-sm" color="negative">
                         You do not have enough votes to create a proposal
                       </Text>
                     )}

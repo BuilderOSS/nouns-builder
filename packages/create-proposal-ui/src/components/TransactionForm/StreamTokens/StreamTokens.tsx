@@ -726,7 +726,7 @@ export const StreamTokens = () => {
                       </Flex>
                       <Text variant="paragraph-sm" color="text3" mb="x4">
                         {formik.values.durationType === 'days'
-                          ? 'All streams will start now and last for a specified number of days.'
+                          ? 'All streams will start when the proposal is executed and last for a specified number of days.'
                           : 'All streams will use specific start and end dates.'}
                       </Text>
                     </Box>

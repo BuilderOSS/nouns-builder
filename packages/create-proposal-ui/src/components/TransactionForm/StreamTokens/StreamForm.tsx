@@ -1,5 +1,6 @@
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { StreamGraph } from '@buildeross/ui/Graph'
+import { formatExponent } from '@buildeross/utils/sablier/streams'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { useFormikContext } from 'formik'
 import React, { useMemo } from 'react'
@@ -243,8 +244,8 @@ export const StreamForm: React.FC<StreamFormProps> = ({ index, removeStream }) =
             {useExponential && formik.values.exponent && (
               <Text as="span" color="text3" ml="x2">
                 {formik.values.invertExponent
-                  ? `(Exponential Frontloaded, exp: 1/${formik.values.exponent} = ${(1 / formik.values.exponent).toFixed(3)})`
-                  : `(Exponential Backloaded, exp: ${formik.values.exponent})`}
+                  ? `(Exponential Frontloaded, exp: ${formatExponent(1 / formik.values.exponent)})`
+                  : `(Exponential Backloaded, exp: ${formatExponent(formik.values.exponent)})`}
               </Text>
             )}
           </Text>
