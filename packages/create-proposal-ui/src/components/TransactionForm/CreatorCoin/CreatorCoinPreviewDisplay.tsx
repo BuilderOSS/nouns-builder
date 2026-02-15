@@ -1,25 +1,19 @@
-import { CHAIN_ID } from '@buildeross/types'
-import { type CoinFormValues, ContentPostPreview } from '@buildeross/ui'
 import { Box, Stack, Text } from '@buildeross/zord'
 
 import { StickyPreviewContainer } from '../../StickyPreviewContainer'
-import { link } from './ContentCoinPreviewDisplay.css'
+import { link } from './CreatorCoinPreviewDisplay.css'
 
-export const ContentCoinPreviewDisplay: React.FC<{
-  previewData: CoinFormValues
-  chainId: CHAIN_ID
-}> = ({ previewData, chainId }) => {
+export const CreatorCoinPreviewDisplay: React.FC = () => {
   return (
     <StickyPreviewContainer align="flex-end">
       <Stack gap="x5">
-        <ContentPostPreview {...previewData} chainId={chainId} />
         <Box style={{ textAlign: 'right' }}>
           <Text fontSize={12} color="text4" style={{ fontWeight: 'bold' }}>
             Powered by
           </Text>
-          <a href="https://zora.co" target="_blank" rel="noopener noreferrer">
+          <a href="https://clanker.world" target="_blank" rel="noopener noreferrer">
             <Text variant="heading-sm" style={{ fontWeight: 'bold' }} className={link}>
-              Zora
+              Clanker
             </Text>
           </a>
         </Box>

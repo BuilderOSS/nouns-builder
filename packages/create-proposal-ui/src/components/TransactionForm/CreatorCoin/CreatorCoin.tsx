@@ -32,6 +32,8 @@ import React, { useMemo, useState } from 'react'
 import { type Address, encodeFunctionData, getAddress, isAddressEqual } from 'viem'
 import { ZodError } from 'zod'
 
+import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
+
 const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
 
 // Default values for Clanker deployment
@@ -599,6 +601,9 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Flex as={Form} direction="column" gap="x6">
+                {/* Preview positioned on the right side (hidden on mobile) */}
+                <CreatorCoinPreviewDisplay />
+
                 <Stack gap="x4">
                   <Text variant="heading-sm">Create Creator Coin</Text>
                   <Text variant="paragraph-md" color="text3">
