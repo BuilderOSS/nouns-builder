@@ -1,4 +1,7 @@
-import { BUILDER_TREASURY_ADDRESS } from '@buildeross/constants'
+import {
+  BUILDER_TREASURY_ADDRESS,
+  COIN_DEPLOYMENT_DISCLAIMER,
+} from '@buildeross/constants'
 import {
   type COIN_SUPPORTED_CHAIN_ID,
   COIN_SUPPORTED_CHAIN_IDS,
@@ -215,6 +218,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const config = useConfig()
   const { address: userAddress } = useAccount()
   const [submitError, setSubmitError] = useState<string | undefined>()
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [isDeploying, setIsDeploying] = useState(false)
   const [deploymentStage, setDeploymentStage] = useState<
     'idle' | 'deploying' | 'processing'
@@ -682,6 +686,35 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                   </Box>
                 )}
 
+                {/* Disclaimer Checkbox */}
+                <Box
+                  p="x4"
+                  borderRadius="curved"
+                  borderStyle="solid"
+                  borderWidth="normal"
+                  borderColor="border"
+                  backgroundColor="background2"
+                >
+                  <label
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      cursor: 'pointer',
+                      alignItems: 'flex-start',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={disclaimerAccepted}
+                      onChange={(e) => setDisclaimerAccepted(e.target.checked)}
+                      style={{ marginTop: '4px', flexShrink: 0 }}
+                    />
+                    <Text fontSize="14" color="text3">
+                      {COIN_DEPLOYMENT_DISCLAIMER}
+                    </Text>
+                  </label>
+                </Box>
+
                 <Flex gap="x3" justify="flex-end">
                   <Button
                     variant="ghost"
@@ -694,7 +727,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                   <ContractButton
                     variant="outline"
                     borderRadius="curved"
-                    disabled={isDisabled || !formik.isValid}
+                    disabled={isDisabled || !formik.isValid || !disclaimerAccepted}
                     loading={isDeploying}
                     handleClick={formik.handleSubmit}
                     chainId={chainId}

@@ -1,4 +1,8 @@
-import { BUILDER_COLLECTION_ADDRESS, WETH_ADDRESS } from '@buildeross/constants'
+import {
+  BUILDER_COLLECTION_ADDRESS,
+  COIN_DEPLOYMENT_DISCLAIMER,
+  WETH_ADDRESS,
+} from '@buildeross/constants'
 import {
   type COIN_SUPPORTED_CHAIN_ID,
   COIN_SUPPORTED_CHAIN_IDS,
@@ -344,6 +348,7 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
   const { chain } = useChainStore()
 
   const [submitError, setSubmitError] = useState<string | undefined>()
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
 
   // Fetch current ETH/USD price
   const {
@@ -697,12 +702,41 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
                   </Box>
                 )}
 
+                {/* Disclaimer Checkbox */}
+                <Box
+                  p="x4"
+                  borderRadius="curved"
+                  borderStyle="solid"
+                  borderWidth="normal"
+                  borderColor="border"
+                  backgroundColor="background2"
+                >
+                  <label
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      cursor: 'pointer',
+                      alignItems: 'flex-start',
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={disclaimerAccepted}
+                      onChange={(e) => setDisclaimerAccepted(e.target.checked)}
+                      style={{ marginTop: '4px', flexShrink: 0 }}
+                    />
+                    <Text variant="paragraph-sm" color="text3">
+                      {COIN_DEPLOYMENT_DISCLAIMER}
+                    </Text>
+                  </label>
+                </Box>
+
                 <Button
                   variant="outline"
                   borderRadius="curved"
                   w="100%"
                   type="submit"
-                  disabled={isDisabled || !formik.isValid}
+                  disabled={isDisabled || !formik.isValid || !disclaimerAccepted}
                 >
                   {formik.isSubmitting
                     ? 'Adding Transaction to Queue...'
