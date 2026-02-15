@@ -27,6 +27,7 @@ import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/poolConfig/zoraCont
 import { Box, Flex, Grid, Spinner, Text } from '@buildeross/zord'
 import { Address } from 'viem'
 
+import { CoinComments } from './CoinComments'
 import {
   coinHeader,
   coinImageContainer,
@@ -272,17 +273,27 @@ export const CoinInfo = ({
 
       {/* Created Date */}
       {createdAt && (
-        <Box mb="x6">
-          <Text variant="label-sm" color="text3" mb="x2">
-            Created
-          </Text>
-          <Text variant="paragraph-md" color="text1">
-            {new Date(parseInt(createdAt) * 1000).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </Text>
+        <>
+          <Box mb="x6">
+            <Text variant="label-sm" color="text3" mb="x2">
+              Created
+            </Text>
+            <Text variant="paragraph-md" color="text1">
+              {new Date(parseInt(createdAt) * 1000).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </Text>
+          </Box>
+          <Box className={sectionDivider} />
+        </>
+      )}
+
+      {/* Comments - Only for Zora Coins */}
+      {!isClankerToken && (
+        <Box mt="x6">
+          <CoinComments coinAddress={coinAddress} chainId={chainId} />
         </Box>
       )}
     </Box>

@@ -1,4 +1,5 @@
 import type { FeedItem as FeedItemType } from '@buildeross/types'
+import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -21,23 +22,6 @@ export interface FeedItemProps {
   item: FeedItemType
   hideActor?: boolean
   hideDao?: boolean
-}
-
-const formatTimestamp = (timestamp: number) => {
-  const date = new Date(timestamp * 1000)
-  const now = new Date()
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-  if (diffInSeconds < 60) return 'just now'
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
-
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
 }
 
 const Separator = () => (
@@ -126,7 +110,7 @@ export const FeedItem: React.FC<FeedItemProps> = ({
             <Separator />
 
             {/* Timestamp */}
-            <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
+            <Text className={feedItemMeta}>{formatTimeAgo(item.timestamp)}</Text>
           </Flex>
         </Box>
       </Stack>

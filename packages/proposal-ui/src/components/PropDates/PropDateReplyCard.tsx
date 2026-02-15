@@ -2,6 +2,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { type PropDate } from '@buildeross/sdk/subgraph'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
+import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 
@@ -25,7 +26,7 @@ export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
         <Flex align="center" gap="x2" mb="x1">
           <Text fontWeight="display">{ensName || walletSnippet(reply.creator)}</Text>
           <Text variant="label-sm" color="text3">
-            • {new Date(reply.timeCreated * 1000).toLocaleString()}
+            • {formatTimeAgo(reply.timeCreated)}
           </Text>
         </Flex>
         <Box className={messageStyle}>
