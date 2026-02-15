@@ -40,7 +40,7 @@ const Separator = () => (
 
 export const FeedItem: React.FC<FeedItemProps> = ({
   item,
-  hideActor = false,
+  hideActor: _hideActor = false,
   hideDao = false,
 }) => {
   const renderContent = () => {
@@ -68,6 +68,7 @@ export const FeedItem: React.FC<FeedItemProps> = ({
     }
   }
 
+  const hideActor = _hideActor || item.type === 'CLANKER_TOKEN_CREATED'
   // Helper to determine whether to render separators
   const shouldShowSeparatorAfterActor = !hideActor && !hideDao
 
