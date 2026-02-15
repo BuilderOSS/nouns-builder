@@ -48,7 +48,8 @@ export const DecodedDisplay: React.FC<{
   transaction: DecodedTransactionData
   target: string
   value: string
-}> = ({ chainId, addresses, transaction, target, value }) => {
+  index: number
+}> = ({ chainId, addresses, transaction, target, value, index }) => {
   const sortedArgs = React.useMemo(() => {
     const keys = Object.keys(transaction.args)
     const inOrder = (transaction.argOrder as string[]).filter((k) => keys.includes(k))
@@ -231,67 +232,78 @@ export const DecodedDisplay: React.FC<{
   } = useTransactionSummary(transactionData)
 
   return (
-    <Stack style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-      <Stack gap={'x1'} px={'x3'} py={'x3'}>
-        <Box
-          color={'secondary'}
-          fontWeight={'heading'}
-          className={atoms({ textDecoration: 'underline' })}
+    <Stack style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+      <Flex direction="row" gap="x0">
+        <Text
+          as="span"
+          fontWeight="heading"
+          py="x3"
+          pl="x3"
+          style={{ flexShrink: 0, minWidth: 24, maxWidth: 40 }}
         >
-          <a
-            href={`${ETHERSCAN_BASE_URL[chainId]}/address/${target}`}
-            target="_blank"
-            rel="noreferrer"
+          {index + 1}.
+        </Text>
+        <Stack style={{ maxWidth: 900 }} gap={'x1'} px={'x3'} py={'x3'}>
+          <Box
+            color={'secondary'}
+            fontWeight={'heading'}
+            className={atoms({ textDecoration: 'underline' })}
           >
-            <Text display={{ '@initial': 'flex', '@768': 'none' }}>
-              {walletSnippet(target)}
-            </Text>
-            <Text display={{ '@initial': 'none', '@768': 'flex' }}>{target}</Text>
-          </a>
-        </Box>
-        <Flex align="center" gap="x0">
-          {`.${transaction.functionName}`}
-          {value !== '0' && transaction.functionName !== 'send' && (
-            <Flex align="center" gap="x1">
-              <Text color="accent">{`{ value:`}</Text>
-              <img
-                src="/chains/ethereum.svg"
-                alt="ETH"
-                loading="lazy"
-                decoding="async"
-                width="16px"
-                height="16px"
-                style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
-              />
-              <Text color="accent">{`${formatCryptoVal(formatEther(BigInt(value)))} ETH }`}</Text>
-            </Flex>
-          )}
-          {`(`}
-          {sortedArgs.length === 0 ? `)` : null}
-        </Flex>
+            <a
+              href={`${ETHERSCAN_BASE_URL[chainId]}/address/${target}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <Text display={{ '@initial': 'flex', '@768': 'none' }}>
+                {walletSnippet(target)}
+              </Text>
+              <Text display={{ '@initial': 'none', '@768': 'flex' }}>{target}</Text>
+            </a>
+          </Box>
+          <Flex align="center" gap="x0">
+            {`.${transaction.functionName}`}
+            {value !== '0' && transaction.functionName !== 'send' && (
+              <Flex align="center" gap="x1">
+                <Text color="accent">{`{ value:`}</Text>
+                <img
+                  src="/chains/ethereum.svg"
+                  alt="ETH"
+                  loading="lazy"
+                  decoding="async"
+                  width="16px"
+                  height="16px"
+                  style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
+                />
+                <Text color="accent">{`${formatCryptoVal(formatEther(BigInt(value)))} ETH }`}</Text>
+              </Flex>
+            )}
+            {`(`}
+            {sortedArgs.length === 0 ? `)` : null}
+          </Flex>
 
-        <Stack pl={'x4'} gap={'x1'}>
-          {sortedArgs.map((argKey, i) => {
-            const arg = transaction.args[argKey]
+          <Stack pl={'x4'} gap={'x1'}>
+            {sortedArgs.map((argKey, i) => {
+              const arg = transaction.args[argKey]
 
-            return (
-              <ArgumentDisplay
-                chainId={chainId}
-                key={`${argKey}-${arg.name}-${i}`}
-                arg={arg}
-                target={target}
-                functionName={transaction.functionName}
-                tokenMetadata={tokenMetadata}
-                nftMetadata={nftMetadata}
-                escrowData={escrowData}
-                streamData={streamData}
-              />
-            )
-          })}
+              return (
+                <ArgumentDisplay
+                  chainId={chainId}
+                  key={`${argKey}-${arg.name}-${i}`}
+                  arg={arg}
+                  target={target}
+                  functionName={transaction.functionName}
+                  tokenMetadata={tokenMetadata}
+                  nftMetadata={nftMetadata}
+                  escrowData={escrowData}
+                  streamData={streamData}
+                />
+              )
+            })}
+          </Stack>
+
+          {sortedArgs.length > 0 ? `)` : null}
         </Stack>
-
-        {sortedArgs.length > 0 ? `)` : null}
-      </Stack>
+      </Flex>
 
       {!isLoadingMetadata &&
         !DISABLE_AI_SUMMARY &&

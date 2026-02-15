@@ -9,8 +9,9 @@ export const TransactionDisplay: React.FC<
   DecodedTransaction & {
     chainId: CHAIN_ID
     addresses: DaoContractAddresses
+    index: number
   }
-> = ({ chainId, addresses, ...decoded }) => {
+> = ({ chainId, addresses, index, ...decoded }) => {
   if (decoded.isNotDecoded || !decoded.transaction.args) {
     const calldata = decoded.isNotDecoded
       ? decoded.transaction
@@ -18,7 +19,7 @@ export const TransactionDisplay: React.FC<
 
     return (
       <NonDecodedDisplay
-        {...{ chainId, target: decoded.target, calldata, value: decoded.value }}
+        {...{ chainId, target: decoded.target, calldata, value: decoded.value, index }}
       />
     )
   }
@@ -26,6 +27,7 @@ export const TransactionDisplay: React.FC<
   return (
     <DecodedDisplay
       {...{
+        index,
         chainId,
         addresses,
         transaction: decoded.transaction,

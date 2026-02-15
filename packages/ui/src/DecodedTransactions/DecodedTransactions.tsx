@@ -1,6 +1,6 @@
 import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { CHAIN_ID, DaoContractAddresses } from '@buildeross/types'
-import { atoms, Stack } from '@buildeross/zord'
+import { atoms, Flex, Stack } from '@buildeross/zord'
 import React from 'react'
 
 import { TransactionDisplay } from './TransactionDisplay'
@@ -18,12 +18,13 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
 }) => {
   return (
     <Stack
-      as="ol"
       style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}
       gap="x4"
     >
       {decodedTransactions?.map((decoded, i) => (
-        <li
+        <Flex
+          direction="row"
+          gap="x2"
           className={atoms({
             borderColor: 'border',
             borderStyle: 'solid',
@@ -32,8 +33,13 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
           })}
           key={`${decoded.target}-${i}`}
         >
-          <TransactionDisplay chainId={chainId} addresses={addresses} {...decoded} />
-        </li>
+          <TransactionDisplay
+            chainId={chainId}
+            addresses={addresses}
+            index={i}
+            {...decoded}
+          />
+        </Flex>
       ))}
     </Stack>
   )
