@@ -7,12 +7,12 @@ import {
   price1Per0FromSqrtX96,
   targetSqrtPriceX96FromMarketCap,
 } from '@buildeross/utils'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Stack, Text } from '@buildeross/zord'
 import { nearestUsableTick, TickMath } from '@uniswap/v3-sdk'
 import JSBI from 'jsbi'
 import React, { useMemo } from 'react'
 
-import { Toggle } from '../Toggle'
+import { AccordionItem } from '../Accordion/AccordionItem'
 
 export interface LaunchEconomicsPreviewProps {
   // Chain ID
@@ -73,8 +73,6 @@ export const LaunchEconomicsPreview: React.FC<LaunchEconomicsPreviewProps> = ({
   quoteTokenUsdPrice,
   showPredictedAddress = true,
 }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false)
-
   // Calculate sqrtPriceX96 from lowerTick
   const sqrtPriceX96 = useMemo(
     () => BigInt(TickMath.getSqrtRatioAtTick(lowerTick).toString()),
@@ -278,227 +276,225 @@ export const LaunchEconomicsPreview: React.FC<LaunchEconomicsPreviewProps> = ({
     )
   }
 
-  return (
-    <Box mt="x8" color="text1">
-      <Flex justify="space-between" align="center" mb="x4">
-        <Text as="h3" variant="heading-sm">
-          Launch Economics Preview
-        </Text>
-        <Toggle on={isExpanded} onToggle={() => setIsExpanded(!isExpanded)} />
-      </Flex>
-
-      {isExpanded && (
-        <Stack gap="x4">
-          {/* Warnings */}
-          {economics.warnings.length > 0 && (
-            <Box
-              p="x4"
-              borderRadius="curved"
-              borderStyle="solid"
-              borderWidth="normal"
-              borderColor="warning"
-              backgroundColor="background2"
-            >
-              <Text variant="label-md" mb="x2" color="warning">
-                ⚠️ Configuration Warnings
-              </Text>
-              {economics.warnings.map((warning, idx) => (
-                <Text key={idx} variant="paragraph-sm" color="text3">
-                  • {warning}
-                </Text>
-              ))}
-            </Box>
-          )}
-
-          {/* Predicted Token Address */}
-          {showPredictedAddress && (
-            <Box
-              p="x4"
-              borderRadius="curved"
-              borderStyle="solid"
-              borderWidth="normal"
-              borderColor="border"
-              backgroundColor="background2"
-            >
-              <Text variant="label-md" mb="x2">
-                Predicted Token Address
-              </Text>
-              <Text
-                variant="paragraph-sm"
-                color="text3"
-                style={{ wordBreak: 'break-all', fontFamily: 'monospace' }}
-              >
-                {baseTokenAddress}
-              </Text>
-            </Box>
-          )}
-
-          {/* Quote Token Price */}
-          {quoteTokenUsdPrice && quoteTokenUsdPrice > 0 && (
-            <Box
-              p="x4"
-              borderRadius="curved"
-              borderStyle="solid"
-              borderWidth="normal"
-              borderColor="border"
-              backgroundColor="background2"
-            >
-              <Text variant="label-md" mb="x2">
-                Quote Token Price
-              </Text>
-              <Text variant="paragraph-sm" color="text3">
-                1 {quoteTokenSymbol} ≈ $
-                {(() => {
-                  // Convert number to rational for adaptive formatting
-                  const scale = 1_000_000_000_000_000_000n // 18 decimals precision
-                  const scaled = BigInt(Math.floor(quoteTokenUsdPrice * 1e18))
-                  return formatUsdFromRational(scaled, scale)
-                })()}
-              </Text>
-            </Box>
-          )}
-
-          {/* Initial Price */}
-          <Box
-            p="x4"
-            borderRadius="curved"
-            borderStyle="solid"
-            borderWidth="normal"
-            borderColor="border"
-            backgroundColor="background2"
-          >
-            <Text variant="label-md" mb="x2">
-              Initial Price
+  const content = (
+    <Stack gap="x4" color="text1">
+      {/* Warnings */}
+      {economics.warnings.length > 0 && (
+        <Box
+          p="x4"
+          borderRadius="curved"
+          borderStyle="solid"
+          borderWidth="normal"
+          borderColor="warning"
+          backgroundColor="background2"
+        >
+          <Text variant="label-md" mb="x2" color="warning">
+            ⚠️ Configuration Warnings
+          </Text>
+          {economics.warnings.map((warning, idx) => (
+            <Text key={idx} variant="paragraph-sm" color="text3">
+              • {warning}
             </Text>
-            <Text variant="paragraph-sm" color="text3">
-              1 {baseTokenSymbol} = {economics.currentPriceStr} {quoteTokenSymbol}
-              {quoteTokenUsdPrice &&
-                quoteTokenUsdPrice > 0 &&
-                (() => {
-                  // Parse currentPriceStr back to number and multiply by quote USD price
-                  const currentPrice = parseFloat(economics.currentPriceStr)
-                  const usdPrice = currentPrice * quoteTokenUsdPrice
-
-                  // Convert to rational for adaptive formatting
-                  const scale = 1_000_000_000_000_000_000n // 18 decimals precision
-                  const scaled = BigInt(Math.floor(usdPrice * 1e18))
-                  return ` ≈ $${formatUsdFromRational(scaled, scale)}`
-                })()}
-            </Text>
-            <Text variant="paragraph-sm" color="text3">
-              1 {quoteTokenSymbol} = {economics.inversePriceStr} {baseTokenSymbol}
-            </Text>
-            <Text variant="paragraph-sm" color="text3" mt="x2">
-              Current Tick: {economics.currentTick}
-            </Text>
-          </Box>
-
-          {/* Price Range */}
-          <Box
-            p="x4"
-            borderRadius="curved"
-            borderStyle="solid"
-            borderWidth="normal"
-            borderColor="border"
-            backgroundColor="background2"
-          >
-            <Text variant="label-md" mb="x2">
-              Price Range
-            </Text>
-            <Text variant="paragraph-sm" color="text3">
-              Lower: {economics.priceLowerStr} {quoteTokenSymbol} (Tick:{' '}
-              {economics.validLowerTick})
-            </Text>
-            <Text variant="paragraph-sm" color="text3">
-              Upper: {economics.priceUpperStr} {quoteTokenSymbol} (Tick:{' '}
-              {economics.validUpperTick})
-            </Text>
-            <Text
-              variant="paragraph-sm"
-              color={economics.isCurrentInRange ? 'positive' : 'warning'}
-              mt="x2"
-            >
-              {economics.isCurrentInRange
-                ? '✓ Initial price is in range'
-                : '⚠ Initial price is outside range'}
-            </Text>
-          </Box>
-
-          {/* Market Cap */}
-          <Box
-            p="x4"
-            borderRadius="curved"
-            borderStyle="solid"
-            borderWidth="normal"
-            borderColor="border"
-            backgroundColor="background2"
-          >
-            <Text variant="label-md" mb="x2">
-              Starting Market Cap
-            </Text>
-            <Text variant="paragraph-sm" color="text3">
-              {economics.startingMarketCapStr} {quoteTokenSymbol}
-              {economics.startingMarketCapUsdStr && (
-                <Text variant="paragraph-sm" color="text3" as="span">
-                  {` ≈ $${economics.startingMarketCapUsdStr}`}
-                </Text>
-              )}
-            </Text>
-            {targetMarketCapUsd && (
-              <Text variant="paragraph-sm" color="text3" mt="x2">
-                Target FDV: $
-                {targetMarketCapUsd.toLocaleString('en-US', {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                })}
-              </Text>
-            )}
-          </Box>
-
-          {/* Target Market Cap */}
-          {economics.targetPriceStr && targetMarketCapUsd && (
-            <Box
-              p="x4"
-              borderRadius="curved"
-              borderStyle="solid"
-              borderWidth="normal"
-              borderColor={economics.isTargetInRange ? 'positive' : 'warning'}
-              backgroundColor="background2"
-            >
-              <Text variant="label-md" mb="x2">
-                Target Market Cap Analysis
-              </Text>
-              <Text variant="paragraph-sm" color="text3">
-                Target Price: {economics.targetPriceStr} {quoteTokenSymbol}
-                {quoteTokenUsdPrice &&
-                  quoteTokenUsdPrice > 0 &&
-                  (() => {
-                    // Parse targetPriceStr back to number and multiply by quote USD price
-                    const targetPrice = parseFloat(economics.targetPriceStr)
-                    const usdPrice = targetPrice * quoteTokenUsdPrice
-
-                    // Convert to rational for adaptive formatting
-                    const scale = 1_000_000_000_000_000_000n // 18 decimals precision
-                    const scaled = BigInt(Math.floor(usdPrice * 1e18))
-                    return ` ≈ $${formatUsdFromRational(scaled, scale)}`
-                  })()}
-              </Text>
-              <Text variant="paragraph-sm" color="text3">
-                Target Tick: {economics.targetTickUsable} (spacing: {tickSpacing})
-              </Text>
-              <Text
-                variant="paragraph-sm"
-                color={economics.isTargetInRange ? 'positive' : 'warning'}
-                mt="x2"
-              >
-                {economics.isTargetInRange
-                  ? '✓ Target price is within liquidity range'
-                  : '⚠ Target price is outside liquidity range - consider adjusting bounds'}
-              </Text>
-            </Box>
-          )}
-        </Stack>
+          ))}
+        </Box>
       )}
-    </Box>
+
+      {/* Predicted Token Address */}
+      {showPredictedAddress && (
+        <Box
+          p="x4"
+          borderRadius="curved"
+          borderStyle="solid"
+          borderWidth="normal"
+          borderColor="border"
+          backgroundColor="background2"
+        >
+          <Text variant="label-md" mb="x2">
+            Predicted Token Address
+          </Text>
+          <Text
+            variant="paragraph-sm"
+            color="text3"
+            style={{ wordBreak: 'break-all', fontFamily: 'monospace' }}
+          >
+            {baseTokenAddress}
+          </Text>
+        </Box>
+      )}
+
+      {/* Quote Token Price */}
+      {quoteTokenUsdPrice && quoteTokenUsdPrice > 0 && (
+        <Box
+          p="x4"
+          borderRadius="curved"
+          borderStyle="solid"
+          borderWidth="normal"
+          borderColor="border"
+          backgroundColor="background2"
+        >
+          <Text variant="label-md" mb="x2">
+            Quote Token Price
+          </Text>
+          <Text variant="paragraph-sm" color="text3">
+            1 {quoteTokenSymbol} ≈ $
+            {(() => {
+              // Convert number to rational for adaptive formatting
+              const scale = 1_000_000_000_000_000_000n // 18 decimals precision
+              const scaled = BigInt(Math.floor(quoteTokenUsdPrice * 1e18))
+              return formatUsdFromRational(scaled, scale)
+            })()}
+          </Text>
+        </Box>
+      )}
+
+      {/* Initial Price */}
+      <Box
+        p="x4"
+        borderRadius="curved"
+        borderStyle="solid"
+        borderWidth="normal"
+        borderColor="border"
+        backgroundColor="background2"
+      >
+        <Text variant="label-md" mb="x2">
+          Initial Price
+        </Text>
+        <Text variant="paragraph-sm" color="text3">
+          1 {baseTokenSymbol} = {economics.currentPriceStr} {quoteTokenSymbol}
+          {quoteTokenUsdPrice &&
+            quoteTokenUsdPrice > 0 &&
+            (() => {
+              // Parse currentPriceStr back to number and multiply by quote USD price
+              const currentPrice = parseFloat(economics.currentPriceStr)
+              const usdPrice = currentPrice * quoteTokenUsdPrice
+
+              // Convert to rational for adaptive formatting
+              const scale = 1_000_000_000_000_000_000n // 18 decimals precision
+              const scaled = BigInt(Math.floor(usdPrice * 1e18))
+              return ` ≈ $${formatUsdFromRational(scaled, scale)}`
+            })()}
+        </Text>
+        <Text variant="paragraph-sm" color="text3">
+          1 {quoteTokenSymbol} = {economics.inversePriceStr} {baseTokenSymbol}
+        </Text>
+        <Text variant="paragraph-sm" color="text3" mt="x2">
+          Current Tick: {economics.currentTick}
+        </Text>
+      </Box>
+
+      {/* Price Range */}
+      <Box
+        p="x4"
+        borderRadius="curved"
+        borderStyle="solid"
+        borderWidth="normal"
+        borderColor="border"
+        backgroundColor="background2"
+      >
+        <Text variant="label-md" mb="x2">
+          Price Range
+        </Text>
+        <Text variant="paragraph-sm" color="text3">
+          Lower: {economics.priceLowerStr} {quoteTokenSymbol} (Tick:{' '}
+          {economics.validLowerTick})
+        </Text>
+        <Text variant="paragraph-sm" color="text3">
+          Upper: {economics.priceUpperStr} {quoteTokenSymbol} (Tick:{' '}
+          {economics.validUpperTick})
+        </Text>
+        <Text
+          variant="paragraph-sm"
+          color={economics.isCurrentInRange ? 'positive' : 'warning'}
+          mt="x2"
+        >
+          {economics.isCurrentInRange
+            ? '✓ Initial price is in range'
+            : '⚠ Initial price is outside range'}
+        </Text>
+      </Box>
+
+      {/* Market Cap */}
+      <Box
+        p="x4"
+        borderRadius="curved"
+        borderStyle="solid"
+        borderWidth="normal"
+        borderColor="border"
+        backgroundColor="background2"
+      >
+        <Text variant="label-md" mb="x2">
+          Starting Market Cap
+        </Text>
+        <Text variant="paragraph-sm" color="text3">
+          {economics.startingMarketCapStr} {quoteTokenSymbol}
+          {economics.startingMarketCapUsdStr && (
+            <Text variant="paragraph-sm" color="text3" as="span">
+              {` ≈ $${economics.startingMarketCapUsdStr}`}
+            </Text>
+          )}
+        </Text>
+        {targetMarketCapUsd && (
+          <Text variant="paragraph-sm" color="text3" mt="x2">
+            Target FDV: $
+            {targetMarketCapUsd.toLocaleString('en-US', {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            })}
+          </Text>
+        )}
+      </Box>
+
+      {/* Target Market Cap */}
+      {economics.targetPriceStr && targetMarketCapUsd && (
+        <Box
+          p="x4"
+          borderRadius="curved"
+          borderStyle="solid"
+          borderWidth="normal"
+          borderColor={economics.isTargetInRange ? 'positive' : 'warning'}
+          backgroundColor="background2"
+        >
+          <Text variant="label-md" mb="x2">
+            Target Market Cap Analysis
+          </Text>
+          <Text variant="paragraph-sm" color="text3">
+            Target Price: {economics.targetPriceStr} {quoteTokenSymbol}
+            {quoteTokenUsdPrice &&
+              quoteTokenUsdPrice > 0 &&
+              (() => {
+                // Parse targetPriceStr back to number and multiply by quote USD price
+                const targetPrice = parseFloat(economics.targetPriceStr)
+                const usdPrice = targetPrice * quoteTokenUsdPrice
+
+                // Convert to rational for adaptive formatting
+                const scale = 1_000_000_000_000_000_000n // 18 decimals precision
+                const scaled = BigInt(Math.floor(usdPrice * 1e18))
+                return ` ≈ $${formatUsdFromRational(scaled, scale)}`
+              })()}
+          </Text>
+          <Text variant="paragraph-sm" color="text3">
+            Target Tick: {economics.targetTickUsable} (spacing: {tickSpacing})
+          </Text>
+          <Text
+            variant="paragraph-sm"
+            color={economics.isTargetInRange ? 'positive' : 'warning'}
+            mt="x2"
+          >
+            {economics.isTargetInRange
+              ? '✓ Target price is within liquidity range'
+              : '⚠ Target price is outside liquidity range - consider adjusting bounds'}
+          </Text>
+        </Box>
+      )}
+    </Stack>
+  )
+
+  return (
+    <AccordionItem
+      title="Launch Economics Preview"
+      description={content}
+      titleFontSize={16}
+      defaultOpen={false}
+    />
   )
 }
