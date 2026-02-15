@@ -2,13 +2,13 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import type { Proposal } from '@buildeross/sdk/subgraph'
 import type { CHAIN_ID } from '@buildeross/types'
 import { getProvider } from '@buildeross/utils/provider'
-import {
-  createLockupLinearStreamEventAbi,
-  lockupAbi,
-  StreamStatus,
-} from '@buildeross/utils/sablier/constants'
+import { lockupAbi, StreamStatus } from '@buildeross/utils/sablier/constants'
 import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
-import { calculateStreamedAmountLL } from '@buildeross/utils/sablier/math'
+import {
+  calculateStreamedAmountLD,
+  calculateStreamedAmountLL,
+  Segment,
+} from '@buildeross/utils/sablier/math'
 import {
   extractStreamData,
   StreamData,
@@ -54,6 +54,7 @@ type FlattenedStaticStream = {
   unlockStart: bigint
   unlockCliff: bigint
   tokenAddress: Address
+  exponent?: number // For exponential (LD) streams
 }
 
 export const useStreamData = (
@@ -122,7 +123,7 @@ export const useStreamData = (
         .map((log) => {
           try {
             return decodeEventLog({
-              abi: createLockupLinearStreamEventAbi,
+              abi: lockupAbi,
               data: log?.data,
               topics: log?.topics,
             })
@@ -130,7 +131,12 @@ export const useStreamData = (
             return null
           }
         })
-        .filter((log) => log !== null && log.eventName === 'CreateLockupLinearStream')
+        .filter(
+          (log) =>
+            log !== null &&
+            (log.eventName === 'CreateLockupLinearStream' ||
+              log.eventName === 'CreateLockupDynamicStream')
+        )
 
       // Extract stream IDs from events
       const streamIds: bigint[] = []
@@ -186,20 +192,63 @@ export const useStreamData = (
         let startTime: number
         let endTime: number
         let cliffTime: number
+        let exponent: number | undefined
 
-        if (batch.isDurationsMode) {
-          // durations-mode: derive absolute times from execution timestamp
-          const cliffDur = Number(s.durations?.cliff ?? 0)
-          const totalDur = Number(s.durations?.total ?? 0)
+        // Check if this is a LockupDynamic stream (has segments)
+        const isLDStream = 'segmentsWithDuration' in s || 'segments' in s
 
-          startTime = executedAt
-          endTime = executedAt + totalDur
-          cliffTime = cliffDur === 0 ? 0 : executedAt + cliffDur
+        if (isLDStream) {
+          // LockupDynamic (exponential) stream
+          if (batch.isDurationsMode) {
+            // LD with durations
+            const segments = s.segmentsWithDuration || []
+            const totalDur = segments.reduce(
+              (sum: number, seg: any) => sum + Number(seg.duration ?? 0),
+              0
+            )
+            startTime = executedAt
+            endTime = executedAt + totalDur
+            cliffTime = 0 // LD streams don't support cliff
+
+            // Extract exponent from first segment (convert from UD2x18)
+            if (segments.length > 0 && segments[0].exponent) {
+              const exponentUD2x18 = BigInt(segments[0].exponent)
+              // Use floating-point division to preserve decimal precision for fractional exponents
+              exponent = Number(exponentUD2x18) / 10 ** 18
+            }
+          } else {
+            // LD with timestamps
+            const segments = s.segments || []
+            startTime = Number(s.startTime ?? 0)
+            endTime =
+              segments.length > 0
+                ? Number(segments[segments.length - 1].timestamp ?? 0)
+                : 0
+            cliffTime = 0 // LD streams don't support cliff
+
+            // Extract exponent from first segment (convert from UD2x18)
+            if (segments.length > 0 && segments[0].exponent) {
+              const exponentUD2x18 = BigInt(segments[0].exponent)
+              // Use floating-point division to preserve decimal precision for fractional exponents
+              exponent = Number(exponentUD2x18) / 10 ** 18
+            }
+          }
         } else {
-          // timestamps-mode: use explicit timestamps
-          startTime = Number(s.timestamps?.start ?? 0)
-          endTime = Number(s.timestamps?.end ?? 0)
-          cliffTime = Number(s.cliffTime ?? 0)
+          // LockupLinear (linear) stream
+          if (batch.isDurationsMode) {
+            // LL durations-mode: derive absolute times from execution timestamp
+            const cliffDur = Number(s.durations?.cliff ?? 0)
+            const totalDur = Number(s.durations?.total ?? 0)
+
+            startTime = executedAt
+            endTime = executedAt + totalDur
+            cliffTime = cliffDur === 0 ? 0 : executedAt + cliffDur
+          } else {
+            // LL timestamps-mode: use explicit timestamps
+            startTime = Number(s.timestamps?.start ?? 0)
+            endTime = Number(s.timestamps?.end ?? 0)
+            cliffTime = Number(s.cliffTime ?? 0)
+          }
         }
 
         out.push({
@@ -214,6 +263,7 @@ export const useStreamData = (
           unlockStart,
           unlockCliff,
           tokenAddress: batch.tokenAddress,
+          exponent,
         })
       }
     }
@@ -328,16 +378,38 @@ export const useStreamData = (
           streamedAmount = (withdrawnAmount as bigint) + withdrawableAmount
         } else {
           // For active/settled/pending streams, calculate based on time for real-time updates
-          streamedAmount = calculateStreamedAmountLL({
-            now,
-            cliffTime: staticStream.cliffTime,
-            depositedAmount,
-            endTime: staticStream.endTime,
-            startTime: staticStream.startTime,
-            unlockStart: staticStream.unlockStart,
-            unlockCliff: staticStream.unlockCliff,
-            withdrawnAmount: withdrawnAmount as bigint,
-          })
+          if (staticStream.exponent && staticStream.exponent > 0) {
+            // Exponential (LockupDynamic) stream - use LD calculation (supports fractional exponents)
+            // Build single segment with full amount at end
+            const segments: Segment[] = [
+              {
+                timestamp: staticStream.endTime,
+                amount: depositedAmount,
+                exponent: staticStream.exponent, // Regular number (supports fractional), NOT UD2x18
+              },
+            ]
+
+            streamedAmount = calculateStreamedAmountLD({
+              depositedAmount,
+              endTime: staticStream.endTime,
+              segments,
+              startTime: staticStream.startTime,
+              withdrawnAmount: withdrawnAmount as bigint,
+              now,
+            })
+          } else {
+            // Linear (LockupLinear) stream - use LL calculation
+            streamedAmount = calculateStreamedAmountLL({
+              now,
+              cliffTime: staticStream.cliffTime,
+              depositedAmount,
+              endTime: staticStream.endTime,
+              startTime: staticStream.startTime,
+              unlockStart: staticStream.unlockStart,
+              unlockCliff: staticStream.unlockCliff,
+              withdrawnAmount: withdrawnAmount as bigint,
+            })
+          }
           withdrawableAmount = clampSub(streamedAmount, withdrawnAmount as bigint)
         }
 
@@ -362,6 +434,13 @@ export const useStreamData = (
           isDepleted,
           asset: staticStream.tokenAddress,
           minFeeWei: minFeeWei as bigint,
+          exponent: staticStream.exponent,
+          shape:
+            staticStream.exponent && staticStream.exponent > 0
+              ? 'dynamicExponential'
+              : staticStream.cliffTime > 0
+                ? 'cliff'
+                : 'linear',
         } as StreamLiveData
       } catch (error) {
         console.error(`Failed to parse stream ${streamId}:`, error)

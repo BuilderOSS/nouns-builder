@@ -18,30 +18,46 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen }) => {
 
   const [openConfirm, setOpenConfirm] = React.useState<boolean>(false)
   const [removeIndex, setRemoveIndex] = React.useState<number | null>(null)
+  const [isBulkRemove, setIsBulkRemove] = React.useState<boolean>(false)
 
   const confirmRemoveTransaction = (index: number) => {
-    setOpenConfirm(true)
     setRemoveIndex(index)
+    setIsBulkRemove(false)
+    setOpenConfirm(true)
   }
 
   const handleRemoveTransaction = () => {
-    if (removeIndex === null) return
+    if (isBulkRemove) {
+      removeAllTransactions()
+      setOpenConfirm(false)
+      setQueueModalOpen(false)
+    } else {
+      if (removeIndex === null) return
 
-    if (transactions.length >= 1) {
-      removeTransaction(removeIndex)
+      if (transactions.length >= 1) {
+        removeTransaction(removeIndex)
+        // Close queue modal if no transactions left
+        if (transactions.length === 1) {
+          setOpenConfirm(false)
+          setQueueModalOpen(false)
+          return
+        }
+      }
+      setOpenConfirm(false)
     }
-    setOpenConfirm(false)
   }
 
   const handleClearAll = () => {
-    removeAllTransactions()
+    setRemoveIndex(null)
+    setIsBulkRemove(true)
+    setOpenConfirm(true)
   }
 
   return (
     <Stack style={{ maxWidth: 500, borderRadius: 16 }}>
-      <Flex justify={'space-between'}>
-        <Text fontWeight={'label'} fontSize={20} style={{ lineHeight: '32px' }} mb={'x6'}>
-          Review Queue
+      <Flex justify={'space-between'} mb={'x6'}>
+        <Text fontWeight={'label'} fontSize={20}>
+          Review Transaction Queue
         </Text>
         <Box
           as="button"
@@ -83,6 +99,7 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen }) => {
         <ConfirmRemove
           handleRemoveTransaction={handleRemoveTransaction}
           setOpenConfirm={setOpenConfirm}
+          isBulkRemove={isBulkRemove}
         />
       </AnimatedModal>
     </Stack>

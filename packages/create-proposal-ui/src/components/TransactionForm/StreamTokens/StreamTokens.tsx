@@ -9,7 +9,9 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { getProvider } from '@buildeross/utils/provider'
 import {
+  encodeCreateWithDurationsLD,
   encodeCreateWithDurationsLL,
+  encodeCreateWithTimestampsLD,
   encodeCreateWithTimestampsLL,
   getSablierContracts,
   getWrappedTokenAddress,
@@ -77,6 +79,9 @@ export const StreamTokens = () => {
     durationType: 'days',
     cancelable: true,
     transferable: false,
+    useExponential: false,
+    invertExponent: false,
+    exponent: undefined,
     streams: [
       {
         recipientAddress: '',
@@ -364,8 +369,13 @@ export const StreamTokens = () => {
       startUnlockAmount: 0n,
       cliffUnlockAmount: 0n,
       tokenAddress: getAddress(tokenAddress),
-      // Use appropriate shape based on cliff presence for better Sablier UI display
-      shape: params.cliffTime > 0 ? 'cliff' : 'linear',
+      // Use appropriate shape based on stream type for better Sablier UI display
+      // Exponential streams use 'dynamicExponential', linear streams use 'cliff' or 'linear'
+      shape: values.useExponential
+        ? 'dynamicExponential'
+        : params.cliffTime > 0
+          ? 'cliff'
+          : 'linear',
     }))
 
     const validationResult = validateBatchStreams(validationParams)
@@ -431,42 +441,84 @@ export const StreamTokens = () => {
 
     // Create the batch stream transaction
     let calldata: Hex
-    if (useDurations) {
-      calldata = encodeCreateWithDurationsLL(
-        contractAddresses.lockup,
-        getAddress(tokenAddress),
-        batchParams.map((params) => ({
-          sender: params.sender,
-          recipient: params.recipient,
-          depositAmount: params.depositAmount,
-          cliffDuration: params.cliffDuration!,
-          totalDuration: params.totalDuration!,
-        })),
-        values.cancelable,
-        values.transferable
-      )
+    let functionSignature: string
+
+    // Use LockupDynamic (LD) for exponential curves, LockupLinear (LL) for linear
+    if (values.useExponential && values.exponent) {
+      // Compute final exponent: invert if checkbox is checked
+      const finalExponent = values.invertExponent ? 1 / values.exponent : values.exponent
+
+      if (useDurations) {
+        calldata = encodeCreateWithDurationsLD(
+          contractAddresses.lockup,
+          getAddress(tokenAddress),
+          batchParams.map((params) => ({
+            sender: params.sender,
+            recipient: params.recipient,
+            depositAmount: params.depositAmount,
+            totalDuration: params.totalDuration!,
+            exponent: finalExponent,
+          })),
+          values.cancelable,
+          values.transferable
+        )
+        functionSignature = 'createWithDurationsLD(address,address,tuple[])'
+      } else {
+        calldata = encodeCreateWithTimestampsLD(
+          contractAddresses.lockup,
+          getAddress(tokenAddress),
+          batchParams.map((params) => ({
+            sender: params.sender,
+            recipient: params.recipient,
+            depositAmount: params.depositAmount,
+            startTime: params.startTime,
+            endTime: params.endTime,
+            exponent: finalExponent,
+          })),
+          values.cancelable,
+          values.transferable
+        )
+        functionSignature = 'createWithTimestampsLD(address,address,tuple[])'
+      }
     } else {
-      calldata = encodeCreateWithTimestampsLL(
-        contractAddresses.lockup,
-        getAddress(tokenAddress),
-        batchParams.map((params) => ({
-          sender: params.sender,
-          recipient: params.recipient,
-          depositAmount: params.depositAmount,
-          startTime: params.startTime,
-          cliffTime: params.cliffTime,
-          endTime: params.endTime,
-        })),
-        values.cancelable,
-        values.transferable
-      )
+      // Use LockupLinear for linear streams
+      if (useDurations) {
+        calldata = encodeCreateWithDurationsLL(
+          contractAddresses.lockup,
+          getAddress(tokenAddress),
+          batchParams.map((params) => ({
+            sender: params.sender,
+            recipient: params.recipient,
+            depositAmount: params.depositAmount,
+            cliffDuration: params.cliffDuration!,
+            totalDuration: params.totalDuration!,
+          })),
+          values.cancelable,
+          values.transferable
+        )
+        functionSignature = 'createWithDurationsLL(address,address,tuple[])'
+      } else {
+        calldata = encodeCreateWithTimestampsLL(
+          contractAddresses.lockup,
+          getAddress(tokenAddress),
+          batchParams.map((params) => ({
+            sender: params.sender,
+            recipient: params.recipient,
+            depositAmount: params.depositAmount,
+            startTime: params.startTime,
+            cliffTime: params.cliffTime,
+            endTime: params.endTime,
+          })),
+          values.cancelable,
+          values.transferable
+        )
+        functionSignature = 'createWithTimestampsLL(address,address,tuple[])'
+      }
     }
 
     const batchStreamTransaction = {
       target: contractAddresses.batchLockup,
-      functionSignature: useDurations
-        ? 'createWithDurationsLL(address,address,tuple[])'
-        : 'createWithTimestampsLL(address,address,tuple[])',
+      functionSignature,
       calldata,
       value: '0',
     }
@@ -476,7 +528,13 @@ export const StreamTokens = () => {
     const streamCount = values.streams.length
     const formattedAmount = formatCryptoVal(formatUnits(totalAmount, tokenDecimals))
     const displaySymbol = isEth ? 'ETH (wrapped to WETH)' : tokenSymbol
-    const summary = `Create ${streamCount} Sablier stream${streamCount > 1 ? 's' : ''} totaling ${formattedAmount} ${displaySymbol}`
+    const streamType =
+      values.useExponential && values.exponent
+        ? values.invertExponent
+          ? 'exponential frontloaded'
+          : 'exponential backloaded'
+        : 'linear'
+    const summary = `Create ${streamCount} ${streamType} Sablier stream${streamCount > 1 ? 's' : ''} totaling ${formattedAmount} ${displaySymbol}`
 
     try {
       addTransaction({
@@ -668,7 +726,7 @@ export const StreamTokens = () => {
                       </Flex>
                       <Text variant="paragraph-sm" color="text3" mb="x4">
                         {formik.values.durationType === 'days'
-                          ? 'All streams will start now and last for a specified number of days.'
+                          ? 'All streams will start when the proposal is executed and last for a specified number of days.'
                           : 'All streams will use specific start and end dates.'}
                       </Text>
                     </Box>
@@ -726,6 +784,83 @@ export const StreamTokens = () => {
                             </Text>
                           </Box>
                         </label>
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formik.values.useExponential || false}
+                            onChange={(e) => {
+                              formik.setFieldValue('useExponential', e.target.checked)
+                              // Set default exponent when enabling
+                              if (e.target.checked && !formik.values.exponent) {
+                                formik.setFieldValue('exponent', 2)
+                              }
+                            }}
+                          />
+                          <Box>
+                            <Text fontWeight="label">Exponential Curve</Text>
+                            <Text variant="paragraph-sm" color="text3">
+                              Use an exponential vesting curve instead of linear
+                            </Text>
+                          </Box>
+                        </label>
+                        {formik.values.useExponential && (
+                          <Box ml="x8" mt="x2">
+                            <SmartInput
+                              type={FIELD_TYPES.NUMBER}
+                              formik={formik}
+                              {...formik.getFieldProps('exponent')}
+                              id="exponent"
+                              inputLabel="Exponent"
+                              placeholder="2"
+                              min={2}
+                              max={18}
+                              step={1}
+                              errorMessage={
+                                formik.touched.exponent && formik.errors.exponent
+                                  ? formik.errors.exponent
+                                  : undefined
+                              }
+                              helperText="Exponent value (2-18). Check 'Invert' below for frontloaded curves (1/2 to 1/18)."
+                            />
+                            <Box mt="x2">
+                              <label
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={formik.values.invertExponent || false}
+                                  onChange={(e) =>
+                                    formik.setFieldValue(
+                                      'invertExponent',
+                                      e.target.checked
+                                    )
+                                  }
+                                />
+                                <Box>
+                                  <Text fontWeight="label">
+                                    Invert Exponent (Frontloaded)
+                                  </Text>
+                                  <Text variant="paragraph-sm" color="text3">
+                                    {formik.values.invertExponent
+                                      ? `Frontloaded: 1/${formik.values.exponent || 2} (more tokens unlock early)`
+                                      : `Backloaded: ${formik.values.exponent || 2} (more tokens unlock late)`}
+                                  </Text>
+                                </Box>
+                              </label>
+                            </Box>
+                          </Box>
+                        )}
                       </Stack>
                     </Box>
                   )}

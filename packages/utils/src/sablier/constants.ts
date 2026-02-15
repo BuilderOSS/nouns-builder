@@ -36,12 +36,6 @@ export const lockupAbi = LATEST_LOCKUP_RELEASE.abi.SablierLockup as Abi
 // Sablier BatchLockup contract ABI for creating multiple streams
 export const batchLockupAbi = LATEST_LOCKUP_RELEASE.abi.SablierBatchLockup as Abi
 
-// Extract specific ABIs we need from the full lockup ABI
-// Event ABI for CreateLockupLinearStream - extract from full ABI
-export const createLockupLinearStreamEventAbi = (lockupAbi as Abi).filter(
-  (item) => item.type === 'event' && item.name === 'CreateLockupLinearStream'
-) as Abi
-
 // Stream status enum
 export enum StreamStatus {
   PENDING = 0,

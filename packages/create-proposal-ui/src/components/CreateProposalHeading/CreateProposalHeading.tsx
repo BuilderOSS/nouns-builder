@@ -37,7 +37,7 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
                   variant="secondary"
                   onClick={() => setQueueModalOpen(true)}
                 >
-                  {`${transactions.length} transactions queued`}
+                  {`${transactions.length} transaction${transactions.length > 1 ? 's' : ''} queued`}
                 </Button>
               )}
               {onOpenProposalReview && (

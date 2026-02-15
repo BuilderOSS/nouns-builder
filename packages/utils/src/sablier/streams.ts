@@ -39,7 +39,46 @@ export interface StreamConfigTimestamps {
   shape: string
 }
 
-export type StreamConfig = StreamConfigDurations | StreamConfigTimestamps
+export interface StreamSegmentWithDuration {
+  amount: bigint
+  exponent: bigint // UD2x18 format
+  duration: number // seconds
+}
+
+export interface StreamSegmentWithTimestamp {
+  amount: bigint
+  exponent: bigint // UD2x18 format
+  timestamp: number // unix timestamp
+}
+
+export interface StreamConfigDurationsLD {
+  sender: Address
+  recipient: Address
+  depositAmount: bigint
+  cancelable: boolean
+  transferable: boolean
+  segmentsWithDuration: StreamSegmentWithDuration[]
+  shape: string
+  exponent?: number // Decoded exponent value (UD2x18: 0 to ~18.446)
+}
+
+export interface StreamConfigTimestampsLD {
+  sender: Address
+  recipient: Address
+  depositAmount: bigint
+  cancelable: boolean
+  transferable: boolean
+  startTime: number // unix timestamp
+  segments: StreamSegmentWithTimestamp[]
+  shape: string
+  exponent?: number // Decoded exponent value (UD2x18: 0 to ~18.446)
+}
+
+export type StreamConfig =
+  | StreamConfigDurations
+  | StreamConfigTimestamps
+  | StreamConfigDurationsLD
+  | StreamConfigTimestampsLD
 
 export interface StreamData {
   lockupAddress: Address
@@ -66,6 +105,8 @@ export interface StreamLiveData {
   asset: Address
   minFeeWei: bigint
   streamedAmount: bigint
+  exponent?: number // Exponent value for exponential streams (UD2x18: 0 to ~18.446)
+  shape?: string // Stream shape (e.g., 'linear', 'cliff', 'dynamicExponential')
 }
 
 export const parseStreamDataConfigDurations = (streamData: any): StreamConfigDurations =>
@@ -107,6 +148,62 @@ export const parseStreamDataConfigTimestamps = (
     shape: streamData.shape as string,
   }) as StreamConfigTimestamps
 
+export const parseStreamDataConfigDurationsLD = (
+  streamData: any
+): StreamConfigDurationsLD => {
+  const segmentsWithDuration: StreamSegmentWithDuration[] =
+    streamData.segmentsWithDuration.map((seg: any) => ({
+      amount: BigInt(seg.amount),
+      exponent: BigInt(seg.exponent),
+      duration: Number(seg.duration),
+    }))
+
+  // Extract exponent value from segments (convert from UD2x18 to number)
+  const exponentUD2x18 =
+    segmentsWithDuration.length > 0 ? segmentsWithDuration[0].exponent : 0n
+  // Use floating-point division to preserve decimal precision for fractional exponents
+  const exponent = exponentUD2x18 > 0n ? Number(exponentUD2x18) / 10 ** 18 : undefined
+
+  return {
+    sender: streamData.sender as Address,
+    recipient: streamData.recipient as Address,
+    depositAmount: BigInt(streamData.depositAmount),
+    cancelable: streamData.cancelable as boolean,
+    transferable: streamData.transferable as boolean,
+    segmentsWithDuration,
+    shape: streamData.shape as string,
+    exponent,
+  } as StreamConfigDurationsLD
+}
+
+export const parseStreamDataConfigTimestampsLD = (
+  streamData: any
+): StreamConfigTimestampsLD => {
+  const segments: StreamSegmentWithTimestamp[] = streamData.segments.map((seg: any) => ({
+    amount: BigInt(seg.amount),
+    exponent: BigInt(seg.exponent),
+    timestamp: Number(seg.timestamp),
+  }))
+
+  // Extract exponent value from segments (convert from UD2x18 to number)
+  const exponentUD2x18 = segments.length > 0 ? segments[0].exponent : 0n
+  // Use floating-point division to preserve decimal precision for fractional exponents
+  const exponent = exponentUD2x18 > 0n ? Number(exponentUD2x18) / 10 ** 18 : undefined
+
+  return {
+    sender: streamData.sender as Address,
+    recipient: streamData.recipient as Address,
+    depositAmount: BigInt(streamData.depositAmount),
+    cancelable: streamData.cancelable as boolean,
+    transferable: streamData.transferable as boolean,
+    startTime: Number(streamData.startTime),
+    segments,
+    cliffTime: Number(streamData.cliffTime),
+    shape: streamData.shape as string,
+    exponent,
+  } as StreamConfigTimestampsLD
+}
+
 /**
  * Extract stream configuration from calldata
  */
@@ -121,7 +218,9 @@ export function extractStreamData(calldata: Hex): StreamData | null {
 
     if (
       decoded.functionName !== 'createWithDurationsLL' &&
-      decoded.functionName !== 'createWithTimestampsLL'
+      decoded.functionName !== 'createWithTimestampsLL' &&
+      decoded.functionName !== 'createWithDurationsLD' &&
+      decoded.functionName !== 'createWithTimestampsLD'
     ) {
       throw new Error('unknown function name: ' + decoded.functionName)
     }
@@ -136,10 +235,22 @@ export function extractStreamData(calldata: Hex): StreamData | null {
       unknown[],
     ]
 
-    const isDurationsMode = decoded.functionName === 'createWithDurationsLL'
-    const parser: (_data: any) => StreamConfig = isDurationsMode
-      ? parseStreamDataConfigDurations
-      : parseStreamDataConfigTimestamps
+    const isDurationsMode =
+      decoded.functionName === 'createWithDurationsLL' ||
+      decoded.functionName === 'createWithDurationsLD'
+
+    let parser: (_data: any) => StreamConfig
+
+    if (decoded.functionName === 'createWithDurationsLL') {
+      parser = parseStreamDataConfigDurations
+    } else if (decoded.functionName === 'createWithTimestampsLL') {
+      parser = parseStreamDataConfigTimestamps
+    } else if (decoded.functionName === 'createWithDurationsLD') {
+      parser = parseStreamDataConfigDurationsLD
+    } else {
+      // createWithTimestampsLD
+      parser = parseStreamDataConfigTimestampsLD
+    }
 
     const streams = batchArray.map(parser)
 
@@ -159,10 +270,41 @@ export function extractStreamData(calldata: Hex): StreamData | null {
  * Calculate start, cliff, and end times for a stream
  */
 export function calculateStreamTimes(
-  stream: StreamConfigDurations | StreamConfigTimestamps,
+  stream: StreamConfig,
   isDurationsMode: boolean,
   creationTimestamp?: number
 ): { startTime: number; cliffTime: number; endTime: number } {
+  // Handle LockupDynamic streams with timestamps
+  if ('segments' in stream && !isDurationsMode) {
+    const ldTimestampStream = stream as StreamConfigTimestampsLD
+    const segments = ldTimestampStream.segments
+    // For single segment: use startTime from config and timestamp from segment as endTime
+    const startTime =
+      'startTime' in stream && typeof stream.startTime === 'number'
+        ? stream.startTime
+        : creationTimestamp || Math.floor(Date.now() / 1000)
+    return {
+      startTime,
+      cliffTime: 0, // LD streams don't support cliff
+      endTime: segments.length > 0 ? segments[segments.length - 1].timestamp : 0,
+    }
+  }
+
+  // Handle LockupDynamic streams with durations
+  if ('segmentsWithDuration' in stream && isDurationsMode) {
+    const ldDurationStream = stream as StreamConfigDurationsLD
+    const segments = ldDurationStream.segmentsWithDuration
+    const startTime = creationTimestamp || Math.floor(Date.now() / 1000)
+    // For LD with durations, calculate end time from segment durations
+    const totalDuration = segments.reduce((sum, seg) => sum + seg.duration, 0)
+    return {
+      startTime,
+      cliffTime: 0, // LD streams don't support cliff
+      endTime: startTime + totalDuration,
+    }
+  }
+
+  // Handle LockupLinear streams with timestamps
   if (!isDurationsMode) {
     const timestampStream = stream as StreamConfigTimestamps
     return {
@@ -172,6 +314,7 @@ export function calculateStreamTimes(
     }
   }
 
+  // Handle LockupLinear streams with durations
   const durationStream = stream as StreamConfigDurations
   const startTime = creationTimestamp || Math.floor(Date.now() / 1000)
   const cliffTime =
@@ -195,6 +338,41 @@ export function formatStreamDuration(seconds: number): string {
   if (minutes > 0) parts.push(`${minutes}m`)
 
   return parts.length > 0 ? parts.join(' ') : '< 1m'
+}
+
+/**
+ * Converts decimal exponents between 0 and 1 to inverted fraction format (1/x)
+ * For example: 0.5 -> "1/2", 0.333 -> "1/3", 0.25 -> "1/4"
+ * Supports denominators from 2 to 18
+ */
+export function convertToInvertedFraction(value: number): string | null {
+  // Only convert if 0 < value < 1
+  if (value <= 0 || value >= 1) return null
+
+  const tolerance = 0.0001 // Tolerance for floating point comparison
+
+  // Try denominators from 2 to 18
+  for (let denominator = 2; denominator <= 18; denominator++) {
+    const fraction = 1 / denominator
+    if (Math.abs(value - fraction) < tolerance) {
+      return `1/${denominator}`
+    }
+  }
+
+  return null
+}
+
+/**
+ * Format exponent value for display, converting fractional exponents to inverted notation
+ * For example: 0.5 -> "1/2", 2 -> "2", 0.333 -> "1/3"
+ */
+export function formatExponent(value: number): string {
+  const invertedFraction = convertToInvertedFraction(value)
+  if (invertedFraction) return invertedFraction
+
+  // Round to max 3 decimal places and remove trailing zeros
+  const rounded = Math.round(value * 1000) / 1000
+  return rounded.toString()
 }
 
 /**

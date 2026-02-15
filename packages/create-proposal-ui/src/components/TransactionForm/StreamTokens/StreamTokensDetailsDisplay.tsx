@@ -6,7 +6,7 @@ export const StreamTokensDetailsDisplay: React.FC<{
   balanceError?: string
   totalStreamAmountWithSymbol?: string
   streamCount?: number
-}> = ({ totalStreamAmountWithSymbol, balanceError, streamCount }) => {
+}> = ({ totalStreamAmountWithSymbol, balanceError }) => {
   return (
     <Box
       position={{ '@initial': 'relative', '@768': 'absolute' }}
@@ -27,16 +27,6 @@ export const StreamTokensDetailsDisplay: React.FC<{
           <Text variant="paragraph-sm" color="negative">
             {balanceError}
           </Text>
-        )}
-        {streamCount !== undefined && (
-          <Box style={{ textAlign: 'right' }}>
-            <Text fontSize={12} color="text4" style={{ fontWeight: 'bold' }}>
-              Number of Streams
-            </Text>
-            <Text variant="heading-sm" style={{ fontWeight: 'bold' }}>
-              {streamCount}
-            </Text>
-          </Box>
         )}
         {totalStreamAmountWithSymbol && (
           <Box style={{ textAlign: 'right' }}>

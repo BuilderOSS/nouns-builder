@@ -8,3 +8,14 @@ export const linkStyle = style([
     },
   },
 ])
+
+export const gridStyle = style([
+  {
+    gridTemplateColumns: '1fr',
+    '@media': {
+      '(min-width: 768px)': {
+        gridTemplateColumns: '1fr 1fr',
+      },
+    },
+  },
+])

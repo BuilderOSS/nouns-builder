@@ -26,6 +26,7 @@ export const AccordionItem: React.FC<{
   onToggle,
 }) => {
   const [internalIsOpen, setInternalIsOpen] = React.useState<boolean>(defaultOpen)
+  const [allowOverflow, setAllowOverflow] = React.useState<boolean>(defaultOpen)
 
   // Use controlled state if provided, otherwise use internal state
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
@@ -35,6 +36,17 @@ export const AccordionItem: React.FC<{
       onToggle()
     } else {
       setInternalIsOpen((bool) => !bool)
+    }
+    // Immediately disable overflow when closing to prevent content flash
+    if (isOpen) {
+      setAllowOverflow(false)
+    }
+  }
+
+  const handleAnimationComplete = () => {
+    // Enable overflow after opening animation completes to prevent flash during expansion
+    if (isOpen) {
+      setAllowOverflow(true)
     }
   }
   const variants = {
@@ -92,9 +104,10 @@ export const AccordionItem: React.FC<{
         variants={variants}
         initial={'initial'}
         animate={isOpen ? 'animate' : 'initial'}
+        onAnimationComplete={handleAnimationComplete}
         className={atoms({
           height: 'x0',
-          overflow: 'hidden',
+          overflow: allowOverflow ? 'visible' : 'hidden',
           paddingLeft: 'x6',
           paddingRight: 'x6',
         })}

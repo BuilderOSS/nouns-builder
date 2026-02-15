@@ -10,7 +10,6 @@ export enum SimulationError {
 }
 
 interface TransactionCardProps {
-  handleEdit?: () => void
   handleRemove?: () => void
   simulationUrl?: string
   simulationError?: SimulationError
@@ -20,7 +19,6 @@ interface TransactionCardProps {
 }
 
 export const TransactionCard: React.FC<TransactionCardProps> = ({
-  handleEdit,
   handleRemove,
   simulationError,
   simulationUrl,
@@ -28,7 +26,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   disabled,
   children,
 }) => {
-  const showCardAction = (handleEdit && !disabled) || (handleRemove && !disabled)
+  const showCardAction = handleRemove && !disabled
 
   const type = transaction.type
 
@@ -66,22 +64,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
 
         {showCardAction && (
           <Flex align={'center'} gap={'x2'} data-testid="actions">
-            {handleEdit && (
-              <Flex
-                as={'button'}
-                py={'x2'}
-                px={'x4'}
-                borderWidth={'none'}
-                cursor={'pointer'}
-                style={{ borderRadius: '8px' }}
-                alignSelf={'flex-end'}
-                onClick={handleEdit}
-                type={'button'}
-                data-testid="edit"
-              >
-                <Text variant={'label-md'}>Edit</Text>
-              </Flex>
-            )}
             {handleRemove && (
               <Flex onClick={handleRemove} cursor={'pointer'} data-testid="remove">
                 <Icon id={'trash'} />
