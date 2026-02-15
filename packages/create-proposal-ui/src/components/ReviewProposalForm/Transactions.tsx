@@ -3,7 +3,6 @@ import { SimulationOutput } from '@buildeross/types'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { Flex, Stack } from '@buildeross/zord'
 import { Field } from 'formik'
-import React from 'react'
 
 import { SimulationError, TransactionCard } from '../TransactionCard'
 
@@ -12,13 +11,11 @@ export const Transactions = ({
   disabled,
   simulations,
   simulationError,
-  onEditTransactions,
 }: {
   transactions: BuilderTransaction[]
   simulations: SimulationOutput[]
   disabled?: boolean
   simulationError?: string
-  onEditTransactions?: () => void
 }) => {
   return (
     <Stack mb={'x10'}>
@@ -42,7 +39,6 @@ export const Transactions = ({
                 simulationError={error}
                 disabled={disabled || transaction.type === 'upgrade'}
                 transaction={transaction}
-                handleEdit={onEditTransactions}
                 simulationUrl={simulation?.url}
               >
                 <Field

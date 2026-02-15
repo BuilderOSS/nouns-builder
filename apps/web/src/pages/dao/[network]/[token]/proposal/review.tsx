@@ -18,7 +18,7 @@ import { useAccount } from 'wagmi'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
   const chain = useChainStore((x) => x.chain)
-  const { back, push } = useRouter()
+  const { push } = useRouter()
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
@@ -50,7 +50,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
-  const onEditTransactions = React.useCallback(async () => {
+  const onOpenCreatePage = React.useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/create`,
       query: {
@@ -80,7 +80,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       <CreateProposalHeading
         title={'Review and Submit Proposal'}
         align={'center'}
-        handleBack={back}
+        handleBack={onOpenCreatePage}
       />
       <Box mx="auto">
         <a href="/guidelines" target="_blank" rel="noreferrer noopener">
@@ -103,7 +103,6 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           title={title}
           summary={summary}
           onProposalCreated={onProposalCreated}
-          onEditTransactions={onEditTransactions}
         />
       </Stack>
     </Stack>

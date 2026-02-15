@@ -33,7 +33,6 @@ interface ReviewProposalProps {
   summary?: string
   transactions: BuilderTransaction[]
   onProposalCreated: () => Promise<void>
-  onEditTransactions?: () => void
 }
 
 const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_TENDERLY_SIMULATION === 'true'
@@ -55,7 +54,6 @@ export const ReviewProposalForm = ({
   summary,
   transactions,
   onProposalCreated,
-  onEditTransactions,
 }: ReviewProposalProps) => {
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -207,7 +205,6 @@ export const ReviewProposalForm = ({
                 transactions={transactions}
                 simulations={failedSimulations}
                 simulationError={simulationError}
-                onEditTransactions={onEditTransactions}
               />
 
               <Field name="title">

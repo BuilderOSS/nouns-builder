@@ -15,7 +15,6 @@ describe('Review Card', () => {
           type: TransactionType.UPGRADE,
           transactions: [],
         }}
-        handleEdit={vi.fn()}
         handleRemove={vi.fn()}
       />
     )
@@ -34,7 +33,6 @@ describe('Review Card', () => {
           type: TransactionType.UPGRADE,
           transactions: [],
         }}
-        handleEdit={mockEditFn}
         handleRemove={mockRemoveFn}
       />
     )
@@ -62,7 +60,6 @@ describe('Review Card', () => {
           type: TransactionType.UPGRADE,
           transactions: [],
         }}
-        handleEdit={mockEditFn}
       />
     )
 
