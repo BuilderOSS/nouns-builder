@@ -16,12 +16,22 @@ import { ProposalCreatedItem } from './ProposalCreatedItem'
 import { ProposalExecutedItem } from './ProposalExecutedItem'
 import { ProposalUpdatedItem } from './ProposalUpdatedItem'
 import { ProposalVotedItem } from './ProposalVotedItem'
+import type {
+  OnOpenBidModal,
+  OnOpenPropdateModal,
+  OnOpenTradeModal,
+  OnOpenVoteModal,
+} from './types/modalStates'
 import { ZoraCoinCreatedItem } from './ZoraCoinCreatedItem'
 
 export interface FeedItemProps {
   item: FeedItemType
   hideActor?: boolean
   hideDao?: boolean
+  onOpenBidModal?: OnOpenBidModal
+  onOpenVoteModal?: OnOpenVoteModal
+  onOpenPropdateModal?: OnOpenPropdateModal
+  onOpenTradeModal?: OnOpenTradeModal
 }
 
 const Separator = () => (
@@ -42,6 +52,10 @@ export const FeedItem: React.FC<FeedItemProps> = ({
   item,
   hideActor: _hideActor = false,
   hideDao = false,
+  onOpenBidModal,
+  onOpenVoteModal,
+  onOpenPropdateModal,
+  onOpenTradeModal,
 }) => {
   const renderContent = () => {
     switch (item.type) {
@@ -100,7 +114,13 @@ export const FeedItem: React.FC<FeedItemProps> = ({
         {/* Actions and metadata row - same row on desktop, different rows on mobile */}
         <Box className={feedItemMetaRow}>
           {/* Actions section */}
-          <FeedItemActions item={item} />
+          <FeedItemActions
+            item={item}
+            onOpenBidModal={onOpenBidModal}
+            onOpenVoteModal={onOpenVoteModal}
+            onOpenPropdateModal={onOpenPropdateModal}
+            onOpenTradeModal={onOpenTradeModal}
+          />
 
           {/* Chain and timestamp */}
           <Flex gap="x2" align="center" justify="flex-end" wrap="wrap">

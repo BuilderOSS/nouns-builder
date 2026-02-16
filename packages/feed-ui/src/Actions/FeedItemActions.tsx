@@ -1,17 +1,33 @@
 import type { FeedItem } from '@buildeross/types'
 import React from 'react'
 
+import type {
+  OnOpenBidModal,
+  OnOpenPropdateModal,
+  OnOpenTradeModal,
+  OnOpenVoteModal,
+} from '../types/modalStates'
 import { AuctionActions } from './AuctionActions'
 import { CoinActions } from './CoinActions'
 import { ProposalActions } from './ProposalActions'
 
 interface FeedItemActionsProps {
   item: FeedItem
+  onOpenBidModal?: OnOpenBidModal
+  onOpenVoteModal?: OnOpenVoteModal
+  onOpenPropdateModal?: OnOpenPropdateModal
+  onOpenTradeModal?: OnOpenTradeModal
 }
 
 const ONE_MONTH = 30 * 24 * 60 * 60
 
-export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
+export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
+  item,
+  onOpenBidModal,
+  onOpenVoteModal,
+  onOpenPropdateModal,
+  onOpenTradeModal,
+}) => {
   // Only show actions for recent items (last 30 days)
   const isRecent = item.timestamp > Date.now() / 1000 - ONE_MONTH
 
@@ -30,6 +46,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           tokenId={item.tokenId}
           tokenName={item.tokenName}
           addresses={item.addresses}
+          onOpenBidModal={onOpenBidModal}
         />
       )
 
@@ -44,6 +61,8 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           proposalTimeCreated={item.proposalTimeCreated}
           isExecuted={false}
           addresses={item.addresses}
+          onOpenVoteModal={onOpenVoteModal}
+          onOpenPropdateModal={onOpenPropdateModal}
         />
       )
 
@@ -58,6 +77,8 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           isExecuted={false}
           updateItem={item}
           addresses={item.addresses}
+          onOpenVoteModal={onOpenVoteModal}
+          onOpenPropdateModal={onOpenPropdateModal}
         />
       )
 
@@ -71,6 +92,8 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           proposalTimeCreated={item.proposalTimeCreated}
           addresses={item.addresses}
           isExecuted={true}
+          onOpenVoteModal={onOpenVoteModal}
+          onOpenPropdateModal={onOpenPropdateModal}
         />
       )
 
@@ -80,6 +103,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           chainId={item.chainId}
           coinAddress={item.tokenAddress}
           symbol={item.tokenSymbol}
+          onOpenTradeModal={onOpenTradeModal}
         />
       )
 
@@ -89,6 +113,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           chainId={item.chainId}
           coinAddress={item.coinAddress}
           symbol={item.coinSymbol}
+          onOpenTradeModal={onOpenTradeModal}
         />
       )
 

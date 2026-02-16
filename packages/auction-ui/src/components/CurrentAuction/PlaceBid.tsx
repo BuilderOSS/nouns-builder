@@ -238,7 +238,12 @@ const InnerPlaceBid = ({
             </ContractButton>
             {chainId !== 1 ? (
               <Box ml="x2" mt={{ '@initial': 'x2', '@768': 'x0' }}>
-                <ShareButton url={shareUrl} size="lg" variant="secondary" />
+                <ShareButton
+                  url={shareUrl}
+                  size="lg"
+                  variant="primary"
+                  className={auctionActionButtonVariants['share']}
+                />
               </Box>
             ) : null}
           </Flex>

@@ -11,6 +11,8 @@ interface ShareButtonProps {
   variant?: 'ghost' | 'outline' | 'secondary' | 'primary'
   // Optional callback when copy is successful
   onCopySuccess?: (url: string) => void
+  // Optional className
+  className?: string
 }
 
 const ShareButton: React.FC<ShareButtonProps> = ({
@@ -18,6 +20,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({
   size = 'md',
   variant = 'ghost',
   onCopySuccess,
+  className,
 }) => {
   const [copied, setCopied] = React.useState<boolean>(false)
 
@@ -43,10 +46,12 @@ const ShareButton: React.FC<ShareButtonProps> = ({
       variant={variant}
       onClick={handleShare}
       borderRadius="curved"
+      size={size}
       style={{
-        padding: size === 'sm' ? '8px' : size === 'md' ? '10px' : '12px',
+        paddingX: size === 'sm' ? '6px' : size === 'md' ? '8px' : '10px',
         minWidth: 'unset',
       }}
+      className={className}
     >
       {!copied ? (
         <Icon id="share" size={iconSize} />
@@ -57,7 +62,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({
           transition={{ duration: 0.2 }}
           exit={{ scale: 0 }}
         >
-          <Icon id="checkInCircle" size={iconSize} fill="positive" />
+          <Icon id="checkInCircle" size={iconSize} />
         </motion.div>
       )}
     </Button>
