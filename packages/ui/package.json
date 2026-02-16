@@ -25,6 +25,7 @@
     "@buildeross/hooks": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/sdk": "workspace:*",
+    "@buildeross/swap": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/utils": "workspace:*",

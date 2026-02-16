@@ -9,6 +9,7 @@
 
 export * from './buildSwapOptions'
 export * from './buildSwapPath'
+export * from './errors'
 export * from './executeSwap'
 export { clearCoinInfoCache, getCoinInfo } from './getCoinInfo'
 export * from './getQuoteFromUniswap'

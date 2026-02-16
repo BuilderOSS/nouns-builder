@@ -3,6 +3,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { Address, encodeAbiParameters, keccak256, PublicClient } from 'viem'
 
 import { uniswapV4QuoterAbi } from './abis/uniswapV4Quoter'
+import { SwapError, SwapErrorCode } from './errors'
 import { SwapPath } from './types'
 import { normalizeForPoolKey } from './utils/normalizeAddresses'
 
@@ -62,7 +63,10 @@ export async function getQuoteFromUniswap({
   const quoterAddress = UNISWAP_V4_QUOTER_ADDRESS[chainId]
 
   if (!quoterAddress) {
-    throw new Error(`Quoter not deployed on chain ${chainId}`)
+    throw new SwapError(
+      SwapErrorCode.QUOTER_NOT_DEPLOYED,
+      `Quoter not deployed on chain ${chainId}`
+    )
   }
 
   // For multi-hop swaps, we need to quote each hop sequentially
@@ -73,7 +77,8 @@ export async function getQuoteFromUniswap({
 
     // Validate required pool parameters
     if (!hop.fee || !hop.tickSpacing || !hop.hooks) {
-      throw new Error(
+      throw new SwapError(
+        SwapErrorCode.POOL_CONFIG_ERROR,
         `Missing required pool parameters for hop ${i}: fee, tickSpacing, or hooks`
       )
     }
@@ -115,7 +120,8 @@ export async function getQuoteFromUniswap({
         '\nNormalized tokenOut:',
         normalizedTokenOut
       )
-      throw new Error(
+      throw new SwapError(
+        SwapErrorCode.POOL_CONFIG_ERROR,
         `PoolKey validation failed for hop ${i}: hash mismatch (computed: ${computedHash}, expected: ${expectedHash})`
       )
     }
@@ -143,14 +149,41 @@ export async function getQuoteFromUniswap({
       const amountOut = result.result[0] as bigint
 
       if (!amountOut || amountOut <= 0n) {
-        throw new Error('Quote returned zero or negative output')
+        throw new SwapError(
+          SwapErrorCode.INSUFFICIENT_LIQUIDITY,
+          'Quote returned zero or negative output - insufficient liquidity in pool'
+        )
       }
 
       // Use this output as input for next hop
       currentAmountIn = amountOut
     } catch (error: any) {
+      // Re-throw SwapErrors as-is
+      if (error instanceof SwapError) {
+        throw error
+      }
+
       console.error(`Quote failed for hop ${i}:`, error)
-      throw new Error(`Failed to get quote: ${error.message || 'Unknown error'}`)
+
+      // Check for network-related errors
+      if (
+        error.message?.includes('fetch failed') ||
+        error.message?.includes('network') ||
+        error.message?.includes('timeout')
+      ) {
+        throw new SwapError(
+          SwapErrorCode.NETWORK_ERROR,
+          `Network error while fetching quote: ${error.message}`,
+          error
+        )
+      }
+
+      // Wrap unknown errors
+      throw new SwapError(
+        SwapErrorCode.UNKNOWN_ERROR,
+        `Failed to get quote: ${error.message || 'Unknown error'}`,
+        error
+      )
     }
   }
 

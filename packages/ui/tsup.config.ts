@@ -18,6 +18,7 @@ export default defineConfig({
     '@buildeross/hooks',
     '@buildeross/ipfs-service',
     '@buildeross/sdk',
+    '@buildeross/swap',
     '@buildeross/types',
     '@buildeross/utils',
     '@buildeross/zord',

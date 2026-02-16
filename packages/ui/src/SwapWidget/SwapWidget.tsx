@@ -1,6 +1,7 @@
 import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants/addresses'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useExecuteSwap, useSwapOptions, useSwapQuote } from '@buildeross/hooks'
+import { SwapError, SwapErrorCode, SwapErrorMessages } from '@buildeross/swap'
 import { CHAIN_ID } from '@buildeross/types'
 import { truncateHex } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
@@ -250,15 +251,77 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
       return 'No swap route available for this pair'
     }
     if (error) {
-      if (error.message.includes('User rejected')) {
+      // Check if it's a SwapError with specific error code
+      if (error instanceof SwapError) {
+        return SwapErrorMessages[error.code]
+      }
+
+      // Check for specific error patterns in error message
+      const errorMessage = error.message || ''
+
+      // User-initiated errors
+      if (
+        errorMessage.includes('User rejected') ||
+        errorMessage.includes('User denied')
+      ) {
         return 'Transaction cancelled'
       }
-      if (error.message.includes('insufficient funds')) {
+
+      // Gas-related errors
+      if (errorMessage.includes('insufficient funds')) {
         return 'Insufficient funds for gas'
       }
-      if (error.message.includes('slippage')) {
+
+      // Slippage errors
+      if (errorMessage.includes('slippage') || errorMessage.includes('Price impact')) {
         return 'Price moved too much. Please try again.'
       }
+
+      // Liquidity errors (fallback for non-SwapError instances)
+      if (
+        errorMessage.includes('INSUFFICIENT_LIQUIDITY') ||
+        errorMessage.includes('NotEnoughLiquidity') ||
+        errorMessage.includes('insufficient liquidity')
+      ) {
+        return SwapErrorMessages[SwapErrorCode.INSUFFICIENT_LIQUIDITY]
+      }
+
+      // Route errors
+      if (errorMessage.includes('NO_ROUTE_FOUND') || errorMessage.includes('No route')) {
+        return SwapErrorMessages[SwapErrorCode.NO_ROUTE_FOUND]
+      }
+
+      // Network errors
+      if (
+        errorMessage.includes('NETWORK_ERROR') ||
+        errorMessage.includes('fetch failed') ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('timeout')
+      ) {
+        return SwapErrorMessages[SwapErrorCode.NETWORK_ERROR]
+      }
+
+      // Pool configuration errors
+      if (
+        errorMessage.includes('POOL_CONFIG_ERROR') ||
+        errorMessage.includes('Pool') ||
+        errorMessage.includes('PoolKey')
+      ) {
+        return SwapErrorMessages[SwapErrorCode.POOL_CONFIG_ERROR]
+      }
+
+      // Contract-specific errors
+      if (errorMessage.includes('InsufficientBalance')) {
+        return 'Insufficient balance in contract'
+      }
+      if (errorMessage.includes('InsufficientETH')) {
+        return 'Not enough ETH for swap'
+      }
+      if (errorMessage.includes('InsufficientAllowance')) {
+        return 'Token allowance too low. Please try again.'
+      }
+
+      // Generic fallback
       return 'Swap failed. Please try again.'
     }
     return null
