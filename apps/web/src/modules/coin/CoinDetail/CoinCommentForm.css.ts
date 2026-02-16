@@ -4,10 +4,9 @@ import { style } from '@vanilla-extract/css'
 export const commentFormContainer = style([
   atoms({
     w: '100%',
-    p: 'x4',
     backgroundColor: 'background2',
     borderRadius: 'curved',
-    mb: 'x4',
+    mb: 'x5',
   }),
 ])
 

@@ -5,8 +5,7 @@ import { style } from '@vanilla-extract/css'
 export const mobileTradeBar = style([
   atoms({
     backgroundColor: 'background1',
-    px: 'x4',
-    py: 'x3',
+    p: 'x4',
   }),
   {
     position: 'fixed',
@@ -16,7 +15,6 @@ export const mobileTradeBar = style([
     zIndex: MOBILE_BOTTOM_NAV_LAYER,
     borderTop: '1px solid',
     borderColor: 'var(--border)',
-    paddingBottom: 'env(safe-area-inset-bottom)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -37,4 +35,5 @@ export const priceDisplay = style({
 
 export const tradeButton = style({
   minWidth: 120,
+  flex: 1,
 })

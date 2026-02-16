@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import {
   useClankerTokenWithPrice,
   useScrollDirection,
@@ -16,7 +17,7 @@ import { AnimatedModal } from '@buildeross/ui/Modal'
 import { SwapWidget } from '@buildeross/ui/SwapWidget'
 import { Box, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Address } from 'viem'
 
 import {
@@ -79,7 +80,7 @@ export const CoinDetail = ({
 }: CoinDetailProps) => {
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false)
   const router = useRouter()
-  const { getDaoLink } = useLinks()
+  const { getDaoLink, getCoinLink } = useLinks()
   const scrollDirection = useScrollDirection()
 
   // Fetch price data for mobile trade bar
@@ -116,6 +117,11 @@ export const CoinDetail = ({
       router.back()
     }
   }
+
+  const shareUrl = useMemo(() => {
+    const link = getCoinLink(chainId as CHAIN_ID, coinAddress)
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
+  }, [chainId, coinAddress, getCoinLink])
 
   return (
     <>
@@ -168,6 +174,7 @@ export const CoinDetail = ({
       <MobileTradeBar
         symbol={symbol}
         priceUsd={priceUsd}
+        shareUrl={shareUrl}
         isLoadingPrice={isLoadingPrice}
         onTradeClick={() => setIsMobileModalOpen(true)}
       />

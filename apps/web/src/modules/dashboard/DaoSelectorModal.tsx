@@ -13,7 +13,6 @@ export interface DaoSelectorModalProps {
   onClose: () => void
   actionType: 'post' | 'proposal'
   userAddress?: AddressType
-  chainIds?: CHAIN_ID[]
 }
 
 export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
@@ -21,7 +20,6 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   onClose,
   actionType,
   userAddress,
-  chainIds = [],
 }) => {
   const router = useRouter()
   const [selectedDao, setSelectedDao] = useState<DaoListItem | undefined>()
@@ -65,7 +63,7 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
   // For posts: filter to coin-supported chains
   const effectiveChainIds = (
-    actionType === 'post' ? COIN_SUPPORTED_CHAIN_IDS : chainIds
+    actionType === 'post' ? COIN_SUPPORTED_CHAIN_IDS : []
   ) as CHAIN_ID[]
 
   return (

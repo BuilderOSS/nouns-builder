@@ -91,7 +91,7 @@
     "analyze": "ANALYZE=true next build",
     "build": "next build",
     "clean": "rm -rf .next .turbo",
-    "dev": "NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "dev": "pnpm clean && NODE_OPTIONS='--max-old-space-size=4096' next dev",
     "lint": "pnpm type-check && eslint --fix .",
     "start": "next start",
     "test": "vitest run",

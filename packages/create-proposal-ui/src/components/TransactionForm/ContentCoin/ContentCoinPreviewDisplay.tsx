@@ -10,7 +10,7 @@ export const ContentCoinPreviewDisplay: React.FC<{
   chainId: CHAIN_ID
 }> = ({ previewData, chainId }) => {
   return (
-    <StickyPreviewContainer align="flex-end">
+    <StickyPreviewContainer align="stretch">
       <Stack gap="x5">
         <ContentCoinPreview {...previewData} chainId={chainId} />
         <Box style={{ textAlign: 'right' }}>

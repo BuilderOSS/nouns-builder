@@ -94,7 +94,7 @@ export const emptyState = style([
   }),
 ])
 
-export const priceBadgeOverlay = style({
+export const marketCapOverlay = style({
   position: 'absolute',
   top: 12,
   right: 12,

@@ -271,17 +271,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
     )
   }
 
-  // Get unique chain IDs from user's DAOs
-  const userChainIds = useMemo(() => {
-    if (!sortedDaos.length) return []
-    return Array.from(new Set(sortedDaos.map((dao) => dao.chainId)))
-  }, [sortedDaos])
-
   return (
     <DashboardLayout
       mainContent={mainContent}
       sidebarContent={sidebarContent}
-      chainIds={userChainIds}
       address={address}
       ensAvatar={ensAvatar}
     />

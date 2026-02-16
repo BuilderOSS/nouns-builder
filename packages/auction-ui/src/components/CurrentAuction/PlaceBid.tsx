@@ -243,6 +243,7 @@ const InnerPlaceBid = ({
                   size="lg"
                   variant="primary"
                   className={auctionActionButtonVariants['share']}
+                  tooltip="Copy Referral Link"
                 />
               </Box>
             ) : null}

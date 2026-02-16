@@ -49,7 +49,7 @@ const EVENT_TYPE_LABELS: Record<FeedEventType, string> = {
   [FeedEventType.ProposalVoted]: 'Proposal Vote',
   [FeedEventType.ProposalExecuted]: 'Proposal Executed',
   [FeedEventType.ProposalUpdated]: 'Proposal Update',
-  [FeedEventType.ClankerTokenCreated]: 'Creator Coin Created',
+  [FeedEventType.ClankerTokenCreated]: 'Creator Coin Deployed',
   [FeedEventType.ZoraCoinCreated]: 'Post Published',
 }
 

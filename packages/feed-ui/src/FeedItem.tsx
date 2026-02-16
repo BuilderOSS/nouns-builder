@@ -2,6 +2,7 @@ import type { FeedItem as FeedItemType } from '@buildeross/types'
 import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
+import { isAddressEqual } from 'viem'
 
 import { FeedItemActions } from './Actions/FeedItemActions'
 import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
@@ -50,7 +51,7 @@ const Separator = () => (
 
 export const FeedItem: React.FC<FeedItemProps> = ({
   item,
-  hideActor: _hideActor = false,
+  hideActor: outerHideActor = false,
   hideDao = false,
   onOpenBidModal,
   onOpenVoteModal,
@@ -82,7 +83,8 @@ export const FeedItem: React.FC<FeedItemProps> = ({
     }
   }
 
-  const hideActor = _hideActor || item.type === 'CLANKER_TOKEN_CREATED'
+  const hideActor = outerHideActor || isAddressEqual(item.actor, item.addresses.treasury)
+
   // Helper to determine whether to render separators
   const shouldShowSeparatorAfterActor = !hideActor && !hideDao
 

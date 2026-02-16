@@ -1,34 +1,26 @@
-import { formatPrice } from '@buildeross/utils/formatMarketCap'
-import { Button, Icon, Spinner, Text } from '@buildeross/zord'
+import { Button } from '@buildeross/zord'
 import React from 'react'
 
-import { mobileTradeBar, priceDisplay, tradeButton } from './MobileTradeBar.css'
+import { ShareButton } from '../ShareButton'
+import { mobileTradeBar, tradeButton } from './MobileTradeBar.css'
 
 export interface MobileTradeBarProps {
   symbol: string
   priceUsd: number | null
+  shareUrl: string | null
   isLoadingPrice?: boolean
   onTradeClick: () => void
 }
 
 export const MobileTradeBar: React.FC<MobileTradeBarProps> = ({
   symbol,
-  priceUsd,
-  isLoadingPrice,
+  shareUrl,
   onTradeClick,
 }) => {
   return (
     <div className={mobileTradeBar}>
-      <div className={priceDisplay}>
-        <Text variant="label-sm" color="text3">
-          Current Price
-        </Text>
-        <Text variant="heading-xs">
-          {isLoadingPrice ? <Spinner size="sm" /> : formatPrice(priceUsd)}
-        </Text>
-      </div>
+      {shareUrl && <ShareButton url={shareUrl} variant="outline" />}
       <Button onClick={onTradeClick} variant="primary" className={tradeButton}>
-        <Icon id="swap" />
         Trade {symbol}
       </Button>
     </div>

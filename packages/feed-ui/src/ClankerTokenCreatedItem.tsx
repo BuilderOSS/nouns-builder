@@ -32,7 +32,7 @@ export const ClankerTokenCreatedItem: React.FC<ClankerTokenCreatedItemProps> = (
 
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
-          <Text className={feedItemTitle}>Created creator coin {item.tokenSymbol}</Text>
+          <Text className={feedItemTitle}>Deployed creator coin {item.tokenSymbol}</Text>
           <Text fontSize="14" color="text3">
             {item.tokenName}
           </Text>

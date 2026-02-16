@@ -17,6 +17,7 @@ interface BasePopUpProps {
   padding?: Atoms['padding']
   triggerClassName?: string // Add className to the trigger element, specifically
   onOpenChange?: (state: boolean) => void
+  showBackdrop?: boolean
 }
 
 export type PopUpProps = BasePopUpProps &
@@ -44,6 +45,7 @@ export function PopUp({
   triggerRef,
   onOpenChange,
   wrapperClassName,
+  showBackdrop = true,
 }: PopUpProps) {
   const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null)
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null)
@@ -115,16 +117,18 @@ export function PopUp({
           >
             {children}
           </Box>
-          <Box
-            cursor="pointer"
-            position="fixed"
-            top="x0"
-            left="x0"
-            w="100vw"
-            h="100vh"
-            onClick={() => setOpenState(false)}
-            style={{ zIndex: 100 }}
-          />
+          {showBackdrop && (
+            <Box
+              cursor="pointer"
+              position="fixed"
+              top="x0"
+              left="x0"
+              w="100vw"
+              h="100vh"
+              onClick={() => setOpenState(false)}
+              style={{ zIndex: 100 }}
+            />
+          )}
         </>
       )}
     </>

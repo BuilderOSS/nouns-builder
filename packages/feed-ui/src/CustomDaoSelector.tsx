@@ -2,7 +2,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { useDaoSearch, useUserDaos } from '@buildeross/hooks'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { Label, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 
 import {
@@ -16,7 +16,6 @@ import {
   daoName,
   emptyState,
   sectionTitle,
-  selectButton,
   selectedChips,
   selectorContainer,
 } from './CustomDaoSelector.css'
@@ -293,16 +292,17 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
               style={{ marginBottom: 8 }}
             >
               <Text className={sectionTitle}>My DAOs</Text>
-              <button
+              <Button
                 type="button"
-                className={selectButton}
                 onClick={selectAllMemberDaos}
                 disabled={
                   isLoadingMemberDaos || !memberDaoItems.length || allMemberSelected
                 }
+                variant="outline"
+                size="xs"
               >
                 {allMemberSelected ? 'All selected' : 'Select all'}
-              </button>
+              </Button>
             </Stack>
           </>
         )}
@@ -325,13 +325,15 @@ export const CustomDaoSelector: React.FC<CustomDaoSelectorProps> = ({
                 onChange={() => toggleDao(dao.address, dao)}
                 onClick={(e) => e.stopPropagation()}
               />
-              <FallbackImage
-                src={dao.image}
-                alt={dao.name}
-                width={32}
-                height={32}
-                className={daoImage}
-              />
+              <Flex align="center" justify="center" style={{ width: 32, height: 32 }}>
+                <FallbackImage
+                  src={dao.image}
+                  alt={dao.name}
+                  width={32}
+                  height={32}
+                  className={daoImage}
+                />
+              </Flex>
               <div className={daoInfo}>
                 <Text className={daoName}>{dao.name}</Text>
                 <Text className={daoAddress}>

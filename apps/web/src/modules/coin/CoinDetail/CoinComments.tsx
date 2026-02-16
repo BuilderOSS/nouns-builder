@@ -51,9 +51,11 @@ const CommentCard: React.FC<{
     <Box className={commentCard}>
       <Flex className={commentHeader} align="center" justify="space-between">
         <Link link={getProfileLink(userAddress as Address)}>
-          <Flex align="center" gap="x2" className={commentAuthor}>
-            <Avatar address={userAddress as Address} src={avatarSrc} size="32" />
-            <Text fontWeight="display">{author}</Text>
+          <Flex align="center" gap="x1" className={commentAuthor}>
+            <Avatar address={userAddress as Address} src={avatarSrc} size="20" />
+            <Text fontWeight="display" fontSize="16">
+              {author}
+            </Text>
           </Flex>
         </Link>
         <Text variant="label-sm" color="text4">
@@ -123,7 +125,7 @@ export const CoinComments: React.FC<CoinCommentsProps> = ({ coinAddress, chainId
   if (error) {
     return (
       <Box className={commentsContainer}>
-        <Text variant="heading-sm" className={commentsTitle}>
+        <Text variant="label-sm" color="text3" className={commentsTitle}>
           Comments
         </Text>
         <Text variant="paragraph-sm" color="negative">
@@ -135,7 +137,7 @@ export const CoinComments: React.FC<CoinCommentsProps> = ({ coinAddress, chainId
 
   return (
     <Box className={commentsContainer}>
-      <Text variant="heading-sm" className={commentsTitle} mb="x4">
+      <Text variant="label-sm" color="text3" className={commentsTitle} mb="x4">
         Comments ({flattenedComments.length})
       </Text>
 
@@ -163,7 +165,7 @@ export const CoinComments: React.FC<CoinCommentsProps> = ({ coinAddress, chainId
       {/* Comments list */}
       {flattenedComments.length > 0 && (
         <>
-          <Flex direction="column" gap="x3">
+          <Flex direction="column" gap="x2">
             {flattenedComments.map((comment) => (
               <CommentCard
                 key={comment.commentId}

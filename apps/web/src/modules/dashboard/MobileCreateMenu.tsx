@@ -1,4 +1,4 @@
-import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import type { AddressType } from '@buildeross/types'
 import { Icon, Stack, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -14,13 +14,9 @@ import {
 
 export interface MobileCreateMenuProps {
   userAddress?: AddressType
-  chainIds?: CHAIN_ID[]
 }
 
-export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
-  userAddress,
-  chainIds,
-}) => {
+export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({ userAddress }) => {
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
 
@@ -79,7 +75,6 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
         onClose={() => setSelectorOpen(false)}
         actionType={actionType}
         userAddress={userAddress}
-        chainIds={chainIds}
       />
     </>
   )

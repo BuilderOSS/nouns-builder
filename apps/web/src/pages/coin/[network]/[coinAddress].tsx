@@ -16,6 +16,7 @@ import { AddressType } from '@buildeross/types'
 import { GetServerSideProps } from 'next'
 import { Meta } from 'src/components/Meta'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'
+import { LayoutWrapper } from 'src/layouts/LayoutWrapper'
 import { CoinDetail } from 'src/modules/coin/CoinDetail'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { isAddress } from 'viem'
@@ -111,9 +112,11 @@ CoinPage.getLayout = (page) => {
     PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId) ?? PUBLIC_DEFAULT_CHAINS[0]
 
   return (
-    <DefaultLayout chain={chain} addresses={addresses}>
-      {page}
-    </DefaultLayout>
+    <LayoutWrapper>
+      <DefaultLayout chain={chain} addresses={addresses} hideFooterOnMobile>
+        {page}
+      </DefaultLayout>
+    </LayoutWrapper>
   )
 }
 
@@ -195,7 +198,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           addresses,
           pairedToken: coin.currency ? (coin.currency as AddressType) : null,
           pairedTokenSymbol,
-          poolFee: coin.poolFee ? `${(Number(coin.poolFee) / 10000).toFixed(2)}%` : null,
+          poolFee: coin.poolFee ? `${(Number(coin.poolFee) / 10000).toFixed(0)}%` : null,
           description: metadata?.description ?? null,
           uri: coin.uri ?? null,
           metadata: metadata ?? null,
@@ -255,7 +258,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           addresses,
           pairedToken: token.pairedToken ? (token.pairedToken as AddressType) : null,
           pairedTokenSymbol: null, // Would need to look up paired token
-          poolFee: null, // ClankerToken doesn't store pool fee directly
+          poolFee: null,
           description,
           uri: null, // ClankerToken doesn't store IPFS URI
           metadata: null, // ClankerToken doesn't have IPFS metadata

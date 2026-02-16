@@ -15,4 +15,9 @@ export const twoColumnGrid = style({
 export const previewColumn = style({
   display: 'block',
   width: '100%',
+  '@media': {
+    '(max-width: 1024px)': {
+      gridRow: 1,
+    },
+  },
 })

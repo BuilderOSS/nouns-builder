@@ -269,13 +269,19 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
                 onChange={() => handleDaoClick(dao)}
                 onClick={(e) => e.stopPropagation()}
               />
-              <FallbackImage
-                src={dao.image}
-                alt={dao.name}
-                width={32}
-                height={32}
-                className={daoImage}
-              />
+              <Flex
+                align="center"
+                justify="center"
+                style={{ width: '32px', height: '32px' }}
+              >
+                <FallbackImage
+                  src={dao.image}
+                  alt={dao.name}
+                  width={32}
+                  height={32}
+                  className={daoImage}
+                />
+              </Flex>
               <div className={daoInfo}>
                 <Text className={daoAddress} fontSize="14" fontWeight="label">
                   {dao.name}

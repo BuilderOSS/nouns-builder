@@ -1,5 +1,12 @@
 import { FeedEventType } from '@buildeross/sdk/subgraph'
-import type { CHAIN_ID, FeedItem, FeedResponse } from '@buildeross/types'
+import {
+  type CHAIN_ID,
+  type FeedItem,
+  type FeedItemType,
+  FeedItemTypes,
+  type FeedResponse,
+} from '@buildeross/types'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { useCallback, useMemo } from 'react'
 import useSWRInfinite from 'swr/infinite'
 
@@ -23,6 +30,11 @@ type UseFeedReturn = {
   refresh: () => Promise<void>
   fetchNextPage: () => Promise<void>
 }
+
+const CoinFeedItemTypes = [
+  FeedItemTypes.CLANKER_TOKEN_CREATED,
+  FeedItemTypes.ZORA_COIN_CREATED,
+] as FeedItemType[]
 
 /**
  * Build feed query URL
@@ -158,7 +170,7 @@ export function useFeed({
     }
   )
 
-  // flatten paginated items
+  // flatten paginated items && remove unsupported items
   const items = useMemo(() => {
     if (!data) return []
     const seen = new Set<string>()
@@ -167,6 +179,8 @@ export function useFeed({
       .flatMap((page) => page.items)
       .filter((item) => {
         if (seen.has(item.id)) return false
+        if (CoinFeedItemTypes.includes(item.type) && !isCoinSupportedChain(item.chainId))
+          return false
         seen.add(item.id)
         return true
       })

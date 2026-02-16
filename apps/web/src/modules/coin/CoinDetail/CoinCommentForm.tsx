@@ -174,7 +174,7 @@ export const CoinCommentForm: React.FC<CoinCommentFormProps> = ({
         minHeight={96}
       />
 
-      <Flex direction="column" gap="x2" mt="x3">
+      <Flex direction="column" gap="x2">
         {error && (
           <Text variant="paragraph-sm" className={commentFormError}>
             {error}
@@ -193,6 +193,7 @@ export const CoinCommentForm: React.FC<CoinCommentFormProps> = ({
           disabled={!commentText.trim() || isSubmitting}
           loading={isSubmitting}
           style={{ width: '100%' }}
+          size="sm"
         >
           {isSubmitting ? 'Posting Comment...' : 'Post Comment'}
         </ContractButton>

@@ -18,12 +18,7 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
-import { StatBadge } from '@buildeross/ui/StatBadge'
-import {
-  formatMarketCap,
-  formatPrice,
-  formatSupply,
-} from '@buildeross/utils/formatMarketCap'
+import { formatMarketCap, formatSupply } from '@buildeross/utils/formatMarketCap'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/poolConfig/clankerCreator'
 import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/poolConfig/zoraContent'
@@ -32,12 +27,7 @@ import { useMemo } from 'react'
 import { Address } from 'viem'
 
 import { CoinComments } from './CoinComments'
-import {
-  coinHeader,
-  coinImageContainer,
-  sectionDivider,
-  statsGrid,
-} from './CoinDetail.css'
+import { coinHeader, coinImageContainer, onlyDesktop, statsGrid } from './CoinDetail.css'
 
 interface CoinInfoProps {
   name: string
@@ -101,7 +91,6 @@ export const CoinInfo = ({
     enabled: !isClankerToken && !!zoraCoin,
   })
 
-  const priceUsd = isClankerToken ? clankerWithPrice.priceUsd : zoraCoinWithPrice.priceUsd
   const marketCap = isClankerToken
     ? clankerWithPrice.marketCap
     : zoraCoinWithPrice.marketCap
@@ -139,7 +128,7 @@ export const CoinInfo = ({
     <Box>
       {/* Media Display */}
       {shouldUseMediaPreview ? (
-        <Box w="100%" mb="x6" borderRadius="curved" overflow="hidden">
+        <Box w="100%" mb="x3" borderRadius="curved" overflow="hidden">
           <MediaPreview
             mediaUrl={animationFetchableUrl}
             mediaType={mediaType}
@@ -147,7 +136,7 @@ export const CoinInfo = ({
           />
         </Box>
       ) : image ? (
-        <Box mb="x6" borderRadius="curved" overflow="hidden">
+        <Box mb="x3" borderRadius="curved" overflow="hidden">
           <FallbackImage src={image} alt={name} style={{ width: '100%' }} />
         </Box>
       ) : null}
@@ -167,27 +156,25 @@ export const CoinInfo = ({
         <Flex direction="column" gap="x2" flex={1}>
           <Flex align="center" gap="x2" justify="space-between">
             <Text variant="heading-md">{name}</Text>
-            <ShareButton url={shareUrl} size="md" variant="ghost" />
+            <ShareButton
+              url={shareUrl}
+              size="md"
+              variant="ghost"
+              className={onlyDesktop}
+            />
           </Flex>
           <Flex align="center" gap="x2">
             <Text variant="heading-xs" color="text3">
               {symbol}
             </Text>
-            {marketCap !== null && marketCap !== undefined && (
-              <StatBadge variant="accent">
-                {isLoadingPrice ? <Spinner size="sm" /> : formatMarketCap(marketCap)}
-              </StatBadge>
-            )}
           </Flex>
         </Flex>
       </Flex>
 
-      <Box className={sectionDivider} />
-
       {/* Creator */}
-      {creatorAddress && (
+      {creatorAddress && !isClankerToken && (
         <>
-          <Box mb="x6">
+          <Box mb="x3">
             <Text variant="label-sm" color="text3" mb="x2">
               Created by
             </Text>
@@ -198,20 +185,11 @@ export const CoinInfo = ({
               </Text>
             </Flex>
           </Box>
-          <Box className={sectionDivider} />
         </>
       )}
 
-      {/* Price, Market Cap, Total Supply - 3 column grid */}
-      <Grid className={statsGrid} mb="x6">
-        <Box>
-          <Text variant="label-sm" color="text3" mb="x2">
-            Price
-          </Text>
-          <Text variant="heading-sm">
-            {isLoadingPrice ? <Spinner size="sm" /> : formatPrice(priceUsd)}
-          </Text>
-        </Box>
+      {/* Market Cap, Total Supply - 2 column grid */}
+      <Grid className={statsGrid} mb="x3">
         <Box>
           <Text variant="label-sm" color="text3" mb="x2">
             Market Cap
@@ -231,32 +209,27 @@ export const CoinInfo = ({
       {/* Paired With */}
       {pairedToken && (
         <>
-          <Box mb="x6">
+          <Box mb="x3">
             <Text variant="label-sm" color="text3" mb="x2">
               Paired With
             </Text>
             <ContractLink address={pairedToken} chainId={chainId as CHAIN_ID} size="sm" />
           </Box>
-          <Box className={sectionDivider} />
         </>
       )}
 
-      <Box className={sectionDivider} />
-
       {/* Contract */}
-      <Box mb="x6">
+      <Box mb="x3">
         <Text variant="label-sm" color="text3" mb="x2">
           Contract
         </Text>
         <ContractLink address={coinAddress} chainId={chainId as CHAIN_ID} size="sm" />
       </Box>
 
-      <Box className={sectionDivider} />
-
       {/* DAO */}
       {daoAddress && daoName && (
         <>
-          <Box mb="x6">
+          <Box mb="x3">
             <Text variant="label-sm" color="text3" mb="x2">
               DAO
             </Text>
@@ -266,14 +239,13 @@ export const CoinInfo = ({
               </Text>
             </Link>
           </Box>
-          <Box className={sectionDivider} />
         </>
       )}
 
       {/* Description */}
       {description && (
         <>
-          <Box mb="x6">
+          <Box mb="x3">
             <Text variant="label-sm" color="text3" mb="x2">
               Description
             </Text>
@@ -281,14 +253,13 @@ export const CoinInfo = ({
               {description}
             </Text>
           </Box>
-          <Box className={sectionDivider} />
         </>
       )}
 
       {/* Created Date */}
       {createdAt && (
         <>
-          <Box mb="x6">
+          <Box mb="x3">
             <Text variant="label-sm" color="text3" mb="x2">
               Created
             </Text>
@@ -300,15 +271,12 @@ export const CoinInfo = ({
               })}
             </Text>
           </Box>
-          <Box className={sectionDivider} />
         </>
       )}
 
       {/* Comments - Only for Zora Coins */}
       {!isClankerToken && chainId !== CHAIN_ID.BASE_SEPOLIA && (
-        <Box mt="x6">
-          <CoinComments coinAddress={coinAddress} chainId={chainId} />
-        </Box>
+        <CoinComments coinAddress={coinAddress} chainId={chainId} />
       )}
     </Box>
   )

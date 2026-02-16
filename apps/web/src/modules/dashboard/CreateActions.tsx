@@ -1,4 +1,4 @@
-import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import type { AddressType } from '@buildeross/types'
 import { Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -8,13 +8,9 @@ import { DaoSelectorModal } from './DaoSelectorModal'
 
 export interface CreateActionsProps {
   userAddress?: AddressType
-  chainIds?: CHAIN_ID[]
 }
 
-export const CreateActions: React.FC<CreateActionsProps> = ({
-  userAddress,
-  chainIds,
-}) => {
+export const CreateActions: React.FC<CreateActionsProps> = ({ userAddress }) => {
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
 
@@ -40,7 +36,7 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
           </Button>
         </Flex>
         <Link href="/create" style={{ width: '100%', flex: 1 }}>
-          <Button variant="ghost" style={{ flex: 1, width: '100%' }}>
+          <Button variant="secondary" style={{ flex: 1, width: '100%' }}>
             Create a DAO
           </Button>
         </Link>
@@ -51,7 +47,6 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
         onClose={() => setSelectorOpen(false)}
         actionType={actionType}
         userAddress={userAddress}
-        chainIds={chainIds}
       />
     </>
   )

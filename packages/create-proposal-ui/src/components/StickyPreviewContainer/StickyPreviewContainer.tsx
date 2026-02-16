@@ -6,7 +6,7 @@ import * as styles from './StickyPreviewContainer.css'
 
 interface StickyPreviewContainerProps {
   children: ReactNode
-  align?: 'flex-start' | 'flex-end'
+  align?: 'flex-start' | 'flex-end' | 'stretch' | 'center'
 }
 
 export const StickyPreviewContainer: React.FC<StickyPreviewContainerProps> = ({

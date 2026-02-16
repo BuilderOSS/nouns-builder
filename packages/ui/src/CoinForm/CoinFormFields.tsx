@@ -189,9 +189,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         <Box mt="x4">
           <Flex justify="space-between" align="center" mb="x4">
             <Box>
-              <Text as="h3" variant="heading-sm">
-                Custom Properties (Optional)
-              </Text>
+              <Text variant="label-md">Custom Properties (Optional)</Text>
               <Text variant="paragraph-sm" color="text3" mt="x2">
                 Add custom key-value pairs as metadata attributes
               </Text>
@@ -259,9 +257,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
       {showTargetFdv && (
         <Box mt="x8">
           <Flex justify="space-between" align="center" mb="x4">
-            <Text as="h3" variant="heading-sm">
-              Advanced Pool Settings
-            </Text>
+            <Text variant="label-md">Advanced Pool Settings</Text>
             <Toggle
               on={showAdvancedFdv}
               onToggle={() => setShowAdvancedFdv(!showAdvancedFdv)}

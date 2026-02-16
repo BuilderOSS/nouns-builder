@@ -7,7 +7,7 @@ import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { StatBadge } from '@buildeross/ui/StatBadge'
-import { formatMarketCap, formatPrice } from '@buildeross/utils/formatMarketCap'
+import { formatMarketCap } from '@buildeross/utils/formatMarketCap'
 import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Spinner, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
@@ -17,7 +17,7 @@ import {
   card,
   coinImage,
   coinInfo,
-  priceBadgeOverlay,
+  marketCapOverlay,
   tradeButtonContainer,
 } from './Coins.css'
 
@@ -41,7 +41,6 @@ export const CoinCard = ({
   name,
   symbol,
   image,
-  priceUsd,
   marketCap,
   isLoadingPrice,
   createdAt,
@@ -123,15 +122,15 @@ export const CoinCard = ({
             />
           )}
 
-          {/* Price Badge Overlay */}
-          {(priceUsd !== null && priceUsd !== undefined) || isLoadingPrice ? (
-            <Box className={priceBadgeOverlay}>
+          {/* Market Cap Overlay */}
+          {(marketCap !== null && marketCap !== undefined) || isLoadingPrice ? (
+            <Box className={marketCapOverlay}>
               {isLoadingPrice ? (
                 <StatBadge variant="default">
                   <Spinner size="sm" />
                 </StatBadge>
               ) : (
-                <StatBadge variant="accent">{formatPrice(priceUsd)}</StatBadge>
+                <StatBadge variant="accent">{formatMarketCap(marketCap)}</StatBadge>
               )}
             </Box>
           ) : null}
@@ -145,8 +144,16 @@ export const CoinCard = ({
         </Box>
 
         <Box pt="x4" position={'relative'} overflow={'hidden'} className={coinInfo}>
-          <Flex justify={'space-between'} align={'center'} pb="x2">
-            <Text variant="label-md" color="text1">
+          <Flex justify={'space-between'} align={'center'} pb="x2" gap="x1">
+            <Text
+              variant="label-md"
+              color="text1"
+              style={{
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
               {name}
             </Text>
             <Flex align="center" gap="x2">
@@ -156,18 +163,6 @@ export const CoinCard = ({
             </Flex>
           </Flex>
 
-          {/* Market Cap */}
-          {(marketCap !== null && marketCap !== undefined) || isLoadingPrice ? (
-            <Flex justify={'space-between'} align={'center'} pb="x3">
-              <Text variant="paragraph-sm" color="text3">
-                Market Cap
-              </Text>
-              <Text variant="paragraph-sm" color="text1">
-                {isLoadingPrice ? <Spinner size="sm" /> : formatMarketCap(marketCap)}
-              </Text>
-            </Flex>
-          ) : null}
-
           {/* Trade Button */}
           {showTradeButton && (
             <Flex
@@ -176,6 +171,7 @@ export const CoinCard = ({
               align="center"
               w="100%"
               justify="space-between"
+              gap="x1"
             >
               {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
               <Button

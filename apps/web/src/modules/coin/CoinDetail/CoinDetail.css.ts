@@ -1,6 +1,14 @@
 import { atoms, media } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
+export const onlyDesktop = style({
+  '@media': {
+    'screen and (max-width: 1023px)': {
+      display: 'none',
+    },
+  },
+})
+
 export const coinDetailContainer = style([
   atoms({
     m: 'auto',
@@ -9,6 +17,11 @@ export const coinDetailContainer = style([
   }),
   {
     maxWidth: 1200,
+    '@media': {
+      'screen and (max-width: 1024px)': {
+        paddingBottom: '108px',
+      },
+    },
   },
 ])
 
@@ -126,7 +139,7 @@ export const maxButton = style([
 
 export const statsGrid = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
+  gridTemplateColumns: 'repeat(2, 1fr)',
   gap: 24,
   '@media': {
     'screen and (max-width: 600px)': {

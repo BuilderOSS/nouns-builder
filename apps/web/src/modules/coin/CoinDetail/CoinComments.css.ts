@@ -15,15 +15,18 @@ export const commentsTitle = style([
 
 export const commentCard = style([
   atoms({
-    p: 'x4',
-    backgroundColor: 'background2',
     borderRadius: 'curved',
+    borderWidth: 'thin',
+    borderStyle: 'solid',
+    borderColor: 'borderOnImage',
+    py: 'x2',
+    px: 'x4',
   }),
 ])
 
 export const commentHeader = style([
   atoms({
-    mb: 'x3',
+    mb: 'x1',
   }),
 ])
 
