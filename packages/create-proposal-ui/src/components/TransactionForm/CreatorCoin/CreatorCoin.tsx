@@ -135,7 +135,7 @@ const createClankerTokenConfig = (
     chainId: chainId as ClankerTokenV4['chainId'],
     symbol: values.symbol,
     tokenAdmin: treasury,
-    image: values.imageUrl || '',
+    image: values.mediaUrl || '', // mediaUrl contains the image in image-only mode
     metadata: {
       description: values.description,
     },
@@ -333,14 +333,14 @@ const CreatorCoinEconomicsPreview: React.FC<CreatorCoinEconomicsPreviewProps> = 
 export interface CreatorCoinProps {
   initialValues?: Partial<CoinFormValues>
   onSubmitSuccess?: () => void
-  showMediaUpload?: boolean
+  mediaType?: 'image' | 'all'
   showProperties?: boolean
 }
 
 export const CreatorCoin: React.FC<CreatorCoinProps> = ({
   initialValues: providedInitialValues,
   onSubmitSuccess,
-  showMediaUpload = false,
+  mediaType = 'image',
   showProperties = false,
 }) => {
   const { treasury } = useDaoStore((state) => state.addresses)
@@ -619,7 +619,7 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
 
                 <ClankerCoinFormFields
                   formik={formik}
-                  showMediaUpload={showMediaUpload}
+                  mediaType={mediaType}
                   showProperties={showProperties}
                   initialValues={initialValues}
                   showCurrencyInput={true}

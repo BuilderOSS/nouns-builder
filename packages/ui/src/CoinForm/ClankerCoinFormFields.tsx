@@ -15,7 +15,7 @@ import type { CoinFormFieldsProps } from './types'
  */
 export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
   formik,
-  showMediaUpload = false,
+  mediaType = 'image',
   showProperties = false,
   showCurrencyInput = true,
   currencyOptions,
@@ -27,7 +27,7 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
       {/* Reuse existing coin form fields */}
       <CoinFormFields
         formik={formik}
-        showMediaUpload={showMediaUpload}
+        mediaType={mediaType}
         showProperties={showProperties}
         showTargetFdv={true}
         showCurrencyInput={showCurrencyInput}

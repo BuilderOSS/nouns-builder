@@ -28,7 +28,7 @@ export type CurrencyOption = {
 
 export type CoinFormFieldsProps = {
   formik: any // FormikProps<CoinFormValues>
-  showMediaUpload?: boolean
+  mediaType?: 'image' | 'all' // 'image' = image-only, 'all' = all media types
   showProperties?: boolean
   showTargetFdv?: boolean
   initialValues?: Partial<CoinFormValues>

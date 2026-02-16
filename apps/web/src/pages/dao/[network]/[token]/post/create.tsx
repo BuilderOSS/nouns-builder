@@ -8,8 +8,8 @@ import { GetServerSideProps } from 'next'
 import React, { useState } from 'react'
 
 import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
-import { CreateContentCoinForm } from '../../../../../modules/post/components/CreateContentCoinForm'
-import * as styles from '../../../../../modules/post/styles/postCreate.css'
+import * as styles from '../../../../../modules/coin/coinCreate.css'
+import { CreateContentCoinForm } from '../../../../../modules/coin/CreateContentCoinForm'
 
 interface CreatePostPageProps {
   daoName: string

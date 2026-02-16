@@ -185,14 +185,14 @@ const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = 
 export interface ContentCoinProps {
   initialValues?: Partial<CoinFormValues>
   onSubmitSuccess?: () => void
-  showMediaUpload?: boolean
+  mediaType?: 'image' | 'all'
   showProperties?: boolean
 }
 
 export const ContentCoin: React.FC<ContentCoinProps> = ({
   initialValues: providedInitialValues,
   onSubmitSuccess,
-  showMediaUpload = true,
+  mediaType = 'all',
   showProperties = true,
 }) => {
   const { treasury, token } = useDaoStore((state) => state.addresses)
@@ -299,14 +299,22 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
         .withSymbol(values.symbol)
         .withDescription(values.description)
 
-      // Set image URI (already uploaded to IPFS via SingleImageUpload)
-      if (values.imageUrl) {
-        metadataBuilder.withImageURI(values.imageUrl)
-      }
+      // Handle media based on type (image vs video/audio)
+      const isMediaImage = values.mediaMimeType?.startsWith('image/')
 
-      // Set media URI if provided (already uploaded to IPFS via handleMediaUpload)
-      if (values.mediaUrl) {
-        metadataBuilder.withMediaURI(values.mediaUrl, values.mediaMimeType)
+      if (isMediaImage) {
+        // Image-only mode: mediaUrl contains the primary image
+        if (values.mediaUrl) {
+          metadataBuilder.withImageURI(values.mediaUrl)
+        }
+      } else {
+        // All-media mode: imageUrl is thumbnail, mediaUrl is video/audio
+        if (values.imageUrl) {
+          metadataBuilder.withImageURI(values.imageUrl)
+        }
+        if (values.mediaUrl) {
+          metadataBuilder.withMediaURI(values.mediaUrl, values.mediaMimeType)
+        }
       }
 
       // Add custom properties if any
@@ -497,7 +505,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
                   <CoinFormFields
                     formik={formik}
                     initialValues={initialValues}
-                    showMediaUpload={showMediaUpload}
+                    mediaType={mediaType}
                     showProperties={showProperties}
                     showTargetFdv={false}
                     showCurrencyInput={true}

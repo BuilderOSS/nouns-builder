@@ -4,20 +4,20 @@ import React from 'react'
 import NumberInput from '../Fields/NumberInput'
 import TextArea from '../Fields/TextArea'
 import TextInput from '../Fields/TextInput'
-import { SingleImageUpload } from '../SingleImageUpload/SingleImageUpload'
 import { SingleMediaUpload } from '../SingleMediaUpload/SingleMediaUpload'
 import { Toggle } from '../Toggle'
 import type { CoinFormFieldsProps } from './types'
 
 export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
   formik,
-  showMediaUpload = false,
+  mediaType = 'all',
   showProperties = false,
   showTargetFdv = false,
   showCurrencyInput = true,
   currencyOptions,
 }) => {
   const [showAdvancedFdv, setShowAdvancedFdv] = React.useState(false)
+  const [showPropertiesSection, setShowPropertiesSection] = React.useState(false)
 
   // Handle media upload to store mime type
   const handleMediaUploadStart = React.useCallback(
@@ -27,8 +27,40 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
     [formik]
   )
 
+  // Check if uploaded media is an image
+  const isMediaImage = formik.values.mediaMimeType?.startsWith('image/')
+  const showThumbnailUpload =
+    mediaType === 'all' && formik.values.mediaMimeType && !isMediaImage
+
   return (
     <Stack gap="x4">
+      {/* Media Upload - Primary Field */}
+      <SingleMediaUpload
+        formik={formik}
+        id="mediaUrl"
+        inputLabel={mediaType === 'image' ? 'Image' : 'Media'}
+        helperText={
+          mediaType === 'image'
+            ? 'Upload an image for your coin (JPG, PNG, WebP, SVG)'
+            : 'Upload media for your coin (images, videos, or audio)'
+        }
+        value={formik.values.mediaUrl || ''}
+        onUploadStart={handleMediaUploadStart}
+        uploadType={mediaType === 'image' ? 'image' : 'media'}
+      />
+
+      {/* Conditional Thumbnail Upload - Only for non-image media in 'all' mode */}
+      {showThumbnailUpload && (
+        <SingleMediaUpload
+          formik={formik}
+          id="imageUrl"
+          inputLabel="Thumbnail Image"
+          helperText="Upload a thumbnail image for your video/audio content (JPG, PNG, WebP, SVG)"
+          value={formik.values.imageUrl || ''}
+          uploadType="image"
+        />
+      )}
+
       {/* Name Field */}
       <TextInput
         id="name"
@@ -152,83 +184,74 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
         </Box>
       )}
 
-      {/* Image Upload */}
-      <SingleImageUpload
-        formik={formik}
-        id="imageUrl"
-        inputLabel="Coin Image"
-        helperText="Upload an image for your coin (JPG, PNG, SVG, WebP)"
-        value={formik.values.imageUrl}
-        size="lg"
-      />
-
-      {/* Optional Media Upload */}
-      {showMediaUpload && (
-        <SingleMediaUpload
-          formik={formik}
-          id="mediaUrl"
-          inputLabel="Media (Optional)"
-          helperText="Upload additional media content (video, audio, etc.)"
-          value={formik.values.mediaUrl || ''}
-          onUploadStart={handleMediaUploadStart}
-        />
-      )}
-
       {/* Optional Properties/Attributes */}
       {showProperties && (
-        <Box>
-          <Text as="label" variant="label-md" mb="x2">
-            Custom Properties (Optional)
-          </Text>
-          <Text variant="paragraph-sm" color="text3" mb="x2">
-            Add custom key-value pairs as metadata attributes
-          </Text>
-          <Flex direction="column" gap="x2">
-            {Object.entries(formik.values.properties || {}).map(([key, value], index) => (
-              <Flex key={index} gap="x2">
-                <TextInput
-                  id={`property-key-${index}`}
-                  value={key}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    const newProps = { ...formik.values.properties }
-                    delete newProps[key]
-                    newProps[e.target.value] = value as string
-                    formik.setFieldValue('properties', newProps)
-                  }}
-                  placeholder="Key"
-                  formik={formik}
-                />
-                <TextInput
-                  id={`property-value-${index}`}
-                  value={value as string}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    const newProps = { ...formik.values.properties }
-                    newProps[key] = e.target.value
-                    formik.setFieldValue('properties', newProps)
-                  }}
-                  placeholder="Value"
-                  formik={formik}
-                />
-              </Flex>
-            ))}
-            <Box
-              as="button"
-              type="button"
-              onClick={() => {
-                const newProps = { ...formik.values.properties, '': '' }
-                formik.setFieldValue('properties', newProps)
-              }}
-              style={{
-                padding: '8px',
-                border: '1px dashed #e5e5e5',
-                borderRadius: '8px',
-                background: 'transparent',
-                cursor: 'pointer',
-              }}
-            >
-              + Add Property
+        <Box mt="x4">
+          <Flex justify="space-between" align="center" mb="x4">
+            <Box>
+              <Text as="h3" variant="heading-sm">
+                Custom Properties (Optional)
+              </Text>
+              <Text variant="paragraph-sm" color="text3" mt="x2">
+                Add custom key-value pairs as metadata attributes
+              </Text>
             </Box>
+            <Toggle
+              on={showPropertiesSection}
+              onToggle={() => setShowPropertiesSection(!showPropertiesSection)}
+            />
           </Flex>
+
+          {showPropertiesSection && (
+            <Flex direction="column" gap="x2">
+              {Object.entries(formik.values.properties || {}).map(
+                ([key, value], index) => (
+                  <Flex key={index} gap="x2">
+                    <TextInput
+                      id={`property-key-${index}`}
+                      value={key}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const newProps = { ...formik.values.properties }
+                        delete newProps[key]
+                        newProps[e.target.value] = value as string
+                        formik.setFieldValue('properties', newProps)
+                      }}
+                      placeholder="Key"
+                      formik={formik}
+                    />
+                    <TextInput
+                      id={`property-value-${index}`}
+                      value={value as string}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const newProps = { ...formik.values.properties }
+                        newProps[key] = e.target.value
+                        formik.setFieldValue('properties', newProps)
+                      }}
+                      placeholder="Value"
+                      formik={formik}
+                    />
+                  </Flex>
+                )
+              )}
+              <Box
+                as="button"
+                type="button"
+                onClick={() => {
+                  const newProps = { ...formik.values.properties, '': '' }
+                  formik.setFieldValue('properties', newProps)
+                }}
+                style={{
+                  padding: '8px',
+                  border: '1px dashed #e5e5e5',
+                  borderRadius: '8px',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                }}
+              >
+                + Add Property
+              </Box>
+            </Flex>
+          )}
         </Box>
       )}
 

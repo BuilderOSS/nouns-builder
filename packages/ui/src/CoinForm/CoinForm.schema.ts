@@ -20,15 +20,20 @@ export const coinFormSchema = yup.object({
     .required('Description is required')
     .min(1, 'Description must be at least 1 character')
     .max(1000, 'Description must be less than 1000 characters'),
-  imageUrl: yup.string().when('imageFile', {
-    is: (imageFile: File | undefined) => !imageFile,
-    then: (schema) => schema.required('Image is required'),
+  mediaUrl: yup.string().when('mediaFile', {
+    is: (mediaFile: File | undefined) => !mediaFile,
+    then: (schema) => schema.required('Media is required'),
     otherwise: (schema) => schema,
   }),
-  imageFile: yup.mixed<File>(),
-  mediaUrl: yup.string(),
   mediaFile: yup.mixed<File>(),
   mediaMimeType: yup.string(),
+  imageUrl: yup.string().when('mediaMimeType', {
+    is: (mimeType: string | undefined) => mimeType && !mimeType.startsWith('image/'),
+    then: (schema) =>
+      schema.required('Thumbnail image is required for video/audio content'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  imageFile: yup.mixed<File>(),
   properties: yup
     .object()
     .test(

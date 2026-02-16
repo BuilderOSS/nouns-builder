@@ -1,7 +1,12 @@
-import { normalizeIPFSUrl, pinataOptions, uploadFile } from '@buildeross/ipfs-service'
+import {
+  normalizeIPFSUrl,
+  pinataOptions,
+  uploadFile,
+  type UploadType,
+} from '@buildeross/ipfs-service'
 import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
-import React, { ReactElement, useEffect, useState } from 'react'
+import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { defaultHelperTextStyle, defaultInputLabelStyle } from '../styles'
 import {
@@ -18,6 +23,7 @@ export type SingleMediaUploadProps = {
   helperText?: string
   onUploadStart?: (value: File) => void
   onUploadSettled?: () => void
+  uploadType?: UploadType
 }
 
 export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
@@ -28,6 +34,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   onUploadStart,
   onUploadSettled,
   value,
+  uploadType = 'media',
 }) => {
   const [isMounted, setIsMounted] = useState(false)
   const [uploadMediaError, setUploadMediaError] = React.useState<any>()
@@ -43,14 +50,17 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
     return value.length > 40 ? `${value.substring(0, 40)}...` : value
   }
 
+  const acceptableMIME = useMemo(
+    () => pinataOptions[uploadType].allow_mime_types,
+    [uploadType]
+  )
+
   const handleFileUpload = React.useCallback(
     async (_input: FileList | null) => {
       if (!_input) return
       const input = _input[0]
 
       setUploadMediaError(false)
-
-      const acceptableMIME = pinataOptions['media'].allow_mime_types
 
       if (input?.type?.length && !acceptableMIME.includes(input.type)) {
         setUploadMediaError({
@@ -85,7 +95,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [id, uploadType]
   )
 
   return (
