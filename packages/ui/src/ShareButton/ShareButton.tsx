@@ -40,6 +40,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({
   }, [url, onCopySuccess, copied])
 
   const iconSize = size === 'sm' ? 'sm' : 'md'
+  const px = size === 'lg' ? 'x6' : 'x4'
 
   return (
     <Button
@@ -47,11 +48,9 @@ const ShareButton: React.FC<ShareButtonProps> = ({
       onClick={handleShare}
       borderRadius="curved"
       size={size}
-      style={{
-        paddingX: size === 'sm' ? '6px' : size === 'md' ? '8px' : '10px',
-        minWidth: 'unset',
-      }}
       className={className}
+      style={{ minWidth: 'unset' }}
+      px={px}
     >
       {!copied ? (
         <Icon id="share" size={iconSize} />
