@@ -40,3 +40,9 @@ export const maxButton = style([
     },
   },
 ])
+
+export const messageText = style({
+  wordBreak: 'break-word',
+  overflowWrap: 'break-word',
+  whiteSpace: 'pre-wrap',
+})

@@ -48,6 +48,7 @@ interface UseZoraCoinCommentsResult {
   error: Error | null
   hasMore: boolean
   loadMore: () => void
+  refetch: () => void
 }
 
 export const useZoraCoinComments = ({
@@ -61,6 +62,7 @@ export const useZoraCoinComments = ({
   const [error, setError] = useState<Error | null>(null)
   const [cursor, setCursor] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
+  const [refetchTrigger, setRefetchTrigger] = useState(0)
 
   useEffect(() => {
     // Reset state when coin address changes
@@ -145,7 +147,7 @@ export const useZoraCoinComments = ({
     }
 
     fetchComments()
-  }, [coinAddress, chainId, enabled, count])
+  }, [coinAddress, chainId, enabled, count, refetchTrigger])
 
   const loadMore = async () => {
     if (!enabled || !coinAddress || !hasMore || !cursor || isLoading) {
@@ -215,11 +217,18 @@ export const useZoraCoinComments = ({
     }
   }
 
+  const refetch = () => {
+    // Reset cursor and trigger refetch
+    setCursor(null)
+    setRefetchTrigger((prev) => prev + 1)
+  }
+
   return {
     comments,
     isLoading,
     error,
     hasMore,
     loadMore,
+    refetch,
   }
 }

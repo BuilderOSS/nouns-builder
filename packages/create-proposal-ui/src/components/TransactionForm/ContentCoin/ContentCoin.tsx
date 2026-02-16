@@ -534,7 +534,15 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
                       borderRadius="curved"
                       style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
                     >
-                      <Text variant="paragraph-sm" color="negative">
+                      <Text
+                        variant="paragraph-sm"
+                        color="negative"
+                        style={{
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
                         {submitError}
                       </Text>
                     </Box>

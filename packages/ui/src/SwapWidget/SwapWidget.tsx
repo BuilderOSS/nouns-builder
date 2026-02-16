@@ -1,11 +1,18 @@
 import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants/addresses'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { useExecuteSwap, useSwapOptions, useSwapQuote } from '@buildeross/hooks'
+import {
+  useEthUsdPrice,
+  useExecuteSwap,
+  useSwapOptions,
+  useSwapQuote,
+  useTokenPrices,
+} from '@buildeross/hooks'
 import { SwapError, SwapErrorCode, SwapErrorMessages } from '@buildeross/swap'
 import { CHAIN_ID } from '@buildeross/types'
+import { formatPrice } from '@buildeross/utils/formatMarketCap'
 import { truncateHex } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Address, erc20Abi, formatEther, parseEther } from 'viem'
 import {
   useAccount,
@@ -17,7 +24,13 @@ import {
 
 import { ContractButton } from '../ContractButton'
 import { DropdownSelect, SelectOption } from '../DropdownSelect'
-import { maxButton, swapButton, swapInput, swapInputContainer } from './SwapWidget.css'
+import {
+  maxButton,
+  messageText,
+  swapButton,
+  swapInput,
+  swapInputContainer,
+} from './SwapWidget.css'
 
 interface SwapWidgetProps {
   coinAddress: Address
@@ -49,6 +62,23 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
   const selectedOption = swapOptions.find(
     (opt) => opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
   )
+
+  // Fetch ETH/USD price
+  const { price: ethUsdPrice } = useEthUsdPrice()
+
+  // Get all unique token addresses for price fetching
+  const tokenAddressesForPrices = useMemo(() => {
+    const addresses: Address[] = [coinAddress]
+    swapOptions.forEach((opt) => {
+      if (opt.token.address.toLowerCase() !== NATIVE_TOKEN_ADDRESS.toLowerCase()) {
+        addresses.push(opt.token.address)
+      }
+    })
+    return addresses
+  }, [coinAddress, swapOptions])
+
+  // Fetch token prices
+  const { prices: tokenPrices } = useTokenPrices(chainId, tokenAddressesForPrices)
 
   // Check if selected payment token is native ETH
   const isNativeEth =
@@ -336,6 +366,37 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     !isLoading &&
     !exceedsBalance
 
+  // Helper to get USD price for a token address
+  const getTokenUsdPrice = useCallback(
+    (tokenAddress: Address): number | null => {
+      const isEth = tokenAddress.toLowerCase() === NATIVE_TOKEN_ADDRESS.toLowerCase()
+      if (isEth) {
+        return ethUsdPrice ?? null
+      }
+      return tokenPrices?.[tokenAddress.toLowerCase()] ?? null
+    },
+    [ethUsdPrice, tokenPrices]
+  )
+
+  // Calculate USD values for input and output
+  const inputUsdValue = useMemo(() => {
+    if (!amountInBigInt || amountInBigInt === 0n) return null
+    const inputTokenAddress = isBuying ? selectedPaymentToken : coinAddress
+    const price = getTokenUsdPrice(inputTokenAddress)
+    if (!price) return null
+    const amount = parseFloat(formatEther(amountInBigInt))
+    return amount * price
+  }, [amountInBigInt, isBuying, selectedPaymentToken, coinAddress, getTokenUsdPrice])
+
+  const outputUsdValue = useMemo(() => {
+    if (!amountOut || amountOut === 0n) return null
+    const outputTokenAddress = isBuying ? coinAddress : selectedPaymentToken
+    const price = getTokenUsdPrice(outputTokenAddress)
+    if (!price) return null
+    const amount = parseFloat(formatEther(amountOut))
+    return amount * price
+  }, [amountOut, isBuying, coinAddress, selectedPaymentToken, getTokenUsdPrice])
+
   // Create dropdown options for payment tokens with balances
   const tokenOptions: SelectOption<Address>[] = useMemo(() => {
     return swapOptions.map((option) => {
@@ -439,14 +500,21 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
             MAX
           </Button>
         </Flex>
-        <Text variant="paragraph-sm" color="text4" mt="x1">
-          {isBuying
-            ? swapOptions.find(
-                (opt) =>
-                  opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
-              )?.token.symbol || 'ETH'
-            : symbol}
-        </Text>
+        <Flex justify="space-between" align="center" mt="x1">
+          <Text variant="paragraph-sm" color="text4">
+            {isBuying
+              ? swapOptions.find(
+                  (opt) =>
+                    opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+                )?.token.symbol || 'ETH'
+              : symbol}
+          </Text>
+          {inputUsdValue !== null && (
+            <Text variant="paragraph-sm" color="text4">
+              ≈ {formatPrice(inputUsdValue)}
+            </Text>
+          )}
+        </Flex>
       </Box>
 
       {/* Output Display */}
@@ -458,14 +526,22 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
           <Text variant="heading-sm">
             {parseFloat(formatEther(amountOut)).toFixed(6)}
           </Text>
-          <Text variant="paragraph-sm" color="text4" mt="x1">
-            {isBuying
-              ? symbol
-              : swapOptions.find(
-                  (opt) =>
-                    opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
-                )?.token.symbol || 'ETH'}
-          </Text>
+          <Flex justify="space-between" align="center" mt="x1">
+            <Text variant="paragraph-sm" color="text4">
+              {isBuying
+                ? symbol
+                : swapOptions.find(
+                    (opt) =>
+                      opt.token.address.toLowerCase() ===
+                      selectedPaymentToken.toLowerCase()
+                  )?.token.symbol || 'ETH'}
+            </Text>
+            {outputUsdValue !== null && (
+              <Text variant="paragraph-sm" color="text4">
+                ≈ {formatPrice(outputUsdValue)}
+              </Text>
+            )}
+          </Flex>
         </Box>
       )}
 
@@ -488,8 +564,8 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
 
       {/* Success Message */}
       {successTxHash && !pendingTxHash && (
-        <Box mt="x4" p="x3" backgroundColor="positiveHover" borderRadius="curved">
-          <Text variant="paragraph-sm">
+        <Box mt="x4">
+          <Text variant="paragraph-sm" color="positive" className={messageText}>
             Swap successful! View transaction:{' '}
             <a
               style={{ display: 'inline-block' }}
@@ -506,7 +582,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
       {/* Error Display */}
       {errorMessage && (
         <Box mt="x4">
-          <Text variant="paragraph-sm" color="negative">
+          <Text variant="paragraph-sm" color="negative" className={messageText}>
             {errorMessage}
           </Text>
         </Box>

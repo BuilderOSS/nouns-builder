@@ -305,7 +305,7 @@ export const CoinInfo = ({
       )}
 
       {/* Comments - Only for Zora Coins */}
-      {!isClankerToken && (
+      {!isClankerToken && chainId !== CHAIN_ID.BASE_SEPOLIA && (
         <Box mt="x6">
           <CoinComments coinAddress={coinAddress} chainId={chainId} />
         </Box>
