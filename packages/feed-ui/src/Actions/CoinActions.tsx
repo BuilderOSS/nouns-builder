@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -30,7 +31,7 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
 
   const shareUrl = useMemo(() => {
     const link = getCoinLink(chainId, coinAddress)
-    return typeof link === 'string' ? link : link.href
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
   }, [chainId, coinAddress, getCoinLink])
 
   const handleOpenTrade = useCallback(() => {

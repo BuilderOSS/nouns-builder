@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import {
   useClankerTokenWithPrice,
   useEnsData,
@@ -131,7 +132,7 @@ export const CoinInfo = ({
 
   const shareUrl = useMemo(() => {
     const link = getCoinLink(chainId as CHAIN_ID, coinAddress)
-    return typeof link === 'string' ? link : link.href
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
   }, [chainId, coinAddress, getCoinLink])
 
   return (

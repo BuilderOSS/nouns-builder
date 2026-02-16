@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useIpfsMetadata, useMediaType } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -48,12 +48,10 @@ export const CoinCard = ({
   onTradeClick,
 }: CoinCardProps) => {
   const { getCoinLink } = useLinks()
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
-  const coinHref = chain ? `/coin/${chain.slug}/${coinAddress}` : '#'
 
   const shareUrl = useMemo(() => {
     const link = getCoinLink(chainId, coinAddress)
-    return typeof link === 'string' ? link : link.href
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
   }, [chainId, coinAddress, getCoinLink])
 
   // Fetch IPFS metadata to get image and animation_url
@@ -88,7 +86,7 @@ export const CoinCard = ({
     <>
       <Link
         direction="column"
-        link={{ href: coinHref }}
+        link={getCoinLink(chainId, coinAddress)}
         borderRadius={'curved'}
         height={'100%'}
         overflow={'hidden'}

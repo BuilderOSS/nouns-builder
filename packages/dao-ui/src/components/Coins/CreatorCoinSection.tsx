@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { CHAIN_ID } from '@buildeross/types'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -39,12 +39,10 @@ export const CreatorCoinSection = ({
   onTradeClick,
 }: CreatorCoinSectionProps) => {
   const { getCoinLink } = useLinks()
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
-  const coinHref = chain ? `/coin/${chain.slug}/${tokenAddress}` : '#'
 
   const shareUrl = useMemo(() => {
     const link = getCoinLink(chainId, tokenAddress)
-    return typeof link === 'string' ? link : link.href
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
   }, [chainId, tokenAddress, getCoinLink])
 
   // Only show Trade button for Base chains
@@ -67,7 +65,7 @@ export const CreatorCoinSection = ({
                 Trade
               </Button>
             )}
-            <Link link={{ href: coinHref }}>
+            <Link link={getCoinLink(chainId, tokenAddress)}>
               <Button variant="outline" icon="arrowRight" iconAlign="right" size="sm">
                 View Details
               </Button>

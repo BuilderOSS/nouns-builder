@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { usePropdateMessage } from '@buildeross/hooks/usePropdateMessage'
 import { useProposalState } from '@buildeross/hooks/useProposalState'
 import { PropDateReplyTo } from '@buildeross/proposal-ui'
@@ -74,7 +75,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
 
   const shareUrl = useMemo(() => {
     const link = getProposalLink(chainId, daoId, proposalNumber, 'details')
-    return typeof link === 'string' ? link : link.href
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
   }, [chainId, daoId, proposalNumber, getProposalLink])
 
   const handleOpenVote = useCallback(() => {

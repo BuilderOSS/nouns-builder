@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useCurrentAuction } from '@buildeross/hooks'
 import { auctionAbi } from '@buildeross/sdk/contract'
@@ -66,7 +67,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
 
   const shareUrl = useMemo(() => {
     const link = getAuctionLink(chainId, daoId, tokenId)
-    return typeof link === 'string' ? link : link.href
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
   }, [chainId, daoId, tokenId, getAuctionLink])
 
   const handleSettle = useCallback(async () => {
