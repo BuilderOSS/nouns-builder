@@ -3,8 +3,10 @@ import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { type CoinFormValues, ContentPostPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
+import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 
 import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
@@ -28,6 +30,7 @@ export default function CreatePostPage({
   chainId,
   network,
 }: CreatePostPageProps) {
+  const { push } = useRouter()
   // State to track form values for preview
   const [previewData, setPreviewData] = useState<CoinFormValues>({
     name: '',
@@ -37,6 +40,37 @@ export default function CreatePostPage({
     mediaUrl: '',
     mediaMimeType: '',
   })
+  const [createdCoinAddress, setCreatedCoinAddress] = useState<
+    AddressType | null | undefined
+  >(undefined)
+
+  const onCoinCreated = (coinAddress: AddressType | null) => {
+    setCreatedCoinAddress(coinAddress)
+  }
+
+  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)!
+
+  const handleCloseSuccessModal = () => {
+    if (createdCoinAddress) {
+      push({
+        pathname: `/coin/[network]/[coinAddress]`,
+        query: {
+          network: chain.slug,
+          coinAddress: createdCoinAddress,
+        },
+      })
+    } else {
+      push({
+        pathname: `/dao/[network]/[token]`,
+        query: {
+          network: chain.slug,
+          token: collectionAddress,
+          tab: 'activity',
+        },
+      })
+    }
+    setCreatedCoinAddress(undefined)
+  }
 
   return (
     <DefaultLayout>
@@ -88,6 +122,7 @@ export default function CreatePostPage({
                   treasury={treasuryAddress}
                   collectionAddress={collectionAddress}
                   onFormChange={setPreviewData}
+                  onCoinCreated={onCoinCreated}
                 />
               </Box>
 
@@ -102,6 +137,16 @@ export default function CreatePostPage({
             </Box>
           </Stack>
         </Box>
+        <AnimatedModal
+          open={createdCoinAddress !== undefined}
+          close={handleCloseSuccessModal}
+        >
+          <SuccessModalContent
+            title={`Post published`}
+            subtitle={`Your Post has been successfully published!`}
+            success
+          />
+        </AnimatedModal>
       </Flex>
     </DefaultLayout>
   )

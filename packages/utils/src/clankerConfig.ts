@@ -97,14 +97,14 @@ export function createDefaultVaultConfig(): VaultConfig {
  */
 export const FEE_CONFIG_OPTIONS = [
   {
-    value: FEE_CONFIGS.DynamicBasic,
-    label: 'Dynamic',
-    description: 'Fees adjust from 1% to 5% based on trading volume',
-  },
-  {
     value: FEE_CONFIGS.StaticBasic,
     label: 'Static',
     description: 'Fixed fee percentage for all trades at 1%',
+  },
+  {
+    value: FEE_CONFIGS.DynamicBasic,
+    label: 'Dynamic',
+    description: 'Fees adjust from 1-5% based on trading volume',
   },
 ]
 

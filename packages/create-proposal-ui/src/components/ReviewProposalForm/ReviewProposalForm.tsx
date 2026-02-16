@@ -1,5 +1,6 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { governorAbi } from '@buildeross/sdk/contract'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import {
   BuilderTransaction,
   useChainStore,
@@ -14,7 +15,7 @@ import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import { Field, FieldProps, Formik } from 'formik'
 import React, { useState } from 'react'
-import { type Hex } from 'viem'
+import { decodeEventLog, type Hex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -32,7 +33,7 @@ interface ReviewProposalProps {
   title?: string
   summary?: string
   transactions: BuilderTransaction[]
-  onProposalCreated: () => Promise<void>
+  onProposalCreated: (proposalId: string | null) => void
 }
 
 const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_TENDERLY_SIMULATION === 'true'
@@ -154,9 +155,44 @@ export const ReviewProposalForm = ({
 
         const hash = await writeContract(config, data.request)
 
-        await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+        const receipt = await waitForTransactionReceipt(config, {
+          hash,
+          chainId: chain.id,
+        })
 
-        onProposalCreated().then(() => clearProposal())
+        await awaitSubgraphSync(chain.id, receipt.blockNumber)
+
+        // Parse logs to find the proposal ID
+        let proposalId: string | null = null
+
+        for (const log of receipt.logs) {
+          try {
+            // Decode the log using the coinFactory ABI
+            const decodedLog = decodeEventLog({
+              abi: governorAbi,
+              data: log.data,
+              topics: log.topics,
+            })
+
+            // Check if this is the ProposalCreated event
+            if (decodedLog.eventName === 'ProposalCreated') {
+              // Extract the coin address from the event args
+              // The event structure should have the coin address in args
+              const args = decodedLog.args as any
+              if (args.coin) {
+                proposalId = args.proposalId as string
+                break
+              }
+            }
+          } catch (e) {
+            // Continue to next log if parsing fails (might be a different event)
+            continue
+          }
+        }
+
+        clearProposal()
+
+        onProposalCreated(proposalId)
       } catch (err: any) {
         if (
           err?.code === 'ACTION_REJECTED' ||

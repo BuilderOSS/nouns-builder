@@ -45,9 +45,6 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
           <Text as="label" htmlFor="feeConfig" variant="label-md" mb="x2">
             Fee Configuration
           </Text>
-          <Text variant="paragraph-sm" color="text3" mb="x2">
-            Fee structure for trading. DynamicBasic adjusts fees based on trading volume.
-          </Text>
           <Box
             as="select"
             id="feeConfig"

@@ -9,6 +9,7 @@ import {
 } from '@buildeross/constants/chains'
 import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import {
   CoinFormFields,
@@ -206,6 +207,7 @@ export interface CreateContentCoinFormProps {
   treasury: AddressType
   collectionAddress: AddressType
   onFormChange?: (values: CoinFormValues) => void
+  onCoinCreated: (coinAddress: AddressType | null) => void
 }
 
 export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
@@ -213,6 +215,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   treasury,
   collectionAddress,
   onFormChange,
+  onCoinCreated,
 }) => {
   const router = useRouter()
   const config = useConfig()
@@ -460,6 +463,8 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
             chainId,
           })
 
+          await awaitSubgraphSync(chainId, receipt.blockNumber)
+
           // Parse logs to find the coin address from CoinCreatedV4 event
           let coinAddress: Address | null = null
 
@@ -491,18 +496,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
           // Reset form
           actions.resetForm()
 
-          // Navigate to coin page if we found the address, otherwise go back
-          if (coinAddress) {
-            const chain = COIN_SUPPORTED_CHAINS.find((c) => c.id === chainId)
-            if (chain) {
-              router.push(`/coin/${chain.slug}/${coinAddress}`)
-            } else {
-              router.back()
-            }
-          } else {
-            // Fallback: navigate back if we couldn't parse the coin address
-            router.back()
-          }
+          onCoinCreated(coinAddress)
         } catch (error) {
           console.error('Error parsing transaction or navigating:', error)
           // Fallback: navigate back on error

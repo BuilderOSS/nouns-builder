@@ -5,7 +5,6 @@ import {
   PUBLIC_ALL_CHAINS,
   PUBLIC_DEFAULT_CHAINS,
 } from '@buildeross/constants/chains'
-import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import {
   About,
   Activity,
@@ -20,7 +19,6 @@ import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
-import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
@@ -54,7 +52,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   ogImageURL,
   chainId,
 }) => {
-  const { query, replace, push, pathname } = useRouter()
+  const { query, push, pathname } = useRouter()
 
   const { address } = useAccount()
 
@@ -88,20 +86,6 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     () => isCoinSupported && clankerTokens && clankerTokens.length > 0,
     [isCoinSupported, clankerTokens]
   )
-
-  const handleCloseSuccessModal = React.useCallback(async () => {
-    const nextQuery = { ...query }
-    delete nextQuery.message
-
-    await replace(
-      {
-        pathname,
-        query: nextQuery,
-      },
-      undefined,
-      { shallow: true }
-    )
-  }, [replace, pathname, query])
 
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
@@ -262,17 +246,6 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         activeTab={activeTab}
         onTabChange={(tab) => openTab(tab, false)}
       />
-
-      <AnimatedModal
-        open={query.message === SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS}
-        close={handleCloseSuccessModal}
-      >
-        <SuccessModalContent
-          title={`Proposal submitted`}
-          subtitle={`Your Proposal has been successfully submitted. It might take a few minutes for it to appear.`}
-          success
-        />
-      </AnimatedModal>
     </Flex>
   )
 }

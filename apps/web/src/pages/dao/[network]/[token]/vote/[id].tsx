@@ -48,7 +48,24 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   addresses,
 }) => {
   const chain = useChainStore((state) => state.chain)
-  const { query, push, pathname } = useRouter()
+  const { query, push, pathname, replace } = useRouter()
+
+  React.useEffect(() => {
+    if (!!replace && !!proposalNumber && !!addresses.token && !!chain.slug) {
+      replace(
+        {
+          pathname: '/dao/[network]/[token]/vote/[id]',
+          query: {
+            network: chain.slug,
+            token: addresses.token,
+            id: proposalNumber,
+          },
+        },
+        undefined,
+        { shallow: true }
+      )
+    }
+  }, [proposalNumber, replace, chain.slug, addresses.token])
 
   const { data: balance } = useBalance({
     address: addresses.treasury,
