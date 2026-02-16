@@ -9,8 +9,9 @@ import type {
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { Button, Flex, Text } from '@buildeross/zord'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
@@ -61,6 +62,11 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   })()
 
   const { mutate } = useSWRConfig()
+
+  const shareUrl = useMemo(() => {
+    const link = getAuctionLink(chainId, daoId, tokenId)
+    return typeof link === 'string' ? link : link.href
+  }, [chainId, daoId, tokenId, getAuctionLink])
 
   const handleSettle = useCallback(async () => {
     try {
@@ -121,6 +127,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
                 View Details
               </Button>
             </LinkWrapper>
+            <ShareButton url={shareUrl} size="sm" variant="secondary" />
           </>
         )}
 
@@ -142,6 +149,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
                 View Details
               </Button>
             </LinkWrapper>
+            <ShareButton url={shareUrl} size="sm" variant="secondary" />
           </>
         )}
 
@@ -162,6 +170,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
                 View Details
               </Button>
             </LinkWrapper>
+            <ShareButton url={shareUrl} size="sm" variant="secondary" />
           </>
         )}
       </Flex>

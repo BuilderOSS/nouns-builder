@@ -2,14 +2,15 @@ import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useIpfsMetadata, useMediaType } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
-import { AnimatedModal } from '@buildeross/ui/Modal'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { StatBadge } from '@buildeross/ui/StatBadge'
-import { SwapWidget } from '@buildeross/ui/SwapWidget'
 import { formatMarketCap, formatPrice } from '@buildeross/utils/formatMarketCap'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Spinner, Text } from '@buildeross/zord'
-import React, { useState } from 'react'
+import React, { useMemo } from 'react'
 import { Address } from 'viem'
 
 import {
@@ -31,6 +32,7 @@ interface CoinCardProps {
   isLoadingPrice?: boolean
   createdAt?: string
   isClankerToken?: boolean
+  onTradeClick?: (coinAddress: Address, symbol: string) => void
 }
 
 export const CoinCard = ({
@@ -43,10 +45,16 @@ export const CoinCard = ({
   marketCap,
   isLoadingPrice,
   createdAt,
+  onTradeClick,
 }: CoinCardProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { getCoinLink } = useLinks()
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
   const coinHref = chain ? `/coin/${chain.slug}/${coinAddress}` : '#'
+
+  const shareUrl = useMemo(() => {
+    const link = getCoinLink(chainId, coinAddress)
+    return typeof link === 'string' ? link : link.href
+  }, [chainId, coinAddress, getCoinLink])
 
   // Fetch IPFS metadata to get image and animation_url
   const { metadata, imageUrl, animationUrl, isLoading } = useIpfsMetadata(image)
@@ -68,12 +76,12 @@ export const CoinCard = ({
     : false
 
   // Only show Trade button for Base chains
-  const showTradeButton = chainId === CHAIN_ID.BASE || chainId === CHAIN_ID.BASE_SEPOLIA
+  const showTradeButton = isCoinSupportedChain(chainId)
 
   const handleTradeClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    setIsModalOpen(true)
+    onTradeClick?.(coinAddress, symbol)
   }
 
   return (
@@ -143,9 +151,11 @@ export const CoinCard = ({
             <Text variant="label-md" color="text1">
               {name}
             </Text>
-            <Text variant="paragraph-sm" color="text3">
-              {symbol}
-            </Text>
+            <Flex align="center" gap="x2">
+              <Text variant="paragraph-sm" color="text3">
+                {symbol}
+              </Text>
+            </Flex>
           </Flex>
 
           {/* Market Cap */}
@@ -162,39 +172,26 @@ export const CoinCard = ({
 
           {/* Trade Button */}
           {showTradeButton && (
-            <Box className={tradeButtonContainer}>
+            <Flex
+              className={tradeButtonContainer}
+              direction="row"
+              align="center"
+              w="100%"
+              justify="space-between"
+            >
+              {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
               <Button
                 size="sm"
                 variant="primary"
-                style={{ width: '100%' }}
+                style={{ flex: 1 }}
                 onClick={handleTradeClick}
               >
                 Trade
               </Button>
-            </Box>
+            </Flex>
           )}
         </Box>
       </Link>
-
-      {/* Trade Modal */}
-      {showTradeButton && (
-        <AnimatedModal
-          open={isModalOpen}
-          close={() => setIsModalOpen(false)}
-          size="medium"
-        >
-          <Box p="x6">
-            <Text variant="heading-md" mb="x4">
-              Trade {symbol}
-            </Text>
-            <SwapWidget
-              coinAddress={coinAddress}
-              symbol={symbol}
-              chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
-            />
-          </Box>
-        </AnimatedModal>
-      )}
     </>
   )
 }

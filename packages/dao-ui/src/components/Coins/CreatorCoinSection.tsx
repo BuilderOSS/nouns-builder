@@ -2,12 +2,13 @@ import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
-import { AnimatedModal } from '@buildeross/ui/Modal'
-import { SwapWidget } from '@buildeross/ui/SwapWidget'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { formatMarketCap, formatPrice } from '@buildeross/utils/formatMarketCap'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Grid, Spinner, Text } from '@buildeross/zord'
-import { useState } from 'react'
+import { useMemo } from 'react'
 import { Address } from 'viem'
 
 import { creatorCoinGrid, creatorCoinSection, stat } from './Coins.css'
@@ -22,6 +23,7 @@ interface CreatorCoinSectionProps {
   marketCap?: number | null
   isLoadingPrice?: boolean
   pairedToken?: string
+  onTradeClick?: (tokenAddress: Address, symbol: string) => void
 }
 
 export const CreatorCoinSection = ({
@@ -34,13 +36,19 @@ export const CreatorCoinSection = ({
   marketCap,
   isLoadingPrice,
   pairedToken,
+  onTradeClick,
 }: CreatorCoinSectionProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const { getCoinLink } = useLinks()
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
   const coinHref = chain ? `/coin/${chain.slug}/${tokenAddress}` : '#'
 
+  const shareUrl = useMemo(() => {
+    const link = getCoinLink(chainId, tokenAddress)
+    return typeof link === 'string' ? link : link.href
+  }, [chainId, tokenAddress, getCoinLink])
+
   // Only show Trade button for Base chains
-  const showTradeButton = chainId === CHAIN_ID.BASE || chainId === CHAIN_ID.BASE_SEPOLIA
+  const showTradeButton = isCoinSupportedChain(chainId)
 
   return (
     <>
@@ -54,7 +62,7 @@ export const CreatorCoinSection = ({
                 icon="swap"
                 iconAlign="left"
                 size="sm"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => onTradeClick?.(tokenAddress, symbol)}
               >
                 Trade
               </Button>
@@ -64,6 +72,7 @@ export const CreatorCoinSection = ({
                 View Details
               </Button>
             </Link>
+            {shareUrl && <ShareButton url={shareUrl} size="sm" variant="outline" />}
           </Flex>
         </Flex>
 
@@ -134,26 +143,6 @@ export const CreatorCoinSection = ({
           </Flex>
         </Grid>
       </Box>
-
-      {/* Trade Modal */}
-      {showTradeButton && (
-        <AnimatedModal
-          open={isModalOpen}
-          close={() => setIsModalOpen(false)}
-          size="medium"
-        >
-          <Box p="x6">
-            <Text variant="heading-md" mb="x4">
-              Trade {symbol}
-            </Text>
-            <SwapWidget
-              coinAddress={tokenAddress}
-              symbol={symbol}
-              chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
-            />
-          </Box>
-        </AnimatedModal>
-      )}
     </>
   )
 }

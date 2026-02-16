@@ -15,13 +15,15 @@ interface ContentCoinsGridProps {
   daoAddress: Address
   coins: ZoraCoinFragment[]
   isLoading?: boolean
+  onTradeClick?: (coinAddress: Address, symbol: string) => void
 }
 
 // Wrapper component to fetch price for individual coin
 const CoinCardWithPrice: React.FC<{
   coin: ZoraCoinFragment
   chainId: CHAIN_ID
-}> = ({ coin, chainId }) => {
+  onTradeClick?: (coinAddress: Address, symbol: string) => void
+}> = ({ coin, chainId, onTradeClick }) => {
   const coinWithPrice = useZoraCoinWithPrice({
     zoraCoin: coin,
     chainId,
@@ -40,6 +42,7 @@ const CoinCardWithPrice: React.FC<{
       isLoadingPrice={coinWithPrice.isLoadingPrice}
       createdAt={coin.createdAt}
       isClankerToken={false}
+      onTradeClick={onTradeClick}
     />
   )
 }
@@ -49,8 +52,10 @@ export const ContentCoinsGrid = ({
   daoAddress,
   coins,
   isLoading,
+  onTradeClick,
 }: ContentCoinsGridProps) => {
   const { getPostCreateLink } = useLinks()
+
   if (isLoading) {
     return (
       <Box className={emptyState}>
@@ -80,7 +85,12 @@ export const ContentCoinsGrid = ({
       </Flex>
       <Box className={coinsGrid}>
         {coins.map((coin) => (
-          <CoinCardWithPrice key={coin.coinAddress} coin={coin} chainId={chainId} />
+          <CoinCardWithPrice
+            key={coin.coinAddress}
+            coin={coin}
+            chainId={chainId}
+            onTradeClick={onTradeClick}
+          />
         ))}
       </Box>
     </>

@@ -1,10 +1,13 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { AnimatedModal } from '@buildeross/ui/Modal'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { SwapWidget } from '@buildeross/ui/SwapWidget'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { Button, Flex, Text } from '@buildeross/zord'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 interface CoinActionsProps {
   chainId: CHAIN_ID
@@ -17,14 +20,20 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
   coinAddress,
   symbol = 'Coin',
 }) => {
+  const { getCoinLink } = useLinks()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   // Build coin detail link
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
   const coinLink = chain ? `/coin/${chain.slug}/${coinAddress}` : '#'
 
+  const shareUrl = useMemo(() => {
+    const link = getCoinLink(chainId, coinAddress)
+    return typeof link === 'string' ? link : link.href
+  }, [chainId, coinAddress, getCoinLink])
+
   // Only show Trade button for Base chains (where swap functionality is available)
-  const showTradeButton = chainId === CHAIN_ID.BASE || chainId === CHAIN_ID.BASE_SEPOLIA
+  const showTradeButton = isCoinSupportedChain(chainId)
 
   return (
     <>
@@ -44,6 +53,7 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
             View Details
           </Button>
         </LinkWrapper>
+        {shareUrl && <ShareButton url={shareUrl} size="sm" variant="secondary" />}
       </Flex>
 
       {showTradeButton && (

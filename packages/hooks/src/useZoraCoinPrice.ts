@@ -1,15 +1,13 @@
 import { UNISWAP_STATE_VIEW_ADDRESS } from '@buildeross/constants'
 import { type ZoraCoinFragment, zoraCoinRequest } from '@buildeross/sdk/subgraph'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { useEffect, useRef, useState } from 'react'
 import { type Address, getAddress, parseAbi, type PublicClient } from 'viem'
 import { usePublicClient } from 'wagmi'
 
 import { fetchClankerTokenUsdPrice } from './useClankerTokenPrice'
 import { useEthUsdPrice } from './useEthUsdPrice'
-
-// Supported chains for Zora Coin pricing
-const SUPPORTED_CHAINS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
 // Uniswap V4 StateView ABI - just the function we need
 const UNISWAP_V4_STATE_VIEW_ABI = parseAbi([
@@ -367,7 +365,7 @@ export const useZoraCoinPrice = ({
     const fetchPrice = async () => {
       const isCurrent = () => requestIdRef.current === currentRequestId
 
-      if (!SUPPORTED_CHAINS.includes(chainId)) {
+      if (!isCoinSupportedChain(chainId)) {
         if (isCurrent()) {
           setPriceUsd(null)
           setIsLoading(false)

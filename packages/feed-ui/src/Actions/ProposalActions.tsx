@@ -11,6 +11,7 @@ import type {
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { Button, Flex, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import { Hex, zeroHash } from 'viem'
@@ -71,6 +72,11 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     }
   }, [updateItem, parsedContent])
 
+  const shareUrl = useMemo(() => {
+    const link = getProposalLink(chainId, daoId, proposalNumber, 'details')
+    return typeof link === 'string' ? link : link.href
+  }, [chainId, daoId, proposalNumber, getProposalLink])
+
   if (isLoading) {
     return (
       <Flex gap="x2" align="center">
@@ -90,6 +96,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
             View Details
           </Button>
         </LinkWrapper>
+        <ShareButton url={shareUrl} size="sm" variant="secondary" />
       </Flex>
     )
   }
@@ -133,6 +140,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
             View Details
           </Button>
         </LinkWrapper>
+        <ShareButton url={shareUrl} size="sm" variant="secondary" />
       </Flex>
 
       {/* Vote Modal */}

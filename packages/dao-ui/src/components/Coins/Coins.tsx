@@ -3,8 +3,12 @@ import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useClankerTokenWithPrice } from '@buildeross/hooks/useCoinsWithPrices'
 import { useZoraCoins } from '@buildeross/hooks/useZoraCoins'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { CHAIN_ID } from '@buildeross/types'
+import { AnimatedModal } from '@buildeross/ui/Modal'
+import { SwapWidget } from '@buildeross/ui/SwapWidget'
 import { Box, Text } from '@buildeross/zord'
-import React, { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
+import { Address } from 'viem'
 
 import { coinsContainer, emptyState } from './Coins.css'
 import { ContentCoinsGrid } from './ContentCoinsGrid'
@@ -15,6 +19,20 @@ export const Coins: React.FC = () => {
     addresses: { token },
   } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
+
+  // Shared modal state for all trade buttons
+  const [selectedCoin, setSelectedCoin] = useState<{
+    address: Address
+    symbol: string
+  } | null>(null)
+
+  const handleTradeClick = (coinAddress: Address, symbol: string) => {
+    setSelectedCoin({ address: coinAddress, symbol })
+  }
+
+  const handleCloseModal = () => {
+    setSelectedCoin(null)
+  }
 
   // Check if chain is supported
   const isChainSupported = useMemo(
@@ -101,6 +119,7 @@ export const Coins: React.FC = () => {
           priceUsd={creatorCoinWithPrice.priceUsd}
           marketCap={creatorCoinWithPrice.marketCap}
           isLoadingPrice={creatorCoinWithPrice.isLoadingPrice}
+          onTradeClick={handleTradeClick}
         />
       ) : (
         <Box className={emptyState} mb="x6">
@@ -118,7 +137,24 @@ export const Coins: React.FC = () => {
           daoAddress={token}
           coins={contentCoins}
           isLoading={zoraLoading}
+          onTradeClick={handleTradeClick}
         />
+      )}
+
+      {/* Shared Trade Modal */}
+      {selectedCoin && (
+        <AnimatedModal open={!!selectedCoin} close={handleCloseModal} size="medium">
+          <Box p="x6">
+            <Text variant="heading-md" mb="x4">
+              Trade {selectedCoin.symbol}
+            </Text>
+            <SwapWidget
+              coinAddress={selectedCoin.address}
+              symbol={selectedCoin.symbol}
+              chainId={chain.id as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+            />
+          </Box>
+        </AnimatedModal>
       )}
     </Box>
   )

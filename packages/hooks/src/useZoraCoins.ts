@@ -1,10 +1,8 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { daoZoraCoinsRequest, type ZoraCoinFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import useSWR, { type KeyedMutator } from 'swr'
-
-// Supported chains for ZoraCoins
-const SUPPORTED_CHAINS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
 export const useZoraCoins = ({
   chainId,
@@ -24,7 +22,7 @@ export const useZoraCoins = ({
   mutate: KeyedMutator<ZoraCoinFragment[]>
 } => {
   // Check if chain is supported
-  const isChainSupported = SUPPORTED_CHAINS.includes(chainId)
+  const isChainSupported = isCoinSupportedChain(chainId)
   const chainError = !isChainSupported
     ? new Error(`ZoraCoins are only supported on Base and Base Sepolia`)
     : undefined

@@ -13,8 +13,10 @@ import { CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { StatBadge } from '@buildeross/ui/StatBadge'
 import {
   formatMarketCap,
@@ -25,6 +27,7 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/poolConfig/clankerCreator'
 import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/poolConfig/zoraContent'
 import { Box, Flex, Grid, Spinner, Text } from '@buildeross/zord'
+import { useMemo } from 'react'
 import { Address } from 'viem'
 
 import { CoinComments } from './CoinComments'
@@ -82,6 +85,8 @@ export const CoinInfo = ({
   clankerToken,
   zoraCoin,
 }: CoinInfoProps) => {
+  const { getCoinLink } = useLinks()
+
   // Fetch price data
   const clankerWithPrice = useClankerTokenWithPrice({
     clankerToken: isClankerToken ? clankerToken : null,
@@ -124,6 +129,11 @@ export const CoinInfo = ({
     ? DEFAULT_CLANKER_TOTAL_SUPPLY
     : DEFAULT_ZORA_TOTAL_SUPPLY
 
+  const shareUrl = useMemo(() => {
+    const link = getCoinLink(chainId as CHAIN_ID, coinAddress)
+    return typeof link === 'string' ? link : link.href
+  }, [chainId, coinAddress, getCoinLink])
+
   return (
     <Box>
       {/* Media Display */}
@@ -154,7 +164,10 @@ export const CoinInfo = ({
         )}
 
         <Flex direction="column" gap="x2" flex={1}>
-          <Text variant="heading-md">{name}</Text>
+          <Flex align="center" gap="x2" justify="space-between">
+            <Text variant="heading-md">{name}</Text>
+            <ShareButton url={shareUrl} size="md" variant="ghost" />
+          </Flex>
           <Flex align="center" gap="x2">
             <Text variant="heading-xs" color="text3">
               {symbol}

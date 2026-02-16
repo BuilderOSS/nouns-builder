@@ -1,14 +1,12 @@
 import { UNISWAP_STATE_VIEW_ADDRESS, WETH_ADDRESS } from '@buildeross/constants'
 import { type ClankerTokenFragment, clankerTokenRequest } from '@buildeross/sdk/subgraph'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { useEffect, useRef, useState } from 'react'
 import { type Address, getAddress, parseAbi, type PublicClient } from 'viem'
 import { usePublicClient } from 'wagmi'
 
 import { useEthUsdPrice } from './useEthUsdPrice'
-
-// Supported chains for ClankerToken pricing
-const SUPPORTED_CHAINS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
 // Uniswap V4 StateView ABI - just the function we need
 const UNISWAP_V4_STATE_VIEW_ABI = parseAbi([
@@ -441,7 +439,7 @@ export const useClankerTokenPrice = ({
       const isCurrent = () => requestIdRef.current === currentRequestId
 
       // Check if chain is supported
-      if (!SUPPORTED_CHAINS.includes(chainId)) {
+      if (!isCoinSupportedChain(chainId)) {
         if (isCurrent()) {
           setPriceUsd(null)
           setIsLoading(false)

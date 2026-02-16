@@ -4,10 +4,8 @@ import {
   daoClankerTokensRequest,
 } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import useSWR, { type KeyedMutator } from 'swr'
-
-// Supported chains for ClankerTokens
-const SUPPORTED_CHAINS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA]
 
 export const useClankerTokens = ({
   chainId,
@@ -27,7 +25,7 @@ export const useClankerTokens = ({
   mutate: KeyedMutator<ClankerTokenFragment[]>
 } => {
   // Check if chain is supported
-  const isChainSupported = SUPPORTED_CHAINS.includes(chainId)
+  const isChainSupported = isCoinSupportedChain(chainId)
   const chainError = !isChainSupported
     ? new Error(`ClankerTokens are only supported on Base and Base Sepolia`)
     : undefined
