@@ -1,5 +1,4 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
@@ -25,10 +24,6 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
 }) => {
   const { getCoinLink } = useLinks()
 
-  // Build coin detail link
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
-  const coinLink = chain ? `/coin/${chain.slug}/${coinAddress}` : '#'
-
   const shareUrl = useMemo(() => {
     const link = getCoinLink(chainId, coinAddress)
     return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
@@ -52,7 +47,7 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
           Trade
         </Button>
       )}
-      <LinkWrapper link={{ href: coinLink }}>
+      <LinkWrapper link={getCoinLink(chainId, coinAddress)} isExternal>
         <Button size="sm" px="x3" variant="secondary">
           View Details
         </Button>

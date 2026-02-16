@@ -1,6 +1,6 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import type { ClankerTokenCreatedFeedItem } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
@@ -15,12 +15,10 @@ interface ClankerTokenCreatedItemProps {
 export const ClankerTokenCreatedItem: React.FC<ClankerTokenCreatedItemProps> = ({
   item,
 }) => {
-  // Build coin detail link
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === item.chainId)
-  const coinLink = chain ? `/coin/${chain.slug}/${item.tokenAddress}` : '#'
+  const { getCoinLink } = useLinks()
 
   return (
-    <LinkWrapper link={{ href: coinLink }}>
+    <LinkWrapper link={getCoinLink(item.chainId, item.tokenAddress)} isExternal>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>

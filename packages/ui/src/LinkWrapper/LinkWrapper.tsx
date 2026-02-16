@@ -17,6 +17,7 @@ type LinkWrapperOptions =
 
 export type LinkWrapperProps = FlexProps & {
   link?: LinkWrapperOptions
+  isExternal?: boolean
   enabled?: boolean
   children: React.ReactNode
 }
@@ -36,6 +37,7 @@ export const LinkWrapper: React.FC<LinkWrapperProps> = ({
   children,
   style,
   enabled = true,
+  isExternal = false,
   ...flexProps
 }) => {
   const Link = useLinkComponent()
@@ -52,7 +54,14 @@ export const LinkWrapper: React.FC<LinkWrapperProps> = ({
   if (link.href) {
     // Link navigation
     return (
-      <Flex as={Link} href={link.href} style={style} {...flexProps}>
+      <Flex
+        as={Link}
+        href={link.href}
+        style={style}
+        {...flexProps}
+        target={isExternal ? '_blank' : undefined}
+        rel={isExternal ? 'noopener noreferrer' : undefined}
+      >
         {children}
       </Flex>
     )

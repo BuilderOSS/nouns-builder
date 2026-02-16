@@ -1,7 +1,7 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useIpfsMetadata, useMediaType } from '@buildeross/hooks'
 import type { ZoraCoinCreatedFeedItem } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { Box, Stack, Text } from '@buildeross/zord'
@@ -20,12 +20,9 @@ interface ZoraCoinCreatedItemProps {
 }
 
 export const ZoraCoinCreatedItem: React.FC<ZoraCoinCreatedItemProps> = ({ item }) => {
+  const { getCoinLink } = useLinks()
   // Fetch metadata from IPFS to get the actual image and animation URLs
   const { metadata, imageUrl, animationUrl, isLoading } = useIpfsMetadata(item.coinUri)
-
-  // Build coin detail link
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === item.chainId)
-  const coinLink = chain ? `/coin/${chain.slug}/${item.coinAddress}` : '#'
 
   // Get media type for animation_url if present
   const {
@@ -39,7 +36,7 @@ export const ZoraCoinCreatedItem: React.FC<ZoraCoinCreatedItemProps> = ({ item }
   const displayImageUrl = imageUrl
 
   return (
-    <LinkWrapper link={{ href: coinLink }}>
+    <LinkWrapper link={getCoinLink(item.chainId, item.coinAddress)} isExternal>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Media - full-width on mobile, fixed width on desktop */}
         {isLoading ||
