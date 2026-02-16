@@ -54,7 +54,7 @@ export const ContentCoinsGrid = ({
   isLoading,
   onTradeClick,
 }: ContentCoinsGridProps) => {
-  const { getPostCreateLink } = useLinks()
+  const { getCoinCreateLink } = useLinks()
 
   if (isLoading) {
     return (
@@ -79,7 +79,7 @@ export const ContentCoinsGrid = ({
     <>
       <Flex justify="space-between" align="center" mb="x4">
         <Text variant="heading-sm">Content Coins</Text>
-        <Link link={getPostCreateLink?.(chainId, daoAddress)}>
+        <Link link={getCoinCreateLink?.(chainId, daoAddress)}>
           <Button>Create Post</Button>
         </Link>
       </Flex>

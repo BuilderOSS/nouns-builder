@@ -1,7 +1,7 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { type CoinFormValues, ContentPostPreview } from '@buildeross/ui'
+import { type CoinFormValues, ContentCoinPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
@@ -13,7 +13,7 @@ import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
 import * as styles from '../../../../../modules/coin/coinCreate.css'
 import { CreateContentCoinForm } from '../../../../../modules/coin/CreateContentCoinForm'
 
-interface CreatePostPageProps {
+interface CreateCoinPageProps {
   daoName: string
   collectionAddress: AddressType
   auctionAddress: AddressType
@@ -22,14 +22,14 @@ interface CreatePostPageProps {
   network: string
 }
 
-export default function CreatePostPage({
+export default function CreateCoinPage({
   daoName,
   collectionAddress,
   auctionAddress,
   treasuryAddress,
   chainId,
   network,
-}: CreatePostPageProps) {
+}: CreateCoinPageProps) {
   const { push } = useRouter()
   // State to track form values for preview
   const [previewData, setPreviewData] = useState<CoinFormValues>({
@@ -80,7 +80,7 @@ export default function CreatePostPage({
             {/* Header */}
             <Box>
               <Text fontSize="35" fontWeight="display" mb="x2">
-                Publish Post
+                Publish Coin
               </Text>
               <Text fontSize="16" color="text3">
                 Share your content on-chain and enable supporters to collect and trade
@@ -128,7 +128,7 @@ export default function CreatePostPage({
 
               {/* Right column: Preview (hidden on mobile) */}
               <Box className={styles.previewColumn}>
-                <ContentPostPreview
+                <ContentCoinPreview
                   {...previewData}
                   chainId={chainId}
                   daoName={daoName}
@@ -152,7 +152,7 @@ export default function CreatePostPage({
   )
 }
 
-export const getServerSideProps: GetServerSideProps<CreatePostPageProps> = async ({
+export const getServerSideProps: GetServerSideProps<CreateCoinPageProps> = async ({
   params,
 }) => {
   const token = params?.token as AddressType
@@ -167,7 +167,7 @@ export const getServerSideProps: GetServerSideProps<CreatePostPageProps> = async
 
     if (!dao) throw new Error('DAO not found')
 
-    const props: CreatePostPageProps = {
+    const props: CreateCoinPageProps = {
       daoName: dao.name,
       collectionAddress: token,
       auctionAddress: dao.auctionAddress as AddressType,

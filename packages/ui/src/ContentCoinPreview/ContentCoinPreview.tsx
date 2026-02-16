@@ -3,9 +3,9 @@ import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { MediaPreview } from '../MediaPreview'
-import * as styles from './ContentPostPreview.css'
+import * as styles from './ContentCoinPreview.css'
 
-export interface ContentPostPreviewProps {
+export interface ContentCoinPreviewProps {
   name: string
   symbol: string
   description: string
@@ -16,7 +16,7 @@ export interface ContentPostPreviewProps {
   daoName?: string
 }
 
-export const ContentPostPreview: React.FC<ContentPostPreviewProps> = ({
+export const ContentCoinPreview: React.FC<ContentCoinPreviewProps> = ({
   name,
   description,
   imageUrl,

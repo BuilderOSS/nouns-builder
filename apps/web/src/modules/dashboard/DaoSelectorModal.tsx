@@ -46,7 +46,7 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
     if (actionType === 'post') {
       // Route: /dao/{network}/{token}/post/create
-      await router.push(`/dao/${network}/${selectedDao.address}/post/create`)
+      await router.push(`/dao/${network}/${selectedDao.address}/coin/create`)
     } else {
       // Route: /dao/{network}/{token}/proposal/create (existing route)
       await router.push(`/dao/${network}/${selectedDao.address}/proposal/create`)

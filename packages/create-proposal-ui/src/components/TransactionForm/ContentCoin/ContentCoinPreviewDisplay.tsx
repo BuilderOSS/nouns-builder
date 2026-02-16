@@ -1,5 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { type CoinFormValues, ContentPostPreview } from '@buildeross/ui'
+import { type CoinFormValues, ContentCoinPreview } from '@buildeross/ui'
 import { Box, Stack, Text } from '@buildeross/zord'
 
 import { StickyPreviewContainer } from '../../StickyPreviewContainer'
@@ -12,7 +12,7 @@ export const ContentCoinPreviewDisplay: React.FC<{
   return (
     <StickyPreviewContainer align="flex-end">
       <Stack gap="x5">
-        <ContentPostPreview {...previewData} chainId={chainId} />
+        <ContentCoinPreview {...previewData} chainId={chainId} />
         <Box style={{ textAlign: 'right' }}>
           <Text fontSize={12} color="text4" style={{ fontWeight: 'bold' }}>
             Powered by

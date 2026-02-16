@@ -50,6 +50,15 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
     []
   )
 
+  const getProposalCreateLink = React.useCallback(
+    (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
+      }
+    },
+    []
+  )
+
   const getProfileLink = React.useCallback((address: AddressType) => {
     return {
       href: `/profile/${address}`,
@@ -62,10 +71,10 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
     }
   }, [])
 
-  const getPostCreateLink = React.useCallback(
+  const getCoinCreateLink = React.useCallback(
     (chainId: CHAIN_ID, tokenAddress: AddressType) => {
       return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/post/create`,
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/coin/create`,
       }
     },
     []
@@ -78,7 +87,8 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
       getProposalLink,
       getProfileLink,
       getCoinLink,
-      getPostCreateLink,
+      getCoinCreateLink,
+      getProposalCreateLink,
     }),
     [
       getAuctionLink,
@@ -86,7 +96,8 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
       getProposalLink,
       getProfileLink,
       getCoinLink,
-      getPostCreateLink,
+      getCoinCreateLink,
+      getProposalCreateLink,
     ]
   )
 

@@ -3,16 +3,15 @@ import {
   AddressType,
   AuctionLinkHandler,
   CHAIN_ID,
+  CoinCreateLinkHandler,
+  CoinLinkHandler,
   DaoLinkHandler,
-  LinkOptions,
   ProfileLinkHandler,
+  ProposalCreateLinkHandler,
   ProposalLinkHandler,
 } from '@buildeross/types'
 import { chainIdToSlug } from '@buildeross/utils/helpers'
 import { createContext, useContext } from 'react'
-
-type CoinLinkHandler = (chainId: CHAIN_ID, address: AddressType) => LinkOptions
-type PostCreateLinkHandler = (chainId: CHAIN_ID, tokenAddress: AddressType) => LinkOptions
 
 type LinksContextValue = {
   getAuctionLink: AuctionLinkHandler
@@ -20,7 +19,8 @@ type LinksContextValue = {
   getProposalLink: ProposalLinkHandler
   getProfileLink: ProfileLinkHandler
   getCoinLink: CoinLinkHandler
-  getPostCreateLink: PostCreateLinkHandler
+  getCoinCreateLink: CoinCreateLinkHandler
+  getProposalCreateLink: ProposalCreateLinkHandler
 }
 
 const defaultGetAuctionLink = (
@@ -72,9 +72,15 @@ const defaultGetCoinLink = (chainId: CHAIN_ID, address: AddressType) => {
   }
 }
 
-const defaultGetPostCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+const defaultGetCoinCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
   return {
-    href: `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/post/create`,
+    href: `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/coin/create`,
+  }
+}
+
+const defaultGetProposalCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+  return {
+    href: `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
   }
 }
 
@@ -84,7 +90,8 @@ const LinksContext = createContext<LinksContextValue>({
   getProposalLink: defaultGetProposalLink,
   getProfileLink: defaultGetProfileLink,
   getCoinLink: defaultGetCoinLink,
-  getPostCreateLink: defaultGetPostCreateLink,
+  getCoinCreateLink: defaultGetCoinCreateLink,
+  getProposalCreateLink: defaultGetProposalCreateLink,
 })
 
 export const useLinks = () => {
