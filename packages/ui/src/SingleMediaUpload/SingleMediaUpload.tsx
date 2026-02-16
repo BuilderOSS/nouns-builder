@@ -59,8 +59,9 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
     async (_input: FileList | null) => {
       if (!_input) return
       const input = _input[0]
-
       setUploadMediaError(false)
+
+      if (!input) return
 
       if (input?.type?.length && !acceptableMIME.includes(input.type)) {
         setUploadMediaError({
@@ -102,9 +103,6 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
     <Flex mb={'x8'}>
       <Stack width={'100%'}>
         <label className={defaultInputLabelStyle}>{inputLabel}</label>
-        {helperText && !uploadMediaError && (
-          <Box className={defaultHelperTextStyle}>{helperText}</Box>
-        )}
         <Flex
           as={'label'}
           direction={'column'}
@@ -155,12 +153,15 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
             data-testid={`file-upload-${id}`}
             name="file"
             type="file"
-            multiple={true}
+            multiple={false}
             onChange={(event) => {
               handleFileUpload(event.currentTarget.files)
             }}
           />
         </Flex>
+        {helperText && !uploadMediaError && (
+          <Box className={defaultHelperTextStyle}>{helperText}</Box>
+        )}
 
         {uploadMediaError && (
           <Box data-testid="error-msg" p={'x4'} fontSize={12} className={uploadErrorBox}>

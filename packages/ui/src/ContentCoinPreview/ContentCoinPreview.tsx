@@ -105,7 +105,7 @@ export const ContentCoinPreview: React.FC<ContentCoinPreviewProps> = ({
         {/* Info */}
         <Box p="x3" borderRadius="curved" backgroundColor="background2">
           <Text fontSize="12" color="text3">
-            This is how your content post will appear to collectors
+            This is how your content coin will appear to collectors
           </Text>
         </Box>
       </Stack>

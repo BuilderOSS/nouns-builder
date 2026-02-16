@@ -80,7 +80,7 @@ export default function CreateCoinPage({
             {/* Header */}
             <Box>
               <Text fontSize="35" fontWeight="display" mb="x2">
-                Publish Coin
+                Publish Post
               </Text>
               <Text fontSize="16" color="text3">
                 Share your content on-chain and enable supporters to collect and trade

@@ -78,8 +78,8 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
             formik.setFieldValue('symbol', generatedSymbol)
           }
         }}
-        inputLabel="Coin Name"
-        placeholder="My Creator Coin"
+        inputLabel="Name"
+        placeholder="My Coin"
         helperText="The display name for your coin (1-100 characters)"
         errorMessage={
           formik.touched.name && formik.errors.name ? formik.errors.name : undefined
