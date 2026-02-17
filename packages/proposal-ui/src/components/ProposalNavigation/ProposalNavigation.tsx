@@ -55,7 +55,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
         onClick={handleBack}
         aria-label="Back"
         cursor="pointer"
-        style={{ background: 'none', border: 'none', padding: 0 }}
+        style={{ background: 'none', border: 'none', padding: 0, flexShrink: 0 }}
       >
         <Flex direction={'row'} align={'center'} gap={'x2'}>
           <Icon id="arrowLeft" />
