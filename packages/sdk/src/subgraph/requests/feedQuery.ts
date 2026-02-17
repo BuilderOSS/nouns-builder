@@ -4,6 +4,7 @@ import {
   FeedResponse,
   ProposalVoteSupportType,
 } from '@buildeross/types'
+import { isCoinSupportedChain } from '@buildeross/utils'
 
 import { SDK } from '../client'
 import {
@@ -22,6 +23,11 @@ interface FeedQueryParams {
   eventTypes?: FeedEventType[]
   actor?: string
 }
+
+const COIN_FEED_EVENT_TYPES: FeedEventType[] = [
+  FeedEventType.ClankerTokenCreated,
+  FeedEventType.ZoraCoinCreated,
+]
 
 type FeedEvent = FeedEventsQuery['feedEvents'][0]
 
@@ -158,11 +164,46 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
       }
     }
 
+    case 'ClankerTokenCreatedEvent': {
+      return {
+        ...baseItem,
+        type: 'CLANKER_TOKEN_CREATED',
+        tokenAddress: event.clankerToken?.tokenAddress,
+        tokenName: event.clankerToken?.tokenName,
+        tokenSymbol: event.clankerToken?.tokenSymbol,
+        tokenImage: event.clankerToken?.tokenImage,
+        poolId: event.clankerToken?.poolId,
+      }
+    }
+
+    case 'ZoraCoinCreatedEvent': {
+      return {
+        ...baseItem,
+        type: 'ZORA_COIN_CREATED',
+        coinAddress: event.zoraCoin?.coinAddress,
+        coinName: event.zoraCoin?.name,
+        coinSymbol: event.zoraCoin?.symbol,
+        coinUri: event.zoraCoin?.uri,
+        currency: event.zoraCoin?.currency,
+      }
+    }
+
     default: {
       const _exhaustive: never = event
       throw new Error(`Unknown event type: ${(_exhaustive as any).__typename}`)
     }
   }
+}
+
+const filterEventTypes = (
+  eventTypes: FeedEventType[],
+  chainId: CHAIN_ID
+): FeedEventType[] => {
+  if (!isCoinSupportedChain(chainId)) {
+    return eventTypes.filter((eventType) => !COIN_FEED_EVENT_TYPES.includes(eventType))
+  }
+
+  return eventTypes
 }
 
 /**
@@ -179,7 +220,7 @@ export const getFeedData = async ({
   limit,
   cursor,
   daos,
-  eventTypes,
+  eventTypes: outerEventTypes = [],
   actor,
 }: FeedQueryParams): Promise<FeedResponse> => {
   // Validate input
@@ -206,7 +247,10 @@ export const getFeedData = async ({
         where.dao_in = daos.map((dao) => dao.toLowerCase())
       }
     }
-    if (eventTypes && eventTypes.length > 0) {
+
+    const eventTypes = filterEventTypes(outerEventTypes, chainId)
+
+    if (eventTypes.length > 0) {
       if (eventTypes.length === 1) {
         where.type = eventTypes[0]
       } else {
@@ -214,11 +258,21 @@ export const getFeedData = async ({
       }
     }
 
-    // Query feed events
-    const data = await SDK.connect(chainId).feedEvents({
-      first: fetchLimit,
-      where,
-    } as FeedEventsQueryVariables)
+    let data: FeedEventsQuery
+
+    if (isCoinSupportedChain(chainId)) {
+      // Query feed events
+      data = await SDK.connect(chainId).feedEvents({
+        first: fetchLimit,
+        where,
+      } as FeedEventsQueryVariables)
+    } else {
+      // Query feed events
+      data = (await SDK.connect(chainId).feedEventsWithoutCoins({
+        first: fetchLimit,
+        where,
+      } as FeedEventsQueryVariables)) as FeedEventsQuery
+    }
 
     const events = data.feedEvents
 
@@ -244,7 +298,7 @@ export const getFeedData = async ({
   } catch (e) {
     console.error(
       'Error fetching feed',
-      { actor, daos, eventTypes, chainId, limit, cursor },
+      { actor, daos, eventTypes: outerEventTypes, chainId, limit, cursor },
       e
     )
 

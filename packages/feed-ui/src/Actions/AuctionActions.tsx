@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useCurrentAuction } from '@buildeross/hooks'
 import { auctionAbi } from '@buildeross/sdk/contract'
@@ -9,13 +10,14 @@ import type {
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { Button, Flex, Text } from '@buildeross/zord'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { BidModal } from '../Modals/BidModal'
+import type { OnOpenBidModal } from '../types/modalStates'
 
 interface AuctionActionsProps {
   daoName: string
@@ -23,6 +25,7 @@ interface AuctionActionsProps {
   tokenId: string
   tokenName: string
   addresses: RequiredDaoContractAddresses
+  onOpenBidModal?: OnOpenBidModal
 }
 
 export const AuctionActions: React.FC<AuctionActionsProps> = ({
@@ -31,13 +34,13 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   tokenId,
   tokenName,
   addresses,
+  onOpenBidModal,
 }) => {
   const { getAuctionLink } = useLinks()
   const daoId = addresses.token
   const config = useConfig()
   const { address: account } = useAccount()
 
-  const [showBidModal, setShowBidModal] = useState(false)
   const [isSettling, setIsSettling] = useState(false)
 
   const {
@@ -61,6 +64,11 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   })()
 
   const { mutate } = useSWRConfig()
+
+  const shareUrl = useMemo(() => {
+    const link = getAuctionLink(chainId, daoId, tokenId)
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
+  }, [chainId, daoId, tokenId, getAuctionLink])
 
   const handleSettle = useCallback(async () => {
     try {
@@ -88,6 +96,31 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
     return 'Start next Auction'
   })()
 
+  const handleOpenBid = useCallback(() => {
+    onOpenBidModal?.({
+      chainId,
+      tokenId,
+      daoName,
+      addresses,
+      highestBid,
+      paused,
+      highestBidder,
+      endTime,
+      tokenName,
+    })
+  }, [
+    onOpenBidModal,
+    chainId,
+    tokenId,
+    daoName,
+    addresses,
+    highestBid,
+    paused,
+    highestBidder,
+    endTime,
+    tokenName,
+  ])
+
   if (isLoading) {
     return (
       <Flex gap="x2" align="center">
@@ -102,84 +135,68 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   const isOldAuction = !isCurrentToken
 
   return (
-    <>
-      <Flex gap="x2" align="center" wrap="wrap">
-        {/* Active auction - show bid option */}
-        {isActive && isCurrentToken && (
-          <>
-            <ContractButton
-              size="sm"
-              px="x3"
-              variant="outline"
-              handleClick={() => setShowBidModal(true)}
-              chainId={chainId}
-            >
-              Place Bid
-            </ContractButton>
-            <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
-              <Button size="sm" px="x3" variant="secondary">
-                View Details
+    <Flex gap="x2" align="center" wrap="wrap">
+      {/* Active auction - show bid option */}
+      {isActive && isCurrentToken && (
+        <>
+          <ContractButton
+            size="sm"
+            px="x3"
+            variant="outline"
+            handleClick={handleOpenBid}
+            chainId={chainId}
+          >
+            Place Bid
+          </ContractButton>
+          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
+            <Button size="sm" px="x3" variant="secondary">
+              View Details
+            </Button>
+          </LinkWrapper>
+          <ShareButton url={shareUrl} size="sm" variant="secondary" />
+        </>
+      )}
+
+      {/* Ended but not settled */}
+      {hasEnded && !settled && isCurrentToken && (
+        <>
+          <ContractButton
+            chainId={chainId}
+            handleClick={handleSettle}
+            disabled={isSettling}
+            variant="outline"
+            size="sm"
+            px="x3"
+          >
+            {isSettling ? 'Settling...' : buttonText}
+          </ContractButton>
+          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
+            <Button size="sm" px="x3" variant="secondary">
+              View Details
+            </Button>
+          </LinkWrapper>
+          <ShareButton url={shareUrl} size="sm" variant="secondary" />
+        </>
+      )}
+
+      {/* Old or settled auction */}
+      {(isOldAuction || settled) && (
+        <>
+          {currentTokenId && tokenId !== currentTokenId.toString() && (
+            <LinkWrapper link={getAuctionLink(chainId, daoId, currentTokenId.toString())}>
+              <Button size="sm" px="x3" variant="outline">
+                Go to Latest Auction
               </Button>
             </LinkWrapper>
-          </>
-        )}
-
-        {/* Ended but not settled */}
-        {hasEnded && !settled && isCurrentToken && (
-          <>
-            <ContractButton
-              chainId={chainId}
-              handleClick={handleSettle}
-              disabled={isSettling}
-              variant="outline"
-              size="sm"
-              px="x3"
-            >
-              {isSettling ? 'Settling...' : buttonText}
-            </ContractButton>
-            <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
-              <Button size="sm" px="x3" variant="secondary">
-                View Details
-              </Button>
-            </LinkWrapper>
-          </>
-        )}
-
-        {/* Old or settled auction */}
-        {(isOldAuction || settled) && (
-          <>
-            {currentTokenId && tokenId !== currentTokenId.toString() && (
-              <LinkWrapper
-                link={getAuctionLink(chainId, daoId, currentTokenId.toString())}
-              >
-                <Button size="sm" px="x3" variant="outline">
-                  Go to Latest Auction
-                </Button>
-              </LinkWrapper>
-            )}
-            <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
-              <Button size="sm" px="x3" variant="secondary">
-                View Details
-              </Button>
-            </LinkWrapper>
-          </>
-        )}
-      </Flex>
-
-      {/* Bid Modal */}
-      <BidModal
-        isOpen={showBidModal}
-        onClose={() => setShowBidModal(false)}
-        chainId={chainId}
-        tokenId={tokenId}
-        daoName={daoName}
-        addresses={addresses}
-        highestBid={highestBid}
-        paused={paused}
-        highestBidder={highestBidder}
-        endTime={endTime}
-        tokenName={tokenName}
-      />
-    </>
+          )}
+          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
+            <Button size="sm" px="x3" variant="secondary">
+              View Details
+            </Button>
+          </LinkWrapper>
+          <ShareButton url={shareUrl} size="sm" variant="secondary" />
+        </>
+      )}
+    </Flex>
   )
 }

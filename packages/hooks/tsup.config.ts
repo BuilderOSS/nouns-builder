@@ -8,6 +8,7 @@ export default defineConfig({
   external: [
     '@buildeross/constants',
     '@buildeross/ipfs-service',
+    '@buildeross/swap',
     '@buildeross/sdk',
     '@buildeross/types',
     '@buildeross/utils',

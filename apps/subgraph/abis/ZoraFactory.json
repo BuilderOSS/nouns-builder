@@ -1,0 +1,538 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "coinV4Impl_", "type": "address" },
+      { "internalType": "address", "name": "creatorCoinImpl_", "type": "address" },
+      { "internalType": "address", "name": "hook_", "type": "address" },
+      { "internalType": "address", "name": "zoraHookRegistry_", "type": "address" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "target", "type": "address" }],
+    "name": "AddressEmptyCode",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ArrayLengthMismatch", "type": "error" },
+  { "inputs": [], "name": "ConfigTickLowerMustBeLessThanTickUpper", "type": "error" },
+  { "inputs": [], "name": "Deprecated", "type": "error" },
+  { "inputs": [], "name": "ERC1167FailedCreateClone", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "implementation", "type": "address" }
+    ],
+    "name": "ERC1967InvalidImplementation",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ERC1967NonPayable", "type": "error" },
+  { "inputs": [], "name": "EthTransferInvalid", "type": "error" },
+  { "inputs": [], "name": "FailedInnerCall", "type": "error" },
+  { "inputs": [], "name": "InvalidConfig", "type": "error" },
+  { "inputs": [], "name": "InvalidHook", "type": "error" },
+  { "inputs": [], "name": "InvalidInitialization", "type": "error" },
+  { "inputs": [], "name": "InvalidPoolVersion", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "int24", "name": "tickLower", "type": "int24" },
+      { "internalType": "int24", "name": "tickUpper", "type": "int24" }
+    ],
+    "name": "InvalidTickRangeMisordered",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "value", "type": "uint256" },
+      { "internalType": "uint256", "name": "limit", "type": "uint256" }
+    ],
+    "name": "MaxShareToBeSoldExceeded",
+    "type": "error"
+  },
+  { "inputs": [], "name": "NotInitializing", "type": "error" },
+  { "inputs": [], "name": "NumDiscoveryPositionsOutOfRange", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  { "inputs": [], "name": "UUPSUnauthorizedCallContext", "type": "error" },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "slot", "type": "bytes32" }],
+    "name": "UUPSUnsupportedProxiableUUID",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "currentName", "type": "string" },
+      { "internalType": "string", "name": "newName", "type": "string" }
+    ],
+    "name": "UpgradeToMismatchedContractName",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ZeroDiscoveryPositions", "type": "error" },
+  { "inputs": [], "name": "ZeroDiscoverySupplyShare", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payoutRecipient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "platformReferrer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "currency",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "string", "name": "uri", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "symbol", "type": "string" },
+      { "indexed": false, "internalType": "address", "name": "coin", "type": "address" },
+      { "indexed": false, "internalType": "address", "name": "pool", "type": "address" },
+      { "indexed": false, "internalType": "string", "name": "version", "type": "string" }
+    ],
+    "name": "CoinCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payoutRecipient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "platformReferrer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "currency",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "string", "name": "uri", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "symbol", "type": "string" },
+      { "indexed": false, "internalType": "address", "name": "coin", "type": "address" },
+      {
+        "components": [
+          { "internalType": "Currency", "name": "currency0", "type": "address" },
+          { "internalType": "Currency", "name": "currency1", "type": "address" },
+          { "internalType": "uint24", "name": "fee", "type": "uint24" },
+          { "internalType": "int24", "name": "tickSpacing", "type": "int24" },
+          { "internalType": "contract IHooks", "name": "hooks", "type": "address" }
+        ],
+        "indexed": false,
+        "internalType": "struct PoolKey",
+        "name": "poolKey",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "poolKeyHash",
+        "type": "bytes32"
+      },
+      { "indexed": false, "internalType": "string", "name": "version", "type": "string" }
+    ],
+    "name": "CoinCreatedV4",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "caller", "type": "address" },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payoutRecipient",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "platformReferrer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "currency",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "string", "name": "uri", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "name", "type": "string" },
+      { "indexed": false, "internalType": "string", "name": "symbol", "type": "string" },
+      { "indexed": false, "internalType": "address", "name": "coin", "type": "address" },
+      {
+        "components": [
+          { "internalType": "Currency", "name": "currency0", "type": "address" },
+          { "internalType": "Currency", "name": "currency1", "type": "address" },
+          { "internalType": "uint24", "name": "fee", "type": "uint24" },
+          { "internalType": "int24", "name": "tickSpacing", "type": "int24" },
+          { "internalType": "contract IHooks", "name": "hooks", "type": "address" }
+        ],
+        "indexed": false,
+        "internalType": "struct PoolKey",
+        "name": "poolKey",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "poolKeyHash",
+        "type": "bytes32"
+      },
+      { "indexed": false, "internalType": "string", "name": "version", "type": "string" }
+    ],
+    "name": "CreatorCoinCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "uint64", "name": "version", "type": "uint64" }
+    ],
+    "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "implementation",
+        "type": "address"
+      }
+    ],
+    "name": "Upgraded",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "UPGRADE_INTERFACE_VERSION",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "acceptOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "msgSender", "type": "address" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "symbol", "type": "string" },
+      { "internalType": "bytes", "name": "poolConfig", "type": "bytes" },
+      { "internalType": "address", "name": "platformReferrer", "type": "address" },
+      { "internalType": "bytes32", "name": "coinSalt", "type": "bytes32" }
+    ],
+    "name": "coinAddress",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "coinV4Impl",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contentCoinHook",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractName",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractVersion",
+    "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "creatorCoinHook",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "creatorCoinImpl",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "payoutRecipient", "type": "address" },
+      { "internalType": "address[]", "name": "owners", "type": "address[]" },
+      { "internalType": "string", "name": "uri", "type": "string" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "symbol", "type": "string" },
+      { "internalType": "address", "name": "platformReferrer", "type": "address" },
+      { "internalType": "address", "name": "currency", "type": "address" },
+      { "internalType": "int24", "name": "", "type": "int24" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "name": "deploy",
+    "outputs": [
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "payoutRecipient", "type": "address" },
+      { "internalType": "address[]", "name": "owners", "type": "address[]" },
+      { "internalType": "string", "name": "uri", "type": "string" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "symbol", "type": "string" },
+      { "internalType": "bytes", "name": "poolConfig", "type": "bytes" },
+      { "internalType": "address", "name": "platformReferrer", "type": "address" },
+      { "internalType": "address", "name": "postDeployHook", "type": "address" },
+      { "internalType": "bytes", "name": "postDeployHookData", "type": "bytes" },
+      { "internalType": "bytes32", "name": "coinSalt", "type": "bytes32" }
+    ],
+    "name": "deploy",
+    "outputs": [
+      { "internalType": "address", "name": "coin", "type": "address" },
+      { "internalType": "bytes", "name": "postDeployHookDataOut", "type": "bytes" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "payoutRecipient", "type": "address" },
+      { "internalType": "address[]", "name": "owners", "type": "address[]" },
+      { "internalType": "string", "name": "uri", "type": "string" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "symbol", "type": "string" },
+      { "internalType": "bytes", "name": "poolConfig", "type": "bytes" },
+      { "internalType": "address", "name": "platformReferrer", "type": "address" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "name": "deploy",
+    "outputs": [
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "payoutRecipient", "type": "address" },
+      { "internalType": "address[]", "name": "owners", "type": "address[]" },
+      { "internalType": "string", "name": "uri", "type": "string" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "symbol", "type": "string" },
+      { "internalType": "bytes", "name": "poolConfig", "type": "bytes" },
+      { "internalType": "address", "name": "platformReferrer", "type": "address" },
+      { "internalType": "bytes32", "name": "coinSalt", "type": "bytes32" }
+    ],
+    "name": "deployCreatorCoin",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "payoutRecipient", "type": "address" },
+      { "internalType": "address[]", "name": "owners", "type": "address[]" },
+      { "internalType": "string", "name": "uri", "type": "string" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "symbol", "type": "string" },
+      { "internalType": "bytes", "name": "poolConfig", "type": "bytes" },
+      { "internalType": "address", "name": "platformReferrer", "type": "address" },
+      { "internalType": "address", "name": "postDeployHook", "type": "address" },
+      { "internalType": "bytes", "name": "postDeployHookData", "type": "bytes" },
+      { "internalType": "bytes32", "name": "coinSalt", "type": "bytes32" }
+    ],
+    "name": "deployCreatorCoin",
+    "outputs": [
+      { "internalType": "address", "name": "coin", "type": "address" },
+      { "internalType": "bytes", "name": "postDeployHookDataOut", "type": "bytes" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "payoutRecipient", "type": "address" },
+      { "internalType": "address[]", "name": "owners", "type": "address[]" },
+      { "internalType": "string", "name": "uri", "type": "string" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "symbol", "type": "string" },
+      { "internalType": "bytes", "name": "poolConfig", "type": "bytes" },
+      { "internalType": "address", "name": "platformReferrer", "type": "address" },
+      { "internalType": "address", "name": "deployHook", "type": "address" },
+      { "internalType": "bytes", "name": "hookData", "type": "bytes" }
+    ],
+    "name": "deployWithHook",
+    "outputs": [
+      { "internalType": "address", "name": "coin", "type": "address" },
+      { "internalType": "bytes", "name": "hookDataOut", "type": "bytes" }
+    ],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "coin", "type": "address" }],
+    "name": "getVersionForDeployedCoin",
+    "outputs": [{ "internalType": "uint8", "name": "", "type": "uint8" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "hook",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "implementation",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "initialOwner", "type": "address" }],
+    "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingOwner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proxiableUUID",
+    "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "newImplementation", "type": "address" },
+      { "internalType": "bytes", "name": "data", "type": "bytes" }
+    ],
+    "name": "upgradeToAndCall",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "zoraHookRegistry",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

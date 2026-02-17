@@ -1,5 +1,6 @@
 import { Box, Stack, Text } from '@buildeross/zord'
 
+import { StickyPreviewContainer } from '../../StickyPreviewContainer'
 import { link } from './MilestonePaymentsDetailsDisplay.css'
 
 export const MilestonePaymentsDetailsDisplay: React.FC<{
@@ -8,21 +9,8 @@ export const MilestonePaymentsDetailsDisplay: React.FC<{
   milestoneCount?: number
 }> = ({ totalEscrowAmountWithSymbol, escrowAmountError, milestoneCount }) => {
   return (
-    <Box
-      position={{ '@initial': 'relative', '@768': 'absolute' }}
-      style={{
-        height: '100%',
-        maxWidth: '100%',
-        '@media': {
-          '(min-width: 768px)': {
-            maxWidth: '50%',
-          },
-        },
-      }}
-      top={'x0'}
-      right={'x0'}
-    >
-      <Stack position={'sticky'} top={'x20'} right={'x0'} gap={'x5'} align="flex-end">
+    <StickyPreviewContainer align="flex-end">
+      <Stack gap={'x5'} align="flex-end">
         {escrowAmountError && (
           <Text variant="paragraph-sm" color="negative">
             {escrowAmountError}
@@ -77,6 +65,6 @@ export const MilestonePaymentsDetailsDisplay: React.FC<{
           </a>
         </Box>
       </Stack>
-    </Box>
+    </StickyPreviewContainer>
   )
 }

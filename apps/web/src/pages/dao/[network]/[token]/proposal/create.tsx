@@ -1,6 +1,11 @@
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import {
+  type COIN_SUPPORTED_CHAIN_ID,
+  COIN_SUPPORTED_CHAIN_IDS,
+  L1_CHAINS,
+  PUBLIC_DEFAULT_CHAINS,
+} from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   SelectTransactionType,
@@ -10,6 +15,7 @@ import {
   TransactionTypeIcon,
   TwoColumnLayout,
 } from '@buildeross/create-proposal-ui'
+import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useVotes } from '@buildeross/hooks/useVotes'
@@ -94,6 +100,24 @@ const CreateProposalPage: NextPageWithLayout = () => {
     [chain.id]
   )
 
+  const isCoinSupported = useMemo(
+    () => COIN_SUPPORTED_CHAIN_IDS.includes(chain.id as COIN_SUPPORTED_CHAIN_ID),
+    [chain.id]
+  )
+
+  // Fetch clanker tokens to check if DAO has any
+  const { data: clankerTokens } = useClankerTokens({
+    chainId: chain.id,
+    collectionAddress: addresses.token,
+    enabled: isCoinSupported,
+    first: 1,
+  })
+
+  const hasClankerToken = useMemo(
+    () => isCoinSupported && clankerTokens && clankerTokens.length > 0,
+    [isCoinSupported, clankerTokens]
+  )
+
   const TRANSACTION_FORM_OPTIONS_FILTERED = useMemo(
     () =>
       TRANSACTION_FORM_OPTIONS.filter((x) => {
@@ -106,6 +130,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
         if (x === TransactionType.NOMINATE_DELEGATE && !isEASSupported) return false
         if (x === TransactionType.PIN_TREASURY_ASSET && !isEASSupported) return false
         if (x === TransactionType.STREAM_TOKENS && !isSablierSupported) return false
+        if (x === TransactionType.CREATOR_COIN && (!isCoinSupported || hasClankerToken))
+          return false
+        if (x === TransactionType.CONTENT_COIN && (!isCoinSupported || !hasClankerToken))
+          return false
         return true
       }),
     [
@@ -115,6 +143,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
       shouldFixRendererBase,
       isEASSupported,
       isSablierSupported,
+      isCoinSupported,
+      hasClankerToken,
     ]
   )
 

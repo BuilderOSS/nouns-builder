@@ -1,0 +1,7 @@
+#import "../fragments/ClankerToken.graphql"
+
+query clankerToken($tokenAddress: ID!) {
+  clankerToken(id: $tokenAddress) {
+    ...ClankerToken
+  }
+}

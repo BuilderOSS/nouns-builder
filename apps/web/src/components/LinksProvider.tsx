@@ -50,11 +50,35 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
     []
   )
 
+  const getProposalCreateLink = React.useCallback(
+    (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
+      }
+    },
+    []
+  )
+
   const getProfileLink = React.useCallback((address: AddressType) => {
     return {
       href: `/profile/${address}`,
     }
   }, [])
+
+  const getCoinLink = React.useCallback((chainId: CHAIN_ID, coinAddress: AddressType) => {
+    return {
+      href: `/coin/${chainIdToSlug(chainId)}/${coinAddress}`,
+    }
+  }, [])
+
+  const getCoinCreateLink = React.useCallback(
+    (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/coin/create`,
+      }
+    },
+    []
+  )
 
   const value = React.useMemo(
     () => ({
@@ -62,8 +86,19 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
       getDaoLink,
       getProposalLink,
       getProfileLink,
+      getCoinLink,
+      getCoinCreateLink,
+      getProposalCreateLink,
     }),
-    [getAuctionLink, getDaoLink, getProposalLink, getProfileLink]
+    [
+      getAuctionLink,
+      getDaoLink,
+      getProposalLink,
+      getProfileLink,
+      getCoinLink,
+      getCoinCreateLink,
+      getProposalCreateLink,
+    ]
   )
 
   return <BaseLinksProvider value={value}>{children}</BaseLinksProvider>

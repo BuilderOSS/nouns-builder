@@ -33,6 +33,7 @@ const basicConfig = {
     '@buildeross/utils',
     '@buildeross/zord',
     '@buildeross/ui',
+    '@buildeross/swap',
     '@buildeross/stores',
     '@buildeross/auction-ui',
     '@buildeross/proposal-ui',

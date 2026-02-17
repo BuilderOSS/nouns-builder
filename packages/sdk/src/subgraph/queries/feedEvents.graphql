@@ -123,5 +123,154 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       }
       amount
     }
+
+    ... on ClankerTokenCreatedEvent {
+      clankerToken {
+        tokenAddress
+        tokenName
+        tokenSymbol
+        tokenImage
+        poolId
+      }
+    }
+
+    ... on ZoraCoinCreatedEvent {
+      zoraCoin {
+        coinAddress
+        name
+        symbol
+        uri
+        currency
+      }
+    }
+  }
+}
+
+query feedEventsWithoutCoins($first: Int!, $where: FeedEvent_filter) {
+  feedEvents(
+    first: $first
+    where: $where
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    __typename
+    id
+    type
+    timestamp
+    blockNumber
+    transactionHash
+    actor
+    dao {
+      auctionAddress
+      governorAddress
+      metadataAddress
+      tokenAddress
+      treasuryAddress
+      name
+      symbol
+      contractImage
+    }
+
+    ... on ProposalCreatedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        timeCreated
+        title
+        description
+        proposer
+      }
+    }
+
+    ... on ProposalVotedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        timeCreated
+        title
+        description
+        proposer
+      }
+      vote {
+        support
+        weight
+        reason
+      }
+    }
+
+    ... on ProposalUpdatedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        timeCreated
+        title
+        description
+        proposer
+      }
+      update {
+        messageType
+        message
+        originalMessageId
+      }
+    }
+
+    ... on ProposalExecutedEvent {
+      proposal {
+        proposalId
+        proposalNumber
+        timeCreated
+        title
+        description
+        proposer
+      }
+    }
+
+    ... on AuctionCreatedEvent {
+      auction {
+        id
+        startTime
+        endTime
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+
+    ... on AuctionBidPlacedEvent {
+      auction {
+        id
+        startTime
+        endTime
+        token {
+          tokenId
+          owner
+          name
+          image
+        }
+      }
+      bid {
+        amount
+        bidTime
+        bidder
+      }
+    }
+
+    ... on AuctionSettledEvent {
+      auction {
+        id
+        startTime
+        endTime
+        token {
+          tokenId
+          owner
+          name
+          image
+        }
+      }
+      amount
+    }
+
   }
 }

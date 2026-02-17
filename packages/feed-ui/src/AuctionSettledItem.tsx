@@ -30,7 +30,7 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
     item.winner === zeroAddress ? `Auction for ${item.tokenName} settled` : winnerTitle
 
   return (
-    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
+    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)} isExternal>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>

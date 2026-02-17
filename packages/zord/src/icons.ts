@@ -12,7 +12,9 @@ import ChevronRight from './assets/chevron-right.svg'
 import ChevronUp from './assets/chevron-up.svg'
 import Code from './assets/code.svg'
 import Collection from './assets/collection.svg'
+import ContentCoin from './assets/content-coin.svg'
 import Copy from './assets/copy.svg'
+import CreatorCoin from './assets/creator-coin.svg'
 import Cross from './assets/cross.svg'
 import Cross16 from './assets/cross-16.svg'
 import Dash from './assets/dash.svg'
@@ -69,8 +71,10 @@ export const icons = {
   chevronRight: ChevronRight,
   chevronUp: ChevronUp,
   code: Code,
+  contentCoin: ContentCoin,
   collection: Collection,
   copy: Copy,
+  creatorCoin: CreatorCoin,
   cross: Cross,
   'cross-16': Cross16,
   dash: Dash,

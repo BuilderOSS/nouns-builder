@@ -1,11 +1,14 @@
 import type { FeedItem as FeedItemType } from '@buildeross/types'
+import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
+import { isAddressEqual } from 'viem'
 
 import { FeedItemActions } from './Actions/FeedItemActions'
 import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
 import { AuctionCreatedItem } from './AuctionCreatedItem'
 import { AuctionSettledItem } from './AuctionSettledItem'
+import { ClankerTokenCreatedItem } from './ClankerTokenCreatedItem'
 import { feedItemCard, feedItemMeta, feedItemMetaRow } from './Feed.css'
 import { FeedItemActor } from './FeedItemActor'
 import { FeedItemChain } from './FeedItemChain'
@@ -14,28 +17,22 @@ import { ProposalCreatedItem } from './ProposalCreatedItem'
 import { ProposalExecutedItem } from './ProposalExecutedItem'
 import { ProposalUpdatedItem } from './ProposalUpdatedItem'
 import { ProposalVotedItem } from './ProposalVotedItem'
+import type {
+  OnOpenBidModal,
+  OnOpenPropdateModal,
+  OnOpenTradeModal,
+  OnOpenVoteModal,
+} from './types/modalStates'
+import { ZoraCoinCreatedItem } from './ZoraCoinCreatedItem'
 
 export interface FeedItemProps {
   item: FeedItemType
   hideActor?: boolean
   hideDao?: boolean
-}
-
-const formatTimestamp = (timestamp: number) => {
-  const date = new Date(timestamp * 1000)
-  const now = new Date()
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-  if (diffInSeconds < 60) return 'just now'
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
-
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  onOpenBidModal?: OnOpenBidModal
+  onOpenVoteModal?: OnOpenVoteModal
+  onOpenPropdateModal?: OnOpenPropdateModal
+  onOpenTradeModal?: OnOpenTradeModal
 }
 
 const Separator = () => (
@@ -54,8 +51,12 @@ const Separator = () => (
 
 export const FeedItem: React.FC<FeedItemProps> = ({
   item,
-  hideActor = false,
+  hideActor: outerHideActor = false,
   hideDao = false,
+  onOpenBidModal,
+  onOpenVoteModal,
+  onOpenPropdateModal,
+  onOpenTradeModal,
 }) => {
   const renderContent = () => {
     switch (item.type) {
@@ -73,10 +74,16 @@ export const FeedItem: React.FC<FeedItemProps> = ({
         return <AuctionBidPlacedItem item={item} />
       case 'AUCTION_SETTLED':
         return <AuctionSettledItem item={item} />
+      case 'CLANKER_TOKEN_CREATED':
+        return <ClankerTokenCreatedItem item={item} />
+      case 'ZORA_COIN_CREATED':
+        return <ZoraCoinCreatedItem item={item} />
       default:
         return <Text color="text3">Unknown feed item type</Text>
     }
   }
+
+  const hideActor = outerHideActor || isAddressEqual(item.actor, item.addresses.treasury)
 
   // Helper to determine whether to render separators
   const shouldShowSeparatorAfterActor = !hideActor && !hideDao
@@ -109,7 +116,13 @@ export const FeedItem: React.FC<FeedItemProps> = ({
         {/* Actions and metadata row - same row on desktop, different rows on mobile */}
         <Box className={feedItemMetaRow}>
           {/* Actions section */}
-          <FeedItemActions item={item} />
+          <FeedItemActions
+            item={item}
+            onOpenBidModal={onOpenBidModal}
+            onOpenVoteModal={onOpenVoteModal}
+            onOpenPropdateModal={onOpenPropdateModal}
+            onOpenTradeModal={onOpenTradeModal}
+          />
 
           {/* Chain and timestamp */}
           <Flex gap="x2" align="center" justify="flex-end" wrap="wrap">
@@ -120,7 +133,7 @@ export const FeedItem: React.FC<FeedItemProps> = ({
             <Separator />
 
             {/* Timestamp */}
-            <Text className={feedItemMeta}>{formatTimestamp(item.timestamp)}</Text>
+            <Text className={feedItemMeta}>{formatTimeAgo(item.timestamp)}</Text>
           </Flex>
         </Box>
       </Stack>

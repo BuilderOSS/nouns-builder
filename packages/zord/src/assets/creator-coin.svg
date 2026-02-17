@@ -1,0 +1,27 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Outer coin -->
+  <circle cx="16" cy="16" r="15"
+    stroke="#00A3FF"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <!-- Inner mint ring -->
+  <circle cx="16" cy="16" r="8"
+    stroke="#00A3FF"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <!-- Subtle mint ridges -->
+  <path d="M1.5 16H3.5"
+    stroke="#00A3FF"
+    stroke-width="2"
+    stroke-linecap="round"/>
+
+  <path d="M28.5 16H30.5"
+    stroke="#00A3FF"
+    stroke-width="2"
+    stroke-linecap="round"/>
+</svg>
+

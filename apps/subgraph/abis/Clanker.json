@@ -1,0 +1,585 @@
+[
+  {
+    "inputs": [{ "internalType": "address", "name": "owner_", "type": "address" }],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  { "inputs": [], "name": "Deprecated", "type": "error" },
+  { "inputs": [], "name": "ExtensionMsgValueMismatch", "type": "error" },
+  { "inputs": [], "name": "ExtensionNotEnabled", "type": "error" },
+  { "inputs": [], "name": "HookNotEnabled", "type": "error" },
+  { "inputs": [], "name": "InvalidExtension", "type": "error" },
+  { "inputs": [], "name": "InvalidHook", "type": "error" },
+  { "inputs": [], "name": "InvalidLocker", "type": "error" },
+  { "inputs": [], "name": "InvalidMevModule", "type": "error" },
+  { "inputs": [], "name": "LockerNotEnabled", "type": "error" },
+  { "inputs": [], "name": "MaxExtensionBpsExceeded", "type": "error" },
+  { "inputs": [], "name": "MaxExtensionsExceeded", "type": "error" },
+  { "inputs": [], "name": "MevModuleNotEnabled", "type": "error" },
+  { "inputs": [], "name": "NotFound", "type": "error" },
+  { "inputs": [], "name": "OnlyNonOriginatingChains", "type": "error" },
+  { "inputs": [], "name": "OnlyOriginatingChain", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  {
+    "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  { "inputs": [], "name": "TeamFeeRecipientNotSet", "type": "error" },
+  { "inputs": [], "name": "Unauthorized", "type": "error" },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "token", "type": "address" },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "recipient",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "ClaimTeamFees",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "extension",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "extensionSupply",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "msgValue",
+        "type": "uint256"
+      }
+    ],
+    "name": "ExtensionTriggered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": true, "internalType": "address", "name": "admin", "type": "address" },
+      { "indexed": false, "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "SetAdmin",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "bool", "name": "deprecated", "type": "bool" }
+    ],
+    "name": "SetDeprecated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "extension",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "SetExtension",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      { "indexed": false, "internalType": "address", "name": "hook", "type": "address" },
+      { "indexed": false, "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "SetHook",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "locker",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "address", "name": "hook", "type": "address" },
+      { "indexed": false, "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "SetLocker",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "mevModule",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "SetMevModule",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "oldTeamFeeRecipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "newTeamFeeRecipient",
+        "type": "address"
+      }
+    ],
+    "name": "SetTeamFeeRecipient",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "msgSender",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenAdmin",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "tokenImage",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "tokenName",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "tokenSymbol",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "tokenMetadata",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "tokenContext",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "int24",
+        "name": "startingTick",
+        "type": "int24"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "poolHook",
+        "type": "address"
+      },
+      { "indexed": false, "internalType": "PoolId", "name": "poolId", "type": "bytes32" },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "pairedToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "locker",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "mevModule",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "extensionsSupply",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "extensions",
+        "type": "address[]"
+      }
+    ],
+    "name": "TokenCreated",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "BPS",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_EXTENSIONS",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_EXTENSION_BPS",
+    "outputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "TOKEN_SUPPLY",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "admins",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+    "name": "claimTeamFees",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "components": [
+              { "internalType": "address", "name": "tokenAdmin", "type": "address" },
+              { "internalType": "string", "name": "name", "type": "string" },
+              { "internalType": "string", "name": "symbol", "type": "string" },
+              { "internalType": "bytes32", "name": "salt", "type": "bytes32" },
+              { "internalType": "string", "name": "image", "type": "string" },
+              { "internalType": "string", "name": "metadata", "type": "string" },
+              { "internalType": "string", "name": "context", "type": "string" },
+              {
+                "internalType": "uint256",
+                "name": "originatingChainId",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IClanker.TokenConfig",
+            "name": "tokenConfig",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              { "internalType": "address", "name": "hook", "type": "address" },
+              { "internalType": "address", "name": "pairedToken", "type": "address" },
+              {
+                "internalType": "int24",
+                "name": "tickIfToken0IsClanker",
+                "type": "int24"
+              },
+              { "internalType": "int24", "name": "tickSpacing", "type": "int24" },
+              { "internalType": "bytes", "name": "poolData", "type": "bytes" }
+            ],
+            "internalType": "struct IClanker.PoolConfig",
+            "name": "poolConfig",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              { "internalType": "address", "name": "locker", "type": "address" },
+              {
+                "internalType": "address[]",
+                "name": "rewardAdmins",
+                "type": "address[]"
+              },
+              {
+                "internalType": "address[]",
+                "name": "rewardRecipients",
+                "type": "address[]"
+              },
+              { "internalType": "uint16[]", "name": "rewardBps", "type": "uint16[]" },
+              { "internalType": "int24[]", "name": "tickLower", "type": "int24[]" },
+              { "internalType": "int24[]", "name": "tickUpper", "type": "int24[]" },
+              { "internalType": "uint16[]", "name": "positionBps", "type": "uint16[]" },
+              { "internalType": "bytes", "name": "lockerData", "type": "bytes" }
+            ],
+            "internalType": "struct IClanker.LockerConfig",
+            "name": "lockerConfig",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              { "internalType": "address", "name": "mevModule", "type": "address" },
+              { "internalType": "bytes", "name": "mevModuleData", "type": "bytes" }
+            ],
+            "internalType": "struct IClanker.MevModuleConfig",
+            "name": "mevModuleConfig",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              { "internalType": "address", "name": "extension", "type": "address" },
+              { "internalType": "uint256", "name": "msgValue", "type": "uint256" },
+              { "internalType": "uint16", "name": "extensionBps", "type": "uint16" },
+              { "internalType": "bytes", "name": "extensionData", "type": "bytes" }
+            ],
+            "internalType": "struct IClanker.ExtensionConfig[]",
+            "name": "extensionConfigs",
+            "type": "tuple[]"
+          }
+        ],
+        "internalType": "struct IClanker.DeploymentConfig",
+        "name": "deploymentConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "deployToken",
+    "outputs": [{ "internalType": "address", "name": "tokenAddress", "type": "address" }],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "tokenAdmin", "type": "address" },
+          { "internalType": "string", "name": "name", "type": "string" },
+          { "internalType": "string", "name": "symbol", "type": "string" },
+          { "internalType": "bytes32", "name": "salt", "type": "bytes32" },
+          { "internalType": "string", "name": "image", "type": "string" },
+          { "internalType": "string", "name": "metadata", "type": "string" },
+          { "internalType": "string", "name": "context", "type": "string" },
+          { "internalType": "uint256", "name": "originatingChainId", "type": "uint256" }
+        ],
+        "internalType": "struct IClanker.TokenConfig",
+        "name": "tokenConfig",
+        "type": "tuple"
+      }
+    ],
+    "name": "deployTokenZeroSupply",
+    "outputs": [{ "internalType": "address", "name": "tokenAddress", "type": "address" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+    "name": "deploymentInfoForToken",
+    "outputs": [
+      { "internalType": "address", "name": "token", "type": "address" },
+      { "internalType": "address", "name": "hook", "type": "address" },
+      { "internalType": "address", "name": "locker", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "deprecated",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "locker", "type": "address" },
+      { "internalType": "address", "name": "hook", "type": "address" }
+    ],
+    "name": "enabledLockers",
+    "outputs": [{ "internalType": "bool", "name": "enabled", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "admin", "type": "address" },
+      { "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "setAdmin",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bool", "name": "deprecated_", "type": "bool" }],
+    "name": "setDeprecated",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "extension", "type": "address" },
+      { "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "setExtension",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "hook", "type": "address" },
+      { "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "setHook",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "locker", "type": "address" },
+      { "internalType": "address", "name": "hook", "type": "address" },
+      { "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "setLocker",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "mevModule", "type": "address" },
+      { "internalType": "bool", "name": "enabled", "type": "bool" }
+    ],
+    "name": "setMevModule",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "teamFeeRecipient_", "type": "address" }
+    ],
+    "name": "setTeamFeeRecipient",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "teamFeeRecipient",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
+    "name": "tokenDeploymentInfo",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "token", "type": "address" },
+          { "internalType": "address", "name": "hook", "type": "address" },
+          { "internalType": "address", "name": "locker", "type": "address" },
+          { "internalType": "address[]", "name": "extensions", "type": "address[]" }
+        ],
+        "internalType": "struct IClanker.DeploymentInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

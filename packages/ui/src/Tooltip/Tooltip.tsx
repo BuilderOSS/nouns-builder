@@ -1,21 +1,26 @@
 import { Box, Icon, PopUp } from '@buildeross/zord'
-import React, { useState } from 'react'
+import { useRef, useState } from 'react'
 
 export const Tooltip = ({ children }: { children: string }) => {
   const [showTooltip, setShowTooltip] = useState(false)
-  const zIndex = showTooltip ? 102 : undefined
+  const triggerRef = useRef<HTMLDivElement | null>(null)
 
   return (
     <>
       <Box
         cursor="pointer"
-        style={{ zIndex }}
         onMouseOver={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
+        ref={triggerRef}
       >
         <Icon id="info-16" size="sm" />
       </Box>
-      <PopUp open={showTooltip} trigger={<></>}>
+      <PopUp
+        open={showTooltip}
+        triggerRef={triggerRef.current}
+        showBackdrop={false}
+        placement="top"
+      >
         <Box maxWidth="x64">{children}</Box>
       </PopUp>
     </>

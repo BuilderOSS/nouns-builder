@@ -8,7 +8,7 @@ import React from 'react'
 import { CopyButton } from '../CopyButton'
 
 export type ContractLinkProps = {
-  address: string
+  address: `0x${string}`
   size?: 'xs' | 'sm' | 'md'
   noBorder?: boolean
   chainId: CHAIN_ID

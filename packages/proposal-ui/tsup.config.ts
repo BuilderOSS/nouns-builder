@@ -14,6 +14,7 @@ export default defineConfig({
     }),
   ],
   external: [
+    '@ethereum-attestation-service/eas-sdk',
     '@buildeross/ipfs-service',
     '@buildeross/constants',
     '@buildeross/hooks',

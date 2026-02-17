@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { COIN_SUPPORTED_CHAIN_IDS, PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -13,7 +13,6 @@ export interface DaoSelectorModalProps {
   onClose: () => void
   actionType: 'post' | 'proposal'
   userAddress?: AddressType
-  chainIds?: CHAIN_ID[]
 }
 
 export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
@@ -21,7 +20,6 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   onClose,
   actionType,
   userAddress,
-  chainIds = [],
 }) => {
   const router = useRouter()
   const [selectedDao, setSelectedDao] = useState<DaoListItem | undefined>()
@@ -46,7 +44,7 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
     if (actionType === 'post') {
       // Route: /dao/{network}/{token}/post/create
-      await router.push(`/dao/${network}/${selectedDao.address}/post/create`)
+      await router.push(`/dao/${network}/${selectedDao.address}/coin/create`)
     } else {
       // Route: /dao/{network}/{token}/proposal/create (existing route)
       await router.push(`/dao/${network}/${selectedDao.address}/proposal/create`)
@@ -63,6 +61,11 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   // For posts: show search, For proposals: no search (members only)
   const showSearch = actionType === 'post'
 
+  // For posts: filter to coin-supported chains
+  const effectiveChainIds = (
+    actionType === 'post' ? COIN_SUPPORTED_CHAIN_IDS : []
+  ) as CHAIN_ID[]
+
   return (
     <AnimatedModal open={open} close={handleCancel} size="large">
       <Stack>
@@ -75,11 +78,12 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
         <div className={modalBody}>
           <SingleDaoSelector
-            chainIds={chainIds}
+            chainIds={effectiveChainIds}
             selectedDaoAddress={selectedDao?.address}
             onSelectedDaoChange={setSelectedDao}
             userAddress={userAddress}
             showSearch={showSearch}
+            actionType={actionType}
           />
         </div>
 

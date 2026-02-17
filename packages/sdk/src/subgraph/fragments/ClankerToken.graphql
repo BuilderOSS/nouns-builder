@@ -1,0 +1,19 @@
+fragment ClankerToken on ClankerToken {
+  id
+  tokenAddress
+  tokenName
+  tokenSymbol
+  tokenImage
+  tokenMetadata
+  pairedToken
+  poolId
+  poolHook
+  createdAt
+  createdAtBlock
+  transactionHash
+  msgSender
+  dao {
+    id
+    name
+  }
+}

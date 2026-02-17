@@ -1,12 +1,12 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { CreateProposalHeading, ReviewProposalForm } from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { atoms, Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -19,6 +19,10 @@ import { useAccount } from 'wagmi'
 const ReviewProposalPage: NextPageWithLayout = () => {
   const chain = useChainStore((x) => x.chain)
   const { push } = useRouter()
+
+  const [proposalIdCreated, setProposalIdCreated] = React.useState<
+    string | null | undefined
+  >(undefined)
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
@@ -38,17 +42,9 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   const { transactions, disabled, title, summary } = useProposalStore()
 
-  const onProposalCreated = React.useCallback(async () => {
-    await push({
-      pathname: `/dao/[network]/[token]`,
-      query: {
-        network: chain.slug,
-        token: addresses.token,
-        message: SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS,
-        tab: 'activity',
-      },
-    })
-  }, [push, chain.slug, addresses.token])
+  const onProposalCreated = (proposalId: string | null) => {
+    setProposalIdCreated(proposalId)
+  }
 
   const onOpenCreatePage = React.useCallback(async () => {
     await push({
@@ -59,6 +55,29 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       },
     })
   }, [push, chain.slug, addresses.token])
+
+  const handleCloseSuccessModal = async () => {
+    if (proposalIdCreated) {
+      await push({
+        pathname: `/dao/[network]/[token]/vote/[id]`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          id: proposalIdCreated,
+        },
+      })
+    } else {
+      await push({
+        pathname: `/dao/[network]/[token]`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          tab: 'activity',
+        },
+      })
+    }
+    setProposalIdCreated(undefined)
+  }
 
   if (isLoading) return null
 
@@ -105,6 +124,17 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           onProposalCreated={onProposalCreated}
         />
       </Stack>
+
+      <AnimatedModal
+        open={proposalIdCreated !== undefined}
+        close={handleCloseSuccessModal}
+      >
+        <SuccessModalContent
+          title={`Proposal submitted`}
+          subtitle={`Your Proposal has been successfully submitted!`}
+          success
+        />
+      </AnimatedModal>
     </Stack>
   )
 }

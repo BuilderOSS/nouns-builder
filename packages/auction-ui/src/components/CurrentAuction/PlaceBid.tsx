@@ -5,10 +5,11 @@ import { averageWinningBid } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal } from '@buildeross/ui/Modal'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { chainIdToSlug, unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
-import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { Box, Button, Flex } from '@buildeross/zord'
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { formatEther, parseEther } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
@@ -172,23 +173,17 @@ const InnerPlaceBid = ({
 
   const isValidBid = bidAmount && isMinBid
   const isValidChain = wagmiChain?.id === chainId
-  const [showTooltip, setShowTooltip] = useState(false)
-  const [copied, setCopied] = useState(false)
 
-  const handleShareClick = useCallback(async () => {
+  // Build share URL with referral parameter if user is connected
+  const shareUrl = useMemo(() => {
     const chainSlug = chainIdToSlug(chainId)!
     const baseUrl = `${BASE_URL}/dao/${chainSlug}/${tokenAddress}`
-    if (address === undefined) {
-      await navigator.clipboard.writeText(baseUrl)
-      return
-    }
+    if (!address) return baseUrl
+
     const params = new URLSearchParams({
       referral: address.toString(),
     })
-    const fullUrl = `${baseUrl}?${params}`
-
-    await navigator.clipboard.writeText(fullUrl)
-    setCopied(true)
+    return `${baseUrl}?${params}`
   }, [chainId, tokenAddress, address])
 
   return (
@@ -242,32 +237,15 @@ const InnerPlaceBid = ({
               Place bid
             </ContractButton>
             {chainId !== 1 ? (
-              <Fragment>
-                <Box
-                  cursor="pointer"
-                  onMouseOver={() => setShowTooltip(true)}
-                  onMouseLeave={() => {
-                    setShowTooltip(false)
-                    setTimeout(() => {
-                      setCopied(false)
-                    }, 500)
-                  }}
-                >
-                  <ContractButton
-                    chainId={chainId}
-                    className={auctionActionButtonVariants['share']}
-                    size="lg"
-                    ml="x2"
-                    mt={{ '@initial': 'x2', '@768': 'x0' }}
-                    handleClick={handleShareClick}
-                  >
-                    <Icon size="md" id="share" />
-                  </ContractButton>
-                </Box>
-                <PopUp open={showTooltip} trigger={<></>} placement="top">
-                  <Text align="center">{copied ? 'Copied' : 'Copy Referral Link'}</Text>
-                </PopUp>
-              </Fragment>
+              <Box ml="x2" mt={{ '@initial': 'x2', '@768': 'x0' }}>
+                <ShareButton
+                  url={shareUrl}
+                  size="lg"
+                  variant="primary"
+                  className={auctionActionButtonVariants['share']}
+                  tooltip="Copy Referral Link"
+                />
+              </Box>
             ) : null}
           </Flex>
         </Flex>

@@ -35,6 +35,11 @@
       "import": "./dist/sablier/index.mjs",
       "require": "./dist/sablier/index.js"
     },
+    "./poolConfig": {
+      "types": "./dist/poolConfig/index.d.ts",
+      "import": "./dist/poolConfig/index.mjs",
+      "require": "./dist/poolConfig/index.js"
+    },
     "./wagmi": {
       "types": "./dist/wagmi/index.d.ts",
       "import": "./dist/wagmi/index.mjs",

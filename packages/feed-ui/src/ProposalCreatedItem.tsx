@@ -26,6 +26,7 @@ export const ProposalCreatedItem: React.FC<ProposalCreatedItemProps> = ({ item }
   return (
     <LinkWrapper
       link={getProposalLink(item.chainId, item.daoId, item.proposalNumber, 'details')}
+      isExternal
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">

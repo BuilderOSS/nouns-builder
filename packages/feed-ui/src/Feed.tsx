@@ -1,6 +1,8 @@
 import { useFeed } from '@buildeross/hooks'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem as FeedItemType } from '@buildeross/types'
+import { AnimatedModal } from '@buildeross/ui/Modal'
+import { SwapWidget } from '@buildeross/ui/SwapWidget'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
@@ -9,6 +11,15 @@ import { FeedFiltersModal } from './FeedFiltersModal'
 import { FeedItem } from './FeedItem'
 import { FeedSkeleton, FeedSkeletonItem } from './FeedSkeleton'
 import { LoadMoreButton } from './LoadMoreButton'
+import { BidModal } from './Modals/BidModal'
+import { PropdateModalWrapper } from './Modals/PropdateModalWrapper'
+import { VoteModalWrapper } from './Modals/VoteModalWrapper'
+import type {
+  BidModalState,
+  PropdateModalState,
+  TradeModalState,
+  VoteModalState,
+} from './types/modalStates'
 import { useFeedFiltersStore } from './useFeedFiltersStore'
 
 // Internal filter mode - Feed manages its own filters
@@ -60,6 +71,14 @@ export const Feed: React.FC<FeedProps> = (props) => {
   const filterStore = useFeedFiltersStore(externalFilterMode ? undefined : address)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
+  // Shared modal states for all feed items
+  const [bidModalState, setBidModalState] = useState<BidModalState | null>(null)
+  const [voteModalState, setVoteModalState] = useState<VoteModalState | null>(null)
+  const [propdateModalState, setPropdateModalState] = useState<PropdateModalState | null>(
+    null
+  )
+  const [tradeModalState, setTradeModalState] = useState<TradeModalState | null>(null)
+
   // Get actual filters to use (either from props or from store)
   const actualChainIds = useMemo(() => {
     if (externalFilterMode) return props.chainIds
@@ -91,6 +110,23 @@ export const Feed: React.FC<FeedProps> = (props) => {
 
   const hideActor = !!actor
   const hideDao = externalFilterMode && !!(actualDaos && actualDaos.length > 0)
+
+  // Modal callbacks
+  const handleOpenBidModal = useCallback((state: BidModalState) => {
+    setBidModalState(state)
+  }, [])
+
+  const handleOpenVoteModal = useCallback((state: VoteModalState) => {
+    setVoteModalState(state)
+  }, [])
+
+  const handleOpenPropdateModal = useCallback((state: PropdateModalState) => {
+    setPropdateModalState(state)
+  }, [])
+
+  const handleOpenTradeModal = useCallback((state: TradeModalState) => {
+    setTradeModalState(state)
+  }, [])
 
   // Filter modal handlers (only used in internal mode)
   const handleApplyFilters = useCallback(
@@ -200,6 +236,10 @@ export const Feed: React.FC<FeedProps> = (props) => {
                 item={item}
                 hideActor={hideActor}
                 hideDao={hideDao}
+                onOpenBidModal={handleOpenBidModal}
+                onOpenVoteModal={handleOpenVoteModal}
+                onOpenPropdateModal={handleOpenPropdateModal}
+                onOpenTradeModal={handleOpenTradeModal}
               />
             ))}
 
@@ -243,6 +283,65 @@ export const Feed: React.FC<FeedProps> = (props) => {
           onApply={handleApplyFilters}
           userAddress={address}
         />
+      )}
+
+      {/* Shared modals for all feed items */}
+      {bidModalState && (
+        <BidModal
+          isOpen={!!bidModalState}
+          onClose={() => setBidModalState(null)}
+          chainId={bidModalState.chainId}
+          tokenId={bidModalState.tokenId}
+          daoName={bidModalState.daoName}
+          addresses={bidModalState.addresses}
+          highestBid={bidModalState.highestBid}
+          paused={bidModalState.paused}
+          highestBidder={bidModalState.highestBidder}
+          endTime={bidModalState.endTime}
+          tokenName={bidModalState.tokenName}
+        />
+      )}
+
+      {voteModalState && (
+        <VoteModalWrapper
+          isOpen={!!voteModalState}
+          onClose={() => setVoteModalState(null)}
+          proposalId={voteModalState.proposalId}
+          proposalTitle={voteModalState.proposalTitle}
+          proposalTimeCreated={voteModalState.proposalTimeCreated}
+          chainId={voteModalState.chainId}
+          addresses={voteModalState.addresses}
+        />
+      )}
+
+      {propdateModalState && (
+        <PropdateModalWrapper
+          isOpen={!!propdateModalState}
+          onClose={() => setPropdateModalState(null)}
+          proposalId={propdateModalState.proposalId}
+          chainId={propdateModalState.chainId}
+          addresses={propdateModalState.addresses}
+          replyTo={propdateModalState.replyTo}
+        />
+      )}
+
+      {tradeModalState && (
+        <AnimatedModal
+          open={!!tradeModalState}
+          close={() => setTradeModalState(null)}
+          size="medium"
+        >
+          <div style={{ padding: '24px' }}>
+            <Text variant="heading-md" mb="x4">
+              Trade {tradeModalState.symbol}
+            </Text>
+            <SwapWidget
+              coinAddress={tradeModalState.coinAddress as `0x${string}`}
+              symbol={tradeModalState.symbol}
+              chainId={tradeModalState.chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+            />
+          </div>
+        </AnimatedModal>
       )}
     </Flex>
   )

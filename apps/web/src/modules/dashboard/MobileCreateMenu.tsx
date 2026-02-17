@@ -1,4 +1,4 @@
-import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import type { AddressType } from '@buildeross/types'
 import { Icon, Stack, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { useState } from 'react'
@@ -14,15 +14,16 @@ import {
 
 export interface MobileCreateMenuProps {
   userAddress?: AddressType
-  chainIds?: CHAIN_ID[]
 }
 
-export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
-  userAddress,
-  chainIds,
-}) => {
+export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({ userAddress }) => {
   const [selectorOpen, setSelectorOpen] = useState(false)
   const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
+
+  const handleCreatePost = () => {
+    setActionType('post')
+    setSelectorOpen(true)
+  }
 
   const handleCreateProposal = () => {
     setActionType('proposal')
@@ -35,6 +36,16 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
         <Text className={createMenuTitle}>What would you like to create?</Text>
 
         <div className={createMenuGrid}>
+          <button className={createMenuCard} onClick={handleCreatePost} type="button">
+            <Icon id="brush" className={createMenuCardIcon} />
+            <Text fontSize="18" fontWeight="label">
+              Create Post
+            </Text>
+            <Text fontSize="14" color="text3">
+              Share updates and content with your DAO community
+            </Text>
+          </button>
+
           <button className={createMenuCard} onClick={handleCreateProposal} type="button">
             <Icon id="checkInCircle" className={createMenuCardIcon} />
             <Text fontSize="18" fontWeight="label">
@@ -64,7 +75,6 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({
         onClose={() => setSelectorOpen(false)}
         actionType={actionType}
         userAddress={userAddress}
-        chainIds={chainIds}
       />
     </>
   )

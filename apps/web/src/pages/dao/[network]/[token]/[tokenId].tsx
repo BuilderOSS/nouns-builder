@@ -1,20 +1,24 @@
 import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
+import {
+  COIN_SUPPORTED_CHAIN_IDS,
+  PUBLIC_ALL_CHAINS,
+  PUBLIC_DEFAULT_CHAINS,
+} from '@buildeross/constants/chains'
 import {
   About,
   Activity,
   Admin,
+  Coins,
   SectionHandler,
   SmartContracts,
   Treasury,
 } from '@buildeross/dao-ui'
+import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
-import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
@@ -48,7 +52,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   ogImageURL,
   chainId,
 }) => {
-  const { query, replace, push, pathname } = useRouter()
+  const { query, push, pathname } = useRouter()
 
   const { address } = useAccount()
 
@@ -61,19 +65,27 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     governorAddress: addresses.governor,
   })
 
-  const handleCloseSuccessModal = React.useCallback(async () => {
-    const nextQuery = { ...query }
-    delete nextQuery.message
+  // Check if chain supports coins
+  const isCoinSupported = useMemo(
+    () =>
+      COIN_SUPPORTED_CHAIN_IDS.includes(
+        chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
+      ),
+    [chainId]
+  )
 
-    await replace(
-      {
-        pathname,
-        query: nextQuery,
-      },
-      undefined,
-      { shallow: true }
-    )
-  }, [replace, pathname, query])
+  // Fetch clanker tokens to check if DAO has any
+  const { data: clankerTokens } = useClankerTokens({
+    chainId,
+    collectionAddress: collection,
+    enabled: isCoinSupported,
+    first: 1,
+  })
+
+  const hasClankerToken = useMemo(
+    () => isCoinSupported && clankerTokens && clankerTokens.length > 0,
+    [isCoinSupported, clankerTokens]
+  )
 
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
@@ -144,16 +156,31 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       component: [<DaoFeed key="feed" />],
     }
 
+    // Only show Coins tab if chain supports coins AND DAO has a clanker token
+    const coinsSection = hasClankerToken
+      ? {
+          title: 'Coins',
+          component: [<Coins key={'coins'} />],
+        }
+      : null
+
     const publicSections = [
       aboutSection,
       daoFeed,
       treasurySection,
       proposalsSection,
+      ...(coinsSection ? [coinsSection] : []),
       smartContractsSection,
     ]
 
     return hasThreshold ? [...publicSections, adminSection] : publicSections
-  }, [hasThreshold, openTab, openProposalCreatePage, openProposalReviewPage])
+  }, [
+    hasClankerToken,
+    hasThreshold,
+    openTab,
+    openProposalCreatePage,
+    openProposalReviewPage,
+  ])
 
   const ogDescription = useMemo(() => {
     if (!description) return ''
@@ -219,17 +246,6 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         activeTab={activeTab}
         onTabChange={(tab) => openTab(tab, false)}
       />
-
-      <AnimatedModal
-        open={query.message === SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS}
-        close={handleCloseSuccessModal}
-      >
-        <SuccessModalContent
-          title={`Proposal submitted`}
-          subtitle={`Your Proposal has been successfully submitted. It might take a few minutes for it to appear.`}
-          success
-        />
-      </AnimatedModal>
     </Flex>
   )
 }

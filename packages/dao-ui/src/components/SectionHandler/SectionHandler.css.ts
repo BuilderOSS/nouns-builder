@@ -2,7 +2,8 @@ import { atoms, media, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const sectionNavigationWrapper = style({
-  margin: '0 -16px 0 -16px',
+  maxWidth: '100vw',
+  overflowX: 'auto',
   selectors: {
     '&::after': {
       content: '',

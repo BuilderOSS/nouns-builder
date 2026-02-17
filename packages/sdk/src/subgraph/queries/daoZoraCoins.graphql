@@ -1,0 +1,10 @@
+#import "../fragments/ZoraCoin.graphql"
+
+query daoZoraCoins($daoId: ID!, $first: Int = 10, $orderBy: ZoraCoin_orderBy = createdAt, $orderDirection: OrderDirection = desc) {
+  dao(id: $daoId) {
+    id
+    zoraCoins(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
+      ...ZoraCoin
+    }
+  }
+}

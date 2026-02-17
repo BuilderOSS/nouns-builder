@@ -27,6 +27,8 @@ type DAO @entity {
   daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
   pinnedAssets: [TreasuryAssetPin!]! @derivedFrom(field: "dao")
   feedEvents: [FeedEvent!]! @derivedFrom(field: "dao")
+  clankerTokens: [ClankerToken!]! @derivedFrom(field: "dao")
+  zoraCoins: [ZoraCoin!]! @derivedFrom(field: "dao")
 }
 
 type _Schema_
@@ -247,6 +249,8 @@ enum FeedEventType {
   AUCTION_CREATED
   AUCTION_BID_PLACED
   AUCTION_SETTLED
+  CLANKER_TOKEN_CREATED
+  ZORA_COIN_CREATED
 }
 
 interface FeedEvent {
@@ -339,4 +343,104 @@ type AuctionSettledEvent implements FeedEvent @entity {
   auction: Auction!
   winner: Bytes!
   amount: BigInt!
+}
+
+type ClankerTokenCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  clankerToken: ClankerToken!
+}
+
+type ZoraCoinCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  zoraCoin: ZoraCoin!
+}
+
+type ClankerToken @entity {
+  # ID is the token address (globally unique)
+  id: ID!
+
+  # Link to DAO (optional - only if tokenAdmin matches a known DAO treasury)
+  dao: DAO
+
+  # Event params
+  tokenAddress: Bytes!
+  msgSender: Bytes!
+  tokenAdmin: Bytes! # The admin address (may or may not be a DAO)
+
+  # Token metadata
+  tokenImage: String!
+  tokenName: String!
+  tokenSymbol: String!
+  tokenMetadata: String!
+  tokenContext: String!
+
+  # Pool configuration
+  startingTick: BigInt!
+  poolHook: Bytes!
+  poolId: Bytes!
+  pairedToken: Bytes!
+
+  # Additional modules
+  locker: Bytes!
+  mevModule: Bytes!
+  extensionsSupply: BigInt!
+  extensions: [Bytes!]!
+
+  # Block metadata
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  transactionHash: Bytes!
+}
+
+type ZoraCoin @entity {
+  # ID is the coin address (globally unique)
+  id: ID!
+
+  # Link to ClankerToken (paired currency must be a known ClankerToken)
+  clankerToken: ClankerToken
+
+  # Link to DAO (through ClankerToken)
+  dao: DAO
+
+  # Event params - indexed
+  caller: Bytes!
+  payoutRecipient: Bytes!
+  platformReferrer: Bytes!
+
+  # Event params - non-indexed
+  currency: Bytes!
+  uri: String!
+  name: String!
+  symbol: String!
+  coinAddress: Bytes!
+
+  # Pool configuration (PoolKey struct)
+  poolCurrency0: Bytes!
+  poolCurrency1: Bytes!
+  poolFee: BigInt!
+  poolTickSpacing: Int!
+  poolHooks: Bytes!
+
+  # Pool key hash
+  poolKeyHash: Bytes!
+
+  # Version
+  version: String!
+
+  # Block metadata
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  transactionHash: Bytes!
 }

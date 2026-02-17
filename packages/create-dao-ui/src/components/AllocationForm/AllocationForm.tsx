@@ -2,6 +2,7 @@ import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { managerAbi } from '@buildeross/sdk/contract'
 import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID, type TokenAllocation } from '@buildeross/types'
+import { Toggle } from '@buildeross/ui'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
   defaultFormAdvancedToggle,
@@ -22,7 +23,6 @@ import { validationSchemaAllocations } from './AllocationForm.schema'
 import { ContributionAllocation } from './ContributionAllocation'
 import { FounderAllocationFields } from './FounderAllocationFields'
 import { FounderRewardsFields } from './FounderRewardsFields'
-import { Toggle } from './Toggle'
 
 export type { TokenAllocation }
 
@@ -263,7 +263,6 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
               <Toggle
                 on={hasFounderAllocation}
                 onToggle={handleToggleFounderAllocation}
-                variant="plain"
               />
             </Flex>
 

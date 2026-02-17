@@ -10,12 +10,19 @@ export interface MediaPreviewProps {
   mediaUrl: string
   mediaType?: string
   coverUrl?: string
+  width?: string | number
+  height?: string | number
+  /** Force a specific aspect ratio (width/height). Examples: 1, 16/9, "16/9", "1:1" */
+  aspectRatio?: number | string
 }
 
 export const MediaPreview: React.FC<MediaPreviewProps> = ({
   mediaType,
   mediaUrl,
   coverUrl,
+  width,
+  height,
+  aspectRatio,
 }) => {
   const fetchableMediaURL = useMemo(
     () => getFetchableUrls(mediaUrl)?.[0] || '',
@@ -27,15 +34,37 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
   )
 
   if (fetchableMediaURL && mediaType?.startsWith('image')) {
-    return <ImagePreview src={fetchableMediaURL} alt="Preview" />
+    return (
+      <ImagePreview
+        src={fetchableMediaURL}
+        alt="Preview"
+        width={width}
+        height={height}
+        aspectRatio={aspectRatio}
+      />
+    )
   }
 
   if (fetchableMediaURL && mediaType?.startsWith('video')) {
-    return <VideoPreview src={fetchableMediaURL} />
+    return (
+      <VideoPreview
+        src={fetchableMediaURL}
+        width={width}
+        height={height}
+        aspectRatio={aspectRatio}
+      />
+    )
   }
 
   if (fetchableMediaURL && mediaType?.startsWith('audio')) {
-    return <AudioPreview src={fetchableMediaURL} cover={fetchableCoverURL} />
+    return (
+      <AudioPreview
+        src={fetchableMediaURL}
+        cover={fetchableCoverURL}
+        width={width}
+        height={height}
+      />
+    )
   }
 
   return <Box backgroundColor="background2" w="100%" h="100%" borderRadius={'curved'} />

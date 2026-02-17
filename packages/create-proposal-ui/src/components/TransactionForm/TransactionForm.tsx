@@ -2,6 +2,8 @@ import { TransactionType } from '@buildeross/types'
 import { ReactNode } from 'react'
 
 import { AddArtwork } from './AddArtwork'
+import { ContentCoin } from './ContentCoin'
+import { CreatorCoin } from './CreatorCoin'
 import { CustomTransaction } from './CustomTransaction'
 import { Droposal } from './Droposal'
 import { FixRendererBase } from './FixRendererBase'
@@ -34,6 +36,8 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.NOMINATE_DELEGATE,
   TransactionType.PIN_TREASURY_ASSET,
   TransactionType.CUSTOM,
+  TransactionType.CREATOR_COIN,
+  TransactionType.CONTENT_COIN,
   TransactionType.DROPOSAL,
   TransactionType.PAUSE_AUCTIONS,
   TransactionType.FIX_RENDERER_BASE,
@@ -61,6 +65,8 @@ export const TransactionForm = ({ type }: TransactionFormProps) => {
     [TransactionType.ADD_ARTWORK]: <AddArtwork />,
     [TransactionType.REPLACE_ARTWORK]: <ReplaceArtwork />,
     [TransactionType.MIGRATION]: <Migration />,
+    [TransactionType.CREATOR_COIN]: <CreatorCoin />,
+    [TransactionType.CONTENT_COIN]: <ContentCoin />,
   }
 
   return <>{FORMS[type]}</>

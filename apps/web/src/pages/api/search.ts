@@ -281,8 +281,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
 export default withCors()(
   withRateLimit({
-    maxRequests: 30,
-    windowSeconds: 60, // 30 requests per minute
     keyPrefix: 'search',
   })(handler)
 )

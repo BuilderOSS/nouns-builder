@@ -1,4 +1,4 @@
-import { atoms, space } from '@buildeross/zord'
+import { atoms, space, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const modalHeader = style([
@@ -7,7 +7,7 @@ export const modalHeader = style([
     borderColor: 'border',
   }),
   {
-    borderBottom: '1px solid',
+    borderBottom: `1px solid ${vars.color.border}`,
   },
 ])
 
@@ -28,7 +28,7 @@ export const modalFooter = style([
     borderColor: 'border',
   }),
   {
-    borderTop: '1px solid',
+    borderTop: `1px solid ${vars.color.border}`,
     justifyContent: 'space-between',
     gap: space.x3,
   },

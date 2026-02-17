@@ -90,6 +90,10 @@ export const defaultInputStyle = style({
     '&::placeholder': {
       color: '#B3B3B3',
     },
+    '&:disabled': {
+      opacity: 0.4,
+      cursor: 'not-allowed',
+    },
   },
 })
 
@@ -107,6 +111,10 @@ export const defaultInputErrorStyle = style({
       outline: 'none',
       backgroundColor: '#FFF',
       borderColor: '#E6E6E6',
+    },
+    '&:disabled': {
+      opacity: 0.4,
+      cursor: 'not-allowed',
     },
   },
 })
@@ -215,6 +223,9 @@ export const numberInputStyle = style({
     '&::placeholder': {
       color: '#B3B3B3',
     },
+    '&:disabled': {
+      cursor: 'not-allowed',
+    },
   },
 })
 
@@ -241,6 +252,9 @@ export const numberInputErrorStyle = style({
     },
     '&::-webkit-input-placeholder': {
       textAlign: 'right',
+    },
+    '&:disabled': {
+      cursor: 'not-allowed',
     },
   },
 })

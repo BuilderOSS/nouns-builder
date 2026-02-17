@@ -61,12 +61,14 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     subTitle: 'Upgrade dao contracts',
     icon: 'plus',
     iconBackdrop: color.ghostHover,
+    iconFill: 'icon1',
   },
   [TransactionType.UPDATE_MINTER]: {
     title: 'Update Minter',
     subTitle: 'Update token minter',
     icon: 'plus',
     iconBackdrop: color.ghostHover,
+    iconFill: 'icon1',
   },
   [TransactionType.PAUSE_AUCTIONS]: {
     title: 'Pause Auctions',
@@ -109,7 +111,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     title: 'Migration',
     subTitle: 'Migrate from L1 to L2',
     icon: 'migrate',
-    iconBackdrop: 'rgba(350,100,0,.1)',
+    iconBackdrop: 'rgba(350, 100, 0, 0.1)',
   },
   [TransactionType.WALLET_CONNECT]: {
     title: 'WalletConnect',
@@ -129,5 +131,17 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     subTitle: 'Continuous token payments over time',
     icon: 'sablier',
     iconBackdrop: 'rgba(243, 139, 0, 0.1)',
+  },
+  [TransactionType.CREATOR_COIN]: {
+    title: 'Creator Coin',
+    subTitle: 'Create a proposal to mint Creator Coin',
+    icon: 'creatorCoin',
+    iconBackdrop: 'rgba(0, 163, 255, 0.1)',
+  },
+  [TransactionType.CONTENT_COIN]: {
+    title: 'Content Coin',
+    subTitle: 'Create a proposal to mint Content Coin',
+    icon: 'contentCoin',
+    iconBackdrop: 'rgba(0, 163, 255, 0.1)',
   },
 }

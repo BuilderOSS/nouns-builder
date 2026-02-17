@@ -27,6 +27,8 @@ export interface FormStoreState {
   setContributionAllocation: (contributionAllocation: Array<TokenAllocation>) => void
   auctionSettings: AuctionSettingsFormValues
   setAuctionSettings: (auctionSettings: AuctionSettingsFormValues) => void
+  enableFastDAO: boolean
+  setEnableFastDAO: (enableFastDAO: boolean) => void
   setUpArtwork: ArtworkFormValues
   setSetUpArtwork: (artwork: ArtworkFormValues) => void
   ipfsUpload: IPFSUpload[]
@@ -86,6 +88,7 @@ const initialState = {
       minutes: undefined,
     },
   },
+  enableFastDAO: false,
   reservedUntilTokenId: '0',
   founderAllocation: [],
   contributionAllocation: [],
@@ -128,6 +131,7 @@ export const useFormStore = create(
       setGeneral: (general: GeneralFormValues) => set({ general }),
       setAuctionSettings: (auctionSettings: AuctionSettingsFormValues) =>
         set({ auctionSettings }),
+      setEnableFastDAO: (enableFastDAO: boolean) => set({ enableFastDAO }),
       setFounderAllocation: (founderAllocation: Array<TokenAllocation>) =>
         set({ founderAllocation }),
       setContributionAllocation: (contributionAllocation: Array<TokenAllocation>) =>

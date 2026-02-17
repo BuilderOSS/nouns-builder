@@ -1,4 +1,9 @@
-import { PUBLIC_ALL_CHAINS, TESTNET_CHAINS } from '@buildeross/constants'
+import {
+  type Chains,
+  COIN_SUPPORTED_CHAIN_IDS,
+  PUBLIC_ALL_CHAINS,
+  TESTNET_CHAINS,
+} from '@buildeross/constants'
 import { CHAIN_ID, Duration } from '@buildeross/types'
 import { getAddress, isAddress } from 'viem'
 
@@ -131,6 +136,33 @@ export const flatten = (object: object) => {
   )
 }
 
+export const truncateHex = (
+  hex: `0x${string}` | undefined,
+  chars: number = 5
+): string => {
+  if (!hex) {
+    return ''
+  }
+
+  if (!hex.startsWith('0x')) {
+    return hex
+  }
+
+  return hex.substring(0, chars) + '…' + hex.substring(hex.length - chars, hex.length)
+}
+
+export const truncateAddress = (addr: string | undefined, chars: number = 5): string => {
+  if (!addr) {
+    return ''
+  }
+
+  if (!isAddress(addr, { strict: false })) {
+    return addr
+  }
+
+  return truncateHex(getAddress(addr), chars)
+}
+
 /**
  * Create snippet of wallet address or
  * return address if it is not a "address"
@@ -138,24 +170,9 @@ export const flatten = (object: object) => {
  *
  * @param addr
  * @param chars
- * @returns {string || null}
+ * @returns {string}
  */
-
-export const walletSnippet = (addr: string | number | undefined, chars: number = 5) => {
-  if (!addr) {
-    return ''
-  }
-
-  if (!isAddress(addr.toString(), { strict: false })) {
-    return addr.toString()
-  }
-
-  let _addr = getAddress(addr.toString())
-
-  return (
-    _addr.substring(0, chars) + '…' + _addr.substring(_addr.length - chars, _addr.length)
-  )
-}
+export const walletSnippet = truncateAddress
 
 /**
  * Pass a normal function in to have it return a promise with its valud
@@ -346,3 +363,23 @@ export const chainIdToSlug = (chainId: CHAIN_ID): string | undefined =>
 
 export const isTestnetChain = (chainId: CHAIN_ID): boolean =>
   TESTNET_CHAINS.some((chain) => chain.id === chainId)
+
+/**
+ * Checks if a chain ID supports coin/swap functionality (Base or Base Sepolia)
+ *
+ * @param chainId - The chain ID to check
+ * @returns {boolean} true if the chain supports coins/swaps, false otherwise
+ */
+export const isCoinSupportedChain = (chainId: CHAIN_ID): boolean =>
+  COIN_SUPPORTED_CHAIN_IDS.includes(chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number])
+
+export const getChainNamesString = (chains: Chains) => {
+  const chainNames = chains.map((chain) => chain.name)
+  if (chainNames.length === 1) {
+    return chainNames[0]
+  }
+  if (chainNames.length === 2) {
+    return chainNames.join(' and ')
+  }
+  return `${chainNames.slice(0, -1).join(', ')}, and ${chainNames.slice(-1)}`
+}

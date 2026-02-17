@@ -143,29 +143,7 @@ export const emptyState = style({
 })
 
 export const sectionTitle = style({
-  fontSize: '12px',
+  fontSize: '14px',
   fontWeight: 600,
-  textTransform: 'uppercase',
-  color: vars.color.text3,
-  letterSpacing: '0.5px',
+  color: vars.color.text1,
 })
-
-export const selectButton = style([
-  {
-    display: 'flex',
-    fontSize: 12,
-    cursor: 'pointer',
-    backgroundColor: vars.color.background2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '4px',
-    transition: 'background-color 0.2s ease',
-    ':hover': {
-      backgroundColor: vars.color.accentHover,
-    },
-    ':focus': {
-      outline: 'none',
-      backgroundColor: vars.color.accentHover,
-    },
-  },
-])
