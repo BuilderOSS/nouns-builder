@@ -173,3 +173,24 @@ export function calculateStreamedAmountLL(params: {
 
   return streamed
 }
+
+const WAD = 10n ** 18n
+
+export function toUD2x18(value: string | number): bigint {
+  // Convert to string without going through floating math where possible
+  // NOTE: For true decimal safety, prefer passing a string from the UI.
+  const s = typeof value === 'number' ? String(value) : value
+
+  if (!/^\d+(\.\d+)?$/.test(s)) {
+    throw new Error(`Invalid decimal: ${s}`)
+  }
+
+  const [whole, frac = ''] = s.split('.')
+  if (frac.length > 18) {
+    throw new Error(`Too many decimal places (max 18): ${s}`)
+  }
+
+  const fracPadded = (frac + '0'.repeat(18)).slice(0, 18)
+
+  return BigInt(whole) * WAD + BigInt(fracPadded)
+}

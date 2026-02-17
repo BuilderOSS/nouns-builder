@@ -20,6 +20,9 @@ export interface StreamTokensValues {
   durationType: 'days' | 'dates' // Toggle between days from now vs start/end dates (applies to all streams)
   cancelable: boolean // Whether streams can be cancelled (applies to all streams)
   transferable: boolean // Whether stream NFTs can be transferred (applies to all streams)
+  useExponential?: boolean // Whether to use exponential curve (LockupDynamic) instead of linear (applies to all streams)
+  exponent?: number // Exponent for exponential curve (2-18, only when useExponential=true)
+  invertExponent?: boolean // Whether to invert the exponent (e.g., 2 → 1/2 for frontloaded curve)
   streams: StreamFormValues[]
 }
 
@@ -84,12 +87,28 @@ const streamTokensSchema = () =>
       .required('Duration type is required.'),
     cancelable: yup.boolean().required('Cancelable setting is required.'),
     transferable: yup.boolean().required('Transferable setting is required.'),
+    useExponential: yup.boolean().optional(),
+    invertExponent: yup.boolean().optional(),
+    exponent: yup
+      .number()
+      .optional()
+      .when('useExponential', {
+        is: true,
+        then: (schema) =>
+          schema
+            .required('Exponent is required when using exponential curve')
+            .integer('Exponent must be a whole number')
+            .min(2, 'Exponent must be at least 2')
+            .max(18, 'Exponent cannot exceed 18 (UD2x18 maximum)'),
+        otherwise: (schema) => schema,
+      }),
     streams: yup
       .array()
       .of(StreamFormSchema)
       .min(1, 'At least one stream is required.')
       .test('validate-stream-fields', 'Stream fields validation', function (streams) {
         const durationType = this.parent.durationType
+        const useExponential = this.parent.useExponential
         if (!streams || streams.length === 0) return true
 
         const errors: yup.ValidationError[] = []
@@ -104,8 +123,9 @@ const streamTokensSchema = () =>
               )
             }
 
-            // Validate cliff doesn't exceed duration (for days mode)
+            // Validate cliff doesn't exceed duration (for days mode) - skip for exponential
             if (
+              !useExponential &&
               stream.cliffDays !== undefined &&
               stream.cliffDays > 0 &&
               stream.durationDays !== undefined &&
@@ -154,8 +174,9 @@ const streamTokensSchema = () =>
               )
             }
 
-            // Validate cliff doesn't exceed duration (for dates mode)
+            // Validate cliff doesn't exceed duration (for dates mode) - skip for exponential
             if (
+              !useExponential &&
               stream.cliffDays !== undefined &&
               stream.cliffDays > 0 &&
               stream.startDate &&

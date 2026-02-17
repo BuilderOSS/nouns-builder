@@ -1,4 +1,5 @@
 import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useDaoStore } from '@buildeross/stores'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -86,7 +87,11 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
     setIsUnPausing(true)
     try {
       const txHash = await writeContractAsync(unpauseData.request)
-      await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+      const receipt = await waitForTransactionReceipt(config, {
+        hash: txHash,
+        chainId: chain.id,
+      })
+      await awaitSubgraphSync(chain.id, receipt.blockNumber)
     } catch (e) {
       console.error(e)
     } finally {

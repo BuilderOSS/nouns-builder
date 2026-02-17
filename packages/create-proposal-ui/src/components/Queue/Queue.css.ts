@@ -5,6 +5,7 @@ export const confirmRemoveHeadingStyle = style({
   fontSize: 24,
   lineHeight: '30px',
   fontWeight: 700,
+  marginBottom: 8,
 })
 
 export const confirmRemoveHelper = style({

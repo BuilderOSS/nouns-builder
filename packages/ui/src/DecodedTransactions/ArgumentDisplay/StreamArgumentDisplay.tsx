@@ -2,6 +2,7 @@ import { TokenMetadata } from '@buildeross/hooks/useTokenMetadata'
 import { DecodedArg } from '@buildeross/types'
 import { formatCryptoVal } from '@buildeross/utils'
 import {
+  convertToInvertedFraction,
   formatStreamDuration,
   type StreamConfig,
 } from '@buildeross/utils/sablier/streams'
@@ -22,6 +23,31 @@ interface StreamArgumentDisplayProps {
   arg: DecodedArg
   tokenMetadata?: TokenMetadata | null
   streamData?: DecodedStreamBatch | null // For potential future use
+}
+
+const formatTimestamp = (timestamp: any) =>
+  new Date(timestamp * 1000).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+
+const formatExponentUD2x18 = (exponentUD2x18: any): string => {
+  if (!exponentUD2x18) return 'N/A'
+  try {
+    // Convert UD2x18 bigint to decimal number
+    const exponentValue = Number(BigInt(exponentUD2x18)) / 10 ** 18
+
+    // Try to convert to inverted fraction if in range (0, 1)
+    const invertedFraction = convertToInvertedFraction(exponentValue)
+    if (invertedFraction) return invertedFraction
+
+    // Otherwise round to max 3 decimal places and remove trailing zeros
+    const rounded = Math.round(exponentValue * 1000) / 1000
+    return rounded.toString()
+  } catch (error) {
+    return exponentUD2x18.toString()
+  }
 }
 
 export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
@@ -103,17 +129,17 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
 
                 {stream.timestamps && (
                   <>
-                    <Flex>
-                      start: {new Date(stream.timestamps.start * 1000).toLocaleString()}
-                    </Flex>
-                    <Flex>
-                      end: {new Date(stream.timestamps.end * 1000).toLocaleString()}
-                    </Flex>
+                    <Flex>start: {formatTimestamp(stream.timestamps.start)}</Flex>
+                    <Flex>end: {formatTimestamp(stream.timestamps.end)}</Flex>
                   </>
                 )}
 
+                {stream.startTime !== undefined && stream.startTime > 0 && (
+                  <Flex>start: {formatTimestamp(stream.startTime)}</Flex>
+                )}
+
                 {stream.cliffTime !== undefined && stream.cliffTime > 0 && (
-                  <Flex>cliff: {new Date(stream.cliffTime * 1000).toLocaleString()}</Flex>
+                  <Flex>cliff: {formatTimestamp(stream.cliffTime)}</Flex>
                 )}
 
                 {stream.cancelable !== undefined && (
@@ -122,6 +148,84 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
                 {stream.transferable !== undefined && (
                   <Flex>transferable: {stream.transferable ? 'true' : 'false'}</Flex>
                 )}
+                {stream.segmentsWithDuration !== undefined &&
+                  Array.isArray(stream.segmentsWithDuration) &&
+                  stream.segmentsWithDuration.map(
+                    (segment: any, segmentIndex: number) => (
+                      <Stack key={`segment-${index}-${segmentIndex}`} gap="x1">
+                        <Text fontWeight="heading">Stream #{index + 1}</Text>
+                        <Stack pl="x2" gap="x1">
+                          {segment.amount && (
+                            <Flex align="center" gap="x1">
+                              <Text>amount:</Text>
+                              {tokenMetadata?.logo && (
+                                <img
+                                  src={tokenMetadata.logo}
+                                  alt={tokenMetadata.symbol}
+                                  loading="lazy"
+                                  decoding="async"
+                                  width="16px"
+                                  height="16px"
+                                  style={{
+                                    maxWidth: '16px',
+                                    maxHeight: '16px',
+                                    objectFit: 'contain',
+                                  }}
+                                />
+                              )}
+                              <Text>{formatAmount(BigInt(segment.amount))}</Text>
+                            </Flex>
+                          )}
+                          {segment.exponent && (
+                            <Flex>
+                              exponent: {formatExponentUD2x18(segment.exponent)}
+                            </Flex>
+                          )}
+                          {segment.duration && (
+                            <Flex>
+                              duration: {formatStreamDuration(segment.duration)}
+                            </Flex>
+                          )}
+                        </Stack>
+                      </Stack>
+                    )
+                  )}
+                {stream.segments !== undefined &&
+                  Array.isArray(stream.segments) &&
+                  stream.segments.map((segment: any, segmentIndex: number) => (
+                    <Stack key={`segment-${index}-${segmentIndex}`} gap="x1">
+                      <Text fontWeight="heading">Stream #{index + 1}</Text>
+                      <Stack pl="x2" gap="x1">
+                        {segment.amount && (
+                          <Flex align="center" gap="x1">
+                            <Text>amount:</Text>
+                            {tokenMetadata?.logo && (
+                              <img
+                                src={tokenMetadata.logo}
+                                alt={tokenMetadata.symbol}
+                                loading="lazy"
+                                decoding="async"
+                                width="16px"
+                                height="16px"
+                                style={{
+                                  maxWidth: '16px',
+                                  maxHeight: '16px',
+                                  objectFit: 'contain',
+                                }}
+                              />
+                            )}
+                            <Text>{formatAmount(BigInt(segment.amount))}</Text>
+                          </Flex>
+                        )}
+                        {segment.exponent && (
+                          <Flex>exponent: {formatExponentUD2x18(segment.exponent)}</Flex>
+                        )}
+                        {segment.timestamp && (
+                          <Flex>timestamp: {formatTimestamp(segment.timestamp)}</Flex>
+                        )}
+                      </Stack>
+                    </Stack>
+                  ))}
                 {stream.shape !== undefined && <Flex>shape: {stream.shape}</Flex>}
               </Stack>
             </Stack>

@@ -67,10 +67,15 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
       toLower(target) === toLower(sablierContracts.batchLockup)) ||
     (sablierContracts.lockup && toLower(target) === toLower(sablierContracts.lockup))
 
+  const isValidFunctionName =
+    functionName === 'createWithDurationsLL' ||
+    functionName === 'createWithTimestampsLL' ||
+    functionName === 'createWithDurationsLD' ||
+    functionName === 'createWithTimestampsLD'
+
   const isSablierArgument =
     isSablierTarget &&
-    (functionName === 'createWithDurationsLL' ||
-      functionName === 'createWithTimestampsLL') &&
+    isValidFunctionName &&
     (arg.name === 'lockup' ||
       arg.name === '_lockup' ||
       arg.name === 'token' ||
