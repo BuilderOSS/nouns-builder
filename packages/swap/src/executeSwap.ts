@@ -6,6 +6,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import {
   Address,
   encodeAbiParameters,
+  encodeFunctionData,
   encodePacked,
   erc20Abi,
   Hex,
@@ -222,13 +223,9 @@ function buildSingleHopSwap(
   const settleCurrency = zeroForOne ? poolKey.currency0 : poolKey.currency1
   const takeCurrency = zeroForOne ? poolKey.currency1 : poolKey.currency0
 
-  // Use SETTLE_ALL/TAKE_ALL for non-ETH swaps, explicit SETTLE/TAKE only for ETH wrapping/unwrapping
-  const useSettleAll = !isInputEth // Use SETTLE_ALL unless we're using wrapped ETH from router
-  const useTakeAll = !isOutputEth // Use TAKE_ALL unless we need to keep WETH in router for unwrapping
-
   // Encode actions
-  const settleAction = useSettleAll ? Actions.SETTLE_ALL : Actions.SETTLE
-  const takeAction = useTakeAll ? Actions.TAKE_ALL : Actions.TAKE
+  const settleAction = Actions.SETTLE
+  const takeAction = Actions.TAKE
 
   const actions = encodePacked(
     ['uint8', 'uint8', 'uint8'],
@@ -274,45 +271,25 @@ function buildSingleHopSwap(
     )
   )
 
-  // 2) SETTLE or SETTLE_ALL
-  if (useSettleAll) {
-    // SETTLE_ALL(currency, maxAmount)
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'uint256' }],
-        [settleCurrency, amountIn]
-      )
+  // SETTLE(currency, amount, payerIsUser)
+  // payerIsUser: false when using wrapped ETH from router or true when using WETH input
+  params.push(
+    encodeAbiParameters(
+      [{ type: 'address' }, { type: 'uint256' }, { type: 'bool' }],
+      [settleCurrency, OPEN_DELTA, isInputEth ? false : true]
     )
-  } else {
-    // SETTLE(currency, amount, payerIsUser)
-    // payerIsUser: false when using wrapped ETH from router
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'uint256' }, { type: 'bool' }],
-        [settleCurrency, OPEN_DELTA, false]
-      )
-    )
-  }
+  )
 
-  // 3) TAKE or TAKE_ALL
-  if (useTakeAll) {
-    // TAKE_ALL(currency, minAmount)
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'uint256' }],
-        [takeCurrency, minAmountOut]
-      )
+  // 3) TAKE
+  // TAKE(currency, recipient, amount)
+  // recipient: address(2) = ROUTER to keep WETH for unwrapping or MSG_SENDER for WETH output
+  const recipient = isOutputEth ? ADDRESS_THIS : MSG_SENDER
+  params.push(
+    encodeAbiParameters(
+      [{ type: 'address' }, { type: 'address' }, { type: 'uint256' }],
+      [takeCurrency, recipient, OPEN_DELTA]
     )
-  } else {
-    // TAKE(currency, recipient, amount)
-    // recipient: address(2) = ROUTER to keep WETH for unwrapping
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'address' }, { type: 'uint256' }],
-        [takeCurrency, ADDRESS_THIS, OPEN_DELTA]
-      )
-    )
-  }
+  )
 
   const inputs = [
     encodeAbiParameters([{ type: 'bytes' }, { type: 'bytes[]' }], [actions, params]),
@@ -361,13 +338,8 @@ function buildMultiHopSwap(
     }
   })
 
-  // Multi-hop needs: SETTLE_ALL, SWAP_EXACT_IN, TAKE_ALL
-  // The order matters: SETTLE first to pay in, SWAP to execute, TAKE to collect
-  const useSettleAll = !isInputEth
-  const useTakeAll = !isOutputEth
-
-  const settleAction = useSettleAll ? Actions.SETTLE_ALL : Actions.SETTLE
-  const takeAction = useTakeAll ? Actions.TAKE_ALL : Actions.TAKE
+  const settleAction = Actions.SETTLE
+  const takeAction = Actions.TAKE
 
   const actions = encodePacked(
     ['uint8', 'uint8', 'uint8'],
@@ -411,39 +383,23 @@ function buildMultiHopSwap(
     )
   )
 
-  // 2) SETTLE or SETTLE_ALL
-  if (useSettleAll) {
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'uint256' }],
-        [currencyIn, amountIn]
-      )
+  // 2) SETTLE
+  const payerIsUser = isInputEth ? false : true
+  params.push(
+    encodeAbiParameters(
+      [{ type: 'address' }, { type: 'uint256' }, { type: 'bool' }],
+      [currencyIn, amountIn, payerIsUser]
     )
-  } else {
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'uint256' }, { type: 'bool' }],
-        [currencyIn, amountIn, false]
-      )
-    )
-  }
+  )
 
-  // 3) TAKE or TAKE_ALL
-  if (useTakeAll) {
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'uint256' }],
-        [currencyOut, minAmountOut]
-      )
+  // 3) TAKE
+  const recipient = isOutputEth ? ADDRESS_THIS : MSG_SENDER
+  params.push(
+    encodeAbiParameters(
+      [{ type: 'address' }, { type: 'address' }, { type: 'uint256' }],
+      [currencyOut, recipient, OPEN_DELTA]
     )
-  } else {
-    params.push(
-      encodeAbiParameters(
-        [{ type: 'address' }, { type: 'address' }, { type: 'uint256' }],
-        [currencyOut, ADDRESS_THIS, OPEN_DELTA]
-      )
-    )
-  }
+  )
 
   const inputs = [
     encodeAbiParameters([{ type: 'bytes' }, { type: 'bytes[]' }], [actions, params]),
@@ -571,6 +527,19 @@ export async function executeSwap({
     })
   }
 
+  const encodedData = encodeFunctionData({
+    abi: universalRouterAbi,
+    functionName: 'execute',
+    args: [commands, inputs, deadline],
+  })
+
+  const gas = await publicClient.estimateGas({
+    account: walletClient.account,
+    to: universalRouterAddress,
+    data: encodedData,
+    value,
+  })
+
   const hash = await walletClient.writeContract({
     address: universalRouterAddress,
     abi: universalRouterAbi,
@@ -579,6 +548,7 @@ export async function executeSwap({
     account: walletClient.account,
     value,
     chain: walletClient.chain,
+    gas: (gas * 3n) / 2n, // add extra gas for safety
   })
 
   return { hash }
