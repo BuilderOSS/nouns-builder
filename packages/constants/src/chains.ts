@@ -141,7 +141,9 @@ export const L2_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   ? ([CHAIN_ID.ZORA_SEPOLIA, CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
   : ([CHAIN_ID.ZORA, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)
 
-export const COIN_SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA] as const // ensure non-empty
+// export const COIN_SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA] as const // ensure non-empty
+// TODO: support base mainnet after all tests are done
+export const COIN_SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE_SEPOLIA] as const // ensure non-empty
 
 export type COIN_SUPPORTED_CHAIN_ID = (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
 
