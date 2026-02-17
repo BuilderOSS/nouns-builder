@@ -179,7 +179,7 @@ export const ReviewProposalForm = ({
               // Extract the coin address from the event args
               // The event structure should have the coin address in args
               const args = decodedLog.args as any
-              if (args.coin) {
+              if (args.proposalId) {
                 proposalId = args.proposalId as string
                 break
               }

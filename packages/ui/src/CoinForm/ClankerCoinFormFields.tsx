@@ -1,6 +1,12 @@
-import { FEE_CONFIG_OPTIONS } from '@buildeross/utils'
+import {
+  DEFAULT_LOCKUP_DAYS,
+  DEFAULT_VAULT_PERCENTAGE,
+  DEFAULT_VESTING_DAYS,
+  FEE_CONFIG_OPTIONS,
+} from '@buildeross/utils'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
+import { formatEther } from 'viem'
 
 import NumberInput from '../Fields/NumberInput'
 import SmartInput from '../Fields/SmartInput'
@@ -19,6 +25,7 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
   showProperties = false,
   showCurrencyInput = true,
   currencyOptions,
+  treasuryEthBalance,
 }) => {
   const [showVaultSettings, setShowVaultSettings] = React.useState(false)
 
@@ -71,9 +78,17 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
 
         {/* Dev Buy Amount */}
         <Box>
-          <Text as="label" htmlFor="devBuyEthAmount" variant="label-md" mb="x2">
-            Initial Purchase (ETH)
-          </Text>
+          <Flex justify="space-between" align="center" mb="x2">
+            <Text as="label" htmlFor="devBuyEthAmount" variant="label-md">
+              Initial Purchase (ETH)
+            </Text>
+            {treasuryEthBalance !== undefined && (
+              <Text variant="paragraph-xs" color="text4">
+                Treasury Balance: {parseFloat(formatEther(treasuryEthBalance)).toFixed(4)}{' '}
+                ETH
+              </Text>
+            )}
+          </Flex>
           <Text variant="paragraph-sm" color="text3" mb="x2">
             Optional: Amount of ETH to automatically purchase on deployment (e.g., 0.1
             ETH)
@@ -102,7 +117,16 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
           </Text>
           <Toggle
             on={showVaultSettings}
-            onToggle={() => setShowVaultSettings(!showVaultSettings)}
+            onToggle={() => {
+              const next = !showVaultSettings
+              if (!next) {
+                formik.setFieldValue('vaultPercentage', DEFAULT_VAULT_PERCENTAGE)
+                formik.setFieldValue('lockupDuration', DEFAULT_LOCKUP_DAYS)
+                formik.setFieldValue('vestingDuration', DEFAULT_VESTING_DAYS)
+                formik.setFieldValue('vaultRecipient', undefined)
+              }
+              setShowVaultSettings(next)
+            }}
           />
         </Flex>
 

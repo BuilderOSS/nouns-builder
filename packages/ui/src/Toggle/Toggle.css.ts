@@ -18,20 +18,9 @@ export const toggleStyle = style([
   },
 ])
 
-export const allocationToggle = styleVariants({
+export const toggleContainer = styleVariants({
   off: [toggleStyle, { justifyContent: 'flex-start', background: '#FFF' }],
   on: [toggleStyle, { justifyContent: 'flex-end', background: '#000' }],
-})
-
-export const allocationToggleButton = style({
-  border: '2px solid #000',
-  marginTop: '-2px',
-  background: '#FFF',
-})
-
-export const allocationToggleButtonVariants = styleVariants({
-  off: [allocationToggleButton, { marginLeft: '-2px' }],
-  on: [allocationToggleButton, { marginRight: '-2px' }],
 })
 
 export const plainToggleButton = style([

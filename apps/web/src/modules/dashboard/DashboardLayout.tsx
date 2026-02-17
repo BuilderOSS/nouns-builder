@@ -55,19 +55,6 @@ export const DashboardLayout = ({
   return (
     <Flex py={{ '@initial': 'x0', '@1024': 'x6' }} w={'100%'} justify="center">
       <Box w="100%" style={{ maxWidth: 1440 }}>
-        {/* Header - only show on desktop
-        <Flex
-          justify="space-between"
-          align="center"
-          mb={'x8'}
-          px={{ '@initial': 'x0', '@1024': 'x8' }}
-          className={styles.desktopLayout}
-        >
-          <Text fontSize={35} fontWeight={'display'}>
-            Dashboard
-          </Text>
-        </Flex> */}
-
         {/* Desktop: Two-column layout */}
         <Flex
           gap="x12"

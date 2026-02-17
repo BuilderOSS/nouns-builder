@@ -1,3 +1,9 @@
+import {
+  DEFAULT_CLANKER_TARGET_FDV,
+  DEFAULT_LOCKUP_DAYS,
+  DEFAULT_VAULT_PERCENTAGE,
+  DEFAULT_VESTING_DAYS,
+} from '@buildeross/utils'
 import * as yup from 'yup'
 
 export const coinFormSchema = yup.object({
@@ -55,14 +61,14 @@ export const coinFormSchema = yup.object({
     .number()
     .transform((value, originalValue) => {
       if (originalValue === '' || originalValue === null || originalValue === undefined) {
-        return 6364000 // default value (geometric center of $27K-$1.5B)
+        return DEFAULT_CLANKER_TARGET_FDV
       }
       const num = Number(originalValue)
       return isNaN(num) ? originalValue : num
     })
     .positive('Target FDV must be a positive number')
     .min(1000, 'Target FDV must be at least $1,000')
-    .default(6364000)
+    .default(DEFAULT_CLANKER_TARGET_FDV)
     .typeError('Target FDV must be a valid number'),
   // Clanker-specific fields
   poolConfig: yup.string(),
@@ -71,38 +77,38 @@ export const coinFormSchema = yup.object({
     .number()
     .transform((value, originalValue) => {
       if (originalValue === '' || originalValue === null || originalValue === undefined) {
-        return 10 // default value
+        return DEFAULT_VAULT_PERCENTAGE
       }
       const num = Number(originalValue)
       return isNaN(num) ? originalValue : num
     })
     .min(1, 'Vault percentage must be at least 1%')
     .max(90, 'Vault percentage cannot exceed 90%')
-    .default(10)
+    .default(DEFAULT_VAULT_PERCENTAGE)
     .typeError('Vault percentage must be a valid number'),
   lockupDuration: yup
     .number()
     .transform((value, originalValue) => {
       if (originalValue === '' || originalValue === null || originalValue === undefined) {
-        return 30 // default value
+        return DEFAULT_LOCKUP_DAYS
       }
       const num = Number(originalValue)
       return isNaN(num) ? originalValue : num
     })
     .min(7, 'Lockup duration must be at least 7 days')
-    .default(30)
+    .default(DEFAULT_LOCKUP_DAYS)
     .typeError('Lockup duration must be a valid number'),
   vestingDuration: yup
     .number()
     .transform((value, originalValue) => {
       if (originalValue === '' || originalValue === null || originalValue === undefined) {
-        return 30 // default value
+        return DEFAULT_VESTING_DAYS
       }
       const num = Number(originalValue)
       return isNaN(num) ? originalValue : num
     })
     .min(0, 'Vesting duration cannot be negative')
-    .default(30)
+    .default(DEFAULT_VESTING_DAYS)
     .typeError('Vesting duration must be a valid number'),
   vaultRecipient: yup
     .string()

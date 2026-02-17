@@ -1,7 +1,8 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
+import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import { useFormik } from 'formik'
 import React, { useMemo } from 'react'
@@ -53,6 +54,14 @@ const EVENT_TYPE_LABELS: Record<FeedEventType, string> = {
   [FeedEventType.ZoraCoinCreated]: 'Post Published',
 }
 
+const COIN_EVENT_TYPES: FeedEventType[] = [
+  FeedEventType.ClankerTokenCreated,
+  FeedEventType.ZoraCoinCreated,
+]
+
+const hasNoCoinSupportedChains = (chainIds: CHAIN_ID[]) =>
+  chainIds.length > 0 && chainIds.every((chainId) => !isCoinSupportedChain(chainId))
+
 export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   open,
   onClose,
@@ -81,13 +90,20 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
 
   const toggleChain = (chainId: CHAIN_ID) => {
     const currentChainIds = formik.values.chainIds
+    let finalChainIds: CHAIN_ID[] = []
     if (currentChainIds.includes(chainId)) {
-      formik.setFieldValue(
-        'chainIds',
-        currentChainIds.filter((id) => id !== chainId)
-      )
+      finalChainIds = currentChainIds.filter((id) => id !== chainId)
     } else {
-      formik.setFieldValue('chainIds', [...currentChainIds, chainId])
+      finalChainIds = [...currentChainIds, chainId]
+    }
+    formik.setFieldValue('chainIds', finalChainIds)
+
+    const currentEventTypes = formik.values.eventTypes
+    if (hasNoCoinSupportedChains(finalChainIds)) {
+      formik.setFieldValue(
+        'eventTypes',
+        currentEventTypes.filter((type) => !COIN_EVENT_TYPES.includes(type))
+      )
     }
   }
 
@@ -141,6 +157,17 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
     }
     return parts
   }, [formik.values])
+
+  const eventTypeLabels = useMemo(() => {
+    if (hasNoCoinSupportedChains(formik.values.chainIds)) {
+      return Object.fromEntries(
+        Object.entries(EVENT_TYPE_LABELS).filter(
+          ([eventType]) => !COIN_EVENT_TYPES.includes(eventType as FeedEventType)
+        )
+      )
+    }
+    return EVENT_TYPE_LABELS
+  }, [formik.values.chainIds])
 
   const hasFilters =
     formik.values.chainIds.length > 0 ||
@@ -197,7 +224,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
             <div className={filterSection}>
               <Text className={sectionLabel}>Event Types</Text>
               <div className={filterGrid}>
-                {Object.entries(EVENT_TYPE_LABELS).map(([eventType, label]) => (
+                {Object.entries(eventTypeLabels).map(([eventType, label]) => (
                   <Label
                     key={eventType}
                     className={filterItem}

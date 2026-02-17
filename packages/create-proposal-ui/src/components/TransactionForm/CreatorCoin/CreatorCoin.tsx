@@ -8,6 +8,12 @@ import {
   COIN_SUPPORTED_CHAIN_IDS,
   COIN_SUPPORTED_CHAINS,
 } from '@buildeross/constants'
+import {
+  EAS_CONTRACT_ADDRESS,
+  easAbi,
+  TREASURY_ASSET_PIN_SCHEMA,
+  TREASURY_ASSET_PIN_SCHEMA_UID,
+} from '@buildeross/constants/eas'
 import { useClankerTokenPrice, useClankerTokens, useEthUsdPrice } from '@buildeross/hooks'
 import { ClankerTokenFragment } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
@@ -24,26 +30,53 @@ import {
   DEFAULT_CLANKER_TARGET_FDV,
   DEFAULT_CLANKER_TICK_SPACING,
   DEFAULT_CLANKER_TOTAL_SUPPLY,
+  DEFAULT_LOCKUP_DAYS,
+  DEFAULT_VAULT_PERCENTAGE,
+  DEFAULT_VESTING_DAYS,
   DYNAMIC_FEE_FLAG,
   FEE_CONFIGS,
   getChainNamesString,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { type ClankerTokenV4, FEE_CONFIGS as SDK_FEE_CONFIGS } from 'clanker-sdk'
 import { Clanker } from 'clanker-sdk/v4'
 import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
-import React, { useMemo, useState } from 'react'
-import { type Address, encodeFunctionData, getAddress, isAddressEqual } from 'viem'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  type Address,
+  encodeFunctionData,
+  formatEther,
+  getAddress,
+  type Hex,
+  isAddressEqual,
+  parseEther,
+  zeroHash,
+} from 'viem'
+import { useBalance } from 'wagmi'
 import { ZodError } from 'zod'
 
 import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
 
 const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
+const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
 
-// Default values for Clanker deployment
-const DEFAULT_VAULT_PERCENTAGE = 10 // 10% of supply
-const DEFAULT_LOCKUP_DAYS = 30 // 30 days
-const DEFAULT_VESTING_DAYS = 30 // 30 days
+/**
+ * FormObserver component to watch form values and trigger callback
+ */
+interface FormObserverProps {
+  onChange: (values: CoinFormValues) => void
+}
+
+const FormObserver: React.FC<FormObserverProps> = ({ onChange }) => {
+  const { values } = useFormikContext<CoinFormValues>()
+
+  useEffect(() => {
+    onChange(values)
+  }, [values, onChange])
+
+  return null
+}
 
 /**
  * Parse error into a user-friendly message
@@ -343,12 +376,15 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
   mediaType = 'image',
   showProperties = false,
 }) => {
-  const { treasury } = useDaoStore((state) => state.addresses)
+  const { treasury, token: daoTokenAddress } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { chain } = useChainStore()
 
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
+  const [pinToTreasury, setPinToTreasury] = useState(false)
+
+  const isEasSupported = !!EAS_CONTRACT_ADDRESS[chain.id]
 
   // Fetch current ETH/USD price
   const {
@@ -393,6 +429,12 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
     return new Clanker()
   }, [isChainSupported])
 
+  // Fetch treasury ETH balance to validate dev buy amount
+  const { data: treasuryBalance } = useBalance({
+    address: treasury as Address | undefined,
+    chainId: chain.id,
+  })
+
   // Initial values from props with Clanker defaults
   const initialValues: CoinFormValues = useMemo(() => {
     const wethAddress = WETH_ADDRESS[chain.id as keyof typeof WETH_ADDRESS]
@@ -423,6 +465,12 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
       devBuyEthAmount: providedInitialValues?.devBuyEthAmount || undefined,
     }
   }, [providedInitialValues, chain.id, latestBuilderClankerToken])
+
+  const [previewData, setPreviewData] = useState<CoinFormValues>(initialValues)
+
+  const handlePreviewChange = useCallback((values: CoinFormValues) => {
+    setPreviewData(values)
+  }, [])
 
   const handleSubmit = async (
     values: CoinFormValues,
@@ -514,6 +562,52 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
         transactions: [transaction],
       })
 
+      // Optionally add a PIN_TREASURY_ASSET transaction as the last step
+      if (pinToTreasury && txData.expectedAddress && daoTokenAddress) {
+        const easContractAddress = EAS_CONTRACT_ADDRESS[chain.id]
+        if (easContractAddress) {
+          const coinAddress = getAddress(txData.expectedAddress)
+          const encodedData = schemaEncoder.encodeData([
+            { name: 'tokenType', type: 'uint8', value: 0 },
+            { name: 'token', type: 'address', value: coinAddress },
+            { name: 'isCollection', type: 'bool', value: true },
+            { name: 'tokenId', type: 'uint256', value: 0n },
+          ]) as Hex
+
+          const pinCalldata = encodeFunctionData({
+            abi: easAbi,
+            functionName: 'attest',
+            args: [
+              {
+                schema: TREASURY_ASSET_PIN_SCHEMA_UID as `0x${string}`,
+                data: {
+                  recipient: getAddress(daoTokenAddress),
+                  expirationTime: 0n,
+                  revocable: true,
+                  refUID: zeroHash,
+                  data: encodedData,
+                  value: 0n,
+                },
+              },
+            ],
+          })
+
+          addTransaction({
+            type: TransactionType.PIN_TREASURY_ASSET,
+            summary: `Pin ${values.symbol} creator coin to treasury`,
+            transactions: [
+              {
+                functionSignature:
+                  'attest((bytes32,(address,uint64,bool,bytes32,bytes,uint256)))',
+                target: easContractAddress,
+                value: '0',
+                calldata: pinCalldata,
+              },
+            ],
+          })
+        }
+      }
+
       // Reset form
       actions.resetForm()
 
@@ -599,6 +693,25 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
           const isDisabled =
             formik.isSubmitting || formik.isValidating || !treasury || isPricesLoading
 
+          // Check dev buy amount against treasury ETH balance
+          const devBuyAmount = formik.values.devBuyEthAmount
+          const devBuyBalanceError = (() => {
+            if (!devBuyAmount || Number(devBuyAmount) <= 0 || !treasuryBalance)
+              return undefined
+            try {
+              const devBuyWei = parseEther(String(devBuyAmount))
+              if (devBuyWei > treasuryBalance.value) {
+                const balanceEth = parseFloat(formatEther(treasuryBalance.value)).toFixed(
+                  4
+                )
+                return `Dev buy amount (${devBuyAmount} ETH) exceeds treasury ETH balance of ${balanceEth} ETH.`
+              }
+            } catch {
+              // Invalid amount — let Formik validation handle it
+            }
+            return undefined
+          })()
+
           return (
             <Box
               as="fieldset"
@@ -606,8 +719,11 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Flex as={Form} direction="column" gap="x6">
+                {/* Observer to trigger preview updates */}
+                <FormObserver onChange={handlePreviewChange} />
+
                 {/* Preview positioned on the right side (hidden on mobile) */}
-                <CreatorCoinPreviewDisplay />
+                <CreatorCoinPreviewDisplay previewData={previewData} chainId={chain.id} />
 
                 <Stack gap="x4">
                   <Text variant="heading-sm">Create Creator Coin</Text>
@@ -625,7 +741,29 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
                   showCurrencyInput={true}
                   showTargetFdv={true}
                   currencyOptions={currencyOptions}
+                  treasuryEthBalance={treasuryBalance?.value}
                 />
+
+                {/* Dev Buy Balance Error */}
+                {devBuyBalanceError && (
+                  <Box
+                    p="x4"
+                    borderRadius="curved"
+                    style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
+                  >
+                    <Text
+                      variant="paragraph-sm"
+                      color="negative"
+                      style={{
+                        wordBreak: 'break-word',
+                        overflowWrap: 'break-word',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {devBuyBalanceError}
+                    </Text>
+                  </Box>
+                )}
 
                 {/* Launch Economics Preview */}
                 {ethUsdPrice && formik.values.currency && !isDisabled && treasury && (
@@ -718,6 +856,37 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
                   </Box>
                 )}
 
+                {/* Pin to Treasury Checkbox */}
+                {isEasSupported && (
+                  <Box
+                    p="x4"
+                    borderRadius="curved"
+                    borderStyle="solid"
+                    borderWidth="normal"
+                    borderColor="border"
+                    backgroundColor="background2"
+                  >
+                    <label
+                      style={{
+                        display: 'flex',
+                        gap: '12px',
+                        cursor: 'pointer',
+                        alignItems: 'flex-start',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={pinToTreasury}
+                        onChange={(e) => setPinToTreasury(e.target.checked)}
+                        style={{ marginTop: '4px', flexShrink: 0 }}
+                      />
+                      <Text variant="paragraph-sm" color="text3">
+                        Automatically pin creator coin to treasury
+                      </Text>
+                    </label>
+                  </Box>
+                )}
+
                 {/* Disclaimer Checkbox */}
                 <Box
                   p="x4"
@@ -752,7 +921,12 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
                   borderRadius="curved"
                   w="100%"
                   type="submit"
-                  disabled={isDisabled || !formik.isValid || !disclaimerAccepted}
+                  disabled={
+                    isDisabled ||
+                    !formik.isValid ||
+                    !disclaimerAccepted ||
+                    !!devBuyBalanceError
+                  }
                 >
                   {formik.isSubmitting
                     ? 'Adding Transaction to Queue...'

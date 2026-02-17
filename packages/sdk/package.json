@@ -84,8 +84,8 @@
     "clean": "rm -rf dist .turbo",
     "codegen": "graphql-codegen",
     "generate-abis": "node ./scripts/generate-abis.js",
-    "parse-events": "tsx ./scripts/parse-events.ts",
     "lint": "pnpm type-check && eslint src --fix",
+    "parse-events": "tsx ./scripts/parse-events.ts",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts"

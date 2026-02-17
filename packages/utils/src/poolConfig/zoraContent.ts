@@ -35,14 +35,10 @@ export function createContentPoolConfigFromTargetFdv(params: {
   currency: Address
   quoteTokenUsd: number
   targetFdvUsd: number
-  tickSpacing?: number
 }): DiscoveryPoolConfig {
-  const {
-    currency,
-    quoteTokenUsd,
-    targetFdvUsd,
-    tickSpacing = DEFAULT_ZORA_TICK_SPACING,
-  } = params
+  const { currency, quoteTokenUsd, targetFdvUsd } = params
+
+  const tickSpacing = DEFAULT_ZORA_TICK_SPACING
 
   if (!Number.isFinite(targetFdvUsd) || targetFdvUsd <= 0)
     throw new Error('targetFdvUsd must be positive')
@@ -116,9 +112,8 @@ export function estimateTargetFdvUsd(params: { creatorFdvUsd: number }): number 
 export function createContentPoolConfigWithClankerTokenAsCurrency(params: {
   currency: Address
   clankerTokenPriceUsd: number
-  tickSpacing?: number
 }): DiscoveryPoolConfig {
-  const { currency, clankerTokenPriceUsd, tickSpacing } = params
+  const { currency, clankerTokenPriceUsd } = params
 
   const creatorFdvUsd = clankerTokenPriceUsd * DEFAULT_CLANKER_TOTAL_SUPPLY
 
@@ -128,6 +123,5 @@ export function createContentPoolConfigWithClankerTokenAsCurrency(params: {
     currency,
     quoteTokenUsd: clankerTokenPriceUsd,
     targetFdvUsd,
-    tickSpacing,
   })
 }

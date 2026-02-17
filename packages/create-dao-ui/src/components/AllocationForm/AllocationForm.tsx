@@ -263,7 +263,6 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
               <Toggle
                 on={hasFounderAllocation}
                 onToggle={handleToggleFounderAllocation}
-                variant="plain"
               />
             </Flex>
 

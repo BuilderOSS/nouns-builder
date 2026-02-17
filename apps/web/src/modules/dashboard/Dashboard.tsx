@@ -136,7 +136,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           <>
             <UserProfileCard
               address={address}
-              daoCount={0}
+              daoCount={-1}
               ensName={displayName}
               ensAvatar={ensAvatar}
             />
@@ -166,7 +166,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           <>
             <UserProfileCard
               address={address}
-              daoCount={0}
+              daoCount={-1}
               ensName={displayName}
               ensAvatar={ensAvatar}
             />

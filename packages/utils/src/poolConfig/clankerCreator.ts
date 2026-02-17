@@ -23,8 +23,6 @@ function assertStrictlyIncreasing(values: number[], label: string) {
   }
 }
 
-const TEMPLATE_ETH_USD = 2700
-
 const CLANKER_PROJECT_TEMPLATE_TICKS = {
   min: -230_400,
   mid1: -214_000,
@@ -33,6 +31,8 @@ const CLANKER_PROJECT_TEMPLATE_TICKS = {
   mid4: -141_000,
   max: -120_000,
 } as const
+
+const TEMPLATE_CENTER_TICK = -175600
 
 const CLANKER_PROJECT_TEMPLATE_POSITIONS: Array<{
   a: keyof typeof CLANKER_PROJECT_TEMPLATE_TICKS
@@ -45,6 +45,15 @@ const CLANKER_PROJECT_TEMPLATE_POSITIONS: Array<{
   { a: 'mid3', b: 'max', bps: 2000 },
   { a: 'mid4', b: 'max', bps: 500 },
 ]
+
+const CLANKER_PROJECT_TEMPLATE_OFFSETS = {
+  min: CLANKER_PROJECT_TEMPLATE_TICKS.min - TEMPLATE_CENTER_TICK,
+  mid1: CLANKER_PROJECT_TEMPLATE_TICKS.mid1 - TEMPLATE_CENTER_TICK,
+  mid2: CLANKER_PROJECT_TEMPLATE_TICKS.mid2 - TEMPLATE_CENTER_TICK,
+  mid3: CLANKER_PROJECT_TEMPLATE_TICKS.mid3 - TEMPLATE_CENTER_TICK,
+  mid4: CLANKER_PROJECT_TEMPLATE_TICKS.mid4 - TEMPLATE_CENTER_TICK,
+  max: CLANKER_PROJECT_TEMPLATE_TICKS.max - TEMPLATE_CENTER_TICK,
+} as const
 
 /**
  * Create 5 Clanker pool positions based on target FDV and geometric spread.
@@ -59,21 +68,16 @@ const CLANKER_PROJECT_TEMPLATE_POSITIONS: Array<{
  *
  * @param targetFdvUsd - Target fully diluted valuation in USD (geometric center)
  * @param quoteTokenUsd - USD price of paired token (e.g., ETH price)
- * @param tickSpacing - Uniswap tick spacing (default: 60)
  * @returns Array of 5 pool positions with ticks and basis points
  */
 export function createClankerPoolPositionsFromTargetFdv(params: {
   targetFdvUsd: number
-  quoteTokenUsd: number // ETH or any token you can price in USD
-  tickSpacing?: number
-  templateEthUsd?: number // optional override, default 2700
+  quoteTokenUsd: number
   targetFdvFloorUsd?: number
   targetFdvCapUsd?: number
 }): ClankerPoolPosition[] {
   const {
     quoteTokenUsd,
-    tickSpacing = DEFAULT_CLANKER_TICK_SPACING,
-    templateEthUsd = TEMPLATE_ETH_USD,
     targetFdvFloorUsd = 250_000,
     targetFdvCapUsd = 100_000_000,
   } = params
@@ -81,18 +85,10 @@ export function createClankerPoolPositionsFromTargetFdv(params: {
 
   if (targetFdvUsd <= 0) throw new Error('targetFdvUsd must be positive')
   if (quoteTokenUsd <= 0) throw new Error('quoteTokenUsd must be positive')
-  if (templateEthUsd <= 0) throw new Error('templateEthUsd must be positive')
 
-  // Clamp target FDV (safety rails)
+  const tickSpacing = DEFAULT_CLANKER_TICK_SPACING
+
   targetFdvUsd = clamp(targetFdvUsd, targetFdvFloorUsd, targetFdvCapUsd)
-
-  // Compute center ticks
-  const tickTemplateCenter = fdvToTick({
-    fdvUsd: DEFAULT_CLANKER_TARGET_FDV,
-    quoteTokenUsd: templateEthUsd,
-    tickSpacing,
-    totalSupply: DEFAULT_CLANKER_TOTAL_SUPPLY,
-  })
 
   const tickDesiredCenter = fdvToTick({
     fdvUsd: targetFdvUsd,
@@ -101,25 +97,20 @@ export function createClankerPoolPositionsFromTargetFdv(params: {
     totalSupply: DEFAULT_CLANKER_TOTAL_SUPPLY,
   })
 
-  const delta = tickDesiredCenter - tickTemplateCenter
+  const shifted = Object.fromEntries(
+    (
+      Object.keys(CLANKER_PROJECT_TEMPLATE_OFFSETS) as Array<
+        keyof typeof CLANKER_PROJECT_TEMPLATE_OFFSETS
+      >
+    ).map((k) => [
+      k,
+      snapToTickSpacing(
+        tickDesiredCenter + CLANKER_PROJECT_TEMPLATE_OFFSETS[k],
+        tickSpacing
+      ),
+    ])
+  ) as Record<keyof typeof CLANKER_PROJECT_TEMPLATE_OFFSETS, number>
 
-  // Shift template ticks
-  const shifted: Record<keyof typeof CLANKER_PROJECT_TEMPLATE_TICKS, number> = {
-    min: 0,
-    mid1: 0,
-    mid2: 0,
-    mid3: 0,
-    mid4: 0,
-    max: 0,
-  }
-
-  for (const k of Object.keys(CLANKER_PROJECT_TEMPLATE_TICKS) as Array<
-    keyof typeof CLANKER_PROJECT_TEMPLATE_TICKS
-  >) {
-    shifted[k] = snapToTickSpacing(CLANKER_PROJECT_TEMPLATE_TICKS[k] + delta, tickSpacing)
-  }
-
-  // Validate ordering
   const ladder = [
     shifted.min,
     shifted.mid1,
@@ -135,32 +126,4 @@ export function createClankerPoolPositionsFromTargetFdv(params: {
     tickUpper: shifted[p.b],
     positionBps: p.bps,
   }))
-}
-
-export function clankerUsdFromSqrtPriceX96(params: {
-  sqrtPriceX96: bigint
-  currencyUsd: number
-  isClankerToken0: boolean
-  clankerDecimals?: number
-  currencyDecimals?: number
-}): number {
-  const {
-    sqrtPriceX96,
-    currencyUsd,
-    isClankerToken0,
-    clankerDecimals = 18,
-    currencyDecimals = 18,
-  } = params
-
-  const ratio_token1_per_token0 = Math.pow(Number(sqrtPriceX96) / 2 ** 96, 2)
-
-  // Adjust for decimals for token1/token0 ratio
-  const ratioAdj =
-    ratio_token1_per_token0 * Math.pow(10, clankerDecimals - currencyDecimals)
-
-  // If clanker is token0: ratioAdj = currency / clanker
-  // If clanker is token1: ratioAdj = clanker / currency (inverted meaning)
-  const currencyPerClanker = isClankerToken0 ? ratioAdj : 1 / ratioAdj
-
-  return currencyPerClanker * currencyUsd
 }

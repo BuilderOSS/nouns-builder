@@ -31,7 +31,7 @@ type UseFeedReturn = {
   fetchNextPage: () => Promise<void>
 }
 
-const CoinFeedItemTypes = [
+const COIN_FEED_ITEM_TYPES = [
   FeedItemTypes.CLANKER_TOKEN_CREATED,
   FeedItemTypes.ZORA_COIN_CREATED,
 ] as FeedItemType[]
@@ -179,7 +179,10 @@ export function useFeed({
       .flatMap((page) => page.items)
       .filter((item) => {
         if (seen.has(item.id)) return false
-        if (CoinFeedItemTypes.includes(item.type) && !isCoinSupportedChain(item.chainId))
+        if (
+          COIN_FEED_ITEM_TYPES.includes(item.type) &&
+          !isCoinSupportedChain(item.chainId)
+        )
           return false
         seen.add(item.id)
         return true

@@ -16,7 +16,6 @@ export {
 // Re-export Clanker creator pool functions and types
 export {
   type ClankerPoolPosition,
-  clankerUsdFromSqrtPriceX96,
   createClankerPoolPositionsFromTargetFdv,
   DEFAULT_CLANKER_TARGET_FDV,
   DEFAULT_CLANKER_TICK_SPACING,

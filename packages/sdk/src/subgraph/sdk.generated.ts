@@ -6561,6 +6561,285 @@ export type FeedEventsQuery = {
   >
 }
 
+export type FeedEventsWithoutCoinsQueryVariables = Exact<{
+  first: Scalars['Int']['input']
+  where?: InputMaybe<FeedEvent_Filter>
+}>
+
+export type FeedEventsWithoutCoinsQuery = {
+  __typename?: 'Query'
+  feedEvents: Array<
+    | {
+        __typename: 'AuctionBidPlacedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        auction: {
+          __typename?: 'Auction'
+          id: string
+          startTime: any
+          endTime: any
+          token: {
+            __typename?: 'Token'
+            tokenId: any
+            owner: any
+            name: string
+            image?: string | null
+          }
+        }
+        bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any; bidder: any }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'AuctionCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        auction: {
+          __typename?: 'Auction'
+          id: string
+          startTime: any
+          endTime: any
+          token: {
+            __typename?: 'Token'
+            tokenId: any
+            name: string
+            image?: string | null
+          }
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'AuctionSettledEvent'
+        amount: any
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        auction: {
+          __typename?: 'Auction'
+          id: string
+          startTime: any
+          endTime: any
+          token: {
+            __typename?: 'Token'
+            tokenId: any
+            owner: any
+            name: string
+            image?: string | null
+          }
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ClankerTokenCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          timeCreated: any
+          title?: string | null
+          description?: string | null
+          proposer: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalExecutedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          timeCreated: any
+          title?: string | null
+          description?: string | null
+          proposer: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalUpdatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          timeCreated: any
+          title?: string | null
+          description?: string | null
+          proposer: any
+        }
+        update: {
+          __typename?: 'ProposalUpdate'
+          messageType: number
+          message: string
+          originalMessageId: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalVotedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        proposal: {
+          __typename?: 'Proposal'
+          proposalId: any
+          proposalNumber: number
+          timeCreated: any
+          title?: string | null
+          description?: string | null
+          proposer: any
+        }
+        vote: {
+          __typename?: 'ProposalVote'
+          support: ProposalVoteSupport
+          weight: number
+          reason?: string | null
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ZoraCoinCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+  >
+}
+
 export type FindAuctionsQueryVariables = Exact<{
   orderBy?: InputMaybe<Auction_OrderBy>
   orderDirection?: InputMaybe<OrderDirection>
@@ -7630,6 +7909,123 @@ export const FeedEventsDocument = gql`
     }
   }
 `
+export const FeedEventsWithoutCoinsDocument = gql`
+  query feedEventsWithoutCoins($first: Int!, $where: FeedEvent_filter) {
+    feedEvents(first: $first, where: $where, orderBy: timestamp, orderDirection: desc) {
+      __typename
+      id
+      type
+      timestamp
+      blockNumber
+      transactionHash
+      actor
+      dao {
+        auctionAddress
+        governorAddress
+        metadataAddress
+        tokenAddress
+        treasuryAddress
+        name
+        symbol
+        contractImage
+      }
+      ... on ProposalCreatedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          timeCreated
+          title
+          description
+          proposer
+        }
+      }
+      ... on ProposalVotedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          timeCreated
+          title
+          description
+          proposer
+        }
+        vote {
+          support
+          weight
+          reason
+        }
+      }
+      ... on ProposalUpdatedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          timeCreated
+          title
+          description
+          proposer
+        }
+        update {
+          messageType
+          message
+          originalMessageId
+        }
+      }
+      ... on ProposalExecutedEvent {
+        proposal {
+          proposalId
+          proposalNumber
+          timeCreated
+          title
+          description
+          proposer
+        }
+      }
+      ... on AuctionCreatedEvent {
+        auction {
+          id
+          startTime
+          endTime
+          token {
+            tokenId
+            name
+            image
+          }
+        }
+      }
+      ... on AuctionBidPlacedEvent {
+        auction {
+          id
+          startTime
+          endTime
+          token {
+            tokenId
+            owner
+            name
+            image
+          }
+        }
+        bid {
+          amount
+          bidTime
+          bidder
+        }
+      }
+      ... on AuctionSettledEvent {
+        auction {
+          id
+          startTime
+          endTime
+          token {
+            tokenId
+            owner
+            name
+            image
+          }
+        }
+        amount
+      }
+    }
+  }
+`
 export const FindAuctionsDocument = gql`
   query findAuctions(
     $orderBy: Auction_orderBy
@@ -8229,6 +8625,24 @@ export function getSdk(
             signal,
           }),
         'feedEvents',
+        'query',
+        variables
+      )
+    },
+    feedEventsWithoutCoins(
+      variables: FeedEventsWithoutCoinsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<FeedEventsWithoutCoinsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<FeedEventsWithoutCoinsQuery>({
+            document: FeedEventsWithoutCoinsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'feedEventsWithoutCoins',
         'query',
         variables
       )

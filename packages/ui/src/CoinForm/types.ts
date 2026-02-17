@@ -34,4 +34,5 @@ export type CoinFormFieldsProps = {
   initialValues?: Partial<CoinFormValues>
   showCurrencyInput?: boolean
   currencyOptions: CurrencyOption[]
+  treasuryEthBalance?: bigint
 }

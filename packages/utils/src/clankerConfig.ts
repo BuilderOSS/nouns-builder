@@ -113,3 +113,10 @@ export const FEE_CONFIG_OPTIONS = [
  */
 export const MIN_FDV_USD = 49
 export const DEFAULT_FDV_USD = 10000
+
+/**
+ * Default values for Clanker vault configuration (in days)
+ */
+export const DEFAULT_VAULT_PERCENTAGE = 10 // 10% of token supply
+export const DEFAULT_LOCKUP_DAYS = 30 // days before vesting begins
+export const DEFAULT_VESTING_DAYS = 30 // days to fully vest

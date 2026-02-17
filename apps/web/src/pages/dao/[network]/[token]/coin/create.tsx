@@ -19,7 +19,6 @@ interface CreateCoinPageProps {
   auctionAddress: AddressType
   treasuryAddress: AddressType
   chainId: CHAIN_ID
-  network: string
 }
 
 export default function CreateCoinPage({
@@ -28,7 +27,6 @@ export default function CreateCoinPage({
   auctionAddress,
   treasuryAddress,
   chainId,
-  network,
 }: CreateCoinPageProps) {
   const { push } = useRouter()
   // State to track form values for preview
@@ -48,7 +46,7 @@ export default function CreateCoinPage({
     setCreatedCoinAddress(coinAddress)
   }
 
-  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)!
+  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)!
 
   const handleCloseSuccessModal = () => {
     if (createdCoinAddress) {
@@ -107,7 +105,7 @@ export default function CreateCoinPage({
                     Creating for {daoName}
                   </Text>
                   <Text fontSize="14" color="text3">
-                    {network}
+                    {chain.name}
                   </Text>
                 </Stack>
               </Flex>
@@ -173,7 +171,6 @@ export const getServerSideProps: GetServerSideProps<CreateCoinPageProps> = async
       auctionAddress: dao.auctionAddress as AddressType,
       treasuryAddress: dao.treasuryAddress as AddressType,
       chainId: chain.id,
-      network: chain.name,
     }
 
     return {

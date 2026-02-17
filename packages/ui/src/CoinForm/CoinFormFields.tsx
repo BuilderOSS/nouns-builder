@@ -1,3 +1,4 @@
+import { DEFAULT_CLANKER_TARGET_FDV } from '@buildeross/utils'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -196,7 +197,11 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
             </Box>
             <Toggle
               on={showPropertiesSection}
-              onToggle={() => setShowPropertiesSection(!showPropertiesSection)}
+              onToggle={() => {
+                const next = !showPropertiesSection
+                if (!next) formik.setFieldValue('properties', {})
+                setShowPropertiesSection(next)
+              }}
             />
           </Flex>
 
@@ -260,7 +265,12 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
             <Text variant="label-md">Advanced Pool Settings</Text>
             <Toggle
               on={showAdvancedFdv}
-              onToggle={() => setShowAdvancedFdv(!showAdvancedFdv)}
+              onToggle={() => {
+                const next = !showAdvancedFdv
+                if (!next)
+                  formik.setFieldValue('targetFdvUsd', DEFAULT_CLANKER_TARGET_FDV)
+                setShowAdvancedFdv(next)
+              }}
             />
           </Flex>
 
