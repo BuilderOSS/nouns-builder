@@ -56,9 +56,9 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
-  const handleCloseSuccessModal = () => {
+  const handleCloseSuccessModal = async () => {
     if (proposalIdCreated) {
-      push({
+      await push({
         pathname: `/dao/[network]/[token]/vote/[id]`,
         query: {
           network: chain.slug,
@@ -67,7 +67,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
         },
       })
     } else {
-      push({
+      await push({
         pathname: `/dao/[network]/[token]`,
         query: {
           network: chain.slug,

@@ -48,9 +48,9 @@ export default function CreateCoinPage({
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)!
 
-  const handleCloseSuccessModal = () => {
+  const handleCloseSuccessModal = async () => {
     if (createdCoinAddress) {
-      push({
+      await push({
         pathname: `/coin/[network]/[coinAddress]`,
         query: {
           network: chain.slug,
@@ -58,7 +58,7 @@ export default function CreateCoinPage({
         },
       })
     } else {
-      push({
+      await push({
         pathname: `/dao/[network]/[token]`,
         query: {
           network: chain.slug,

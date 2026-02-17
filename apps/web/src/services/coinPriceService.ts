@@ -11,6 +11,7 @@ import { clankerTokenRequest, zoraCoinRequest } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getProvider } from '@buildeross/utils/provider'
 import { type Address, getAddress, parseAbi, type PublicClient } from 'viem'
+
 import { getRedisConnection } from './redisConnection'
 
 // Uniswap V4 StateView ABI
@@ -171,7 +172,9 @@ export async function fetchEthUsdPrice(): Promise<number> {
 
   // Layer 3: Coinbase API
   try {
-    const response = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH')
+    const response = await fetch(
+      'https://api.coinbase.com/v2/exchange-rates?currency=ETH'
+    )
     if (!response.ok) throw new Error('Failed to fetch ETH/USD price')
 
     const json = await response.json()
@@ -204,7 +207,10 @@ export async function fetchEthUsdPrice(): Promise<number> {
           }
         }
       } catch (redisFallbackErr) {
-        console.warn('Redis unavailable when reading stale ETH/USD price:', redisFallbackErr)
+        console.warn(
+          'Redis unavailable when reading stale ETH/USD price:',
+          redisFallbackErr
+        )
       }
     }
 

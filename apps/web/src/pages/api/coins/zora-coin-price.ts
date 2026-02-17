@@ -27,9 +27,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Invalid coinAddress' })
   }
 
-  const clientEthUsdPrice = ethUsdPrice
-    ? parseFloat(ethUsdPrice as string)
-    : undefined
+  const clientEthUsdPrice = ethUsdPrice ? parseFloat(ethUsdPrice as string) : undefined
   const resolvedEthUsdPrice =
     clientEthUsdPrice !== undefined && !isNaN(clientEthUsdPrice) && clientEthUsdPrice > 0
       ? clientEthUsdPrice

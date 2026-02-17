@@ -1,20 +1,27 @@
+import { useChainStore } from '@buildeross/stores'
 import { DaysHoursMinsSecs, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
   defaultFormButtonWithPrev,
 } from '@buildeross/ui/styles'
-import { isEmpty } from '@buildeross/utils/helpers'
+import { formatDuration } from '@buildeross/utils/formatDuration'
+import { isEmpty, isTestnetChain } from '@buildeross/utils/helpers'
 import { Button, Flex, Heading, Icon, Stack } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
-import React, { BaseSyntheticEvent } from 'react'
+import React, { BaseSyntheticEvent, useEffect } from 'react'
 
 import { useFormStore } from '../../stores'
+import {
+  deployCheckboxHelperText,
+  deployCheckboxStyleVariants,
+} from '../ReviewAndDeploy/ReviewAndDeploy.css'
 import {
   AuctionSettingsFormValues,
   auctionSettingsValidationSchema,
 } from './AuctionSettingsForm.schema'
+import { FAST_DAO_TIMINGS } from './fastDaoTimings'
 
 interface AuctionSettingsFormProps {
   title: string
@@ -42,8 +49,17 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
     setFulfilledSections,
     setActiveSection,
     activeSection,
+    enableFastDAO,
+    setEnableFastDAO,
   } = useFormStore()
+  const chain = useChainStore((x) => x.chain)
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false)
+
+  useEffect(() => {
+    if (enableFastDAO && !isTestnetChain(chain.id)) {
+      setEnableFastDAO(false)
+    }
+  }, [chain.id, enableFastDAO, setEnableFastDAO])
 
   const initialValues: AuctionSettingsFormValues = {
     auctionDuration: {
@@ -91,6 +107,47 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
     setActiveSection(activeSection - 1)
   }
 
+  const handleFastDAOToggle = (formik: {
+    setValues: (v: AuctionSettingsFormValues) => void
+    values: AuctionSettingsFormValues
+  }) => {
+    if (!enableFastDAO) {
+      formik.setValues({
+        ...formik.values,
+        auctionDuration: {
+          days: 0,
+          hours: 0,
+          minutes: FAST_DAO_TIMINGS.AUCTION_DURATION.minutes,
+          seconds: 0,
+        },
+        auctionReservePrice: 0,
+        votingDelay: {
+          days: 0,
+          hours: 0,
+          minutes: FAST_DAO_TIMINGS.VOTING_DELAY.minutes,
+          seconds: 0,
+        },
+        votingPeriod: {
+          days: 0,
+          hours: 0,
+          minutes: FAST_DAO_TIMINGS.VOTING_PERIOD.minutes,
+          seconds: 0,
+        },
+        timelockDelay: {
+          days: 0,
+          hours: 0,
+          minutes: FAST_DAO_TIMINGS.TIMELOCK_DELAY.minutes,
+          seconds: 0,
+        },
+      })
+      setShowAdvanced(true)
+      setEnableFastDAO(true)
+    } else {
+      formik.setValues(initialValues)
+      setEnableFastDAO(false)
+    }
+  }
+
   return (
     <Formik<AuctionSettingsFormValues>
       initialValues={initialValues}
@@ -118,6 +175,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                     : undefined
                 }
                 placeholder={['1', '0', '0', '0']}
+                disabled={enableFastDAO}
               />
 
               <SmartInput
@@ -130,7 +188,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                   formik.setFieldValue('auctionReservePrice', parseFloat(target.value))
                 }}
                 onBlur={formik.handleBlur}
-                helperText="The minimum bid required to start an auction. If no bids meet this price, the auction won’t begin."
+                helperText="The minimum bid required to start an auction. If no bids meet this price, the auction won't begin."
                 errorMessage={
                   formik.touched['auctionReservePrice'] &&
                   formik.errors['auctionReservePrice']
@@ -138,8 +196,35 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                     : undefined
                 }
                 perma={'ETH'}
+                disabled={enableFastDAO}
               />
             </Stack>
+
+            {isTestnetChain(chain.id) && (
+              <Flex mt={'x4'} mb={'x4'}>
+                <Flex align={'center'} justify={'center'} gap={'x4'}>
+                  <Flex
+                    align={'center'}
+                    justify={'center'}
+                    className={
+                      deployCheckboxStyleVariants[enableFastDAO ? 'confirmed' : 'default']
+                    }
+                    onClick={() => handleFastDAOToggle(formik)}
+                  >
+                    {enableFastDAO && <Icon fill="background1" id="check" />}
+                  </Flex>
+                  <Flex className={deployCheckboxHelperText}>
+                    <strong>Enable Fast DAO (testnet only):</strong> ultra-short timings
+                    for testing &mdash;{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0 ETH
+                    reserve), {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock,{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period.{' '}
+                    <strong>Not for production.</strong>
+                  </Flex>
+                </Flex>
+              </Flex>
+            )}
 
             <Button
               align={'center'}
@@ -216,6 +301,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                 }
                 helperText="How long a proposal remains open for voting before it closes and results are tallied."
                 placeholder={['4', '0', '0', '0']}
+                disabled={enableFastDAO}
               />
 
               <DaysHoursMinsSecs
@@ -232,6 +318,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                 }
                 helperText="The time between when a proposal is created and when voting begins. This gives members a chance to review and discuss the proposal."
                 placeholder={['1', '0', '0', '0']}
+                disabled={enableFastDAO}
               />
 
               <DaysHoursMinsSecs
@@ -248,6 +335,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                 }
                 helperText="The delay between when a passed proposal is queued and when it can be executed. This provides time for final review, vetoing, or cancellation before execution."
                 placeholder={['2', '0', '0', '0']}
+                disabled={enableFastDAO}
               />
             </motion.div>
 

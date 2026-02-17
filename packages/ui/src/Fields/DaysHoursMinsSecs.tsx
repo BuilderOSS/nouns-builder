@@ -22,6 +22,7 @@ interface DaysHoursMinsProps {
   placeholder?: string[]
   helperText?: string
   tooltip?: string
+  disabled?: boolean
 }
 
 const helperVariants = {
@@ -44,6 +45,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   tooltip,
   helperText,
   onBlur,
+  disabled = false,
 }) => {
   const { days, hours, minutes, seconds } = value
   const handleChange = (e: any, type: string) => {
@@ -81,7 +83,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   }
 
   return (
-    <Flex direction={'column'} mb={'x8'}>
+    <Flex direction={'column'} mb={'x8'} style={disabled ? { opacity: 0.5 } : undefined}>
       <Flex
         align={'center'}
         justify={'flex-start'}
@@ -103,6 +105,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           value={days}
           step={1}
           min={0}
+          disabled={disabled}
         />
 
         <NumberInput
@@ -116,6 +119,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           value={hours}
           step={1}
           min={0}
+          disabled={disabled}
         />
 
         <NumberInput
@@ -129,6 +133,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           value={minutes}
           step={1}
           min={0}
+          disabled={disabled}
         />
 
         <NumberInput
@@ -142,6 +147,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           value={seconds}
           step={1}
           min={0}
+          disabled={disabled}
         />
       </Grid>
       <motion.div
