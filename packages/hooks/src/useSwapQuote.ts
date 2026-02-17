@@ -39,6 +39,7 @@ export function useSwapQuote({
 
   const refetch = () => setRefetchTrigger((prev) => prev + 1)
 
+  // TODO: handle liquidity errors
   useEffect(() => {
     if (!enabled || !path || !amountIn || !publicClient) {
       setAmountOut(null)
