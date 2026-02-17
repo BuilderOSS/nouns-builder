@@ -58,4 +58,7 @@ export const SWR_KEYS = {
   ZORA_COINS: 'zora-coins',
   MEDIA_TYPE: 'media-type',
   DAOS_WITH_CLANKER_TOKENS: 'daos-with-clanker-tokens',
+  CLANKER_TOKEN_PRICE: 'clanker-token-price',
+  ZORA_COIN_PRICE: 'zora-coin-price',
+  SWAP_OPTIONS: 'swap-options',
 } as const
