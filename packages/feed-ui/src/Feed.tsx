@@ -1,8 +1,6 @@
 import { useFeed } from '@buildeross/hooks'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem as FeedItemType } from '@buildeross/types'
-import { AnimatedModal } from '@buildeross/ui/Modal'
-import { SwapWidget } from '@buildeross/ui/SwapWidget'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
@@ -13,6 +11,7 @@ import { FeedSkeleton, FeedSkeletonItem } from './FeedSkeleton'
 import { LoadMoreButton } from './LoadMoreButton'
 import { BidModal } from './Modals/BidModal'
 import { PropdateModalWrapper } from './Modals/PropdateModalWrapper'
+import { TradeModal } from './Modals/TradeModal'
 import { VoteModalWrapper } from './Modals/VoteModalWrapper'
 import type {
   BidModalState,
@@ -60,6 +59,24 @@ function isExternalFilterMode(props: FeedProps): props is ExternalFilterMode {
   )
 }
 
+type ModalState =
+  | {
+      type: 'bid'
+      state: BidModalState
+    }
+  | {
+      type: 'vote'
+      state: VoteModalState
+    }
+  | {
+      type: 'propdate'
+      state: PropdateModalState
+    }
+  | {
+      type: 'trade'
+      state: TradeModalState
+    }
+
 export const Feed: React.FC<FeedProps> = (props) => {
   const { actor, limit, enableFeed, onError, enableInfiniteScroll = true } = props
 
@@ -72,12 +89,13 @@ export const Feed: React.FC<FeedProps> = (props) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
   // Shared modal states for all feed items
-  const [bidModalState, setBidModalState] = useState<BidModalState | null>(null)
-  const [voteModalState, setVoteModalState] = useState<VoteModalState | null>(null)
-  const [propdateModalState, setPropdateModalState] = useState<PropdateModalState | null>(
-    null
-  )
-  const [tradeModalState, setTradeModalState] = useState<TradeModalState | null>(null)
+  // const [bidModalState, setBidModalState] = useState<BidModalState | null>(null)
+  // const [modalState.state, setVoteModalState] = useState<VoteModalState | null>(null)
+  // const [modalState.state, setPropdateModalState] = useState<PropdateModalState | null>(
+  //   null
+  // )
+  // const [modalState.state, setTradeModalState] = useState<TradeModalState | null>(null)
+  const [modalState, setModalState] = useState<ModalState | null>(null)
 
   // Get actual filters to use (either from props or from store)
   const actualChainIds = useMemo(() => {
@@ -113,19 +131,19 @@ export const Feed: React.FC<FeedProps> = (props) => {
 
   // Modal callbacks
   const handleOpenBidModal = useCallback((state: BidModalState) => {
-    setBidModalState(state)
+    setModalState({ type: 'bid', state: state })
   }, [])
 
   const handleOpenVoteModal = useCallback((state: VoteModalState) => {
-    setVoteModalState(state)
+    setModalState({ type: 'vote', state: state })
   }, [])
 
   const handleOpenPropdateModal = useCallback((state: PropdateModalState) => {
-    setPropdateModalState(state)
+    setModalState({ type: 'propdate', state: state })
   }, [])
 
   const handleOpenTradeModal = useCallback((state: TradeModalState) => {
-    setTradeModalState(state)
+    setModalState({ type: 'trade', state: state })
   }, [])
 
   // Filter modal handlers (only used in internal mode)
@@ -286,62 +304,61 @@ export const Feed: React.FC<FeedProps> = (props) => {
       )}
 
       {/* Shared modals for all feed items */}
-      {bidModalState && (
+      {modalState?.type === 'bid' && (
         <BidModal
-          isOpen={!!bidModalState}
-          onClose={() => setBidModalState(null)}
-          chainId={bidModalState.chainId}
-          tokenId={bidModalState.tokenId}
-          daoName={bidModalState.daoName}
-          addresses={bidModalState.addresses}
-          highestBid={bidModalState.highestBid}
-          paused={bidModalState.paused}
-          highestBidder={bidModalState.highestBidder}
-          endTime={bidModalState.endTime}
-          tokenName={bidModalState.tokenName}
+          isOpen
+          onClose={() => setModalState(null)}
+          chainId={modalState.state.chainId}
+          tokenId={modalState.state.tokenId}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+          addresses={modalState.state.addresses}
+          highestBid={modalState.state.highestBid}
+          paused={modalState.state.paused}
+          highestBidder={modalState.state.highestBidder}
+          endTime={modalState.state.endTime}
+          tokenName={modalState.state.tokenName}
         />
       )}
 
-      {voteModalState && (
+      {modalState?.type === 'vote' && (
         <VoteModalWrapper
-          isOpen={!!voteModalState}
-          onClose={() => setVoteModalState(null)}
-          proposalId={voteModalState.proposalId}
-          proposalTitle={voteModalState.proposalTitle}
-          proposalTimeCreated={voteModalState.proposalTimeCreated}
-          chainId={voteModalState.chainId}
-          addresses={voteModalState.addresses}
+          isOpen
+          onClose={() => setModalState(null)}
+          proposalId={modalState.state.proposalId}
+          proposalTitle={modalState.state.proposalTitle}
+          proposalTimeCreated={modalState.state.proposalTimeCreated}
+          chainId={modalState.state.chainId}
+          addresses={modalState.state.addresses}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
         />
       )}
 
-      {propdateModalState && (
+      {modalState?.type === 'propdate' && (
         <PropdateModalWrapper
-          isOpen={!!propdateModalState}
-          onClose={() => setPropdateModalState(null)}
-          proposalId={propdateModalState.proposalId}
-          chainId={propdateModalState.chainId}
-          addresses={propdateModalState.addresses}
-          replyTo={propdateModalState.replyTo}
+          isOpen
+          onClose={() => setModalState(null)}
+          proposalId={modalState.state.proposalId}
+          chainId={modalState.state.chainId}
+          addresses={modalState.state.addresses}
+          replyTo={modalState.state.replyTo}
+          proposalTitle={modalState.state.proposalTitle}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
         />
       )}
 
-      {tradeModalState && (
-        <AnimatedModal
-          open={!!tradeModalState}
-          close={() => setTradeModalState(null)}
-          size="medium"
-        >
-          <div style={{ padding: '24px' }}>
-            <Text variant="heading-md" mb="x4">
-              Trade {tradeModalState.symbol}
-            </Text>
-            <SwapWidget
-              coinAddress={tradeModalState.coinAddress as `0x${string}`}
-              symbol={tradeModalState.symbol}
-              chainId={tradeModalState.chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
-            />
-          </div>
-        </AnimatedModal>
+      {modalState?.type === 'trade' && (
+        <TradeModal
+          isOpen
+          onClose={() => setModalState(null)}
+          coinAddress={modalState.state.coinAddress}
+          symbol={modalState.state.symbol}
+          chainId={modalState.state.chainId}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+        />
       )}
     </Flex>
   )

@@ -8,9 +8,11 @@ import type {
   RequiredDaoContractAddresses,
 } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { Stack, Text } from '@buildeross/zord'
+import { Stack } from '@buildeross/zord'
 import React, { useState } from 'react'
 import useSWR from 'swr'
+
+import { ModalHeader } from './ModalHeader'
 
 export interface BidModalProps {
   isOpen: boolean
@@ -19,6 +21,7 @@ export interface BidModalProps {
   tokenId: string
   tokenName: string
   daoName: string
+  daoImage: string
   addresses: RequiredDaoContractAddresses
   highestBid?: bigint
   highestBidder?: AddressType
@@ -33,6 +36,7 @@ export const BidModal: React.FC<BidModalProps> = ({
   tokenId,
   tokenName,
   daoName,
+  daoImage,
   addresses,
   highestBid,
   paused,
@@ -45,14 +49,14 @@ export const BidModal: React.FC<BidModalProps> = ({
     setIsSuccess(true)
     // Auto-close after 2 seconds
     setTimeout(() => {
-      setIsSuccess(false)
       onClose()
+      setIsSuccess(false)
     }, 2000)
   }
 
   const handleClose = () => {
-    setIsSuccess(false)
     onClose()
+    setIsSuccess(false)
   }
 
   const { data: bids } = useSWR(
@@ -77,40 +81,38 @@ export const BidModal: React.FC<BidModalProps> = ({
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
 
   return (
-    <AnimatedModal open={isOpen} close={handleClose} size="medium">
-      <>
-        {isOpen &&
-          (isSuccess ? (
-            <SuccessModalContent
-              success
-              title="Bid Placed!"
-              subtitle="Your bid has been submitted successfully"
-            />
-          ) : (
-            <Stack p="x6" w="100%">
-              <Text variant="heading-md" mb="x4">
-                Place Your Bid
-              </Text>
-              <Text variant="paragraph-sm" color="tertiary" mb="x6">
-                Token: {tokenName}
-              </Text>
+    <AnimatedModal key="feed-bid-modal" open={isOpen} close={handleClose} size="medium">
+      {isSuccess ? (
+        <SuccessModalContent
+          success
+          title="Bid Placed!"
+          subtitle="Your bid has been submitted successfully"
+        />
+      ) : (
+        <Stack w="100%">
+          <ModalHeader
+            daoName={daoName}
+            daoImage={daoImage}
+            title="Place Bid"
+            subtitle={tokenName}
+            onClose={handleClose}
+          />
 
-              <CurrentAuction
-                chainId={chain.id}
-                tokenId={tokenId}
-                auctionAddress={addresses.auction}
-                tokenAddress={addresses.token}
-                auctionPaused={paused ?? false}
-                daoName={daoName}
-                bid={highestBid}
-                owner={highestBidder}
-                endTime={endTime}
-                bids={bids || []}
-                onSuccess={handleSuccess}
-              />
-            </Stack>
-          ))}
-      </>
+          <CurrentAuction
+            chainId={chain.id}
+            tokenId={tokenId}
+            auctionAddress={addresses.auction}
+            tokenAddress={addresses.token}
+            auctionPaused={paused ?? false}
+            daoName={daoName}
+            bid={highestBid}
+            owner={highestBidder}
+            endTime={endTime}
+            bids={bids || []}
+            onSuccess={handleSuccess}
+          />
+        </Stack>
+      )}
     </AnimatedModal>
   )
 }

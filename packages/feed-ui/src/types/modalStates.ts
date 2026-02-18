@@ -11,6 +11,7 @@ export type BidModalState = {
   chainId: CHAIN_ID
   tokenId: string
   daoName: string
+  daoImage: string
   addresses: RequiredDaoContractAddresses
   highestBid?: bigint
   paused: boolean
@@ -25,6 +26,8 @@ export type VoteModalState = {
   proposalTimeCreated: string
   chainId: CHAIN_ID
   addresses: RequiredDaoContractAddresses
+  daoName: string
+  daoImage: string
 }
 
 export type PropdateModalState = {
@@ -36,12 +39,17 @@ export type PropdateModalState = {
     creator: `0x${string}`
     message: string
   }
+  proposalTitle: string
+  daoName: string
+  daoImage: string
 }
 
 export type TradeModalState = {
   coinAddress: Address
   symbol: string
   chainId: CHAIN_ID
+  daoName: string
+  daoImage: string
 }
 
 // Callback types

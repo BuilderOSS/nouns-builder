@@ -9,8 +9,10 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Atoms, Box, Flex, Icon, IconType, Stack, Text } from '@buildeross/zord'
-import React, { ReactNode, useCallback, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import { useAccount } from 'wagmi'
+
+import { ModalHeader } from './ModalHeader'
 
 export interface VoteModalWrapperProps {
   isOpen: boolean
@@ -20,6 +22,8 @@ export interface VoteModalWrapperProps {
   proposalTimeCreated: string
   chainId: CHAIN_ID
   addresses: RequiredDaoContractAddresses
+  daoName: string
+  daoImage: string
 }
 
 const voteStyleMap: Record<
@@ -83,16 +87,20 @@ const VoteStatusDisplay: React.FC<{ vote: ProposalVoteFragment }> = ({ vote }) =
 
 const AlreadyVotedContent: React.FC<{
   proposalTitle: string
+  daoName: string
+  daoImage: string
   vote: ProposalVoteFragment
-}> = ({ proposalTitle, vote }) => {
+  onClose: () => void
+}> = ({ proposalTitle, daoName, daoImage, vote, onClose }) => {
   return (
-    <Box p="x6">
-      <Text variant="heading-md" mb="x4">
-        Your Vote
-      </Text>
-      <Text variant="paragraph-sm" color="tertiary" mb="x6">
-        Proposal: {proposalTitle}
-      </Text>
+    <Box>
+      <ModalHeader
+        daoName={daoName}
+        daoImage={daoImage}
+        title="Your Vote"
+        subtitle={proposalTitle}
+        onClose={onClose}
+      />
       <VoteStatusDisplay vote={vote} />
       <Text variant="paragraph-sm" color="tertiary" mt="x4">
         You have already voted on this proposal. Your vote has been recorded.
@@ -103,15 +111,19 @@ const AlreadyVotedContent: React.FC<{
 
 const NotAMemberContent: React.FC<{
   proposalTitle: string
-}> = ({ proposalTitle }) => {
+  daoName: string
+  daoImage: string
+  onClose: () => void
+}> = ({ proposalTitle, daoName, daoImage, onClose }) => {
   return (
-    <Box p="x6">
-      <Text variant="heading-md" mb="x4">
-        Cannot Vote
-      </Text>
-      <Text variant="paragraph-sm" color="tertiary" mb="x6">
-        Proposal: {proposalTitle}
-      </Text>
+    <Box>
+      <ModalHeader
+        daoName={daoName}
+        daoImage={daoImage}
+        title="Cannot Vote"
+        subtitle={proposalTitle}
+        onClose={onClose}
+      />
       <Box p="x4" backgroundColor="background2" borderRadius="curved">
         <Text variant="paragraph-md">
           You are not a member of this DAO. To vote on proposals, you need to hold at
@@ -124,16 +136,20 @@ const NotAMemberContent: React.FC<{
 
 const DelegatedVotesContent: React.FC<{
   proposalTitle: string
+  daoName: string
+  daoImage: string
   membership: NonNullable<ReturnType<typeof useDaoMembership>['data']>
-}> = ({ proposalTitle, membership }) => {
+  onClose: () => void
+}> = ({ proposalTitle, daoName, daoImage, membership, onClose }) => {
   return (
-    <Box p="x6">
-      <Text variant="heading-md" mb="x4">
-        Cannot Vote
-      </Text>
-      <Text variant="paragraph-sm" color="tertiary" mb="x6">
-        Proposal: {proposalTitle}
-      </Text>
+    <Box>
+      <ModalHeader
+        daoName={daoName}
+        daoImage={daoImage}
+        title="Cannot Vote"
+        subtitle={proposalTitle}
+        onClose={onClose}
+      />
 
       {membership.voteDescription && (
         <Box mb="x4" color="text3">
@@ -201,6 +217,8 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   proposalTimeCreated,
   chainId,
   addresses,
+  daoName,
+  daoImage,
 }) => {
   const { address: userAddress } = useAccount()
   const [isCastVoteSuccess, setIsCastVoteSuccess] = useState<boolean>(false)
@@ -239,13 +257,19 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   const votesAvailable = votes ? Number(votes) : 0
   const isLoading = isLoadingVotes || isVoteLoading || isMembershipLoading
 
-  const handleModalClose = useCallback(() => {
+  const handleModalClose = () => {
+    setIsCastVoteSuccess(false)
     onClose()
-    // Reset success state when modal closes
-    if (isCastVoteSuccess) {
-      setTimeout(() => setIsCastVoteSuccess(false), 300)
-    }
-  }, [onClose, isCastVoteSuccess])
+  }
+
+  const handleSuccess = () => {
+    setIsCastVoteSuccess(true)
+    // Auto-close after 2 seconds
+    setTimeout(() => {
+      setIsCastVoteSuccess(false)
+      onClose()
+    }, 2000)
+  }
 
   // Determine modal size based on state
   const modalSize = isCastVoteSuccess ? 'small' : 'medium'
@@ -255,7 +279,14 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
     // Show loading state
     if (isLoading) {
       return (
-        <Box p="x6">
+        <Box>
+          <ModalHeader
+            daoName={daoName}
+            daoImage={daoImage}
+            title="Vote on Proposal"
+            subtitle={proposalTitle}
+            onClose={handleModalClose}
+          />
           <Text>Loading...</Text>
         </Box>
       )
@@ -274,12 +305,27 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
 
     // User has already voted
     if (hasVoted && vote) {
-      return <AlreadyVotedContent proposalTitle={proposalTitle} vote={vote} />
+      return (
+        <AlreadyVotedContent
+          proposalTitle={proposalTitle}
+          daoName={daoName}
+          daoImage={daoImage}
+          vote={vote}
+          onClose={handleModalClose}
+        />
+      )
     }
 
     // User is not in the DAO system at all
     if (!membership) {
-      return <NotAMemberContent proposalTitle={proposalTitle} />
+      return (
+        <NotAMemberContent
+          proposalTitle={proposalTitle}
+          daoName={daoName}
+          daoImage={daoImage}
+          onClose={handleModalClose}
+        />
+      )
     }
 
     // User has no voting power available
@@ -291,32 +337,58 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
           return (
             <DelegatedVotesContent
               proposalTitle={proposalTitle}
+              daoName={daoName}
+              daoImage={daoImage}
               membership={membership}
+              onClose={handleModalClose}
             />
           )
         }
       }
 
       // No votes and not meaningfully in the system - not a member
-      return <NotAMemberContent proposalTitle={proposalTitle} />
+      return (
+        <NotAMemberContent
+          proposalTitle={proposalTitle}
+          daoName={daoName}
+          daoImage={daoImage}
+          onClose={handleModalClose}
+        />
+      )
     }
 
     // User has voting power - show the voting interface
+    // SubmitVoteForm has its own header/close button, so we wrap it with the DAO header above
     return (
-      <SubmitVoteForm
-        proposalId={proposalId}
-        votesAvailable={votesAvailable}
-        handleModalClose={handleModalClose}
-        setIsCastVoteSuccess={setIsCastVoteSuccess}
-        title={proposalTitle}
-        addresses={addresses}
-        chainId={chainId}
-      />
+      <Box>
+        <ModalHeader
+          daoName={daoName}
+          daoImage={daoImage}
+          title="Vote on Proposal"
+          subtitle={proposalTitle}
+          onClose={handleModalClose}
+        />
+        <SubmitVoteForm
+          proposalId={proposalId}
+          votesAvailable={votesAvailable}
+          handleModalClose={handleModalClose}
+          onSuccess={handleSuccess}
+          title={proposalTitle}
+          addresses={addresses}
+          chainId={chainId}
+          hideHeader
+        />
+      </Box>
     )
   }
 
   return (
-    <AnimatedModal open={isOpen} size={modalSize} close={handleModalClose}>
+    <AnimatedModal
+      key="feed-vote-modal"
+      open={isOpen}
+      size={modalSize}
+      close={handleModalClose}
+    >
       {renderContent()}
     </AnimatedModal>
   )

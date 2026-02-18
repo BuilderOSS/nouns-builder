@@ -26,10 +26,12 @@ interface ProposalActionsProps {
   proposalTitle: string
   proposalTimeCreated: string
   addresses: RequiredDaoContractAddresses
-  isExecuted?: boolean
+  daoName: string
+  daoImage: string
+  isExecuted: boolean
   updateItem?: ProposalUpdatePostedFeedItem
-  onOpenVoteModal?: OnOpenVoteModal
-  onOpenPropdateModal?: OnOpenPropdateModal
+  onOpenVoteModal: OnOpenVoteModal
+  onOpenPropdateModal: OnOpenPropdateModal
 }
 
 export const ProposalActions: React.FC<ProposalActionsProps> = ({
@@ -39,6 +41,8 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   proposalNumber,
   proposalTitle,
   proposalTimeCreated,
+  daoName,
+  daoImage,
   isExecuted,
   updateItem,
   onOpenVoteModal,
@@ -79,12 +83,14 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   }, [chainId, daoId, proposalNumber, getProposalLink])
 
   const handleOpenVote = useCallback(() => {
-    onOpenVoteModal?.({
+    onOpenVoteModal({
       proposalId,
       proposalTitle,
       proposalTimeCreated,
       chainId,
       addresses,
+      daoName,
+      daoImage,
     })
   }, [
     onOpenVoteModal,
@@ -93,16 +99,30 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     proposalTimeCreated,
     chainId,
     addresses,
+    daoName,
+    daoImage,
   ])
 
   const handleOpenPropdate = useCallback(() => {
-    onOpenPropdateModal?.({
+    onOpenPropdateModal({
       proposalId,
       chainId,
       addresses,
       replyTo,
+      proposalTitle,
+      daoName,
+      daoImage,
     })
-  }, [onOpenPropdateModal, proposalId, chainId, addresses, replyTo])
+  }, [
+    onOpenPropdateModal,
+    proposalId,
+    chainId,
+    addresses,
+    replyTo,
+    proposalTitle,
+    daoName,
+    daoImage,
+  ])
 
   if (isLoading) {
     return (

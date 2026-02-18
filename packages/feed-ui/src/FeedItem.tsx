@@ -29,10 +29,10 @@ export interface FeedItemProps {
   item: FeedItemType
   hideActor?: boolean
   hideDao?: boolean
-  onOpenBidModal?: OnOpenBidModal
-  onOpenVoteModal?: OnOpenVoteModal
-  onOpenPropdateModal?: OnOpenPropdateModal
-  onOpenTradeModal?: OnOpenTradeModal
+  onOpenBidModal: OnOpenBidModal
+  onOpenVoteModal: OnOpenVoteModal
+  onOpenPropdateModal: OnOpenPropdateModal
+  onOpenTradeModal: OnOpenTradeModal
 }
 
 const Separator = () => (

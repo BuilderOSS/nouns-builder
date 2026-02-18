@@ -1,7 +1,7 @@
 import { COIN_SUPPORTED_CHAIN_IDS, PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
-import { Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 
@@ -70,10 +70,23 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
     <AnimatedModal open={open} close={handleCancel} size="large">
       <Stack>
         <div className={modalHeader}>
-          <Text className={modalTitle}>{title}</Text>
-          <Text fontSize="14" color="text3" style={{ marginTop: '4px' }}>
-            {description}
-          </Text>
+          <Flex align="center" gap="x2" mb="x3" justify="space-between">
+            <Box>
+              <Text className={modalTitle}>{title}</Text>
+              <Text fontSize="14" color="text3" style={{ marginTop: '4px' }}>
+                {description}
+              </Text>
+            </Box>
+            <Button
+              variant="ghost"
+              onClick={handleCancel}
+              p={'x0'}
+              size="xs"
+              style={{ padding: 0, flexShrink: 0 }}
+            >
+              <Icon id="cross" />
+            </Button>
+          </Flex>
         </div>
 
         <div className={modalBody}>

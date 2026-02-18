@@ -12,14 +12,19 @@ import type { OnOpenTradeModal } from '../types/modalStates'
 interface CoinActionsProps {
   chainId: CHAIN_ID
   coinAddress: AddressType
-  symbol?: string
-  onOpenTradeModal?: OnOpenTradeModal
+  symbol: string
+  daoName: string
+  daoImage: string
+  onOpenTradeModal: OnOpenTradeModal
+  isClankerToken: boolean
 }
 
 export const CoinActions: React.FC<CoinActionsProps> = ({
   chainId,
   coinAddress,
   symbol = 'Coin',
+  daoName,
+  daoImage,
   onOpenTradeModal,
 }) => {
   const { getCoinLink } = useLinks()
@@ -30,12 +35,14 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
   }, [chainId, coinAddress, getCoinLink])
 
   const handleOpenTrade = useCallback(() => {
-    onOpenTradeModal?.({
+    onOpenTradeModal({
       coinAddress,
       symbol,
       chainId,
+      daoName,
+      daoImage,
     })
-  }, [onOpenTradeModal, coinAddress, symbol, chainId])
+  }, [onOpenTradeModal, coinAddress, symbol, chainId, daoName, daoImage])
 
   // Only show Trade button for Base chains (where swap functionality is available)
   const showTradeButton = isCoinSupportedChain(chainId)
