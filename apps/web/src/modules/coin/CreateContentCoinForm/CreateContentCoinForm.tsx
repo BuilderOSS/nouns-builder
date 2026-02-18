@@ -2,14 +2,10 @@ import {
   BUILDER_TREASURY_ADDRESS,
   COIN_DEPLOYMENT_DISCLAIMER,
 } from '@buildeross/constants'
-import {
-  type COIN_SUPPORTED_CHAIN_ID,
-  COIN_SUPPORTED_CHAIN_IDS,
-  COIN_SUPPORTED_CHAINS,
-} from '@buildeross/constants/chains'
-import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
+import { COIN_SUPPORTED_CHAINS } from '@buildeross/constants/chains'
+import { useClankerTokenPrice } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, ClankerTokenFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import {
   CoinFormFields,
@@ -25,6 +21,7 @@ import {
   DEFAULT_ZORA_TOTAL_SUPPLY,
   estimateTargetFdvUsd,
   getChainNamesString,
+  isCoinSupportedChain,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
@@ -86,7 +83,7 @@ type CurrencyOption = {
 interface CreateContentCoinEconomicsPreviewProps {
   factoryAddress: Address
   chainId: number
-  latestClankerToken: any
+  latestClankerToken: ClankerTokenFragment
   clankerTokenPriceUsd: number | undefined
 }
 
@@ -205,7 +202,7 @@ const CreateContentCoinEconomicsPreview: React.FC<
 export interface CreateContentCoinFormProps {
   chainId: CHAIN_ID
   treasury: AddressType
-  collectionAddress: AddressType
+  latestClankerToken: ClankerTokenFragment | null
   onFormChange?: (values: CoinFormValues) => void
   onCoinCreated: (coinAddress: AddressType | null) => void
 }
@@ -213,7 +210,7 @@ export interface CreateContentCoinFormProps {
 export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   chainId,
   treasury,
-  collectionAddress,
+  latestClankerToken,
   onFormChange,
   onCoinCreated,
 }) => {
@@ -229,25 +226,10 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const [priceWarning, setPriceWarning] = useState<string | undefined>()
 
   // Check if the current chain is supported
-  const isChainSupported = COIN_SUPPORTED_CHAIN_IDS.includes(
-    chainId as COIN_SUPPORTED_CHAIN_ID
-  )
+  const isChainSupported = isCoinSupportedChain(chainId)
   const factoryAddress = isChainSupported
     ? (coinFactoryAddress[chainId as keyof typeof coinFactoryAddress] as AddressType)
     : undefined
-
-  // Fetch the latest ClankerToken for this DAO
-  const { data: clankerTokens } = useClankerTokens({
-    chainId,
-    collectionAddress,
-    enabled: isChainSupported,
-    first: 1, // Only fetch the latest token
-  })
-
-  // Get the latest ClankerToken (first item in array)
-  const latestClankerToken = React.useMemo(() => {
-    return clankerTokens && clankerTokens.length > 0 ? clankerTokens[0] : null
-  }, [clankerTokens])
 
   // Fetch the ClankerToken price
   const {

@@ -1,10 +1,12 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { useClankerTokens } from '@buildeross/hooks'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { type CoinFormValues, ContentCoinPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { isCoinSupportedChain } from '@buildeross/utils'
+import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
@@ -70,6 +72,21 @@ export default function CreateCoinPage({
     setCreatedCoinAddress(undefined)
   }
 
+  const isChainSupported = isCoinSupportedChain(chainId)
+
+  // Fetch the latest ClankerToken for this DAO
+  const { data: clankerTokens, isLoading } = useClankerTokens({
+    chainId,
+    collectionAddress,
+    enabled: isChainSupported,
+    first: 1, // Only fetch the latest token
+  })
+
+  // Get the latest ClankerToken (first item in array)
+  const latestClankerToken = React.useMemo(() => {
+    return clankerTokens && clankerTokens.length > 0 ? clankerTokens[0] : null
+  }, [clankerTokens])
+
   return (
     <DefaultLayout>
       <Flex justify="center" py="x12" px="x4">
@@ -114,24 +131,32 @@ export default function CreateCoinPage({
             {/* Two-column layout: Form on left, Preview on right */}
             <Box className={styles.twoColumnGrid}>
               {/* Left column: Form */}
-              <Box>
-                <CreateContentCoinForm
-                  chainId={chainId}
-                  treasury={treasuryAddress}
-                  collectionAddress={collectionAddress}
-                  onFormChange={setPreviewData}
-                  onCoinCreated={onCoinCreated}
-                />
-              </Box>
+              {isLoading ? (
+                <Box p="x4">
+                  <Spinner />
+                </Box>
+              ) : (
+                <Box>
+                  <CreateContentCoinForm
+                    chainId={chainId}
+                    treasury={treasuryAddress}
+                    latestClankerToken={latestClankerToken}
+                    onFormChange={setPreviewData}
+                    onCoinCreated={onCoinCreated}
+                  />
+                </Box>
+              )}
 
-              {/* Right column: Preview (hidden on mobile) */}
-              <Box className={styles.previewColumn}>
-                <ContentCoinPreview
-                  {...previewData}
-                  chainId={chainId}
-                  daoName={daoName}
-                />
-              </Box>
+              {/* Right column: Preview */}
+              {latestClankerToken && (
+                <Box className={styles.previewColumn}>
+                  <ContentCoinPreview
+                    {...previewData}
+                    chainId={chainId}
+                    daoName={daoName}
+                  />
+                </Box>
+              )}
             </Box>
           </Stack>
         </Box>
