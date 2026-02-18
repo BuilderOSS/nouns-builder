@@ -22,6 +22,7 @@ import {
 } from 'viem'
 
 import { CsvRecord, CsvUpload, TokenSelectionForm } from '../../shared'
+import { type FormComponent } from '../types'
 import sendTokensSchema, {
   RecipientFormValues,
   SendTokensValues,
@@ -30,7 +31,7 @@ import { SendTokensDetailsDisplay } from './SendTokensDetailsDisplay'
 
 const DECIMAL_REGEX = /^(\d+\.?\d*|\.\d+)$/
 
-export const SendTokens = () => {
+export const SendTokens: FormComponent = ({ resetTransactionType }) => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
   const [csvError, setCsvError] = useState<string>('')
@@ -209,6 +210,7 @@ export const SendTokens = () => {
         transactions,
       })
       actions.resetForm()
+      resetTransactionType()
     } catch (err) {
       console.error('Error adding transaction:', err)
     }

@@ -1,4 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { useTimeout } from '@buildeross/hooks/useTimeout'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { getProposal, Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
@@ -59,6 +60,18 @@ const Execute: React.FC<{
 export const SuccessfulProposalActions: React.FC<SuccessfulProposalActionsProps> = ({
   proposal,
 }) => {
+  const {
+    proposalId,
+    state,
+    calldatas,
+    targets,
+    values,
+    descriptionHash,
+    proposer,
+    expiresAt,
+    executableFrom,
+  } = proposal
+
   const { mutate } = useSWRConfig()
   const chain = useChainStore((x) => x.chain)
 
@@ -75,21 +88,19 @@ export const SuccessfulProposalActions: React.FC<SuccessfulProposalActionsProps>
     setShowSuccessModal(true)
   }
 
-  const onEnd = () => {
-    mutate([SWR_KEYS.PROPOSAL, chain.id, proposalId], getProposal(chain.id, proposalId))
-  }
+  const [isEnded, setIsEnded] = useState<boolean>(false)
 
-  const {
-    proposalId,
-    state,
-    calldatas,
-    targets,
-    values,
-    descriptionHash,
-    proposer,
-    expiresAt,
-    executableFrom,
-  } = proposal
+  const isEndedTimeout = isEnded ? 4000 : null
+  useTimeout(() => {
+    mutate(
+      [SWR_KEYS.PROPOSAL, chain.id, proposalId.toLowerCase()],
+      getProposal(chain.id, proposalId)
+    )
+  }, isEndedTimeout)
+
+  const onEnd = () => {
+    setIsEnded(true)
+  }
 
   const getBorderColor = (proposal: Proposal) => {
     if (proposal.state === ProposalState.Succeeded) {

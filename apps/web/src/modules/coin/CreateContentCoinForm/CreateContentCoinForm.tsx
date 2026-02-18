@@ -14,6 +14,7 @@ import {
   LaunchEconomicsPreview,
 } from '@buildeross/ui'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import {
   createContentPoolConfigWithClankerTokenAsCurrency,
   DEFAULT_CLANKER_TOTAL_SUPPLY,
@@ -220,10 +221,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [isDeploying, setIsDeploying] = useState(false)
-  const [deploymentStage, setDeploymentStage] = useState<
-    'idle' | 'deploying' | 'processing'
-  >('idle')
-  const [priceWarning, setPriceWarning] = useState<string | undefined>()
 
   // Check if the current chain is supported
   const isChainSupported = isCoinSupportedChain(chainId)
@@ -341,9 +338,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     }
 
     setSubmitError(undefined)
-    setPriceWarning(undefined)
     setIsDeploying(true)
-    setDeploymentStage('deploying')
 
     try {
       // 1. Create metadata builder and configure metadata
@@ -392,15 +387,17 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
 
       if (clankerTokenPriceError) {
         const warningMessage = `Error fetching token price: ${clankerTokenPriceError.message}. Cannot create content coin without token price.`
-        console.error(warningMessage)
-        setPriceWarning(warningMessage)
+        setSubmitError(warningMessage)
+        actions.setSubmitting(false)
+        setIsDeploying(false)
         return
       }
 
       if (!clankerTokenPriceUsd) {
         const warningMessage = `No price data available for token ${currency}. Cannot create content coin without token price.`
-        console.error(warningMessage)
-        setPriceWarning(warningMessage)
+        setSubmitError(warningMessage)
+        actions.setSubmitting(false)
+        setIsDeploying(false)
         return
       }
 
@@ -436,9 +433,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       // Success! Parse transaction and navigate to coin page
       if (txHash) {
         try {
-          // Update stage to show we're processing
-          setDeploymentStage('processing')
-
           // Wait for transaction receipt to get logs
           const receipt = await waitForTransactionReceipt(config, {
             hash: txHash,
@@ -493,7 +487,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       setSubmitError(error instanceof Error ? error.message : 'Failed to publish post')
     } finally {
       setIsDeploying(false)
-      setDeploymentStage('idle')
       actions.setSubmitting(false)
     }
   }
@@ -599,26 +592,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                     />
                   )}
 
-                {priceWarning && (
-                  <Box
-                    p="x4"
-                    borderRadius="curved"
-                    borderStyle="solid"
-                    borderWidth="normal"
-                    borderColor="warning"
-                    backgroundColor="background2"
-                  >
-                    <Stack gap="x2">
-                      <Text fontSize="14" fontWeight="label" color="warning">
-                        ⚠️ Price Data Unavailable
-                      </Text>
-                      <Text fontSize="14" color="text3">
-                        {priceWarning}
-                      </Text>
-                    </Stack>
-                  </Box>
-                )}
-
                 {submitError && (
                   <Box
                     p="x4"
@@ -716,11 +689,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                     handleClick={formik.handleSubmit}
                     chainId={chainId}
                   >
-                    {deploymentStage === 'processing'
-                      ? 'Processing transaction...'
-                      : deploymentStage === 'deploying'
-                        ? 'Publishing...'
-                        : 'Publish Post'}
+                    {'Publish Post'}
                   </ContractButton>
                 </Flex>
               </Flex>
@@ -728,6 +697,13 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
           )
         }}
       </Formik>
+      <AnimatedModal open={isDeploying}>
+        <SuccessModalContent
+          title={'Publishing post'}
+          subtitle={'Your post is being published'}
+          pending
+        />
+      </AnimatedModal>
     </Box>
   )
 }

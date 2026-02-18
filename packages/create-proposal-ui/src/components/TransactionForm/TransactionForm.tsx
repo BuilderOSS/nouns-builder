@@ -1,5 +1,4 @@
 import { TransactionType } from '@buildeross/types'
-import { ReactNode } from 'react'
 
 import { AddArtwork } from './AddArtwork'
 import { ContentCoin } from './ContentCoin'
@@ -18,10 +17,12 @@ import { ResumeAuctions } from './ResumeAuctions'
 import { SendNft } from './SendNft'
 import { SendTokens } from './SendTokens'
 import { StreamTokens } from './StreamTokens'
+import { FormComponent, requireResetForm } from './types'
 import { WalletConnect } from './WalletConnect'
 
 interface TransactionFormProps {
-  type: TransactionFormType
+  transactionType: TransactionFormType
+  resetTransactionType: () => void
 }
 
 export type TransactionFormType = (typeof TRANSACTION_FORM_OPTIONS)[number]
@@ -47,27 +48,32 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.MIGRATION,
 ] as const
 
-export const TransactionForm = ({ type }: TransactionFormProps) => {
-  const FORMS: { [key in TransactionFormType]: ReactNode } = {
-    [TransactionType.CUSTOM]: <CustomTransaction />,
-    [TransactionType.MINT_GOVERNANCE_TOKENS]: <MintGovernanceTokens />,
-    [TransactionType.DROPOSAL]: <Droposal />,
-    [TransactionType.SEND_NFT]: <SendNft />,
-    [TransactionType.SEND_TOKENS]: <SendTokens />,
-    [TransactionType.STREAM_TOKENS]: <StreamTokens />,
-    [TransactionType.MILESTONE_PAYMENTS]: <MilestonePayments />,
-    [TransactionType.NOMINATE_DELEGATE]: <NominateEscrowDelegate />,
-    [TransactionType.WALLET_CONNECT]: <WalletConnect />,
-    [TransactionType.PIN_TREASURY_ASSET]: <PinTreasuryAsset />,
-    [TransactionType.PAUSE_AUCTIONS]: <PauseAuctions />,
-    [TransactionType.FIX_RENDERER_BASE]: <FixRendererBase />,
-    [TransactionType.RESUME_AUCTIONS]: <ResumeAuctions />,
-    [TransactionType.ADD_ARTWORK]: <AddArtwork />,
-    [TransactionType.REPLACE_ARTWORK]: <ReplaceArtwork />,
-    [TransactionType.MIGRATION]: <Migration />,
-    [TransactionType.CREATOR_COIN]: <CreatorCoin />,
-    [TransactionType.CONTENT_COIN]: <ContentCoin />,
-  }
+const FORMS: Record<TransactionFormType, FormComponent> = {
+  [TransactionType.CUSTOM]: requireResetForm(CustomTransaction),
+  [TransactionType.MINT_GOVERNANCE_TOKENS]: requireResetForm(MintGovernanceTokens),
+  [TransactionType.DROPOSAL]: requireResetForm(Droposal),
+  [TransactionType.SEND_NFT]: requireResetForm(SendNft),
+  [TransactionType.SEND_TOKENS]: requireResetForm(SendTokens),
+  [TransactionType.STREAM_TOKENS]: requireResetForm(StreamTokens),
+  [TransactionType.MILESTONE_PAYMENTS]: requireResetForm(MilestonePayments),
+  [TransactionType.NOMINATE_DELEGATE]: requireResetForm(NominateEscrowDelegate),
+  [TransactionType.WALLET_CONNECT]: requireResetForm(WalletConnect),
+  [TransactionType.PIN_TREASURY_ASSET]: requireResetForm(PinTreasuryAsset),
+  [TransactionType.PAUSE_AUCTIONS]: requireResetForm(PauseAuctions),
+  [TransactionType.FIX_RENDERER_BASE]: requireResetForm(FixRendererBase),
+  [TransactionType.RESUME_AUCTIONS]: requireResetForm(ResumeAuctions),
+  [TransactionType.ADD_ARTWORK]: requireResetForm(AddArtwork),
+  [TransactionType.REPLACE_ARTWORK]: requireResetForm(ReplaceArtwork),
+  [TransactionType.MIGRATION]: requireResetForm(Migration),
+  [TransactionType.CREATOR_COIN]: requireResetForm(CreatorCoin),
+  [TransactionType.CONTENT_COIN]: requireResetForm(ContentCoin),
+} as const
 
-  return <>{FORMS[type]}</>
+export const TransactionForm = ({
+  transactionType,
+  resetTransactionType,
+}: TransactionFormProps) => {
+  const Component: FormComponent = FORMS[transactionType]
+
+  return <Component resetTransactionType={resetTransactionType} />
 }

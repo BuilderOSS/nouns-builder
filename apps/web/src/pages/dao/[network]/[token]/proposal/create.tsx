@@ -21,7 +21,7 @@ import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
@@ -29,7 +29,7 @@ import { isSablierSupported as isChainIdSupportedBySablier } from '@buildeross/u
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
@@ -47,10 +47,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const [transactionType, setTransactionType] = useState<
-    TransactionFormType | undefined
-  >()
-  const transactions = useProposalStore((state) => state.transactions)
+  const [transactionType, setTransactionType] = useState<TransactionFormType | null>(null)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -63,12 +60,6 @@ const CreateProposalPage: NextPageWithLayout = () => {
     chainId: chain.id,
     addresses,
   })
-
-  useEffect(() => {
-    if (transactions.length && !transactionType) {
-      setTransactionType(transactions[0].type as TransactionFormType)
-    }
-  }, [transactions, transactionType, setTransactionType])
 
   const { address } = useAccount()
 
@@ -224,7 +215,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
                 options={options}
                 onChange={(value) => setTransactionType(value)}
               />
-              <TransactionForm type={transactionType} />
+              <TransactionForm
+                transactionType={transactionType}
+                resetTransactionType={() => setTransactionType(null)}
+              />
             </Stack>
           }
         />

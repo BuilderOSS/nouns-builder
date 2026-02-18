@@ -1,6 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { getProposal } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, getProposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, ButtonProps } from '@buildeross/zord'
@@ -78,10 +78,12 @@ export function GovernorContractButton({
         chainId: chain.id,
         gas: (gas * 3n) / 2n, // add extra gas for safety
       })
-      await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+      const receipt = await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+
+      await awaitSubgraphSync(chain.id, receipt.blockNumber)
 
       await mutate(
-        [SWR_KEYS.PROPOSAL, chain.id, proposalId],
+        [SWR_KEYS.PROPOSAL, chain.id, proposalId.toLowerCase()],
         getProposal(chain.id, proposalId)
       )
       setIsPending(false)

@@ -36,6 +36,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { type Address, encodeFunctionData, zeroAddress, zeroHash } from 'viem'
 import { useReadContract } from 'wagmi'
 
+import type { FormComponent } from '../types'
 import { ContentCoinPreviewDisplay } from './ContentCoinPreviewDisplay'
 import { IPFSUploader } from './ipfsUploader'
 
@@ -182,19 +183,7 @@ const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = 
   }
 }
 
-export interface ContentCoinProps {
-  initialValues?: Partial<CoinFormValues>
-  onSubmitSuccess?: () => void
-  mediaType?: 'image' | 'all'
-  showProperties?: boolean
-}
-
-export const ContentCoin: React.FC<ContentCoinProps> = ({
-  initialValues: providedInitialValues,
-  onSubmitSuccess,
-  mediaType = 'all',
-  showProperties = true,
-}) => {
+export const ContentCoin: FormComponent = ({ resetTransactionType }) => {
   const { treasury, token } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { chain } = useChainStore()
@@ -260,16 +249,16 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
   // Initial values from props - automatically set currency if only one option
   const initialValues: CoinFormValues = useMemo(
     () => ({
-      name: providedInitialValues?.name || '',
-      symbol: providedInitialValues?.symbol || '',
-      description: providedInitialValues?.description || '',
-      imageUrl: providedInitialValues?.imageUrl || '',
-      mediaUrl: providedInitialValues?.mediaUrl || '',
-      mediaMimeType: providedInitialValues?.mediaMimeType || '',
-      properties: providedInitialValues?.properties || {},
-      currency: providedInitialValues?.currency || currencyOptions[0]?.value,
+      name: '',
+      symbol: '',
+      description: '',
+      imageUrl: '',
+      mediaUrl: '',
+      mediaMimeType: '',
+      properties: {},
+      currency: currencyOptions[0]?.value,
     }),
-    [providedInitialValues, currencyOptions]
+    [currencyOptions]
   )
 
   const handleSubmit = async (
@@ -405,10 +394,7 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
       // Reset form
       actions.resetForm()
 
-      // Call success callback if provided
-      if (onSubmitSuccess) {
-        onSubmitSuccess()
-      }
+      resetTransactionType()
     } catch (error) {
       console.error('Error creating content coin transaction:', error)
       setSubmitError(
@@ -505,8 +491,8 @@ export const ContentCoin: React.FC<ContentCoinProps> = ({
                   <CoinFormFields
                     formik={formik}
                     initialValues={initialValues}
-                    mediaType={mediaType}
-                    showProperties={showProperties}
+                    mediaType={'all'}
+                    showProperties={true}
                     showTargetFdv={false}
                     showCurrencyInput={true}
                     currencyOptions={currencyOptions}

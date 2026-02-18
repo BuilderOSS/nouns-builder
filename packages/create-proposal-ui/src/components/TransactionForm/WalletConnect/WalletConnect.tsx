@@ -15,6 +15,7 @@ import {
   WCParams,
   WCPayload,
 } from '../../../hooks/useWalletConnect'
+import { type FormComponent } from '../types'
 import * as styles from './WalletConnect.css'
 import walletConnectSchema, { WalletConnectValues } from './WalletConnect.schema'
 
@@ -248,7 +249,7 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
   )
 }
 
-export const WalletConnect = () => {
+export const WalletConnect: FormComponent = ({ resetTransactionType }) => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const [currentClientData, setCurrentClientData] = useState<WCClientData | null>(null)
   const [currentTxPayload, setCurrentTxPayload] = useState<WCPayload | null>(null)
@@ -293,8 +294,9 @@ export const WalletConnect = () => {
 
       actions.resetForm()
       setCurrentTxPayload(null)
+      resetTransactionType()
     },
-    [currentTxPayload, currentClientData, addTransaction, decoded]
+    [currentTxPayload, currentClientData, addTransaction, decoded, resetTransactionType]
   )
 
   const onTransactionReceived = useCallback(

@@ -75,7 +75,9 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   })
 
   const { data: proposal } = useSWR(
-    chainId && proposalId ? ([SWR_KEYS.PROPOSAL, chainId, proposalId] as const) : null,
+    chainId && proposalId
+      ? ([SWR_KEYS.PROPOSAL, chainId, proposalId.toLowerCase()] as const)
+      : null,
     ([, _chainId, _proposalId]) => getProposal(_chainId, _proposalId)
   )
 
@@ -318,8 +320,11 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   return {
     props: {
       fallback: {
-        [unstable_serialize([SWR_KEYS.PROPOSAL, chain.id, proposal.proposalId])]:
-          proposal,
+        [unstable_serialize([
+          SWR_KEYS.PROPOSAL,
+          chain.id,
+          proposal.proposalId.toLowerCase(),
+        ])]: proposal,
       },
       daoName: name,
       ogImageURL,

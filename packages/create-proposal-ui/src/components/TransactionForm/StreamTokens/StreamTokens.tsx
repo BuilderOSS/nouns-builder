@@ -36,6 +36,7 @@ import {
 } from 'viem'
 
 import { TokenSelectionForm } from '../../shared'
+import { type FormComponent } from '../types'
 import { StreamForm } from './StreamForm'
 import streamTokensSchema, {
   StreamFormValues,
@@ -50,7 +51,7 @@ const truncateAddress = (addr: string) => {
   return snippet
 }
 
-export const StreamTokens = () => {
+export const StreamTokens: FormComponent = ({ resetTransactionType }) => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
@@ -543,6 +544,7 @@ export const StreamTokens = () => {
         transactions,
       })
       actions.resetForm()
+      resetTransactionType()
     } catch (err) {
       console.error('Error adding transaction:', err)
     }

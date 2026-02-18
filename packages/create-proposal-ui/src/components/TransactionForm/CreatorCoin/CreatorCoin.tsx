@@ -56,6 +56,7 @@ import {
 import { useBalance } from 'wagmi'
 import { ZodError } from 'zod'
 
+import type { FormComponent } from '../types'
 import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
 
 const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
@@ -363,19 +364,7 @@ const CreatorCoinEconomicsPreview: React.FC<CreatorCoinEconomicsPreviewProps> = 
   }
 }
 
-export interface CreatorCoinProps {
-  initialValues?: Partial<CoinFormValues>
-  onSubmitSuccess?: () => void
-  mediaType?: 'image' | 'all'
-  showProperties?: boolean
-}
-
-export const CreatorCoin: React.FC<CreatorCoinProps> = ({
-  initialValues: providedInitialValues,
-  onSubmitSuccess,
-  mediaType = 'image',
-  showProperties = false,
-}) => {
+export const CreatorCoin: FormComponent = ({ resetTransactionType }) => {
   const { treasury, token: daoTokenAddress } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { chain } = useChainStore()
@@ -439,32 +428,28 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
   const initialValues: CoinFormValues = useMemo(() => {
     const wethAddress = WETH_ADDRESS[chain.id as keyof typeof WETH_ADDRESS]
     // Prefer Builder token, fallback to WETH
-    const defaultCurrency =
-      providedInitialValues?.currency ||
-      (latestBuilderClankerToken
-        ? (latestBuilderClankerToken.tokenAddress as AddressType)
-        : wethAddress) ||
-      ''
-
+    const defaultCurrency = latestBuilderClankerToken
+      ? (latestBuilderClankerToken.tokenAddress as AddressType)
+      : wethAddress
     return {
-      name: providedInitialValues?.name || '',
-      symbol: providedInitialValues?.symbol || '',
-      description: providedInitialValues?.description || '',
-      imageUrl: providedInitialValues?.imageUrl || '',
-      mediaUrl: providedInitialValues?.mediaUrl || '',
-      mediaMimeType: providedInitialValues?.mediaMimeType || '',
-      properties: providedInitialValues?.properties || {},
+      name: '',
+      symbol: '',
+      description: '',
+      imageUrl: '',
+      mediaUrl: '',
+      mediaMimeType: '',
+      properties: {},
       currency: defaultCurrency,
-      targetFdvUsd: providedInitialValues?.targetFdvUsd || DEFAULT_CLANKER_TARGET_FDV,
+      targetFdvUsd: DEFAULT_CLANKER_TARGET_FDV,
       // Clanker-specific defaults
-      feeConfig: providedInitialValues?.feeConfig || FEE_CONFIGS.DynamicBasic,
-      vaultPercentage: providedInitialValues?.vaultPercentage ?? DEFAULT_VAULT_PERCENTAGE,
-      lockupDuration: providedInitialValues?.lockupDuration ?? DEFAULT_LOCKUP_DAYS,
-      vestingDuration: providedInitialValues?.vestingDuration ?? DEFAULT_VESTING_DAYS,
-      vaultRecipient: providedInitialValues?.vaultRecipient || undefined,
-      devBuyEthAmount: providedInitialValues?.devBuyEthAmount || undefined,
+      feeConfig: FEE_CONFIGS.StaticBasic,
+      vaultPercentage: DEFAULT_VAULT_PERCENTAGE,
+      lockupDuration: DEFAULT_LOCKUP_DAYS,
+      vestingDuration: DEFAULT_VESTING_DAYS,
+      vaultRecipient: undefined,
+      devBuyEthAmount: undefined,
     }
-  }, [providedInitialValues, chain.id, latestBuilderClankerToken])
+  }, [chain.id, latestBuilderClankerToken])
 
   const [previewData, setPreviewData] = useState<CoinFormValues>(initialValues)
 
@@ -611,10 +596,7 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
       // Reset form
       actions.resetForm()
 
-      // Call success callback if provided
-      if (onSubmitSuccess) {
-        onSubmitSuccess()
-      }
+      resetTransactionType()
     } catch (error) {
       console.error('Error creating creator coin transaction:', error)
       setSubmitError(parseErrorMessage(error))
@@ -735,8 +717,8 @@ export const CreatorCoin: React.FC<CreatorCoinProps> = ({
 
                 <ClankerCoinFormFields
                   formik={formik}
-                  mediaType={mediaType}
-                  showProperties={showProperties}
+                  mediaType={'image'}
+                  showProperties={false}
                   initialValues={initialValues}
                   showCurrencyInput={true}
                   showTargetFdv={true}

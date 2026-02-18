@@ -1,4 +1,4 @@
-import { Box, Flex, Icon } from '@buildeross/zord'
+import { Box, Flex, Icon, Spinner } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement, ReactNode, useState } from 'react'
 
@@ -20,6 +20,7 @@ interface DropdownSelectProps<T> {
   inputLabel?: string | ReactElement
   onChange: (value: T) => void
   disabled?: boolean
+  isLoading?: boolean
 }
 
 export function DropdownSelect<T extends React.Key>({
@@ -28,6 +29,7 @@ export function DropdownSelect<T extends React.Key>({
   options,
   inputLabel,
   disabled = false,
+  isLoading = false,
 }: React.PropsWithChildren<DropdownSelectProps<T>>) {
   const [showOptions, setShowOptions] = useState(false)
 
@@ -70,12 +72,25 @@ export function DropdownSelect<T extends React.Key>({
             {selectedOption?.icon && <Flex pr={'x4'}>{selectedOption.icon}</Flex>}
             {selectedOption?.label}
           </Flex>
-          <Icon
-            id={showOptions ? 'chevronUp' : 'chevronDown'}
-            size={'md'}
-            align={'center'}
-            pr={'x4'}
-          />
+          {isLoading ? (
+            <Flex
+              pr={'x4'}
+              direction="row"
+              h="100%"
+              align="center"
+              justify="center"
+              alignSelf="center"
+            >
+              <Spinner size={'sm'} />
+            </Flex>
+          ) : (
+            <Icon
+              id={showOptions ? 'chevronUp' : 'chevronDown'}
+              size={'md'}
+              align={'center'}
+              pr={'x4'}
+            />
+          )}
         </Flex>
         <AnimatePresence>
           <motion.div

@@ -10,9 +10,10 @@ import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
+import { type FormComponent } from '../types'
 import { AddArtworkForm } from './AddArtworkForm'
 
-export const AddArtwork = () => {
+export const AddArtwork: FormComponent = ({ resetTransactionType }) => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -133,7 +134,15 @@ export const AddArtwork = () => {
     })
 
     resetForm()
-  }, [addresses.metadata, addTransaction, isValid, resetForm, transactions])
+    resetTransactionType()
+  }, [
+    addresses.metadata,
+    addTransaction,
+    isValid,
+    resetForm,
+    resetTransactionType,
+    transactions,
+  ])
 
   return (
     <Stack>
