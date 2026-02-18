@@ -230,8 +230,9 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           value={selectedNftOption}
           onChange={handleNftOptionChange}
           options={nftOptions}
-          inputLabel="Select NFT"
+          inputLabel={'Select NFT'}
           disabled={isLoadingTreasury}
+          isLoading={isLoadingTreasury}
         />
 
         {selectedNftOption === 'custom' && (
