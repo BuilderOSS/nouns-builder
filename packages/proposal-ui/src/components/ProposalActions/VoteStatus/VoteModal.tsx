@@ -17,7 +17,7 @@ import {
   theme,
 } from '@buildeross/zord'
 import { Field, Formik } from 'formik'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
@@ -63,20 +63,44 @@ export const VoteModal: React.FC<VoteModalProps> = ({
   chainId: chainIdProp,
   onSuccess,
 }) => {
-  const [isCastVoteSuccess, setIsCastVoteSuccess] = React.useState<boolean>(false)
+  const [isCastVoteSuccess, setIsSuccess] = useState<boolean>(false)
 
-  const handleModalClose = useCallback(() => {
-    setShowVoteModal(false)
-    if (isCastVoteSuccess && onSuccess) {
-      onSuccess()
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
     }
-  }, [setShowVoteModal, isCastVoteSuccess, onSuccess])
+  }, [])
+
+  const handleClose = () => {
+    setShowVoteModal(false)
+    setIsSuccess(false)
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+  }
+
+  const handleSuccess = () => {
+    setIsSuccess(true)
+    onSuccess?.()
+    // Auto-close after 2 seconds
+    successTimerRef.current = setTimeout(() => {
+      handleClose()
+    }, 2000)
+  }
 
   return (
     <AnimatedModal
       open={showVoteModal}
       size={isCastVoteSuccess ? 'small' : 'medium'}
-      close={handleModalClose}
+      close={handleClose}
     >
       {isCastVoteSuccess ? (
         <SuccessModalContent
@@ -88,8 +112,8 @@ export const VoteModal: React.FC<VoteModalProps> = ({
         <SubmitVoteForm
           proposalId={proposalId}
           votesAvailable={votesAvailable}
-          handleModalClose={handleModalClose}
-          onSuccess={() => setIsCastVoteSuccess(true)}
+          handleModalClose={handleClose}
+          onSuccess={handleSuccess}
           title={title}
           addresses={addressesProp}
           chainId={chainIdProp}
@@ -304,15 +328,14 @@ export const SubmitVoteForm: React.FC<{
 
               <ContractButton
                 chainId={chainId}
-                loading={isSubmitting}
-                disabled={!values.choice}
+                disabled={!values.choice || isSubmitting}
                 w="100%"
                 size="lg"
                 mt="x8"
                 borderRadius="curved"
                 handleClick={handleSubmit}
               >
-                Submit vote
+                {isSubmitting ? 'Submitting...' : 'Submit vote'}
               </ContractButton>
             </fieldset>
           </form>
