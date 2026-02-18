@@ -17,7 +17,11 @@ export interface MigrationDAOFormProps {
   memberMerkleRoot: `0x${string}`
 }
 
-export const MigrateDAOForm = () => {
+export const MigrateDAOForm = ({
+  resetTransactionType,
+}: {
+  resetTransactionType: () => void
+}) => {
   const { auction: auctionAddress } = useDaoStore((x) => x.addresses)
   const { id: chainId } = useChainStore((x) => x.chain)
   const [migratingToChainId, setMigratingToChainId] = useState<CHAIN_ID>(
@@ -46,6 +50,7 @@ export const MigrateDAOForm = () => {
       summary: 'Migrate to L2',
       transactions,
     })
+    resetTransactionType()
   }
 
   const handleChainChange = (value: CHAIN_ID) => {

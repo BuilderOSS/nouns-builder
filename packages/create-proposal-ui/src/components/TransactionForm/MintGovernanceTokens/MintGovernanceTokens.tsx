@@ -12,13 +12,14 @@ import React from 'react'
 import { Address, encodeFunctionData, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
+import { FormComponent } from '../types'
 import { UpgradeInProgress, UpgradeRequired } from '../Upgrade'
 import MintGovernanceTokensForm from './MintGovernanceTokensForm'
 import { MintGovernanceTokensFormValues } from './MintGovernanceTokensForm.schema'
 
 const CONTRACT_VERSION = '1.2.0'
 
-export const MintGovernanceTokens: React.FC = () => {
+export const MintGovernanceTokens: FormComponent = ({ resetTransactionType }) => {
   const addresses = useDaoStore((state) => state.addresses)
   const transactions = useProposalStore((state) => state.transactions)
   const addTransaction = useProposalStore((state) => state.addTransaction)
@@ -134,6 +135,8 @@ export const MintGovernanceTokens: React.FC = () => {
     })
 
     actions.resetForm()
+
+    resetTransactionType()
   }
 
   const isTreasuryContractOwner = auctionOwner === addresses.treasury

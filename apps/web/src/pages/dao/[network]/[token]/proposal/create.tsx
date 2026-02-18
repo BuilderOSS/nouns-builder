@@ -47,9 +47,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const [transactionType, setTransactionType] = useState<
-    TransactionFormType | undefined
-  >()
+  const [transactionType, setTransactionType] = useState<TransactionFormType | null>(null)
   const transactions = useProposalStore((state) => state.transactions)
 
   const { data: paused } = useReadContract({
@@ -224,7 +222,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
                 options={options}
                 onChange={(value) => setTransactionType(value)}
               />
-              <TransactionForm type={transactionType} />
+              <TransactionForm
+                transactionType={transactionType}
+                resetTransactionType={() => setTransactionType(null)}
+              />
             </Stack>
           }
         />

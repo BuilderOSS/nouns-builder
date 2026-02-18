@@ -12,12 +12,13 @@ import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
+import { type FormComponent } from '../types'
 import { UpgradeInProgress, UpgradeRequired } from '../Upgrade'
 import { ReplaceArtworkForm } from './ReplaceArtworkForm'
 
 const REPLACE_ARTWORK_CONTRACT_VERSION = '1.2.0'
 
-export const ReplaceArtwork = () => {
+export const ReplaceArtwork: FormComponent = ({ resetTransactionType }) => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
@@ -126,7 +127,15 @@ export const ReplaceArtwork = () => {
     })
 
     resetForm()
-  }, [addTransaction, resetForm, transactions, isValid, addresses.metadata])
+    resetTransactionType()
+  }, [
+    addTransaction,
+    resetForm,
+    resetTransactionType,
+    transactions,
+    isValid,
+    addresses.metadata,
+  ])
 
   return (
     <Stack>

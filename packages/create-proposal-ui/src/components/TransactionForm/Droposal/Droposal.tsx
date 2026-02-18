@@ -7,6 +7,7 @@ import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import { encodeFunctionData, isAddress, parseEther } from 'viem'
 
+import { type FormComponent } from '../types'
 import { DroposalForm } from './DroposalForm'
 import { DroposalFormValues } from './DroposalForm.schema'
 
@@ -15,7 +16,7 @@ const UINT_32_MAX = BigInt('4294967295')
 const HASH_ZERO =
   '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`
 
-export const Droposal: React.FC = () => {
+export const Droposal: FormComponent = ({ resetTransactionType }) => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
 
@@ -98,6 +99,8 @@ export const Droposal: React.FC = () => {
     })
 
     actions.resetForm()
+
+    resetTransactionType()
   }
 
   return (

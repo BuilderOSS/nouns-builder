@@ -4,6 +4,8 @@ import { vi } from 'vitest'
 
 import { MintGovernanceTokens } from './MintGovernanceTokens'
 
+const resetTransactionType = () => {}
+
 vi.mock('@buildeross/sdk/subgraph', async () => {
   const mod = await vi.importActual<typeof import('@buildeross/sdk/subgraph')>(
     '@buildeross/sdk/subgraph'
@@ -29,7 +31,7 @@ describe('MintGovernanceTokens', () => {
   })
 
   it('should render initially disabled mint-governance-tokens form given a required upgrade', async () => {
-    render(<MintGovernanceTokens />, {
+    render(<MintGovernanceTokens resetTransactionType={resetTransactionType} />, {
       chain: FOUNDRY_CHAIN,
       addresses: BUILDER_DAO,
     })

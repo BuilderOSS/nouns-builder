@@ -10,7 +10,11 @@ import { useReadContract } from 'wagmi'
 
 import { checkboxStyleVariants } from '../ReplaceArtwork/ReplaceArtworkForm.css'
 
-export const PauseAuctionsForm = () => {
+export const PauseAuctionsForm = ({
+  resetTransactionType,
+}: {
+  resetTransactionType: () => void
+}) => {
   const { auction, governor } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
@@ -74,6 +78,8 @@ export const PauseAuctionsForm = () => {
         transactions: [votingDelay],
       })
     }
+
+    resetTransactionType()
   }
 
   return (

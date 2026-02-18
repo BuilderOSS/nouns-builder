@@ -18,8 +18,10 @@ import bridgeTreasuryFormSchema, {
 
 export const BridgeTreasuryForm = ({
   migratedToChainId,
+  resetTransactionType,
 }: {
   migratedToChainId?: CHAIN_ID
+  resetTransactionType: () => void
 }) => {
   const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -63,6 +65,7 @@ export const BridgeTreasuryForm = ({
     })
 
     actions.resetForm()
+    resetTransactionType()
   }
 
   return (

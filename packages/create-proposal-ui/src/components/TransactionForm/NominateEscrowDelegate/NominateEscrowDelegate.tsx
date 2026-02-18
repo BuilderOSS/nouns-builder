@@ -19,6 +19,8 @@ import { useCallback } from 'react'
 import { encodeFunctionData, getAddress, Hex, isAddress, zeroHash } from 'viem'
 import * as yup from 'yup'
 
+import { type FormComponent } from '../types'
+
 interface EscrowDelegateFormValues {
   escrowDelegate: string
 }
@@ -50,7 +52,7 @@ const escrowDelegateFormSchema = (_escrowDelegate: string | undefined) =>
 
 const schemaEncoder = new SchemaEncoder(ESCROW_DELEGATE_SCHEMA)
 
-export const NominateEscrowDelegate = () => {
+export const NominateEscrowDelegate: FormComponent = ({ resetTransactionType }) => {
   const { token, treasury } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const chain = useChainStore((x) => x.chain)
@@ -109,8 +111,9 @@ export const NominateEscrowDelegate = () => {
         summary: `Nominate ${displayName} as the delegate`,
         transactions: [attest],
       })
+      resetTransactionType()
     },
-    [addTransaction, chain.id, token]
+    [addTransaction, chain.id, token, resetTransactionType]
   )
 
   const currentDelegate = escrowDelegate ?? treasury

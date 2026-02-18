@@ -14,12 +14,13 @@ import { Formik } from 'formik'
 import { useCallback } from 'react'
 import { encodeFunctionData, getAddress, type Hex, zeroHash } from 'viem'
 
+import { type FormComponent } from '../types'
 import { pinTreasuryAssetSchema, PinTreasuryAssetValues } from './PinTreasuryAsset.schema'
 import { PinTreasuryAssetForm } from './PinTreasuryAssetForm'
 
 const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
 
-export const PinTreasuryAsset = () => {
+export const PinTreasuryAsset: FormComponent = ({ resetTransactionType }) => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -90,8 +91,9 @@ export const PinTreasuryAsset = () => {
       })
 
       actions.resetForm()
+      resetTransactionType()
     },
-    [addTransaction, addresses.token, chain.id]
+    [addTransaction, addresses.token, chain.id, resetTransactionType]
   )
 
   return (
