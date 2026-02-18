@@ -36,7 +36,7 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </Flex>
-        <Text variant="paragraph-sm" color="tertiary" style={{ flexGrow: 1 }}>
+        <Text variant="paragraph-sm" color="text3" style={{ flexGrow: 1 }}>
           {daoName}
         </Text>
         <Button

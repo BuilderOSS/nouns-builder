@@ -47,6 +47,25 @@ export const CreatorCoinSection = ({
   // Only show Trade button for Base chains
   const showTradeButton = isCoinSupportedChain(chainId)
 
+  const renderActionButtons = () => (
+    <>
+      {showTradeButton && (
+        <Button
+          variant="primary"
+          iconAlign="left"
+          onClick={() => onTradeClick?.(tokenAddress, symbol)}
+        >
+          Trade
+        </Button>
+      )}
+      <Link link={getCoinLink(chainId, tokenAddress)}>
+        <Button variant="outline" icon="arrowRight" iconAlign="right">
+          View Details
+        </Button>
+      </Link>
+    </>
+  )
+
   return (
     <Flex className={creatorCoinSection} direction="column" gap="x6">
       <Flex justify="space-between" wrap="wrap" gap="x2" align="flex-start">
@@ -90,20 +109,7 @@ export const CreatorCoinSection = ({
           display={{ '@initial': 'none', '@768': 'flex' }}
           style={{ flexShrink: 0 }}
         >
-          {showTradeButton && (
-            <Button
-              variant="primary"
-              iconAlign="left"
-              onClick={() => onTradeClick?.(tokenAddress, symbol)}
-            >
-              Trade
-            </Button>
-          )}
-          <Link link={getCoinLink(chainId, tokenAddress)}>
-            <Button variant="outline" icon="arrowRight" iconAlign="right">
-              View Details
-            </Button>
-          </Link>
+          {renderActionButtons()}
         </Flex>
       </Flex>
 
@@ -137,20 +143,7 @@ export const CreatorCoinSection = ({
         w="100%"
         display={{ '@initial': 'flex', '@768': 'none' }}
       >
-        {showTradeButton && (
-          <Button
-            variant="primary"
-            iconAlign="left"
-            onClick={() => onTradeClick?.(tokenAddress, symbol)}
-          >
-            Trade
-          </Button>
-        )}
-        <Link link={getCoinLink(chainId, tokenAddress)}>
-          <Button variant="outline" icon="arrowRight" iconAlign="right">
-            View Details
-          </Button>
-        </Link>
+        {renderActionButtons()}
       </Flex>
     </Flex>
   )

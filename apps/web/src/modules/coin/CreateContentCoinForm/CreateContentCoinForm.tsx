@@ -391,15 +391,15 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       }
 
       if (clankerTokenPriceError) {
-        const warningMessage = `Error fetching token price: ${clankerTokenPriceError.message}. Using $1 as default price for market cap calculations.`
-        console.warn(warningMessage)
+        const warningMessage = `Error fetching token price: ${clankerTokenPriceError.message}. Cannot create content coin without token price.`
+        console.error(warningMessage)
         setPriceWarning(warningMessage)
         return
       }
 
       if (!clankerTokenPriceUsd) {
-        const warningMessage = `No price data available for token ${currency}. Using $1 as default price for market cap calculations.`
-        console.warn(warningMessage)
+        const warningMessage = `No price data available for token ${currency}. Cannot create content coin without token price.`
+        console.error(warningMessage)
         setPriceWarning(warningMessage)
         return
       }

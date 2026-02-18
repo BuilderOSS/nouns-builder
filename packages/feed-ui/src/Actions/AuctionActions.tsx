@@ -73,10 +73,9 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
     const baseUrl = link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
     if (!account) return baseUrl
 
-    const params = new URLSearchParams({
-      referral: account.toString(),
-    })
-    return `${baseUrl}?${params}`
+    const url = new URL(baseUrl)
+    url.searchParams.set('referral', account.toString())
+    return url.toString()
   }, [chainId, daoId, tokenId, getAuctionLink, account])
 
   const handleSettle = useCallback(async () => {

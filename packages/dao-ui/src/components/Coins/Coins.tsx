@@ -143,7 +143,7 @@ export const Coins: React.FC = () => {
 
       {/* Shared Trade Modal */}
       {selectedCoin && (
-        <AnimatedModal open={!!selectedCoin} close={handleCloseModal} size="medium">
+        <AnimatedModal open={true} close={handleCloseModal} size="medium">
           <Box w="100%">
             <Flex align="center" justify="space-between" mb="x4" w="100%">
               <Text variant="heading-md">Trade {selectedCoin.symbol}</Text>

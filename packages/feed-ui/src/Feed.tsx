@@ -88,13 +88,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
   const filterStore = useFeedFiltersStore(externalFilterMode ? undefined : address)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
-  // Shared modal states for all feed items
-  // const [bidModalState, setBidModalState] = useState<BidModalState | null>(null)
-  // const [modalState.state, setVoteModalState] = useState<VoteModalState | null>(null)
-  // const [modalState.state, setPropdateModalState] = useState<PropdateModalState | null>(
-  //   null
-  // )
-  // const [modalState.state, setTradeModalState] = useState<TradeModalState | null>(null)
+  // Shared modal state for all feed items
   const [modalState, setModalState] = useState<ModalState | null>(null)
 
   // Get actual filters to use (either from props or from store)

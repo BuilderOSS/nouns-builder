@@ -9,7 +9,7 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Atoms, Box, Flex, Icon, IconType, Stack, Text } from '@buildeross/zord'
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import { useAccount } from 'wagmi'
 
 import { ModalHeader } from './ModalHeader'
@@ -221,7 +221,36 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   daoImage,
 }) => {
   const { address: userAddress } = useAccount()
-  const [isCastVoteSuccess, setIsCastVoteSuccess] = useState<boolean>(false)
+  const [isSuccess, setIsSuccess] = useState<boolean>(false)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+    }
+  }, [])
+
+  const handleClose = () => {
+    onClose()
+    setIsSuccess(false)
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+  }
+
+  const handleSuccess = () => {
+    setIsSuccess(true)
+    // Auto-close after 2 seconds
+    successTimerRef.current = setTimeout(() => {
+      handleClose()
+    }, 2000)
+  }
 
   const {
     votes,
@@ -257,22 +286,8 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   const votesAvailable = votes ? Number(votes) : 0
   const isLoading = isLoadingVotes || isVoteLoading || isMembershipLoading
 
-  const handleModalClose = () => {
-    setIsCastVoteSuccess(false)
-    onClose()
-  }
-
-  const handleSuccess = () => {
-    setIsCastVoteSuccess(true)
-    // Auto-close after 2 seconds
-    setTimeout(() => {
-      setIsCastVoteSuccess(false)
-      onClose()
-    }, 2000)
-  }
-
   // Determine modal size based on state
-  const modalSize = isCastVoteSuccess ? 'small' : 'medium'
+  const modalSize = isSuccess ? 'small' : 'medium'
 
   // Render modal content based on state
   const renderContent = () => {
@@ -285,7 +300,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
             daoImage={daoImage}
             title="Vote on Proposal"
             subtitle={proposalTitle}
-            onClose={handleModalClose}
+            onClose={handleClose}
           />
           <Text>Loading...</Text>
         </Box>
@@ -293,7 +308,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
     }
 
     // Show success state after voting
-    if (isCastVoteSuccess) {
+    if (isSuccess) {
       return (
         <SuccessModalContent
           success={true}
@@ -311,7 +326,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
           daoName={daoName}
           daoImage={daoImage}
           vote={vote}
-          onClose={handleModalClose}
+          onClose={handleClose}
         />
       )
     }
@@ -323,7 +338,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
           proposalTitle={proposalTitle}
           daoName={daoName}
           daoImage={daoImage}
-          onClose={handleModalClose}
+          onClose={handleClose}
         />
       )
     }
@@ -340,7 +355,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
               daoName={daoName}
               daoImage={daoImage}
               membership={membership}
-              onClose={handleModalClose}
+              onClose={handleClose}
             />
           )
         }
@@ -352,7 +367,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
           proposalTitle={proposalTitle}
           daoName={daoName}
           daoImage={daoImage}
-          onClose={handleModalClose}
+          onClose={handleClose}
         />
       )
     }
@@ -366,12 +381,12 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
           daoImage={daoImage}
           title="Vote on Proposal"
           subtitle={proposalTitle}
-          onClose={handleModalClose}
+          onClose={handleClose}
         />
         <SubmitVoteForm
           proposalId={proposalId}
           votesAvailable={votesAvailable}
-          handleModalClose={handleModalClose}
+          handleModalClose={handleClose}
           onSuccess={handleSuccess}
           title={proposalTitle}
           addresses={addresses}
@@ -387,7 +402,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
       key="feed-vote-modal"
       open={isOpen}
       size={modalSize}
-      close={handleModalClose}
+      close={handleClose}
     >
       {renderContent()}
     </AnimatedModal>

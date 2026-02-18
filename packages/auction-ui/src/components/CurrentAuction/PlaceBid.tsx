@@ -182,10 +182,9 @@ const InnerPlaceBid = ({
     const baseUrl = link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
     if (!address) return baseUrl
 
-    const params = new URLSearchParams({
-      referral: address.toString(),
-    })
-    return `${baseUrl}?${params}`
+    const url = new URL(baseUrl)
+    url.searchParams.set('referral', address.toString())
+    return url.toString()
   }, [chainId, tokenAddress, tokenId, getAuctionLink, address])
 
   return (

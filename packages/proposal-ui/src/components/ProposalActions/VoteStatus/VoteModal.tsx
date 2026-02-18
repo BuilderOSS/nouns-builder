@@ -194,7 +194,7 @@ export const SubmitVoteForm: React.FC<{
         <Flex justify={'space-between'}>
           <Box>
             <Text variant="heading-md" className={voteModalFormTitle}>
-              {votesAvailable === 0 ? 'Submit Vote' : 'Submit Votes'}
+              {votesAvailable <= 1 ? 'Submit Vote' : 'Submit Votes'}
             </Text>
             <Text variant="paragraph-sm" color="tertiary">
               Proposal: {title}

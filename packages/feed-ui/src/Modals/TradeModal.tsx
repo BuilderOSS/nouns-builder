@@ -33,7 +33,6 @@ export const TradeModal: React.FC<TradeModalProps> = ({
           daoName={daoName}
           daoImage={daoImage}
           title={`Trade ${symbol}`}
-          subtitle={symbol}
           onClose={onClose}
         />
         <SwapWidget

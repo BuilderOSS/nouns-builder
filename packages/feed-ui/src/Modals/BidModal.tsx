@@ -1,5 +1,4 @@
 import { CurrentAuction, useAuctionEvents } from '@buildeross/auction-ui'
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getBids } from '@buildeross/sdk/subgraph'
 import type {
@@ -9,7 +8,7 @@ import type {
 } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Stack } from '@buildeross/zord'
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import useSWR from 'swr'
 
 import { ModalHeader } from './ModalHeader'
@@ -44,19 +43,34 @@ export const BidModal: React.FC<BidModalProps> = ({
   endTime,
 }) => {
   const [isSuccess, setIsSuccess] = useState(false)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const handleSuccess = () => {
-    setIsSuccess(true)
-    // Auto-close after 2 seconds
-    setTimeout(() => {
-      onClose()
-      setIsSuccess(false)
-    }, 2000)
-  }
+  // Clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+    }
+  }, [])
 
   const handleClose = () => {
     onClose()
     setIsSuccess(false)
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+  }
+
+  const handleSuccess = () => {
+    setIsSuccess(true)
+    // Auto-close after 2 seconds
+    successTimerRef.current = setTimeout(() => {
+      handleClose()
+    }, 2000)
   }
 
   const { data: bids } = useSWR(
@@ -78,8 +92,6 @@ export const BidModal: React.FC<BidModalProps> = ({
     enabled: isOpen,
   })
 
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
-
   return (
     <AnimatedModal key="feed-bid-modal" open={isOpen} close={handleClose} size="medium">
       {isSuccess ? (
@@ -99,7 +111,7 @@ export const BidModal: React.FC<BidModalProps> = ({
           />
 
           <CurrentAuction
-            chainId={chain.id}
+            chainId={chainId}
             tokenId={tokenId}
             auctionAddress={addresses.auction}
             tokenAddress={addresses.token}
