@@ -1,6 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { getProposal } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, getProposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { BytesType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -177,10 +177,15 @@ export const SubmitVoteForm: React.FC<{
         })
         const txHash = await writeContract(config, data.request)
 
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chainId })
+        const receipt = await waitForTransactionReceipt(config, {
+          hash: txHash,
+          chainId: chainId,
+        })
+
+        await awaitSubgraphSync(chainId, receipt.blockNumber)
 
         await mutate(
-          [SWR_KEYS.PROPOSAL, chainId, proposalId],
+          [SWR_KEYS.PROPOSAL, chainId, proposalId.toLowerCase()],
           getProposal(chainId, proposalId)
         )
 

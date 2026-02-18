@@ -6,7 +6,7 @@ import {
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { MessageType } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, MessageType } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
@@ -189,7 +189,11 @@ export const PropDateForm = ({
           args: [attestParams],
         })
         const txHash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chainId })
+        const receipt = await waitForTransactionReceipt(config, {
+          hash: txHash,
+          chainId: chainId,
+        })
+        await awaitSubgraphSync(chainId, receipt.blockNumber)
         setIsTxSuccess(true)
       } catch (err: unknown) {
         console.error('Error submitting propdate (signing):', err)
