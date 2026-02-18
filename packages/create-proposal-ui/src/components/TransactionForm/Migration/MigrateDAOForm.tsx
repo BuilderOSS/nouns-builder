@@ -9,19 +9,11 @@ import { useState } from 'react'
 import { useReadContract } from 'wagmi'
 
 import { usePrepareMigration } from '../../../hooks/usePrepareMigration'
+import { type FormComponent } from '../types'
 
 const chainOptions = [{ label: 'Base', value: CHAIN_ID.BASE }]
 
-export interface MigrationDAOFormProps {
-  currentTokenId: bigint
-  memberMerkleRoot: `0x${string}`
-}
-
-export const MigrateDAOForm = ({
-  resetTransactionType,
-}: {
-  resetTransactionType: () => void
-}) => {
+export const MigrateDAOForm: FormComponent = ({ resetTransactionType }) => {
   const { auction: auctionAddress } = useDaoStore((x) => x.addresses)
   const { id: chainId } = useChainStore((x) => x.chain)
   const [migratingToChainId, setMigratingToChainId] = useState<CHAIN_ID>(

@@ -4,8 +4,6 @@ import { vi } from 'vitest'
 
 import { MintGovernanceTokens } from './MintGovernanceTokens'
 
-const resetTransactionType = () => {}
-
 vi.mock('@buildeross/sdk/subgraph', async () => {
   const mod = await vi.importActual<typeof import('@buildeross/sdk/subgraph')>(
     '@buildeross/sdk/subgraph'
@@ -31,6 +29,8 @@ describe('MintGovernanceTokens', () => {
   })
 
   it('should render initially disabled mint-governance-tokens form given a required upgrade', async () => {
+    const resetTransactionType = vi.fn()
+
     render(<MintGovernanceTokens resetTransactionType={resetTransactionType} />, {
       chain: FOUNDRY_CHAIN,
       addresses: BUILDER_DAO,
@@ -74,5 +74,9 @@ describe('MintGovernanceTokens', () => {
     })
     const amountAfterSubmit = screen.getByDisplayValue(0) as HTMLInputElement
     expect(amountAfterSubmit.value).toBe('0')
+
+    await waitFor(() => {
+      expect(resetTransactionType).toHaveBeenCalledTimes(1)
+    })
   })
 })

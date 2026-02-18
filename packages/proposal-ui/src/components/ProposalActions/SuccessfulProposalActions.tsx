@@ -60,6 +60,18 @@ const Execute: React.FC<{
 export const SuccessfulProposalActions: React.FC<SuccessfulProposalActionsProps> = ({
   proposal,
 }) => {
+  const {
+    proposalId,
+    state,
+    calldatas,
+    targets,
+    values,
+    descriptionHash,
+    proposer,
+    expiresAt,
+    executableFrom,
+  } = proposal
+
   const { mutate } = useSWRConfig()
   const chain = useChainStore((x) => x.chain)
 
@@ -89,18 +101,6 @@ export const SuccessfulProposalActions: React.FC<SuccessfulProposalActionsProps>
   const onEnd = () => {
     setIsEnded(true)
   }
-
-  const {
-    proposalId,
-    state,
-    calldatas,
-    targets,
-    values,
-    descriptionHash,
-    proposer,
-    expiresAt,
-    executableFrom,
-  } = proposal
 
   const getBorderColor = (proposal: Proposal) => {
     if (proposal.state === ProposalState.Succeeded) {

@@ -67,7 +67,7 @@ const FORMS: Record<TransactionFormType, FormComponent> = {
   [TransactionType.MIGRATION]: requireResetForm(Migration),
   [TransactionType.CREATOR_COIN]: requireResetForm(CreatorCoin),
   [TransactionType.CONTENT_COIN]: requireResetForm(ContentCoin),
-} as const satisfies Record<TransactionFormType, FormComponent>
+} as const
 
 export const TransactionForm = ({
   transactionType,

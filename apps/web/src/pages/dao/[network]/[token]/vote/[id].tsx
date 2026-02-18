@@ -320,8 +320,11 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   return {
     props: {
       fallback: {
-        [unstable_serialize([SWR_KEYS.PROPOSAL, chain.id, proposal.proposalId])]:
-          proposal,
+        [unstable_serialize([
+          SWR_KEYS.PROPOSAL,
+          chain.id,
+          proposal.proposalId.toLowerCase(),
+        ])]: proposal,
       },
       daoName: name,
       ogImageURL,

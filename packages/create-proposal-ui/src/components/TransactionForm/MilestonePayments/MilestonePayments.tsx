@@ -19,7 +19,7 @@ import { useCallback, useState } from 'react'
 import useSWR from 'swr'
 import { Address, encodeFunctionData, formatUnits, isAddress, parseUnits } from 'viem'
 
-import { FormComponent } from '../types'
+import { type FormComponent } from '../types'
 import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
 import MilestonePaymentsForm from './MilestonePaymentsForm'
 import { encodeEscrowData } from './MilestonePaymentsUtils'

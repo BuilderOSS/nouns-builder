@@ -221,7 +221,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [isDeploying, setIsDeploying] = useState(false)
-  const [priceWarning, setPriceWarning] = useState<string | undefined>()
 
   // Check if the current chain is supported
   const isChainSupported = isCoinSupportedChain(chainId)
@@ -339,7 +338,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     }
 
     setSubmitError(undefined)
-    setPriceWarning(undefined)
     setIsDeploying(true)
 
     try {
@@ -389,15 +387,17 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
 
       if (clankerTokenPriceError) {
         const warningMessage = `Error fetching token price: ${clankerTokenPriceError.message}. Cannot create content coin without token price.`
-        console.error(warningMessage)
-        setPriceWarning(warningMessage)
+        setSubmitError(warningMessage)
+        actions.setSubmitting(false)
+        setIsDeploying(false)
         return
       }
 
       if (!clankerTokenPriceUsd) {
         const warningMessage = `No price data available for token ${currency}. Cannot create content coin without token price.`
-        console.error(warningMessage)
-        setPriceWarning(warningMessage)
+        setSubmitError(warningMessage)
+        actions.setSubmitting(false)
+        setIsDeploying(false)
         return
       }
 
@@ -591,26 +591,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                       clankerTokenPriceUsd={clankerTokenPriceUsd}
                     />
                   )}
-
-                {priceWarning && (
-                  <Box
-                    p="x4"
-                    borderRadius="curved"
-                    borderStyle="solid"
-                    borderWidth="normal"
-                    borderColor="warning"
-                    backgroundColor="background2"
-                  >
-                    <Stack gap="x2">
-                      <Text fontSize="14" fontWeight="label" color="warning">
-                        ⚠️ Price Data Unavailable
-                      </Text>
-                      <Text fontSize="14" color="text3">
-                        {priceWarning}
-                      </Text>
-                    </Stack>
-                  </Box>
-                )}
 
                 {submitError && (
                   <Box
