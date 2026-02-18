@@ -200,7 +200,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
       mx="auto"
     >
       <CreateProposalHeading
-        title={'Create Proposal'}
+        title={'Add Transactions'}
         handleBack={openDaoActivityPage}
         showDocsLink
         showQueue
