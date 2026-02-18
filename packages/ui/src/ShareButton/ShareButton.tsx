@@ -22,7 +22,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({
   size = 'md',
   variant = 'ghost',
   onCopySuccess,
-  tooltip = 'Copy to clipboard',
+  tooltip = 'Copy Share Link',
   className,
 }) => {
   const [copied, setCopied] = React.useState<boolean>(false)

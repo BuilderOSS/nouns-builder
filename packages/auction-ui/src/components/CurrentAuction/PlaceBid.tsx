@@ -4,9 +4,10 @@ import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { ShareButton } from '@buildeross/ui/ShareButton'
-import { chainIdToSlug, unpackOptionalArray } from '@buildeross/utils/helpers'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex } from '@buildeross/zord'
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
@@ -42,6 +43,7 @@ const InnerPlaceBid = ({
   const { address, chain: wagmiChain } = useAccount()
   const { data: balance } = useBalance({ address: address, chainId })
   const { mutate } = useSWRConfig()
+  const { getAuctionLink } = useLinks()
 
   const config = useConfig()
 
@@ -176,15 +178,14 @@ const InnerPlaceBid = ({
 
   // Build share URL with referral parameter if user is connected
   const shareUrl = useMemo(() => {
-    const chainSlug = chainIdToSlug(chainId)!
-    const baseUrl = `${BASE_URL}/dao/${chainSlug}/${tokenAddress}`
+    const link = getAuctionLink(chainId, tokenAddress, tokenId)
+    const baseUrl = link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
     if (!address) return baseUrl
 
-    const params = new URLSearchParams({
-      referral: address.toString(),
-    })
-    return `${baseUrl}?${params}`
-  }, [chainId, tokenAddress, address])
+    const url = new URL(baseUrl)
+    url.searchParams.set('referral', address.toString())
+    return url.toString()
+  }, [chainId, tokenAddress, tokenId, getAuctionLink, address])
 
   return (
     <Flex

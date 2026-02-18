@@ -21,15 +21,17 @@ import type { OnOpenBidModal } from '../types/modalStates'
 
 interface AuctionActionsProps {
   daoName: string
+  daoImage: string
   chainId: CHAIN_ID
   tokenId: string
   tokenName: string
   addresses: RequiredDaoContractAddresses
-  onOpenBidModal?: OnOpenBidModal
+  onOpenBidModal: OnOpenBidModal
 }
 
 export const AuctionActions: React.FC<AuctionActionsProps> = ({
   daoName,
+  daoImage,
   chainId,
   tokenId,
   tokenName,
@@ -65,10 +67,16 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
 
   const { mutate } = useSWRConfig()
 
+  // Build share URL with referral parameter if user is connected
   const shareUrl = useMemo(() => {
     const link = getAuctionLink(chainId, daoId, tokenId)
-    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
-  }, [chainId, daoId, tokenId, getAuctionLink])
+    const baseUrl = link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
+    if (!account) return baseUrl
+
+    const url = new URL(baseUrl)
+    url.searchParams.set('referral', account.toString())
+    return url.toString()
+  }, [chainId, daoId, tokenId, getAuctionLink, account])
 
   const handleSettle = useCallback(async () => {
     try {
@@ -97,10 +105,11 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   })()
 
   const handleOpenBid = useCallback(() => {
-    onOpenBidModal?.({
+    onOpenBidModal({
       chainId,
       tokenId,
       daoName,
+      daoImage,
       addresses,
       highestBid,
       paused,
@@ -113,6 +122,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
     chainId,
     tokenId,
     daoName,
+    daoImage,
     addresses,
     highestBid,
     paused,

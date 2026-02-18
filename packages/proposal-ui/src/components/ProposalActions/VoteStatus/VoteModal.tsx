@@ -89,7 +89,7 @@ export const VoteModal: React.FC<VoteModalProps> = ({
           proposalId={proposalId}
           votesAvailable={votesAvailable}
           handleModalClose={handleModalClose}
-          setIsCastVoteSuccess={setIsCastVoteSuccess}
+          onSuccess={() => setIsCastVoteSuccess(true)}
           title={title}
           addresses={addressesProp}
           chainId={chainIdProp}
@@ -103,18 +103,20 @@ export const SubmitVoteForm: React.FC<{
   proposalId: BytesType
   votesAvailable: number
   handleModalClose: () => void
-  setIsCastVoteSuccess: (show: boolean) => void
+  onSuccess: () => void
   title: string
   addresses?: RequiredDaoContractAddresses
   chainId?: CHAIN_ID
+  hideHeader?: boolean
 }> = ({
   proposalId,
   votesAvailable,
   handleModalClose,
   title,
-  setIsCastVoteSuccess,
+  onSuccess,
   addresses: addressesProp,
   chainId: chainIdProp,
+  hideHeader = false,
 }) => {
   const storeAddresses = useDaoStore((state) => state.addresses)
   const storeChain = useChainStore((state) => state.chain)
@@ -158,12 +160,12 @@ export const SubmitVoteForm: React.FC<{
           getProposal(chainId, proposalId)
         )
 
-        setIsCastVoteSuccess(true)
+        onSuccess()
       } catch (err) {
         console.error('Error casting vote:', err)
       }
     },
-    [governorAddress, chainId, proposalId, config, mutate, setIsCastVoteSuccess]
+    [governorAddress, chainId, proposalId, config, mutate, onSuccess]
   )
 
   const voteOptions = useMemo(
@@ -188,28 +190,30 @@ export const SubmitVoteForm: React.FC<{
   )
   return (
     <Box>
-      <Flex justify={'space-between'}>
-        <Box>
-          <Text variant="heading-md" className={voteModalFormTitle}>
-            {votesAvailable === 0 ? 'Submit Vote' : 'Submit Votes'}
-          </Text>
-          <Text variant="paragraph-sm" color="tertiary">
-            Proposal: {title}
-          </Text>
-        </Box>
-        <Button
-          variant="ghost"
-          onClick={handleModalClose}
-          p={'x0'}
-          size="xs"
-          style={{
-            // prop padding does not change padding to 0
-            padding: 0,
-          }}
-        >
-          <Icon id="cross" />
-        </Button>
-      </Flex>
+      {!hideHeader && (
+        <Flex justify={'space-between'}>
+          <Box>
+            <Text variant="heading-md" className={voteModalFormTitle}>
+              {votesAvailable <= 1 ? 'Submit Vote' : 'Submit Votes'}
+            </Text>
+            <Text variant="paragraph-sm" color="tertiary">
+              Proposal: {title}
+            </Text>
+          </Box>
+          <Button
+            variant="ghost"
+            onClick={handleModalClose}
+            p={'x0'}
+            size="xs"
+            style={{
+              // prop padding does not change padding to 0
+              padding: 0,
+            }}
+          >
+            <Icon id="cross" />
+          </Button>
+        </Flex>
+      )}
 
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ values, isSubmitting, setFieldValue, handleSubmit }) => (

@@ -45,10 +45,11 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
       {sections && sections.length > 1 && (
         <Box position={'relative'} className={sectionNavigationWrapper}>
           <Flex
-            px={'x6'}
-            mx={{ '@initial': 'x0', '@768': 'auto' }}
+            px={'x4'}
+            mx={'auto'}
             justify={'center'}
-            w={'100%'}
+            align={'stretch'}
+            style={{ width: 'fit-content' }}
           >
             {sections?.map((section) => {
               return (
@@ -62,7 +63,6 @@ export const SectionHandler: React.FC<SectionHandlerProps> = ({
                       activeSection?.title === section.title ? 'active' : 'default'
                     ]
                   }
-                  w={'100%'}
                   align={'center'}
                 >
                   <Text fontWeight={'display'}>{section.title}</Text>

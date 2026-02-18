@@ -6,7 +6,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { SwapWidget } from '@buildeross/ui/SwapWidget'
-import { Box, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import { Address } from 'viem'
 
@@ -143,11 +143,20 @@ export const Coins: React.FC = () => {
 
       {/* Shared Trade Modal */}
       {selectedCoin && (
-        <AnimatedModal open={!!selectedCoin} close={handleCloseModal} size="medium">
-          <Box p="x6">
-            <Text variant="heading-md" mb="x4">
-              Trade {selectedCoin.symbol}
-            </Text>
+        <AnimatedModal open={true} close={handleCloseModal} size="medium">
+          <Box w="100%">
+            <Flex align="center" justify="space-between" mb="x4" w="100%">
+              <Text variant="heading-md">Trade {selectedCoin.symbol}</Text>
+              <Button
+                variant="ghost"
+                p="x0"
+                size="xs"
+                onClick={handleCloseModal}
+                style={{ padding: 0, flexShrink: 0 }}
+              >
+                <Icon id="cross" />
+              </Button>
+            </Flex>
             <SwapWidget
               coinAddress={selectedCoin.address}
               symbol={selectedCoin.symbol}
