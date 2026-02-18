@@ -12,8 +12,8 @@ export const onlyDesktop = style({
 export const coinDetailContainer = style([
   atoms({
     m: 'auto',
-    px: { '@initial': 'x4', '@768': 'x6' },
-    py: 'x8',
+    px: { '@initial': 'x0', '@1024': 'x6' },
+    py: { '@initial': 'x0', '@1024': 'x6' },
   }),
   {
     maxWidth: 1200,
@@ -42,6 +42,13 @@ export const coinInfoPanel = style([
     borderRadius: 'curved',
     backgroundColor: 'background2',
   }),
+  {
+    '@media': {
+      'screen and (max-width: 1024px)': {
+        padding: 'x4',
+      },
+    },
+  },
 ])
 
 export const swapPanel = style([

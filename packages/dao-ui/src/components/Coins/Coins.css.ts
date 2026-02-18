@@ -80,12 +80,6 @@ export const creatorCoinGrid = style([
   },
 ])
 
-export const stat = style([
-  atoms({
-    mb: 'x4',
-  }),
-])
-
 export const emptyState = style([
   atoms({
     textAlign: 'center',

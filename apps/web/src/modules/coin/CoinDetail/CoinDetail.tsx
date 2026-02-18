@@ -15,7 +15,7 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { MobileTradeBar } from '@buildeross/ui/MobileTradeBar'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { SwapWidget } from '@buildeross/ui/SwapWidget'
-import { Box, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import { Address } from 'viem'
@@ -185,10 +185,19 @@ export const CoinDetail = ({
         close={() => setIsMobileModalOpen(false)}
         size="medium"
       >
-        <Box p="x6">
-          <Text variant="heading-md" mb="x4">
-            Trade {symbol}
-          </Text>
+        <Box w="100%">
+          <Flex align="center" justify="space-between" mb="x4" w="100%">
+            <Text variant="heading-md">Trade {symbol}</Text>
+            <Button
+              variant="ghost"
+              p="x0"
+              size="xs"
+              onClick={() => setIsMobileModalOpen(false)}
+              style={{ padding: 0, flexShrink: 0 }}
+            >
+              <Icon id="cross" />
+            </Button>
+          </Flex>
           <SwapWidget coinAddress={coinAddress} symbol={symbol} chainId={chainId} />
         </Box>
       </AnimatedModal>
