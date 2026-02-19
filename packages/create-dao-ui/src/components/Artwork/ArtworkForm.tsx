@@ -1,10 +1,10 @@
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
-import { Button, Flex, Icon } from '@buildeross/zord'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React from 'react'
 
 import { useFormStore } from '../../stores'
+import { FormNavButtons } from '../FormNavButtons'
 import { ArtworkFormValues, validationSchemaArtwork } from './ArtworkForm.schema'
 import { ArtworkUpload } from './ArtworkUpload'
 
@@ -87,37 +87,16 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
             }
           />
 
-          <Flex justify={'space-between'} mt={'x8'}>
-            <Button
-              justify={'center'}
-              align={'center'}
-              borderRadius={'curved'}
-              h={'x15'}
-              minH={'x15'}
-              minW={'x15'}
-              variant={'secondary'}
-              onClick={handlePrevious}
-              aria-label="Back"
-            >
-              <Icon id="arrowLeft" />
-            </Button>
-            <Button
-              flex={1}
-              borderRadius={'curved'}
-              width={'auto'}
-              ml={'x2'}
-              minH={'x15'}
-              type="submit"
-              disabled={
-                !isEmpty(formik.errors) ||
-                formik.isSubmitting ||
-                isUploadingToIPFS ||
-                ipfsUpload.length === 0
-              }
-            >
-              Continue
-            </Button>
-          </Flex>
+          <FormNavButtons
+            hasPrev
+            onPrev={handlePrevious}
+            nextDisabled={
+              !isEmpty(formik.errors) ||
+              formik.isSubmitting ||
+              isUploadingToIPFS ||
+              ipfsUpload.length === 0
+            }
+          />
         </Form>
       )}
     </Formik>

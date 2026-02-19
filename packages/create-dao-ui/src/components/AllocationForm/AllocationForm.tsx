@@ -7,7 +7,6 @@ import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
-  defaultFormButtonWithPrev,
 } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Button, Flex, Heading, Icon, Paragraph } from '@buildeross/zord'
@@ -19,6 +18,7 @@ import { useAccount, useReadContract } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 import { useFormStore } from '../../stores'
+import { FormNavButtons } from '../FormNavButtons'
 import { validationSchemaAllocations } from './AllocationForm.schema'
 import { ContributionAllocation } from './ContributionAllocation'
 import { FounderAllocationFields } from './FounderAllocationFields'
@@ -361,33 +361,13 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
         </Flex>
       )}
 
-      <Flex justify={'space-between'} mt={'x8'}>
-        <Button
-          justify={'center'}
-          align={'center'}
-          h={'x15'}
-          minH={'x15'}
-          minW={'x15'}
-          type="button"
-          onClick={handlePrev}
-          variant="secondary"
-          aria-label="Back"
-        >
-          <Icon id="arrowLeft" />
-        </Button>
-        <Button
-          flex={1}
-          width={'auto'}
-          ml={'x2'}
-          minH={'x15'}
-          className={defaultFormButtonWithPrev}
-          disabled={isVersionLoading}
-          type="submit"
-          onClick={() => formRef.current?.handleSubmit()}
-        >
-          Continue
-        </Button>
-      </Flex>
+      <FormNavButtons
+        hasPrev
+        onPrev={handlePrev}
+        isSubmit={false}
+        onNext={() => formRef.current?.handleSubmit()}
+        nextDisabled={isVersionLoading}
+      />
     </>
   )
 }

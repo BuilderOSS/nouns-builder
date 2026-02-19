@@ -2,6 +2,7 @@ import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -26,6 +27,7 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import { useFormStore } from '../../stores'
 import { TokenAllocation } from '../AllocationForm'
 import { FAST_DAO_TIMINGS } from '../AuctionSettingsForm/fastDaoTimings'
+import { FormNavButtons } from '../FormNavButtons'
 import { PreviewArtwork } from './PreviewArtwork'
 import {
   deployCheckboxHelperText,
@@ -260,11 +262,13 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         txHash = await writeContract(config, data.request)
       }
 
-      if (txHash)
+      if (txHash) {
         transaction = await waitForTransactionReceipt(config, {
           hash: txHash,
           chainId: chain.id,
         })
+        await awaitSubgraphSync(chain.id, transaction.blockNumber)
+      }
     } catch (e) {
       console.error('Error deploying DAO:', e)
       setIsPendingTransaction(false)
@@ -570,23 +574,11 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               </Flex>
             )}
 
-            <Flex mt={'x8'}>
-              <Flex
-                justify={'center'}
-                align={'center'}
-                w={'x15'}
-                h={'x15'}
-                minH={'x15'}
-                minW={'x15'}
-                onClick={() => handlePrev()}
-                variant="secondary"
-              >
-                <Icon id="arrowLeft" />
-              </Flex>
+            <FormNavButtons hasPrev onPrev={handlePrev}>
               <ContractButton
                 chainId={chain.id}
                 handleClick={handleDeploy}
-                w={'100%'}
+                flex={1}
                 disabled={isDisabled}
                 className={
                   deployContractButtonStyle[isPendingTransaction ? 'pending' : 'default']
@@ -594,7 +586,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               >
                 {`${isPendingTransaction ? 'Deploying' : 'Deploy'} Contracts (1 of 2)`}
               </ContractButton>
-            </Flex>
+            </FormNavButtons>
           </Flex>
         </Box>
       ) : (

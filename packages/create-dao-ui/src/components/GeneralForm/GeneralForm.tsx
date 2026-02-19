@@ -1,12 +1,12 @@
 import { SmartInput } from '@buildeross/ui/Fields'
 import { SingleImageUpload } from '@buildeross/ui/SingleImageUpload'
-import { defaultFormButton } from '@buildeross/ui/styles'
 import { isEmpty } from '@buildeross/utils/helpers'
-import { Button, Flex, Stack } from '@buildeross/zord'
+import { Flex, Stack } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import React, { BaseSyntheticEvent } from 'react'
 
 import { useFormStore } from '../../stores'
+import { FormNavButtons } from '../FormNavButtons'
 import { GeneralFormValues, generalValidationSchema } from './GeneralForm.schema'
 
 interface GeneralFormProps {
@@ -115,16 +115,21 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ title }) => {
                 placeholder={'https://www.nouns.wtf'}
                 disabled={false}
               />
-              <Button
-                h={'x15'}
-                className={defaultFormButton}
-                type={'submit'}
-                disabled={!isEmpty(formik.errors) || formik.isSubmitting}
-                onMouseDown={(e: React.MouseEvent<HTMLElement>) => e.preventDefault()}
-              >
-                Continue
-              </Button>
             </Stack>
+            <FormNavButtons
+              nextDisabled={!isEmpty(formik.errors) || formik.isSubmitting}
+              showReset={Object.values(formik.values).some((v) => v !== '')}
+              onAfterReset={() =>
+                formik.resetForm({
+                  values: {
+                    daoAvatar: '',
+                    daoName: '',
+                    daoSymbol: '',
+                    daoWebsite: '',
+                  },
+                })
+              }
+            />
           </Flex>
         </Form>
       )}

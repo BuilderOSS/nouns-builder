@@ -3,7 +3,6 @@ import { DaysHoursMinsSecs, FIELD_TYPES, SmartInput } from '@buildeross/ui/Field
 import {
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
-  defaultFormButtonWithPrev,
 } from '@buildeross/ui/styles'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { isEmpty, isTestnetChain } from '@buildeross/utils/helpers'
@@ -13,6 +12,7 @@ import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
 
 import { useFormStore } from '../../stores'
+import { FormNavButtons } from '../FormNavButtons'
 import {
   deployCheckboxHelperText,
   deployCheckboxStyleVariants,
@@ -339,29 +339,11 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               />
             </motion.div>
 
-            <Flex>
-              <Button
-                justify={'center'}
-                align={'center'}
-                h={'x15'}
-                minH={'x15'}
-                minW={'x15'}
-                onClick={() => handlePrev()}
-                variant={'secondary'}
-                aria-label="Back"
-              >
-                <Icon id="arrowLeft" />
-              </Button>
-              <Button
-                h={'x15'}
-                className={defaultFormButtonWithPrev}
-                type={'submit'}
-                disabled={!isEmpty(formik.errors) || formik.isSubmitting}
-                onMouseDown={(e: React.MouseEvent<HTMLElement>) => e.preventDefault()}
-              >
-                Continue
-              </Button>
-            </Flex>
+            <FormNavButtons
+              hasPrev
+              onPrev={handlePrev}
+              nextDisabled={!isEmpty(formik.errors) || formik.isSubmitting}
+            />
           </Flex>
         </Form>
       )}
