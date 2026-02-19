@@ -246,6 +246,9 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
 
   const handleSuccess = () => {
     setIsSuccess(true)
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+    }
     // Auto-close after 2 seconds
     successTimerRef.current = setTimeout(() => {
       handleClose()

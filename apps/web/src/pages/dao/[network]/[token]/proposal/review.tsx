@@ -10,7 +10,7 @@ import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { atoms, Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
@@ -19,10 +19,6 @@ import { useAccount } from 'wagmi'
 const ReviewProposalPage: NextPageWithLayout = () => {
   const chain = useChainStore((x) => x.chain)
   const { push } = useRouter()
-
-  const [proposalIdCreated, setProposalIdCreated] = React.useState<
-    string | null | undefined
-  >(undefined)
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
@@ -42,11 +38,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   const { transactions, disabled, title, summary } = useProposalStore()
 
-  const onProposalCreated = (proposalId: string | null) => {
-    setProposalIdCreated(proposalId)
-  }
-
-  const onOpenCreatePage = React.useCallback(async () => {
+  const onOpenCreatePage = useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/create`,
       query: {
@@ -56,7 +48,12 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
-  const handleCloseSuccessModal = async () => {
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [proposalIdCreated, setProposalIdCreated] = useState<string | null | undefined>(
+    undefined
+  )
+
+  const handleClose = useCallback(async () => {
     if (proposalIdCreated) {
       await push({
         pathname: `/dao/[network]/[token]/vote/[id]`,
@@ -77,7 +74,36 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       })
     }
     setProposalIdCreated(undefined)
-  }
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+  }, [proposalIdCreated, chain.slug, addresses.token, push])
+
+  const onProposalCreated = useCallback((proposalId: string | null) => {
+    setProposalIdCreated(proposalId)
+  }, [])
+
+  useEffect(() => {
+    if (proposalIdCreated) {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+      // Auto-close after 2 seconds
+      successTimerRef.current = setTimeout(() => {
+        handleClose()
+      }, 2000)
+    }
+
+    return () => {
+      // Clear timer on unmount
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+    }
+  }, [handleClose, proposalIdCreated])
 
   if (isLoading) return null
 
@@ -125,10 +151,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
         />
       </Stack>
 
-      <AnimatedModal
-        open={proposalIdCreated !== undefined}
-        close={handleCloseSuccessModal}
-      >
+      <AnimatedModal open={proposalIdCreated !== undefined} close={handleClose}>
         <SuccessModalContent
           title={`Proposal submitted`}
           subtitle={`Your Proposal has been successfully submitted!`}

@@ -63,7 +63,7 @@ export const VoteModal: React.FC<VoteModalProps> = ({
   chainId: chainIdProp,
   onSuccess,
 }) => {
-  const [isCastVoteSuccess, setIsSuccess] = useState<boolean>(false)
+  const [isSuccess, setIsSuccess] = useState<boolean>(false)
 
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -90,6 +90,9 @@ export const VoteModal: React.FC<VoteModalProps> = ({
   const handleSuccess = () => {
     setIsSuccess(true)
     onSuccess?.()
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+    }
     // Auto-close after 2 seconds
     successTimerRef.current = setTimeout(() => {
       handleClose()
@@ -99,10 +102,10 @@ export const VoteModal: React.FC<VoteModalProps> = ({
   return (
     <AnimatedModal
       open={showVoteModal}
-      size={isCastVoteSuccess ? 'small' : 'medium'}
+      size={isSuccess ? 'small' : 'medium'}
       close={handleClose}
     >
-      {isCastVoteSuccess ? (
+      {isSuccess ? (
         <SuccessModalContent
           success={true}
           title={'Vote Submitted'}
