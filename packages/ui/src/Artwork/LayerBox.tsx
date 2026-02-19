@@ -213,7 +213,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
                 justify={'center'}
                 className={artworkSettingsPropertyCount}
               >
-                {ipfs && image && (
+                {src && (
                   <img
                     src={src}
                     className={artworkSettingsImageThumb}

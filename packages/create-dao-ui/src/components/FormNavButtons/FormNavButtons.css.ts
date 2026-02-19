@@ -5,7 +5,7 @@ export const formNavResetButton = style({
 })
 
 export const formNavContinueButton = style({
-  borderRadius: '10px',
+  borderRadius: 10,
   height: 60,
   marginLeft: 8,
 })

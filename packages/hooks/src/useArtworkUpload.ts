@@ -40,6 +40,11 @@ async function validateSquareMinSize(
   file: File,
   minPx: number
 ): Promise<{ ok: true } | { ok: false; error: ArtworkError }> {
+  if (file.type === 'image/svg+xml') {
+    // SVG: scalable — skip all dimension checks
+    return { ok: true }
+  }
+
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const fr = new FileReader()
     fr.onerror = () => reject(new Error('Failed to read file'))
@@ -65,17 +70,12 @@ async function validateSquareMinSize(
     }
   }
 
-  if (file.type === 'image/svg+xml') {
-    // SVG: enforce square only
-    return { ok: true }
-  }
-
   // Raster images (PNG)
   if (width < minPx || height < minPx) {
     return {
       ok: false,
       error: {
-        dimensions: `we recommend images of min, 600px width x height, your images are width: ${width} x ${height} px`,
+        dimensions: `images must be at least ${minPx}×${minPx}px; yours are ${width}×${height}px`,
       },
     }
   }
@@ -95,14 +95,14 @@ type ProcessedArtworkInfo = {
   fileType: string
   collectionName: string
   traits: Trait[]
-  fileArray: ArtworkItem[]
+  artworkItems: ArtworkItem[]
 }
 
 export type UploadedArtworkItem = ArtworkItem & {
   ipfs: IPFSUploadResponse
 }
 
-export type UploadedArtwork = Omit<ProcessedArtworkInfo, 'fileArray'> & {
+export type UploadedArtwork = Omit<ProcessedArtworkInfo, 'artworkItems'> & {
   items: UploadedArtworkItem[]
   // optional convenience helpers
   ipfs: IPFSUploadResponse
@@ -150,6 +150,8 @@ export const useArtworkUpload = ({
    */
   React.useEffect(() => {
     const runId = ++processRunIdRef.current
+    // Invalidate any in-flight upload so it discards its result
+    ++uploadRunIdRef.current
 
     const commitIfLatest = (fn: () => void) => {
       if (runId !== processRunIdRef.current) return
@@ -192,7 +194,7 @@ export const useArtworkUpload = ({
       // traitsMap: trait -> properties[]
       const traitsMap = new Map<string, string[]>()
 
-      const fileArray: ArtworkItem[] = []
+      const artworkItems: ArtworkItem[] = []
 
       // Validate synchronously first (fast fail)
       for (let index = 0; index < filesArray.length; index++) {
@@ -250,12 +252,12 @@ export const useArtworkUpload = ({
           return
         }
 
-        fileArray.push({
+        artworkItems.push({
           collection,
           trait: currentTrait,
           traitProperty: currentProperty,
           file,
-        } as ArtworkItem)
+        })
       }
 
       // Async validations (dimensions) — awaited to avoid race
@@ -288,11 +290,11 @@ export const useArtworkUpload = ({
         .sort((a, b) => b.trait.localeCompare(a.trait))
 
       const processed: ProcessedArtworkInfo = {
-        filesLength: inputFiles.length,
+        filesLength: artworkItems.length,
         fileType,
         collectionName,
         traits,
-        fileArray: fileArray as unknown as ProcessedArtworkInfo['fileArray'],
+        artworkItems: artworkItems,
       }
 
       commitIfLatest(() => {
@@ -333,13 +335,15 @@ export const useArtworkUpload = ({
     []
   )
 
+  const uploadRunIdRef = React.useRef(0)
+
   React.useEffect(() => {
     if (status !== 'processed' || !processedArtworkInfo || !!artworkError) return
+    const uploadId = ++uploadRunIdRef.current
 
     const handleUpload = async () => {
-      const preparedItems = processedArtworkInfo.fileArray as unknown as ArtworkItem[]
-      const filesArray = preparedItems.map(({ file }) => file)
-      const files = filesArray.filter((file) => file.name !== '.DS_Store')
+      const preparedItems = processedArtworkInfo.artworkItems
+      const files = preparedItems.map(({ file }) => file)
 
       try {
         setStatus('uploading')
@@ -349,14 +353,20 @@ export const useArtworkUpload = ({
 
         const ipfsUploads = await uploadToIPFS(files)
 
+        // discard if a newer upload has started
+        if (uploadId !== uploadRunIdRef.current) return
         // eslint-disable-next-line no-console
         console.debug('Uploaded to IPFS', ipfsUploads)
+
+        if (!ipfsUploads.length) {
+          throw new Error('No files uploaded')
+        }
 
         // Enrich each prepared item with IPFS response
         // NOTE: uploadDirectory returns one response for the directory; it's the same for every file
         const directoryIpfs = ipfsUploads[0].ipfs as IPFSUploadResponse
 
-        const items: UploadedArtworkItem[] = preparedItems.map((item) => ({
+        const uploadedArtworkItems: UploadedArtworkItem[] = preparedItems.map((item) => ({
           ...item,
           ipfs: directoryIpfs,
         }))
@@ -366,10 +376,10 @@ export const useArtworkUpload = ({
           fileType: processedArtworkInfo.fileType,
           collectionName: processedArtworkInfo.collectionName,
           traits: processedArtworkInfo.traits,
-          items,
+          items: uploadedArtworkItems,
           ipfs: directoryIpfs,
           itemsByPath: Object.fromEntries(
-            items.map((it) => [it.file.webkitRelativePath, it])
+            uploadedArtworkItems.map((it) => [it.file.webkitRelativePath, it])
           ),
         }
 
@@ -380,6 +390,7 @@ export const useArtworkUpload = ({
 
         setStatus('ready')
       } catch (err: unknown) {
+        if (uploadId !== uploadRunIdRef.current) return
         setUploadError((err as Error).message)
         console.error('Error uploading to IPFS', err)
         onUploadError(err as Error)

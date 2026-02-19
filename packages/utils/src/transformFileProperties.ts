@@ -40,7 +40,7 @@ export const transformPropertiesToOrderedTraits = (
       trait: property.name,
       properties: property.items.map((item) => item.name),
     }))
-    .reverse()
+    .reverse() // reversed to display order (newest-first); transformFileProperties re-reverses to contract order
 }
 
 export function transformPropertiesToImageProps(properties: Property[]): ImageProps[] {

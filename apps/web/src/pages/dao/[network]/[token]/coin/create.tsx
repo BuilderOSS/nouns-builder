@@ -9,7 +9,7 @@ import { isCoinSupportedChain } from '@buildeross/utils'
 import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
 import * as styles from '../../../../../modules/coin/coinCreate.css'
@@ -40,9 +40,12 @@ export default function CreateCoinPage({
     mediaUrl: '',
     mediaMimeType: '',
   })
+
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [createdCoinAddress, setCreatedCoinAddress] = useState<
     AddressType | null | undefined
   >(undefined)
+  const isNavigatingRef = useRef(false)
 
   const onCoinCreated = (coinAddress: AddressType | null) => {
     setCreatedCoinAddress(coinAddress)
@@ -50,27 +53,59 @@ export default function CreateCoinPage({
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)!
 
-  const handleCloseSuccessModal = async () => {
-    if (createdCoinAddress) {
-      await push({
-        pathname: `/coin/[network]/[coinAddress]`,
-        query: {
-          network: chain.slug,
-          coinAddress: createdCoinAddress,
-        },
-      })
-    } else {
-      await push({
-        pathname: `/dao/[network]/[token]`,
-        query: {
-          network: chain.slug,
-          token: collectionAddress,
-          tab: 'activity',
-        },
-      })
+  const handleCloseSuccessModal = useCallback(async () => {
+    if (isNavigatingRef.current) return
+    isNavigatingRef.current = true
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
     }
-    setCreatedCoinAddress(undefined)
-  }
+
+    try {
+      if (createdCoinAddress) {
+        await push({
+          pathname: `/coin/[network]/[coinAddress]`,
+          query: {
+            network: chain.slug,
+            coinAddress: createdCoinAddress,
+          },
+        })
+      } else {
+        await push({
+          pathname: `/dao/[network]/[token]`,
+          query: {
+            network: chain.slug,
+            token: collectionAddress,
+            tab: 'activity',
+          },
+        })
+      }
+      setCreatedCoinAddress(undefined)
+    } finally {
+      isNavigatingRef.current = false
+    }
+  }, [push, createdCoinAddress, chain.slug, collectionAddress])
+
+  useEffect(() => {
+    if (createdCoinAddress !== undefined) {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+      // Auto-close after 2 seconds
+      successTimerRef.current = setTimeout(() => {
+        handleCloseSuccessModal()
+      }, 2000)
+    }
+
+    return () => {
+      // Clear timer on cleanup
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+    }
+  }, [handleCloseSuccessModal, createdCoinAddress])
 
   const isChainSupported = isCoinSupportedChain(chainId)
 

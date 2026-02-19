@@ -49,35 +49,43 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   }, [push, chain.slug, addresses.token])
 
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isNavigatingRef = useRef(false)
   const [proposalIdCreated, setProposalIdCreated] = useState<string | null | undefined>(
     undefined
   )
 
-  const handleClose = useCallback(async () => {
-    if (proposalIdCreated) {
-      await push({
-        pathname: `/dao/[network]/[token]/vote/[id]`,
-        query: {
-          network: chain.slug,
-          token: addresses.token,
-          id: proposalIdCreated,
-        },
-      })
-    } else {
-      await push({
-        pathname: `/dao/[network]/[token]`,
-        query: {
-          network: chain.slug,
-          token: addresses.token,
-          tab: 'activity',
-        },
-      })
-    }
-    setProposalIdCreated(undefined)
+  const handleCloseSuccessModal = useCallback(async () => {
+    if (isNavigatingRef.current) return
+    isNavigatingRef.current = true
 
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
       successTimerRef.current = null
+    }
+
+    try {
+      if (proposalIdCreated) {
+        await push({
+          pathname: `/dao/[network]/[token]/vote/[id]`,
+          query: {
+            network: chain.slug,
+            token: addresses.token,
+            id: proposalIdCreated,
+          },
+        })
+      } else {
+        await push({
+          pathname: `/dao/[network]/[token]`,
+          query: {
+            network: chain.slug,
+            token: addresses.token,
+            tab: 'activity',
+          },
+        })
+      }
+      setProposalIdCreated(undefined)
+    } finally {
+      isNavigatingRef.current = false
     }
   }, [proposalIdCreated, chain.slug, addresses.token, push])
 
@@ -86,13 +94,13 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   }, [])
 
   useEffect(() => {
-    if (proposalIdCreated) {
+    if (proposalIdCreated !== undefined) {
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
       }
       // Auto-close after 2 seconds
       successTimerRef.current = setTimeout(() => {
-        handleClose()
+        handleCloseSuccessModal()
       }, 2000)
     }
 
@@ -103,7 +111,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
         successTimerRef.current = null
       }
     }
-  }, [handleClose, proposalIdCreated])
+  }, [handleCloseSuccessModal, proposalIdCreated])
 
   if (isLoading) return null
 
@@ -151,7 +159,10 @@ const ReviewProposalPage: NextPageWithLayout = () => {
         />
       </Stack>
 
-      <AnimatedModal open={proposalIdCreated !== undefined} close={handleClose}>
+      <AnimatedModal
+        open={proposalIdCreated !== undefined}
+        close={handleCloseSuccessModal}
+      >
         <SuccessModalContent
           title={`Proposal submitted`}
           subtitle={`Your Proposal has been successfully submitted!`}

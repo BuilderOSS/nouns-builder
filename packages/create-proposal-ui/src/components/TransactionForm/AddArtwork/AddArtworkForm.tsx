@@ -6,7 +6,7 @@ import { isTestnetChain } from '@buildeross/utils/helpers'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
 import { ArtworkUpload } from '../../ArtworkUpload'
@@ -50,10 +50,13 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
   const isTestnetDAO = React.useMemo(() => isTestnetChain(chainId), [chainId])
   const [hasConfirmed, setHasConfirmed] = useState(isTestnetDAO ? true : false)
 
-  const values = {
-    artwork: setUpArtwork?.artwork || [],
-    filesLength: setUpArtwork?.filesLength || '',
-  }
+  const values = useMemo(
+    () => ({
+      artwork: setUpArtwork?.artwork || [],
+      filesLength: setUpArtwork?.filesLength || '',
+    }),
+    [setUpArtwork?.artwork, setUpArtwork?.filesLength]
+  )
 
   const showPropertyErrors = ipfsUpload.length > 0
 
@@ -89,7 +92,6 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
         enableReinitialize
         validateOnBlur={false}
         validateOnMount={true}
-        validateOnChange={true}
         validationSchema={validationSchemaArtwork}
         onSubmit={handleSubmit}
       >
@@ -102,11 +104,6 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
                 id={'artwork'}
                 helperText={
                   'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG and SVG'
-                }
-                errorMessage={
-                  formik.touched.artwork && formik.errors?.artwork
-                    ? formik.errors?.artwork
-                    : undefined
                 }
               />
 

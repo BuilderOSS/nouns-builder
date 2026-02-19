@@ -67,7 +67,7 @@ const processArtworkFiles = (
 
   return {
     images,
-    orderedLayers: traits.reverse(),
+    orderedLayers: traits.sort((a, b) => b.trait.localeCompare(a.trait)),
   }
 }
 
@@ -76,6 +76,13 @@ export const CustomArtworkUpload: React.FC = () => {
   const [orderedLayers, setOrderedLayers] = useState<OrderedTraits>([])
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (fileInputRef.current !== null) {
+      fileInputRef.current.setAttribute('directory', '')
+      fileInputRef.current.setAttribute('webkitdirectory', '')
+    }
+  }, [fileInputRef])
 
   const handleUpload = useCallback((e: BaseSyntheticEvent) => {
     setError(null)
@@ -207,13 +214,10 @@ export const CustomArtworkUpload: React.FC = () => {
 
         <input
           ref={fileInputRef}
+          name="artwork-upload"
           type="file"
           id="artwork-upload"
-          // @ts-ignore - webkitdirectory is not in the types but is supported
-          webkitdirectory=""
-          directory=""
-          multiple
-          accept="image/png,image/svg+xml"
+          multiple={true}
           onChange={handleUpload}
           style={{ display: 'none' }}
         />

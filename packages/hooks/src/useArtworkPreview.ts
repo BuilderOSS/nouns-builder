@@ -17,12 +17,16 @@ export type UseArtworkPreviewProps = {
   selectedTraits?: SelectedTraitsProps[]
 }
 
+export type LayerProps = {
+  trait: string
+  images: ImageProps[]
+}
+
 export interface UseArtworkPreviewReturn {
-  layers: OrderedTraits
-  generateStackedImage: (e?: BaseSyntheticEvent) => void
+  layers: LayerProps[]
+  generateStackedImage: (e?: BaseSyntheticEvent) => Promise<void>
   generatedImages: string[]
-  canvas: React.RefObject<HTMLCanvasElement>
-  images: ImageProps[] | undefined
+  canvas: React.RefObject<HTMLCanvasElement | null>
 }
 
 const MAX_GENERATED_IMAGES = 20
@@ -40,38 +44,32 @@ export const useArtworkImages = ({
     if (!ipfsUpload?.length || !traits?.length) return undefined
 
     try {
-      if (Array.isArray(ipfsUpload) && traits.length) {
-        return ipfsUpload.reduce((acc: ImageProps[] = [], upload) => {
-          const index = traits.map((e: any) => e.trait).indexOf(upload.trait)
-          const childIndex = traits[index]?.properties.indexOf(upload.name)
-          const trait = traits[index]?.trait
-          const property = traits[index]?.properties[childIndex]
+      return ipfsUpload.reduce((acc: ImageProps[] = [], upload) => {
+        const index = traits.map((e: Trait) => e.trait).indexOf(upload.trait)
+        if (index === -1) return acc // trait not found - skip
 
-          const path = `/${sanitizeFileName(`${trait}/${property}`)}`
-          const uri = encodeURI(upload.ipfs.uri + path)
+        const trait = traits[index].trait
+        const childIndex = traits[index].properties.indexOf(upload.name)
 
-          const image: ImageProps = {
-            trait: trait,
-            name: property,
-            uri: uri,
-          }
+        if (childIndex === -1) return acc // property not found - skip
 
-          const isContentValid = upload?.content && upload?.content?.size > 0
+        const property = traits[index].properties[childIndex]
+        const path = `/${sanitizeFileName(`${trait}/${property}`)}`
+        const uri = encodeURI(upload.ipfs.uri + path)
 
-          if (isContentValid) {
-            image.content = upload?.content
-          }
+        const image: ImageProps = { trait, name: property, uri }
 
-          acc.push(image)
-          return acc
-        }, [])
-      }
+        if (upload.content && upload.content.size > 0) {
+          image.content = upload?.content
+        }
+
+        acc.push(image)
+        return acc
+      }, [])
     } catch (err) {
       console.error('Error parsing ipfs upload', err)
       return []
     }
-
-    return []
   }, [traits, ipfsUpload])
 
   return images
@@ -81,7 +79,7 @@ export const useArtworkPreview = ({
   images,
   orderedLayers,
   selectedTraits,
-}: UseArtworkPreviewProps) => {
+}: UseArtworkPreviewProps): UseArtworkPreviewReturn => {
   const canvas = React.useRef<HTMLCanvasElement | null>(null)
   const [generatedImages, setGeneratedImages] = React.useState<string[]>([])
   const usedBlobUrls = React.useRef<string[]>([])

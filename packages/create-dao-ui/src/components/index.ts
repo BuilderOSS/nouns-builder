@@ -1,7 +1,6 @@
 export * from './AllocationForm'
 export * from './Artwork'
 export * from './AuctionSettingsForm'
-export * from './ConfirmReset'
 export * from './CreateNavigation'
 export * from './FormHandler'
 export * from './FormNavButtons'
