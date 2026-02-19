@@ -3,18 +3,79 @@ import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import {
   ImageProps,
   ImagesByTraitProps,
+  IPFSUpload,
   OrderedTraits,
   SelectedTraitsProps,
+  Trait,
 } from '@buildeross/types'
+import { sanitizeFileName } from '@buildeross/utils/sanitize'
 import React, { BaseSyntheticEvent, useEffect } from 'react'
 
-export interface UseArtworkPreviewProps {
-  orderedLayers: OrderedTraits
-  images?: ImageProps[]
+export type UseArtworkPreviewProps = {
+  images: ImageProps[] | undefined
+  orderedLayers: OrderedTraits | undefined
   selectedTraits?: SelectedTraitsProps[]
 }
 
+export interface UseArtworkPreviewReturn {
+  layers: OrderedTraits
+  generateStackedImage: (e?: BaseSyntheticEvent) => void
+  generatedImages: string[]
+  canvas: React.RefObject<HTMLCanvasElement>
+  images: ImageProps[] | undefined
+}
+
 const MAX_GENERATED_IMAGES = 20
+
+export type UseArtworkImagesProps = {
+  ipfsUpload?: IPFSUpload[]
+  traits?: Trait[]
+}
+
+export const useArtworkImages = ({
+  ipfsUpload,
+  traits,
+}: UseArtworkImagesProps): ImageProps[] | undefined => {
+  const images = React.useMemo(() => {
+    if (!ipfsUpload?.length || !traits?.length) return undefined
+
+    try {
+      if (Array.isArray(ipfsUpload) && traits.length) {
+        return ipfsUpload.reduce((acc: ImageProps[] = [], upload) => {
+          const index = traits.map((e: any) => e.trait).indexOf(upload.trait)
+          const childIndex = traits[index]?.properties.indexOf(upload.name)
+          const trait = traits[index]?.trait
+          const property = traits[index]?.properties[childIndex]
+
+          const path = `/${sanitizeFileName(`${trait}/${property}`)}`
+          const uri = encodeURI(upload.ipfs.uri + path)
+
+          const image: ImageProps = {
+            trait: trait,
+            name: property,
+            uri: uri,
+          }
+
+          const isContentValid = upload?.content && upload?.content?.size > 0
+
+          if (isContentValid) {
+            image.content = upload?.content
+          }
+
+          acc.push(image)
+          return acc
+        }, [])
+      }
+    } catch (err) {
+      console.error('Error parsing ipfs upload', err)
+      return []
+    }
+
+    return []
+  }, [traits, ipfsUpload])
+
+  return images
+}
 
 export const useArtworkPreview = ({
   images,
@@ -23,7 +84,6 @@ export const useArtworkPreview = ({
 }: UseArtworkPreviewProps) => {
   const canvas = React.useRef<HTMLCanvasElement | null>(null)
   const [generatedImages, setGeneratedImages] = React.useState<string[]>([])
-  const [isInit, setIsInit] = React.useState<boolean>(true)
   const usedBlobUrls = React.useRef<string[]>([])
   const isMountedRef = React.useRef(false)
 
@@ -33,6 +93,7 @@ export const useArtworkPreview = ({
       isMountedRef.current = false
       // Cleanup blob URLs on unmount
       usedBlobUrls.current.forEach((url) => URL.revokeObjectURL(url))
+      usedBlobUrls.current = []
     }
   }, [])
 
@@ -84,8 +145,7 @@ export const useArtworkPreview = ({
         picker: 'random',
         trait: layer.trait,
         uri: selectedImage.uri,
-        url: selectedImage.url,
-        content: selectedImage.content as File,
+        content: selectedImage.content,
       }
     })
   }, [selectedTraits, layers])
@@ -97,8 +157,7 @@ export const useArtworkPreview = ({
     const traits = selectTraits()
 
     const stack = traits.map((trait) => {
-      const isLocal = trait.content && trait.content?.webkitRelativePath?.length > 0
-      if (isLocal && trait.content) {
+      if (!!trait.content) {
         const blobUrl = URL.createObjectURL(trait.content)
         usedBlobUrls.current.push(blobUrl)
         return blobUrl
@@ -107,9 +166,7 @@ export const useArtworkPreview = ({
     })
 
     const imageLayerStack = stack.reverse()
-    const hasLocalFile = traits.some(
-      (trait) => !!trait.content && trait.content?.webkitRelativePath?.length > 0
-    )
+    const hasLocalFile = traits.some((trait) => !!trait.content)
 
     const imagesToDraw = imageLayerStack.map((src) => {
       const img = new Image()
@@ -139,9 +196,12 @@ export const useArtworkPreview = ({
     }
   }, [])
 
+  const genIdRef = React.useRef(0)
+
   const generateStackedImage = React.useCallback(
     async (e?: BaseSyntheticEvent) => {
       try {
+        const myGenId = ++genIdRef.current
         if (e) e.stopPropagation()
         if (!canvas.current) throw new Error('No canvas')
         if (!layers.length) throw new Error('No layers')
@@ -172,8 +232,8 @@ export const useArtworkPreview = ({
                 })
             )
           )
+          if (genIdRef.current !== myGenId) return
           draw()
-          if (isInit) setIsInit(false)
         } else {
           const rendererBase = RENDERER_BASE.replace('https://nouns.build', BASE_URL)
           const url = new URL(rendererBase)
@@ -192,8 +252,29 @@ export const useArtworkPreview = ({
         console.error('Error generating image', err)
       }
     },
-    [canvas, isInit, canvasToBlob, selectImagesToDraw, layers]
+    [canvas, canvasToBlob, selectImagesToDraw, layers]
   )
+
+  const hasAutoGeneratedRef = React.useRef(false)
+
+  useEffect(() => {
+    if (!layers.length) {
+      hasAutoGeneratedRef.current = false
+      setGeneratedImages([])
+
+      // cleanup any pending blob URLs
+      usedBlobUrls.current.forEach((url) => URL.revokeObjectURL(url))
+      usedBlobUrls.current = []
+    }
+  }, [layers.length])
+
+  useEffect(() => {
+    if (!layers.length) return
+    if (hasAutoGeneratedRef.current) return
+    hasAutoGeneratedRef.current = true
+
+    generateStackedImage()
+  }, [layers.length, generateStackedImage])
 
   return {
     layers,

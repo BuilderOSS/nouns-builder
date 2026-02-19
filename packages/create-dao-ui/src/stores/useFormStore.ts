@@ -102,6 +102,7 @@ const initialState = {
     collectionName: '',
     externalUrl: '',
     filesLength: '',
+    fileType: '',
   },
   ipfsUpload: [],
   orderedLayers: [],

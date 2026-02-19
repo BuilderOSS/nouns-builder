@@ -1,4 +1,4 @@
-import { useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
+import { useArtworkImages, useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
 import { useArtworkUpload } from '@buildeross/hooks/useArtworkUpload'
 import { IPFSUpload } from '@buildeross/types'
 import {
@@ -6,15 +6,9 @@ import {
   ArtworkUpload as UploadComponent,
   LayerOrdering,
 } from '@buildeross/ui/Artwork'
-import { FormikProps } from 'formik'
+import { type FormikProps } from 'formik'
 import { motion } from 'framer-motion'
-import React, {
-  BaseSyntheticEvent,
-  ChangeEventHandler,
-  ReactElement,
-  useCallback,
-  useEffect,
-} from 'react'
+import React, { BaseSyntheticEvent, ReactElement, useCallback, useEffect } from 'react'
 
 import { useFormStore } from '../../stores'
 import { artworkPreviewPanel } from './ArtworkUpload.css'
@@ -44,38 +38,37 @@ const previewVariants = {
 
 interface ArtworkFormProps {
   id: string
-  value: any
   inputLabel: string | ReactElement
-  onChange: ChangeEventHandler
-  onBlur: ChangeEventHandler
   formik?: FormikProps<any>
   errorMessage?: any
   helperText?: string
 }
 
 export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
+  id,
   inputLabel,
   helperText,
   errorMessage,
   formik,
 }) => {
   const {
-    ipfsUpload,
-    setSetUpArtwork,
     setUpArtwork,
-    setIpfsUpload,
-    isUploadingToIPFS,
+    setSetUpArtwork,
     setIsUploadingToIPFS,
-    setIpfsUploadProgress,
+    ipfsUpload,
+    setIpfsUpload,
     orderedLayers,
     setOrderedLayers,
+    setIpfsUploadProgress,
   } = useFormStore()
 
-  const { artwork } = setUpArtwork ?? {}
-
   const handleUploadStart = useCallback(() => {
+    if (!formik) return
+    setSetUpArtwork({ ...formik.values, filesLength: 0, artwork: [], fileType: '' })
     setIsUploadingToIPFS(true)
-  }, [setIsUploadingToIPFS])
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setIsUploadingToIPFS, formik])
 
   const handleUploadSuccess = useCallback(
     (ipfs: IPFSUpload[]) => {
@@ -83,12 +76,11 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
       setIsUploadingToIPFS(false)
       setIpfsUploadProgress(0)
     },
-    [setIpfsUpload, setIsUploadingToIPFS, setIpfsUploadProgress]
+    [setIsUploadingToIPFS, setIpfsUploadProgress, setIpfsUpload]
   )
 
   const handleUploadError = useCallback(
     async (err: Error) => {
-      setIpfsUpload([])
       setIsUploadingToIPFS(false)
       setIpfsUploadProgress(0)
       try {
@@ -99,25 +91,24 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
         }
       } catch (_) {}
     },
-    [setIpfsUpload, setIsUploadingToIPFS, setIpfsUploadProgress]
+    [setIsUploadingToIPFS, setIpfsUploadProgress]
   )
 
   const {
-    images,
-    fileInfo,
-    filesArray,
-    ipfsUploadError,
-    uploadArtworkError,
-    setUploadArtworkError,
+    artwork: uploadedArtwork,
+    uploadError,
+    artworkError,
     setFiles,
   } = useArtworkUpload({
-    artwork,
-    ipfsUpload,
-    isUploadingToIPFS,
     onUploadStart: handleUploadStart,
     onUploadSuccess: handleUploadSuccess,
     onUploadError: handleUploadError,
     onUploadProgress: setIpfsUploadProgress,
+  })
+
+  const images = useArtworkImages({
+    ipfsUpload,
+    traits: setUpArtwork.artwork,
   })
 
   const { generateStackedImage, generatedImages, canvas } = useArtworkPreview({
@@ -127,42 +118,36 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
 
   const handleUpload = useCallback(
     (e: BaseSyntheticEvent) => {
-      setUploadArtworkError(undefined)
       setOrderedLayers([])
       setFiles(e.currentTarget.files)
     },
-    [setUploadArtworkError, setOrderedLayers, setFiles]
+    [setOrderedLayers, setFiles]
   )
 
   // Set up artwork traits into store
   useEffect(() => {
-    if (!fileInfo || !filesArray || !fileInfo.traits || !formik || uploadArtworkError)
-      return
+    if (!uploadedArtwork || !formik) return
 
     setSetUpArtwork({
       ...formik.values,
-      artwork: fileInfo.traits,
-      filesLength: fileInfo.filesLength,
+      artwork: uploadedArtwork.traits,
+      filesLength: uploadedArtwork.filesLength,
+      fileType: uploadedArtwork.fileType,
     })
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filesArray, fileInfo, uploadArtworkError])
-
-  const showPreview = React.useMemo(
-    () => fileInfo && !isUploadingToIPFS && !ipfsUploadError && !uploadArtworkError,
-    [isUploadingToIPFS, ipfsUploadError, uploadArtworkError, fileInfo]
-  )
+  }, [uploadedArtwork])
 
   useEffect(() => {
-    if (isUploadingToIPFS || !fileInfo) return
+    if (
+      setUpArtwork.artwork.length >= 0 &&
+      setUpArtwork.artwork.length !== orderedLayers.length
+    ) {
+      setOrderedLayers(setUpArtwork.artwork)
+    }
+  }, [setUpArtwork.artwork, orderedLayers, setOrderedLayers])
 
-    generateStackedImage()
-  }, [generateStackedImage, isUploadingToIPFS, fileInfo])
-
-  useEffect(() => {
-    if (!artwork || artwork.length === 0 || artwork.length === orderedLayers.length)
-      return
-    setOrderedLayers(artwork)
-  }, [artwork, orderedLayers, setOrderedLayers])
+  const showPreview = !!images?.length && !!orderedLayers.length
 
   const layerOrdering = (
     <LayerOrdering
@@ -174,16 +159,16 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
   return (
     <>
       <UploadComponent
+        id={id}
         inputLabel={inputLabel}
-        fileCount={setUpArtwork?.filesLength}
-        traitCount={setUpArtwork?.artwork?.length}
+        fileCount={setUpArtwork.filesLength}
+        traitCount={setUpArtwork.artwork.length}
         helperText={helperText}
         formError={errorMessage}
         onUpload={handleUpload}
-        ipfsUploadError={ipfsUploadError}
-        uploadArtworkError={uploadArtworkError}
-        images={images}
-        fileType={fileInfo?.fileType}
+        uploadError={uploadError}
+        artworkError={artworkError}
+        fileType={setUpArtwork.fileType}
         layerOrdering={layerOrdering}
       />
       {showPreview && (

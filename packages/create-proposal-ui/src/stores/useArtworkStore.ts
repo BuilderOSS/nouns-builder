@@ -1,9 +1,10 @@
-import { ArtworkType, IPFSUpload, OrderedTraits } from '@buildeross/types'
+import { IPFSUpload, OrderedTraits, Trait } from '@buildeross/types'
 import { create } from 'zustand'
 
 export interface ArtworkFormValues {
-  artwork: Array<ArtworkType>
+  artwork: Trait[]
   filesLength: number | string
+  fileType: string
 }
 
 export interface ArtworkStore {
@@ -24,6 +25,7 @@ const initialState = {
   setUpArtwork: {
     artwork: [],
     filesLength: '',
+    fileType: '',
   },
   ipfsUpload: [],
   orderedLayers: [],

@@ -55,8 +55,6 @@ const processArtworkFiles = (
       trait: traitName,
       name: itemName,
       uri: blobUrl,
-      url: blobUrl,
-      path: path,
       content: file,
     })
   })
@@ -117,8 +115,8 @@ export const CustomArtworkUpload: React.FC = () => {
   useEffect(() => {
     return () => {
       images.forEach((img) => {
-        if (img.url.startsWith('blob:')) {
-          URL.revokeObjectURL(img.url)
+        if (img.uri.startsWith('blob:')) {
+          URL.revokeObjectURL(img.uri)
         }
       })
     }
