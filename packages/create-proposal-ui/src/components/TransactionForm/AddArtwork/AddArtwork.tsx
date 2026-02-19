@@ -5,7 +5,7 @@ import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack } from '@buildeross/zord'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 

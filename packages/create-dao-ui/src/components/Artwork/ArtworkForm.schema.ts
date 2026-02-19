@@ -1,10 +1,11 @@
-import { ArtworkType } from '@buildeross/types'
+import { Trait } from '@buildeross/types'
 import * as Yup from 'yup'
 
 export interface ArtworkFormValues {
   projectDescription: string
-  artwork: Array<ArtworkType>
+  artwork: Trait[]
   filesLength: number | string
+  fileType: string
   externalUrl?: string
   collectionName?: string
 }

@@ -1,8 +1,7 @@
 import { atoms } from '@buildeross/zord'
 import { keyframes, style, styleVariants } from '@vanilla-extract/css'
 
-const defaultFormButtonWithPrev = style({
-  width: 'calc(100% - 68px)',
+const deployButtonBase = style({
   borderRadius: '10px',
   height: 60,
   marginLeft: 8,
@@ -22,10 +21,10 @@ export const deployPendingButtonStyle = style({
 })
 
 export const deployContractButtonStyle = styleVariants({
-  pending: [defaultFormButtonWithPrev, deployPendingButtonStyle],
-  default: [defaultFormButtonWithPrev],
-  defaultFull: [defaultFormButtonWithPrev, { width: '100%' }],
-  pendingFull: [defaultFormButtonWithPrev, deployPendingButtonStyle, { width: '100%' }],
+  pending: [deployButtonBase, deployPendingButtonStyle],
+  default: [deployButtonBase],
+  defaultFull: [deployButtonBase, { width: '100%' }],
+  pendingFull: [deployButtonBase, deployPendingButtonStyle, { width: '100%' }],
 })
 
 export const deployCheckboxWrapperStyle = style({

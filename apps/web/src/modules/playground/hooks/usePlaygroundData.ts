@@ -1,14 +1,9 @@
-import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
-import type { CHAIN_ID, ImageProps, OrderedTraits } from '@buildeross/types'
+import type { CHAIN_ID, ImageProps, OrderedTraits, Property } from '@buildeross/types'
+import {
+  transformPropertiesToImageProps,
+  transformPropertiesToOrderedTraits,
+} from '@buildeross/utils'
 import useSWR from 'swr'
-
-interface Property {
-  name: string
-  items: {
-    name: string
-    uri: string
-  }[]
-}
 
 interface PropertyItemsResponse {
   images: ImageProps[]
@@ -33,28 +28,6 @@ interface UsePlaygroundDataReturn {
   error: Error | null
 }
 
-const transformToImageProps = (properties: Property[]): ImageProps[] => {
-  return properties.flatMap((property) =>
-    property.items.map((item) => {
-      return {
-        name: item.name,
-        trait: property.name,
-        uri: item.uri,
-        url: getFetchableUrls(item.uri)?.[0] ?? item.uri,
-      }
-    })
-  )
-}
-
-const transformToOrderedTraits = (properties: Property[]): OrderedTraits => {
-  return properties
-    .map((property) => ({
-      trait: property.name,
-      properties: property.items.map((item) => item.name),
-    }))
-    .reverse()
-}
-
 const fetcher = async (url: string): Promise<PropertyItemsResponse> => {
   const res = await fetch(url)
   if (!res.ok) {
@@ -64,8 +37,8 @@ const fetcher = async (url: string): Promise<PropertyItemsResponse> => {
 
   return {
     ...data,
-    images: transformToImageProps(data.properties),
-    orderedLayers: transformToOrderedTraits(data.properties),
+    images: transformPropertiesToImageProps(data.properties),
+    orderedLayers: transformPropertiesToOrderedTraits(data.properties),
   }
 }
 

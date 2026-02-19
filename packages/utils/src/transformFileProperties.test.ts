@@ -30,7 +30,6 @@ export const ipfsUploadObject = (trait: string): IPFSUpload => {
   return {
     name: 'glasses-square-teal.png',
     content: {} as File,
-    blob: 'blob:http://localhost:3000/a184d324-0279-4c32-955a-744e9e324916',
     trait: trait,
     webkitRelativePath: 'nouns/4-glasses/glasses-square-teal.png',
     type: 'image/png',

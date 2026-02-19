@@ -7,7 +7,7 @@ import { getLayerName } from '@buildeross/ui/Artwork'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack, Text } from '@buildeross/zord'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 

@@ -102,6 +102,7 @@ const initialState = {
     collectionName: '',
     externalUrl: '',
     filesLength: '',
+    fileType: '',
   },
   ipfsUpload: [],
   orderedLayers: [],
@@ -162,7 +163,19 @@ export const useFormStore = create(
     {
       name: `nouns-builder-create-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`,
       storage: createJSONStorage(() => localStorage),
-      version: 1,
+      version: 2,
+      migrate: (persistedState: any, version: number) => {
+        if (version < 2 && persistedState?.setUpArtwork !== undefined) {
+          return {
+            ...persistedState,
+            setUpArtwork: {
+              ...persistedState.setUpArtwork,
+              fileType: persistedState.setUpArtwork.fileType ?? '',
+            },
+          }
+        }
+        return persistedState
+      },
     }
   )
 )
