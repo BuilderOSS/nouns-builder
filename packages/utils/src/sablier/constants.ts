@@ -15,7 +15,7 @@ export const SUPPORTED_SABLIER_CHAINS: CHAIN_ID[] = PUBLIC_ALL_CHAINS.map(
 ).filter((chainId: CHAIN_ID) => SABLIER_CHAIN_IDS.has(chainId))
 
 // Check if a chain supports Sablier
-export function isSablierSupported(chainId: CHAIN_ID): boolean {
+export function isChainIdSupportedBySablier(chainId: CHAIN_ID): boolean {
   return SUPPORTED_SABLIER_CHAINS.includes(chainId)
 }
 

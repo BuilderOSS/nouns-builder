@@ -2,7 +2,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type ZoraCoinFragment } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
-import { isCoinSupportedChain } from '@buildeross/utils/helpers'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR from 'swr'
 
 import { useEthUsdPrice } from './useEthUsdPrice'
@@ -44,7 +44,10 @@ export const useZoraCoinPrice = ({
   const { price: ethUsdPrice } = useEthUsdPrice()
 
   const { data, isLoading, error } = useSWR(
-    enabled && coinAddress && isCoinSupportedChain(chainId) && ethUsdPrice !== undefined
+    enabled &&
+      coinAddress &&
+      isChainIdSupportedByCoining(chainId) &&
+      ethUsdPrice !== undefined
       ? ([SWR_KEYS.ZORA_COIN_PRICE, chainId, coinAddress, ethUsdPrice] as const)
       : null,
     async ([, _chainId, _coinAddress, _ethUsdPrice]) =>

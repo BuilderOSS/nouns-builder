@@ -1,5 +1,5 @@
 import { DecodedArg } from '@buildeross/types'
-import { decodePoolConfig } from '@buildeross/utils/poolConfig'
+import { decodePoolConfig } from '@buildeross/utils/coining'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatUnits } from 'viem'

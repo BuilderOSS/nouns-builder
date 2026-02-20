@@ -4,7 +4,7 @@ import {
   FeedResponse,
   ProposalVoteSupportType,
 } from '@buildeross/types'
-import { isCoinSupportedChain } from '@buildeross/utils'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 
 import { SDK } from '../client'
 import {
@@ -199,7 +199,7 @@ const filterEventTypes = (
   eventTypes: FeedEventType[],
   chainId: CHAIN_ID
 ): FeedEventType[] => {
-  if (!isCoinSupportedChain(chainId)) {
+  if (!isChainIdSupportedByCoining(chainId)) {
     return eventTypes.filter((eventType) => !COIN_FEED_EVENT_TYPES.includes(eventType))
   }
 
@@ -260,7 +260,7 @@ export const getFeedData = async ({
 
     let data: FeedEventsQuery
 
-    if (isCoinSupportedChain(chainId)) {
+    if (isChainIdSupportedByCoining(chainId)) {
       // Query feed events
       data = await SDK.connect(chainId).feedEvents({
         first: fetchLimit,

@@ -3,8 +3,8 @@ import {
   type ZoraCoinFragment,
 } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
-import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/poolConfig/clankerCreator'
-import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/poolConfig/zoraContent'
+import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/coining/clankerCreator'
+import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/coining/zoraContent'
 import { useMemo } from 'react'
 
 import { useClankerTokenPrice } from './useClankerTokenPrice'

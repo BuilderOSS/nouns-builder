@@ -6,7 +6,7 @@ import {
   FeedItemTypes,
   type FeedResponse,
 } from '@buildeross/types'
-import { isCoinSupportedChain } from '@buildeross/utils/helpers'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { useCallback, useMemo } from 'react'
 import useSWRInfinite from 'swr/infinite'
 
@@ -181,7 +181,7 @@ export function useFeed({
         if (seen.has(item.id)) return false
         if (
           COIN_FEED_ITEM_TYPES.includes(item.type) &&
-          !isCoinSupportedChain(item.chainId)
+          !isChainIdSupportedByCoining(item.chainId)
         )
           return false
         seen.add(item.id)

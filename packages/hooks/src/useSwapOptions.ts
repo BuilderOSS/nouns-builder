@@ -2,7 +2,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { SwapOption as SwapOptionType } from '@buildeross/swap'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { isCoinSupportedChain } from '@buildeross/utils/helpers'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR from 'swr'
 
 // Re-export SwapOption type from swap package
@@ -67,7 +67,7 @@ export function useSwapOptions(
   isBuying: boolean = true
 ): UseSwapOptionsResult {
   const { data, isLoading, error } = useSWR(
-    coinAddress && isCoinSupportedChain(chainId)
+    coinAddress && isChainIdSupportedByCoining(chainId)
       ? ([SWR_KEYS.SWAP_OPTIONS, chainId, coinAddress, isBuying] as const)
       : null,
     async ([, _chainId, _coinAddress, _isBuying]) =>

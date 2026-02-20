@@ -1,6 +1,6 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { LinksProvider as BaseLinksProvider } from '@buildeross/ui/LinksProvider'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { chainIdToSlug } from '@buildeross/utils/chains'
 import React from 'react'
 
 type LinksProviderProps = {

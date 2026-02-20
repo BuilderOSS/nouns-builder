@@ -1,10 +1,6 @@
 import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import {
-  COIN_SUPPORTED_CHAIN_IDS,
-  PUBLIC_ALL_CHAINS,
-  PUBLIC_DEFAULT_CHAINS,
-} from '@buildeross/constants/chains'
+import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   About,
   Activity,
@@ -19,6 +15,7 @@ import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining/constants'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
@@ -66,13 +63,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   })
 
   // Check if chain supports coins
-  const isCoinSupported = useMemo(
-    () =>
-      COIN_SUPPORTED_CHAIN_IDS.includes(
-        chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
-      ),
-    [chainId]
-  )
+  const isCoinSupported = isChainIdSupportedByCoining(chainId)
 
   // Fetch clanker tokens to check if DAO has any
   const { data: clankerTokens } = useClankerTokens({

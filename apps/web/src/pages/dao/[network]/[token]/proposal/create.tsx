@@ -1,11 +1,6 @@
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import {
-  type COIN_SUPPORTED_CHAIN_ID,
-  COIN_SUPPORTED_CHAIN_IDS,
-  L1_CHAINS,
-  PUBLIC_DEFAULT_CHAINS,
-} from '@buildeross/constants/chains'
+import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   SelectTransactionType,
@@ -24,8 +19,10 @@ import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
-import { isSablierSupported as isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
+import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -91,10 +88,12 @@ const CreateProposalPage: NextPageWithLayout = () => {
     [chain.id]
   )
 
-  const isCoinSupported = useMemo(
-    () => COIN_SUPPORTED_CHAIN_IDS.includes(chain.id as COIN_SUPPORTED_CHAIN_ID),
+  const isDroposalSupported = useMemo(
+    () => isChainIdSupportedByDroposal(chain.id),
     [chain.id]
   )
+
+  const isCoinSupported = useMemo(() => isChainIdSupportedByCoining(chain.id), [chain.id])
 
   // Fetch clanker tokens to check if DAO has any
   const { data: clankerTokens } = useClankerTokens({
@@ -121,6 +120,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
         if (x === TransactionType.NOMINATE_DELEGATE && !isEASSupported) return false
         if (x === TransactionType.PIN_TREASURY_ASSET && !isEASSupported) return false
         if (x === TransactionType.STREAM_TOKENS && !isSablierSupported) return false
+        if (x === TransactionType.DROPOSAL && !isDroposalSupported) return false
         if (x === TransactionType.CREATOR_COIN && (!isCoinSupported || hasClankerToken))
           return false
         if (x === TransactionType.CONTENT_COIN && (!isCoinSupported || !hasClankerToken))
@@ -134,6 +134,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
       shouldFixRendererBase,
       isEASSupported,
       isSablierSupported,
+      isDroposalSupported,
       isCoinSupported,
       hasClankerToken,
     ]

@@ -2,7 +2,7 @@
 export { type DiscoveryPoolConfig, fdvToTick, type PoolConfig } from './shared'
 
 // Re-export pool constants
-export { DYNAMIC_FEE_FLAG } from './constants'
+export * from './constants'
 
 // Re-export Zora content pool functions
 export {
@@ -23,4 +23,5 @@ export {
 } from './clankerCreator'
 
 // Re-export encoding/decoding functions
+export * from './clankerConfig'
 export { decodePoolConfig, encodePoolConfig, poolConfigEncodingABI } from './encoding'

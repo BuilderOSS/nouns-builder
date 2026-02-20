@@ -1,6 +1,6 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { chainIdToSlug } from '@buildeross/utils/chains'
 import { Stack } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'

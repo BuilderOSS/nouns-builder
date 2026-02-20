@@ -145,10 +145,8 @@ export const L2_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
 // TODO: support base mainnet after all tests are done
 export const COIN_SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE_SEPOLIA] as const // ensure non-empty
 
-export type COIN_SUPPORTED_CHAIN_ID = (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
-
 const COIN_SUPPORTED_CHAINS_UNSORTED = PUBLIC_ALL_CHAINS.filter((chain) =>
-  COIN_SUPPORTED_CHAIN_IDS.includes(chain.id as COIN_SUPPORTED_CHAIN_ID)
+  COIN_SUPPORTED_CHAIN_IDS.includes(chain.id as (typeof COIN_SUPPORTED_CHAIN_IDS)[number])
 )
 
 export const COIN_SUPPORTED_CHAINS: Chains = sortNonEmptyChains(

@@ -5,7 +5,7 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { type CoinFormValues, ContentCoinPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { isCoinSupportedChain } from '@buildeross/utils'
+import { isChainIdSupportedByCoining } from '@buildeross/utils'
 import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -107,7 +107,7 @@ export default function CreateCoinPage({
     }
   }, [handleCloseSuccessModal, createdCoinAddress])
 
-  const isChainSupported = isCoinSupportedChain(chainId)
+  const isChainSupported = isChainIdSupportedByCoining(chainId)
 
   // Fetch the latest ClankerToken for this DAO
   const { data: clankerTokens, isLoading } = useClankerTokens({

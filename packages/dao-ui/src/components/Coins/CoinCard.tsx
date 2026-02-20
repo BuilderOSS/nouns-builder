@@ -7,8 +7,8 @@ import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { StatBadge } from '@buildeross/ui/StatBadge'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { formatMarketCap } from '@buildeross/utils/formatMarketCap'
-import { isCoinSupportedChain } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Spinner, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { Address } from 'viem'
@@ -73,7 +73,7 @@ export const CoinCard = ({
     : false
 
   // Only show Trade button for Base chains
-  const showTradeButton = isCoinSupportedChain(chainId)
+  const showTradeButton = isChainIdSupportedByCoining(chainId)
 
   const handleTradeClick = (e: React.MouseEvent) => {
     e.preventDefault()
