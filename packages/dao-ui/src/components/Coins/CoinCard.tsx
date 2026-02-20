@@ -72,7 +72,7 @@ export const CoinCard = ({
     ? Date.now() / 1000 - parseInt(createdAt) < 7 * 24 * 60 * 60
     : false
 
-  // Only show Trade button for Base chains
+  // Only show Trade button for supported chains
   const showTradeButton = isChainIdSupportedByCoining(chainId)
 
   const handleTradeClick = (e: React.MouseEvent) => {

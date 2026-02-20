@@ -7,7 +7,7 @@ import type {
   RequiredDaoContractAddresses,
 } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { isChainIdSupportedByCoining } from '@buildeross/utils/coining/constants'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 

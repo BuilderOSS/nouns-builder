@@ -9,7 +9,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
-import { isChainIdSupportedByCoining } from '@buildeross/utils/coining/constants'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { GetServerSideProps } from 'next'
 import { Meta } from 'src/components/Meta'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'

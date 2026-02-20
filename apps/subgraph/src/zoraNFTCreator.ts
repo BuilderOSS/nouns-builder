@@ -98,7 +98,7 @@ export function handleCreatedDrop(event: CreatedDrop): void {
   drop.save()
 
   // Create feed event
-  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEventId = event.transaction.hash.toHexString() + '-' + event.logIndex.toString()
   let feedEvent = new ZoraDropCreatedFeedEvent(feedEventId)
   feedEvent.type = 'ZORA_DROP_CREATED'
   feedEvent.dao = dao.id
