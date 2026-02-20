@@ -4,7 +4,7 @@ export default defineConfig({
   entry: [
     'src/*.ts',
     'src/sablier/*.ts',
-    'src/poolConfig/*.ts',
+    'src/coining/*.ts',
     'src/wagmi/*.ts',
     'src/yup/*.ts',
     '!src/*.test.ts',

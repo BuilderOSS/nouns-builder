@@ -22,7 +22,7 @@ import {
   DEFAULT_ZORA_TOTAL_SUPPLY,
   estimateTargetFdvUsd,
   getChainNamesString,
-  isCoinSupportedChain,
+  isChainIdSupportedByCoining,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import * as Sentry from '@sentry/nextjs'
@@ -223,7 +223,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const [isDeploying, setIsDeploying] = useState(false)
 
   // Check if the current chain is supported
-  const isChainSupported = isCoinSupportedChain(chainId)
+  const isChainSupported = isChainIdSupportedByCoining(chainId)
   const factoryAddress = isChainSupported
     ? (coinFactoryAddress[chainId as keyof typeof coinFactoryAddress] as AddressType)
     : undefined

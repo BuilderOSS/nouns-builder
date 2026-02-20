@@ -2,7 +2,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
-import { isCoinSupportedChain } from '@buildeross/utils/helpers'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import { useFormik } from 'formik'
 import React, { useMemo } from 'react'
@@ -60,7 +60,8 @@ const COIN_EVENT_TYPES: FeedEventType[] = [
 ]
 
 const hasNoCoinSupportedChains = (chainIds: CHAIN_ID[]) =>
-  chainIds.length > 0 && chainIds.every((chainId) => !isCoinSupportedChain(chainId))
+  chainIds.length > 0 &&
+  chainIds.every((chainId) => !isChainIdSupportedByCoining(chainId))
 
 export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   open,

@@ -7,6 +7,7 @@ import type {
   RequiredDaoContractAddresses,
 } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -85,11 +86,7 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
   const daosByChain = useMemo(() => {
     const grouped: Record<CHAIN_ID, DaoListItem[]> = {} as Record<CHAIN_ID, DaoListItem[]>
     allDaoItems.forEach((dao) => {
-      if (
-        COIN_SUPPORTED_CHAIN_IDS.includes(
-          dao.chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
-        )
-      ) {
+      if (isChainIdSupportedByCoining(dao.chainId)) {
         if (!grouped[dao.chainId]) {
           grouped[dao.chainId] = []
         }

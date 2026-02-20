@@ -1,10 +1,6 @@
 import {
   BUILDER_TREASURY_ADDRESS,
   COIN_DEPLOYMENT_DISCLAIMER,
-} from '@buildeross/constants'
-import {
-  type COIN_SUPPORTED_CHAIN_ID,
-  COIN_SUPPORTED_CHAIN_IDS,
   COIN_SUPPORTED_CHAINS,
 } from '@buildeross/constants'
 import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
@@ -23,6 +19,7 @@ import {
   DEFAULT_ZORA_TOTAL_SUPPLY,
   estimateTargetFdvUsd,
   getChainNamesString,
+  isChainIdSupportedByCoining,
 } from '@buildeross/utils'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
@@ -200,9 +197,7 @@ export const ContentCoin: FormComponent = ({ resetTransactionType }) => {
   })
 
   // Check if the current chain is supported
-  const isChainSupported = COIN_SUPPORTED_CHAIN_IDS.includes(
-    chain.id as COIN_SUPPORTED_CHAIN_ID
-  )
+  const isChainSupported = isChainIdSupportedByCoining(chain.id)
   const factoryAddress = isChainSupported
     ? (coinFactoryAddress[chain.id as keyof typeof coinFactoryAddress] as AddressType)
     : undefined

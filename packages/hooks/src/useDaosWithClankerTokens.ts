@@ -1,10 +1,10 @@
-import { COIN_SUPPORTED_CHAIN_IDS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   daosWithClankerTokensRequest,
   type DaosWithClankerTokensResponse,
 } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR, { type KeyedMutator } from 'swr'
 
 export const useDaosWithClankerTokens = ({
@@ -23,9 +23,7 @@ export const useDaosWithClankerTokens = ({
   mutate: KeyedMutator<DaosWithClankerTokensResponse>
 } => {
   // Check if chain is supported
-  const isChainSupported = COIN_SUPPORTED_CHAIN_IDS.includes(
-    chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
-  )
+  const isChainSupported = isChainIdSupportedByCoining(chainId)
   const chainError = !isChainSupported
     ? new Error(`ClankerTokens are only supported on coin-enabled chains`)
     : undefined

@@ -1,5 +1,5 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { chainIdToSlug } from '@buildeross/utils/chains'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { Meta } from 'src/components/Meta'

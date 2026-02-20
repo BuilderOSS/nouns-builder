@@ -1,10 +1,7 @@
 import { NATIVE_TOKEN_ADDRESS, WETH_ADDRESS } from '@buildeross/constants/addresses'
 import { clankerTokenRequest, zoraCoinRequest } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
-import {
-  DEFAULT_CLANKER_TICK_SPACING,
-  DYNAMIC_FEE_FLAG,
-} from '@buildeross/utils/poolConfig'
+import { DEFAULT_CLANKER_TICK_SPACING, DYNAMIC_FEE_FLAG } from '@buildeross/utils/coining'
 import { Address } from 'viem'
 
 import { CoinInfo } from './types'

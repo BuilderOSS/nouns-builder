@@ -1,5 +1,5 @@
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { chainIdToSlug } from '@buildeross/utils/chains'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'

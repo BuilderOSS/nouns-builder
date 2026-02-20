@@ -15,8 +15,8 @@ import {
   encodeCreateWithTimestampsLL,
   getSablierContracts,
   getWrappedTokenAddress,
+  isChainIdSupportedBySablier,
   isNativeEth,
-  isSablierSupported,
   UNSUPPORTED_CHAIN_ERROR,
   validateBatchStreams,
   weth9Abi,
@@ -56,7 +56,7 @@ export const StreamTokens: FormComponent = ({ resetTransactionType }) => {
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
 
-  const chainSupported = isSablierSupported(chain.id)
+  const chainSupported = isChainIdSupportedBySablier(chain.id)
 
   // Get Sablier contract addresses (synchronous)
   const contractAddresses = useMemo(

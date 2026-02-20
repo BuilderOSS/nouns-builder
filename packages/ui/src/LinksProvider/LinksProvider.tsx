@@ -10,7 +10,7 @@ import {
   ProposalCreateLinkHandler,
   ProposalLinkHandler,
 } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { chainIdToSlug } from '@buildeross/utils/chains'
 import { createContext, useContext } from 'react'
 
 type LinksContextValue = {

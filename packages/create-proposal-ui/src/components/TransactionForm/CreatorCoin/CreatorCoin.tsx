@@ -1,12 +1,8 @@
 import {
   BUILDER_COLLECTION_ADDRESS,
   COIN_DEPLOYMENT_DISCLAIMER,
-  WETH_ADDRESS,
-} from '@buildeross/constants'
-import {
-  type COIN_SUPPORTED_CHAIN_ID,
-  COIN_SUPPORTED_CHAIN_IDS,
   COIN_SUPPORTED_CHAINS,
+  WETH_ADDRESS,
 } from '@buildeross/constants'
 import {
   EAS_CONTRACT_ADDRESS,
@@ -36,6 +32,7 @@ import {
   DYNAMIC_FEE_FLAG,
   FEE_CONFIGS,
   getChainNamesString,
+  isChainIdSupportedByCoining,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
@@ -383,9 +380,7 @@ export const CreatorCoin: FormComponent = ({ resetTransactionType }) => {
   } = useEthUsdPrice()
 
   // Check if the current chain is supported
-  const isChainSupported = COIN_SUPPORTED_CHAIN_IDS.includes(
-    chain.id as COIN_SUPPORTED_CHAIN_ID
-  )
+  const isChainSupported = isChainIdSupportedByCoining(chain.id)
 
   // Fetch the latest ClankerToken for Builder DAO
   const builderCollectionAddress =

@@ -1,6 +1,6 @@
 import { buildSwapOptions } from '@buildeross/swap'
 import { CHAIN_ID } from '@buildeross/types'
-import { isCoinSupportedChain } from '@buildeross/utils/helpers'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
@@ -48,7 +48,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Invalid chainId' })
   }
 
-  if (!isCoinSupportedChain(chainIdNum as CHAIN_ID)) {
+  if (!isChainIdSupportedByCoining(chainIdNum as CHAIN_ID)) {
     return res.status(400).json({ error: 'Chain not supported for swap options' })
   }
 

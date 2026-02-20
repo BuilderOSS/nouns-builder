@@ -4,8 +4,9 @@ import {
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
 } from '@buildeross/ui/styles'
+import { isTestnetChain } from '@buildeross/utils/chains'
 import { formatDuration } from '@buildeross/utils/formatDuration'
-import { isEmpty, isTestnetChain } from '@buildeross/utils/helpers'
+import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Heading, Icon, Stack } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'

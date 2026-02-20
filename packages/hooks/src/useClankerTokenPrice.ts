@@ -2,7 +2,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type ClankerTokenFragment } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
-import { isCoinSupportedChain } from '@buildeross/utils/helpers'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR from 'swr'
 
 import { useEthUsdPrice } from './useEthUsdPrice'
@@ -44,7 +44,10 @@ export const useClankerTokenPrice = ({
   const { price: ethUsdPrice } = useEthUsdPrice()
 
   const { data, isLoading, error } = useSWR(
-    enabled && tokenAddress && isCoinSupportedChain(chainId) && ethUsdPrice !== undefined
+    enabled &&
+      tokenAddress &&
+      isChainIdSupportedByCoining(chainId) &&
+      ethUsdPrice !== undefined
       ? ([SWR_KEYS.CLANKER_TOKEN_PRICE, chainId, tokenAddress, ethUsdPrice] as const)
       : null,
     async ([, _chainId, _tokenAddress, _ethUsdPrice]) =>

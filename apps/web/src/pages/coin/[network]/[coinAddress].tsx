@@ -1,9 +1,5 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import {
-  COIN_SUPPORTED_CHAIN_IDS,
-  PUBLIC_ALL_CHAINS,
-  PUBLIC_DEFAULT_CHAINS,
-} from '@buildeross/constants/chains'
+import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { fetchIpfsMetadata, type IpfsMetadata } from '@buildeross/ipfs-service'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import {
@@ -13,6 +9,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { GetServerSideProps } from 'next'
 import { Meta } from 'src/components/Meta'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'
@@ -139,9 +136,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
   }
 
   // Check if chain supports coins
-  const isChainSupported = COIN_SUPPORTED_CHAIN_IDS.includes(
-    chain.id as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
-  )
+  const isChainSupported = isChainIdSupportedByCoining(chain.id)
   if (!isChainSupported) {
     return { notFound: true }
   }

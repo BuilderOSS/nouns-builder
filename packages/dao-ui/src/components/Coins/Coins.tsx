@@ -1,4 +1,3 @@
-import { COIN_SUPPORTED_CHAIN_IDS } from '@buildeross/constants/chains'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useClankerTokenWithPrice } from '@buildeross/hooks/useCoinsWithPrices'
 import { useZoraCoins } from '@buildeross/hooks/useZoraCoins'
@@ -6,6 +5,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { SwapWidget } from '@buildeross/ui/SwapWidget'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import { Address } from 'viem'
@@ -36,10 +36,7 @@ export const Coins: React.FC = () => {
 
   // Check if chain is supported
   const isChainSupported = useMemo(
-    () =>
-      COIN_SUPPORTED_CHAIN_IDS.includes(
-        chain.id as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
-      ),
+    () => isChainIdSupportedByCoining(chain.id),
     [chain.id]
   )
 

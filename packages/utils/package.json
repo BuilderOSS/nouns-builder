@@ -35,10 +35,10 @@
       "import": "./dist/sablier/index.mjs",
       "require": "./dist/sablier/index.js"
     },
-    "./poolConfig": {
-      "types": "./dist/poolConfig/index.d.ts",
-      "import": "./dist/poolConfig/index.mjs",
-      "require": "./dist/poolConfig/index.js"
+    "./coining": {
+      "types": "./dist/coining/index.d.ts",
+      "import": "./dist/coining/index.mjs",
+      "require": "./dist/coining/index.js"
     },
     "./wagmi": {
       "types": "./dist/wagmi/index.d.ts",

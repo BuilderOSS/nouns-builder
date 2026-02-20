@@ -1,7 +1,7 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { useChainStore } from '@buildeross/stores'
 import { Uploading } from '@buildeross/ui/Uploading'
-import { isTestnetChain } from '@buildeross/utils/helpers'
+import { isTestnetChain } from '@buildeross/utils/chains'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
