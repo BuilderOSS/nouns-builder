@@ -476,7 +476,7 @@ type ZoraDrop @entity {
 
   # Sales configuration from ERC721Drop.salesConfig()
   publicSalePrice: BigInt!
-  maxSalePurchasePerAddress: Int!
+  maxSalePurchasePerAddress: BigInt!
   publicSaleStart: BigInt!
   publicSaleEnd: BigInt!
   presaleStart: BigInt!

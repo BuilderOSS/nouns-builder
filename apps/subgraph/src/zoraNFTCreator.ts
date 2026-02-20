@@ -46,7 +46,9 @@ export function handleCreatedDrop(event: CreatedDrop): void {
   }
 
   // Bind to EditionMetadataRenderer to get metadata
-  let rendererContract = EditionMetadataRendererContract.bind(config.metadataRenderer)
+  let rendererContract = EditionMetadataRendererContract.bind(
+    config.getMetadataRenderer()
+  )
 
   // Call tokenInfos(dropAddress) - exit if reverted
   let tokenInfosResult = rendererContract.try_tokenInfos(
@@ -68,27 +70,27 @@ export function handleCreatedDrop(event: CreatedDrop): void {
   drop.editionSize = event.params.editionSize
 
   // Config from ERC721Drop.config()
-  drop.metadataRenderer = config.metadataRenderer
-  drop.royaltyBPS = config.royaltyBPS
-  drop.fundsRecipient = config.fundsRecipient
+  drop.metadataRenderer = config.getMetadataRenderer()
+  drop.royaltyBPS = config.getRoyaltyBPS()
+  drop.fundsRecipient = config.getFundsRecipient()
 
   // Sales configuration from ERC721Drop.salesConfig()
-  drop.publicSalePrice = salesConfig.publicSalePrice
-  drop.maxSalePurchasePerAddress = salesConfig.maxSalePurchasePerAddress
-  drop.publicSaleStart = salesConfig.publicSaleStart
-  drop.publicSaleEnd = salesConfig.publicSaleEnd
-  drop.presaleStart = salesConfig.presaleStart
-  drop.presaleEnd = salesConfig.presaleEnd
-  drop.presaleMerkleRoot = salesConfig.presaleMerkleRoot
+  drop.publicSalePrice = salesConfig.getPublicSalePrice()
+  drop.maxSalePurchasePerAddress = salesConfig.getMaxSalePurchasePerAddress()
+  drop.publicSaleStart = salesConfig.getPublicSaleStart()
+  drop.publicSaleEnd = salesConfig.getPublicSaleEnd()
+  drop.presaleStart = salesConfig.getPresaleStart()
+  drop.presaleEnd = salesConfig.getPresaleEnd()
+  drop.presaleMerkleRoot = salesConfig.getPresaleMerkleRoot()
 
   // NFT metadata from ERC721Drop
   drop.name = nameResult.value
   drop.symbol = symbolResult.value
 
   // Metadata from EditionMetadataRenderer.tokenInfos()
-  drop.description = tokenInfos.description
-  drop.imageURI = tokenInfos.imageURI
-  drop.animationURI = tokenInfos.animationURI
+  drop.description = tokenInfos.getDescription()
+  drop.imageURI = tokenInfos.getImageURI()
+  drop.animationURI = tokenInfos.getAnimationURI()
 
   // Block metadata
   drop.createdAt = event.block.timestamp
