@@ -129,6 +129,37 @@ dataSources:
           handler: handleCoinCreatedV4
       file: ./src/zoraFactory.ts
 {{/zoraFactory}}
+{{#zoraNFTCreator}}
+  - kind: ethereum
+    name: ZoraNFTCreator
+    network: {{network}}
+    source:
+      address: '{{zoraNFTCreator.address}}'
+      abi: ZoraNFTCreatorV1
+      startBlock: {{zoraNFTCreator.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ZoraDrop
+        - DAO
+      abis:
+        - name: ZoraNFTCreatorV1
+          file: ./abis/ZoraNFTCreatorV1.json
+        - name: ERC721Drop
+          file: ./abis/ERC721Drop.json
+        - name: EditionMetadataRenderer
+          file: ./abis/EditionMetadataRenderer.json
+        - name: Treasury
+          file: ./abis/Treasury.json
+        - name: Governor
+          file: ./abis/Governor.json
+      eventHandlers:
+        - event: CreatedDrop(indexed address,indexed address,uint256)
+          handler: handleCreatedDrop
+      file: ./src/zoraNFTCreator.ts
+{{/zoraNFTCreator}}
 templates:
   - kind: ethereum
     name: Token

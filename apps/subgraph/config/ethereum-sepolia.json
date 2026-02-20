@@ -8,5 +8,9 @@
     "address": "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
     "startBlock": 6927101
   },
+  "zoraNFTCreator": {
+    "address": "0x87cfd516c5ea86e50b950678CA970a8a28de27ac",
+    "startBlock": 5074430
+  },
   "callHandlers": false
 }
