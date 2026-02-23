@@ -38,7 +38,7 @@ export const ZoraDropCreatedItem: React.FC<ZoraDropCreatedItemProps> = ({ item }
   return (
     <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
       {/* Media - full-width on mobile, fixed width on desktop */}
-      {isMediaTypeLoading || (!shouldUseMediaPreview && !displayImageUrl) ? (
+      {isMediaTypeLoading ? (
         <Box className={feedItemImage}>
           <ImageSkeleton />
         </Box>
