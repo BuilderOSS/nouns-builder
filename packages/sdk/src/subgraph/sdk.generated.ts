@@ -6325,6 +6325,32 @@ export type ZoraCoinFragment = {
   } | null
 }
 
+export type ZoraDropFragment = {
+  __typename?: 'ZoraDrop'
+  id: string
+  creator: any
+  editionSize: any
+  metadataRenderer: any
+  royaltyBPS: number
+  fundsRecipient: any
+  publicSalePrice: any
+  maxSalePurchasePerAddress: any
+  publicSaleStart: any
+  publicSaleEnd: any
+  presaleStart: any
+  presaleEnd: any
+  presaleMerkleRoot: any
+  name: string
+  symbol: string
+  description: string
+  imageURI: string
+  animationURI: string
+  createdAt: any
+  createdAtBlock: any
+  transactionHash: any
+  dao?: { __typename?: 'DAO'; id: string; name: string } | null
+}
+
 export type DaoMultisigUpdateFragment = {
   __typename?: 'DaoMultisigUpdate'
   id: string
@@ -6708,6 +6734,46 @@ export type DaoZoraCoinsQuery = {
         tokenName: string
         tokenSymbol: string
       } | null
+    }>
+  } | null
+}
+
+export type DaoZoraDropsQueryVariables = Exact<{
+  daoId: Scalars['ID']['input']
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDrop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type DaoZoraDropsQuery = {
+  __typename?: 'Query'
+  dao?: {
+    __typename?: 'DAO'
+    id: string
+    zoraDrops: Array<{
+      __typename?: 'ZoraDrop'
+      id: string
+      creator: any
+      editionSize: any
+      metadataRenderer: any
+      royaltyBPS: number
+      fundsRecipient: any
+      publicSalePrice: any
+      maxSalePurchasePerAddress: any
+      publicSaleStart: any
+      publicSaleEnd: any
+      presaleStart: any
+      presaleEnd: any
+      presaleMerkleRoot: any
+      name: string
+      symbol: string
+      description: string
+      imageURI: string
+      animationURI: string
+      createdAt: any
+      createdAtBlock: any
+      transactionHash: any
+      dao?: { __typename?: 'DAO'; id: string; name: string } | null
     }>
   } | null
 }
@@ -7514,6 +7580,39 @@ export type ZoraCoinQuery = {
   } | null
 }
 
+export type ZoraDropQueryVariables = Exact<{
+  dropAddress: Scalars['ID']['input']
+}>
+
+export type ZoraDropQuery = {
+  __typename?: 'Query'
+  zoraDrop?: {
+    __typename?: 'ZoraDrop'
+    id: string
+    creator: any
+    editionSize: any
+    metadataRenderer: any
+    royaltyBPS: number
+    fundsRecipient: any
+    publicSalePrice: any
+    maxSalePurchasePerAddress: any
+    publicSaleStart: any
+    publicSaleEnd: any
+    presaleStart: any
+    presaleEnd: any
+    presaleMerkleRoot: any
+    name: string
+    symbol: string
+    description: string
+    imageURI: string
+    animationURI: string
+    createdAt: any
+    createdAtBlock: any
+    transactionHash: any
+    dao?: { __typename?: 'DAO'; id: string; name: string } | null
+  } | null
+}
+
 export const AuctionFragmentDoc = gql`
   fragment Auction on Auction {
     dao {
@@ -7687,6 +7786,35 @@ export const ZoraCoinFragmentDoc = gql`
       tokenAddress
       tokenName
       tokenSymbol
+    }
+  }
+`
+export const ZoraDropFragmentDoc = gql`
+  fragment ZoraDrop on ZoraDrop {
+    id
+    creator
+    editionSize
+    metadataRenderer
+    royaltyBPS
+    fundsRecipient
+    publicSalePrice
+    maxSalePurchasePerAddress
+    publicSaleStart
+    publicSaleEnd
+    presaleStart
+    presaleEnd
+    presaleMerkleRoot
+    name
+    symbol
+    description
+    imageURI
+    animationURI
+    createdAt
+    createdAtBlock
+    transactionHash
+    dao {
+      id
+      name
     }
   }
 `
@@ -8016,6 +8144,22 @@ export const DaoZoraCoinsDocument = gql`
     }
   }
   ${ZoraCoinFragmentDoc}
+`
+export const DaoZoraDropsDocument = gql`
+  query daoZoraDrops(
+    $daoId: ID!
+    $first: Int = 10
+    $orderBy: ZoraDrop_orderBy = createdAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    dao(id: $daoId) {
+      id
+      zoraDrops(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
+        ...ZoraDrop
+      }
+    }
+  }
+  ${ZoraDropFragmentDoc}
 `
 export const DaosForDashboardDocument = gql`
   query daosForDashboard($user: Bytes!, $first: Int, $skip: Int) {
@@ -8456,6 +8600,14 @@ export const ZoraCoinDocument = gql`
   }
   ${ZoraCoinFragmentDoc}
 `
+export const ZoraDropDocument = gql`
+  query zoraDrop($dropAddress: ID!) {
+    zoraDrop(id: $dropAddress) {
+      ...ZoraDrop
+    }
+  }
+  ${ZoraDropFragmentDoc}
+`
 
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -8760,6 +8912,24 @@ export function getSdk(
             signal,
           }),
         'daoZoraCoins',
+        'query',
+        variables
+      )
+    },
+    daoZoraDrops(
+      variables: DaoZoraDropsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaoZoraDropsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaoZoraDropsQuery>({
+            document: DaoZoraDropsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daoZoraDrops',
         'query',
         variables
       )
@@ -9084,6 +9254,24 @@ export function getSdk(
             signal,
           }),
         'zoraCoin',
+        'query',
+        variables
+      )
+    },
+    zoraDrop(
+      variables: ZoraDropQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraDropQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraDropQuery>({
+            document: ZoraDropDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'zoraDrop',
         'query',
         variables
       )

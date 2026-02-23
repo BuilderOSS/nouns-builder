@@ -1,0 +1,10 @@
+#import "../fragments/ZoraDrop.graphql"
+
+query daoZoraDrops($daoId: ID!, $first: Int = 10, $orderBy: ZoraDrop_orderBy = createdAt, $orderDirection: OrderDirection = desc) {
+  dao(id: $daoId) {
+    id
+    zoraDrops(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
+      ...ZoraDrop
+    }
+  }
+}

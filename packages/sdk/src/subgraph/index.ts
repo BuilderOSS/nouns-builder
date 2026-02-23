@@ -24,6 +24,7 @@ export * from './requests/sync'
 export * from './requests/tokensQuery'
 export * from './requests/userProposalVote'
 export * from './requests/zoraCoinQuery'
+export * from './requests/zoraDropQuery'
 export {
   Auction_OrderBy,
   type AuctionBidFragment,
@@ -45,4 +46,6 @@ export {
   type TokenWithDaoQuery,
   ZoraCoin_OrderBy,
   type ZoraCoinFragment,
+  ZoraDrop_OrderBy,
+  type ZoraDropFragment,
 } from './sdk.generated'

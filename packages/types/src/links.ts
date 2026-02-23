@@ -35,3 +35,5 @@ export type CoinCreateLinkHandler = (
   chainId: CHAIN_ID,
   daoTokenAddress: AddressType
 ) => LinkOptions
+
+export type DropLinkHandler = (chainId: CHAIN_ID, dropAddress: AddressType) => LinkOptions
