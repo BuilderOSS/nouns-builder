@@ -133,8 +133,6 @@ export const ALLOWED_MIGRATION_DAOS: AddressType[] = [
 export const PROTOCOL_REWARDS_MANAGER: AddressType =
   '0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B'
 
-export const ZORA_COMMENTS: AddressType = '0x7777777C2B3132e03a65721a41745C07170a5877'
-
 // WETH (Wrapped ETH) contract addresses
 export const WETH_ADDRESS = {
   [CHAIN_ID.ETHEREUM]: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2' as AddressType,
@@ -196,3 +194,8 @@ export const UNISWAP_UNIVERSAL_ROUTER_ADDRESS = {
 // Permit2 (same across chains)
 export const PERMIT2_ADDRESS: AddressType =
   '0x000000000022D473030F116dDEE9F6B43aC78BA3' as AddressType
+
+export const ZORA_COIN_FACTORY_ADDRESS: AddressType =
+  '0x777777751622c0d3258f214F9DF38E35BF45baF3'
+
+export const ZORA_COMMENTS: AddressType = '0x7777777C2B3132e03a65721a41745C07170a5877'

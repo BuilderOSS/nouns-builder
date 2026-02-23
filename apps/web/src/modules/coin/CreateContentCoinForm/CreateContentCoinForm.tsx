@@ -1,6 +1,7 @@
 import {
   BUILDER_TREASURY_ADDRESS,
   COIN_DEPLOYMENT_DISCLAIMER,
+  ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants'
 import { COIN_SUPPORTED_CHAINS } from '@buildeross/constants/chains'
 import { useClankerTokenPrice } from '@buildeross/hooks'
@@ -29,7 +30,6 @@ import * as Sentry from '@sentry/nextjs'
 import type { Uploader, UploadResult } from '@zoralabs/coins-sdk'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
 import {
-  coinFactoryAddress,
   coinFactoryConfig,
   encodeMultiCurvePoolConfig,
 } from '@zoralabs/protocol-deployments'
@@ -82,7 +82,6 @@ type CurrencyOption = {
 }
 
 interface CreateContentCoinEconomicsPreviewProps {
-  factoryAddress: Address
   chainId: number
   latestClankerToken: ClankerTokenFragment
   clankerTokenPriceUsd: number | undefined
@@ -90,7 +89,7 @@ interface CreateContentCoinEconomicsPreviewProps {
 
 const CreateContentCoinEconomicsPreview: React.FC<
   CreateContentCoinEconomicsPreviewProps
-> = ({ factoryAddress, chainId, latestClankerToken, clankerTokenPriceUsd }) => {
+> = ({ chainId, latestClankerToken, clankerTokenPriceUsd }) => {
   const formik = useFormikContext<CoinFormValues>()
   const { address: userAddress } = useAccount()
 
@@ -137,7 +136,7 @@ const CreateContentCoinEconomicsPreview: React.FC<
 
   // Call coinAddress view function on ZoraFactory
   const { data: predictedAddress } = useReadContract({
-    address: factoryAddress,
+    address: ZORA_COIN_FACTORY_ADDRESS,
     abi: coinFactoryConfig.abi,
     functionName: 'coinAddress',
     args:
@@ -224,9 +223,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
 
   // Check if the current chain is supported
   const isChainSupported = isChainIdSupportedByCoining(chainId)
-  const factoryAddress = isChainSupported
-    ? (coinFactoryAddress[chainId as keyof typeof coinFactoryAddress] as AddressType)
-    : undefined
 
   // Fetch the ClankerToken price
   const {
@@ -276,10 +272,6 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       encodedPoolConfig: `0x${string}`,
       builderTreasuryAddress: Address
     ) => {
-      if (!factoryAddress) {
-        throw new Error('Factory address not found')
-      }
-
       if (!userAddress) {
         throw new Error('User wallet not connected')
       }
@@ -290,7 +282,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       // Simulate the contract call
       const simulation = await simulateContract(config, {
         abi: coinFactoryConfig.abi,
-        address: factoryAddress as Address,
+        address: ZORA_COIN_FACTORY_ADDRESS as Address,
         functionName: 'deploy',
         args: [
           userAddress as Address, // payoutRecipient (user's address)
@@ -316,7 +308,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
 
       return txHash
     },
-    [config, factoryAddress, userAddress, treasury, chainId]
+    [config, userAddress, treasury, chainId]
   )
 
   const handleSubmit = async (
@@ -329,7 +321,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       return
     }
 
-    if (!factoryAddress) {
+    if (!isChainSupported) {
       setSubmitError(
         `Posts are only supported on ${chainNamesString}. Current chain ID: ${chainId}`
       )
@@ -582,10 +574,8 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
                 {clankerTokenPriceUsd &&
                   latestClankerToken &&
                   formik.values.currency &&
-                  !isDisabled &&
-                  factoryAddress && (
+                  !isDisabled && (
                     <CreateContentCoinEconomicsPreview
-                      factoryAddress={factoryAddress}
                       chainId={chainId}
                       latestClankerToken={latestClankerToken}
                       clankerTokenPriceUsd={clankerTokenPriceUsd}
