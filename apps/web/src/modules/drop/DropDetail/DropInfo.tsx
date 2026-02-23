@@ -9,13 +9,12 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
-import { formatSupply } from '@buildeross/utils/formatMarketCap'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Flex, Grid, Text } from '@buildeross/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address, formatEther } from 'viem'
 
-import { dropHeader, dropImageContainer, onlyDesktop, statsGrid } from './DropDetail.css'
+import { dropHeader, dropImageContainer, onlyDesktop } from './DropDetail.css'
 
 interface DropInfoProps {
   drop: ZoraDropFragment
@@ -118,23 +117,15 @@ export const DropInfo = ({
         </Flex>
       </Box>
 
-      {/* Price, Edition Size - 2 column grid */}
-      <Grid className={statsGrid} mb="x3">
-        <Box>
-          <Text variant="label-sm" color="text3" mb="x2">
-            Price
-          </Text>
-          <Text variant="heading-sm">
-            {Number(priceEth) === 0 ? 'Free' : `${priceEth} ETH`}
-          </Text>
-        </Box>
-        <Box>
-          <Text variant="label-sm" color="text3" mb="x2">
-            Edition Size
-          </Text>
-          <Text variant="heading-sm">{formatSupply(drop.editionSize)}</Text>
-        </Box>
-      </Grid>
+      {/* Price */}
+      <Box mb="x3">
+        <Text variant="label-sm" color="text3" mb="x2">
+          Price
+        </Text>
+        <Text variant="heading-sm">
+          {Number(priceEth) === 0 ? 'Free' : `${priceEth} ETH`}
+        </Text>
+      </Box>
 
       {/* Funds Recipient */}
       <Box mb="x3">

@@ -62,4 +62,6 @@ export const SWR_KEYS = {
   CLANKER_TOKEN_PRICE: 'clanker-token-price',
   ZORA_COIN_PRICE: 'zora-coin-price',
   SWAP_OPTIONS: 'swap-options',
+  COIN_ADDRESSES: 'coin-addresses',
+  DROP_ADDRESSES: 'drop-addresses',
 } as const

@@ -4,6 +4,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Input, Stack, Text } from '@buildeross/zord'
 import { useState } from 'react'
 import type { Address } from 'viem'
+import { useAccount } from 'wagmi'
 
 import { ContractButton } from '../ContractButton'
 import {
@@ -47,29 +48,24 @@ export const DropMintWidget = ({
 }: DropMintWidgetProps) => {
   const [quantity, setQuantity] = useState(1)
   const [comment, setComment] = useState('')
+  const { address } = useAccount()
+  const isConnected = Boolean(address)
 
-  const {
-    mint,
-    isPending,
-    isReady,
-    isConnected,
-    mintStatus,
-    mintError,
-    transactionHash,
-  } = useZoraMint({
-    chainId,
-    dropAddress,
-    priceEth,
-    onSuccess: (txHash) => {
-      // Reset form after successful mint
-      setQuantity(1)
-      setComment('')
-      onMintSuccess?.(txHash)
-    },
-    onError: (error) => {
-      console.error('Mint failed:', error)
-    },
-  })
+  const { mint, isPending, isReady, mintStatus, mintError, transactionHash } =
+    useZoraMint({
+      chainId,
+      dropAddress,
+      priceEth,
+      onSuccess: (txHash) => {
+        // Reset form after successful mint
+        setQuantity(1)
+        setComment('')
+        onMintSuccess?.(txHash)
+      },
+      onError: (error) => {
+        console.error('Mint failed:', error)
+      },
+    })
 
   const handleMint = async () => {
     await mint(quantity, comment)
@@ -134,18 +130,6 @@ export const DropMintWidget = ({
           {Number(priceEth) === 0 ? 'Free' : `${priceEth} ETH`}
         </Text>
       </Box>
-
-      {/* Edition Size */}
-      {editionSize && (
-        <Box>
-          <Text variant="label-sm" color="text3">
-            Edition Size
-          </Text>
-          <Text variant="heading-sm" mt="x1">
-            {editionSize}
-          </Text>
-        </Box>
-      )}
 
       {/* Sale Status */}
       {saleNotStarted && saleStart && (

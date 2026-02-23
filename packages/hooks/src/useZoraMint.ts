@@ -60,7 +60,7 @@ export function useZoraMint({
 }: UseZoraMintArgs) {
   const [mintStatus, setMintStatus] = useState<MintStatus>('idle')
   const [mintError, setMintError] = useState<MintError | null>(null)
-  const { address, isConnected, chain } = useAccount()
+  const { address } = useAccount()
   const successHandledRef = useRef<string | null>(null)
 
   // Validate drop address
@@ -69,7 +69,7 @@ export function useZoraMint({
     dropAddress.length === 42 &&
     dropAddress !== '0x0000000000000000000000000000000000000000'
 
-  const isReady = isValidDropAddress && isConnected && Boolean(address)
+  const isReady = isValidDropAddress && Boolean(address)
 
   // Calculate total price including protocol reward
   const simulationPrice = parseEther(
@@ -119,7 +119,7 @@ export function useZoraMint({
       if (!isReady || !dropAddress || !address) {
         const error: MintError = {
           type: 'network-error',
-          message: isConnected
+          message: !!address
             ? 'Sale is not available.'
             : 'Please connect your wallet first.',
         }
@@ -206,11 +206,10 @@ export function useZoraMint({
       }
     },
     [
-      chain,
+      chainId,
       dropAddress,
       address,
       isReady,
-      isConnected,
       priceEth,
       mintReferral,
       onError,
@@ -222,8 +221,6 @@ export function useZoraMint({
     mintStatus === 'confirming-wallet' || mintStatus === 'pending-tx' || isConfirming
 
   return {
-    isConnected,
-    address,
     isReady,
     isPending,
     isSuccess: mintStatus === 'success',

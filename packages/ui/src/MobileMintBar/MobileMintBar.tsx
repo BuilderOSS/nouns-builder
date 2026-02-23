@@ -2,7 +2,7 @@ import { Button } from '@buildeross/zord'
 import React from 'react'
 
 import { ShareButton } from '../ShareButton'
-import { mintButton, mobileMintBar, priceDisplay } from './MobileMintBar.css'
+import { mintButton, mobileMintBar } from './MobileMintBar.css'
 
 export interface MobileMintBarProps {
   symbol: string
@@ -14,7 +14,6 @@ export interface MobileMintBarProps {
 
 export const MobileMintBar: React.FC<MobileMintBarProps> = ({
   symbol,
-  priceEth,
   shareUrl,
   saleActive,
   onMintClick,
@@ -22,11 +21,6 @@ export const MobileMintBar: React.FC<MobileMintBarProps> = ({
   return (
     <div className={mobileMintBar}>
       {shareUrl && <ShareButton url={shareUrl} variant="outline" />}
-      <div className={priceDisplay}>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text3)' }}>
-          {Number(priceEth) === 0 ? 'Free' : `${priceEth} ETH`}
-        </span>
-      </div>
       <Button
         onClick={onMintClick}
         variant="primary"

@@ -22,7 +22,7 @@ interface FeedItemActionsProps {
   onOpenMintModal: OnOpenMintModal
 }
 
-const ONE_MONTH = 30 * 24 * 60 * 60
+const TWO_MONTHS = 2 * 30 * 24 * 60 * 60
 
 export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
   item,
@@ -33,7 +33,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
   onOpenMintModal,
 }) => {
   // Only show actions for recent items (last 30 days)
-  const isRecent = item.timestamp > Date.now() / 1000 - ONE_MONTH
+  const isRecent = item.timestamp > Date.now() / 1000 - TWO_MONTHS
 
   if (!isRecent) {
     return null

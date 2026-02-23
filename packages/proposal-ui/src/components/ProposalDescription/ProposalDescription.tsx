@@ -1,3 +1,7 @@
+import {
+  CLANKER_FACTORY_ADDRESS,
+  PUBLIC_ZORA_NFT_CREATOR,
+} from '@buildeross/constants/addresses'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
@@ -14,11 +18,14 @@ import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
 import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
 import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
+import { coinFactoryAddress } from '@zoralabs/protocol-deployments'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
 import useSWR from 'swr'
 
 import { propPageWrapper } from '../styles.css'
+import { CoinDetails } from './CoinDetails'
+import { DropDetails } from './DropDetails'
 import { MilestoneDetails } from './MilestoneDetails'
 import { proposalDescription } from './ProposalDescription.css'
 import { Section } from './Section'
@@ -69,6 +76,35 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
     )
   }, [proposal.targets, chain.id])
 
+  // Check if proposal has coin creation transactions
+  const hasCoinCreation = useMemo(() => {
+    if (!proposal.targets) return false
+
+    const zoraCoinFactory =
+      coinFactoryAddress[chain.id as keyof typeof coinFactoryAddress]
+    const clankerFactory = CLANKER_FACTORY_ADDRESS
+
+    return proposal.targets.some((target) => {
+      const targetLower = toLower(target)
+      return (
+        (zoraCoinFactory && targetLower === toLower(zoraCoinFactory)) ||
+        (clankerFactory && targetLower === toLower(clankerFactory))
+      )
+    })
+  }, [proposal.targets, chain.id])
+
+  // Check if proposal has drop creation transactions
+  const hasDropCreation = useMemo(() => {
+    if (!proposal.targets) return false
+
+    const zoraCreatorAddress = PUBLIC_ZORA_NFT_CREATOR[chain.id]
+    if (!zoraCreatorAddress) return false
+
+    return proposal.targets.some(
+      (target) => toLower(target) === toLower(zoraCreatorAddress)
+    )
+  }, [proposal.targets, chain.id])
+
   const { data: tokenImage, error } = useSWR(
     !!collection && !!proposal.proposer
       ? ([SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposal.proposer] as const)
@@ -103,6 +139,14 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
             proposal={proposal}
             onOpenProposalReview={onOpenProposalReview}
           />
+        )}
+
+        {hasCoinCreation && (
+          <CoinDetails proposal={proposal} onOpenProposalReview={onOpenProposalReview} />
+        )}
+
+        {hasDropCreation && (
+          <DropDetails proposal={proposal} onOpenProposalReview={onOpenProposalReview} />
         )}
 
         <Section title="Description">
