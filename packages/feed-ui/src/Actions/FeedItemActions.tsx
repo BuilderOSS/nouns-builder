@@ -10,6 +10,7 @@ import type {
 import { AuctionActions } from './AuctionActions'
 import { CoinActions } from './CoinActions'
 import { ProposalActions } from './ProposalActions'
+import { ZoraDropActions } from './ZoraDropActions'
 
 interface FeedItemActionsProps {
   item: FeedItem
@@ -97,6 +98,9 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
           isClankerToken={false}
         />
       )
+
+    case 'ZORA_DROP_CREATED':
+      return <ZoraDropActions dropId={item.dropId} />
 
     default:
       return null

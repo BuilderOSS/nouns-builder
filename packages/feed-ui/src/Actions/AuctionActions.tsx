@@ -160,7 +160,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
           </ContractButton>
           <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
             <Button size="sm" px="x3" variant="secondary">
-              View Details
+              View Auction
             </Button>
           </LinkWrapper>
           <ShareButton url={shareUrl} size="sm" variant="secondary" />
@@ -182,7 +182,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
           </ContractButton>
           <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
             <Button size="sm" px="x3" variant="secondary">
-              View Details
+              View Auction
             </Button>
           </LinkWrapper>
           <ShareButton url={shareUrl} size="sm" variant="secondary" />
@@ -201,7 +201,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
           )}
           <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
             <Button size="sm" px="x3" variant="secondary">
-              View Details
+              View Auction
             </Button>
           </LinkWrapper>
           <ShareButton url={shareUrl} size="sm" variant="secondary" />
