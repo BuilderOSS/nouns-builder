@@ -8,6 +8,7 @@ export const Commands = {
   V4_SWAP: 0x10,
   WRAP_ETH: 0x0b,
   UNWRAP_WETH: 0x0c,
+  SWEEP: 0x04,
   // Add other commands as needed
 } as const
 
@@ -31,16 +32,17 @@ export const Actions = {
   UNWRAP: 0x16,
 } as const
 
-/**
- * OPEN_DELTA sentinel value
- * When used as amount in TAKE, it means "take the full open delta"
- * @see https://github.com/Uniswap/v4-periphery
- */
-export const OPEN_DELTA = 0n
+/// @notice used to signal that an action should use the input value of the open delta on the pool manager
+/// or of the balance that the contract holds
+export const OPEN_DELTA: bigint = 0n
 
-/**
- * Address constants
- */
+/// @notice used to signal that an action should use the contract's entire balance of a currency
+/// This value is equivalent to 1<<255, i.e. a singular 1 in the most significant bit.
+export const CONTRACT_BALANCE: bigint =
+  0x8000000000000000000000000000000000000000000000000000000000000000n
+
+/// @notice used to signal that the recipient of an action should be the address(this)
 export const ADDRESS_THIS: Address = '0x0000000000000000000000000000000000000002'
 
+/// @notice used to signal that the recipient of an action should be the msgSender
 export const MSG_SENDER: Address = '0x0000000000000000000000000000000000000001'
