@@ -24,19 +24,44 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
   height,
   aspectRatio,
 }) => {
-  const fetchableMediaURL = useMemo(
-    () => getFetchableUrls(mediaUrl)?.[0] || '',
-    [mediaUrl]
-  )
-  const fetchableCoverURL = useMemo(
-    () => getFetchableUrls(coverUrl)?.[0] || '',
-    [coverUrl]
-  )
+  // Get all fetchable URLs, using the original mediaUrl as primary and others as fallbacks
+  const { primaryUrl: primaryMediaUrl, fallbackUrls: fallbackMediaUrls } = useMemo(() => {
+    const fetchableUrls = getFetchableUrls(mediaUrl)
+    // If getFetchableUrls returns URLs, use them as fallbacks while keeping the original as primary
+    if (fetchableUrls && fetchableUrls.length > 0) {
+      return {
+        primaryUrl: mediaUrl,
+        fallbackUrls: fetchableUrls,
+      }
+    }
+    // Otherwise just use the mediaUrl
+    return {
+      primaryUrl: mediaUrl,
+      fallbackUrls: [],
+    }
+  }, [mediaUrl])
 
-  if (fetchableMediaURL && mediaType?.startsWith('image')) {
+  const { primaryUrl: primaryCoverUrl, fallbackUrls: fallbackCoverUrls } = useMemo(() => {
+    if (!coverUrl) return { primaryUrl: '', fallbackUrls: [] }
+
+    const fetchableUrls = getFetchableUrls(coverUrl)
+    if (fetchableUrls && fetchableUrls.length > 0) {
+      return {
+        primaryUrl: coverUrl,
+        fallbackUrls: fetchableUrls,
+      }
+    }
+    return {
+      primaryUrl: coverUrl,
+      fallbackUrls: [],
+    }
+  }, [coverUrl])
+
+  if (primaryMediaUrl && mediaType?.startsWith('image')) {
     return (
       <ImagePreview
-        src={fetchableMediaURL}
+        src={primaryMediaUrl}
+        fallbackSrcs={fallbackMediaUrls}
         alt="Preview"
         width={width}
         height={height}
@@ -45,10 +70,11 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
     )
   }
 
-  if (fetchableMediaURL && mediaType?.startsWith('video')) {
+  if (primaryMediaUrl && mediaType?.startsWith('video')) {
     return (
       <VideoPreview
-        src={fetchableMediaURL}
+        src={primaryMediaUrl}
+        fallbackSrcs={fallbackMediaUrls}
         width={width}
         height={height}
         aspectRatio={aspectRatio}
@@ -56,11 +82,13 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
     )
   }
 
-  if (fetchableMediaURL && mediaType?.startsWith('audio')) {
+  if (primaryMediaUrl && mediaType?.startsWith('audio')) {
     return (
       <AudioPreview
-        src={fetchableMediaURL}
-        cover={fetchableCoverURL}
+        src={primaryMediaUrl}
+        fallbackSrcs={fallbackMediaUrls}
+        cover={primaryCoverUrl}
+        coverFallbackSrcs={fallbackCoverUrls}
         width={width}
         height={height}
       />

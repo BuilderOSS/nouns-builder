@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react'
 
 export interface ImagePreviewProps {
   src: string
+  /** Additional fallback URLs to try if primary src fails */
+  fallbackSrcs?: string[]
   alt?: string
 
   /** When aspect-ratio mode is used, this becomes the wrapper width. */
@@ -35,6 +37,7 @@ const normalizeAspectRatio = (r: number | string) => {
 
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
   src,
+  fallbackSrcs = [],
   alt = 'Preview',
   width = '100%',
   height = 400,
@@ -44,6 +47,10 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   objectFit = 'cover',
 }) => {
   const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
+  const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
+
+  // Build array of all sources with primary src first
+  const allSrcs = useMemo(() => [src, ...fallbackSrcs], [src, fallbackSrcs])
 
   // Decide which ratio to use (explicit > measured > fallback)
   const ratioForBox = useMemo(() => {
@@ -53,12 +60,24 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
     return undefined
   }, [aspectRatio, measuredRatio, fallbackAspectRatio])
 
+  const handleError = () => {
+    // Try next source if available
+    if (currentSrcIndex < allSrcs.length - 1) {
+      console.warn(
+        `Image failed to load from ${allSrcs[currentSrcIndex]}, trying next source...`
+      )
+      setCurrentSrcIndex(currentSrcIndex + 1)
+    }
+  }
+
   const imgEl = (
     <img
-      src={src}
+      key={currentSrcIndex}
+      src={allSrcs[currentSrcIndex]}
       alt={alt}
       loading="lazy"
       decoding="async"
+      onError={handleError}
       onLoad={(e) => {
         const img = e.currentTarget
         if (img.naturalWidth && img.naturalHeight) {

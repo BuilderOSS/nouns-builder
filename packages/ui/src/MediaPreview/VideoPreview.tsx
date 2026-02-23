@@ -2,6 +2,8 @@ import React, { useMemo, useState } from 'react'
 
 export interface VideoPreviewProps {
   src: string
+  /** Additional fallback URLs to try if primary src fails */
+  fallbackSrcs?: string[]
   /** When aspect-ratio mode is used, this becomes the wrapper width. */
   width?: string | number
   /** Used only when aspectRatio is NOT provided and ratio mode is off. */
@@ -33,6 +35,7 @@ const normalizeAspectRatio = (r: number | string) => {
 
 export const VideoPreview: React.FC<VideoPreviewProps> = ({
   src,
+  fallbackSrcs = [],
   width = '100%',
   height = 400,
   aspectRatio,
@@ -41,6 +44,10 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
   objectFit = 'cover',
 }) => {
   const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
+  const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
+
+  // Build array of all sources with primary src first
+  const allSrcs = useMemo(() => [src, ...fallbackSrcs], [src, fallbackSrcs])
 
   // Decide which ratio to use (explicit > measured > fallback)
   const ratioForBox = useMemo(() => {
@@ -50,14 +57,26 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     return undefined
   }, [aspectRatio, measuredRatio, fallbackAspectRatio])
 
+  const handleError = () => {
+    // Try next source if available
+    if (currentSrcIndex < allSrcs.length - 1) {
+      console.warn(
+        `Video failed to load from ${allSrcs[currentSrcIndex]}, trying next source...`
+      )
+      setCurrentSrcIndex(currentSrcIndex + 1)
+    }
+  }
+
   const videoEl = (
     <video
-      src={src}
+      key={currentSrcIndex}
+      src={allSrcs[currentSrcIndex]}
       autoPlay
       loop
       muted
       playsInline
       preload="metadata"
+      onError={handleError}
       onLoadedMetadata={(e) => {
         const v = e.currentTarget
         if (v.videoWidth && v.videoHeight) {
