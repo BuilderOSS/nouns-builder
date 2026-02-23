@@ -10,11 +10,13 @@ import { FeedItem } from './FeedItem'
 import { FeedSkeleton, FeedSkeletonItem } from './FeedSkeleton'
 import { LoadMoreButton } from './LoadMoreButton'
 import { BidModal } from './Modals/BidModal'
+import { MintModal } from './Modals/MintModal'
 import { PropdateModalWrapper } from './Modals/PropdateModalWrapper'
 import { TradeModal } from './Modals/TradeModal'
 import { VoteModalWrapper } from './Modals/VoteModalWrapper'
 import type {
   BidModalState,
+  MintModalState,
   PropdateModalState,
   TradeModalState,
   VoteModalState,
@@ -75,6 +77,10 @@ type ModalState =
   | {
       type: 'trade'
       state: TradeModalState
+    }
+  | {
+      type: 'mint'
+      state: MintModalState
     }
 
 export const Feed: React.FC<FeedProps> = (props) => {
@@ -138,6 +144,10 @@ export const Feed: React.FC<FeedProps> = (props) => {
 
   const handleOpenTradeModal = useCallback((state: TradeModalState) => {
     setModalState({ type: 'trade', state: state })
+  }, [])
+
+  const handleOpenMintModal = useCallback((state: MintModalState) => {
+    setModalState({ type: 'mint', state: state })
   }, [])
 
   // Filter modal handlers (only used in internal mode)
@@ -252,6 +262,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
                 onOpenVoteModal={handleOpenVoteModal}
                 onOpenPropdateModal={handleOpenPropdateModal}
                 onOpenTradeModal={handleOpenTradeModal}
+                onOpenMintModal={handleOpenMintModal}
               />
             ))}
 
@@ -352,6 +363,26 @@ export const Feed: React.FC<FeedProps> = (props) => {
           chainId={modalState.state.chainId}
           daoName={modalState.state.daoName}
           daoImage={modalState.state.daoImage}
+        />
+      )}
+
+      {modalState?.type === 'mint' && (
+        <MintModal
+          isOpen
+          onClose={() => setModalState(null)}
+          dropAddress={modalState.state.dropAddress}
+          symbol={modalState.state.symbol}
+          chainId={modalState.state.chainId}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+          priceEth={modalState.state.priceEth}
+          saleActive={modalState.state.saleActive}
+          saleNotStarted={modalState.state.saleNotStarted}
+          saleEnded={modalState.state.saleEnded}
+          saleStart={modalState.state.saleStart}
+          saleEnd={modalState.state.saleEnd}
+          editionSize={modalState.state.editionSize}
+          maxPerAddress={modalState.state.maxPerAddress}
         />
       )}
     </Flex>

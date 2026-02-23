@@ -19,6 +19,7 @@ import { ProposalUpdatedItem } from './ProposalUpdatedItem'
 import { ProposalVotedItem } from './ProposalVotedItem'
 import type {
   OnOpenBidModal,
+  OnOpenMintModal,
   OnOpenPropdateModal,
   OnOpenTradeModal,
   OnOpenVoteModal,
@@ -34,6 +35,7 @@ export interface FeedItemProps {
   onOpenVoteModal: OnOpenVoteModal
   onOpenPropdateModal: OnOpenPropdateModal
   onOpenTradeModal: OnOpenTradeModal
+  onOpenMintModal: OnOpenMintModal
 }
 
 const Separator = () => (
@@ -58,6 +60,7 @@ export const FeedItem: React.FC<FeedItemProps> = ({
   onOpenVoteModal,
   onOpenPropdateModal,
   onOpenTradeModal,
+  onOpenMintModal,
 }) => {
   const renderContent = () => {
     switch (item.type) {
@@ -125,6 +128,7 @@ export const FeedItem: React.FC<FeedItemProps> = ({
             onOpenVoteModal={onOpenVoteModal}
             onOpenPropdateModal={onOpenPropdateModal}
             onOpenTradeModal={onOpenTradeModal}
+            onOpenMintModal={onOpenMintModal}
           />
 
           {/* Chain and timestamp */}

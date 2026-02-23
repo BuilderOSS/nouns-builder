@@ -52,8 +52,25 @@ export type TradeModalState = {
   daoImage: string
 }
 
+export type MintModalState = {
+  dropAddress: Address
+  symbol: string
+  chainId: CHAIN_ID
+  daoName: string
+  daoImage: string
+  priceEth: string
+  saleActive: boolean
+  saleNotStarted: boolean
+  saleEnded: boolean
+  saleStart?: number
+  saleEnd?: number
+  editionSize?: string
+  maxPerAddress?: number
+}
+
 // Callback types
 export type OnOpenBidModal = (state: BidModalState) => void
 export type OnOpenVoteModal = (state: VoteModalState) => void
 export type OnOpenPropdateModal = (state: PropdateModalState) => void
 export type OnOpenTradeModal = (state: TradeModalState) => void
+export type OnOpenMintModal = (state: MintModalState) => void

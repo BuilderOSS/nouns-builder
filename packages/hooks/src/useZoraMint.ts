@@ -1,3 +1,4 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Address } from 'viem'
 import { parseEther } from 'viem'
@@ -7,7 +8,6 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from 'wagmi'
-import { CHAIN_ID } from '@buildeross/types'
 
 // Zora protocol reward fee per token (0.000777 ETH)
 export const ZORA_PROTOCOL_REWARD = 0.000777
@@ -41,12 +41,12 @@ export type MintStatus = 'idle' | 'confirming-wallet' | 'pending-tx' | 'success'
 
 export interface MintError {
   type:
-  | 'rejected'
-  | 'insufficient-funds'
-  | 'sale-inactive'
-  | 'invalid-config'
-  | 'network-error'
-  | 'unknown'
+    | 'rejected'
+    | 'insufficient-funds'
+    | 'sale-inactive'
+    | 'invalid-config'
+    | 'network-error'
+    | 'unknown'
   message: string
 }
 

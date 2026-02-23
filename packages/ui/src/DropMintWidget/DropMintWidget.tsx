@@ -57,6 +57,7 @@ export const DropMintWidget = ({
     mintError,
     transactionHash,
   } = useZoraMint({
+    chainId,
     dropAddress,
     priceEth,
     onSuccess: (txHash) => {
