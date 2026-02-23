@@ -25,16 +25,16 @@ interface DropDetailProps {
   drop: ZoraDropFragment
   daoAddress: Address | null
   daoName: string | null
-  chainSlug: string
   chainId: number
+  transactionHash: string | null
 }
 
 export const DropDetail = ({
   drop,
   daoAddress,
   daoName,
-  chainSlug,
   chainId,
+  transactionHash,
 }: DropDetailProps) => {
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false)
   const router = useRouter()
@@ -88,7 +88,7 @@ export const DropDetail = ({
               daoAddress={daoAddress}
               daoName={daoName}
               chainId={chainId}
-              chainSlug={chainSlug}
+              transactionHash={transactionHash}
             />
           </Box>
 

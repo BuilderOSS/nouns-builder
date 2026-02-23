@@ -35,7 +35,6 @@ interface CoinDetailProps {
   symbol: string
   image: string | null
   coinAddress: Address
-  chainSlug: string
   chainId: number
   // DAO info
   daoAddress: Address | null
@@ -50,6 +49,7 @@ interface CoinDetailProps {
   metadata: IpfsMetadata | null
   createdAt: string | null
   creatorAddress: Address | null
+  transactionHash: string | null
   // Coin type
   isClankerToken?: boolean
   // Optional: full coin/token data
@@ -62,7 +62,6 @@ export const CoinDetail = ({
   symbol,
   image,
   coinAddress,
-  chainSlug,
   chainId,
   daoAddress,
   daoName,
@@ -74,6 +73,7 @@ export const CoinDetail = ({
   metadata,
   createdAt,
   creatorAddress,
+  transactionHash,
   isClankerToken,
   clankerToken,
   zoraCoin,
@@ -141,7 +141,6 @@ export const CoinDetail = ({
               daoAddress={daoAddress}
               daoName={daoName}
               chainId={chainId}
-              chainSlug={chainSlug}
               pairedToken={pairedToken}
               pairedTokenSymbol={pairedTokenSymbol}
               poolFee={poolFee}
@@ -150,6 +149,7 @@ export const CoinDetail = ({
               metadata={metadata}
               createdAt={createdAt}
               creatorAddress={creatorAddress}
+              transactionHash={transactionHash}
               isClankerToken={isClankerToken}
               clankerToken={clankerToken}
               zoraCoin={zoraCoin}

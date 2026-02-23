@@ -19,6 +19,7 @@ interface DropPageProps {
   daoAddress: AddressType
   daoName: string
   addresses: DaoContractAddresses | null
+  transactionHash: string | null
 }
 
 const DropPage: NextPageWithLayout<DropPageProps> = ({
@@ -27,6 +28,7 @@ const DropPage: NextPageWithLayout<DropPageProps> = ({
   chainId,
   daoAddress,
   daoName,
+  transactionHash,
 }) => {
   const path = `/drop/${chainSlug}/${drop.id}`
 
@@ -39,10 +41,10 @@ const DropPage: NextPageWithLayout<DropPageProps> = ({
       />
       <DropDetail
         drop={drop}
-        chainSlug={chainSlug}
         chainId={chainId}
         daoAddress={daoAddress}
         daoName={daoName}
+        transactionHash={transactionHash}
       />
     </>
   )
@@ -116,6 +118,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
         daoAddress,
         daoName,
         addresses,
+        transactionHash: drop.transactionHash ?? null,
       },
     }
   } catch (error) {

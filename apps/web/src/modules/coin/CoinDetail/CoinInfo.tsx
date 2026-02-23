@@ -3,6 +3,7 @@ import {
   useClankerTokenWithPrice,
   useEnsData,
   useMediaType,
+  useProposalByExecutionTx,
   useZoraCoinWithPrice,
 } from '@buildeross/hooks'
 import { type IpfsMetadata } from '@buildeross/ipfs-service'
@@ -37,7 +38,6 @@ interface CoinInfoProps {
   daoAddress: Address | null
   daoName: string | null
   chainId: number
-  chainSlug: string
   // Pool info
   pairedToken: Address | null
   pairedTokenSymbol: string | null
@@ -48,6 +48,7 @@ interface CoinInfoProps {
   metadata: IpfsMetadata | null
   createdAt: string | null
   creatorAddress: Address | null
+  transactionHash: string | null
   // Coin type
   isClankerToken?: boolean
   // Optional: pass the full coin/token data for price fetching
@@ -63,7 +64,6 @@ export const CoinInfo = ({
   daoAddress,
   daoName,
   chainId,
-  chainSlug,
   pairedToken,
   // pairedTokenSymbol,
   // poolFee,
@@ -72,11 +72,19 @@ export const CoinInfo = ({
   metadata,
   createdAt,
   creatorAddress,
+  transactionHash,
   isClankerToken,
   clankerToken,
   zoraCoin,
 }: CoinInfoProps) => {
-  const { getCoinLink } = useLinks()
+  const { getCoinLink, getProposalLink, getDaoLink } = useLinks()
+
+  // Fetch proposal by execution transaction hash
+  const { data: proposal } = useProposalByExecutionTx({
+    chainId: chainId as CHAIN_ID,
+    executionTransactionHash: transactionHash || undefined,
+    enabled: !!transactionHash,
+  })
 
   // Fetch price data
   const clankerWithPrice = useClankerTokenWithPrice({
@@ -233,9 +241,31 @@ export const CoinInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               DAO
             </Text>
-            <Link link={`/dao/${chainSlug}/${daoAddress}`}>
+            <Link link={getDaoLink(chainId, daoAddress)}>
               <Text variant="paragraph-md" color="accent">
                 {daoName}
+              </Text>
+            </Link>
+          </Box>
+        </>
+      )}
+
+      {/* Proposal */}
+      {proposal && (
+        <>
+          <Box mb="x3">
+            <Text variant="label-sm" color="text3" mb="x2">
+              Proposal
+            </Text>
+            <Link
+              link={getProposalLink(
+                chainId,
+                proposal.dao.id as `0x${string}`,
+                proposal.proposalId
+              )}
+            >
+              <Text variant="paragraph-md" color="accent">
+                Proposal {proposal.proposalNumber}: {proposal.title}
               </Text>
             </Link>
           </Box>

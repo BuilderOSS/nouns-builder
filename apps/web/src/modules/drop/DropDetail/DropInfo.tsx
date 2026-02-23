@@ -1,5 +1,5 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { useEnsData, useMediaType } from '@buildeross/hooks'
+import { useEnsData, useMediaType, useProposalByExecutionTx } from '@buildeross/hooks'
 import { type ZoraDropFragment } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
@@ -21,7 +21,7 @@ interface DropInfoProps {
   daoAddress: Address | null
   daoName: string | null
   chainId: number
-  chainSlug: string
+  transactionHash: string | null
 }
 
 export const DropInfo = ({
@@ -29,9 +29,16 @@ export const DropInfo = ({
   daoAddress,
   daoName,
   chainId,
-  chainSlug,
+  transactionHash,
 }: DropInfoProps) => {
-  const { getDropLink } = useLinks()
+  const { getDropLink, getProposalLink, getDaoLink } = useLinks()
+
+  // Fetch proposal by execution transaction hash
+  const { data: proposal } = useProposalByExecutionTx({
+    chainId: chainId as CHAIN_ID,
+    executionTransactionHash: transactionHash || undefined,
+    enabled: !!transactionHash,
+  })
 
   // Fetch creator ENS data
   const { displayName: creatorDisplayName, ensAvatar: creatorAvatar } = useEnsData(
@@ -170,9 +177,31 @@ export const DropInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               DAO
             </Text>
-            <Link link={`/dao/${chainSlug}/${daoAddress}`}>
+            <Link link={getDaoLink(chainId, daoAddress)}>
               <Text variant="paragraph-md" color="accent">
                 {daoName}
+              </Text>
+            </Link>
+          </Box>
+        </>
+      )}
+
+      {/* Proposal */}
+      {proposal && (
+        <>
+          <Box mb="x3">
+            <Text variant="label-sm" color="text3" mb="x2">
+              Proposal
+            </Text>
+            <Link
+              link={getProposalLink(
+                chainId,
+                proposal.dao.id as `0x${string}`,
+                proposal.proposalId
+              )}
+            >
+              <Text variant="paragraph-md" color="accent">
+                Proposal {proposal.proposalNumber}: {proposal.title}
               </Text>
             </Link>
           </Box>

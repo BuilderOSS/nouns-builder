@@ -40,6 +40,7 @@ interface CoinPageProps {
   metadata: IpfsMetadata | null
   createdAt: string | null
   creatorAddress: AddressType | null
+  transactionHash: string | null
   // Type
   isClankerToken: boolean
   // Full coin/token data for price fetching
@@ -64,6 +65,7 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
   metadata,
   createdAt,
   creatorAddress,
+  transactionHash,
   isClankerToken,
   clankerToken,
   zoraCoin,
@@ -82,7 +84,6 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
         symbol={symbol}
         image={image}
         coinAddress={coinAddress}
-        chainSlug={chainSlug}
         chainId={chainId}
         daoAddress={daoAddress}
         daoName={daoName}
@@ -94,6 +95,7 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
         metadata={metadata}
         createdAt={createdAt}
         creatorAddress={creatorAddress}
+        transactionHash={transactionHash}
         isClankerToken={isClankerToken}
         clankerToken={clankerToken}
         zoraCoin={zoraCoin}
@@ -199,6 +201,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           metadata: metadata ?? null,
           createdAt: coin.createdAt ?? null,
           creatorAddress: coin.caller ? (coin.caller as AddressType) : null,
+          transactionHash: coin.transactionHash ?? null,
           isClankerToken: false,
           zoraCoin: coin,
           clankerToken: null,
@@ -259,6 +262,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           metadata: null, // ClankerToken doesn't have IPFS metadata
           createdAt: token.createdAt ?? null,
           creatorAddress: token.msgSender ? (token.msgSender as AddressType) : null,
+          transactionHash: token.transactionHash ?? null,
           isClankerToken: true,
           clankerToken: token,
           zoraCoin: null,

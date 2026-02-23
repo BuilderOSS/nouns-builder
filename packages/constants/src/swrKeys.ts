@@ -11,6 +11,7 @@ export const SWR_KEYS = {
   PROFILE_DAOS: 'profile-daos',
   PROFILE_TOKENS: 'profile-tokens',
   PROPOSAL: 'proposal',
+  PROPOSAL_BY_EXECUTION_TX: 'proposal-by-execution-tx',
   PROPDATES: 'propdates',
   PROPDATE_MESSAGE: 'propdate-message',
   PROPOSALS: 'proposals',

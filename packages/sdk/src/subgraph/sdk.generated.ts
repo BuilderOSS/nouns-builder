@@ -7319,6 +7319,21 @@ export type ProposalQuery = {
   } | null
 }
 
+export type ProposalByExecutionTxHashQueryVariables = Exact<{
+  executionTransactionHash: Scalars['Bytes']['input']
+}>
+
+export type ProposalByExecutionTxHashQuery = {
+  __typename?: 'Query'
+  proposals: Array<{
+    __typename?: 'Proposal'
+    proposalId: any
+    proposalNumber: number
+    title?: string | null
+    dao: { __typename?: 'DAO'; id: string; name: string; contractImage: string }
+  }>
+}
+
 export type ProposalOgMetadataQueryVariables = Exact<{
   where: Proposal_Filter
   first: Scalars['Int']['input']
@@ -8447,6 +8462,20 @@ export const ProposalDocument = gql`
   ${ProposalFragmentDoc}
   ${ProposalVoteFragmentDoc}
 `
+export const ProposalByExecutionTxHashDocument = gql`
+  query proposalByExecutionTxHash($executionTransactionHash: Bytes!) {
+    proposals(where: { executionTransactionHash: $executionTransactionHash }, first: 1) {
+      proposalId
+      proposalNumber
+      title
+      dao {
+        id
+        name
+        contractImage
+      }
+    }
+  }
+`
 export const ProposalOgMetadataDocument = gql`
   query proposalOGMetadata($where: Proposal_filter!, $first: Int!) {
     proposals(where: $where, first: $first) {
@@ -9092,6 +9121,24 @@ export function getSdk(
             signal,
           }),
         'proposal',
+        'query',
+        variables
+      )
+    },
+    proposalByExecutionTxHash(
+      variables: ProposalByExecutionTxHashQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProposalByExecutionTxHashQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProposalByExecutionTxHashQuery>({
+            document: ProposalByExecutionTxHashDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'proposalByExecutionTxHash',
         'query',
         variables
       )
