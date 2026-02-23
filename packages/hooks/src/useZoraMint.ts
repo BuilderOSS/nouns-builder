@@ -1,7 +1,7 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Address } from 'viem'
-import { parseEther } from 'viem'
+import { isAddress, isAddressEqual, parseEther, zeroAddress } from 'viem'
 import {
   useAccount,
   useSimulateContract,
@@ -45,6 +45,7 @@ export interface MintError {
     | 'insufficient-funds'
     | 'sale-inactive'
     | 'invalid-config'
+    | 'wallet-not-connected'
     | 'network-error'
     | 'unknown'
   message: string
@@ -62,19 +63,27 @@ export function useZoraMint({
   const [mintError, setMintError] = useState<MintError | null>(null)
   const { address } = useAccount()
   const successHandledRef = useRef<string | null>(null)
+  const mintResetTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Validate drop address
   const isValidDropAddress =
     dropAddress &&
-    dropAddress.length === 42 &&
-    dropAddress !== '0x0000000000000000000000000000000000000000'
+    isAddress(dropAddress, { strict: false }) &&
+    !isAddressEqual(dropAddress, zeroAddress)
 
   const isReady = isValidDropAddress && Boolean(address)
 
   // Calculate total price including protocol reward
-  const simulationPrice = parseEther(
-    (parseFloat(priceEth) + ZORA_PROTOCOL_REWARD).toFixed(18)
-  )
+  const protocolRewardWei = parseEther(String(ZORA_PROTOCOL_REWARD))
+  const parsedPriceWei = (() => {
+    try {
+      return parseEther(priceEth)
+    } catch {
+      return null
+    }
+  })()
+  const simulationPrice =
+    parsedPriceWei !== null ? parsedPriceWei + protocolRewardWei : protocolRewardWei
 
   // Simulate the mintWithRewards transaction
   const { isError: simulateError } = useSimulateContract({
@@ -84,7 +93,8 @@ export function useZoraMint({
     args: [address!, 1n, '', (mintReferral || address!) as Address],
     value: simulationPrice,
     query: {
-      enabled: isReady && mintStatus === 'idle' && Boolean(address),
+      enabled:
+        isReady && mintStatus === 'idle' && Boolean(address) && parsedPriceWei !== null,
     },
     chainId: chainId,
   })
@@ -98,6 +108,16 @@ export function useZoraMint({
     },
   })
 
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (mintResetTimerRef.current) {
+        clearTimeout(mintResetTimerRef.current)
+        mintResetTimerRef.current = null
+      }
+    }
+  }, [])
+
   // Handle successful transaction
   useEffect(() => {
     if (isSuccess && pendingHash && successHandledRef.current !== pendingHash) {
@@ -107,21 +127,39 @@ export function useZoraMint({
       onSuccess?.(pendingHash)
 
       // Reset to idle after a delay
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setMintStatus('idle')
         resetWrite()
       }, 3000)
+
+      return () => {
+        clearTimeout(timer)
+      }
     }
+    return () => {}
   }, [isSuccess, pendingHash, onSuccess, resetWrite])
 
   const mint = useCallback(
     async (quantity: number = 1, comment?: string): Promise<`0x${string}` | null> => {
-      if (!isReady || !dropAddress || !address) {
+      if (mintResetTimerRef.current) {
+        clearTimeout(mintResetTimerRef.current)
+        mintResetTimerRef.current = null
+      }
+      // Check wallet connection first
+      if (!address) {
         const error: MintError = {
-          type: 'network-error',
-          message: !!address
-            ? 'Sale is not available.'
-            : 'Please connect your wallet first.',
+          type: 'wallet-not-connected',
+          message: 'Please connect your wallet first.',
+        }
+        setMintError(error)
+        return null
+      }
+
+      // Check drop configuration
+      if (!dropAddress || !isReady) {
+        const error: MintError = {
+          type: 'invalid-config',
+          message: 'Drop configuration is invalid or sale is not available.',
         }
         setMintError(error)
         return null
@@ -134,9 +172,10 @@ export function useZoraMint({
         setMintStatus('confirming-wallet')
 
         // Calculate total price with protocol reward
-        const salePrice = parseFloat(priceEth) * quantity
-        const protocolReward = ZORA_PROTOCOL_REWARD * quantity
-        const totalPrice = parseEther((salePrice + protocolReward).toFixed(18))
+        const salePriceWei = parseEther(priceEth) * BigInt(quantity)
+        const protocolRewardWei =
+          parseEther(String(ZORA_PROTOCOL_REWARD)) * BigInt(quantity)
+        const totalPriceWei = salePriceWei + protocolRewardWei
 
         // Use mintWithRewards
         const txHash = await writeContractAsync({
@@ -149,7 +188,7 @@ export function useZoraMint({
             comment?.trim() || '', // comment
             (mintReferral || address) as Address, // mintReferral
           ],
-          value: totalPrice,
+          value: totalPriceWei,
           chainId: chainId,
         })
 
@@ -197,9 +236,15 @@ export function useZoraMint({
         setMintError(mintError)
         onError?.(error)
 
+        // Clear any existing timer before setting a new one
+        if (mintResetTimerRef.current) {
+          clearTimeout(mintResetTimerRef.current)
+        }
+
         // Reset to idle after error
-        setTimeout(() => {
+        mintResetTimerRef.current = setTimeout(() => {
           setMintStatus('idle')
+          mintResetTimerRef.current = null
         }, 100)
 
         return null

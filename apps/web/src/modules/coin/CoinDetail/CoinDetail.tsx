@@ -39,6 +39,7 @@ interface CoinDetailProps {
   // DAO info
   daoAddress: Address | null
   daoName: string | null
+  daoImage: string | null
   // Pool info
   pairedToken: Address | null
   pairedTokenSymbol: string | null
@@ -65,6 +66,7 @@ export const CoinDetail = ({
   chainId,
   daoAddress,
   daoName,
+  daoImage,
   pairedToken,
   pairedTokenSymbol,
   poolFee,
@@ -140,6 +142,7 @@ export const CoinDetail = ({
               coinAddress={coinAddress}
               daoAddress={daoAddress}
               daoName={daoName}
+              daoImage={daoImage}
               chainId={chainId}
               pairedToken={pairedToken}
               pairedTokenSymbol={pairedTokenSymbol}

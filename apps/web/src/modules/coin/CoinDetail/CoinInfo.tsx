@@ -23,10 +23,11 @@ import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/coining/clankerC
 import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/coining/zoraContent'
 import { formatMarketCap, formatSupply } from '@buildeross/utils/formatMarketCap'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Flex, Grid, Spinner, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Grid, Icon, Spinner, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address } from 'viem'
 
+import { ProposalLink } from '../../../components/ProposalLink'
 import { CoinComments } from './CoinComments'
 import { coinHeader, coinImageContainer, onlyDesktop, statsGrid } from './CoinDetail.css'
 
@@ -37,6 +38,7 @@ interface CoinInfoProps {
   coinAddress: Address
   daoAddress: Address | null
   daoName: string | null
+  daoImage: string | null
   chainId: number
   // Pool info
   pairedToken: Address | null
@@ -63,6 +65,7 @@ export const CoinInfo = ({
   coinAddress,
   daoAddress,
   daoName,
+  daoImage,
   chainId,
   pairedToken,
   // pairedTokenSymbol,
@@ -77,7 +80,7 @@ export const CoinInfo = ({
   clankerToken,
   zoraCoin,
 }: CoinInfoProps) => {
-  const { getCoinLink, getProposalLink, getDaoLink } = useLinks()
+  const { getCoinLink, getDaoLink } = useLinks()
 
   // Fetch proposal by execution transaction hash
   const { data: proposal } = useProposalByExecutionTx({
@@ -242,35 +245,28 @@ export const CoinInfo = ({
               DAO
             </Text>
             <Link link={getDaoLink(chainId, daoAddress)}>
-              <Text variant="paragraph-md" color="accent">
+              <Button variant="secondary" size="sm">
+                {daoImage && (
+                  <Box flexShrink={0}>
+                    <FallbackImage
+                      src={daoImage}
+                      style={{ borderRadius: '100%', objectFit: 'contain' }}
+                      alt={daoName}
+                      height={32}
+                      width={32}
+                    />
+                  </Box>
+                )}
                 {daoName}
-              </Text>
+                <Icon id="arrowTopRight" />
+              </Button>
             </Link>
           </Box>
         </>
       )}
 
       {/* Proposal */}
-      {proposal && (
-        <>
-          <Box mb="x3">
-            <Text variant="label-sm" color="text3" mb="x2">
-              Proposal
-            </Text>
-            <Link
-              link={getProposalLink(
-                chainId,
-                proposal.dao.id as `0x${string}`,
-                proposal.proposalId
-              )}
-            >
-              <Text variant="paragraph-md" color="accent">
-                Proposal {proposal.proposalNumber}: {proposal.title}
-              </Text>
-            </Link>
-          </Box>
-        </>
-      )}
+      {proposal && <ProposalLink proposal={proposal} chainId={chainId} />}
 
       {/* Description */}
       {description && (

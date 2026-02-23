@@ -184,7 +184,7 @@ export const useDropData = (chainId: CHAIN_ID, proposal: Proposal): DropDataResu
   }, [dropsStaticData, dropAddresses])
 
   return {
-    isCreateTx: dropTransactionIndices.length > 0,
+    isCreateTx: drops.length > 0,
     drops,
     isLoading: isLoading && !dropAddresses && !!proposal.executionTransactionHash,
   }

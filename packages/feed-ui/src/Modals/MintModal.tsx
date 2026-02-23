@@ -23,6 +23,7 @@ export interface MintModalProps {
   saleEnd?: number
   editionSize?: string
   maxPerAddress?: number
+  onMintSuccess?: (txHash: string) => void
 }
 
 export const MintModal: React.FC<MintModalProps> = ({
@@ -41,9 +42,18 @@ export const MintModal: React.FC<MintModalProps> = ({
   saleEnd,
   editionSize,
   maxPerAddress,
+  onMintSuccess,
 }) => {
+  const onSuccessMint = React.useCallback(
+    (txHash: string) => {
+      onMintSuccess?.(txHash)
+      onClose()
+    },
+    [onClose, onMintSuccess]
+  )
+
   return (
-    <AnimatedModal key="feed-mint-modal" open={isOpen} close={onClose} size="medium">
+    <AnimatedModal open={isOpen} close={onClose} size="medium">
       <Stack w="100%">
         <ModalHeader
           daoName={daoName}
@@ -63,9 +73,7 @@ export const MintModal: React.FC<MintModalProps> = ({
           saleEnd={saleEnd}
           editionSize={editionSize}
           maxPerAddress={maxPerAddress}
-          onMintSuccess={() => {
-            // Could show success toast here
-          }}
+          onMintSuccess={onSuccessMint}
         />
       </Stack>
     </AnimatedModal>

@@ -30,7 +30,7 @@ export const PropdateModalWrapper: React.FC<PropdateModalWrapperProps> = ({
   daoImage,
 }) => {
   return (
-    <AnimatedModal key="feed-propdate-modal" open={isOpen} close={onClose} size="medium">
+    <AnimatedModal open={isOpen} close={onClose} size="medium">
       <Box w="100%">
         <ModalHeader
           daoName={daoName}

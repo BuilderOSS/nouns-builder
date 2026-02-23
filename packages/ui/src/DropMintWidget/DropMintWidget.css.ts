@@ -24,9 +24,6 @@ export const mintInput = style({
   backgroundColor: 'transparent',
   textAlign: 'center',
   width: '80px',
-  ':focus': {
-    outline: 'none',
-  },
 })
 
 export const mintButton = style({

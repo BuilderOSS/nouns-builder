@@ -1,5 +1,5 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { useScrollDirection } from '@buildeross/hooks'
+import { useNowSeconds, useScrollDirection } from '@buildeross/hooks'
 import { ProposalNavigation } from '@buildeross/proposal-ui'
 import { type ZoraDropFragment } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
@@ -25,6 +25,7 @@ interface DropDetailProps {
   drop: ZoraDropFragment
   daoAddress: Address | null
   daoName: string | null
+  daoImage: string | null
   chainId: number
   transactionHash: string | null
 }
@@ -33,6 +34,7 @@ export const DropDetail = ({
   drop,
   daoAddress,
   daoName,
+  daoImage,
   chainId,
   transactionHash,
 }: DropDetailProps) => {
@@ -46,14 +48,15 @@ export const DropDetail = ({
   const sidebarTopOffset = scrollDirection === 'down' ? 24 : 104 // 24px + 80px header
 
   // Calculate sale timing
-  const now = Date.now() / 1000
-  const saleStart = parseInt(drop.publicSaleStart)
-  const saleEnd = parseInt(drop.publicSaleEnd)
+  const now = useNowSeconds(true)
+
+  const saleStart = parseInt(drop.publicSaleStart) || 0
+  const saleEnd = parseInt(drop.publicSaleEnd) || 0
   const saleNotStarted = saleStart > 0 && now < saleStart
   const saleEnded = saleEnd > 0 && now > saleEnd
   const saleActive = !saleNotStarted && !saleEnded
 
-  const priceEth = formatEther(BigInt(drop.publicSalePrice))
+  const priceEth = formatEther(BigInt(drop.publicSalePrice || '0'))
 
   const handleBackClick = () => {
     if (daoAddress) {
@@ -87,6 +90,7 @@ export const DropDetail = ({
               drop={drop}
               daoAddress={daoAddress}
               daoName={daoName}
+              daoImage={daoImage}
               chainId={chainId}
               transactionHash={transactionHash}
             />

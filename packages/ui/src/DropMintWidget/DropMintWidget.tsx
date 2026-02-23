@@ -3,10 +3,11 @@ import { useZoraMint, ZORA_PROTOCOL_REWARD } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Input, Stack, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import type { Address } from 'viem'
+import { type Address, formatEther, parseEther } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { ContractButton } from '../ContractButton'
+import { Countdown } from '../Countdown'
 import {
   errorMessage,
   mintButton,
@@ -42,7 +43,7 @@ export const DropMintWidget = ({
   saleEnded,
   saleStart,
   saleEnd,
-  editionSize,
+  // editionSize,
   maxPerAddress,
   onMintSuccess,
 }: DropMintWidgetProps) => {
@@ -87,21 +88,10 @@ export const DropMintWidget = ({
   }
 
   // Calculate total price including protocol reward fee
-  const salePrice = parseFloat(priceEth) * quantity
-  const protocolFee = ZORA_PROTOCOL_REWARD * quantity
-  const totalPrice = (salePrice + protocolFee).toFixed(4)
-
-  // Format countdown
-  const formatCountdown = (target: number) => {
-    const now = Date.now()
-    const diff = Math.max(0, target - now)
-    const d = Math.floor(diff / (1000 * 60 * 60 * 24))
-    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-    if (d > 0) return `${d}d ${h}h ${m}m`
-    if (h > 0) return `${h}h ${m}m`
-    return `${m}m`
-  }
+  const salePriceWei = parseEther(priceEth) * BigInt(quantity)
+  const protocolRewardWei = parseEther(String(ZORA_PROTOCOL_REWARD)) * BigInt(quantity)
+  const totalPriceWei = salePriceWei + protocolRewardWei
+  const totalPrice = formatEther(totalPriceWei)
 
   // Determine button text based on state
   const getButtonText = () => {
@@ -138,7 +128,7 @@ export const DropMintWidget = ({
             Sale starts in
           </Text>
           <Text variant="paragraph-sm" mt="x1">
-            {formatCountdown(saleStart * 1000)}
+            <Countdown end={saleStart} />
           </Text>
         </Box>
       )}
@@ -222,11 +212,12 @@ export const DropMintWidget = ({
             <Text variant="paragraph-sm" className={successMessage}>
               Successfully minted! View on{' '}
               <a
-                href={`${ETHERSCAN_BASE_URL}/tx/${transactionHash}`}
+                style={{ display: 'inline-block' }}
+                href={`${ETHERSCAN_BASE_URL[chainId]}/tx/${transactionHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Basescan
+                Explorer
               </a>
             </Text>
           )}

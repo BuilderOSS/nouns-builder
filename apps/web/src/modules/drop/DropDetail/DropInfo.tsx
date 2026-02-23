@@ -10,16 +10,18 @@ import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address, formatEther } from 'viem'
 
+import { ProposalLink } from '../../../components/ProposalLink'
 import { dropHeader, dropImageContainer, onlyDesktop } from './DropDetail.css'
 
 interface DropInfoProps {
   drop: ZoraDropFragment
   daoAddress: Address | null
   daoName: string | null
+  daoImage: string | null
   chainId: number
   transactionHash: string | null
 }
@@ -28,10 +30,11 @@ export const DropInfo = ({
   drop,
   daoAddress,
   daoName,
+  daoImage,
   chainId,
   transactionHash,
 }: DropInfoProps) => {
-  const { getDropLink, getProposalLink, getDaoLink } = useLinks()
+  const { getDropLink, getDaoLink } = useLinks()
 
   // Fetch proposal by execution transaction hash
   const { data: proposal } = useProposalByExecutionTx({
@@ -61,7 +64,7 @@ export const DropInfo = ({
     return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
   }, [chainId, drop.id, getDropLink])
 
-  const priceEth = formatEther(BigInt(drop.publicSalePrice))
+  const priceEth = formatEther(BigInt(drop.publicSalePrice || '0'))
 
   return (
     <Box>
@@ -178,35 +181,28 @@ export const DropInfo = ({
               DAO
             </Text>
             <Link link={getDaoLink(chainId, daoAddress)}>
-              <Text variant="paragraph-md" color="accent">
+              <Button variant="secondary" size="sm">
+                {daoImage && (
+                  <Box flexShrink={0}>
+                    <FallbackImage
+                      src={daoImage}
+                      style={{ borderRadius: '100%', objectFit: 'contain' }}
+                      alt={daoName}
+                      height={32}
+                      width={32}
+                    />
+                  </Box>
+                )}
                 {daoName}
-              </Text>
+                <Icon id="arrowTopRight" />
+              </Button>
             </Link>
           </Box>
         </>
       )}
 
       {/* Proposal */}
-      {proposal && (
-        <>
-          <Box mb="x3">
-            <Text variant="label-sm" color="text3" mb="x2">
-              Proposal
-            </Text>
-            <Link
-              link={getProposalLink(
-                chainId,
-                proposal.dao.id as `0x${string}`,
-                proposal.proposalId
-              )}
-            >
-              <Text variant="paragraph-md" color="accent">
-                Proposal {proposal.proposalNumber}: {proposal.title}
-              </Text>
-            </Link>
-          </Box>
-        </>
-      )}
+      {proposal && <ProposalLink proposal={proposal} chainId={chainId} />}
 
       {/* Description */}
       {drop.description && (
@@ -228,7 +224,7 @@ export const DropInfo = ({
           Royalty
         </Text>
         <Text variant="paragraph-md" color="text1">
-          {drop.royaltyBPS / 100}%
+          {Number(drop.royaltyBPS ?? 0) / 100}%
         </Text>
       </Box>
 

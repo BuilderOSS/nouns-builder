@@ -1,11 +1,13 @@
-import { CLANKER_FACTORY_ADDRESS } from '@buildeross/constants/addresses'
+import {
+  CLANKER_FACTORY_ADDRESS,
+  ZORA_COIN_FACTORY_ADDRESS,
+} from '@buildeross/constants/addresses'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { clankerFactoryAbi } from '@buildeross/sdk/contract'
 import type { Proposal } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getProvider } from '@buildeross/utils/provider'
-import { coinFactoryAddress, coinFactoryConfig } from '@zoralabs/protocol-deployments'
-import get from 'lodash/get'
+import { coinFactoryConfig } from '@zoralabs/protocol-deployments'
 import toLower from 'lodash/toLower'
 import { useMemo } from 'react'
 import useSWR from 'swr'
@@ -28,13 +30,7 @@ export type CoinDataResult = {
   isCreateTx: boolean
   coins: CoinInstanceData[]
   isLoading: boolean
-}
-
-/**
- * Get Zora coin factory address for the given chain
- */
-const getZoraCoinFactoryAddress = (chainId: CHAIN_ID): string | undefined => {
-  return coinFactoryAddress[chainId as keyof typeof coinFactoryAddress]
+  isValidating: boolean
 }
 
 /**
@@ -42,7 +38,7 @@ const getZoraCoinFactoryAddress = (chainId: CHAIN_ID): string | undefined => {
  * Handles both Content Coins (Zora) and Creator Coins (Clanker)
  */
 export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResult => {
-  const zoraCoinFactory = getZoraCoinFactoryAddress(chainId)
+  const zoraCoinFactory = ZORA_COIN_FACTORY_ADDRESS
   const clankerFactory = CLANKER_FACTORY_ADDRESS
 
   // Find all coin transaction indices in proposal
@@ -67,10 +63,13 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
   }, [proposal.targets, zoraCoinFactory, clankerFactory])
 
   // Extract static coin data from calldatas
-  const coinsStaticData = useMemo((): CoinStaticData[] => {
+  // Store with transaction index for unique key generation
+  const coinsStaticDataWithIndex = useMemo((): Array<
+    CoinStaticData & { transactionIndex: number }
+  > => {
     if (coinTransactionIndices.length === 0 || !proposal.calldatas) return []
 
-    const results: CoinStaticData[] = []
+    const results: Array<CoinStaticData & { transactionIndex: number }> = []
 
     for (const { index, isContentCoin } of coinTransactionIndices) {
       const calldata = proposal.calldatas?.[index]
@@ -107,6 +106,7 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
             imageUrl: undefined,
             description: undefined,
             isContentCoin: true,
+            transactionIndex: index,
           })
         } else {
           // Decode Clanker Creator Coin calldata using the 'deployToken' function
@@ -118,14 +118,6 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
 
             if (decoded.functionName !== 'deployToken' || !decoded.args) {
               console.warn('Unexpected Clanker function:', decoded.functionName)
-              results.push({
-                name: 'Creator Coin',
-                symbol: 'CREATOR',
-                metadataUri: undefined,
-                imageUrl: undefined,
-                description: undefined,
-                isContentCoin: false,
-              })
               continue
             }
 
@@ -135,36 +127,31 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
             if (deploymentConfig?.tokenConfig) {
               const tokenConfig = deploymentConfig.tokenConfig
 
+              // Parse description from tokenMetadata JSON
+              let description: string | null = null
+              if (tokenConfig.metadata) {
+                try {
+                  const parsed = JSON.parse(tokenConfig.metadata)
+                  description = parsed.description ?? null
+                } catch {
+                  // If parsing fails, use raw metadata as description
+                  description = tokenConfig.metadata
+                }
+              }
+
               results.push({
                 name: tokenConfig.name || 'Creator Coin',
                 symbol: tokenConfig.symbol || 'CREATOR',
                 metadataUri: undefined,
                 imageUrl: tokenConfig.image,
-                description: tokenConfig.metadata,
+                description: description ?? '',
                 isContentCoin: false,
-              })
-            } else {
-              // Fallback: return minimal data
-              results.push({
-                name: 'Creator Coin',
-                symbol: 'CREATOR',
-                metadataUri: undefined,
-                imageUrl: undefined,
-                description: undefined,
-                isContentCoin: false,
+                transactionIndex: index,
               })
             }
           } catch (decodeError) {
             console.warn('Could not decode Clanker calldata:', decodeError)
             // Fallback: return minimal data
-            results.push({
-              name: 'Creator Coin',
-              symbol: 'CREATOR',
-              metadataUri: undefined,
-              imageUrl: undefined,
-              description: undefined,
-              isContentCoin: false,
-            })
           }
         }
       } catch (error) {
@@ -176,17 +163,30 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
   }, [coinTransactionIndices, proposal.calldatas])
 
   // Fetch coin addresses from execution transaction logs
-  const { data: coinAddresses, isValidating: isLoading } = useSWR(
+  // Returns a map of "transactionIndex:name:symbol" -> address for deterministic matching
+  const {
+    data: coinAddressMap,
+    isValidating,
+    isLoading,
+  } = useSWR(
     proposal.executionTransactionHash &&
       isHex(proposal.executionTransactionHash) &&
       coinTransactionIndices.length > 0
-      ? ([SWR_KEYS.COIN_ADDRESSES, chainId, proposal.executionTransactionHash] as const)
+      ? ([
+          SWR_KEYS.COIN_ADDRESSES,
+          chainId,
+          proposal.executionTransactionHash,
+          coinTransactionIndices,
+        ] as const)
       : null,
-    async ([, _chainId, _txHash]) => {
+    async ([, _chainId, _txHash, _coinIndices]) => {
       const provider = getProvider(_chainId)
       const receipt = await provider.getTransactionReceipt({ hash: _txHash })
 
-      const addresses: (AddressType | undefined)[] = []
+      const addressMap = new Map<string, AddressType>()
+
+      // Track which transaction index we're on (matches order of events)
+      let currentCoinEventIndex = 0
 
       // Parse logs for coin creation events
       for (const log of receipt.logs) {
@@ -199,9 +199,22 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
           })
 
           if (zoraDecoded.eventName === 'CoinCreatedV4') {
-            const coinAddress = get(zoraDecoded, 'args.coin')
-            if (coinAddress) {
-              addresses.push(coinAddress as AddressType)
+            const args = zoraDecoded.args as any
+            const coinAddress = args.coin
+            const name = args.name
+            const symbol = args.symbol
+
+            if (
+              coinAddress &&
+              name &&
+              symbol &&
+              currentCoinEventIndex < _coinIndices.length
+            ) {
+              // Create stable key with transaction index
+              const transactionIndex = _coinIndices[currentCoinEventIndex].index
+              const key = `${transactionIndex}:${name}:${symbol}`
+              addressMap.set(key, coinAddress as AddressType)
+              currentCoinEventIndex++
               continue
             }
           }
@@ -218,9 +231,22 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
           })
 
           if (clankerDecoded.eventName === 'TokenCreated') {
-            const tokenAddress = get(clankerDecoded, 'args.tokenAddress')
-            if (tokenAddress) {
-              addresses.push(tokenAddress as AddressType)
+            const args = clankerDecoded.args as any
+            const tokenAddress = args.tokenAddress
+            const name = args.tokenName
+            const symbol = args.tokenSymbol
+
+            if (
+              tokenAddress &&
+              name &&
+              symbol &&
+              currentCoinEventIndex < _coinIndices.length
+            ) {
+              // Create stable key with transaction index
+              const transactionIndex = _coinIndices[currentCoinEventIndex].index
+              const key = `${transactionIndex}:${name}:${symbol}`
+              addressMap.set(key, tokenAddress as AddressType)
+              currentCoinEventIndex++
               continue
             }
           }
@@ -229,21 +255,32 @@ export const useCoinData = (chainId: CHAIN_ID, proposal: Proposal): CoinDataResu
         }
       }
 
-      return addresses
+      return addressMap
     }
   )
 
-  // Combine static data with execution data
+  // Combine static data with execution data using stable key-based matching
   const coins = useMemo((): CoinInstanceData[] => {
-    return coinsStaticData.map((staticData, index) => ({
-      ...staticData,
-      address: coinAddresses?.[index],
-    }))
-  }, [coinsStaticData, coinAddresses])
+    return coinsStaticDataWithIndex.map((staticData) => {
+      // Create the same key format used in the address map: "transactionIndex:name:symbol"
+      const key = `${staticData.transactionIndex}:${staticData.name}:${staticData.symbol}`
+      const address = coinAddressMap?.get(key)
+
+      // Remove transactionIndex from final result
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { transactionIndex, ...coinData } = staticData
+
+      return {
+        ...coinData,
+        address,
+      }
+    })
+  }, [coinsStaticDataWithIndex, coinAddressMap])
 
   return {
-    isCreateTx: coinTransactionIndices.length > 0,
+    isCreateTx: coins.length > 0,
     coins,
-    isLoading: isLoading && !coinAddresses && !!proposal.executionTransactionHash,
+    isLoading: isLoading && !coinAddressMap && !!proposal.executionTransactionHash,
+    isValidating,
   }
 }

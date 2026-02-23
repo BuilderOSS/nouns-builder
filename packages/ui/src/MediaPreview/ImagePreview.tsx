@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 export interface ImagePreviewProps {
   src: string
@@ -35,9 +35,11 @@ const normalizeAspectRatio = (r: number | string) => {
   return r.includes(':') ? r.replace(':', ' / ') : r
 }
 
+const EMPTY_SRCS: string[] = []
+
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
   src,
-  fallbackSrcs = [],
+  fallbackSrcs = EMPTY_SRCS,
   alt = 'Preview',
   width = '100%',
   height = 400,
@@ -49,8 +51,21 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
   const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
 
+  // Create stable key for source changes to prevent unnecessary re-renders
+  const sourcesKey = useMemo(
+    () => JSON.stringify([src, ...fallbackSrcs]),
+    [src, fallbackSrcs]
+  )
+
   // Build array of all sources with primary src first
-  const allSrcs = useMemo(() => [src, ...fallbackSrcs], [src, fallbackSrcs])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allSrcs = useMemo(() => [src, ...fallbackSrcs], [sourcesKey])
+
+  // Reset index when sources change
+  useEffect(() => {
+    setCurrentSrcIndex(0)
+    setMeasuredRatio(null)
+  }, [sourcesKey])
 
   // Decide which ratio to use (explicit > measured > fallback)
   const ratioForBox = useMemo(() => {
@@ -61,13 +76,13 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   }, [aspectRatio, measuredRatio, fallbackAspectRatio])
 
   const handleError = () => {
-    // Try next source if available
-    if (currentSrcIndex < allSrcs.length - 1) {
-      console.warn(
-        `Image failed to load from ${allSrcs[currentSrcIndex]}, trying next source...`
-      )
-      setCurrentSrcIndex(currentSrcIndex + 1)
-    }
+    setCurrentSrcIndex((prev) => {
+      if (prev < allSrcs.length - 1) {
+        console.warn(`Image failed to load from ${allSrcs[prev]}, trying next source...`)
+        return prev + 1
+      }
+      return prev
+    })
   }
 
   const imgEl = (

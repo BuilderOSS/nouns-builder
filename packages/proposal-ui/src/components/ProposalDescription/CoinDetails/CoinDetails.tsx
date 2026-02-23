@@ -8,7 +8,6 @@ import { CoinItem } from './CoinItem'
 
 interface CoinDetailsProps {
   proposal: Proposal
-  onOpenProposalReview: () => Promise<void>
 }
 
 export const CoinDetails = ({ proposal }: CoinDetailsProps) => {

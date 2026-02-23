@@ -61,7 +61,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
           <Icon id="arrowLeft" />
 
           {daoImage ? (
-            <Box mr="x2" flexShrink={0}>
+            <Box flexShrink={0}>
               <FallbackImage
                 src={daoImage}
                 style={{ borderRadius: '100%', objectFit: 'contain' }}
@@ -71,7 +71,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
               />
             </Box>
           ) : (
-            <Box mr="x2" borderRadius="phat">
+            <Box borderRadius="phat">
               <Avatar address={token ?? undefined} size="32" />
             </Box>
           )}

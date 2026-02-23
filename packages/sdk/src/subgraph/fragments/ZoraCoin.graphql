@@ -16,6 +16,7 @@ fragment ZoraCoin on ZoraCoin {
   dao {
     id
     name
+    contractImage
   }
   clankerToken {
     tokenAddress

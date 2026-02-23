@@ -32,7 +32,7 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
   onOpenTradeModal,
   onOpenMintModal,
 }) => {
-  // Only show actions for recent items (last 30 days)
+  // Only show actions for recent items (last 60 days)
   const isRecent = item.timestamp > Date.now() / 1000 - TWO_MONTHS
 
   if (!isRecent) {
@@ -103,14 +103,6 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
       )
 
     case 'ZORA_DROP_CREATED': {
-      // Calculate sale timing
-      const now = Date.now() / 1000
-      const saleStart = item.publicSaleStart
-      const saleEnd = item.publicSaleEnd
-      const saleNotStarted = saleStart > now
-      const saleEnded = saleEnd < now
-      const saleActive = saleStart <= now && saleEnd > now
-
       return (
         <ZoraDropActions
           chainId={item.chainId}
@@ -119,11 +111,8 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
           daoName={item.daoName}
           daoImage={item.daoImage}
           priceEth={item.publicSalePrice}
-          saleActive={saleActive}
-          saleNotStarted={saleNotStarted}
-          saleEnded={saleEnded}
-          saleStart={saleStart}
-          saleEnd={saleEnd}
+          publicSaleStart={item.publicSaleStart}
+          publicSaleEnd={item.publicSaleEnd}
           editionSize={item.editionSize}
           maxPerAddress={item.maxSalePurchasePerAddress}
           onOpenMintModal={onOpenMintModal}

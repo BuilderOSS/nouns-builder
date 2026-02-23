@@ -27,7 +27,7 @@ export const TradeModal: React.FC<TradeModalProps> = ({
   daoImage,
 }) => {
   return (
-    <AnimatedModal key="feed-trade-modal" open={isOpen} close={onClose} size="medium">
+    <AnimatedModal open={isOpen} close={onClose} size="medium">
       <Stack w="100%">
         <ModalHeader
           daoName={daoName}

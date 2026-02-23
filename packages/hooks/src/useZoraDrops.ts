@@ -1,18 +1,14 @@
-import { COIN_SUPPORTED_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { daoZoraDropsRequest, type ZoraDropFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { getChainNamesString } from '@buildeross/utils/chains'
-import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import useSWR, { type KeyedMutator } from 'swr'
-
-const supportedChains = getChainNamesString(COIN_SUPPORTED_CHAINS)
 
 export const useZoraDrops = ({
   chainId,
   collectionAddress,
   enabled = true,
-  first = 10,
+  first = 100,
 }: {
   chainId: CHAIN_ID
   collectionAddress?: AddressType
@@ -26,9 +22,9 @@ export const useZoraDrops = ({
   mutate: KeyedMutator<ZoraDropFragment[]>
 } => {
   // Check if chain is supported
-  const isChainSupported = isChainIdSupportedByCoining(chainId)
+  const isChainSupported = isChainIdSupportedByDroposal(chainId)
   const chainError = !isChainSupported
-    ? new Error(`ZoraDrops are only supported on ${supportedChains}`)
+    ? new Error(`ZoraDrops are not supported on ${chainId}`)
     : undefined
 
   const { data, error, isLoading, isValidating, mutate } = useSWR(

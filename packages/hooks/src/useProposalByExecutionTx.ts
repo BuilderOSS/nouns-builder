@@ -6,6 +6,15 @@ import {
 import { type CHAIN_ID } from '@buildeross/types'
 import useSWR, { type KeyedMutator } from 'swr'
 
+const fetcher = async ([, _chainId, _executionTransactionHash]: [
+  string,
+  CHAIN_ID,
+  string,
+]): Promise<ProposalBasicInfo | undefined> => {
+  const proposal = await getProposalByExecutionTxHash(_chainId, _executionTransactionHash)
+  return proposal
+}
+
 export const useProposalByExecutionTx = ({
   chainId,
   executionTransactionHash,
@@ -21,12 +30,14 @@ export const useProposalByExecutionTx = ({
   error: Error | undefined
   mutate: KeyedMutator<ProposalBasicInfo | undefined>
 } => {
-  const { data, error, isLoading, isValidating, mutate } = useSWR(
+  const { data, error, isLoading, isValidating, mutate } = useSWR<
+    ProposalBasicInfo | undefined,
+    Error
+  >(
     executionTransactionHash && enabled
       ? ([SWR_KEYS.PROPOSAL_BY_EXECUTION_TX, chainId, executionTransactionHash] as const)
       : null,
-    async ([, _chainId, _executionTransactionHash]) =>
-      getProposalByExecutionTxHash(_chainId, _executionTransactionHash),
+    fetcher,
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

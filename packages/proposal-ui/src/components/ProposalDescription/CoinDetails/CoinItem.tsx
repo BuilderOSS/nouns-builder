@@ -6,10 +6,10 @@ import { AccordionItem } from '@buildeross/ui/Accordion'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
-import { Box, Button, Grid, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Icon, Stack, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 
-import { gridStyle, linkStyle } from './CoinItem.css'
+import { linkStyle } from './CoinItem.css'
 
 interface CoinItemProps {
   coin: CoinInstanceData
@@ -39,7 +39,15 @@ export const CoinItem = ({ coin, index, isExecuted, chainId }: CoinItemProps) =>
       imageUrl: coin.imageUrl || ipfsImageUrl,
       animationUrl: ipfsAnimationUrl,
     }
-  }, [coin, ipfsMetadata, ipfsImageUrl, ipfsAnimationUrl])
+  }, [
+    coin.name,
+    coin.symbol,
+    coin.description,
+    coin.imageUrl,
+    ipfsMetadata?.description,
+    ipfsImageUrl,
+    ipfsAnimationUrl,
+  ])
 
   // Get media type for animation_url if present
   const {
@@ -61,105 +69,66 @@ export const CoinItem = ({ coin, index, isExecuted, chainId }: CoinItemProps) =>
       <Text>
         {coinType} {index + 1}: {metadata.symbol}
       </Text>
-      {coin.isContentCoin && (
-        <Box
-          backgroundColor="accent"
-          px="x2"
-          py="x1"
-          borderRadius="curved"
-          display="inline-block"
-        >
-          <Text variant="label-sm" color="primary">
-            Zora
-          </Text>
-        </Box>
-      )}
-      {!coin.isContentCoin && (
-        <Box
-          backgroundColor="secondary"
-          px="x2"
-          py="x1"
-          borderRadius="curved"
-          display="inline-block"
-        >
-          <Text variant="label-sm" color="primary">
-            Clanker
-          </Text>
-        </Box>
-      )}
     </Stack>
   )
 
   const description = (
     <Stack gap="x3">
-      <Grid gap="x3" className={gridStyle}>
-        {/* Left column: Coin Information */}
-        <Stack gap="x2" flex="1">
-          <Stack direction="row" align="center" gap="x2">
-            <Text variant="label-sm" color="tertiary">
-              Name:
-            </Text>
-            <Text variant="label-sm">{metadata.name}</Text>
-          </Stack>
+      {/* Media Preview Row */}
+      {(shouldUseMediaPreview || displayImageUrl) && !isMediaTypeLoading && (
+        <Box
+          w="100%"
+          borderRadius="curved"
+          backgroundColor="background2"
+          overflow="hidden"
+          style={shouldUseMediaPreview ? { maxHeight: '400px' } : { aspectRatio: '1/1' }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          {shouldUseMediaPreview ? (
+            <MediaPreview
+              mediaUrl={animationFetchableUrl}
+              mediaType={mediaType}
+              coverUrl={displayImageUrl || undefined}
+              width="100%"
+              height="100%"
+            />
+          ) : displayImageUrl ? (
+            <FallbackImage
+              src={displayImageUrl}
+              alt={metadata.name}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                maxHeight: '400px',
+              }}
+            />
+          ) : null}
+        </Box>
+      )}
 
-          <Stack direction="row" align="center" gap="x2">
-            <Text variant="label-sm" color="tertiary">
-              Symbol:
-            </Text>
-            <Text variant="label-sm">{metadata.symbol}</Text>
-          </Stack>
-
-          {metadata.description && (
-            <Stack direction="column" gap="x1">
-              <Text variant="label-sm" color="tertiary">
-                Description:
-              </Text>
-              <Text variant="paragraph-sm">{metadata.description}</Text>
-            </Stack>
-          )}
-
-          {isExecuted && coin.address && (
-            <Stack direction="row" align="center" gap="x2">
-              <Text variant="label-sm" color="tertiary">
-                Address:
-              </Text>
-              <Text variant="label-sm" style={{ wordBreak: 'break-all' }}>
-                {coin.address}
-              </Text>
-            </Stack>
-          )}
+      {/* Coin Information */}
+      <Stack gap="x2">
+        <Stack direction="row" align="center" gap="x2">
+          <Text variant="label-sm" color="tertiary">
+            Name:
+          </Text>
+          <Text variant="label-sm">
+            {metadata.name} ({metadata.symbol})
+          </Text>
         </Stack>
 
-        {/* Right column: Media Preview */}
-        {(shouldUseMediaPreview || displayImageUrl) && !isMediaTypeLoading && (
-          <Box
-            flex="1"
-            borderRadius="curved"
-            backgroundColor="background2"
-            overflow="hidden"
-            style={{ aspectRatio: '1/1' }}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            {shouldUseMediaPreview ? (
-              <MediaPreview
-                mediaUrl={animationFetchableUrl}
-                mediaType={mediaType}
-                coverUrl={displayImageUrl || undefined}
-                width="100%"
-                height="100%"
-              />
-            ) : displayImageUrl ? (
-              <FallbackImage
-                src={displayImageUrl}
-                alt={metadata.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : null}
-          </Box>
+        {metadata.description && (
+          <Stack direction="column" gap="x1">
+            <Text variant="label-sm" color="tertiary">
+              Description:
+            </Text>
+            <Text variant="paragraph-sm">{metadata.description}</Text>
+          </Stack>
         )}
-      </Grid>
+      </Stack>
 
       {/* Executed state: Show link to coin page */}
       {isExecuted && coinLink && (

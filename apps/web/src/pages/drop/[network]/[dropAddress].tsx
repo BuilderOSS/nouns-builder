@@ -16,8 +16,9 @@ interface DropPageProps {
   drop: ZoraDropFragment
   chainSlug: string
   chainId: number
-  daoAddress: AddressType
-  daoName: string
+  daoAddress: AddressType | null
+  daoName: string | null
+  daoImage: string | null
   addresses: DaoContractAddresses | null
   transactionHash: string | null
 }
@@ -28,6 +29,7 @@ const DropPage: NextPageWithLayout<DropPageProps> = ({
   chainId,
   daoAddress,
   daoName,
+  daoImage,
   transactionHash,
 }) => {
   const path = `/drop/${chainSlug}/${drop.id}`
@@ -44,6 +46,7 @@ const DropPage: NextPageWithLayout<DropPageProps> = ({
         chainId={chainId}
         daoAddress={daoAddress}
         daoName={daoName}
+        daoImage={daoImage}
         transactionHash={transactionHash}
       />
     </>
@@ -97,8 +100,9 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
     }
 
     // Extract DAO info
-    const daoAddress = drop.dao?.id as AddressType
-    const daoName = drop.dao?.name ?? ''
+    const daoAddress = (drop.dao?.id as AddressType) ?? null
+    const daoName = drop.dao?.name ?? null
+    const daoImage = drop.dao?.contractImage ?? null
 
     // Fetch DAO addresses
     let addresses: DaoContractAddresses | null = null
@@ -117,6 +121,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
         chainId: chain.id,
         daoAddress,
         daoName,
+        daoImage,
         addresses,
         transactionHash: drop.transactionHash ?? null,
       },

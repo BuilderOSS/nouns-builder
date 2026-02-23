@@ -31,7 +31,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
     if (fetchableUrls && fetchableUrls.length > 0) {
       return {
         primaryUrl: mediaUrl,
-        fallbackUrls: fetchableUrls,
+        fallbackUrls: fetchableUrls.filter((url) => url !== mediaUrl),
       }
     }
     // Otherwise just use the mediaUrl
@@ -48,7 +48,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
     if (fetchableUrls && fetchableUrls.length > 0) {
       return {
         primaryUrl: coverUrl,
-        fallbackUrls: fetchableUrls,
+        fallbackUrls: fetchableUrls.filter((url) => url !== coverUrl),
       }
     }
     return {

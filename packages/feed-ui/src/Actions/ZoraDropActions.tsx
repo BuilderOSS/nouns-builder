@@ -1,4 +1,5 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { useNowSeconds } from '@buildeross/hooks'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
@@ -15,11 +16,8 @@ interface ZoraDropActionsProps {
   daoName: string
   daoImage: string
   priceEth: string
-  saleActive: boolean
-  saleNotStarted: boolean
-  saleEnded: boolean
-  saleStart?: number
-  saleEnd?: number
+  publicSaleStart: number
+  publicSaleEnd: number
   editionSize?: string
   maxPerAddress?: number
   onOpenMintModal: OnOpenMintModal
@@ -32,15 +30,21 @@ export const ZoraDropActions: React.FC<ZoraDropActionsProps> = ({
   daoName,
   daoImage,
   priceEth,
-  saleActive,
-  saleNotStarted,
-  saleEnded,
-  saleStart,
-  saleEnd,
+  publicSaleStart,
+  publicSaleEnd,
   editionSize,
   maxPerAddress,
   onOpenMintModal,
 }) => {
+  // Calculate sale timing
+  const now = useNowSeconds(true)
+
+  const saleStart = Number.isFinite(publicSaleStart) ? publicSaleStart : 0
+  const saleEnd = Number.isFinite(publicSaleEnd) ? publicSaleEnd : 0
+  const saleNotStarted = saleStart > 0 && saleStart > now
+  const saleEnded = saleEnd > 0 && saleEnd < now
+  const saleActive = !saleNotStarted && !saleEnded
+
   const { getDropLink } = useLinks()
 
   const shareUrl = useMemo(() => {

@@ -29,6 +29,7 @@ interface CoinPageProps {
   // DAO info
   daoAddress: AddressType | null
   daoName: string | null
+  daoImage: string | null
   addresses: DaoContractAddresses | null
   // Pool info
   pairedToken: AddressType | null
@@ -57,6 +58,7 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
   image,
   daoAddress,
   daoName,
+  daoImage,
   pairedToken,
   pairedTokenSymbol,
   poolFee,
@@ -87,6 +89,7 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
         chainId={chainId}
         daoAddress={daoAddress}
         daoName={daoName}
+        daoImage={daoImage}
         pairedToken={pairedToken}
         pairedTokenSymbol={pairedTokenSymbol}
         poolFee={poolFee}
@@ -168,6 +171,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
       // Fetch DAO name if we have a DAO link
       const daoName = coin.dao?.name ?? null
       const daoAddress = coin.dao?.id ? (coin.dao.id as AddressType) : null
+      const daoImage = coin.dao?.contractImage ?? null
 
       // Fetch DAO addresses if we have a DAO
       let addresses: DaoContractAddresses | null = null
@@ -192,6 +196,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           image: metadata?.image ?? metadata?.imageUrl ?? null,
           daoAddress,
           daoName,
+          daoImage,
           addresses,
           pairedToken: coin.currency ? (coin.currency as AddressType) : null,
           pairedTokenSymbol,
@@ -220,6 +225,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
       // Fetch DAO name if we have a DAO link
       const daoName = token.dao?.name ?? null
       const daoAddress = token.dao?.id ? (token.dao.id as AddressType) : null
+      const daoImage = token.dao?.contractImage ?? null
 
       // Fetch DAO addresses if we have a DAO
       let addresses: DaoContractAddresses | null = null
@@ -253,6 +259,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           image: token.tokenImage ?? null,
           daoAddress,
           daoName,
+          daoImage,
           addresses,
           pairedToken: token.pairedToken ? (token.pairedToken as AddressType) : null,
           pairedTokenSymbol: null, // Would need to look up paired token

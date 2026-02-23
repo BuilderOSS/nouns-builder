@@ -23,5 +23,6 @@ fragment ZoraDrop on ZoraDrop {
   dao {
     id
     name
+    contractImage
   }
 }

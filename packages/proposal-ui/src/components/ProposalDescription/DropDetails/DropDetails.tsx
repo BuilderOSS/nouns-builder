@@ -8,7 +8,6 @@ import { DropItem } from './DropItem'
 
 interface DropDetailsProps {
   proposal: Proposal
-  onOpenProposalReview: () => Promise<void>
 }
 
 export const DropDetails = ({ proposal }: DropDetailsProps) => {

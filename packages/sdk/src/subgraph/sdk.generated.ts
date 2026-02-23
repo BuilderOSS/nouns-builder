@@ -6210,7 +6210,7 @@ export type ClankerTokenFragment = {
   createdAtBlock: any
   transactionHash: any
   msgSender: any
-  dao?: { __typename?: 'DAO'; id: string; name: string } | null
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
 }
 
 export type CurrentAuctionFragment = {
@@ -6316,7 +6316,7 @@ export type ZoraCoinFragment = {
   createdAtBlock: any
   transactionHash: any
   caller: any
-  dao?: { __typename?: 'DAO'; id: string; name: string } | null
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
   clankerToken?: {
     __typename?: 'ClankerToken'
     tokenAddress: any
@@ -6348,7 +6348,7 @@ export type ZoraDropFragment = {
   createdAt: any
   createdAtBlock: any
   transactionHash: any
-  dao?: { __typename?: 'DAO'; id: string; name: string } | null
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
 }
 
 export type DaoMultisigUpdateFragment = {
@@ -6454,13 +6454,14 @@ export type ClankerTokenQuery = {
     createdAtBlock: any
     transactionHash: any
     msgSender: any
-    dao?: { __typename?: 'DAO'; id: string; name: string } | null
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
   } | null
 }
 
 export type DaoClankerTokensQueryVariables = Exact<{
   daoId: Scalars['ID']['input']
   first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
   orderBy?: InputMaybe<ClankerToken_OrderBy>
   orderDirection?: InputMaybe<OrderDirection>
 }>
@@ -6485,7 +6486,7 @@ export type DaoClankerTokensQuery = {
       createdAtBlock: any
       transactionHash: any
       msgSender: any
-      dao?: { __typename?: 'DAO'; id: string; name: string } | null
+      dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
     }>
   } | null
 }
@@ -6702,6 +6703,7 @@ export type DaoVotersQuery = {
 export type DaoZoraCoinsQueryVariables = Exact<{
   daoId: Scalars['ID']['input']
   first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
   orderBy?: InputMaybe<ZoraCoin_OrderBy>
   orderDirection?: InputMaybe<OrderDirection>
 }>
@@ -6727,7 +6729,7 @@ export type DaoZoraCoinsQuery = {
       createdAtBlock: any
       transactionHash: any
       caller: any
-      dao?: { __typename?: 'DAO'; id: string; name: string } | null
+      dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
       clankerToken?: {
         __typename?: 'ClankerToken'
         tokenAddress: any
@@ -6741,6 +6743,7 @@ export type DaoZoraCoinsQuery = {
 export type DaoZoraDropsQueryVariables = Exact<{
   daoId: Scalars['ID']['input']
   first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
   orderBy?: InputMaybe<ZoraDrop_OrderBy>
   orderDirection?: InputMaybe<OrderDirection>
 }>
@@ -6773,7 +6776,7 @@ export type DaoZoraDropsQuery = {
       createdAt: any
       createdAtBlock: any
       transactionHash: any
-      dao?: { __typename?: 'DAO'; id: string; name: string } | null
+      dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
     }>
   } | null
 }
@@ -7585,7 +7588,7 @@ export type ZoraCoinQuery = {
     createdAtBlock: any
     transactionHash: any
     caller: any
-    dao?: { __typename?: 'DAO'; id: string; name: string } | null
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
     clankerToken?: {
       __typename?: 'ClankerToken'
       tokenAddress: any
@@ -7624,7 +7627,7 @@ export type ZoraDropQuery = {
     createdAt: any
     createdAtBlock: any
     transactionHash: any
-    dao?: { __typename?: 'DAO'; id: string; name: string } | null
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
   } | null
 }
 
@@ -7662,6 +7665,7 @@ export const ClankerTokenFragmentDoc = gql`
     dao {
       id
       name
+      contractImage
     }
   }
 `
@@ -7796,6 +7800,7 @@ export const ZoraCoinFragmentDoc = gql`
     dao {
       id
       name
+      contractImage
     }
     clankerToken {
       tokenAddress
@@ -7830,6 +7835,7 @@ export const ZoraDropFragmentDoc = gql`
     dao {
       id
       name
+      contractImage
     }
   }
 `
@@ -7914,13 +7920,19 @@ export const ClankerTokenDocument = gql`
 export const DaoClankerTokensDocument = gql`
   query daoClankerTokens(
     $daoId: ID!
-    $first: Int = 10
+    $first: Int = 100
+    $skip: Int = 0
     $orderBy: ClankerToken_orderBy = createdAt
     $orderDirection: OrderDirection = desc
   ) {
     dao(id: $daoId) {
       id
-      clankerTokens(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
+      clankerTokens(
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        skip: $skip
+      ) {
         ...ClankerToken
       }
     }
@@ -8147,13 +8159,19 @@ export const DaoVotersDocument = gql`
 export const DaoZoraCoinsDocument = gql`
   query daoZoraCoins(
     $daoId: ID!
-    $first: Int = 10
+    $first: Int = 100
+    $skip: Int = 0
     $orderBy: ZoraCoin_orderBy = createdAt
     $orderDirection: OrderDirection = desc
   ) {
     dao(id: $daoId) {
       id
-      zoraCoins(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
+      zoraCoins(
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        skip: $skip
+      ) {
         ...ZoraCoin
       }
     }
@@ -8163,13 +8181,19 @@ export const DaoZoraCoinsDocument = gql`
 export const DaoZoraDropsDocument = gql`
   query daoZoraDrops(
     $daoId: ID!
-    $first: Int = 10
+    $first: Int = 100
+    $skip: Int = 0
     $orderBy: ZoraDrop_orderBy = createdAt
     $orderDirection: OrderDirection = desc
   ) {
     dao(id: $daoId) {
       id
-      zoraDrops(first: $first, orderBy: $orderBy, orderDirection: $orderDirection) {
+      zoraDrops(
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        skip: $skip
+      ) {
         ...ZoraDrop
       }
     }

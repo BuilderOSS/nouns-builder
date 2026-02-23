@@ -96,7 +96,7 @@ export const BidModal: React.FC<BidModalProps> = ({
   })
 
   return (
-    <AnimatedModal key="feed-bid-modal" open={isOpen} close={handleClose} size="medium">
+    <AnimatedModal open={isOpen} close={handleClose} size="medium">
       {isSuccess ? (
         <SuccessModalContent
           success

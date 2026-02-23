@@ -12,7 +12,7 @@ export const useZoraCoins = ({
   chainId,
   collectionAddress,
   enabled = true,
-  first = 10,
+  first = 100,
 }: {
   chainId: CHAIN_ID
   collectionAddress?: AddressType

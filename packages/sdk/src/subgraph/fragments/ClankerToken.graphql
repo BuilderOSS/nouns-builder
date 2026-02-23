@@ -15,5 +15,6 @@ fragment ClankerToken on ClankerToken {
   dao {
     id
     name
+    contractImage
   }
 }

@@ -566,14 +566,14 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
       {successTxHash && !pendingTxHash && (
         <Box mt="x4">
           <Text variant="paragraph-sm" color="positive" className={messageText}>
-            Swap successful! View transaction:{' '}
+            Swap successful! View on{' '}
             <a
               style={{ display: 'inline-block' }}
               href={`${ETHERSCAN_BASE_URL[chainId]}/tx/${successTxHash}`}
               target="_blank"
               rel="noreferrer"
             >
-              <Text>{truncateHex(successTxHash)}</Text>
+              Explorer
             </a>
           </Text>
         </Box>

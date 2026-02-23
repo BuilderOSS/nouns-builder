@@ -1,5 +1,5 @@
 import { Box, Icon } from '@buildeross/zord'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 export interface AudioPreviewProps {
   src: string
@@ -12,11 +12,13 @@ export interface AudioPreviewProps {
   height?: string | number
 }
 
+const EMPTY_SRCS: string[] = []
+
 export const AudioPreview: React.FC<AudioPreviewProps> = ({
   src,
-  fallbackSrcs = [],
+  fallbackSrcs = EMPTY_SRCS,
   cover,
-  coverFallbackSrcs = [],
+  coverFallbackSrcs = EMPTY_SRCS,
   width = 400,
   height = 400,
 }) => {
@@ -25,9 +27,34 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
   const [currentCoverIndex, setCurrentCoverIndex] = useState(0)
   const audioRef = useRef<HTMLAudioElement>(null)
 
+  // Create stable keys for source changes to prevent unnecessary re-renders
+  const audioSourcesKey = useMemo(
+    () => JSON.stringify([src, ...fallbackSrcs]),
+    [src, fallbackSrcs]
+  )
+
+  const coverSourcesKey = useMemo(
+    () => JSON.stringify([cover, ...coverFallbackSrcs]),
+    [cover, coverFallbackSrcs]
+  )
+
   // Build array of all sources with primary src first
-  const allSrcs = [src, ...fallbackSrcs]
-  const allCoverSrcs = cover ? [cover, ...coverFallbackSrcs] : []
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allSrcs = useMemo(() => [src, ...fallbackSrcs], [audioSourcesKey])
+  const allCoverSrcs = useMemo(
+    () => (cover ? [cover, ...coverFallbackSrcs] : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [coverSourcesKey]
+  )
+
+  // Reset index when sources change
+  useEffect(() => {
+    setCurrentSrcIndex(0)
+  }, [audioSourcesKey])
+
+  useEffect(() => {
+    setCurrentCoverIndex(0)
+  }, [coverSourcesKey])
 
   const togglePlay = useCallback(async () => {
     if (!audioRef.current) return
@@ -37,22 +64,26 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
 
   const handleAudioError = () => {
     // Try next source if available
-    if (currentSrcIndex < allSrcs.length - 1) {
-      console.warn(
-        `Audio failed to load from ${allSrcs[currentSrcIndex]}, trying next source...`
-      )
-      setCurrentSrcIndex(currentSrcIndex + 1)
-    }
+    setCurrentSrcIndex((prev) => {
+      if (prev < allSrcs.length - 1) {
+        console.warn(`Audio failed to load from ${allSrcs[prev]}, trying next source...`)
+        return prev + 1
+      }
+      return prev
+    })
   }
 
   const handleCoverError = () => {
     // Try next cover source if available
-    if (currentCoverIndex < allCoverSrcs.length - 1) {
-      console.warn(
-        `Cover image failed to load from ${allCoverSrcs[currentCoverIndex]}, trying next source...`
-      )
-      setCurrentCoverIndex(currentCoverIndex + 1)
-    }
+    setCurrentCoverIndex((prev) => {
+      if (prev < allCoverSrcs.length - 1) {
+        console.warn(
+          `Cover image failed to load from ${allCoverSrcs[prev]}, trying next source...`
+        )
+        return prev + 1
+      }
+      return prev
+    })
   }
 
   return (
@@ -99,6 +130,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
         loop
         preload={'auto'}
         playsInline
+        controls
         onError={handleAudioError}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}

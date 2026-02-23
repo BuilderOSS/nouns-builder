@@ -401,12 +401,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   }
 
   return (
-    <AnimatedModal
-      key="feed-vote-modal"
-      open={isOpen}
-      size={modalSize}
-      close={handleClose}
-    >
+    <AnimatedModal open={isOpen} size={modalSize} close={handleClose}>
       {renderContent()}
     </AnimatedModal>
   )
