@@ -12,6 +12,7 @@ export const FeedItemTypes = {
   AUCTION_SETTLED: 'AUCTION_SETTLED',
   CLANKER_TOKEN_CREATED: 'CLANKER_TOKEN_CREATED',
   ZORA_COIN_CREATED: 'ZORA_COIN_CREATED',
+  ZORA_DROP_CREATED: 'ZORA_DROP_CREATED',
 } as const
 
 export type FeedItemType = (typeof FeedItemTypes)[keyof typeof FeedItemTypes]
@@ -143,6 +144,28 @@ export type ZoraCoinCreatedFeedItem = BaseFeedItem & {
   currency: AddressType
 }
 
+export type ZoraDropCreatedFeedItem = BaseFeedItem & {
+  type: 'ZORA_DROP_CREATED'
+  dropId: string
+  dropCreator: AddressType
+  dropName: string
+  dropSymbol: string
+  dropDescription: string
+  dropImageURI: string
+  dropAnimationURI: string
+  editionSize: string
+  metadataRenderer: AddressType
+  royaltyBPS: number
+  fundsRecipient: AddressType
+  publicSalePrice: string
+  maxSalePurchasePerAddress: number
+  publicSaleStart: number
+  publicSaleEnd: number
+  presaleStart: number
+  presaleEnd: number
+  presaleMerkleRoot: BytesType
+}
+
 export type FeedItem =
   | ProposalCreatedFeedItem
   | ProposalVotedFeedItem
@@ -153,6 +176,7 @@ export type FeedItem =
   | AuctionSettledFeedItem
   | ClankerTokenCreatedFeedItem
   | ZoraCoinCreatedFeedItem
+  | ZoraDropCreatedFeedItem
 
 export type FeedResponse =
   | {

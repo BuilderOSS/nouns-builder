@@ -56,7 +56,7 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
       )}
       <LinkWrapper link={getCoinLink(chainId, coinAddress)} isExternal>
         <Button size="sm" px="x3" variant="secondary">
-          View Details
+          View Coin
         </Button>
       </LinkWrapper>
       {shareUrl && <ShareButton url={shareUrl} size="sm" variant="secondary" />}

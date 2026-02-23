@@ -143,7 +143,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
           isExternal
         >
           <Button size="sm" px="x3" variant="secondary">
-            View Details
+            View Proposal
           </Button>
         </LinkWrapper>
         <ShareButton url={shareUrl} size="sm" variant="secondary" />
@@ -187,7 +187,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         isExternal
       >
         <Button size="sm" px="x3" variant="secondary">
-          View Details
+          {isUpdate ? 'View Updates' : 'View Proposal'}
         </Button>
       </LinkWrapper>
       <ShareButton url={shareUrl} size="sm" variant="secondary" />

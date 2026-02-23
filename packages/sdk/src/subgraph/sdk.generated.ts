@@ -1421,6 +1421,7 @@ export type Dao = {
   voterCount: Scalars['Int']['output']
   voters: Array<DaoVoter>
   zoraCoins: Array<ZoraCoin>
+  zoraDrops: Array<ZoraDrop>
 }
 
 export type DaoAuctionsArgs = {
@@ -1509,6 +1510,14 @@ export type DaoZoraCoinsArgs = {
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<ZoraCoin_Filter>
+}
+
+export type DaoZoraDropsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDrop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ZoraDrop_Filter>
 }
 
 export type DaoTokenOwner = {
@@ -1987,6 +1996,7 @@ export type Dao_Filter = {
   voterCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
   voters_?: InputMaybe<DaoVoter_Filter>
   zoraCoins_?: InputMaybe<ZoraCoin_Filter>
+  zoraDrops_?: InputMaybe<ZoraDrop_Filter>
 }
 
 export enum Dao_OrderBy {
@@ -2032,6 +2042,7 @@ export enum Dao_OrderBy {
   VoterCount = 'voterCount',
   Voters = 'voters',
   ZoraCoins = 'zoraCoins',
+  ZoraDrops = 'zoraDrops',
 }
 
 export type DaoMultisigUpdate = {
@@ -2170,6 +2181,7 @@ export enum FeedEventType {
   ProposalUpdated = 'PROPOSAL_UPDATED',
   ProposalVoted = 'PROPOSAL_VOTED',
   ZoraCoinCreated = 'ZORA_COIN_CREATED',
+  ZoraDropCreated = 'ZORA_DROP_CREATED',
 }
 
 export type FeedEvent_Filter = {
@@ -4104,6 +4116,10 @@ export type Query = {
   zoraCoinCreatedEvent?: Maybe<ZoraCoinCreatedEvent>
   zoraCoinCreatedEvents: Array<ZoraCoinCreatedEvent>
   zoraCoins: Array<ZoraCoin>
+  zoraDrop?: Maybe<ZoraDrop>
+  zoraDropCreatedEvent?: Maybe<ZoraDropCreatedEvent>
+  zoraDropCreatedEvents: Array<ZoraDropCreatedEvent>
+  zoraDrops: Array<ZoraDrop>
 }
 
 export type Query_MetaArgs = {
@@ -4549,6 +4565,38 @@ export type QueryZoraCoinsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<ZoraCoin_Filter>
+}
+
+export type QueryZoraDropArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraDropCreatedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraDropCreatedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropCreatedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraDropCreatedEvent_Filter>
+}
+
+export type QueryZoraDropsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDrop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraDrop_Filter>
 }
 
 export type Snapshot = {
@@ -5608,6 +5656,498 @@ export enum ZoraCoin_OrderBy {
   Version = 'version',
 }
 
+export type ZoraDrop = {
+  __typename?: 'ZoraDrop'
+  animationURI: Scalars['String']['output']
+  createdAt: Scalars['BigInt']['output']
+  createdAtBlock: Scalars['BigInt']['output']
+  creator: Scalars['Bytes']['output']
+  dao?: Maybe<Dao>
+  description: Scalars['String']['output']
+  editionSize: Scalars['BigInt']['output']
+  fundsRecipient: Scalars['Bytes']['output']
+  id: Scalars['ID']['output']
+  imageURI: Scalars['String']['output']
+  maxSalePurchasePerAddress: Scalars['BigInt']['output']
+  metadataRenderer: Scalars['Bytes']['output']
+  name: Scalars['String']['output']
+  presaleEnd: Scalars['BigInt']['output']
+  presaleMerkleRoot: Scalars['Bytes']['output']
+  presaleStart: Scalars['BigInt']['output']
+  publicSaleEnd: Scalars['BigInt']['output']
+  publicSalePrice: Scalars['BigInt']['output']
+  publicSaleStart: Scalars['BigInt']['output']
+  royaltyBPS: Scalars['Int']['output']
+  symbol: Scalars['String']['output']
+  transactionHash: Scalars['Bytes']['output']
+}
+
+export type ZoraDropCreatedEvent = FeedEvent & {
+  __typename?: 'ZoraDropCreatedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  dao: Dao
+  id: Scalars['ID']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+  zoraDrop: ZoraDrop
+}
+
+export type ZoraDropCreatedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<ZoraDropCreatedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ZoraDropCreatedEvent_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+  zoraDrop?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_?: InputMaybe<ZoraDrop_Filter>
+  zoraDrop_contains?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_gt?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_gte?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraDrop_lt?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_lte?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_contains?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraDrop_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum ZoraDropCreatedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+  ZoraDrop = 'zoraDrop',
+  ZoraDropAnimationUri = 'zoraDrop__animationURI',
+  ZoraDropCreatedAt = 'zoraDrop__createdAt',
+  ZoraDropCreatedAtBlock = 'zoraDrop__createdAtBlock',
+  ZoraDropCreator = 'zoraDrop__creator',
+  ZoraDropDescription = 'zoraDrop__description',
+  ZoraDropEditionSize = 'zoraDrop__editionSize',
+  ZoraDropFundsRecipient = 'zoraDrop__fundsRecipient',
+  ZoraDropId = 'zoraDrop__id',
+  ZoraDropImageUri = 'zoraDrop__imageURI',
+  ZoraDropMaxSalePurchasePerAddress = 'zoraDrop__maxSalePurchasePerAddress',
+  ZoraDropMetadataRenderer = 'zoraDrop__metadataRenderer',
+  ZoraDropName = 'zoraDrop__name',
+  ZoraDropPresaleEnd = 'zoraDrop__presaleEnd',
+  ZoraDropPresaleMerkleRoot = 'zoraDrop__presaleMerkleRoot',
+  ZoraDropPresaleStart = 'zoraDrop__presaleStart',
+  ZoraDropPublicSaleEnd = 'zoraDrop__publicSaleEnd',
+  ZoraDropPublicSalePrice = 'zoraDrop__publicSalePrice',
+  ZoraDropPublicSaleStart = 'zoraDrop__publicSaleStart',
+  ZoraDropRoyaltyBps = 'zoraDrop__royaltyBPS',
+  ZoraDropSymbol = 'zoraDrop__symbol',
+  ZoraDropTransactionHash = 'zoraDrop__transactionHash',
+}
+
+export type ZoraDrop_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ZoraDrop_Filter>>>
+  animationURI?: InputMaybe<Scalars['String']['input']>
+  animationURI_contains?: InputMaybe<Scalars['String']['input']>
+  animationURI_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_ends_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_gt?: InputMaybe<Scalars['String']['input']>
+  animationURI_gte?: InputMaybe<Scalars['String']['input']>
+  animationURI_in?: InputMaybe<Array<Scalars['String']['input']>>
+  animationURI_lt?: InputMaybe<Scalars['String']['input']>
+  animationURI_lte?: InputMaybe<Scalars['String']['input']>
+  animationURI_not?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_contains?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  animationURI_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_starts_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  createdAt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  creator?: InputMaybe<Scalars['Bytes']['input']>
+  creator_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  creator_lt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_lte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description?: InputMaybe<Scalars['String']['input']>
+  description_contains?: InputMaybe<Scalars['String']['input']>
+  description_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  description_ends_with?: InputMaybe<Scalars['String']['input']>
+  description_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_gt?: InputMaybe<Scalars['String']['input']>
+  description_gte?: InputMaybe<Scalars['String']['input']>
+  description_in?: InputMaybe<Array<Scalars['String']['input']>>
+  description_lt?: InputMaybe<Scalars['String']['input']>
+  description_lte?: InputMaybe<Scalars['String']['input']>
+  description_not?: InputMaybe<Scalars['String']['input']>
+  description_not_contains?: InputMaybe<Scalars['String']['input']>
+  description_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  description_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  description_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  description_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  description_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_starts_with?: InputMaybe<Scalars['String']['input']>
+  description_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  editionSize?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_gt?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_gte?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  editionSize_lt?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_lte?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_not?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  fundsRecipient?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_contains?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_gt?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_gte?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  fundsRecipient_lt?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_lte?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_not?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  imageURI?: InputMaybe<Scalars['String']['input']>
+  imageURI_contains?: InputMaybe<Scalars['String']['input']>
+  imageURI_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_ends_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_gt?: InputMaybe<Scalars['String']['input']>
+  imageURI_gte?: InputMaybe<Scalars['String']['input']>
+  imageURI_in?: InputMaybe<Array<Scalars['String']['input']>>
+  imageURI_lt?: InputMaybe<Scalars['String']['input']>
+  imageURI_lte?: InputMaybe<Scalars['String']['input']>
+  imageURI_not?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_contains?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  imageURI_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_starts_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  maxSalePurchasePerAddress?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_gt?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_gte?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  maxSalePurchasePerAddress_lt?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_lte?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_not?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  metadataRenderer?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_contains?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_gt?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_gte?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  metadataRenderer_lt?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_lte?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_not?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  name?: InputMaybe<Scalars['String']['input']>
+  name_contains?: InputMaybe<Scalars['String']['input']>
+  name_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  name_ends_with?: InputMaybe<Scalars['String']['input']>
+  name_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_gt?: InputMaybe<Scalars['String']['input']>
+  name_gte?: InputMaybe<Scalars['String']['input']>
+  name_in?: InputMaybe<Array<Scalars['String']['input']>>
+  name_lt?: InputMaybe<Scalars['String']['input']>
+  name_lte?: InputMaybe<Scalars['String']['input']>
+  name_not?: InputMaybe<Scalars['String']['input']>
+  name_not_contains?: InputMaybe<Scalars['String']['input']>
+  name_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  name_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  name_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  name_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  name_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_starts_with?: InputMaybe<Scalars['String']['input']>
+  name_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  or?: InputMaybe<Array<InputMaybe<ZoraDrop_Filter>>>
+  presaleEnd?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_gt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_gte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  presaleEnd_lt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_lte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_not?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  presaleMerkleRoot?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_contains?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_gt?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_gte?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  presaleMerkleRoot_lt?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_lte?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_not?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  presaleStart?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_gt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_gte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  presaleStart_lt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_lte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_not?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleEnd?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_gt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_gte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleEnd_lt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_lte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_not?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSalePrice?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_gt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_gte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSalePrice_lt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_lte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_not?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleStart?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_gt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_gte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleStart_lt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_lte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_not?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  royaltyBPS?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_gt?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_gte?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  royaltyBPS_lt?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_lte?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_not?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  symbol?: InputMaybe<Scalars['String']['input']>
+  symbol_contains?: InputMaybe<Scalars['String']['input']>
+  symbol_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_ends_with?: InputMaybe<Scalars['String']['input']>
+  symbol_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_gt?: InputMaybe<Scalars['String']['input']>
+  symbol_gte?: InputMaybe<Scalars['String']['input']>
+  symbol_in?: InputMaybe<Array<Scalars['String']['input']>>
+  symbol_lt?: InputMaybe<Scalars['String']['input']>
+  symbol_lte?: InputMaybe<Scalars['String']['input']>
+  symbol_not?: InputMaybe<Scalars['String']['input']>
+  symbol_not_contains?: InputMaybe<Scalars['String']['input']>
+  symbol_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  symbol_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  symbol_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  symbol_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_starts_with?: InputMaybe<Scalars['String']['input']>
+  symbol_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum ZoraDrop_OrderBy {
+  AnimationUri = 'animationURI',
+  CreatedAt = 'createdAt',
+  CreatedAtBlock = 'createdAtBlock',
+  Creator = 'creator',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Description = 'description',
+  EditionSize = 'editionSize',
+  FundsRecipient = 'fundsRecipient',
+  Id = 'id',
+  ImageUri = 'imageURI',
+  MaxSalePurchasePerAddress = 'maxSalePurchasePerAddress',
+  MetadataRenderer = 'metadataRenderer',
+  Name = 'name',
+  PresaleEnd = 'presaleEnd',
+  PresaleMerkleRoot = 'presaleMerkleRoot',
+  PresaleStart = 'presaleStart',
+  PublicSaleEnd = 'publicSaleEnd',
+  PublicSalePrice = 'publicSalePrice',
+  PublicSaleStart = 'publicSaleStart',
+  RoyaltyBps = 'royaltyBPS',
+  Symbol = 'symbol',
+  TransactionHash = 'transactionHash',
+}
+
 export type _Block_ = {
   __typename?: '_Block_'
   /** The hash of the block */
@@ -6558,273 +7098,35 @@ export type FeedEventsQuery = {
           contractImage: string
         }
       }
-  >
-}
-
-export type FeedEventsWithoutCoinsQueryVariables = Exact<{
-  first: Scalars['Int']['input']
-  where?: InputMaybe<FeedEvent_Filter>
-}>
-
-export type FeedEventsWithoutCoinsQuery = {
-  __typename?: 'Query'
-  feedEvents: Array<
     | {
-        __typename: 'AuctionBidPlacedEvent'
+        __typename: 'ZoraDropCreatedEvent'
         id: string
         type: FeedEventType
         timestamp: any
         blockNumber: any
         transactionHash: any
         actor: any
-        auction: {
-          __typename?: 'Auction'
+        zoraDrop: {
+          __typename?: 'ZoraDrop'
           id: string
-          startTime: any
-          endTime: any
-          token: {
-            __typename?: 'Token'
-            tokenId: any
-            owner: any
-            name: string
-            image?: string | null
-          }
-        }
-        bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any; bidder: any }
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
+          creator: any
           name: string
           symbol: string
-          contractImage: string
+          description: string
+          imageURI: string
+          animationURI: string
+          editionSize: any
+          metadataRenderer: any
+          royaltyBPS: number
+          fundsRecipient: any
+          publicSalePrice: any
+          maxSalePurchasePerAddress: any
+          publicSaleStart: any
+          publicSaleEnd: any
+          presaleStart: any
+          presaleEnd: any
+          presaleMerkleRoot: any
         }
-      }
-    | {
-        __typename: 'AuctionCreatedEvent'
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
-        auction: {
-          __typename?: 'Auction'
-          id: string
-          startTime: any
-          endTime: any
-          token: {
-            __typename?: 'Token'
-            tokenId: any
-            name: string
-            image?: string | null
-          }
-        }
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
-          name: string
-          symbol: string
-          contractImage: string
-        }
-      }
-    | {
-        __typename: 'AuctionSettledEvent'
-        amount: any
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
-        auction: {
-          __typename?: 'Auction'
-          id: string
-          startTime: any
-          endTime: any
-          token: {
-            __typename?: 'Token'
-            tokenId: any
-            owner: any
-            name: string
-            image?: string | null
-          }
-        }
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
-          name: string
-          symbol: string
-          contractImage: string
-        }
-      }
-    | {
-        __typename: 'ClankerTokenCreatedEvent'
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
-          name: string
-          symbol: string
-          contractImage: string
-        }
-      }
-    | {
-        __typename: 'ProposalCreatedEvent'
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
-        proposal: {
-          __typename?: 'Proposal'
-          proposalId: any
-          proposalNumber: number
-          timeCreated: any
-          title?: string | null
-          description?: string | null
-          proposer: any
-        }
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
-          name: string
-          symbol: string
-          contractImage: string
-        }
-      }
-    | {
-        __typename: 'ProposalExecutedEvent'
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
-        proposal: {
-          __typename?: 'Proposal'
-          proposalId: any
-          proposalNumber: number
-          timeCreated: any
-          title?: string | null
-          description?: string | null
-          proposer: any
-        }
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
-          name: string
-          symbol: string
-          contractImage: string
-        }
-      }
-    | {
-        __typename: 'ProposalUpdatedEvent'
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
-        proposal: {
-          __typename?: 'Proposal'
-          proposalId: any
-          proposalNumber: number
-          timeCreated: any
-          title?: string | null
-          description?: string | null
-          proposer: any
-        }
-        update: {
-          __typename?: 'ProposalUpdate'
-          messageType: number
-          message: string
-          originalMessageId: any
-        }
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
-          name: string
-          symbol: string
-          contractImage: string
-        }
-      }
-    | {
-        __typename: 'ProposalVotedEvent'
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
-        proposal: {
-          __typename?: 'Proposal'
-          proposalId: any
-          proposalNumber: number
-          timeCreated: any
-          title?: string | null
-          description?: string | null
-          proposer: any
-        }
-        vote: {
-          __typename?: 'ProposalVote'
-          support: ProposalVoteSupport
-          weight: number
-          reason?: string | null
-        }
-        dao: {
-          __typename?: 'DAO'
-          auctionAddress: any
-          governorAddress: any
-          metadataAddress: any
-          tokenAddress: any
-          treasuryAddress: any
-          name: string
-          symbol: string
-          contractImage: string
-        }
-      }
-    | {
-        __typename: 'ZoraCoinCreatedEvent'
-        id: string
-        type: FeedEventType
-        timestamp: any
-        blockNumber: any
-        transactionHash: any
-        actor: any
         dao: {
           __typename?: 'DAO'
           auctionAddress: any
@@ -7906,122 +8208,27 @@ export const FeedEventsDocument = gql`
           currency
         }
       }
-    }
-  }
-`
-export const FeedEventsWithoutCoinsDocument = gql`
-  query feedEventsWithoutCoins($first: Int!, $where: FeedEvent_filter) {
-    feedEvents(first: $first, where: $where, orderBy: timestamp, orderDirection: desc) {
-      __typename
-      id
-      type
-      timestamp
-      blockNumber
-      transactionHash
-      actor
-      dao {
-        auctionAddress
-        governorAddress
-        metadataAddress
-        tokenAddress
-        treasuryAddress
-        name
-        symbol
-        contractImage
-      }
-      ... on ProposalCreatedEvent {
-        proposal {
-          proposalId
-          proposalNumber
-          timeCreated
-          title
-          description
-          proposer
-        }
-      }
-      ... on ProposalVotedEvent {
-        proposal {
-          proposalId
-          proposalNumber
-          timeCreated
-          title
-          description
-          proposer
-        }
-        vote {
-          support
-          weight
-          reason
-        }
-      }
-      ... on ProposalUpdatedEvent {
-        proposal {
-          proposalId
-          proposalNumber
-          timeCreated
-          title
-          description
-          proposer
-        }
-        update {
-          messageType
-          message
-          originalMessageId
-        }
-      }
-      ... on ProposalExecutedEvent {
-        proposal {
-          proposalId
-          proposalNumber
-          timeCreated
-          title
-          description
-          proposer
-        }
-      }
-      ... on AuctionCreatedEvent {
-        auction {
+      ... on ZoraDropCreatedEvent {
+        zoraDrop {
           id
-          startTime
-          endTime
-          token {
-            tokenId
-            name
-            image
-          }
+          creator
+          name
+          symbol
+          description
+          imageURI
+          animationURI
+          editionSize
+          metadataRenderer
+          royaltyBPS
+          fundsRecipient
+          publicSalePrice
+          maxSalePurchasePerAddress
+          publicSaleStart
+          publicSaleEnd
+          presaleStart
+          presaleEnd
+          presaleMerkleRoot
         }
-      }
-      ... on AuctionBidPlacedEvent {
-        auction {
-          id
-          startTime
-          endTime
-          token {
-            tokenId
-            owner
-            name
-            image
-          }
-        }
-        bid {
-          amount
-          bidTime
-          bidder
-        }
-      }
-      ... on AuctionSettledEvent {
-        auction {
-          id
-          startTime
-          endTime
-          token {
-            tokenId
-            owner
-            name
-            image
-          }
-        }
-        amount
       }
     }
   }
@@ -8625,24 +8832,6 @@ export function getSdk(
             signal,
           }),
         'feedEvents',
-        'query',
-        variables
-      )
-    },
-    feedEventsWithoutCoins(
-      variables: FeedEventsWithoutCoinsQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
-      signal?: RequestInit['signal']
-    ): Promise<FeedEventsWithoutCoinsQuery> {
-      return withWrapper(
-        (wrappedRequestHeaders) =>
-          client.request<FeedEventsWithoutCoinsQuery>({
-            document: FeedEventsWithoutCoinsDocument,
-            variables,
-            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
-            signal,
-          }),
-        'feedEventsWithoutCoins',
         'query',
         variables
       )

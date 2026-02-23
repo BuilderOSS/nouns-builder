@@ -24,6 +24,7 @@ import type {
   OnOpenVoteModal,
 } from './types/modalStates'
 import { ZoraCoinCreatedItem } from './ZoraCoinCreatedItem'
+import { ZoraDropCreatedItem } from './ZoraDropCreatedItem'
 
 export interface FeedItemProps {
   item: FeedItemType
@@ -78,6 +79,8 @@ export const FeedItem: React.FC<FeedItemProps> = ({
         return <ClankerTokenCreatedItem item={item} />
       case 'ZORA_COIN_CREATED':
         return <ZoraCoinCreatedItem item={item} />
+      case 'ZORA_DROP_CREATED':
+        return <ZoraDropCreatedItem item={item} />
       default:
         return <Text color="text3">Unknown feed item type</Text>
     }

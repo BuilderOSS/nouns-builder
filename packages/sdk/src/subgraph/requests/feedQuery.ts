@@ -168,11 +168,11 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
       return {
         ...baseItem,
         type: 'CLANKER_TOKEN_CREATED',
-        tokenAddress: event.clankerToken?.tokenAddress,
-        tokenName: event.clankerToken?.tokenName,
-        tokenSymbol: event.clankerToken?.tokenSymbol,
-        tokenImage: event.clankerToken?.tokenImage,
-        poolId: event.clankerToken?.poolId,
+        tokenAddress: event.clankerToken.tokenAddress,
+        tokenName: event.clankerToken.tokenName,
+        tokenSymbol: event.clankerToken.tokenSymbol,
+        tokenImage: event.clankerToken.tokenImage,
+        poolId: event.clankerToken.poolId,
       }
     }
 
@@ -180,11 +180,36 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
       return {
         ...baseItem,
         type: 'ZORA_COIN_CREATED',
-        coinAddress: event.zoraCoin?.coinAddress,
-        coinName: event.zoraCoin?.name,
-        coinSymbol: event.zoraCoin?.symbol,
-        coinUri: event.zoraCoin?.uri,
-        currency: event.zoraCoin?.currency,
+        coinAddress: event.zoraCoin.coinAddress,
+        coinName: event.zoraCoin.name,
+        coinSymbol: event.zoraCoin.symbol,
+        coinUri: event.zoraCoin.uri,
+        currency: event.zoraCoin.currency,
+      }
+    }
+
+    case 'ZoraDropCreatedEvent': {
+      return {
+        ...baseItem,
+        type: 'ZORA_DROP_CREATED',
+        dropId: event.zoraDrop.id,
+        dropCreator: event.zoraDrop.creator,
+        dropName: event.zoraDrop.name,
+        dropSymbol: event.zoraDrop.symbol,
+        dropDescription: event.zoraDrop.description,
+        dropImageURI: event.zoraDrop.imageURI,
+        dropAnimationURI: event.zoraDrop.animationURI,
+        editionSize: event.zoraDrop.editionSize.toString(),
+        metadataRenderer: event.zoraDrop.metadataRenderer,
+        royaltyBPS: Number(event.zoraDrop.royaltyBPS),
+        fundsRecipient: event.zoraDrop.fundsRecipient,
+        publicSalePrice: event.zoraDrop.publicSalePrice.toString(),
+        maxSalePurchasePerAddress: Number(event.zoraDrop.maxSalePurchasePerAddress),
+        publicSaleStart: Number(event.zoraDrop.publicSaleStart),
+        publicSaleEnd: Number(event.zoraDrop.publicSaleEnd),
+        presaleStart: Number(event.zoraDrop.presaleStart),
+        presaleEnd: Number(event.zoraDrop.presaleEnd),
+        presaleMerkleRoot: event.zoraDrop.presaleMerkleRoot,
       }
     }
 
@@ -258,21 +283,10 @@ export const getFeedData = async ({
       }
     }
 
-    let data: FeedEventsQuery
-
-    if (isChainIdSupportedByCoining(chainId)) {
-      // Query feed events
-      data = await SDK.connect(chainId).feedEvents({
-        first: fetchLimit,
-        where,
-      } as FeedEventsQueryVariables)
-    } else {
-      // Query feed events
-      data = (await SDK.connect(chainId).feedEventsWithoutCoins({
-        first: fetchLimit,
-        where,
-      } as FeedEventsQueryVariables)) as FeedEventsQuery
-    }
+    const data: FeedEventsQuery = await SDK.connect(chainId).feedEvents({
+      first: fetchLimit,
+      where,
+    } as FeedEventsQueryVariables)
 
     const events = data.feedEvents
 

@@ -3,6 +3,7 @@ import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import { useFormik } from 'formik'
 import React, { useMemo } from 'react'
@@ -52,6 +53,7 @@ const EVENT_TYPE_LABELS: Record<FeedEventType, string> = {
   [FeedEventType.ProposalUpdated]: 'Proposal Update',
   [FeedEventType.ClankerTokenCreated]: 'Creator Coin Deployed',
   [FeedEventType.ZoraCoinCreated]: 'Post Published',
+  [FeedEventType.ZoraDropCreated]: 'Drop Created',
 }
 
 const COIN_EVENT_TYPES: FeedEventType[] = [
@@ -62,6 +64,10 @@ const COIN_EVENT_TYPES: FeedEventType[] = [
 const hasNoCoinSupportedChains = (chainIds: CHAIN_ID[]) =>
   chainIds.length > 0 &&
   chainIds.every((chainId) => !isChainIdSupportedByCoining(chainId))
+
+const hasNoDroposalSupportedChains = (chainIds: CHAIN_ID[]) =>
+  chainIds.length > 0 &&
+  chainIds.every((chainId) => !isChainIdSupportedByDroposal(chainId))
 
 export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   open,
@@ -92,20 +98,27 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   const toggleChain = (chainId: CHAIN_ID) => {
     const currentChainIds = formik.values.chainIds
     let finalChainIds: CHAIN_ID[] = []
+
     if (currentChainIds.includes(chainId)) {
       finalChainIds = currentChainIds.filter((id) => id !== chainId)
     } else {
       finalChainIds = [...currentChainIds, chainId]
     }
-    formik.setFieldValue('chainIds', finalChainIds)
 
     const currentEventTypes = formik.values.eventTypes
+    let finalEventTypes: FeedEventType[] = currentEventTypes
+
     if (hasNoCoinSupportedChains(finalChainIds)) {
-      formik.setFieldValue(
-        'eventTypes',
-        currentEventTypes.filter((type) => !COIN_EVENT_TYPES.includes(type))
+      finalEventTypes = finalEventTypes.filter((type) => !COIN_EVENT_TYPES.includes(type))
+    }
+    if (hasNoDroposalSupportedChains(finalChainIds)) {
+      finalEventTypes = finalEventTypes.filter(
+        (type) => type !== FeedEventType.ZoraDropCreated
       )
     }
+
+    formik.setFieldValue('chainIds', finalChainIds)
+    formik.setFieldValue('eventTypes', finalEventTypes)
   }
 
   const toggleEventType = (eventType: FeedEventType) => {
@@ -160,14 +173,18 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   }, [formik.values])
 
   const eventTypeLabels = useMemo(() => {
+    let entries = Object.entries(EVENT_TYPE_LABELS)
     if (hasNoCoinSupportedChains(formik.values.chainIds)) {
-      return Object.fromEntries(
-        Object.entries(EVENT_TYPE_LABELS).filter(
-          ([eventType]) => !COIN_EVENT_TYPES.includes(eventType as FeedEventType)
-        )
+      entries = entries.filter(
+        ([eventType]) => !COIN_EVENT_TYPES.includes(eventType as FeedEventType)
       )
     }
-    return EVENT_TYPE_LABELS
+    if (hasNoDroposalSupportedChains(formik.values.chainIds)) {
+      entries = entries.filter(
+        ([eventType]) => eventType !== FeedEventType.ZoraDropCreated
+      )
+    }
+    return Object.fromEntries(entries)
   }, [formik.values.chainIds])
 
   const hasFilters =
