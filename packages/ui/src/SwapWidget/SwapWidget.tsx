@@ -38,6 +38,9 @@ interface SwapWidgetProps {
   chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
 }
 
+// Toggle to enable/disable the sell tab
+const ENABLE_SELL_TAB = false
+
 export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) => {
   const [amountIn, setAmountIn] = useState('')
   const [isBuying, setIsBuying] = useState(true) // true = buy coin, false = sell coin
@@ -426,33 +429,39 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
 
   return (
     <Box>
-      {/* Buy/Sell Toggle */}
-      <Flex gap="x2" mb="x4">
-        <Button
-          variant={isBuying ? 'primary' : 'secondary'}
-          onClick={() => {
-            setIsBuying(true)
-            setAmountIn('')
-            setSuccessTxHash(null)
-            setPendingTxHash(null)
-          }}
-          style={{ flex: 1 }}
-        >
+      {/* Buy/Sell Toggle or Title */}
+      {ENABLE_SELL_TAB ? (
+        <Flex gap="x2" mb="x4">
+          <Button
+            variant={isBuying ? 'primary' : 'secondary'}
+            onClick={() => {
+              setIsBuying(true)
+              setAmountIn('')
+              setSuccessTxHash(null)
+              setPendingTxHash(null)
+            }}
+            style={{ flex: 1 }}
+          >
+            Buy {symbol}
+          </Button>
+          <Button
+            variant={!isBuying ? 'primary' : 'secondary'}
+            onClick={() => {
+              setIsBuying(false)
+              setAmountIn('')
+              setSuccessTxHash(null)
+              setPendingTxHash(null)
+            }}
+            style={{ flex: 1 }}
+          >
+            Sell {symbol}
+          </Button>
+        </Flex>
+      ) : (
+        <Text variant="heading-sm" mb="x4">
           Buy {symbol}
-        </Button>
-        <Button
-          variant={!isBuying ? 'primary' : 'secondary'}
-          onClick={() => {
-            setIsBuying(false)
-            setAmountIn('')
-            setSuccessTxHash(null)
-            setPendingTxHash(null)
-          }}
-          style={{ flex: 1 }}
-        >
-          Sell {symbol}
-        </Button>
-      </Flex>
+        </Text>
+      )}
 
       {/* Payment Token Selector (show for both buying and selling) */}
       {swapOptions.length > 0 && !isLoadingOptions && (
