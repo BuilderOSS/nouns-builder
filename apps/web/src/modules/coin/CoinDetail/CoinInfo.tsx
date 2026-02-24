@@ -244,7 +244,7 @@ export const CoinInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               DAO
             </Text>
-            <Link link={getDaoLink(chainId, daoAddress)}>
+            <Link link={getDaoLink(chainId, daoAddress)} isExternal>
               <Button variant="secondary" size="sm">
                 {daoImage && (
                   <Box flexShrink={0}>

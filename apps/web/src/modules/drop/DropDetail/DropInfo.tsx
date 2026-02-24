@@ -161,18 +161,6 @@ export const DropInfo = ({
         />
       </Box>
 
-      {/* Metadata Renderer */}
-      <Box mb="x3">
-        <Text variant="label-sm" color="text3" mb="x2">
-          Metadata Renderer
-        </Text>
-        <ContractLink
-          address={drop.metadataRenderer as Address}
-          chainId={chainId as CHAIN_ID}
-          size="sm"
-        />
-      </Box>
-
       {/* DAO */}
       {daoAddress && daoName && (
         <>
@@ -180,7 +168,7 @@ export const DropInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               DAO
             </Text>
-            <Link link={getDaoLink(chainId, daoAddress)}>
+            <Link link={getDaoLink(chainId, daoAddress)} isExternal>
               <Button variant="secondary" size="sm">
                 {daoImage && (
                   <Box flexShrink={0}>
