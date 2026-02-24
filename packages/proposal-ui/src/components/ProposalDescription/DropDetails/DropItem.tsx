@@ -119,8 +119,14 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
 
       {/* Drop Information */}
       <Stack gap="x2">
-        <Stack direction="row" align="center" justify="space-between" flexWrap="wrap">
-          <Stack direction="row" align="center" gap="x2">
+        <Stack
+          direction="row"
+          align="center"
+          justify="space-between"
+          flexWrap="wrap"
+          gap="x2"
+        >
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Name:
             </Text>
@@ -128,7 +134,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
               {drop.name} ({drop.symbol})
             </Text>
           </Stack>
-          <Stack direction="row" align="center" gap="x2">
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Funds Recipient:
             </Text>
@@ -150,28 +156,40 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
           </Stack>
         )}
 
-        <Stack direction="row" align="center" justify="space-between" flexWrap="wrap">
-          <Stack direction="row" align="center" gap="x2">
+        <Stack
+          direction="row"
+          align="center"
+          justify="space-between"
+          flexWrap="wrap"
+          gap="x2"
+        >
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Max Per Address:
             </Text>
             <Text variant="label-sm">{maxPurchaseDisplay}</Text>
           </Stack>
-          <Stack direction="row" align="center" gap="x2">
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Edition Size:
             </Text>
             <Text variant="label-sm">{editionSizeDisplay}</Text>
           </Stack>
         </Stack>
-        <Stack direction="row" align="center" justify="space-between" flexWrap="wrap">
-          <Stack direction="row" align="center" gap="x2">
+        <Stack
+          direction="row"
+          align="center"
+          justify="space-between"
+          flexWrap="wrap"
+          gap="x2"
+        >
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Price:
             </Text>
             <Text variant="label-sm">{formatEther(drop.publicSalePrice)} ETH</Text>
           </Stack>
-          <Stack direction="row" align="center" gap="x2">
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Royalty:
             </Text>
@@ -179,14 +197,20 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
           </Stack>
         </Stack>
 
-        <Stack direction="row" align="center" justify="space-between" flexWrap="wrap">
-          <Stack direction="row" align="center" gap="x2">
+        <Stack
+          direction="row"
+          align="center"
+          justify="space-between"
+          flexWrap="wrap"
+          gap="x2"
+        >
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Sale Start:
             </Text>
             <Text variant="label-sm">{saleStartDate}</Text>
           </Stack>
-          <Stack direction="row" align="center" gap="x2">
+          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Sale End:
             </Text>
