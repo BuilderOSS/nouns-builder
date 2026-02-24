@@ -6,11 +6,10 @@ import { useState } from 'react'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
-import { type FormComponent } from '../types'
-
-export const PauseAuctions: FormComponent = ({ resetTransactionType }) => {
+export const PauseAuctions: React.FC = () => {
   const { auction } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: paused } = useReadContract({

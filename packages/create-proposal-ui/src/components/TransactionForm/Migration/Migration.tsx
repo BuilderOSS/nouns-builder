@@ -8,7 +8,6 @@ import axios from 'axios'
 import useSWR from 'swr'
 import { useReadContract } from 'wagmi'
 
-import { type FormComponent } from '../types'
 import { BridgeTreasuryForm } from './BridgeTreasuryForm'
 import { MigrateDAOForm } from './MigrateDAOForm'
 import { MigrationTracker } from './MigrationTracker'
@@ -20,7 +19,7 @@ export enum DAOMigrationProgress {
   DEPLOYED = 2,
 }
 
-export const Migration: FormComponent = ({ resetTransactionType }) => {
+export const Migration: React.FC = () => {
   const chain = useChainStore((x) => x.chain)
   const {
     addresses: { treasury, auction },
@@ -48,15 +47,11 @@ export const Migration: FormComponent = ({ resetTransactionType }) => {
   else if (!deployed) daoProgress = DAOMigrationProgress.PAUSED
 
   const formComponents = [
-    <PauseAuctionsForm
-      key="pause-auctions-form"
-      resetTransactionType={resetTransactionType}
-    />,
-    <MigrateDAOForm key="migrate-dao-form" resetTransactionType={resetTransactionType} />,
+    <PauseAuctionsForm key="pause-auctions-form" />,
+    <MigrateDAOForm key="migrate-dao-form" />,
     <BridgeTreasuryForm
       migratedToChainId={migratedRes?.migrated?.chainId}
       key="bridge-treasury-form"
-      resetTransactionType={resetTransactionType}
     />,
   ]
 

@@ -53,7 +53,6 @@ import {
 import { useBalance } from 'wagmi'
 import { ZodError } from 'zod'
 
-import type { FormComponent } from '../types'
 import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
 
 const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
@@ -361,9 +360,10 @@ const CreatorCoinEconomicsPreview: React.FC<CreatorCoinEconomicsPreviewProps> = 
   }
 }
 
-export const CreatorCoin: FormComponent = ({ resetTransactionType }) => {
+export const CreatorCoin: React.FC = () => {
   const { treasury, token: daoTokenAddress } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const { chain } = useChainStore()
 
   const [submitError, setSubmitError] = useState<string | undefined>()

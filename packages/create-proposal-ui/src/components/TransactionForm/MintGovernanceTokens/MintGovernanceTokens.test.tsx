@@ -29,9 +29,7 @@ describe('MintGovernanceTokens', () => {
   })
 
   it('should render initially disabled mint-governance-tokens form given a required upgrade', async () => {
-    const resetTransactionType = vi.fn()
-
-    render(<MintGovernanceTokens resetTransactionType={resetTransactionType} />, {
+    render(<MintGovernanceTokens />, {
       chain: FOUNDRY_CHAIN,
       addresses: BUILDER_DAO,
     })
@@ -74,9 +72,5 @@ describe('MintGovernanceTokens', () => {
     })
     const amountAfterSubmit = screen.getByDisplayValue(0) as HTMLInputElement
     expect(amountAfterSubmit.value).toBe('0')
-
-    await waitFor(() => {
-      expect(resetTransactionType).toHaveBeenCalledTimes(1)
-    })
   })
 })

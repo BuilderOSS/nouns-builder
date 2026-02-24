@@ -12,16 +12,16 @@ import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
-import { type FormComponent } from '../types'
 import { UpgradeInProgress, UpgradeRequired } from '../Upgrade'
 import { ReplaceArtworkForm } from './ReplaceArtworkForm'
 
 const REPLACE_ARTWORK_CONTRACT_VERSION = '1.2.0'
 
-export const ReplaceArtwork: FormComponent = ({ resetTransactionType }) => {
+export const ReplaceArtwork: React.FC = () => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const currentTransactions = useProposalStore((state) => state.transactions)
   const chain = useChainStore((x) => x.chain)
 

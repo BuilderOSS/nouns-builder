@@ -33,7 +33,6 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { type Address, encodeFunctionData, zeroAddress, zeroHash } from 'viem'
 import { useReadContract } from 'wagmi'
 
-import type { FormComponent } from '../types'
 import { ContentCoinPreviewDisplay } from './ContentCoinPreviewDisplay'
 import { IPFSUploader } from './ipfsUploader'
 
@@ -178,9 +177,10 @@ const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = 
   }
 }
 
-export const ContentCoin: FormComponent = ({ resetTransactionType }) => {
+export const ContentCoin: React.FC = () => {
   const { treasury, token } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const { chain } = useChainStore()
 
   const [submitError, setSubmitError] = useState<string | undefined>()

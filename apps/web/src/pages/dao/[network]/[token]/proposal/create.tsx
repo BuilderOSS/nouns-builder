@@ -6,7 +6,6 @@ import {
   SelectTransactionType,
   TRANSACTION_FORM_OPTIONS,
   TransactionForm,
-  TransactionFormType,
   TransactionTypeIcon,
   TwoColumnLayout,
 } from '@buildeross/create-proposal-ui'
@@ -16,7 +15,7 @@ import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
@@ -26,14 +25,14 @@ import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
 import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
-const createSelectOption = (type: TransactionFormType) => ({
+const createSelectOption = (type: TransactionType) => ({
   value: type,
   label: TRANSACTION_TYPES[type].title,
   icon: <TransactionTypeIcon transactionType={type} />,
@@ -44,7 +43,9 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const [transactionType, setTransactionType] = useState<TransactionFormType | null>(null)
+  const transactionType = useProposalStore((x) => x.transactionType)
+  const setTransactionType = useProposalStore((x) => x.setTransactionType)
+  const resetTransactionType = useProposalStore((x) => x.resetTransactionType)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -140,6 +141,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
     ]
   )
 
+  useEffect(() => {
+    if (
+      transactionType &&
+      !TRANSACTION_FORM_OPTIONS_FILTERED.includes(transactionType as any)
+    ) {
+      resetTransactionType()
+    }
+  }, [transactionType, TRANSACTION_FORM_OPTIONS_FILTERED, resetTransactionType])
+
   const options = useMemo(() => {
     return TRANSACTION_FORM_OPTIONS_FILTERED.map(createSelectOption)
   }, [TRANSACTION_FORM_OPTIONS_FILTERED])
@@ -216,10 +226,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
                 options={options}
                 onChange={(value) => setTransactionType(value)}
               />
-              <TransactionForm
-                transactionType={transactionType}
-                resetTransactionType={() => setTransactionType(null)}
-              />
+              <TransactionForm />
             </Stack>
           }
         />
