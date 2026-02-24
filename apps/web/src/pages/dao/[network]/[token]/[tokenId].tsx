@@ -6,16 +6,19 @@ import {
   Activity,
   Admin,
   Coins,
+  Drops,
   SectionHandler,
   SmartContracts,
   Treasury,
 } from '@buildeross/dao-ui'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useVotes } from '@buildeross/hooks/useVotes'
+import { useZoraDrops } from '@buildeross/hooks/useZoraDrops'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
@@ -76,6 +79,22 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   const hasClankerToken = useMemo(
     () => isCoinSupported && clankerTokens && clankerTokens.length > 0,
     [isCoinSupported, clankerTokens]
+  )
+
+  // Check if chain supports drops
+  const isDropSupported = isChainIdSupportedByDroposal(chainId)
+
+  // Fetch drops to check if DAO has any
+  const { data: drops } = useZoraDrops({
+    chainId,
+    collectionAddress: collection,
+    enabled: isDropSupported,
+    first: 1,
+  })
+
+  const hasDrops = useMemo(
+    () => isDropSupported && drops && drops.length > 0,
+    [isDropSupported, drops]
   )
 
   const openTab = React.useCallback(
@@ -155,18 +174,30 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         }
       : null
 
+    // Only show Drops tab if chain supports drops AND DAO has drops
+    const dropsSection = hasDrops
+      ? {
+          title: 'Drops',
+          component: [
+            <Drops key={'drops'} onOpenProposalCreate={openProposalCreatePage} />,
+          ],
+        }
+      : null
+
     const publicSections = [
       aboutSection,
       daoFeed,
       treasurySection,
       proposalsSection,
       ...(coinsSection ? [coinsSection] : []),
+      ...(dropsSection ? [dropsSection] : []),
       smartContractsSection,
     ]
 
     return hasThreshold ? [...publicSections, adminSection] : publicSections
   }, [
     hasClankerToken,
+    hasDrops,
     hasThreshold,
     openTab,
     openProposalCreatePage,

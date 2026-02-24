@@ -1,5 +1,5 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { useZoraMint, ZORA_PROTOCOL_REWARD } from '@buildeross/hooks'
+import { useEthUsdPrice, useZoraMint, ZORA_PROTOCOL_REWARD } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Input, Stack, Text } from '@buildeross/zord'
 import { useState } from 'react'
@@ -8,12 +8,13 @@ import { useAccount } from 'wagmi'
 
 import { ContractButton } from '../ContractButton'
 import { Countdown } from '../Countdown'
+import TextArea from '../Fields/TextArea'
 import {
   errorMessage,
   mintButton,
   mintInput,
-  mintInputContainer,
   quantityButton,
+  quantityInputWrapper,
   successMessage,
   widgetContainer,
 } from './DropMintWidget.css'
@@ -51,6 +52,9 @@ export const DropMintWidget = ({
   const [comment, setComment] = useState('')
   const { address } = useAccount()
   const isConnected = Boolean(address)
+
+  // Fetch ETH/USD price
+  const { price: ethUsdPrice } = useEthUsdPrice()
 
   const { mint, isPending, isReady, mintStatus, mintError, transactionHash } =
     useZoraMint({
@@ -93,6 +97,11 @@ export const DropMintWidget = ({
   const totalPriceWei = salePriceWei + protocolRewardWei
   const totalPrice = formatEther(totalPriceWei)
 
+  // Calculate USD prices
+  const pricePerMintEth = Number(priceEth) + ZORA_PROTOCOL_REWARD
+  const pricePerMintUsd = ethUsdPrice ? pricePerMintEth * ethUsdPrice : null
+  const totalPriceUsd = ethUsdPrice ? Number(totalPrice) * ethUsdPrice : null
+
   // Determine button text based on state
   const getButtonText = () => {
     if (!isConnected) return 'Connect Wallet'
@@ -119,6 +128,14 @@ export const DropMintWidget = ({
         <Text variant="heading-sm" mt="x1">
           {Number(priceEth) === 0 ? 'Free' : `${priceEth} ETH`}
         </Text>
+        <Text variant="paragraph-sm" color="text3" mt="x1">
+          + {ZORA_PROTOCOL_REWARD} ETH Zora protocol fee per mint
+        </Text>
+        {pricePerMintUsd && (
+          <Text variant="paragraph-sm" color="text3" mt="x1">
+            ~${pricePerMintUsd.toFixed(2)} USD per mint
+          </Text>
+        )}
       </Box>
 
       {/* Sale Status */}
@@ -152,9 +169,9 @@ export const DropMintWidget = ({
             <Text variant="label-sm" color="text3" mb="x2">
               Quantity
             </Text>
-            <Flex align="center" gap="x2">
+            <Box className={quantityInputWrapper}>
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 onClick={decrementQuantity}
                 disabled={quantity <= 1}
@@ -171,7 +188,7 @@ export const DropMintWidget = ({
                 className={mintInput}
               />
               <Button
-                variant="secondary"
+                variant="ghost"
                 size="sm"
                 onClick={incrementQuantity}
                 disabled={maxPerAddress ? quantity >= maxPerAddress : false}
@@ -179,25 +196,21 @@ export const DropMintWidget = ({
               >
                 +
               </Button>
-            </Flex>
+            </Box>
           </Box>
 
           {/* Comment Input */}
           <Box>
-            <Text variant="label-sm" color="text3" mb="x2">
-              Comment (optional)
-            </Text>
-            <Box className={mintInputContainer}>
-              <Input
-                as="textarea"
-                placeholder="Add a comment to your mint..."
-                value={comment}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setComment(e.target.value)
-                }
-                rows={3}
-              />
-            </Box>
+            <TextArea
+              id="mint-comment"
+              value={comment}
+              onChange={(e: any) => setComment(e.target.value)}
+              placeholder="Add a comment to your mint..."
+              disabled={isPending}
+              maxLength={1000}
+              minHeight={96}
+              rows={3}
+            />
           </Box>
 
           {/* Error Message */}
@@ -220,6 +233,25 @@ export const DropMintWidget = ({
                 Explorer
               </a>
             </Text>
+          )}
+
+          {/* Total Price Summary */}
+          {quantity > 1 && totalPriceUsd && (
+            <Box>
+              <Flex justify="space-between" align="center">
+                <Text variant="paragraph-md" color="text1">
+                  Total ({quantity} mints)
+                </Text>
+                <Box>
+                  <Text variant="paragraph-md" color="text1" align="right">
+                    {totalPrice} ETH
+                  </Text>
+                  <Text variant="paragraph-sm" color="text3" align="right" mt="x1">
+                    ~${totalPriceUsd.toFixed(2)} USD
+                  </Text>
+                </Box>
+              </Flex>
+            </Box>
           )}
 
           {/* Mint Button */}
