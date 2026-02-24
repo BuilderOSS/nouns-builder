@@ -149,7 +149,7 @@ export const WETH_ADDRESS = {
 
 // Special address used to represent native ETH in some contexts (e.g., Escrow)
 export const NATIVE_TOKEN_ADDRESS: AddressType =
-  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE' as AddressType
+  '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
 // Builder Treasury addresses by chain (used as referral address)
 export const BUILDER_TREASURY_ADDRESS = {
@@ -191,11 +191,12 @@ export const UNISWAP_UNIVERSAL_ROUTER_ADDRESS = {
   [CHAIN_ID.BASE_SEPOLIA]: '0x492e6456d9528771018deb9e87ef7750ef184104' as AddressType,
 }
 
-// Permit2 (same across chains)
-export const PERMIT2_ADDRESS: AddressType =
-  '0x000000000022D473030F116dDEE9F6B43aC78BA3' as AddressType
+export const ZORA_COMMENTS: AddressType = '0x7777777C2B3132e03a65721a41745C07170a5877'
 
 export const ZORA_COIN_FACTORY_ADDRESS: AddressType =
   '0x777777751622c0d3258f214F9DF38E35BF45baF3'
 
-export const ZORA_COMMENTS: AddressType = '0x7777777C2B3132e03a65721a41745C07170a5877'
+export const PERMIT2_ADDRESS: AddressType = '0x000000000022D473030F116dDEE9F6B43aC78BA3'
+
+export const CLANKER_FACTORY_ADDRESS: AddressType =
+  '0xE85A59c628F7d27878ACeB4bf3b35733630083a9'

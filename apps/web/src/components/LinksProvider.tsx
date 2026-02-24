@@ -80,6 +80,12 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
     []
   )
 
+  const getDropLink = React.useCallback((chainId: CHAIN_ID, dropAddress: AddressType) => {
+    return {
+      href: `/drop/${chainIdToSlug(chainId)}/${dropAddress}`,
+    }
+  }, [])
+
   const value = React.useMemo(
     () => ({
       getAuctionLink,
@@ -89,6 +95,7 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
       getCoinLink,
       getCoinCreateLink,
       getProposalCreateLink,
+      getDropLink,
     }),
     [
       getAuctionLink,
@@ -98,6 +105,7 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
       getCoinLink,
       getCoinCreateLink,
       getProposalCreateLink,
+      getDropLink,
     ]
   )
 

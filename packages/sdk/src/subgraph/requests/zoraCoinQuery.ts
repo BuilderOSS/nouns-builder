@@ -9,7 +9,7 @@ export type DaoZoraCoinsResponse = ZoraCoinFragment[]
 export const daoZoraCoinsRequest = async (
   daoAddress: string,
   chainId: CHAIN_ID,
-  first: number = 10
+  first: number = 100
 ): Promise<DaoZoraCoinsResponse> => {
   if (!daoAddress) throw new Error('No DAO address provided')
   if (!isAddress(daoAddress)) throw new Error('Invalid DAO address')

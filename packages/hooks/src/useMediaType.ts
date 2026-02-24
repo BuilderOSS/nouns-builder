@@ -40,10 +40,26 @@ const getMediaTypeFromUrl = (url: string): string | undefined => {
 const fetchContentType = async (url: string): Promise<string | null> => {
   try {
     const response = await fetch(url, { method: 'HEAD' })
+
+    // Check if the request was successful
+    if (!response.ok) {
+      console.warn(`Gateway returned status ${response.status} for ${url}`)
+      return null
+    }
+
     const contentType = response.headers.get('content-type')
     if (contentType) {
       // Extract the main type (e.g., "video/mp4" from "video/mp4; charset=utf-8")
-      return contentType.split(';')[0].trim()
+      const mainType = contentType.split(';')[0].trim()
+
+      // Reject text content types - these are typically error pages from gateways
+      // Media content should be video/*, audio/*, or image/*
+      if (mainType === 'text/plain' || mainType === 'text/html') {
+        console.warn(`Gateway returned ${mainType} (likely an error page) for ${url}`)
+        return null
+      }
+
+      return mainType
     }
     return null
   } catch (error) {
@@ -60,6 +76,7 @@ const fetchContentType = async (url: string): Promise<string | null> => {
  * 2. Convert ipfs:// URLs to https:// using getFetchableUrls
  * 3. Check URL file extension
  * 4. Fall back to HEAD request to get Content-Type header
+ * 5. Try all fetchable URLs in order until one succeeds
  */
 const mediaTypeFetcher = async ([
   ,
@@ -68,30 +85,41 @@ const mediaTypeFetcher = async ([
 ]: MediaTypeKey): Promise<MediaTypeData> => {
   // Step 1: Convert ipfs:// to https:// using getFetchableUrls
   const urls = getFetchableUrls(mediaUrl)
-  const httpUrl = urls?.[0] || mediaUrl
+  const fetchableUrls = urls && urls.length > 0 ? urls : [mediaUrl]
 
-  // Step 2: If we have media type from metadata, use it
+  // Step 2: If we have media type from metadata, use it with the first URL
   if (metadataType) {
     return {
       mediaType: metadataType,
-      fetchableUrl: httpUrl,
+      fetchableUrl: fetchableUrls[0],
     }
   }
 
-  // Step 3: Try to detect from URL extension
-  const urlBasedType = getMediaTypeFromUrl(httpUrl)
-  if (urlBasedType) {
-    return {
-      mediaType: urlBasedType,
-      fetchableUrl: httpUrl,
+  // Step 3: Try each URL in order until we get a successful response
+  for (const httpUrl of fetchableUrls) {
+    // Try to detect from URL extension
+    const urlBasedType = getMediaTypeFromUrl(httpUrl)
+    if (urlBasedType) {
+      return {
+        mediaType: urlBasedType,
+        fetchableUrl: httpUrl,
+      }
+    }
+
+    // Step 4: Fall back to HEAD request
+    const contentType = await fetchContentType(httpUrl)
+    if (contentType) {
+      return {
+        mediaType: contentType,
+        fetchableUrl: httpUrl,
+      }
     }
   }
 
-  // Step 4: Fall back to HEAD request
-  const contentType = await fetchContentType(httpUrl)
+  // If all URLs failed, return null with the first URL
   return {
-    mediaType: contentType,
-    fetchableUrl: httpUrl,
+    mediaType: null,
+    fetchableUrl: fetchableUrls[0],
   }
 }
 

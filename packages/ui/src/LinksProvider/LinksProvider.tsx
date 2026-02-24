@@ -6,6 +6,7 @@ import {
   CoinCreateLinkHandler,
   CoinLinkHandler,
   DaoLinkHandler,
+  DropLinkHandler,
   ProfileLinkHandler,
   ProposalCreateLinkHandler,
   ProposalLinkHandler,
@@ -21,6 +22,7 @@ type LinksContextValue = {
   getCoinLink: CoinLinkHandler
   getCoinCreateLink: CoinCreateLinkHandler
   getProposalCreateLink: ProposalCreateLinkHandler
+  getDropLink: DropLinkHandler
 }
 
 const defaultGetAuctionLink = (
@@ -84,6 +86,12 @@ const defaultGetProposalCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressTy
   }
 }
 
+const defaultGetDropLink = (chainId: CHAIN_ID, address: AddressType) => {
+  return {
+    href: `${BASE_URL}/drop/${chainIdToSlug(chainId)}/${address}`,
+  }
+}
+
 const LinksContext = createContext<LinksContextValue>({
   getAuctionLink: defaultGetAuctionLink,
   getDaoLink: defaultGetDaoLink,
@@ -92,6 +100,7 @@ const LinksContext = createContext<LinksContextValue>({
   getCoinLink: defaultGetCoinLink,
   getCoinCreateLink: defaultGetCoinCreateLink,
   getProposalCreateLink: defaultGetProposalCreateLink,
+  getDropLink: defaultGetDropLink,
 })
 
 export const useLinks = () => {

@@ -13,7 +13,7 @@ interface Countdown {
  * does not match server-rendered HTML" errors. */
 export const useCountdown = (
   endTime: number,
-  onEnd: <T extends any[]>(...args: T) => void
+  onEnd?: <T extends any[]>(...args: T) => void
 ): Countdown => {
   const [now, setNow] = useState(dayjs.unix(Date.now() / 1000))
   const [isRunning, setIsRunning] = useState(true)
@@ -30,7 +30,7 @@ export const useCountdown = (
   useEffect(() => {
     if (now >= end) {
       setIsRunning(false)
-      onEnd()
+      onEnd?.()
     }
   }, [now, end, onEnd])
 

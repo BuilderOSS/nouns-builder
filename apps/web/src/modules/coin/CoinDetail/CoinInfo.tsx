@@ -3,6 +3,7 @@ import {
   useClankerTokenWithPrice,
   useEnsData,
   useMediaType,
+  useProposalByExecutionTx,
   useZoraCoinWithPrice,
 } from '@buildeross/hooks'
 import { type IpfsMetadata } from '@buildeross/ipfs-service'
@@ -22,10 +23,11 @@ import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/coining/clankerC
 import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/coining/zoraContent'
 import { formatMarketCap, formatSupply } from '@buildeross/utils/formatMarketCap'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Flex, Grid, Spinner, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Grid, Icon, Spinner, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address } from 'viem'
 
+import { ProposalLink } from '../../../components/ProposalLink'
 import { CoinComments } from './CoinComments'
 import { coinHeader, coinImageContainer, onlyDesktop, statsGrid } from './CoinDetail.css'
 
@@ -36,8 +38,8 @@ interface CoinInfoProps {
   coinAddress: Address
   daoAddress: Address | null
   daoName: string | null
+  daoImage: string | null
   chainId: number
-  chainSlug: string
   // Pool info
   pairedToken: Address | null
   pairedTokenSymbol: string | null
@@ -48,6 +50,7 @@ interface CoinInfoProps {
   metadata: IpfsMetadata | null
   createdAt: string | null
   creatorAddress: Address | null
+  transactionHash: string | null
   // Coin type
   isClankerToken?: boolean
   // Optional: pass the full coin/token data for price fetching
@@ -62,8 +65,8 @@ export const CoinInfo = ({
   coinAddress,
   daoAddress,
   daoName,
+  daoImage,
   chainId,
-  chainSlug,
   pairedToken,
   // pairedTokenSymbol,
   // poolFee,
@@ -72,11 +75,19 @@ export const CoinInfo = ({
   metadata,
   createdAt,
   creatorAddress,
+  transactionHash,
   isClankerToken,
   clankerToken,
   zoraCoin,
 }: CoinInfoProps) => {
-  const { getCoinLink } = useLinks()
+  const { getCoinLink, getDaoLink } = useLinks()
+
+  // Fetch proposal by execution transaction hash
+  const { data: proposal } = useProposalByExecutionTx({
+    chainId: chainId as CHAIN_ID,
+    executionTransactionHash: transactionHash || undefined,
+    enabled: !!transactionHash,
+  })
 
   // Fetch price data
   const clankerWithPrice = useClankerTokenWithPrice({
@@ -233,14 +244,29 @@ export const CoinInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               DAO
             </Text>
-            <Link link={`/dao/${chainSlug}/${daoAddress}`}>
-              <Text variant="paragraph-md" color="accent">
+            <Link link={getDaoLink(chainId, daoAddress)}>
+              <Button variant="secondary" size="sm">
+                {daoImage && (
+                  <Box flexShrink={0}>
+                    <FallbackImage
+                      src={daoImage}
+                      style={{ borderRadius: '100%', objectFit: 'contain' }}
+                      alt={daoName}
+                      height={32}
+                      width={32}
+                    />
+                  </Box>
+                )}
                 {daoName}
-              </Text>
+                <Icon id="arrowTopRight" />
+              </Button>
             </Link>
           </Box>
         </>
       )}
+
+      {/* Proposal */}
+      {proposal && <ProposalLink proposal={proposal} chainId={chainId} />}
 
       {/* Description */}
       {description && (

@@ -3,6 +3,7 @@ import React from 'react'
 
 import type {
   OnOpenBidModal,
+  OnOpenMintModal,
   OnOpenPropdateModal,
   OnOpenTradeModal,
   OnOpenVoteModal,
@@ -18,9 +19,10 @@ interface FeedItemActionsProps {
   onOpenVoteModal: OnOpenVoteModal
   onOpenPropdateModal: OnOpenPropdateModal
   onOpenTradeModal: OnOpenTradeModal
+  onOpenMintModal: OnOpenMintModal
 }
 
-const ONE_MONTH = 30 * 24 * 60 * 60
+const TWO_MONTHS = 2 * 30 * 24 * 60 * 60
 
 export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
   item,
@@ -28,9 +30,10 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
   onOpenVoteModal,
   onOpenPropdateModal,
   onOpenTradeModal,
+  onOpenMintModal,
 }) => {
-  // Only show actions for recent items (last 30 days)
-  const isRecent = item.timestamp > Date.now() / 1000 - ONE_MONTH
+  // Only show actions for recent items (last 60 days)
+  const isRecent = item.timestamp > Date.now() / 1000 - TWO_MONTHS
 
   if (!isRecent) {
     return null
@@ -99,8 +102,23 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
         />
       )
 
-    case 'ZORA_DROP_CREATED':
-      return <ZoraDropActions dropId={item.dropId} />
+    case 'ZORA_DROP_CREATED': {
+      return (
+        <ZoraDropActions
+          chainId={item.chainId}
+          dropAddress={item.dropAddress}
+          symbol={item.dropSymbol}
+          daoName={item.daoName}
+          daoImage={item.daoImage}
+          priceEth={item.publicSalePrice}
+          publicSaleStart={item.publicSaleStart}
+          publicSaleEnd={item.publicSaleEnd}
+          editionSize={item.editionSize}
+          maxPerAddress={item.maxSalePurchasePerAddress}
+          onOpenMintModal={onOpenMintModal}
+        />
+      )
+    }
 
     default:
       return null

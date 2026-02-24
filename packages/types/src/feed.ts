@@ -146,7 +146,7 @@ export type ZoraCoinCreatedFeedItem = BaseFeedItem & {
 
 export type ZoraDropCreatedFeedItem = BaseFeedItem & {
   type: 'ZORA_DROP_CREATED'
-  dropId: string
+  dropAddress: AddressType
   dropCreator: AddressType
   dropName: string
   dropSymbol: string

@@ -1,4 +1,5 @@
 export { auctionAbi } from './Auction'
+export { clankerFactoryAbi } from './ClankerFactory'
 export { erc20Abi } from './ERC20'
 export { erc721Abi } from './ERC721'
 export { erc721RedeemMinterAbi } from './ERC721RedeemMinter'

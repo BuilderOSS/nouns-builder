@@ -1,7 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 export interface VideoPreviewProps {
   src: string
+  /** Additional fallback URLs to try if primary src fails */
+  fallbackSrcs?: string[]
   /** When aspect-ratio mode is used, this becomes the wrapper width. */
   width?: string | number
   /** Used only when aspectRatio is NOT provided and ratio mode is off. */
@@ -31,8 +33,11 @@ const normalizeAspectRatio = (r: number | string) => {
   return r.includes(':') ? r.replace(':', ' / ') : r
 }
 
+const EMPTY_SRCS: string[] = []
+
 export const VideoPreview: React.FC<VideoPreviewProps> = ({
   src,
+  fallbackSrcs = EMPTY_SRCS,
   width = '100%',
   height = 400,
   aspectRatio,
@@ -41,6 +46,23 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
   objectFit = 'cover',
 }) => {
   const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
+  const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
+
+  // Create stable key for source changes to prevent unnecessary re-renders
+  const sourcesKey = useMemo(
+    () => JSON.stringify([src, ...fallbackSrcs]),
+    [src, fallbackSrcs]
+  )
+
+  // Build array of all sources with primary src first
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allSrcs = useMemo(() => [src, ...fallbackSrcs], [sourcesKey])
+
+  // Reset index when sources change
+  useEffect(() => {
+    setCurrentSrcIndex(0)
+    setMeasuredRatio(null)
+  }, [sourcesKey])
 
   // Decide which ratio to use (explicit > measured > fallback)
   const ratioForBox = useMemo(() => {
@@ -50,14 +72,28 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     return undefined
   }, [aspectRatio, measuredRatio, fallbackAspectRatio])
 
+  const handleError = () => {
+    // Try next source if available
+    setCurrentSrcIndex((prev) => {
+      if (prev < allSrcs.length - 1) {
+        console.warn(`Video failed to load from ${allSrcs[prev]}, trying next source...`)
+        return prev + 1
+      }
+      return prev
+    })
+  }
+
   const videoEl = (
     <video
-      src={src}
+      key={currentSrcIndex}
+      src={allSrcs[currentSrcIndex]}
       autoPlay
-      loop
       muted
+      loop
       playsInline
+      controls
       preload="metadata"
+      onError={handleError}
       onLoadedMetadata={(e) => {
         const v = e.currentTarget
         if (v.videoWidth && v.videoHeight) {

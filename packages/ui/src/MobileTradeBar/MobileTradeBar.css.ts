@@ -1,5 +1,5 @@
 import { MOBILE_BOTTOM_NAV_LAYER } from '@buildeross/constants/layers'
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const mobileTradeBar = style([
@@ -14,7 +14,7 @@ export const mobileTradeBar = style([
     right: 0,
     zIndex: MOBILE_BOTTOM_NAV_LAYER,
     borderTop: '1px solid',
-    borderColor: 'var(--border)',
+    borderColor: vars.color.border,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',

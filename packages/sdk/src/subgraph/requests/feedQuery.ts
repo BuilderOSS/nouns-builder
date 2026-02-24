@@ -1,4 +1,5 @@
 import {
+  AddressType,
   CHAIN_ID,
   FeedItem,
   FeedResponse,
@@ -192,7 +193,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
       return {
         ...baseItem,
         type: 'ZORA_DROP_CREATED',
-        dropId: event.zoraDrop.id,
+        dropAddress: event.zoraDrop.id as AddressType,
         dropCreator: event.zoraDrop.creator,
         dropName: event.zoraDrop.name,
         dropSymbol: event.zoraDrop.symbol,

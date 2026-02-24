@@ -1,7 +1,9 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 export interface ImagePreviewProps {
   src: string
+  /** Additional fallback URLs to try if primary src fails */
+  fallbackSrcs?: string[]
   alt?: string
 
   /** When aspect-ratio mode is used, this becomes the wrapper width. */
@@ -33,8 +35,11 @@ const normalizeAspectRatio = (r: number | string) => {
   return r.includes(':') ? r.replace(':', ' / ') : r
 }
 
+const EMPTY_SRCS: string[] = []
+
 export const ImagePreview: React.FC<ImagePreviewProps> = ({
   src,
+  fallbackSrcs = EMPTY_SRCS,
   alt = 'Preview',
   width = '100%',
   height = 400,
@@ -44,6 +49,23 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   objectFit = 'cover',
 }) => {
   const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
+  const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
+
+  // Create stable key for source changes to prevent unnecessary re-renders
+  const sourcesKey = useMemo(
+    () => JSON.stringify([src, ...fallbackSrcs]),
+    [src, fallbackSrcs]
+  )
+
+  // Build array of all sources with primary src first
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const allSrcs = useMemo(() => [src, ...fallbackSrcs], [sourcesKey])
+
+  // Reset index when sources change
+  useEffect(() => {
+    setCurrentSrcIndex(0)
+    setMeasuredRatio(null)
+  }, [sourcesKey])
 
   // Decide which ratio to use (explicit > measured > fallback)
   const ratioForBox = useMemo(() => {
@@ -53,12 +75,24 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
     return undefined
   }, [aspectRatio, measuredRatio, fallbackAspectRatio])
 
+  const handleError = () => {
+    setCurrentSrcIndex((prev) => {
+      if (prev < allSrcs.length - 1) {
+        console.warn(`Image failed to load from ${allSrcs[prev]}, trying next source...`)
+        return prev + 1
+      }
+      return prev
+    })
+  }
+
   const imgEl = (
     <img
-      src={src}
+      key={currentSrcIndex}
+      src={allSrcs[currentSrcIndex]}
       alt={alt}
       loading="lazy"
       decoding="async"
+      onError={handleError}
       onLoad={(e) => {
         const img = e.currentTarget
         if (img.naturalWidth && img.naturalHeight) {

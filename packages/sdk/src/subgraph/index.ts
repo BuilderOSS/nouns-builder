@@ -18,12 +18,14 @@ export * from './requests/getPropDates'
 export * from './requests/getTreasuryAssetPins'
 export * from './requests/homepageQuery'
 export * from './requests/memberSnapshot'
+export * from './requests/proposalByExecutionTxHashQuery'
 export * from './requests/proposalQuery'
 export * from './requests/proposalsQuery'
 export * from './requests/sync'
 export * from './requests/tokensQuery'
 export * from './requests/userProposalVote'
 export * from './requests/zoraCoinQuery'
+export * from './requests/zoraDropQuery'
 export {
   Auction_OrderBy,
   type AuctionBidFragment,
@@ -45,4 +47,6 @@ export {
   type TokenWithDaoQuery,
   ZoraCoin_OrderBy,
   type ZoraCoinFragment,
+  ZoraDrop_OrderBy,
+  type ZoraDropFragment,
 } from './sdk.generated'
