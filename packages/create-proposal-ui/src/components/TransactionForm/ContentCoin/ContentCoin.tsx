@@ -2,6 +2,7 @@ import {
   BUILDER_TREASURY_ADDRESS,
   COIN_DEPLOYMENT_DISCLAIMER,
   COIN_SUPPORTED_CHAINS,
+  ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants'
 import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
@@ -24,7 +25,6 @@ import {
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
 import {
-  coinFactoryAddress,
   coinFactoryConfig,
   encodeMultiCurvePoolConfig,
 } from '@zoralabs/protocol-deployments'
@@ -58,7 +58,6 @@ const FormObserver: React.FC<FormObserverProps> = ({ onChange }) => {
 
 interface ContentCoinEconomicsPreviewProps {
   treasury: Address
-  factoryAddress: Address
   chainId: number
   latestClankerToken: any
   clankerTokenPriceUsd: number | undefined
@@ -66,7 +65,6 @@ interface ContentCoinEconomicsPreviewProps {
 
 const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = ({
   treasury,
-  factoryAddress,
   chainId,
   latestClankerToken,
   clankerTokenPriceUsd,
@@ -116,7 +114,7 @@ const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = 
 
   // Call coinAddress view function on ZoraFactory
   const { data: predictedAddress } = useReadContract({
-    address: factoryAddress,
+    address: ZORA_COIN_FACTORY_ADDRESS,
     abi: coinFactoryConfig.abi,
     functionName: 'coinAddress',
     args:
@@ -198,9 +196,6 @@ export const ContentCoin: FormComponent = ({ resetTransactionType }) => {
 
   // Check if the current chain is supported
   const isChainSupported = isChainIdSupportedByCoining(chain.id)
-  const factoryAddress = isChainSupported
-    ? (coinFactoryAddress[chain.id as keyof typeof coinFactoryAddress] as AddressType)
-    : undefined
 
   // Fetch the latest ClankerToken for this DAO
   const { data: clankerTokens } = useClankerTokens({
@@ -266,7 +261,7 @@ export const ContentCoin: FormComponent = ({ resetTransactionType }) => {
       return
     }
 
-    if (!factoryAddress) {
+    if (!isChainSupported) {
       setSubmitError(
         `Content coins are only supported on ${chainNamesString}. Current chain: ${chain.name}`
       )
@@ -372,7 +367,7 @@ export const ContentCoin: FormComponent = ({ resetTransactionType }) => {
 
       // 8. Create transaction object
       const transaction = {
-        target: factoryAddress,
+        target: ZORA_COIN_FACTORY_ADDRESS,
         functionSignature:
           'deploy(address,address[],string,string,string,bytes,address,address,bytes,bytes32)',
         calldata,
@@ -498,11 +493,9 @@ export const ContentCoin: FormComponent = ({ resetTransactionType }) => {
                     latestClankerToken &&
                     formik.values.currency &&
                     !isDisabled &&
-                    treasury &&
-                    factoryAddress && (
+                    treasury && (
                       <ContentCoinEconomicsPreview
                         treasury={treasury}
-                        factoryAddress={factoryAddress}
                         chainId={chain.id}
                         latestClankerToken={latestClankerToken}
                         clankerTokenPriceUsd={clankerTokenPriceUsd}

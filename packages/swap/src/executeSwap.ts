@@ -224,12 +224,9 @@ function buildSingleHopSwap(
   const takeCurrency = zeroForOne ? poolKey.currency1 : poolKey.currency0
 
   // Encode actions
-  const settleAction = Actions.SETTLE
-  const takeAction = Actions.TAKE
-
   const actions = encodePacked(
     ['uint8', 'uint8', 'uint8'],
-    [Actions.SWAP_EXACT_IN_SINGLE, settleAction, takeAction]
+    [Actions.SWAP_EXACT_IN_SINGLE, Actions.SETTLE, Actions.TAKE]
   )
 
   const params: Hex[] = []
@@ -271,12 +268,12 @@ function buildSingleHopSwap(
     )
   )
 
-  // SETTLE(currency, amount, payerIsUser)
+  // 2) SETTLE(currency, amount, payerIsUser)
   // payerIsUser: false when using wrapped ETH from router or true when using WETH input
   params.push(
     encodeAbiParameters(
       [{ type: 'address' }, { type: 'uint256' }, { type: 'bool' }],
-      [settleCurrency, OPEN_DELTA, isInputEth ? false : true]
+      [settleCurrency, amountIn, isInputEth ? false : true]
     )
   )
 
@@ -338,12 +335,9 @@ function buildMultiHopSwap(
     }
   })
 
-  const settleAction = Actions.SETTLE
-  const takeAction = Actions.TAKE
-
   const actions = encodePacked(
     ['uint8', 'uint8', 'uint8'],
-    [Actions.SWAP_EXACT_IN, settleAction, takeAction]
+    [Actions.SWAP_EXACT_IN, Actions.SETTLE, Actions.TAKE]
   )
 
   const params: Hex[] = []
@@ -549,6 +543,7 @@ export async function executeSwap({
     value,
     chain: walletClient.chain,
     gas: (gas * 3n) / 2n, // add extra gas for safety
+    // gas: 1_500_000n,
   })
 
   return { hash }
