@@ -52,7 +52,7 @@ export const Drops: React.FC<DropsProps> = ({ onOpenProposalCreate }) => {
   })
 
   // Get voting threshold for Create Drop button
-  const { hasThreshold } = useVotes({
+  const { isOwner, isDelegating, hasThreshold, proposalVotesRequired } = useVotes({
     chainId: chain.id,
     governorAddress: governor,
     signerAddress: address,
@@ -113,15 +113,53 @@ export const Drops: React.FC<DropsProps> = ({ onOpenProposalCreate }) => {
         <Text variant="heading-sm" style={{ fontWeight: 800 }}>
           Drops
         </Text>
-        <ContractButton
-          chainId={chain.id}
-          handleClick={handleCreateDrop}
-          disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
-          color="tertiary"
-          className={createDropBtn}
+
+        <Flex
+          justify={'center'}
+          align={'center'}
+          display={{ '@initial': 'none', '@768': 'flex' }}
         >
-          Create Drop
-        </ContractButton>
+          {address && !isDelegating && !isOwner && (
+            <Flex mr={'x4'} color={'tertiary'}>
+              You have no votes.
+            </Flex>
+          )}
+          {isDelegating && (
+            <Flex mr={'x4'} color={'tertiary'}>
+              Your votes are delegated.
+            </Flex>
+          )}
+          {isOwner && !hasThreshold && (
+            <Flex mr={'x4'} color={'tertiary'}>
+              {Number(proposalVotesRequired)} votes required to propose.
+            </Flex>
+          )}
+          <ContractButton
+            chainId={chain.id}
+            handleClick={handleCreateDrop}
+            disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+            color="tertiary"
+            className={createDropBtn}
+          >
+            Create Drop
+          </ContractButton>
+        </Flex>
+
+        <Flex
+          justify={'center'}
+          align={'center'}
+          display={{ '@initial': 'flex', '@768': 'none' }}
+        >
+          <ContractButton
+            chainId={chain.id}
+            handleClick={handleCreateDrop}
+            disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+            color="tertiary"
+            className={createDropBtn}
+          >
+            Create Drop
+          </ContractButton>
+        </Flex>
       </Flex>
 
       {/* Loading State */}
