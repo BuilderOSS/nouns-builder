@@ -12,18 +12,16 @@ import { Form, Formik } from 'formik'
 import { encodeFunctionData, parseEther } from 'viem'
 import { useBalance } from 'wagmi'
 
-import { type FormComponentProps } from '../types'
 import bridgeTreasuryFormSchema, {
   BridgeTreasuryValues,
 } from './BridgeTreasuryForm.schema'
 
-type BridgeTreasuryFormProps = FormComponentProps & {
+type BridgeTreasuryFormProps = {
   migratedToChainId?: CHAIN_ID
 }
 
 export const BridgeTreasuryForm: React.FC<BridgeTreasuryFormProps> = ({
   migratedToChainId,
-  resetTransactionType,
 }) => {
   const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -32,6 +30,7 @@ export const BridgeTreasuryForm: React.FC<BridgeTreasuryFormProps> = ({
     chainId: chain.id,
   })
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const initialValues: BridgeTreasuryValues = {
     amount: 0,
   }

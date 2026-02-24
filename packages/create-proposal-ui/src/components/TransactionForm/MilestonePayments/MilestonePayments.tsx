@@ -19,7 +19,6 @@ import { useCallback, useState } from 'react'
 import useSWR from 'swr'
 import { Address, encodeFunctionData, formatUnits, isAddress, parseUnits } from 'viem'
 
-import { type FormComponent } from '../types'
 import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
 import MilestonePaymentsForm from './MilestonePaymentsForm'
 import { encodeEscrowData } from './MilestonePaymentsUtils'
@@ -27,7 +26,8 @@ import { encodeEscrowData } from './MilestonePaymentsUtils'
 const LIMIT = 20
 const PAGE = 1
 
-export const MilestonePayments: FormComponent = ({ resetTransactionType }) => {
+export const MilestonePayments: React.FC = () => {
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ipfsUploadError, setIpfsUploadError] = useState<Error | null>(null)
 

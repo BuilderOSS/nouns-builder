@@ -9,11 +9,11 @@ import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import { checkboxStyleVariants } from '../ReplaceArtwork/ReplaceArtworkForm.css'
-import { type FormComponent } from '../types'
 
-export const PauseAuctionsForm: FormComponent = ({ resetTransactionType }) => {
+export const PauseAuctionsForm: React.FC = () => {
   const { auction, governor } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
   const { data: paused } = useReadContract({
     abi: auctionAbi,

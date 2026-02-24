@@ -10,14 +10,14 @@ import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
-import { type FormComponent } from '../types'
 import { AddArtworkForm } from './AddArtworkForm'
 
-export const AddArtwork: FormComponent = ({ resetTransactionType }) => {
+export const AddArtwork: React.FC = () => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
   const chain = useChainStore((x) => x.chain)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
 
   const contractOrderedLayers = useMemo(
     () => [...orderedLayers].reverse(), // traits in the contract are reversed

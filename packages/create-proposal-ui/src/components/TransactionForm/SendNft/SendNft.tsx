@@ -17,7 +17,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { encodeFunctionData, getAddress, isAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
-import { type FormComponent } from '../types'
 import sendNftSchema, { SendNftValues } from './SendNft.schema'
 
 type NftOption = 'treasury-nfts' | 'custom' | string
@@ -454,8 +453,9 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
   )
 }
 
-export const SendNft: FormComponent = ({ resetTransactionType }) => {
+export const SendNft: React.FC = () => {
   const { treasury } = useDaoStore((state) => state.addresses)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const [currentNftMetadata, setCurrentNftMetadata] = useState<NftMetadata | null>(null)

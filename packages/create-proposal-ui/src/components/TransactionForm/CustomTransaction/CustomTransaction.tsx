@@ -5,13 +5,13 @@ import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
 
 import { useCustomTransactionStore } from '../../../stores/useCustomTransactionStore'
-import { type FormComponent } from '../types'
 import { customTransactionWrapper, transactionFormWrapper } from './CustomTransaction.css'
 import { FormHeading } from './FormHeading'
 import { ABI, Address, Arguments, Function, Summary, Value } from './forms'
 
-export const CustomTransaction: FormComponent = ({ resetTransactionType }) => {
-  const { addTransaction } = useProposalStore()
+export const CustomTransaction: React.FC = () => {
+  const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
 
   const {
     active: activeCustomTransactionSection,

@@ -12,7 +12,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { formatPrice } from '@buildeross/utils/formatMarketCap'
 import { truncateHex } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Address, erc20Abi, formatEther, parseEther } from 'viem'
 import {
   useAccount,
@@ -60,6 +60,14 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     coinAddress,
     isBuying
   )
+
+  useEffect(() => {
+    if (swapOptions.length === 0) return
+    const optionAddresses = swapOptions.map((o) => o.token.address.toLowerCase())
+    if (!optionAddresses.includes(selectedPaymentToken.toLowerCase())) {
+      setSelectedPaymentToken(swapOptions[0].token.address)
+    }
+  }, [swapOptions, selectedPaymentToken])
 
   // Get the selected swap option
   const selectedOption = swapOptions.find(

@@ -2,11 +2,10 @@ import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { Box, Button, Paragraph } from '@buildeross/zord'
 
-import { type FormComponent } from '../types'
-
-export const FixRendererBase: FormComponent = ({ resetTransactionType }) => {
+export const FixRendererBase: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
 
   const { shouldFix, transaction } = useRendererBaseFix({
