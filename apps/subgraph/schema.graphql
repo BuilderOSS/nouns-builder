@@ -465,6 +465,9 @@ type ZoraDrop @entity {
   # Link to DAO (only if creator matches a known DAO treasury)
   dao: DAO
 
+  # Derived field: all owners of this drop
+  owners: [ZoraDropOwner!]! @derivedFrom(field: "drop")
+
   # Event params
   creator: Bytes! # The creator address (treasury)
   editionSize: BigInt!
@@ -496,4 +499,27 @@ type ZoraDrop @entity {
   createdAt: BigInt!
   createdAtBlock: BigInt!
   transactionHash: Bytes!
+}
+
+# Tracks individual ownership and spending for each address per Zora drop
+type ZoraDropOwner @entity {
+  # ID is: drop-address-owner-address
+  id: ID!
+
+  # References
+  drop: ZoraDrop!
+  owner: Bytes!
+
+  # Balance of NFTs owned (current)
+  balance: BigInt!
+
+  # Total amount spent on this drop (in wei)
+  totalSpent: BigInt!
+
+  # Total quantity purchased (may differ from balance due to transfers/sales)
+  totalPurchased: BigInt!
+
+  # Block metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
 }

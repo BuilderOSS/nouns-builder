@@ -4119,6 +4119,8 @@ export type Query = {
   zoraDrop?: Maybe<ZoraDrop>
   zoraDropCreatedEvent?: Maybe<ZoraDropCreatedEvent>
   zoraDropCreatedEvents: Array<ZoraDropCreatedEvent>
+  zoraDropOwner?: Maybe<ZoraDropOwner>
+  zoraDropOwners: Array<ZoraDropOwner>
   zoraDrops: Array<ZoraDrop>
 }
 
@@ -4587,6 +4589,22 @@ export type QueryZoraDropCreatedEventsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<ZoraDropCreatedEvent_Filter>
+}
+
+export type QueryZoraDropOwnerArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraDropOwnersArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropOwner_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraDropOwner_Filter>
 }
 
 export type QueryZoraDropsArgs = {
@@ -5671,6 +5689,7 @@ export type ZoraDrop = {
   maxSalePurchasePerAddress: Scalars['BigInt']['output']
   metadataRenderer: Scalars['Bytes']['output']
   name: Scalars['String']['output']
+  owners: Array<ZoraDropOwner>
   presaleEnd: Scalars['BigInt']['output']
   presaleMerkleRoot: Scalars['Bytes']['output']
   presaleStart: Scalars['BigInt']['output']
@@ -5680,6 +5699,14 @@ export type ZoraDrop = {
   royaltyBPS: Scalars['Int']['output']
   symbol: Scalars['String']['output']
   transactionHash: Scalars['Bytes']['output']
+}
+
+export type ZoraDropOwnersArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropOwner_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ZoraDropOwner_Filter>
 }
 
 export type ZoraDropCreatedEvent = FeedEvent & {
@@ -5838,6 +5865,136 @@ export enum ZoraDropCreatedEvent_OrderBy {
   ZoraDropRoyaltyBps = 'zoraDrop__royaltyBPS',
   ZoraDropSymbol = 'zoraDrop__symbol',
   ZoraDropTransactionHash = 'zoraDrop__transactionHash',
+}
+
+export type ZoraDropOwner = {
+  __typename?: 'ZoraDropOwner'
+  balance: Scalars['BigInt']['output']
+  drop: ZoraDrop
+  id: Scalars['ID']['output']
+  owner: Scalars['Bytes']['output']
+  totalPurchased: Scalars['BigInt']['output']
+  totalSpent: Scalars['BigInt']['output']
+  updatedAt: Scalars['BigInt']['output']
+  updatedAtBlock: Scalars['BigInt']['output']
+}
+
+export type ZoraDropOwner_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ZoraDropOwner_Filter>>>
+  balance?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  balance_lt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_lte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  drop?: InputMaybe<Scalars['String']['input']>
+  drop_?: InputMaybe<ZoraDrop_Filter>
+  drop_contains?: InputMaybe<Scalars['String']['input']>
+  drop_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_ends_with?: InputMaybe<Scalars['String']['input']>
+  drop_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_gt?: InputMaybe<Scalars['String']['input']>
+  drop_gte?: InputMaybe<Scalars['String']['input']>
+  drop_in?: InputMaybe<Array<Scalars['String']['input']>>
+  drop_lt?: InputMaybe<Scalars['String']['input']>
+  drop_lte?: InputMaybe<Scalars['String']['input']>
+  drop_not?: InputMaybe<Scalars['String']['input']>
+  drop_not_contains?: InputMaybe<Scalars['String']['input']>
+  drop_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  drop_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  drop_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  drop_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_starts_with?: InputMaybe<Scalars['String']['input']>
+  drop_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ZoraDropOwner_Filter>>>
+  owner?: InputMaybe<Scalars['Bytes']['input']>
+  owner_contains?: InputMaybe<Scalars['Bytes']['input']>
+  owner_gt?: InputMaybe<Scalars['Bytes']['input']>
+  owner_gte?: InputMaybe<Scalars['Bytes']['input']>
+  owner_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  owner_lt?: InputMaybe<Scalars['Bytes']['input']>
+  owner_lte?: InputMaybe<Scalars['Bytes']['input']>
+  owner_not?: InputMaybe<Scalars['Bytes']['input']>
+  owner_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  owner_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  totalPurchased?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_gt?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_gte?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalPurchased_lt?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_lte?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_not?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalSpent?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_gt?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_gte?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalSpent_lt?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_lte?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_not?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+}
+
+export enum ZoraDropOwner_OrderBy {
+  Balance = 'balance',
+  Drop = 'drop',
+  DropAnimationUri = 'drop__animationURI',
+  DropCreatedAt = 'drop__createdAt',
+  DropCreatedAtBlock = 'drop__createdAtBlock',
+  DropCreator = 'drop__creator',
+  DropDescription = 'drop__description',
+  DropEditionSize = 'drop__editionSize',
+  DropFundsRecipient = 'drop__fundsRecipient',
+  DropId = 'drop__id',
+  DropImageUri = 'drop__imageURI',
+  DropMaxSalePurchasePerAddress = 'drop__maxSalePurchasePerAddress',
+  DropMetadataRenderer = 'drop__metadataRenderer',
+  DropName = 'drop__name',
+  DropPresaleEnd = 'drop__presaleEnd',
+  DropPresaleMerkleRoot = 'drop__presaleMerkleRoot',
+  DropPresaleStart = 'drop__presaleStart',
+  DropPublicSaleEnd = 'drop__publicSaleEnd',
+  DropPublicSalePrice = 'drop__publicSalePrice',
+  DropPublicSaleStart = 'drop__publicSaleStart',
+  DropRoyaltyBps = 'drop__royaltyBPS',
+  DropSymbol = 'drop__symbol',
+  DropTransactionHash = 'drop__transactionHash',
+  Id = 'id',
+  Owner = 'owner',
+  TotalPurchased = 'totalPurchased',
+  TotalSpent = 'totalSpent',
+  UpdatedAt = 'updatedAt',
+  UpdatedAtBlock = 'updatedAtBlock',
 }
 
 export type ZoraDrop_Filter = {
@@ -6016,6 +6173,7 @@ export type ZoraDrop_Filter = {
   name_starts_with?: InputMaybe<Scalars['String']['input']>
   name_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   or?: InputMaybe<Array<InputMaybe<ZoraDrop_Filter>>>
+  owners_?: InputMaybe<ZoraDropOwner_Filter>
   presaleEnd?: InputMaybe<Scalars['BigInt']['input']>
   presaleEnd_gt?: InputMaybe<Scalars['BigInt']['input']>
   presaleEnd_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -6137,6 +6295,7 @@ export enum ZoraDrop_OrderBy {
   MaxSalePurchasePerAddress = 'maxSalePurchasePerAddress',
   MetadataRenderer = 'metadataRenderer',
   Name = 'name',
+  Owners = 'owners',
   PresaleEnd = 'presaleEnd',
   PresaleMerkleRoot = 'presaleMerkleRoot',
   PresaleStart = 'presaleStart',
@@ -6349,6 +6508,24 @@ export type ZoraDropFragment = {
   createdAtBlock: any
   transactionHash: any
   dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+}
+
+export type ZoraDropOwnerFragment = {
+  __typename?: 'ZoraDropOwner'
+  id: string
+  owner: any
+  balance: any
+  totalSpent: any
+  totalPurchased: any
+  updatedAt: any
+  updatedAtBlock: any
+  drop: {
+    __typename?: 'ZoraDrop'
+    id: string
+    name: string
+    symbol: string
+    imageURI: string
+  }
 }
 
 export type DaoMultisigUpdateFragment = {
@@ -7632,6 +7809,60 @@ export type ZoraDropQuery = {
   } | null
 }
 
+export type ZoraDropOwnerQueryVariables = Exact<{
+  id: Scalars['ID']['input']
+}>
+
+export type ZoraDropOwnerQuery = {
+  __typename?: 'Query'
+  zoraDropOwner?: {
+    __typename?: 'ZoraDropOwner'
+    id: string
+    owner: any
+    balance: any
+    totalSpent: any
+    totalPurchased: any
+    updatedAt: any
+    updatedAtBlock: any
+    drop: {
+      __typename?: 'ZoraDrop'
+      id: string
+      name: string
+      symbol: string
+      imageURI: string
+    }
+  } | null
+}
+
+export type ZoraDropOwnersQueryVariables = Exact<{
+  where?: InputMaybe<ZoraDropOwner_Filter>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropOwner_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type ZoraDropOwnersQuery = {
+  __typename?: 'Query'
+  zoraDropOwners: Array<{
+    __typename?: 'ZoraDropOwner'
+    id: string
+    owner: any
+    balance: any
+    totalSpent: any
+    totalPurchased: any
+    updatedAt: any
+    updatedAtBlock: any
+    drop: {
+      __typename?: 'ZoraDrop'
+      id: string
+      name: string
+      symbol: string
+      imageURI: string
+    }
+  }>
+}
+
 export const AuctionFragmentDoc = gql`
   fragment Auction on Auction {
     dao {
@@ -7837,6 +8068,23 @@ export const ZoraDropFragmentDoc = gql`
       id
       name
       contractImage
+    }
+  }
+`
+export const ZoraDropOwnerFragmentDoc = gql`
+  fragment ZoraDropOwner on ZoraDropOwner {
+    id
+    owner
+    balance
+    totalSpent
+    totalPurchased
+    updatedAt
+    updatedAtBlock
+    drop {
+      id
+      name
+      symbol
+      imageURI
     }
   }
 `
@@ -8668,6 +8916,34 @@ export const ZoraDropDocument = gql`
   }
   ${ZoraDropFragmentDoc}
 `
+export const ZoraDropOwnerDocument = gql`
+  query ZoraDropOwner($id: ID!) {
+    zoraDropOwner(id: $id) {
+      ...ZoraDropOwner
+    }
+  }
+  ${ZoraDropOwnerFragmentDoc}
+`
+export const ZoraDropOwnersDocument = gql`
+  query ZoraDropOwners(
+    $where: ZoraDropOwner_filter
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ZoraDropOwner_orderBy = updatedAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    zoraDropOwners(
+      where: $where
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      ...ZoraDropOwner
+    }
+  }
+  ${ZoraDropOwnerFragmentDoc}
+`
 
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -9350,6 +9626,42 @@ export function getSdk(
             signal,
           }),
         'zoraDrop',
+        'query',
+        variables
+      )
+    },
+    ZoraDropOwner(
+      variables: ZoraDropOwnerQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraDropOwnerQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraDropOwnerQuery>({
+            document: ZoraDropOwnerDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ZoraDropOwner',
+        'query',
+        variables
+      )
+    },
+    ZoraDropOwners(
+      variables?: ZoraDropOwnersQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraDropOwnersQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraDropOwnersQuery>({
+            document: ZoraDropOwnersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ZoraDropOwners',
         'query',
         variables
       )
