@@ -29,6 +29,8 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
 }) => {
   const { getCoinLink } = useLinks()
 
+  const buttonSize = { '@initial': 'xs', '@768': 'sm' } as const
+
   const shareUrl = useMemo(() => {
     const link = getCoinLink(chainId, coinAddress)
     return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
@@ -50,16 +52,16 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
   return (
     <Flex gap="x2" align="center" wrap="wrap">
       {showTradeButton && (
-        <Button size="sm" px="x3" variant="outline" onClick={handleOpenTrade}>
+        <Button size={buttonSize} px="x3" variant="outline" onClick={handleOpenTrade}>
           Trade
         </Button>
       )}
       <LinkWrapper link={getCoinLink(chainId, coinAddress)} isExternal>
-        <Button size="sm" px="x3" variant="secondary">
+        <Button size={buttonSize} px="x3" variant="secondary">
           View Coin
         </Button>
       </LinkWrapper>
-      {shareUrl && <ShareButton url={shareUrl} size="sm" variant="secondary" />}
+      {shareUrl && <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />}
     </Flex>
   )
 }

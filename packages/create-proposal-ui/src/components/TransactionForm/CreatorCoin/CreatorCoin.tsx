@@ -1,7 +1,6 @@
 import {
   BUILDER_COLLECTION_ADDRESS,
   COIN_DEPLOYMENT_DISCLAIMER,
-  COIN_SUPPORTED_CHAINS,
   WETH_ADDRESS,
 } from '@buildeross/constants'
 import {
@@ -31,7 +30,6 @@ import {
   DEFAULT_VESTING_DAYS,
   DYNAMIC_FEE_FLAG,
   FEE_CONFIGS,
-  getChainNamesString,
   isChainIdSupportedByCoining,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -55,7 +53,6 @@ import { ZodError } from 'zod'
 
 import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
 
-const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
 const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
 
 /**
@@ -463,9 +460,7 @@ export const CreatorCoin: React.FC = () => {
     }
 
     if (!isChainSupported || !clanker) {
-      setSubmitError(
-        `Creator coins are only supported on ${chainNamesString}. Current chain: ${chain.name}`
-      )
+      setSubmitError(`Creator coins are not supported on ${chain.name}.`)
       actions.setSubmitting(false)
       return
     }
@@ -636,8 +631,7 @@ export const CreatorCoin: React.FC = () => {
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
-              Creator coins are currently only supported on {chainNamesString}. Please
-              switch to a supported network to create a creator coin.
+              Creator coins are not supported on {chain.name}.
             </Text>
           </Stack>
         </Box>

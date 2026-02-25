@@ -36,6 +36,8 @@ export const ZoraDropActions: React.FC<ZoraDropActionsProps> = ({
   maxPerAddress,
   onOpenMintModal,
 }) => {
+  const buttonSize = { '@initial': 'xs', '@768': 'sm' } as const
+
   // Calculate sale timing
   const now = useNowSeconds(true)
 
@@ -87,15 +89,15 @@ export const ZoraDropActions: React.FC<ZoraDropActionsProps> = ({
 
   return (
     <Flex gap="x2" align="center" wrap="wrap">
-      <Button size="sm" px="x3" variant="outline" onClick={handleOpenMint}>
+      <Button size={buttonSize} px="x3" variant="outline" onClick={handleOpenMint}>
         Mint
       </Button>
       <LinkWrapper link={getDropLink(chainId, dropAddress)} isExternal>
-        <Button size="sm" px="x3" variant="secondary">
+        <Button size={buttonSize} px="x3" variant="secondary">
           View Drop
         </Button>
       </LinkWrapper>
-      {shareUrl && <ShareButton url={shareUrl} size="sm" variant="secondary" />}
+      {shareUrl && <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />}
     </Flex>
   )
 }

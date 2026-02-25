@@ -114,6 +114,11 @@ export const CoinInfo = ({
     creatorAddress || undefined
   )
 
+  // Fetch proposer ENS data
+  const { displayName: proposerDisplayName, ensAvatar: proposerAvatar } = useEnsData(
+    (proposal?.proposer ?? undefined) as Address | undefined
+  )
+
   // Get media type for animation_url if present
   const animationUrl = metadata?.animation_url
   const {
@@ -182,21 +187,36 @@ export const CoinInfo = ({
         </Flex>
       </Flex>
 
-      {/* Creator */}
-      {creatorAddress && !isClankerToken && (
-        <>
-          <Box mb="x3">
-            <Text variant="label-sm" color="text3" mb="x2">
-              Created by
+      {proposal?.proposer ? (
+        <Box mb="x3">
+          {/* Proposer */}
+          <Text variant="label-sm" color="text3" mb="x2">
+            Created by
+          </Text>
+          <Flex align="center">
+            <Avatar
+              address={proposal.proposer as Address}
+              src={proposerAvatar}
+              size="28"
+            />
+            <Text fontWeight="display" ml="x2">
+              {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
             </Text>
-            <Flex align="center">
-              <Avatar address={creatorAddress} src={creatorAvatar} size="28" />
-              <Text fontWeight="display" ml="x2">
-                {creatorDisplayName || walletSnippet(creatorAddress)}
-              </Text>
-            </Flex>
-          </Box>
-        </>
+          </Flex>
+        </Box>
+      ) : (
+        <Box mb="x3">
+          {/* Creator */}
+          <Text variant="label-sm" color="text3" mb="x2">
+            Created by
+          </Text>
+          <Flex align="center">
+            <Avatar address={creatorAddress as Address} src={creatorAvatar} size="28" />
+            <Text fontWeight="display" ml="x2">
+              {creatorDisplayName || walletSnippet(creatorAddress as Address)}
+            </Text>
+          </Flex>
+        </Box>
       )}
 
       {/* Market Cap, Total Supply - 2 column grid */}
@@ -245,7 +265,13 @@ export const CoinInfo = ({
               DAO
             </Text>
             <Link link={getDaoLink(chainId, daoAddress)} isExternal>
-              <Button variant="secondary" size="sm">
+              <Button
+                variant="secondaryAccent"
+                size="md"
+                px="x4"
+                gap="x2"
+                style={{ fontSize: '14px' }}
+              >
                 {daoImage && (
                   <Box flexShrink={0}>
                     <FallbackImage

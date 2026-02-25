@@ -51,6 +51,8 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const { getProposalLink } = useLinks()
   const daoId = addresses.token
 
+  const buttonSize = { '@initial': 'xs', '@768': 'sm' } as const
+
   const { isActive, isLoading: isLoadingState } = useProposalState({
     chainId,
     governorAddress: addresses.governor as AddressType,
@@ -142,11 +144,11 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
           link={getProposalLink(chainId, daoId, proposalNumber, 'details')}
           isExternal
         >
-          <Button size="sm" px="x3" variant="secondary">
+          <Button size={buttonSize} px="x3" variant="secondary">
             View Proposal
           </Button>
         </LinkWrapper>
-        <ShareButton url={shareUrl} size="sm" variant="secondary" />
+        <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />
       </Flex>
     )
   }
@@ -158,7 +160,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
       {/* Active proposals show vote option */}
       {isActive && (
         <ContractButton
-          size="sm"
+          size={buttonSize}
           px="x3"
           variant="outline"
           chainId={chainId}
@@ -168,7 +170,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         </ContractButton>
       )}
       <ContractButton
-        size="sm"
+        size={buttonSize}
         px="x3"
         variant="outline"
         chainId={chainId}
@@ -186,11 +188,11 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         )}
         isExternal
       >
-        <Button size="sm" px="x3" variant="secondary">
+        <Button size={buttonSize} px="x3" variant="secondary">
           {isUpdate ? 'View Updates' : 'View Proposal'}
         </Button>
       </LinkWrapper>
-      <ShareButton url={shareUrl} size="sm" variant="secondary" />
+      <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />
     </Flex>
   )
 }

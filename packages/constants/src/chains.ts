@@ -25,7 +25,7 @@ const sorter = (a: Chain, b: Chain) => a.icon.localeCompare(b.icon)
 /**
  * Sorts a non-empty chain list by name while preserving its non-empty type.
  */
-const sortNonEmptyChains = <T extends Chain>(
+export const sortNonEmptyChains = <T extends Chain>(
   chains: NonEmptyArray<T>
 ): NonEmptyArray<T> => {
   const sorted = [...chains].sort(sorter)
@@ -131,7 +131,7 @@ export const PUBLIC_DEFAULT_CHAINS: Chains = sortNonEmptyChains(
 // L1 / L2 CHAIN IDS
 // ----------------------
 
-type NonEmptyChainIds = NonEmptyArray<CHAIN_ID>
+export type NonEmptyChainIds = NonEmptyArray<CHAIN_ID>
 
 export const L1_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   ? ([CHAIN_ID.SEPOLIA] as const)
@@ -140,15 +140,3 @@ export const L1_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
 export const L2_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   ? ([CHAIN_ID.ZORA_SEPOLIA, CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
   : ([CHAIN_ID.ZORA, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)
-
-// export const COIN_SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE, CHAIN_ID.BASE_SEPOLIA] as const // ensure non-empty
-// TODO: support base mainnet after all tests are done
-export const COIN_SUPPORTED_CHAIN_IDS = [CHAIN_ID.BASE_SEPOLIA] as const // ensure non-empty
-
-const COIN_SUPPORTED_CHAINS_UNSORTED = PUBLIC_ALL_CHAINS.filter((chain) =>
-  COIN_SUPPORTED_CHAIN_IDS.includes(chain.id as (typeof COIN_SUPPORTED_CHAIN_IDS)[number])
-)
-
-export const COIN_SUPPORTED_CHAINS: Chains = sortNonEmptyChains(
-  COIN_SUPPORTED_CHAINS_UNSORTED as unknown as NonEmptyArray<Chain>
-)

@@ -5,6 +5,7 @@ query proposalByExecutionTxHash($executionTransactionHash: Bytes!) {
     orderBy: timeCreated
     orderDirection: desc
   ) {
+    proposer
     proposalId
     proposalNumber
     title

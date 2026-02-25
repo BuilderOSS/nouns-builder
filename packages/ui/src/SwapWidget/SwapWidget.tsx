@@ -38,9 +38,6 @@ interface SwapWidgetProps {
   chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
 }
 
-// Toggle to enable/disable the sell tab
-const ENABLE_SELL_TAB = false
-
 export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) => {
   const [amountIn, setAmountIn] = useState('')
   const [isBuying, setIsBuying] = useState(true) // true = buy coin, false = sell coin
@@ -60,6 +57,18 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     coinAddress,
     isBuying
   )
+
+  // Selling is failing on Base Sepolia, so disable it for now
+  const sellTabEnabled = CHAIN_ID.BASE === chainId
+
+  useEffect(() => {
+    if (!sellTabEnabled) {
+      setIsBuying(true)
+      setAmountIn('')
+      setSuccessTxHash(null)
+      setPendingTxHash(null)
+    }
+  }, [sellTabEnabled])
 
   useEffect(() => {
     if (swapOptions.length === 0) return
@@ -438,7 +447,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
   return (
     <Box>
       {/* Buy/Sell Toggle or Title */}
-      {ENABLE_SELL_TAB ? (
+      {sellTabEnabled ? (
         <Flex gap="x2" mb="x4">
           <Button
             variant={isBuying ? 'primary' : 'secondary'}
