@@ -10,13 +10,26 @@ import {
   baseButton,
   buttonLoading,
   buttonPill,
-  buttonPillLg,
-  buttonPillMd,
-  buttonPillSm,
+  buttonPillSize,
   buttonSize,
   buttonVariants,
+  responsiveButtonPillSize,
+  responsiveButtonSize,
 } from './Button.css'
 import { iconVariants } from './Icon.css'
+
+type ResponsiveProp<T> = T | { [key: string]: T }
+
+// Helper to map responsive size to pre-generated style
+function getResponsiveSizeKey(size: { [key: string]: string }): string | null {
+  const initial = size['@initial']
+  const at768 = size['@768']
+
+  if (initial && at768) {
+    return `${initial}-${at768}`
+  }
+  return null
+}
 
 export interface ButtonProps extends FlexProps {
   disabled?: boolean
@@ -30,7 +43,7 @@ export interface ButtonProps extends FlexProps {
     | 'circleSolid'
     | 'ghost'
     | 'unset'
-  size?: 'xs' | 'sm' | 'md' | 'lg'
+  size?: ResponsiveProp<'xs' | 'sm' | 'md' | 'lg'>
   icon?: IconProps['id']
   iconAlign?: 'left' | 'right'
   type?: 'submit' | 'reset' | 'button'
@@ -72,6 +85,33 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
     return icon ? <Icon id={icon} size={iconSize} /> : null
   }, [icon, iconSize])
 
+  // Apply button size styles
+  const buttonSizeStyle = useMemo(() => {
+    if (typeof size === 'string') {
+      return buttonSize[size]
+    }
+    // For responsive sizes, use pre-generated responsive styles
+    const key = getResponsiveSizeKey(size)
+    return key && responsiveButtonSize[key as keyof typeof responsiveButtonSize]
+      ? responsiveButtonSize[key as keyof typeof responsiveButtonSize]
+      : buttonSize.md
+  }, [size])
+
+  // Get the effective size for class names (use @initial value if responsive, otherwise use string value)
+  const effectiveSize = typeof size === 'string' ? size : size['@initial'] || 'md'
+
+  const pillSizeStyle = useMemo(() => {
+    if (!pill) return undefined
+    if (typeof size === 'string') {
+      return buttonPillSize[size]
+    }
+    // For responsive sizes, use pre-generated responsive pill styles
+    const key = getResponsiveSizeKey(size)
+    return key && responsiveButtonPillSize[key as keyof typeof responsiveButtonPillSize]
+      ? responsiveButtonPillSize[key as keyof typeof responsiveButtonPillSize]
+      : undefined
+  }, [pill, size])
+
   return (
     <Flex
       ref={ref}
@@ -81,18 +121,16 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
       type={type}
       className={[
         variant && `${ZORD_CLASS}${variant ? `-${variant}` : ''}`,
-        size && `${ZORD_CLASS}-${size}`,
+        effectiveSize && `${ZORD_CLASS}-${effectiveSize}`,
         pill && `${ZORD_CLASS}-pill`,
         loading && `${ZORD_CLASS}-loading`,
         disabled && `${ZORD_CLASS}-disabled`,
-        buttonSize[size],
+        buttonSizeStyle,
         buttonVariants[variant],
         baseButton,
         loading && buttonLoading,
         pill && buttonPill,
-        pill && size === 'sm' && buttonPillSm,
-        pill && size === 'md' && buttonPillMd,
-        pill && size === 'lg' && buttonPillLg,
+        pillSizeStyle,
         className,
       ]}
       px={px}

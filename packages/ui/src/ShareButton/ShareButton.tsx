@@ -1,12 +1,12 @@
-import { Button, Icon, PopUp, Text } from '@buildeross/zord'
+import { Button, ButtonProps, Icon, PopUp, Text } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React from 'react'
 
 interface ShareButtonProps {
   // Full URL to copy
   url: string
-  // Button size
-  size?: 'sm' | 'md' | 'lg'
+  // Button size - supports responsive sizes like {'@initial': 'sm', '@768': 'md'}
+  size?: ButtonProps['size']
   // Button variant
   variant?: 'ghost' | 'outline' | 'secondary' | 'primary'
   // Optional callback when copy is successful
@@ -50,8 +50,10 @@ const ShareButton: React.FC<ShareButtonProps> = ({
     [url, onCopySuccess, copied]
   )
 
-  const iconSize = size === 'sm' ? 'sm' : 'md'
-  const px = size === 'lg' ? 'x6' : 'x4'
+  // Get effective size for icon and padding (use @initial value if responsive, otherwise use string value)
+  const effectiveSize = typeof size === 'string' ? size : size?.['@initial'] || 'md'
+  const iconSize = effectiveSize === 'sm' || effectiveSize === 'xs' ? 'sm' : 'md'
+  const px = effectiveSize === 'lg' ? 'x6' : effectiveSize === 'xs' ? 'x3' : 'x4'
 
   return (
     <>

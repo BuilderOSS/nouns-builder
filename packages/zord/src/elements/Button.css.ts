@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css'
+import { style, styleVariants } from '@vanilla-extract/css'
 
 import { atoms } from '../atoms'
 import { vars } from '../theme'
@@ -38,49 +38,71 @@ export const baseButton = style([
   },
 ])
 
-export const buttonSize = {
-  xs: style([
-    {
-      width: 'auto',
+// Button size styles
+const buttonSizeStyles = {
+  xs: {
+    width: 'auto',
+    display: 'inline-flex' as const,
+    paddingLeft: vars.space.x2,
+    paddingRight: vars.space.x2,
+    height: vars.size.x7,
+    minWidth: vars.size.x10,
+    fontSize: vars.fontSize[14],
+    fontWeight: vars.fontWeight.label,
+  },
+  sm: {
+    width: 'auto',
+    display: 'inline-flex' as const,
+    paddingLeft: vars.space.x3,
+    paddingRight: vars.space.x3,
+    height: vars.size.x10,
+    minWidth: vars.size.x19,
+    fontSize: vars.fontSize[14],
+    fontWeight: vars.fontWeight.label,
+  },
+  md: {
+    height: vars.size.x12,
+    fontWeight: vars.fontWeight.label,
+    fontSize: vars.fontSize[16],
+  },
+  lg: {
+    paddingLeft: vars.space.x4,
+    paddingRight: vars.space.x4,
+    height: vars.size.x15,
+    minWidth: vars.size.x23,
+    fontSize: vars.fontSize[18],
+    fontWeight: vars.fontWeight.label,
+  },
+} as const
+
+export const buttonSize = styleVariants(buttonSizeStyles, (sizeStyle) => sizeStyle)
+
+// Responsive button size styles - pre-generated common combinations
+export const responsiveButtonSize = {
+  'xs-sm': style({
+    ...buttonSizeStyles.xs,
+    '@media': {
+      '(min-width: 768px)': buttonSizeStyles.sm,
     },
-    atoms({
-      display: 'inline-flex',
-      px: 'x2',
-      height: 'x7',
-      minWidth: 'x10',
-      fontSize: 14,
-      fontWeight: 'label',
-    }),
-  ]),
-  sm: style([
-    {
-      width: 'auto',
+  }),
+  'xs-md': style({
+    ...buttonSizeStyles.xs,
+    '@media': {
+      '(min-width: 768px)': buttonSizeStyles.md,
     },
-    atoms({
-      display: 'inline-flex',
-      px: 'x3',
-      height: 'x10',
-      minWidth: 'x19',
-      fontSize: 14,
-      fontWeight: 'label',
-    }),
-  ]),
-  md: style([
-    atoms({
-      h: 'x12',
-      fontWeight: 'label',
-      fontSize: 16,
-    }),
-  ]),
-  lg: style([
-    atoms({
-      px: 'x4',
-      height: 'x15',
-      minWidth: 'x23',
-      fontSize: 18,
-      fontWeight: 'label',
-    }),
-  ]),
+  }),
+  'sm-md': style({
+    ...buttonSizeStyles.sm,
+    '@media': {
+      '(min-width: 768px)': buttonSizeStyles.md,
+    },
+  }),
+  'sm-lg': style({
+    ...buttonSizeStyles.sm,
+    '@media': {
+      '(min-width: 768px)': buttonSizeStyles.lg,
+    },
+  }),
 }
 
 export const buttonVariants = {
@@ -259,15 +281,48 @@ export const buttonLoading = atoms({ pointerEvents: 'none' })
 
 export const buttonPill = atoms({ borderRadius: 'round' })
 
-export const buttonPillSm = atoms({
-  px: 'x4',
-  py: 'x1',
-})
+// Button pill size styles
+const buttonPillSizeStyles = {
+  xs: {},
+  sm: {
+    paddingLeft: vars.space.x4,
+    paddingRight: vars.space.x4,
+    paddingTop: vars.space.x1,
+    paddingBottom: vars.space.x1,
+  },
+  md: {
+    paddingLeft: vars.space.x5,
+    paddingRight: vars.space.x5,
+  },
+  lg: {
+    paddingLeft: vars.space.x6,
+    paddingRight: vars.space.x6,
+  },
+} as const
 
-export const buttonPillMd = atoms({
-  px: 'x5',
-})
+export const buttonPillSize = styleVariants(
+  buttonPillSizeStyles,
+  (sizeStyle) => sizeStyle
+)
 
-export const buttonPillLg = atoms({
-  px: 'x6',
-})
+// Responsive pill size styles
+export const responsiveButtonPillSize = {
+  'xs-sm': style({}),
+  'xs-md': style({
+    '@media': {
+      '(min-width: 768px)': buttonPillSizeStyles.md,
+    },
+  }),
+  'sm-md': style({
+    ...buttonPillSizeStyles.sm,
+    '@media': {
+      '(min-width: 768px)': buttonPillSizeStyles.md,
+    },
+  }),
+  'sm-lg': style({
+    ...buttonPillSizeStyles.sm,
+    '@media': {
+      '(min-width: 768px)': buttonPillSizeStyles.lg,
+    },
+  }),
+}

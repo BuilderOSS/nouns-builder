@@ -73,7 +73,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
 
   const fundsRecipientDisplay = fundsRecipientName || walletSnippet(drop.fundsRecipient)
   const title = (
-    <Stack direction="row" align="center" gap="x2" flexWrap="wrap">
+    <Stack direction="row" align="center" gap="x2" wrap>
       <Text>
         Drop {index + 1}: {drop.symbol}
       </Text>
@@ -119,13 +119,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
 
       {/* Drop Information */}
       <Stack gap="x2">
-        <Stack
-          direction="row"
-          align="center"
-          justify="space-between"
-          flexWrap="wrap"
-          gap="x2"
-        >
+        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
           <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Name:
@@ -156,13 +150,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
           </Stack>
         )}
 
-        <Stack
-          direction="row"
-          align="center"
-          justify="space-between"
-          flexWrap="wrap"
-          gap="x2"
-        >
+        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
           <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Max Per Address:
@@ -176,13 +164,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
             <Text variant="label-sm">{editionSizeDisplay}</Text>
           </Stack>
         </Stack>
-        <Stack
-          direction="row"
-          align="center"
-          justify="space-between"
-          flexWrap="wrap"
-          gap="x2"
-        >
+        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
           <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Price:
@@ -197,13 +179,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
           </Stack>
         </Stack>
 
-        <Stack
-          direction="row"
-          align="center"
-          justify="space-between"
-          flexWrap="wrap"
-          gap="x2"
-        >
+        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
           <Stack direction="row" align="center" gap="x2" flexShrink={0}>
             <Text variant="label-sm" color="tertiary">
               Sale Start:

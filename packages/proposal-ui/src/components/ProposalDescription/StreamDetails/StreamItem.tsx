@@ -250,13 +250,7 @@ export const StreamItem = ({
       <Grid gap="x3" className={gridStyle}>
         {/* Left column: Stream Information */}
         <Stack gap="x2" flex="1">
-          <Stack
-            direction="row"
-            align="center"
-            justify="space-between"
-            flexWrap="wrap"
-            gap="x2"
-          >
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
             <Stack direction="row" align="center" gap="x2" flexShrink={0}>
               <Text variant="label-sm" color="tertiary">
                 Recipient:
@@ -269,13 +263,7 @@ export const StreamItem = ({
               </Box>
             </Stack>
           </Stack>
-          <Stack
-            direction="row"
-            align="center"
-            justify="space-between"
-            flexWrap="wrap"
-            gap="x2"
-          >
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
             <Stack direction="row" align="center" gap="x2" flexShrink={0}>
               <Text variant="label-sm" color="tertiary">
                 Cancelable:
@@ -289,13 +277,7 @@ export const StreamItem = ({
               <Text variant="label-sm">{stream.transferable ? 'Yes' : 'No'}</Text>
             </Stack>
           </Stack>
-          <Stack
-            direction="row"
-            align="center"
-            justify="space-between"
-            flexWrap="wrap"
-            gap="x2"
-          >
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
             {hasCliff && (
               <Stack direction="row" align="center" gap="x2" flexShrink={0}>
                 <Text variant="label-sm" color="tertiary">
@@ -314,13 +296,7 @@ export const StreamItem = ({
             </Stack>
           </Stack>
           {(!isDurationsMode || isExecuted) && (
-            <Stack
-              direction="row"
-              align="center"
-              justify="space-between"
-              flexWrap="wrap"
-              gap="x2"
-            >
+            <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
               <Stack direction="row" align="center" gap="x2" flexShrink={0}>
                 <Text variant="label-sm" color="tertiary">
                   Start:

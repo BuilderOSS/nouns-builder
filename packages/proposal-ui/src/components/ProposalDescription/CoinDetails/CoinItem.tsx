@@ -65,7 +65,7 @@ export const CoinItem = ({ coin, index, isExecuted, chainId }: CoinItemProps) =>
   const coinLink = coin.address ? getCoinLink(chainId, coin.address) : null
 
   const title = (
-    <Stack direction="row" align="center" gap="x2" flexWrap="wrap">
+    <Stack direction="row" align="center" gap="x2" wrap>
       <Text>
         {coinType} {index + 1}: {metadata.symbol}
       </Text>

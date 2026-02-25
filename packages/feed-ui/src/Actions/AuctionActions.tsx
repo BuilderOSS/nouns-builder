@@ -45,6 +45,8 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
 
   const [isSettling, setIsSettling] = useState(false)
 
+  const buttonSize = { '@initial': 'xs', '@768': 'sm' } as const
+
   const {
     isActive,
     hasEnded,
@@ -150,7 +152,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
       {isActive && isCurrentToken && (
         <>
           <ContractButton
-            size="sm"
+            size={buttonSize}
             px="x3"
             variant="outline"
             handleClick={handleOpenBid}
@@ -159,11 +161,11 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
             Place Bid
           </ContractButton>
           <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
-            <Button size="sm" px="x3" variant="secondary">
+            <Button size={buttonSize} px="x3" variant="secondary">
               View Auction
             </Button>
           </LinkWrapper>
-          <ShareButton url={shareUrl} size="sm" variant="secondary" />
+          <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />
         </>
       )}
 
@@ -175,17 +177,17 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
             handleClick={handleSettle}
             disabled={isSettling}
             variant="outline"
-            size="sm"
+            size={buttonSize}
             px="x3"
           >
             {isSettling ? 'Settling...' : buttonText}
           </ContractButton>
           <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
-            <Button size="sm" px="x3" variant="secondary">
+            <Button size={buttonSize} px="x3" variant="secondary">
               View Auction
             </Button>
           </LinkWrapper>
-          <ShareButton url={shareUrl} size="sm" variant="secondary" />
+          <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />
         </>
       )}
 
@@ -194,17 +196,17 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         <>
           {currentTokenId && tokenId !== currentTokenId.toString() && (
             <LinkWrapper link={getAuctionLink(chainId, daoId, currentTokenId.toString())}>
-              <Button size="sm" px="x3" variant="outline">
+              <Button size={buttonSize} px="x3" variant="outline">
                 Go to Latest Auction
               </Button>
             </LinkWrapper>
           )}
           <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
-            <Button size="sm" px="x3" variant="secondary">
+            <Button size={buttonSize} px="x3" variant="secondary">
               View Auction
             </Button>
           </LinkWrapper>
-          <ShareButton url={shareUrl} size="sm" variant="secondary" />
+          <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />
         </>
       )}
     </Flex>
