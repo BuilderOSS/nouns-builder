@@ -24,8 +24,7 @@ import {
   MSG_SENDER,
   OPEN_DELTA,
 } from './constants/v4Router'
-import { PoolKey } from './getQuoteFromUniswap'
-import { SwapPath } from './types'
+import { PoolKey, SwapPath } from './types'
 import {
   isNativeEthAddress,
   normalizeCurrency,

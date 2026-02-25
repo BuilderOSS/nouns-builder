@@ -1,19 +1,11 @@
 import { UNISWAP_V4_QUOTER_ADDRESS } from '@buildeross/constants/addresses'
 import { CHAIN_ID } from '@buildeross/types'
-import { Address, encodeAbiParameters, keccak256, PublicClient } from 'viem'
+import { encodeAbiParameters, keccak256, PublicClient } from 'viem'
 
 import { uniswapV4QuoterAbi } from './abis/uniswapV4Quoter'
 import { SwapError, SwapErrorCode } from './errors'
-import { SwapPath } from './types'
+import { PoolKey, SwapPath } from './types'
 import { normalizeForPoolKey } from './utils/normalizeAddresses'
-
-export interface PoolKey {
-  currency0: Address
-  currency1: Address
-  fee: number
-  tickSpacing: number
-  hooks: Address
-}
 
 /**
  * Compute the hash of a PoolKey struct

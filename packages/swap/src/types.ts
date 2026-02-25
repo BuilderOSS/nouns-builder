@@ -163,23 +163,89 @@ export type PostQuoteResponse = {
 export type CoinType = 'zora-coin' | 'clanker-token' | 'weth' | 'eth'
 
 /**
- * Coin info for building swap paths
+ * Base coin info shared by all coin types
  */
-export type CoinInfo = {
+type BaseCoinInfo = {
   address: Address
-  type: CoinType
   symbol: string
-  name?: string
-  /** For Zora coins: the clanker token it's paired with */
-  pairedToken?: Address
-  /** Pool ID for Uniswap V4 */
-  poolId?: string
+  name: string
+}
+
+/**
+ * ETH coin info
+ */
+type EthCoinInfo = BaseCoinInfo & {
+  type: 'eth'
+}
+
+/**
+ * WETH coin info
+ */
+type WethCoinInfo = BaseCoinInfo & {
+  type: 'weth'
+}
+
+/**
+ * Zora coin info with required pool fields
+ */
+type ZoraCoinInfo = BaseCoinInfo & {
+  type: 'zora-coin'
+  /** The clanker token it's paired with */
+  pairedToken: Address
   /** Pool key hash for Uniswap V4 */
-  poolKeyHash?: string
+  poolKeyHash: string
   /** Pool hooks address */
-  hooks?: Address
+  hooks: Address
   /** Pool fee */
-  fee?: bigint
+  fee: bigint
   /** Tick spacing */
-  tickSpacing?: number
+  tickSpacing: number
+}
+
+/**
+ * Clanker token info with required pool fields
+ */
+type ClankerTokenInfo = BaseCoinInfo & {
+  type: 'clanker-token'
+  /** The token it's paired with */
+  pairedToken: Address
+  /** Pool ID for Uniswap V4 */
+  poolId: string
+  /** Pool hooks address */
+  hooks: Address
+  /** Pool fee (always dynamic fee flag for clanker) */
+  fee: bigint
+  /** Tick spacing */
+  tickSpacing: number
+}
+
+/**
+ * Coin info for building swap paths
+ * Discriminated union based on coin type
+ */
+export type CoinInfo = EthCoinInfo | WethCoinInfo | ZoraCoinInfo | ClankerTokenInfo
+
+/**
+ * Pool key for Uniswap V4
+ */
+export type PoolKey = {
+  currency0: Address
+  currency1: Address
+  fee: number
+  tickSpacing: number
+  hooks: Address
+}
+
+/**
+ * Result from getPoolMaxSwapAmount
+ */
+export type PoolMaxSwapAmountResult = {
+  /** Maximum amount that can be swapped in */
+  maxAmountIn: bigint
+  /** Current sqrt price in Q64.96 format */
+  sqrtPriceX96: bigint
+  /** Current tick */
+  tick: number
+  /** Available liquidity */
+  liquidity: bigint
 }

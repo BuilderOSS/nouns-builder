@@ -50,6 +50,7 @@ export type TradeModalState = {
   chainId: CHAIN_ID
   daoName: string
   daoImage: string
+  isZoraCoin: boolean
 }
 
 export type MintModalState = {

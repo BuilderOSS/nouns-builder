@@ -76,7 +76,7 @@ export const CoinDetail = ({
   createdAt,
   creatorAddress,
   transactionHash,
-  isClankerToken,
+  isClankerToken = false,
   clankerToken,
   zoraCoin,
 }: CoinDetailProps) => {
@@ -102,6 +102,9 @@ export const CoinDetail = ({
   const isLoadingPrice = isClankerToken
     ? clankerWithPrice.isLoadingPrice
     : zoraCoinWithPrice.isLoadingPrice
+
+  // Derived variable to avoid repeating !isClankerToken
+  const isZoraCoin = !isClankerToken
 
   // Calculate sidebar top offset based on header visibility
   // Header is 80px tall and hidden when scrollDirection is 'down'
@@ -168,7 +171,12 @@ export const CoinDetail = ({
             <Text variant="heading-sm" mb="x4">
               Trade {symbol}
             </Text>
-            <SwapWidget coinAddress={coinAddress} symbol={symbol} chainId={chainId} />
+            <SwapWidget
+              coinAddress={coinAddress}
+              symbol={symbol}
+              chainId={chainId}
+              isZoraCoin={isZoraCoin}
+            />
           </Box>
         </Box>
       </Box>
@@ -201,7 +209,12 @@ export const CoinDetail = ({
               <Icon id="cross" />
             </Button>
           </Flex>
-          <SwapWidget coinAddress={coinAddress} symbol={symbol} chainId={chainId} />
+          <SwapWidget
+            coinAddress={coinAddress}
+            symbol={symbol}
+            chainId={chainId}
+            isZoraCoin={isZoraCoin}
+          />
         </Box>
       </AnimatedModal>
     </>

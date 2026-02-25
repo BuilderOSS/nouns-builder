@@ -24,10 +24,15 @@ export const Coins: React.FC = () => {
   const [selectedCoin, setSelectedCoin] = useState<{
     address: Address
     symbol: string
+    isZoraCoin: boolean
   } | null>(null)
 
-  const handleTradeClick = (coinAddress: Address, symbol: string) => {
-    setSelectedCoin({ address: coinAddress, symbol })
+  const handleTradeClick = (
+    coinAddress: Address,
+    symbol: string,
+    isZoraCoin: boolean
+  ) => {
+    setSelectedCoin({ address: coinAddress, symbol, isZoraCoin })
   }
 
   const handleCloseModal = () => {
@@ -116,6 +121,7 @@ export const Coins: React.FC = () => {
           priceUsd={creatorCoinWithPrice.priceUsd}
           marketCap={creatorCoinWithPrice.marketCap}
           isLoadingPrice={creatorCoinWithPrice.isLoadingPrice}
+          isZoraCoin={false}
           onTradeClick={handleTradeClick}
         />
       ) : (
@@ -158,6 +164,7 @@ export const Coins: React.FC = () => {
               coinAddress={selectedCoin.address}
               symbol={selectedCoin.symbol}
               chainId={chain.id as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+              isZoraCoin={selectedCoin.isZoraCoin}
             />
           </Box>
         </AnimatedModal>

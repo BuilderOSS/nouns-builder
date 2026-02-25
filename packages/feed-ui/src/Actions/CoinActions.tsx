@@ -22,10 +22,11 @@ interface CoinActionsProps {
 export const CoinActions: React.FC<CoinActionsProps> = ({
   chainId,
   coinAddress,
-  symbol = 'Coin',
+  symbol,
   daoName,
   daoImage,
   onOpenTradeModal,
+  isClankerToken,
 }) => {
   const { getCoinLink } = useLinks()
 
@@ -43,8 +44,9 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
       chainId,
       daoName,
       daoImage,
+      isZoraCoin: !isClankerToken,
     })
-  }, [onOpenTradeModal, coinAddress, symbol, chainId, daoName, daoImage])
+  }, [onOpenTradeModal, coinAddress, symbol, chainId, daoName, daoImage, isClankerToken])
 
   // Only show Trade button for Base chains (where swap functionality is available)
   const showTradeButton = isChainIdSupportedByCoining(chainId)

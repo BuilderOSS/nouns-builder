@@ -20,13 +20,19 @@ function hopFromPairingSide(
   tokenIn: Address,
   tokenOut: Address
 ): SwapPathHop {
+  // Only Zora coins and Clanker tokens have pool info
+  if (pairingSide.type !== 'zora-coin' && pairingSide.type !== 'clanker-token') {
+    throw new Error('Cannot create hop from non-pool coin')
+  }
+
   return {
     tokenIn,
     tokenOut,
-    poolId: pairingSide.poolId || pairingSide.poolKeyHash || '',
-    fee: pairingSide.fee, // optional per your type
-    hooks: pairingSide.hooks, // optional
-    tickSpacing: pairingSide.tickSpacing, // optional
+    poolId:
+      pairingSide.type === 'clanker-token' ? pairingSide.poolId : pairingSide.poolKeyHash,
+    fee: pairingSide.fee,
+    hooks: pairingSide.hooks,
+    tickSpacing: pairingSide.tickSpacing,
   }
 }
 
@@ -35,10 +41,18 @@ function hopFromPairingSide(
  * We pick hop metadata from the token whose `pairedToken` points at the other.
  */
 function makeDirectHop(a: CoinInfo, b: CoinInfo): SwapPathHop | null {
-  if (addrEq(a.pairedToken, b.address)) {
+  // Check if a has pairedToken and it matches b
+  if (
+    (a.type === 'zora-coin' || a.type === 'clanker-token') &&
+    addrEq(a.pairedToken, b.address)
+  ) {
     return hopFromPairingSide(a, a.address, b.address)
   }
-  if (addrEq(b.pairedToken, a.address)) {
+  // Check if b has pairedToken and it matches a
+  if (
+    (b.type === 'zora-coin' || b.type === 'clanker-token') &&
+    addrEq(b.pairedToken, a.address)
+  ) {
     return hopFromPairingSide(b, a.address, b.address)
   }
   return null
@@ -71,6 +85,8 @@ async function buildChainToWeth(
 
     if (addrEq(info.address, weth)) return chain
 
+    // Only Zora coins and Clanker tokens have pairedToken
+    if (info.type !== 'zora-coin' && info.type !== 'clanker-token') return null
     if (!info.pairedToken) return null
     cur = info.pairedToken
   }

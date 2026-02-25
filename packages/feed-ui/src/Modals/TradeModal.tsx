@@ -15,6 +15,7 @@ export interface TradeModalProps {
   chainId: CHAIN_ID
   daoName: string
   daoImage: string
+  isZoraCoin: boolean
 }
 
 export const TradeModal: React.FC<TradeModalProps> = ({
@@ -25,6 +26,7 @@ export const TradeModal: React.FC<TradeModalProps> = ({
   chainId,
   daoName,
   daoImage,
+  isZoraCoin,
 }) => {
   return (
     <AnimatedModal open={isOpen} close={onClose} size="medium">
@@ -39,6 +41,7 @@ export const TradeModal: React.FC<TradeModalProps> = ({
           coinAddress={coinAddress as `0x${string}`}
           symbol={symbol}
           chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+          isZoraCoin={isZoraCoin}
         />
       </Stack>
     </AnimatedModal>
