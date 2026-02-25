@@ -3,6 +3,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { SDK } from '../client'
 
 export interface ProposalBasicInfo {
+  proposer: `0x${string}`
   proposalId: string
   proposalNumber: number
   title: string
@@ -30,6 +31,7 @@ export const getProposalByExecutionTxHash = async (
     return {
       proposalId: proposal.proposalId,
       proposalNumber: proposal.proposalNumber,
+      proposer: proposal.proposer,
       title: proposal.title ?? '',
       dao: {
         id: proposal.dao.id,

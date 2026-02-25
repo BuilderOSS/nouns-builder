@@ -1,6 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useEnsData, useMediaType, useProposalByExecutionTx } from '@buildeross/hooks'
 import { type ZoraDropFragment } from '@buildeross/sdk/subgraph'
+import { useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { ContractLink } from '@buildeross/ui/ContractLink'
@@ -12,7 +13,7 @@ import { ShareButton } from '@buildeross/ui/ShareButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
-import { Address, formatEther } from 'viem'
+import { Address, formatEther, isAddressEqual } from 'viem'
 
 import { ProposalLink } from '../../../components/ProposalLink'
 import { dropHeader, dropImageContainer, onlyDesktop } from './DropDetail.css'
@@ -35,6 +36,7 @@ export const DropInfo = ({
   transactionHash,
 }: DropInfoProps) => {
   const { getDropLink, getDaoLink } = useLinks()
+  const { treasury } = useDaoStore((state) => state.addresses)
 
   // Fetch proposal by execution transaction hash
   const { data: proposal } = useProposalByExecutionTx({
@@ -46,6 +48,11 @@ export const DropInfo = ({
   // Fetch creator ENS data
   const { displayName: creatorDisplayName, ensAvatar: creatorAvatar } = useEnsData(
     drop.creator as Address
+  )
+
+  // Fetch proposer ENS data
+  const { displayName: proposerDisplayName, ensAvatar: proposerAvatar } = useEnsData(
+    (proposal?.proposer ?? undefined) as Address | undefined
   )
 
   // Get media type for animation_url if present
@@ -65,6 +72,10 @@ export const DropInfo = ({
   }, [chainId, drop.id, getDropLink])
 
   const priceEth = formatEther(BigInt(drop.publicSalePrice || '0'))
+
+  const isTreasuryFundsRecipient = treasury
+    ? isAddressEqual(drop.fundsRecipient, treasury)
+    : false
 
   return (
     <Box>
@@ -114,18 +125,37 @@ export const DropInfo = ({
         </Flex>
       </Flex>
 
-      {/* Creator */}
-      <Box mb="x3">
-        <Text variant="label-sm" color="text3" mb="x2">
-          Created by
-        </Text>
-        <Flex align="center">
-          <Avatar address={drop.creator as Address} src={creatorAvatar} size="28" />
-          <Text fontWeight="display" ml="x2">
-            {creatorDisplayName || walletSnippet(drop.creator as Address)}
+      {proposal?.proposer ? (
+        <Box mb="x3">
+          {/* Proposer */}
+          <Text variant="label-sm" color="text3" mb="x2">
+            Created by
           </Text>
-        </Flex>
-      </Box>
+          <Flex align="center">
+            <Avatar
+              address={proposal.proposer as Address}
+              src={proposerAvatar}
+              size="28"
+            />
+            <Text fontWeight="display" ml="x2">
+              {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
+            </Text>
+          </Flex>
+        </Box>
+      ) : (
+        <Box mb="x3">
+          {/* Creator */}
+          <Text variant="label-sm" color="text3" mb="x2">
+            Created by
+          </Text>
+          <Flex align="center">
+            <Avatar address={drop.creator as Address} src={creatorAvatar} size="28" />
+            <Text fontWeight="display" ml="x2">
+              {creatorDisplayName || walletSnippet(drop.creator as Address)}
+            </Text>
+          </Flex>
+        </Box>
+      )}
 
       {/* Price */}
       <Box mb="x3">
@@ -137,22 +167,10 @@ export const DropInfo = ({
         </Text>
       </Box>
 
-      {/* Funds Recipient */}
-      <Box mb="x3">
-        <Text variant="label-sm" color="text3" mb="x2">
-          Funds Recipient
-        </Text>
-        <ContractLink
-          address={drop.fundsRecipient as Address}
-          chainId={chainId as CHAIN_ID}
-          size="sm"
-        />
-      </Box>
-
       {/* Contract */}
       <Box mb="x3">
         <Text variant="label-sm" color="text3" mb="x2">
-          Drop Contract
+          Contract
         </Text>
         <ContractLink
           address={drop.id as Address}
@@ -161,23 +179,43 @@ export const DropInfo = ({
         />
       </Box>
 
+      {!isTreasuryFundsRecipient && (
+        <Box mb="x3">
+          {/* Funds Recipient */}
+          <Text variant="label-sm" color="text3" mb="x2">
+            Funds Recipient
+          </Text>
+          <ContractLink
+            address={drop.fundsRecipient as Address}
+            chainId={chainId as CHAIN_ID}
+            size="sm"
+          />
+        </Box>
+      )}
+
       {/* DAO */}
       {daoAddress && daoName && (
         <>
           <Box mb="x3">
             <Text variant="label-sm" color="text3" mb="x2">
-              DAO
+              {isTreasuryFundsRecipient ? 'DAO & Funds Recipient' : 'DAO'}
             </Text>
             <Link link={getDaoLink(chainId, daoAddress)} isExternal>
-              <Button variant="secondary" size="sm">
+              <Button
+                variant="secondaryAccent"
+                size="md"
+                px="x4"
+                gap="x2"
+                style={{ fontSize: '14px' }}
+              >
                 {daoImage && (
                   <Box flexShrink={0}>
                     <FallbackImage
                       src={daoImage}
                       style={{ borderRadius: '100%', objectFit: 'contain' }}
                       alt={daoName}
-                      height={32}
-                      width={32}
+                      height={24}
+                      width={24}
                     />
                   </Box>
                 )}

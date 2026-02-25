@@ -7330,6 +7330,7 @@ export type ProposalByExecutionTxHashQuery = {
   __typename?: 'Query'
   proposals: Array<{
     __typename?: 'Proposal'
+    proposer: any
     proposalId: any
     proposalNumber: number
     title?: string | null
@@ -8488,7 +8489,13 @@ export const ProposalDocument = gql`
 `
 export const ProposalByExecutionTxHashDocument = gql`
   query proposalByExecutionTxHash($executionTransactionHash: Bytes!) {
-    proposals(where: { executionTransactionHash: $executionTransactionHash }, first: 1) {
+    proposals(
+      where: { executionTransactionHash: $executionTransactionHash }
+      first: 1
+      orderBy: timeCreated
+      orderDirection: desc
+    ) {
+      proposer
       proposalId
       proposalNumber
       title

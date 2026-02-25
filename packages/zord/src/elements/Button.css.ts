@@ -112,6 +112,20 @@ export const buttonVariants = {
       backgroundColor: 'background2',
     }),
   ]),
+  secondaryAccent: style([
+    {
+      selectors: {
+        '&:not([disabled]):hover': {
+          cursor: 'pointer',
+          backgroundColor: vars.color.neutralHover,
+        },
+      },
+    },
+    atoms({
+      color: 'primary',
+      backgroundColor: 'onAccent',
+    }),
+  ]),
   positive: style([
     {
       selectors: {
