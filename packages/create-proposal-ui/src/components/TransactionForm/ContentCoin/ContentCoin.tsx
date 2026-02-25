@@ -1,7 +1,6 @@
 import {
   BUILDER_TREASURY_ADDRESS,
   COIN_DEPLOYMENT_DISCLAIMER,
-  COIN_SUPPORTED_CHAINS,
   ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants'
 import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
@@ -19,7 +18,6 @@ import {
   DEFAULT_ZORA_TICK_SPACING,
   DEFAULT_ZORA_TOTAL_SUPPLY,
   estimateTargetFdvUsd,
-  getChainNamesString,
   isChainIdSupportedByCoining,
 } from '@buildeross/utils'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
@@ -35,8 +33,6 @@ import { useReadContract } from 'wagmi'
 
 import { ContentCoinPreviewDisplay } from './ContentCoinPreviewDisplay'
 import { IPFSUploader } from './ipfsUploader'
-
-const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -262,9 +258,7 @@ export const ContentCoin: React.FC = () => {
     }
 
     if (!isChainSupported) {
-      setSubmitError(
-        `Content coins are only supported on ${chainNamesString}. Current chain: ${chain.name}`
-      )
+      setSubmitError(`Content coins are not supported on ${chain.name}.`)
       actions.setSubmitting(false)
       return
     }
@@ -407,8 +401,7 @@ export const ContentCoin: React.FC = () => {
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
-              Content coins are currently only supported on {chainNamesString}. Please
-              switch to a supported network to create a content coin.
+              Content coins are not supported on ${chain.name}.
             </Text>
           </Stack>
         </Box>

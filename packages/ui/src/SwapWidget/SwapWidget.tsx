@@ -38,9 +38,6 @@ interface SwapWidgetProps {
   chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
 }
 
-// Toggle to enable/disable the sell tab
-const ENABLE_SELL_TAB = false
-
 export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) => {
   const [amountIn, setAmountIn] = useState('')
   const [isBuying, setIsBuying] = useState(true) // true = buy coin, false = sell coin
@@ -60,6 +57,9 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     coinAddress,
     isBuying
   )
+
+  // Toggle to enable/disable the sell tab
+  const ENABLE_SELL_TAB = CHAIN_ID.BASE === chainId
 
   useEffect(() => {
     if (swapOptions.length === 0) return

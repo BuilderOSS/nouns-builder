@@ -3,7 +3,6 @@ import {
   COIN_DEPLOYMENT_DISCLAIMER,
   ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants'
-import { COIN_SUPPORTED_CHAINS } from '@buildeross/constants/chains'
 import { useClankerTokenPrice } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
 import { awaitSubgraphSync, ClankerTokenFragment } from '@buildeross/sdk/subgraph'
@@ -17,12 +16,12 @@ import {
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import {
+  chainIdToName,
   createContentPoolConfigWithClankerTokenAsCurrency,
   DEFAULT_CLANKER_TOTAL_SUPPLY,
   DEFAULT_ZORA_TICK_SPACING,
   DEFAULT_ZORA_TOTAL_SUPPLY,
   estimateTargetFdvUsd,
-  getChainNamesString,
   isChainIdSupportedByCoining,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -39,8 +38,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { type Address, decodeEventLog, zeroAddress, zeroHash } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
-
-const chainNamesString = getChainNamesString(COIN_SUPPORTED_CHAINS)
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -322,9 +319,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
     }
 
     if (!isChainSupported) {
-      setSubmitError(
-        `Posts are only supported on ${chainNamesString}. Current chain ID: ${chainId}`
-      )
+      setSubmitError(`Posts are not supported on ${chainIdToName(chainId)}.`)
       actions.setSubmitting(false)
       return
     }
@@ -500,8 +495,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
               Network Not Supported
             </Text>
             <Text fontSize="14" color="text3">
-              Publishing posts is currently only supported on {chainNamesString}. Please
-              switch to a supported network to publish your post.
+              Publishing posts is not supported on {chainIdToName(chainId)}.
             </Text>
           </Stack>
         </Box>

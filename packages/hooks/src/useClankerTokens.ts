@@ -1,15 +1,13 @@
-import { COIN_SUPPORTED_CHAINS } from '@buildeross/constants/chains'
+import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   type ClankerTokenFragment,
   daoClankerTokensRequest,
 } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { getChainNamesString } from '@buildeross/utils/chains'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { chainIdToName } from '@buildeross/utils/chains'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR, { type KeyedMutator } from 'swr'
-
-const supportedChains = getChainNamesString(COIN_SUPPORTED_CHAINS)
 
 export const useClankerTokens = ({
   chainId,
@@ -31,11 +29,11 @@ export const useClankerTokens = ({
   // Check if chain is supported
   const isChainSupported = isChainIdSupportedByCoining(chainId)
   const chainError = !isChainSupported
-    ? new Error(`ClankerTokens are only supported on ${supportedChains}`)
+    ? new Error(`ClankerTokens are not supported on ${chainIdToName(chainId)}`)
     : undefined
 
   const { data, error, isLoading, isValidating, mutate } = useSWR(
-    !!collectionAddress && enabled && isChainSupported
+    !!collectionAddress && enabled && isChainSupported && COINING_ENABLED
       ? ([SWR_KEYS.CLANKER_TOKENS, chainId, collectionAddress, first] as const)
       : null,
     async ([, _chainId, _collectionAddress, _first]) =>

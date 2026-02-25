@@ -1,4 +1,5 @@
-import { COIN_SUPPORTED_CHAIN_IDS, PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { COIN_SUPPORTED_CHAIN_IDS, COINING_ENABLED } from '@buildeross/constants/coining'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
@@ -24,11 +25,12 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   const router = useRouter()
   const [selectedDao, setSelectedDao] = useState<DaoListItem | undefined>()
 
-  const title = actionType === 'post' ? 'Select DAO for Post' : 'Select DAO for Proposal'
-  const description =
-    actionType === 'post'
-      ? 'Choose which DAO you want to create a post for'
-      : 'Choose which DAO you want to create a proposal for (members only)'
+  const isForPost = actionType === 'post' && COINING_ENABLED
+
+  const title = isForPost ? 'Select DAO for Post' : 'Select DAO for Proposal'
+  const description = isForPost
+    ? 'Choose which DAO you want to create a post for'
+    : 'Choose which DAO you want to create a proposal for (members only)'
 
   const handleContinue = async () => {
     if (!selectedDao) return
@@ -42,7 +44,7 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
     const network = chain.slug
 
-    if (actionType === 'post') {
+    if (isForPost) {
       // Route: /dao/{network}/{token}/post/create
       await router.push(`/dao/${network}/${selectedDao.address}/coin/create`)
     } else {
@@ -59,12 +61,10 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   }
 
   // For posts: show search, For proposals: no search (members only)
-  const showSearch = actionType === 'post'
+  const showSearch = isForPost
 
   // For posts: filter to coin-supported chains
-  const effectiveChainIds = (
-    actionType === 'post' ? COIN_SUPPORTED_CHAIN_IDS : []
-  ) as CHAIN_ID[]
+  const effectiveChainIds = (isForPost ? COIN_SUPPORTED_CHAIN_IDS : []) as CHAIN_ID[]
 
   return (
     <AnimatedModal open={open} close={handleCancel} size="large">
