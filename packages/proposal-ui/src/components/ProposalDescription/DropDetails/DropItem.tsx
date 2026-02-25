@@ -8,11 +8,11 @@ import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { atoms, Box, Button, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Icon, Stack, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { formatEther, maxUint32, maxUint64 } from 'viem'
 
-import { linkStyle } from './DropItem.css'
+import { itemContent, itemImage, itemMedia, linkStyle } from '../CoinDetails/CoinItem.css'
 
 interface DropItemProps {
   drop: DropInstanceData
@@ -82,115 +82,115 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
 
   const description = (
     <Stack gap="x3">
-      {/* Media Preview Row */}
-      {(shouldUseMediaPreview || displayImageUrl) && !isMediaTypeLoading && (
-        <Box
-          w="100%"
-          borderRadius="curved"
-          backgroundColor="background2"
-          overflow="hidden"
-          style={shouldUseMediaPreview ? { maxHeight: '400px' } : { aspectRatio: '1/1' }}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          {shouldUseMediaPreview ? (
-            <MediaPreview
-              mediaUrl={animationFetchableUrl}
-              mediaType={mediaType}
-              coverUrl={displayImageUrl || undefined}
-              width="100%"
-              height="100%"
-            />
-          ) : displayImageUrl ? (
-            <FallbackImage
-              src={displayImageUrl}
-              alt={drop.name}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                maxHeight: '400px',
-              }}
-            />
-          ) : null}
-        </Box>
-      )}
-
-      {/* Drop Information */}
-      <Stack gap="x2">
-        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Name:
-            </Text>
-            <Text variant="label-sm">
-              {drop.name} ({drop.symbol})
-            </Text>
-          </Stack>
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Funds Recipient:
-            </Text>
-            <Avatar address={drop.fundsRecipient} src={fundsRecipientAvatar} size="24" />
-            <Box className={atoms({ textDecoration: 'underline' })}>
-              <a href={`/profile/${drop.fundsRecipient}`}>
-                <Text variant="label-sm">{fundsRecipientDisplay}</Text>
-              </a>
-            </Box>
-          </Stack>
-        </Stack>
-
-        {drop.description && (
-          <Stack direction="column" gap="x1">
-            <Text variant="label-sm" color="tertiary">
-              Description:
-            </Text>
-            <Text variant="paragraph-sm">{drop.description}</Text>
-          </Stack>
+      <Stack gap="x4" w="100%" className={itemContent}>
+        {/* Media Preview */}
+        {(shouldUseMediaPreview || displayImageUrl) && !isMediaTypeLoading && (
+          <>
+            {shouldUseMediaPreview ? (
+              <Box className={itemMedia}>
+                <MediaPreview
+                  mediaUrl={animationFetchableUrl}
+                  mediaType={mediaType}
+                  coverUrl={displayImageUrl || undefined}
+                  width="100%"
+                  height="100%"
+                />
+              </Box>
+            ) : displayImageUrl ? (
+              <Box className={itemImage}>
+                <FallbackImage
+                  src={displayImageUrl}
+                  alt={drop.name}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />{' '}
+              </Box>
+            ) : null}
+          </>
         )}
 
-        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Max Per Address:
-            </Text>
-            <Text variant="label-sm">{maxPurchaseDisplay}</Text>
+        {/* Drop Information */}
+        <Stack gap="x2">
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Name:
+              </Text>
+              <Text variant="label-sm">
+                {drop.name} ({drop.symbol})
+              </Text>
+            </Stack>
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Funds Recipient:
+              </Text>
+              <Avatar
+                address={drop.fundsRecipient}
+                src={fundsRecipientAvatar}
+                size="24"
+              />
+              <Box style={{ textDecoration: 'underline' }}>
+                <a href={`/profile/${drop.fundsRecipient}`}>
+                  <Text variant="label-sm">{fundsRecipientDisplay}</Text>
+                </a>
+              </Box>
+            </Stack>
           </Stack>
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Edition Size:
-            </Text>
-            <Text variant="label-sm">{editionSizeDisplay}</Text>
-          </Stack>
-        </Stack>
-        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Price:
-            </Text>
-            <Text variant="label-sm">{formatEther(drop.publicSalePrice)} ETH</Text>
-          </Stack>
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Royalty:
-            </Text>
-            <Text variant="label-sm">{(drop.royaltyBPS / 100).toFixed(2)}%</Text>
-          </Stack>
-        </Stack>
 
-        <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Sale Start:
-            </Text>
-            <Text variant="label-sm">{saleStartDate}</Text>
+          {drop.description && (
+            <Stack direction="column" gap="x1">
+              <Text variant="label-sm" color="tertiary">
+                Description:
+              </Text>
+              <Text variant="paragraph-sm">{drop.description}</Text>
+            </Stack>
+          )}
+
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Max Per Address:
+              </Text>
+              <Text variant="label-sm">{maxPurchaseDisplay}</Text>
+            </Stack>
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Edition Size:
+              </Text>
+              <Text variant="label-sm">{editionSizeDisplay}</Text>
+            </Stack>
           </Stack>
-          <Stack direction="row" align="center" gap="x2" flexShrink={0}>
-            <Text variant="label-sm" color="tertiary">
-              Sale End:
-            </Text>
-            <Text variant="label-sm">{saleEndDate}</Text>
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Price:
+              </Text>
+              <Text variant="label-sm">{formatEther(drop.publicSalePrice)} ETH</Text>
+            </Stack>
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Royalty:
+              </Text>
+              <Text variant="label-sm">{(drop.royaltyBPS / 100).toFixed(2)}%</Text>
+            </Stack>
+          </Stack>
+
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Sale Start:
+              </Text>
+              <Text variant="label-sm">{saleStartDate}</Text>
+            </Stack>
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
+              <Text variant="label-sm" color="tertiary">
+                Sale End:
+              </Text>
+              <Text variant="label-sm">{saleEndDate}</Text>
+            </Stack>
           </Stack>
         </Stack>
       </Stack>
