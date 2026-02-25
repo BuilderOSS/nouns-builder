@@ -36,6 +36,7 @@ export interface ButtonProps extends FlexProps {
   variant?:
     | 'primary'
     | 'secondary'
+    | 'secondaryAccent'
     | 'positive'
     | 'destructive'
     | 'outline'

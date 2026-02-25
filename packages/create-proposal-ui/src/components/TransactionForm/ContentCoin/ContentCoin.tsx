@@ -401,7 +401,7 @@ export const ContentCoin: React.FC = () => {
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
-              Content coins are not supported on ${chain.name}.
+              Content coins are not supported on {chain.name}.
             </Text>
           </Stack>
         </Box>

@@ -98,7 +98,7 @@ export const CoinItem = ({ coin, index, isExecuted, chainId }: CoinItemProps) =>
                     height: '100%',
                     objectFit: 'cover',
                   }}
-                />{' '}
+                />
               </Box>
             ) : null}
           </>

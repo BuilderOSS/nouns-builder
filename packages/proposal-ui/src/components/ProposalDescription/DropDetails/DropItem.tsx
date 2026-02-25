@@ -106,7 +106,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
                     height: '100%',
                     objectFit: 'cover',
                   }}
-                />{' '}
+                />
               </Box>
             ) : null}
           </>

@@ -631,7 +631,7 @@ export const CreatorCoin: React.FC = () => {
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
-              Creator coins are not supported on ${chain.name}.
+              Creator coins are not supported on {chain.name}.
             </Text>
           </Stack>
         </Box>

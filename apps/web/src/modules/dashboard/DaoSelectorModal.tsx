@@ -45,10 +45,10 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
     const network = chain.slug
 
     if (isForPost) {
-      // Route: /dao/{network}/{token}/post/create
+      // Route: /dao/{network}/{token}/coin/create
       await router.push(`/dao/${network}/${selectedDao.address}/coin/create`)
     } else {
-      // Route: /dao/{network}/{token}/proposal/create (existing route)
+      // Route: /dao/{network}/{token}/proposal/create
       await router.push(`/dao/${network}/${selectedDao.address}/proposal/create`)
     }
 
