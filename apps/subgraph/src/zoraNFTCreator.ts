@@ -2,6 +2,7 @@ import {
   ZoraDrop,
   ZoraDropCreatedEvent as ZoraDropCreatedFeedEvent,
 } from '../generated/schema'
+import { ZoraDrop as ZoraDropTemplate } from '../generated/templates'
 import { EditionMetadataRenderer as EditionMetadataRendererContract } from '../generated/ZoraNFTCreator/EditionMetadataRenderer'
 import { ERC721Drop as ERC721DropContract } from '../generated/ZoraNFTCreator/ERC721Drop'
 import { CreatedDrop } from '../generated/ZoraNFTCreator/ZoraNFTCreatorV1'
@@ -110,4 +111,7 @@ export function handleCreatedDrop(event: CreatedDrop): void {
   feedEvent.actor = event.params.creator
   feedEvent.zoraDrop = drop.id
   feedEvent.save()
+
+  // Instantiate the ZoraDrop template to start tracking ownership and purchases
+  ZoraDropTemplate.create(event.params.editionContractAddress)
 }

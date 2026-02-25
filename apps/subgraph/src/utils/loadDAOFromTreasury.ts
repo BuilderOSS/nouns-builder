@@ -1,8 +1,8 @@
 import { Address } from '@graphprotocol/graph-ts'
 
-import { Governor as GovernorContract } from '../../generated/Clanker/Governor'
-import { Treasury as TreasuryContract } from '../../generated/Clanker/Treasury'
 import { DAO } from '../../generated/schema'
+import { Governor as GovernorContract } from '../../generated/templates/Governor/Governor'
+import { Treasury as TreasuryContract } from '../../generated/templates/Governor/Treasury'
 
 /**
  * Loads a DAO entity by validating the treasury->governor->token chain.
