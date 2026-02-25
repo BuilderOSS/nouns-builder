@@ -3,6 +3,7 @@
  */
 export enum SwapErrorCode {
   INSUFFICIENT_LIQUIDITY = 'INSUFFICIENT_LIQUIDITY',
+  POOL_LIMIT_EXCEEDED = 'POOL_LIMIT_EXCEEDED',
   NO_ROUTE_FOUND = 'NO_ROUTE_FOUND',
   NETWORK_ERROR = 'NETWORK_ERROR',
   POOL_CONFIG_ERROR = 'POOL_CONFIG_ERROR',
@@ -17,6 +18,8 @@ export enum SwapErrorCode {
 export const SwapErrorMessages: Record<SwapErrorCode, string> = {
   [SwapErrorCode.INSUFFICIENT_LIQUIDITY]:
     'Not enough liquidity in the pool for this trade size. Try a smaller amount.',
+  [SwapErrorCode.POOL_LIMIT_EXCEEDED]:
+    'Amount exceeds pool limit. Please try a smaller amount.',
   [SwapErrorCode.NO_ROUTE_FOUND]: 'No trading route found for this token pair',
   [SwapErrorCode.NETWORK_ERROR]:
     'Network error. Please check your connection and try again.',

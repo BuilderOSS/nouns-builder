@@ -66,7 +66,7 @@ export const SwapWidget = ({
   )
 
   // Selling is failing on Base Sepolia, so disable it for now
-  const sellTabEnabled = CHAIN_ID.BASE === chainId
+  const sellTabEnabled = true
 
   useEffect(() => {
     if (!sellTabEnabled) {
@@ -362,6 +362,16 @@ export const SwapWidget = ({
       // Slippage errors
       if (errorMessage.includes('slippage') || errorMessage.includes('Price impact')) {
         return 'Price moved too much. Please try again.'
+      }
+
+      // Pool limit errors (fallback for non-SwapError instances)
+      if (
+        errorMessage.includes('POOL_LIMIT_EXCEEDED') ||
+        errorMessage.includes('pool limit') ||
+        errorMessage.includes('TickMath') ||
+        errorMessage.includes('SPL')
+      ) {
+        return SwapErrorMessages[SwapErrorCode.POOL_LIMIT_EXCEEDED]
       }
 
       // Liquidity errors (fallback for non-SwapError instances)

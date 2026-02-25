@@ -157,15 +157,48 @@ export async function getQuoteFromUniswap({
 
       console.error(`Quote failed for hop ${i}:`, error)
 
+      const errorMessage = error.message?.toLowerCase() || ''
+      const errorString = String(error).toLowerCase()
+
       // Check for network-related errors
       if (
-        error.message?.includes('fetch failed') ||
-        error.message?.includes('network') ||
-        error.message?.includes('timeout')
+        errorMessage.includes('fetch failed') ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('timeout')
       ) {
         throw new SwapError(
           SwapErrorCode.NETWORK_ERROR,
           `Network error while fetching quote: ${error.message}`,
+          error
+        )
+      }
+
+      // Check for pool limit / liquidity errors
+      // These can manifest as reverts, "TickMath", "SPL" (sqrt price limit), or liquidity errors
+      if (
+        errorMessage.includes('tickmath') ||
+        errorMessage.includes('spl') ||
+        errorMessage.includes('sqrt price limit') ||
+        errorMessage.includes('price limit') ||
+        errorString.includes('tickmath') ||
+        errorString.includes('spl')
+      ) {
+        throw new SwapError(
+          SwapErrorCode.POOL_LIMIT_EXCEEDED,
+          'Amount exceeds pool limit. Please try a smaller amount.',
+          error
+        )
+      }
+
+      // Generic insufficient liquidity
+      if (
+        errorMessage.includes('insufficient liquidity') ||
+        errorMessage.includes('notEnoughLiquidity') ||
+        errorMessage.includes('liquidity')
+      ) {
+        throw new SwapError(
+          SwapErrorCode.INSUFFICIENT_LIQUIDITY,
+          'Not enough liquidity in the pool for this trade size. Try a smaller amount.',
           error
         )
       }
