@@ -8,12 +8,10 @@ import { CHAIN_ID } from '@buildeross/types'
  * @returns {boolean} true if the chain supports coins/swaps, false otherwise
  */
 export const isChainIdSupportedByCoining = (chainId: CHAIN_ID): boolean =>
-  COIN_SUPPORTED_CHAIN_IDS.includes(chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number])
+  COIN_SUPPORTED_CHAIN_IDS.includes(chainId)
 
 export const isChainIdSupportedForSaleOfZoraCoins = (chainId: CHAIN_ID): boolean =>
-  COIN_SUPPORTED_CHAIN_IDS.includes(
-    chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
-  ) && chainId === CHAIN_ID.BASE
+  isChainIdSupportedByCoining(chainId) && chainId === CHAIN_ID.BASE
 
 /**
  * Uniswap v4 dynamic fee flag

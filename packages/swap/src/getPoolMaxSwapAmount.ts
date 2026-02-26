@@ -128,14 +128,16 @@ async function binarySearchMaxAmount(
 
   // --------------------------------------------
   // Ensure minimal probe works
+  // Iteratively reduce precision if initial minProbe fails
   // --------------------------------------------
-  const minProbe = userBalanceLessThanPrecision(maxBound, precision)
+  let currentPrecision = precision
+  let minProbe = userBalanceLessThanPrecision(maxBound, currentPrecision)
     ? maxBound
-    : precision
+    : currentPrecision
 
   if (minProbe === 0n) return 0n
 
-  const minWorks = await testSwapAmount(
+  let minWorks = await testSwapAmount(
     publicClient,
     quoterAddress,
     poolKey,
@@ -143,7 +145,33 @@ async function binarySearchMaxAmount(
     minProbe
   )
 
+  // If the initial minProbe fails, iteratively reduce precision and retry
+  while (!minWorks && currentPrecision > 0n) {
+    // Halve the precision
+    currentPrecision = currentPrecision / 2n
+
+    if (currentPrecision === 0n) {
+      // No valid swap amount found even at smallest granularity
+      return 0n
+    }
+
+    minProbe = userBalanceLessThanPrecision(maxBound, currentPrecision)
+      ? maxBound
+      : currentPrecision
+
+    minWorks = await testSwapAmount(
+      publicClient,
+      quoterAddress,
+      poolKey,
+      zeroForOne,
+      minProbe
+    )
+  }
+
   if (!minWorks) return 0n
+
+  // Update precision for the binary search to use the working granularity
+  precision = currentPrecision
 
   // Only update low if minProbe is greater than existing low
   if (minProbe > low) {
@@ -174,8 +202,8 @@ async function binarySearchMaxAmount(
       bestValid = mid > bestValid ? mid : bestValid
       low = mid
     } else {
-      // step down safely
-      high = mid > precision ? mid - precision : 0n
+      // Keep high invalid by setting it to mid (which we just confirmed is invalid)
+      high = mid
     }
 
     if (high - low < precision) break
