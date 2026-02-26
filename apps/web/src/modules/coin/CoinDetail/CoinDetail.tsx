@@ -117,7 +117,7 @@ export const CoinDetail = ({
 
   const handleBackClick = () => {
     if (daoAddress) {
-      const daoLink = getDaoLink?.(chainId, daoAddress, 'coins')
+      const daoLink = getDaoLink?.(chainId, daoAddress, 'gallery')
       if (daoLink) {
         router.push(daoLink.href)
       } else {

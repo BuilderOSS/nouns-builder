@@ -60,7 +60,7 @@ export const DropDetail = ({
 
   const handleBackClick = () => {
     if (daoAddress) {
-      const daoLink = getDaoLink?.(chainId, daoAddress, 'drops')
+      const daoLink = getDaoLink?.(chainId, daoAddress, 'gallery')
       if (daoLink) {
         router.push(daoLink.href)
       } else {
