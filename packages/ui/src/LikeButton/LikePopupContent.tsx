@@ -1,79 +1,222 @@
+import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants/addresses'
+import {
+  useEthUsdPrice,
+  useExecuteSwap,
+  useSwapOptions,
+  useSwapQuote,
+} from '@buildeross/hooks'
+import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { motion } from 'framer-motion'
-import React from 'react'
-import { formatUnits } from 'viem'
-
-interface PresetAmount {
-  usd: number
-  eth: bigint
-}
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { type Address } from 'viem'
+import { useAccount, useBalance, usePublicClient, useWalletClient } from 'wagmi'
 
 interface LikePopupContentProps {
-  // Loading state while fetching prices
-  isLoadingData: boolean
-  // Available preset amounts with ETH conversion
-  presetAmounts: PresetAmount[]
-  // Currently executing transaction
-  isExecuting: boolean
-  // Selected amount (during execution)
-  selectedAmount: bigint | null
-  // Success state
-  txSuccess: boolean
-  // Transaction hash
-  txHash: string | null
-  // Chain ID for explorer link
-  chainId: number
-  // Error message
-  error: string | null
-  // User's balance
-  userBalance: bigint | undefined
-  // Handlers
-  onSelectAmount: (amount: bigint) => void
+  coinAddress: Address
+  chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
   onClose: () => void
+  onLikeSuccess?: (txHash: string, amount: bigint) => void
 }
 
 const LikePopupContent: React.FC<LikePopupContentProps> = ({
-  isLoadingData,
-  presetAmounts,
-  isExecuting,
-  selectedAmount,
-  txSuccess,
-  txHash,
+  coinAddress,
   chainId,
-  error,
-  userBalance,
-  onSelectAmount,
   onClose,
+  onLikeSuccess,
 }) => {
-  // Format ETH amount for display
-  const formatEth = (amount: bigint) => {
-    const formatted = formatUnits(amount, 18)
-    const num = parseFloat(formatted)
-    if (num < 0.0001) return `${formatted} ETH`
-    return `${num.toFixed(4)} ETH`
-  }
+  // Transaction state
+  const [selectedAmount, setSelectedAmount] = useState<bigint | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
+  const [txSuccess, setTxSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Wagmi hooks
+  const { address: userAddress } = useAccount()
+  const publicClient = usePublicClient({ chainId })
+  const { data: walletClient, isLoading: isLoadingWalletClient } = useWalletClient({
+    chainId,
+  })
+
+  // Get user's ETH balance
+  const { data: ethBalance } = useBalance({
+    address: userAddress,
+    chainId,
+    query: {
+      enabled: !!userAddress,
+    },
+  })
+
+  // Fetch ETH/USD price
+  const { price: ethUsdPrice, isLoading: isLoadingPrice } = useEthUsdPrice()
+
+  // Fetch swap options (ETH -> Coin)
+  const { options: swapOptions, isLoading: isLoadingOptions } = useSwapOptions(
+    chainId,
+    coinAddress,
+    true // isBuying
+  )
+
+  // Find the ETH payment option
+  const ethOption = useMemo(() => {
+    return swapOptions.find((opt) => opt.token.address === NATIVE_TOKEN_ADDRESS)
+  }, [swapOptions])
+
+  // Calculate preset amounts based on ETH/USD price
+  const presetAmounts = useMemo(() => {
+    if (!ethUsdPrice) return []
+
+    const usdAmounts = [0.01, 0.1, 1.0] // $0.01, $0.10, $1.00
+    return usdAmounts.map((usd) => ({
+      usd,
+      eth: BigInt(Math.floor((usd / ethUsdPrice) * 1e18)),
+    }))
+  }, [ethUsdPrice])
+
+  // Get quote for selected amount - only when amount is selected
+  const { amountOut, isLoading: isLoadingQuote } = useSwapQuote({
+    chainId,
+    path: ethOption?.path,
+    amountIn: selectedAmount ?? undefined,
+    slippage: 0.01, // 1%
+    enabled: !!selectedAmount && !!ethOption?.path,
+  })
+
+  // Execute swap hook
+  const { execute, isExecuting } = useExecuteSwap({
+    walletClient: walletClient ?? undefined,
+    publicClient: publicClient ?? undefined,
+  })
 
   // Check if user has sufficient balance
-  const hasSufficientBalance = (amount: bigint) => {
-    if (!userBalance) return false
-    return userBalance >= amount
-  }
+  const hasSufficientBalance = useCallback(
+    (amount: bigint) => {
+      if (!ethBalance) return false
+      return ethBalance.value >= amount
+    },
+    [ethBalance]
+  )
 
-  // Get explorer URL
-  const getExplorerUrl = () => {
-    if (!txHash) return ''
-    const baseUrl =
-      chainId === 8453 ? 'https://basescan.org' : 'https://sepolia.basescan.org'
-    return `${baseUrl}/tx/${txHash}`
-  }
+  // Determine if initial data is loading
+  const isLoadingData =
+    isLoadingPrice ||
+    isLoadingOptions ||
+    isLoadingWalletClient ||
+    !ethOption ||
+    presetAmounts.length === 0
+
+  // Handle amount selection and execute swap
+  const handleSelectAmount = useCallback(
+    async (amount: bigint) => {
+      if (!userAddress) {
+        setError('Please connect your wallet')
+        return
+      }
+
+      if (!ethOption) {
+        setError('Swap options not available')
+        return
+      }
+
+      if (!publicClient || !walletClient) {
+        setError('Wallet client not ready')
+        return
+      }
+
+      // Check balance
+      if (!ethBalance || ethBalance.value < amount) {
+        setError('Insufficient ETH balance')
+        return
+      }
+
+      setSelectedAmount(amount)
+      setError(null)
+
+      try {
+        // Wait for quote to load with timeout
+        const QUOTE_TIMEOUT = 5000 // 5 seconds
+        const startTime = Date.now()
+
+        while (isLoadingQuote && Date.now() - startTime < QUOTE_TIMEOUT) {
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+
+        // Check if we timed out or if quote is still missing
+        if (isLoadingQuote || !amountOut) {
+          setError('Failed to get swap quote. Please try again.')
+          setSelectedAmount(null)
+          return
+        }
+
+        // Execute the swap
+        const hash = await execute({
+          chainId,
+          path: ethOption.path,
+          amountIn: amount,
+          amountOut: amountOut,
+          slippage: 0.01,
+        })
+
+        setTxHash(hash)
+
+        // Wait for transaction confirmation
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash,
+          confirmations: 1,
+        })
+
+        if (receipt.status === 'success') {
+          setTxSuccess(true)
+          onLikeSuccess?.(hash, amount)
+          // Auto-close is handled by useEffect watching txSuccess
+        } else {
+          setError('Transaction failed')
+        }
+      } catch (err: any) {
+        console.error('Like transaction error:', err)
+        setError(err?.message || 'Transaction failed')
+        setSelectedAmount(null)
+      }
+    },
+    [
+      ethOption,
+      userAddress,
+      publicClient,
+      walletClient,
+      ethBalance,
+      chainId,
+      amountOut,
+      execute,
+      onLikeSuccess,
+      onClose,
+      isLoadingQuote,
+    ]
+  )
+
+  // Auto-close on success (backup in case setTimeout doesn't work)
+  useEffect(() => {
+    if (txSuccess) {
+      const timer = setTimeout(() => {
+        onClose()
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [txSuccess, onClose])
 
   // Loading state
   if (isLoadingData) {
     return (
-      <Box p="x6" style={{ minWidth: '280px' }}>
-        <Flex justify="center" align="center" gap="x3">
+      <Box
+        p="x3"
+        style={{ minWidth: '180px' }}
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <Flex justify="center" align="center" gap="x2">
           <Spinner size="sm" />
-          <Text variant="paragraph-sm">Loading options...</Text>
+          <Text variant="label-sm">Loading...</Text>
         </Flex>
       </Box>
     )
@@ -82,32 +225,25 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
   // Success state
   if (txSuccess && txHash) {
     return (
-      <Box p="x6" style={{ minWidth: '280px' }}>
-        <Stack gap="x4" align="center">
+      <Box
+        p="x4"
+        style={{ minWidth: '180px' }}
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <Stack gap="x2" align="center">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
           >
-            <Icon id="checkInCircle" size="lg" />
+            <Icon id="checkInCircle" size="md" />
           </motion.div>
-          <Text variant="heading-xs" align="center">
+          <Text variant="label-md" align="center" style={{ fontWeight: 500 }}>
             Liked!
           </Text>
-          <Button
-            as="a"
-            href={getExplorerUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="ghost"
-            size="sm"
-            style={{ textDecoration: 'none' }}
-          >
-            <Flex align="center" gap="x2">
-              <Text variant="paragraph-sm">View on Basescan</Text>
-              <Icon id="arrowTopRight" size="sm" />
-            </Flex>
-          </Button>
         </Stack>
       </Box>
     )
@@ -116,15 +252,27 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
   // Error state
   if (error) {
     return (
-      <Box p="x6" style={{ minWidth: '280px' }}>
-        <Stack gap="x4">
-          <Flex align="center" gap="x2">
-            <Icon id="warning-16" size="sm" />
-            <Text variant="paragraph-sm" color="negative">
-              {error}
-            </Text>
-          </Flex>
-          <Button variant="outline" size="sm" onClick={onClose}>
+      <Box
+        p="x3"
+        style={{ minWidth: '180px' }}
+        onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+      >
+        <Stack gap="x2">
+          <Text variant="label-sm" color="negative" align="center">
+            {error}
+          </Text>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onClose()
+            }}
+          >
             Close
           </Button>
         </Stack>
@@ -132,53 +280,60 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
     )
   }
 
+  // Check if wallet is ready
+  const isWalletReady = !!(userAddress && publicClient && walletClient)
+
   // Preset selection state
   return (
-    <Box p="x6" style={{ minWidth: '280px' }}>
-      <Stack gap="x4">
-        <Text variant="heading-xs" align="center">
-          Select Amount
+    <Box
+      p="x3"
+      style={{ minWidth: '200px' }}
+      onClick={(e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+      }}
+    >
+      <Stack gap="x2">
+        <Text variant="label-sm" align="center" style={{ fontWeight: 500 }}>
+          Like with
         </Text>
-        <Flex gap="x3" justify="space-between">
+        <Flex gap="x2" justify="center">
           {presetAmounts.map((preset) => {
             const isSelected = selectedAmount === preset.eth
             const isSufficientBalance = hasSufficientBalance(preset.eth)
-            const isDisabled = isExecuting || !isSufficientBalance
+            const isButtonDisabled =
+              !isWalletReady || !isSufficientBalance || (isExecuting && !isSelected)
+            const isButtonLoading = isSelected && (isLoadingQuote || isExecuting)
 
             return (
               <Button
                 key={preset.usd}
-                variant={isSelected && isExecuting ? 'primary' : 'outline'}
+                variant={'outline'}
                 size="sm"
-                onClick={() => !isDisabled && onSelectAmount(preset.eth)}
-                disabled={isDisabled}
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  if (!isButtonDisabled && !isButtonLoading) {
+                    handleSelectAmount(preset.eth)
+                  }
+                }}
+                disabled={isButtonDisabled}
                 style={{ flex: 1, minWidth: 0 }}
               >
-                {isSelected && isExecuting ? (
-                  <Flex align="center" gap="x2" justify="center">
-                    <Spinner size="xs" />
-                  </Flex>
+                {isButtonLoading ? (
+                  <Spinner size="xs" />
                 ) : (
-                  <Stack gap="x1" align="center">
-                    <Text variant="label-md" style={{ fontWeight: 'bold' }}>
-                      ${preset.usd.toFixed(2)}
-                    </Text>
-                    <Text
-                      variant="label-xs"
-                      color="tertiary"
-                      style={{ fontSize: '0.7rem' }}
-                    >
-                      ≈ {formatEth(preset.eth)}
-                    </Text>
-                  </Stack>
+                  <Text variant="label-sm" style={{ fontWeight: 500 }}>
+                    ${preset.usd < 1 ? preset.usd.toFixed(2) : preset.usd.toFixed(0)}
+                  </Text>
                 )}
               </Button>
             )
           })}
         </Flex>
-        {userBalance !== undefined && (
+        {!isWalletReady && (
           <Text variant="label-xs" color="tertiary" align="center">
-            Balance: {formatEth(userBalance)}
+            Connect wallet to like
           </Text>
         )}
       </Stack>

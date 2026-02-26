@@ -1,5 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
+import { LikeButton } from '@buildeross/ui/LikeButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { ShareButton } from '@buildeross/ui/ShareButton'
@@ -57,18 +59,36 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
     ? true
     : isChainIdSupportedForSaleOfZoraCoins(chainId)
 
+  // Show like button only for Zora coins (not Clanker tokens) on supported chains
+  const showLikeButton = !isClankerToken && isChainIdSupportedByCoining(chainId)
+
   return (
     <Flex gap="x2" align="center" wrap="wrap">
       {showTradeButton && (
-        <Button size={buttonSize} px="x3" variant="outline" onClick={handleOpenTrade}>
+        <ContractButton
+          size={buttonSize}
+          px="x3"
+          variant="outline"
+          handleClick={handleOpenTrade}
+          chainId={chainId}
+        >
           {sellEnabled ? 'Trade' : 'Buy'}
-        </Button>
+        </ContractButton>
       )}
       <LinkWrapper link={getCoinLink(chainId, coinAddress)} isExternal>
         <Button size={buttonSize} px="x3" variant="secondary">
           View Coin
         </Button>
       </LinkWrapper>
+      {showLikeButton && isChainIdSupportedByCoining(chainId) && (
+        <LikeButton
+          coinAddress={coinAddress}
+          symbol={symbol}
+          chainId={chainId}
+          size={buttonSize}
+          variant="secondary"
+        />
+      )}
       {shareUrl && <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />}
     </Flex>
   )

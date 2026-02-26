@@ -3,11 +3,14 @@ import { CHAIN_ID } from '@buildeross/types'
 
 /**
  * Checks if a chain ID supports coining functionality
+ * Type guard that narrows to BASE or BASE_SEPOLIA
  *
  * @param chainId - The chain ID to check
  * @returns {boolean} true if the chain supports coins/swaps, false otherwise
  */
-export const isChainIdSupportedByCoining = (chainId: CHAIN_ID): boolean =>
+export const isChainIdSupportedByCoining = (
+  chainId: CHAIN_ID
+): chainId is CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA =>
   COIN_SUPPORTED_CHAIN_IDS.includes(chainId)
 
 export const isChainIdSupportedForSaleOfZoraCoins = (chainId: CHAIN_ID): boolean =>
