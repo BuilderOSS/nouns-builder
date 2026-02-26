@@ -44,9 +44,9 @@ export const useGalleryItems = ({
   const isCoinSupported = isChainIdSupportedByCoining(chainId)
   const isDropSupported = isChainIdSupportedByDroposal(chainId)
 
-  // Only error if BOTH are not supported
+  // Only error if BOTH are not supported AND hook is enabled
   const supportError =
-    !isCoinSupported && !isDropSupported
+    enabled && !isCoinSupported && !isDropSupported
       ? new Error(`Gallery is not supported on ${chainIdToName(chainId)}`)
       : undefined
 

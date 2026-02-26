@@ -91,29 +91,30 @@ export const CoinCard = ({
           aspectRatio={1 / 1}
           position="relative"
           overflow={'hidden'}
-          className={coinImage}
         >
-          {isLoading ||
-          isMediaTypeLoading ||
-          (!shouldUseMediaPreview && !displayImageUrl) ? (
-            <Box backgroundColor="background2" w="100%" h="100%" />
-          ) : shouldUseMediaPreview ? (
-            <MediaPreview
-              mediaUrl={animationFetchableUrl}
-              mediaType={mediaType}
-              coverUrl={displayImageUrl || undefined}
-              width="100%"
-              height="100%"
-              aspectRatio={1}
-            />
-          ) : (
-            <FallbackImage
-              src={displayImageUrl!}
-              sizes="100vw"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              alt={`${name} image`}
-            />
-          )}
+          <Box w="100%" h="100%" aspectRatio={1 / 1} className={coinImage}>
+            {isLoading ||
+            isMediaTypeLoading ||
+            (!shouldUseMediaPreview && !displayImageUrl) ? (
+              <Box backgroundColor="background2" w="100%" h="100%" />
+            ) : shouldUseMediaPreview ? (
+              <MediaPreview
+                mediaUrl={animationFetchableUrl}
+                mediaType={mediaType}
+                coverUrl={displayImageUrl || undefined}
+                width="100%"
+                height="100%"
+                aspectRatio={1}
+              />
+            ) : (
+              <FallbackImage
+                src={displayImageUrl!}
+                sizes="100vw"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                alt={`${name} image`}
+              />
+            )}
+          </Box>
 
           {/* New Badge */}
           {isNew && (

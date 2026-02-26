@@ -90,8 +90,10 @@ const MintWidgetModal: React.FC<MintWidgetModalProps> = ({
   // Calculate sale timing
   const now = useNowSeconds(true)
 
-  const saleStart = Number.isFinite(drop.publicSaleStart) ? drop.publicSaleStart : 0
-  const saleEnd = Number.isFinite(drop.publicSaleEnd) ? drop.publicSaleEnd : 0
+  const saleStartNum = Number(drop.publicSaleStart)
+  const saleEndNum = Number(drop.publicSaleEnd)
+  const saleStart = Number.isFinite(saleStartNum) ? saleStartNum : 0
+  const saleEnd = Number.isFinite(saleEndNum) ? saleEndNum : 0
   const saleNotStarted = saleStart > 0 && saleStart > now
   const saleEnded = saleEnd > 0 && saleEnd < now
   const saleActive = !saleNotStarted && !saleEnded
@@ -289,8 +291,8 @@ export const Gallery: React.FC<GalleryProps> = ({
     const options: SelectOption<CreateOption>[] = []
 
     if (!creatorCoin) {
-      // No creator coin - show creator coin and drop options for voters
-      if (isCoinSupported) {
+      // No creator coin - show creator coin option for voters (unless governance is delayed)
+      if (isCoinSupported && !isGovernanceDelayed) {
         options.push({
           value: 'dao-creator-coin',
           label: 'Create Creator Coin',
@@ -303,13 +305,15 @@ export const Gallery: React.FC<GalleryProps> = ({
           value: 'permissionless-post',
           label: 'Create Post',
         })
-        options.push({
-          value: 'dao-post',
-          label: 'Propose Post',
-        })
+        if (!isGovernanceDelayed) {
+          options.push({
+            value: 'dao-post',
+            label: 'Propose Post',
+          })
+        }
       }
     }
-    if (isDropSupported) {
+    if (isDropSupported && !isGovernanceDelayed) {
       options.push({
         value: 'dao-drop',
         label: 'Create Drop',
@@ -317,7 +321,7 @@ export const Gallery: React.FC<GalleryProps> = ({
     }
 
     return options
-  }, [creatorCoin, isCoinSupported, isDropSupported])
+  }, [creatorCoin, isCoinSupported, isDropSupported, isGovernanceDelayed])
 
   // Get the default selected option (first available option)
   const defaultCreateOption = useMemo(
@@ -337,14 +341,14 @@ export const Gallery: React.FC<GalleryProps> = ({
     )
   }
 
-  if (clankerError || galleryError) {
+  if (galleryError) {
     return (
       <Box className={emptyState}>
         <Text variant="paragraph-md" color="negative">
           Error loading gallery
         </Text>
         <Text variant="paragraph-sm" color="text3" mt="x2">
-          {clankerError?.message || galleryError?.message || 'Please try again later'}
+          {galleryError?.message || 'Please try again later'}
         </Text>
       </Box>
     )
@@ -358,6 +362,12 @@ export const Gallery: React.FC<GalleryProps> = ({
           {clankerLoading ? (
             <Box className={emptyState}>
               <Text variant="paragraph-md">Loading creator coin...</Text>
+            </Box>
+          ) : clankerError ? (
+            <Box p="x4" backgroundColor="background2" borderRadius="curved" mb="x4">
+              <Text variant="paragraph-sm" color="text3">
+                Unable to load creator coin: {clankerError.message}
+              </Text>
             </Box>
           ) : creatorCoin ? (
             <CreatorCoinSection

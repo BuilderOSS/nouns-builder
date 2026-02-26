@@ -1,5 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import type { GalleryItem } from '@buildeross/hooks/useGalleryItems'
+import { useNowSeconds } from '@buildeross/hooks/useNowSeconds'
 import { CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -46,6 +47,28 @@ export const DropCard = ({
     onMintClick?.(drop)
   }
 
+  const now = useNowSeconds(true)
+
+  const saleStartNum = Number(drop.publicSaleStart)
+  const saleEndNum = Number(drop.publicSaleEnd)
+  const saleStart = Number.isFinite(saleStartNum) ? saleStartNum : 0
+  const saleEnd = Number.isFinite(saleEndNum) ? saleEndNum : 0
+  const saleNotStarted = saleStart > 0 && saleStart > now
+  const saleEnded = saleEnd > 0 && saleEnd < now
+  const saleActive = !saleNotStarted && !saleEnded
+
+  const getButtonText = () => {
+    if (saleEnded) {
+      return 'Sale Ended'
+    }
+    if (saleNotStarted) {
+      return 'Sale Not Started'
+    }
+    return 'Mint'
+  }
+
+  const mintButtonText = getButtonText()
+
   return (
     <Link
       direction="column"
@@ -62,18 +85,19 @@ export const DropCard = ({
         aspectRatio={1 / 1}
         position="relative"
         overflow={'hidden'}
-        className={coinImage}
       >
-        {drop.imageURI ? (
-          <FallbackImage
-            src={drop.imageURI}
-            sizes="100vw"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            alt={`${drop.name} image`}
-          />
-        ) : (
-          <Box backgroundColor="background2" w="100%" h="100%" />
-        )}
+        <Box w="100%" h="100%" aspectRatio={1 / 1} className={coinImage}>
+          {drop.imageURI ? (
+            <FallbackImage
+              src={drop.imageURI}
+              sizes="100vw"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              alt={`${drop.name} image`}
+            />
+          ) : (
+            <Box backgroundColor="background2" w="100%" h="100%" />
+          )}
+        </Box>
 
         {/* New Badge */}
         {isNew && (
@@ -125,8 +149,9 @@ export const DropCard = ({
               variant="primary"
               style={{ flex: 1 }}
               onClick={handleMintClick}
+              disabled={!saleActive}
             >
-              Mint
+              {mintButtonText}
             </Button>
           </Flex>
         )}

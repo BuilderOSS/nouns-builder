@@ -9,6 +9,42 @@ import {
 } from '../Fields/styles.css'
 import { absoluteDropdownMenu, dropdownOption } from './DropdownSelect.css'
 
+const inlineVariants = {
+  init: {
+    height: 0,
+    overflow: 'hidden' as const,
+    boxShadow: 'none',
+    transition: {
+      ease: 'easeInOut' as const,
+    },
+  },
+  open: {
+    height: 'auto' as const,
+    transition: {
+      ease: 'easeInOut' as const,
+    },
+  },
+}
+
+const absoluteVariants = {
+  init: {
+    opacity: 0,
+    y: -10,
+    transition: {
+      ease: 'easeInOut' as const,
+      duration: 0.2,
+    },
+  },
+  open: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      ease: 'easeInOut' as const,
+      duration: 0.2,
+    },
+  },
+}
+
 export interface SelectOption<T> {
   value: T
   label: string
@@ -74,41 +110,25 @@ export function DropdownSelect<T extends React.Key>({
     }
   }, [positioning, showOptions])
 
-  const inlineVariants = {
-    init: {
-      height: 0,
-      overflow: 'hidden' as const,
-      boxShadow: 'none',
-      transition: {
-        ease: 'easeInOut' as const,
-      },
-    },
-    open: {
-      height: 'auto' as const,
-      transition: {
-        ease: 'easeInOut' as const,
-      },
-    },
-  }
-
-  const absoluteVariants = {
-    init: {
-      opacity: 0,
-      y: -10,
-      transition: {
-        ease: 'easeInOut' as const,
-        duration: 0.2,
-      },
-    },
-    open: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        ease: 'easeInOut' as const,
-        duration: 0.2,
-      },
-    },
-  }
+  // Shared option renderer
+  const renderOptions = (optionClassName: string) =>
+    options.map((option) => (
+      <Flex
+        key={option.value}
+        onClick={() => handleOptionSelect(option)}
+        className={optionClassName}
+        pl={'x4'}
+        direction={'row'}
+        align={'center'}
+        height={'x18'}
+        width={'100%'}
+        fontSize={16}
+        fontWeight={'display'}
+      >
+        {option.icon && <Flex pr={'x4'}>{option.icon}</Flex>}
+        {option.label}
+      </Flex>
+    ))
 
   return (
     <Box
@@ -192,32 +212,14 @@ export function DropdownSelect<T extends React.Key>({
             )}
           </Flex>
           {positioning === 'inline' && (
-            <AnimatePresence>
-              <motion.div
-                initial={'init'}
-                animate={showOptions ? 'open' : 'init'}
-                variants={inlineVariants}
-              >
-                <Flex backgroundColor="border" height="x1" />
-                {options.map((option) => (
-                  <Flex
-                    key={option.value}
-                    onClick={() => handleOptionSelect(option)}
-                    className={defaultDropdownSelectOptionStyle}
-                    pl={'x4'}
-                    direction={'row'}
-                    align={'center'}
-                    height={'x18'}
-                    width={'100%'}
-                    fontSize={16}
-                    fontWeight={'display'}
-                  >
-                    {option.icon && <Flex pr={'x4'}>{option.icon}</Flex>}
-                    {option.label}
-                  </Flex>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+            <motion.div
+              initial={'init'}
+              animate={showOptions ? 'open' : 'init'}
+              variants={inlineVariants}
+            >
+              <Flex backgroundColor="border" height="x1" />
+              {renderOptions(defaultDropdownSelectOptionStyle)}
+            </motion.div>
           )}
         </Flex>
       )}
@@ -231,23 +233,7 @@ export function DropdownSelect<T extends React.Key>({
               variants={absoluteVariants}
               className={absoluteDropdownMenu[align]}
             >
-              {options.map((option) => (
-                <Flex
-                  key={option.value}
-                  onClick={() => handleOptionSelect(option)}
-                  className={dropdownOption}
-                  pl={'x4'}
-                  direction={'row'}
-                  align={'center'}
-                  height={'x18'}
-                  width={'100%'}
-                  fontSize={16}
-                  fontWeight={'display'}
-                >
-                  {option.icon && <Flex pr={'x4'}>{option.icon}</Flex>}
-                  {option.label}
-                </Flex>
-              ))}
+              {renderOptions(dropdownOption)}
             </motion.div>
           )}
         </AnimatePresence>
