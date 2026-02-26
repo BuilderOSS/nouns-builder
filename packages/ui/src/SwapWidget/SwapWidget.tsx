@@ -10,6 +10,7 @@ import {
 } from '@buildeross/hooks'
 import { SwapError, SwapErrorCode, SwapErrorMessages } from '@buildeross/swap'
 import { CHAIN_ID } from '@buildeross/types'
+import { isChainIdSupportedForSaleOfZoraCoins } from '@buildeross/utils/coining'
 import { formatPrice } from '@buildeross/utils/formatMarketCap'
 import { truncateHex } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
@@ -66,16 +67,16 @@ export const SwapWidget = ({
   )
 
   // Selling is failing on Base Sepolia, so disable it for now
-  const sellTabEnabled = true
+  const sellEnabled = !isZoraCoin ? true : isChainIdSupportedForSaleOfZoraCoins(chainId)
 
   useEffect(() => {
-    if (!sellTabEnabled) {
+    if (!sellEnabled) {
       setIsBuying(true)
       setAmountIn('')
       setSuccessTxHash(null)
       setPendingTxHash(null)
     }
-  }, [sellTabEnabled])
+  }, [sellEnabled])
 
   useEffect(() => {
     if (swapOptions.length === 0) return
@@ -299,7 +300,7 @@ export const SwapWidget = ({
   const handleMaxClick = () => {
     if (inputBalance !== undefined) {
       // If we have pool max info and it's less than balance, use that instead
-      if (poolMaxAmount && poolMaxAmount < inputBalance) {
+      if (poolMaxAmount !== null && poolMaxAmount < inputBalance) {
         setAmountIn(formatEther(poolMaxAmount))
       } else {
         setAmountIn(formatEther(inputBalance))
@@ -308,7 +309,11 @@ export const SwapWidget = ({
   }
 
   const isLoading =
-    isLoadingPath || isLoadingQuote || isExecuting || isWaitingForConfirmation
+    isLoadingPath ||
+    isLoadingQuote ||
+    isLoadingPoolMax ||
+    isExecuting ||
+    isWaitingForConfirmation
   const error = quoteError || executeError
 
   // Better error messages
@@ -492,10 +497,27 @@ export const SwapWidget = ({
     })
   }, [swapOptions, balanceMap])
 
+  const getButtonText = () => {
+    if (isWaitingForConfirmation) return 'Waiting for confirmation...'
+    if (isExecuting) return 'Swapping...'
+    if (isLoadingPath) return 'Finding route...'
+    if (isLoadingQuote) return 'Getting quote...'
+    if (isLoadingPoolMax) return 'Loading pool limit...'
+
+    if (!userAddress) return 'Connect Wallet'
+    if (!path && amountInBigInt > 0n) return 'No route available'
+    if (exceedsBalance) return 'Insufficient Balance'
+    if (exceedsPoolLimit) return 'Exceeds Pool Limit'
+
+    return isBuying ? 'Buy' : 'Sell'
+  }
+
+  const buttonText = getButtonText()
+
   return (
     <Box>
-      {/* Buy/Sell Toggle or Title */}
-      {sellTabEnabled ? (
+      {/* Buy/Sell Toggle */}
+      {sellEnabled && (
         <Flex gap="x2" mb="x4">
           <Button
             variant={isBuying ? 'primary' : 'secondary'}
@@ -522,10 +544,6 @@ export const SwapWidget = ({
             Sell {symbol}
           </Button>
         </Flex>
-      ) : (
-        <Text variant="heading-sm" mb="x4">
-          Buy {symbol}
-        </Text>
       )}
 
       {/* Payment Token Selector (show for both buying and selling) */}
@@ -590,8 +608,8 @@ export const SwapWidget = ({
           )}
         </Flex>
         {/* Show helper text if pool max is less than user's balance */}
-        {poolMaxAmount &&
-          inputBalance &&
+        {poolMaxAmount !== null &&
+          inputBalance !== undefined &&
           poolMaxAmount < inputBalance &&
           !isLoadingPoolMax && (
             <Box mt="x2">
@@ -690,23 +708,7 @@ export const SwapWidget = ({
         mt="x4"
         style={{ width: '100%' }}
       >
-        {isWaitingForConfirmation
-          ? 'Waiting for confirmation...'
-          : isExecuting
-            ? 'Swapping...'
-            : isLoadingPath
-              ? 'Finding route...'
-              : isLoadingQuote
-                ? 'Getting quote...'
-                : !userAddress
-                  ? 'Connect Wallet'
-                  : !path && amountInBigInt > 0n
-                    ? 'No route available'
-                    : exceedsBalance
-                      ? 'Insufficient Balance'
-                      : exceedsPoolLimit
-                        ? 'Exceeds Pool Limit'
-                        : 'Swap'}
+        {buttonText}
       </ContractButton>
 
       {/* Path Info */}

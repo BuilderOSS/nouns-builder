@@ -145,7 +145,10 @@ async function binarySearchMaxAmount(
 
   if (!minWorks) return 0n
 
-  low = minProbe
+  // Only update low if minProbe is greater than existing low
+  if (minProbe > low) {
+    low = minProbe
+  }
   // Only update bestValid if minProbe is greater than existing bestValid
   if (minProbe > bestValid) {
     bestValid = minProbe
@@ -167,7 +170,8 @@ async function binarySearchMaxAmount(
     const ok = await testSwapAmount(publicClient, quoterAddress, poolKey, zeroForOne, mid)
 
     if (ok) {
-      bestValid = mid
+      // Use max to ensure we never lose a higher known-valid amount
+      bestValid = mid > bestValid ? mid : bestValid
       low = mid
     } else {
       // step down safely

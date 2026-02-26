@@ -15,6 +15,7 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { MobileTradeBar } from '@buildeross/ui/MobileTradeBar'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { SwapWidget } from '@buildeross/ui/SwapWidget'
+import { isChainIdSupportedForSaleOfZoraCoins } from '@buildeross/utils/coining'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -106,6 +107,10 @@ export const CoinDetail = ({
   // Derived variable to avoid repeating !isClankerToken
   const isZoraCoin = !isClankerToken
 
+  const sellEnabled = isClankerToken
+    ? true
+    : isChainIdSupportedForSaleOfZoraCoins(chainId)
+
   // Calculate sidebar top offset based on header visibility
   // Header is 80px tall and hidden when scrollDirection is 'down'
   const sidebarTopOffset = scrollDirection === 'down' ? 24 : 104 // 24px + 80px header
@@ -169,7 +174,7 @@ export const CoinDetail = ({
             data-header-visible={scrollDirection !== 'down'}
           >
             <Text variant="heading-sm" mb="x4">
-              Trade {symbol}
+              {sellEnabled ? 'Trade' : 'Buy'} {symbol}
             </Text>
             <SwapWidget
               coinAddress={coinAddress}
@@ -198,7 +203,9 @@ export const CoinDetail = ({
       >
         <Box w="100%">
           <Flex align="center" justify="space-between" mb="x4" w="100%">
-            <Text variant="heading-md">Trade {symbol}</Text>
+            <Text variant="heading-md">
+              {sellEnabled ? 'Trade' : 'Buy'} {symbol}
+            </Text>
             <Button
               variant="ghost"
               p="x0"

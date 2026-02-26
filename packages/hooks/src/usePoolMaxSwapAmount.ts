@@ -80,7 +80,8 @@ export function usePoolMaxSwapAmount({
   // - When buying: key by tokenOut (the coin being bought)
   // - When selling: key by tokenIn (the coin being sold)
   // This allows ETH/WETH to share the same cache for the same coin
-  const shouldFetch = enabled && path && publicClient && userBalance > 0n
+  const shouldFetch =
+    enabled && path && path.hops?.length > 0 && publicClient && userBalance > 0n
 
   const relevantToken = path
     ? isBuying
@@ -106,6 +107,10 @@ export function usePoolMaxSwapAmount({
         throw new Error('Missing required parameters')
       }
 
+      if (!path.hops || path.hops.length === 0) {
+        throw new Error('Swap path has no hops')
+      }
+
       // Find the hop that contains the token we care about
       // When buying: find hop where tokenOut matches (last hop typically)
       // When selling: find hop where tokenIn matches (first hop typically)
@@ -118,7 +123,12 @@ export function usePoolMaxSwapAmount({
           ) || path.hops[0] // Fallback to first hop
 
       // Validate hop has required pool info
-      if (relevantHop.fee == null || !relevantHop.tickSpacing || !relevantHop.hooks) {
+      if (
+        !relevantHop ||
+        relevantHop.fee == null ||
+        !relevantHop.tickSpacing ||
+        !relevantHop.hooks
+      ) {
         throw new Error('Missing pool information in swap path')
       }
 

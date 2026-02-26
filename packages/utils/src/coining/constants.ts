@@ -10,6 +10,11 @@ import { CHAIN_ID } from '@buildeross/types'
 export const isChainIdSupportedByCoining = (chainId: CHAIN_ID): boolean =>
   COIN_SUPPORTED_CHAIN_IDS.includes(chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number])
 
+export const isChainIdSupportedForSaleOfZoraCoins = (chainId: CHAIN_ID): boolean =>
+  COIN_SUPPORTED_CHAIN_IDS.includes(
+    chainId as (typeof COIN_SUPPORTED_CHAIN_IDS)[number]
+  ) && chainId === CHAIN_ID.BASE
+
 /**
  * Uniswap v4 dynamic fee flag
  * When set in the fee field of a pool key, indicates the pool uses dynamic fees
