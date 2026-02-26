@@ -15,7 +15,6 @@ import {
   WalletClient,
 } from 'viem'
 
-import { permit2Abi } from './abis/permit2'
 import { universalRouterAbi } from './abis/universalRouter'
 import {
   Actions,
@@ -24,7 +23,8 @@ import {
   MSG_SENDER,
   OPEN_DELTA,
 } from './constants/v4Router'
-import { PoolKey, SwapPath } from './types'
+import { PoolKey, SignatureWithPermit, SwapPath } from './types'
+import { createPermit2Signature } from './utils/createPermit2Signature'
 import {
   isNativeEthAddress,
   normalizeCurrency,
@@ -77,17 +77,20 @@ function toUint24(n: bigint | number): number {
  * Build swap calldata for Universal Router
  * Supports both single-hop and multi-hop swaps
  * ETH wrapping/unwrapping handled by Universal Router WRAP_ETH/UNWRAP_WETH commands
+ * Optional permit2 signature for gasless ERC20 approvals
  */
 export function buildSwapCalldata({
   chainId,
   path,
   amountIn,
   minAmountOut,
+  permit2Signature,
 }: {
   chainId: CHAIN_ID
   path: SwapPath
   amountIn: bigint
   minAmountOut: bigint
+  permit2Signature?: SignatureWithPermit
 }): { commands: Hex; inputs: Hex[]; value: bigint } {
   if (!path?.hops?.length) throw new Error('Empty swap path')
 
@@ -97,71 +100,53 @@ export function buildSwapCalldata({
   const isInputEth = isNativeEthAddress(firstHop.tokenIn)
   const isOutputEth = isNativeEthAddress(lastHop.tokenOut)
 
-  // Build the core swap
-  const swapResult =
-    path.hops.length === 1
-      ? buildSingleHopSwap(chainId, path, amountIn, minAmountOut, isInputEth, isOutputEth)
-      : buildMultiHopSwap(chainId, path, amountIn, minAmountOut, isInputEth, isOutputEth)
-
-  // If no ETH involved, return as-is
-  if (!isInputEth && !isOutputEth) {
-    return swapResult
-  }
-
-  // Add WRAP_ETH and/or UNWRAP_WETH commands as needed
-  return addWrapUnwrapCommands({
-    swapResult,
-    isInputEth,
-    isOutputEth,
-    amountIn,
-    minAmountOut,
-  })
-}
-
-/**
- * Add WRAP_ETH and/or UNWRAP_WETH commands around the swap
- */
-function addWrapUnwrapCommands({
-  swapResult,
-  isInputEth,
-  isOutputEth,
-  amountIn,
-  minAmountOut,
-}: {
-  swapResult: { commands: Hex; inputs: Hex[]; value: bigint }
-  isInputEth: boolean
-  isOutputEth: boolean
-  amountIn: bigint
-  minAmountOut: bigint
-}): { commands: Hex; inputs: Hex[]; value: bigint } {
   const commandList: number[] = []
   const inputList: Hex[] = []
+  let value = 0n
 
-  // Step 1: WRAP_ETH if input is ETH
+  // Step 1: Add PERMIT2_PERMIT if signature provided
+  if (permit2Signature) {
+    commandList.push(Commands.PERMIT2_PERMIT)
+    inputList.push(encodePermit2Single(permit2Signature))
+  }
+
+  // Step 2: Add WRAP_ETH if input is ETH
   if (isInputEth) {
     commandList.push(Commands.WRAP_ETH)
-    // WRAP_ETH takes (recipient, amountMin)
-    // recipient: address(2) = ROUTER (the universal router itself)
     inputList.push(
       encodeAbiParameters(
         [{ type: 'address' }, { type: 'uint256' }],
         [ADDRESS_THIS, amountIn]
       )
     )
+    value = amountIn
   }
 
-  // Step 2: V4_SWAP (the swap commands/inputs from buildSingleHopSwap or buildMultiHopSwap)
-  // Extract command byte from swapResult.commands (it's a single byte packed)
-  const swapCommand = Number(`0x${swapResult.commands.slice(2)}`)
-  commandList.push(swapCommand)
-  inputList.push(...swapResult.inputs)
+  // Step 3: Add V4_SWAP
+  commandList.push(Commands.V4_SWAP)
+  const swapInput =
+    path.hops.length === 1
+      ? buildSingleHopSwapInput(
+          chainId,
+          path,
+          amountIn,
+          minAmountOut,
+          isInputEth,
+          isOutputEth
+        )
+      : buildMultiHopSwapInput(
+          chainId,
+          path,
+          amountIn,
+          minAmountOut,
+          isInputEth,
+          isOutputEth
+        )
+  inputList.push(swapInput)
 
-  // Step 3: UNWRAP_WETH if output is ETH
+  // Step 4: Add UNWRAP_WETH if output is ETH
   if (isOutputEth) {
     commandList.push(Commands.UNWRAP_WETH)
-    // UNWRAP_WETH takes (recipient, amountMin)
-    // recipient: address(1) = MSG_SENDER (the user)
-    // amountMin: minimum WETH to unwrap (TAKE keeps WETH in router with receiverIsUser=false)
     inputList.push(
       encodeAbiParameters(
         [{ type: 'address' }, { type: 'uint256' }],
@@ -176,23 +161,62 @@ function addWrapUnwrapCommands({
     commandList as [number, ...Array<number>]
   )
 
-  // Value: send ETH only if input is ETH
-  const value = isInputEth ? amountIn : 0n
-
   return { commands, inputs: inputList, value }
 }
 
 /**
- * Build single-hop swap calldata (matches Uniswap v4 quickstart)
+ * Encode Permit2 PermitSingle input for Universal Router
  */
-function buildSingleHopSwap(
+function encodePermit2Single(permit2Signature: SignatureWithPermit): Hex {
+  return encodeAbiParameters(
+    [
+      {
+        components: [
+          {
+            components: [
+              { name: 'token', type: 'address' },
+              { name: 'amount', type: 'uint160' },
+              { name: 'expiration', type: 'uint48' },
+              { name: 'nonce', type: 'uint48' },
+            ],
+            name: 'details',
+            type: 'tuple',
+          },
+          { name: 'spender', type: 'address' },
+          { name: 'sigDeadline', type: 'uint256' },
+        ],
+        name: 'permitSingle',
+        type: 'tuple',
+      },
+      { name: 'signature', type: 'bytes' },
+    ],
+    [
+      {
+        details: {
+          token: permit2Signature.permit.details.token,
+          amount: permit2Signature.permit.details.amount,
+          expiration: permit2Signature.permit.details.expiration,
+          nonce: permit2Signature.permit.details.nonce,
+        },
+        spender: permit2Signature.permit.spender,
+        sigDeadline: permit2Signature.permit.sigDeadline,
+      },
+      permit2Signature.signature,
+    ]
+  )
+}
+
+/**
+ * Build single-hop swap input for V4_SWAP command
+ */
+function buildSingleHopSwapInput(
   chainId: CHAIN_ID,
   path: SwapPath,
   amountIn: bigint,
   minAmountOut: bigint,
   isInputEth: boolean,
   isOutputEth: boolean
-): { commands: Hex; inputs: Hex[]; value: bigint } {
+): Hex {
   const hop = path.hops[0]
 
   if (!hop.fee || hop.tickSpacing == null || !hop.hooks) {
@@ -287,29 +311,20 @@ function buildSingleHopSwap(
     )
   )
 
-  const inputs = [
-    encodeAbiParameters([{ type: 'bytes' }, { type: 'bytes[]' }], [actions, params]),
-  ]
-
-  const commands = encodePacked(['uint8'], [Commands.V4_SWAP])
-
-  // No value here - wrapping is handled by Universal Router WRAP_ETH command
-  const value = 0n
-
-  return { commands, inputs, value }
+  return encodeAbiParameters([{ type: 'bytes' }, { type: 'bytes[]' }], [actions, params])
 }
 
 /**
- * Build multi-hop swap calldata (Exact In)
+ * Build multi-hop swap input for V4_SWAP command
  */
-function buildMultiHopSwap(
+function buildMultiHopSwapInput(
   chainId: CHAIN_ID,
   path: SwapPath,
   amountIn: bigint,
   minAmountOut: bigint,
   isInputEth: boolean,
   isOutputEth: boolean
-): { commands: Hex; inputs: Hex[]; value: bigint } {
+): Hex {
   const firstHop = path.hops[0]
   const lastHop = path.hops[path.hops.length - 1]
 
@@ -394,25 +409,16 @@ function buildMultiHopSwap(
     )
   )
 
-  const inputs = [
-    encodeAbiParameters([{ type: 'bytes' }, { type: 'bytes[]' }], [actions, params]),
-  ]
-
-  const commands = encodePacked(['uint8'], [Commands.V4_SWAP])
-
-  // No value here - wrapping is handled by Universal Router WRAP_ETH command
-  const value = 0n
-  return { commands, inputs, value }
+  return encodeAbiParameters([{ type: 'bytes' }, { type: 'bytes[]' }], [actions, params])
 }
 
 /**
  * Execute a swap using Uniswap V4 Universal Router
  *
- * This version follows the Uniswap v4 quickstart Permit2 flow:
- * 1) ERC20 approve Permit2 (unlimited)
- * 2) Permit2 approve Universal Router (amount + expiration) — on-chain
- *
- * (No PermitSingle signature in this drop-in; it’s simpler and matches docs.)
+ * This version uses Permit2 signatures for gasless approvals:
+ * 1) ERC20 approve Permit2 (unlimited, one-time)
+ * 2) Create PermitSingle signature (off-chain, 5 minute deadline)
+ * 3) Execute swap with PERMIT2_PERMIT + V4_SWAP commands
  */
 export async function executeSwap({
   chainId,
@@ -441,9 +447,11 @@ export async function executeSwap({
   const tokenIn = normalizeCurrency(firstHop.tokenIn)
   const isNativeETH = isNativeEthAddress(firstHop.tokenIn)
 
-  // Permit2 approvals if ERC20 input
+  let permit2Signature: SignatureWithPermit | undefined
+
+  // Permit2 signature if ERC20 input
   if (!isNativeETH) {
-    // Step 1: ERC20 approve Permit2 if needed (unlimited)
+    // Step 1: ERC20 approve Permit2 if needed (unlimited, one-time)
     const erc20Allowance = await publicClient.readContract({
       address: tokenIn,
       abi: erc20Abi,
@@ -463,38 +471,15 @@ export async function executeSwap({
       await publicClient.waitForTransactionReceipt({ hash: approveTx })
     }
 
-    // Step 2: Permit2 approve Universal Router if needed
-    // allowance(owner, token, spender) -> (amount, expiration, nonce)
-    const [p2Amount, p2Expiration] = await publicClient.readContract({
-      address: PERMIT2_ADDRESS,
-      abi: permit2Abi,
-      functionName: 'allowance',
-      args: [walletClient.account.address, tokenIn, universalRouterAddress],
+    // Step 2: Create Permit2 signature (off-chain, 5 minute deadline)
+    permit2Signature = await createPermit2Signature({
+      chainId,
+      token: tokenIn,
+      spender: universalRouterAddress,
+      amount: amountIn,
+      walletClient,
+      publicClient,
     })
-
-    const currentBlock = await publicClient.getBlock()
-    const now = Number(currentBlock.timestamp)
-
-    // Choose an expiration window (30 days)
-    const desiredExpiration = now + 30 * 24 * 60 * 60
-
-    const needsPermit2Approve =
-      (p2Amount as bigint) < amountIn || Number(p2Expiration) < now + 60 // expiring soon
-
-    if (needsPermit2Approve) {
-      // Approve router for max uint160 (common) or just amountIn; max is convenient
-      const maxUint160 = BigInt('0xffffffffffffffffffffffffffffffffffffffff') // 2^160-1
-
-      const p2Tx = await walletClient.writeContract({
-        address: PERMIT2_ADDRESS,
-        abi: permit2Abi,
-        functionName: 'approve',
-        args: [tokenIn, universalRouterAddress, maxUint160, desiredExpiration],
-        account: walletClient.account,
-        chain: walletClient.chain,
-      })
-      await publicClient.waitForTransactionReceipt({ hash: p2Tx })
-    }
   }
 
   // Deadline: short horizon, but not block.timestamp itself (per docs)
@@ -506,6 +491,7 @@ export async function executeSwap({
     path,
     amountIn,
     minAmountOut,
+    permit2Signature,
   })
 
   // Optional simulate

@@ -9,6 +9,10 @@ export const Commands = {
   WRAP_ETH: 0x0b,
   UNWRAP_WETH: 0x0c,
   SWEEP: 0x04,
+  PERMIT2_TRANSFER_FROM: 0x02,
+  PERMIT2_TRANSFER_FROM_BATCH: 0x0d,
+  PERMIT2_PERMIT: 0x0a,
+  PERMIT2_PERMIT_BATCH: 0x03,
   // Add other commands as needed
 } as const
 
