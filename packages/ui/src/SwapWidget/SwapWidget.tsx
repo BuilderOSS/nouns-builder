@@ -3,12 +3,14 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import {
   useEthUsdPrice,
   useExecuteSwap,
+  usePoolMaxSwapAmount,
   useSwapOptions,
   useSwapQuote,
   useTokenPrices,
 } from '@buildeross/hooks'
 import { SwapError, SwapErrorCode, SwapErrorMessages } from '@buildeross/swap'
 import { CHAIN_ID } from '@buildeross/types'
+import { isChainIdSupportedForSaleOfZoraCoins } from '@buildeross/utils/coining'
 import { formatPrice } from '@buildeross/utils/formatMarketCap'
 import { truncateHex } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
@@ -36,9 +38,15 @@ interface SwapWidgetProps {
   coinAddress: Address
   symbol: string
   chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
+  isZoraCoin: boolean
 }
 
-export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) => {
+export const SwapWidget = ({
+  coinAddress,
+  symbol,
+  chainId,
+  isZoraCoin,
+}: SwapWidgetProps) => {
   const [amountIn, setAmountIn] = useState('')
   const [isBuying, setIsBuying] = useState(true) // true = buy coin, false = sell coin
   const [selectedPaymentToken, setSelectedPaymentToken] =
@@ -59,16 +67,16 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
   )
 
   // Selling is failing on Base Sepolia, so disable it for now
-  const sellTabEnabled = CHAIN_ID.BASE === chainId
+  const sellEnabled = !isZoraCoin ? true : isChainIdSupportedForSaleOfZoraCoins(chainId)
 
   useEffect(() => {
-    if (!sellTabEnabled) {
+    if (!sellEnabled) {
       setIsBuying(true)
       setAmountIn('')
       setSuccessTxHash(null)
       setPendingTxHash(null)
     }
-  }, [sellTabEnabled])
+  }, [sellEnabled])
 
   useEffect(() => {
     if (swapOptions.length === 0) return
@@ -188,11 +196,27 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
   const path = selectedOption?.path ?? null
   const isLoadingPath = isLoadingOptions
 
+  // Get max swap amount using binary search
+  // This finds the actual maximum that won't cause liquidity errors
+  // For Zora coins with large balances (>1M), we optimize the search
+  const { maxAmountIn: poolMaxAmount, isLoading: isLoadingPoolMax } =
+    usePoolMaxSwapAmount({
+      chainId,
+      path,
+      userBalance: inputBalance ?? 0n,
+      isZoraCoin: !isBuying && isZoraCoin, // Only optimize when selling Zora coins
+      isBuying,
+      enabled: !!path && !!inputBalance && inputBalance > 0n,
+    })
+
   // Parse amount
   const amountInBigInt = amountIn ? parseEther(amountIn) : 0n
 
   // Check if amount exceeds balance
   const exceedsBalance = inputBalance !== undefined && amountInBigInt > inputBalance
+
+  // Check if amount exceeds pool limit
+  const exceedsPoolLimit = poolMaxAmount !== null && amountInBigInt > poolMaxAmount
 
   // Get quote
   const {
@@ -204,7 +228,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     path: path ?? undefined,
     amountIn: amountInBigInt,
     slippage: 0.01, // 1%
-    enabled: !!path && amountInBigInt > 0n && !exceedsBalance,
+    enabled: !!path && amountInBigInt > 0n && !exceedsBalance && !exceedsPoolLimit,
   })
 
   const {
@@ -275,12 +299,21 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
 
   const handleMaxClick = () => {
     if (inputBalance !== undefined) {
-      setAmountIn(formatEther(inputBalance))
+      // If we have pool max info and it's less than balance, use that instead
+      if (poolMaxAmount !== null && poolMaxAmount < inputBalance) {
+        setAmountIn(formatEther(poolMaxAmount))
+      } else {
+        setAmountIn(formatEther(inputBalance))
+      }
     }
   }
 
   const isLoading =
-    isLoadingPath || isLoadingQuote || isExecuting || isWaitingForConfirmation
+    isLoadingPath ||
+    isLoadingQuote ||
+    isLoadingPoolMax ||
+    isExecuting ||
+    isWaitingForConfirmation
   const error = quoteError || executeError
 
   // Better error messages
@@ -293,6 +326,15 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
           )?.token.symbol || 'ETH'
         : symbol
       return `Insufficient ${tokenSymbol} balance`
+    }
+    if (exceedsPoolLimit) {
+      const tokenSymbol = isBuying
+        ? swapOptions.find(
+            (opt) =>
+              opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
+          )?.token.symbol || 'ETH'
+        : symbol
+      return `Amount exceeds pool limit (max: ${parseFloat(formatEther(poolMaxAmount!)).toFixed(4)} ${tokenSymbol})`
     }
     if (!userAddress) {
       return 'Please connect your wallet'
@@ -325,6 +367,16 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
       // Slippage errors
       if (errorMessage.includes('slippage') || errorMessage.includes('Price impact')) {
         return 'Price moved too much. Please try again.'
+      }
+
+      // Pool limit errors (fallback for non-SwapError instances)
+      if (
+        errorMessage.includes('POOL_LIMIT_EXCEEDED') ||
+        errorMessage.includes('pool limit') ||
+        errorMessage.includes('TickMath') ||
+        errorMessage.includes('SPL')
+      ) {
+        return SwapErrorMessages[SwapErrorCode.POOL_LIMIT_EXCEEDED]
       }
 
       // Liquidity errors (fallback for non-SwapError instances)
@@ -384,7 +436,8 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     amountInBigInt > 0n &&
     !!walletClient?.account &&
     !isLoading &&
-    !exceedsBalance
+    !exceedsBalance &&
+    !exceedsPoolLimit
 
   // Helper to get USD price for a token address
   const getTokenUsdPrice = useCallback(
@@ -444,10 +497,27 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
     })
   }, [swapOptions, balanceMap])
 
+  const getButtonText = () => {
+    if (isWaitingForConfirmation) return 'Waiting for confirmation...'
+    if (isExecuting) return 'Swapping...'
+    if (isLoadingPath) return 'Finding route...'
+    if (isLoadingQuote) return 'Getting quote...'
+    if (isLoadingPoolMax) return 'Loading pool limit...'
+
+    if (!userAddress) return 'Connect Wallet'
+    if (!path && amountInBigInt > 0n) return 'No route available'
+    if (exceedsBalance) return 'Insufficient Balance'
+    if (exceedsPoolLimit) return 'Exceeds Pool Limit'
+
+    return isBuying ? 'Buy' : 'Sell'
+  }
+
+  const buttonText = getButtonText()
+
   return (
     <Box>
-      {/* Buy/Sell Toggle or Title */}
-      {sellTabEnabled ? (
+      {/* Buy/Sell Toggle */}
+      {sellEnabled && (
         <Flex gap="x2" mb="x4">
           <Button
             variant={isBuying ? 'primary' : 'secondary'}
@@ -474,10 +544,6 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
             Sell {symbol}
           </Button>
         </Flex>
-      ) : (
-        <Text variant="heading-sm" mb="x4">
-          Buy {symbol}
-        </Text>
       )}
 
       {/* Payment Token Selector (show for both buying and selling) */}
@@ -541,10 +607,29 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
             </Text>
           )}
         </Flex>
+        {/* Show helper text if pool max is less than user's balance */}
+        {poolMaxAmount !== null &&
+          inputBalance !== undefined &&
+          poolMaxAmount < inputBalance &&
+          !isLoadingPoolMax && (
+            <Box mt="x2">
+              <Text variant="paragraph-xs" color="warning">
+                Pool limit: {parseFloat(formatEther(poolMaxAmount)).toFixed(4)}{' '}
+                {isBuying
+                  ? swapOptions.find(
+                      (opt) =>
+                        opt.token.address.toLowerCase() ===
+                        selectedPaymentToken.toLowerCase()
+                    )?.token.symbol || 'ETH'
+                  : symbol}{' '}
+                (max available)
+              </Text>
+            </Box>
+          )}
       </Box>
 
       {/* Output Display */}
-      {amountOut && amountOut > 0n && !exceedsBalance && (
+      {amountOut && amountOut > 0n && !exceedsBalance && !exceedsPoolLimit && (
         <Box className={swapInputContainer} mt="x4">
           <Text variant="label-sm" color="text3" mb="x2">
             You receive (estimated)
@@ -623,21 +708,7 @@ export const SwapWidget = ({ coinAddress, symbol, chainId }: SwapWidgetProps) =>
         mt="x4"
         style={{ width: '100%' }}
       >
-        {isWaitingForConfirmation
-          ? 'Waiting for confirmation...'
-          : isExecuting
-            ? 'Swapping...'
-            : isLoadingPath
-              ? 'Finding route...'
-              : isLoadingQuote
-                ? 'Getting quote...'
-                : !userAddress
-                  ? 'Connect Wallet'
-                  : !path && amountInBigInt > 0n
-                    ? 'No route available'
-                    : exceedsBalance
-                      ? 'Insufficient Balance'
-                      : 'Swap'}
+        {buttonText}
       </ContractButton>
 
       {/* Path Info */}

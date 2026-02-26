@@ -3,7 +3,10 @@ import { type AddressType, CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { ShareButton } from '@buildeross/ui/ShareButton'
-import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import {
+  isChainIdSupportedByCoining,
+  isChainIdSupportedForSaleOfZoraCoins,
+} from '@buildeross/utils/coining'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useMemo } from 'react'
 
@@ -22,10 +25,11 @@ interface CoinActionsProps {
 export const CoinActions: React.FC<CoinActionsProps> = ({
   chainId,
   coinAddress,
-  symbol = 'Coin',
+  symbol,
   daoName,
   daoImage,
   onOpenTradeModal,
+  isClankerToken,
 }) => {
   const { getCoinLink } = useLinks()
 
@@ -43,17 +47,21 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
       chainId,
       daoName,
       daoImage,
+      isZoraCoin: !isClankerToken,
     })
-  }, [onOpenTradeModal, coinAddress, symbol, chainId, daoName, daoImage])
+  }, [onOpenTradeModal, coinAddress, symbol, chainId, daoName, daoImage, isClankerToken])
 
   // Only show Trade button for Base chains (where swap functionality is available)
   const showTradeButton = isChainIdSupportedByCoining(chainId)
+  const sellEnabled = isClankerToken
+    ? true
+    : isChainIdSupportedForSaleOfZoraCoins(chainId)
 
   return (
     <Flex gap="x2" align="center" wrap="wrap">
       {showTradeButton && (
         <Button size={buttonSize} px="x3" variant="outline" onClick={handleOpenTrade}>
-          Trade
+          {sellEnabled ? 'Trade' : 'Buy'}
         </Button>
       )}
       <LinkWrapper link={getCoinLink(chainId, coinAddress)} isExternal>

@@ -65,4 +65,5 @@ export const SWR_KEYS = {
   SWAP_OPTIONS: 'swap-options',
   COIN_ADDRESSES: 'coin-addresses',
   DROP_ADDRESSES: 'drop-addresses',
+  POOL_MAX_SWAP_AMOUNT: 'pool-max-swap-amount',
 } as const

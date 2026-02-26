@@ -363,6 +363,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
           chainId={modalState.state.chainId}
           daoName={modalState.state.daoName}
           daoImage={modalState.state.daoImage}
+          isZoraCoin={modalState.state.isZoraCoin}
         />
       )}
 

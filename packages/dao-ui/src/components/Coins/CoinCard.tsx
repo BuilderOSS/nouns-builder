@@ -31,8 +31,8 @@ interface CoinCardProps {
   marketCap?: number | null
   isLoadingPrice?: boolean
   createdAt?: string
-  isClankerToken?: boolean
-  onTradeClick?: (coinAddress: Address, symbol: string) => void
+  isZoraCoin?: boolean
+  onTradeClick?: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
 }
 
 export const CoinCard = ({
@@ -44,6 +44,7 @@ export const CoinCard = ({
   marketCap,
   isLoadingPrice,
   createdAt,
+  isZoraCoin = true,
   onTradeClick,
 }: CoinCardProps) => {
   const { getCoinLink } = useLinks()
@@ -78,7 +79,7 @@ export const CoinCard = ({
   const handleTradeClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    onTradeClick?.(coinAddress, symbol)
+    onTradeClick?.(coinAddress, symbol, isZoraCoin)
   }
 
   return (

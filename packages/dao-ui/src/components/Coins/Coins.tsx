@@ -5,7 +5,10 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { SwapWidget } from '@buildeross/ui/SwapWidget'
-import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import {
+  isChainIdSupportedByCoining,
+  isChainIdSupportedForSaleOfZoraCoins,
+} from '@buildeross/utils/coining'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import { Address } from 'viem'
@@ -13,6 +16,52 @@ import { Address } from 'viem'
 import { coinsContainer, emptyState } from './Coins.css'
 import { ContentCoinsGrid } from './ContentCoinsGrid'
 import { CreatorCoinSection } from './CreatorCoinSection'
+
+type SwapWidgetModalProps = {
+  handleCloseModal: () => void
+  selectedCoin: {
+    address: Address
+    symbol: string
+    isZoraCoin: boolean
+  }
+  chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
+}
+
+const SwapWidgetModal: React.FC<SwapWidgetModalProps> = ({
+  handleCloseModal,
+  selectedCoin,
+  chainId,
+}) => {
+  const sellEnabled = !selectedCoin.isZoraCoin
+    ? true
+    : isChainIdSupportedForSaleOfZoraCoins(chainId)
+  return (
+    <AnimatedModal open={true} close={handleCloseModal} size="medium">
+      <Box w="100%">
+        <Flex align="center" justify="space-between" mb="x4" w="100%">
+          <Text variant="heading-md">
+            {sellEnabled ? 'Trade' : 'Buy'} {selectedCoin.symbol}
+          </Text>
+          <Button
+            variant="ghost"
+            p="x0"
+            size="xs"
+            onClick={handleCloseModal}
+            style={{ padding: 0, flexShrink: 0 }}
+          >
+            <Icon id="cross" />
+          </Button>
+        </Flex>
+        <SwapWidget
+          coinAddress={selectedCoin.address}
+          symbol={selectedCoin.symbol}
+          chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+          isZoraCoin={selectedCoin.isZoraCoin}
+        />
+      </Box>
+    </AnimatedModal>
+  )
+}
 
 export const Coins: React.FC = () => {
   const {
@@ -24,10 +73,15 @@ export const Coins: React.FC = () => {
   const [selectedCoin, setSelectedCoin] = useState<{
     address: Address
     symbol: string
+    isZoraCoin: boolean
   } | null>(null)
 
-  const handleTradeClick = (coinAddress: Address, symbol: string) => {
-    setSelectedCoin({ address: coinAddress, symbol })
+  const handleTradeClick = (
+    coinAddress: Address,
+    symbol: string,
+    isZoraCoin: boolean
+  ) => {
+    setSelectedCoin({ address: coinAddress, symbol, isZoraCoin })
   }
 
   const handleCloseModal = () => {
@@ -116,6 +170,7 @@ export const Coins: React.FC = () => {
           priceUsd={creatorCoinWithPrice.priceUsd}
           marketCap={creatorCoinWithPrice.marketCap}
           isLoadingPrice={creatorCoinWithPrice.isLoadingPrice}
+          isZoraCoin={false}
           onTradeClick={handleTradeClick}
         />
       ) : (
@@ -140,27 +195,11 @@ export const Coins: React.FC = () => {
 
       {/* Shared Trade Modal */}
       {selectedCoin && (
-        <AnimatedModal open={true} close={handleCloseModal} size="medium">
-          <Box w="100%">
-            <Flex align="center" justify="space-between" mb="x4" w="100%">
-              <Text variant="heading-md">Trade {selectedCoin.symbol}</Text>
-              <Button
-                variant="ghost"
-                p="x0"
-                size="xs"
-                onClick={handleCloseModal}
-                style={{ padding: 0, flexShrink: 0 }}
-              >
-                <Icon id="cross" />
-              </Button>
-            </Flex>
-            <SwapWidget
-              coinAddress={selectedCoin.address}
-              symbol={selectedCoin.symbol}
-              chainId={chain.id as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
-            />
-          </Box>
-        </AnimatedModal>
+        <SwapWidgetModal
+          handleCloseModal={handleCloseModal}
+          selectedCoin={selectedCoin}
+          chainId={chain.id as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+        />
       )}
     </Box>
   )

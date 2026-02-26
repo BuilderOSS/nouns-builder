@@ -15,14 +15,14 @@ interface ContentCoinsGridProps {
   daoAddress: Address
   coins: ZoraCoinFragment[]
   isLoading?: boolean
-  onTradeClick?: (coinAddress: Address, symbol: string) => void
+  onTradeClick?: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
 }
 
 // Wrapper component to fetch price for individual coin
 const CoinCardWithPrice: React.FC<{
   coin: ZoraCoinFragment
   chainId: CHAIN_ID
-  onTradeClick?: (coinAddress: Address, symbol: string) => void
+  onTradeClick?: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
 }> = ({ coin, chainId, onTradeClick }) => {
   const coinWithPrice = useZoraCoinWithPrice({
     zoraCoin: coin,
@@ -41,7 +41,7 @@ const CoinCardWithPrice: React.FC<{
       marketCap={coinWithPrice.marketCap}
       isLoadingPrice={coinWithPrice.isLoadingPrice}
       createdAt={coin.createdAt}
-      isClankerToken={false}
+      isZoraCoin={true}
       onTradeClick={onTradeClick}
     />
   )

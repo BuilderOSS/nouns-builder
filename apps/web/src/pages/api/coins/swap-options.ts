@@ -18,7 +18,10 @@ function serializeSwapOptions(
       ...opt,
       token: {
         ...opt.token,
-        fee: opt.token.fee !== undefined ? opt.token.fee.toString() : undefined,
+        fee:
+          opt.token.type === 'zora-coin' || opt.token.type === 'clanker-token'
+            ? opt.token.fee.toString()
+            : undefined,
       },
       path: {
         ...opt.path,

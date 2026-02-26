@@ -23,7 +23,8 @@ interface CreatorCoinSectionProps {
   marketCap?: number | null
   isLoadingPrice?: boolean
   pairedToken?: string
-  onTradeClick?: (tokenAddress: Address, symbol: string) => void
+  isZoraCoin?: boolean
+  onTradeClick?: (tokenAddress: Address, symbol: string, isZoraCoin: boolean) => void
 }
 
 export const CreatorCoinSection = ({
@@ -35,6 +36,7 @@ export const CreatorCoinSection = ({
   // priceUsd,
   marketCap,
   isLoadingPrice,
+  isZoraCoin = false,
   onTradeClick,
 }: CreatorCoinSectionProps) => {
   const { getCoinLink } = useLinks()
@@ -53,7 +55,7 @@ export const CreatorCoinSection = ({
         <Button
           variant="primary"
           iconAlign="left"
-          onClick={() => onTradeClick?.(tokenAddress, symbol)}
+          onClick={() => onTradeClick?.(tokenAddress, symbol, isZoraCoin)}
         >
           Trade
         </Button>
