@@ -160,13 +160,15 @@ export const Gallery: React.FC<GalleryProps> = ({
   const {
     data: clankerTokens,
     isLoading: clankerLoading,
-    error: clankerError,
+    error: errorClanker,
   } = useClankerTokens({
     chainId: chain.id,
     collectionAddress: token,
     enabled: isCoinSupported,
     first: 1,
   })
+
+  const clankerError = isCoinSupported ? errorClanker : null
 
   // Fetch gallery items (combined coins and drops)
   const {
@@ -206,6 +208,15 @@ export const Gallery: React.FC<GalleryProps> = ({
 
   // Handle create option selection from dropdown
   const handleCreateOptionChange = (option: CreateOption) => {
+    // Block DAO-related options if governance is delayed
+    const isDaoOption =
+      option === 'dao-post' || option === 'dao-drop' || option === 'dao-creator-coin'
+
+    if (isDaoOption && isGovernanceDelayed) {
+      // Don't execute DAO actions when governance is delayed
+      return
+    }
+
     switch (option) {
       case 'permissionless-post':
         // Navigate to coin create page
@@ -360,7 +371,7 @@ export const Gallery: React.FC<GalleryProps> = ({
                 You need votes to create content for this DAO.
               </Text>
             )}
-            {address && !isDelegating && !isOwner && hasThreshold && (
+            {address && !isDelegating && !isOwner && !hasThreshold && (
               <Text variant="paragraph-sm" color="text3">
                 You have no votes.
               </Text>
@@ -385,7 +396,7 @@ export const Gallery: React.FC<GalleryProps> = ({
                 value={defaultCreateOption}
                 options={createOptions}
                 onChange={handleCreateOptionChange}
-                disabled={isGovernanceDelayed}
+                disabled={false}
               />
             </Box>
           ) : creatorCoin ? (

@@ -44,13 +44,11 @@ export const useGalleryItems = ({
   const isCoinSupported = isChainIdSupportedByCoining(chainId)
   const isDropSupported = isChainIdSupportedByDroposal(chainId)
 
-  const coinError = !isCoinSupported
-    ? new Error(`ZoraCoins are not supported on ${chainIdToName(chainId)}`)
-    : undefined
-
-  const dropError = !isDropSupported
-    ? new Error(`ZoraDrops are not supported on ${chainId}`)
-    : undefined
+  // Only error if BOTH are not supported
+  const supportError =
+    !isCoinSupported && !isDropSupported
+      ? new Error(`Gallery is not supported on ${chainIdToName(chainId)}`)
+      : undefined
 
   // Fetch coins
   const {
@@ -136,7 +134,7 @@ export const useGalleryItems = ({
     drops: isDropSupported ? dropsData : undefined,
     isLoading: isLoadingCoins || isLoadingDrops,
     isValidating: isValidatingCoins || isValidatingDrops,
-    error: coinError || dropError || coinsError || dropsError,
+    error: supportError || coinsError || dropsError,
     mutate,
   }
 }

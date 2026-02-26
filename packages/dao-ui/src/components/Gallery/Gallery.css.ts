@@ -21,20 +21,11 @@ export const galleryGrid = style([
       'screen and (min-width: 600px) and (max-width: 1023px)': {
         gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
       },
-      'screen and (max-width: 600px)': {
+      'screen and (max-width: 599px)': {
         gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
       },
     },
   },
-])
-
-export const creatorCoinSection = style([
-  atoms({
-    p: 'x6',
-    borderRadius: 'curved',
-    backgroundColor: 'background2',
-    mb: 'x6',
-  }),
 ])
 
 export const emptyState = style([
