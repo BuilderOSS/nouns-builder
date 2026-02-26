@@ -256,14 +256,10 @@ export const Gallery: React.FC<GalleryProps> = ({
 
     if (!creatorCoin) {
       // No creator coin - show creator coin and drop options for voters
-      options.push({
-        value: 'dao-creator-coin',
-        label: 'Create DAO Creator Coin',
-      })
-      if (isDropSupported) {
+      if (isCoinSupported) {
         options.push({
-          value: 'dao-drop',
-          label: 'Create DAO Drop',
+          value: 'dao-creator-coin',
+          label: 'Create Creator Coin',
         })
       }
     } else {
@@ -271,19 +267,19 @@ export const Gallery: React.FC<GalleryProps> = ({
       if (isCoinSupported) {
         options.push({
           value: 'permissionless-post',
-          label: 'Create Permissionless Post',
+          label: 'Create Post',
         })
         options.push({
           value: 'dao-post',
-          label: 'Create DAO Post',
+          label: 'Propose Post',
         })
       }
-      if (isDropSupported) {
-        options.push({
-          value: 'dao-drop',
-          label: 'Create DAO Drop',
-        })
-      }
+    }
+    if (isDropSupported) {
+      options.push({
+        value: 'dao-drop',
+        label: 'Create Drop',
+      })
     }
 
     return options
@@ -385,19 +381,36 @@ export const Gallery: React.FC<GalleryProps> = ({
 
           {/* Create button - adapts based on creator coin and voting power */}
           {hasThreshold ? (
-            // User has voting power - show dropdown
-            <Box width={{ '@initial': '100%', '@768': 'auto' }}>
-              <DropdownSelect
-                value={defaultCreateOption}
-                options={createOptions}
-                onChange={handleCreateOptionChange}
-                disabled={false}
-              />
-            </Box>
+            // User has voting power - show dropdown or single button
+            createOptions.length === 1 ? (
+              // Only one option - render simple button
+              <Button
+                variant="primary"
+                onClick={() => handleCreateOptionChange(createOptions[0].value)}
+              >
+                {createOptions[0].label}
+              </Button>
+            ) : (
+              // Multiple options - render dropdown
+              <Box width={{ '@initial': '100%', '@768': 'auto' }}>
+                <DropdownSelect
+                  value={defaultCreateOption}
+                  options={createOptions}
+                  onChange={handleCreateOptionChange}
+                  disabled={false}
+                  positioning="absolute"
+                  customLabel="Create"
+                  variant="button"
+                  buttonVariant="primary"
+                  buttonSize="md"
+                  align="right"
+                />
+              </Box>
+            )
           ) : creatorCoin ? (
             // No voting power but has creator coin - show simple link button
             <Link link={getCoinCreateLink(chain.id, token as `0x${string}`)}>
-              <Button variant="primary">Create</Button>
+              <Button variant="primary">Create Post</Button>
             </Link>
           ) : (
             // No voting power and no creator coin - disabled button
