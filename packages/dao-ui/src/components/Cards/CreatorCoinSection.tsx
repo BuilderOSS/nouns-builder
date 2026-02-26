@@ -11,7 +11,7 @@ import { Box, Button, Flex, Spinner, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address } from 'viem'
 
-import { creatorCoinSection } from './Coins.css'
+import { creatorCoinSection } from './Cards.css'
 
 interface CreatorCoinSectionProps {
   chainId: CHAIN_ID

@@ -19,7 +19,8 @@ import {
   coinInfo,
   marketCapOverlay,
   tradeButtonContainer,
-} from './Coins.css'
+  typeBadge,
+} from './Cards.css'
 
 interface CoinCardProps {
   chainId: CHAIN_ID
@@ -33,6 +34,7 @@ interface CoinCardProps {
   createdAt?: string
   isZoraCoin?: boolean
   onTradeClick?: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
+  showTypeBadge?: boolean
 }
 
 export const CoinCard = ({
@@ -46,6 +48,7 @@ export const CoinCard = ({
   createdAt,
   isZoraCoin = true,
   onTradeClick,
+  showTypeBadge = false,
 }: CoinCardProps) => {
   const { getCoinLink } = useLinks()
 
@@ -140,6 +143,13 @@ export const CoinCard = ({
           {isNew && (
             <Box position="absolute" top="x3" left="x3">
               <StatBadge variant="positive">New</StatBadge>
+            </Box>
+          )}
+
+          {/* Type Badge */}
+          {showTypeBadge && (
+            <Box className={typeBadge}>
+              <StatBadge variant="default">Coin</StatBadge>
             </Box>
           )}
         </Box>

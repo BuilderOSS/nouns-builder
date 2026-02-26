@@ -9,7 +9,7 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address } from 'viem'
 
-import { card, coinImage } from './Drops.css'
+import { card, coinImage, typeBadge } from './Cards.css'
 
 interface DropCardProps {
   chainId: CHAIN_ID
@@ -19,6 +19,7 @@ interface DropCardProps {
   imageURI?: string
   editionSize?: string
   createdAt?: string
+  showTypeBadge?: boolean
 }
 
 export const DropCard = ({
@@ -28,6 +29,7 @@ export const DropCard = ({
   // symbol,
   imageURI,
   createdAt,
+  showTypeBadge = false,
 }: DropCardProps) => {
   const { getDropLink } = useLinks()
 
@@ -74,6 +76,13 @@ export const DropCard = ({
         {isNew && (
           <Box position="absolute" top="x3" left="x3">
             <StatBadge variant="positive">New</StatBadge>
+          </Box>
+        )}
+
+        {/* Type Badge */}
+        {showTypeBadge && (
+          <Box className={typeBadge}>
+            <StatBadge variant="default">Drop</StatBadge>
           </Box>
         )}
       </Box>
