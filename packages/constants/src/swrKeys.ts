@@ -66,4 +66,5 @@ export const SWR_KEYS = {
   COIN_ADDRESSES: 'coin-addresses',
   DROP_ADDRESSES: 'drop-addresses',
   POOL_MAX_SWAP_AMOUNT: 'pool-max-swap-amount',
+  ZORA_COIN_COMMENTS: 'zora-coin-comments',
 } as const

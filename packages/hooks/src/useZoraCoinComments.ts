@@ -1,5 +1,7 @@
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getCoinComments } from '@zoralabs/coins-sdk'
-import { useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
+import useSWRInfinite from 'swr/infinite'
 import { Address } from 'viem'
 
 export interface CoinCommentReply {
@@ -51,184 +53,155 @@ interface UseZoraCoinCommentsResult {
   refetch: () => void
 }
 
+interface CommentsPageData {
+  comments: CoinComment[]
+  endCursor: string | null
+  hasNextPage: boolean
+}
+
+// Helper to transform API response to our format
+const transformCommentsResponse = (response: any): CoinComment[] => {
+  const edges = response.data?.zora20Token?.zoraComments?.edges || []
+  return edges.map((edge: any) => ({
+    commentId: edge.node.commentId,
+    comment: edge.node.comment,
+    timestamp: edge.node.timestamp,
+    userAddress: edge.node.userAddress,
+    userProfile: edge.node.userProfile
+      ? {
+          handle: edge.node.userProfile.handle,
+          avatar: edge.node.userProfile.avatar
+            ? {
+                previewImage: {
+                  small: edge.node.userProfile.avatar.previewImage.small,
+                  medium: edge.node.userProfile.avatar.previewImage.medium,
+                },
+              }
+            : undefined,
+        }
+      : undefined,
+    replies:
+      edge.node.replies?.edges?.map((replyEdge: any) => ({
+        commentId: replyEdge.node.commentId,
+        comment: replyEdge.node.comment,
+        timestamp: replyEdge.node.timestamp,
+        userAddress: replyEdge.node.userAddress,
+        userProfile: replyEdge.node.userProfile
+          ? {
+              handle: replyEdge.node.userProfile.handle,
+              avatar: replyEdge.node.userProfile.avatar
+                ? {
+                    previewImage: {
+                      small: replyEdge.node.userProfile.avatar.previewImage.small,
+                      medium: replyEdge.node.userProfile.avatar.previewImage.medium,
+                    },
+                  }
+                : undefined,
+            }
+          : undefined,
+      })) || [],
+  }))
+}
+
+// Fetcher function for SWR
+const fetcher = async ([_key, coinAddress, chainId, count, cursor]: readonly [
+  string,
+  Address,
+  number,
+  number,
+  string | null,
+]): Promise<CommentsPageData> => {
+  const response = await getCoinComments({
+    address: coinAddress,
+    chain: chainId,
+    count,
+    ...(cursor && { after: cursor }),
+  })
+
+  const comments = transformCommentsResponse(response)
+  const pageInfo = response.data?.zora20Token?.zoraComments?.pageInfo
+
+  return {
+    comments,
+    endCursor: pageInfo?.endCursor || null,
+    hasNextPage: pageInfo?.hasNextPage || false,
+  }
+}
+
 export const useZoraCoinComments = ({
   coinAddress,
   chainId,
   enabled = true,
   count = 20,
 }: UseZoraCoinCommentsParams): UseZoraCoinCommentsResult => {
-  const [comments, setComments] = useState<CoinComment[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
-  const [cursor, setCursor] = useState<string | null>(null)
-  const [hasMore, setHasMore] = useState(true)
-  const [refetchTrigger, setRefetchTrigger] = useState(0)
-
-  useEffect(() => {
-    // Reset state when coin address changes
-    setComments([])
-    setCursor(null)
-    setHasMore(true)
-    setError(null)
-  }, [coinAddress])
-
-  useEffect(() => {
-    if (!enabled || !coinAddress) {
-      setComments([])
-      setIsLoading(false)
-      setError(null)
-      return
+  // Build base key for SWR
+  const baseKey = useMemo(() => {
+    if (!enabled || !coinAddress) return null
+    return {
+      coinAddress,
+      chainId,
+      count,
     }
+  }, [enabled, coinAddress, chainId, count])
 
-    const fetchComments = async () => {
-      setIsLoading(true)
-      setError(null)
+  const { data, error, isValidating, size, setSize, mutate } = useSWRInfinite<
+    CommentsPageData,
+    Error
+  >(
+    (pageIndex, previousPageData) => {
+      if (!baseKey) return null
+      if (previousPageData && !previousPageData.hasNextPage) return null
 
-      try {
-        const response = await getCoinComments({
-          address: coinAddress,
-          chain: chainId,
-          count,
-        })
-
-        const edges = response.data?.zora20Token?.zoraComments?.edges || []
-        const newComments: CoinComment[] = edges.map((edge) => ({
-          commentId: edge.node.commentId,
-          comment: edge.node.comment,
-          timestamp: edge.node.timestamp,
-          userAddress: edge.node.userAddress,
-          userProfile: edge.node.userProfile
-            ? {
-                handle: edge.node.userProfile.handle,
-                avatar: edge.node.userProfile.avatar
-                  ? {
-                      previewImage: {
-                        small: edge.node.userProfile.avatar.previewImage.small,
-                        medium: edge.node.userProfile.avatar.previewImage.medium,
-                      },
-                    }
-                  : undefined,
-              }
-            : undefined,
-          replies:
-            edge.node.replies?.edges?.map((replyEdge) => ({
-              commentId: replyEdge.node.commentId,
-              comment: replyEdge.node.comment,
-              timestamp: replyEdge.node.timestamp,
-              userAddress: replyEdge.node.userAddress,
-              userProfile: replyEdge.node.userProfile
-                ? {
-                    handle: replyEdge.node.userProfile.handle,
-                    avatar: replyEdge.node.userProfile.avatar
-                      ? {
-                          previewImage: {
-                            small: replyEdge.node.userProfile.avatar.previewImage.small,
-                            medium: replyEdge.node.userProfile.avatar.previewImage.medium,
-                          },
-                        }
-                      : undefined,
-                  }
-                : undefined,
-            })) || [],
-        }))
-
-        setComments(newComments)
-        setCursor(response.data?.zora20Token?.zoraComments?.pageInfo?.endCursor || null)
-        setHasMore(
-          response.data?.zora20Token?.zoraComments?.pageInfo?.hasNextPage || false
-        )
-      } catch (err) {
+      const cursor = pageIndex === 0 ? null : (previousPageData?.endCursor ?? null)
+      return [SWR_KEYS.ZORA_COIN_COMMENTS, coinAddress!, chainId, count, cursor] as const
+    },
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 15_000,
+      keepPreviousData: true,
+      shouldRetryOnError: true,
+      errorRetryCount: 3,
+      errorRetryInterval: 1000,
+      onError: (err) => {
         console.error('Error fetching Zora coin comments:', err)
-        setError(err instanceof Error ? err : new Error('Failed to fetch comments'))
-        setComments([])
-      } finally {
-        setIsLoading(false)
-      }
+      },
     }
+  )
 
-    fetchComments()
-  }, [coinAddress, chainId, enabled, count, refetchTrigger])
-
-  const loadMore = async () => {
-    if (!enabled || !coinAddress || !hasMore || !cursor || isLoading) {
-      return
-    }
-
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await getCoinComments({
-        address: coinAddress,
-        chain: chainId,
-        after: cursor,
-        count,
+  // Flatten paginated comments with deduplication
+  const comments = useMemo(() => {
+    if (!data) return []
+    const seen = new Set<string>()
+    return data
+      .flatMap((page) => page.comments)
+      .filter((comment) => {
+        if (seen.has(comment.commentId)) return false
+        seen.add(comment.commentId)
+        return true
       })
+  }, [data])
 
-      const edges = response.data?.zora20Token?.zoraComments?.edges || []
-      const newComments: CoinComment[] = edges.map((edge) => ({
-        commentId: edge.node.commentId,
-        comment: edge.node.comment,
-        timestamp: edge.node.timestamp,
-        userAddress: edge.node.userAddress,
-        userProfile: edge.node.userProfile
-          ? {
-              handle: edge.node.userProfile.handle,
-              avatar: edge.node.userProfile.avatar
-                ? {
-                    previewImage: {
-                      small: edge.node.userProfile.avatar.previewImage.small,
-                      medium: edge.node.userProfile.avatar.previewImage.medium,
-                    },
-                  }
-                : undefined,
-            }
-          : undefined,
-        replies:
-          edge.node.replies?.edges?.map((replyEdge) => ({
-            commentId: replyEdge.node.commentId,
-            comment: replyEdge.node.comment,
-            timestamp: replyEdge.node.timestamp,
-            userAddress: replyEdge.node.userAddress,
-            userProfile: replyEdge.node.userProfile
-              ? {
-                  handle: replyEdge.node.userProfile.handle,
-                  avatar: replyEdge.node.userProfile.avatar
-                    ? {
-                        previewImage: {
-                          small: replyEdge.node.userProfile.avatar.previewImage.small,
-                          medium: replyEdge.node.userProfile.avatar.previewImage.medium,
-                        },
-                      }
-                    : undefined,
-                }
-              : undefined,
-          })) || [],
-      }))
+  const hasMore = useMemo(() => {
+    const lastPage = data?.[data.length - 1]
+    return lastPage?.hasNextPage ?? false
+  }, [data])
 
-      setComments((prev) => [...prev, ...newComments])
-      setCursor(response.data?.zora20Token?.zoraComments?.pageInfo?.endCursor || null)
-      setHasMore(response.data?.zora20Token?.zoraComments?.pageInfo?.hasNextPage || false)
-    } catch (err) {
-      console.error('Error loading more comments:', err)
-      setError(err instanceof Error ? err : new Error('Failed to load more comments'))
-    } finally {
-      setIsLoading(false)
+  const isLoading = useMemo(() => !data && !error && enabled, [data, error, enabled])
+
+  const loadMore = useCallback(() => {
+    if (hasMore && !isValidating) {
+      setSize(size + 1)
     }
-  }
-
-  const refetch = () => {
-    // Reset cursor and trigger refetch
-    setCursor(null)
-    setRefetchTrigger((prev) => prev + 1)
-  }
+  }, [hasMore, isValidating, setSize, size])
 
   return {
     comments,
     isLoading,
-    error,
+    error: error || null,
     hasMore,
     loadMore,
-    refetch,
+    refetch: mutate,
   }
 }

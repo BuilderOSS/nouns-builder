@@ -150,25 +150,20 @@ export const Gallery: React.FC<GalleryProps> = ({
   }
 
   // Check if chains are supported
-  const isCoinSupported = useMemo(() => isChainIdSupportedByCoining(chain.id), [chain.id])
-  const isDropSupported = useMemo(
-    () => isChainIdSupportedByDroposal(chain.id),
-    [chain.id]
-  )
+  const isCoinSupported = isChainIdSupportedByCoining(chain.id)
+  const isDropSupported = isChainIdSupportedByDroposal(chain.id)
 
   // Fetch creator coins (ClankerTokens) - only the first/latest one
   const {
     data: clankerTokens,
     isLoading: clankerLoading,
-    error: errorClanker,
+    error: clankerError,
   } = useClankerTokens({
     chainId: chain.id,
     collectionAddress: token,
     enabled: isCoinSupported,
     first: 1,
   })
-
-  const clankerError = isCoinSupported ? errorClanker : null
 
   // Fetch gallery items (combined coins and drops)
   const {

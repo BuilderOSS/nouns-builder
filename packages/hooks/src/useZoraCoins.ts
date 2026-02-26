@@ -49,7 +49,7 @@ export const useZoraCoins = ({
     data: isChainSupported ? data : undefined,
     isLoading: isChainSupported ? isLoading : false,
     isValidating: isChainSupported ? isValidating : false,
-    error: chainError || error,
+    error: enabled ? chainError || error : undefined,
     mutate,
   }
 }
