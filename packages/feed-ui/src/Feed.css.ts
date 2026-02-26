@@ -189,12 +189,22 @@ export const feedItemMetaRow = style({
   flexDirection: 'column',
   gap: space.x3,
   width: '100%',
+  marginTop: space.x2,
   '@media': {
     '(min-width: 768px)': {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginTop: space.x4,
+    },
+  },
+})
+
+export const feedItemChain = style({
+  justifyContent: 'flex-start',
+  '@media': {
+    '(min-width: 768px)': {
+      justifyContent: 'flex-end',
     },
   },
 })

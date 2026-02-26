@@ -9,7 +9,7 @@ import { AuctionBidPlacedItem } from './AuctionBidPlacedItem'
 import { AuctionCreatedItem } from './AuctionCreatedItem'
 import { AuctionSettledItem } from './AuctionSettledItem'
 import { ClankerTokenCreatedItem } from './ClankerTokenCreatedItem'
-import { feedItemCard, feedItemMeta, feedItemMetaRow } from './Feed.css'
+import { feedItemCard, feedItemChain, feedItemMeta, feedItemMetaRow } from './Feed.css'
 import { FeedItemActor } from './FeedItemActor'
 import { FeedItemChain } from './FeedItemChain'
 import { FeedItemDao } from './FeedItemDao'
@@ -98,7 +98,7 @@ export const FeedItem: React.FC<FeedItemProps> = ({
     <Flex className={feedItemCard}>
       <Stack gap="x3" w="100%">
         {/* Top row: User, DAO */}
-        <Flex gap="x2" align="center" wrap="wrap">
+        <Flex gap="x2" align="center" wrap>
           {/* Actor */}
           {!hideActor && <FeedItemActor address={item.actor} />}
 
@@ -132,7 +132,7 @@ export const FeedItem: React.FC<FeedItemProps> = ({
           />
 
           {/* Chain and timestamp */}
-          <Flex gap="x2" align="center" justify="flex-end" wrap="wrap">
+          <Flex gap="x2" align="center" wrap className={feedItemChain} flex={1}>
             {/* Chain */}
             <FeedItemChain chainId={item.chainId} />
 
