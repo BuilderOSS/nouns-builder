@@ -3,6 +3,7 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
+  Queue,
   SelectTransactionType,
   TRANSACTION_FORM_OPTIONS,
   TransactionForm,
@@ -22,13 +23,14 @@ import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
-import { Flex, Stack } from '@buildeross/zord'
+import { Box, Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
+import * as styles from 'src/styles/create.css'
 import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
@@ -46,6 +48,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const transactionType = useProposalStore((x) => x.transactionType)
   const setTransactionType = useProposalStore((x) => x.setTransactionType)
   const resetTransactionType = useProposalStore((x) => x.resetTransactionType)
+  const transactions = useProposalStore((x) => x.transactions)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -214,8 +217,9 @@ const CreateProposalPage: NextPageWithLayout = () => {
         title={'Add Transactions'}
         handleBack={openDaoActivityPage}
         showDocsLink
-        showQueue
+        showQueue={!!transactionType || (!transactionType && transactions.length > 0)}
         onOpenProposalReview={openProposalReviewPage}
+        queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
       />
       {transactionType ? (
         <TwoColumnLayout
@@ -238,6 +242,13 @@ const CreateProposalPage: NextPageWithLayout = () => {
               onSelect={setTransactionType}
               onOpenAdminSettings={openDaoAdminPage}
             />
+          }
+          rightColumn={
+            transactions.length > 0 ? (
+              <Box className={styles.hideOnMobile}>
+                <Queue embedded />
+              </Box>
+            ) : undefined
           }
         />
       )}

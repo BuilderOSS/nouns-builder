@@ -24,6 +24,7 @@ export const TransactionTypeIcon: React.FC<TransactionTypeIconProps> = ({
       my={'x4'}
       minH={large ? 'x13' : 'x10'}
       minW={large ? 'x13' : 'x10'}
+      flexShrink={0}
     >
       <Icon id={metadata?.icon ?? 'plus'} fill={metadata?.iconFill ?? 'transparent'} />
     </Flex>
