@@ -1,7 +1,8 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useClankerTokens } from '@buildeross/hooks'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { useChainStore } from '@buildeross/stores'
+import { AddressType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { type CoinFormValues, ContentCoinPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
@@ -11,26 +12,23 @@ import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
-import { DefaultLayout } from '../../../../../layouts/DefaultLayout'
+import { getDaoLayout } from '../../../../../layouts/DaoLayout'
 import * as styles from '../../../../../modules/coin/coinCreate.css'
 import { CreateContentCoinForm } from '../../../../../modules/coin/CreateContentCoinForm'
+import { NextPageWithLayout } from '../../../../_app'
 
 interface CreateCoinPageProps {
   daoName: string
-  collectionAddress: AddressType
-  auctionAddress: AddressType
-  treasuryAddress: AddressType
+  addresses: RequiredDaoContractAddresses
   chainId: CHAIN_ID
 }
 
-export default function CreateCoinPage({
+const CreateCoinPage: NextPageWithLayout<CreateCoinPageProps> = ({
   daoName,
-  collectionAddress,
-  auctionAddress,
-  treasuryAddress,
-  chainId,
-}: CreateCoinPageProps) {
+  addresses,
+}) => {
   const { push } = useRouter()
+  const chain = useChainStore((x) => x.chain)
   // State to track form values for preview
   const [previewData, setPreviewData] = useState<CoinFormValues>({
     name: '',
@@ -50,8 +48,6 @@ export default function CreateCoinPage({
   const onCoinCreated = (coinAddress: AddressType | null) => {
     setCreatedCoinAddress(coinAddress)
   }
-
-  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)!
 
   const handleCloseSuccessModal = useCallback(async () => {
     if (isNavigatingRef.current) return
@@ -76,7 +72,7 @@ export default function CreateCoinPage({
           pathname: `/dao/[network]/[token]`,
           query: {
             network: chain.slug,
-            token: collectionAddress,
+            token: addresses.token,
             tab: 'activity',
           },
         })
@@ -85,7 +81,7 @@ export default function CreateCoinPage({
     } finally {
       isNavigatingRef.current = false
     }
-  }, [push, createdCoinAddress, chain.slug, collectionAddress])
+  }, [push, createdCoinAddress, chain.slug, addresses.token])
 
   useEffect(() => {
     if (createdCoinAddress !== undefined) {
@@ -107,12 +103,12 @@ export default function CreateCoinPage({
     }
   }, [handleCloseSuccessModal, createdCoinAddress])
 
-  const isChainSupported = isChainIdSupportedByCoining(chainId)
+  const isChainSupported = isChainIdSupportedByCoining(chain.id)
 
   // Fetch the latest ClankerToken for this DAO
   const { data: clankerTokens, isLoading } = useClankerTokens({
-    chainId,
-    collectionAddress,
+    chainId: chain.id,
+    collectionAddress: addresses.token,
     enabled: isChainSupported,
     first: 1, // Only fetch the latest token
   })
@@ -123,92 +119,92 @@ export default function CreateCoinPage({
   }, [clankerTokens])
 
   return (
-    <DefaultLayout>
-      <Flex justify="center" py="x12" px="x4">
-        <Box style={{ maxWidth: 1280, width: '100%' }}>
-          <Stack gap="x6">
-            {/* Header */}
-            <Box>
-              <Text fontSize="35" fontWeight="display" mb="x2">
-                Publish Post
-              </Text>
-              <Text fontSize="16" color="text3">
-                Share your content on-chain and enable supporters to collect and trade
-              </Text>
-            </Box>
+    <Flex justify="center" py="x12" px="x4">
+      <Box style={{ maxWidth: 1280, width: '100%' }}>
+        <Stack gap="x6">
+          {/* Header */}
+          <Box>
+            <Text fontSize="35" fontWeight="display" mb="x2">
+              Publish Post
+            </Text>
+            <Text fontSize="16" color="text3">
+              Share your content on-chain and enable supporters to collect and trade
+            </Text>
+          </Box>
 
-            {/* DAO Context */}
-            <Box
-              borderRadius="curved"
-              borderStyle="solid"
-              borderWidth="normal"
-              borderColor="border"
-              p="x4"
-            >
-              <Flex align="center" gap="x3">
-                <DaoAvatar
-                  collectionAddress={collectionAddress}
-                  auctionAddress={auctionAddress}
-                  chainId={chainId}
-                  size="48"
+          {/* DAO Context */}
+          <Box
+            borderRadius="curved"
+            borderStyle="solid"
+            borderWidth="normal"
+            borderColor="border"
+            p="x4"
+          >
+            <Flex align="center" gap="x3">
+              <DaoAvatar
+                collectionAddress={addresses.token}
+                auctionAddress={addresses.auction}
+                chainId={chain.id}
+                size="48"
+              />
+              <Stack gap="x1">
+                <Text fontSize="16" fontWeight="label">
+                  Creating for {daoName}
+                </Text>
+                <Text fontSize="14" color="text3">
+                  {chain.name}
+                </Text>
+              </Stack>
+            </Flex>
+          </Box>
+
+          {/* Two-column layout: Form on left, Preview on right */}
+          <Box className={styles.twoColumnGrid}>
+            {/* Left column: Form */}
+            {isLoading ? (
+              <Box p="x4">
+                <Spinner />
+              </Box>
+            ) : (
+              <Box>
+                <CreateContentCoinForm
+                  latestClankerToken={latestClankerToken}
+                  onFormChange={setPreviewData}
+                  onCoinCreated={onCoinCreated}
                 />
-                <Stack gap="x1">
-                  <Text fontSize="16" fontWeight="label">
-                    Creating for {daoName}
-                  </Text>
-                  <Text fontSize="14" color="text3">
-                    {chain.name}
-                  </Text>
-                </Stack>
-              </Flex>
-            </Box>
+              </Box>
+            )}
 
-            {/* Two-column layout: Form on left, Preview on right */}
-            <Box className={styles.twoColumnGrid}>
-              {/* Left column: Form */}
-              {isLoading ? (
-                <Box p="x4">
-                  <Spinner />
-                </Box>
-              ) : (
-                <Box>
-                  <CreateContentCoinForm
-                    chainId={chainId}
-                    treasury={treasuryAddress}
-                    latestClankerToken={latestClankerToken}
-                    onFormChange={setPreviewData}
-                    onCoinCreated={onCoinCreated}
-                  />
-                </Box>
-              )}
-
-              {/* Right column: Preview */}
-              {latestClankerToken && (
-                <Box className={styles.previewColumn}>
-                  <ContentCoinPreview
-                    {...previewData}
-                    chainId={chainId}
-                    daoName={daoName}
-                  />
-                </Box>
-              )}
-            </Box>
-          </Stack>
-        </Box>
-        <AnimatedModal
-          open={createdCoinAddress !== undefined}
-          close={handleCloseSuccessModal}
-        >
-          <SuccessModalContent
-            title={`Post published`}
-            subtitle={`Your Post has been successfully published!`}
-            success
-          />
-        </AnimatedModal>
-      </Flex>
-    </DefaultLayout>
+            {/* Right column: Preview */}
+            {latestClankerToken && (
+              <Box className={styles.previewColumn}>
+                <ContentCoinPreview
+                  {...previewData}
+                  chainId={chain.id}
+                  daoName={daoName}
+                />
+              </Box>
+            )}
+          </Box>
+        </Stack>
+      </Box>
+      <AnimatedModal
+        open={createdCoinAddress !== undefined}
+        close={handleCloseSuccessModal}
+      >
+        <SuccessModalContent
+          title={`Post published`}
+          subtitle={`Your Post has been successfully published!`}
+          success
+        />
+      </AnimatedModal>
+    </Flex>
   )
 }
+
+CreateCoinPage.getLayout = getDaoLayout
+
+export default CreateCoinPage
 
 export const getServerSideProps: GetServerSideProps<CreateCoinPageProps> = async ({
   params,
@@ -225,11 +221,17 @@ export const getServerSideProps: GetServerSideProps<CreateCoinPageProps> = async
 
     if (!dao) throw new Error('DAO not found')
 
+    const addresses: RequiredDaoContractAddresses = {
+      token: token,
+      metadata: dao.metadataAddress as AddressType,
+      auction: dao.auctionAddress as AddressType,
+      treasury: dao.treasuryAddress as AddressType,
+      governor: dao.governorAddress as AddressType,
+    }
+
     const props: CreateCoinPageProps = {
       daoName: dao.name,
-      collectionAddress: token,
-      auctionAddress: dao.auctionAddress as AddressType,
-      treasuryAddress: dao.treasuryAddress as AddressType,
+      addresses,
       chainId: chain.id,
     }
 

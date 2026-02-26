@@ -79,21 +79,27 @@ export const DropInfo = ({
 
   return (
     <Box>
-      {/* Media Display */}
-      {shouldUseMediaPreview ? (
-        <Box w="100%" mb="x3" borderRadius="curved" overflow="hidden">
-          <MediaPreview
-            mediaUrl={animationFetchableUrl}
-            mediaType={mediaType}
-            coverUrl={drop.imageURI}
-            width="100%"
-          />
-        </Box>
-      ) : drop.imageURI ? (
-        <Box mb="x3" borderRadius="curved" overflow="hidden">
-          <FallbackImage src={drop.imageURI} alt={drop.name} style={{ width: '100%' }} />
-        </Box>
-      ) : null}
+      <Box w="100%" mb="x3">
+        {/* Media Display */}
+        {shouldUseMediaPreview ? (
+          <Box w="100%" borderRadius="curved" overflow="hidden">
+            <MediaPreview
+              mediaUrl={animationFetchableUrl}
+              mediaType={mediaType}
+              coverUrl={drop.imageURI}
+              width="100%"
+            />
+          </Box>
+        ) : drop.imageURI ? (
+          <Box w="100%" borderRadius="curved" overflow="hidden">
+            <FallbackImage
+              src={drop.imageURI}
+              alt={drop.name}
+              style={{ width: '100%' }}
+            />
+          </Box>
+        ) : null}
+      </Box>
 
       {/* Header with image and basic info */}
       <Flex gap="x6" align="flex-start" className={dropHeader}>

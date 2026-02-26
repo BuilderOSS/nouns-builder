@@ -8,18 +8,11 @@ import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { StatBadge } from '@buildeross/ui/StatBadge'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
-import { formatMarketCap } from '@buildeross/utils/formatMarketCap'
-import { Box, Button, Flex, Spinner, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { Address } from 'viem'
 
-import {
-  card,
-  coinImage,
-  coinInfo,
-  marketCapOverlay,
-  tradeButtonContainer,
-} from './Coins.css'
+import { card, coinImage, coinInfo, tradeButtonContainer, typeBadge } from './Cards.css'
 
 interface CoinCardProps {
   chainId: CHAIN_ID
@@ -27,12 +20,11 @@ interface CoinCardProps {
   name: string
   symbol: string
   image?: string // This is the IPFS URI
-  priceUsd?: number | null
-  marketCap?: number | null
-  isLoadingPrice?: boolean
   createdAt?: string
   isZoraCoin?: boolean
   onTradeClick?: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
+  showTypeBadge?: boolean
+  sellEnabled?: boolean
 }
 
 export const CoinCard = ({
@@ -41,11 +33,11 @@ export const CoinCard = ({
   name,
   symbol,
   image,
-  marketCap,
-  isLoadingPrice,
   createdAt,
   isZoraCoin = true,
   onTradeClick,
+  showTypeBadge = false,
+  sellEnabled = true,
 }: CoinCardProps) => {
   const { getCoinLink } = useLinks()
 
@@ -99,47 +91,42 @@ export const CoinCard = ({
           aspectRatio={1 / 1}
           position="relative"
           overflow={'hidden'}
-          className={coinImage}
         >
-          {isLoading ||
-          isMediaTypeLoading ||
-          (!shouldUseMediaPreview && !displayImageUrl) ? (
-            <Box backgroundColor="background2" w="100%" h="100%" />
-          ) : shouldUseMediaPreview ? (
-            <MediaPreview
-              mediaUrl={animationFetchableUrl}
-              mediaType={mediaType}
-              coverUrl={displayImageUrl || undefined}
-              width="100%"
-              height="100%"
-              aspectRatio={1}
-            />
-          ) : (
-            <FallbackImage
-              src={displayImageUrl!}
-              sizes="100vw"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              alt={`${name} image`}
-            />
-          )}
-
-          {/* Market Cap Overlay */}
-          {(marketCap !== null && marketCap !== undefined) || isLoadingPrice ? (
-            <Box className={marketCapOverlay}>
-              {isLoadingPrice ? (
-                <StatBadge variant="default">
-                  <Spinner size="sm" />
-                </StatBadge>
-              ) : (
-                <StatBadge variant="accent">{formatMarketCap(marketCap)}</StatBadge>
-              )}
-            </Box>
-          ) : null}
+          <Box w="100%" h="100%" aspectRatio={1 / 1} className={coinImage}>
+            {isLoading ||
+            isMediaTypeLoading ||
+            (!shouldUseMediaPreview && !displayImageUrl) ? (
+              <Box backgroundColor="background2" w="100%" h="100%" />
+            ) : shouldUseMediaPreview ? (
+              <MediaPreview
+                mediaUrl={animationFetchableUrl}
+                mediaType={mediaType}
+                coverUrl={displayImageUrl || undefined}
+                width="100%"
+                height="100%"
+                aspectRatio={1}
+              />
+            ) : (
+              <FallbackImage
+                src={displayImageUrl!}
+                sizes="100vw"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                alt={`${name} image`}
+              />
+            )}
+          </Box>
 
           {/* New Badge */}
           {isNew && (
             <Box position="absolute" top="x3" left="x3">
               <StatBadge variant="positive">New</StatBadge>
+            </Box>
+          )}
+
+          {/* Type Badge */}
+          {showTypeBadge && (
+            <Box className={typeBadge}>
+              <StatBadge variant="default">Coin</StatBadge>
             </Box>
           )}
         </Box>
@@ -181,7 +168,7 @@ export const CoinCard = ({
                 style={{ flex: 1 }}
                 onClick={handleTradeClick}
               >
-                Trade
+                {sellEnabled ? 'Trade' : 'Buy'}
               </Button>
             </Flex>
           )}

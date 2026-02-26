@@ -5,15 +5,13 @@ import {
   About,
   Activity,
   Admin,
-  Coins,
-  Drops,
+  Gallery,
   SectionHandler,
   SmartContracts,
   Treasury,
 } from '@buildeross/dao-ui'
-import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
+import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { useZoraDrops } from '@buildeross/hooks/useZoraDrops'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
@@ -65,36 +63,21 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     governorAddress: addresses.governor,
   })
 
-  // Check if chain supports coins
+  // Check if chain supports coins or drops
   const isCoinSupported = isChainIdSupportedByCoining(chainId)
-
-  // Fetch clanker tokens to check if DAO has any
-  const { data: clankerTokens } = useClankerTokens({
-    chainId,
-    collectionAddress: collection,
-    enabled: isCoinSupported,
-    first: 1,
-  })
-
-  const hasClankerToken = useMemo(
-    () => isCoinSupported && clankerTokens && clankerTokens.length > 0,
-    [isCoinSupported, clankerTokens]
-  )
-
-  // Check if chain supports drops
   const isDropSupported = isChainIdSupportedByDroposal(chainId)
 
-  // Fetch drops to check if DAO has any
-  const { data: drops } = useZoraDrops({
+  // Fetch gallery items to check if DAO has any coins or drops
+  const { data: galleryItems } = useGalleryItems({
     chainId,
     collectionAddress: collection,
-    enabled: isDropSupported,
+    enabled: isCoinSupported || isDropSupported,
     first: 1,
   })
 
-  const hasDrops = useMemo(
-    () => isDropSupported && drops && drops.length > 0,
-    [isDropSupported, drops]
+  const hasGalleryItems = useMemo(
+    () => (isCoinSupported || isDropSupported) && galleryItems && galleryItems.length > 0,
+    [isCoinSupported, isDropSupported, galleryItems]
   )
 
   const openTab = React.useCallback(
@@ -113,6 +96,16 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     },
     [push, pathname, query]
   )
+
+  const openCoinCreatePage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]/coin/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [push, chain.slug, addresses.token])
 
   const openProposalCreatePage = React.useCallback(async () => {
     await push({
@@ -166,20 +159,16 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       component: [<DaoFeed key="feed" />],
     }
 
-    // Only show Coins tab if chain supports coins AND DAO has a clanker token
-    const coinsSection = hasClankerToken
+    // Show Gallery tab if DAO has coins or drops
+    const gallerySection = hasGalleryItems
       ? {
-          title: 'Coins',
-          component: [<Coins key={'coins'} />],
-        }
-      : null
-
-    // Only show Drops tab if chain supports drops AND DAO has drops
-    const dropsSection = hasDrops
-      ? {
-          title: 'Drops',
+          title: 'Gallery',
           component: [
-            <Drops key={'drops'} onOpenProposalCreate={openProposalCreatePage} />,
+            <Gallery
+              key={'gallery'}
+              onOpenProposalCreate={openProposalCreatePage}
+              onOpenCoinCreate={openCoinCreatePage}
+            />,
           ],
         }
       : null
@@ -189,17 +178,16 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       daoFeed,
       treasurySection,
       proposalsSection,
-      ...(coinsSection ? [coinsSection] : []),
-      ...(dropsSection ? [dropsSection] : []),
+      ...(gallerySection ? [gallerySection] : []),
       smartContractsSection,
     ]
 
     return hasThreshold ? [...publicSections, adminSection] : publicSections
   }, [
-    hasClankerToken,
-    hasDrops,
+    hasGalleryItems,
     hasThreshold,
     openTab,
+    openCoinCreatePage,
     openProposalCreatePage,
     openProposalReviewPage,
   ])

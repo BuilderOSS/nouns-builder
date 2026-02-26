@@ -6,6 +6,7 @@ import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useMemo } from 'react'
+import { formatEther } from 'viem'
 
 import type { OnOpenMintModal } from '../types/modalStates'
 
@@ -15,7 +16,7 @@ interface ZoraDropActionsProps {
   symbol: string
   daoName: string
   daoImage: string
-  priceEth: string
+  publicSalePrice: string
   publicSaleStart: number
   publicSaleEnd: number
   editionSize?: string
@@ -29,7 +30,7 @@ export const ZoraDropActions: React.FC<ZoraDropActionsProps> = ({
   symbol,
   daoName,
   daoImage,
-  priceEth,
+  publicSalePrice,
   publicSaleStart,
   publicSaleEnd,
   editionSize,
@@ -46,6 +47,7 @@ export const ZoraDropActions: React.FC<ZoraDropActionsProps> = ({
   const saleNotStarted = saleStart > 0 && saleStart > now
   const saleEnded = saleEnd > 0 && saleEnd < now
   const saleActive = !saleNotStarted && !saleEnded
+  const priceEth = formatEther(BigInt(publicSalePrice || '0'))
 
   const { getDropLink } = useLinks()
 

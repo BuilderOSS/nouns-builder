@@ -142,20 +142,22 @@ export const CoinInfo = ({
 
   return (
     <Box>
-      {/* Media Display */}
-      {shouldUseMediaPreview ? (
-        <Box w="100%" mb="x3" borderRadius="curved" overflow="hidden">
-          <MediaPreview
-            mediaUrl={animationFetchableUrl}
-            mediaType={mediaType}
-            width="100%"
-          />
-        </Box>
-      ) : image ? (
-        <Box mb="x3" borderRadius="curved" overflow="hidden">
-          <FallbackImage src={image} alt={name} style={{ width: '100%' }} />
-        </Box>
-      ) : null}
+      <Box w="100%" mb="x3">
+        {/* Media Display */}
+        {shouldUseMediaPreview ? (
+          <Box w="100%" borderRadius="curved" overflow="hidden">
+            <MediaPreview
+              mediaUrl={animationFetchableUrl}
+              mediaType={mediaType}
+              width="100%"
+            />
+          </Box>
+        ) : image ? (
+          <Box w="100%" borderRadius="curved" overflow="hidden">
+            <FallbackImage src={image} alt={name} style={{ width: '100%' }} />
+          </Box>
+        ) : null}
+      </Box>
 
       {/* Header with image and basic info */}
       <Flex gap="x6" align="flex-start" className={coinHeader}>

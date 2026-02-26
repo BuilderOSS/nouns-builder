@@ -6,7 +6,8 @@ import {
 import { useClankerTokenPrice } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
 import { awaitSubgraphSync, ClankerTokenFragment } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { AddressType } from '@buildeross/types'
 import {
   CoinFormFields,
   coinFormSchema,
@@ -38,6 +39,8 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { type Address, decodeEventLog, zeroAddress, zeroHash } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+
+import { NoCreatorCoinWarning } from './NoCreatorCoinWarning'
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -197,16 +200,12 @@ const CreateContentCoinEconomicsPreview: React.FC<
 }
 
 export interface CreateContentCoinFormProps {
-  chainId: CHAIN_ID
-  treasury: AddressType
   latestClankerToken: ClankerTokenFragment | null
   onFormChange?: (values: CoinFormValues) => void
   onCoinCreated: (coinAddress: AddressType | null) => void
 }
 
 export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
-  chainId,
-  treasury,
   latestClankerToken,
   onFormChange,
   onCoinCreated,
@@ -217,6 +216,12 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [isDeploying, setIsDeploying] = useState(false)
+
+  // Get addresses and chain from stores
+  const addresses = useDaoStore((x) => x.addresses)
+  const chain = useChainStore((x) => x.chain)
+  const chainId = chain.id
+  const treasury = addresses.treasury
 
   // Check if the current chain is supported
   const isChainSupported = isChainIdSupportedByCoining(chainId)
@@ -505,29 +510,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
 
   // If no ClankerToken exists, show warning and don't render form
   if (!latestClankerToken) {
-    return (
-      <Box w="100%">
-        <Box
-          p="x6"
-          borderRadius="curved"
-          borderStyle="solid"
-          borderWidth="normal"
-          borderColor="warning"
-          backgroundColor="background2"
-        >
-          <Stack gap="x2">
-            <Text fontSize="16" fontWeight="label">
-              No Creator Coin Found
-            </Text>
-            <Text fontSize="14" color="text3">
-              This DAO needs to create a Creator Coin before publishing posts. Creator
-              Coins are used as the base currency for content posts. Please create a
-              Creator Coin proposal first.
-            </Text>
-          </Stack>
-        </Box>
-      </Box>
-    )
+    return <NoCreatorCoinWarning />
   }
 
   return (
