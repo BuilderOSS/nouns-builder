@@ -6,7 +6,7 @@ import { type Address } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
 import { ContractButton } from '../ContractButton'
-import LikePopupContent from './LikePopupContent'
+import { LikePopupContent } from './LikePopupContent'
 
 interface LikeButtonProps {
   coinAddress: Address
@@ -19,7 +19,7 @@ interface LikeButtonProps {
 
 const LikeButton: React.FC<LikeButtonProps> = ({
   coinAddress,
-  symbol,
+  // symbol,
   chainId,
   variant = 'ghost',
   size = 'md',
@@ -27,7 +27,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 }) => {
   // UI State
   const [showPopup, setShowPopup] = useState(false)
+  const [justLiked, setJustLiked] = useState(false)
+
   const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const justLikedTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Wagmi hooks
   const { address: userAddress } = useAccount()
@@ -63,7 +66,25 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const px = effectiveSize === 'lg' ? 'x6' : effectiveSize === 'xs' ? 'x3' : 'x4'
 
   // Determine which heart icon to show
-  const heartIcon = hasBalance ? 'heartFilled' : 'heart'
+  const heartIcon = hasBalance && justLiked ? 'heartFilled' : 'heart'
+
+  const onLikeSuccessInner = useCallback(
+    (txHash: string, amount: bigint) => {
+      setJustLiked(true)
+      onLikeSuccess?.(txHash, amount)
+
+      justLikedTimeoutRef.current = setTimeout(() => {
+        setJustLiked(false)
+      }, 3000)
+
+      return () => {
+        if (justLikedTimeoutRef.current) {
+          clearTimeout(justLikedTimeoutRef.current)
+        }
+      }
+    },
+    [onLikeSuccess]
+  )
 
   return (
     <>
@@ -100,7 +121,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
             coinAddress={coinAddress}
             chainId={chainId}
             onClose={handleClosePopup}
-            onLikeSuccess={onLikeSuccess}
+            onLikeSuccess={onLikeSuccessInner}
           />
         )}
       </PopUp>

@@ -1,10 +1,5 @@
 import { NATIVE_TOKEN_ADDRESS } from '@buildeross/constants/addresses'
-import {
-  useEthUsdPrice,
-  useExecuteSwap,
-  useSwapOptions,
-  useSwapQuote,
-} from '@buildeross/hooks'
+import { useEthUsdPrice, useExecuteSwap, useSwapOptions } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { motion } from 'framer-motion'
@@ -19,7 +14,7 @@ interface LikePopupContentProps {
   onLikeSuccess?: (txHash: string, amount: bigint) => void
 }
 
-const LikePopupContent: React.FC<LikePopupContentProps> = ({
+export const LikePopupContent: React.FC<LikePopupContentProps> = ({
   coinAddress,
   chainId,
   onClose,
@@ -29,6 +24,7 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
   const [selectedAmount, setSelectedAmount] = useState<bigint | null>(null)
   const [txHash, setTxHash] = useState<string | null>(null)
   const [txSuccess, setTxSuccess] = useState(false)
+  const [isLiking, setIsLiking] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Wagmi hooks
@@ -73,17 +69,8 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
     }))
   }, [ethUsdPrice])
 
-  // Get quote for selected amount - only when amount is selected
-  const { amountOut, isLoading: isLoadingQuote } = useSwapQuote({
-    chainId,
-    path: ethOption?.path,
-    amountIn: selectedAmount ?? undefined,
-    slippage: 0.01, // 1%
-    enabled: !!selectedAmount && !!ethOption?.path,
-  })
-
   // Execute swap hook
-  const { execute, isExecuting } = useExecuteSwap({
+  const { execute } = useExecuteSwap({
     walletClient: walletClient ?? undefined,
     publicClient: publicClient ?? undefined,
   })
@@ -133,27 +120,13 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
       setError(null)
 
       try {
-        // Wait for quote to load with timeout
-        const QUOTE_TIMEOUT = 5000 // 5 seconds
-        const startTime = Date.now()
-
-        while (isLoadingQuote && Date.now() - startTime < QUOTE_TIMEOUT) {
-          await new Promise((resolve) => setTimeout(resolve, 100))
-        }
-
-        // Check if we timed out or if quote is still missing
-        if (isLoadingQuote || !amountOut) {
-          setError('Failed to get swap quote. Please try again.')
-          setSelectedAmount(null)
-          return
-        }
-
+        setIsLiking(true)
         // Execute the swap
         const hash = await execute({
           chainId,
           path: ethOption.path,
           amountIn: amount,
-          amountOut: amountOut,
+          amountOut: 1n, // we set a non-zero amountOut to avoid reverting the transaction
           slippage: 0.01,
         })
 
@@ -174,8 +147,10 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
         }
       } catch (err: any) {
         console.error('Like transaction error:', err)
-        setError(err?.message || 'Transaction failed')
+        setError('Transaction failed')
         setSelectedAmount(null)
+      } finally {
+        setIsLiking(false)
       }
     },
     [
@@ -185,11 +160,8 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
       walletClient,
       ethBalance,
       chainId,
-      amountOut,
       execute,
       onLikeSuccess,
-      onClose,
-      isLoadingQuote,
     ]
   )
 
@@ -302,8 +274,8 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
             const isSelected = selectedAmount === preset.eth
             const isSufficientBalance = hasSufficientBalance(preset.eth)
             const isButtonDisabled =
-              !isWalletReady || !isSufficientBalance || (isExecuting && !isSelected)
-            const isButtonLoading = isSelected && (isLoadingQuote || isExecuting)
+              !isWalletReady || !isSufficientBalance || (isLiking && !isSelected)
+            const isButtonLoading = isSelected && isLiking
 
             return (
               <Button
@@ -317,7 +289,7 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
                     handleSelectAmount(preset.eth)
                   }
                 }}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || isButtonLoading}
                 style={{ flex: 1, minWidth: 0 }}
               >
                 {isButtonLoading ? (
@@ -340,5 +312,3 @@ const LikePopupContent: React.FC<LikePopupContentProps> = ({
     </Box>
   )
 }
-
-export default LikePopupContent
