@@ -29,20 +29,13 @@ export const coinInfo = style([
   }),
 ])
 
-export const marketCapOverlay = style({
-  position: 'absolute',
-  top: 12,
-  right: 12,
-  zIndex: 10,
-})
-
 export const tradeButtonContainer = style({
   marginTop: 8,
 })
 
 export const typeBadge = style({
   position: 'absolute',
-  bottom: 12,
+  top: 12,
   right: 12,
   zIndex: 10,
 })

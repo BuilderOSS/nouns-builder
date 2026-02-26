@@ -1,14 +1,13 @@
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
-import {
-  useClankerTokenWithPrice,
-  useZoraCoinWithPrice,
-} from '@buildeross/hooks/useCoinsWithPrices'
+import { useClankerTokenWithPrice } from '@buildeross/hooks/useCoinsWithPrices'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
-import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
+import { type GalleryItem, useGalleryItems } from '@buildeross/hooks/useGalleryItems'
+import { useNowSeconds } from '@buildeross/hooks/useNowSeconds'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { DropdownSelect, type SelectOption } from '@buildeross/ui/DropdownSelect'
+import { DropMintWidget } from '@buildeross/ui/DropMintWidget'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { AnimatedModal } from '@buildeross/ui/Modal'
@@ -21,7 +20,7 @@ import {
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
-import { Address } from 'viem'
+import { Address, formatEther } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { CoinCard } from '../Cards/CoinCard'
@@ -75,37 +74,60 @@ const SwapWidgetModal: React.FC<SwapWidgetModalProps> = ({
   )
 }
 
-// Wrapper component to fetch price for individual coin
-const CoinCardWithPrice: React.FC<{
-  coinAddress: Address
-  name: string
-  symbol: string
-  image?: string
-  createdAt?: string
+type DropItem = Extract<GalleryItem, { itemType: 'drop' }>
+
+type MintWidgetModalProps = {
+  handleCloseModal: () => void
+  selectedDrop: DropItem
   chainId: CHAIN_ID
-  onTradeClick?: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
-}> = ({ coinAddress, name, symbol, image, createdAt, chainId, onTradeClick }) => {
-  const coinWithPrice = useZoraCoinWithPrice({
-    zoraCoin: { coinAddress, name, symbol, uri: image } as any,
-    chainId,
-    enabled: true,
-  })
+}
+
+const MintWidgetModal: React.FC<MintWidgetModalProps> = ({
+  handleCloseModal,
+  selectedDrop: drop,
+  chainId,
+}) => {
+  // Calculate sale timing
+  const now = useNowSeconds(true)
+
+  const saleStart = Number.isFinite(drop.publicSaleStart) ? drop.publicSaleStart : 0
+  const saleEnd = Number.isFinite(drop.publicSaleEnd) ? drop.publicSaleEnd : 0
+  const saleNotStarted = saleStart > 0 && saleStart > now
+  const saleEnded = saleEnd > 0 && saleEnd < now
+  const saleActive = !saleNotStarted && !saleEnded
+  const priceEth = formatEther(BigInt(drop.publicSalePrice || '0'))
 
   return (
-    <CoinCard
-      chainId={chainId}
-      coinAddress={coinAddress}
-      name={name}
-      symbol={symbol}
-      image={image}
-      priceUsd={coinWithPrice.priceUsd}
-      marketCap={coinWithPrice.marketCap}
-      isLoadingPrice={coinWithPrice.isLoadingPrice}
-      createdAt={createdAt}
-      isZoraCoin={true}
-      onTradeClick={onTradeClick}
-      showTypeBadge={true}
-    />
+    <AnimatedModal open={true} close={handleCloseModal} size="medium">
+      <Box w="100%">
+        <Flex align="center" justify="space-between" mb="x4" w="100%">
+          <Text variant="heading-md">Mint {drop.symbol}</Text>
+          <Button
+            variant="ghost"
+            p="x0"
+            size="xs"
+            onClick={handleCloseModal}
+            style={{ padding: 0, flexShrink: 0 }}
+          >
+            <Icon id="cross" />
+          </Button>
+        </Flex>
+        <DropMintWidget
+          chainId={chainId}
+          dropAddress={drop.id as `0x${string}`}
+          symbol={drop.symbol}
+          priceEth={priceEth}
+          saleActive={saleActive}
+          saleNotStarted={saleNotStarted}
+          saleEnded={saleEnded}
+          saleStart={saleStart}
+          saleEnd={saleEnd}
+          editionSize={drop.editionSize}
+          maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
+          onMintSuccess={handleCloseModal}
+        />
+      </Box>
+    </AnimatedModal>
   )
 }
 
@@ -137,6 +159,9 @@ export const Gallery: React.FC<GalleryProps> = ({
     isZoraCoin: boolean
   } | null>(null)
 
+  // Shared modal state for all mint buttons
+  const [selectedDrop, setSelectedDrop] = useState<DropItem | null>(null)
+
   const handleTradeClick = (
     coinAddress: Address,
     symbol: string,
@@ -145,13 +170,22 @@ export const Gallery: React.FC<GalleryProps> = ({
     setSelectedCoin({ address: coinAddress, symbol, isZoraCoin })
   }
 
+  const handleMintClick = (drop: DropItem) => {
+    setSelectedDrop(drop)
+  }
+
   const handleCloseModal = () => {
     setSelectedCoin(null)
+  }
+
+  const handleCloseMintModal = () => {
+    setSelectedDrop(null)
   }
 
   // Check if chains are supported
   const isCoinSupported = isChainIdSupportedByCoining(chain.id)
   const isDropSupported = isChainIdSupportedByDroposal(chain.id)
+  const isSellEnabledForZoraCoins = isChainIdSupportedForSaleOfZoraCoins(chain.id)
 
   // Fetch creator coins (ClankerTokens) - only the first/latest one
   const {
@@ -440,7 +474,7 @@ export const Gallery: React.FC<GalleryProps> = ({
           {galleryItems.map((item) => {
             if (item.itemType === 'coin') {
               return (
-                <CoinCardWithPrice
+                <CoinCard
                   key={item.coinAddress}
                   coinAddress={item.coinAddress}
                   name={item.name}
@@ -449,20 +483,19 @@ export const Gallery: React.FC<GalleryProps> = ({
                   createdAt={item.createdAt}
                   chainId={chain.id}
                   onTradeClick={handleTradeClick}
+                  isZoraCoin={true}
+                  showTypeBadge={true}
+                  sellEnabled={isSellEnabledForZoraCoins}
                 />
               )
             } else {
               return (
                 <DropCard
                   key={item.id}
+                  drop={item}
                   chainId={chain.id}
-                  dropAddress={item.id as `0x${string}`}
-                  name={item.name}
-                  symbol={item.symbol}
-                  imageURI={item.imageURI}
-                  editionSize={item.editionSize}
-                  createdAt={item.createdAt}
                   showTypeBadge={true}
+                  onMintClick={handleMintClick}
                 />
               )
             }
@@ -483,6 +516,15 @@ export const Gallery: React.FC<GalleryProps> = ({
           handleCloseModal={handleCloseModal}
           selectedCoin={selectedCoin}
           chainId={chain.id as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+        />
+      )}
+
+      {/* Shared Mint Modal */}
+      {selectedDrop && (
+        <MintWidgetModal
+          handleCloseModal={handleCloseMintModal}
+          selectedDrop={selectedDrop}
+          chainId={chain.id}
         />
       )}
     </Box>
