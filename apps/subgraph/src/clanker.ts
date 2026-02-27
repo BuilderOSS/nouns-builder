@@ -6,7 +6,6 @@ import {
   ClankerTokenCreatedEvent as ClankerTokenCreatedFeedEvent,
 } from '../generated/schema'
 import { ClankerToken as ClankerTokenTemplate } from '../generated/templates'
-import { WETH_ADDRESS } from './utils/constants'
 import { loadDAOFromTreasury } from './utils/loadDAOFromTreasury'
 import { buildSwapRoute } from './utils/swapPath'
 
@@ -68,20 +67,14 @@ export function handleTokenCreated(event: TokenCreated): void {
   token.transactionHash = event.transaction.hash
 
   // Build swap route for this token
-  // Note: Event handlers are only configured for base and base-sepolia networks,
-  // but we log if we somehow receive events from other networks
-  if (network != 'base' && network != 'base-sepolia') {
-    log.error('ClankerToken event received from unsupported network: {}. This should not happen.', [
-      network,
-    ])
-  }
   let swapRoute = buildSwapRoute(event.params.tokenAddress, event.block.timestamp)
 
   // Only save the token if we successfully built a swap route
   if (!swapRoute) {
-    log.warning('Failed to build swap route for ClankerToken {}, skipping token creation', [
-      event.params.tokenAddress.toHexString(),
-    ])
+    log.warning(
+      'Failed to build swap route for ClankerToken {}, skipping token creation',
+      [event.params.tokenAddress.toHexString()]
+    )
     return
   }
 

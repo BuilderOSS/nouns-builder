@@ -1,7 +1,7 @@
-import { Bytes, BigInt } from '@graphprotocol/graph-ts'
+import { BigInt, Bytes } from '@graphprotocol/graph-ts'
 
 import { ClankerToken, ZoraCoin } from '../../generated/schema'
-import { WETH_ADDRESS, DYNAMIC_FEE_FLAG, CLANKER_TICK_SPACING } from './constants'
+import { CLANKER_TICK_SPACING, DYNAMIC_FEE_FLAG, WETH_ADDRESS } from './constants'
 
 /**
  * Coin type constants for routing
@@ -51,7 +51,7 @@ export function loadCoinInfo(tokenAddress: Bytes): CoinInfo | null {
   const tokenId = tokenAddress.toHexString()
 
   // Check if it's WETH
-  if (tokenAddress.toHexString().toLowerCase() == WETH_ADDRESS.toHexString().toLowerCase()) {
+  if (tokenAddress.equals(WETH_ADDRESS)) {
     return new CoinInfo(
       tokenAddress,
       CoinType.WETH,
@@ -92,11 +92,4 @@ export function loadCoinInfo(tokenAddress: Bytes): CoinInfo | null {
   }
 
   return null
-}
-
-/**
- * Check if two addresses are equal (case-insensitive)
- */
-export function addressEquals(a: Bytes, b: Bytes): boolean {
-  return a.toHexString().toLowerCase() == b.toHexString().toLowerCase()
 }

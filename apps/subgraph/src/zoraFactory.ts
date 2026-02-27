@@ -5,9 +5,8 @@ import {
   ZoraCoin,
   ZoraCoinCreatedEvent as ZoraCoinCreatedFeedEvent,
 } from '../generated/schema'
-import { CoinCreatedV4 } from '../generated/ZoraFactory/ZoraFactory'
 import { ZoraCoin as ZoraCoinTemplate } from '../generated/templates'
-import { WETH_ADDRESS } from './utils/constants'
+import { CoinCreatedV4 } from '../generated/ZoraFactory/ZoraFactory'
 import { buildSwapRoute } from './utils/swapPath'
 
 // Platform referrer constants
@@ -78,13 +77,6 @@ export function handleCoinCreatedV4(event: CoinCreatedV4): void {
   coin.transactionHash = event.transaction.hash
 
   // Build swap route for this coin
-  // Note: Event handlers are only configured for base and base-sepolia networks,
-  // but we log if we somehow receive events from other networks
-  if (network != 'base' && network != 'base-sepolia') {
-    log.error('ZoraCoin event received from unsupported network: {}. This should not happen.', [
-      network,
-    ])
-  }
   let swapRoute = buildSwapRoute(event.params.coin, event.block.timestamp)
 
   // Only save the coin if we successfully built a swap route

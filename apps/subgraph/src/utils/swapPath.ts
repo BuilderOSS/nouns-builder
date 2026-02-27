@@ -1,7 +1,7 @@
-import { Bytes, BigInt, log } from '@graphprotocol/graph-ts'
+import { BigInt, Bytes, log } from '@graphprotocol/graph-ts'
 
-import { SwapRoute, SwapHop, PaymentOption } from '../../generated/schema'
-import { CoinInfo, CoinType, loadCoinInfo, addressEquals } from './coinInfo'
+import { PaymentOption, SwapHop, SwapRoute } from '../../generated/schema'
+import { CoinInfo, CoinType, loadCoinInfo } from './coinInfo'
 import { WETH_ADDRESS } from './constants'
 
 /**
@@ -34,11 +34,18 @@ class PathHop {
 
 /**
  * Create a hop from a coin with pool info
+ * Returns null if the coin doesn't have pool info
  */
-function hopFromCoinInfo(pairingSide: CoinInfo, tokenIn: Bytes, tokenOut: Bytes): PathHop {
+function hopFromCoinInfo(
+  pairingSide: CoinInfo,
+  tokenIn: Bytes,
+  tokenOut: Bytes
+): PathHop | null {
   if (!pairingSide.poolId) {
-    log.error('Cannot create hop from coin without poolId: {}', [pairingSide.address.toHexString()])
-    return new PathHop(tokenIn, tokenOut, '', null, null, 0)
+    log.error('Cannot create hop from coin without poolId: {}', [
+      pairingSide.address.toHexString(),
+    ])
+    return null
   }
 
   return new PathHop(
@@ -60,7 +67,7 @@ function makeDirectHop(a: CoinInfo, b: CoinInfo): PathHop | null {
   if (
     (a.type == CoinType.ZORA_COIN || a.type == CoinType.CLANKER_TOKEN) &&
     a.pairedToken &&
-    addressEquals(a.pairedToken!, b.address)
+    a.pairedToken!.equals(b.address)
   ) {
     return hopFromCoinInfo(a, a.address, b.address)
   }
@@ -69,7 +76,7 @@ function makeDirectHop(a: CoinInfo, b: CoinInfo): PathHop | null {
   if (
     (b.type == CoinType.ZORA_COIN || b.type == CoinType.CLANKER_TOKEN) &&
     b.pairedToken &&
-    addressEquals(b.pairedToken!, a.address)
+    b.pairedToken!.equals(a.address)
   ) {
     return hopFromCoinInfo(b, a.address, b.address)
   }
@@ -104,7 +111,7 @@ function buildChainToWeth(start: Bytes, maxSteps: i32): CoinInfo[] | null {
     chain.push(info)
 
     // If we reached WETH, we're done
-    if (addressEquals(info.address, WETH_ADDRESS)) {
+    if (info.address.equals(WETH_ADDRESS)) {
       return chain
     }
 
@@ -217,9 +224,10 @@ export function buildSwapRoute(coinAddress: Bytes, timestamp: BigInt): SwapRoute
       // Find where this token appears in the chain
       for (let j = 0; j < chainToWeth.length; j++) {
         if (chainToWeth[j].address.toHexString().toLowerCase() == tokenAddr) {
-          // When buying: intermediate token -> coin (use hops from j to end)
-          // When selling: coin -> intermediate token (use hops from start to j)
-          // We store indices for both directions (frontend will interpret based on buy/sell)
+          // Store hop indices for intermediate-token → coin direction (for buying)
+          // The frontend must reverse these indices when selling (coin → intermediate-token)
+          // startHopIndex = j represents the hop starting from the intermediate token
+          // endHopIndex = hops.length - 1 represents the final hop to the target coin
           startHopIndex = j
           endHopIndex = hops.length - 1
           break

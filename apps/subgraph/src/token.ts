@@ -6,8 +6,8 @@ import {
   Token as TokenContract,
   Transfer as TransferEvent,
 } from '../generated/templates/Token/Token'
-import { setTokenMetadata } from './utils/setTokenMetadata'
 import { ADDRESS_ZERO } from './utils/constants'
+import { setTokenMetadata } from './utils/setTokenMetadata'
 
 function getOrCreateZeroAddressOwner(daoAddress: Bytes): DAOTokenOwner {
   let zeroOwnerId = `${daoAddress.toHexString()}:${ADDRESS_ZERO.toHexString()}`

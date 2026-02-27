@@ -1,4 +1,4 @@
-import { Address, Bytes, BigInt } from '@graphprotocol/graph-ts'
+import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
 
 /**
  * Zero address constant (used for mints and burns)
