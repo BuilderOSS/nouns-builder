@@ -78,7 +78,12 @@ export function handleTransfer(event: Transfer): void {
       event.block.number
     )
 
-    fromHolder.balance = fromHolder.balance.minus(BigInt.fromI32(1))
+    // Defensively check balance to prevent negative values
+    if (fromHolder.balance.gt(BigInt.fromI32(0))) {
+      fromHolder.balance = fromHolder.balance.minus(BigInt.fromI32(1))
+    } else {
+      fromHolder.balance = BigInt.fromI32(0)
+    }
     fromHolder.updatedAt = event.block.timestamp
     fromHolder.updatedAtBlock = event.block.number
 

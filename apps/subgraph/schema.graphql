@@ -564,6 +564,12 @@ type ZoraDropMintComment @entity {
 
 # Swap routing entities
 
+enum CoinType {
+  WETH
+  CLANKER_TOKEN
+  ZORA_COIN
+}
+
 type SwapRoute @entity {
   # ID is the coin/token address
   id: ID!
@@ -597,7 +603,7 @@ type SwapHop @entity {
   # Hop details
   tokenIn: Bytes!
   tokenOut: Bytes!
-  poolId: String!
+  poolId: Bytes!
   fee: BigInt
   hooks: Bytes
   tickSpacing: Int
@@ -615,7 +621,7 @@ type PaymentOption @entity {
 
   # Payment token details
   tokenAddress: Bytes!
-  tokenType: String! # "weth", "clanker-token", "zora-coin"
+  tokenType: CoinType!
 
   # Hops from this payment token to the target coin (when buying)
   # Or from target coin to this payment token (when selling)

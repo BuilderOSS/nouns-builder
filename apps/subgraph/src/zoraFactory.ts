@@ -76,23 +76,21 @@ export function handleCoinCreatedV4(event: CoinCreatedV4): void {
   coin.createdAtBlock = event.block.number
   coin.transactionHash = event.transaction.hash
 
+  // Save coin first to ensure it's persisted regardless of swap route success
+  coin.save()
+
   // Build swap route for this coin
   let swapRoute = buildSwapRoute(event.params.coin, event.block.timestamp)
 
-  // Only save the coin if we successfully built a swap route
-  if (!swapRoute) {
-    log.warning('Failed to build swap route for ZoraCoin {}, skipping coin creation', [
+  // Link swap route to coin if it was successfully created
+  if (swapRoute) {
+    swapRoute.zoraCoin = coin.id
+    swapRoute.save()
+  } else {
+    log.warning('Failed to build swap route for ZoraCoin {}, coin saved without route', [
       event.params.coin.toHexString(),
     ])
-    return
   }
-
-  // Link swap route to coin
-  swapRoute.zoraCoin = coin.id
-  swapRoute.save()
-
-  // Save coin after swap route is created
-  coin.save()
 
   // Instantiate template to start tracking coin holders
   ZoraCoinTemplate.create(event.params.coin)

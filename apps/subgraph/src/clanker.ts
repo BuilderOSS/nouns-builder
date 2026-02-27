@@ -66,24 +66,22 @@ export function handleTokenCreated(event: TokenCreated): void {
   token.createdAtBlock = event.block.number
   token.transactionHash = event.transaction.hash
 
+  // Save token first to ensure it's persisted regardless of swap route success
+  token.save()
+
   // Build swap route for this token
   let swapRoute = buildSwapRoute(event.params.tokenAddress, event.block.timestamp)
 
-  // Only save the token if we successfully built a swap route
-  if (!swapRoute) {
+  // Link swap route to token if it was successfully created
+  if (swapRoute) {
+    swapRoute.clankerToken = token.id
+    swapRoute.save()
+  } else {
     log.warning(
-      'Failed to build swap route for ClankerToken {}, skipping token creation',
+      'Failed to build swap route for ClankerToken {}, token saved without route',
       [event.params.tokenAddress.toHexString()]
     )
-    return
   }
-
-  // Link swap route to token
-  swapRoute.clankerToken = token.id
-  swapRoute.save()
-
-  // Save token after swap route is created
-  token.save()
 
   // Instantiate template to start tracking token holders
   ClankerTokenTemplate.create(event.params.tokenAddress)

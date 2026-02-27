@@ -39,21 +39,33 @@ export function handleTransfer(event: Transfer): void {
   let timestamp = event.block.timestamp
   let blockNumber = event.block.number
 
+  // Skip balance updates for self-transfers (from == to)
+  // Only update timestamps in this case
+  if (from.equals(to)) {
+    // Still update timestamp for the holder
+    if (from.notEqual(ADDRESS_ZERO)) {
+      let holder = getOrCreateHolder(tokenAddress, from, timestamp, blockNumber)
+      holder.updatedAt = timestamp
+      holder.updatedAtBlock = blockNumber
+      holder.save()
+    }
+    return
+  }
+
   // Decrease sender balance (if not mint)
   if (from.notEqual(ADDRESS_ZERO)) {
     let fromHolder = getOrCreateHolder(tokenAddress, from, timestamp, blockNumber)
-    fromHolder.balance = fromHolder.balance.minus(value)
+    // Defensively check balance to prevent negative values
+    if (fromHolder.balance.lt(value)) {
+      fromHolder.balance = BigInt.fromI32(0)
+    } else {
+      fromHolder.balance = fromHolder.balance.minus(value)
+    }
     fromHolder.updatedAt = timestamp
     fromHolder.updatedAtBlock = blockNumber
 
-    // Remove holder entity if balance is zero
-    if (fromHolder.balance.equals(BigInt.fromI32(0))) {
-      // Note: In subgraphs, we typically keep zero-balance holders for historical data
-      // But we can delete if we want to save space
-      fromHolder.save()
-    } else {
-      fromHolder.save()
-    }
+    // Note: In subgraphs, we typically keep zero-balance holders for historical data
+    fromHolder.save()
   }
 
   // Increase recipient balance (if not burn)

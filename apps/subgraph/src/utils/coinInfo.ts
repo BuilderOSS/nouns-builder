@@ -7,9 +7,9 @@ import { CLANKER_TICK_SPACING, DYNAMIC_FEE_FLAG, WETH_ADDRESS } from './constant
  * Coin type constants for routing
  */
 export namespace CoinType {
-  export const WETH: string = 'weth'
-  export const CLANKER_TOKEN: string = 'clanker-token'
-  export const ZORA_COIN: string = 'zora-coin'
+  export const WETH: string = 'WETH'
+  export const CLANKER_TOKEN: string = 'CLANKER_TOKEN'
+  export const ZORA_COIN: string = 'ZORA_COIN'
 }
 
 /**
@@ -19,7 +19,7 @@ export class CoinInfo {
   address: Bytes
   type: string
   pairedToken: Bytes | null
-  poolId: string | null // Uniswap V4 pool identifier (from either poolId or poolKeyHash)
+  poolId: Bytes | null // Uniswap V4 pool identifier (from either poolId or poolKeyHash)
   fee: BigInt | null
   hooks: Bytes | null
   tickSpacing: i32 // Use 0 as sentinel for null
@@ -28,7 +28,7 @@ export class CoinInfo {
     address: Bytes,
     type: string,
     pairedToken: Bytes | null,
-    poolId: string | null,
+    poolId: Bytes | null,
     fee: BigInt | null,
     hooks: Bytes | null,
     tickSpacing: i32
@@ -70,7 +70,7 @@ export function loadCoinInfo(tokenAddress: Bytes): CoinInfo | null {
       zoraCoin.coinAddress,
       CoinType.ZORA_COIN,
       zoraCoin.currency,
-      zoraCoin.poolKeyHash.toHexString(), // poolKeyHash is the Uniswap V4 pool identifier
+      zoraCoin.poolKeyHash, // poolKeyHash is the Uniswap V4 pool identifier
       zoraCoin.poolFee,
       zoraCoin.poolHooks,
       zoraCoin.poolTickSpacing
@@ -84,7 +84,7 @@ export function loadCoinInfo(tokenAddress: Bytes): CoinInfo | null {
       clankerToken.tokenAddress,
       CoinType.CLANKER_TOKEN,
       clankerToken.pairedToken,
-      clankerToken.poolId.toHexString(), // poolId is the Uniswap V4 pool identifier
+      clankerToken.poolId, // poolId is the Uniswap V4 pool identifier
       DYNAMIC_FEE_FLAG,
       clankerToken.poolHook,
       CLANKER_TICK_SPACING

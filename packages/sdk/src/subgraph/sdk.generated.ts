@@ -1515,6 +1515,12 @@ export enum ClankerToken_OrderBy {
   TransactionHash = 'transactionHash',
 }
 
+export enum CoinType {
+  ClankerToken = 'CLANKER_TOKEN',
+  Weth = 'WETH',
+  ZoraCoin = 'ZORA_COIN',
+}
+
 export type Dao = {
   __typename?: 'DAO'
   auctionAddress: Scalars['Bytes']['output']
@@ -2670,7 +2676,7 @@ export type PaymentOption = {
   route: SwapRoute
   startHopIndex: Scalars['Int']['output']
   tokenAddress: Scalars['Bytes']['output']
-  tokenType: Scalars['String']['output']
+  tokenType: CoinType
 }
 
 export type PaymentOption_Filter = {
@@ -2737,26 +2743,10 @@ export type PaymentOption_Filter = {
   tokenAddress_not?: InputMaybe<Scalars['Bytes']['input']>
   tokenAddress_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   tokenAddress_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  tokenType?: InputMaybe<Scalars['String']['input']>
-  tokenType_contains?: InputMaybe<Scalars['String']['input']>
-  tokenType_contains_nocase?: InputMaybe<Scalars['String']['input']>
-  tokenType_ends_with?: InputMaybe<Scalars['String']['input']>
-  tokenType_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
-  tokenType_gt?: InputMaybe<Scalars['String']['input']>
-  tokenType_gte?: InputMaybe<Scalars['String']['input']>
-  tokenType_in?: InputMaybe<Array<Scalars['String']['input']>>
-  tokenType_lt?: InputMaybe<Scalars['String']['input']>
-  tokenType_lte?: InputMaybe<Scalars['String']['input']>
-  tokenType_not?: InputMaybe<Scalars['String']['input']>
-  tokenType_not_contains?: InputMaybe<Scalars['String']['input']>
-  tokenType_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
-  tokenType_not_ends_with?: InputMaybe<Scalars['String']['input']>
-  tokenType_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
-  tokenType_not_in?: InputMaybe<Array<Scalars['String']['input']>>
-  tokenType_not_starts_with?: InputMaybe<Scalars['String']['input']>
-  tokenType_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
-  tokenType_starts_with?: InputMaybe<Scalars['String']['input']>
-  tokenType_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenType?: InputMaybe<CoinType>
+  tokenType_in?: InputMaybe<Array<CoinType>>
+  tokenType_not?: InputMaybe<CoinType>
+  tokenType_not_in?: InputMaybe<Array<CoinType>>
 }
 
 export enum PaymentOption_OrderBy {
@@ -5102,7 +5092,7 @@ export type SwapHop = {
   hooks?: Maybe<Scalars['Bytes']['output']>
   hopIndex: Scalars['Int']['output']
   id: Scalars['ID']['output']
-  poolId: Scalars['String']['output']
+  poolId: Scalars['Bytes']['output']
   route: SwapRoute
   tickSpacing?: Maybe<Scalars['Int']['output']>
   tokenIn: Scalars['Bytes']['output']
@@ -5148,26 +5138,16 @@ export type SwapHop_Filter = {
   id_not?: InputMaybe<Scalars['ID']['input']>
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
   or?: InputMaybe<Array<InputMaybe<SwapHop_Filter>>>
-  poolId?: InputMaybe<Scalars['String']['input']>
-  poolId_contains?: InputMaybe<Scalars['String']['input']>
-  poolId_contains_nocase?: InputMaybe<Scalars['String']['input']>
-  poolId_ends_with?: InputMaybe<Scalars['String']['input']>
-  poolId_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
-  poolId_gt?: InputMaybe<Scalars['String']['input']>
-  poolId_gte?: InputMaybe<Scalars['String']['input']>
-  poolId_in?: InputMaybe<Array<Scalars['String']['input']>>
-  poolId_lt?: InputMaybe<Scalars['String']['input']>
-  poolId_lte?: InputMaybe<Scalars['String']['input']>
-  poolId_not?: InputMaybe<Scalars['String']['input']>
-  poolId_not_contains?: InputMaybe<Scalars['String']['input']>
-  poolId_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
-  poolId_not_ends_with?: InputMaybe<Scalars['String']['input']>
-  poolId_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
-  poolId_not_in?: InputMaybe<Array<Scalars['String']['input']>>
-  poolId_not_starts_with?: InputMaybe<Scalars['String']['input']>
-  poolId_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
-  poolId_starts_with?: InputMaybe<Scalars['String']['input']>
-  poolId_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  poolId?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolId_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   route?: InputMaybe<Scalars['String']['input']>
   route_?: InputMaybe<SwapRoute_Filter>
   route_contains?: InputMaybe<Scalars['String']['input']>

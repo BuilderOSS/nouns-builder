@@ -10,7 +10,7 @@ import { WETH_ADDRESS } from './constants'
 class PathHop {
   tokenIn: Bytes
   tokenOut: Bytes
-  poolId: string
+  poolId: Bytes
   fee: BigInt | null
   hooks: Bytes | null
   tickSpacing: i32 // Use 0 as sentinel for null
@@ -18,7 +18,7 @@ class PathHop {
   constructor(
     tokenIn: Bytes,
     tokenOut: Bytes,
-    poolId: string,
+    poolId: Bytes,
     fee: BigInt | null,
     hooks: Bytes | null,
     tickSpacing: i32
@@ -224,12 +224,12 @@ export function buildSwapRoute(coinAddress: Bytes, timestamp: BigInt): SwapRoute
       // Find where this token appears in the chain
       for (let j = 0; j < chainToWeth.length; j++) {
         if (chainToWeth[j].address.toHexString().toLowerCase() == tokenAddr) {
-          // Store hop indices for intermediate-token → coin direction (for buying)
-          // The frontend must reverse these indices when selling (coin → intermediate-token)
-          // startHopIndex = j represents the hop starting from the intermediate token
-          // endHopIndex = hops.length - 1 represents the final hop to the target coin
-          startHopIndex = j
-          endHopIndex = hops.length - 1
+          // Store hop indices for coin → intermediate-token direction
+          // startHopIndex = 0 represents the hop starting from the coin
+          // endHopIndex = j - 1 represents the hop ending at the intermediate token
+          // The frontend must reverse these indices when selling (intermediate-token → coin)
+          startHopIndex = 0
+          endHopIndex = j > 0 ? j - 1 : 0
           break
         }
       }
