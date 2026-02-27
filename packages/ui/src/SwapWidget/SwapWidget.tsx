@@ -588,7 +588,7 @@ export const SwapWidget = ({
             className={swapInput}
             style={{ flex: 1 }}
           />
-          <Button onClick={handleMaxClick} className={maxButton} disabled={!inputBalance}>
+          <Button onClick={handleMaxClick} className={maxButton} disabled={isLoading}>
             MAX
           </Button>
         </Flex>
@@ -658,7 +658,7 @@ export const SwapWidget = ({
 
       {/* Pending Transaction Message */}
       {pendingTxHash && (
-        <Box mt="x4" p="x3" backgroundColor="background2" borderRadius="curved">
+        <Box mt="x4">
           <Text variant="paragraph-sm" color="text3">
             Transaction pending... View transaction:{' '}
             <a
@@ -691,7 +691,7 @@ export const SwapWidget = ({
       )}
 
       {/* Error Display */}
-      {errorMessage && (
+      {errorMessage && !isLoading && (
         <Box mt="x4">
           <Text variant="paragraph-sm" color="negative" className={messageText}>
             {errorMessage}

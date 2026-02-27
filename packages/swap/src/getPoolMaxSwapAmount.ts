@@ -4,7 +4,8 @@ import { Address, PublicClient } from 'viem'
 
 import { SwapError, SwapErrorCode } from './errors'
 import { testSwapAmount } from './testSwapAmount'
-import { PoolKey, PoolMaxSwapAmountResult } from './types'
+import { PoolKey, PoolMaxSwapAmountResult, SwapPathHop } from './types'
+import { normalizeForPoolKey } from './utils/normalizeAddresses'
 
 const TEN_MILLION = 10n ** 25n // 10M tokens with 18 decimals
 const HALF_TOKEN = 5n * 10n ** 17n // 0.5 tokens with 18 decimals
@@ -46,94 +47,43 @@ async function binarySearchMaxAmount(
     return maxBound
   }
 
+  const quantizeDown = (x: bigint) => (x / precision) * precision
+
+  // -----------------------------
+  // Zora heuristic
+  // -----------------------------
+  if (isZoraCoin && maxBound > TEN_MILLION) {
+    const estimate = quantizeDown(maxBound - TEN_MILLION)
+
+    const estimateIsValid = await testSwapAmount(
+      publicClient,
+      quoterAddress,
+      poolKey,
+      zeroForOne,
+      maxBound
+    )
+
+    if (estimateIsValid) {
+      return estimate
+    }
+    maxBound = estimate
+  }
+
   // --------------------------------------------
   // We now maintain invariant:
   //   low  = known valid (or 0)
   //   high = known invalid
   // --------------------------------------------
-
   let low = 0n
-  let high = maxBound // already known invalid
+  let high = maxBound
   let bestValid = 0n
-
-  const quantizeDown = (x: bigint) => (x / precision) * precision
-
-  // -----------------------------
-  // Zora heuristic (hardened)
-  // -----------------------------
-  if (isZoraCoin && maxBound > TEN_MILLION) {
-    const rawEstimate = (maxBound - TEN_MILLION) * 2n
-    const clamped = rawEstimate > maxBound ? maxBound : rawEstimate
-    const estimate = quantizeDown(clamped)
-
-    if (estimate > 0n && estimate < maxBound) {
-      const ok = await testSwapAmount(
-        publicClient,
-        quoterAddress,
-        poolKey,
-        zeroForOne,
-        estimate
-      )
-
-      if (ok) {
-        low = estimate
-        bestValid = estimate
-      } else {
-        high = estimate
-      }
-    }
-  }
-
-  // --------------------------------------------
-  // Quantize bounds to precision grid
-  // --------------------------------------------
-  low = quantizeDown(low)
-  const quantHigh = quantizeDown(high)
-  high = quantHigh
-
-  // --------------------------------------------
-  // Ensure `high` is actually invalid after quantization
-  // (quantizing down can accidentally make it valid)
-  // --------------------------------------------
-  if (high !== maxBound && high > 0n) {
-    let highIsValid = await testSwapAmount(
-      publicClient,
-      quoterAddress,
-      poolKey,
-      zeroForOne,
-      high
-    )
-
-    while (highIsValid) {
-      // Update bestValid with the current valid high before incrementing
-      bestValid = high
-
-      const next = high + precision
-      if (next > maxBound) {
-        // Safety fallback: return the last valid high
-        return high
-      }
-
-      high = next
-
-      highIsValid = await testSwapAmount(
-        publicClient,
-        quoterAddress,
-        poolKey,
-        zeroForOne,
-        high
-      )
-    }
-  }
 
   // --------------------------------------------
   // Ensure minimal probe works
   // Iteratively reduce precision if initial minProbe fails
   // --------------------------------------------
   let currentPrecision = precision
-  let minProbe = userBalanceLessThanPrecision(maxBound, currentPrecision)
-    ? maxBound
-    : currentPrecision
+  let minProbe = maxBound < currentPrecision ? maxBound : currentPrecision
 
   if (minProbe === 0n) return 0n
 
@@ -155,9 +105,7 @@ async function binarySearchMaxAmount(
       return 0n
     }
 
-    minProbe = userBalanceLessThanPrecision(maxBound, currentPrecision)
-      ? maxBound
-      : currentPrecision
+    minProbe = maxBound < currentPrecision ? maxBound : currentPrecision
 
     minWorks = await testSwapAmount(
       publicClient,
@@ -212,19 +160,13 @@ async function binarySearchMaxAmount(
   return bestValid
 }
 
-// helper
-function userBalanceLessThanPrecision(balance: bigint, precision: bigint): boolean {
-  return balance < precision
-}
-
 /**
  * Get the maximum swap amount for a single pool using binary search
  * Uses the quoter contract to test different amounts and find the maximum
  *
  * @param publicClient - Viem public client
  * @param chainId - Chain ID
- * @param poolKey - Pool key with currency0, currency1, fee, tickSpacing, hooks
- * @param zeroForOne - Swap direction (true = currency0 -> currency1, false = currency1 -> currency0)
+ * @param hop - Swap path hop with token addresses and pool info
  * @param userBalance - User balance to use as upper bound for the search
  * @param isZoraCoin - Optional flag to indicate this is a Zora coin (enables optimization for large balances)
  * @returns Maximum amount in that can be swapped
@@ -232,15 +174,13 @@ function userBalanceLessThanPrecision(balance: bigint, precision: bigint): boole
 export async function getPoolMaxSwapAmount({
   publicClient,
   chainId,
-  poolKey,
-  zeroForOne,
+  hop,
   userBalance,
   isZoraCoin = false,
 }: {
   publicClient: PublicClient
   chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
-  poolKey: PoolKey
-  zeroForOne: boolean
+  hop: SwapPathHop
   userBalance: bigint
   isZoraCoin?: boolean
 }): Promise<PoolMaxSwapAmountResult> {
@@ -252,6 +192,32 @@ export async function getPoolMaxSwapAmount({
       `Quoter not deployed on chain ${chainId}`
     )
   }
+
+  // Validate required pool parameters
+  if (!hop.fee || !hop.tickSpacing || !hop.hooks) {
+    throw new SwapError(
+      SwapErrorCode.POOL_CONFIG_ERROR,
+      'Missing required pool parameters: fee, tickSpacing, or hooks'
+    )
+  }
+
+  // Normalize addresses: pools use WETH, but hops may have NATIVE_TOKEN_ADDRESS
+  const normalizedTokenIn = normalizeForPoolKey(hop.tokenIn, chainId)
+  const normalizedTokenOut = normalizeForPoolKey(hop.tokenOut, chainId)
+
+  // Build PoolKey with normalized and ordered addresses
+  const poolKey: PoolKey = {
+    currency0:
+      normalizedTokenIn < normalizedTokenOut ? normalizedTokenIn : normalizedTokenOut,
+    currency1:
+      normalizedTokenIn < normalizedTokenOut ? normalizedTokenOut : normalizedTokenIn,
+    fee: Number(hop.fee),
+    tickSpacing: hop.tickSpacing,
+    hooks: hop.hooks,
+  }
+
+  // Determine if this is a zeroForOne swap (using normalized addresses)
+  const zeroForOne = normalizedTokenIn === poolKey.currency0
 
   // Calculate pool ID for reference
   try {

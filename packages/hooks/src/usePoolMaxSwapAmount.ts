@@ -1,7 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   getPoolMaxSwapAmount,
-  type PoolKey,
   type PoolMaxSwapAmountResult,
   type SwapPath,
 } from '@buildeross/swap'
@@ -132,28 +131,12 @@ export function usePoolMaxSwapAmount({
         throw new Error('Missing pool information in swap path')
       }
 
-      // Build pool key from the hop
-      const tokenIn = relevantHop.tokenIn.toLowerCase()
-      const tokenOut = relevantHop.tokenOut.toLowerCase()
-
-      const poolKey: PoolKey = {
-        currency0: tokenIn < tokenOut ? relevantHop.tokenIn : relevantHop.tokenOut,
-        currency1: tokenIn < tokenOut ? relevantHop.tokenOut : relevantHop.tokenIn,
-        fee: Number(relevantHop.fee),
-        tickSpacing: relevantHop.tickSpacing,
-        hooks: relevantHop.hooks,
-      }
-
-      // Determine swap direction
-      const zeroForOne =
-        relevantHop.tokenIn.toLowerCase() === poolKey.currency0.toLowerCase()
-
       // Get max swap amount using binary search
+      // Pass the hop directly so getPoolMaxSwapAmount can normalize addresses properly
       return await getPoolMaxSwapAmount({
         publicClient,
         chainId,
-        poolKey,
-        zeroForOne,
+        hop: relevantHop,
         userBalance,
         isZoraCoin,
       })
