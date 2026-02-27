@@ -2,6 +2,7 @@
   {
     "type": "event",
     "name": "Approval",
+    "anonymous": false,
     "inputs": [
       {
         "indexed": true,
@@ -23,6 +24,7 @@
   {
     "type": "event",
     "name": "Transfer",
+    "anonymous": false,
     "inputs": [
       {
         "indexed": true,
@@ -57,6 +59,7 @@
     ],
     "outputs": [
       {
+        "name": "",
         "type": "uint256"
       }
     ]
@@ -77,6 +80,7 @@
     ],
     "outputs": [
       {
+        "name": "",
         "type": "bool"
       }
     ]
@@ -93,6 +97,7 @@
     ],
     "outputs": [
       {
+        "name": "",
         "type": "uint256"
       }
     ]
@@ -104,6 +109,7 @@
     "inputs": [],
     "outputs": [
       {
+        "name": "",
         "type": "uint8"
       }
     ]
@@ -115,6 +121,7 @@
     "inputs": [],
     "outputs": [
       {
+        "name": "",
         "type": "string"
       }
     ]
@@ -126,6 +133,7 @@
     "inputs": [],
     "outputs": [
       {
+        "name": "",
         "type": "string"
       }
     ]
@@ -137,6 +145,7 @@
     "inputs": [],
     "outputs": [
       {
+        "name": "",
         "type": "uint256"
       }
     ]
@@ -157,6 +166,7 @@
     ],
     "outputs": [
       {
+        "name": "",
         "type": "bool"
       }
     ]
@@ -181,6 +191,7 @@
     ],
     "outputs": [
       {
+        "name": "",
         "type": "bool"
       }
     ]
