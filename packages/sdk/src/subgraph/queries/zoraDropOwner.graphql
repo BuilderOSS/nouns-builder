@@ -1,7 +1,0 @@
-#import "../fragments/ZoraDropOwner.graphql"
-
-query ZoraDropOwner($id: ID!) {
-  zoraDropOwner(id: $id) {
-    ...ZoraDropOwner
-  }
-}
