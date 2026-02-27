@@ -1,6 +1,6 @@
-fragment ZoraDropOwner on ZoraDropOwner {
+fragment ZoraDropHolder on ZoraDropHolder {
   id
-  owner
+  holder
   balance
   totalSpent
   totalPurchased

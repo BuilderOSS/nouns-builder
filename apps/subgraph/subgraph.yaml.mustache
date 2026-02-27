@@ -195,7 +195,8 @@ templates:
       language: wasm/assemblyscript
       entities:
         - ZoraDrop
-        - ZoraDropOwner
+        - ZoraDropHolder
+        - ZoraDropMintComment
       abis:
         - name: ERC721Drop
           file: ./abis/ERC721Drop.json
@@ -204,6 +205,8 @@ templates:
           handler: handleSale
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
+        - event: MintComment(indexed address,indexed address,indexed uint256,uint256,string)
+          handler: handleMintComment
       file: ./src/zoraDropTemplate.ts
 {{/zoraNFTCreator}}
   - kind: ethereum
@@ -341,3 +344,45 @@ templates:
         - event: MinBidIncrementPercentageUpdated(uint256)
           handler: handleMinBidIncrementPercentageUpdated
       file: ./src/auction.ts
+{{#clanker}}
+  - kind: ethereum
+    name: ClankerToken
+    network: {{network}}
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ClankerToken
+        - ClankerTokenHolder
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/clankerTokenTemplate.ts
+{{/clanker}}
+{{#zoraFactory}}
+  - kind: ethereum
+    name: ZoraCoin
+    network: {{network}}
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ZoraCoin
+        - ZoraCoinHolder
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/zoraCoinTemplate.ts
+{{/zoraFactory}}

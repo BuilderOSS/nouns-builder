@@ -1,19 +1,19 @@
-#import "../fragments/ZoraDropOwner.graphql"
+#import "../fragments/ZoraDropHolder.graphql"
 
-query ZoraDropOwners(
-  $where: ZoraDropOwner_filter
+query ZoraDropHolders(
+  $where: ZoraDropHolder_filter
   $first: Int = 100
   $skip: Int = 0
-  $orderBy: ZoraDropOwner_orderBy = updatedAt
+  $orderBy: ZoraDropHolder_orderBy = updatedAt
   $orderDirection: OrderDirection = desc
 ) {
-  zoraDropOwners(
+  zoraDropHolders(
     where: $where
     first: $first
     skip: $skip
     orderBy: $orderBy
     orderDirection: $orderDirection
   ) {
-    ...ZoraDropOwner
+    ...ZoraDropHolder
   }
 }

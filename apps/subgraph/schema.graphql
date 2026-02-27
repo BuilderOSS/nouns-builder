@@ -400,6 +400,12 @@ type ClankerToken @entity {
   extensionsSupply: BigInt!
   extensions: [Bytes!]!
 
+  # Swap routing
+  swapRoute: SwapRoute @derivedFrom(field: "clankerToken")
+
+  # Token holders
+  holders: [ClankerTokenHolder!]! @derivedFrom(field: "token")
+
   # Block metadata
   createdAt: BigInt!
   createdAtBlock: BigInt!
@@ -441,6 +447,12 @@ type ZoraCoin @entity {
   # Version
   version: String!
 
+  # Swap routing
+  swapRoute: SwapRoute @derivedFrom(field: "zoraCoin")
+
+  # Token holders
+  holders: [ZoraCoinHolder!]! @derivedFrom(field: "coin")
+
   # Block metadata
   createdAt: BigInt!
   createdAtBlock: BigInt!
@@ -465,8 +477,11 @@ type ZoraDrop @entity {
   # Link to DAO (only if creator matches a known DAO treasury)
   dao: DAO
 
-  # Derived field: all owners of this drop
-  owners: [ZoraDropOwner!]! @derivedFrom(field: "drop")
+  # Derived field: all holders of this drop
+  holders: [ZoraDropHolder!]! @derivedFrom(field: "drop")
+
+  # Derived field: all mint comments for this drop
+  mintComments: [ZoraDropMintComment!]! @derivedFrom(field: "drop")
 
   # Event params
   creator: Bytes! # The creator address (treasury)
@@ -495,6 +510,9 @@ type ZoraDrop @entity {
   imageURI: String!
   animationURI: String!
 
+  # Sales tracking
+  totalSalesAmount: BigInt!
+
   # Block metadata
   createdAt: BigInt!
   createdAtBlock: BigInt!
@@ -502,13 +520,13 @@ type ZoraDrop @entity {
 }
 
 # Tracks individual ownership and spending for each address per Zora drop
-type ZoraDropOwner @entity {
-  # ID is: drop-address-owner-address
+type ZoraDropHolder @entity {
+  # ID is: drop-address-holder-address
   id: ID!
 
   # References
   drop: ZoraDrop!
-  owner: Bytes!
+  holder: Bytes!
 
   # Balance of NFTs owned (current)
   balance: BigInt!
@@ -520,6 +538,131 @@ type ZoraDropOwner @entity {
   totalPurchased: BigInt!
 
   # Block metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
+}
+
+# Tracks mint comments for Zora drops
+type ZoraDropMintComment @entity {
+  # ID is: tx-hash-log-index
+  id: ID!
+
+  # References
+  drop: ZoraDrop!
+  sender: Bytes!
+
+  # Mint details
+  tokenId: BigInt!
+  quantity: BigInt!
+  comment: String!
+
+  # Block metadata
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+# Swap routing entities
+
+enum CoinType {
+  WETH
+  CLANKER_TOKEN
+  ZORA_COIN
+}
+
+type SwapRoute @entity {
+  # ID is the coin/token address
+  id: ID!
+
+  # Link to either ClankerToken or ZoraCoin
+  clankerToken: ClankerToken
+  zoraCoin: ZoraCoin
+
+  # The coin/token address this route is for
+  coinAddress: Bytes!
+
+  # Main path from this coin to WETH (or WETH to this coin)
+  # The path can be traversed in either direction for buy/sell
+  mainPath: [SwapHop!]! @derivedFrom(field: "route")
+
+  # Available payment tokens (extracted from mainPath)
+  paymentOptions: [PaymentOption!]! @derivedFrom(field: "route")
+
+  # Metadata
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type SwapHop @entity {
+  # ID is: route-id-hop-index
+  id: ID!
+
+  # Link to route
+  route: SwapRoute!
+
+  # Hop details
+  tokenIn: Bytes!
+  tokenOut: Bytes!
+  poolId: Bytes!
+  fee: BigInt
+  hooks: Bytes
+  tickSpacing: Int
+
+  # Position in the path (0-indexed)
+  hopIndex: Int!
+}
+
+type PaymentOption @entity {
+  # ID is: route-id-token-address
+  id: ID!
+
+  # Link to route
+  route: SwapRoute!
+
+  # Payment token details
+  tokenAddress: Bytes!
+  tokenType: CoinType!
+
+  # Hops from this payment token to the target coin (when buying)
+  # Or from target coin to this payment token (when selling)
+  # References hops from the main path
+  startHopIndex: Int!
+  endHopIndex: Int!
+
+  # Whether this is a direct swap (single hop)
+  isDirectSwap: Boolean!
+}
+
+# Token holder entities
+
+type ClankerTokenHolder @entity {
+  # ID is: token-address-holder-address
+  id: ID!
+
+  # References
+  token: ClankerToken!
+  holder: Bytes!
+
+  # Balance held by this address
+  balance: BigInt!
+
+  # Metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
+}
+
+type ZoraCoinHolder @entity {
+  # ID is: coin-address-holder-address
+  id: ID!
+
+  # References
+  coin: ZoraCoin!
+  holder: Bytes!
+
+  # Balance held by this address
+  balance: BigInt!
+
+  # Metadata
   updatedAt: BigInt!
   updatedAtBlock: BigInt!
 }
