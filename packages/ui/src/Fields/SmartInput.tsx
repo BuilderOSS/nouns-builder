@@ -203,7 +203,6 @@ const SmartInput: React.FC<SmartInputProps> = ({
             }}
             onClick={(e: any) => {
               e.stopPropagation()
-              e.preventDefault()
               setShowAddress(!showAddress)
             }}
           >
