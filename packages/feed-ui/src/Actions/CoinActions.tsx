@@ -11,6 +11,7 @@ import {
 } from '@buildeross/utils/coining'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useMemo } from 'react'
+import { useAccount, useBalance } from 'wagmi'
 
 import type { OnOpenTradeModal } from '../types/modalStates'
 
@@ -59,6 +60,24 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
     ? true
     : isChainIdSupportedForSaleOfZoraCoins(chainId)
 
+  const { address: userAddress } = useAccount()
+
+  // Get user's coin balance to determine if they can trade
+  // Only fetch balance if sellEnabled is true (otherwise we always show "Buy")
+  const { data: coinBalance } = useBalance({
+    address: userAddress,
+    token: coinAddress,
+    chainId,
+    query: {
+      enabled: !!userAddress && sellEnabled,
+    },
+  })
+
+  // Check if user owns any of this coin
+  const hasBalance = useMemo(() => {
+    return sellEnabled && coinBalance && coinBalance.value > 0n
+  }, [sellEnabled, coinBalance])
+
   // Show like button only for Zora coins (not Clanker tokens) on supported chains
   const showLikeButton = !isClankerToken && isChainIdSupportedByCoining(chainId)
 
@@ -72,7 +91,7 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
           handleClick={handleOpenTrade}
           chainId={chainId}
         >
-          {sellEnabled ? 'Trade' : 'Buy'}
+          {sellEnabled && hasBalance ? 'Trade' : 'Buy'}
         </ContractButton>
       )}
       <LinkWrapper link={getCoinLink(chainId, coinAddress)} isExternal>

@@ -12,6 +12,7 @@ import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { Address } from 'viem'
+import { useAccount, useBalance } from 'wagmi'
 
 import { card, coinImage, coinInfo, tradeButtonContainer, typeBadge } from './Cards.css'
 
@@ -68,6 +69,24 @@ export const CoinCard = ({
 
   // Only show Trade button for supported chains
   const showTradeButton = isChainIdSupportedByCoining(chainId)
+
+  const { address: userAddress } = useAccount()
+
+  // Get user's coin balance to determine if they can trade
+  // Only fetch balance if sellEnabled is true (otherwise we always show "Buy")
+  const { data: coinBalance } = useBalance({
+    address: userAddress,
+    token: coinAddress,
+    chainId,
+    query: {
+      enabled: !!userAddress && sellEnabled,
+    },
+  })
+
+  // Check if user owns any of this coin
+  const hasBalance = useMemo(() => {
+    return sellEnabled && coinBalance && coinBalance.value > 0n
+  }, [sellEnabled, coinBalance])
 
   const handleTradeClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -178,7 +197,7 @@ export const CoinCard = ({
                 style={{ flex: 1 }}
                 onClick={handleTradeClick}
               >
-                {sellEnabled ? 'Trade' : 'Buy'}
+                {sellEnabled && hasBalance ? 'Trade' : 'Buy'}
               </Button>
             </Flex>
           )}

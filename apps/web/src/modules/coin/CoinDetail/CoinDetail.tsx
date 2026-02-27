@@ -193,6 +193,9 @@ export const CoinDetail = ({
         shareUrl={shareUrl}
         isLoadingPrice={isLoadingPrice}
         onTradeClick={() => setIsMobileModalOpen(true)}
+        chainId={chainId}
+        coinAddress={coinAddress}
+        sellEnabled={sellEnabled}
       />
 
       {/* Mobile Trade Modal */}
