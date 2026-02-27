@@ -87,7 +87,6 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 animate={'animate'}
                 exit={'initial'}
                 onClick={(e: React.MouseEvent) => {
-                  e.preventDefault()
                   e.stopPropagation()
                 }}
               >
