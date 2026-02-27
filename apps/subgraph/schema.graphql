@@ -477,8 +477,8 @@ type ZoraDrop @entity {
   # Link to DAO (only if creator matches a known DAO treasury)
   dao: DAO
 
-  # Derived field: all owners of this drop
-  owners: [ZoraDropOwner!]! @derivedFrom(field: "drop")
+  # Derived field: all holders of this drop
+  holders: [ZoraDropHolder!]! @derivedFrom(field: "drop")
 
   # Event params
   creator: Bytes! # The creator address (treasury)
@@ -514,13 +514,13 @@ type ZoraDrop @entity {
 }
 
 # Tracks individual ownership and spending for each address per Zora drop
-type ZoraDropOwner @entity {
-  # ID is: drop-address-owner-address
+type ZoraDropHolder @entity {
+  # ID is: drop-address-holder-address
   id: ID!
 
   # References
   drop: ZoraDrop!
-  owner: Bytes!
+  holder: Bytes!
 
   # Balance of NFTs owned (current)
   balance: BigInt!

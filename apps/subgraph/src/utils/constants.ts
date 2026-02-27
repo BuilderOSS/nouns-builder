@@ -1,6 +1,13 @@
 import { Address, Bytes, BigInt } from '@graphprotocol/graph-ts'
 
 /**
+ * Zero address constant (used for mints and burns)
+ */
+export const ADDRESS_ZERO: Bytes = Address.fromString(
+  '0x0000000000000000000000000000000000000000'
+)
+
+/**
  * WETH address for Base and Base Sepolia
  * Both networks use the same WETH address (L2 standard)
  */

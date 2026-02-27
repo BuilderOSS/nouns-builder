@@ -2,8 +2,7 @@ import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
 
 import { ZoraCoinHolder } from '../generated/schema'
 import { Transfer } from '../generated/templates/ZoraCoin/ERC20'
-
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+import { ADDRESS_ZERO } from './utils/constants'
 
 /**
  * Get or create a ZoraCoinHolder entity
@@ -41,7 +40,7 @@ export function handleTransfer(event: Transfer): void {
   let blockNumber = event.block.number
 
   // Decrease sender balance (if not mint)
-  if (from.toHexString() != ZERO_ADDRESS) {
+  if (from.notEqual(ADDRESS_ZERO)) {
     let fromHolder = getOrCreateHolder(coinAddress, from, timestamp, blockNumber)
     fromHolder.balance = fromHolder.balance.minus(value)
     fromHolder.updatedAt = timestamp
@@ -58,7 +57,7 @@ export function handleTransfer(event: Transfer): void {
   }
 
   // Increase recipient balance (if not burn)
-  if (to.toHexString() != ZERO_ADDRESS) {
+  if (to.notEqual(ADDRESS_ZERO)) {
     let toHolder = getOrCreateHolder(coinAddress, to, timestamp, blockNumber)
     toHolder.balance = toHolder.balance.plus(value)
     toHolder.updatedAt = timestamp

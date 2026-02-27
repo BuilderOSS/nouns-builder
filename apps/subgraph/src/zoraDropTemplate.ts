@@ -1,36 +1,37 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 
-import { ZoraDropOwner } from '../generated/schema'
+import { ZoraDropHolder } from '../generated/schema'
 import { Sale, Transfer } from '../generated/templates/ZoraDrop/ERC721Drop'
+import { ADDRESS_ZERO } from './utils/constants'
 
-function getOrCreateZoraDropOwner(
+function getOrCreateZoraDropHolder(
   dropAddress: Address,
-  ownerAddress: Address,
+  holderAddress: Address,
   timestamp: BigInt,
   blockNumber: BigInt
-): ZoraDropOwner {
-  let id = dropAddress.toHexString() + '-' + ownerAddress.toHexString()
-  let owner = ZoraDropOwner.load(id)
+): ZoraDropHolder {
+  let id = dropAddress.toHexString() + '-' + holderAddress.toHexString()
+  let holder = ZoraDropHolder.load(id)
 
-  if (owner == null) {
-    owner = new ZoraDropOwner(id)
-    owner.drop = dropAddress.toHexString()
-    owner.owner = ownerAddress
-    owner.balance = BigInt.fromI32(0)
-    owner.totalSpent = BigInt.fromI32(0)
-    owner.totalPurchased = BigInt.fromI32(0)
-    owner.updatedAt = timestamp
-    owner.updatedAtBlock = blockNumber
+  if (!holder) {
+    holder = new ZoraDropHolder(id)
+    holder.drop = dropAddress.toHexString()
+    holder.holder = holderAddress
+    holder.balance = BigInt.fromI32(0)
+    holder.totalSpent = BigInt.fromI32(0)
+    holder.totalPurchased = BigInt.fromI32(0)
+    holder.updatedAt = timestamp
+    holder.updatedAtBlock = blockNumber
   }
 
-  return owner
+  return holder
 }
 
 export function handleSale(event: Sale): void {
   let dropAddress = event.address
   let buyerAddress = event.params.to
 
-  let owner = getOrCreateZoraDropOwner(
+  let holder = getOrCreateZoraDropHolder(
     dropAddress,
     buyerAddress,
     event.block.timestamp,
@@ -38,19 +39,19 @@ export function handleSale(event: Sale): void {
   )
 
   // Update purchase tracking
-  owner.totalPurchased = owner.totalPurchased.plus(event.params.quantity)
+  holder.totalPurchased = holder.totalPurchased.plus(event.params.quantity)
 
   // Calculate total price: quantity * pricePerToken
   let totalPrice = event.params.quantity.times(event.params.pricePerToken)
-  owner.totalSpent = owner.totalSpent.plus(totalPrice)
+  holder.totalSpent = holder.totalSpent.plus(totalPrice)
 
   // Note: Balance is updated by Transfer events, not here (to avoid double-counting)
 
   // Update timestamp
-  owner.updatedAt = event.block.timestamp
-  owner.updatedAtBlock = event.block.number
+  holder.updatedAt = event.block.timestamp
+  holder.updatedAtBlock = event.block.number
 
-  owner.save()
+  holder.save()
 }
 
 export function handleTransfer(event: Transfer): void {
@@ -62,34 +63,34 @@ export function handleTransfer(event: Transfer): void {
   // transfers between users, and burns (to zero address)
 
   // Update sender (if not zero address/mint)
-  if (event.params.from.toHexString() != '0x0000000000000000000000000000000000000000') {
-    let fromOwner = getOrCreateZoraDropOwner(
+  if (event.params.from.notEqual(ADDRESS_ZERO)) {
+    let fromHolder = getOrCreateZoraDropHolder(
       dropAddress,
       fromAddress,
       event.block.timestamp,
       event.block.number
     )
 
-    fromOwner.balance = fromOwner.balance.minus(BigInt.fromI32(1))
-    fromOwner.updatedAt = event.block.timestamp
-    fromOwner.updatedAtBlock = event.block.number
+    fromHolder.balance = fromHolder.balance.minus(BigInt.fromI32(1))
+    fromHolder.updatedAt = event.block.timestamp
+    fromHolder.updatedAtBlock = event.block.number
 
-    fromOwner.save()
+    fromHolder.save()
   }
 
   // Update recipient (if not zero address/burn)
-  if (event.params.to.toHexString() != '0x0000000000000000000000000000000000000000') {
-    let toOwner = getOrCreateZoraDropOwner(
+  if (event.params.to.notEqual(ADDRESS_ZERO)) {
+    let toHolder = getOrCreateZoraDropHolder(
       dropAddress,
       toAddress,
       event.block.timestamp,
       event.block.number
     )
 
-    toOwner.balance = toOwner.balance.plus(BigInt.fromI32(1))
-    toOwner.updatedAt = event.block.timestamp
-    toOwner.updatedAtBlock = event.block.number
+    toHolder.balance = toHolder.balance.plus(BigInt.fromI32(1))
+    toHolder.updatedAt = event.block.timestamp
+    toHolder.updatedAtBlock = event.block.number
 
-    toOwner.save()
+    toHolder.save()
   }
 }
