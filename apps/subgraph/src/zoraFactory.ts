@@ -1,4 +1,4 @@
-import { Address, BigInt, dataSource } from '@graphprotocol/graph-ts'
+import { Address, BigInt, dataSource, log } from '@graphprotocol/graph-ts'
 
 import {
   ClankerToken,
@@ -6,6 +6,8 @@ import {
   ZoraCoinCreatedEvent as ZoraCoinCreatedFeedEvent,
 } from '../generated/schema'
 import { CoinCreatedV4 } from '../generated/ZoraFactory/ZoraFactory'
+import { WETH_ADDRESS } from './utils/constants'
+import { buildSwapRoute } from './utils/swapPath'
 
 // Platform referrer constants
 const PLATFORM_REFERRER_BASE_MAINNET = '0xcf325a4c78912216249b818521b0798a0f904c10'
@@ -39,7 +41,7 @@ export function handleCoinCreatedV4(event: CoinCreatedV4): void {
   let clankerToken = ClankerToken.load(event.params.currency.toHexString())
 
   // Link to ClankerToken and DAO if found
-  if (clankerToken != null) {
+  if (clankerToken) {
     coin.clankerToken = clankerToken.id
     coin.dao = clankerToken.dao
   }
@@ -74,10 +76,33 @@ export function handleCoinCreatedV4(event: CoinCreatedV4): void {
   coin.createdAtBlock = event.block.number
   coin.transactionHash = event.transaction.hash
 
+  // Build swap route for this coin
+  // Note: Event handlers are only configured for base and base-sepolia networks,
+  // but we log if we somehow receive events from other networks
+  if (network != 'base' && network != 'base-sepolia') {
+    log.error('ZoraCoin event received from unsupported network: {}. This should not happen.', [
+      network,
+    ])
+  }
+  let swapRoute = buildSwapRoute(event.params.coin, event.block.timestamp)
+
+  // Only save the coin if we successfully built a swap route
+  if (!swapRoute) {
+    log.warning('Failed to build swap route for ZoraCoin {}, skipping coin creation', [
+      event.params.coin.toHexString(),
+    ])
+    return
+  }
+
+  // Link swap route to coin
+  swapRoute.zoraCoin = coin.id
+  swapRoute.save()
+
+  // Save coin after swap route is created
   coin.save()
 
   // Create feed event only if linked to a DAO
-  if (clankerToken != null && coin.dao != null) {
+  if (clankerToken && coin.dao) {
     let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
     let feedEvent = new ZoraCoinCreatedFeedEvent(feedEventId)
     feedEvent.type = 'ZORA_COIN_CREATED'

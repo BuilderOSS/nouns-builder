@@ -1,11 +1,13 @@
-import { BigInt, Bytes, dataSource } from '@graphprotocol/graph-ts'
+import { BigInt, Bytes, dataSource, log } from '@graphprotocol/graph-ts'
 
 import { TokenCreated } from '../generated/Clanker/Clanker'
 import {
   ClankerToken,
   ClankerTokenCreatedEvent as ClankerTokenCreatedFeedEvent,
 } from '../generated/schema'
+import { WETH_ADDRESS } from './utils/constants'
 import { loadDAOFromTreasury } from './utils/loadDAOFromTreasury'
+import { buildSwapRoute } from './utils/swapPath'
 
 export function handleTokenCreated(event: TokenCreated): void {
   // Only process events on base and base-sepolia networks
@@ -18,7 +20,7 @@ export function handleTokenCreated(event: TokenCreated): void {
   let dao = loadDAOFromTreasury(event.params.tokenAdmin)
 
   // Only save the Clanker token if we found a valid DAO
-  if (dao == null) {
+  if (!dao) {
     return
   }
 
@@ -64,6 +66,29 @@ export function handleTokenCreated(event: TokenCreated): void {
   token.createdAtBlock = event.block.number
   token.transactionHash = event.transaction.hash
 
+  // Build swap route for this token
+  // Note: Event handlers are only configured for base and base-sepolia networks,
+  // but we log if we somehow receive events from other networks
+  if (network != 'base' && network != 'base-sepolia') {
+    log.error('ClankerToken event received from unsupported network: {}. This should not happen.', [
+      network,
+    ])
+  }
+  let swapRoute = buildSwapRoute(event.params.tokenAddress, event.block.timestamp)
+
+  // Only save the token if we successfully built a swap route
+  if (!swapRoute) {
+    log.warning('Failed to build swap route for ClankerToken {}, skipping token creation', [
+      event.params.tokenAddress.toHexString(),
+    ])
+    return
+  }
+
+  // Link swap route to token
+  swapRoute.clankerToken = token.id
+  swapRoute.save()
+
+  // Save token after swap route is created
   token.save()
 
   // Create feed event

@@ -400,6 +400,9 @@ type ClankerToken @entity {
   extensionsSupply: BigInt!
   extensions: [Bytes!]!
 
+  # Swap routing
+  swapRoute: SwapRoute @derivedFrom(field: "clankerToken")
+
   # Block metadata
   createdAt: BigInt!
   createdAtBlock: BigInt!
@@ -440,6 +443,9 @@ type ZoraCoin @entity {
 
   # Version
   version: String!
+
+  # Swap routing
+  swapRoute: SwapRoute @derivedFrom(field: "zoraCoin")
 
   # Block metadata
   createdAt: BigInt!
@@ -522,4 +528,69 @@ type ZoraDropOwner @entity {
   # Block metadata
   updatedAt: BigInt!
   updatedAtBlock: BigInt!
+}
+
+# Swap routing entities
+
+type SwapRoute @entity {
+  # ID is the coin/token address
+  id: ID!
+
+  # Link to either ClankerToken or ZoraCoin
+  clankerToken: ClankerToken
+  zoraCoin: ZoraCoin
+
+  # The coin/token address this route is for
+  coinAddress: Bytes!
+
+  # Main path from this coin to WETH (or WETH to this coin)
+  # The path can be traversed in either direction for buy/sell
+  mainPath: [SwapHop!]! @derivedFrom(field: "route")
+
+  # Available payment tokens (extracted from mainPath)
+  paymentOptions: [PaymentOption!]! @derivedFrom(field: "route")
+
+  # Metadata
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type SwapHop @entity {
+  # ID is: route-id-hop-index
+  id: ID!
+
+  # Link to route
+  route: SwapRoute!
+
+  # Hop details
+  tokenIn: Bytes!
+  tokenOut: Bytes!
+  poolId: String!
+  fee: BigInt
+  hooks: Bytes
+  tickSpacing: Int
+
+  # Position in the path (0-indexed)
+  hopIndex: Int!
+}
+
+type PaymentOption @entity {
+  # ID is: route-id-token-address
+  id: ID!
+
+  # Link to route
+  route: SwapRoute!
+
+  # Payment token details
+  tokenAddress: Bytes!
+  tokenType: String! # "weth", "clanker-token", "zora-coin"
+
+  # Hops from this payment token to the target coin (when buying)
+  # Or from target coin to this payment token (when selling)
+  # References hops from the main path
+  startHopIndex: Int!
+  endHopIndex: Int!
+
+  # Whether this is a direct swap (single hop)
+  isDirectSwap: Boolean!
 }
