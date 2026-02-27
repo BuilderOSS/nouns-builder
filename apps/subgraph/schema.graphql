@@ -507,6 +507,9 @@ type ZoraDrop @entity {
   imageURI: String!
   animationURI: String!
 
+  # Sales tracking
+  totalSalesAmount: BigInt!
+
   # Block metadata
   createdAt: BigInt!
   createdAtBlock: BigInt!

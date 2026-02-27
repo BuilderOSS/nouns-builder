@@ -1,6 +1,6 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 
-import { ZoraDropHolder } from '../generated/schema'
+import { ZoraDrop, ZoraDropHolder } from '../generated/schema'
 import { Sale, Transfer } from '../generated/templates/ZoraDrop/ERC721Drop'
 import { ADDRESS_ZERO } from './utils/constants'
 
@@ -52,6 +52,13 @@ export function handleSale(event: Sale): void {
   holder.updatedAtBlock = event.block.number
 
   holder.save()
+
+  // Update ZoraDrop total sales amount
+  let drop = ZoraDrop.load(dropAddress.toHexString())
+  if (drop) {
+    drop.totalSalesAmount = drop.totalSalesAmount.plus(totalPrice)
+    drop.save()
+  }
 }
 
 export function handleTransfer(event: Transfer): void {

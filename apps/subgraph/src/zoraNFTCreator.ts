@@ -1,3 +1,5 @@
+import { BigInt } from '@graphprotocol/graph-ts'
+
 import {
   ZoraDrop,
   ZoraDropCreatedEvent as ZoraDropCreatedFeedEvent,
@@ -92,6 +94,9 @@ export function handleCreatedDrop(event: CreatedDrop): void {
   drop.description = tokenInfos.getDescription()
   drop.imageURI = tokenInfos.getImageURI()
   drop.animationURI = tokenInfos.getAnimationURI()
+
+  // Sales tracking
+  drop.totalSalesAmount = BigInt.fromI32(0)
 
   // Block metadata
   drop.createdAt = event.block.timestamp
