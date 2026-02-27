@@ -39,7 +39,6 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
       {trigger &&
         React.cloneElement(trigger, {
           onClick: (e: React.MouseEvent) => {
-            e.preventDefault()
             e.stopPropagation()
             setIsOpen(true)
           },
@@ -63,7 +62,6 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
               exit={'initial'}
               className={animatedModal}
               onClick={(e: React.MouseEvent) => {
-                e.preventDefault()
                 e.stopPropagation()
                 handleClose()
               }}

@@ -182,7 +182,6 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
         p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
-          e.preventDefault()
           e.stopPropagation()
         }}
       >
@@ -201,7 +200,6 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
         p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
-          e.preventDefault()
           e.stopPropagation()
         }}
       >
@@ -228,7 +226,6 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
         p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
-          e.preventDefault()
           e.stopPropagation()
         }}
       >
@@ -240,7 +237,6 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
             variant="ghost"
             size="xs"
             onClick={(e: React.MouseEvent) => {
-              e.preventDefault()
               e.stopPropagation()
               onClose()
             }}
@@ -261,7 +257,6 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
       p="x1"
       style={{ minWidth: '180px' }}
       onClick={(e: React.MouseEvent) => {
-        e.preventDefault()
         e.stopPropagation()
       }}
     >
@@ -283,7 +278,6 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
                 variant={'outline'}
                 size="sm"
                 onClick={(e: React.MouseEvent) => {
-                  e.preventDefault()
                   e.stopPropagation()
                   if (!isButtonDisabled && !isButtonLoading) {
                     handleSelectAmount(preset.eth)

@@ -88,7 +88,6 @@ export function PopUp({
       {triggerRef === undefined && (
         <Box
           onClick={(e: React.MouseEvent) => {
-            e.preventDefault()
             e.stopPropagation()
             setOpenState(!openState)
           }}
@@ -130,7 +129,6 @@ export function PopUp({
               w="100vw"
               h="100vh"
               onClick={(e: React.MouseEvent) => {
-                e.preventDefault()
                 e.stopPropagation()
                 setOpenState(false)
               }}

@@ -31,7 +31,6 @@ const ShareButton: React.FC<ShareButtonProps> = ({
 
   const handleShare = React.useCallback(
     async (e: React.MouseEvent) => {
-      e.preventDefault()
       e.stopPropagation()
 
       if (copied || !url) return

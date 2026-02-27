@@ -10,6 +10,7 @@ import {
   SmartContracts,
   Treasury,
 } from '@buildeross/dao-ui'
+import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
@@ -67,6 +68,14 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   const isCoinSupported = isChainIdSupportedByCoining(chainId)
   const isDropSupported = isChainIdSupportedByDroposal(chainId)
 
+  // Fetch clanker tokens to check if DAO has a creator coin
+  const { data: clankerTokens } = useClankerTokens({
+    chainId,
+    collectionAddress: collection,
+    enabled: isCoinSupported,
+    first: 1,
+  })
+
   // Fetch gallery items to check if DAO has any coins or drops
   const { data: galleryItems } = useGalleryItems({
     chainId,
@@ -75,9 +84,19 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     first: 1,
   })
 
+  const hasCreatorCoin = useMemo(
+    () => isCoinSupported && clankerTokens && clankerTokens.length > 0,
+    [isCoinSupported, clankerTokens]
+  )
+
   const hasGalleryItems = useMemo(
     () => (isCoinSupported || isDropSupported) && galleryItems && galleryItems.length > 0,
     [isCoinSupported, isDropSupported, galleryItems]
+  )
+
+  const shouldShowGallery = useMemo(
+    () => hasGalleryItems || hasCreatorCoin,
+    [hasGalleryItems, hasCreatorCoin]
   )
 
   const openTab = React.useCallback(
@@ -159,8 +178,8 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       component: [<DaoFeed key="feed" />],
     }
 
-    // Show Gallery tab if DAO has coins or drops
-    const gallerySection = hasGalleryItems
+    // Show Gallery tab if DAO has coins, drops, or creator coin
+    const gallerySection = shouldShowGallery
       ? {
           title: 'Gallery',
           component: [
@@ -184,7 +203,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
 
     return hasThreshold ? [...publicSections, adminSection] : publicSections
   }, [
-    hasGalleryItems,
+    shouldShowGallery,
     hasThreshold,
     openTab,
     openCoinCreatePage,
