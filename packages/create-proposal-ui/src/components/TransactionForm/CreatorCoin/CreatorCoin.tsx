@@ -481,10 +481,11 @@ export const CreatorCoin: React.FC = () => {
     const isWethSelected = isAddressEqual(values.currency, wethAddress)
 
     if (
-      !latestBuilderClankerToken ||
-      (!isWethSelected &&
-        !isAddressEqual(values.currency, latestBuilderClankerToken.tokenAddress))
+      !isWethSelected &&
+      !!latestBuilderClankerToken &&
+      !isAddressEqual(values.currency, latestBuilderClankerToken.tokenAddress)
     ) {
+      // Only weth or latest builder token is allowed
       setSubmitError('Please select a valid currency')
       actions.setSubmitting(false)
       return
