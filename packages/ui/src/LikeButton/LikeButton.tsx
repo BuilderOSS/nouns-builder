@@ -1,7 +1,7 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { ButtonProps, Icon, PopUp } from '@buildeross/zord'
 import { motion } from 'framer-motion'
-import React, { useCallback, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { type Address } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
@@ -73,18 +73,27 @@ const LikeButton: React.FC<LikeButtonProps> = ({
       setJustLiked(true)
       onLikeSuccess?.(txHash, amount)
 
+      // Clear any existing timeout before creating a new one
+      if (justLikedTimeoutRef.current) {
+        clearTimeout(justLikedTimeoutRef.current)
+      }
+
       justLikedTimeoutRef.current = setTimeout(() => {
         setJustLiked(false)
       }, 3000)
-
-      return () => {
-        if (justLikedTimeoutRef.current) {
-          clearTimeout(justLikedTimeoutRef.current)
-        }
-      }
     },
     [onLikeSuccess]
   )
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (justLikedTimeoutRef.current) {
+        clearTimeout(justLikedTimeoutRef.current)
+        justLikedTimeoutRef.current = null
+      }
+    }
+  }, [])
 
   return (
     <>
@@ -115,6 +124,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         onOpenChange={(open) => {
           if (!open) handleClosePopup()
         }}
+        padding="x2"
       >
         {showPopup && (
           <LikePopupContent

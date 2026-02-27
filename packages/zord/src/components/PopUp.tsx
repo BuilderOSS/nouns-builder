@@ -92,6 +92,7 @@ export function PopUp({
             e.stopPropagation()
             setOpenState(!openState)
           }}
+          ref={setTriggerElement}
           className={[triggerClassName]}
         >
           {trigger || (

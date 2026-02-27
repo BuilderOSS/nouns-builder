@@ -179,7 +179,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
   if (isLoadingData) {
     return (
       <Box
-        p="x3"
+        p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
           e.preventDefault()
@@ -198,7 +198,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
   if (txSuccess && txHash) {
     return (
       <Box
-        p="x4"
+        p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
           e.preventDefault()
@@ -225,7 +225,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
   if (error) {
     return (
       <Box
-        p="x3"
+        p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
           e.preventDefault()
@@ -258,8 +258,8 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
   // Preset selection state
   return (
     <Box
-      p="x3"
-      style={{ minWidth: '200px' }}
+      p="x1"
+      style={{ minWidth: '180px' }}
       onClick={(e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -290,7 +290,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
                   }
                 }}
                 disabled={isButtonDisabled || isButtonLoading}
-                style={{ flex: 1, minWidth: 0 }}
+                style={{ flex: 1, width: '50px', minWidth: 0, maxWidth: '50px' }}
               >
                 {isButtonLoading ? (
                   <Spinner size="xs" />
