@@ -66,7 +66,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const px = effectiveSize === 'lg' ? 'x6' : effectiveSize === 'xs' ? 'x3' : 'x4'
 
   // Determine which heart icon to show
-  const heartIcon = hasBalance && justLiked ? 'heartFilled' : 'heart'
+  const heartIcon = hasBalance || justLiked ? 'heartFilled' : 'heart'
 
   const onLikeSuccessInner = useCallback(
     (txHash: string, amount: bigint) => {
