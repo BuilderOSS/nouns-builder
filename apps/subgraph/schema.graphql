@@ -480,6 +480,9 @@ type ZoraDrop @entity {
   # Derived field: all holders of this drop
   holders: [ZoraDropHolder!]! @derivedFrom(field: "drop")
 
+  # Derived field: all mint comments for this drop
+  mintComments: [ZoraDropMintComment!]! @derivedFrom(field: "drop")
+
   # Event params
   creator: Bytes! # The creator address (treasury)
   editionSize: BigInt!
@@ -537,6 +540,26 @@ type ZoraDropHolder @entity {
   # Block metadata
   updatedAt: BigInt!
   updatedAtBlock: BigInt!
+}
+
+# Tracks mint comments for Zora drops
+type ZoraDropMintComment @entity {
+  # ID is: tx-hash-log-index
+  id: ID!
+
+  # References
+  drop: ZoraDrop!
+  sender: Bytes!
+
+  # Mint details
+  tokenId: BigInt!
+  quantity: BigInt!
+  comment: String!
+
+  # Block metadata
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
 }
 
 # Swap routing entities

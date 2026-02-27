@@ -1,7 +1,7 @@
 import { Address, BigInt } from '@graphprotocol/graph-ts'
 
-import { ZoraDrop, ZoraDropHolder } from '../generated/schema'
-import { Sale, Transfer } from '../generated/templates/ZoraDrop/ERC721Drop'
+import { ZoraDrop, ZoraDropHolder, ZoraDropMintComment } from '../generated/schema'
+import { MintComment, Sale, Transfer } from '../generated/templates/ZoraDrop/ERC721Drop'
 import { ADDRESS_ZERO } from './utils/constants'
 
 function getOrCreateZoraDropHolder(
@@ -100,4 +100,28 @@ export function handleTransfer(event: Transfer): void {
 
     toHolder.save()
   }
+}
+
+export function handleMintComment(event: MintComment): void {
+  let dropAddress = event.address
+
+  // Create unique ID for this mint comment
+  let commentId = event.transaction.hash.toHexString() + '-' + event.logIndex.toString()
+  let mintComment = new ZoraDropMintComment(commentId)
+
+  // Set references
+  mintComment.drop = dropAddress.toHexString()
+  mintComment.sender = event.params.sender
+
+  // Set mint details
+  mintComment.tokenId = event.params.tokenId
+  mintComment.quantity = event.params.quantity
+  mintComment.comment = event.params.comment
+
+  // Set block metadata
+  mintComment.timestamp = event.block.timestamp
+  mintComment.blockNumber = event.block.number
+  mintComment.transactionHash = event.transaction.hash
+
+  mintComment.save()
 }

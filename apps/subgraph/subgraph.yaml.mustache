@@ -196,6 +196,7 @@ templates:
       entities:
         - ZoraDrop
         - ZoraDropHolder
+        - ZoraDropMintComment
       abis:
         - name: ERC721Drop
           file: ./abis/ERC721Drop.json
@@ -204,6 +205,8 @@ templates:
           handler: handleSale
         - event: Transfer(indexed address,indexed address,indexed uint256)
           handler: handleTransfer
+        - event: MintComment(indexed address,indexed address,indexed uint256,uint256,string)
+          handler: handleMintComment
       file: ./src/zoraDropTemplate.ts
 {{/zoraNFTCreator}}
   - kind: ethereum
