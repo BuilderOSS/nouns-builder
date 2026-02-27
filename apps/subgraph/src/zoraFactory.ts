@@ -6,6 +6,7 @@ import {
   ZoraCoinCreatedEvent as ZoraCoinCreatedFeedEvent,
 } from '../generated/schema'
 import { CoinCreatedV4 } from '../generated/ZoraFactory/ZoraFactory'
+import { ZoraCoin as ZoraCoinTemplate } from '../generated/templates'
 import { WETH_ADDRESS } from './utils/constants'
 import { buildSwapRoute } from './utils/swapPath'
 
@@ -100,6 +101,9 @@ export function handleCoinCreatedV4(event: CoinCreatedV4): void {
 
   // Save coin after swap route is created
   coin.save()
+
+  // Instantiate template to start tracking coin holders
+  ZoraCoinTemplate.create(event.params.coin)
 
   // Create feed event only if linked to a DAO
   if (clankerToken && coin.dao) {

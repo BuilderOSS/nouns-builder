@@ -5,6 +5,7 @@ import {
   ClankerToken,
   ClankerTokenCreatedEvent as ClankerTokenCreatedFeedEvent,
 } from '../generated/schema'
+import { ClankerToken as ClankerTokenTemplate } from '../generated/templates'
 import { WETH_ADDRESS } from './utils/constants'
 import { loadDAOFromTreasury } from './utils/loadDAOFromTreasury'
 import { buildSwapRoute } from './utils/swapPath'
@@ -90,6 +91,9 @@ export function handleTokenCreated(event: TokenCreated): void {
 
   // Save token after swap route is created
   token.save()
+
+  // Instantiate template to start tracking token holders
+  ClankerTokenTemplate.create(event.params.tokenAddress)
 
   // Create feed event
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()

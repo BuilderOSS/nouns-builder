@@ -403,6 +403,9 @@ type ClankerToken @entity {
   # Swap routing
   swapRoute: SwapRoute @derivedFrom(field: "clankerToken")
 
+  # Token holders
+  holders: [ClankerTokenHolder!]! @derivedFrom(field: "token")
+
   # Block metadata
   createdAt: BigInt!
   createdAtBlock: BigInt!
@@ -446,6 +449,9 @@ type ZoraCoin @entity {
 
   # Swap routing
   swapRoute: SwapRoute @derivedFrom(field: "zoraCoin")
+
+  # Token holders
+  holders: [ZoraCoinHolder!]! @derivedFrom(field: "coin")
 
   # Block metadata
   createdAt: BigInt!
@@ -593,4 +599,38 @@ type PaymentOption @entity {
 
   # Whether this is a direct swap (single hop)
   isDirectSwap: Boolean!
+}
+
+# Token holder entities
+
+type ClankerTokenHolder @entity {
+  # ID is: token-address-holder-address
+  id: ID!
+
+  # References
+  token: ClankerToken!
+  holder: Bytes!
+
+  # Balance held by this address
+  balance: BigInt!
+
+  # Metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
+}
+
+type ZoraCoinHolder @entity {
+  # ID is: coin-address-holder-address
+  id: ID!
+
+  # References
+  coin: ZoraCoin!
+  holder: Bytes!
+
+  # Balance held by this address
+  balance: BigInt!
+
+  # Metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
 }
