@@ -1,4 +1,5 @@
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { CopyButton } from '@buildeross/ui/CopyButton'
@@ -118,7 +119,11 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
           args: [transaction.names, transaction.items, transaction.data],
         })
         const txHash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+        const reciept = await waitForTransactionReceipt(config, {
+          hash: txHash,
+          chainId: chain.id,
+        })
+        await awaitSubgraphSync(chain.id, reciept.blockNumber)
       } catch (err) {
         console.warn(err)
         setIsPendingTransaction(false)
