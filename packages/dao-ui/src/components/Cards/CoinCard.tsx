@@ -2,6 +2,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useIpfsMetadata, useMediaType } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { LikeButton } from '@buildeross/ui/LikeButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
@@ -131,7 +132,7 @@ export const CoinCard = ({
           )}
         </Box>
 
-        <Box pt="x4" position={'relative'} overflow={'hidden'} className={coinInfo}>
+        <Box pt="x4" position={'relative'} className={coinInfo}>
           <Flex justify={'space-between'} align={'center'} pb="x2" gap="x1">
             <Text
               variant="label-md"
@@ -161,6 +162,15 @@ export const CoinCard = ({
               justify="space-between"
               gap="x1"
             >
+              {isZoraCoin && (
+                <LikeButton
+                  coinAddress={coinAddress}
+                  symbol={symbol}
+                  chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+                  size="sm"
+                  variant="ghost"
+                />
+              )}
               {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
               <Button
                 size="sm"

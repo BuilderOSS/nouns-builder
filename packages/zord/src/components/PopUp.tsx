@@ -87,7 +87,11 @@ export function PopUp({
     <>
       {triggerRef === undefined && (
         <Box
-          onClick={() => setOpenState(!openState)}
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setOpenState(!openState)
+          }}
           ref={setTriggerElement}
           className={[triggerClassName]}
         >
@@ -125,7 +129,11 @@ export function PopUp({
               left="x0"
               w="100vw"
               h="100vh"
-              onClick={() => setOpenState(false)}
+              onClick={(e: React.MouseEvent) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setOpenState(false)
+              }}
               style={{ zIndex: 100 }}
             />
           )}

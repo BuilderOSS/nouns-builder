@@ -1,6 +1,7 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useNowSeconds } from '@buildeross/hooks'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { ShareButton } from '@buildeross/ui/ShareButton'
@@ -91,9 +92,15 @@ export const ZoraDropActions: React.FC<ZoraDropActionsProps> = ({
 
   return (
     <Flex gap="x2" align="center" wrap="wrap">
-      <Button size={buttonSize} px="x3" variant="outline" onClick={handleOpenMint}>
+      <ContractButton
+        size={buttonSize}
+        px="x3"
+        variant="outline"
+        handleClick={handleOpenMint}
+        chainId={chainId}
+      >
         Mint
-      </Button>
+      </ContractButton>
       <LinkWrapper link={getDropLink(chainId, dropAddress)} isExternal>
         <Button size={buttonSize} px="x3" variant="secondary">
           View Drop

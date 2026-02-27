@@ -30,6 +30,8 @@ import Github from './assets/github.svg'
 import Globe from './assets/globe.svg'
 import HandlebarCircle from './assets/handlebar-circle.svg'
 import Handshake from './assets/handshake.svg'
+import Heart from './assets/heart.svg'
+import HeartFilled from './assets/heart-filled.svg'
 import Info16 from './assets/info-16.svg'
 import Migrate from './assets/migrate.svg'
 import Move from './assets/move.svg'
@@ -90,6 +92,8 @@ export const icons = {
   globe: Globe,
   handlebarCircle: HandlebarCircle,
   handshake: Handshake,
+  heart: Heart,
+  heartFilled: HeartFilled,
   'info-16': Info16,
   migrate: Migrate,
   move: Move,

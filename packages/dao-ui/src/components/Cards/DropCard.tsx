@@ -114,7 +114,7 @@ export const DropCard = ({
         )}
       </Box>
 
-      <Box py="x2" px="x4" position={'relative'} overflow={'hidden'}>
+      <Box py="x2" px="x4" position={'relative'}>
         <Flex justify={'space-between'} align={'center'} gap="x2" w="100%">
           <Text
             variant="label-md"
