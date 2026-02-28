@@ -8,7 +8,6 @@ import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { StatBadge } from '@buildeross/ui/StatBadge'
-import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { Address } from 'viem'
@@ -24,7 +23,7 @@ interface CoinCardProps {
   image?: string // This is the IPFS URI
   createdAt?: string
   isZoraCoin?: boolean
-  onTradeClick?: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
+  onTradeClick: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
   showTypeBadge?: boolean
   sellEnabled?: boolean
 }
@@ -66,9 +65,6 @@ export const CoinCard = ({
   const isNew = createdAt
     ? Date.now() / 1000 - parseInt(createdAt) < 7 * 24 * 60 * 60
     : false
-
-  // Only show Trade button for supported chains
-  const showTradeButton = isChainIdSupportedByCoining(chainId)
 
   const { address: userAddress } = useAccount()
 
@@ -172,35 +168,37 @@ export const CoinCard = ({
           </Flex>
 
           {/* Trade Button */}
-          {showTradeButton && (
-            <Flex
-              className={tradeButtonContainer}
-              direction="row"
-              align="center"
-              w="100%"
-              justify="space-between"
-              gap="x1"
-            >
-              {isZoraCoin && (
-                <LikeButton
-                  coinAddress={coinAddress}
-                  symbol={symbol}
-                  chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
-                  size="sm"
-                  variant="ghost"
-                />
-              )}
-              {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
-              <Button
+          <Flex
+            className={tradeButtonContainer}
+            direction="row"
+            align="center"
+            w="100%"
+            justify="space-between"
+            gap="x1"
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault()
+              e.stopPropagation()
+            }}
+          >
+            {isZoraCoin && (
+              <LikeButton
+                coinAddress={coinAddress}
+                symbol={symbol}
+                chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
                 size="sm"
-                variant="primary"
-                style={{ flex: 1 }}
-                onClick={handleTradeClick}
-              >
-                {sellEnabled && hasBalance ? 'Trade' : 'Buy'}
-              </Button>
-            </Flex>
-          )}
+                variant="ghost"
+              />
+            )}
+            {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
+            <Button
+              size="sm"
+              variant="primary"
+              style={{ flex: 1 }}
+              onClick={handleTradeClick}
+            >
+              {sellEnabled && hasBalance ? 'Trade' : 'Buy'}
+            </Button>
+          </Flex>
         </Box>
       </Link>
     </>
