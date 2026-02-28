@@ -65,8 +65,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const iconSize = effectiveSize === 'sm' || effectiveSize === 'xs' ? 'sm' : 'md'
   const px = effectiveSize === 'lg' ? 'x6' : effectiveSize === 'xs' ? 'x3' : 'x4'
 
+  const isLiked = hasBalance || justLiked
+
   // Determine which heart icon to show
-  const heartIcon = hasBalance || justLiked ? 'heartFilled' : 'heart'
+  const heartIcon = isLiked ? 'heartFilled' : 'heart'
 
   const onLikeSuccessInner = useCallback(
     (txHash: string, amount: bigint) => {
@@ -106,6 +108,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         size={size}
         style={{ minWidth: 'unset' }}
         px={px}
+        disabled={isLiked}
       >
         <motion.div
           key={heartIcon}
