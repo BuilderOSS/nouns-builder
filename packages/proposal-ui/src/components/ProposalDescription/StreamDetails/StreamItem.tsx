@@ -250,14 +250,8 @@ export const StreamItem = ({
       <Grid gap="x3" className={gridStyle}>
         {/* Left column: Stream Information */}
         <Stack gap="x2" flex="1">
-          <Stack
-            direction="row"
-            align="center"
-            justify="space-between"
-            flexWrap="wrap"
-            gap="x2"
-          >
-            <Stack direction="row" align="center" gap="x2">
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
               <Text variant="label-sm" color="tertiary">
                 Recipient:
               </Text>
@@ -269,44 +263,32 @@ export const StreamItem = ({
               </Box>
             </Stack>
           </Stack>
-          <Stack
-            direction="row"
-            align="center"
-            justify="space-between"
-            flexWrap="wrap"
-            gap="x2"
-          >
-            <Stack direction="row" align="center" gap="x2">
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
               <Text variant="label-sm" color="tertiary">
                 Cancelable:
               </Text>
               <Text variant="label-sm">{stream.cancelable ? 'Yes' : 'No'}</Text>
             </Stack>
-            <Stack direction="row" align="center" gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
               <Text variant="label-sm" color="tertiary">
                 Transferable:
               </Text>
               <Text variant="label-sm">{stream.transferable ? 'Yes' : 'No'}</Text>
             </Stack>
           </Stack>
-          <Stack
-            direction="row"
-            align="center"
-            justify="space-between"
-            flexWrap="wrap"
-            gap="x2"
-          >
+          <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
             {hasCliff && (
-              <Stack direction="row" align="center" gap="x2">
+              <Stack direction="row" align="center" gap="x2" flexShrink={0}>
                 <Text variant="label-sm" color="tertiary">
                   Cliff:
                 </Text>
                 <Text variant="label-sm">
-                  {new Date(cliffTime * 1000).toLocaleDateString()}
+                  {new Date(cliffTime * 1000).toLocaleDateString(`en-US`)}
                 </Text>
               </Stack>
             )}
-            <Stack direction="row" align="center" gap="x2">
+            <Stack direction="row" align="center" gap="x2" flexShrink={0}>
               <Text variant="label-sm" color="tertiary">
                 Duration:
               </Text>
@@ -314,27 +296,21 @@ export const StreamItem = ({
             </Stack>
           </Stack>
           {(!isDurationsMode || isExecuted) && (
-            <Stack
-              direction="row"
-              align="center"
-              justify="space-between"
-              flexWrap="wrap"
-              gap="x2"
-            >
-              <Stack direction="row" align="center" gap="x2">
+            <Stack direction="row" align="center" justify="space-between" wrap gap="x2">
+              <Stack direction="row" align="center" gap="x2" flexShrink={0}>
                 <Text variant="label-sm" color="tertiary">
                   Start:
                 </Text>
                 <Text variant="label-sm">
-                  {new Date(startTime * 1000).toLocaleDateString()}
+                  {new Date(startTime * 1000).toLocaleDateString(`en-US`)}
                 </Text>
               </Stack>
-              <Stack direction="row" align="center" gap="x2">
+              <Stack direction="row" align="center" gap="x2" flexShrink={0}>
                 <Text variant="label-sm" color="tertiary">
                   End:
                 </Text>
                 <Text variant="label-sm">
-                  {new Date(endTime * 1000).toLocaleDateString()}
+                  {new Date(endTime * 1000).toLocaleDateString(`en-US`)}
                 </Text>
               </Stack>
             </Stack>
@@ -344,7 +320,7 @@ export const StreamItem = ({
           {liveData && (
             <Stack gap="x2" display={{ '@initial': 'none', '@768': 'flex' }}>
               <Stack direction="row" align="center" justify="space-between">
-                <Text variant="label-sm" color="tertiary">
+                <Text variant="label-sm" color="tertiary" flexShrink={0}>
                   Status:
                 </Text>
                 <Box

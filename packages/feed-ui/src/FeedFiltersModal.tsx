@@ -1,7 +1,10 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import { useFormik } from 'formik'
 import React, { useMemo } from 'react'
@@ -49,7 +52,23 @@ const EVENT_TYPE_LABELS: Record<FeedEventType, string> = {
   [FeedEventType.ProposalVoted]: 'Proposal Vote',
   [FeedEventType.ProposalExecuted]: 'Proposal Executed',
   [FeedEventType.ProposalUpdated]: 'Proposal Update',
+  [FeedEventType.ClankerTokenCreated]: 'Creator Coin Deployed',
+  [FeedEventType.ZoraCoinCreated]: 'Post Published',
+  [FeedEventType.ZoraDropCreated]: 'Drop Created',
 }
+
+const COIN_EVENT_TYPES: FeedEventType[] = [
+  FeedEventType.ClankerTokenCreated,
+  FeedEventType.ZoraCoinCreated,
+]
+
+const hasNoCoinSupportedChains = (chainIds: CHAIN_ID[]) =>
+  chainIds.length > 0 &&
+  chainIds.every((chainId) => !isChainIdSupportedByCoining(chainId))
+
+const hasNoDroposalSupportedChains = (chainIds: CHAIN_ID[]) =>
+  chainIds.length > 0 &&
+  chainIds.every((chainId) => !isChainIdSupportedByDroposal(chainId))
 
 export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   open,
@@ -79,14 +98,28 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
 
   const toggleChain = (chainId: CHAIN_ID) => {
     const currentChainIds = formik.values.chainIds
+    let finalChainIds: CHAIN_ID[] = []
+
     if (currentChainIds.includes(chainId)) {
-      formik.setFieldValue(
-        'chainIds',
-        currentChainIds.filter((id) => id !== chainId)
-      )
+      finalChainIds = currentChainIds.filter((id) => id !== chainId)
     } else {
-      formik.setFieldValue('chainIds', [...currentChainIds, chainId])
+      finalChainIds = [...currentChainIds, chainId]
     }
+
+    const currentEventTypes = formik.values.eventTypes
+    let finalEventTypes: FeedEventType[] = currentEventTypes
+
+    if (hasNoCoinSupportedChains(finalChainIds)) {
+      finalEventTypes = finalEventTypes.filter((type) => !COIN_EVENT_TYPES.includes(type))
+    }
+    if (hasNoDroposalSupportedChains(finalChainIds)) {
+      finalEventTypes = finalEventTypes.filter(
+        (type) => type !== FeedEventType.ZoraDropCreated
+      )
+    }
+
+    formik.setFieldValue('chainIds', finalChainIds)
+    formik.setFieldValue('eventTypes', finalEventTypes)
   }
 
   const toggleEventType = (eventType: FeedEventType) => {
@@ -139,6 +172,21 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
     }
     return parts
   }, [formik.values])
+
+  const eventTypeLabels = useMemo(() => {
+    let entries = Object.entries(EVENT_TYPE_LABELS)
+    if (hasNoCoinSupportedChains(formik.values.chainIds) || !COINING_ENABLED) {
+      entries = entries.filter(
+        ([eventType]) => !COIN_EVENT_TYPES.includes(eventType as FeedEventType)
+      )
+    }
+    if (hasNoDroposalSupportedChains(formik.values.chainIds)) {
+      entries = entries.filter(
+        ([eventType]) => eventType !== FeedEventType.ZoraDropCreated
+      )
+    }
+    return Object.fromEntries(entries)
+  }, [formik.values.chainIds])
 
   const hasFilters =
     formik.values.chainIds.length > 0 ||
@@ -195,7 +243,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
             <div className={filterSection}>
               <Text className={sectionLabel}>Event Types</Text>
               <div className={filterGrid}>
-                {Object.entries(EVENT_TYPE_LABELS).map(([eventType, label]) => (
+                {Object.entries(eventTypeLabels).map(([eventType, label]) => (
                   <Label
                     key={eventType}
                     className={filterItem}

@@ -903,11 +903,630 @@ export type Block_Height = {
   number_gte?: InputMaybe<Scalars['Int']['input']>
 }
 
+export type ClankerToken = {
+  __typename?: 'ClankerToken'
+  createdAt: Scalars['BigInt']['output']
+  createdAtBlock: Scalars['BigInt']['output']
+  dao?: Maybe<Dao>
+  extensions: Array<Scalars['Bytes']['output']>
+  extensionsSupply: Scalars['BigInt']['output']
+  holders: Array<ClankerTokenHolder>
+  id: Scalars['ID']['output']
+  locker: Scalars['Bytes']['output']
+  mevModule: Scalars['Bytes']['output']
+  msgSender: Scalars['Bytes']['output']
+  pairedToken: Scalars['Bytes']['output']
+  poolHook: Scalars['Bytes']['output']
+  poolId: Scalars['Bytes']['output']
+  startingTick: Scalars['BigInt']['output']
+  swapRoute?: Maybe<SwapRoute>
+  tokenAddress: Scalars['Bytes']['output']
+  tokenAdmin: Scalars['Bytes']['output']
+  tokenContext: Scalars['String']['output']
+  tokenImage: Scalars['String']['output']
+  tokenMetadata: Scalars['String']['output']
+  tokenName: Scalars['String']['output']
+  tokenSymbol: Scalars['String']['output']
+  transactionHash: Scalars['Bytes']['output']
+}
+
+export type ClankerTokenHoldersArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerTokenHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ClankerTokenHolder_Filter>
+}
+
+export type ClankerTokenCreatedEvent = FeedEvent & {
+  __typename?: 'ClankerTokenCreatedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  clankerToken: ClankerToken
+  dao: Dao
+  id: Scalars['ID']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type ClankerTokenCreatedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<ClankerTokenCreatedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  clankerToken?: InputMaybe<Scalars['String']['input']>
+  clankerToken_?: InputMaybe<ClankerToken_Filter>
+  clankerToken_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_lt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_lte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ClankerTokenCreatedEvent_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum ClankerTokenCreatedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  ClankerToken = 'clankerToken',
+  ClankerTokenCreatedAt = 'clankerToken__createdAt',
+  ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
+  ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
+  ClankerTokenId = 'clankerToken__id',
+  ClankerTokenLocker = 'clankerToken__locker',
+  ClankerTokenMevModule = 'clankerToken__mevModule',
+  ClankerTokenMsgSender = 'clankerToken__msgSender',
+  ClankerTokenPairedToken = 'clankerToken__pairedToken',
+  ClankerTokenPoolHook = 'clankerToken__poolHook',
+  ClankerTokenPoolId = 'clankerToken__poolId',
+  ClankerTokenStartingTick = 'clankerToken__startingTick',
+  ClankerTokenTokenAddress = 'clankerToken__tokenAddress',
+  ClankerTokenTokenAdmin = 'clankerToken__tokenAdmin',
+  ClankerTokenTokenContext = 'clankerToken__tokenContext',
+  ClankerTokenTokenImage = 'clankerToken__tokenImage',
+  ClankerTokenTokenMetadata = 'clankerToken__tokenMetadata',
+  ClankerTokenTokenName = 'clankerToken__tokenName',
+  ClankerTokenTokenSymbol = 'clankerToken__tokenSymbol',
+  ClankerTokenTransactionHash = 'clankerToken__transactionHash',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+}
+
+export type ClankerTokenHolder = {
+  __typename?: 'ClankerTokenHolder'
+  balance: Scalars['BigInt']['output']
+  holder: Scalars['Bytes']['output']
+  id: Scalars['ID']['output']
+  token: ClankerToken
+  updatedAt: Scalars['BigInt']['output']
+  updatedAtBlock: Scalars['BigInt']['output']
+}
+
+export type ClankerTokenHolder_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ClankerTokenHolder_Filter>>>
+  balance?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  balance_lt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_lte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  holder?: InputMaybe<Scalars['Bytes']['input']>
+  holder_contains?: InputMaybe<Scalars['Bytes']['input']>
+  holder_gt?: InputMaybe<Scalars['Bytes']['input']>
+  holder_gte?: InputMaybe<Scalars['Bytes']['input']>
+  holder_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  holder_lt?: InputMaybe<Scalars['Bytes']['input']>
+  holder_lte?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ClankerTokenHolder_Filter>>>
+  token?: InputMaybe<Scalars['String']['input']>
+  token_?: InputMaybe<ClankerToken_Filter>
+  token_contains?: InputMaybe<Scalars['String']['input']>
+  token_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  token_ends_with?: InputMaybe<Scalars['String']['input']>
+  token_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  token_gt?: InputMaybe<Scalars['String']['input']>
+  token_gte?: InputMaybe<Scalars['String']['input']>
+  token_in?: InputMaybe<Array<Scalars['String']['input']>>
+  token_lt?: InputMaybe<Scalars['String']['input']>
+  token_lte?: InputMaybe<Scalars['String']['input']>
+  token_not?: InputMaybe<Scalars['String']['input']>
+  token_not_contains?: InputMaybe<Scalars['String']['input']>
+  token_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  token_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  token_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  token_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  token_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  token_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  token_starts_with?: InputMaybe<Scalars['String']['input']>
+  token_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  updatedAt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+}
+
+export enum ClankerTokenHolder_OrderBy {
+  Balance = 'balance',
+  Holder = 'holder',
+  Id = 'id',
+  Token = 'token',
+  TokenCreatedAt = 'token__createdAt',
+  TokenCreatedAtBlock = 'token__createdAtBlock',
+  TokenExtensionsSupply = 'token__extensionsSupply',
+  TokenId = 'token__id',
+  TokenLocker = 'token__locker',
+  TokenMevModule = 'token__mevModule',
+  TokenMsgSender = 'token__msgSender',
+  TokenPairedToken = 'token__pairedToken',
+  TokenPoolHook = 'token__poolHook',
+  TokenPoolId = 'token__poolId',
+  TokenStartingTick = 'token__startingTick',
+  TokenTokenAddress = 'token__tokenAddress',
+  TokenTokenAdmin = 'token__tokenAdmin',
+  TokenTokenContext = 'token__tokenContext',
+  TokenTokenImage = 'token__tokenImage',
+  TokenTokenMetadata = 'token__tokenMetadata',
+  TokenTokenName = 'token__tokenName',
+  TokenTokenSymbol = 'token__tokenSymbol',
+  TokenTransactionHash = 'token__transactionHash',
+  UpdatedAt = 'updatedAt',
+  UpdatedAtBlock = 'updatedAtBlock',
+}
+
+export type ClankerToken_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ClankerToken_Filter>>>
+  createdAt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  extensions?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  extensionsSupply?: InputMaybe<Scalars['BigInt']['input']>
+  extensionsSupply_gt?: InputMaybe<Scalars['BigInt']['input']>
+  extensionsSupply_gte?: InputMaybe<Scalars['BigInt']['input']>
+  extensionsSupply_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  extensionsSupply_lt?: InputMaybe<Scalars['BigInt']['input']>
+  extensionsSupply_lte?: InputMaybe<Scalars['BigInt']['input']>
+  extensionsSupply_not?: InputMaybe<Scalars['BigInt']['input']>
+  extensionsSupply_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  extensions_contains?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  extensions_contains_nocase?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  extensions_not?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  extensions_not_contains?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  extensions_not_contains_nocase?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  holders_?: InputMaybe<ClankerTokenHolder_Filter>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  locker?: InputMaybe<Scalars['Bytes']['input']>
+  locker_contains?: InputMaybe<Scalars['Bytes']['input']>
+  locker_gt?: InputMaybe<Scalars['Bytes']['input']>
+  locker_gte?: InputMaybe<Scalars['Bytes']['input']>
+  locker_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  locker_lt?: InputMaybe<Scalars['Bytes']['input']>
+  locker_lte?: InputMaybe<Scalars['Bytes']['input']>
+  locker_not?: InputMaybe<Scalars['Bytes']['input']>
+  locker_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  locker_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  mevModule?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_contains?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_gt?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_gte?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  mevModule_lt?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_lte?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_not?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  mevModule_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  msgSender?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_contains?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_gt?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_gte?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  msgSender_lt?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_lte?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_not?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  msgSender_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ClankerToken_Filter>>>
+  pairedToken?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_contains?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_gt?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_gte?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  pairedToken_lt?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_lte?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_not?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  pairedToken_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolHook?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolHook_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolHook_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolId?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolId_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  startingTick?: InputMaybe<Scalars['BigInt']['input']>
+  startingTick_gt?: InputMaybe<Scalars['BigInt']['input']>
+  startingTick_gte?: InputMaybe<Scalars['BigInt']['input']>
+  startingTick_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  startingTick_lt?: InputMaybe<Scalars['BigInt']['input']>
+  startingTick_lte?: InputMaybe<Scalars['BigInt']['input']>
+  startingTick_not?: InputMaybe<Scalars['BigInt']['input']>
+  startingTick_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  swapRoute_?: InputMaybe<SwapRoute_Filter>
+  tokenAddress?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_gt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_gte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenAddress_lt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_lte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_not?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenAdmin?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_gt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_gte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenAdmin_lt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_lte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_not?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAdmin_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenContext?: InputMaybe<Scalars['String']['input']>
+  tokenContext_contains?: InputMaybe<Scalars['String']['input']>
+  tokenContext_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenContext_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenContext_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenContext_gt?: InputMaybe<Scalars['String']['input']>
+  tokenContext_gte?: InputMaybe<Scalars['String']['input']>
+  tokenContext_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenContext_lt?: InputMaybe<Scalars['String']['input']>
+  tokenContext_lte?: InputMaybe<Scalars['String']['input']>
+  tokenContext_not?: InputMaybe<Scalars['String']['input']>
+  tokenContext_not_contains?: InputMaybe<Scalars['String']['input']>
+  tokenContext_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenContext_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenContext_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenContext_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenContext_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenContext_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenContext_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenContext_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenImage?: InputMaybe<Scalars['String']['input']>
+  tokenImage_contains?: InputMaybe<Scalars['String']['input']>
+  tokenImage_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenImage_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenImage_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenImage_gt?: InputMaybe<Scalars['String']['input']>
+  tokenImage_gte?: InputMaybe<Scalars['String']['input']>
+  tokenImage_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenImage_lt?: InputMaybe<Scalars['String']['input']>
+  tokenImage_lte?: InputMaybe<Scalars['String']['input']>
+  tokenImage_not?: InputMaybe<Scalars['String']['input']>
+  tokenImage_not_contains?: InputMaybe<Scalars['String']['input']>
+  tokenImage_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenImage_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenImage_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenImage_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenImage_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenImage_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenImage_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenImage_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_contains?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_gt?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_gte?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenMetadata_lt?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_lte?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_not?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_not_contains?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenMetadata_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenMetadata_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName?: InputMaybe<Scalars['String']['input']>
+  tokenName_contains?: InputMaybe<Scalars['String']['input']>
+  tokenName_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_gt?: InputMaybe<Scalars['String']['input']>
+  tokenName_gte?: InputMaybe<Scalars['String']['input']>
+  tokenName_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenName_lt?: InputMaybe<Scalars['String']['input']>
+  tokenName_lte?: InputMaybe<Scalars['String']['input']>
+  tokenName_not?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_contains?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenName_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_contains?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_gt?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_gte?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenSymbol_lt?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_lte?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_contains?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenSymbol_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum ClankerToken_OrderBy {
+  CreatedAt = 'createdAt',
+  CreatedAtBlock = 'createdAtBlock',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Extensions = 'extensions',
+  ExtensionsSupply = 'extensionsSupply',
+  Holders = 'holders',
+  Id = 'id',
+  Locker = 'locker',
+  MevModule = 'mevModule',
+  MsgSender = 'msgSender',
+  PairedToken = 'pairedToken',
+  PoolHook = 'poolHook',
+  PoolId = 'poolId',
+  StartingTick = 'startingTick',
+  SwapRoute = 'swapRoute',
+  SwapRouteCoinAddress = 'swapRoute__coinAddress',
+  SwapRouteCreatedAt = 'swapRoute__createdAt',
+  SwapRouteId = 'swapRoute__id',
+  SwapRouteUpdatedAt = 'swapRoute__updatedAt',
+  TokenAddress = 'tokenAddress',
+  TokenAdmin = 'tokenAdmin',
+  TokenContext = 'tokenContext',
+  TokenImage = 'tokenImage',
+  TokenMetadata = 'tokenMetadata',
+  TokenName = 'tokenName',
+  TokenSymbol = 'tokenSymbol',
+  TransactionHash = 'transactionHash',
+}
+
+export enum CoinType {
+  ClankerToken = 'CLANKER_TOKEN',
+  Weth = 'WETH',
+  ZoraCoin = 'ZORA_COIN',
+}
+
 export type Dao = {
   __typename?: 'DAO'
   auctionAddress: Scalars['Bytes']['output']
   auctionConfig: AuctionConfig
   auctions: Array<Auction>
+  clankerTokens: Array<ClankerToken>
   contractImage: Scalars['String']['output']
   currentAuction?: Maybe<Auction>
   daoMultisigUpdates: Array<DaoMultisigUpdate>
@@ -933,6 +1552,8 @@ export type Dao = {
   treasuryAddress: Scalars['Bytes']['output']
   voterCount: Scalars['Int']['output']
   voters: Array<DaoVoter>
+  zoraCoins: Array<ZoraCoin>
+  zoraDrops: Array<ZoraDrop>
 }
 
 export type DaoAuctionsArgs = {
@@ -941,6 +1562,14 @@ export type DaoAuctionsArgs = {
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<Auction_Filter>
+}
+
+export type DaoClankerTokensArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerToken_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ClankerToken_Filter>
 }
 
 export type DaoDaoMultisigUpdatesArgs = {
@@ -1005,6 +1634,22 @@ export type DaoVotersArgs = {
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<DaoVoter_Filter>
+}
+
+export type DaoZoraCoinsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraCoin_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ZoraCoin_Filter>
+}
+
+export type DaoZoraDropsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDrop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ZoraDrop_Filter>
 }
 
 export type DaoTokenOwner = {
@@ -1249,6 +1894,7 @@ export type Dao_Filter = {
   auctionConfig_starts_with?: InputMaybe<Scalars['String']['input']>
   auctionConfig_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   auctions_?: InputMaybe<Auction_Filter>
+  clankerTokens_?: InputMaybe<ClankerToken_Filter>
   contractImage?: InputMaybe<Scalars['String']['input']>
   contractImage_contains?: InputMaybe<Scalars['String']['input']>
   contractImage_contains_nocase?: InputMaybe<Scalars['String']['input']>
@@ -1481,6 +2127,8 @@ export type Dao_Filter = {
   voterCount_not?: InputMaybe<Scalars['Int']['input']>
   voterCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
   voters_?: InputMaybe<DaoVoter_Filter>
+  zoraCoins_?: InputMaybe<ZoraCoin_Filter>
+  zoraDrops_?: InputMaybe<ZoraDrop_Filter>
 }
 
 export enum Dao_OrderBy {
@@ -1492,6 +2140,7 @@ export enum Dao_OrderBy {
   AuctionConfigReservePrice = 'auctionConfig__reservePrice',
   AuctionConfigTimeBuffer = 'auctionConfig__timeBuffer',
   Auctions = 'auctions',
+  ClankerTokens = 'clankerTokens',
   ContractImage = 'contractImage',
   CurrentAuction = 'currentAuction',
   CurrentAuctionBidCount = 'currentAuction__bidCount',
@@ -1524,6 +2173,8 @@ export enum Dao_OrderBy {
   TreasuryAddress = 'treasuryAddress',
   VoterCount = 'voterCount',
   Voters = 'voters',
+  ZoraCoins = 'zoraCoins',
+  ZoraDrops = 'zoraDrops',
 }
 
 export type DaoMultisigUpdate = {
@@ -1656,10 +2307,13 @@ export enum FeedEventType {
   AuctionBidPlaced = 'AUCTION_BID_PLACED',
   AuctionCreated = 'AUCTION_CREATED',
   AuctionSettled = 'AUCTION_SETTLED',
+  ClankerTokenCreated = 'CLANKER_TOKEN_CREATED',
   ProposalCreated = 'PROPOSAL_CREATED',
   ProposalExecuted = 'PROPOSAL_EXECUTED',
   ProposalUpdated = 'PROPOSAL_UPDATED',
   ProposalVoted = 'PROPOSAL_VOTED',
+  ZoraCoinCreated = 'ZORA_COIN_CREATED',
+  ZoraDropCreated = 'ZORA_DROP_CREATED',
 }
 
 export type FeedEvent_Filter = {
@@ -2012,6 +2666,101 @@ export enum MetadataProperty_OrderBy {
 export enum OrderDirection {
   Asc = 'asc',
   Desc = 'desc',
+}
+
+export type PaymentOption = {
+  __typename?: 'PaymentOption'
+  endHopIndex: Scalars['Int']['output']
+  id: Scalars['ID']['output']
+  isDirectSwap: Scalars['Boolean']['output']
+  route: SwapRoute
+  startHopIndex: Scalars['Int']['output']
+  tokenAddress: Scalars['Bytes']['output']
+  tokenType: CoinType
+}
+
+export type PaymentOption_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<PaymentOption_Filter>>>
+  endHopIndex?: InputMaybe<Scalars['Int']['input']>
+  endHopIndex_gt?: InputMaybe<Scalars['Int']['input']>
+  endHopIndex_gte?: InputMaybe<Scalars['Int']['input']>
+  endHopIndex_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  endHopIndex_lt?: InputMaybe<Scalars['Int']['input']>
+  endHopIndex_lte?: InputMaybe<Scalars['Int']['input']>
+  endHopIndex_not?: InputMaybe<Scalars['Int']['input']>
+  endHopIndex_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  isDirectSwap?: InputMaybe<Scalars['Boolean']['input']>
+  isDirectSwap_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  isDirectSwap_not?: InputMaybe<Scalars['Boolean']['input']>
+  isDirectSwap_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  or?: InputMaybe<Array<InputMaybe<PaymentOption_Filter>>>
+  route?: InputMaybe<Scalars['String']['input']>
+  route_?: InputMaybe<SwapRoute_Filter>
+  route_contains?: InputMaybe<Scalars['String']['input']>
+  route_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  route_ends_with?: InputMaybe<Scalars['String']['input']>
+  route_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  route_gt?: InputMaybe<Scalars['String']['input']>
+  route_gte?: InputMaybe<Scalars['String']['input']>
+  route_in?: InputMaybe<Array<Scalars['String']['input']>>
+  route_lt?: InputMaybe<Scalars['String']['input']>
+  route_lte?: InputMaybe<Scalars['String']['input']>
+  route_not?: InputMaybe<Scalars['String']['input']>
+  route_not_contains?: InputMaybe<Scalars['String']['input']>
+  route_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  route_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  route_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  route_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  route_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  route_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  route_starts_with?: InputMaybe<Scalars['String']['input']>
+  route_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  startHopIndex?: InputMaybe<Scalars['Int']['input']>
+  startHopIndex_gt?: InputMaybe<Scalars['Int']['input']>
+  startHopIndex_gte?: InputMaybe<Scalars['Int']['input']>
+  startHopIndex_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  startHopIndex_lt?: InputMaybe<Scalars['Int']['input']>
+  startHopIndex_lte?: InputMaybe<Scalars['Int']['input']>
+  startHopIndex_not?: InputMaybe<Scalars['Int']['input']>
+  startHopIndex_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  tokenAddress?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_gt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_gte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenAddress_lt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_lte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_not?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenAddress_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenType?: InputMaybe<CoinType>
+  tokenType_in?: InputMaybe<Array<CoinType>>
+  tokenType_not?: InputMaybe<CoinType>
+  tokenType_not_in?: InputMaybe<Array<CoinType>>
+}
+
+export enum PaymentOption_OrderBy {
+  EndHopIndex = 'endHopIndex',
+  Id = 'id',
+  IsDirectSwap = 'isDirectSwap',
+  Route = 'route',
+  RouteCoinAddress = 'route__coinAddress',
+  RouteCreatedAt = 'route__createdAt',
+  RouteId = 'route__id',
+  RouteUpdatedAt = 'route__updatedAt',
+  StartHopIndex = 'startHopIndex',
+  TokenAddress = 'tokenAddress',
+  TokenType = 'tokenType',
 }
 
 export type Proposal = {
@@ -3551,6 +4300,12 @@ export type Query = {
   auctionSettledEvent?: Maybe<AuctionSettledEvent>
   auctionSettledEvents: Array<AuctionSettledEvent>
   auctions: Array<Auction>
+  clankerToken?: Maybe<ClankerToken>
+  clankerTokenCreatedEvent?: Maybe<ClankerTokenCreatedEvent>
+  clankerTokenCreatedEvents: Array<ClankerTokenCreatedEvent>
+  clankerTokenHolder?: Maybe<ClankerTokenHolder>
+  clankerTokenHolders: Array<ClankerTokenHolder>
+  clankerTokens: Array<ClankerToken>
   dao?: Maybe<Dao>
   daoMultisigUpdate?: Maybe<DaoMultisigUpdate>
   daoMultisigUpdates: Array<DaoMultisigUpdate>
@@ -3566,6 +4321,8 @@ export type Query = {
   metadataItems: Array<MetadataItem>
   metadataProperties: Array<MetadataProperty>
   metadataProperty?: Maybe<MetadataProperty>
+  paymentOption?: Maybe<PaymentOption>
+  paymentOptions: Array<PaymentOption>
   proposal?: Maybe<Proposal>
   proposalCreatedEvent?: Maybe<ProposalCreatedEvent>
   proposalCreatedEvents: Array<ProposalCreatedEvent>
@@ -3582,10 +4339,28 @@ export type Query = {
   proposals: Array<Proposal>
   snapshot?: Maybe<Snapshot>
   snapshots: Array<Snapshot>
+  swapHop?: Maybe<SwapHop>
+  swapHops: Array<SwapHop>
+  swapRoute?: Maybe<SwapRoute>
+  swapRoutes: Array<SwapRoute>
   token?: Maybe<Token>
   tokens: Array<Token>
   treasuryAssetPin?: Maybe<TreasuryAssetPin>
   treasuryAssetPins: Array<TreasuryAssetPin>
+  zoraCoin?: Maybe<ZoraCoin>
+  zoraCoinCreatedEvent?: Maybe<ZoraCoinCreatedEvent>
+  zoraCoinCreatedEvents: Array<ZoraCoinCreatedEvent>
+  zoraCoinHolder?: Maybe<ZoraCoinHolder>
+  zoraCoinHolders: Array<ZoraCoinHolder>
+  zoraCoins: Array<ZoraCoin>
+  zoraDrop?: Maybe<ZoraDrop>
+  zoraDropCreatedEvent?: Maybe<ZoraDropCreatedEvent>
+  zoraDropCreatedEvents: Array<ZoraDropCreatedEvent>
+  zoraDropHolder?: Maybe<ZoraDropHolder>
+  zoraDropHolders: Array<ZoraDropHolder>
+  zoraDropMintComment?: Maybe<ZoraDropMintComment>
+  zoraDropMintComments: Array<ZoraDropMintComment>
+  zoraDrops: Array<ZoraDrop>
 }
 
 export type Query_MetaArgs = {
@@ -3686,6 +4461,54 @@ export type QueryAuctionsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<Auction_Filter>
+}
+
+export type QueryClankerTokenArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryClankerTokenCreatedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryClankerTokenCreatedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerTokenCreatedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ClankerTokenCreatedEvent_Filter>
+}
+
+export type QueryClankerTokenHolderArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryClankerTokenHoldersArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerTokenHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ClankerTokenHolder_Filter>
+}
+
+export type QueryClankerTokensArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerToken_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ClankerToken_Filter>
 }
 
 export type QueryDaoArgs = {
@@ -3807,6 +4630,22 @@ export type QueryMetadataPropertyArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
   subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryPaymentOptionArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryPaymentOptionsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<PaymentOption_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<PaymentOption_Filter>
 }
 
 export type QueryProposalArgs = {
@@ -3937,6 +4776,38 @@ export type QuerySnapshotsArgs = {
   where?: InputMaybe<Snapshot_Filter>
 }
 
+export type QuerySwapHopArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QuerySwapHopsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<SwapHop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<SwapHop_Filter>
+}
+
+export type QuerySwapRouteArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QuerySwapRoutesArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<SwapRoute_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<SwapRoute_Filter>
+}
+
 export type QueryTokenArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
@@ -3967,6 +4838,118 @@ export type QueryTreasuryAssetPinsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<TreasuryAssetPin_Filter>
+}
+
+export type QueryZoraCoinArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraCoinCreatedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraCoinCreatedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraCoinCreatedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraCoinCreatedEvent_Filter>
+}
+
+export type QueryZoraCoinHolderArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraCoinHoldersArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraCoinHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraCoinHolder_Filter>
+}
+
+export type QueryZoraCoinsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraCoin_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraCoin_Filter>
+}
+
+export type QueryZoraDropArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraDropCreatedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraDropCreatedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropCreatedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraDropCreatedEvent_Filter>
+}
+
+export type QueryZoraDropHolderArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraDropHoldersArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraDropHolder_Filter>
+}
+
+export type QueryZoraDropMintCommentArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryZoraDropMintCommentsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropMintComment_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraDropMintComment_Filter>
+}
+
+export type QueryZoraDropsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDrop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ZoraDrop_Filter>
 }
 
 export type Snapshot = {
@@ -4101,6 +5084,297 @@ export enum Snapshot_OrderBy {
   TokensCount = 'tokensCount',
   TotalSupply = 'totalSupply',
   VoterCount = 'voterCount',
+}
+
+export type SwapHop = {
+  __typename?: 'SwapHop'
+  fee?: Maybe<Scalars['BigInt']['output']>
+  hooks?: Maybe<Scalars['Bytes']['output']>
+  hopIndex: Scalars['Int']['output']
+  id: Scalars['ID']['output']
+  poolId: Scalars['Bytes']['output']
+  route: SwapRoute
+  tickSpacing?: Maybe<Scalars['Int']['output']>
+  tokenIn: Scalars['Bytes']['output']
+  tokenOut: Scalars['Bytes']['output']
+}
+
+export type SwapHop_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<SwapHop_Filter>>>
+  fee?: InputMaybe<Scalars['BigInt']['input']>
+  fee_gt?: InputMaybe<Scalars['BigInt']['input']>
+  fee_gte?: InputMaybe<Scalars['BigInt']['input']>
+  fee_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  fee_lt?: InputMaybe<Scalars['BigInt']['input']>
+  fee_lte?: InputMaybe<Scalars['BigInt']['input']>
+  fee_not?: InputMaybe<Scalars['BigInt']['input']>
+  fee_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  hooks?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_contains?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_gt?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_gte?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  hooks_lt?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_lte?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_not?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  hooks_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  hopIndex?: InputMaybe<Scalars['Int']['input']>
+  hopIndex_gt?: InputMaybe<Scalars['Int']['input']>
+  hopIndex_gte?: InputMaybe<Scalars['Int']['input']>
+  hopIndex_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  hopIndex_lt?: InputMaybe<Scalars['Int']['input']>
+  hopIndex_lte?: InputMaybe<Scalars['Int']['input']>
+  hopIndex_not?: InputMaybe<Scalars['Int']['input']>
+  hopIndex_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<SwapHop_Filter>>>
+  poolId?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolId_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  route?: InputMaybe<Scalars['String']['input']>
+  route_?: InputMaybe<SwapRoute_Filter>
+  route_contains?: InputMaybe<Scalars['String']['input']>
+  route_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  route_ends_with?: InputMaybe<Scalars['String']['input']>
+  route_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  route_gt?: InputMaybe<Scalars['String']['input']>
+  route_gte?: InputMaybe<Scalars['String']['input']>
+  route_in?: InputMaybe<Array<Scalars['String']['input']>>
+  route_lt?: InputMaybe<Scalars['String']['input']>
+  route_lte?: InputMaybe<Scalars['String']['input']>
+  route_not?: InputMaybe<Scalars['String']['input']>
+  route_not_contains?: InputMaybe<Scalars['String']['input']>
+  route_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  route_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  route_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  route_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  route_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  route_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  route_starts_with?: InputMaybe<Scalars['String']['input']>
+  route_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tickSpacing?: InputMaybe<Scalars['Int']['input']>
+  tickSpacing_gt?: InputMaybe<Scalars['Int']['input']>
+  tickSpacing_gte?: InputMaybe<Scalars['Int']['input']>
+  tickSpacing_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  tickSpacing_lt?: InputMaybe<Scalars['Int']['input']>
+  tickSpacing_lte?: InputMaybe<Scalars['Int']['input']>
+  tickSpacing_not?: InputMaybe<Scalars['Int']['input']>
+  tickSpacing_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  tokenIn?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_gt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_gte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenIn_lt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_lte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_not?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenIn_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenOut?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_gt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_gte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenOut_lt?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_lte?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_not?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  tokenOut_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum SwapHop_OrderBy {
+  Fee = 'fee',
+  Hooks = 'hooks',
+  HopIndex = 'hopIndex',
+  Id = 'id',
+  PoolId = 'poolId',
+  Route = 'route',
+  RouteCoinAddress = 'route__coinAddress',
+  RouteCreatedAt = 'route__createdAt',
+  RouteId = 'route__id',
+  RouteUpdatedAt = 'route__updatedAt',
+  TickSpacing = 'tickSpacing',
+  TokenIn = 'tokenIn',
+  TokenOut = 'tokenOut',
+}
+
+export type SwapRoute = {
+  __typename?: 'SwapRoute'
+  clankerToken?: Maybe<ClankerToken>
+  coinAddress: Scalars['Bytes']['output']
+  createdAt: Scalars['BigInt']['output']
+  id: Scalars['ID']['output']
+  mainPath: Array<SwapHop>
+  paymentOptions: Array<PaymentOption>
+  updatedAt: Scalars['BigInt']['output']
+  zoraCoin?: Maybe<ZoraCoin>
+}
+
+export type SwapRouteMainPathArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<SwapHop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<SwapHop_Filter>
+}
+
+export type SwapRoutePaymentOptionsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<PaymentOption_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<PaymentOption_Filter>
+}
+
+export type SwapRoute_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<SwapRoute_Filter>>>
+  clankerToken?: InputMaybe<Scalars['String']['input']>
+  clankerToken_?: InputMaybe<ClankerToken_Filter>
+  clankerToken_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_lt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_lte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  coinAddress?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_contains?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_gt?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_gte?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  coinAddress_lt?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_lte?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_not?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  createdAt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  mainPath_?: InputMaybe<SwapHop_Filter>
+  or?: InputMaybe<Array<InputMaybe<SwapRoute_Filter>>>
+  paymentOptions_?: InputMaybe<PaymentOption_Filter>
+  updatedAt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  zoraCoin?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_?: InputMaybe<ZoraCoin_Filter>
+  zoraCoin_contains?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_gt?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_gte?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraCoin_lt?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_lte?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_contains?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraCoin_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum SwapRoute_OrderBy {
+  ClankerToken = 'clankerToken',
+  ClankerTokenCreatedAt = 'clankerToken__createdAt',
+  ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
+  ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
+  ClankerTokenId = 'clankerToken__id',
+  ClankerTokenLocker = 'clankerToken__locker',
+  ClankerTokenMevModule = 'clankerToken__mevModule',
+  ClankerTokenMsgSender = 'clankerToken__msgSender',
+  ClankerTokenPairedToken = 'clankerToken__pairedToken',
+  ClankerTokenPoolHook = 'clankerToken__poolHook',
+  ClankerTokenPoolId = 'clankerToken__poolId',
+  ClankerTokenStartingTick = 'clankerToken__startingTick',
+  ClankerTokenTokenAddress = 'clankerToken__tokenAddress',
+  ClankerTokenTokenAdmin = 'clankerToken__tokenAdmin',
+  ClankerTokenTokenContext = 'clankerToken__tokenContext',
+  ClankerTokenTokenImage = 'clankerToken__tokenImage',
+  ClankerTokenTokenMetadata = 'clankerToken__tokenMetadata',
+  ClankerTokenTokenName = 'clankerToken__tokenName',
+  ClankerTokenTokenSymbol = 'clankerToken__tokenSymbol',
+  ClankerTokenTransactionHash = 'clankerToken__transactionHash',
+  CoinAddress = 'coinAddress',
+  CreatedAt = 'createdAt',
+  Id = 'id',
+  MainPath = 'mainPath',
+  PaymentOptions = 'paymentOptions',
+  UpdatedAt = 'updatedAt',
+  ZoraCoin = 'zoraCoin',
+  ZoraCoinCaller = 'zoraCoin__caller',
+  ZoraCoinCoinAddress = 'zoraCoin__coinAddress',
+  ZoraCoinCreatedAt = 'zoraCoin__createdAt',
+  ZoraCoinCreatedAtBlock = 'zoraCoin__createdAtBlock',
+  ZoraCoinCurrency = 'zoraCoin__currency',
+  ZoraCoinId = 'zoraCoin__id',
+  ZoraCoinName = 'zoraCoin__name',
+  ZoraCoinPayoutRecipient = 'zoraCoin__payoutRecipient',
+  ZoraCoinPlatformReferrer = 'zoraCoin__platformReferrer',
+  ZoraCoinPoolCurrency0 = 'zoraCoin__poolCurrency0',
+  ZoraCoinPoolCurrency1 = 'zoraCoin__poolCurrency1',
+  ZoraCoinPoolFee = 'zoraCoin__poolFee',
+  ZoraCoinPoolHooks = 'zoraCoin__poolHooks',
+  ZoraCoinPoolKeyHash = 'zoraCoin__poolKeyHash',
+  ZoraCoinPoolTickSpacing = 'zoraCoin__poolTickSpacing',
+  ZoraCoinSymbol = 'zoraCoin__symbol',
+  ZoraCoinTransactionHash = 'zoraCoin__transactionHash',
+  ZoraCoinUri = 'zoraCoin__uri',
+  ZoraCoinVersion = 'zoraCoin__version',
 }
 
 export type Token = {
@@ -4516,6 +5790,1453 @@ export enum TreasuryAssetPin_OrderBy {
   TransactionHash = 'transactionHash',
 }
 
+export type ZoraCoin = {
+  __typename?: 'ZoraCoin'
+  caller: Scalars['Bytes']['output']
+  clankerToken?: Maybe<ClankerToken>
+  coinAddress: Scalars['Bytes']['output']
+  createdAt: Scalars['BigInt']['output']
+  createdAtBlock: Scalars['BigInt']['output']
+  currency: Scalars['Bytes']['output']
+  dao?: Maybe<Dao>
+  holders: Array<ZoraCoinHolder>
+  id: Scalars['ID']['output']
+  name: Scalars['String']['output']
+  payoutRecipient: Scalars['Bytes']['output']
+  platformReferrer: Scalars['Bytes']['output']
+  poolCurrency0: Scalars['Bytes']['output']
+  poolCurrency1: Scalars['Bytes']['output']
+  poolFee: Scalars['BigInt']['output']
+  poolHooks: Scalars['Bytes']['output']
+  poolKeyHash: Scalars['Bytes']['output']
+  poolTickSpacing: Scalars['Int']['output']
+  swapRoute?: Maybe<SwapRoute>
+  symbol: Scalars['String']['output']
+  transactionHash: Scalars['Bytes']['output']
+  uri: Scalars['String']['output']
+  version: Scalars['String']['output']
+}
+
+export type ZoraCoinHoldersArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraCoinHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ZoraCoinHolder_Filter>
+}
+
+export type ZoraCoinCreatedEvent = FeedEvent & {
+  __typename?: 'ZoraCoinCreatedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  dao: Dao
+  id: Scalars['ID']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+  zoraCoin: ZoraCoin
+}
+
+export type ZoraCoinCreatedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<ZoraCoinCreatedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ZoraCoinCreatedEvent_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+  zoraCoin?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_?: InputMaybe<ZoraCoin_Filter>
+  zoraCoin_contains?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_gt?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_gte?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraCoin_lt?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_lte?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_contains?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraCoin_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraCoin_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum ZoraCoinCreatedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+  ZoraCoin = 'zoraCoin',
+  ZoraCoinCaller = 'zoraCoin__caller',
+  ZoraCoinCoinAddress = 'zoraCoin__coinAddress',
+  ZoraCoinCreatedAt = 'zoraCoin__createdAt',
+  ZoraCoinCreatedAtBlock = 'zoraCoin__createdAtBlock',
+  ZoraCoinCurrency = 'zoraCoin__currency',
+  ZoraCoinId = 'zoraCoin__id',
+  ZoraCoinName = 'zoraCoin__name',
+  ZoraCoinPayoutRecipient = 'zoraCoin__payoutRecipient',
+  ZoraCoinPlatformReferrer = 'zoraCoin__platformReferrer',
+  ZoraCoinPoolCurrency0 = 'zoraCoin__poolCurrency0',
+  ZoraCoinPoolCurrency1 = 'zoraCoin__poolCurrency1',
+  ZoraCoinPoolFee = 'zoraCoin__poolFee',
+  ZoraCoinPoolHooks = 'zoraCoin__poolHooks',
+  ZoraCoinPoolKeyHash = 'zoraCoin__poolKeyHash',
+  ZoraCoinPoolTickSpacing = 'zoraCoin__poolTickSpacing',
+  ZoraCoinSymbol = 'zoraCoin__symbol',
+  ZoraCoinTransactionHash = 'zoraCoin__transactionHash',
+  ZoraCoinUri = 'zoraCoin__uri',
+  ZoraCoinVersion = 'zoraCoin__version',
+}
+
+export type ZoraCoinHolder = {
+  __typename?: 'ZoraCoinHolder'
+  balance: Scalars['BigInt']['output']
+  coin: ZoraCoin
+  holder: Scalars['Bytes']['output']
+  id: Scalars['ID']['output']
+  updatedAt: Scalars['BigInt']['output']
+  updatedAtBlock: Scalars['BigInt']['output']
+}
+
+export type ZoraCoinHolder_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ZoraCoinHolder_Filter>>>
+  balance?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  balance_lt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_lte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  coin?: InputMaybe<Scalars['String']['input']>
+  coin_?: InputMaybe<ZoraCoin_Filter>
+  coin_contains?: InputMaybe<Scalars['String']['input']>
+  coin_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  coin_ends_with?: InputMaybe<Scalars['String']['input']>
+  coin_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  coin_gt?: InputMaybe<Scalars['String']['input']>
+  coin_gte?: InputMaybe<Scalars['String']['input']>
+  coin_in?: InputMaybe<Array<Scalars['String']['input']>>
+  coin_lt?: InputMaybe<Scalars['String']['input']>
+  coin_lte?: InputMaybe<Scalars['String']['input']>
+  coin_not?: InputMaybe<Scalars['String']['input']>
+  coin_not_contains?: InputMaybe<Scalars['String']['input']>
+  coin_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  coin_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  coin_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  coin_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  coin_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  coin_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  coin_starts_with?: InputMaybe<Scalars['String']['input']>
+  coin_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  holder?: InputMaybe<Scalars['Bytes']['input']>
+  holder_contains?: InputMaybe<Scalars['Bytes']['input']>
+  holder_gt?: InputMaybe<Scalars['Bytes']['input']>
+  holder_gte?: InputMaybe<Scalars['Bytes']['input']>
+  holder_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  holder_lt?: InputMaybe<Scalars['Bytes']['input']>
+  holder_lte?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ZoraCoinHolder_Filter>>>
+  updatedAt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+}
+
+export enum ZoraCoinHolder_OrderBy {
+  Balance = 'balance',
+  Coin = 'coin',
+  CoinCaller = 'coin__caller',
+  CoinCoinAddress = 'coin__coinAddress',
+  CoinCreatedAt = 'coin__createdAt',
+  CoinCreatedAtBlock = 'coin__createdAtBlock',
+  CoinCurrency = 'coin__currency',
+  CoinId = 'coin__id',
+  CoinName = 'coin__name',
+  CoinPayoutRecipient = 'coin__payoutRecipient',
+  CoinPlatformReferrer = 'coin__platformReferrer',
+  CoinPoolCurrency0 = 'coin__poolCurrency0',
+  CoinPoolCurrency1 = 'coin__poolCurrency1',
+  CoinPoolFee = 'coin__poolFee',
+  CoinPoolHooks = 'coin__poolHooks',
+  CoinPoolKeyHash = 'coin__poolKeyHash',
+  CoinPoolTickSpacing = 'coin__poolTickSpacing',
+  CoinSymbol = 'coin__symbol',
+  CoinTransactionHash = 'coin__transactionHash',
+  CoinUri = 'coin__uri',
+  CoinVersion = 'coin__version',
+  Holder = 'holder',
+  Id = 'id',
+  UpdatedAt = 'updatedAt',
+  UpdatedAtBlock = 'updatedAtBlock',
+}
+
+export type ZoraCoin_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ZoraCoin_Filter>>>
+  caller?: InputMaybe<Scalars['Bytes']['input']>
+  caller_contains?: InputMaybe<Scalars['Bytes']['input']>
+  caller_gt?: InputMaybe<Scalars['Bytes']['input']>
+  caller_gte?: InputMaybe<Scalars['Bytes']['input']>
+  caller_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  caller_lt?: InputMaybe<Scalars['Bytes']['input']>
+  caller_lte?: InputMaybe<Scalars['Bytes']['input']>
+  caller_not?: InputMaybe<Scalars['Bytes']['input']>
+  caller_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  caller_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  clankerToken?: InputMaybe<Scalars['String']['input']>
+  clankerToken_?: InputMaybe<ClankerToken_Filter>
+  clankerToken_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_lt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_lte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  coinAddress?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_contains?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_gt?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_gte?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  coinAddress_lt?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_lte?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_not?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  coinAddress_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  createdAt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  currency?: InputMaybe<Scalars['Bytes']['input']>
+  currency_contains?: InputMaybe<Scalars['Bytes']['input']>
+  currency_gt?: InputMaybe<Scalars['Bytes']['input']>
+  currency_gte?: InputMaybe<Scalars['Bytes']['input']>
+  currency_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  currency_lt?: InputMaybe<Scalars['Bytes']['input']>
+  currency_lte?: InputMaybe<Scalars['Bytes']['input']>
+  currency_not?: InputMaybe<Scalars['Bytes']['input']>
+  currency_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  currency_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  holders_?: InputMaybe<ZoraCoinHolder_Filter>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  name?: InputMaybe<Scalars['String']['input']>
+  name_contains?: InputMaybe<Scalars['String']['input']>
+  name_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  name_ends_with?: InputMaybe<Scalars['String']['input']>
+  name_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_gt?: InputMaybe<Scalars['String']['input']>
+  name_gte?: InputMaybe<Scalars['String']['input']>
+  name_in?: InputMaybe<Array<Scalars['String']['input']>>
+  name_lt?: InputMaybe<Scalars['String']['input']>
+  name_lte?: InputMaybe<Scalars['String']['input']>
+  name_not?: InputMaybe<Scalars['String']['input']>
+  name_not_contains?: InputMaybe<Scalars['String']['input']>
+  name_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  name_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  name_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  name_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  name_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_starts_with?: InputMaybe<Scalars['String']['input']>
+  name_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  or?: InputMaybe<Array<InputMaybe<ZoraCoin_Filter>>>
+  payoutRecipient?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_contains?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_gt?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_gte?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  payoutRecipient_lt?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_lte?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_not?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  payoutRecipient_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  platformReferrer?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_contains?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_gt?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_gte?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  platformReferrer_lt?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_lte?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_not?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  platformReferrer_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolCurrency0?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolCurrency0_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency0_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolCurrency1?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolCurrency1_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolCurrency1_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolFee?: InputMaybe<Scalars['BigInt']['input']>
+  poolFee_gt?: InputMaybe<Scalars['BigInt']['input']>
+  poolFee_gte?: InputMaybe<Scalars['BigInt']['input']>
+  poolFee_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  poolFee_lt?: InputMaybe<Scalars['BigInt']['input']>
+  poolFee_lte?: InputMaybe<Scalars['BigInt']['input']>
+  poolFee_not?: InputMaybe<Scalars['BigInt']['input']>
+  poolFee_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  poolHooks?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolHooks_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolHooks_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolKeyHash?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolKeyHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  poolKeyHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  poolTickSpacing?: InputMaybe<Scalars['Int']['input']>
+  poolTickSpacing_gt?: InputMaybe<Scalars['Int']['input']>
+  poolTickSpacing_gte?: InputMaybe<Scalars['Int']['input']>
+  poolTickSpacing_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  poolTickSpacing_lt?: InputMaybe<Scalars['Int']['input']>
+  poolTickSpacing_lte?: InputMaybe<Scalars['Int']['input']>
+  poolTickSpacing_not?: InputMaybe<Scalars['Int']['input']>
+  poolTickSpacing_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  swapRoute_?: InputMaybe<SwapRoute_Filter>
+  symbol?: InputMaybe<Scalars['String']['input']>
+  symbol_contains?: InputMaybe<Scalars['String']['input']>
+  symbol_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_ends_with?: InputMaybe<Scalars['String']['input']>
+  symbol_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_gt?: InputMaybe<Scalars['String']['input']>
+  symbol_gte?: InputMaybe<Scalars['String']['input']>
+  symbol_in?: InputMaybe<Array<Scalars['String']['input']>>
+  symbol_lt?: InputMaybe<Scalars['String']['input']>
+  symbol_lte?: InputMaybe<Scalars['String']['input']>
+  symbol_not?: InputMaybe<Scalars['String']['input']>
+  symbol_not_contains?: InputMaybe<Scalars['String']['input']>
+  symbol_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  symbol_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  symbol_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  symbol_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_starts_with?: InputMaybe<Scalars['String']['input']>
+  symbol_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  uri?: InputMaybe<Scalars['String']['input']>
+  uri_contains?: InputMaybe<Scalars['String']['input']>
+  uri_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  uri_ends_with?: InputMaybe<Scalars['String']['input']>
+  uri_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  uri_gt?: InputMaybe<Scalars['String']['input']>
+  uri_gte?: InputMaybe<Scalars['String']['input']>
+  uri_in?: InputMaybe<Array<Scalars['String']['input']>>
+  uri_lt?: InputMaybe<Scalars['String']['input']>
+  uri_lte?: InputMaybe<Scalars['String']['input']>
+  uri_not?: InputMaybe<Scalars['String']['input']>
+  uri_not_contains?: InputMaybe<Scalars['String']['input']>
+  uri_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  uri_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  uri_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  uri_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  uri_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  uri_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  uri_starts_with?: InputMaybe<Scalars['String']['input']>
+  uri_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  version?: InputMaybe<Scalars['String']['input']>
+  version_contains?: InputMaybe<Scalars['String']['input']>
+  version_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  version_ends_with?: InputMaybe<Scalars['String']['input']>
+  version_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  version_gt?: InputMaybe<Scalars['String']['input']>
+  version_gte?: InputMaybe<Scalars['String']['input']>
+  version_in?: InputMaybe<Array<Scalars['String']['input']>>
+  version_lt?: InputMaybe<Scalars['String']['input']>
+  version_lte?: InputMaybe<Scalars['String']['input']>
+  version_not?: InputMaybe<Scalars['String']['input']>
+  version_not_contains?: InputMaybe<Scalars['String']['input']>
+  version_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  version_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  version_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  version_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  version_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  version_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  version_starts_with?: InputMaybe<Scalars['String']['input']>
+  version_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum ZoraCoin_OrderBy {
+  Caller = 'caller',
+  ClankerToken = 'clankerToken',
+  ClankerTokenCreatedAt = 'clankerToken__createdAt',
+  ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
+  ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
+  ClankerTokenId = 'clankerToken__id',
+  ClankerTokenLocker = 'clankerToken__locker',
+  ClankerTokenMevModule = 'clankerToken__mevModule',
+  ClankerTokenMsgSender = 'clankerToken__msgSender',
+  ClankerTokenPairedToken = 'clankerToken__pairedToken',
+  ClankerTokenPoolHook = 'clankerToken__poolHook',
+  ClankerTokenPoolId = 'clankerToken__poolId',
+  ClankerTokenStartingTick = 'clankerToken__startingTick',
+  ClankerTokenTokenAddress = 'clankerToken__tokenAddress',
+  ClankerTokenTokenAdmin = 'clankerToken__tokenAdmin',
+  ClankerTokenTokenContext = 'clankerToken__tokenContext',
+  ClankerTokenTokenImage = 'clankerToken__tokenImage',
+  ClankerTokenTokenMetadata = 'clankerToken__tokenMetadata',
+  ClankerTokenTokenName = 'clankerToken__tokenName',
+  ClankerTokenTokenSymbol = 'clankerToken__tokenSymbol',
+  ClankerTokenTransactionHash = 'clankerToken__transactionHash',
+  CoinAddress = 'coinAddress',
+  CreatedAt = 'createdAt',
+  CreatedAtBlock = 'createdAtBlock',
+  Currency = 'currency',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Holders = 'holders',
+  Id = 'id',
+  Name = 'name',
+  PayoutRecipient = 'payoutRecipient',
+  PlatformReferrer = 'platformReferrer',
+  PoolCurrency0 = 'poolCurrency0',
+  PoolCurrency1 = 'poolCurrency1',
+  PoolFee = 'poolFee',
+  PoolHooks = 'poolHooks',
+  PoolKeyHash = 'poolKeyHash',
+  PoolTickSpacing = 'poolTickSpacing',
+  SwapRoute = 'swapRoute',
+  SwapRouteCoinAddress = 'swapRoute__coinAddress',
+  SwapRouteCreatedAt = 'swapRoute__createdAt',
+  SwapRouteId = 'swapRoute__id',
+  SwapRouteUpdatedAt = 'swapRoute__updatedAt',
+  Symbol = 'symbol',
+  TransactionHash = 'transactionHash',
+  Uri = 'uri',
+  Version = 'version',
+}
+
+export type ZoraDrop = {
+  __typename?: 'ZoraDrop'
+  animationURI: Scalars['String']['output']
+  createdAt: Scalars['BigInt']['output']
+  createdAtBlock: Scalars['BigInt']['output']
+  creator: Scalars['Bytes']['output']
+  dao?: Maybe<Dao>
+  description: Scalars['String']['output']
+  editionSize: Scalars['BigInt']['output']
+  fundsRecipient: Scalars['Bytes']['output']
+  holders: Array<ZoraDropHolder>
+  id: Scalars['ID']['output']
+  imageURI: Scalars['String']['output']
+  maxSalePurchasePerAddress: Scalars['BigInt']['output']
+  metadataRenderer: Scalars['Bytes']['output']
+  mintComments: Array<ZoraDropMintComment>
+  name: Scalars['String']['output']
+  presaleEnd: Scalars['BigInt']['output']
+  presaleMerkleRoot: Scalars['Bytes']['output']
+  presaleStart: Scalars['BigInt']['output']
+  publicSaleEnd: Scalars['BigInt']['output']
+  publicSalePrice: Scalars['BigInt']['output']
+  publicSaleStart: Scalars['BigInt']['output']
+  royaltyBPS: Scalars['Int']['output']
+  symbol: Scalars['String']['output']
+  totalSalesAmount: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+}
+
+export type ZoraDropHoldersArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ZoraDropHolder_Filter>
+}
+
+export type ZoraDropMintCommentsArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropMintComment_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<ZoraDropMintComment_Filter>
+}
+
+export type ZoraDropCreatedEvent = FeedEvent & {
+  __typename?: 'ZoraDropCreatedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  dao: Dao
+  id: Scalars['ID']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+  zoraDrop: ZoraDrop
+}
+
+export type ZoraDropCreatedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<ZoraDropCreatedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ZoraDropCreatedEvent_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+  zoraDrop?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_?: InputMaybe<ZoraDrop_Filter>
+  zoraDrop_contains?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_gt?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_gte?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraDrop_lt?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_lte?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_contains?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  zoraDrop_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_starts_with?: InputMaybe<Scalars['String']['input']>
+  zoraDrop_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum ZoraDropCreatedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+  ZoraDrop = 'zoraDrop',
+  ZoraDropAnimationUri = 'zoraDrop__animationURI',
+  ZoraDropCreatedAt = 'zoraDrop__createdAt',
+  ZoraDropCreatedAtBlock = 'zoraDrop__createdAtBlock',
+  ZoraDropCreator = 'zoraDrop__creator',
+  ZoraDropDescription = 'zoraDrop__description',
+  ZoraDropEditionSize = 'zoraDrop__editionSize',
+  ZoraDropFundsRecipient = 'zoraDrop__fundsRecipient',
+  ZoraDropId = 'zoraDrop__id',
+  ZoraDropImageUri = 'zoraDrop__imageURI',
+  ZoraDropMaxSalePurchasePerAddress = 'zoraDrop__maxSalePurchasePerAddress',
+  ZoraDropMetadataRenderer = 'zoraDrop__metadataRenderer',
+  ZoraDropName = 'zoraDrop__name',
+  ZoraDropPresaleEnd = 'zoraDrop__presaleEnd',
+  ZoraDropPresaleMerkleRoot = 'zoraDrop__presaleMerkleRoot',
+  ZoraDropPresaleStart = 'zoraDrop__presaleStart',
+  ZoraDropPublicSaleEnd = 'zoraDrop__publicSaleEnd',
+  ZoraDropPublicSalePrice = 'zoraDrop__publicSalePrice',
+  ZoraDropPublicSaleStart = 'zoraDrop__publicSaleStart',
+  ZoraDropRoyaltyBps = 'zoraDrop__royaltyBPS',
+  ZoraDropSymbol = 'zoraDrop__symbol',
+  ZoraDropTotalSalesAmount = 'zoraDrop__totalSalesAmount',
+  ZoraDropTransactionHash = 'zoraDrop__transactionHash',
+}
+
+export type ZoraDropHolder = {
+  __typename?: 'ZoraDropHolder'
+  balance: Scalars['BigInt']['output']
+  drop: ZoraDrop
+  holder: Scalars['Bytes']['output']
+  id: Scalars['ID']['output']
+  totalPurchased: Scalars['BigInt']['output']
+  totalSpent: Scalars['BigInt']['output']
+  updatedAt: Scalars['BigInt']['output']
+  updatedAtBlock: Scalars['BigInt']['output']
+}
+
+export type ZoraDropHolder_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ZoraDropHolder_Filter>>>
+  balance?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_gte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  balance_lt?: InputMaybe<Scalars['BigInt']['input']>
+  balance_lte?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not?: InputMaybe<Scalars['BigInt']['input']>
+  balance_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  drop?: InputMaybe<Scalars['String']['input']>
+  drop_?: InputMaybe<ZoraDrop_Filter>
+  drop_contains?: InputMaybe<Scalars['String']['input']>
+  drop_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_ends_with?: InputMaybe<Scalars['String']['input']>
+  drop_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_gt?: InputMaybe<Scalars['String']['input']>
+  drop_gte?: InputMaybe<Scalars['String']['input']>
+  drop_in?: InputMaybe<Array<Scalars['String']['input']>>
+  drop_lt?: InputMaybe<Scalars['String']['input']>
+  drop_lte?: InputMaybe<Scalars['String']['input']>
+  drop_not?: InputMaybe<Scalars['String']['input']>
+  drop_not_contains?: InputMaybe<Scalars['String']['input']>
+  drop_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  drop_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  drop_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  drop_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_starts_with?: InputMaybe<Scalars['String']['input']>
+  drop_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  holder?: InputMaybe<Scalars['Bytes']['input']>
+  holder_contains?: InputMaybe<Scalars['Bytes']['input']>
+  holder_gt?: InputMaybe<Scalars['Bytes']['input']>
+  holder_gte?: InputMaybe<Scalars['Bytes']['input']>
+  holder_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  holder_lt?: InputMaybe<Scalars['Bytes']['input']>
+  holder_lte?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  holder_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ZoraDropHolder_Filter>>>
+  totalPurchased?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_gt?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_gte?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalPurchased_lt?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_lte?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_not?: InputMaybe<Scalars['BigInt']['input']>
+  totalPurchased_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalSpent?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_gt?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_gte?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalSpent_lt?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_lte?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_not?: InputMaybe<Scalars['BigInt']['input']>
+  totalSpent_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  updatedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  updatedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+}
+
+export enum ZoraDropHolder_OrderBy {
+  Balance = 'balance',
+  Drop = 'drop',
+  DropAnimationUri = 'drop__animationURI',
+  DropCreatedAt = 'drop__createdAt',
+  DropCreatedAtBlock = 'drop__createdAtBlock',
+  DropCreator = 'drop__creator',
+  DropDescription = 'drop__description',
+  DropEditionSize = 'drop__editionSize',
+  DropFundsRecipient = 'drop__fundsRecipient',
+  DropId = 'drop__id',
+  DropImageUri = 'drop__imageURI',
+  DropMaxSalePurchasePerAddress = 'drop__maxSalePurchasePerAddress',
+  DropMetadataRenderer = 'drop__metadataRenderer',
+  DropName = 'drop__name',
+  DropPresaleEnd = 'drop__presaleEnd',
+  DropPresaleMerkleRoot = 'drop__presaleMerkleRoot',
+  DropPresaleStart = 'drop__presaleStart',
+  DropPublicSaleEnd = 'drop__publicSaleEnd',
+  DropPublicSalePrice = 'drop__publicSalePrice',
+  DropPublicSaleStart = 'drop__publicSaleStart',
+  DropRoyaltyBps = 'drop__royaltyBPS',
+  DropSymbol = 'drop__symbol',
+  DropTotalSalesAmount = 'drop__totalSalesAmount',
+  DropTransactionHash = 'drop__transactionHash',
+  Holder = 'holder',
+  Id = 'id',
+  TotalPurchased = 'totalPurchased',
+  TotalSpent = 'totalSpent',
+  UpdatedAt = 'updatedAt',
+  UpdatedAtBlock = 'updatedAtBlock',
+}
+
+export type ZoraDropMintComment = {
+  __typename?: 'ZoraDropMintComment'
+  blockNumber: Scalars['BigInt']['output']
+  comment: Scalars['String']['output']
+  drop: ZoraDrop
+  id: Scalars['ID']['output']
+  quantity: Scalars['BigInt']['output']
+  sender: Scalars['Bytes']['output']
+  timestamp: Scalars['BigInt']['output']
+  tokenId: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+}
+
+export type ZoraDropMintComment_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ZoraDropMintComment_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  comment?: InputMaybe<Scalars['String']['input']>
+  comment_contains?: InputMaybe<Scalars['String']['input']>
+  comment_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_ends_with?: InputMaybe<Scalars['String']['input']>
+  comment_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_gt?: InputMaybe<Scalars['String']['input']>
+  comment_gte?: InputMaybe<Scalars['String']['input']>
+  comment_in?: InputMaybe<Array<Scalars['String']['input']>>
+  comment_lt?: InputMaybe<Scalars['String']['input']>
+  comment_lte?: InputMaybe<Scalars['String']['input']>
+  comment_not?: InputMaybe<Scalars['String']['input']>
+  comment_not_contains?: InputMaybe<Scalars['String']['input']>
+  comment_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  comment_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  comment_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  comment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_starts_with?: InputMaybe<Scalars['String']['input']>
+  comment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop?: InputMaybe<Scalars['String']['input']>
+  drop_?: InputMaybe<ZoraDrop_Filter>
+  drop_contains?: InputMaybe<Scalars['String']['input']>
+  drop_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_ends_with?: InputMaybe<Scalars['String']['input']>
+  drop_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_gt?: InputMaybe<Scalars['String']['input']>
+  drop_gte?: InputMaybe<Scalars['String']['input']>
+  drop_in?: InputMaybe<Array<Scalars['String']['input']>>
+  drop_lt?: InputMaybe<Scalars['String']['input']>
+  drop_lte?: InputMaybe<Scalars['String']['input']>
+  drop_not?: InputMaybe<Scalars['String']['input']>
+  drop_not_contains?: InputMaybe<Scalars['String']['input']>
+  drop_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  drop_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  drop_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  drop_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  drop_starts_with?: InputMaybe<Scalars['String']['input']>
+  drop_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ZoraDropMintComment_Filter>>>
+  quantity?: InputMaybe<Scalars['BigInt']['input']>
+  quantity_gt?: InputMaybe<Scalars['BigInt']['input']>
+  quantity_gte?: InputMaybe<Scalars['BigInt']['input']>
+  quantity_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  quantity_lt?: InputMaybe<Scalars['BigInt']['input']>
+  quantity_lte?: InputMaybe<Scalars['BigInt']['input']>
+  quantity_not?: InputMaybe<Scalars['BigInt']['input']>
+  quantity_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  sender?: InputMaybe<Scalars['Bytes']['input']>
+  sender_contains?: InputMaybe<Scalars['Bytes']['input']>
+  sender_gt?: InputMaybe<Scalars['Bytes']['input']>
+  sender_gte?: InputMaybe<Scalars['Bytes']['input']>
+  sender_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  sender_lt?: InputMaybe<Scalars['Bytes']['input']>
+  sender_lte?: InputMaybe<Scalars['Bytes']['input']>
+  sender_not?: InputMaybe<Scalars['Bytes']['input']>
+  sender_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  sender_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  tokenId?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_gt?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_gte?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  tokenId_lt?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_lte?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_not?: InputMaybe<Scalars['BigInt']['input']>
+  tokenId_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum ZoraDropMintComment_OrderBy {
+  BlockNumber = 'blockNumber',
+  Comment = 'comment',
+  Drop = 'drop',
+  DropAnimationUri = 'drop__animationURI',
+  DropCreatedAt = 'drop__createdAt',
+  DropCreatedAtBlock = 'drop__createdAtBlock',
+  DropCreator = 'drop__creator',
+  DropDescription = 'drop__description',
+  DropEditionSize = 'drop__editionSize',
+  DropFundsRecipient = 'drop__fundsRecipient',
+  DropId = 'drop__id',
+  DropImageUri = 'drop__imageURI',
+  DropMaxSalePurchasePerAddress = 'drop__maxSalePurchasePerAddress',
+  DropMetadataRenderer = 'drop__metadataRenderer',
+  DropName = 'drop__name',
+  DropPresaleEnd = 'drop__presaleEnd',
+  DropPresaleMerkleRoot = 'drop__presaleMerkleRoot',
+  DropPresaleStart = 'drop__presaleStart',
+  DropPublicSaleEnd = 'drop__publicSaleEnd',
+  DropPublicSalePrice = 'drop__publicSalePrice',
+  DropPublicSaleStart = 'drop__publicSaleStart',
+  DropRoyaltyBps = 'drop__royaltyBPS',
+  DropSymbol = 'drop__symbol',
+  DropTotalSalesAmount = 'drop__totalSalesAmount',
+  DropTransactionHash = 'drop__transactionHash',
+  Id = 'id',
+  Quantity = 'quantity',
+  Sender = 'sender',
+  Timestamp = 'timestamp',
+  TokenId = 'tokenId',
+  TransactionHash = 'transactionHash',
+}
+
+export type ZoraDrop_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ZoraDrop_Filter>>>
+  animationURI?: InputMaybe<Scalars['String']['input']>
+  animationURI_contains?: InputMaybe<Scalars['String']['input']>
+  animationURI_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_ends_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_gt?: InputMaybe<Scalars['String']['input']>
+  animationURI_gte?: InputMaybe<Scalars['String']['input']>
+  animationURI_in?: InputMaybe<Array<Scalars['String']['input']>>
+  animationURI_lt?: InputMaybe<Scalars['String']['input']>
+  animationURI_lte?: InputMaybe<Scalars['String']['input']>
+  animationURI_not?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_contains?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  animationURI_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  animationURI_starts_with?: InputMaybe<Scalars['String']['input']>
+  animationURI_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  createdAt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAtBlock_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAtBlock_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  createdAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  createdAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  creator?: InputMaybe<Scalars['Bytes']['input']>
+  creator_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_gte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  creator_lt?: InputMaybe<Scalars['Bytes']['input']>
+  creator_lte?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  creator_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description?: InputMaybe<Scalars['String']['input']>
+  description_contains?: InputMaybe<Scalars['String']['input']>
+  description_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  description_ends_with?: InputMaybe<Scalars['String']['input']>
+  description_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_gt?: InputMaybe<Scalars['String']['input']>
+  description_gte?: InputMaybe<Scalars['String']['input']>
+  description_in?: InputMaybe<Array<Scalars['String']['input']>>
+  description_lt?: InputMaybe<Scalars['String']['input']>
+  description_lte?: InputMaybe<Scalars['String']['input']>
+  description_not?: InputMaybe<Scalars['String']['input']>
+  description_not_contains?: InputMaybe<Scalars['String']['input']>
+  description_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  description_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  description_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  description_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  description_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_starts_with?: InputMaybe<Scalars['String']['input']>
+  description_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  editionSize?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_gt?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_gte?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  editionSize_lt?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_lte?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_not?: InputMaybe<Scalars['BigInt']['input']>
+  editionSize_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  fundsRecipient?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_contains?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_gt?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_gte?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  fundsRecipient_lt?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_lte?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_not?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  fundsRecipient_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  holders_?: InputMaybe<ZoraDropHolder_Filter>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  imageURI?: InputMaybe<Scalars['String']['input']>
+  imageURI_contains?: InputMaybe<Scalars['String']['input']>
+  imageURI_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_ends_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_gt?: InputMaybe<Scalars['String']['input']>
+  imageURI_gte?: InputMaybe<Scalars['String']['input']>
+  imageURI_in?: InputMaybe<Array<Scalars['String']['input']>>
+  imageURI_lt?: InputMaybe<Scalars['String']['input']>
+  imageURI_lte?: InputMaybe<Scalars['String']['input']>
+  imageURI_not?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_contains?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  imageURI_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  imageURI_starts_with?: InputMaybe<Scalars['String']['input']>
+  imageURI_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  maxSalePurchasePerAddress?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_gt?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_gte?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  maxSalePurchasePerAddress_lt?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_lte?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_not?: InputMaybe<Scalars['BigInt']['input']>
+  maxSalePurchasePerAddress_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  metadataRenderer?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_contains?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_gt?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_gte?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  metadataRenderer_lt?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_lte?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_not?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  metadataRenderer_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  mintComments_?: InputMaybe<ZoraDropMintComment_Filter>
+  name?: InputMaybe<Scalars['String']['input']>
+  name_contains?: InputMaybe<Scalars['String']['input']>
+  name_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  name_ends_with?: InputMaybe<Scalars['String']['input']>
+  name_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_gt?: InputMaybe<Scalars['String']['input']>
+  name_gte?: InputMaybe<Scalars['String']['input']>
+  name_in?: InputMaybe<Array<Scalars['String']['input']>>
+  name_lt?: InputMaybe<Scalars['String']['input']>
+  name_lte?: InputMaybe<Scalars['String']['input']>
+  name_not?: InputMaybe<Scalars['String']['input']>
+  name_not_contains?: InputMaybe<Scalars['String']['input']>
+  name_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  name_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  name_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  name_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  name_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  name_starts_with?: InputMaybe<Scalars['String']['input']>
+  name_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  or?: InputMaybe<Array<InputMaybe<ZoraDrop_Filter>>>
+  presaleEnd?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_gt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_gte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  presaleEnd_lt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_lte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_not?: InputMaybe<Scalars['BigInt']['input']>
+  presaleEnd_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  presaleMerkleRoot?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_contains?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_gt?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_gte?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  presaleMerkleRoot_lt?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_lte?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_not?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  presaleMerkleRoot_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  presaleStart?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_gt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_gte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  presaleStart_lt?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_lte?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_not?: InputMaybe<Scalars['BigInt']['input']>
+  presaleStart_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleEnd?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_gt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_gte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleEnd_lt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_lte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_not?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleEnd_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSalePrice?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_gt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_gte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSalePrice_lt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_lte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_not?: InputMaybe<Scalars['BigInt']['input']>
+  publicSalePrice_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleStart?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_gt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_gte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  publicSaleStart_lt?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_lte?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_not?: InputMaybe<Scalars['BigInt']['input']>
+  publicSaleStart_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  royaltyBPS?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_gt?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_gte?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  royaltyBPS_lt?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_lte?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_not?: InputMaybe<Scalars['Int']['input']>
+  royaltyBPS_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  symbol?: InputMaybe<Scalars['String']['input']>
+  symbol_contains?: InputMaybe<Scalars['String']['input']>
+  symbol_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_ends_with?: InputMaybe<Scalars['String']['input']>
+  symbol_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_gt?: InputMaybe<Scalars['String']['input']>
+  symbol_gte?: InputMaybe<Scalars['String']['input']>
+  symbol_in?: InputMaybe<Array<Scalars['String']['input']>>
+  symbol_lt?: InputMaybe<Scalars['String']['input']>
+  symbol_lte?: InputMaybe<Scalars['String']['input']>
+  symbol_not?: InputMaybe<Scalars['String']['input']>
+  symbol_not_contains?: InputMaybe<Scalars['String']['input']>
+  symbol_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  symbol_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  symbol_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  symbol_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  symbol_starts_with?: InputMaybe<Scalars['String']['input']>
+  symbol_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  totalSalesAmount?: InputMaybe<Scalars['BigInt']['input']>
+  totalSalesAmount_gt?: InputMaybe<Scalars['BigInt']['input']>
+  totalSalesAmount_gte?: InputMaybe<Scalars['BigInt']['input']>
+  totalSalesAmount_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  totalSalesAmount_lt?: InputMaybe<Scalars['BigInt']['input']>
+  totalSalesAmount_lte?: InputMaybe<Scalars['BigInt']['input']>
+  totalSalesAmount_not?: InputMaybe<Scalars['BigInt']['input']>
+  totalSalesAmount_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+}
+
+export enum ZoraDrop_OrderBy {
+  AnimationUri = 'animationURI',
+  CreatedAt = 'createdAt',
+  CreatedAtBlock = 'createdAtBlock',
+  Creator = 'creator',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Description = 'description',
+  EditionSize = 'editionSize',
+  FundsRecipient = 'fundsRecipient',
+  Holders = 'holders',
+  Id = 'id',
+  ImageUri = 'imageURI',
+  MaxSalePurchasePerAddress = 'maxSalePurchasePerAddress',
+  MetadataRenderer = 'metadataRenderer',
+  MintComments = 'mintComments',
+  Name = 'name',
+  PresaleEnd = 'presaleEnd',
+  PresaleMerkleRoot = 'presaleMerkleRoot',
+  PresaleStart = 'presaleStart',
+  PublicSaleEnd = 'publicSaleEnd',
+  PublicSalePrice = 'publicSalePrice',
+  PublicSaleStart = 'publicSaleStart',
+  RoyaltyBps = 'royaltyBPS',
+  Symbol = 'symbol',
+  TotalSalesAmount = 'totalSalesAmount',
+  TransactionHash = 'transactionHash',
+}
+
 export type _Block_ = {
   __typename?: '_Block_'
   /** The hash of the block */
@@ -4561,6 +7282,24 @@ export type AuctionBidFragment = {
   id: string
   amount: any
   bidder: any
+}
+
+export type ClankerTokenFragment = {
+  __typename?: 'ClankerToken'
+  id: string
+  tokenAddress: any
+  tokenName: string
+  tokenSymbol: string
+  tokenImage: string
+  tokenMetadata: string
+  pairedToken: any
+  poolId: any
+  poolHook: any
+  createdAt: any
+  createdAtBlock: any
+  transactionHash: any
+  msgSender: any
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
 }
 
 export type CurrentAuctionFragment = {
@@ -4650,6 +7389,75 @@ export type TokenFragment = {
   dao: { __typename?: 'DAO'; description: string }
 }
 
+export type ZoraCoinFragment = {
+  __typename?: 'ZoraCoin'
+  id: string
+  coinAddress: any
+  name: string
+  symbol: string
+  uri: string
+  currency: any
+  poolKeyHash: any
+  poolHooks: any
+  poolFee: any
+  poolTickSpacing: number
+  createdAt: any
+  createdAtBlock: any
+  transactionHash: any
+  caller: any
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+  clankerToken?: {
+    __typename?: 'ClankerToken'
+    tokenAddress: any
+    tokenName: string
+    tokenSymbol: string
+  } | null
+}
+
+export type ZoraDropFragment = {
+  __typename?: 'ZoraDrop'
+  id: string
+  creator: any
+  editionSize: any
+  metadataRenderer: any
+  royaltyBPS: number
+  fundsRecipient: any
+  publicSalePrice: any
+  maxSalePurchasePerAddress: any
+  publicSaleStart: any
+  publicSaleEnd: any
+  presaleStart: any
+  presaleEnd: any
+  presaleMerkleRoot: any
+  name: string
+  symbol: string
+  description: string
+  imageURI: string
+  animationURI: string
+  createdAt: any
+  createdAtBlock: any
+  transactionHash: any
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+}
+
+export type ZoraDropHolderFragment = {
+  __typename?: 'ZoraDropHolder'
+  id: string
+  holder: any
+  balance: any
+  totalSpent: any
+  totalPurchased: any
+  updatedAt: any
+  updatedAtBlock: any
+  drop: {
+    __typename?: 'ZoraDrop'
+    id: string
+    name: string
+    symbol: string
+    imageURI: string
+  }
+}
+
 export type DaoMultisigUpdateFragment = {
   __typename?: 'DaoMultisigUpdate'
   id: string
@@ -4728,6 +7536,64 @@ export type AuctionHistoryQuery = {
       endTime: any
       settled: boolean
       winningBid?: { __typename?: 'AuctionBid'; amount: any } | null
+    }>
+  } | null
+}
+
+export type ClankerTokenQueryVariables = Exact<{
+  tokenAddress: Scalars['ID']['input']
+}>
+
+export type ClankerTokenQuery = {
+  __typename?: 'Query'
+  clankerToken?: {
+    __typename?: 'ClankerToken'
+    id: string
+    tokenAddress: any
+    tokenName: string
+    tokenSymbol: string
+    tokenImage: string
+    tokenMetadata: string
+    pairedToken: any
+    poolId: any
+    poolHook: any
+    createdAt: any
+    createdAtBlock: any
+    transactionHash: any
+    msgSender: any
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+  } | null
+}
+
+export type DaoClankerTokensQueryVariables = Exact<{
+  daoId: Scalars['ID']['input']
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerToken_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type DaoClankerTokensQuery = {
+  __typename?: 'Query'
+  dao?: {
+    __typename?: 'DAO'
+    id: string
+    clankerTokens: Array<{
+      __typename?: 'ClankerToken'
+      id: string
+      tokenAddress: any
+      tokenName: string
+      tokenSymbol: string
+      tokenImage: string
+      tokenMetadata: string
+      pairedToken: any
+      poolId: any
+      poolHook: any
+      createdAt: any
+      createdAtBlock: any
+      transactionHash: any
+      msgSender: any
+      dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
     }>
   } | null
 }
@@ -4941,6 +7807,87 @@ export type DaoVotersQuery = {
   }>
 }
 
+export type DaoZoraCoinsQueryVariables = Exact<{
+  daoId: Scalars['ID']['input']
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraCoin_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type DaoZoraCoinsQuery = {
+  __typename?: 'Query'
+  dao?: {
+    __typename?: 'DAO'
+    id: string
+    zoraCoins: Array<{
+      __typename?: 'ZoraCoin'
+      id: string
+      coinAddress: any
+      name: string
+      symbol: string
+      uri: string
+      currency: any
+      poolKeyHash: any
+      poolHooks: any
+      poolFee: any
+      poolTickSpacing: number
+      createdAt: any
+      createdAtBlock: any
+      transactionHash: any
+      caller: any
+      dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+      clankerToken?: {
+        __typename?: 'ClankerToken'
+        tokenAddress: any
+        tokenName: string
+        tokenSymbol: string
+      } | null
+    }>
+  } | null
+}
+
+export type DaoZoraDropsQueryVariables = Exact<{
+  daoId: Scalars['ID']['input']
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDrop_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type DaoZoraDropsQuery = {
+  __typename?: 'Query'
+  dao?: {
+    __typename?: 'DAO'
+    id: string
+    zoraDrops: Array<{
+      __typename?: 'ZoraDrop'
+      id: string
+      creator: any
+      editionSize: any
+      metadataRenderer: any
+      royaltyBPS: number
+      fundsRecipient: any
+      publicSalePrice: any
+      maxSalePurchasePerAddress: any
+      publicSaleStart: any
+      publicSaleEnd: any
+      presaleStart: any
+      presaleEnd: any
+      presaleMerkleRoot: any
+      name: string
+      symbol: string
+      description: string
+      imageURI: string
+      animationURI: string
+      createdAt: any
+      createdAtBlock: any
+      transactionHash: any
+      dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+    }>
+  } | null
+}
+
 export type DaosForDashboardQueryVariables = Exact<{
   user: Scalars['Bytes']['input']
   first?: InputMaybe<Scalars['Int']['input']>
@@ -5019,6 +7966,19 @@ export type DaosForUserQuery = {
     treasuryAddress: any
     auctionAddress: any
     governorAddress: any
+  }>
+}
+
+export type DaosWithClankerTokensQueryVariables = Exact<{
+  daoIds: Array<Scalars['ID']['input']> | Scalars['ID']['input']
+}>
+
+export type DaosWithClankerTokensQuery = {
+  __typename?: 'Query'
+  daos: Array<{
+    __typename?: 'DAO'
+    id: string
+    clankerTokens: Array<{ __typename?: 'ClankerToken'; id: string }>
   }>
 }
 
@@ -5117,6 +8077,34 @@ export type FeedEventsQuery = {
             name: string
             image?: string | null
           }
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ClankerTokenCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        clankerToken: {
+          __typename?: 'ClankerToken'
+          tokenAddress: any
+          tokenName: string
+          tokenSymbol: string
+          tokenImage: string
+          poolId: any
         }
         dao: {
           __typename?: 'DAO'
@@ -5258,6 +8246,75 @@ export type FeedEventsQuery = {
           contractImage: string
         }
       }
+    | {
+        __typename: 'ZoraCoinCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        zoraCoin: {
+          __typename?: 'ZoraCoin'
+          coinAddress: any
+          name: string
+          symbol: string
+          uri: string
+          currency: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ZoraDropCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        zoraDrop: {
+          __typename?: 'ZoraDrop'
+          id: string
+          creator: any
+          name: string
+          symbol: string
+          description: string
+          imageURI: string
+          animationURI: string
+          editionSize: any
+          metadataRenderer: any
+          royaltyBPS: number
+          fundsRecipient: any
+          publicSalePrice: any
+          maxSalePurchasePerAddress: any
+          publicSaleStart: any
+          publicSaleEnd: any
+          presaleStart: any
+          presaleEnd: any
+          presaleMerkleRoot: any
+        }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
   >
 }
 
@@ -5370,6 +8427,22 @@ export type ProposalQuery = {
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
   } | null
+}
+
+export type ProposalByExecutionTxHashQueryVariables = Exact<{
+  executionTransactionHash: Scalars['Bytes']['input']
+}>
+
+export type ProposalByExecutionTxHashQuery = {
+  __typename?: 'Query'
+  proposals: Array<{
+    __typename?: 'Proposal'
+    proposer: any
+    proposalId: any
+    proposalNumber: number
+    title?: string | null
+    dao: { __typename?: 'DAO'; id: string; name: string; contractImage: string }
+  }>
 }
 
 export type ProposalOgMetadataQueryVariables = Exact<{
@@ -5601,6 +8674,125 @@ export type UserProposalVoteQuery = {
   }>
 }
 
+export type ZoraCoinQueryVariables = Exact<{
+  coinAddress: Scalars['ID']['input']
+}>
+
+export type ZoraCoinQuery = {
+  __typename?: 'Query'
+  zoraCoin?: {
+    __typename?: 'ZoraCoin'
+    id: string
+    coinAddress: any
+    name: string
+    symbol: string
+    uri: string
+    currency: any
+    poolKeyHash: any
+    poolHooks: any
+    poolFee: any
+    poolTickSpacing: number
+    createdAt: any
+    createdAtBlock: any
+    transactionHash: any
+    caller: any
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+    clankerToken?: {
+      __typename?: 'ClankerToken'
+      tokenAddress: any
+      tokenName: string
+      tokenSymbol: string
+    } | null
+  } | null
+}
+
+export type ZoraDropQueryVariables = Exact<{
+  dropAddress: Scalars['ID']['input']
+}>
+
+export type ZoraDropQuery = {
+  __typename?: 'Query'
+  zoraDrop?: {
+    __typename?: 'ZoraDrop'
+    id: string
+    creator: any
+    editionSize: any
+    metadataRenderer: any
+    royaltyBPS: number
+    fundsRecipient: any
+    publicSalePrice: any
+    maxSalePurchasePerAddress: any
+    publicSaleStart: any
+    publicSaleEnd: any
+    presaleStart: any
+    presaleEnd: any
+    presaleMerkleRoot: any
+    name: string
+    symbol: string
+    description: string
+    imageURI: string
+    animationURI: string
+    createdAt: any
+    createdAtBlock: any
+    transactionHash: any
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+  } | null
+}
+
+export type ZoraDropHolderQueryVariables = Exact<{
+  id: Scalars['ID']['input']
+}>
+
+export type ZoraDropHolderQuery = {
+  __typename?: 'Query'
+  zoraDropHolder?: {
+    __typename?: 'ZoraDropHolder'
+    id: string
+    holder: any
+    balance: any
+    totalSpent: any
+    totalPurchased: any
+    updatedAt: any
+    updatedAtBlock: any
+    drop: {
+      __typename?: 'ZoraDrop'
+      id: string
+      name: string
+      symbol: string
+      imageURI: string
+    }
+  } | null
+}
+
+export type ZoraDropHoldersQueryVariables = Exact<{
+  where?: InputMaybe<ZoraDropHolder_Filter>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraDropHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type ZoraDropHoldersQuery = {
+  __typename?: 'Query'
+  zoraDropHolders: Array<{
+    __typename?: 'ZoraDropHolder'
+    id: string
+    holder: any
+    balance: any
+    totalSpent: any
+    totalPurchased: any
+    updatedAt: any
+    updatedAtBlock: any
+    drop: {
+      __typename?: 'ZoraDrop'
+      id: string
+      name: string
+      symbol: string
+      imageURI: string
+    }
+  }>
+}
+
 export const AuctionFragmentDoc = gql`
   fragment Auction on Auction {
     dao {
@@ -5615,6 +8807,28 @@ export const AuctionBidFragmentDoc = gql`
     id
     amount
     bidder
+  }
+`
+export const ClankerTokenFragmentDoc = gql`
+  fragment ClankerToken on ClankerToken {
+    id
+    tokenAddress
+    tokenName
+    tokenSymbol
+    tokenImage
+    tokenMetadata
+    pairedToken
+    poolId
+    poolHook
+    createdAt
+    createdAtBlock
+    transactionHash
+    msgSender
+    dao {
+      id
+      name
+      contractImage
+    }
   }
 `
 export const CurrentAuctionFragmentDoc = gql`
@@ -5729,6 +8943,81 @@ export const TokenFragmentDoc = gql`
     mintedAt
   }
 `
+export const ZoraCoinFragmentDoc = gql`
+  fragment ZoraCoin on ZoraCoin {
+    id
+    coinAddress
+    name
+    symbol
+    uri
+    currency
+    poolKeyHash
+    poolHooks
+    poolFee
+    poolTickSpacing
+    createdAt
+    createdAtBlock
+    transactionHash
+    caller
+    dao {
+      id
+      name
+      contractImage
+    }
+    clankerToken {
+      tokenAddress
+      tokenName
+      tokenSymbol
+    }
+  }
+`
+export const ZoraDropFragmentDoc = gql`
+  fragment ZoraDrop on ZoraDrop {
+    id
+    creator
+    editionSize
+    metadataRenderer
+    royaltyBPS
+    fundsRecipient
+    publicSalePrice
+    maxSalePurchasePerAddress
+    publicSaleStart
+    publicSaleEnd
+    presaleStart
+    presaleEnd
+    presaleMerkleRoot
+    name
+    symbol
+    description
+    imageURI
+    animationURI
+    createdAt
+    createdAtBlock
+    transactionHash
+    dao {
+      id
+      name
+      contractImage
+    }
+  }
+`
+export const ZoraDropHolderFragmentDoc = gql`
+  fragment ZoraDropHolder on ZoraDropHolder {
+    id
+    holder
+    balance
+    totalSpent
+    totalPurchased
+    updatedAt
+    updatedAtBlock
+    drop {
+      id
+      name
+      symbol
+      imageURI
+    }
+  }
+`
 export const DaoMultisigUpdateFragmentDoc = gql`
   fragment DaoMultisigUpdate on DaoMultisigUpdate {
     id
@@ -5798,6 +9087,36 @@ export const AuctionHistoryDocument = gql`
       }
     }
   }
+`
+export const ClankerTokenDocument = gql`
+  query clankerToken($tokenAddress: ID!) {
+    clankerToken(id: $tokenAddress) {
+      ...ClankerToken
+    }
+  }
+  ${ClankerTokenFragmentDoc}
+`
+export const DaoClankerTokensDocument = gql`
+  query daoClankerTokens(
+    $daoId: ID!
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ClankerToken_orderBy = createdAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    dao(id: $daoId) {
+      id
+      clankerTokens(
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        skip: $skip
+      ) {
+        ...ClankerToken
+      }
+    }
+  }
+  ${ClankerTokenFragmentDoc}
 `
 export const DaoInfoDocument = gql`
   query daoInfo($tokenAddress: ID!) {
@@ -6016,6 +9335,50 @@ export const DaoVotersDocument = gql`
     }
   }
 `
+export const DaoZoraCoinsDocument = gql`
+  query daoZoraCoins(
+    $daoId: ID!
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ZoraCoin_orderBy = createdAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    dao(id: $daoId) {
+      id
+      zoraCoins(
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        skip: $skip
+      ) {
+        ...ZoraCoin
+      }
+    }
+  }
+  ${ZoraCoinFragmentDoc}
+`
+export const DaoZoraDropsDocument = gql`
+  query daoZoraDrops(
+    $daoId: ID!
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ZoraDrop_orderBy = createdAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    dao(id: $daoId) {
+      id
+      zoraDrops(
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        skip: $skip
+      ) {
+        ...ZoraDrop
+      }
+    }
+  }
+  ${ZoraDropFragmentDoc}
+`
 export const DaosForDashboardDocument = gql`
   query daosForDashboard($user: Bytes!, $first: Int, $skip: Int) {
     daos(
@@ -6064,6 +9427,16 @@ export const DaosForUserDocument = gql`
     }
   }
   ${DaoFragmentDoc}
+`
+export const DaosWithClankerTokensDocument = gql`
+  query daosWithClankerTokens($daoIds: [ID!]!) {
+    daos(where: { id_in: $daoIds }) {
+      id
+      clankerTokens(first: 1) {
+        id
+      }
+    }
+  }
 `
 export const FeedEventsDocument = gql`
   query feedEvents($first: Int!, $where: FeedEvent_filter) {
@@ -6179,6 +9552,46 @@ export const FeedEventsDocument = gql`
         }
         amount
       }
+      ... on ClankerTokenCreatedEvent {
+        clankerToken {
+          tokenAddress
+          tokenName
+          tokenSymbol
+          tokenImage
+          poolId
+        }
+      }
+      ... on ZoraCoinCreatedEvent {
+        zoraCoin {
+          coinAddress
+          name
+          symbol
+          uri
+          currency
+        }
+      }
+      ... on ZoraDropCreatedEvent {
+        zoraDrop {
+          id
+          creator
+          name
+          symbol
+          description
+          imageURI
+          animationURI
+          editionSize
+          metadataRenderer
+          royaltyBPS
+          fundsRecipient
+          publicSalePrice
+          maxSalePurchasePerAddress
+          publicSaleStart
+          publicSaleEnd
+          presaleStart
+          presaleEnd
+          presaleMerkleRoot
+        }
+      }
     }
   }
 `
@@ -6251,6 +9664,26 @@ export const ProposalDocument = gql`
   }
   ${ProposalFragmentDoc}
   ${ProposalVoteFragmentDoc}
+`
+export const ProposalByExecutionTxHashDocument = gql`
+  query proposalByExecutionTxHash($executionTransactionHash: Bytes!) {
+    proposals(
+      where: { executionTransactionHash: $executionTransactionHash }
+      first: 1
+      orderBy: timeCreated
+      orderDirection: desc
+    ) {
+      proposer
+      proposalId
+      proposalNumber
+      title
+      dao {
+        id
+        name
+        contractImage
+      }
+    }
+  }
 `
 export const ProposalOgMetadataDocument = gql`
   query proposalOGMetadata($where: Proposal_filter!, $first: Int!) {
@@ -6397,6 +9830,50 @@ export const UserProposalVoteDocument = gql`
   }
   ${ProposalVoteFragmentDoc}
 `
+export const ZoraCoinDocument = gql`
+  query zoraCoin($coinAddress: ID!) {
+    zoraCoin(id: $coinAddress) {
+      ...ZoraCoin
+    }
+  }
+  ${ZoraCoinFragmentDoc}
+`
+export const ZoraDropDocument = gql`
+  query zoraDrop($dropAddress: ID!) {
+    zoraDrop(id: $dropAddress) {
+      ...ZoraDrop
+    }
+  }
+  ${ZoraDropFragmentDoc}
+`
+export const ZoraDropHolderDocument = gql`
+  query ZoraDropHolder($id: ID!) {
+    zoraDropHolder(id: $id) {
+      ...ZoraDropHolder
+    }
+  }
+  ${ZoraDropHolderFragmentDoc}
+`
+export const ZoraDropHoldersDocument = gql`
+  query ZoraDropHolders(
+    $where: ZoraDropHolder_filter
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ZoraDropHolder_orderBy = updatedAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    zoraDropHolders(
+      where: $where
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      ...ZoraDropHolder
+    }
+  }
+  ${ZoraDropHolderFragmentDoc}
+`
 
 export type SdkFunctionWrapper = <T>(
   action: (requestHeaders?: Record<string, string>) => Promise<T>,
@@ -6485,6 +9962,42 @@ export function getSdk(
             signal,
           }),
         'auctionHistory',
+        'query',
+        variables
+      )
+    },
+    clankerToken(
+      variables: ClankerTokenQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ClankerTokenQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ClankerTokenQuery>({
+            document: ClankerTokenDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'clankerToken',
+        'query',
+        variables
+      )
+    },
+    daoClankerTokens(
+      variables: DaoClankerTokensQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaoClankerTokensQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaoClankerTokensQuery>({
+            document: DaoClankerTokensDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daoClankerTokens',
         'query',
         variables
       )
@@ -6651,6 +10164,42 @@ export function getSdk(
         variables
       )
     },
+    daoZoraCoins(
+      variables: DaoZoraCoinsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaoZoraCoinsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaoZoraCoinsQuery>({
+            document: DaoZoraCoinsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daoZoraCoins',
+        'query',
+        variables
+      )
+    },
+    daoZoraDrops(
+      variables: DaoZoraDropsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaoZoraDropsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaoZoraDropsQuery>({
+            document: DaoZoraDropsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daoZoraDrops',
+        'query',
+        variables
+      )
+    },
     daosForDashboard(
       variables: DaosForDashboardQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -6683,6 +10232,24 @@ export function getSdk(
             signal,
           }),
         'daosForUser',
+        'query',
+        variables
+      )
+    },
+    daosWithClankerTokens(
+      variables: DaosWithClankerTokensQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaosWithClankerTokensQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaosWithClankerTokensQuery>({
+            document: DaosWithClankerTokensDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daosWithClankerTokens',
         'query',
         variables
       )
@@ -6791,6 +10358,24 @@ export function getSdk(
             signal,
           }),
         'proposal',
+        'query',
+        variables
+      )
+    },
+    proposalByExecutionTxHash(
+      variables: ProposalByExecutionTxHashQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProposalByExecutionTxHashQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProposalByExecutionTxHashQuery>({
+            document: ProposalByExecutionTxHashDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'proposalByExecutionTxHash',
         'query',
         variables
       )
@@ -6935,6 +10520,78 @@ export function getSdk(
             signal,
           }),
         'userProposalVote',
+        'query',
+        variables
+      )
+    },
+    zoraCoin(
+      variables: ZoraCoinQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraCoinQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraCoinQuery>({
+            document: ZoraCoinDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'zoraCoin',
+        'query',
+        variables
+      )
+    },
+    zoraDrop(
+      variables: ZoraDropQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraDropQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraDropQuery>({
+            document: ZoraDropDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'zoraDrop',
+        'query',
+        variables
+      )
+    },
+    ZoraDropHolder(
+      variables: ZoraDropHolderQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraDropHolderQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraDropHolderQuery>({
+            document: ZoraDropHolderDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ZoraDropHolder',
+        'query',
+        variables
+      )
+    },
+    ZoraDropHolders(
+      variables?: ZoraDropHoldersQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraDropHoldersQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraDropHoldersQuery>({
+            document: ZoraDropHoldersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ZoraDropHolders',
         'query',
         variables
       )

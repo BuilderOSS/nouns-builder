@@ -1,16 +1,16 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { SUCCESS_MESSAGES } from '@buildeross/constants/messages'
 import { CreateProposalHeading, ReviewProposalForm } from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { atoms, Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
@@ -38,19 +38,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   const { transactions, disabled, title, summary } = useProposalStore()
 
-  const onProposalCreated = React.useCallback(async () => {
-    await push({
-      pathname: `/dao/[network]/[token]`,
-      query: {
-        network: chain.slug,
-        token: addresses.token,
-        message: SUCCESS_MESSAGES.PROPOSAL_SUBMISSION_SUCCESS,
-        tab: 'activity',
-      },
-    })
-  }, [push, chain.slug, addresses.token])
-
-  const onOpenCreatePage = React.useCallback(async () => {
+  const onOpenCreatePage = useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/create`,
       query: {
@@ -59,6 +47,71 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       },
     })
   }, [push, chain.slug, addresses.token])
+
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isNavigatingRef = useRef(false)
+  const [proposalIdCreated, setProposalIdCreated] = useState<string | null | undefined>(
+    undefined
+  )
+
+  const handleCloseSuccessModal = useCallback(async () => {
+    if (isNavigatingRef.current) return
+    isNavigatingRef.current = true
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+
+    try {
+      if (proposalIdCreated) {
+        await push({
+          pathname: `/dao/[network]/[token]/vote/[id]`,
+          query: {
+            network: chain.slug,
+            token: addresses.token,
+            id: proposalIdCreated,
+          },
+        })
+      } else {
+        await push({
+          pathname: `/dao/[network]/[token]`,
+          query: {
+            network: chain.slug,
+            token: addresses.token,
+            tab: 'activity',
+          },
+        })
+      }
+      setProposalIdCreated(undefined)
+    } finally {
+      isNavigatingRef.current = false
+    }
+  }, [proposalIdCreated, chain.slug, addresses.token, push])
+
+  const onProposalCreated = useCallback((proposalId: string | null) => {
+    setProposalIdCreated(proposalId)
+  }, [])
+
+  useEffect(() => {
+    if (proposalIdCreated !== undefined) {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+      }
+      // Auto-close after 2 seconds
+      successTimerRef.current = setTimeout(() => {
+        handleCloseSuccessModal()
+      }, 2000)
+    }
+
+    return () => {
+      // Clear timer on unmount
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+    }
+  }, [handleCloseSuccessModal, proposalIdCreated])
 
   if (isLoading) return null
 
@@ -105,6 +158,17 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           onProposalCreated={onProposalCreated}
         />
       </Stack>
+
+      <AnimatedModal
+        open={proposalIdCreated !== undefined}
+        close={handleCloseSuccessModal}
+      >
+        <SuccessModalContent
+          title={`Proposal submitted`}
+          subtitle={`Your Proposal has been successfully submitted!`}
+          success
+        />
+      </AnimatedModal>
     </Stack>
   )
 }

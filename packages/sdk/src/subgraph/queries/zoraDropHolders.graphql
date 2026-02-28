@@ -1,0 +1,19 @@
+#import "../fragments/ZoraDropHolder.graphql"
+
+query ZoraDropHolders(
+  $where: ZoraDropHolder_filter
+  $first: Int = 100
+  $skip: Int = 0
+  $orderBy: ZoraDropHolder_orderBy = updatedAt
+  $orderDirection: OrderDirection = desc
+) {
+  zoraDropHolders(
+    where: $where
+    first: $first
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    ...ZoraDropHolder
+  }
+}

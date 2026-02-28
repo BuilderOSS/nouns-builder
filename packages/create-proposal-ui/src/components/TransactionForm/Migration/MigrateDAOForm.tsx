@@ -12,18 +12,14 @@ import { usePrepareMigration } from '../../../hooks/usePrepareMigration'
 
 const chainOptions = [{ label: 'Base', value: CHAIN_ID.BASE }]
 
-export interface MigrationDAOFormProps {
-  currentTokenId: bigint
-  memberMerkleRoot: `0x${string}`
-}
-
-export const MigrateDAOForm = () => {
+export const MigrateDAOForm: React.FC = () => {
   const { auction: auctionAddress } = useDaoStore((x) => x.addresses)
   const { id: chainId } = useChainStore((x) => x.chain)
   const [migratingToChainId, setMigratingToChainId] = useState<CHAIN_ID>(
     chainOptions[0].value
   )
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
 
   const { data: auction } = useReadContract({
     abi: auctionAbi,
@@ -46,6 +42,7 @@ export const MigrateDAOForm = () => {
       summary: 'Migrate to L2',
       transactions,
     })
+    resetTransactionType()
   }
 
   const handleChainChange = (value: CHAIN_ID) => {

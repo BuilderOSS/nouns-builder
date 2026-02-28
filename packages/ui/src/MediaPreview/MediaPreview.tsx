@@ -10,32 +10,89 @@ export interface MediaPreviewProps {
   mediaUrl: string
   mediaType?: string
   coverUrl?: string
+  width?: string | number
+  height?: string | number
+  /** Force a specific aspect ratio (width/height). Examples: 1, 16/9, "16/9", "1:1" */
+  aspectRatio?: number | string
 }
 
 export const MediaPreview: React.FC<MediaPreviewProps> = ({
   mediaType,
   mediaUrl,
   coverUrl,
+  width,
+  height,
+  aspectRatio,
 }) => {
-  const fetchableMediaURL = useMemo(
-    () => getFetchableUrls(mediaUrl)?.[0] || '',
-    [mediaUrl]
-  )
-  const fetchableCoverURL = useMemo(
-    () => getFetchableUrls(coverUrl)?.[0] || '',
-    [coverUrl]
-  )
+  // Get all fetchable URLs, using the original mediaUrl as primary and others as fallbacks
+  const { primaryUrl: primaryMediaUrl, fallbackUrls: fallbackMediaUrls } = useMemo(() => {
+    const fetchableUrls = getFetchableUrls(mediaUrl)
+    // If getFetchableUrls returns URLs, use them as fallbacks while keeping the original as primary
+    if (fetchableUrls && fetchableUrls.length > 0) {
+      return {
+        primaryUrl: mediaUrl,
+        fallbackUrls: fetchableUrls.filter((url) => url !== mediaUrl),
+      }
+    }
+    // Otherwise just use the mediaUrl
+    return {
+      primaryUrl: mediaUrl,
+      fallbackUrls: [],
+    }
+  }, [mediaUrl])
 
-  if (fetchableMediaURL && mediaType?.startsWith('image')) {
-    return <ImagePreview src={fetchableMediaURL} alt="Preview" />
+  const { primaryUrl: primaryCoverUrl, fallbackUrls: fallbackCoverUrls } = useMemo(() => {
+    if (!coverUrl) return { primaryUrl: '', fallbackUrls: [] }
+
+    const fetchableUrls = getFetchableUrls(coverUrl)
+    if (fetchableUrls && fetchableUrls.length > 0) {
+      return {
+        primaryUrl: coverUrl,
+        fallbackUrls: fetchableUrls.filter((url) => url !== coverUrl),
+      }
+    }
+    return {
+      primaryUrl: coverUrl,
+      fallbackUrls: [],
+    }
+  }, [coverUrl])
+
+  if (primaryMediaUrl && mediaType?.startsWith('image')) {
+    return (
+      <ImagePreview
+        src={primaryMediaUrl}
+        fallbackSrcs={fallbackMediaUrls}
+        alt="Preview"
+        width={width}
+        height={height}
+        aspectRatio={aspectRatio}
+      />
+    )
   }
 
-  if (fetchableMediaURL && mediaType?.startsWith('video')) {
-    return <VideoPreview src={fetchableMediaURL} />
+  if (primaryMediaUrl && mediaType?.startsWith('video')) {
+    return (
+      <VideoPreview
+        src={primaryMediaUrl}
+        fallbackSrcs={fallbackMediaUrls}
+        width={width}
+        height={height}
+        aspectRatio={aspectRatio}
+      />
+    )
   }
 
-  if (fetchableMediaURL && mediaType?.startsWith('audio')) {
-    return <AudioPreview src={fetchableMediaURL} cover={fetchableCoverURL} />
+  if (primaryMediaUrl && mediaType?.startsWith('audio')) {
+    return (
+      <AudioPreview
+        src={primaryMediaUrl}
+        fallbackSrcs={fallbackMediaUrls}
+        cover={primaryCoverUrl}
+        coverFallbackSrcs={fallbackCoverUrls}
+        width={width}
+        height={height}
+      />
+    )
   }
 
   return <Box backgroundColor="background2" w="100%" h="100%" borderRadius={'curved'} />

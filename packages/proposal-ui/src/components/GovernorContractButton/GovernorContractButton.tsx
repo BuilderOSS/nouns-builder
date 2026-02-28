@@ -1,19 +1,19 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { getProposal } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, getProposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, ButtonProps } from '@buildeross/zord'
-import React, { useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
-import { ContractFunctionName } from 'viem'
+import { ContractFunctionName, encodeFunctionData } from 'viem'
+import { useConfig, UseSimulateContractParameters } from 'wagmi'
 import {
-  useConfig,
-  useSimulateContract,
-  UseSimulateContractParameters,
-  useWriteContract,
-} from 'wagmi'
-import { waitForTransactionReceipt } from 'wagmi/actions'
+  estimateGas,
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from 'wagmi/actions'
 
 import { uploadingSpinnerWhite } from './GovernorContractButton.css'
 
@@ -46,28 +46,44 @@ export function GovernorContractButton({
 
   const [isPending, setIsPending] = useState<boolean>(false)
 
-  const { data, isError } = useSimulateContract({
-    query: {
-      enabled: !!addresses.governor,
-    },
-    address: addresses.governor,
-    abi: governorAbi,
-    functionName: functionName,
-    args: args,
-  })
-
-  const { writeContractAsync } = useWriteContract()
-
   const handleClick = useCallback(async () => {
-    if (!writeContractAsync || !data) return
+    if (!addresses.governor || !functionName || !args) return
 
     try {
       setIsPending(true)
-      const hash = await writeContractAsync(data.request as any)
-      await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+      await simulateContract(config, {
+        address: addresses.governor,
+        abi: governorAbi,
+        functionName: functionName,
+        args: args,
+        chainId: chain.id,
+      })
+
+      const encodedData = encodeFunctionData({
+        abi: governorAbi,
+        functionName: functionName,
+        args: args,
+      })
+      const gas = await estimateGas(config, {
+        to: addresses.governor,
+        data: encodedData,
+        chainId: chain.id,
+      })
+
+      const hash = await writeContract(config, {
+        address: addresses.governor,
+        abi: governorAbi,
+        functionName: functionName,
+        args: args,
+        chainId: chain.id,
+        gas: (gas * 3n) / 2n, // add extra gas for safety
+      })
+      const receipt = await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+
+      await awaitSubgraphSync(chain.id, receipt.blockNumber)
 
       await mutate(
-        [SWR_KEYS.PROPOSAL, chain.id, proposalId],
+        [SWR_KEYS.PROPOSAL, chain.id, proposalId.toLowerCase()],
         getProposal(chain.id, proposalId)
       )
       setIsPending(false)
@@ -76,14 +92,23 @@ export function GovernorContractButton({
       setIsPending(false)
       console.error('Error interacting with governor contract:', err)
     }
-  }, [writeContractAsync, data, config, chain.id, mutate, proposalId, onSuccess])
+  }, [
+    config,
+    chain.id,
+    mutate,
+    proposalId,
+    onSuccess,
+    addresses.governor,
+    args,
+    functionName,
+  ])
 
   return (
     <ContractButton
       chainId={chain.id}
       handleClick={handleClick}
       className={buttonClassName}
-      disabled={isPending || isError}
+      disabled={isPending}
       {...rest}
     >
       {isPending ? <Box className={uploadingSpinnerWhite} /> : buttonText}

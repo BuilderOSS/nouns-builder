@@ -9,6 +9,18 @@ import { FeedFiltersModal } from './FeedFiltersModal'
 import { FeedItem } from './FeedItem'
 import { FeedSkeleton, FeedSkeletonItem } from './FeedSkeleton'
 import { LoadMoreButton } from './LoadMoreButton'
+import { BidModal } from './Modals/BidModal'
+import { MintModal } from './Modals/MintModal'
+import { PropdateModalWrapper } from './Modals/PropdateModalWrapper'
+import { TradeModal } from './Modals/TradeModal'
+import { VoteModalWrapper } from './Modals/VoteModalWrapper'
+import type {
+  BidModalState,
+  MintModalState,
+  PropdateModalState,
+  TradeModalState,
+  VoteModalState,
+} from './types/modalStates'
 import { useFeedFiltersStore } from './useFeedFiltersStore'
 
 // Internal filter mode - Feed manages its own filters
@@ -49,6 +61,28 @@ function isExternalFilterMode(props: FeedProps): props is ExternalFilterMode {
   )
 }
 
+type ModalState =
+  | {
+      type: 'bid'
+      state: BidModalState
+    }
+  | {
+      type: 'vote'
+      state: VoteModalState
+    }
+  | {
+      type: 'propdate'
+      state: PropdateModalState
+    }
+  | {
+      type: 'trade'
+      state: TradeModalState
+    }
+  | {
+      type: 'mint'
+      state: MintModalState
+    }
+
 export const Feed: React.FC<FeedProps> = (props) => {
   const { actor, limit, enableFeed, onError, enableInfiniteScroll = true } = props
 
@@ -59,6 +93,9 @@ export const Feed: React.FC<FeedProps> = (props) => {
   const { address } = useAccount()
   const filterStore = useFeedFiltersStore(externalFilterMode ? undefined : address)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
+
+  // Shared modal state for all feed items
+  const [modalState, setModalState] = useState<ModalState | null>(null)
 
   // Get actual filters to use (either from props or from store)
   const actualChainIds = useMemo(() => {
@@ -91,6 +128,27 @@ export const Feed: React.FC<FeedProps> = (props) => {
 
   const hideActor = !!actor
   const hideDao = externalFilterMode && !!(actualDaos && actualDaos.length > 0)
+
+  // Modal callbacks
+  const handleOpenBidModal = useCallback((state: BidModalState) => {
+    setModalState({ type: 'bid', state: state })
+  }, [])
+
+  const handleOpenVoteModal = useCallback((state: VoteModalState) => {
+    setModalState({ type: 'vote', state: state })
+  }, [])
+
+  const handleOpenPropdateModal = useCallback((state: PropdateModalState) => {
+    setModalState({ type: 'propdate', state: state })
+  }, [])
+
+  const handleOpenTradeModal = useCallback((state: TradeModalState) => {
+    setModalState({ type: 'trade', state: state })
+  }, [])
+
+  const handleOpenMintModal = useCallback((state: MintModalState) => {
+    setModalState({ type: 'mint', state: state })
+  }, [])
 
   // Filter modal handlers (only used in internal mode)
   const handleApplyFilters = useCallback(
@@ -200,6 +258,11 @@ export const Feed: React.FC<FeedProps> = (props) => {
                 item={item}
                 hideActor={hideActor}
                 hideDao={hideDao}
+                onOpenBidModal={handleOpenBidModal}
+                onOpenVoteModal={handleOpenVoteModal}
+                onOpenPropdateModal={handleOpenPropdateModal}
+                onOpenTradeModal={handleOpenTradeModal}
+                onOpenMintModal={handleOpenMintModal}
               />
             ))}
 
@@ -242,6 +305,85 @@ export const Feed: React.FC<FeedProps> = (props) => {
           selectedDaos={filterStore.selectedDaos}
           onApply={handleApplyFilters}
           userAddress={address}
+        />
+      )}
+
+      {/* Shared modals for all feed items */}
+      {modalState?.type === 'bid' && (
+        <BidModal
+          isOpen
+          onClose={() => setModalState(null)}
+          chainId={modalState.state.chainId}
+          tokenId={modalState.state.tokenId}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+          addresses={modalState.state.addresses}
+          highestBid={modalState.state.highestBid}
+          paused={modalState.state.paused}
+          highestBidder={modalState.state.highestBidder}
+          endTime={modalState.state.endTime}
+          tokenName={modalState.state.tokenName}
+        />
+      )}
+
+      {modalState?.type === 'vote' && (
+        <VoteModalWrapper
+          isOpen
+          onClose={() => setModalState(null)}
+          proposalId={modalState.state.proposalId}
+          proposalTitle={modalState.state.proposalTitle}
+          proposalTimeCreated={modalState.state.proposalTimeCreated}
+          chainId={modalState.state.chainId}
+          addresses={modalState.state.addresses}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+        />
+      )}
+
+      {modalState?.type === 'propdate' && (
+        <PropdateModalWrapper
+          isOpen
+          onClose={() => setModalState(null)}
+          proposalId={modalState.state.proposalId}
+          chainId={modalState.state.chainId}
+          addresses={modalState.state.addresses}
+          replyTo={modalState.state.replyTo}
+          proposalTitle={modalState.state.proposalTitle}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+        />
+      )}
+
+      {modalState?.type === 'trade' && (
+        <TradeModal
+          isOpen
+          onClose={() => setModalState(null)}
+          coinAddress={modalState.state.coinAddress}
+          symbol={modalState.state.symbol}
+          chainId={modalState.state.chainId}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+          isZoraCoin={modalState.state.isZoraCoin}
+        />
+      )}
+
+      {modalState?.type === 'mint' && (
+        <MintModal
+          isOpen
+          onClose={() => setModalState(null)}
+          dropAddress={modalState.state.dropAddress}
+          symbol={modalState.state.symbol}
+          chainId={modalState.state.chainId}
+          daoName={modalState.state.daoName}
+          daoImage={modalState.state.daoImage}
+          priceEth={modalState.state.priceEth}
+          saleActive={modalState.state.saleActive}
+          saleNotStarted={modalState.state.saleNotStarted}
+          saleEnded={modalState.state.saleEnded}
+          saleStart={modalState.state.saleStart}
+          saleEnd={modalState.state.saleEnd}
+          editionSize={modalState.state.editionSize}
+          maxPerAddress={modalState.state.maxPerAddress}
         />
       )}
     </Flex>

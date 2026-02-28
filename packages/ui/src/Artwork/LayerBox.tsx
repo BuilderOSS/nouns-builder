@@ -1,3 +1,4 @@
+import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { ImageProps, OrderedTraits } from '@buildeross/types'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import { motion } from 'framer-motion'
@@ -196,8 +197,8 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
       >
         {properties?.map((property) => {
           const index = ipfs?.map((e) => e.name).indexOf(property)
-          const image = ipfs?.[index]?.cid
-          const src = ipfs?.[index]?.url
+          const image = ipfs?.[index]?.uri
+          const src = getFetchableUrls(image)?.[0]
           return (
             <Flex gap={'x2'} key={property} justify={'center'} align={'center'}>
               <Flex
@@ -212,7 +213,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
                 justify={'center'}
                 className={artworkSettingsPropertyCount}
               >
-                {ipfs && image && (
+                {src && (
                   <img
                     src={src}
                     className={artworkSettingsImageThumb}

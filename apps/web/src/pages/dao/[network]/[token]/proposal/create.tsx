@@ -3,13 +3,14 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
+  Queue,
   SelectTransactionType,
   TRANSACTION_FORM_OPTIONS,
   TransactionForm,
-  TransactionFormType,
   TransactionTypeIcon,
   TwoColumnLayout,
 } from '@buildeross/create-proposal-ui'
+import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useVotes } from '@buildeross/hooks/useVotes'
@@ -18,19 +19,22 @@ import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
+import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
-import { isSablierSupported as isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
-import { Flex, Stack } from '@buildeross/zord'
+import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
+import { Box, Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
+import * as styles from 'src/styles/create.css'
 import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
-const createSelectOption = (type: TransactionFormType) => ({
+const createSelectOption = (type: TransactionType) => ({
   value: type,
   label: TRANSACTION_TYPES[type].title,
   icon: <TransactionTypeIcon transactionType={type} />,
@@ -41,10 +45,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const [transactionType, setTransactionType] = useState<
-    TransactionFormType | undefined
-  >()
-  const transactions = useProposalStore((state) => state.transactions)
+  const transactionType = useProposalStore((x) => x.transactionType)
+  const setTransactionType = useProposalStore((x) => x.setTransactionType)
+  const resetTransactionType = useProposalStore((x) => x.resetTransactionType)
+  const transactions = useProposalStore((x) => x.transactions)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -57,12 +61,6 @@ const CreateProposalPage: NextPageWithLayout = () => {
     chainId: chain.id,
     addresses,
   })
-
-  useEffect(() => {
-    if (transactions.length && !transactionType) {
-      setTransactionType(transactions[0].type as TransactionFormType)
-    }
-  }, [transactions, transactionType, setTransactionType])
 
   const { address } = useAccount()
 
@@ -94,6 +92,26 @@ const CreateProposalPage: NextPageWithLayout = () => {
     [chain.id]
   )
 
+  const isDroposalSupported = useMemo(
+    () => isChainIdSupportedByDroposal(chain.id),
+    [chain.id]
+  )
+
+  const isCoinSupported = useMemo(() => isChainIdSupportedByCoining(chain.id), [chain.id])
+
+  // Fetch clanker tokens to check if DAO has any
+  const { data: clankerTokens } = useClankerTokens({
+    chainId: chain.id,
+    collectionAddress: addresses.token,
+    enabled: isCoinSupported,
+    first: 1,
+  })
+
+  const hasClankerToken = useMemo(
+    () => isCoinSupported && clankerTokens && clankerTokens.length > 0,
+    [isCoinSupported, clankerTokens]
+  )
+
   const TRANSACTION_FORM_OPTIONS_FILTERED = useMemo(
     () =>
       TRANSACTION_FORM_OPTIONS.filter((x) => {
@@ -106,6 +124,11 @@ const CreateProposalPage: NextPageWithLayout = () => {
         if (x === TransactionType.NOMINATE_DELEGATE && !isEASSupported) return false
         if (x === TransactionType.PIN_TREASURY_ASSET && !isEASSupported) return false
         if (x === TransactionType.STREAM_TOKENS && !isSablierSupported) return false
+        if (x === TransactionType.DROPOSAL && !isDroposalSupported) return false
+        if (x === TransactionType.CREATOR_COIN && (!isCoinSupported || hasClankerToken))
+          return false
+        if (x === TransactionType.CONTENT_COIN && (!isCoinSupported || !hasClankerToken))
+          return false
         return true
       }),
     [
@@ -115,8 +138,20 @@ const CreateProposalPage: NextPageWithLayout = () => {
       shouldFixRendererBase,
       isEASSupported,
       isSablierSupported,
+      isDroposalSupported,
+      isCoinSupported,
+      hasClankerToken,
     ]
   )
+
+  useEffect(() => {
+    if (
+      transactionType &&
+      !TRANSACTION_FORM_OPTIONS_FILTERED.includes(transactionType as any)
+    ) {
+      resetTransactionType()
+    }
+  }, [transactionType, TRANSACTION_FORM_OPTIONS_FILTERED, resetTransactionType])
 
   const options = useMemo(() => {
     return TRANSACTION_FORM_OPTIONS_FILTERED.map(createSelectOption)
@@ -179,11 +214,12 @@ const CreateProposalPage: NextPageWithLayout = () => {
       mx="auto"
     >
       <CreateProposalHeading
-        title={'Create Proposal'}
+        title={'Add Transactions'}
         handleBack={openDaoActivityPage}
         showDocsLink
-        showQueue
+        showQueue={!!transactionType || (!transactionType && transactions.length > 0)}
         onOpenProposalReview={openProposalReviewPage}
+        queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
       />
       {transactionType ? (
         <TwoColumnLayout
@@ -194,7 +230,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
                 options={options}
                 onChange={(value) => setTransactionType(value)}
               />
-              <TransactionForm type={transactionType} />
+              <TransactionForm />
             </Stack>
           }
         />
@@ -206,6 +242,13 @@ const CreateProposalPage: NextPageWithLayout = () => {
               onSelect={setTransactionType}
               onOpenAdminSettings={openDaoAdminPage}
             />
+          }
+          rightColumn={
+            transactions.length > 0 ? (
+              <Box className={styles.hideOnMobile}>
+                <Queue embedded />
+              </Box>
+            ) : undefined
           }
         />
       )}

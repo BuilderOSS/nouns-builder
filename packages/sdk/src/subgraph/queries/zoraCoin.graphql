@@ -1,0 +1,7 @@
+#import "../fragments/ZoraCoin.graphql"
+
+query zoraCoin($coinAddress: ID!) {
+  zoraCoin(id: $coinAddress) {
+    ...ZoraCoin
+  }
+}

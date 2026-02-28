@@ -67,3 +67,20 @@ export const formWrapper = style({
     },
   },
 })
+
+export const hideOnMobile = style({
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'none',
+    },
+  },
+})
+
+export const showOnMobile = style({
+  display: 'none',
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'block',
+    },
+  },
+})

@@ -1,6 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { getProposal } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, getProposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { BytesType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -17,7 +17,7 @@ import {
   theme,
 } from '@buildeross/zord'
 import { Field, Formik } from 'formik'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
@@ -63,22 +63,49 @@ export const VoteModal: React.FC<VoteModalProps> = ({
   chainId: chainIdProp,
   onSuccess,
 }) => {
-  const [isCastVoteSuccess, setIsCastVoteSuccess] = React.useState<boolean>(false)
+  const [isSuccess, setIsSuccess] = useState<boolean>(false)
 
-  const handleModalClose = useCallback(() => {
-    setShowVoteModal(false)
-    if (isCastVoteSuccess && onSuccess) {
-      onSuccess()
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
     }
-  }, [setShowVoteModal, isCastVoteSuccess, onSuccess])
+  }, [])
+
+  const handleClose = () => {
+    setShowVoteModal(false)
+    setIsSuccess(false)
+
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+  }
+
+  const handleSuccess = () => {
+    setIsSuccess(true)
+    onSuccess?.()
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+    }
+    // Auto-close after 2 seconds
+    successTimerRef.current = setTimeout(() => {
+      handleClose()
+    }, 2000)
+  }
 
   return (
     <AnimatedModal
       open={showVoteModal}
-      size={isCastVoteSuccess ? 'small' : 'medium'}
-      close={handleModalClose}
+      size={isSuccess ? 'small' : 'medium'}
+      close={handleClose}
     >
-      {isCastVoteSuccess ? (
+      {isSuccess ? (
         <SuccessModalContent
           success={true}
           title={'Vote Submitted'}
@@ -88,8 +115,8 @@ export const VoteModal: React.FC<VoteModalProps> = ({
         <SubmitVoteForm
           proposalId={proposalId}
           votesAvailable={votesAvailable}
-          handleModalClose={handleModalClose}
-          setIsCastVoteSuccess={setIsCastVoteSuccess}
+          handleModalClose={handleClose}
+          onSuccess={handleSuccess}
           title={title}
           addresses={addressesProp}
           chainId={chainIdProp}
@@ -103,18 +130,20 @@ export const SubmitVoteForm: React.FC<{
   proposalId: BytesType
   votesAvailable: number
   handleModalClose: () => void
-  setIsCastVoteSuccess: (show: boolean) => void
+  onSuccess: () => void
   title: string
   addresses?: RequiredDaoContractAddresses
   chainId?: CHAIN_ID
+  hideHeader?: boolean
 }> = ({
   proposalId,
   votesAvailable,
   handleModalClose,
   title,
-  setIsCastVoteSuccess,
+  onSuccess,
   addresses: addressesProp,
   chainId: chainIdProp,
+  hideHeader = false,
 }) => {
   const storeAddresses = useDaoStore((state) => state.addresses)
   const storeChain = useChainStore((state) => state.chain)
@@ -151,19 +180,24 @@ export const SubmitVoteForm: React.FC<{
         })
         const txHash = await writeContract(config, data.request)
 
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chainId })
+        const receipt = await waitForTransactionReceipt(config, {
+          hash: txHash,
+          chainId: chainId,
+        })
+
+        await awaitSubgraphSync(chainId, receipt.blockNumber)
 
         await mutate(
-          [SWR_KEYS.PROPOSAL, chainId, proposalId],
+          [SWR_KEYS.PROPOSAL, chainId, proposalId.toLowerCase()],
           getProposal(chainId, proposalId)
         )
 
-        setIsCastVoteSuccess(true)
+        onSuccess()
       } catch (err) {
         console.error('Error casting vote:', err)
       }
     },
-    [governorAddress, chainId, proposalId, config, mutate, setIsCastVoteSuccess]
+    [governorAddress, chainId, proposalId, config, mutate, onSuccess]
   )
 
   const voteOptions = useMemo(
@@ -188,28 +222,30 @@ export const SubmitVoteForm: React.FC<{
   )
   return (
     <Box>
-      <Flex justify={'space-between'}>
-        <Box>
-          <Text variant="heading-md" className={voteModalFormTitle}>
-            {votesAvailable === 0 ? 'Submit Vote' : 'Submit Votes'}
-          </Text>
-          <Text variant="paragraph-sm" color="tertiary">
-            Proposal: {title}
-          </Text>
-        </Box>
-        <Button
-          variant="ghost"
-          onClick={handleModalClose}
-          p={'x0'}
-          size="xs"
-          style={{
-            // prop padding does not change padding to 0
-            padding: 0,
-          }}
-        >
-          <Icon id="cross" />
-        </Button>
-      </Flex>
+      {!hideHeader && (
+        <Flex justify={'space-between'}>
+          <Box>
+            <Text variant="heading-md" className={voteModalFormTitle}>
+              {votesAvailable <= 1 ? 'Submit Vote' : 'Submit Votes'}
+            </Text>
+            <Text variant="paragraph-sm" color="tertiary">
+              Proposal: {title}
+            </Text>
+          </Box>
+          <Button
+            variant="ghost"
+            onClick={handleModalClose}
+            p={'x0'}
+            size="xs"
+            style={{
+              // prop padding does not change padding to 0
+              padding: 0,
+            }}
+          >
+            <Icon id="cross" />
+          </Button>
+        </Flex>
+      )}
 
       <Formik initialValues={initialValues} onSubmit={handleSubmit}>
         {({ values, isSubmitting, setFieldValue, handleSubmit }) => (
@@ -300,15 +336,14 @@ export const SubmitVoteForm: React.FC<{
 
               <ContractButton
                 chainId={chainId}
-                loading={isSubmitting}
-                disabled={!values.choice}
+                disabled={!values.choice || isSubmitting}
                 w="100%"
                 size="lg"
                 mt="x8"
                 borderRadius="curved"
                 handleClick={handleSubmit}
               >
-                Submit vote
+                {isSubmitting ? 'Submitting...' : 'Submit vote'}
               </ContractButton>
             </fieldset>
           </form>

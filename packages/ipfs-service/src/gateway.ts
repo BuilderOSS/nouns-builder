@@ -7,8 +7,8 @@ export const PINATA_GATEWAY =
 
 export const IPFS_GATEWAYS = [
   `https://${PINATA_GATEWAY}`,
-  'https://magic.decentralized-content.com',
   'https://ipfs.io',
+  'https://magic.decentralized-content.com',
   'https://dweb.link',
   'https://gateway.pinata.cloud',
   'https://w3s.link',

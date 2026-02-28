@@ -8,7 +8,6 @@ import { getProvider } from '@buildeross/utils/provider'
 import { Stack, Text } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import gte from 'lodash/gte'
-import React from 'react'
 import { Address, encodeFunctionData, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
@@ -22,6 +21,7 @@ export const MintGovernanceTokens: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
   const transactions = useProposalStore((state) => state.transactions)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
 
   const {
@@ -134,6 +134,8 @@ export const MintGovernanceTokens: React.FC = () => {
     })
 
     actions.resetForm()
+
+    resetTransactionType()
   }
 
   const isTreasuryContractOwner = auctionOwner === addresses.treasury

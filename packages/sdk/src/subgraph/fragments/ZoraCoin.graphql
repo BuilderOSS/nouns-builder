@@ -1,0 +1,26 @@
+fragment ZoraCoin on ZoraCoin {
+  id
+  coinAddress
+  name
+  symbol
+  uri
+  currency
+  poolKeyHash
+  poolHooks
+  poolFee
+  poolTickSpacing
+  createdAt
+  createdAtBlock
+  transactionHash
+  caller
+  dao {
+    id
+    name
+    contractImage
+  }
+  clankerToken {
+    tokenAddress
+    tokenName
+    tokenSymbol
+  }
+}

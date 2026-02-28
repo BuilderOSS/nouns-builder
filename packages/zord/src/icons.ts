@@ -12,7 +12,9 @@ import ChevronRight from './assets/chevron-right.svg'
 import ChevronUp from './assets/chevron-up.svg'
 import Code from './assets/code.svg'
 import Collection from './assets/collection.svg'
+import ContentCoin from './assets/content-coin.svg'
 import Copy from './assets/copy.svg'
+import CreatorCoin from './assets/creator-coin.svg'
 import Cross from './assets/cross.svg'
 import Cross16 from './assets/cross-16.svg'
 import Dash from './assets/dash.svg'
@@ -28,6 +30,8 @@ import Github from './assets/github.svg'
 import Globe from './assets/globe.svg'
 import HandlebarCircle from './assets/handlebar-circle.svg'
 import Handshake from './assets/handshake.svg'
+import Heart from './assets/heart.svg'
+import HeartFilled from './assets/heart-filled.svg'
 import Info16 from './assets/info-16.svg'
 import Migrate from './assets/migrate.svg'
 import Move from './assets/move.svg'
@@ -69,8 +73,10 @@ export const icons = {
   chevronRight: ChevronRight,
   chevronUp: ChevronUp,
   code: Code,
+  contentCoin: ContentCoin,
   collection: Collection,
   copy: Copy,
+  creatorCoin: CreatorCoin,
   cross: Cross,
   'cross-16': Cross16,
   dash: Dash,
@@ -86,6 +92,8 @@ export const icons = {
   globe: Globe,
   handlebarCircle: HandlebarCircle,
   handshake: Handshake,
+  heart: Heart,
+  heartFilled: HeartFilled,
   'info-16': Info16,
   migrate: Migrate,
   move: Move,

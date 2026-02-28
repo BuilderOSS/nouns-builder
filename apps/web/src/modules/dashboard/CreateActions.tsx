@@ -1,22 +1,26 @@
-import type { AddressType, CHAIN_ID } from '@buildeross/types'
-import { Button, Flex } from '@buildeross/zord'
+import { COINING_ENABLED } from '@buildeross/constants/coining'
+import type { AddressType } from '@buildeross/types'
+import { Button, Flex, Grid } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-import { actionButtons } from './CreateActions.css'
+import { actionButtons, daoButton } from './CreateActions.css'
 import { DaoSelectorModal } from './DaoSelectorModal'
 
 export interface CreateActionsProps {
   userAddress?: AddressType
-  chainIds?: CHAIN_ID[]
 }
 
-export const CreateActions: React.FC<CreateActionsProps> = ({
-  userAddress,
-  chainIds,
-}) => {
+export const CreateActions: React.FC<CreateActionsProps> = ({ userAddress }) => {
   const [selectorOpen, setSelectorOpen] = useState(false)
-  const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
+  const [actionType, setActionType] = useState<'post' | 'proposal'>(
+    COINING_ENABLED ? 'post' : 'proposal'
+  )
+
+  const handleCreatePost = () => {
+    setActionType('post')
+    setSelectorOpen(true)
+  }
 
   const handleCreateProposal = () => {
     setActionType('proposal')
@@ -25,13 +29,45 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
 
   return (
     <>
-      <Flex className={actionButtons} gap="x3">
-        <Button onClick={handleCreateProposal} style={{ flex: 1 }}>
-          Create Proposal
-        </Button>
-        <Button variant="outline" style={{ flex: 1 }} as={Link} href="/create">
-          Create a DAO
-        </Button>
+      <Flex direction="column" className={actionButtons} gap="x3">
+        {COINING_ENABLED ? (
+          <>
+            <Flex gap="x3">
+              <Button onClick={handleCreatePost} variant="primary" style={{ flex: 1 }}>
+                Create Post
+              </Button>
+              <Button
+                onClick={handleCreateProposal}
+                variant="outline"
+                style={{ flex: 1 }}
+              >
+                Create Proposal
+              </Button>
+            </Flex>
+            <Link href="/create" style={{ width: '100%', flex: 1 }}>
+              <Button style={{ width: '100%' }} variant="outline" className={daoButton}>
+                Create a DAO
+              </Button>
+            </Link>
+          </>
+        ) : (
+          <>
+            <Grid columns={2} gap="x3">
+              <Button
+                onClick={handleCreateProposal}
+                variant="primary"
+                style={{ flex: 1 }}
+              >
+                Create Proposal
+              </Button>
+              <Link href="/create" style={{ flex: 1 }}>
+                <Button variant="outline" style={{ width: '100%' }}>
+                  Create a DAO
+                </Button>
+              </Link>
+            </Grid>
+          </>
+        )}
       </Flex>
 
       <DaoSelectorModal
@@ -39,7 +75,6 @@ export const CreateActions: React.FC<CreateActionsProps> = ({
         onClose={() => setSelectorOpen(false)}
         actionType={actionType}
         userAddress={userAddress}
-        chainIds={chainIds}
       />
     </>
   )

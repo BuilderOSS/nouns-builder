@@ -30,8 +30,9 @@ import { SendTokensDetailsDisplay } from './SendTokensDetailsDisplay'
 
 const DECIMAL_REGEX = /^(\d+\.?\d*|\.\d+)$/
 
-export const SendTokens = () => {
+export const SendTokens: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
   const [csvError, setCsvError] = useState<string>('')
 
@@ -209,6 +210,7 @@ export const SendTokens = () => {
         transactions,
       })
       actions.resetForm()
+      resetTransactionType()
     } catch (err) {
       console.error('Error adding transaction:', err)
     }

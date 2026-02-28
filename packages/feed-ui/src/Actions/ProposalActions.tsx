@@ -1,3 +1,4 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { usePropdateMessage } from '@buildeross/hooks/usePropdateMessage'
 import { useProposalState } from '@buildeross/hooks/useProposalState'
 import { PropDateReplyTo } from '@buildeross/proposal-ui'
@@ -11,12 +12,12 @@ import type {
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
+import { ShareButton } from '@buildeross/ui/ShareButton'
 import { Button, Flex, Text } from '@buildeross/zord'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import { Hex, zeroHash } from 'viem'
 
-import { PropdateModalWrapper } from '../Modals/PropdateModalWrapper'
-import { VoteModalWrapper } from '../Modals/VoteModalWrapper'
+import type { OnOpenPropdateModal, OnOpenVoteModal } from '../types/modalStates'
 
 interface ProposalActionsProps {
   chainId: CHAIN_ID
@@ -25,8 +26,12 @@ interface ProposalActionsProps {
   proposalTitle: string
   proposalTimeCreated: string
   addresses: RequiredDaoContractAddresses
-  isExecuted?: boolean
+  daoName: string
+  daoImage: string
+  isExecuted: boolean
   updateItem?: ProposalUpdatePostedFeedItem
+  onOpenVoteModal: OnOpenVoteModal
+  onOpenPropdateModal: OnOpenPropdateModal
 }
 
 export const ProposalActions: React.FC<ProposalActionsProps> = ({
@@ -36,14 +41,17 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   proposalNumber,
   proposalTitle,
   proposalTimeCreated,
+  daoName,
+  daoImage,
   isExecuted,
   updateItem,
+  onOpenVoteModal,
+  onOpenPropdateModal,
 }) => {
   const { getProposalLink } = useLinks()
   const daoId = addresses.token
 
-  const [showVoteModal, setShowVoteModal] = useState(false)
-  const [showPropdateModal, setShowPropdateModal] = useState(false)
+  const buttonSize = { '@initial': 'xs', '@768': 'sm' } as const
 
   const { isActive, isLoading: isLoadingState } = useProposalState({
     chainId,
@@ -71,6 +79,53 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     }
   }, [updateItem, parsedContent])
 
+  const shareUrl = useMemo(() => {
+    const link = getProposalLink(chainId, daoId, proposalNumber, 'details')
+    return link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
+  }, [chainId, daoId, proposalNumber, getProposalLink])
+
+  const handleOpenVote = useCallback(() => {
+    onOpenVoteModal({
+      proposalId,
+      proposalTitle,
+      proposalTimeCreated,
+      chainId,
+      addresses,
+      daoName,
+      daoImage,
+    })
+  }, [
+    onOpenVoteModal,
+    proposalId,
+    proposalTitle,
+    proposalTimeCreated,
+    chainId,
+    addresses,
+    daoName,
+    daoImage,
+  ])
+
+  const handleOpenPropdate = useCallback(() => {
+    onOpenPropdateModal({
+      proposalId,
+      chainId,
+      addresses,
+      replyTo,
+      proposalTitle,
+      daoName,
+      daoImage,
+    })
+  }, [
+    onOpenPropdateModal,
+    proposalId,
+    chainId,
+    addresses,
+    replyTo,
+    proposalTitle,
+    daoName,
+    daoImage,
+  ])
+
   if (isLoading) {
     return (
       <Flex gap="x2" align="center">
@@ -85,11 +140,15 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   if (isExecuted) {
     return (
       <Flex gap="x2" align="center" wrap="wrap">
-        <LinkWrapper link={getProposalLink(chainId, daoId, proposalNumber, 'details')}>
-          <Button size="sm" px="x3" variant="secondary">
-            View Details
+        <LinkWrapper
+          link={getProposalLink(chainId, daoId, proposalNumber, 'details')}
+          isExternal
+        >
+          <Button size={buttonSize} px="x3" variant="secondary">
+            View Proposal
           </Button>
         </LinkWrapper>
+        <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />
       </Flex>
     )
   }
@@ -97,64 +156,43 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const isUpdate = updateItem !== undefined
 
   return (
-    <>
-      <Flex gap="x2" align="center" wrap="wrap">
-        {/* Active proposals show vote option */}
-        {isActive && (
-          <ContractButton
-            size="sm"
-            px="x3"
-            variant="outline"
-            chainId={chainId}
-            handleClick={() => setShowVoteModal(true)}
-          >
-            Vote
-          </ContractButton>
-        )}
+    <Flex gap="x2" align="center" wrap="wrap">
+      {/* Active proposals show vote option */}
+      {isActive && (
         <ContractButton
-          size="sm"
+          size={buttonSize}
           px="x3"
           variant="outline"
           chainId={chainId}
-          handleClick={() => setShowPropdateModal(true)}
+          handleClick={handleOpenVote}
         >
-          {isUpdate ? 'Respond' : 'Add Update'}
+          Vote
         </ContractButton>
-
-        <LinkWrapper
-          link={getProposalLink(
-            chainId,
-            daoId,
-            proposalNumber,
-            isUpdate ? 'propdates' : 'details'
-          )}
-        >
-          <Button size="sm" px="x3" variant="secondary">
-            View Details
-          </Button>
-        </LinkWrapper>
-      </Flex>
-
-      {/* Vote Modal */}
-      <VoteModalWrapper
-        isOpen={showVoteModal}
-        onClose={() => setShowVoteModal(false)}
-        proposalId={proposalId}
-        proposalTitle={proposalTitle}
-        proposalTimeCreated={proposalTimeCreated}
+      )}
+      <ContractButton
+        size={buttonSize}
+        px="x3"
+        variant="outline"
         chainId={chainId}
-        addresses={addresses}
-      />
+        handleClick={handleOpenPropdate}
+      >
+        {isUpdate ? 'Respond' : 'Add Update'}
+      </ContractButton>
 
-      {/* Propdate Modal */}
-      <PropdateModalWrapper
-        isOpen={showPropdateModal}
-        onClose={() => setShowPropdateModal(false)}
-        proposalId={proposalId}
-        chainId={chainId}
-        addresses={addresses}
-        replyTo={replyTo}
-      />
-    </>
+      <LinkWrapper
+        link={getProposalLink(
+          chainId,
+          daoId,
+          proposalNumber,
+          isUpdate ? 'propdates' : 'details'
+        )}
+        isExternal
+      >
+        <Button size={buttonSize} px="x3" variant="secondary">
+          {isUpdate ? 'View Updates' : 'View Proposal'}
+        </Button>
+      </LinkWrapper>
+      <ShareButton url={shareUrl} size={buttonSize} variant="secondary" />
+    </Flex>
   )
 }

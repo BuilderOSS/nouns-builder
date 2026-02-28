@@ -1,0 +1,32 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Larger outer coin -->
+  <circle cx="16" cy="16" r="15"
+    stroke="#00A3FF"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+
+  <!-- Mask to remove overlap area from backing square -->
+  <mask id="cutOverlap32" maskUnits="userSpaceOnUse">
+    <rect width="32" height="32" fill="white"/>
+    <!-- Slightly inflated front square to fully hide stroke overlap -->
+    <rect x="9.5" y="9.5" width="13" height="13" rx="3.5" fill="black"/>
+  </mask>
+
+  <!-- Back square (top-right layer) -->
+  <g mask="url(#cutOverlap32)">
+    <rect x="13" y="6.5" width="12" height="12" rx="3"
+      stroke="#00A3FF"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"/>
+  </g>
+
+  <!-- Front square (perfectly centered) -->
+  <rect x="10" y="10" width="12" height="12" rx="3"
+    stroke="#00A3FF"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"/>
+</svg>
+

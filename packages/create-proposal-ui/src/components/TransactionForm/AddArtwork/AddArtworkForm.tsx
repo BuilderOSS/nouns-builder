@@ -1,12 +1,12 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
-import { type Property } from '@buildeross/sdk/contract'
 import { useChainStore } from '@buildeross/stores'
+import { type Property } from '@buildeross/types'
 import { Uploading } from '@buildeross/ui/Uploading'
-import { isTestnetChain } from '@buildeross/utils/helpers'
+import { isTestnetChain } from '@buildeross/utils/chains'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
 import { ArtworkUpload } from '../../ArtworkUpload'
@@ -50,10 +50,13 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
   const isTestnetDAO = React.useMemo(() => isTestnetChain(chainId), [chainId])
   const [hasConfirmed, setHasConfirmed] = useState(isTestnetDAO ? true : false)
 
-  const initialValues = {
-    artwork: setUpArtwork?.artwork || [],
-    filesLength: setUpArtwork?.filesLength || '',
-  }
+  const values = useMemo(
+    () => ({
+      artwork: setUpArtwork?.artwork || [],
+      filesLength: setUpArtwork?.filesLength || '',
+    }),
+    [setUpArtwork?.artwork, setUpArtwork?.filesLength]
+  )
 
   const showPropertyErrors = ipfsUpload.length > 0
 
@@ -84,11 +87,11 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
         ipfsUploadProgress={ipfsUploadProgress}
       />
       <Formik<ArtworkFormValues>
-        initialValues={initialValues}
+        // We are using formik only for validation, and values are set via initialValues & enableReinitialize
+        initialValues={values}
         enableReinitialize
         validateOnBlur={false}
         validateOnMount={true}
-        validateOnChange={true}
         validationSchema={validationSchemaArtwork}
         onSubmit={handleSubmit}
       >
@@ -96,20 +99,11 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
           return (
             <Flex as={Form} direction={'column'} mt="x8">
               <ArtworkUpload
-                {...formik.getFieldProps('artwork')}
                 inputLabel={'Artwork'}
-                formik={formik}
                 existingProperties={properties}
                 id={'artwork'}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
                 helperText={
                   'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG and SVG'
-                }
-                errorMessage={
-                  formik.touched.artwork && formik.errors?.artwork
-                    ? formik.errors?.artwork
-                    : undefined
                 }
               />
 

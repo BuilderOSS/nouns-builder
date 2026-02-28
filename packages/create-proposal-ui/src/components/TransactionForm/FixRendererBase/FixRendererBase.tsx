@@ -2,9 +2,10 @@ import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { Box, Button, Paragraph } from '@buildeross/zord'
 
-export const FixRendererBase = () => {
+export const FixRendererBase: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
 
   const { shouldFix, transaction } = useRendererBaseFix({
@@ -32,7 +33,12 @@ export const FixRendererBase = () => {
         borderRadius={'curved'}
         w={'100%'}
         type="button"
-        onClick={() => transaction && addTransaction(transaction)}
+        onClick={() => {
+          if (transaction) {
+            addTransaction(transaction)
+            resetTransactionType()
+          }
+        }}
         disabled={!shouldFix}
       >
         Add Transaction to Queue

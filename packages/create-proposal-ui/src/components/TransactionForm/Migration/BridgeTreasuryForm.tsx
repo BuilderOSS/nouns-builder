@@ -16,10 +16,12 @@ import bridgeTreasuryFormSchema, {
   BridgeTreasuryValues,
 } from './BridgeTreasuryForm.schema'
 
-export const BridgeTreasuryForm = ({
-  migratedToChainId,
-}: {
+type BridgeTreasuryFormProps = {
   migratedToChainId?: CHAIN_ID
+}
+
+export const BridgeTreasuryForm: React.FC<BridgeTreasuryFormProps> = ({
+  migratedToChainId,
 }) => {
   const { treasury } = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -28,6 +30,7 @@ export const BridgeTreasuryForm = ({
     chainId: chain.id,
   })
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const initialValues: BridgeTreasuryValues = {
     amount: 0,
   }
@@ -63,6 +66,7 @@ export const BridgeTreasuryForm = ({
     })
 
     actions.resetForm()
+    resetTransactionType()
   }
 
   return (

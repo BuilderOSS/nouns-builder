@@ -6,7 +6,7 @@ import {
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { MessageType } from '@buildeross/sdk/subgraph'
+import { awaitSubgraphSync, MessageType } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
@@ -78,6 +78,7 @@ export interface PropDateFormProps {
   chainId?: CHAIN_ID
   addresses?: RequiredDaoContractAddresses
   insideModal?: boolean
+  hideHeader?: boolean
 }
 
 export const PropDateForm = ({
@@ -89,6 +90,7 @@ export const PropDateForm = ({
   chainId: chainIdProp,
   addresses: addressesProp,
   insideModal = false,
+  hideHeader = false,
 }: PropDateFormProps) => {
   const ref = useRef<HTMLDivElement | null>(null)
   const initialValues = useMemo(
@@ -119,10 +121,10 @@ export const PropDateForm = ({
   )
 
   useEffect(() => {
-    if (ref.current) {
+    if (ref.current && !insideModal) {
       ref.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [])
+  }, [insideModal])
 
   const handleSubmit = useCallback(
     async (values: PropDateFormValues) => {
@@ -187,7 +189,11 @@ export const PropDateForm = ({
           args: [attestParams],
         })
         const txHash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chainId })
+        const receipt = await waitForTransactionReceipt(config, {
+          hash: txHash,
+          chainId: chainId,
+        })
+        await awaitSubgraphSync(chainId, receipt.blockNumber)
         setIsTxSuccess(true)
       } catch (err: unknown) {
         console.error('Error submitting propdate (signing):', err)
@@ -219,11 +225,13 @@ export const PropDateForm = ({
 
   return (
     <Box {...boxProps} ref={ref}>
-      <Flex justify="space-between" mb="x4" align="center">
-        <Text fontSize={20} fontWeight="label">
-          Create Propdate
-        </Text>
-      </Flex>
+      {!hideHeader && (
+        <Flex justify="space-between" mb="x4" align="center">
+          <Text fontSize={20} fontWeight="label">
+            Create Propdate
+          </Text>
+        </Flex>
+      )}
 
       <Formik<PropDateFormValues>
         initialValues={initialValues}
@@ -296,7 +304,7 @@ export const PropDateForm = ({
 
               <Flex justify="flex-end" mt="x2" gap="x2">
                 <Button variant="ghost" onClick={closeForm} disabled={isSubmitting}>
-                  Reset
+                  {insideModal ? 'Cancel' : 'Reset'}
                 </Button>
                 <ContractButton
                   chainId={chainId}

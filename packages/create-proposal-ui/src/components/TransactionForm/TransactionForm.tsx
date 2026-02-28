@@ -1,7 +1,9 @@
+import { useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
-import { ReactNode } from 'react'
 
 import { AddArtwork } from './AddArtwork'
+import { ContentCoin } from './ContentCoin'
+import { CreatorCoin } from './CreatorCoin'
 import { CustomTransaction } from './CustomTransaction'
 import { Droposal } from './Droposal'
 import { FixRendererBase } from './FixRendererBase'
@@ -18,10 +20,6 @@ import { SendTokens } from './SendTokens'
 import { StreamTokens } from './StreamTokens'
 import { WalletConnect } from './WalletConnect'
 
-interface TransactionFormProps {
-  type: TransactionFormType
-}
-
 export type TransactionFormType = (typeof TRANSACTION_FORM_OPTIONS)[number]
 
 export const TRANSACTION_FORM_OPTIONS = [
@@ -34,6 +32,8 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.NOMINATE_DELEGATE,
   TransactionType.PIN_TREASURY_ASSET,
   TransactionType.CUSTOM,
+  TransactionType.CREATOR_COIN,
+  TransactionType.CONTENT_COIN,
   TransactionType.DROPOSAL,
   TransactionType.PAUSE_AUCTIONS,
   TransactionType.FIX_RENDERER_BASE,
@@ -43,25 +43,34 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.MIGRATION,
 ] as const
 
-export const TransactionForm = ({ type }: TransactionFormProps) => {
-  const FORMS: { [key in TransactionFormType]: ReactNode } = {
-    [TransactionType.CUSTOM]: <CustomTransaction />,
-    [TransactionType.MINT_GOVERNANCE_TOKENS]: <MintGovernanceTokens />,
-    [TransactionType.DROPOSAL]: <Droposal />,
-    [TransactionType.SEND_NFT]: <SendNft />,
-    [TransactionType.SEND_TOKENS]: <SendTokens />,
-    [TransactionType.STREAM_TOKENS]: <StreamTokens />,
-    [TransactionType.MILESTONE_PAYMENTS]: <MilestonePayments />,
-    [TransactionType.NOMINATE_DELEGATE]: <NominateEscrowDelegate />,
-    [TransactionType.WALLET_CONNECT]: <WalletConnect />,
-    [TransactionType.PIN_TREASURY_ASSET]: <PinTreasuryAsset />,
-    [TransactionType.PAUSE_AUCTIONS]: <PauseAuctions />,
-    [TransactionType.FIX_RENDERER_BASE]: <FixRendererBase />,
-    [TransactionType.RESUME_AUCTIONS]: <ResumeAuctions />,
-    [TransactionType.ADD_ARTWORK]: <AddArtwork />,
-    [TransactionType.REPLACE_ARTWORK]: <ReplaceArtwork />,
-    [TransactionType.MIGRATION]: <Migration />,
+const FORMS: Record<TransactionFormType, React.FC> = {
+  [TransactionType.CUSTOM]: CustomTransaction,
+  [TransactionType.MINT_GOVERNANCE_TOKENS]: MintGovernanceTokens,
+  [TransactionType.DROPOSAL]: Droposal,
+  [TransactionType.SEND_NFT]: SendNft,
+  [TransactionType.SEND_TOKENS]: SendTokens,
+  [TransactionType.STREAM_TOKENS]: StreamTokens,
+  [TransactionType.MILESTONE_PAYMENTS]: MilestonePayments,
+  [TransactionType.NOMINATE_DELEGATE]: NominateEscrowDelegate,
+  [TransactionType.WALLET_CONNECT]: WalletConnect,
+  [TransactionType.PIN_TREASURY_ASSET]: PinTreasuryAsset,
+  [TransactionType.PAUSE_AUCTIONS]: PauseAuctions,
+  [TransactionType.FIX_RENDERER_BASE]: FixRendererBase,
+  [TransactionType.RESUME_AUCTIONS]: ResumeAuctions,
+  [TransactionType.ADD_ARTWORK]: AddArtwork,
+  [TransactionType.REPLACE_ARTWORK]: ReplaceArtwork,
+  [TransactionType.MIGRATION]: Migration,
+  [TransactionType.CREATOR_COIN]: CreatorCoin,
+  [TransactionType.CONTENT_COIN]: ContentCoin,
+} as const
+
+export const TransactionForm: React.FC = () => {
+  const transactionType = useProposalStore((state) => state.transactionType)
+  const Component = FORMS[transactionType as TransactionFormType]
+
+  if (!Component) {
+    return null
   }
 
-  return <>{FORMS[type]}</>
+  return <Component />
 }

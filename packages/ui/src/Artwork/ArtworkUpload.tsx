@@ -1,4 +1,4 @@
-import { ArtworkUploadError, ImageProps } from '@buildeross/types'
+import { ArtworkError } from '@buildeross/types'
 import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
 
@@ -16,28 +16,29 @@ import {
 } from '../styles'
 
 interface ArtworkUploadProps {
+  id: string
   inputLabel: string | ReactElement
   helperText?: string
   formError?: any
   fileCount: number | string
   traitCount: number
   onUpload: (e: BaseSyntheticEvent) => void
-  uploadArtworkError: ArtworkUploadError | undefined
-  ipfsUploadError: string | undefined
-  images: ImageProps[] | undefined
+  artworkError: ArtworkError | undefined
+  uploadError: string | undefined
   fileType?: string
   layerOrdering: React.ReactNode
 }
 
 export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
+  id,
   inputLabel,
   helperText,
   formError,
   fileCount,
   traitCount,
   onUpload,
-  uploadArtworkError,
-  ipfsUploadError,
+  artworkError: artworkError,
+  uploadError: uploadError,
   fileType,
   layerOrdering,
 }) => {
@@ -51,7 +52,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
 
   return (
     <Box mb={'x3'}>
-      <label className={defaultInputLabelStyle}>{inputLabel}</label>
+      <div className={defaultInputLabelStyle}>{inputLabel}</div>
       {!!helperText && helperText?.length ? (
         <Stack mb={'x8'}>
           <Text className={defaultHelperTextStyle}>{helperText} </Text>
@@ -69,7 +70,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
           h={'x16'}
           w={'100%'}
           px={'x8'}
-          htmlFor="file-upload"
+          htmlFor={id}
           className={defaultUploadButtonStyle}
         >
           <Box as="span">Upload</Box>
@@ -81,7 +82,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
         </Box>
         <input
           className={defaultUploadStyle}
-          id="file-upload"
+          id={id}
           name="file"
           type="file"
           multiple={true}
@@ -89,19 +90,19 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
           onChange={onUpload}
         />
       </div>
-      {((uploadArtworkError || ipfsUploadError) && (
+      {((artworkError || uploadError) && (
         <Box py={'x4'} className={uploadErrorBox}>
-          {ipfsUploadError && <Box>{ipfsUploadError}</Box>}
+          {uploadError && <Box>{uploadError}</Box>}
 
           <Box as={'ul'} m={'x0'}>
-            {uploadArtworkError?.maxTraits && <li>{uploadArtworkError.maxTraits}</li>}
-            {uploadArtworkError?.mime && <li>{uploadArtworkError.mime}</li>}
-            {uploadArtworkError?.directory && <li>{uploadArtworkError.directory}</li>}
-            {uploadArtworkError?.dimensions && <li>{uploadArtworkError.dimensions}</li>}
+            {artworkError?.maxTraits && <li>{artworkError.maxTraits}</li>}
+            {artworkError?.mime && <li>{artworkError.mime}</li>}
+            {artworkError?.directory && <li>{artworkError.directory}</li>}
+            {artworkError?.dimensions && <li>{artworkError.dimensions}</li>}
           </Box>
         </Box>
       )) ||
-        (traitCount > 0 && (
+        (traitCount > 0 && !!fileType && (
           <>
             <Box p={'x4'} fontSize={12} className={uploadSuccessBox}>
               <Box as={'ul'} m={'x0'}>

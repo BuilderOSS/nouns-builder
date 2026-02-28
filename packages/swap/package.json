@@ -1,0 +1,58 @@
+{
+  "name": "@buildeross/swap",
+  "description": "Swap utilities for ZoraCoins and ClankerTokens",
+  "version": "0.2.2",
+  "devDependencies": {
+    "@buildeross/constants": "workspace:*",
+    "@buildeross/eslint-config-custom": "workspace:*",
+    "@buildeross/sdk": "workspace:*",
+    "@buildeross/tsconfig": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "@buildeross/utils": "workspace:*",
+    "@types/node": "^22.15.21",
+    "eslint": "8.57.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "peerDependencies": {
+    "@buildeross/constants": "0.2.2",
+    "@buildeross/sdk": "0.2.2",
+    "@buildeross/types": "0.2.2",
+    "viem": "^2.44.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BuilderOSS/nouns-builder.git",
+    "directory": "packages/swap"
+  },
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist .turbo",
+    "lint": "pnpm type-check && eslint src --fix",
+    "type-check": "tsc --noEmit"
+  },
+  "types": "./dist/index.d.ts"
+}

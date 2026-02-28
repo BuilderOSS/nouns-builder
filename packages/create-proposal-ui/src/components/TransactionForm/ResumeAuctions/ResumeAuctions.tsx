@@ -6,9 +6,10 @@ import { useState } from 'react'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
-export const ResumeAuctions = () => {
+export const ResumeAuctions: React.FC = () => {
   const { auction } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: paused } = useReadContract({
@@ -36,6 +37,7 @@ export const ResumeAuctions = () => {
         summary: 'Resume auctions',
         transactions: [pause],
       })
+      resetTransactionType()
     } finally {
       setIsSubmitting(false)
     }

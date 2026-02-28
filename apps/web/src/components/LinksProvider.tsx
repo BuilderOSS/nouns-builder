@@ -1,6 +1,6 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { LinksProvider as BaseLinksProvider } from '@buildeross/ui/LinksProvider'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { chainIdToSlug } from '@buildeross/utils/chains'
 import React from 'react'
 
 type LinksProviderProps = {
@@ -50,9 +50,39 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
     []
   )
 
+  const getProposalCreateLink = React.useCallback(
+    (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
+      }
+    },
+    []
+  )
+
   const getProfileLink = React.useCallback((address: AddressType) => {
     return {
       href: `/profile/${address}`,
+    }
+  }, [])
+
+  const getCoinLink = React.useCallback((chainId: CHAIN_ID, coinAddress: AddressType) => {
+    return {
+      href: `/coin/${chainIdToSlug(chainId)}/${coinAddress}`,
+    }
+  }, [])
+
+  const getCoinCreateLink = React.useCallback(
+    (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+      return {
+        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/coin/create`,
+      }
+    },
+    []
+  )
+
+  const getDropLink = React.useCallback((chainId: CHAIN_ID, dropAddress: AddressType) => {
+    return {
+      href: `/drop/${chainIdToSlug(chainId)}/${dropAddress}`,
     }
   }, [])
 
@@ -62,8 +92,21 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
       getDaoLink,
       getProposalLink,
       getProfileLink,
+      getCoinLink,
+      getCoinCreateLink,
+      getProposalCreateLink,
+      getDropLink,
     }),
-    [getAuctionLink, getDaoLink, getProposalLink, getProfileLink]
+    [
+      getAuctionLink,
+      getDaoLink,
+      getProposalLink,
+      getProfileLink,
+      getCoinLink,
+      getCoinCreateLink,
+      getProposalCreateLink,
+      getDropLink,
+    ]
   )
 
   return <BaseLinksProvider value={value}>{children}</BaseLinksProvider>

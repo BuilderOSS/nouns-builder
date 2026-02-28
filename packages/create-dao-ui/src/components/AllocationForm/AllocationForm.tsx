@@ -2,27 +2,28 @@ import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { managerAbi } from '@buildeross/sdk/contract'
 import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID, type TokenAllocation } from '@buildeross/types'
+import { Toggle } from '@buildeross/ui'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
-  defaultFormButtonWithPrev,
 } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
+import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Heading, Icon, Paragraph } from '@buildeross/zord'
-import { FieldArray, Form, Formik, FormikProps } from 'formik'
+import { FieldArray, Form, Formik, FormikProps, useFormikContext } from 'formik'
 import { motion } from 'framer-motion'
 import sum from 'lodash/sum'
-import React, { BaseSyntheticEvent, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useAccount, useReadContract } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 import { useFormStore } from '../../stores'
+import { FormNavButtons } from '../FormNavButtons'
 import { validationSchemaAllocations } from './AllocationForm.schema'
 import { ContributionAllocation } from './ContributionAllocation'
 import { FounderAllocationFields } from './FounderAllocationFields'
 import { FounderRewardsFields } from './FounderRewardsFields'
-import { Toggle } from './Toggle'
 
 export type { TokenAllocation }
 
@@ -39,6 +40,20 @@ const animation = {
   },
 }
 
+const FormErrorObserver: React.FC<{
+  setIsFormSubmittable: React.Dispatch<React.SetStateAction<boolean>>
+}> = ({ setIsFormSubmittable }) => {
+  const formik = useFormikContext<FounderAllocationFormValues>()
+
+  const submittable = isEmpty(formik.errors) && !formik.isSubmitting
+
+  useEffect(() => {
+    setIsFormSubmittable(submittable)
+  }, [submittable, setIsFormSubmittable])
+
+  return null
+}
+
 export interface FounderAllocationFormValues {
   founderAllocation: TokenAllocation[]
   founderRewardRecipient: string
@@ -49,6 +64,7 @@ export interface FounderAllocationFormValues {
 export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
   const formRef = useRef<FormikProps<FounderAllocationFormValues>>(null)
   const [allocationError, setAllocationError] = useState(false)
+  const [isFormSubmittable, setIsFormSubmittable] = useState(false)
   const chain = useChainStore((x) => x.chain)
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false)
 
@@ -232,126 +248,138 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
         validationSchema={validationSchemaAllocations(address)}
         onSubmit={handleSubmit}
       >
-        {(formik) => (
-          <Form>
-            <FounderRewardsFields
-              founderRewardRecipient={formik.values.founderRewardRecipient}
-              founderRewardBps={formik.values.founderRewardBps}
-              setFounderRewardRecipient={(value) =>
-                formik.setFieldValue('founderRewardRecipient', (value ?? '').trim())
-              }
-              setFounderRewardBps={(value) =>
-                formik.setFieldValue(
-                  'founderRewardBps',
-                  Number.isFinite(Number(value)) ? Number(value) : 0
-                )
-              }
-              recipientErrorMessage={formik.errors.founderRewardRecipient}
-              clearRewardError={() =>
-                formik.setFieldError('founderRewardRecipient', undefined)
-              }
-            />
-
-            <Flex
-              justify={'space-between'}
-              align={'center'}
-              mb={'x2'}
-              mt={'x6'}
-              pr={'x2'}
-            >
-              <Heading size="xs">Token Allocation</Heading>
-              <Toggle
-                on={hasFounderAllocation}
-                onToggle={handleToggleFounderAllocation}
-                variant="plain"
+        {(formik) => {
+          return (
+            <Form>
+              <FormErrorObserver setIsFormSubmittable={setIsFormSubmittable} />
+              <FounderRewardsFields
+                founderRewardRecipient={formik.values.founderRewardRecipient}
+                founderRewardBps={formik.values.founderRewardBps}
+                setFounderRewardRecipient={(value) =>
+                  formik.setFieldValue('founderRewardRecipient', (value ?? '').trim())
+                }
+                setFounderRewardBps={(value) =>
+                  formik.setFieldValue(
+                    'founderRewardBps',
+                    Number.isFinite(Number(value)) ? Number(value) : 0
+                  )
+                }
+                recipientErrorMessage={
+                  formik.touched.founderRewardRecipient
+                    ? formik.errors.founderRewardRecipient
+                    : undefined
+                }
+                clearRewardError={() =>
+                  formik.setFieldError('founderRewardRecipient', undefined)
+                }
               />
-            </Flex>
 
-            <Paragraph color="text3" mb={'x6'}>
-              Allocate a percentage of minted tokens to founder addresses. Founders
-              automatically receive their share of tokens as they are minted until the
-              specified end date. Toggle off to create a DAO with no founder allocation.
-            </Paragraph>
+              <Flex
+                justify={'space-between'}
+                align={'center'}
+                mb={'x2'}
+                mt={'x6'}
+                pr={'x2'}
+              >
+                <Heading size="xs">Token Allocation</Heading>
+                <Toggle
+                  on={hasFounderAllocation}
+                  onToggle={handleToggleFounderAllocation}
+                />
+              </Flex>
 
-            {hasFounderAllocation && (
-              <FieldArray name="founderAllocation">
-                {({ remove, push }) => (
-                  <FounderAllocationFields
-                    formik={formik}
-                    auctionDuration={auctionDuration!}
-                    vetoPower={vetoPower}
-                    vetoerAddress={vetoerAddress}
-                    touched={formik.touched}
-                    values={formik.values}
-                    errors={formik.errors}
-                    removeFounderAddress={remove}
-                    addFounderAddress={() =>
-                      push({ founderAddress: '', allocationPercentage: '', endDate: '' })
-                    }
-                  />
-                )}
-              </FieldArray>
-            )}
-            {!isVersionLoading && version?.startsWith('2') && (
-              <>
-                <Flex w="100%" align={'center'} justify={'center'}>
-                  <Button
-                    align={'center'}
-                    justify={'center'}
-                    alignSelf={'center'}
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className={defaultFormAdvancedToggle}
-                    gap={'x3'}
-                    py={'x3'}
-                    mt={'x8'}
-                    mb={'x8'}
+              <Paragraph color="text3" mb={'x6'}>
+                Allocate a percentage of minted tokens to founder addresses. Founders
+                automatically receive their share of tokens as they are minted until the
+                specified end date. Toggle off to create a DAO with no founder allocation.
+              </Paragraph>
+
+              {hasFounderAllocation && (
+                <FieldArray name="founderAllocation">
+                  {({ remove, push }) => (
+                    <FounderAllocationFields
+                      formik={formik}
+                      auctionDuration={auctionDuration!}
+                      vetoPower={vetoPower}
+                      vetoerAddress={vetoerAddress}
+                      touched={formik.touched}
+                      values={formik.values}
+                      errors={formik.errors}
+                      removeFounderAddress={remove}
+                      addFounderAddress={() =>
+                        push({
+                          founderAddress: '',
+                          allocationPercentage: '',
+                          endDate: '',
+                        })
+                      }
+                    />
+                  )}
+                </FieldArray>
+              )}
+              {!isVersionLoading && version?.startsWith('2') && (
+                <>
+                  <Flex w="100%" align={'center'} justify={'center'}>
+                    <Button
+                      align={'center'}
+                      justify={'center'}
+                      alignSelf={'center'}
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                      className={defaultFormAdvancedToggle}
+                      gap={'x3'}
+                      py={'x3'}
+                      mt={'x8'}
+                      mb={'x8'}
+                    >
+                      Advanced Settings
+                      <Icon id={showAdvanced ? 'chevronUp' : 'chevronDown'} />
+                    </Button>
+                  </Flex>
+                  <motion.div
+                    className={defaultFormAdvancedWrapper}
+                    variants={animation}
+                    initial={'init'}
+                    animate={showAdvanced ? 'open' : 'init'}
                   >
-                    Advanced Settings
-                    <Icon id={showAdvanced ? 'chevronUp' : 'chevronDown'} />
-                  </Button>
-                </Flex>
-                <motion.div
-                  className={defaultFormAdvancedWrapper}
-                  variants={animation}
-                  initial={'init'}
-                  animate={showAdvanced ? 'open' : 'init'}
-                >
-                  <Heading size="xs">Reserve Tokens for Airdrops or Manual Mints</Heading>
-                  <Paragraph color="text3" mb={'x6'}>
-                    Token IDs below this number are reserved for DAO minting. Auctions
-                    start at this ID. Cannot be lowered after minting begins.
-                  </Paragraph>
-                  <SmartInput
-                    {...formik.getFieldProps('reservedUntilTokenId')}
-                    inputLabel={'Reserve Tokens Until'}
-                    type={FIELD_TYPES.NUMBER}
-                    formik={formik}
-                    id={'reservedUntilTokenId'}
-                    onChange={({ target }: BaseSyntheticEvent) => {
-                      formik.setFieldValue('reservedUntilTokenId', target.value)
-                    }}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['reservedUntilTokenId'] &&
-                      formik.errors['reservedUntilTokenId']
-                        ? formik.errors['reservedUntilTokenId']
-                        : undefined
-                    }
-                  />
-                  {formik.values.reservedUntilTokenId &&
-                    Number(formik.values.reservedUntilTokenId) > 0 && (
-                      <Paragraph color="text3" mt={'x2'} fontSize={14}>
-                        Reserving tokens 0 -{' '}
-                        {Math.max(Number(formik.values.reservedUntilTokenId) - 1, 0)}{' '}
-                        (Total {formik.values.reservedUntilTokenId} token
-                        {Number(formik.values.reservedUntilTokenId) === 1 ? '' : 's'})
-                      </Paragraph>
-                    )}
-                </motion.div>
-              </>
-            )}
-          </Form>
-        )}
+                    <Heading size="xs">
+                      Reserve Tokens for Airdrops or Manual Mints
+                    </Heading>
+                    <Paragraph color="text3" mb={'x6'}>
+                      Token IDs below this number are reserved for DAO minting. Auctions
+                      start at this ID. Cannot be lowered after minting begins.
+                    </Paragraph>
+                    <SmartInput
+                      {...formik.getFieldProps('reservedUntilTokenId')}
+                      inputLabel={'Reserve Tokens Until'}
+                      type={FIELD_TYPES.NUMBER}
+                      formik={formik}
+                      id={'reservedUntilTokenId'}
+                      onChange={({ target }: React.BaseSyntheticEvent) => {
+                        formik.setFieldValue('reservedUntilTokenId', target.value)
+                      }}
+                      onBlur={formik.handleBlur}
+                      errorMessage={
+                        formik.touched['reservedUntilTokenId'] &&
+                        formik.errors['reservedUntilTokenId']
+                          ? formik.errors['reservedUntilTokenId']
+                          : undefined
+                      }
+                    />
+                    {formik.values.reservedUntilTokenId &&
+                      Number(formik.values.reservedUntilTokenId) > 0 && (
+                        <Paragraph color="text3" mt={'x2'} fontSize={14}>
+                          Reserving tokens 0 -{' '}
+                          {Math.max(Number(formik.values.reservedUntilTokenId) - 1, 0)}{' '}
+                          (Total {formik.values.reservedUntilTokenId} token
+                          {Number(formik.values.reservedUntilTokenId) === 1 ? '' : 's'})
+                        </Paragraph>
+                      )}
+                  </motion.div>
+                </>
+              )}
+            </Form>
+          )
+        }}
       </Formik>
       {chain.id === CHAIN_ID.ETHEREUM && <ContributionAllocation />}
 
@@ -362,33 +390,13 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
         </Flex>
       )}
 
-      <Flex justify={'space-between'} mt={'x8'}>
-        <Button
-          justify={'center'}
-          align={'center'}
-          h={'x15'}
-          minH={'x15'}
-          minW={'x15'}
-          type="button"
-          onClick={handlePrev}
-          variant="secondary"
-          aria-label="Back"
-        >
-          <Icon id="arrowLeft" />
-        </Button>
-        <Button
-          flex={1}
-          width={'auto'}
-          ml={'x2'}
-          minH={'x15'}
-          className={defaultFormButtonWithPrev}
-          disabled={isVersionLoading}
-          type="submit"
-          onClick={() => formRef.current?.handleSubmit()}
-        >
-          Continue
-        </Button>
-      </Flex>
+      <FormNavButtons
+        hasPrev
+        onPrev={handlePrev}
+        isSubmit={false}
+        onNext={() => formRef.current?.handleSubmit()}
+        nextDisabled={isVersionLoading || !isFormSubmittable}
+      />
     </>
   )
 }

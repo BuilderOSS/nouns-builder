@@ -8,9 +8,11 @@ import React from 'react'
 import { CopyButton } from '../CopyButton'
 
 export type ContractLinkProps = {
-  address: string
+  address: `0x${string}`
   size?: 'xs' | 'sm' | 'md'
   noBorder?: boolean
+  py?: FlexProps['py']
+  px?: FlexProps['px']
   chainId: CHAIN_ID
 }
 
@@ -19,6 +21,8 @@ export const ContractLink = ({
   size = 'md',
   chainId,
   noBorder = false,
+  py: pyOverride,
+  px: pxOverride,
 }: ContractLinkProps) => {
   // Resolve address to basename/ENS name if available
   const { ensName } = useEnsName(address)
@@ -43,8 +47,8 @@ export const ContractLink = ({
 
   return (
     <Flex
-      py={py}
-      px={px}
+      py={pyOverride ?? py}
+      px={pxOverride ?? px}
       justify={'space-between'}
       align={'center'}
       borderRadius={noBorder ? undefined : 'curved'}

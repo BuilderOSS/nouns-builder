@@ -1,0 +1,18 @@
+query proposalByExecutionTxHash($executionTransactionHash: Bytes!) {
+  proposals(
+    where: { executionTransactionHash: $executionTransactionHash }
+    first: 1
+    orderBy: timeCreated
+    orderDirection: desc
+  ) {
+    proposer
+    proposalId
+    proposalNumber
+    title
+    dao {
+      id
+      name
+      contractImage
+    }
+  }
+}

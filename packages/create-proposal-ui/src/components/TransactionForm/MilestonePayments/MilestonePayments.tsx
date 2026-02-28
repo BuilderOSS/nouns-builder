@@ -27,6 +27,7 @@ const LIMIT = 20
 const PAGE = 1
 
 export const MilestonePayments: React.FC = () => {
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ipfsUploadError, setIpfsUploadError] = useState<Error | null>(null)
 
@@ -222,13 +223,14 @@ export const MilestonePayments: React.FC = () => {
           transactions,
         })
         actions.resetForm()
+        resetTransactionType()
       } catch (err) {
         console.error('Error Adding Transaction', err)
       } finally {
         setIsSubmitting(false)
       }
     },
-    [addTransaction, chain.id, lastProposalId, addresses.treasury]
+    [addTransaction, chain.id, lastProposalId, addresses.treasury, resetTransactionType]
   )
 
   return (

@@ -1,5 +1,5 @@
 import { normalizeIPFSUrl } from '@buildeross/ipfs-service'
-import { IPFSUpload, OrderedTraits } from '@buildeross/types'
+import type { ImageProps, IPFSUpload, OrderedTraits, Property } from '@buildeross/types'
 
 export type PropertyItem = {
   propertyId: bigint
@@ -30,6 +30,46 @@ function uploadsToPropertyItems(
       isNewProperty,
     }
   })
+}
+
+export const transformPropertiesToOrderedTraits = (
+  properties: Property[]
+): OrderedTraits => {
+  return properties
+    .map((property) => ({
+      trait: property.name,
+      properties: property.items.map((item) => item.name),
+    }))
+    .reverse() // reversed to display order (newest-first); transformFileProperties re-reverses to contract order
+}
+
+export function transformPropertiesToImageProps(properties: Property[]): ImageProps[] {
+  const imageProps: ImageProps[] = []
+
+  for (const property of properties) {
+    for (const item of property.items) {
+      const match = item.uri.match(/^ipfs:\/\/([^/]+)\/.+$/)
+      if (!match || !match[1]) {
+        console.error(`Invalid IPFS URI format: ${item.uri}`)
+        continue
+      }
+
+      const nameParts = item.uri.split('/')
+      const name = nameParts[nameParts.length - 1]
+      if (!name) {
+        console.error(`Unable to extract name from URI: ${item.uri}`)
+        continue
+      }
+
+      imageProps.push({
+        name,
+        trait: property.name,
+        uri: item.uri,
+      })
+    }
+  }
+
+  return imageProps
 }
 
 export function transformFileProperties(

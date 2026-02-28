@@ -90,6 +90,10 @@ export const defaultInputStyle = style({
     '&::placeholder': {
       color: '#B3B3B3',
     },
+    '&:disabled': {
+      opacity: 0.4,
+      cursor: 'not-allowed',
+    },
   },
 })
 
@@ -108,25 +112,16 @@ export const defaultInputErrorStyle = style({
       backgroundColor: '#FFF',
       borderColor: '#E6E6E6',
     },
+    '&:disabled': {
+      opacity: 0.4,
+      cursor: 'not-allowed',
+    },
   },
 })
 
 export const inputStyleVariants = styleVariants({
   default: [defaultInputStyle],
   error: [defaultInputErrorStyle],
-})
-
-export const defaultFormButtonWithPrev = style({
-  width: 'calc(100% - 68px)',
-  borderRadius: '10px',
-  height: 60,
-  marginLeft: 8,
-})
-
-export const defaultFormButton = style({
-  width: '100%',
-  borderRadius: '10px',
-  height: 60,
 })
 
 export const defaultInputLabelStyle = style([
@@ -215,6 +210,9 @@ export const numberInputStyle = style({
     '&::placeholder': {
       color: '#B3B3B3',
     },
+    '&:disabled': {
+      cursor: 'not-allowed',
+    },
   },
 })
 
@@ -241,6 +239,9 @@ export const numberInputErrorStyle = style({
     },
     '&::-webkit-input-placeholder': {
       textAlign: 'right',
+    },
+    '&:disabled': {
+      cursor: 'not-allowed',
     },
   },
 })

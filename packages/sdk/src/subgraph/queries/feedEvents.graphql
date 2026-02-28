@@ -123,5 +123,48 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
       }
       amount
     }
+
+    ... on ClankerTokenCreatedEvent {
+      clankerToken {
+        tokenAddress
+        tokenName
+        tokenSymbol
+        tokenImage
+        poolId
+      }
+    }
+
+    ... on ZoraCoinCreatedEvent {
+      zoraCoin {
+        coinAddress
+        name
+        symbol
+        uri
+        currency
+      }
+    }
+
+    ... on ZoraDropCreatedEvent {
+      zoraDrop {
+        id
+        creator
+        name
+        symbol
+        description
+        imageURI
+        animationURI
+        editionSize
+        metadataRenderer
+        royaltyBPS
+        fundsRecipient
+        publicSalePrice
+        maxSalePurchasePerAddress
+        publicSaleStart
+        publicSaleEnd
+        presaleStart
+        presaleEnd
+        presaleMerkleRoot
+      }
+    }
   }
 }

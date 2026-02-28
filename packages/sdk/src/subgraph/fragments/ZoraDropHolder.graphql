@@ -1,0 +1,15 @@
+fragment ZoraDropHolder on ZoraDropHolder {
+  id
+  holder
+  balance
+  totalSpent
+  totalPurchased
+  updatedAt
+  updatedAtBlock
+  drop {
+    id
+    name
+    symbol
+    imageURI
+  }
+}

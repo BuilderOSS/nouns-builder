@@ -19,8 +19,9 @@ import { PinTreasuryAssetForm } from './PinTreasuryAssetForm'
 
 const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
 
-export const PinTreasuryAsset = () => {
+export const PinTreasuryAsset: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
 
@@ -90,8 +91,9 @@ export const PinTreasuryAsset = () => {
       })
 
       actions.resetForm()
+      resetTransactionType()
     },
-    [addTransaction, addresses.token, chain.id]
+    [addTransaction, addresses.token, chain.id, resetTransactionType]
   )
 
   return (

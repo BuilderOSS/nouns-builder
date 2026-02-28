@@ -1,7 +1,7 @@
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { useChainStore } from '@buildeross/stores'
 import { Uploading } from '@buildeross/ui/Uploading'
-import { isTestnetChain } from '@buildeross/utils/helpers'
+import { isTestnetChain } from '@buildeross/utils/chains'
 import { atoms, Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
@@ -41,7 +41,7 @@ export const ReplaceArtworkForm: React.FC<ReplaceArtworkFormProps> = ({
   const isTestnetDAO = React.useMemo(() => isTestnetChain(chainId), [chainId])
   const [hasConfirmed, setHasConfirmed] = useState(isTestnetDAO ? true : false)
 
-  const initialValues = {
+  const values = {
     artwork: setUpArtwork?.artwork || [],
     filesLength: setUpArtwork?.filesLength || '',
   }
@@ -73,7 +73,8 @@ export const ReplaceArtworkForm: React.FC<ReplaceArtworkFormProps> = ({
         ipfsUploadProgress={ipfsUploadProgress}
       />
       <Formik<ArtworkFormValues>
-        initialValues={initialValues}
+        // We are using formik only for validation, and values are set via initialValues & enableReinitialize
+        initialValues={values}
         enableReinitialize
         validateOnBlur={false}
         validateOnMount={true}
@@ -84,12 +85,8 @@ export const ReplaceArtworkForm: React.FC<ReplaceArtworkFormProps> = ({
         {(formik) => (
           <Flex as={Form} direction={'column'} mt="x8">
             <ArtworkUpload
-              {...formik.getFieldProps('artwork')}
               inputLabel={'Artwork'}
-              formik={formik}
               id={'artwork'}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
               helperText={
                 'Builder uses folder hierarchy to organize your assets. Upload a single folder containing a subfolder for each trait. Each subfolder should contain every variant for that trait.\nMaximum directory size: 200MB\nSupported image types: PNG and SVG'
               }

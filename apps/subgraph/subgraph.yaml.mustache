@@ -57,7 +57,7 @@ dataSources:
         - name: EAS
           file: ./abis/EAS.json
         - name: Token
-          file: ./abis/Token.json 
+          file: ./abis/Token.json
         - name: Governor
           file: ./abis/Governor.json
         - name: Treasury
@@ -77,6 +77,89 @@ dataSources:
           handler: handleRevoked
       file: ./src/eas.ts
 {{/eas}}
+{{#clanker}}
+  - kind: ethereum
+    name: Clanker
+    network: {{network}}
+    source:
+      address: '{{clanker.address}}'
+      abi: Clanker
+      startBlock: {{clanker.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ClankerToken
+        - DAO
+      abis:
+        - name: Clanker
+          file: ./abis/Clanker.json
+        - name: Treasury
+          file: ./abis/Treasury.json
+        - name: Governor
+          file: ./abis/Governor.json
+      eventHandlers:
+        - event: TokenCreated(address,indexed address,indexed address,string,string,string,string,string,int24,address,bytes32,address,address,address,uint256,address[])
+          handler: handleTokenCreated
+      file: ./src/clanker.ts
+{{/clanker}}
+{{#zoraFactory}}
+  - kind: ethereum
+    name: ZoraFactory
+    network: {{network}}
+    source:
+      address: '{{zoraFactory.address}}'
+      abi: ZoraFactory
+      startBlock: {{zoraFactory.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ZoraCoin
+        - DAO
+      abis:
+        - name: ZoraFactory
+          file: ./abis/ZoraFactory.json
+        - name: Token
+          file: ./abis/Token.json
+      eventHandlers:
+        - event: CoinCreatedV4(indexed address,indexed address,indexed address,address,string,string,string,address,(address,address,uint24,int24,address),bytes32,string)
+          handler: handleCoinCreatedV4
+      file: ./src/zoraFactory.ts
+{{/zoraFactory}}
+{{#zoraNFTCreator}}
+  - kind: ethereum
+    name: ZoraNFTCreator
+    network: {{network}}
+    source:
+      address: '{{zoraNFTCreator.address}}'
+      abi: ZoraNFTCreatorV1
+      startBlock: {{zoraNFTCreator.startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ZoraDrop
+        - DAO
+      abis:
+        - name: ZoraNFTCreatorV1
+          file: ./abis/ZoraNFTCreatorV1.json
+        - name: ERC721Drop
+          file: ./abis/ERC721Drop.json
+        - name: EditionMetadataRenderer
+          file: ./abis/EditionMetadataRenderer.json
+        - name: Treasury
+          file: ./abis/Treasury.json
+        - name: Governor
+          file: ./abis/Governor.json
+      eventHandlers:
+        - event: CreatedDrop(indexed address,indexed address,uint256)
+          handler: handleCreatedDrop
+      file: ./src/zoraNFTCreator.ts
+{{/zoraNFTCreator}}
 templates:
   - kind: ethereum
     name: Token
@@ -100,6 +183,32 @@ templates:
         - event: DelegateChanged(indexed address,indexed address,indexed address)
           handler: handleDelegateChanged
       file: ./src/token.ts
+{{#zoraNFTCreator}}
+  - kind: ethereum
+    name: ZoraDrop
+    network: {{network}}
+    source:
+      abi: ERC721Drop
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ZoraDrop
+        - ZoraDropHolder
+        - ZoraDropMintComment
+      abis:
+        - name: ERC721Drop
+          file: ./abis/ERC721Drop.json
+      eventHandlers:
+        - event: Sale(indexed address,indexed uint256,indexed uint256,uint256)
+          handler: handleSale
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+        - event: MintComment(indexed address,indexed address,indexed uint256,uint256,string)
+          handler: handleMintComment
+      file: ./src/zoraDropTemplate.ts
+{{/zoraNFTCreator}}
   - kind: ethereum
     name: Governor
     network: {{network}}
@@ -235,3 +344,45 @@ templates:
         - event: MinBidIncrementPercentageUpdated(uint256)
           handler: handleMinBidIncrementPercentageUpdated
       file: ./src/auction.ts
+{{#clanker}}
+  - kind: ethereum
+    name: ClankerToken
+    network: {{network}}
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ClankerToken
+        - ClankerTokenHolder
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/clankerTokenTemplate.ts
+{{/clanker}}
+{{#zoraFactory}}
+  - kind: ethereum
+    name: ZoraCoin
+    network: {{network}}
+    source:
+      abi: ERC20
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - ZoraCoin
+        - ZoraCoinHolder
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/zoraCoinTemplate.ts
+{{/zoraFactory}}

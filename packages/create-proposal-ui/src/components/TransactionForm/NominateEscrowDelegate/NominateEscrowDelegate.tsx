@@ -50,9 +50,10 @@ const escrowDelegateFormSchema = (_escrowDelegate: string | undefined) =>
 
 const schemaEncoder = new SchemaEncoder(ESCROW_DELEGATE_SCHEMA)
 
-export const NominateEscrowDelegate = () => {
+export const NominateEscrowDelegate: React.FC = () => {
   const { token, treasury } = useDaoStore((state) => state.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
   const { escrowDelegate } = useEscrowDelegate({
     chainId: chain.id,
@@ -109,8 +110,9 @@ export const NominateEscrowDelegate = () => {
         summary: `Nominate ${displayName} as the delegate`,
         transactions: [attest],
       })
+      resetTransactionType()
     },
-    [addTransaction, chain.id, token]
+    [addTransaction, chain.id, token, resetTransactionType]
   )
 
   const currentDelegate = escrowDelegate ?? treasury

@@ -1,12 +1,13 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
+import { COIN_SUPPORTED_CHAIN_IDS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { SearchInput } from '@buildeross/feed-ui'
-import { useDaoSearch, useUserDaos } from '@buildeross/hooks'
+import { useDaoSearch, useDaosWithClankerTokens, useUserDaos } from '@buildeross/hooks'
 import type {
   AddressType,
   CHAIN_ID,
   RequiredDaoContractAddresses,
 } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { Button, Flex, Label, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -35,6 +36,7 @@ export interface SingleDaoSelectorProps {
   onSelectedDaoChange: (dao: DaoListItem | undefined) => void
   userAddress?: AddressType
   showSearch?: boolean
+  actionType?: 'post' | 'proposal'
 }
 
 const MIN_SEARCH_LENGTH = 3
@@ -45,6 +47,7 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
   onSelectedDaoChange,
   userAddress,
   showSearch = false,
+  actionType,
 }) => {
   const [searchInput, setSearchInput] = useState('')
   const [activeSearchQuery, setActiveSearchQuery] = useState('')
@@ -55,17 +58,8 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
     enabled: !!userAddress,
   })
 
-  // Search for DAOs across all chains - only use activeSearchQuery
-  const { daos: searchResults, isLoading: isSearching } = useDaoSearch(
-    activeSearchQuery,
-    {
-      enabled: showSearch && activeSearchQuery.trim().length >= MIN_SEARCH_LENGTH,
-      chainIds: chainIds && chainIds.length > 0 ? chainIds : undefined,
-    }
-  )
-
-  // Convert MyDaosResponse to DaoListItem format
-  const memberDaoItems: DaoListItem[] = useMemo(() => {
+  // Convert MyDaosResponse to DaoListItem format (before filtering)
+  const allDaoItems: DaoListItem[] = useMemo(() => {
     let items = memberDaos.map((dao) => ({
       name: dao.name,
       image: dao.contractImage,
@@ -87,6 +81,65 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
 
     return items
   }, [memberDaos, chainIds])
+
+  // Group DAOs by chain for checking clanker tokens
+  const daosByChain = useMemo(() => {
+    const grouped: Record<CHAIN_ID, DaoListItem[]> = {} as Record<CHAIN_ID, DaoListItem[]>
+    allDaoItems.forEach((dao) => {
+      if (isChainIdSupportedByCoining(dao.chainId)) {
+        if (!grouped[dao.chainId]) {
+          grouped[dao.chainId] = []
+        }
+        grouped[dao.chainId].push(dao)
+      }
+    })
+    return grouped
+  }, [allDaoItems])
+
+  // Fetch clanker tokens for each chain
+  const chainQueries = COIN_SUPPORTED_CHAIN_IDS.map((chainId) => {
+    const daosOnChain = daosByChain[chainId] || []
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useDaosWithClankerTokens({
+      chainId,
+      daoAddresses: daosOnChain.map((dao) => dao.address),
+      enabled: actionType === 'post' && daosOnChain.length > 0,
+    })
+  })
+
+  // Combine results from all chains
+  const daosWithClankerTokens = useMemo(() => {
+    const combined: Record<string, boolean> = {}
+    chainQueries.forEach((query) => {
+      if (query.data) {
+        Object.assign(combined, query.data)
+      }
+    })
+    return combined
+  }, [chainQueries])
+
+  const isLoadingClankerTokens = chainQueries.some((query) => query.isLoading)
+
+  // Search for DAOs across all chains - only use activeSearchQuery
+  const { daos: searchResults, isLoading: isSearching } = useDaoSearch(
+    activeSearchQuery,
+    {
+      enabled: showSearch && activeSearchQuery.trim().length >= MIN_SEARCH_LENGTH,
+      chainIds: chainIds && chainIds.length > 0 ? chainIds : undefined,
+    }
+  )
+
+  // Filter member DAOs by clanker tokens if actionType is 'post'
+  const memberDaoItems: DaoListItem[] = useMemo(() => {
+    if (actionType === 'post' && daosWithClankerTokens) {
+      // Filter to only show DAOs that have clanker tokens
+      return allDaoItems.filter((dao) => {
+        const hasToken = daosWithClankerTokens[dao.address.toLowerCase()]
+        return hasToken === true
+      })
+    }
+    return allDaoItems
+  }, [allDaoItems, actionType, daosWithClankerTokens])
 
   // Convert search results to DaoListItem format
   const searchDaoItems: DaoListItem[] = useMemo(
@@ -141,7 +194,10 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
   }, [showSearch, activeSearchQuery, searchDaoItems, memberDaoItems])
 
   const showEmptyState =
-    !isSearching && !isLoadingMemberDaos && daosToDisplay.length === 0
+    !isSearching &&
+    !isLoadingMemberDaos &&
+    !isLoadingClankerTokens &&
+    daosToDisplay.length === 0
 
   const showMemberDaosSection =
     !showSearch || activeSearchQuery.trim().length < MIN_SEARCH_LENGTH
@@ -210,13 +266,19 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
                 onChange={() => handleDaoClick(dao)}
                 onClick={(e) => e.stopPropagation()}
               />
-              <FallbackImage
-                src={dao.image}
-                alt={dao.name}
-                width={32}
-                height={32}
-                className={daoImage}
-              />
+              <Flex
+                align="center"
+                justify="center"
+                style={{ width: '32px', height: '32px' }}
+              >
+                <FallbackImage
+                  src={dao.image}
+                  alt={dao.name}
+                  width={32}
+                  height={32}
+                  className={daoImage}
+                />
+              </Flex>
               <div className={daoInfo}>
                 <Text className={daoAddress} fontSize="14" fontWeight="label">
                   {dao.name}
@@ -234,13 +296,20 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
         {isLoadingMemberDaos && activeSearchQuery.trim().length < MIN_SEARCH_LENGTH && (
           <Text className={emptyState}>Loading your DAOs...</Text>
         )}
+        {isLoadingClankerTokens &&
+          !isLoadingMemberDaos &&
+          activeSearchQuery.trim().length < MIN_SEARCH_LENGTH && (
+            <Text className={emptyState}>Checking for creator coins...</Text>
+          )}
         {showEmptyState && (
           <Text className={emptyState}>
             {activeSearchQuery.trim().length >= MIN_SEARCH_LENGTH
               ? 'No DAOs found'
-              : chainIds && chainIds.length > 0
-                ? 'No DAOs found on selected chains'
-                : "You don't have any DAOs yet"}
+              : actionType === 'post'
+                ? 'No DAOs with creator coins found'
+                : chainIds && chainIds.length > 0
+                  ? 'No DAOs found on selected chains'
+                  : "You don't have any DAOs yet"}
           </Text>
         )}
       </div>

@@ -1,0 +1,28 @@
+fragment ZoraDrop on ZoraDrop {
+  id
+  creator
+  editionSize
+  metadataRenderer
+  royaltyBPS
+  fundsRecipient
+  publicSalePrice
+  maxSalePurchasePerAddress
+  publicSaleStart
+  publicSaleEnd
+  presaleStart
+  presaleEnd
+  presaleMerkleRoot
+  name
+  symbol
+  description
+  imageURI
+  animationURI
+  createdAt
+  createdAtBlock
+  transactionHash
+  dao {
+    id
+    name
+    contractImage
+  }
+}

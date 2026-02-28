@@ -3,11 +3,15 @@ import {
   AddressType,
   AuctionLinkHandler,
   CHAIN_ID,
+  CoinCreateLinkHandler,
+  CoinLinkHandler,
   DaoLinkHandler,
+  DropLinkHandler,
   ProfileLinkHandler,
+  ProposalCreateLinkHandler,
   ProposalLinkHandler,
 } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/helpers'
+import { chainIdToSlug } from '@buildeross/utils/chains'
 import { createContext, useContext } from 'react'
 
 type LinksContextValue = {
@@ -15,6 +19,10 @@ type LinksContextValue = {
   getDaoLink: DaoLinkHandler
   getProposalLink: ProposalLinkHandler
   getProfileLink: ProfileLinkHandler
+  getCoinLink: CoinLinkHandler
+  getCoinCreateLink: CoinCreateLinkHandler
+  getProposalCreateLink: ProposalCreateLinkHandler
+  getDropLink: DropLinkHandler
 }
 
 const defaultGetAuctionLink = (
@@ -60,11 +68,39 @@ const defaultGetProfileLink = (address: AddressType) => {
   }
 }
 
+const defaultGetCoinLink = (chainId: CHAIN_ID, address: AddressType) => {
+  return {
+    href: `${BASE_URL}/coin/${chainIdToSlug(chainId)}/${address}`,
+  }
+}
+
+const defaultGetCoinCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+  return {
+    href: `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/coin/create`,
+  }
+}
+
+const defaultGetProposalCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+  return {
+    href: `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
+  }
+}
+
+const defaultGetDropLink = (chainId: CHAIN_ID, address: AddressType) => {
+  return {
+    href: `${BASE_URL}/drop/${chainIdToSlug(chainId)}/${address}`,
+  }
+}
+
 const LinksContext = createContext<LinksContextValue>({
   getAuctionLink: defaultGetAuctionLink,
   getDaoLink: defaultGetDaoLink,
   getProposalLink: defaultGetProposalLink,
   getProfileLink: defaultGetProfileLink,
+  getCoinLink: defaultGetCoinLink,
+  getCoinCreateLink: defaultGetCoinCreateLink,
+  getProposalCreateLink: defaultGetProposalCreateLink,
+  getDropLink: defaultGetDropLink,
 })
 
 export const useLinks = () => {

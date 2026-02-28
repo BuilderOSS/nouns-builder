@@ -1,8 +1,10 @@
-import type { BuilderTransaction } from '@buildeross/types'
+import type { BuilderTransaction, TransactionType } from '@buildeross/types'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 export type { BuilderTransaction }
+
+export type TransactionFormType = TransactionType
 
 export const PROPOSAL_STORE_IDENTIFIER = `nouns-builder-proposal-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`
 
@@ -11,6 +13,7 @@ type State = {
   disabled: boolean
   title?: string
   summary?: string
+  transactionType: TransactionFormType | null
 }
 
 type Actions = {
@@ -25,6 +28,8 @@ type Actions = {
     transactions,
   }: Pick<State, 'title' | 'summary' | 'transactions' | 'disabled'>) => void
   clearProposal: () => void
+  setTransactionType: (type: TransactionFormType | null) => void
+  resetTransactionType: () => void
 }
 
 const initialState: State = {
@@ -32,6 +37,7 @@ const initialState: State = {
   title: undefined,
   disabled: false,
   transactions: [],
+  transactionType: null,
 }
 
 export const useProposalStore = create<State & Actions>()(
@@ -59,6 +65,8 @@ export const useProposalStore = create<State & Actions>()(
       createProposal: ({ title, summary, disabled, transactions }) =>
         set({ title, summary, disabled, transactions }),
       clearProposal: () => set(() => ({ ...initialState })),
+      setTransactionType: (type) => set({ transactionType: type }),
+      resetTransactionType: () => set({ transactionType: null }),
     }),
     {
       name: PROPOSAL_STORE_IDENTIFIER,
@@ -68,6 +76,7 @@ export const useProposalStore = create<State & Actions>()(
         disabled: state.disabled,
         title: state.title,
         summary: state.summary,
+        transactionType: state.transactionType,
       }),
     }
   )

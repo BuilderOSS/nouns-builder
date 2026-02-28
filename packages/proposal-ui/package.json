@@ -26,6 +26,7 @@
     "@buildeross/ui": "workspace:*",
     "@buildeross/utils": "workspace:*",
     "@buildeross/zord": "workspace:*",
+    "@zoralabs/protocol-deployments": "^0.7.2",
     "@smartinvoicexyz/types": "^0.1.27",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",

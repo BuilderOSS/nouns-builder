@@ -4,6 +4,7 @@
   "version": "0.2.2",
   "dependencies": {
     "@smartinvoicexyz/types": "^0.1.27",
+    "@zoralabs/coins-sdk": "^0.4.3",
     "dayjs": "^1.11.13"
   },
   "devDependencies": {
@@ -11,9 +12,11 @@
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
     "@buildeross/sdk": "workspace:*",
+    "@buildeross/swap": "workspace:*",
     "@buildeross/tsconfig": "workspace:*",
     "@buildeross/types": "workspace:*",
     "@buildeross/utils": "workspace:*",
+    "@zoralabs/protocol-deployments": "^0.7.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@types/node": "^22.15.21",

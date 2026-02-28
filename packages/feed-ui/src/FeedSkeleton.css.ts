@@ -43,8 +43,8 @@ export const skeletonImage = style({
   aspectRatio: '1 / 1',
   borderRadius: '12px',
   '@media': {
-    '(min-width: 480px)': {
-      width: '240px',
+    '(min-width: 600px)': {
+      width: '50%',
       flexShrink: 0,
     },
   },

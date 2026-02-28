@@ -7,7 +7,7 @@ interface CountdownProps
     HTMLSpanElement
   > {
   end: number
-  onEnd: () => void
+  onEnd?: () => void
 }
 
 export const Countdown: React.FC<CountdownProps> = ({ end, onEnd, ...props }) => {

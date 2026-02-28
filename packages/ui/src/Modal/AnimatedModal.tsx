@@ -38,7 +38,8 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
     <>
       {trigger &&
         React.cloneElement(trigger, {
-          onClick: () => {
+          onClick: (e: React.MouseEvent) => {
+            e.stopPropagation()
             setIsOpen(true)
           },
           className: animatedModalTrigger,
@@ -60,7 +61,10 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
               animate={'animate'}
               exit={'initial'}
               className={animatedModal}
-              onClick={() => handleClose()}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation()
+                handleClose()
+              }}
             >
               <motion.div
                 variants={{
@@ -80,7 +84,9 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
                 initial={'initial'}
                 animate={'animate'}
                 exit={'initial'}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation()
+                }}
               >
                 <Flex
                   direction={'column'}

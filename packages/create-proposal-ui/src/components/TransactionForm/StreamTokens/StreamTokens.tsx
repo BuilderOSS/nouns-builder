@@ -15,8 +15,8 @@ import {
   encodeCreateWithTimestampsLL,
   getSablierContracts,
   getWrappedTokenAddress,
+  isChainIdSupportedBySablier,
   isNativeEth,
-  isSablierSupported,
   UNSUPPORTED_CHAIN_ERROR,
   validateBatchStreams,
   weth9Abi,
@@ -50,12 +50,13 @@ const truncateAddress = (addr: string) => {
   return snippet
 }
 
-export const StreamTokens = () => {
+export const StreamTokens: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
 
-  const chainSupported = isSablierSupported(chain.id)
+  const chainSupported = isChainIdSupportedBySablier(chain.id)
 
   // Get Sablier contract addresses (synchronous)
   const contractAddresses = useMemo(
@@ -543,6 +544,7 @@ export const StreamTokens = () => {
         transactions,
       })
       actions.resetForm()
+      resetTransactionType()
     } catch (err) {
       console.error('Error adding transaction:', err)
     }

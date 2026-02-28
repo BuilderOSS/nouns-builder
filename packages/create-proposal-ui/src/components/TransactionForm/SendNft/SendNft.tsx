@@ -229,8 +229,9 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
           value={selectedNftOption}
           onChange={handleNftOptionChange}
           options={nftOptions}
-          inputLabel="Select NFT"
+          inputLabel={'Select NFT'}
           disabled={isLoadingTreasury}
+          isLoading={isLoadingTreasury}
         />
 
         {selectedNftOption === 'custom' && (
@@ -452,8 +453,9 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
   )
 }
 
-export const SendNft = () => {
+export const SendNft: React.FC = () => {
   const { treasury } = useDaoStore((state) => state.addresses)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const [currentNftMetadata, setCurrentNftMetadata] = useState<NftMetadata | null>(null)
@@ -535,8 +537,9 @@ export const SendNft = () => {
       })
 
       actions.resetForm()
+      resetTransactionType()
     },
-    [chain.id, currentNftMetadata, addTransaction, treasury]
+    [chain.id, currentNftMetadata, addTransaction, treasury, resetTransactionType]
   )
 
   return (

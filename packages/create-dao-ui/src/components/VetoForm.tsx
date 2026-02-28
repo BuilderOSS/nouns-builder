@@ -1,15 +1,15 @@
 import { Radio, SmartInput } from '@buildeross/ui/Fields'
-import { defaultFormButtonWithPrev } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { addressValidationSchema } from '@buildeross/utils/yup'
-import { atoms, Button, Flex, Icon } from '@buildeross/zord'
+import { atoms, Flex } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import { motion } from 'framer-motion'
 import React, { BaseSyntheticEvent } from 'react'
 import * as Yup from 'yup'
 
 import { useFormStore } from '../stores'
+import { FormNavButtons } from './FormNavButtons'
 
 interface VetoFormProps {
   title: string
@@ -115,29 +115,11 @@ export const VetoForm: React.FC<VetoFormProps> = ({ title }) => {
               />
             </motion.div>
 
-            <Flex>
-              <Button
-                justify={'center'}
-                align={'center'}
-                h={'x15'}
-                minH={'x15'}
-                minW={'x15'}
-                onClick={() => handlePrev()}
-                variant="secondary"
-                aria-label="Back"
-              >
-                <Icon id="arrowLeft" />
-              </Button>
-              <Button
-                h={'x15'}
-                className={defaultFormButtonWithPrev}
-                type={'submit'}
-                disabled={!isEmpty(formik.errors) || formik.isSubmitting}
-                onMouseDown={(e: React.MouseEvent<HTMLElement>) => e.preventDefault()}
-              >
-                Continue
-              </Button>
-            </Flex>
+            <FormNavButtons
+              hasPrev
+              onPrev={handlePrev}
+              nextDisabled={!isEmpty(formik.errors) || formik.isSubmitting}
+            />
           </Flex>
         </Form>
       )}

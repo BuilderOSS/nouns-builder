@@ -40,6 +40,7 @@ export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) =>
   return (
     <LinkWrapper
       link={getProposalLink(item.chainId, item.daoId, item.proposalNumber, 'votes')}
+      isExternal
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">

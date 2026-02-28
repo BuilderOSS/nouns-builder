@@ -7,7 +7,7 @@ import { getLayerName } from '@buildeross/ui/Artwork'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack, Text } from '@buildeross/zord'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
@@ -17,10 +17,11 @@ import { ReplaceArtworkForm } from './ReplaceArtworkForm'
 
 const REPLACE_ARTWORK_CONTRACT_VERSION = '1.2.0'
 
-export const ReplaceArtwork = () => {
+export const ReplaceArtwork: React.FC = () => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const currentTransactions = useProposalStore((state) => state.transactions)
   const chain = useChainStore((x) => x.chain)
 
@@ -126,7 +127,15 @@ export const ReplaceArtwork = () => {
     })
 
     resetForm()
-  }, [addTransaction, resetForm, transactions, isValid, addresses.metadata])
+    resetTransactionType()
+  }, [
+    addTransaction,
+    resetForm,
+    resetTransactionType,
+    transactions,
+    isValid,
+    addresses.metadata,
+  ])
 
   return (
     <Stack>

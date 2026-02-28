@@ -10,7 +10,8 @@ import { FormHeading } from './FormHeading'
 import { ABI, Address, Arguments, Function, Summary, Value } from './forms'
 
 export const CustomTransaction: React.FC = () => {
-  const { addTransaction } = useProposalStore()
+  const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
 
   const {
     active: activeCustomTransactionSection,
@@ -103,7 +104,8 @@ export const CustomTransaction: React.FC = () => {
 
     addTransaction(currentTransaction)
     reset()
-  }, [currentTransaction, addTransaction, reset])
+    resetTransactionType()
+  }, [currentTransaction, addTransaction, reset, resetTransactionType])
 
   return (
     <Flex

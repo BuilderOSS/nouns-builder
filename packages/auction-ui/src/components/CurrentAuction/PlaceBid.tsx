@@ -4,11 +4,13 @@ import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { AnimatedModal } from '@buildeross/ui/Modal'
-import { chainIdToSlug, unpackOptionalArray } from '@buildeross/utils/helpers'
+import { ShareButton } from '@buildeross/ui/ShareButton'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
-import React, { Fragment, memo, useCallback, useEffect, useMemo, useState } from 'react'
+import { Box, Button, Flex } from '@buildeross/zord'
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { formatEther, parseEther } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
@@ -41,6 +43,7 @@ const InnerPlaceBid = ({
   const { address, chain: wagmiChain } = useAccount()
   const { data: balance } = useBalance({ address: address, chainId })
   const { mutate } = useSWRConfig()
+  const { getAuctionLink } = useLinks()
 
   const config = useConfig()
 
@@ -172,24 +175,17 @@ const InnerPlaceBid = ({
 
   const isValidBid = bidAmount && isMinBid
   const isValidChain = wagmiChain?.id === chainId
-  const [showTooltip, setShowTooltip] = useState(false)
-  const [copied, setCopied] = useState(false)
 
-  const handleShareClick = useCallback(async () => {
-    const chainSlug = chainIdToSlug(chainId)!
-    const baseUrl = `${BASE_URL}/dao/${chainSlug}/${tokenAddress}`
-    if (address === undefined) {
-      await navigator.clipboard.writeText(baseUrl)
-      return
-    }
-    const params = new URLSearchParams({
-      referral: address.toString(),
-    })
-    const fullUrl = `${baseUrl}?${params}`
+  // Build share URL with referral parameter if user is connected
+  const shareUrl = useMemo(() => {
+    const link = getAuctionLink(chainId, tokenAddress, tokenId)
+    const baseUrl = link.href.startsWith('http') ? link.href : `${BASE_URL}${link.href}`
+    if (!address) return baseUrl
 
-    await navigator.clipboard.writeText(fullUrl)
-    setCopied(true)
-  }, [chainId, tokenAddress, address])
+    const url = new URL(baseUrl)
+    url.searchParams.set('referral', address.toString())
+    return url.toString()
+  }, [chainId, tokenAddress, tokenId, getAuctionLink, address])
 
   return (
     <Flex
@@ -242,32 +238,15 @@ const InnerPlaceBid = ({
               Place bid
             </ContractButton>
             {chainId !== 1 ? (
-              <Fragment>
-                <Box
-                  cursor="pointer"
-                  onMouseOver={() => setShowTooltip(true)}
-                  onMouseLeave={() => {
-                    setShowTooltip(false)
-                    setTimeout(() => {
-                      setCopied(false)
-                    }, 500)
-                  }}
-                >
-                  <ContractButton
-                    chainId={chainId}
-                    className={auctionActionButtonVariants['share']}
-                    size="lg"
-                    ml="x2"
-                    mt={{ '@initial': 'x2', '@768': 'x0' }}
-                    handleClick={handleShareClick}
-                  >
-                    <Icon size="md" id="share" />
-                  </ContractButton>
-                </Box>
-                <PopUp open={showTooltip} trigger={<></>} placement="top">
-                  <Text align="center">{copied ? 'Copied' : 'Copy Referral Link'}</Text>
-                </PopUp>
-              </Fragment>
+              <Box ml="x2" mt={{ '@initial': 'x2', '@768': 'x0' }}>
+                <ShareButton
+                  url={shareUrl}
+                  size="lg"
+                  variant="primary"
+                  className={auctionActionButtonVariants['share']}
+                  tooltip="Copy Referral Link"
+                />
+              </Box>
             ) : null}
           </Flex>
         </Flex>

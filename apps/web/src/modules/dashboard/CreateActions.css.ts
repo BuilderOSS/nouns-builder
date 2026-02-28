@@ -1,3 +1,4 @@
+import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const actionButtons = style({
@@ -7,4 +8,8 @@ export const actionButtons = style({
       display: 'none',
     },
   },
+})
+
+export const daoButton = style({
+  borderColor: `${vars.color.border} !important`,
 })

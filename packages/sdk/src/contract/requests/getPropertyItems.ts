@@ -1,4 +1,4 @@
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import type { AddressType, CHAIN_ID, Property } from '@buildeross/types'
 import { executeConcurrently, getProvider, serverConfig } from '@buildeross/utils'
 import {
   encodeAbiParameters,
@@ -34,16 +34,6 @@ type PropertyWithReferenceSlot = {
 type IPFSGroup = {
   baseUri: string
   extension: string
-}
-
-export type Item = {
-  name: string
-  uri: string
-}
-
-export type Property = {
-  name: string
-  items: Item[]
 }
 
 type RendererKind = 'MetadataRenderer' | 'PropertyIPFS'

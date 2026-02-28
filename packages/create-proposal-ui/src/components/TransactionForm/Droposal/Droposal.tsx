@@ -5,18 +5,25 @@ import { AddressType, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Stack } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
-import { encodeFunctionData, isAddress, parseEther } from 'viem'
+import {
+  encodeFunctionData,
+  isAddress,
+  maxUint32,
+  maxUint64,
+  parseEther,
+  zeroHash,
+} from 'viem'
 
 import { DroposalForm } from './DroposalForm'
 import { DroposalFormValues } from './DroposalForm.schema'
 
-const UINT_64_MAX = BigInt('18446744073709551615')
-const UINT_32_MAX = BigInt('4294967295')
-const HASH_ZERO =
-  '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`
+const UINT_64_MAX = maxUint64
+const UINT_32_MAX = maxUint32
+const HASH_ZERO = zeroHash
 
 export const Droposal: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const chain = useChainStore((x) => x.chain)
 
   const handleDroposalTransaction = async (
@@ -98,6 +105,8 @@ export const Droposal: React.FC = () => {
     })
 
     actions.resetForm()
+
+    resetTransactionType()
   }
 
   return (

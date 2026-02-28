@@ -13,15 +13,18 @@ import {
 interface TextAreaProps {
   id: string
   value: string
-  inputLabel: string | ReactElement
+  inputLabel?: string | ReactElement
   onChange: ChangeEventHandler
-  onBlur: ChangeEventHandler
+  onBlur?: ChangeEventHandler
   formik?: FormikProps<any>
   errorMessage?: any
   helperText?: string
   autoSubmit?: boolean
   placeholder?: string
   minHeight?: number
+  rows?: number
+  disabled?: boolean
+  maxLength?: number
 }
 
 const TextArea: React.FC<TextAreaProps> = ({
@@ -29,14 +32,19 @@ const TextArea: React.FC<TextAreaProps> = ({
   value,
   inputLabel,
   onChange,
+  onBlur,
   errorMessage,
   helperText,
   autoSubmit,
   formik,
   placeholder,
   minHeight,
+  disabled,
+  rows = 2,
+  maxLength,
 }) => {
-  const handleBlur = () => {
+  const handleBlur = (e: any) => {
+    onBlur?.(e)
     if (autoSubmit && formik) {
       formik.submitForm()
     }
@@ -55,7 +63,7 @@ const TextArea: React.FC<TextAreaProps> = ({
           {errorMessage}
         </Box>
       )}
-      <label className={defaultInputLabelStyle}>{inputLabel}</label>
+      {inputLabel && <label className={defaultInputLabelStyle}>{inputLabel}</label>}
       <textarea
         id={id}
         onChange={onChange}
@@ -64,6 +72,9 @@ const TextArea: React.FC<TextAreaProps> = ({
         className={!!errorMessage ? defaultTextAreaErrorStyle : defaultTextAreaStyle}
         placeholder={placeholder}
         style={{ minHeight: minHeight || 'none' }}
+        rows={rows}
+        disabled={disabled}
+        maxLength={maxLength}
       />
       {!!helperText && helperText?.length > 0 ? (
         <Box className={defaultHelperTextStyle}>{helperText}</Box>

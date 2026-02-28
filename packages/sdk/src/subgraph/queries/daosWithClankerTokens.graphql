@@ -1,0 +1,8 @@
+query daosWithClankerTokens($daoIds: [ID!]!) {
+  daos(where: { id_in: $daoIds }) {
+    id
+    clankerTokens(first: 1) {
+      id
+    }
+  }
+}

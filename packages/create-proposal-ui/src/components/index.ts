@@ -1,4 +1,5 @@
 export * from './CreateProposalHeading'
+export * from './Queue'
 export * from './ReviewProposalForm'
 export * from './SelectTransactionType'
 export * from './TransactionCard'

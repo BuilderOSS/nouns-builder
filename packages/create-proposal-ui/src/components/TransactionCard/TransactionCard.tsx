@@ -1,5 +1,5 @@
 import { BuilderTransaction } from '@buildeross/types'
-import { atoms, Box, Flex, Icon, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 
 import { TransactionTypeIcon } from './TransactionTypeIcon'
@@ -53,9 +53,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
           <Text
             variant={'paragraph-md'}
             style={{ marginBottom: '2px', textOverflow: 'ellipsis' }}
-            className={atoms({
-              maxWidth: !disabled ? 'x64' : 'auto',
-            })}
+            flexGrow={1}
           >
             {summary}
           </Text>
@@ -63,7 +61,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
         </Flex>
 
         {showCardAction && (
-          <Flex align={'center'} gap={'x2'} data-testid="actions">
+          <Flex align={'center'} gap={'x2'} data-testid="actions" flexShrink={0}>
             {handleRemove && (
               <Flex onClick={handleRemove} cursor={'pointer'} data-testid="remove">
                 <Icon id={'trash'} />

@@ -75,7 +75,7 @@ export const PropDates = ({ proposal }: PropDatesProps) => {
   return (
     <Flex className={propPageWrapper}>
       <Box w="100%">
-        <Flex justify="space-between" mb="x6" align="center">
+        <Flex justify="space-between" mb="x6" align="center" wrap gap="x4">
           <Text fontSize={20} fontWeight="label">
             Propdates
           </Text>

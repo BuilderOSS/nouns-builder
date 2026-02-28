@@ -27,7 +27,7 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
   const formattedAmount = formatCryptoVal(formatEther(BigInt(item.amount)))
 
   return (
-    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
+    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)} isExternal>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>

@@ -1,266 +1,329 @@
-import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
 import { uploadDirectory } from '@buildeross/ipfs-service/upload'
-import {
-  ArtworkType,
-  ArtworkUploadError,
-  FileInfo,
-  ImageProps,
-  IPFSUpload,
-} from '@buildeross/types'
+import { ArtworkError, IPFSUpload, IPFSUploadResponse, Trait } from '@buildeross/types'
 import { sanitizeFileName } from '@buildeross/utils/sanitize'
 import React from 'react'
 
 export interface UseArtworkUploadProps {
-  artwork: ArtworkType[]
-  ipfsUpload: IPFSUpload[]
-  isUploadingToIPFS: boolean
   onUploadStart: () => void
   onUploadSuccess: (ipfs: IPFSUpload[]) => void
   onUploadError: (error: Error) => void
   onUploadProgress: (progress: number) => void
 }
 
+type UploadArtworkStatus =
+  | 'idle'
+  | 'processing'
+  | 'processed'
+  | 'uploading'
+  | 'ready'
+  | 'error'
+
+const ACCEPTABLE_MIME = ['image/png', 'image/svg+xml'] as const
+const MIN_IMAGE_DIMENSION_PX = 600
+const MAX_TRAITS = 10
+
+const isAcceptableMime = (t: string): t is (typeof ACCEPTABLE_MIME)[number] =>
+  (ACCEPTABLE_MIME as readonly string[]).includes(t)
+
+function hasInvalidNameOrStructure(file: File, paths: string[]): boolean {
+  // forward slashes sometimes converted to `:`
+  // also disallow extra periods in filenames and trait folder names
+  return (
+    file.name.includes(':') ||
+    paths[2]?.includes(':') ||
+    file.name.split('.').length !== 2 ||
+    paths[1].split('.').length !== 1
+  )
+}
+
+async function validateSquareMinSize(
+  file: File,
+  minPx: number
+): Promise<{ ok: true } | { ok: false; error: ArtworkError }> {
+  if (file.type === 'image/svg+xml') {
+    // SVG: scalable — skip all dimension checks
+    return { ok: true }
+  }
+
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const fr = new FileReader()
+    fr.onerror = () => reject(new Error('Failed to read file'))
+    fr.onload = () => resolve(fr.result?.toString() || '')
+    fr.readAsDataURL(file)
+  })
+
+  const { width, height } = await new Promise<{ width: number; height: number }>(
+    (resolve, reject) => {
+      const img = new Image()
+      img.onerror = () => reject(new Error('Failed to load image'))
+      img.onload = () => resolve({ width: img.width, height: img.height })
+      img.src = dataUrl
+    }
+  )
+
+  if (width !== height) {
+    return {
+      ok: false,
+      error: {
+        dimensions: `images must be of equal height and width, your images are width: ${width} x ${height} px`,
+      },
+    }
+  }
+
+  // Raster images (PNG)
+  if (width < minPx || height < minPx) {
+    return {
+      ok: false,
+      error: {
+        dimensions: `images must be at least ${minPx}×${minPx}px; yours are ${width}×${height}px`,
+      },
+    }
+  }
+
+  return { ok: true }
+}
+
+type ArtworkItem = {
+  collection: string
+  trait: string
+  traitProperty: string
+  file: File
+}
+
+type ProcessedArtworkInfo = {
+  filesLength: number
+  fileType: string
+  collectionName: string
+  traits: Trait[]
+  artworkItems: ArtworkItem[]
+}
+
+export type UploadedArtworkItem = ArtworkItem & {
+  ipfs: IPFSUploadResponse
+}
+
+export type UploadedArtwork = Omit<ProcessedArtworkInfo, 'artworkItems'> & {
+  items: UploadedArtworkItem[]
+  // optional convenience helpers
+  ipfs: IPFSUploadResponse
+  itemsByPath: Record<string, UploadedArtworkItem>
+}
+
 export interface UseArtworkUploadReturn {
-  images: ImageProps[] | undefined
-  setFiles: (files: FileList | null) => void
-  fileInfo: FileInfo | undefined
-  filesArray: File[] | null
-  uploadArtworkError: ArtworkUploadError | undefined
-  setUploadArtworkError: (error: ArtworkUploadError | undefined) => void
-  ipfsUploadError: string | undefined
+  artwork: UploadedArtwork | undefined
+  setFiles: (files: FileList | undefined) => void
+  artworkError: ArtworkError | undefined
+  uploadError: string | undefined
+  status: UploadArtworkStatus
 }
 
 export const useArtworkUpload = ({
-  artwork,
-  ipfsUpload,
-  isUploadingToIPFS,
   onUploadStart,
   onUploadSuccess,
   onUploadError,
   onUploadProgress,
 }: UseArtworkUploadProps): UseArtworkUploadReturn => {
-  const [uploadArtworkError, setUploadArtworkError] = React.useState<
-    ArtworkUploadError | undefined
-  >()
-  const [ipfsUploadError, setIpfsUploadError] = React.useState<string | undefined>()
+  const [artworkError, setArtworkError] = React.useState<ArtworkError | undefined>(
+    undefined
+  )
+  const [uploadError, setUploadError] = React.useState<string | undefined>(undefined)
 
-  /*   assign ipfs upload to property  */
-  const images = React.useMemo(() => {
-    if (isUploadingToIPFS) return
+  const [status, setStatus] = React.useState<UploadArtworkStatus>('idle')
+  const [inputFiles, setInputFiles] = React.useState<FileList | undefined>(undefined)
 
-    try {
-      if (Array.isArray(ipfsUpload) && artwork.length) {
-        return ipfsUpload.reduce((acc: ImageProps[] = [], upload) => {
-          const index = artwork?.map((e: any) => e.trait).indexOf(upload.trait)
-          const childIndex = artwork[index]?.properties.indexOf(upload.name)
-          const childName = artwork[index]?.properties[childIndex]
-          const fetchableUrl = getFetchableUrls(upload?.ipfs?.uri)?.[0] ?? ''
+  // "prepared" info (pre-upload)
+  const [processedArtworkInfo, setProcessedArtworkInfo] = React.useState<
+    ProcessedArtworkInfo | undefined
+  >(undefined)
 
-          acc.push({
-            trait: artwork[index]?.trait,
-            name: childName,
-            cid: upload?.ipfs?.cid || '',
-            uri: upload?.ipfs?.uri || '',
-            url: encodeURI(
-              fetchableUrl +
-                `/${sanitizeFileName(
-                  upload?.webkitRelativePath?.split('/').slice(1).join('/') ?? ''
-                )}`
-            ),
-            path: upload?.webkitRelativePath,
-            content: upload?.content,
-            blob: upload?.blob,
-          })
-          return acc
-        }, [])
-      }
-    } catch (err) {
-      console.error('Error parsing ipfs upload', err)
-      return []
+  // final enriched artifact (post-upload)
+  const [artwork, setArtwork] = React.useState<UploadedArtwork | undefined>(undefined)
+
+  // Guards against “old processing finishes after new files were selected”
+  const processRunIdRef = React.useRef(0)
+
+  /**
+   * Process & validate input files
+   * - no side-effects in useMemo
+   * - async dimension checks are awaited (no race)
+   * - runId guard prevents stale commits
+   */
+  React.useEffect(() => {
+    const runId = ++processRunIdRef.current
+    // Invalidate any in-flight upload so it discards its result
+    ++uploadRunIdRef.current
+
+    const commitIfLatest = (fn: () => void) => {
+      if (runId !== processRunIdRef.current) return
+      fn()
     }
 
-    return []
-  }, [artwork, ipfsUpload, isUploadingToIPFS])
+    const fail = (error: ArtworkError) => {
+      commitIfLatest(() => {
+        setArtworkError(error)
+        setStatus('error')
+      })
+    }
 
-  /* prepare files */
+    const run = async () => {
+      // Reset derived state when files change
+      commitIfLatest(() => {
+        setArtwork(undefined)
+        setProcessedArtworkInfo(undefined)
+        setUploadError(undefined)
+        setArtworkError(undefined)
+      })
 
-  const [isProcessing, setIsProcessing] = React.useState<boolean | undefined>(undefined)
-  const [files, setFiles] = React.useState<FileList | null>(null)
-  const [filesArray, setFilesArray] = React.useState<File[] | null>(null)
-  const fileInfo = React.useMemo(() => {
-    if (!files) return
+      if (!inputFiles) {
+        commitIfLatest(() => setStatus('idle'))
+        return
+      }
 
-    setIsProcessing(true)
-    const filesArray = Array.from(files).filter((file) => file.name !== '.DS_Store')
-    const acceptableMIME = ['image/png', 'image/svg+xml']
+      commitIfLatest(() => setStatus('processing'))
 
-    let collectionName: string = ''
-    let fileType: string = ''
-    let traits: {
-      trait: string
-      properties: string[]
-    }[] = []
+      const filesArray = Array.from(inputFiles).filter((f) => f.name !== '.DS_Store')
 
-    const reduced = filesArray.reduce((acc: any = [], cv, index) => {
-      const paths = cv.webkitRelativePath.split('/')
+      if (!filesArray.length) {
+        commitIfLatest(() => setStatus('idle'))
+        return
+      }
 
-      if (paths.length !== 3 || !paths) {
-        if (paths.length > 3) {
-          setUploadArtworkError({
-            directory: `file or folder naming incorrect. must not include back slashes.`,
+      let collectionName = ''
+      let fileType = ''
+
+      // traitsMap: trait -> properties[]
+      const traitsMap = new Map<string, string[]>()
+
+      const artworkItems: ArtworkItem[] = []
+
+      // Validate synchronously first (fast fail)
+      for (let index = 0; index < filesArray.length; index++) {
+        const file = filesArray[index]!
+        const paths = file.webkitRelativePath.split('/')
+
+        if (paths.length !== 3) {
+          fail({
+            directory:
+              paths && paths.length > 3
+                ? `file or folder naming incorrect. must not include back slashes.`
+                : `folder structure is incorrect. download the demo folder to compare.`,
           })
           return
         }
 
-        setUploadArtworkError({
-          directory: `folder structure is incorrect. download the demo folder to compare.`,
-        })
-        return
-      }
+        const [collectionRaw, traitRaw, propertyRaw] = paths
 
-      const collection = paths[0]
-      const currentTrait = sanitizeFileName(paths[1])
-      const currentProperty = sanitizeFileName(paths[2])
+        const collection = collectionRaw
+        const currentTrait = sanitizeFileName(traitRaw)
+        const currentProperty = sanitizeFileName(propertyRaw)
 
-      /*  set collection name and file type */
-      if (!collectionName) {
-        collectionName = paths[0]
-      }
+        if (!collectionName) collectionName = collectionRaw
+        if (!fileType) fileType = file.type
 
-      if (!fileType) {
-        fileType = cv.type
-      }
-
-      /*  construct traits and properties  */
-      if (traits.filter((trait) => trait.trait === currentTrait).length === 0) {
-        traits.push({ trait: currentTrait, properties: [] })
-      }
-
-      if (!!traits) {
-        traits
-          .filter((trait) => trait.trait === currentTrait)[0]
-          ?.properties?.push(currentProperty)
-      }
-
-      /* handle errors */
-
-      // forward slashes seem to be converted to `:`
-      // check for both folder and file name
-      if (
-        cv.name.includes(':') ||
-        paths[2]?.includes(':') ||
-        cv.name.split('.').length !== 2 ||
-        paths[1].split('.').length !== 1
-      ) {
-        setUploadArtworkError({
-          directory: `file or folder naming incorrect. must not include forward slashes or periods.`,
-        })
-        return
-      }
-
-      if (cv.type.length && !acceptableMIME.includes(cv.type)) {
-        setUploadArtworkError({
-          mime: `${cv.type} is an unsupported file type - file: ${cv.name}`,
-        })
-        return
-      }
-
-      if (traits.length > 10) {
-        setUploadArtworkError({
-          maxTraits: `Maximum of 10 traits per collection. Your upload includes ${traits.length} traits.`,
-        })
-        return
-      }
-
-      if (filesArray[index - 1 > 0 ? index - 1 : 0].type !== cv.type) {
-        setUploadArtworkError({
-          mime: `All file types must be the same.`,
-        })
-        return
-      }
-
-      /* get image size */
-      const fr = new FileReader()
-      fr.readAsDataURL(cv)
-      const getImageSize = (fr: FileReader, count: number) => {
-        let img = new Image()
-        img.src = fr.result?.toString() || ''
-        img.onload = function () {
-          let height = img.height
-          let width = img.width
-          let min = 600
-
-          if ((height < min || width < min) && cv.type !== 'image/svg+xml') {
-            setUploadArtworkError({
-              dimensions: `we recommend images of min, 600px width x height, your images are width: ${width} x ${height} px`,
-            })
-            return
-          }
-
-          if (height !== width) {
-            setUploadArtworkError({
-              dimensions: `images must be of equal height and width, your images are width: ${width} x ${height} px`,
-            })
-            return
-          }
-
-          if (count === filesArray?.length - 1) {
-            setIsProcessing(false)
-          }
+        if (hasInvalidNameOrStructure(file, paths)) {
+          fail({
+            directory: `file or folder naming incorrect. must not include forward slashes or periods.`,
+          })
+          return
         }
+
+        if (!isAcceptableMime(file.type)) {
+          fail({
+            mime: `${file.type} is an unsupported file type - file: ${file.name}`,
+          })
+          return
+        }
+
+        // enforce consistent mime across all files
+        if (fileType && file.type !== fileType) {
+          fail({
+            mime: `All file types must be the same.`,
+          })
+          return
+        }
+
+        if (!traitsMap.has(currentTrait)) traitsMap.set(currentTrait, [])
+        traitsMap.get(currentTrait)!.push(currentProperty)
+
+        if (traitsMap.size > MAX_TRAITS) {
+          fail({
+            maxTraits: `Maximum of 10 traits per collection. Your upload includes ${traitsMap.size} traits.`,
+          })
+          return
+        }
+
+        artworkItems.push({
+          collection,
+          trait: currentTrait,
+          traitProperty: currentProperty,
+          file,
+        })
       }
-      fr.onload = () => getImageSize(fr, filesArray.indexOf(cv))
 
-      acc.push({
-        collection,
-        trait: currentTrait,
-        traitProperty: currentProperty,
-        file: cv,
+      // Async validations (dimensions) — awaited to avoid race
+      try {
+        const dimensionResults = await Promise.all(
+          filesArray.map((file) => validateSquareMinSize(file, MIN_IMAGE_DIMENSION_PX))
+        )
+
+        if (runId !== processRunIdRef.current) return
+
+        const firstFailure = dimensionResults.find((r) => r.ok === false)
+        if (firstFailure && !firstFailure.ok) {
+          fail(firstFailure.error)
+          return
+        }
+      } catch (err) {
+        if (runId !== processRunIdRef.current) return
+        fail({
+          dimensions: `Unable to validate image dimensions for one or more files.`,
+        })
+        return
+      }
+
+      // Build traits array for return type
+      const traits = Array.from(traitsMap.entries())
+        .map(([trait, properties]) => ({
+          trait,
+          properties,
+        }))
+        .sort((a, b) => b.trait.localeCompare(a.trait))
+
+      const processed: ProcessedArtworkInfo = {
+        filesLength: artworkItems.length,
+        fileType,
+        collectionName,
+        traits,
+        artworkItems: artworkItems,
+      }
+
+      commitIfLatest(() => {
+        setProcessedArtworkInfo(processed)
+        setStatus('processed')
       })
-
-      return acc
-    }, [])
-
-    return {
-      filesLength: files.length,
-      fileType,
-      collectionName,
-      traits,
-      fileArray: reduced,
     }
-  }, [files])
 
-  React.useEffect(() => {
-    if (isProcessing === false) {
-      const filesArray = fileInfo?.fileArray.reduce((acc: any[], cv: { file: File }) => {
-        acc.push(cv.file)
-
-        return acc
-      }, [])
-
-      setFilesArray(filesArray)
-    }
-  }, [isProcessing, fileInfo])
+    run()
+  }, [inputFiles])
 
   /* upload Files to ipfs via ipfs service */
   const uploadToIPFS: (files: File[]) => Promise<IPFSUpload[]> = React.useCallback(
     async (files: File[]) => {
-      const ipfsUploadResponse = await uploadDirectory(
+      const ipfsUploadResponse = (await uploadDirectory(
         files.map((file) => ({
           content: file,
           path: sanitizeFileName(file.webkitRelativePath.split('/').slice(1).join('/')),
         })),
         { cache: true, onProgress: onUploadProgress }
-      )
+      )) as IPFSUploadResponse
 
-      const results = files.map((file) => ({
+      const results: IPFSUpload[] = files.map((file) => ({
         name: sanitizeFileName(file.webkitRelativePath.split('/')[2]),
         property: file.webkitRelativePath.split('/')[2],
         collection: file.webkitRelativePath.split('/')[0],
         trait: sanitizeFileName(file.webkitRelativePath.split('/')[1]),
         path: file.webkitRelativePath,
         content: file,
-        blob: URL.createObjectURL(file),
         webkitRelativePath: file.webkitRelativePath,
         type: file.type,
         ipfs: ipfsUploadResponse,
@@ -272,38 +335,80 @@ export const useArtworkUpload = ({
     []
   )
 
-  React.useEffect(() => {
-    if (!filesArray || !!uploadArtworkError) return
+  const uploadRunIdRef = React.useRef(0)
 
-    const handleUpload = async (filesArray: File[]) => {
-      const files = filesArray.filter((file) => file.name !== '.DS_Store')
+  React.useEffect(() => {
+    if (status !== 'processed' || !processedArtworkInfo || !!artworkError) return
+    const uploadId = ++uploadRunIdRef.current
+
+    const handleUpload = async () => {
+      const preparedItems = processedArtworkInfo.artworkItems
+      const files = preparedItems.map(({ file }) => file)
 
       try {
-        setIpfsUploadError(undefined)
+        setStatus('uploading')
+        setUploadError(undefined)
+
         onUploadStart()
-        const ipfs = await uploadToIPFS(files)
+
+        const ipfsUploads = await uploadToIPFS(files)
+
+        // discard if a newer upload has started
+        if (uploadId !== uploadRunIdRef.current) return
         // eslint-disable-next-line no-console
-        console.debug('Uploaded to IPFS', ipfs)
-        onUploadSuccess(ipfs)
+        console.debug('Uploaded to IPFS', ipfsUploads)
+
+        if (!ipfsUploads.length) {
+          throw new Error('No files uploaded')
+        }
+
+        // Enrich each prepared item with IPFS response
+        // NOTE: uploadDirectory returns one response for the directory; it's the same for every file
+        const directoryIpfs = ipfsUploads[0].ipfs as IPFSUploadResponse
+
+        const uploadedArtworkItems: UploadedArtworkItem[] = preparedItems.map((item) => ({
+          ...item,
+          ipfs: directoryIpfs,
+        }))
+
+        const uploadedArtwork: UploadedArtwork = {
+          filesLength: processedArtworkInfo.filesLength,
+          fileType: processedArtworkInfo.fileType,
+          collectionName: processedArtworkInfo.collectionName,
+          traits: processedArtworkInfo.traits,
+          items: uploadedArtworkItems,
+          ipfs: directoryIpfs,
+          itemsByPath: Object.fromEntries(
+            uploadedArtworkItems.map((it) => [it.file.webkitRelativePath, it])
+          ),
+        }
+
+        setArtwork(uploadedArtwork)
+
+        // Keep external callback unchanged (still provides IPFSUpload[])
+        onUploadSuccess(ipfsUploads)
+
+        setStatus('ready')
       } catch (err: unknown) {
-        setIpfsUploadError((err as Error).message)
+        if (uploadId !== uploadRunIdRef.current) return
+        setUploadError((err as Error).message)
         console.error('Error uploading to IPFS', err)
         onUploadError(err as Error)
-        return
+        setStatus('error')
       }
     }
 
-    handleUpload(filesArray)
+    handleUpload()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filesArray, uploadArtworkError, uploadToIPFS])
+  }, [status, processedArtworkInfo, artworkError, uploadToIPFS])
+
+  const hasError = Boolean(uploadError || artworkError)
 
   return {
-    images,
-    setFiles,
-    fileInfo,
-    filesArray,
-    uploadArtworkError,
-    setUploadArtworkError,
-    ipfsUploadError,
+    setFiles: setInputFiles,
+    artwork: hasError || status !== 'ready' ? undefined : artwork,
+    artworkError,
+    uploadError,
+    status,
   }
 }

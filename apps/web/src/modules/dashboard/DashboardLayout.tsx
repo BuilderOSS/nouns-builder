@@ -1,5 +1,5 @@
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
-import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import type { AddressType } from '@buildeross/types'
 import { Box, Flex } from '@buildeross/zord'
 import React, { ReactNode, useEffect, useMemo, useState } from 'react'
 
@@ -11,13 +11,11 @@ import { MobileProfileView } from './MobileProfileView'
 export const DashboardLayout = ({
   mainContent,
   sidebarContent,
-  chainIds,
   address,
   ensAvatar,
 }: {
   mainContent: ReactNode
   sidebarContent: ReactNode
-  chainIds?: CHAIN_ID[]
   address?: AddressType
   ensAvatar?: string
 }) => {
@@ -46,30 +44,17 @@ export const DashboardLayout = ({
       case 'feed':
         return mainContent
       case 'create':
-        return <MobileCreateMenu userAddress={address} chainIds={chainIds} />
+        return <MobileCreateMenu userAddress={address} />
       case 'profile':
         return <MobileProfileView sidebarContent={sidebarContent} />
       default:
         return mainContent
     }
-  }, [activeTab, address, chainIds, mainContent, sidebarContent])
+  }, [activeTab, address, mainContent, sidebarContent])
 
   return (
     <Flex py={{ '@initial': 'x0', '@1024': 'x6' }} w={'100%'} justify="center">
       <Box w="100%" style={{ maxWidth: 1440 }}>
-        {/* Header - only show on desktop
-        <Flex
-          justify="space-between"
-          align="center"
-          mb={'x8'}
-          px={{ '@initial': 'x0', '@1024': 'x8' }}
-          className={styles.desktopLayout}
-        >
-          <Text fontSize={35} fontWeight={'display'}>
-            Dashboard
-          </Text>
-        </Flex> */}
-
         {/* Desktop: Two-column layout */}
         <Flex
           gap="x12"

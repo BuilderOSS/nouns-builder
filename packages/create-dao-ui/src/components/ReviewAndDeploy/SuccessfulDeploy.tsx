@@ -1,4 +1,5 @@
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { CopyButton } from '@buildeross/ui/CopyButton'
@@ -28,7 +29,7 @@ const DEPLOYMENT_ERROR = {
     'Oops! It looks like there was a problem. Please ensure that your input data is correct',
 }
 
-const DisplayAddress: React.FC<{ address: string }> = ({ address }) => {
+const DisplayAddress: React.FC<{ address: `0x${string}` }> = ({ address }) => {
   return (
     <Flex align={'center'} fontSize={18} className={infoSectionValueVariants['default']}>
       <Text
@@ -118,7 +119,11 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
           args: [transaction.names, transaction.items, transaction.data],
         })
         const txHash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+        const reciept = await waitForTransactionReceipt(config, {
+          hash: txHash,
+          chainId: chain.id,
+        })
+        await awaitSubgraphSync(chain.id, reciept.blockNumber)
       } catch (err) {
         console.warn(err)
         setIsPendingTransaction(false)

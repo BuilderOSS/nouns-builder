@@ -2,6 +2,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { type PropDate } from '@buildeross/sdk/subgraph'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
+import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
@@ -58,7 +59,7 @@ export const PropDateCard = ({
           <Avatar address={propDate.creator} src={ensAvatar} size="28" />
           <Text fontWeight="display">{ensName || walletSnippet(propDate.creator)}</Text>
           <Text variant="label-sm" color="text3">
-            • {new Date(propDate.timeCreated * 1000).toLocaleString()}
+            • {formatTimeAgo(propDate.timeCreated)}
           </Text>
         </Flex>
         {milestoneTitle && (

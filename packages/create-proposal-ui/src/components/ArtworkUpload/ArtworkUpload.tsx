@@ -1,18 +1,16 @@
-import { useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
+import { useArtworkImages, useArtworkPreview } from '@buildeross/hooks/useArtworkPreview'
 import { useArtworkUpload } from '@buildeross/hooks/useArtworkUpload'
-import { getFetchableUrls } from '@buildeross/ipfs-service'
-import { type Property } from '@buildeross/sdk/contract'
-import { ImageProps, IPFSUpload, Trait } from '@buildeross/types'
+import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
+import type { IPFSUpload, Property, Trait } from '@buildeross/types'
 import {
   ArtworkPreview,
   ArtworkUpload as UploadComponent,
   LayerOrdering,
 } from '@buildeross/ui/Artwork'
-import { FormikProps } from 'formik'
+import { transformPropertiesToImageProps } from '@buildeross/utils'
 import { motion } from 'framer-motion'
 import React, {
   BaseSyntheticEvent,
-  ChangeEventHandler,
   ReactElement,
   useCallback,
   useEffect,
@@ -44,52 +42,10 @@ const previewVariants = {
 
 interface ArtworkFormProps {
   id: string
-  value: any
   inputLabel: string | ReactElement
-  onChange: ChangeEventHandler
-  onBlur: ChangeEventHandler
   existingProperties?: Property[]
-  formik?: FormikProps<any>
   errorMessage?: any
   helperText?: string
-}
-
-function convertToImageProps(properties: Property[]): ImageProps[] {
-  const imageProps: ImageProps[] = []
-
-  for (const property of properties) {
-    for (const item of property.items) {
-      const match = item.uri.match(/^ipfs:\/\/([^/]+)\/.+$/)
-      if (!match || !match[1]) {
-        console.error(`Invalid IPFS URI format: ${item.uri}`)
-        continue
-      }
-      const cid = match[1]
-
-      const nameParts = item.uri.split('/')
-      const name = nameParts[nameParts.length - 1]
-      if (!name) {
-        console.error(`Unable to extract name from URI: ${item.uri}`)
-        continue
-      }
-
-      const urls = getFetchableUrls(item.uri)
-      if (!urls || urls.length === 0) {
-        console.error(`Unable to get fetchable URLs for: ${item.uri}`)
-        continue
-      }
-
-      imageProps.push({
-        cid,
-        name,
-        trait: property.name,
-        uri: item.uri,
-        url: urls[0],
-      })
-    }
-  }
-
-  return imageProps
 }
 
 function mergeTraits(a: Trait[], b: Trait[]): Trait[] {
@@ -120,27 +76,33 @@ function mergeTraits(a: Trait[], b: Trait[]): Trait[] {
 }
 
 export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
+  id,
   existingProperties, // NOTE: only for add artwork, must be undefined for replace artwork
   inputLabel,
   helperText,
   errorMessage,
-  formik,
 }) => {
   const {
-    ipfsUpload,
-    setSetUpArtwork,
     setUpArtwork,
-    setIpfsUpload,
-    isUploadingToIPFS,
+    setSetUpArtwork,
     setIsUploadingToIPFS,
-    setIpfsUploadProgress,
+    ipfsUpload,
+    setIpfsUpload,
     orderedLayers,
     setOrderedLayers,
+    setIpfsUploadProgress,
   } = useArtworkStore()
-  const { artwork } = setUpArtwork
+  const scrollDirection = useScrollDirection()
+
+  // Calculate top offset based on header visibility
+  // Header is 80px tall and hidden when scrollDirection is 'down'
+  const topOffset = scrollDirection === 'down' ? 24 : 104 // 24px + 80px header
 
   const handleUploadStart = useCallback(() => {
+    setSetUpArtwork({ filesLength: 0, artwork: [], fileType: '' })
     setIsUploadingToIPFS(true)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setIsUploadingToIPFS])
 
   const handleUploadSuccess = useCallback(
@@ -149,13 +111,12 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
       setIsUploadingToIPFS(false)
       setIpfsUploadProgress(0)
     },
-    [setIpfsUpload, setIsUploadingToIPFS, setIpfsUploadProgress]
+    [setIsUploadingToIPFS, setIpfsUploadProgress, setIpfsUpload]
   )
 
   const handleUploadError = useCallback(
     async (err: Error) => {
       console.error('Error uploading to IPFS', err)
-      setIpfsUpload([])
       setIsUploadingToIPFS(false)
       setIpfsUploadProgress(0)
       try {
@@ -165,31 +126,30 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
       } catch (_) {}
       return
     },
-    [setIpfsUpload, setIsUploadingToIPFS, setIpfsUploadProgress]
+    [setIsUploadingToIPFS, setIpfsUploadProgress]
   )
 
   const {
-    images,
-    fileInfo,
-    filesArray,
-    ipfsUploadError,
-    uploadArtworkError,
-    setUploadArtworkError,
+    artwork: uploadedArtwork,
+    uploadError,
+    artworkError,
     setFiles,
   } = useArtworkUpload({
-    artwork,
-    ipfsUpload,
-    isUploadingToIPFS,
     onUploadStart: handleUploadStart,
     onUploadSuccess: handleUploadSuccess,
     onUploadError: handleUploadError,
     onUploadProgress: setIpfsUploadProgress,
   })
 
+  const images = useArtworkImages({
+    ipfsUpload,
+    traits: setUpArtwork.artwork,
+  })
+
   const { existingImages, existingOrderedLayers } = useMemo(() => {
     if (!existingProperties) return { existingImages: [], existingOrderedLayers: [] }
 
-    const existingImages = convertToImageProps(existingProperties)
+    const existingImages = transformPropertiesToImageProps(existingProperties)
     const existingOrderedLayers: Trait[] = existingProperties.map((property) => {
       return {
         trait: property.name,
@@ -211,49 +171,35 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
 
   const handleUpload = useCallback(
     (e: BaseSyntheticEvent) => {
-      setUploadArtworkError(undefined)
       setOrderedLayers([])
       setFiles(e.currentTarget.files)
     },
-    [setUploadArtworkError, setOrderedLayers, setFiles]
+    [setOrderedLayers, setFiles]
   )
 
   // Set up artwork traits into store
   useEffect(() => {
-    if (!fileInfo || !filesArray || !fileInfo.traits || !formik || uploadArtworkError)
-      return
+    if (!uploadedArtwork) return
 
     setSetUpArtwork({
-      ...formik.values,
-      artwork: fileInfo.traits,
-      filesLength: fileInfo.filesLength,
+      artwork: uploadedArtwork.traits,
+      filesLength: uploadedArtwork.filesLength,
+      fileType: uploadedArtwork.fileType,
     })
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filesArray, fileInfo, uploadArtworkError])
+  }, [uploadedArtwork])
 
-  const showPreview = useMemo(
-    () =>
-      fileInfo &&
-      !isUploadingToIPFS &&
-      !ipfsUploadError &&
-      !uploadArtworkError &&
-      artwork.length > 0,
-    [isUploadingToIPFS, ipfsUploadError, uploadArtworkError, fileInfo, artwork]
-  )
+  const showPreview = !!images?.length && !!orderedLayers.length
 
   useEffect(() => {
-    if (isUploadingToIPFS || !fileInfo) return
-    generateStackedImage()
-  }, [generateStackedImage, isUploadingToIPFS, fileInfo])
-
-  useEffect(() => {
-    if (!artwork || artwork.length === 0) {
+    if (setUpArtwork.artwork.length == 0) {
       return
     }
-    const mergedOrderedLayers = mergeTraits(artwork, existingOrderedLayers)
+    const mergedOrderedLayers = mergeTraits(setUpArtwork.artwork, existingOrderedLayers)
     if (orderedLayers?.length === mergedOrderedLayers?.length) return
     setOrderedLayers(mergedOrderedLayers)
-  }, [artwork, existingOrderedLayers, orderedLayers, setOrderedLayers])
+  }, [setUpArtwork.artwork, existingOrderedLayers, orderedLayers, setOrderedLayers])
 
   const layerOrdering = (
     <LayerOrdering
@@ -266,16 +212,16 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
   return (
     <>
       <UploadComponent
+        id={id}
         inputLabel={inputLabel}
         fileCount={setUpArtwork.filesLength}
-        traitCount={orderedLayers.length}
+        traitCount={setUpArtwork.artwork.length}
         helperText={helperText}
         formError={errorMessage}
         onUpload={handleUpload}
-        ipfsUploadError={ipfsUploadError}
-        uploadArtworkError={uploadArtworkError}
-        images={images}
-        fileType={fileInfo?.fileType}
+        uploadError={uploadError}
+        artworkError={artworkError}
+        fileType={setUpArtwork.fileType}
         layerOrdering={layerOrdering}
       />
       {showPreview && (
@@ -286,13 +232,21 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
           animate={'open'}
           className={artworkPreviewPanel}
         >
-          <ArtworkPreview
-            canvas={canvas}
-            generateStackedImage={generateStackedImage}
-            images={mergedImages}
-            generatedImages={generatedImages}
-            orderedLayers={orderedLayers}
-          />
+          <div
+            style={{
+              position: 'sticky',
+              top: `${topOffset}px`,
+              transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
+            <ArtworkPreview
+              canvas={canvas}
+              generateStackedImage={generateStackedImage}
+              images={mergedImages}
+              generatedImages={generatedImages}
+              orderedLayers={orderedLayers}
+            />
+          </div>
         </motion.div>
       )}
     </>

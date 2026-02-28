@@ -23,6 +23,16 @@ export const loadingSpinner = recipe({
 
   variants: {
     size: {
+      xs: style({
+        selectors: {
+          '&::after': {
+            width: 8,
+            height: 8,
+            margin: 1,
+            borderWidth: 1,
+          },
+        },
+      }),
       sm: style({
         selectors: {
           '&::after': {

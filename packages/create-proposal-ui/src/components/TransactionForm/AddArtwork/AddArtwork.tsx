@@ -5,18 +5,19 @@ import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack } from '@buildeross/zord'
-import React, { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
 import { AddArtworkForm } from './AddArtworkForm'
 
-export const AddArtwork = () => {
+export const AddArtwork: React.FC = () => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
   const chain = useChainStore((x) => x.chain)
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
 
   const contractOrderedLayers = useMemo(
     () => [...orderedLayers].reverse(), // traits in the contract are reversed
@@ -133,7 +134,15 @@ export const AddArtwork = () => {
     })
 
     resetForm()
-  }, [addresses.metadata, addTransaction, isValid, resetForm, transactions])
+    resetTransactionType()
+  }, [
+    addresses.metadata,
+    addTransaction,
+    isValid,
+    resetForm,
+    resetTransactionType,
+    transactions,
+  ])
 
   return (
     <Stack>

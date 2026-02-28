@@ -27,6 +27,9 @@ type DAO @entity {
   daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
   pinnedAssets: [TreasuryAssetPin!]! @derivedFrom(field: "dao")
   feedEvents: [FeedEvent!]! @derivedFrom(field: "dao")
+  clankerTokens: [ClankerToken!]! @derivedFrom(field: "dao")
+  zoraCoins: [ZoraCoin!]! @derivedFrom(field: "dao")
+  zoraDrops: [ZoraDrop!]! @derivedFrom(field: "dao")
 }
 
 type _Schema_
@@ -247,6 +250,9 @@ enum FeedEventType {
   AUCTION_CREATED
   AUCTION_BID_PLACED
   AUCTION_SETTLED
+  CLANKER_TOKEN_CREATED
+  ZORA_COIN_CREATED
+  ZORA_DROP_CREATED
 }
 
 interface FeedEvent {
@@ -339,4 +345,324 @@ type AuctionSettledEvent implements FeedEvent @entity {
   auction: Auction!
   winner: Bytes!
   amount: BigInt!
+}
+
+type ClankerTokenCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  clankerToken: ClankerToken!
+}
+
+type ZoraCoinCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  zoraCoin: ZoraCoin!
+}
+
+type ClankerToken @entity {
+  # ID is the token address (globally unique)
+  id: ID!
+
+  # Link to DAO (optional - only if tokenAdmin matches a known DAO treasury)
+  dao: DAO
+
+  # Event params
+  tokenAddress: Bytes!
+  msgSender: Bytes!
+  tokenAdmin: Bytes! # The admin address (may or may not be a DAO)
+
+  # Token metadata
+  tokenImage: String!
+  tokenName: String!
+  tokenSymbol: String!
+  tokenMetadata: String!
+  tokenContext: String!
+
+  # Pool configuration
+  startingTick: BigInt!
+  poolHook: Bytes!
+  poolId: Bytes!
+  pairedToken: Bytes!
+
+  # Additional modules
+  locker: Bytes!
+  mevModule: Bytes!
+  extensionsSupply: BigInt!
+  extensions: [Bytes!]!
+
+  # Swap routing
+  swapRoute: SwapRoute @derivedFrom(field: "clankerToken")
+
+  # Token holders
+  holders: [ClankerTokenHolder!]! @derivedFrom(field: "token")
+
+  # Block metadata
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  transactionHash: Bytes!
+}
+
+type ZoraCoin @entity {
+  # ID is the coin address (globally unique)
+  id: ID!
+
+  # Link to ClankerToken (paired currency must be a known ClankerToken)
+  clankerToken: ClankerToken
+
+  # Link to DAO (through ClankerToken)
+  dao: DAO
+
+  # Event params - indexed
+  caller: Bytes!
+  payoutRecipient: Bytes!
+  platformReferrer: Bytes!
+
+  # Event params - non-indexed
+  currency: Bytes!
+  uri: String!
+  name: String!
+  symbol: String!
+  coinAddress: Bytes!
+
+  # Pool configuration (PoolKey struct)
+  poolCurrency0: Bytes!
+  poolCurrency1: Bytes!
+  poolFee: BigInt!
+  poolTickSpacing: Int!
+  poolHooks: Bytes!
+
+  # Pool key hash
+  poolKeyHash: Bytes!
+
+  # Version
+  version: String!
+
+  # Swap routing
+  swapRoute: SwapRoute @derivedFrom(field: "zoraCoin")
+
+  # Token holders
+  holders: [ZoraCoinHolder!]! @derivedFrom(field: "coin")
+
+  # Block metadata
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  transactionHash: Bytes!
+}
+
+type ZoraDropCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  zoraDrop: ZoraDrop!
+}
+
+type ZoraDrop @entity {
+  # ID is the drop contract address (globally unique)
+  id: ID!
+
+  # Link to DAO (only if creator matches a known DAO treasury)
+  dao: DAO
+
+  # Derived field: all holders of this drop
+  holders: [ZoraDropHolder!]! @derivedFrom(field: "drop")
+
+  # Derived field: all mint comments for this drop
+  mintComments: [ZoraDropMintComment!]! @derivedFrom(field: "drop")
+
+  # Event params
+  creator: Bytes! # The creator address (treasury)
+  editionSize: BigInt!
+
+  # Config from ERC721Drop.config()
+  metadataRenderer: Bytes!
+  royaltyBPS: Int!
+  fundsRecipient: Bytes!
+
+  # Sales configuration from ERC721Drop.salesConfig()
+  publicSalePrice: BigInt!
+  maxSalePurchasePerAddress: BigInt!
+  publicSaleStart: BigInt!
+  publicSaleEnd: BigInt!
+  presaleStart: BigInt!
+  presaleEnd: BigInt!
+  presaleMerkleRoot: Bytes!
+
+  # NFT metadata from ERC721Drop
+  name: String!
+  symbol: String!
+
+  # Metadata from EditionMetadataRenderer.tokenInfos()
+  description: String!
+  imageURI: String!
+  animationURI: String!
+
+  # Sales tracking
+  totalSalesAmount: BigInt!
+
+  # Block metadata
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  transactionHash: Bytes!
+}
+
+# Tracks individual ownership and spending for each address per Zora drop
+type ZoraDropHolder @entity {
+  # ID is: drop-address-holder-address
+  id: ID!
+
+  # References
+  drop: ZoraDrop!
+  holder: Bytes!
+
+  # Balance of NFTs owned (current)
+  balance: BigInt!
+
+  # Total amount spent on this drop (in wei)
+  totalSpent: BigInt!
+
+  # Total quantity purchased (may differ from balance due to transfers/sales)
+  totalPurchased: BigInt!
+
+  # Block metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
+}
+
+# Tracks mint comments for Zora drops
+type ZoraDropMintComment @entity {
+  # ID is: tx-hash-log-index
+  id: ID!
+
+  # References
+  drop: ZoraDrop!
+  sender: Bytes!
+
+  # Mint details
+  tokenId: BigInt!
+  quantity: BigInt!
+  comment: String!
+
+  # Block metadata
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+# Swap routing entities
+
+enum CoinType {
+  WETH
+  CLANKER_TOKEN
+  ZORA_COIN
+}
+
+type SwapRoute @entity {
+  # ID is the coin/token address
+  id: ID!
+
+  # Link to either ClankerToken or ZoraCoin
+  clankerToken: ClankerToken
+  zoraCoin: ZoraCoin
+
+  # The coin/token address this route is for
+  coinAddress: Bytes!
+
+  # Main path from this coin to WETH (or WETH to this coin)
+  # The path can be traversed in either direction for buy/sell
+  mainPath: [SwapHop!]! @derivedFrom(field: "route")
+
+  # Available payment tokens (extracted from mainPath)
+  paymentOptions: [PaymentOption!]! @derivedFrom(field: "route")
+
+  # Metadata
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+type SwapHop @entity {
+  # ID is: route-id-hop-index
+  id: ID!
+
+  # Link to route
+  route: SwapRoute!
+
+  # Hop details
+  tokenIn: Bytes!
+  tokenOut: Bytes!
+  poolId: Bytes!
+  fee: BigInt
+  hooks: Bytes
+  tickSpacing: Int
+
+  # Position in the path (0-indexed)
+  hopIndex: Int!
+}
+
+type PaymentOption @entity {
+  # ID is: route-id-token-address
+  id: ID!
+
+  # Link to route
+  route: SwapRoute!
+
+  # Payment token details
+  tokenAddress: Bytes!
+  tokenType: CoinType!
+
+  # Hops from this payment token to the target coin (when buying)
+  # Or from target coin to this payment token (when selling)
+  # References hops from the main path
+  startHopIndex: Int!
+  endHopIndex: Int!
+
+  # Whether this is a direct swap (single hop)
+  isDirectSwap: Boolean!
+}
+
+# Token holder entities
+
+type ClankerTokenHolder @entity {
+  # ID is: token-address-holder-address
+  id: ID!
+
+  # References
+  token: ClankerToken!
+  holder: Bytes!
+
+  # Balance held by this address
+  balance: BigInt!
+
+  # Metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
+}
+
+type ZoraCoinHolder @entity {
+  # ID is: coin-address-holder-address
+  id: ID!
+
+  # References
+  coin: ZoraCoin!
+  holder: Bytes!
+
+  # Balance held by this address
+  balance: BigInt!
+
+  # Metadata
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
 }

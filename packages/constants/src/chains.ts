@@ -25,7 +25,7 @@ const sorter = (a: Chain, b: Chain) => a.icon.localeCompare(b.icon)
 /**
  * Sorts a non-empty chain list by name while preserving its non-empty type.
  */
-const sortNonEmptyChains = <T extends Chain>(
+export const sortNonEmptyChains = <T extends Chain>(
   chains: NonEmptyArray<T>
 ): NonEmptyArray<T> => {
   const sorted = [...chains].sort(sorter)
@@ -131,7 +131,7 @@ export const PUBLIC_DEFAULT_CHAINS: Chains = sortNonEmptyChains(
 // L1 / L2 CHAIN IDS
 // ----------------------
 
-type NonEmptyChainIds = NonEmptyArray<CHAIN_ID>
+export type NonEmptyChainIds = NonEmptyArray<CHAIN_ID>
 
 export const L1_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   ? ([CHAIN_ID.SEPOLIA] as const)

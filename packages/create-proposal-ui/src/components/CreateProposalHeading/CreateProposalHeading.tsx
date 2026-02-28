@@ -10,9 +10,11 @@ interface CreateProposalHeadingProps {
   title: string
   align?: 'center' | 'left'
   showQueue?: boolean
+  showContinue?: boolean
   onOpenProposalReview?: () => void
   showDocsLink?: boolean
   handleBack: () => void
+  queueButtonClassName?: string
 }
 
 export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
@@ -20,27 +22,31 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
   align = 'left',
   showDocsLink = false,
   showQueue = false,
+  showContinue = true,
   handleBack,
   onOpenProposalReview,
+  queueButtonClassName,
 }) => {
   const [queueModalOpen, setQueueModalOpen] = useState(false)
   const transactions = useProposalStore((state) => state.transactions)
   return (
     <Stack mx={'auto'} pb={'x3'} w={'100%'}>
       <ProposalNavigation handleBack={handleBack}>
-        {showQueue && (
+        {(showQueue || showContinue) && (
           <Flex align="center" direction="row" justify="flex-end" w="100%">
             <Flex>
-              {transactions.length > 0 && (
+              {showQueue && (
                 <Button
                   mr="x6"
                   variant="secondary"
                   onClick={() => setQueueModalOpen(true)}
+                  disabled={!transactions.length}
+                  className={queueButtonClassName}
                 >
-                  {`${transactions.length} transaction${transactions.length > 1 ? 's' : ''} queued`}
+                  {`${transactions.length} transaction${transactions.length === 1 ? '' : 's'} queued`}
                 </Button>
               )}
-              {onOpenProposalReview && (
+              {showContinue && onOpenProposalReview && (
                 <Button disabled={!transactions.length} onClick={onOpenProposalReview}>
                   Continue
                 </Button>

@@ -63,6 +63,7 @@ export const feedItemChainName = style({
 export const feedItemImage = style([
   atoms({
     borderRadius: 'curved',
+    backgroundColor: 'border',
     overflow: 'hidden',
     w: '100%',
   }),
@@ -70,8 +71,25 @@ export const feedItemImage = style([
     aspectRatio: '1 / 1',
     objectFit: 'cover',
     '@media': {
-      '(min-width: 480px)': {
-        width: '240px',
+      '(min-width: 600px)': {
+        width: '50%',
+        flexShrink: 0,
+      },
+    },
+  },
+])
+
+export const feedItemMedia = style([
+  atoms({
+    borderRadius: 'curved',
+    overflow: 'hidden',
+    w: '100%',
+  }),
+  {
+    objectFit: 'cover',
+    '@media': {
+      '(min-width: 600px)': {
+        width: '50%',
         flexShrink: 0,
       },
     },
@@ -80,7 +98,7 @@ export const feedItemImage = style([
 
 export const feedItemContentHorizontal = style({
   '@media': {
-    '(min-width: 480px)': {
+    '(min-width: 600px)': {
       display: 'flex',
       flexDirection: 'row',
       gap: space.x4,
@@ -171,12 +189,22 @@ export const feedItemMetaRow = style({
   flexDirection: 'column',
   gap: space.x3,
   width: '100%',
+  marginTop: space.x2,
   '@media': {
     '(min-width: 768px)': {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
       marginTop: space.x4,
+    },
+  },
+})
+
+export const feedItemChain = style({
+  justifyContent: 'flex-start',
+  '@media': {
+    '(min-width: 768px)': {
+      justifyContent: 'flex-end',
     },
   },
 })

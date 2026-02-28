@@ -10,9 +10,10 @@ export const profileCard = style([
     borderColor: 'border',
   }),
   {
-    transition: 'border-color 0.15s ease',
+    cursor: 'pointer',
+    transition: 'background-color 0.15s ease',
     ':hover': {
-      borderColor: color.neutralHover,
+      backgroundColor: color.border,
     },
   },
 ])

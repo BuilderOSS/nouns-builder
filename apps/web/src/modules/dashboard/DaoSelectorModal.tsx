@@ -1,7 +1,8 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { COIN_SUPPORTED_CHAIN_IDS, COINING_ENABLED } from '@buildeross/constants/coining'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
-import { Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 
@@ -13,7 +14,6 @@ export interface DaoSelectorModalProps {
   onClose: () => void
   actionType: 'post' | 'proposal'
   userAddress?: AddressType
-  chainIds?: CHAIN_ID[]
 }
 
 export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
@@ -21,16 +21,16 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   onClose,
   actionType,
   userAddress,
-  chainIds = [],
 }) => {
   const router = useRouter()
   const [selectedDao, setSelectedDao] = useState<DaoListItem | undefined>()
 
-  const title = actionType === 'post' ? 'Select DAO for Post' : 'Select DAO for Proposal'
-  const description =
-    actionType === 'post'
-      ? 'Choose which DAO you want to create a post for'
-      : 'Choose which DAO you want to create a proposal for (members only)'
+  const isForPost = actionType === 'post' && COINING_ENABLED
+
+  const title = isForPost ? 'Select DAO for Post' : 'Select DAO for Proposal'
+  const description = isForPost
+    ? 'Choose which DAO you want to create a post for'
+    : 'Choose which DAO you want to create a proposal for (members only)'
 
   const handleContinue = async () => {
     if (!selectedDao) return
@@ -44,11 +44,11 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
 
     const network = chain.slug
 
-    if (actionType === 'post') {
-      // Route: /dao/{network}/{token}/post/create
-      await router.push(`/dao/${network}/${selectedDao.address}/post/create`)
+    if (isForPost) {
+      // Route: /dao/{network}/{token}/coin/create
+      await router.push(`/dao/${network}/${selectedDao.address}/coin/create`)
     } else {
-      // Route: /dao/{network}/{token}/proposal/create (existing route)
+      // Route: /dao/{network}/{token}/proposal/create
       await router.push(`/dao/${network}/${selectedDao.address}/proposal/create`)
     }
 
@@ -61,25 +61,42 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   }
 
   // For posts: show search, For proposals: no search (members only)
-  const showSearch = actionType === 'post'
+  const showSearch = isForPost
+
+  // For posts: filter to coin-supported chains
+  const effectiveChainIds = (isForPost ? COIN_SUPPORTED_CHAIN_IDS : []) as CHAIN_ID[]
 
   return (
     <AnimatedModal open={open} close={handleCancel} size="large">
       <Stack>
         <div className={modalHeader}>
-          <Text className={modalTitle}>{title}</Text>
-          <Text fontSize="14" color="text3" style={{ marginTop: '4px' }}>
-            {description}
-          </Text>
+          <Flex align="center" gap="x2" mb="x3" justify="space-between">
+            <Box>
+              <Text className={modalTitle}>{title}</Text>
+              <Text fontSize="14" color="text3" style={{ marginTop: '4px' }}>
+                {description}
+              </Text>
+            </Box>
+            <Button
+              variant="ghost"
+              onClick={handleCancel}
+              p={'x0'}
+              size="xs"
+              style={{ padding: 0, flexShrink: 0 }}
+            >
+              <Icon id="cross" />
+            </Button>
+          </Flex>
         </div>
 
         <div className={modalBody}>
           <SingleDaoSelector
-            chainIds={chainIds}
+            chainIds={effectiveChainIds}
             selectedDaoAddress={selectedDao?.address}
             onSelectedDaoChange={setSelectedDao}
             userAddress={userAddress}
             showSearch={showSearch}
+            actionType={actionType}
           />
         </div>
 

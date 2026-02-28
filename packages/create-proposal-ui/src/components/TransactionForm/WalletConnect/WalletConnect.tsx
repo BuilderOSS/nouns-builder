@@ -248,8 +248,9 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
   )
 }
 
-export const WalletConnect = () => {
+export const WalletConnect: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
+  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
   const [currentClientData, setCurrentClientData] = useState<WCClientData | null>(null)
   const [currentTxPayload, setCurrentTxPayload] = useState<WCPayload | null>(null)
 
@@ -293,8 +294,9 @@ export const WalletConnect = () => {
 
       actions.resetForm()
       setCurrentTxPayload(null)
+      resetTransactionType()
     },
-    [currentTxPayload, currentClientData, addTransaction, decoded]
+    [currentTxPayload, currentClientData, addTransaction, decoded, resetTransactionType]
   )
 
   const onTransactionReceived = useCallback(

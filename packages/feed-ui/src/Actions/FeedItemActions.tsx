@@ -1,18 +1,39 @@
 import type { FeedItem } from '@buildeross/types'
 import React from 'react'
 
+import type {
+  OnOpenBidModal,
+  OnOpenMintModal,
+  OnOpenPropdateModal,
+  OnOpenTradeModal,
+  OnOpenVoteModal,
+} from '../types/modalStates'
 import { AuctionActions } from './AuctionActions'
+import { CoinActions } from './CoinActions'
 import { ProposalActions } from './ProposalActions'
+import { ZoraDropActions } from './ZoraDropActions'
 
 interface FeedItemActionsProps {
   item: FeedItem
+  onOpenBidModal: OnOpenBidModal
+  onOpenVoteModal: OnOpenVoteModal
+  onOpenPropdateModal: OnOpenPropdateModal
+  onOpenTradeModal: OnOpenTradeModal
+  onOpenMintModal: OnOpenMintModal
 }
 
-const ONE_MONTH = 30 * 24 * 60 * 60
+const TWO_MONTHS = 2 * 30 * 24 * 60 * 60
 
-export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
-  // Only show actions for recent items (last 30 days)
-  const isRecent = item.timestamp > Date.now() / 1000 - ONE_MONTH
+export const FeedItemActions: React.FC<FeedItemActionsProps> = ({
+  item,
+  onOpenBidModal,
+  onOpenVoteModal,
+  onOpenPropdateModal,
+  onOpenTradeModal,
+  onOpenMintModal,
+}) => {
+  // Only show actions for recent items (last 60 days)
+  const isRecent = item.timestamp > Date.now() / 1000 - TWO_MONTHS
 
   if (!isRecent) {
     return null
@@ -25,41 +46,18 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
       return (
         <AuctionActions
           daoName={item.daoName}
+          daoImage={item.daoImage}
           chainId={item.chainId}
           tokenId={item.tokenId}
           tokenName={item.tokenName}
           addresses={item.addresses}
+          onOpenBidModal={onOpenBidModal}
         />
       )
 
     case 'PROPOSAL_CREATED':
     case 'PROPOSAL_VOTED':
-      return (
-        <ProposalActions
-          chainId={item.chainId}
-          proposalId={item.proposalId}
-          proposalNumber={item.proposalNumber}
-          proposalTitle={item.proposalTitle}
-          proposalTimeCreated={item.proposalTimeCreated}
-          isExecuted={false}
-          addresses={item.addresses}
-        />
-      )
-
     case 'PROPOSAL_UPDATED':
-      return (
-        <ProposalActions
-          chainId={item.chainId}
-          proposalId={item.proposalId}
-          proposalNumber={item.proposalNumber}
-          proposalTitle={item.proposalTitle}
-          proposalTimeCreated={item.proposalTimeCreated}
-          isExecuted={false}
-          updateItem={item}
-          addresses={item.addresses}
-        />
-      )
-
     case 'PROPOSAL_EXECUTED':
       return (
         <ProposalActions
@@ -69,9 +67,58 @@ export const FeedItemActions: React.FC<FeedItemActionsProps> = ({ item }) => {
           proposalTitle={item.proposalTitle}
           proposalTimeCreated={item.proposalTimeCreated}
           addresses={item.addresses}
-          isExecuted={true}
+          daoName={item.daoName}
+          daoImage={item.daoImage}
+          isExecuted={item.type === 'PROPOSAL_EXECUTED'}
+          updateItem={item.type === 'PROPOSAL_UPDATED' ? item : undefined}
+          onOpenVoteModal={onOpenVoteModal}
+          onOpenPropdateModal={onOpenPropdateModal}
         />
       )
+
+    case 'CLANKER_TOKEN_CREATED':
+      return (
+        <CoinActions
+          chainId={item.chainId}
+          coinAddress={item.tokenAddress}
+          symbol={item.tokenSymbol}
+          daoName={item.daoName}
+          daoImage={item.daoImage}
+          onOpenTradeModal={onOpenTradeModal}
+          isClankerToken={true}
+        />
+      )
+
+    case 'ZORA_COIN_CREATED':
+      return (
+        <CoinActions
+          chainId={item.chainId}
+          coinAddress={item.coinAddress}
+          symbol={item.coinSymbol}
+          daoName={item.daoName}
+          daoImage={item.daoImage}
+          onOpenTradeModal={onOpenTradeModal}
+          isClankerToken={false}
+        />
+      )
+
+    case 'ZORA_DROP_CREATED': {
+      return (
+        <ZoraDropActions
+          chainId={item.chainId}
+          dropAddress={item.dropAddress}
+          symbol={item.dropSymbol}
+          daoName={item.daoName}
+          daoImage={item.daoImage}
+          publicSalePrice={item.publicSalePrice}
+          publicSaleStart={item.publicSaleStart}
+          publicSaleEnd={item.publicSaleEnd}
+          editionSize={item.editionSize}
+          maxPerAddress={item.maxSalePurchasePerAddress}
+          onOpenMintModal={onOpenMintModal}
+        />
+      )
+    }
 
     default:
       return null
