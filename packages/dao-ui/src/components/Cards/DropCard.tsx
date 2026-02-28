@@ -18,7 +18,7 @@ interface DropCardProps {
   drop: DropItem
   chainId: CHAIN_ID
   showTypeBadge?: boolean
-  onMintClick?: (drop: DropItem) => void
+  onMintClick: (drop: DropItem) => void
 }
 
 export const DropCard = ({
@@ -38,8 +38,6 @@ export const DropCard = ({
   const isNew = drop.createdAt
     ? Date.now() / 1000 - parseInt(drop.createdAt) < 7 * 24 * 60 * 60
     : false
-
-  const showMintButton = !!onMintClick
 
   const handleMintClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -129,32 +127,31 @@ export const DropCard = ({
           >
             {drop.name}
           </Text>
-          {!showMintButton && shareUrl && (
-            <ShareButton url={shareUrl} size="sm" variant="ghost" />
-          )}
         </Flex>
 
-        {showMintButton && (
-          <Flex
-            className={tradeButtonContainer}
-            direction="row"
-            align="center"
-            w="100%"
-            justify="space-between"
-            gap="x1"
+        <Flex
+          className={tradeButtonContainer}
+          direction="row"
+          align="center"
+          w="100%"
+          justify="space-between"
+          gap="x1"
+          onClick={(e: React.MouseEvent) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        >
+          {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
+          <Button
+            size="sm"
+            variant="primary"
+            style={{ flex: 1 }}
+            onClick={handleMintClick}
+            disabled={!saleActive}
           >
-            {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
-            <Button
-              size="sm"
-              variant="primary"
-              style={{ flex: 1 }}
-              onClick={handleMintClick}
-              disabled={!saleActive}
-            >
-              {mintButtonText}
-            </Button>
-          </Flex>
-        )}
+            {mintButtonText}
+          </Button>
+        </Flex>
       </Box>
     </Link>
   )

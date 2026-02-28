@@ -65,8 +65,10 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const iconSize = effectiveSize === 'sm' || effectiveSize === 'xs' ? 'sm' : 'md'
   const px = effectiveSize === 'lg' ? 'x6' : effectiveSize === 'xs' ? 'x3' : 'x4'
 
+  const isLiked = hasBalance || justLiked
+
   // Determine which heart icon to show
-  const heartIcon = hasBalance || justLiked ? 'heartFilled' : 'heart'
+  const heartIcon = isLiked ? 'heartFilled' : 'heart'
 
   const onLikeSuccessInner = useCallback(
     (txHash: string, amount: bigint) => {
@@ -104,8 +106,9 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         chainId={chainId}
         borderRadius="curved"
         size={size}
-        style={{ minWidth: 'unset' }}
+        style={{ minWidth: 'unset', opacity: 1, cursor: 'not-allowed' }}
         px={px}
+        disabled={isLiked}
       >
         <motion.div
           key={heartIcon}

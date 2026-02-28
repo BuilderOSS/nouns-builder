@@ -62,7 +62,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
   const presetAmounts = useMemo(() => {
     if (!ethUsdPrice) return []
 
-    const usdAmounts = [0.01, 0.1, 1.0] // $0.01, $0.10, $1.00
+    const usdAmounts = [0.1, 0.5, 1.0] // $0.10, $0.50, $1.00
     return usdAmounts.map((usd) => ({
       usd,
       eth: BigInt(Math.floor((usd / ethUsdPrice) * 1e18)),
@@ -182,6 +182,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
         p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
           e.stopPropagation()
         }}
       >
@@ -200,6 +201,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
         p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
           e.stopPropagation()
         }}
       >
@@ -226,6 +228,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
         p="x1"
         style={{ minWidth: '180px' }}
         onClick={(e: React.MouseEvent) => {
+          e.preventDefault()
           e.stopPropagation()
         }}
       >
@@ -237,9 +240,11 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
             variant="ghost"
             size="xs"
             onClick={(e: React.MouseEvent) => {
+              e.preventDefault()
               e.stopPropagation()
               onClose()
             }}
+            px="x2"
           >
             Close
           </Button>
@@ -257,6 +262,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
       p="x1"
       style={{ minWidth: '180px' }}
       onClick={(e: React.MouseEvent) => {
+        e.preventDefault()
         e.stopPropagation()
       }}
     >
@@ -278,6 +284,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
                 variant={'outline'}
                 size="sm"
                 onClick={(e: React.MouseEvent) => {
+                  e.preventDefault()
                   e.stopPropagation()
                   if (!isButtonDisabled && !isButtonLoading) {
                     handleSelectAmount(preset.eth)
@@ -290,18 +297,13 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
                   <Spinner size="xs" />
                 ) : (
                   <Text variant="label-sm" style={{ fontWeight: 500 }}>
-                    ${preset.usd < 1 ? preset.usd.toFixed(2) : preset.usd.toFixed(0)}
+                    ${preset.usd.toFixed(1)}
                   </Text>
                 )}
               </Button>
             )
           })}
         </Flex>
-        {!isWalletReady && (
-          <Text variant="label-xs" color="tertiary" align="center">
-            Connect wallet to like
-          </Text>
-        )}
       </Stack>
     </Box>
   )
