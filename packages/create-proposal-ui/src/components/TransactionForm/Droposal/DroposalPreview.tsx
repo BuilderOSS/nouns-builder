@@ -1,8 +1,8 @@
-import { MediaPreview } from '@buildeross/ui/MediaPreview'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { ContentPreview } from '@buildeross/ui/ContentPreview'
+import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 
-import { previewTextStyle } from './Droposal.css'
+import { StickyPreviewContainer } from '../../StickyPreviewContainer'
 import { EditionType } from './DroposalForm'
 import { DroposalFormValues } from './DroposalForm.schema'
 
@@ -15,49 +15,19 @@ export const DroposalPreview: React.FC<DroposalPreviewProps> = ({
   formik,
   editionType,
 }) => {
-  const {
-    mediaUrl,
-    coverUrl,
-    mediaType,
-    symbol,
-    name,
-    description,
-    pricePerMint,
-    maxSupply,
-  } = formik.values
+  const { mediaUrl, coverUrl, mediaType, name, description, pricePerMint, maxSupply } =
+    formik.values
   return (
-    <Box position={'absolute'} style={{ height: '100%' }} top={'x0'} right={'x0'}>
-      <Box position={'sticky'} top={'x6'} right={'x0'}>
-        <Box style={{ width: '400px', height: '400px' }}>
-          <MediaPreview mediaUrl={mediaUrl} coverUrl={coverUrl} mediaType={mediaType} />
-        </Box>
-        <Text mt="x4" variant="heading-sm" className={previewTextStyle}>
-          {name || 'Collection name'}
-        </Text>
-        <Flex mt="x2" align={'center'}>
-          <Text
-            style={{ backgroundColor: 'black', color: 'white' }}
-            py="x1"
-            px="x2"
-            variant="eyebrow"
-            borderRadius="normal"
-          >
-            ${symbol || 'SYMBOL'}
-          </Text>
-          <Text ml="x2" color="text4" fontSize={14} style={{ fontWeight: 'bold' }}>
-            EDITION
-          </Text>
-        </Flex>
-        <Text
-          mt="x2"
-          variant={'paragraph-lg'}
-          className={previewTextStyle}
-          style={{
-            fontWeight: 500,
-          }}
-        >
-          {description || 'description'}
-        </Text>
+    <StickyPreviewContainer align="stretch">
+      <Stack gap="x4">
+        <ContentPreview
+          name={name || 'Collection name'}
+          description={description || 'description'}
+          imageUrl={coverUrl}
+          mediaUrl={mediaUrl}
+          mediaMimeType={mediaType}
+          type="drop"
+        />
         <Flex mt="x4">
           <Box>
             <Text fontSize={12} color="text4" style={{ fontWeight: 'bold' }}>
@@ -76,7 +46,7 @@ export const DroposalPreview: React.FC<DroposalPreviewProps> = ({
             </Text>
           </Box>
         </Flex>
-      </Box>
-    </Box>
+      </Stack>
+    </StickyPreviewContainer>
   )
 }

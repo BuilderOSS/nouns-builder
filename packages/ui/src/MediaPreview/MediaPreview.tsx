@@ -77,6 +77,8 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
       <VideoPreview
         src={primaryMediaUrl}
         fallbackSrcs={fallbackMediaUrls}
+        cover={primaryCoverUrl}
+        coverFallbackSrcs={fallbackCoverUrls}
         width={width}
         height={height}
         aspectRatio={aspectRatio}
@@ -94,6 +96,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
         coverFallbackSrcs={fallbackCoverUrls}
         width={width}
         height={height}
+        aspectRatio={aspectRatio}
         controls={controls}
       />
     )

@@ -1,27 +1,25 @@
-import { CHAIN_ID } from '@buildeross/types'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { MediaPreview } from '../MediaPreview'
-import * as styles from './ContentCoinPreview.css'
+import * as styles from './ContentPreview.css'
 
-export interface ContentCoinPreviewProps {
+export interface ContentPreviewProps {
   name: string
-  symbol: string
   description: string
   imageUrl?: string
   mediaUrl?: string
   mediaMimeType?: string
-  chainId: CHAIN_ID
-  daoName?: string
+  type?: 'post' | 'drop'
 }
 
-export const ContentCoinPreview: React.FC<ContentCoinPreviewProps> = ({
+export const ContentPreview: React.FC<ContentPreviewProps> = ({
   name,
   description,
   imageUrl,
   mediaUrl,
   mediaMimeType,
+  type = 'post',
 }) => {
   // Determine which media to show - prefer mediaUrl over imageUrl
   const displayMediaUrl = mediaUrl || imageUrl
@@ -96,7 +94,7 @@ export const ContentCoinPreview: React.FC<ContentCoinPreviewProps> = ({
               style={{ textAlign: 'center' }}
             >
               <Text fontSize="14" color="text3">
-                Fill in the form to see your post preview
+                Fill in the form to see your {type} preview
               </Text>
             </Box>
           )}
@@ -105,7 +103,7 @@ export const ContentCoinPreview: React.FC<ContentCoinPreviewProps> = ({
         {/* Info */}
         <Box p="x3" borderRadius="curved" backgroundColor="background2">
           <Text fontSize="12" color="text3">
-            This is how your content coin will appear to collectors
+            This is how your {type} will appear to collectors
           </Text>
         </Box>
       </Stack>
