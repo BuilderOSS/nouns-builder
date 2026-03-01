@@ -1,5 +1,5 @@
-import { Box, Icon } from '@buildeross/zord'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Box } from '@buildeross/zord'
+import { useEffect, useMemo, useState } from 'react'
 
 export interface AudioPreviewProps {
   src: string
@@ -8,8 +8,35 @@ export interface AudioPreviewProps {
   cover?: string
   /** Additional fallback URLs for cover image */
   coverFallbackSrcs?: string[]
+  /** When aspect-ratio mode is used, this becomes the wrapper width. */
   width?: string | number
+  /** Used only when aspectRatio is NOT provided and ratio mode is off. */
   height?: string | number
+
+  /** Force a specific aspect ratio (width/height). Examples: 1, 16/9, "16/9", "1:1" */
+  aspectRatio?: number | string
+
+  /**
+   * If true, use an aspect-ratio wrapper:
+   * - wrapper width = `width` (default "100%")
+   * - wrapper height computed from aspect ratio
+   */
+  fitToAspectRatio?: boolean
+
+  /** Used while cover image loads (prevents layout jump). If omitted, it will size naturally until loaded. */
+  fallbackAspectRatio?: number | string
+
+  objectFit?: React.CSSProperties['objectFit']
+
+  controls?: boolean
+}
+
+const toCssSize = (v: string | number | undefined) =>
+  typeof v === 'number' ? `${v}px` : v
+
+const normalizeAspectRatio = (r: number | string) => {
+  if (typeof r === 'number') return String(r)
+  return r.includes(':') ? r.replace(':', ' / ') : r
 }
 
 const EMPTY_SRCS: string[] = []
@@ -19,13 +46,17 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
   fallbackSrcs = EMPTY_SRCS,
   cover,
   coverFallbackSrcs = EMPTY_SRCS,
-  width = 400,
+  width = '100%',
   height = 400,
+  aspectRatio,
+  fitToAspectRatio = true,
+  fallbackAspectRatio,
+  objectFit = 'cover',
+  controls = true,
 }) => {
-  const [playing, setPlaying] = useState(false)
+  const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
   const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
   const [currentCoverIndex, setCurrentCoverIndex] = useState(0)
-  const audioRef = useRef<HTMLAudioElement>(null)
 
   // Create stable keys for source changes to prevent unnecessary re-renders
   const audioSourcesKey = useMemo(
@@ -47,20 +78,24 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
     [coverSourcesKey]
   )
 
+  // Decide which ratio to use (explicit > measured > fallback)
+  const ratioForBox = useMemo(() => {
+    if (aspectRatio) return normalizeAspectRatio(aspectRatio)
+    if (measuredRatio) return String(measuredRatio)
+    if (fallbackAspectRatio) return normalizeAspectRatio(fallbackAspectRatio)
+    return undefined
+  }, [aspectRatio, measuredRatio, fallbackAspectRatio])
+
   // Reset index when sources change
   useEffect(() => {
     setCurrentSrcIndex(0)
+    setMeasuredRatio(null)
   }, [audioSourcesKey])
 
   useEffect(() => {
     setCurrentCoverIndex(0)
+    setMeasuredRatio(null)
   }, [coverSourcesKey])
-
-  const togglePlay = useCallback(async () => {
-    if (!audioRef.current) return
-    if (playing) audioRef.current.pause()
-    else audioRef.current.play()
-  }, [audioRef, playing])
 
   const handleAudioError = () => {
     // Try next source if available
@@ -86,7 +121,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
     })
   }
 
-  return (
+  const contentEl = (
     <Box position={'relative'} w="100%" h="100%">
       {!cover ? (
         <Box backgroundColor="background2" w="100%" h="100%" borderRadius={'curved'} />
@@ -94,47 +129,63 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
         <img
           key={currentCoverIndex}
           src={allCoverSrcs[currentCoverIndex]}
-          width={width}
-          height={height}
           alt="Preview"
+          loading="lazy"
+          decoding="async"
           onError={handleCoverError}
+          onLoad={(e) => {
+            const img = e.currentTarget
+            if (img.naturalWidth && img.naturalHeight) {
+              setMeasuredRatio(img.naturalWidth / img.naturalHeight)
+            }
+          }}
           style={{
-            objectFit: 'cover',
             borderRadius: '10px',
-            height: typeof height === 'number' ? `${height}px` : height,
-            width: typeof width === 'number' ? `${width}px` : width,
+            objectFit,
+            display: 'block',
+            // In ratio-box mode we fill the box; otherwise keep the old sizing
+            width: fitToAspectRatio ? '100%' : toCssSize(width),
+            height: fitToAspectRatio ? '100%' : toCssSize(height),
           }}
         />
       )}
 
-      <Box
-        as={'button'}
-        onClick={togglePlay}
-        borderColor="transparent"
-        h="x10"
-        w="x10"
-        cursor={'pointer'}
-        borderRadius="round"
-        backgroundColor={'background1'}
-        position={'absolute'}
-        bottom="x4"
-        right="x4"
-      >
-        <Icon id={playing ? 'pause' : 'play'} fill={'text2'} />
-      </Box>
-
       <audio
         key={currentSrcIndex}
         src={allSrcs[currentSrcIndex]}
-        ref={audioRef}
         loop
         preload={'auto'}
         playsInline
-        controls
+        controls={controls}
         onError={handleAudioError}
-        onPlay={() => setPlaying(true)}
-        onPause={() => setPlaying(false)}
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          width: fitToAspectRatio ? '100%' : (toCssSize(width) ?? '100%'),
+          height: 'auto',
+        }}
       />
     </Box>
   )
+
+  // If we want ratio layout and we have (or want) a ratio, wrap it
+  if (fitToAspectRatio && ratioForBox) {
+    return (
+      <div
+        style={{
+          width: toCssSize(width) ?? '100%',
+          aspectRatio: ratioForBox,
+          overflow: 'hidden',
+          borderRadius: '10px',
+        }}
+      >
+        {contentEl}
+      </div>
+    )
+  }
+
+  // Otherwise, old behavior (fixed width/height)
+  return contentEl
 }

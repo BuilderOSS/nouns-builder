@@ -148,6 +148,7 @@ export const CoinInfo = ({
           <Box w="100%" borderRadius="curved" overflow="hidden">
             <MediaPreview
               mediaUrl={animationFetchableUrl}
+              coverUrl={image ?? undefined}
               mediaType={mediaType}
               width="100%"
             />
