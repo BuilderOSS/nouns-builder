@@ -1,10 +1,12 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { useMediaType } from '@buildeross/hooks'
 import type { GalleryItem } from '@buildeross/hooks/useGalleryItems'
 import { useNowSeconds } from '@buildeross/hooks/useNowSeconds'
 import { CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
+import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { StatBadge } from '@buildeross/ui/StatBadge'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
@@ -67,6 +69,16 @@ export const DropCard = ({
 
   const mintButtonText = getButtonText()
 
+  const {
+    mediaType,
+    fetchableUrl: animationFetchableUrl,
+    isLoading: isMediaTypeLoading,
+  } = useMediaType(drop.animationURI, null)
+
+  // Determine what media to show - prefer animation_url over image
+  const shouldUseMediaPreview =
+    drop.animationURI && mediaType && animationFetchableUrl && !isMediaTypeLoading
+
   return (
     <Flex
       direction="column"
@@ -89,15 +101,25 @@ export const DropCard = ({
           overflow={'hidden'}
         >
           <Box w="100%" h="100%" aspectRatio={1 / 1} className={coinImage}>
-            {drop.imageURI ? (
+            {isMediaTypeLoading || (!shouldUseMediaPreview && !drop.imageURI) ? (
+              <Box backgroundColor="background2" w="100%" h="100%" />
+            ) : shouldUseMediaPreview ? (
+              <MediaPreview
+                mediaUrl={animationFetchableUrl}
+                mediaType={mediaType}
+                coverUrl={drop.imageURI || undefined}
+                width="100%"
+                height="100%"
+                aspectRatio={1}
+                controls={false}
+              />
+            ) : (
               <FallbackImage
-                src={drop.imageURI}
+                src={drop.imageURI!}
                 sizes="100vw"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 alt={`${drop.name} image`}
               />
-            ) : (
-              <Box backgroundColor="background2" w="100%" h="100%" />
             )}
           </Box>
 

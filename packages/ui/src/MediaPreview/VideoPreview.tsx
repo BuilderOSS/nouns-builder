@@ -23,6 +23,8 @@ export interface VideoPreviewProps {
   fallbackAspectRatio?: number | string
 
   objectFit?: React.CSSProperties['objectFit']
+
+  controls?: boolean
 }
 
 const toCssSize = (v: string | number | undefined) =>
@@ -44,6 +46,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
   fitToAspectRatio = true,
   fallbackAspectRatio,
   objectFit = 'cover',
+  controls = true,
 }) => {
   const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
   const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
@@ -91,7 +94,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
       muted
       loop
       playsInline
-      controls
+      controls={controls}
       preload="metadata"
       onError={handleError}
       onLoadedMetadata={(e) => {

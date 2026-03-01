@@ -10,6 +10,7 @@ export interface AudioPreviewProps {
   coverFallbackSrcs?: string[]
   width?: string | number
   height?: string | number
+  controls?: boolean
 }
 
 const EMPTY_SRCS: string[] = []
@@ -21,6 +22,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
   coverFallbackSrcs = EMPTY_SRCS,
   width = 400,
   height = 400,
+  controls = true,
 }) => {
   const [playing, setPlaying] = useState(false)
   const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
@@ -130,7 +132,7 @@ export const AudioPreview: React.FC<AudioPreviewProps> = ({
         loop
         preload={'auto'}
         playsInline
-        controls
+        controls={controls}
         onError={handleAudioError}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}

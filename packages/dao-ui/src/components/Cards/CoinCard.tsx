@@ -20,7 +20,7 @@ interface CoinCardProps {
   coinAddress: Address
   name: string
   symbol: string
-  image?: string // This is the IPFS URI
+  uri?: string // This is the IPFS URI
   createdAt?: string
   isZoraCoin?: boolean
   onTradeClick: (coinAddress: Address, symbol: string, isZoraCoin: boolean) => void
@@ -33,7 +33,7 @@ export const CoinCard = ({
   coinAddress,
   name,
   symbol,
-  image,
+  uri,
   createdAt,
   isZoraCoin = true,
   onTradeClick,
@@ -48,7 +48,7 @@ export const CoinCard = ({
   }, [chainId, coinAddress, getCoinLink])
 
   // Fetch IPFS metadata to get image and animation_url
-  const { metadata, imageUrl, animationUrl, isLoading } = useIpfsMetadata(image)
+  const { metadata, imageUrl, animationUrl, isLoading } = useIpfsMetadata(uri)
 
   // Get media type for animation_url if present
   const {
@@ -59,7 +59,6 @@ export const CoinCard = ({
 
   // Determine what media to show - prefer animation_url over image
   const shouldUseMediaPreview = animationUrl && mediaType && animationFetchableUrl
-  const displayImageUrl = imageUrl
 
   // Check if coin is new (less than 7 days old)
   const isNew = createdAt
@@ -112,22 +111,21 @@ export const CoinCard = ({
           overflow={'hidden'}
         >
           <Box w="100%" h="100%" aspectRatio={1 / 1} className={coinImage}>
-            {isLoading ||
-            isMediaTypeLoading ||
-            (!shouldUseMediaPreview && !displayImageUrl) ? (
+            {isLoading || isMediaTypeLoading || (!shouldUseMediaPreview && !imageUrl) ? (
               <Box backgroundColor="background2" w="100%" h="100%" />
             ) : shouldUseMediaPreview ? (
               <MediaPreview
                 mediaUrl={animationFetchableUrl}
                 mediaType={mediaType}
-                coverUrl={displayImageUrl || undefined}
+                coverUrl={imageUrl || undefined}
                 width="100%"
                 height="100%"
                 aspectRatio={1}
+                controls={false}
               />
             ) : (
               <FallbackImage
-                src={displayImageUrl!}
+                src={imageUrl!}
                 sizes="100vw"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 alt={`${name} image`}
