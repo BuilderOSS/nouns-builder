@@ -106,7 +106,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         chainId={chainId}
         borderRadius="curved"
         size={size}
-        style={{ minWidth: 'unset', opacity: 1, cursor: 'not-allowed' }}
+        style={{ minWidth: 'unset', opacity: 1 }}
         px={px}
         disabled={isLiked}
       >

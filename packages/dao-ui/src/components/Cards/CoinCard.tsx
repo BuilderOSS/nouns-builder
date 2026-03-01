@@ -13,7 +13,7 @@ import React, { useMemo } from 'react'
 import { Address } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
-import { card, coinImage, coinInfo, tradeButtonContainer, typeBadge } from './Cards.css'
+import { card, coinImage, tradeButtonContainer, typeBadge } from './Cards.css'
 
 interface CoinCardProps {
   chainId: CHAIN_ID
@@ -91,14 +91,17 @@ export const CoinCard = ({
   }
 
   return (
-    <>
+    <Flex
+      direction="column"
+      borderRadius={'curved'}
+      height={'100%'}
+      overflow={'hidden'}
+      className={card}
+    >
       <Link
         direction="column"
         link={getCoinLink(chainId, coinAddress)}
-        borderRadius={'curved'}
-        height={'100%'}
-        overflow={'hidden'}
-        className={card}
+        style={{ cursor: 'pointer' }}
       >
         <Box
           backgroundColor="background2"
@@ -147,7 +150,7 @@ export const CoinCard = ({
           )}
         </Box>
 
-        <Box pt="x4" position={'relative'} className={coinInfo}>
+        <Box pt="x4" px="x4" position={'relative'}>
           <Flex justify={'space-between'} align={'center'} pb="x2" gap="x1">
             <Text
               variant="label-md"
@@ -166,41 +169,39 @@ export const CoinCard = ({
               </Text>
             </Flex>
           </Flex>
-
-          {/* Trade Button */}
-          <Flex
-            className={tradeButtonContainer}
-            direction="row"
-            align="center"
-            w="100%"
-            justify="space-between"
-            gap="x1"
-            onClick={(e: React.MouseEvent) => {
-              e.preventDefault()
-              e.stopPropagation()
-            }}
-          >
-            {isZoraCoin && (
-              <LikeButton
-                coinAddress={coinAddress}
-                symbol={symbol}
-                chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
-                size="sm"
-                variant="ghost"
-              />
-            )}
-            {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
-            <Button
-              size="sm"
-              variant="primary"
-              style={{ flex: 1 }}
-              onClick={handleTradeClick}
-            >
-              {sellEnabled && hasBalance ? 'Trade' : 'Buy'}
-            </Button>
-          </Flex>
         </Box>
       </Link>
-    </>
+
+      {/* Trade Button */}
+      <Flex
+        className={tradeButtonContainer}
+        direction="row"
+        align="center"
+        w="100%"
+        justify="space-between"
+        gap="x1"
+        px="x4"
+        pb="x4"
+      >
+        {isZoraCoin && (
+          <LikeButton
+            coinAddress={coinAddress}
+            symbol={symbol}
+            chainId={chainId as CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA}
+            size="sm"
+            variant="ghost"
+          />
+        )}
+        {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
+        <Button
+          size="sm"
+          variant="primary"
+          style={{ flex: 1 }}
+          onClick={handleTradeClick}
+        >
+          {sellEnabled && hasBalance ? 'Trade' : 'Buy'}
+        </Button>
+      </Flex>
+    </Flex>
   )
 }

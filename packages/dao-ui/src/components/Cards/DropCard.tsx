@@ -68,91 +68,94 @@ export const DropCard = ({
   const mintButtonText = getButtonText()
 
   return (
-    <Link
+    <Flex
       direction="column"
-      link={getDropLink(chainId, drop.id as `0x${string}`)}
       borderRadius={'curved'}
       height={'100%'}
       overflow={'hidden'}
       className={card}
     >
-      <Box
-        backgroundColor="background2"
-        width={'100%'}
-        height={'auto'}
-        aspectRatio={1 / 1}
-        position="relative"
-        overflow={'hidden'}
+      <Link
+        direction="column"
+        link={getDropLink(chainId, drop.id as `0x${string}`)}
+        style={{ cursor: 'pointer' }}
       >
-        <Box w="100%" h="100%" aspectRatio={1 / 1} className={coinImage}>
-          {drop.imageURI ? (
-            <FallbackImage
-              src={drop.imageURI}
-              sizes="100vw"
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              alt={`${drop.name} image`}
-            />
-          ) : (
-            <Box backgroundColor="background2" w="100%" h="100%" />
+        <Box
+          backgroundColor="background2"
+          width={'100%'}
+          height={'auto'}
+          aspectRatio={1 / 1}
+          position="relative"
+          overflow={'hidden'}
+        >
+          <Box w="100%" h="100%" aspectRatio={1 / 1} className={coinImage}>
+            {drop.imageURI ? (
+              <FallbackImage
+                src={drop.imageURI}
+                sizes="100vw"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                alt={`${drop.name} image`}
+              />
+            ) : (
+              <Box backgroundColor="background2" w="100%" h="100%" />
+            )}
+          </Box>
+
+          {/* New Badge */}
+          {isNew && (
+            <Box position="absolute" top="x3" left="x3">
+              <StatBadge variant="positive">New</StatBadge>
+            </Box>
+          )}
+
+          {/* Type Badge */}
+          {showTypeBadge && (
+            <Box className={typeBadge}>
+              <StatBadge variant="default">Drop</StatBadge>
+            </Box>
           )}
         </Box>
 
-        {/* New Badge */}
-        {isNew && (
-          <Box position="absolute" top="x3" left="x3">
-            <StatBadge variant="positive">New</StatBadge>
-          </Box>
-        )}
+        <Box py="x2" px="x4" position={'relative'}>
+          <Flex justify={'space-between'} align={'center'} gap="x2" w="100%">
+            <Text
+              variant="label-md"
+              color="text1"
+              style={{
+                flex: 1,
+                minWidth: 0,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {drop.name}
+            </Text>
+          </Flex>
+        </Box>
+      </Link>
 
-        {/* Type Badge */}
-        {showTypeBadge && (
-          <Box className={typeBadge}>
-            <StatBadge variant="default">Drop</StatBadge>
-          </Box>
-        )}
-      </Box>
-
-      <Box py="x2" px="x4" position={'relative'}>
-        <Flex justify={'space-between'} align={'center'} gap="x2" w="100%">
-          <Text
-            variant="label-md"
-            color="text1"
-            style={{
-              flex: 1,
-              minWidth: 0,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {drop.name}
-          </Text>
-        </Flex>
-
-        <Flex
-          className={tradeButtonContainer}
-          direction="row"
-          align="center"
-          w="100%"
-          justify="space-between"
-          gap="x1"
-          onClick={(e: React.MouseEvent) => {
-            e.preventDefault()
-            e.stopPropagation()
-          }}
+      <Flex
+        className={tradeButtonContainer}
+        direction="row"
+        align="center"
+        w="100%"
+        justify="space-between"
+        gap="x1"
+        px="x4"
+        pb="x2"
+      >
+        {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
+        <Button
+          size="sm"
+          variant="primary"
+          style={{ flex: 1 }}
+          onClick={handleMintClick}
+          disabled={!saleActive}
         >
-          {shareUrl && <ShareButton url={shareUrl} size="sm" variant="ghost" />}
-          <Button
-            size="sm"
-            variant="primary"
-            style={{ flex: 1 }}
-            onClick={handleMintClick}
-            disabled={!saleActive}
-          >
-            {mintButtonText}
-          </Button>
-        </Flex>
-      </Box>
-    </Link>
+          {mintButtonText}
+        </Button>
+      </Flex>
+    </Flex>
   )
 }
