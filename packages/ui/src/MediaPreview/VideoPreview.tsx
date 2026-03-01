@@ -4,6 +4,10 @@ export interface VideoPreviewProps {
   src: string
   /** Additional fallback URLs to try if primary src fails */
   fallbackSrcs?: string[]
+  /** Cover/poster image to show before video loads */
+  cover?: string
+  /** Additional fallback URLs to try if primary cover fails */
+  coverFallbackSrcs?: string[]
   /** When aspect-ratio mode is used, this becomes the wrapper width. */
   width?: string | number
   /** Used only when aspectRatio is NOT provided and ratio mode is off. */
@@ -23,6 +27,8 @@ export interface VideoPreviewProps {
   fallbackAspectRatio?: number | string
 
   objectFit?: React.CSSProperties['objectFit']
+
+  controls?: boolean
 }
 
 const toCssSize = (v: string | number | undefined) =>
@@ -38,15 +44,19 @@ const EMPTY_SRCS: string[] = []
 export const VideoPreview: React.FC<VideoPreviewProps> = ({
   src,
   fallbackSrcs = EMPTY_SRCS,
+  cover,
+  coverFallbackSrcs = EMPTY_SRCS,
   width = '100%',
   height = 400,
   aspectRatio,
   fitToAspectRatio = true,
   fallbackAspectRatio,
   objectFit = 'cover',
+  controls = true,
 }) => {
   const [measuredRatio, setMeasuredRatio] = useState<number | null>(null)
   const [currentSrcIndex, setCurrentSrcIndex] = useState(0)
+  const [currentCoverIndex, setCurrentCoverIndex] = useState(0)
 
   // Create stable key for source changes to prevent unnecessary re-renders
   const sourcesKey = useMemo(
@@ -58,11 +68,29 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const allSrcs = useMemo(() => [src, ...fallbackSrcs], [sourcesKey])
 
+  // Create stable key for cover changes to prevent unnecessary re-renders
+  const coverSourcesKey = useMemo(
+    () => JSON.stringify([cover, ...coverFallbackSrcs]),
+    [cover, coverFallbackSrcs]
+  )
+
+  // Build array of all cover sources with primary cover first
+  const allCoverSrcs = useMemo(
+    () => (cover ? [cover, ...coverFallbackSrcs] : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [coverSourcesKey]
+  )
+
   // Reset index when sources change
   useEffect(() => {
     setCurrentSrcIndex(0)
     setMeasuredRatio(null)
   }, [sourcesKey])
+
+  // Reset cover index when cover sources change
+  useEffect(() => {
+    setCurrentCoverIndex(0)
+  }, [coverSourcesKey])
 
   // Decide which ratio to use (explicit > measured > fallback)
   const ratioForBox = useMemo(() => {
@@ -83,32 +111,61 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     })
   }
 
+  const handleCoverError = () => {
+    // Try next cover source if available
+    setCurrentCoverIndex((prev) => {
+      if (prev < allCoverSrcs.length - 1) {
+        console.warn(
+          `Cover image failed to load from ${allCoverSrcs[prev]}, trying next source...`
+        )
+        return prev + 1
+      }
+      return prev
+    })
+  }
+
+  const currentCoverSrc =
+    allCoverSrcs.length > 0 ? allCoverSrcs[currentCoverIndex] : undefined
+
   const videoEl = (
-    <video
-      key={currentSrcIndex}
-      src={allSrcs[currentSrcIndex]}
-      autoPlay
-      muted
-      loop
-      playsInline
-      controls
-      preload="metadata"
-      onError={handleError}
-      onLoadedMetadata={(e) => {
-        const v = e.currentTarget
-        if (v.videoWidth && v.videoHeight) {
-          setMeasuredRatio(v.videoWidth / v.videoHeight)
-        }
-      }}
-      style={{
-        borderRadius: '10px',
-        objectFit,
-        display: 'block',
-        // In ratio-box mode we fill the box; otherwise keep the old sizing
-        width: fitToAspectRatio ? '100%' : toCssSize(width),
-        height: fitToAspectRatio ? '100%' : toCssSize(height),
-      }}
-    />
+    <>
+      <video
+        key={allSrcs[currentSrcIndex]}
+        src={allSrcs[currentSrcIndex]}
+        poster={currentCoverSrc}
+        autoPlay
+        muted
+        loop
+        playsInline
+        controls={controls}
+        preload="metadata"
+        onError={handleError}
+        onLoadedMetadata={(e) => {
+          const v = e.currentTarget
+          if (v.videoWidth && v.videoHeight) {
+            setMeasuredRatio(v.videoWidth / v.videoHeight)
+          }
+        }}
+        style={{
+          borderRadius: '10px',
+          objectFit,
+          display: 'block',
+          // In ratio-box mode we fill the box; otherwise keep the old sizing
+          width: fitToAspectRatio ? '100%' : toCssSize(width),
+          height: fitToAspectRatio ? '100%' : toCssSize(height),
+        }}
+      />
+      {/* Hidden img element to handle cover error fallback, since video poster doesn't reliably fire onerror */}
+      {currentCoverSrc && (
+        <img
+          key={currentCoverSrc}
+          src={currentCoverSrc}
+          alt=""
+          onError={handleCoverError}
+          style={{ display: 'none' }}
+        />
+      )}
+    </>
   )
 
   // If we want ratio layout and we have (or want) a ratio, wrap it
@@ -120,6 +177,12 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
           aspectRatio: ratioForBox,
           overflow: 'hidden',
           borderRadius: '10px',
+          ...(currentCoverSrc && {
+            backgroundImage: `url(${currentCoverSrc})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }),
         }}
       >
         {videoEl}

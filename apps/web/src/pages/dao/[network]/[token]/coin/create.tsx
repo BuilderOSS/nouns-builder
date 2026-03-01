@@ -3,7 +3,7 @@ import { useClankerTokens } from '@buildeross/hooks'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
-import { type CoinFormValues, ContentCoinPreview } from '@buildeross/ui'
+import { type CoinFormValues, ContentPreview } from '@buildeross/ui'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { isChainIdSupportedByCoining } from '@buildeross/utils'
@@ -178,11 +178,7 @@ const CreateCoinPage: NextPageWithLayout<CreateCoinPageProps> = ({
             {/* Right column: Preview */}
             {latestClankerToken && (
               <Box className={styles.previewColumn}>
-                <ContentCoinPreview
-                  {...previewData}
-                  chainId={chain.id}
-                  daoName={daoName}
-                />
+                <ContentPreview {...previewData} />
               </Box>
             )}
           </Box>

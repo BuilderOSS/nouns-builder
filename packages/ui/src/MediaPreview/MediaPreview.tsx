@@ -14,6 +14,7 @@ export interface MediaPreviewProps {
   height?: string | number
   /** Force a specific aspect ratio (width/height). Examples: 1, 16/9, "16/9", "1:1" */
   aspectRatio?: number | string
+  controls?: boolean
 }
 
 export const MediaPreview: React.FC<MediaPreviewProps> = ({
@@ -23,6 +24,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
   width,
   height,
   aspectRatio,
+  controls = true,
 }) => {
   // Get all fetchable URLs, using the original mediaUrl as primary and others as fallbacks
   const { primaryUrl: primaryMediaUrl, fallbackUrls: fallbackMediaUrls } = useMemo(() => {
@@ -75,9 +77,12 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
       <VideoPreview
         src={primaryMediaUrl}
         fallbackSrcs={fallbackMediaUrls}
+        cover={primaryCoverUrl}
+        coverFallbackSrcs={fallbackCoverUrls}
         width={width}
         height={height}
         aspectRatio={aspectRatio}
+        controls={controls}
       />
     )
   }
@@ -91,6 +96,8 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
         coverFallbackSrcs={fallbackCoverUrls}
         width={width}
         height={height}
+        aspectRatio={aspectRatio}
+        controls={controls}
       />
     )
   }

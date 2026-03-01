@@ -457,10 +457,7 @@ export const ContentCoin: React.FC = () => {
 
                 <Stack gap="x6">
                   {/* Preview positioned absolutely on the right side (hidden on mobile) */}
-                  <ContentCoinPreviewDisplay
-                    previewData={previewData}
-                    chainId={chain.id}
-                  />
+                  <ContentCoinPreviewDisplay previewData={previewData} />
 
                   {/* Form header and fields */}
                   <Stack gap="x4">
