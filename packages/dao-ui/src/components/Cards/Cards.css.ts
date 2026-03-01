@@ -3,7 +3,6 @@ import { style } from '@vanilla-extract/css'
 
 export const card = style([
   {
-    cursor: 'pointer',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     border: `2px solid ${color.border}`,
     ':hover': {

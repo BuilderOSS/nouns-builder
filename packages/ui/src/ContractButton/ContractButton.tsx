@@ -149,15 +149,6 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
       }
     }
 
-    // Extract style from rest and merge with error state styling
-    const { style: userStyle, ...restProps } = rest
-    const mergedStyle = {
-      ...userStyle,
-      ...(errorState && {
-        boxShadow: '0 0 0 2px #EF4444',
-      }),
-    }
-
     return (
       <>
         {/* type must be explicitly 'button' to prevent default form submission */}
@@ -167,8 +158,7 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
           onClick={handleClickWithValidation}
           disabled={disabled || loading}
           loading={loading}
-          style={mergedStyle}
-          {...restProps}
+          {...rest}
         >
           {children}
         </Button>
