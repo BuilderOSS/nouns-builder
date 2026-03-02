@@ -2676,6 +2676,8 @@ export type PaymentOption = {
   route: SwapRoute
   startHopIndex: Scalars['Int']['output']
   tokenAddress: Scalars['Bytes']['output']
+  tokenName: Scalars['String']['output']
+  tokenSymbol: Scalars['String']['output']
   tokenType: CoinType
 }
 
@@ -2743,6 +2745,46 @@ export type PaymentOption_Filter = {
   tokenAddress_not?: InputMaybe<Scalars['Bytes']['input']>
   tokenAddress_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   tokenAddress_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  tokenName?: InputMaybe<Scalars['String']['input']>
+  tokenName_contains?: InputMaybe<Scalars['String']['input']>
+  tokenName_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_gt?: InputMaybe<Scalars['String']['input']>
+  tokenName_gte?: InputMaybe<Scalars['String']['input']>
+  tokenName_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenName_lt?: InputMaybe<Scalars['String']['input']>
+  tokenName_lte?: InputMaybe<Scalars['String']['input']>
+  tokenName_not?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_contains?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenName_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenName_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenName_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_contains?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_gt?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_gte?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenSymbol_lt?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_lte?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_contains?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  tokenSymbol_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_starts_with?: InputMaybe<Scalars['String']['input']>
+  tokenSymbol_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   tokenType?: InputMaybe<CoinType>
   tokenType_in?: InputMaybe<Array<CoinType>>
   tokenType_not?: InputMaybe<CoinType>
@@ -2760,6 +2802,8 @@ export enum PaymentOption_OrderBy {
   RouteUpdatedAt = 'route__updatedAt',
   StartHopIndex = 'startHopIndex',
   TokenAddress = 'tokenAddress',
+  TokenName = 'tokenName',
+  TokenSymbol = 'tokenSymbol',
   TokenType = 'tokenType',
 }
 
@@ -7371,6 +7415,18 @@ export type ExploreDaoFragment = {
   token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
 }
 
+export type PaymentOptionFragment = {
+  __typename?: 'PaymentOption'
+  id: string
+  tokenAddress: any
+  tokenType: CoinType
+  tokenName: string
+  tokenSymbol: string
+  startHopIndex: number
+  endHopIndex: number
+  isDirectSwap: boolean
+}
+
 export type ProposalFragment = {
   __typename?: 'Proposal'
   abstainVotes: number
@@ -7419,6 +7475,60 @@ export type SnapshotFragment = {
   timestamp: any
   blockNumber: any
   dao: { __typename?: 'DAO'; name: string; id: string }
+}
+
+export type SwapHopFragment = {
+  __typename?: 'SwapHop'
+  id: string
+  tokenIn: any
+  tokenOut: any
+  poolId: any
+  fee?: any | null
+  hooks?: any | null
+  tickSpacing?: number | null
+  hopIndex: number
+}
+
+export type SwapRouteFragment = {
+  __typename?: 'SwapRoute'
+  id: string
+  coinAddress: any
+  createdAt: any
+  updatedAt: any
+  clankerToken?: {
+    __typename?: 'ClankerToken'
+    tokenAddress: any
+    tokenName: string
+    tokenSymbol: string
+  } | null
+  zoraCoin?: {
+    __typename?: 'ZoraCoin'
+    coinAddress: any
+    name: string
+    symbol: string
+  } | null
+  mainPath: Array<{
+    __typename?: 'SwapHop'
+    id: string
+    tokenIn: any
+    tokenOut: any
+    poolId: any
+    fee?: any | null
+    hooks?: any | null
+    tickSpacing?: number | null
+    hopIndex: number
+  }>
+  paymentOptions: Array<{
+    __typename?: 'PaymentOption'
+    id: string
+    tokenAddress: any
+    tokenType: CoinType
+    tokenName: string
+    tokenSymbol: string
+    startHopIndex: number
+    endHopIndex: number
+    isDirectSwap: boolean
+  }>
 }
 
 export type TokenFragment = {
@@ -8765,6 +8875,55 @@ export type SnapshotsQuery = {
   }>
 }
 
+export type SwapRouteQueryVariables = Exact<{
+  coinAddress: Scalars['ID']['input']
+}>
+
+export type SwapRouteQuery = {
+  __typename?: 'Query'
+  swapRoute?: {
+    __typename?: 'SwapRoute'
+    id: string
+    coinAddress: any
+    createdAt: any
+    updatedAt: any
+    clankerToken?: {
+      __typename?: 'ClankerToken'
+      tokenAddress: any
+      tokenName: string
+      tokenSymbol: string
+    } | null
+    zoraCoin?: {
+      __typename?: 'ZoraCoin'
+      coinAddress: any
+      name: string
+      symbol: string
+    } | null
+    mainPath: Array<{
+      __typename?: 'SwapHop'
+      id: string
+      tokenIn: any
+      tokenOut: any
+      poolId: any
+      fee?: any | null
+      hooks?: any | null
+      tickSpacing?: number | null
+      hopIndex: number
+    }>
+    paymentOptions: Array<{
+      __typename?: 'PaymentOption'
+      id: string
+      tokenAddress: any
+      tokenType: CoinType
+      tokenName: string
+      tokenSymbol: string
+      startHopIndex: number
+      endHopIndex: number
+      isDirectSwap: boolean
+    }>
+  } | null
+}
+
 export type TokenWithDaoQueryVariables = Exact<{
   id: Scalars['ID']['input']
 }>
@@ -9263,6 +9422,56 @@ export const SnapshotFragmentDoc = gql`
     timestamp
     blockNumber
   }
+`
+export const SwapHopFragmentDoc = gql`
+  fragment SwapHop on SwapHop {
+    id
+    tokenIn
+    tokenOut
+    poolId
+    fee
+    hooks
+    tickSpacing
+    hopIndex
+  }
+`
+export const PaymentOptionFragmentDoc = gql`
+  fragment PaymentOption on PaymentOption {
+    id
+    tokenAddress
+    tokenType
+    tokenName
+    tokenSymbol
+    startHopIndex
+    endHopIndex
+    isDirectSwap
+  }
+`
+export const SwapRouteFragmentDoc = gql`
+  fragment SwapRoute on SwapRoute {
+    id
+    coinAddress
+    clankerToken {
+      tokenAddress
+      tokenName
+      tokenSymbol
+    }
+    zoraCoin {
+      coinAddress
+      name
+      symbol
+    }
+    mainPath(orderBy: hopIndex, orderDirection: asc) {
+      ...SwapHop
+    }
+    paymentOptions {
+      ...PaymentOption
+    }
+    createdAt
+    updatedAt
+  }
+  ${SwapHopFragmentDoc}
+  ${PaymentOptionFragmentDoc}
 `
 export const TokenFragmentDoc = gql`
   fragment Token on Token {
@@ -10178,6 +10387,14 @@ export const SnapshotsDocument = gql`
   }
   ${SnapshotFragmentDoc}
 `
+export const SwapRouteDocument = gql`
+  query swapRoute($coinAddress: ID!) {
+    swapRoute(id: $coinAddress) {
+      ...SwapRoute
+    }
+  }
+  ${SwapRouteFragmentDoc}
+`
 export const TokenWithDaoDocument = gql`
   query tokenWithDao($id: ID!) {
     token(id: $id) {
@@ -10980,6 +11197,24 @@ export function getSdk(
             signal,
           }),
         'snapshots',
+        'query',
+        variables
+      )
+    },
+    swapRoute(
+      variables: SwapRouteQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<SwapRouteQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<SwapRouteQuery>({
+            document: SwapRouteDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'swapRoute',
         'query',
         variables
       )

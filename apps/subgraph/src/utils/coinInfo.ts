@@ -18,6 +18,8 @@ export namespace CoinType {
 export class CoinInfo {
   address: Bytes
   type: string
+  name: string
+  symbol: string
   pairedToken: Bytes | null
   poolId: Bytes | null // Uniswap V4 pool identifier (from either poolId or poolKeyHash)
   fee: BigInt | null
@@ -27,6 +29,8 @@ export class CoinInfo {
   constructor(
     address: Bytes,
     type: string,
+    name: string,
+    symbol: string,
     pairedToken: Bytes | null,
     poolId: Bytes | null,
     fee: BigInt | null,
@@ -35,6 +39,8 @@ export class CoinInfo {
   ) {
     this.address = address
     this.type = type
+    this.name = name
+    this.symbol = symbol
     this.pairedToken = pairedToken
     this.poolId = poolId
     this.fee = fee
@@ -55,6 +61,8 @@ export function loadCoinInfo(tokenAddress: Bytes): CoinInfo | null {
     return new CoinInfo(
       tokenAddress,
       CoinType.WETH,
+      'Wrapped Ether',
+      'WETH',
       null, // WETH has no pairedToken
       null, // WETH has no pool
       null,
@@ -69,6 +77,8 @@ export function loadCoinInfo(tokenAddress: Bytes): CoinInfo | null {
     return new CoinInfo(
       zoraCoin.coinAddress,
       CoinType.ZORA_COIN,
+      zoraCoin.name,
+      zoraCoin.symbol,
       zoraCoin.currency,
       zoraCoin.poolKeyHash, // poolKeyHash is the Uniswap V4 pool identifier
       zoraCoin.poolFee,
@@ -83,6 +93,8 @@ export function loadCoinInfo(tokenAddress: Bytes): CoinInfo | null {
     return new CoinInfo(
       clankerToken.tokenAddress,
       CoinType.CLANKER_TOKEN,
+      clankerToken.tokenName,
+      clankerToken.tokenSymbol,
       clankerToken.pairedToken,
       clankerToken.poolId, // poolId is the Uniswap V4 pool identifier
       DYNAMIC_FEE_FLAG,

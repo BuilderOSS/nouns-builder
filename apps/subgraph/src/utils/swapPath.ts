@@ -242,9 +242,13 @@ export function buildSwapRoute(coinAddress: Bytes, timestamp: BigInt): SwapRoute
 
     // Determine token type
     let tokenType = CoinType.WETH
+    let tokenName = 'Wrapped Ether'
+    let tokenSymbol = 'WETH'
     const info = loadCoinInfo(tokenBytes)
     if (info) {
       tokenType = info.type
+      tokenName = info.name
+      tokenSymbol = info.symbol
     }
 
     // Create payment option
@@ -253,6 +257,8 @@ export function buildSwapRoute(coinAddress: Bytes, timestamp: BigInt): SwapRoute
     option.route = routeId
     option.tokenAddress = tokenBytes
     option.tokenType = tokenType
+    option.tokenName = tokenName
+    option.tokenSymbol = tokenSymbol
     option.startHopIndex = startHopIndex
     option.endHopIndex = endHopIndex
     option.isDirectSwap = endHopIndex - startHopIndex == 0 // Single hop = direct swap

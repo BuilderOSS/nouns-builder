@@ -1,0 +1,25 @@
+#import "./SwapHop.graphql"
+#import "./PaymentOption.graphql"
+
+fragment SwapRoute on SwapRoute {
+  id
+  coinAddress
+  clankerToken {
+    tokenAddress
+    tokenName
+    tokenSymbol
+  }
+  zoraCoin {
+    coinAddress
+    name
+    symbol
+  }
+  mainPath(orderBy: hopIndex, orderDirection: asc) {
+    ...SwapHop
+  }
+  paymentOptions {
+    ...PaymentOption
+  }
+  createdAt
+  updatedAt
+}

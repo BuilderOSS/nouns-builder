@@ -622,6 +622,8 @@ type PaymentOption @entity {
   # Payment token details
   tokenAddress: Bytes!
   tokenType: CoinType!
+  tokenName: String!
+  tokenSymbol: String!
 
   # Hops from this payment token to the target coin (when buying)
   # Or from target coin to this payment token (when selling)

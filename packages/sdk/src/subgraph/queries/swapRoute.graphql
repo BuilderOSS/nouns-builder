@@ -1,0 +1,7 @@
+#import "../fragments/SwapRoute.graphql"
+
+query swapRoute($coinAddress: ID!) {
+  swapRoute(id: $coinAddress) {
+    ...SwapRoute
+  }
+}
