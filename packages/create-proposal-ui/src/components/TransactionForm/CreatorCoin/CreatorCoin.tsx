@@ -9,7 +9,11 @@ import {
   TREASURY_ASSET_PIN_SCHEMA,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from '@buildeross/constants/eas'
-import { useClankerTokenPrice, useClankerTokens, useEthUsdPrice } from '@buildeross/hooks'
+import {
+  useClankerTokenPrice,
+  useClankerTokensFull,
+  useEthUsdPrice,
+} from '@buildeross/hooks'
 import { ClankerTokenFragment } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { type AddressType, TransactionType } from '@buildeross/types'
@@ -379,10 +383,10 @@ export const CreatorCoin: React.FC = () => {
   // Check if the current chain is supported
   const isChainSupported = isChainIdSupportedByCoining(chain.id)
 
-  // Fetch the latest ClankerToken for Builder DAO
+  // Fetch the latest ClankerToken for Builder DAO (with full fragment including pool info)
   const builderCollectionAddress =
     BUILDER_COLLECTION_ADDRESS[chain.id as keyof typeof BUILDER_COLLECTION_ADDRESS]
-  const { data: builderClankerTokens } = useClankerTokens({
+  const { data: builderClankerTokens } = useClankerTokensFull({
     chainId: chain.id,
     collectionAddress: builderCollectionAddress as AddressType,
     enabled: isChainSupported && !!builderCollectionAddress,

@@ -1,6 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { type ClankerTokenFragment } from '@buildeross/sdk/subgraph'
+import { type ClankerTokenCardFragment } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR from 'swr'
@@ -32,7 +32,7 @@ export const useClankerTokenPrice = ({
   chainId,
   enabled = true,
 }: {
-  clankerToken?: ClankerTokenFragment | null
+  clankerToken?: ClankerTokenCardFragment | null
   chainId: CHAIN_ID
   enabled?: boolean
 }): {

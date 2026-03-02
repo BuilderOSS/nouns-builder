@@ -1,0 +1,13 @@
+fragment ZoraCoinHolder on ZoraCoinHolder {
+  id
+  holder
+  balance
+  updatedAt
+  updatedAtBlock
+  coin {
+    coinAddress
+    name
+    symbol
+    uri
+  }
+}

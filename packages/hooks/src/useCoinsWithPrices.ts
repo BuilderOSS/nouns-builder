@@ -1,6 +1,6 @@
 import {
-  type ClankerTokenFragment,
-  type ZoraCoinFragment,
+  type ClankerTokenCardFragment,
+  type ZoraCoinCardFragment,
 } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/coining/clankerCreator'
@@ -24,10 +24,10 @@ export const useClankerTokenWithPrice = ({
   chainId,
   enabled = true,
 }: {
-  clankerToken?: ClankerTokenFragment | null
+  clankerToken?: ClankerTokenCardFragment | null
   chainId: CHAIN_ID
   enabled?: boolean
-}): ClankerTokenFragment & CoinWithPrice => {
+}): ClankerTokenCardFragment & CoinWithPrice => {
   const { priceUsd, isLoading } = useClankerTokenPrice({
     clankerToken,
     chainId,
@@ -45,7 +45,7 @@ export const useClankerTokenWithPrice = ({
       priceUsd,
       marketCap,
       isLoadingPrice: isLoading,
-    } as ClankerTokenFragment & CoinWithPrice
+    } as ClankerTokenCardFragment & CoinWithPrice
   }, [clankerToken, priceUsd, isLoading])
 
   return enrichedToken
@@ -59,10 +59,10 @@ export const useZoraCoinWithPrice = ({
   chainId,
   enabled = true,
 }: {
-  zoraCoin?: ZoraCoinFragment | null
+  zoraCoin?: ZoraCoinCardFragment | null
   chainId: CHAIN_ID
   enabled?: boolean
-}): ZoraCoinFragment & CoinWithPrice => {
+}): ZoraCoinCardFragment & CoinWithPrice => {
   const { priceUsd, isLoading } = useZoraCoinPrice({
     zoraCoin,
     chainId,
@@ -80,41 +80,8 @@ export const useZoraCoinWithPrice = ({
       priceUsd,
       marketCap,
       isLoadingPrice: isLoading,
-    } as ZoraCoinFragment & CoinWithPrice
+    } as ZoraCoinCardFragment & CoinWithPrice
   }, [zoraCoin, priceUsd, isLoading])
 
   return enrichedCoin
-}
-
-/**
- * Enrich multiple Zora coins with price and market cap data
- * Note: This hook returns coins with null price data as placeholders.
- * Individual components should use useZoraCoinWithPrice to fetch prices.
- */
-export const useZoraCoinsWithPrices = ({
-  zoraCoins,
-  _chainId,
-  _enabled = true,
-}: {
-  zoraCoins?: ZoraCoinFragment[]
-  _chainId: CHAIN_ID
-  _enabled?: boolean
-}): (ZoraCoinFragment & CoinWithPrice)[] => {
-  // Create a stable array reference to avoid infinite loops
-  const stableCoins = useMemo(() => zoraCoins || [], [zoraCoins])
-
-  // We can't use hooks in a loop, so individual components use useZoraCoinWithPrice
-  // This function just adds the CoinWithPrice shape with null values
-  const enrichedCoins = useMemo(() => {
-    return stableCoins.map((coin) => {
-      return {
-        ...coin,
-        priceUsd: null,
-        marketCap: null,
-        isLoadingPrice: true,
-      } as ZoraCoinFragment & CoinWithPrice
-    })
-  }, [stableCoins])
-
-  return enrichedCoins
 }

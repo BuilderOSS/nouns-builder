@@ -2,9 +2,9 @@ import { CHAIN_ID } from '@buildeross/types'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
-import type { ZoraCoinFragment } from '../sdk.generated'
+import type { ZoraCoinCardFragment, ZoraCoinFragment } from '../sdk.generated'
 
-export type DaoZoraCoinsResponse = ZoraCoinFragment[]
+export type DaoZoraCoinsResponse = ZoraCoinCardFragment[]
 
 export const daoZoraCoinsRequest = async (
   daoAddress: string,

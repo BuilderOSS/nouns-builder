@@ -7286,19 +7286,62 @@ export type AuctionBidFragment = {
 
 export type ClankerTokenFragment = {
   __typename?: 'ClankerToken'
-  id: string
-  tokenAddress: any
-  tokenName: string
-  tokenSymbol: string
-  tokenImage: string
-  tokenMetadata: string
   pairedToken: any
   poolId: any
   poolHook: any
   createdAt: any
-  createdAtBlock: any
   transactionHash: any
   msgSender: any
+  tokenAddress: any
+  tokenName: string
+  tokenSymbol: string
+  tokenImage: string
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+}
+
+export type ClankerTokenCardFragment = {
+  __typename?: 'ClankerToken'
+  tokenAddress: any
+  tokenName: string
+  tokenSymbol: string
+  tokenImage: string
+}
+
+export type ClankerTokenHolderFragment = {
+  __typename?: 'ClankerTokenHolder'
+  id: string
+  holder: any
+  balance: any
+  updatedAt: any
+  updatedAtBlock: any
+  token: {
+    __typename?: 'ClankerToken'
+    tokenAddress: any
+    tokenName: string
+    tokenSymbol: string
+    tokenImage: string
+  }
+}
+
+export type ClankerTokenWithHoldersFragment = {
+  __typename?: 'ClankerToken'
+  pairedToken: any
+  poolId: any
+  poolHook: any
+  createdAt: any
+  transactionHash: any
+  msgSender: any
+  tokenAddress: any
+  tokenName: string
+  tokenSymbol: string
+  tokenImage: string
+  holders: Array<{
+    __typename?: 'ClankerTokenHolder'
+    id: string
+    holder: any
+    balance: any
+    updatedAt: any
+  }>
   dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
 }
 
@@ -7392,52 +7435,106 @@ export type TokenFragment = {
 export type ZoraCoinFragment = {
   __typename?: 'ZoraCoin'
   id: string
-  coinAddress: any
-  name: string
-  symbol: string
-  uri: string
+  transactionHash: any
+  caller: any
   currency: any
   poolKeyHash: any
   poolHooks: any
   poolFee: any
   poolTickSpacing: number
+  coinAddress: any
+  name: string
+  symbol: string
+  uri: string
   createdAt: any
-  createdAtBlock: any
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+}
+
+export type ZoraCoinCardFragment = {
+  __typename?: 'ZoraCoin'
+  coinAddress: any
+  name: string
+  symbol: string
+  uri: string
+  createdAt: any
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+}
+
+export type ZoraCoinHolderFragment = {
+  __typename?: 'ZoraCoinHolder'
+  id: string
+  holder: any
+  balance: any
+  updatedAt: any
+  updatedAtBlock: any
+  coin: {
+    __typename?: 'ZoraCoin'
+    coinAddress: any
+    name: string
+    symbol: string
+    uri: string
+  }
+}
+
+export type ZoraCoinWithHoldersFragment = {
+  __typename?: 'ZoraCoin'
+  id: string
   transactionHash: any
   caller: any
+  currency: any
+  poolKeyHash: any
+  poolHooks: any
+  poolFee: any
+  poolTickSpacing: number
+  coinAddress: any
+  name: string
+  symbol: string
+  uri: string
+  createdAt: any
+  holders: Array<{
+    __typename?: 'ZoraCoinHolder'
+    id: string
+    holder: any
+    balance: any
+    updatedAt: any
+  }>
   dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
-  clankerToken?: {
-    __typename?: 'ClankerToken'
-    tokenAddress: any
-    tokenName: string
-    tokenSymbol: string
-  } | null
 }
 
 export type ZoraDropFragment = {
   __typename?: 'ZoraDrop'
-  id: string
   creator: any
-  editionSize: any
-  metadataRenderer: any
+  description: string
   royaltyBPS: number
   fundsRecipient: any
-  publicSalePrice: any
-  maxSalePurchasePerAddress: any
-  publicSaleStart: any
-  publicSaleEnd: any
-  presaleStart: any
-  presaleEnd: any
-  presaleMerkleRoot: any
+  transactionHash: any
+  id: string
   name: string
   symbol: string
-  description: string
   imageURI: string
   animationURI: string
   createdAt: any
-  createdAtBlock: any
-  transactionHash: any
+  publicSaleStart: any
+  publicSaleEnd: any
+  publicSalePrice: any
+  editionSize: any
+  maxSalePurchasePerAddress: any
   dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+}
+
+export type ZoraDropCardFragment = {
+  __typename?: 'ZoraDrop'
+  id: string
+  name: string
+  symbol: string
+  imageURI: string
+  animationURI: string
+  createdAt: any
+  publicSaleStart: any
+  publicSaleEnd: any
+  publicSalePrice: any
+  editionSize: any
+  maxSalePurchasePerAddress: any
 }
 
 export type ZoraDropHolderFragment = {
@@ -7456,6 +7553,36 @@ export type ZoraDropHolderFragment = {
     symbol: string
     imageURI: string
   }
+}
+
+export type ZoraDropWithHoldersFragment = {
+  __typename?: 'ZoraDrop'
+  creator: any
+  description: string
+  royaltyBPS: number
+  fundsRecipient: any
+  transactionHash: any
+  id: string
+  name: string
+  symbol: string
+  imageURI: string
+  animationURI: string
+  createdAt: any
+  publicSaleStart: any
+  publicSaleEnd: any
+  publicSalePrice: any
+  editionSize: any
+  maxSalePurchasePerAddress: any
+  holders: Array<{
+    __typename?: 'ZoraDropHolder'
+    id: string
+    holder: any
+    balance: any
+    totalSpent: any
+    totalPurchased: any
+    updatedAt: any
+  }>
+  dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
 }
 
 export type DaoMultisigUpdateFragment = {
@@ -7548,19 +7675,95 @@ export type ClankerTokenQuery = {
   __typename?: 'Query'
   clankerToken?: {
     __typename?: 'ClankerToken'
-    id: string
-    tokenAddress: any
-    tokenName: string
-    tokenSymbol: string
-    tokenImage: string
-    tokenMetadata: string
     pairedToken: any
     poolId: any
     poolHook: any
     createdAt: any
-    createdAtBlock: any
     transactionHash: any
     msgSender: any
+    tokenAddress: any
+    tokenName: string
+    tokenSymbol: string
+    tokenImage: string
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+  } | null
+}
+
+export type ClankerTokenHolderQueryVariables = Exact<{
+  id: Scalars['ID']['input']
+}>
+
+export type ClankerTokenHolderQuery = {
+  __typename?: 'Query'
+  clankerTokenHolder?: {
+    __typename?: 'ClankerTokenHolder'
+    id: string
+    holder: any
+    balance: any
+    updatedAt: any
+    updatedAtBlock: any
+    token: {
+      __typename?: 'ClankerToken'
+      tokenAddress: any
+      tokenName: string
+      tokenSymbol: string
+      tokenImage: string
+    }
+  } | null
+}
+
+export type ClankerTokenHoldersQueryVariables = Exact<{
+  where?: InputMaybe<ClankerTokenHolder_Filter>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerTokenHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type ClankerTokenHoldersQuery = {
+  __typename?: 'Query'
+  clankerTokenHolders: Array<{
+    __typename?: 'ClankerTokenHolder'
+    id: string
+    holder: any
+    balance: any
+    updatedAt: any
+    updatedAtBlock: any
+    token: {
+      __typename?: 'ClankerToken'
+      tokenAddress: any
+      tokenName: string
+      tokenSymbol: string
+      tokenImage: string
+    }
+  }>
+}
+
+export type ClankerTokenWithHoldersQueryVariables = Exact<{
+  tokenAddress: Scalars['ID']['input']
+}>
+
+export type ClankerTokenWithHoldersQuery = {
+  __typename?: 'Query'
+  clankerToken?: {
+    __typename?: 'ClankerToken'
+    pairedToken: any
+    poolId: any
+    poolHook: any
+    createdAt: any
+    transactionHash: any
+    msgSender: any
+    tokenAddress: any
+    tokenName: string
+    tokenSymbol: string
+    tokenImage: string
+    holders: Array<{
+      __typename?: 'ClankerTokenHolder'
+      id: string
+      holder: any
+      balance: any
+      updatedAt: any
+    }>
     dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
   } | null
 }
@@ -7580,19 +7783,39 @@ export type DaoClankerTokensQuery = {
     id: string
     clankerTokens: Array<{
       __typename?: 'ClankerToken'
-      id: string
       tokenAddress: any
       tokenName: string
       tokenSymbol: string
       tokenImage: string
-      tokenMetadata: string
+    }>
+  } | null
+}
+
+export type DaoClankerTokensFullQueryVariables = Exact<{
+  daoId: Scalars['ID']['input']
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerToken_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type DaoClankerTokensFullQuery = {
+  __typename?: 'Query'
+  dao?: {
+    __typename?: 'DAO'
+    id: string
+    clankerTokens: Array<{
+      __typename?: 'ClankerToken'
       pairedToken: any
       poolId: any
       poolHook: any
       createdAt: any
-      createdAtBlock: any
       transactionHash: any
       msgSender: any
+      tokenAddress: any
+      tokenName: string
+      tokenSymbol: string
+      tokenImage: string
       dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
     }>
   } | null
@@ -7822,27 +8045,12 @@ export type DaoZoraCoinsQuery = {
     id: string
     zoraCoins: Array<{
       __typename?: 'ZoraCoin'
-      id: string
       coinAddress: any
       name: string
       symbol: string
       uri: string
-      currency: any
-      poolKeyHash: any
-      poolHooks: any
-      poolFee: any
-      poolTickSpacing: number
       createdAt: any
-      createdAtBlock: any
-      transactionHash: any
-      caller: any
       dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
-      clankerToken?: {
-        __typename?: 'ClankerToken'
-        tokenAddress: any
-        tokenName: string
-        tokenSymbol: string
-      } | null
     }>
   } | null
 }
@@ -7863,27 +8071,16 @@ export type DaoZoraDropsQuery = {
     zoraDrops: Array<{
       __typename?: 'ZoraDrop'
       id: string
-      creator: any
-      editionSize: any
-      metadataRenderer: any
-      royaltyBPS: number
-      fundsRecipient: any
-      publicSalePrice: any
-      maxSalePurchasePerAddress: any
-      publicSaleStart: any
-      publicSaleEnd: any
-      presaleStart: any
-      presaleEnd: any
-      presaleMerkleRoot: any
       name: string
       symbol: string
-      description: string
       imageURI: string
       animationURI: string
       createdAt: any
-      createdAtBlock: any
-      transactionHash: any
-      dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+      publicSaleStart: any
+      publicSaleEnd: any
+      publicSalePrice: any
+      editionSize: any
+      maxSalePurchasePerAddress: any
     }>
   } | null
 }
@@ -8683,26 +8880,101 @@ export type ZoraCoinQuery = {
   zoraCoin?: {
     __typename?: 'ZoraCoin'
     id: string
-    coinAddress: any
-    name: string
-    symbol: string
-    uri: string
+    transactionHash: any
+    caller: any
     currency: any
     poolKeyHash: any
     poolHooks: any
     poolFee: any
     poolTickSpacing: number
+    coinAddress: any
+    name: string
+    symbol: string
+    uri: string
     createdAt: any
-    createdAtBlock: any
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+  } | null
+}
+
+export type ZoraCoinHolderQueryVariables = Exact<{
+  id: Scalars['ID']['input']
+}>
+
+export type ZoraCoinHolderQuery = {
+  __typename?: 'Query'
+  zoraCoinHolder?: {
+    __typename?: 'ZoraCoinHolder'
+    id: string
+    holder: any
+    balance: any
+    updatedAt: any
+    updatedAtBlock: any
+    coin: {
+      __typename?: 'ZoraCoin'
+      coinAddress: any
+      name: string
+      symbol: string
+      uri: string
+    }
+  } | null
+}
+
+export type ZoraCoinHoldersQueryVariables = Exact<{
+  where?: InputMaybe<ZoraCoinHolder_Filter>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ZoraCoinHolder_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type ZoraCoinHoldersQuery = {
+  __typename?: 'Query'
+  zoraCoinHolders: Array<{
+    __typename?: 'ZoraCoinHolder'
+    id: string
+    holder: any
+    balance: any
+    updatedAt: any
+    updatedAtBlock: any
+    coin: {
+      __typename?: 'ZoraCoin'
+      coinAddress: any
+      name: string
+      symbol: string
+      uri: string
+    }
+  }>
+}
+
+export type ZoraCoinWithHoldersQueryVariables = Exact<{
+  coinAddress: Scalars['ID']['input']
+}>
+
+export type ZoraCoinWithHoldersQuery = {
+  __typename?: 'Query'
+  zoraCoin?: {
+    __typename?: 'ZoraCoin'
+    id: string
     transactionHash: any
     caller: any
+    currency: any
+    poolKeyHash: any
+    poolHooks: any
+    poolFee: any
+    poolTickSpacing: number
+    coinAddress: any
+    name: string
+    symbol: string
+    uri: string
+    createdAt: any
+    holders: Array<{
+      __typename?: 'ZoraCoinHolder'
+      id: string
+      holder: any
+      balance: any
+      updatedAt: any
+    }>
     dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
-    clankerToken?: {
-      __typename?: 'ClankerToken'
-      tokenAddress: any
-      tokenName: string
-      tokenSymbol: string
-    } | null
   } | null
 }
 
@@ -8714,27 +8986,22 @@ export type ZoraDropQuery = {
   __typename?: 'Query'
   zoraDrop?: {
     __typename?: 'ZoraDrop'
-    id: string
     creator: any
-    editionSize: any
-    metadataRenderer: any
+    description: string
     royaltyBPS: number
     fundsRecipient: any
-    publicSalePrice: any
-    maxSalePurchasePerAddress: any
-    publicSaleStart: any
-    publicSaleEnd: any
-    presaleStart: any
-    presaleEnd: any
-    presaleMerkleRoot: any
+    transactionHash: any
+    id: string
     name: string
     symbol: string
-    description: string
     imageURI: string
     animationURI: string
     createdAt: any
-    createdAtBlock: any
-    transactionHash: any
+    publicSaleStart: any
+    publicSaleEnd: any
+    publicSalePrice: any
+    editionSize: any
+    maxSalePurchasePerAddress: any
     dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
   } | null
 }
@@ -8793,6 +9060,43 @@ export type ZoraDropHoldersQuery = {
   }>
 }
 
+export type ZoraDropWithHoldersQueryVariables = Exact<{
+  dropAddress: Scalars['ID']['input']
+}>
+
+export type ZoraDropWithHoldersQuery = {
+  __typename?: 'Query'
+  zoraDrop?: {
+    __typename?: 'ZoraDrop'
+    creator: any
+    description: string
+    royaltyBPS: number
+    fundsRecipient: any
+    transactionHash: any
+    id: string
+    name: string
+    symbol: string
+    imageURI: string
+    animationURI: string
+    createdAt: any
+    publicSaleStart: any
+    publicSaleEnd: any
+    publicSalePrice: any
+    editionSize: any
+    maxSalePurchasePerAddress: any
+    holders: Array<{
+      __typename?: 'ZoraDropHolder'
+      id: string
+      holder: any
+      balance: any
+      totalSpent: any
+      totalPurchased: any
+      updatedAt: any
+    }>
+    dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
+  } | null
+}
+
 export const AuctionFragmentDoc = gql`
   fragment Auction on Auction {
     dao {
@@ -8809,19 +9113,36 @@ export const AuctionBidFragmentDoc = gql`
     bidder
   }
 `
-export const ClankerTokenFragmentDoc = gql`
-  fragment ClankerToken on ClankerToken {
+export const ClankerTokenHolderFragmentDoc = gql`
+  fragment ClankerTokenHolder on ClankerTokenHolder {
     id
+    holder
+    balance
+    updatedAt
+    updatedAtBlock
+    token {
+      tokenAddress
+      tokenName
+      tokenSymbol
+      tokenImage
+    }
+  }
+`
+export const ClankerTokenCardFragmentDoc = gql`
+  fragment ClankerTokenCard on ClankerToken {
     tokenAddress
     tokenName
     tokenSymbol
     tokenImage
-    tokenMetadata
+  }
+`
+export const ClankerTokenFragmentDoc = gql`
+  fragment ClankerToken on ClankerToken {
+    ...ClankerTokenCard
     pairedToken
     poolId
     poolHook
     createdAt
-    createdAtBlock
     transactionHash
     msgSender
     dao {
@@ -8830,6 +9151,19 @@ export const ClankerTokenFragmentDoc = gql`
       contractImage
     }
   }
+  ${ClankerTokenCardFragmentDoc}
+`
+export const ClankerTokenWithHoldersFragmentDoc = gql`
+  fragment ClankerTokenWithHolders on ClankerToken {
+    ...ClankerToken
+    holders(first: 10, orderBy: balance, orderDirection: desc) {
+      id
+      holder
+      balance
+      updatedAt
+    }
+  }
+  ${ClankerTokenFragmentDoc}
 `
 export const CurrentAuctionFragmentDoc = gql`
   fragment CurrentAuction on Auction {
@@ -8943,63 +9277,60 @@ export const TokenFragmentDoc = gql`
     mintedAt
   }
 `
-export const ZoraCoinFragmentDoc = gql`
-  fragment ZoraCoin on ZoraCoin {
+export const ZoraCoinHolderFragmentDoc = gql`
+  fragment ZoraCoinHolder on ZoraCoinHolder {
     id
+    holder
+    balance
+    updatedAt
+    updatedAtBlock
+    coin {
+      coinAddress
+      name
+      symbol
+      uri
+    }
+  }
+`
+export const ZoraCoinCardFragmentDoc = gql`
+  fragment ZoraCoinCard on ZoraCoin {
     coinAddress
     name
     symbol
     uri
+    createdAt
+    dao {
+      id
+      name
+      contractImage
+    }
+  }
+`
+export const ZoraCoinFragmentDoc = gql`
+  fragment ZoraCoin on ZoraCoin {
+    ...ZoraCoinCard
+    id
+    transactionHash
+    caller
     currency
     poolKeyHash
     poolHooks
     poolFee
     poolTickSpacing
-    createdAt
-    createdAtBlock
-    transactionHash
-    caller
-    dao {
-      id
-      name
-      contractImage
-    }
-    clankerToken {
-      tokenAddress
-      tokenName
-      tokenSymbol
-    }
   }
+  ${ZoraCoinCardFragmentDoc}
 `
-export const ZoraDropFragmentDoc = gql`
-  fragment ZoraDrop on ZoraDrop {
-    id
-    creator
-    editionSize
-    metadataRenderer
-    royaltyBPS
-    fundsRecipient
-    publicSalePrice
-    maxSalePurchasePerAddress
-    publicSaleStart
-    publicSaleEnd
-    presaleStart
-    presaleEnd
-    presaleMerkleRoot
-    name
-    symbol
-    description
-    imageURI
-    animationURI
-    createdAt
-    createdAtBlock
-    transactionHash
-    dao {
+export const ZoraCoinWithHoldersFragmentDoc = gql`
+  fragment ZoraCoinWithHolders on ZoraCoin {
+    ...ZoraCoin
+    holders(first: 10, orderBy: balance, orderDirection: desc) {
       id
-      name
-      contractImage
+      holder
+      balance
+      updatedAt
     }
   }
+  ${ZoraCoinFragmentDoc}
 `
 export const ZoraDropHolderFragmentDoc = gql`
   fragment ZoraDropHolder on ZoraDropHolder {
@@ -9017,6 +9348,51 @@ export const ZoraDropHolderFragmentDoc = gql`
       imageURI
     }
   }
+`
+export const ZoraDropCardFragmentDoc = gql`
+  fragment ZoraDropCard on ZoraDrop {
+    id
+    name
+    symbol
+    imageURI
+    animationURI
+    createdAt
+    publicSaleStart
+    publicSaleEnd
+    publicSalePrice
+    editionSize
+    maxSalePurchasePerAddress
+  }
+`
+export const ZoraDropFragmentDoc = gql`
+  fragment ZoraDrop on ZoraDrop {
+    ...ZoraDropCard
+    creator
+    description
+    royaltyBPS
+    fundsRecipient
+    transactionHash
+    dao {
+      id
+      name
+      contractImage
+    }
+  }
+  ${ZoraDropCardFragmentDoc}
+`
+export const ZoraDropWithHoldersFragmentDoc = gql`
+  fragment ZoraDropWithHolders on ZoraDrop {
+    ...ZoraDrop
+    holders(first: 10, orderBy: balance, orderDirection: desc) {
+      id
+      holder
+      balance
+      totalSpent
+      totalPurchased
+      updatedAt
+    }
+  }
+  ${ZoraDropFragmentDoc}
 `
 export const DaoMultisigUpdateFragmentDoc = gql`
   fragment DaoMultisigUpdate on DaoMultisigUpdate {
@@ -9096,8 +9472,66 @@ export const ClankerTokenDocument = gql`
   }
   ${ClankerTokenFragmentDoc}
 `
+export const ClankerTokenHolderDocument = gql`
+  query ClankerTokenHolder($id: ID!) {
+    clankerTokenHolder(id: $id) {
+      ...ClankerTokenHolder
+    }
+  }
+  ${ClankerTokenHolderFragmentDoc}
+`
+export const ClankerTokenHoldersDocument = gql`
+  query ClankerTokenHolders(
+    $where: ClankerTokenHolder_filter
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ClankerTokenHolder_orderBy = updatedAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    clankerTokenHolders(
+      where: $where
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      ...ClankerTokenHolder
+    }
+  }
+  ${ClankerTokenHolderFragmentDoc}
+`
+export const ClankerTokenWithHoldersDocument = gql`
+  query clankerTokenWithHolders($tokenAddress: ID!) {
+    clankerToken(id: $tokenAddress) {
+      ...ClankerTokenWithHolders
+    }
+  }
+  ${ClankerTokenWithHoldersFragmentDoc}
+`
 export const DaoClankerTokensDocument = gql`
   query daoClankerTokens(
+    $daoId: ID!
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ClankerToken_orderBy = createdAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    dao(id: $daoId) {
+      id
+      clankerTokens(
+        first: $first
+        orderBy: $orderBy
+        orderDirection: $orderDirection
+        skip: $skip
+      ) {
+        ...ClankerTokenCard
+      }
+    }
+  }
+  ${ClankerTokenCardFragmentDoc}
+`
+export const DaoClankerTokensFullDocument = gql`
+  query daoClankerTokensFull(
     $daoId: ID!
     $first: Int = 100
     $skip: Int = 0
@@ -9351,11 +9785,11 @@ export const DaoZoraCoinsDocument = gql`
         orderDirection: $orderDirection
         skip: $skip
       ) {
-        ...ZoraCoin
+        ...ZoraCoinCard
       }
     }
   }
-  ${ZoraCoinFragmentDoc}
+  ${ZoraCoinCardFragmentDoc}
 `
 export const DaoZoraDropsDocument = gql`
   query daoZoraDrops(
@@ -9373,11 +9807,11 @@ export const DaoZoraDropsDocument = gql`
         orderDirection: $orderDirection
         skip: $skip
       ) {
-        ...ZoraDrop
+        ...ZoraDropCard
       }
     }
   }
-  ${ZoraDropFragmentDoc}
+  ${ZoraDropCardFragmentDoc}
 `
 export const DaosForDashboardDocument = gql`
   query daosForDashboard($user: Bytes!, $first: Int, $skip: Int) {
@@ -9838,6 +10272,42 @@ export const ZoraCoinDocument = gql`
   }
   ${ZoraCoinFragmentDoc}
 `
+export const ZoraCoinHolderDocument = gql`
+  query ZoraCoinHolder($id: ID!) {
+    zoraCoinHolder(id: $id) {
+      ...ZoraCoinHolder
+    }
+  }
+  ${ZoraCoinHolderFragmentDoc}
+`
+export const ZoraCoinHoldersDocument = gql`
+  query ZoraCoinHolders(
+    $where: ZoraCoinHolder_filter
+    $first: Int = 100
+    $skip: Int = 0
+    $orderBy: ZoraCoinHolder_orderBy = updatedAt
+    $orderDirection: OrderDirection = desc
+  ) {
+    zoraCoinHolders(
+      where: $where
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      ...ZoraCoinHolder
+    }
+  }
+  ${ZoraCoinHolderFragmentDoc}
+`
+export const ZoraCoinWithHoldersDocument = gql`
+  query zoraCoinWithHolders($coinAddress: ID!) {
+    zoraCoin(id: $coinAddress) {
+      ...ZoraCoinWithHolders
+    }
+  }
+  ${ZoraCoinWithHoldersFragmentDoc}
+`
 export const ZoraDropDocument = gql`
   query zoraDrop($dropAddress: ID!) {
     zoraDrop(id: $dropAddress) {
@@ -9873,6 +10343,14 @@ export const ZoraDropHoldersDocument = gql`
     }
   }
   ${ZoraDropHolderFragmentDoc}
+`
+export const ZoraDropWithHoldersDocument = gql`
+  query zoraDropWithHolders($dropAddress: ID!) {
+    zoraDrop(id: $dropAddress) {
+      ...ZoraDropWithHolders
+    }
+  }
+  ${ZoraDropWithHoldersFragmentDoc}
 `
 
 export type SdkFunctionWrapper = <T>(
@@ -9984,6 +10462,60 @@ export function getSdk(
         variables
       )
     },
+    ClankerTokenHolder(
+      variables: ClankerTokenHolderQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ClankerTokenHolderQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ClankerTokenHolderQuery>({
+            document: ClankerTokenHolderDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ClankerTokenHolder',
+        'query',
+        variables
+      )
+    },
+    ClankerTokenHolders(
+      variables?: ClankerTokenHoldersQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ClankerTokenHoldersQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ClankerTokenHoldersQuery>({
+            document: ClankerTokenHoldersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ClankerTokenHolders',
+        'query',
+        variables
+      )
+    },
+    clankerTokenWithHolders(
+      variables: ClankerTokenWithHoldersQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ClankerTokenWithHoldersQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ClankerTokenWithHoldersQuery>({
+            document: ClankerTokenWithHoldersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'clankerTokenWithHolders',
+        'query',
+        variables
+      )
+    },
     daoClankerTokens(
       variables: DaoClankerTokensQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -9998,6 +10530,24 @@ export function getSdk(
             signal,
           }),
         'daoClankerTokens',
+        'query',
+        variables
+      )
+    },
+    daoClankerTokensFull(
+      variables: DaoClankerTokensFullQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaoClankerTokensFullQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaoClankerTokensFullQuery>({
+            document: DaoClankerTokensFullDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daoClankerTokensFull',
         'query',
         variables
       )
@@ -10542,6 +11092,60 @@ export function getSdk(
         variables
       )
     },
+    ZoraCoinHolder(
+      variables: ZoraCoinHolderQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraCoinHolderQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraCoinHolderQuery>({
+            document: ZoraCoinHolderDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ZoraCoinHolder',
+        'query',
+        variables
+      )
+    },
+    ZoraCoinHolders(
+      variables?: ZoraCoinHoldersQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraCoinHoldersQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraCoinHoldersQuery>({
+            document: ZoraCoinHoldersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'ZoraCoinHolders',
+        'query',
+        variables
+      )
+    },
+    zoraCoinWithHolders(
+      variables: ZoraCoinWithHoldersQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraCoinWithHoldersQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraCoinWithHoldersQuery>({
+            document: ZoraCoinWithHoldersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'zoraCoinWithHolders',
+        'query',
+        variables
+      )
+    },
     zoraDrop(
       variables: ZoraDropQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -10592,6 +11196,24 @@ export function getSdk(
             signal,
           }),
         'ZoraDropHolders',
+        'query',
+        variables
+      )
+    },
+    zoraDropWithHolders(
+      variables: ZoraDropWithHoldersQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ZoraDropWithHoldersQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ZoraDropWithHoldersQuery>({
+            document: ZoraDropWithHoldersDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'zoraDropWithHolders',
         'query',
         variables
       )

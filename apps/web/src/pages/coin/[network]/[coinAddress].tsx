@@ -4,8 +4,10 @@ import { fetchIpfsMetadata, type IpfsMetadata } from '@buildeross/ipfs-service'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import {
   type ClankerTokenFragment,
+  type ClankerTokenWithHoldersFragment,
   SubgraphSDK,
   type ZoraCoinFragment,
+  type ZoraCoinWithHoldersFragment,
 } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
@@ -47,6 +49,11 @@ interface CoinPageProps {
   // Full coin/token data for price fetching
   clankerToken?: ClankerTokenFragment | null
   zoraCoin?: ZoraCoinFragment | null
+  // Holders data
+  holders?: Array<{
+    holder: `0x${string}`
+    balance: string
+  }>
 }
 
 const CoinPage: NextPageWithLayout<CoinPageProps> = ({
@@ -71,6 +78,7 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
   isClankerToken,
   clankerToken,
   zoraCoin,
+  holders,
 }) => {
   const path = `/coin/${chainSlug}/${coinAddress}`
 
@@ -102,6 +110,7 @@ const CoinPage: NextPageWithLayout<CoinPageProps> = ({
         isClankerToken={isClankerToken}
         clankerToken={clankerToken}
         zoraCoin={zoraCoin}
+        holders={holders}
       />
     </>
   )
@@ -154,13 +163,13 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
   try {
     const sdk = SubgraphSDK.connect(chain.id)
 
-    // Try to fetch as ZoraCoin first
-    const zoraCoinResult = await sdk.zoraCoin({
+    // Try to fetch as ZoraCoin first (with holders)
+    const zoraCoinResult = await sdk.zoraCoinWithHolders({
       coinAddress: coinAddress.toLowerCase(),
     })
 
     if (zoraCoinResult.zoraCoin) {
-      const coin = zoraCoinResult.zoraCoin
+      const coin = zoraCoinResult.zoraCoin as ZoraCoinWithHoldersFragment
 
       // Fetch metadata from IPFS to get image and description
       let metadata: IpfsMetadata | null = null
@@ -183,8 +192,15 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
         }
       }
 
-      // Determine paired token symbol (usually the clanker token or WETH)
-      const pairedTokenSymbol = coin.clankerToken?.tokenSymbol ?? null
+      // Determine paired token symbol
+      const pairedTokenSymbol = null
+
+      // Extract holders data
+      const holders =
+        coin.holders?.map((h) => ({
+          holder: h.holder as `0x${string}`,
+          balance: h.balance.toString(),
+        })) ?? []
 
       return {
         props: {
@@ -210,17 +226,18 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           isClankerToken: false,
           zoraCoin: coin,
           clankerToken: null,
+          holders,
         },
       }
     }
 
-    // Try to fetch as ClankerToken
-    const clankerTokenResult = await sdk.clankerToken({
+    // Try to fetch as ClankerToken (with holders)
+    const clankerTokenResult = await sdk.clankerTokenWithHolders({
       tokenAddress: coinAddress.toLowerCase(),
     })
 
     if (clankerTokenResult.clankerToken) {
-      const token = clankerTokenResult.clankerToken
+      const token = clankerTokenResult.clankerToken as ClankerTokenWithHoldersFragment
 
       // Fetch DAO name if we have a DAO link
       const daoName = token.dao?.name ?? null
@@ -237,17 +254,15 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
         }
       }
 
-      // Parse description from tokenMetadata JSON
-      let description: string | null = null
-      if (token.tokenMetadata) {
-        try {
-          const parsed = JSON.parse(token.tokenMetadata)
-          description = parsed.description ?? null
-        } catch {
-          // If parsing fails, use raw metadata as description
-          description = token.tokenMetadata
-        }
-      }
+      // Parse description (ClankerToken doesn't have metadata in current schema)
+      const description: string | null = null
+
+      // Extract holders data
+      const holders =
+        token.holders?.map((h) => ({
+          holder: h.holder as `0x${string}`,
+          balance: h.balance.toString(),
+        })) ?? []
 
       return {
         props: {
@@ -273,6 +288,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
           isClankerToken: true,
           clankerToken: token,
           zoraCoin: null,
+          holders,
         },
       }
     }

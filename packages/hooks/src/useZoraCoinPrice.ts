@@ -1,6 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { type ZoraCoinFragment } from '@buildeross/sdk/subgraph'
+import { type ZoraCoinCardFragment } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR from 'swr'
@@ -32,7 +32,7 @@ export const useZoraCoinPrice = ({
   chainId,
   enabled = true,
 }: {
-  zoraCoin?: ZoraCoinFragment | null
+  zoraCoin?: ZoraCoinCardFragment | null
   chainId: CHAIN_ID
   enabled?: boolean
 }): {

@@ -1,7 +1,11 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
-import { type ZoraDropFragment, zoraDropRequest } from '@buildeross/sdk/subgraph'
+import {
+  type ZoraDropFragment,
+  type ZoraDropWithHoldersFragment,
+  zoraDropWithHoldersRequest,
+} from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { GetServerSideProps } from 'next'
@@ -21,6 +25,12 @@ interface DropPageProps {
   daoImage: string | null
   addresses: DaoContractAddresses | null
   transactionHash: string | null
+  holders?: Array<{
+    holder: `0x${string}`
+    balance: string
+    totalSpent?: string
+    totalPurchased?: string
+  }>
 }
 
 const DropPage: NextPageWithLayout<DropPageProps> = ({
@@ -31,6 +41,7 @@ const DropPage: NextPageWithLayout<DropPageProps> = ({
   daoName,
   daoImage,
   transactionHash,
+  holders,
 }) => {
   const path = `/drop/${chainSlug}/${drop.id}`
 
@@ -48,6 +59,7 @@ const DropPage: NextPageWithLayout<DropPageProps> = ({
         daoName={daoName}
         daoImage={daoImage}
         transactionHash={transactionHash}
+        holders={holders}
       />
     </>
   )
@@ -92,12 +104,14 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
   }
 
   try {
-    // Fetch drop data
-    const drop = await zoraDropRequest(dropAddress, chain.id)
+    // Fetch drop data with holders
+    const drop = await zoraDropWithHoldersRequest(dropAddress, chain.id)
 
     if (!drop) {
       return { notFound: true }
     }
+
+    const dropWithHolders = drop as ZoraDropWithHoldersFragment
 
     // Extract DAO info
     const daoAddress = (drop.dao?.id as AddressType) ?? null
@@ -114,6 +128,15 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
       }
     }
 
+    // Extract holders data
+    const holders =
+      dropWithHolders.holders?.map((h) => ({
+        holder: h.holder as `0x${string}`,
+        balance: h.balance.toString(),
+        totalSpent: h.totalSpent?.toString(),
+        totalPurchased: h.totalPurchased?.toString(),
+      })) ?? []
+
     return {
       props: {
         drop,
@@ -123,7 +146,8 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
         daoName,
         daoImage,
         addresses,
-        transactionHash: drop.transactionHash ?? null,
+        transactionHash: (drop.transactionHash as `0x${string}`) ?? null,
+        holders,
       },
     }
   } catch (error) {

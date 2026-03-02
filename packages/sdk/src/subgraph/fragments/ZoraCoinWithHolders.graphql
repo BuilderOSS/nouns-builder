@@ -1,0 +1,11 @@
+#import "./ZoraCoin.graphql"
+
+fragment ZoraCoinWithHolders on ZoraCoin {
+  ...ZoraCoin
+  holders(first: 10, orderBy: balance, orderDirection: desc) {
+    id
+    holder
+    balance
+    updatedAt
+  }
+}
