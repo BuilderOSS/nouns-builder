@@ -249,3 +249,15 @@ export type PoolMaxSwapAmountResult = {
   /** Available liquidity */
   liquidity: bigint
 }
+
+/**
+ * Swap option for a coin
+ */
+export interface SwapOption {
+  /** Token info including address, symbol, and type */
+  token: CoinInfo
+  /** Swap path for this token <-> coin */
+  path: SwapPath
+  /** True if this is a direct swap (single hop or no hop) */
+  isDirectSwap: boolean
+}

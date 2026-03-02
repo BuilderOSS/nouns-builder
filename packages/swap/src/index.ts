@@ -7,11 +7,8 @@
  * - Execute swaps directly via Uniswap V4 Universal Router
  */
 
-export * from './buildSwapOptions'
-export * from './buildSwapPath'
 export * from './errors'
 export * from './executeSwap'
-export { clearCoinInfoCache, getCoinInfo } from './getCoinInfo'
 export * from './getPoolMaxSwapAmount'
 export * from './getQuoteFromUniswap'
 export * from './types'
