@@ -1,15 +1,11 @@
+#import "./ClankerTokenCard.graphql"
+
 fragment ClankerToken on ClankerToken {
-  id
-  tokenAddress
-  tokenName
-  tokenSymbol
-  tokenImage
-  tokenMetadata
+  ...ClankerTokenCard
   pairedToken
   poolId
   poolHook
   createdAt
-  createdAtBlock
   transactionHash
   msgSender
   dao {

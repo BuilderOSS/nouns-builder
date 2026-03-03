@@ -1,0 +1,6 @@
+fragment ClankerTokenCard on ClankerToken {
+  tokenAddress
+  tokenName
+  tokenSymbol
+  tokenImage
+}

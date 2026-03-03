@@ -1,24 +1,11 @@
+#import "./ZoraDropCard.graphql"
+
 fragment ZoraDrop on ZoraDrop {
-  id
+  ...ZoraDropCard
   creator
-  editionSize
-  metadataRenderer
+  description
   royaltyBPS
   fundsRecipient
-  publicSalePrice
-  maxSalePurchasePerAddress
-  publicSaleStart
-  publicSaleEnd
-  presaleStart
-  presaleEnd
-  presaleMerkleRoot
-  name
-  symbol
-  description
-  imageURI
-  animationURI
-  createdAt
-  createdAtBlock
   transactionHash
   dao {
     id

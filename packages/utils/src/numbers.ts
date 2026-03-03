@@ -67,3 +67,54 @@ export function formatCryptoVal(cryptoVal: BigNumber | BigNumberish | string) {
       ? formatCryptoValFrom100Kto1Quadrillion(parsedamount)
       : formatCryptoValUnder100K(parsedamount)
 }
+
+/**
+ * Format price to human-readable format with appropriate precision
+ * Uses adaptive precision:
+ * - If >= $1: 2 decimals with commas (e.g., "$1,234.56")
+ * - If $0.01 <= value < $1: 4 decimals (e.g., "$0.0789")
+ * - If < $0.01: Show up to 10 decimals, trimming trailing zeros (e.g., "$0.0000000433")
+ * - null/undefined -> "—"
+ */
+export function formatPrice(price: number | null | undefined): string {
+  if (price === null || price === undefined || !Number.isFinite(price)) {
+    return '—'
+  }
+
+  if (price === 0) {
+    return '$0.00'
+  }
+
+  const absValue = Math.abs(price)
+  const sign = price < 0 ? '-' : ''
+
+  // For prices >= $1, use 2 decimals with thousand separators
+  if (absValue >= 1) {
+    return `${sign}$${absValue.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
+  }
+
+  // For prices >= $0.01, use 4 decimals
+  if (absValue >= 0.01) {
+    return `${sign}$${absValue.toFixed(4)}`
+  }
+
+  // For very small prices (< $0.01), show up to 10 decimals
+  // This handles values like $0.0000000433 properly
+  let formatted = absValue.toFixed(10)
+
+  // Trim trailing zeros but keep at least 2 decimals
+  formatted = formatted.replace(/(\.\d*?)0+$/, '$1')
+  if (formatted.endsWith('.')) {
+    formatted += '00'
+  } else {
+    const decimalPart = formatted.split('.')[1]
+    if (decimalPart && decimalPart.length < 2) {
+      formatted += '0'
+    }
+  }
+
+  return `${sign}$${formatted}`
+}

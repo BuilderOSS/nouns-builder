@@ -1,0 +1,12 @@
+fragment ZoraCoinCard on ZoraCoin {
+  coinAddress
+  name
+  symbol
+  uri
+  createdAt
+  dao {
+    id
+    name
+    contractImage
+  }
+}

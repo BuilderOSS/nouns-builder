@@ -14,6 +14,7 @@ export type ContractLinkProps = {
   py?: FlexProps['py']
   px?: FlexProps['px']
   chainId: CHAIN_ID
+  isToken?: boolean
 }
 
 export const ContractLink = ({
@@ -23,6 +24,7 @@ export const ContractLink = ({
   noBorder = false,
   py: pyOverride,
   px: pxOverride,
+  isToken = false,
 }: ContractLinkProps) => {
   // Resolve address to basename/ENS name if available
   const { ensName } = useEnsName(address)
@@ -68,7 +70,7 @@ export const ContractLink = ({
       </Text>
       <Flex justify={'center'} align={'center'} gap={size === 'xs' ? 'x1' : 'x2'}>
         <a
-          href={`${ETHERSCAN_BASE_URL[chainId]}/address/${address}`}
+          href={`${ETHERSCAN_BASE_URL[chainId]}/${isToken ? 'token' : 'address'}/${address}`}
           target="_blank"
           rel="noreferrer"
         >

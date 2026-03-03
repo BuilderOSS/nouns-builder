@@ -57,6 +57,11 @@ interface CoinDetailProps {
   // Optional: full coin/token data
   clankerToken?: ClankerTokenFragment | null
   zoraCoin?: ZoraCoinFragment | null
+  // Holders
+  holders?: Array<{
+    holder: `0x${string}`
+    balance: string
+  }>
 }
 
 export const CoinDetail = ({
@@ -80,6 +85,7 @@ export const CoinDetail = ({
   isClankerToken = false,
   clankerToken,
   zoraCoin,
+  holders,
 }: CoinDetailProps) => {
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false)
   const router = useRouter()
@@ -164,6 +170,7 @@ export const CoinDetail = ({
               isClankerToken={isClankerToken}
               clankerToken={clankerToken}
               zoraCoin={zoraCoin}
+              holders={holders}
             />
           </Box>
 

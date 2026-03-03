@@ -1,5 +1,5 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { daoZoraDropsRequest, type ZoraDropFragment } from '@buildeross/sdk/subgraph'
+import { daoZoraDropsRequest, type ZoraDropCardFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import useSWR, { type KeyedMutator } from 'swr'
@@ -15,11 +15,11 @@ export const useZoraDrops = ({
   enabled?: boolean
   first?: number
 }): {
-  data: ZoraDropFragment[] | undefined
+  data: ZoraDropCardFragment[] | undefined
   isValidating: boolean
   isLoading: boolean
   error: Error | undefined
-  mutate: KeyedMutator<ZoraDropFragment[]>
+  mutate: KeyedMutator<ZoraDropCardFragment[]>
 } => {
   // Check if chain is supported
   const isChainSupported = isChainIdSupportedByDroposal(chainId)

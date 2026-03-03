@@ -1,0 +1,7 @@
+#import "../fragments/ClankerTokenHolder.graphql"
+
+query ClankerTokenHolder($id: ID!) {
+  clankerTokenHolder(id: $id) {
+    ...ClankerTokenHolder
+  }
+}

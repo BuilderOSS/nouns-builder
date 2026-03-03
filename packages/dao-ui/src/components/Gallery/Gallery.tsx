@@ -376,7 +376,6 @@ export const Gallery: React.FC<GalleryProps> = ({
               name={creatorCoin.tokenName}
               symbol={creatorCoin.tokenSymbol}
               image={creatorCoin.tokenImage}
-              pairedToken={creatorCoin.pairedToken}
               priceUsd={creatorCoinWithPrice.priceUsd}
               marketCap={creatorCoinWithPrice.marketCap}
               isLoadingPrice={creatorCoinWithPrice.isLoadingPrice}
