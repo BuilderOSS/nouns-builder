@@ -28,6 +28,12 @@ interface DropDetailProps {
   daoImage: string | null
   chainId: number
   transactionHash: string | null
+  holders?: Array<{
+    holder: `0x${string}`
+    balance: string
+    totalSpent?: string
+    totalPurchased?: string
+  }>
 }
 
 export const DropDetail = ({
@@ -37,6 +43,7 @@ export const DropDetail = ({
   daoImage,
   chainId,
   transactionHash,
+  holders,
 }: DropDetailProps) => {
   const [isMobileModalOpen, setIsMobileModalOpen] = useState(false)
   const router = useRouter()
@@ -93,6 +100,7 @@ export const DropDetail = ({
               daoImage={daoImage}
               chainId={chainId}
               transactionHash={transactionHash}
+              holders={holders}
             />
           </Box>
 

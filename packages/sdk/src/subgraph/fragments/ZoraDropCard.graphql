@@ -1,0 +1,13 @@
+fragment ZoraDropCard on ZoraDrop {
+  id
+  name
+  symbol
+  imageURI
+  animationURI
+  createdAt
+  publicSaleStart
+  publicSaleEnd
+  publicSalePrice
+  editionSize
+  maxSalePurchasePerAddress
+}

@@ -1,0 +1,19 @@
+#import "../fragments/ZoraCoinHolder.graphql"
+
+query ZoraCoinHolders(
+  $where: ZoraCoinHolder_filter
+  $first: Int = 100
+  $skip: Int = 0
+  $orderBy: ZoraCoinHolder_orderBy = updatedAt
+  $orderDirection: OrderDirection = desc
+) {
+  zoraCoinHolders(
+    where: $where
+    first: $first
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    ...ZoraCoinHolder
+  }
+}

@@ -6,7 +6,7 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
-import { formatMarketCap } from '@buildeross/utils/formatMarketCap'
+import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Spinner, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address } from 'viem'
@@ -135,7 +135,13 @@ export const CreatorCoinSection = ({
             Market Cap
           </Text>
           <Text variant="paragraph-md" color="text1">
-            {isLoadingPrice ? <Spinner size="sm" /> : formatMarketCap(marketCap)}
+            {isLoadingPrice ? (
+              <Spinner size="sm" />
+            ) : marketCap ? (
+              `$${formatCryptoVal(marketCap.toString())}`
+            ) : (
+              '-'
+            )}
           </Text>
         </Box>
       </Flex>

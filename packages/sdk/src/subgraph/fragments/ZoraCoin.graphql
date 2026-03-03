@@ -1,26 +1,13 @@
+#import "./ZoraCoinCard.graphql"
+
 fragment ZoraCoin on ZoraCoin {
+  ...ZoraCoinCard
   id
-  coinAddress
-  name
-  symbol
-  uri
+  transactionHash
+  caller
   currency
   poolKeyHash
   poolHooks
   poolFee
   poolTickSpacing
-  createdAt
-  createdAtBlock
-  transactionHash
-  caller
-  dao {
-    id
-    name
-    contractImage
-  }
-  clankerToken {
-    tokenAddress
-    tokenName
-    tokenSymbol
-  }
 }

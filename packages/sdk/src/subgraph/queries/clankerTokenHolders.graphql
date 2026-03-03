@@ -1,0 +1,19 @@
+#import "../fragments/ClankerTokenHolder.graphql"
+
+query ClankerTokenHolders(
+  $where: ClankerTokenHolder_filter
+  $first: Int = 100
+  $skip: Int = 0
+  $orderBy: ClankerTokenHolder_orderBy = updatedAt
+  $orderDirection: OrderDirection = desc
+) {
+  clankerTokenHolders(
+    where: $where
+    first: $first
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    ...ClankerTokenHolder
+  }
+}

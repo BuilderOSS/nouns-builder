@@ -19,14 +19,15 @@ import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
+import { formatCryptoVal } from '@buildeross/utils'
 import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/coining/clankerCreator'
 import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/coining/zoraContent'
-import { formatMarketCap, formatSupply } from '@buildeross/utils/formatMarketCap'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Grid, Icon, Spinner, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address } from 'viem'
 
+import { HoldersSection } from '../../../components/HoldersSection'
 import { ProposalLink } from '../../../components/ProposalLink'
 import { CoinComments } from './CoinComments'
 import { coinHeader, coinImageContainer, onlyDesktop, statsGrid } from './CoinDetail.css'
@@ -56,6 +57,11 @@ interface CoinInfoProps {
   // Optional: pass the full coin/token data for price fetching
   clankerToken?: ClankerTokenFragment | null
   zoraCoin?: ZoraCoinFragment | null
+  // Holders
+  holders?: Array<{
+    holder: `0x${string}`
+    balance: string
+  }>
 }
 
 export const CoinInfo = ({
@@ -79,6 +85,7 @@ export const CoinInfo = ({
   isClankerToken,
   clankerToken,
   zoraCoin,
+  holders,
 }: CoinInfoProps) => {
   const { getCoinLink, getDaoLink } = useLinks()
 
@@ -229,14 +236,20 @@ export const CoinInfo = ({
             Market Cap
           </Text>
           <Text variant="heading-sm">
-            {isLoadingPrice ? <Spinner size="sm" /> : formatMarketCap(marketCap)}
+            {isLoadingPrice ? (
+              <Spinner size="sm" />
+            ) : marketCap ? (
+              `$${formatCryptoVal(marketCap.toString())}`
+            ) : (
+              '-'
+            )}
           </Text>
         </Box>
         <Box>
           <Text variant="label-sm" color="text3" mb="x2">
             Total Supply
           </Text>
-          <Text variant="heading-sm">{formatSupply(totalSupply)}</Text>
+          <Text variant="heading-sm">{formatCryptoVal(totalSupply)}</Text>
         </Box>
       </Grid>
 
@@ -247,7 +260,12 @@ export const CoinInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               Paired With
             </Text>
-            <ContractLink address={pairedToken} chainId={chainId as CHAIN_ID} size="sm" />
+            <ContractLink
+              address={pairedToken}
+              chainId={chainId as CHAIN_ID}
+              size="sm"
+              isToken
+            />
           </Box>
         </>
       )}
@@ -257,7 +275,12 @@ export const CoinInfo = ({
         <Text variant="label-sm" color="text3" mb="x2">
           Contract
         </Text>
-        <ContractLink address={coinAddress} chainId={chainId as CHAIN_ID} size="sm" />
+        <ContractLink
+          address={coinAddress}
+          chainId={chainId as CHAIN_ID}
+          size="sm"
+          isToken
+        />
       </Box>
 
       {/* DAO */}
@@ -327,6 +350,14 @@ export const CoinInfo = ({
             </Text>
           </Box>
         </>
+      )}
+
+      {/* Holders */}
+      {holders && holders.length > 0 && (
+        <HoldersSection
+          holders={holders}
+          totalSupplyWei={BigInt(totalSupply) * BigInt(10 ** 18)}
+        />
       )}
 
       {/* Comments - Only for Zora Coins */}

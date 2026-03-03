@@ -56,6 +56,7 @@ export const SWR_KEYS = {
   SABLIER_STREAM_IDS: 'sablier-stream-ids',
   SABLIER_LIVE_STREAMS: 'sablier-live-streams',
   CLANKER_TOKENS: 'clanker-tokens',
+  CLANKER_TOKENS_FULL: 'clanker-tokens-full',
   ZORA_COINS: 'zora-coins',
   ZORA_DROPS: 'zora-drops',
   MEDIA_TYPE: 'media-type',

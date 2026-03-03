@@ -1,5 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { useClankerTokens } from '@buildeross/hooks'
+import { useClankerTokensFull } from '@buildeross/hooks'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
@@ -105,8 +105,8 @@ const CreateCoinPage: NextPageWithLayout<CreateCoinPageProps> = ({
 
   const isChainSupported = isChainIdSupportedByCoining(chain.id)
 
-  // Fetch the latest ClankerToken for this DAO
-  const { data: clankerTokens, isLoading } = useClankerTokens({
+  // Fetch the latest ClankerToken for this DAO (with full fragment including pool info)
+  const { data: clankerTokens, isLoading } = useClankerTokensFull({
     chainId: chain.id,
     collectionAddress: addresses.token,
     enabled: isChainSupported,

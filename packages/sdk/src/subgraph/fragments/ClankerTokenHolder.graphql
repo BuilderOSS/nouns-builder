@@ -1,0 +1,10 @@
+fragment ClankerTokenHolder on ClankerTokenHolder {
+  id
+  holder
+  balance
+  updatedAt
+  updatedAtBlock
+  token {
+    ...ClankerTokenCard
+  }
+}

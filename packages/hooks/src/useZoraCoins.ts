@@ -1,6 +1,6 @@
 import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { daoZoraCoinsRequest, type ZoraCoinFragment } from '@buildeross/sdk/subgraph'
+import { daoZoraCoinsRequest, type ZoraCoinCardFragment } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { chainIdToName } from '@buildeross/utils/chains'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
@@ -17,11 +17,11 @@ export const useZoraCoins = ({
   enabled?: boolean
   first?: number
 }): {
-  data: ZoraCoinFragment[] | undefined
+  data: ZoraCoinCardFragment[] | undefined
   isValidating: boolean
   isLoading: boolean
   error: Error | undefined
-  mutate: KeyedMutator<ZoraCoinFragment[]>
+  mutate: KeyedMutator<ZoraCoinCardFragment[]>
 } => {
   // Check if chain is supported
   const isChainSupported = isChainIdSupportedByCoining(chainId)

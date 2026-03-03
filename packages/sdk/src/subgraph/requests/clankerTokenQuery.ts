@@ -2,9 +2,11 @@ import { CHAIN_ID } from '@buildeross/types'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
-import type { ClankerTokenFragment } from '../sdk.generated'
+import type { ClankerTokenCardFragment, ClankerTokenFragment } from '../sdk.generated'
 
-export type DaoClankerTokensResponse = ClankerTokenFragment[]
+export type DaoClankerTokensResponse = ClankerTokenCardFragment[]
+
+export type DaoClankerTokensFullResponse = ClankerTokenFragment[]
 
 export type DaosWithClankerTokensResponse = Record<string, boolean>
 
@@ -25,6 +27,32 @@ export const daoClankerTokensRequest = async (
     return data.dao?.clankerTokens || []
   } catch (e: any) {
     console.error('Error fetching DAO ClankerTokens:', e)
+    try {
+      const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
+      sentry.captureException(e)
+      sentry.flush(2000).catch(() => {})
+    } catch (_) {}
+    return []
+  }
+}
+
+export const daoClankerTokensFullRequest = async (
+  daoAddress: string,
+  chainId: CHAIN_ID,
+  first: number = 100
+): Promise<DaoClankerTokensFullResponse> => {
+  if (!daoAddress) throw new Error('No DAO address provided')
+  if (!isAddress(daoAddress)) throw new Error('Invalid DAO address')
+
+  try {
+    const data = await SDK.connect(chainId).daoClankerTokensFull({
+      daoId: daoAddress.toLowerCase(),
+      first,
+    })
+
+    return data.dao?.clankerTokens || []
+  } catch (e: any) {
+    console.error('Error fetching DAO ClankerTokens (full):', e)
     try {
       const sentry = (await import('@sentry/nextjs')) as typeof import('@sentry/nextjs')
       sentry.captureException(e)

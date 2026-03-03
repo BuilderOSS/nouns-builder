@@ -1,0 +1,13 @@
+#import "./ZoraDrop.graphql"
+
+fragment ZoraDropWithHolders on ZoraDrop {
+  ...ZoraDrop
+  holders(first: 10, orderBy: balance, orderDirection: desc) {
+    id
+    holder
+    balance
+    totalSpent
+    totalPurchased
+    updatedAt
+  }
+}

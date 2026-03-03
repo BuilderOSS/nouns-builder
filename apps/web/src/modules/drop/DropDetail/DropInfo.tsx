@@ -15,6 +15,7 @@ import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address, formatEther, isAddressEqual } from 'viem'
 
+import { HoldersSection } from '../../../components/HoldersSection'
 import { ProposalLink } from '../../../components/ProposalLink'
 import { dropHeader, dropImageContainer, onlyDesktop } from './DropDetail.css'
 
@@ -25,6 +26,12 @@ interface DropInfoProps {
   daoImage: string | null
   chainId: number
   transactionHash: string | null
+  holders?: Array<{
+    holder: `0x${string}`
+    balance: string
+    totalSpent?: string
+    totalPurchased?: string
+  }>
 }
 
 export const DropInfo = ({
@@ -34,6 +41,7 @@ export const DropInfo = ({
   daoImage,
   chainId,
   transactionHash,
+  holders,
 }: DropInfoProps) => {
   const { getDropLink, getDaoLink } = useLinks()
   const { treasury } = useDaoStore((state) => state.addresses)
@@ -182,6 +190,7 @@ export const DropInfo = ({
           address={drop.id as Address}
           chainId={chainId as CHAIN_ID}
           size="sm"
+          isToken
         />
       </Box>
 
@@ -273,6 +282,11 @@ export const DropInfo = ({
           })}
         </Text>
       </Box>
+
+      {/* Holders */}
+      {holders && holders.length > 0 && (
+        <HoldersSection holders={holders} title="Top Collectors" isDrop />
+      )}
     </Box>
   )
 }

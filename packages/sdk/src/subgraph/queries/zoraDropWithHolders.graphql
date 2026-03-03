@@ -1,0 +1,7 @@
+#import "../fragments/ZoraDropWithHolders.graphql"
+
+query zoraDropWithHolders($dropAddress: ID!) {
+  zoraDrop(id: $dropAddress) {
+    ...ZoraDropWithHolders
+  }
+}

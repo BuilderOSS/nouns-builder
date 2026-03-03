@@ -1,15 +1,20 @@
 import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
-  type ClankerTokenCardFragment,
-  daoClankerTokensRequest,
+  type ClankerTokenFragment,
+  daoClankerTokensFullRequest,
 } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { chainIdToName } from '@buildeross/utils/chains'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR, { type KeyedMutator } from 'swr'
 
-export const useClankerTokens = ({
+/**
+ * Hook to fetch full ClankerToken fragments (with pool info) for a DAO
+ * Use this when you need pool-related fields (pairedToken, poolId, poolHook)
+ * For gallery/list views, use useClankerTokens instead for better performance
+ */
+export const useClankerTokensFull = ({
   chainId,
   collectionAddress,
   enabled = true,
@@ -20,11 +25,11 @@ export const useClankerTokens = ({
   enabled?: boolean
   first?: number
 }): {
-  data: ClankerTokenCardFragment[] | undefined
+  data: ClankerTokenFragment[] | undefined
   isValidating: boolean
   isLoading: boolean
   error: Error | undefined
-  mutate: KeyedMutator<ClankerTokenCardFragment[]>
+  mutate: KeyedMutator<ClankerTokenFragment[]>
 } => {
   // Check if chain is supported
   const isChainSupported = isChainIdSupportedByCoining(chainId)
@@ -34,10 +39,10 @@ export const useClankerTokens = ({
 
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     !!collectionAddress && enabled && isChainSupported && COINING_ENABLED
-      ? ([SWR_KEYS.CLANKER_TOKENS, chainId, collectionAddress, first] as const)
+      ? ([SWR_KEYS.CLANKER_TOKENS_FULL, chainId, collectionAddress, first] as const)
       : null,
     async ([, _chainId, _collectionAddress, _first]) =>
-      daoClankerTokensRequest(
+      daoClankerTokensFullRequest(
         _collectionAddress as AddressType,
         _chainId as CHAIN_ID,
         _first

@@ -3,8 +3,8 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   daoZoraCoinsRequest,
   daoZoraDropsRequest,
-  type ZoraCoinFragment,
-  type ZoraDropFragment,
+  type ZoraCoinCardFragment,
+  type ZoraDropCardFragment,
 } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { chainIdToName } from '@buildeross/utils/chains'
@@ -16,13 +16,13 @@ import useSWR from 'swr'
 export type GalleryItemType = 'coin' | 'drop'
 
 export type GalleryItem =
-  | (ZoraCoinFragment & { itemType: 'coin' })
-  | (ZoraDropFragment & { itemType: 'drop' })
+  | (ZoraCoinCardFragment & { itemType: 'coin' })
+  | (ZoraDropCardFragment & { itemType: 'drop' })
 
 export interface UseGalleryItemsReturn {
   data: GalleryItem[] | undefined
-  coins: ZoraCoinFragment[] | undefined
-  drops: ZoraDropFragment[] | undefined
+  coins: ZoraCoinCardFragment[] | undefined
+  drops: ZoraDropCardFragment[] | undefined
   isValidating: boolean
   isLoading: boolean
   error: Error | undefined
