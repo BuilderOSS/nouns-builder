@@ -137,8 +137,10 @@ export const CreatorCoinSection = ({
           <Text variant="paragraph-md" color="text1">
             {isLoadingPrice ? (
               <Spinner size="sm" />
+            ) : marketCap ? (
+              `$${formatCryptoVal(marketCap.toString())}`
             ) : (
-              `$${formatCryptoVal(marketCap ? marketCap.toString() : '0')}`
+              '-'
             )}
           </Text>
         </Box>

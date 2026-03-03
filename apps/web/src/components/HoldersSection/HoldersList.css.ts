@@ -5,5 +5,8 @@ export const holderLink = style({
     '&:hover': {
       backgroundColor: 'rgba(0, 0, 0, 0.1)',
     },
+    '&:focus-visible': {
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    },
   },
 })

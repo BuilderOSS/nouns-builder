@@ -238,8 +238,10 @@ export const CoinInfo = ({
           <Text variant="heading-sm">
             {isLoadingPrice ? (
               <Spinner size="sm" />
+            ) : marketCap ? (
+              `$${formatCryptoVal(marketCap.toString())}`
             ) : (
-              `$${formatCryptoVal(marketCap ? marketCap.toString() : 0)}`
+              '-'
             )}
           </Text>
         </Box>

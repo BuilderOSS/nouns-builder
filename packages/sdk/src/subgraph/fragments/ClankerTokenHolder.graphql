@@ -5,9 +5,6 @@ fragment ClankerTokenHolder on ClankerTokenHolder {
   updatedAt
   updatedAtBlock
   token {
-    tokenAddress
-    tokenName
-    tokenSymbol
-    tokenImage
+    ...ClankerTokenCard
   }
 }
