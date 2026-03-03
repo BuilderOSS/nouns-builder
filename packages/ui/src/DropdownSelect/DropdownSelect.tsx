@@ -1,4 +1,13 @@
-import { Box, Button, ButtonProps, Flex, Icon, Spinner } from '@buildeross/zord'
+import {
+  Box,
+  Button,
+  ButtonProps,
+  Flex,
+  Icon,
+  Spinner,
+  Stack,
+  Text,
+} from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { ReactElement, ReactNode, useEffect, useRef, useState } from 'react'
 
@@ -48,11 +57,12 @@ const absoluteVariants = {
 export interface SelectOption<T> {
   value: T
   label: string
+  description?: string
   icon?: ReactNode
 }
 
 interface DropdownSelectProps<T> {
-  value: T
+  value?: T
   options: SelectOption<T>[]
   inputLabel?: string | ReactElement
   onChange: (value: T) => void
@@ -89,7 +99,7 @@ export function DropdownSelect<T extends React.Key>({
   }
 
   const selectedOption = options.find((option) => option.value === value)
-  const displayLabel = customLabel || selectedOption?.label
+  const displayLabel = customLabel || selectedOption?.label || 'Select option'
 
   // Click outside handler for absolute positioning
   useEffect(() => {
@@ -118,15 +128,33 @@ export function DropdownSelect<T extends React.Key>({
         onClick={() => handleOptionSelect(option)}
         className={optionClassName}
         pl={'x4'}
+        pr={option.description ? 'x4' : undefined}
         direction={'row'}
-        align={'center'}
-        height={'x18'}
+        align={option.description ? 'center' : 'center'}
+        py={option.description ? 'x3' : undefined}
+        height={option.description ? undefined : 'x18'}
+        minHeight={'x18'}
         width={'100%'}
-        fontSize={16}
-        fontWeight={'display'}
+        gap={option.description ? 'x3' : undefined}
+        fontSize={option.description ? undefined : 16}
+        fontWeight={option.description ? undefined : 'display'}
       >
-        {option.icon && <Flex pr={'x4'}>{option.icon}</Flex>}
-        {option.label}
+        {option.icon && (
+          <Flex pr={option.description ? undefined : 'x4'}>{option.icon}</Flex>
+        )}
+
+        {option.description ? (
+          <Stack gap={'x1'} justify={'center'}>
+            <Text fontSize={16} fontWeight={'display'}>
+              {option.label}
+            </Text>
+            <Text color={'text3'} variant={'paragraph-sm'}>
+              {option.description}
+            </Text>
+          </Stack>
+        ) : (
+          option.label
+        )}
       </Flex>
     ))
 

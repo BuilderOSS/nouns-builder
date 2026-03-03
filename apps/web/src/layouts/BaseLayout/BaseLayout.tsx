@@ -38,9 +38,11 @@ export function BaseLayout({
     <ConnectModalProvider value={{ openConnectModal }}>
       <ChainStoreProvider store={chainStore}>
         <DaoStoreProvider store={daoStore}>
-          <Box>
+          <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             {nav || <DefaultLayoutNav />}
-            <Box {...props}>{children}</Box>
+            <Box style={{ flex: 1 }} {...props}>
+              {children}
+            </Box>
             {footer}
           </Box>
         </DaoStoreProvider>

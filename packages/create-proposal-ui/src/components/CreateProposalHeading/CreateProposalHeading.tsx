@@ -1,9 +1,10 @@
 import { ProposalNavigation } from '@buildeross/proposal-ui'
 import { useProposalStore } from '@buildeross/stores'
 import { AnimatedModal } from '@buildeross/ui/Modal'
-import { atoms, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
 
+import { ProposalHelpLinks } from '../ProposalHelpLinks'
 import { Queue } from '../Queue'
 
 interface CreateProposalHeadingProps {
@@ -12,7 +13,18 @@ interface CreateProposalHeadingProps {
   showQueue?: boolean
   showContinue?: boolean
   onOpenProposalReview?: () => void
+  onContinue?: () => void
+  showStepBack?: boolean
+  onStepBack?: () => void
+  backDisabled?: boolean
+  showReset?: boolean
+  onReset?: () => void
+  resetLabel?: string
+  continueDisabled?: boolean
+  backLabel?: string
+  continueLabel?: string
   showDocsLink?: boolean
+  showHelpLinks?: boolean
   handleBack: () => void
   queueButtonClassName?: string
 }
@@ -21,18 +33,31 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
   title,
   align = 'left',
   showDocsLink = false,
+  showHelpLinks = false,
   showQueue = false,
   showContinue = true,
   handleBack,
   onOpenProposalReview,
+  onContinue,
+  showStepBack = false,
+  onStepBack,
+  backDisabled = false,
+  showReset = false,
+  onReset,
+  resetLabel = 'Reset proposal',
+  continueDisabled,
+  backLabel = 'Back',
+  continueLabel = 'Continue',
   queueButtonClassName,
 }) => {
   const [queueModalOpen, setQueueModalOpen] = useState(false)
+  const [resetModalOpen, setResetModalOpen] = useState(false)
   const transactions = useProposalStore((state) => state.transactions)
+  const continueHandler = onContinue || onOpenProposalReview
   return (
     <Stack mx={'auto'} pb={'x3'} w={'100%'}>
       <ProposalNavigation handleBack={handleBack}>
-        {(showQueue || showContinue) && (
+        {(showQueue || showContinue || showStepBack || showReset) && (
           <Flex align="center" direction="row" justify="flex-end" w="100%">
             <Flex>
               {showQueue && (
@@ -46,9 +71,33 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
                   {`${transactions.length} transaction${transactions.length === 1 ? '' : 's'} queued`}
                 </Button>
               )}
-              {showContinue && onOpenProposalReview && (
-                <Button disabled={!transactions.length} onClick={onOpenProposalReview}>
-                  Continue
+              {showStepBack && onStepBack && (
+                <Button
+                  mr="x3"
+                  variant="secondary"
+                  onClick={onStepBack}
+                  disabled={backDisabled}
+                  aria-label={backLabel}
+                >
+                  <Icon id="arrowLeft" />
+                </Button>
+              )}
+              {showReset && onReset && (
+                <Button
+                  mr="x3"
+                  variant="secondary"
+                  onClick={() => setResetModalOpen(true)}
+                  aria-label={resetLabel}
+                >
+                  <Icon id="trash" />
+                </Button>
+              )}
+              {showContinue && continueHandler && (
+                <Button
+                  disabled={continueDisabled ?? !transactions.length}
+                  onClick={continueHandler}
+                >
+                  {continueLabel}
                 </Button>
               )}
             </Flex>
@@ -58,6 +107,33 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
       <AnimatedModal close={() => setQueueModalOpen(false)} open={queueModalOpen}>
         <Queue setQueueModalOpen={setQueueModalOpen} />
       </AnimatedModal>
+
+      {showReset && onReset && (
+        <AnimatedModal close={() => setResetModalOpen(false)} open={resetModalOpen}>
+          <Flex direction={'column'} align={'center'} gap={'x2'} w={'100%'}>
+            <Flex fontSize={28} fontWeight={'display'} mb="x2">
+              Reset proposal?
+            </Flex>
+            <Flex color={'text3'} mb="x2">
+              This will clear your title, summary, and queued transactions.
+            </Flex>
+            <Flex direction={'column'} align={'stretch'} w={'100%'}>
+              <Button
+                onClick={() => {
+                  onReset()
+                  setResetModalOpen(false)
+                }}
+                mb="x2"
+              >
+                Reset
+              </Button>
+              <Button variant={'secondary'} onClick={() => setResetModalOpen(false)}>
+                Cancel
+              </Button>
+            </Flex>
+          </Flex>
+        </AnimatedModal>
+      )}
       <Flex
         direction="column"
         align={align === 'center' ? 'center' : 'flex-start'}
@@ -73,24 +149,7 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
         >
           {title}
         </Text>
-        {showDocsLink && (
-          <a
-            href="https://docs.nouns.build/onboarding/builder-proposal/"
-            target="_blank"
-            rel="noreferrer noopener"
-          >
-            <Flex align={'center'} color={'text3'}>
-              <Text
-                fontWeight={'heading'}
-                fontSize={14}
-                className={atoms({ textDecoration: 'underline' })}
-              >
-                How to create a proposal?
-              </Text>
-              <Icon fill="text3" size="sm" ml="x1" id="external-16" />
-            </Flex>
-          </a>
-        )}
+        {(showHelpLinks || showDocsLink) && <ProposalHelpLinks align={align} />}
       </Flex>
     </Stack>
   )

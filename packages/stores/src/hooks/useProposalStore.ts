@@ -28,6 +28,9 @@ type Actions = {
     transactions,
   }: Pick<State, 'title' | 'summary' | 'transactions' | 'disabled'>) => void
   clearProposal: () => void
+  setTitle: (title?: string) => void
+  setSummary: (summary?: string) => void
+  setDraftMetadata: ({ title, summary }: Pick<State, 'title' | 'summary'>) => void
   setTransactionType: (type: TransactionFormType | null) => void
   resetTransactionType: () => void
 }
@@ -65,6 +68,9 @@ export const useProposalStore = create<State & Actions>()(
       createProposal: ({ title, summary, disabled, transactions }) =>
         set({ title, summary, disabled, transactions }),
       clearProposal: () => set(() => ({ ...initialState })),
+      setTitle: (title) => set({ title }),
+      setSummary: (summary) => set({ summary }),
+      setDraftMetadata: ({ title, summary }) => set({ title, summary }),
       setTransactionType: (type) => set({ transactionType: type }),
       resetTransactionType: () => set({ transactionType: null }),
     }),

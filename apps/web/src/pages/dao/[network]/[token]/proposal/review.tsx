@@ -1,13 +1,17 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { CreateProposalHeading, ReviewProposalForm } from '@buildeross/create-proposal-ui'
+import {
+  CreateProposalHeading,
+  ProposalStageIndicator,
+  ReviewProposalForm,
+} from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { atoms, Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -36,7 +40,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     governorAddress: addresses.governor,
   })
 
-  const { transactions, disabled, title, summary } = useProposalStore()
+  const { transactions, disabled, title, summary, clearProposal } = useProposalStore()
 
   const onOpenCreatePage = useCallback(async () => {
     await push({
@@ -47,6 +51,33 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       },
     })
   }, [push, chain.slug, addresses.token])
+
+  const onOpenCreateStage = useCallback(
+    async (stage: 'draft' | 'transactions') => {
+      await push({
+        pathname: `/dao/[network]/[token]/proposal/create`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          stage,
+        },
+      })
+    },
+    [push, chain.slug, addresses.token]
+  )
+
+  const onResetProposal = useCallback(async () => {
+    clearProposal()
+
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        stage: 'draft',
+      },
+    })
+  }, [clearProposal, push, chain.slug, addresses.token])
 
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isNavigatingRef = useRef(false)
@@ -129,27 +160,37 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   }
 
   return (
-    <Stack mb={'x20'} w={'100%'} px={'x3'} style={{ maxWidth: 1060 }} mx="auto">
+    <Stack
+      mt={'x24'}
+      mb={'x20'}
+      w={'100%'}
+      px={'x3'}
+      style={{ maxWidth: 1060 }}
+      mx="auto"
+    >
       <CreateProposalHeading
-        title={'Review and Submit Proposal'}
-        align={'center'}
+        title={'Review and Submit'}
         handleBack={onOpenCreatePage}
+        showHelpLinks
+        showStepBack
+        onStepBack={() => void onOpenCreateStage('transactions')}
+        showContinue={false}
+        showQueue={false}
+        showReset
+        onReset={() => void onResetProposal()}
       />
-      <Box mx="auto">
-        <a href="/guidelines" target="_blank" rel="noreferrer noopener">
-          <Flex align={'center'} mb={'x10'} color="text1">
-            <Text
-              fontSize={{ '@initial': 14, '@768': 18 }}
-              fontWeight={'paragraph'}
-              className={atoms({ textDecoration: 'underline' })}
-            >
-              Tips on how to write great proposals
-            </Text>
-            <Icon fill="text1" size="sm" ml="x1" id="external-16" />
-          </Flex>
-        </a>
-      </Box>
-      <Stack w={'100%'} px={'x3'} style={{ maxWidth: 680 }} mx="auto">
+
+      <ProposalStageIndicator
+        currentStage={'review'}
+        onStageSelect={(stage) => {
+          if (stage === 'draft' || stage === 'transactions') {
+            void onOpenCreateStage(stage)
+          }
+        }}
+        isStageClickable={(stage) => stage === 'draft' || stage === 'transactions'}
+      />
+
+      <Stack w={'100%'} px={'x3'} mx="auto">
         <ReviewProposalForm
           disabled={disabled}
           transactions={transactions}
