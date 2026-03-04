@@ -1,5 +1,5 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
-import { COIN_SUPPORTED_CHAIN_IDS, COINING_ENABLED } from '@buildeross/constants/coining'
+import { COIN_SUPPORTED_CHAIN_IDS } from '@buildeross/constants/coining'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
@@ -25,7 +25,7 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
   const router = useRouter()
   const [selectedDao, setSelectedDao] = useState<DaoListItem | undefined>()
 
-  const isForPost = actionType === 'post' && COINING_ENABLED
+  const isForPost = actionType === 'post'
 
   const title = isForPost ? 'Select DAO for Post' : 'Select DAO for Proposal'
   const description = isForPost
