@@ -207,47 +207,24 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const isMissingDescription = !summary?.trim()
   const isMissingTransactions = transactions.length === 0
 
+  const joinRequirements = (requirements: string[]) => {
+    if (requirements.length === 1) return requirements[0]
+    if (requirements.length === 2) return `${requirements[0]} and ${requirements[1]}`
+    return `${requirements.slice(0, -1).join(', ')}, and ${requirements.at(-1)}`
+  }
+
   const continueHelperText = useMemo(() => {
-    if (createStage === 'draft') {
-      if (!isMissingTitle && !isMissingDescription) return null
-      if (isMissingTitle && isMissingDescription) {
-        return 'To continue, add a title and description.'
-      }
-      if (isMissingTitle) {
-        return 'To continue, add a title.'
-      }
-      return 'To continue, add a description.'
+    const requiredMissing: string[] = []
+
+    if (isMissingTitle) requiredMissing.push('a title')
+    if (isMissingDescription) requiredMissing.push('a description')
+    if (createStage === 'transactions' && isMissingTransactions) {
+      requiredMissing.push('at least one transaction')
     }
 
-    if (!isMissingTitle && !isMissingDescription && !isMissingTransactions) {
-      return null
-    }
+    if (!requiredMissing.length) return null
 
-    if (isMissingTransactions && !isMissingTitle && !isMissingDescription) {
-      return 'To continue, add at least one transaction.'
-    }
-
-    if (!isMissingTransactions && isMissingTitle && isMissingDescription) {
-      return 'To continue, add a title and description.'
-    }
-
-    if (!isMissingTransactions && isMissingTitle) {
-      return 'To continue, add a title.'
-    }
-
-    if (!isMissingTransactions && isMissingDescription) {
-      return 'To continue, add a description.'
-    }
-
-    if (isMissingTitle && isMissingDescription && isMissingTransactions) {
-      return 'To continue, add a title, description, and at least one transaction.'
-    }
-
-    if (isMissingTransactions && isMissingTitle) {
-      return 'To continue, add a title and at least one transaction.'
-    }
-
-    return 'To continue, add a description and at least one transaction.'
+    return `To continue, add ${joinRequirements(requiredMissing)}.`
   }, [createStage, isMissingDescription, isMissingTitle, isMissingTransactions])
 
   React.useEffect(() => {

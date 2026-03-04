@@ -6,6 +6,7 @@ import React, { useState } from 'react'
 
 import { ProposalHelpLinks } from '../ProposalHelpLinks'
 import { Queue } from '../Queue'
+import { ResetConfirmationModal } from '../ResetConfirmationModal'
 
 interface CreateProposalHeadingProps {
   title: string
@@ -119,30 +120,14 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
       </AnimatedModal>
 
       {showReset && onReset && (
-        <AnimatedModal close={() => setResetModalOpen(false)} open={resetModalOpen}>
-          <Flex direction={'column'} align={'center'} gap={'x2'} w={'100%'}>
-            <Flex fontSize={28} fontWeight={'display'} mb="x2">
-              Reset proposal?
-            </Flex>
-            <Flex color={'text3'} mb="x2">
-              This will clear your title, summary, and queued transactions.
-            </Flex>
-            <Flex direction={'column'} align={'stretch'} w={'100%'}>
-              <Button
-                onClick={() => {
-                  onReset()
-                  setResetModalOpen(false)
-                }}
-                mb="x2"
-              >
-                Reset
-              </Button>
-              <Button variant={'secondary'} onClick={() => setResetModalOpen(false)}>
-                Cancel
-              </Button>
-            </Flex>
-          </Flex>
-        </AnimatedModal>
+        <ResetConfirmationModal
+          open={resetModalOpen}
+          onConfirm={() => {
+            onReset()
+            setResetModalOpen(false)
+          }}
+          onCancel={() => setResetModalOpen(false)}
+        />
       )}
       <Flex
         direction="column"

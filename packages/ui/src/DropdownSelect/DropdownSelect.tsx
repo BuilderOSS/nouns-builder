@@ -99,7 +99,7 @@ export function DropdownSelect<T extends React.Key>({
   }
 
   const selectedOption = options.find((option) => option.value === value)
-  const displayLabel = customLabel || selectedOption?.label || 'Select option'
+  const displayLabel = customLabel ?? selectedOption?.label ?? 'Select option'
 
   // Click outside handler for absolute positioning
   useEffect(() => {
@@ -130,7 +130,7 @@ export function DropdownSelect<T extends React.Key>({
         pl={'x4'}
         pr={option.description ? 'x4' : undefined}
         direction={'row'}
-        align={option.description ? 'center' : 'center'}
+        align={'center'}
         py={option.description ? 'x3' : undefined}
         height={option.description ? undefined : 'x18'}
         minHeight={'x18'}

@@ -103,6 +103,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           <textarea
             value={value}
             onChange={(e) => onChange(e.target.value)}
+            aria-label={typeof inputLabel === 'string' ? inputLabel : 'Markdown editor'}
             style={{
               width: '100%',
               minHeight: 220,

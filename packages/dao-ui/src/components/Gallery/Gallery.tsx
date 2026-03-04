@@ -5,7 +5,7 @@ import { type GalleryItem, useGalleryItems } from '@buildeross/hooks/useGalleryI
 import { useNowSeconds } from '@buildeross/hooks/useNowSeconds'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { CHAIN_ID, TransactionType } from '@buildeross/types'
+import { CHAIN_ID, ProposalCreateStage, TransactionType } from '@buildeross/types'
 import { DropdownSelect, type SelectOption } from '@buildeross/ui/DropdownSelect'
 import { DropMintWidget } from '@buildeross/ui/DropMintWidget'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -134,7 +134,7 @@ const MintWidgetModal: React.FC<MintWidgetModalProps> = ({
 }
 
 export type GalleryProps = {
-  onOpenProposalCreate: (stage?: 'draft' | 'transactions') => void
+  onOpenProposalCreate: (stage?: ProposalCreateStage) => void
   onOpenCoinCreate: () => void
 }
 

@@ -98,6 +98,10 @@ export const ProposalStageIndicator: React.FC<ProposalStageIndicatorProps> = ({
             !!onStageSelect &&
             (isStageClickable ? isStageClickable(stage.id) : isCompleted)
           const isLocked = !clickable && !isActive
+          const onStageActivate = () => {
+            if (!clickable || isLocked) return
+            onStageSelect(stage.id)
+          }
 
           return (
             <Stack
@@ -114,7 +118,19 @@ export const ProposalStageIndicator: React.FC<ProposalStageIndicatorProps> = ({
                 cursor: clickable ? 'pointer' : isLocked ? 'not-allowed' : 'default',
                 opacity: isLocked ? 0.6 : 1,
               }}
-              onClick={clickable ? () => onStageSelect(stage.id) : undefined}
+              role="button"
+              tabIndex={clickable && !isLocked ? 0 : -1}
+              aria-disabled={isLocked}
+              onClick={clickable ? onStageActivate : undefined}
+              onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                if (!clickable || isLocked) return
+                if (event.key === 'Enter' || event.key === ' ') {
+                  if (event.key === ' ') {
+                    event.preventDefault()
+                  }
+                  onStageActivate()
+                }
+              }}
             >
               <Flex align={'center'} justify={'space-between'}>
                 <Flex align={'center'} gap={'x2'}>

@@ -9,7 +9,7 @@ import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { AddressType } from '@buildeross/types'
+import { AddressType, ProposalCreateStage } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
@@ -53,7 +53,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   }, [push, chain.slug, addresses.token])
 
   const onOpenCreateStage = useCallback(
-    async (stage: 'draft' | 'transactions') => {
+    async (stage: ProposalCreateStage) => {
       await push({
         pathname: `/dao/[network]/[token]/proposal/create`,
         query: {

@@ -68,11 +68,16 @@ export const useProposalStore = create<State & Actions>()(
       setTitle: (title) => set({ title }),
       setSummary: (summary) => set({ summary }),
       setDraftMetadata: ({ title, summary }) => set({ title, summary }),
-      startProposalDraft: (draft = {}) =>
+      startProposalDraft: (draft = {}) => {
+        const sanitizedDraft = Object.fromEntries(
+          Object.entries(draft).filter(([, value]) => value !== undefined)
+        ) as Partial<State>
+
         set(() => ({
           ...initialState,
-          ...draft,
-        })),
+          ...sanitizedDraft,
+        }))
+      },
       setTransactionType: (type) => set({ transactionType: type }),
       resetTransactionType: () => set({ transactionType: null }),
     }),

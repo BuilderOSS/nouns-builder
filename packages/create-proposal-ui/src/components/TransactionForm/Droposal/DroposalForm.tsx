@@ -92,7 +92,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                   rel="noreferrer noopener"
                   href="https://docs.zora.co/contracts/ERC721Drop"
                 >
-                  Lean more
+                  Learn more
                 </a>
               </Text>
               <Box

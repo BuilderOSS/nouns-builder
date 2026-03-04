@@ -57,7 +57,7 @@ const logError = async (e: unknown) => {
 }
 
 const formatTimestamp = (timestamp?: number) => {
-  if (!timestamp) return 'Unavailable'
+  if (timestamp === undefined || timestamp === null) return 'Unavailable'
   return `${dayjs.unix(timestamp).format('MMM D, YYYY h:mm A')} ${handleGMTOffset()}`
 }
 
@@ -270,15 +270,19 @@ export const ReviewProposalForm = ({
 
   const tokensNeeded = Number(proposalVotesRequired ?? 0n)
   const nowTimestamp = Math.floor(Date.now() / 1000)
-  const estimatedVotingStartsAt = votingDelay
+  const hasVotingDelay = votingDelay !== undefined && votingDelay !== null
+  const hasVotingPeriod = votingPeriod !== undefined && votingPeriod !== null
+  const hasTimelockDelay = timelockDelay !== undefined && timelockDelay !== null
+
+  const estimatedVotingStartsAt = hasVotingDelay
     ? nowTimestamp + Number(votingDelay)
     : undefined
   const estimatedVotingEndsAt =
-    votingDelay && votingPeriod
+    hasVotingDelay && hasVotingPeriod
       ? nowTimestamp + Number(votingDelay) + Number(votingPeriod)
       : undefined
   const estimatedEarliestExecutionAt =
-    estimatedVotingEndsAt && timelockDelay
+    estimatedVotingEndsAt !== undefined && hasTimelockDelay
       ? estimatedVotingEndsAt + Number(timelockDelay)
       : undefined
 

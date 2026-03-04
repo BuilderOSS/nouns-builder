@@ -1,9 +1,10 @@
 import { useProposalStore } from '@buildeross/stores'
 import { AnimatedModal } from '@buildeross/ui/Modal'
-import { Button, Flex, Icon, Text } from '@buildeross/zord'
+import { Button, Icon, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
 
 import { Queue } from '../Queue'
+import { ResetConfirmationModal } from '../ResetConfirmationModal'
 import {
   mobileActionPrimary,
   mobileProposalActionBar,
@@ -92,30 +93,14 @@ export const MobileProposalActionBar: React.FC<MobileProposalActionBarProps> = (
       </AnimatedModal>
 
       {showReset && onReset && (
-        <AnimatedModal close={() => setResetModalOpen(false)} open={resetModalOpen}>
-          <Flex direction={'column'} align={'center'} gap={'x2'} w={'100%'}>
-            <Flex fontSize={28} fontWeight={'display'} mb="x2">
-              Reset proposal?
-            </Flex>
-            <Flex color={'text3'} mb="x2">
-              This will clear your title, summary, and queued transactions.
-            </Flex>
-            <Flex direction={'column'} align={'stretch'} w={'100%'}>
-              <Button
-                onClick={() => {
-                  onReset()
-                  setResetModalOpen(false)
-                }}
-                mb="x2"
-              >
-                Reset
-              </Button>
-              <Button variant={'secondary'} onClick={() => setResetModalOpen(false)}>
-                Cancel
-              </Button>
-            </Flex>
-          </Flex>
-        </AnimatedModal>
+        <ResetConfirmationModal
+          open={resetModalOpen}
+          onConfirm={() => {
+            onReset()
+            setResetModalOpen(false)
+          }}
+          onCancel={() => setResetModalOpen(false)}
+        />
       )}
     </>
   )

@@ -6,10 +6,13 @@ import {
   CoinCreateLinkHandler,
   CoinLinkHandler,
   DaoLinkHandler,
+  DaoTab,
   DropLinkHandler,
   ProfileLinkHandler,
   ProposalCreateLinkHandler,
+  ProposalCreateStage,
   ProposalLinkHandler,
+  ProposalTab,
 } from '@buildeross/types'
 import { chainIdToSlug } from '@buildeross/utils/chains'
 import { createContext, useContext } from 'react'
@@ -42,7 +45,7 @@ const defaultGetAuctionLink = (
 const defaultGetDaoLink = (
   chainId: CHAIN_ID,
   tokenAddress: AddressType,
-  tab?: string
+  tab?: DaoTab
 ) => {
   const baseHref = `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}`
   return {
@@ -54,7 +57,7 @@ const defaultGetProposalLink = (
   chainId: CHAIN_ID,
   tokenAddress: AddressType,
   proposalId: number | string | bigint,
-  tab?: string
+  tab?: ProposalTab
 ) => {
   const baseHref = `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalId}`
   return {
@@ -83,7 +86,7 @@ const defaultGetCoinCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) 
 const defaultGetProposalCreateLink = (
   chainId: CHAIN_ID,
   tokenAddress: AddressType,
-  stage?: 'draft' | 'transactions'
+  stage?: ProposalCreateStage
 ) => {
   const baseHref = `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`
   return {

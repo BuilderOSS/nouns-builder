@@ -2,11 +2,24 @@ import { CHAIN_ID } from './chain'
 import { AddressType } from './hex'
 
 export type LinkOptions = { href: string }
+export type ProposalCreateStage = 'draft' | 'transactions'
+export type DaoTab =
+  | 'about'
+  | 'activity'
+  | 'admin'
+  | 'gallery'
+  | 'contracts'
+  | 'custom-minter'
+  | 'erc721-redeem'
+  | 'feed'
+  | 'merkle-reserve'
+  | 'treasury'
+export type ProposalTab = 'details' | 'votes' | 'propdates'
 
 export type DaoLinkHandler = (
   chainId: CHAIN_ID,
   daoTokenAddress: AddressType,
-  tab?: string
+  tab?: DaoTab
 ) => LinkOptions
 
 export type AuctionLinkHandler = (
@@ -19,13 +32,13 @@ export type ProposalLinkHandler = (
   chainId: CHAIN_ID,
   daoTokenAddress: AddressType,
   proposalId: number | string | bigint,
-  tab?: string
+  tab?: ProposalTab
 ) => LinkOptions
 
 export type ProposalCreateLinkHandler = (
   chainId: CHAIN_ID,
   daoTokenAddress: AddressType,
-  stage?: 'draft' | 'transactions'
+  stage?: ProposalCreateStage
 ) => LinkOptions
 
 export type ProfileLinkHandler = (address: AddressType) => LinkOptions

@@ -43,7 +43,8 @@ export const NoCreatorCoinWarning: React.FC = () => {
     router.push({
       pathname: '/dao/[network]/[token]/proposal/create',
       query: {
-        ...router.query,
+        network: router.query.network,
+        token: router.query.token,
         stage: 'transactions',
       },
     })

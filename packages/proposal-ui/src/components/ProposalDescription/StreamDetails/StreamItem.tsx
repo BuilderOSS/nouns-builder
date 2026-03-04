@@ -215,7 +215,11 @@ export const StreamItem = ({
       transactions: [cancelTxnData],
       disabled: false,
     })
-    onOpenProposalReview()
+    try {
+      await onOpenProposalReview()
+    } catch (error) {
+      console.error('Failed to open proposal review:', error)
+    }
   }, [onOpenProposalReview, startProposalDraft, lockupAddress, liveData])
 
   const recipientDisplay = recipientName || walletSnippet(stream.recipient)

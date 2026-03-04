@@ -15,7 +15,7 @@ import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
-import { AddressType, Chain, CHAIN_ID } from '@buildeross/types'
+import { AddressType, Chain, CHAIN_ID, ProposalCreateStage } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
@@ -127,7 +127,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   }, [push, chain.slug, addresses.token])
 
   const openProposalCreatePage = React.useCallback(
-    async (stage?: 'draft' | 'transactions') => {
+    async (stage?: ProposalCreateStage) => {
       await push({
         pathname: `/dao/[network]/[token]/proposal/create`,
         query: {

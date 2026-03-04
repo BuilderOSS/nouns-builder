@@ -16,7 +16,7 @@ import {
 import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID, ProposalCreateStage } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { atoms, Flex, Text, theme } from '@buildeross/zord'
@@ -136,7 +136,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   )
 
   const openProposalCreatePage = React.useCallback(
-    async (stage?: 'draft' | 'transactions') => {
+    async (stage?: ProposalCreateStage) => {
       await push({
         pathname: `/dao/[network]/[token]/proposal/create`,
         query: {
@@ -209,7 +209,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
       ...baseSections,
       ...minterSections,
       {
-        title: 'Smart Contracts',
+        title: 'Contracts',
         component: [<SmartContracts key={'smart_contracts'} />],
       },
     ]

@@ -3,20 +3,20 @@ import React from 'react'
 
 type ProposalHelpLinksProps = {
   align?: 'left' | 'center'
+  howToCreateHref?: string
+  proposalTipsHref?: string
 }
 
 export const ProposalHelpLinks: React.FC<ProposalHelpLinksProps> = ({
   align = 'left',
+  howToCreateHref = 'https://docs.nouns.build/onboarding/builder-proposal/',
+  proposalTipsHref = '/guidelines',
 }) => {
   const alignment = align === 'center' ? 'center' : 'flex-start'
 
   return (
     <Stack gap={'x2'} align={alignment}>
-      <a
-        href="https://docs.nouns.build/onboarding/builder-proposal/"
-        target="_blank"
-        rel="noreferrer noopener"
-      >
+      <a href={howToCreateHref} target="_blank" rel="noreferrer noopener">
         <Flex align={'center'} color={'text3'}>
           <Text
             fontWeight={'heading'}
@@ -29,7 +29,7 @@ export const ProposalHelpLinks: React.FC<ProposalHelpLinksProps> = ({
         </Flex>
       </a>
 
-      <a href="/guidelines" target="_blank" rel="noreferrer noopener">
+      <a href={proposalTipsHref} target="_blank" rel="noreferrer noopener">
         <Flex align={'center'} color={'text3'}>
           <Text
             fontWeight={'heading'}

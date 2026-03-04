@@ -30,6 +30,7 @@ export function BaseLayout({
   nav,
   ...props
 }: BaseLayoutProps) {
+  const { style, ...rest } = props
   const chainStore = useMemo(() => createChainStore(chain), [chain])
   const daoStore = useMemo(() => createDaoStore(addresses), [addresses])
   const { openConnectModal } = useConnectModal()
@@ -40,7 +41,7 @@ export function BaseLayout({
         <DaoStoreProvider store={daoStore}>
           <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             {nav || <DefaultLayoutNav />}
-            <Box style={{ flex: 1 }} {...props}>
+            <Box style={{ ...style, flex: 1 }} {...rest}>
               {children}
             </Box>
             {footer}
