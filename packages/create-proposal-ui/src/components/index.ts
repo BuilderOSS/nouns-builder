@@ -1,4 +1,5 @@
 export * from './CreateProposalHeading'
+export * from './MobileProposalActionBar'
 export * from './ProposalDraftForm'
 export * from './ProposalHelpLinks'
 export * from './ProposalStageIndicator'

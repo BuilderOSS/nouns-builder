@@ -45,6 +45,7 @@ import Pin from './assets/pin.svg'
 import Play from './assets/play.svg'
 import Plus from './assets/plus.svg'
 import Question from './assets/question.svg'
+import Queue from './assets/queue.svg'
 import Refresh from './assets/refresh.svg'
 import ResumeTemplate from './assets/resume-template.svg'
 import Sablier from './assets/sablier.svg'
@@ -107,6 +108,7 @@ export const icons = {
   pin: Pin,
   play: Play,
   plus: Plus,
+  queue: Queue,
   question: Question,
   refresh: Refresh,
   resumeTemplate: ResumeTemplate,

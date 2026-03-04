@@ -163,6 +163,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     <Stack
       mt={'x24'}
       mb={'x20'}
+      pb={{ '@initial': 'x30', '@768': 'x0' }}
       w={'100%'}
       px={'x3'}
       style={{ maxWidth: 1060 }}
@@ -177,6 +178,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
         showContinue={false}
         showQueue={false}
         showReset
+        hideActionsOnMobile
         onReset={() => void onResetProposal()}
       />
 
@@ -197,6 +199,8 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           title={title}
           summary={summary}
           onProposalCreated={onProposalCreated}
+          onBackMobile={() => void onOpenCreateStage('transactions')}
+          onResetMobile={() => void onResetProposal()}
         />
       </Stack>
 
@@ -214,7 +218,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   )
 }
 
-ReviewProposalPage.getLayout = getDaoLayout
+ReviewProposalPage.getLayout = (page) => getDaoLayout(page, { hideFooterOnMobile: true })
 
 export default ReviewProposalPage
 

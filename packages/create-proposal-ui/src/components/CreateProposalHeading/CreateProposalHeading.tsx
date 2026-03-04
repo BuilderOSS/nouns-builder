@@ -25,6 +25,7 @@ interface CreateProposalHeadingProps {
   continueLabel?: string
   showDocsLink?: boolean
   showHelpLinks?: boolean
+  hideActionsOnMobile?: boolean
   handleBack: () => void
   queueButtonClassName?: string
 }
@@ -34,6 +35,7 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
   align = 'left',
   showDocsLink = false,
   showHelpLinks = false,
+  hideActionsOnMobile = false,
   showQueue = false,
   showContinue = true,
   handleBack,
@@ -58,7 +60,15 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
     <Stack mx={'auto'} pb={'x3'} w={'100%'}>
       <ProposalNavigation handleBack={handleBack}>
         {(showQueue || showContinue || showStepBack || showReset) && (
-          <Flex align="center" direction="row" justify="flex-end" w="100%">
+          <Flex
+            align="center"
+            direction="row"
+            justify="flex-end"
+            w="100%"
+            display={
+              hideActionsOnMobile ? { '@initial': 'none', '@768': 'flex' } : 'flex'
+            }
+          >
             <Flex>
               {showQueue && (
                 <Button

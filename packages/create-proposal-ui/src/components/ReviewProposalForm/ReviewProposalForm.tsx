@@ -27,6 +27,7 @@ import {
   isSimulationSupported,
   simulateTransactions,
 } from '../../utils/tenderlySimulation'
+import { MobileProposalActionBar } from '../MobileProposalActionBar'
 import { ProposalDraftForm } from '../ProposalDraftForm'
 import { ERROR_CODE, FormValues, validationSchema } from './fields'
 import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'
@@ -38,6 +39,8 @@ interface ReviewProposalProps {
   summary?: string
   transactions: BuilderTransaction[]
   onProposalCreated: (proposalId: string | null) => void
+  onBackMobile?: () => void
+  onResetMobile?: () => void
 }
 
 const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_TENDERLY_SIMULATION === 'true'
@@ -64,6 +67,8 @@ export const ReviewProposalForm = ({
   summary,
   transactions,
   onProposalCreated,
+  onBackMobile,
+  onResetMobile,
 }: ReviewProposalProps) => {
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
@@ -424,6 +429,7 @@ export const ReviewProposalForm = ({
                 disabled={simulating || proposing}
                 handleClick={formik.handleSubmit}
                 h={'x15'}
+                display={{ '@initial': 'none', '@768': 'flex' }}
               >
                 <Box>{'Submit Proposal'}</Box>
                 {!!votes && (
@@ -441,6 +447,21 @@ export const ReviewProposalForm = ({
                   </Box>
                 )}
               </ContractButton>
+
+              <MobileProposalActionBar
+                showBack={!!onBackMobile}
+                onBack={onBackMobile}
+                showQueue={false}
+                showReset={!!onResetMobile}
+                onReset={onResetMobile}
+                showContinue
+                onContinue={() => {
+                  void formik.handleSubmit()
+                }}
+                continueDisabled={simulating || proposing}
+                continueLoading={simulating}
+                continueLabel={'Submit Proposal'}
+              />
             </form>
           )}
         </Formik>

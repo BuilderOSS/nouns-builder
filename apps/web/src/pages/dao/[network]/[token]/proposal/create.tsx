@@ -3,6 +3,7 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
+  MobileProposalActionBar,
   ProposalDraftForm,
   ProposalStageIndicator,
   Queue,
@@ -305,6 +306,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     <Stack
       mt={'x24'}
       mb={'x20'}
+      pb={{ '@initial': 'x30', '@768': 'x0' }}
       w={'100%'}
       px={'x3'}
       style={{ maxWidth: 1060 }}
@@ -328,6 +330,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
           createStage === 'draft' ? !canStartTransactions : !canContinueToReview
         }
         onContinue={onContinueStep}
+        hideActionsOnMobile
         queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
       />
 
@@ -384,8 +387,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
                     </Box>
                     <Button
                       variant="secondary"
-                      h={'x19'}
-                      minH={'x19'}
+                      h={'x18'}
+                      minH={'x18'}
                       px={'x4'}
                       aria-label={'Cancel editing transaction'}
                       onClick={resetTransactionType}
@@ -456,11 +459,28 @@ const CreateProposalPage: NextPageWithLayout = () => {
           }
         />
       )}
+
+      <MobileProposalActionBar
+        showBack
+        onBack={onBackStep}
+        backDisabled={createStage === 'draft'}
+        showQueue={createStage === 'transactions'}
+        showReset
+        onReset={onResetProposal}
+        showContinue
+        onContinue={() => {
+          void onContinueStep()
+        }}
+        continueDisabled={
+          createStage === 'draft' ? !canStartTransactions : !canContinueToReview
+        }
+        continueLabel={'Continue'}
+      />
     </Stack>
   )
 }
 
-CreateProposalPage.getLayout = getDaoLayout
+CreateProposalPage.getLayout = (page) => getDaoLayout(page, { hideFooterOnMobile: true })
 
 export default CreateProposalPage
 
