@@ -240,12 +240,15 @@ export function buildSwapRoute(coinAddress: Bytes, timestamp: BigInt): SwapRoute
       continue
     }
 
-    // Determine token type
-    let tokenType = CoinType.WETH
-    let tokenName = 'Wrapped Ether'
-    let tokenSymbol = 'WETH'
+    let tokenType = CoinType.UNKNOWN
+    let tokenName = 'Unknown Token'
+    let tokenSymbol = 'UNKNOWN'
     const info = loadCoinInfo(tokenBytes)
-    if (info) {
+    if (!info) {
+      log.warning('Payment option has missing coin info, using UNKNOWN metadata: {}', [
+        tokenAddr,
+      ])
+    } else {
       tokenType = info.type
       tokenName = info.name
       tokenSymbol = info.symbol

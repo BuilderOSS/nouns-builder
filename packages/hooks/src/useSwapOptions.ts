@@ -1,7 +1,7 @@
 import { NATIVE_TOKEN_ADDRESS, WETH_ADDRESS } from '@buildeross/constants/addresses'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type SwapRouteFragment, swapRouteRequest } from '@buildeross/sdk/subgraph'
-import { CoinInfo, SwapOption as SwapOptionType, SwapPath } from '@buildeross/swap'
+import type { SwapOption as SwapOptionType, SwapPath, TokenInfo } from '@buildeross/swap'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import useSWR from 'swr'
@@ -56,17 +56,68 @@ function normalizeHopsForTradeDirection(
 
 function convertCoinType(
   coinType: string
-): 'eth' | 'weth' | 'zora-coin' | 'clanker-token' {
+): 'eth' | 'weth' | 'zora-coin' | 'clanker-token' | undefined {
   switch (coinType) {
+    case 'ETH':
+      return 'eth'
     case 'WETH':
       return 'weth'
     case 'CLANKER_TOKEN':
       return 'clanker-token'
     case 'ZORA_COIN':
       return 'zora-coin'
+    case 'UNKNOWN':
+      return undefined
     default:
-      return 'weth' // fallback
+      return undefined
   }
+}
+
+function sanitizeHopRange(
+  startHopIndex: number,
+  endHopIndex: number,
+  pathLength: number,
+  label: string
+): { start: number; end: number } | null {
+  if (pathLength <= 0) {
+    console.warn(`[useSwapOptions] Skipping ${label}: mainPath is empty`)
+    return null
+  }
+
+  const originalStart = startHopIndex
+  const originalEnd = endHopIndex
+
+  if (!Number.isInteger(startHopIndex) || !Number.isInteger(endHopIndex)) {
+    console.warn(
+      `[useSwapOptions] Non-integer hop indices for ${label}: start=${startHopIndex}, end=${endHopIndex}`
+    )
+  }
+
+  if (!Number.isFinite(startHopIndex) || !Number.isFinite(endHopIndex)) {
+    console.warn(
+      `[useSwapOptions] Skipping ${label}: non-finite hop indices start=${startHopIndex}, end=${endHopIndex}`
+    )
+    return null
+  }
+
+  const maxIndex = pathLength - 1
+  const start = Math.min(Math.max(Math.trunc(startHopIndex), 0), maxIndex)
+  const end = Math.min(Math.max(Math.trunc(endHopIndex), 0), maxIndex)
+
+  if (start !== originalStart || end !== originalEnd) {
+    console.warn(
+      `[useSwapOptions] Clamped hop indices for ${label}: start=${originalStart}->${start}, end=${originalEnd}->${end}, pathLength=${pathLength}`
+    )
+  }
+
+  if (start > end) {
+    console.warn(
+      `[useSwapOptions] Skipping ${label}: invalid hop range start=${start}, end=${end}`
+    )
+    return null
+  }
+
+  return { start, end }
 }
 
 function addrEq(a?: string, b?: string): boolean {
@@ -119,10 +170,21 @@ export function convertSwapRouteToOptions(
 
   // Build options from paymentOptions
   for (const paymentOption of paymentOptions) {
-    const relevantHops = swapRoute.mainPath.slice(
+    const hopRange = sanitizeHopRange(
       paymentOption.startHopIndex,
-      paymentOption.endHopIndex + 1
+      paymentOption.endHopIndex,
+      swapRoute.mainPath.length,
+      `payment option ${paymentOption.tokenAddress}`
     )
+    if (!hopRange) continue
+
+    const relevantHops = swapRoute.mainPath.slice(hopRange.start, hopRange.end + 1)
+    if (relevantHops.length === 0) {
+      console.warn(
+        `[useSwapOptions] Skipping payment option ${paymentOption.tokenAddress}: no hops in sanitized range`
+      )
+      continue
+    }
 
     const hops = normalizeHopsForTradeDirection(relevantHops, isBuying)
 
@@ -138,12 +200,20 @@ export function convertSwapRouteToOptions(
       name: 'Token',
     }
 
-    const tokenInfo: CoinInfo = {
+    const tokenType = convertCoinType(paymentOption.tokenType)
+    if (!tokenType) {
+      console.warn(
+        `[useSwapOptions] Skipping payment option ${paymentOption.tokenAddress}: unsupported tokenType ${paymentOption.tokenType}`
+      )
+      continue
+    }
+
+    const tokenInfo: TokenInfo = {
       address: tokenAddress,
       symbol: tokenDetails.symbol,
       name: tokenDetails.name,
-      type: convertCoinType(paymentOption.tokenType),
-    } as CoinInfo
+      type: tokenType,
+    }
 
     options.push({
       token: tokenInfo,
@@ -159,10 +229,22 @@ export function convertSwapRouteToOptions(
   })
 
   if (wethOpt) {
-    const relevantHops = swapRoute.mainPath.slice(
+    const hopRange = sanitizeHopRange(
       wethOpt.startHopIndex,
-      wethOpt.endHopIndex + 1
+      wethOpt.endHopIndex,
+      swapRoute.mainPath.length,
+      `WETH payment option ${wethOpt.tokenAddress}`
     )
+    if (!hopRange) {
+      return options
+    }
+
+    const relevantHops = swapRoute.mainPath.slice(hopRange.start, hopRange.end + 1)
+    if (relevantHops.length === 0) {
+      console.warn('[useSwapOptions] Skipping ETH option: WETH path has no hops in range')
+      return options
+    }
+
     const hops = normalizeHopsForTradeDirection(relevantHops, isBuying)
 
     // If user selected ETH (not WETH), preserve native currency in displayed path.
@@ -186,12 +268,12 @@ export function convertSwapRouteToOptions(
       estimatedGas: undefined,
     }
 
-    const ethInfo: CoinInfo = {
+    const ethInfo: TokenInfo = {
       address: NATIVE_TOKEN_ADDRESS,
       symbol: 'ETH',
       name: 'Ethereum',
       type: 'eth',
-    } as CoinInfo
+    }
 
     options.unshift({
       token: ethInfo,

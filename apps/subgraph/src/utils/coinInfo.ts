@@ -7,6 +7,7 @@ import { CLANKER_TICK_SPACING, DYNAMIC_FEE_FLAG, WETH_ADDRESS } from './constant
  * Coin type constants for routing
  */
 export namespace CoinType {
+  export const UNKNOWN: string = 'UNKNOWN'
   export const WETH: string = 'WETH'
   export const CLANKER_TOKEN: string = 'CLANKER_TOKEN'
   export const ZORA_COIN: string = 'ZORA_COIN'

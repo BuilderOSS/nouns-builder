@@ -380,7 +380,6 @@ type ClankerToken @entity {
   tokenAddress: Bytes!
   msgSender: Bytes!
   tokenAdmin: Bytes! # The admin address (may or may not be a DAO)
-
   # Token metadata
   tokenImage: String!
   tokenName: String!
@@ -565,6 +564,7 @@ type ZoraDropMintComment @entity {
 # Swap routing entities
 
 enum CoinType {
+  UNKNOWN
   WETH
   CLANKER_TOKEN
   ZORA_COIN
