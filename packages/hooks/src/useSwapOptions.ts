@@ -69,6 +69,11 @@ function convertCoinType(
   }
 }
 
+function addrEq(a?: string, b?: string): boolean {
+  if (!a || !b) return false
+  return a.toLowerCase() === b.toLowerCase()
+}
+
 export function convertSwapRouteToOptions(
   swapRoute: SwapRouteFragment,
   isBuying: boolean,
@@ -159,6 +164,21 @@ export function convertSwapRouteToOptions(
       wethOpt.endHopIndex + 1
     )
     const hops = normalizeHopsForTradeDirection(relevantHops, isBuying)
+
+    // If user selected ETH (not WETH), preserve native currency in displayed path.
+    if (hops.length > 0 && wethAddress) {
+      if (isBuying) {
+        const firstHop = hops[0]
+        if (addrEq(firstHop.tokenIn, wethAddress)) {
+          hops[0] = { ...firstHop, tokenIn: NATIVE_TOKEN_ADDRESS }
+        }
+      } else {
+        const lastHop = hops[hops.length - 1]
+        if (addrEq(lastHop.tokenOut, wethAddress)) {
+          hops[hops.length - 1] = { ...lastHop, tokenOut: NATIVE_TOKEN_ADDRESS }
+        }
+      }
+    }
 
     const ethPath: SwapPath = {
       hops,

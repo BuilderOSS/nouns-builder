@@ -11,7 +11,6 @@ import {
 import { SwapError, SwapErrorCode, SwapErrorMessages } from '@buildeross/swap'
 import { CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedForSaleOfZoraCoins } from '@buildeross/utils/coining'
-import { truncateHex } from '@buildeross/utils/helpers'
 import { formatPrice } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -660,14 +659,14 @@ export const SwapWidget = ({
       {pendingTxHash && (
         <Box mt="x4">
           <Text variant="paragraph-sm" color="text3">
-            Transaction pending... View transaction:{' '}
+            Transaction pending... View on{' '}
             <a
               style={{ display: 'inline-block' }}
               href={`${ETHERSCAN_BASE_URL[chainId]}/tx/${pendingTxHash}`}
               target="_blank"
               rel="noreferrer"
             >
-              <Text>{truncateHex(pendingTxHash)}</Text>
+              Explorer
             </a>
           </Text>
         </Box>

@@ -3,10 +3,12 @@ import { style } from '@vanilla-extract/css'
 
 export const card = style([
   {
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    position: 'relative',
+    top: 0,
+    transition: 'top 0.2s ease, box-shadow 0.2s ease',
     border: `2px solid ${color.border}`,
     ':hover': {
-      transform: 'translateY(-2px)',
+      top: -2,
       boxShadow: `0 4px 12px ${theme.colors.ghostHover}`,
     },
   },
