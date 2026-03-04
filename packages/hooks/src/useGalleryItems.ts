@@ -1,4 +1,3 @@
-import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   daoZoraCoinsRequest,
@@ -58,7 +57,7 @@ export const useGalleryItems = ({
     isValidating: isValidatingCoins,
     mutate: mutateCoins,
   } = useSWR(
-    !!collectionAddress && enabled && isCoinSupported && COINING_ENABLED
+    !!collectionAddress && enabled && isCoinSupported
       ? ([SWR_KEYS.ZORA_COINS, chainId, collectionAddress, first] as const)
       : null,
     async ([, _chainId, _collectionAddress, _first]) =>

@@ -1,8 +1,5 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { chainIdToSlug } from '@buildeross/utils/chains'
 import { Stack } from '@buildeross/zord'
-import { useRouter } from 'next/router'
 import React, { ReactNode } from 'react'
 import { Meta } from 'src/components/Meta'
 import { DefaultLayout } from 'src/layouts/DefaultLayout'
@@ -46,23 +43,12 @@ function ConditionalLayout({ children }: { children: ReactNode }) {
 
 const HomePage: NextPageWithLayout = () => {
   const { address } = useAccount()
-  const { push } = useRouter()
-
-  const handleOpenCreateProposal = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
-    push({
-      pathname: `/dao/[network]/[token]/proposal/create`,
-      query: {
-        network: chainIdToSlug(chainId),
-        token: tokenAddress,
-      },
-    })
-  }
 
   return (
     <>
       <Meta title={'Nouns your ideas'} type={'website'} path={'/'} />
       {address ? (
-        <Dashboard handleOpenCreateProposal={handleOpenCreateProposal} />
+        <Dashboard />
       ) : (
         <Stack align={'center'}>
           <Marquee />

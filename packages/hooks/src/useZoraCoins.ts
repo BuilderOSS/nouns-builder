@@ -1,4 +1,3 @@
-import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { daoZoraCoinsRequest, type ZoraCoinCardFragment } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
@@ -30,7 +29,7 @@ export const useZoraCoins = ({
     : undefined
 
   const { data, error, isLoading, isValidating, mutate } = useSWR(
-    !!collectionAddress && enabled && isChainSupported && COINING_ENABLED
+    !!collectionAddress && enabled && isChainSupported
       ? ([SWR_KEYS.ZORA_COINS, chainId, collectionAddress, first] as const)
       : null,
     async ([, _chainId, _collectionAddress, _first]) =>
