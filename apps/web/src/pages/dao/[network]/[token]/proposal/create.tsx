@@ -3,8 +3,10 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
+  MobileProposalActionBar,
+  ProposalDraftForm,
+  ProposalStageIndicator,
   Queue,
-  SelectTransactionType,
   TRANSACTION_FORM_OPTIONS,
   TransactionForm,
   TransactionTypeIcon,
@@ -23,7 +25,7 @@ import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
-import { Box, Flex, Stack } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
@@ -37,6 +39,7 @@ import { useAccount, useReadContract } from 'wagmi'
 const createSelectOption = (type: TransactionType) => ({
   value: type,
   label: TRANSACTION_TYPES[type].title,
+  description: TRANSACTION_TYPES[type].subTitle,
   icon: <TransactionTypeIcon transactionType={type} />,
 })
 
@@ -49,6 +52,23 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const setTransactionType = useProposalStore((x) => x.setTransactionType)
   const resetTransactionType = useProposalStore((x) => x.resetTransactionType)
   const transactions = useProposalStore((x) => x.transactions)
+  const title = useProposalStore((x) => x.title)
+  const summary = useProposalStore((x) => x.summary)
+  const setTitle = useProposalStore((x) => x.setTitle)
+  const setSummary = useProposalStore((x) => x.setSummary)
+  const clearProposal = useProposalStore((x) => x.clearProposal)
+
+  const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
+  const [createStage, setCreateStage] = React.useState<'draft' | 'transactions'>(() =>
+    initialStageFromQuery === 'transactions' || transactionType || transactions.length > 0
+      ? 'transactions'
+      : 'draft'
+  )
+  const [furthestStage, setFurthestStage] = React.useState<'draft' | 'transactions'>(
+    initialStageFromQuery === 'transactions' || transactionType || transactions.length > 0
+      ? 'transactions'
+      : 'draft'
+  )
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -157,6 +177,74 @@ const CreateProposalPage: NextPageWithLayout = () => {
     return TRANSACTION_FORM_OPTIONS_FILTERED.map(createSelectOption)
   }, [TRANSACTION_FORM_OPTIONS_FILTERED])
 
+  const missingDraftRequirements = useMemo(() => {
+    const requirements: string[] = []
+
+    if (!title?.trim()) {
+      requirements.push('add a proposal title')
+    }
+
+    if (!summary?.trim()) {
+      requirements.push('add a proposal summary')
+    }
+
+    return requirements
+  }, [title, summary])
+
+  const missingReviewRequirements = useMemo(() => {
+    const requirements = [...missingDraftRequirements]
+
+    if (!transactions.length) {
+      requirements.push('queue at least one transaction')
+    }
+
+    return requirements
+  }, [missingDraftRequirements, transactions.length])
+
+  const canStartTransactions = missingDraftRequirements.length === 0
+  const canContinueToReview = missingReviewRequirements.length === 0
+  const isMissingTitle = !title?.trim()
+  const isMissingDescription = !summary?.trim()
+  const isMissingTransactions = transactions.length === 0
+
+  const joinRequirements = (requirements: string[]) => {
+    if (requirements.length === 1) return requirements[0]
+    if (requirements.length === 2) return `${requirements[0]} and ${requirements[1]}`
+    return `${requirements.slice(0, -1).join(', ')}, and ${requirements.at(-1)}`
+  }
+
+  const continueHelperText = useMemo(() => {
+    const requiredMissing: string[] = []
+
+    if (isMissingTitle) requiredMissing.push('a title')
+    if (isMissingDescription) requiredMissing.push('a description')
+    if (createStage === 'transactions' && isMissingTransactions) {
+      requiredMissing.push('at least one transaction')
+    }
+
+    if (!requiredMissing.length) return null
+
+    return `To continue, add ${joinRequirements(requiredMissing)}.`
+  }, [createStage, isMissingDescription, isMissingTitle, isMissingTransactions])
+
+  React.useEffect(() => {
+    if (transactionType) {
+      setCreateStage('transactions')
+      setFurthestStage('transactions')
+    }
+  }, [transactionType])
+
+  React.useEffect(() => {
+    if (query?.stage === 'transactions' && furthestStage === 'transactions') {
+      setCreateStage('transactions')
+      return
+    }
+
+    if (query?.stage === 'draft') {
+      setCreateStage('draft')
+    }
+  }, [query?.stage, furthestStage])
+
   const openDaoActivityPage = useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]`,
@@ -189,6 +277,39 @@ const CreateProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
+  const onContinueStep = useCallback(async () => {
+    if (createStage === 'draft') {
+      if (!canStartTransactions) return
+      setCreateStage('transactions')
+      setFurthestStage('transactions')
+      return
+    }
+
+    if (!canContinueToReview) return
+    await openProposalReviewPage()
+  }, [createStage, canStartTransactions, canContinueToReview, openProposalReviewPage])
+
+  const onBackStep = useCallback(() => {
+    if (createStage === 'transactions') {
+      setCreateStage('draft')
+    }
+  }, [createStage])
+
+  const onResetProposal = useCallback(() => {
+    clearProposal()
+    setCreateStage('draft')
+    setFurthestStage('draft')
+  }, [clearProposal])
+
+  const onStageSelect = useCallback(
+    (stage: 'draft' | 'transactions' | 'review') => {
+      if (stage === 'review') return
+      if (stage === 'transactions' && furthestStage !== 'transactions') return
+      setCreateStage(stage)
+    },
+    [furthestStage]
+  )
+
   if (isLoading) return null
 
   if (!address)
@@ -208,43 +329,170 @@ const CreateProposalPage: NextPageWithLayout = () => {
     <Stack
       mt={'x24'}
       mb={'x20'}
+      pb={{ '@initial': 'x30', '@768': 'x0' }}
       w={'100%'}
       px={'x3'}
       style={{ maxWidth: 1060 }}
       mx="auto"
     >
       <CreateProposalHeading
-        title={'Add Transactions'}
+        title={createStage === 'draft' ? 'Write Proposal' : 'Add Transactions'}
         handleBack={openDaoActivityPage}
-        showDocsLink
-        showQueue={!!transactionType || (!transactionType && transactions.length > 0)}
-        onOpenProposalReview={openProposalReviewPage}
+        showHelpLinks
+        showQueue={
+          createStage === 'transactions' &&
+          (!!transactionType || (!transactionType && transactions.length > 0))
+        }
+        showContinue
+        showStepBack
+        onStepBack={onBackStep}
+        backDisabled={createStage === 'draft'}
+        showReset
+        onReset={onResetProposal}
+        continueDisabled={
+          createStage === 'draft' ? !canStartTransactions : !canContinueToReview
+        }
+        onContinue={onContinueStep}
+        hideActionsOnMobile
         queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
       />
-      {transactionType ? (
-        <TwoColumnLayout
-          leftColumn={
-            <Stack gap="x4">
-              <DropdownSelect
-                value={transactionType}
-                options={options}
-                onChange={(value) => setTransactionType(value)}
-              />
-              <TransactionForm />
-            </Stack>
+
+      <ProposalStageIndicator
+        currentStage={createStage === 'draft' ? 'draft' : 'transactions'}
+        showOnboardingCallout
+        onStageSelect={onStageSelect}
+        isStageClickable={(stage) => {
+          if (stage === 'draft') {
+            return furthestStage === 'transactions' && createStage !== 'draft'
           }
-        />
+          if (stage === 'transactions') {
+            return furthestStage === 'transactions' && createStage !== 'transactions'
+          }
+          return false
+        }}
+      />
+
+      {continueHelperText && (
+        <Flex align={'center'} gap={'x2'} mb={'x4'}>
+          <Text variant={'paragraph-sm'} color={'text3'}>
+            {continueHelperText}
+          </Text>
+          {createStage === 'transactions' && (isMissingTitle || isMissingDescription) && (
+            <Text
+              variant={'paragraph-sm'}
+              color={'text3'}
+              style={{ cursor: 'pointer', textDecoration: 'underline' }}
+              onClick={() => setCreateStage('draft')}
+            >
+              Go to Write Proposal
+            </Text>
+          )}
+        </Flex>
+      )}
+
+      {createStage === 'draft' ? (
+        <Stack
+          w={'100%'}
+          p={'x4'}
+          mb={'x8'}
+          borderColor={'border'}
+          borderStyle={'solid'}
+          borderWidth={'normal'}
+          borderRadius={'curved'}
+          gap={'x2'}
+        >
+          <ProposalDraftForm
+            title={title || ''}
+            summary={summary || ''}
+            onTitleChange={setTitle}
+            onSummaryChange={setSummary}
+          />
+        </Stack>
       ) : (
         <TwoColumnLayout
           leftColumn={
-            <SelectTransactionType
-              transactionTypes={TRANSACTION_FORM_OPTIONS_FILTERED}
-              onSelect={setTransactionType}
-              onOpenAdminSettings={openDaoAdminPage}
-            />
+            <Stack gap={'x0'}>
+              <Stack>
+                <Text variant={'heading-xs'} mb={'x5'}>
+                  Select Transaction Type
+                </Text>
+                {transactionType ? (
+                  <Flex gap={'x2'} align={'flex-start'}>
+                    <Box style={{ flex: 1, minWidth: 0 }}>
+                      <DropdownSelect
+                        value={transactionType}
+                        options={options}
+                        customLabel={TRANSACTION_TYPES[transactionType].title}
+                        onChange={(value: TransactionType) => setTransactionType(value)}
+                      />
+                    </Box>
+                    <Button
+                      variant="secondary"
+                      h={'x19'}
+                      minH={'x19'}
+                      px={'x4'}
+                      aria-label={'Cancel editing transaction'}
+                      onClick={resetTransactionType}
+                    >
+                      <Icon id={'cross'} />
+                    </Button>
+                  </Flex>
+                ) : (
+                  <DropdownSelect
+                    value={undefined}
+                    options={options}
+                    customLabel={'Select transaction type'}
+                    onChange={(value: TransactionType) => setTransactionType(value)}
+                  />
+                )}
+              </Stack>
+
+              <Flex
+                borderWidth={'thin'}
+                borderStyle={'solid'}
+                borderColor={'ghostHover'}
+                mt={'x2'}
+                mb={'x8'}
+              />
+
+              {!transactionType && (
+                <Stack gap={'x2'}>
+                  <Flex
+                    w={'100%'}
+                    justify={'flex-start'}
+                    p={'x6'}
+                    borderWidth={'normal'}
+                    borderStyle={'solid'}
+                    borderColor={'ghostHover'}
+                    style={{ borderRadius: 12 }}
+                    gap={'x2'}
+                    cursor={'pointer'}
+                    onClick={() => void openDaoAdminPage()}
+                  >
+                    <Stack>
+                      <Text variant="label-lg" mb={'x1'}>
+                        Configure DAO Settings
+                      </Text>
+                      <Text variant="paragraph-md" color={'text3'}>
+                        Change all the main DAO settings in the Admin Tab
+                      </Text>
+                    </Stack>
+                    <Icon
+                      id={'external-16'}
+                      fill={'text4'}
+                      size={'sm'}
+                      alignSelf={'center'}
+                      ml={'auto'}
+                    />
+                  </Flex>
+                </Stack>
+              )}
+
+              {transactionType && <TransactionForm />}
+            </Stack>
           }
           rightColumn={
-            transactions.length > 0 ? (
+            transactions.length > 0 && !transactionType ? (
               <Box className={styles.hideOnMobile}>
                 <Queue embedded />
               </Box>
@@ -252,11 +500,28 @@ const CreateProposalPage: NextPageWithLayout = () => {
           }
         />
       )}
+
+      <MobileProposalActionBar
+        showBack
+        onBack={onBackStep}
+        backDisabled={createStage === 'draft'}
+        showQueue={createStage === 'transactions'}
+        showReset
+        onReset={onResetProposal}
+        showContinue
+        onContinue={() => {
+          void onContinueStep()
+        }}
+        continueDisabled={
+          createStage === 'draft' ? !canStartTransactions : !canContinueToReview
+        }
+        continueLabel={'Continue'}
+      />
     </Stack>
   )
 }
 
-CreateProposalPage.getLayout = getDaoLayout
+CreateProposalPage.getLayout = (page) => getDaoLayout(page, { hideFooterOnMobile: true })
 
 export default CreateProposalPage
 

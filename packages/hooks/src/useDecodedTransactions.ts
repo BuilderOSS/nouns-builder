@@ -128,7 +128,8 @@ export const decodeTransactions = async (
 
 export const useDecodedTransactions = (
   chainId: CHAIN_ID,
-  proposal: Proposal
+  proposal: Proposal,
+  enabled = true
 ): {
   decodedTransactions: DecodedTransaction[] | undefined
   isValidating: boolean
@@ -145,7 +146,7 @@ export const useDecodedTransactions = (
     error,
     mutate,
   } = useSWR(
-    targets && calldatas && values
+    targets && calldatas && values && enabled
       ? ([SWR_KEYS.PROPOSALS_TRANSACTIONS, chainId, targets, calldatas, values] as const)
       : null,
     async ([, _chainId, _targets, _calldatas, _values]) =>

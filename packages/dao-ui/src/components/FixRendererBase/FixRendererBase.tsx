@@ -21,7 +21,7 @@ export const FixRendererBase = ({
   addresses: DaoContractAddresses
   onOpenProposalReview: () => void
 }) => {
-  const createProposal = useProposalStore((state) => state.createProposal)
+  const startProposalDraft = useProposalStore((state) => state.startProposalDraft)
   const chain = useChainStore((x) => x.chain)
 
   const { description, transaction, shouldFix } = useRendererBaseFix({
@@ -32,7 +32,7 @@ export const FixRendererBase = ({
   if (!shouldFix) return null
 
   const handleUpgrade = (): void => {
-    createProposal({
+    startProposalDraft({
       transactions: [transaction!],
       disabled: true,
       title: `Fix Metadata Renderer Base`,

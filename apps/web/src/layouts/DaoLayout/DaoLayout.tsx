@@ -9,14 +9,25 @@ type DaoPageProps = {
   chainId?: number
 }
 
-export function getDaoLayout(page: ReactElement<DaoPageProps>) {
+type DaoLayoutOptions = {
+  hideFooterOnMobile?: boolean
+}
+
+export function getDaoLayout(
+  page: ReactElement<DaoPageProps>,
+  options?: DaoLayoutOptions
+) {
   const addresses = page.props?.addresses ?? {}
   const chainId = page.props?.chainId ?? 1
   const chain =
     PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId) ?? PUBLIC_DEFAULT_CHAINS[0]
 
   return (
-    <DefaultLayout chain={chain} addresses={addresses}>
+    <DefaultLayout
+      chain={chain}
+      addresses={addresses}
+      hideFooterOnMobile={options?.hideFooterOnMobile}
+    >
       {page}
     </DefaultLayout>
   )

@@ -10,7 +10,7 @@ import { useAccount } from 'wagmi'
 export const NoCreatorCoinWarning: React.FC = () => {
   const router = useRouter()
   const { address: userAddress } = useAccount()
-  const { createProposal, setTransactionType } = useProposalStore()
+  const { startProposalDraft } = useProposalStore()
 
   // Get addresses and chain from stores
   const addresses = useDaoStore((x) => x.addresses)
@@ -36,17 +36,17 @@ export const NoCreatorCoinWarning: React.FC = () => {
 
   // Handle creating a Creator Coin proposal
   const handleCreateCreatorCoinProposal = () => {
-    setTransactionType(TransactionType.CREATOR_COIN)
-    createProposal({
-      title: undefined,
-      summary: undefined,
-      disabled: false,
-      transactions: [],
+    startProposalDraft({
+      transactionType: TransactionType.CREATOR_COIN,
     })
     // Navigate to proposal create page
     router.push({
       pathname: '/dao/[network]/[token]/proposal/create',
-      query: router.query,
+      query: {
+        network: router.query.network,
+        token: router.query.token,
+        stage: 'transactions',
+      },
     })
   }
 

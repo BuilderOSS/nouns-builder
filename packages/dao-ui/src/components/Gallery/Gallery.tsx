@@ -5,7 +5,7 @@ import { type GalleryItem, useGalleryItems } from '@buildeross/hooks/useGalleryI
 import { useNowSeconds } from '@buildeross/hooks/useNowSeconds'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { CHAIN_ID, TransactionType } from '@buildeross/types'
+import { CHAIN_ID, ProposalCreateStage, TransactionType } from '@buildeross/types'
 import { DropdownSelect, type SelectOption } from '@buildeross/ui/DropdownSelect'
 import { DropMintWidget } from '@buildeross/ui/DropMintWidget'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -134,7 +134,7 @@ const MintWidgetModal: React.FC<MintWidgetModalProps> = ({
 }
 
 export type GalleryProps = {
-  onOpenProposalCreate: () => void
+  onOpenProposalCreate: (stage?: ProposalCreateStage) => void
   onOpenCoinCreate: () => void
 }
 
@@ -149,7 +149,7 @@ export const Gallery: React.FC<GalleryProps> = ({
   const { address } = useAccount()
   const { getCoinCreateLink } = useLinks()
 
-  const { createProposal, setTransactionType } = useProposalStore()
+  const { startProposalDraft } = useProposalStore()
 
   // State for dropdown selection
   type CreateOption = 'permissionless-post' | 'dao-post' | 'dao-drop' | 'dao-creator-coin'
@@ -254,34 +254,22 @@ export const Gallery: React.FC<GalleryProps> = ({
         onOpenCoinCreate()
         break
       case 'dao-post':
-        setTransactionType(TransactionType.CONTENT_COIN)
-        createProposal({
-          title: undefined,
-          summary: undefined,
-          disabled: false,
-          transactions: [],
+        startProposalDraft({
+          transactionType: TransactionType.CONTENT_COIN,
         })
-        onOpenProposalCreate()
+        onOpenProposalCreate('transactions')
         break
       case 'dao-drop':
-        setTransactionType(TransactionType.DROPOSAL)
-        createProposal({
-          title: undefined,
-          summary: undefined,
-          disabled: false,
-          transactions: [],
+        startProposalDraft({
+          transactionType: TransactionType.DROPOSAL,
         })
-        onOpenProposalCreate()
+        onOpenProposalCreate('transactions')
         break
       case 'dao-creator-coin':
-        setTransactionType(TransactionType.CREATOR_COIN)
-        createProposal({
-          title: undefined,
-          summary: undefined,
-          disabled: false,
-          transactions: [],
+        startProposalDraft({
+          transactionType: TransactionType.CREATOR_COIN,
         })
-        onOpenProposalCreate()
+        onOpenProposalCreate('transactions')
         break
     }
   }

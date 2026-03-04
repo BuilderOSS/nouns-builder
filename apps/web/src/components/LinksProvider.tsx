@@ -1,4 +1,10 @@
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import {
+  AddressType,
+  CHAIN_ID,
+  DaoTab,
+  ProposalCreateStage,
+  ProposalTab,
+} from '@buildeross/types'
 import { LinksProvider as BaseLinksProvider } from '@buildeross/ui/LinksProvider'
 import { chainIdToSlug } from '@buildeross/utils/chains'
 import React from 'react'
@@ -26,7 +32,7 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
   )
 
   const getDaoLink = React.useCallback(
-    (chainId: CHAIN_ID, tokenAddress: AddressType, tab?: string) => {
+    (chainId: CHAIN_ID, tokenAddress: AddressType, tab?: DaoTab) => {
       const baseHref = `/dao/${chainIdToSlug(chainId)}/${tokenAddress}`
       return {
         href: tab ? `${baseHref}?tab=${tab}` : baseHref,
@@ -40,7 +46,7 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
       chainId: CHAIN_ID,
       tokenAddress: AddressType,
       proposalId: string | number | bigint,
-      tab?: string
+      tab?: ProposalTab
     ) => {
       const baseHref = `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/vote/${proposalId}`
       return {
@@ -51,9 +57,10 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
   )
 
   const getProposalCreateLink = React.useCallback(
-    (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+    (chainId: CHAIN_ID, tokenAddress: AddressType, stage?: ProposalCreateStage) => {
+      const baseHref = `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`
       return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
+        href: stage ? `${baseHref}?stage=${stage}` : baseHref,
       }
     },
     []

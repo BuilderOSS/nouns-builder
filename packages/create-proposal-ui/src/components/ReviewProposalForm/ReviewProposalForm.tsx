@@ -1,5 +1,7 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { governorAbi } from '@buildeross/sdk/contract'
+import { ProposalDescription } from '@buildeross/proposal-ui'
+import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
+import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import {
   BuilderTransaction,
@@ -9,14 +11,15 @@ import {
 } from '@buildeross/stores'
 import { type SimulationOutput } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { TextInput } from '@buildeross/ui/Fields'
-import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { Box, Flex, Icon } from '@buildeross/zord'
-import { Field, FieldProps, Formik } from 'formik'
+import { defaultInputLabelStyle } from '@buildeross/ui/styles'
+import { handleGMTOffset, unpackOptionalArray } from '@buildeross/utils/helpers'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import dayjs from 'dayjs'
+import { Formik } from 'formik'
 import React, { useState } from 'react'
 import { decodeEventLog, type Hex } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
+import { useAccount, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
@@ -24,6 +27,8 @@ import {
   isSimulationSupported,
   simulateTransactions,
 } from '../../utils/tenderlySimulation'
+import { MobileProposalActionBar } from '../MobileProposalActionBar'
+import { ProposalDraftForm } from '../ProposalDraftForm'
 import { ERROR_CODE, FormValues, validationSchema } from './fields'
 import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'
 import { Transactions } from './Transactions'
@@ -34,6 +39,8 @@ interface ReviewProposalProps {
   summary?: string
   transactions: BuilderTransaction[]
   onProposalCreated: (proposalId: string | null) => void
+  onBackMobile?: () => void
+  onResetMobile?: () => void
 }
 
 const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_TENDERLY_SIMULATION === 'true'
@@ -49,18 +56,25 @@ const logError = async (e: unknown) => {
   } catch (_) {}
 }
 
+const formatTimestamp = (timestamp?: number) => {
+  if (timestamp === undefined || timestamp === null) return 'Unavailable'
+  return `${dayjs.unix(timestamp).format('MMM D, YYYY h:mm A')} ${handleGMTOffset()}`
+}
+
 export const ReviewProposalForm = ({
   disabled: disabledForm,
   title,
   summary,
   transactions,
   onProposalCreated,
+  onBackMobile,
+  onResetMobile,
 }: ReviewProposalProps) => {
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
   const { address } = useAccount()
-  const { clearProposal } = useProposalStore()
+  const { clearProposal, setTitle, setSummary } = useProposalStore()
 
   const [error, setError] = useState<string | undefined>()
   const [simulationError, setSimulationError] = useState<string | undefined>()
@@ -68,6 +82,7 @@ export const ReviewProposalForm = ({
   const [failedSimulations, setFailedSimulations] = useState<Array<SimulationOutput>>([])
   const [proposing, setProposing] = useState<boolean>(false)
   const [skipSimulation, setSkipSimulation] = useState<boolean>(SKIP_SIMULATION)
+  const [isEditingMetadata, setIsEditingMetadata] = useState<boolean>(false)
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
@@ -75,6 +90,38 @@ export const ReviewProposalForm = ({
     governorAddress: addresses.governor,
     signerAddress: address,
   })
+
+  const { data: governanceConfigData } = useReadContracts({
+    allowFailure: false,
+    query: {
+      enabled: !!addresses.governor && !!addresses.treasury,
+    },
+    contracts: [
+      {
+        abi: governorAbi,
+        address: addresses.governor,
+        chainId: chain.id,
+        functionName: 'votingDelay',
+      },
+      {
+        abi: governorAbi,
+        address: addresses.governor,
+        chainId: chain.id,
+        functionName: 'votingPeriod',
+      },
+      {
+        abi: treasuryAbi,
+        address: addresses.treasury,
+        chainId: chain.id,
+        functionName: 'delay',
+      },
+    ] as const,
+  })
+
+  const [votingDelay, votingPeriod, timelockDelay] = unpackOptionalArray(
+    governanceConfigData,
+    3
+  )
 
   const onSubmit = React.useCallback(
     async (values: FormValues) => {
@@ -222,13 +269,29 @@ export const ReviewProposalForm = ({
   if (isLoading) return null
 
   const tokensNeeded = Number(proposalVotesRequired ?? 0n)
+  const nowTimestamp = Math.floor(Date.now() / 1000)
+  const hasVotingDelay = votingDelay !== undefined && votingDelay !== null
+  const hasVotingPeriod = votingPeriod !== undefined && votingPeriod !== null
+  const hasTimelockDelay = timelockDelay !== undefined && timelockDelay !== null
+
+  const estimatedVotingStartsAt = hasVotingDelay
+    ? nowTimestamp + Number(votingDelay)
+    : undefined
+  const estimatedVotingEndsAt =
+    hasVotingDelay && hasVotingPeriod
+      ? nowTimestamp + Number(votingDelay) + Number(votingPeriod)
+      : undefined
+  const estimatedEarliestExecutionAt =
+    estimatedVotingEndsAt !== undefined && hasTimelockDelay
+      ? estimatedVotingEndsAt + Number(timelockDelay)
+      : undefined
 
   return (
     <Flex direction={'column'} width={'100%'} pb={'x24'}>
       <Flex direction={'column'} width={'100%'}>
         <Formik
           validationSchema={validationSchema}
-          initialValues={{ summary, title: title || '', transactions }}
+          initialValues={{ summary: summary || '', title: title || '', transactions }}
           validateOnMount={false}
           validateOnChange={false}
           validateOnBlur={false}
@@ -236,6 +299,75 @@ export const ReviewProposalForm = ({
         >
           {(formik) => (
             <form onSubmit={formik.handleSubmit} style={{ width: '100%' }}>
+              <Flex
+                justify={'space-between'}
+                align={'center'}
+                className={defaultInputLabelStyle}
+              >
+                <label>Proposal Preview</label>
+                <Button
+                  size={'sm'}
+                  variant={'secondary'}
+                  onClick={() => setIsEditingMetadata((state) => !state)}
+                >
+                  <Icon id={isEditingMetadata ? 'check' : 'pencil'} />
+                  {isEditingMetadata ? 'Done' : 'Edit'}
+                </Button>
+              </Flex>
+              <Stack
+                gap={'x3'}
+                p={'x4'}
+                mb={'x8'}
+                borderColor={'border'}
+                borderStyle={'solid'}
+                borderWidth={'normal'}
+                borderRadius={'curved'}
+              >
+                {isEditingMetadata ? (
+                  <ProposalDraftForm
+                    title={formik.values.title || ''}
+                    summary={formik.values.summary || ''}
+                    onTitleChange={(value) => {
+                      formik.setFieldValue('title', value)
+                      setTitle(value)
+                    }}
+                    onSummaryChange={(value) => {
+                      formik.setFieldValue('summary', value)
+                      setSummary(value)
+                    }}
+                    disabled={disabledForm}
+                    titleError={formik.errors['title']}
+                    summaryError={formik.errors['summary']}
+                  />
+                ) : (
+                  (() => {
+                    const { targets, calldata, values } = prepareProposalTransactions(
+                      formik.values.transactions
+                    )
+
+                    const previewProposal = {
+                      proposer: (address ||
+                        '0x0000000000000000000000000000000000000000') as `0x${string}`,
+                      description: formik.values.summary || '',
+                      title: formik.values.title || '',
+                      targets,
+                      calldatas: calldata,
+                      values: values.map((value) => value.toString()),
+                    } as unknown as Proposal
+
+                    return (
+                      <ProposalDescription
+                        title={formik.values.title || ''}
+                        proposal={previewProposal}
+                        collection={addresses.token || ''}
+                        onOpenProposalReview={async () => undefined}
+                        isPreview
+                      />
+                    )
+                  })()
+                )}
+              </Stack>
+
               <Transactions
                 disabled={disabledForm}
                 transactions={transactions}
@@ -243,29 +375,35 @@ export const ReviewProposalForm = ({
                 simulationError={simulationError}
               />
 
-              <Field name="title">
-                {() => (
-                  <TextInput
-                    {...formik.getFieldProps('title')}
-                    id={'title'}
-                    inputLabel={'Proposal Title'}
-                    disabled={disabledForm}
-                    errorMessage={formik.errors['title']}
-                  />
-                )}
-              </Field>
-
-              <Field name="summary">
-                {({ field }: FieldProps) => (
-                  <MarkdownEditor
-                    value={field.value}
-                    onChange={(value: string) => formik?.setFieldValue(field.name, value)}
-                    disabled={disabledForm}
-                    inputLabel={'Summary'}
-                    errorMessage={formik.errors['summary']}
-                  />
-                )}
-              </Field>
+              <label className={defaultInputLabelStyle}>
+                Governance Timeline (estimated)
+              </label>
+              <Stack
+                gap={'x2'}
+                p={'x4'}
+                mb={'x8'}
+                borderColor={'border'}
+                borderStyle={'solid'}
+                borderWidth={'normal'}
+                borderRadius={'curved'}
+              >
+                <Flex justify={'space-between'} align={'center'} mt={'x1'}>
+                  <Text color={'text3'}>Submitted:</Text>
+                  <Text>{formatTimestamp(nowTimestamp)}</Text>
+                </Flex>
+                <Flex justify={'space-between'} align={'center'}>
+                  <Text color={'text3'}>Voting starts: </Text>
+                  <Text>{formatTimestamp(estimatedVotingStartsAt)}</Text>
+                </Flex>
+                <Flex justify={'space-between'} align={'center'}>
+                  <Text color={'text3'}>Voting ends: </Text>
+                  <Text>{formatTimestamp(estimatedVotingEndsAt)}</Text>
+                </Flex>
+                <Flex justify={'space-between'} align={'center'}>
+                  <Text color={'text3'}>Earliest execution: </Text>
+                  <Text>{formatTimestamp(estimatedEarliestExecutionAt)}</Text>
+                </Flex>
+              </Stack>
 
               {(!!simulationError || failedSimulations.length > 0) && (
                 <Flex mt={'x4'} align={'center'} justify={'center'} gap={'x2'} pb={'x4'}>
@@ -295,6 +433,7 @@ export const ReviewProposalForm = ({
                 disabled={simulating || proposing}
                 handleClick={formik.handleSubmit}
                 h={'x15'}
+                display={{ '@initial': 'none', '@768': 'flex' }}
               >
                 <Box>{'Submit Proposal'}</Box>
                 {!!votes && (
@@ -312,6 +451,21 @@ export const ReviewProposalForm = ({
                   </Box>
                 )}
               </ContractButton>
+
+              <MobileProposalActionBar
+                showBack={!!onBackMobile}
+                onBack={onBackMobile}
+                showQueue={false}
+                showReset={!!onResetMobile}
+                onReset={onResetMobile}
+                showContinue
+                onContinue={() => {
+                  void formik.handleSubmit()
+                }}
+                continueDisabled={simulating || proposing}
+                continueLoading={simulating}
+                continueLabel={'Submit Proposal'}
+              />
             </form>
           )}
         </Formik>

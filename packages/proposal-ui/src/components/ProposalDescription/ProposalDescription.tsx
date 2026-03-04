@@ -18,7 +18,7 @@ import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
 import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
-import { atoms, Box, Flex, Paragraph } from '@buildeross/zord'
+import { atoms, Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
 import useSWR from 'swr'
@@ -33,21 +33,30 @@ import { Section } from './Section'
 import { StreamDetails } from './StreamDetails'
 
 type ProposalDescriptionProps = {
+  title?: string
   proposal: Proposal
   collection: string
   onOpenProposalReview: () => Promise<void>
+  isPreview?: boolean
 }
 
 export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
+  title,
   proposal,
   collection,
   onOpenProposalReview,
+  isPreview = false,
 }) => {
   const { displayName } = useEnsData(proposal.proposer)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
 
-  const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
+  const enableDecodedTransactions = !isPreview
+  const { decodedTransactions } = useDecodedTransactions(
+    chain.id,
+    proposal,
+    enableDecodedTransactions
+  )
 
   // Check if proposal has escrow milestone transactions
   const hasEscrowMilestone = useMemo(() => {
@@ -125,8 +134,24 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   )
 
   return (
-    <Flex className={propPageWrapper}>
-      <Flex direction={'column'} mt={{ '@initial': 'x6', '@768': 'x13' }}>
+    <Flex
+      direction="column"
+      w="100%"
+      mx="auto"
+      className={isPreview ? undefined : propPageWrapper}
+    >
+      <Flex
+        direction={'column'}
+        mt={isPreview ? undefined : { '@initial': 'x6', '@768': 'x13' }}
+      >
+        {title && (
+          <Section title="Title">
+            <Text fontSize={28} fontWeight={'display'}>
+              {title}
+            </Text>
+          </Section>
+        )}
+
         {hasEscrowMilestone && (
           <MilestoneDetails
             proposal={proposal}
@@ -155,7 +180,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Paragraph>
         </Section>
 
-        <Section title="Proposer">
+        <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
           <Flex direction={'row'} placeItems={'center'}>
             <Box
               backgroundColor="background2"
@@ -187,13 +212,15 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Flex>
         </Section>
 
-        <Section title="Proposed Transactions">
-          <DecodedTransactions
-            decodedTransactions={decodedTransactions}
-            chainId={chain.id}
-            addresses={addresses}
-          />
-        </Section>
+        {!isPreview && (
+          <Section title="Proposed Transactions">
+            <DecodedTransactions
+              decodedTransactions={decodedTransactions}
+              chainId={chain.id}
+              addresses={addresses}
+            />
+          </Section>
+        )}
       </Flex>
     </Flex>
   )
