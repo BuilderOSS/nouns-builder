@@ -68,7 +68,7 @@ const HolderItem = ({ address, balance, isDrop = false }: HolderItemProps) => {
         justify="space-between"
         gap="x3"
         py="x1"
-        px="x4"
+        px="x2"
         borderRadius="curved"
         className={holderLink}
       >

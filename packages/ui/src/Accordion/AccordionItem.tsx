@@ -31,6 +31,12 @@ export const AccordionItem: React.FC<{
   // Use controlled state if provided, otherwise use internal state
   const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen
 
+  React.useEffect(() => {
+    if (!isOpen) {
+      setAllowOverflow(false)
+    }
+  }, [isOpen])
+
   const handleToggle = () => {
     if (onToggle) {
       onToggle()

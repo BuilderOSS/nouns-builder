@@ -52,12 +52,9 @@ export const HoldersSection = ({
 
   return (
     <Box mb="x3">
-      <Flex align="center" justify="space-between" mb="x3">
+      <Flex align="center" mb="x3">
         <Text variant="label-sm" color="text3">
           {title}
-        </Text>
-        <Text variant="label-xs" color="text3">
-          Showing {filteredHolders.length}
         </Text>
       </Flex>
       <HoldersList holders={filteredHolders} isDrop={isDrop} />
