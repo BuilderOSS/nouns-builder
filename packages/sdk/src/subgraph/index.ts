@@ -21,6 +21,7 @@ export * from './requests/memberSnapshot'
 export * from './requests/proposalByExecutionTxHashQuery'
 export * from './requests/proposalQuery'
 export * from './requests/proposalsQuery'
+export * from './requests/swapRouteQuery'
 export * from './requests/sync'
 export * from './requests/tokensQuery'
 export * from './requests/userProposalVote'
@@ -42,11 +43,14 @@ export {
   type DaosForDashboardQuery,
   FeedEventType,
   OrderDirection,
+  type PaymentOptionFragment,
   type Proposal_Filter,
   type ProposalFragment,
   type ProposalVoteFragment,
   ProposalVoteSupport,
   Snapshot_OrderBy,
+  type SwapHopFragment,
+  type SwapRouteFragment,
   Token_OrderBy,
   type TokenWithDaoQuery,
   ZoraCoin_OrderBy,

@@ -2,6 +2,15 @@ import BigNumber from 'bignumber.js'
 
 export type BigNumberish = BigNumber | bigint | string | number
 
+type DecimalFormatMode = 'round' | 'truncate'
+
+type DecimalFormatOptions = {
+  minDecimals: number
+  maxDecimals: number
+  mode?: DecimalFormatMode
+  useGrouping?: boolean
+}
+
 const ONE_QUADRILLION = new BigNumber(1000000000000000)
 const ONE_TRILLION = new BigNumber(1000000000000)
 const ONE_BILLION = new BigNumber(1000000000)
@@ -68,6 +77,71 @@ export function formatCryptoVal(cryptoVal: BigNumber | BigNumberish | string) {
       : formatCryptoValUnder100K(parsedamount)
 }
 
+function formatDecimalValue(
+  value: BigNumber | BigNumberish | string,
+  { minDecimals, maxDecimals, mode = 'round', useGrouping = false }: DecimalFormatOptions
+): string {
+  const raw = typeof value === 'string' ? value : value?.toString()
+  const parsed = new BigNumber(raw)
+
+  if (!parsed.isFinite()) return '0'
+
+  const roundingMode =
+    mode === 'truncate' ? BigNumber.ROUND_DOWN : BigNumber.ROUND_HALF_UP
+  const normalized = parsed.decimalPlaces(maxDecimals, roundingMode)
+
+  let [integerPart, fractionalPart = ''] = normalized.toFixed(maxDecimals).split('.')
+
+  fractionalPart = fractionalPart.replace(/0+$/, '')
+  if (fractionalPart.length < minDecimals) {
+    fractionalPart = fractionalPart.padEnd(minDecimals, '0')
+  }
+
+  if (useGrouping) {
+    const sign = integerPart.startsWith('-') ? '-' : ''
+    const absInteger = sign ? integerPart.slice(1) : integerPart
+    integerPart = `${sign}${absInteger.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`
+  }
+
+  return fractionalPart.length > 0 ? `${integerPart}.${fractionalPart}` : integerPart
+}
+
+export function formatTokenAmount(value: BigNumber | BigNumberish | string): string {
+  const minDecimals = 2
+  const maxDecimals = 10
+  const mode: DecimalFormatMode = 'truncate'
+  const useGrouping = false
+
+  const formatted = formatDecimalValue(value, {
+    minDecimals,
+    maxDecimals,
+    mode,
+    useGrouping,
+  })
+
+  const raw = typeof value === 'string' ? value : value?.toString()
+  const parsed = new BigNumber(raw)
+  if (!parsed.isFinite()) return formatted
+
+  const zeroFormatted = formatDecimalValue(0, {
+    minDecimals,
+    maxDecimals,
+    mode,
+    useGrouping,
+  })
+
+  const threshold = new BigNumber(10).pow(1 - maxDecimals)
+  if (
+    parsed.isGreaterThan(0) &&
+    parsed.isLessThan(threshold) &&
+    formatted === zeroFormatted
+  ) {
+    return `<${threshold.toFixed(Math.max(0, maxDecimals - 1))}`
+  }
+
+  return formatted
+}
+
 /**
  * Format price to human-readable format with appropriate precision
  * Uses adaptive precision:
@@ -90,31 +164,32 @@ export function formatPrice(price: number | null | undefined): string {
 
   // For prices >= $1, use 2 decimals with thousand separators
   if (absValue >= 1) {
-    return `${sign}$${absValue.toLocaleString('en-US', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+    return `${sign}$${formatDecimalValue(absValue, {
+      minDecimals: 2,
+      maxDecimals: 2,
+      mode: 'round',
+      useGrouping: true,
     })}`
   }
 
   // For prices >= $0.01, use 4 decimals
   if (absValue >= 0.01) {
-    return `${sign}$${absValue.toFixed(4)}`
+    return `${sign}$${formatDecimalValue(absValue, {
+      minDecimals: 4,
+      maxDecimals: 4,
+      mode: 'round',
+      useGrouping: false,
+    })}`
   }
 
   // For very small prices (< $0.01), show up to 10 decimals
-  // This handles values like $0.0000000433 properly
-  let formatted = absValue.toFixed(10)
-
-  // Trim trailing zeros but keep at least 2 decimals
-  formatted = formatted.replace(/(\.\d*?)0+$/, '$1')
-  if (formatted.endsWith('.')) {
-    formatted += '00'
-  } else {
-    const decimalPart = formatted.split('.')[1]
-    if (decimalPart && decimalPart.length < 2) {
-      formatted += '0'
-    }
-  }
+  // This handles values like $0.0000000433 properly.
+  const formatted = formatDecimalValue(absValue, {
+    minDecimals: 2,
+    maxDecimals: 10,
+    mode: 'round',
+    useGrouping: false,
+  })
 
   return `${sign}$${formatted}`
 }

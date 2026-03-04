@@ -1,0 +1,10 @@
+fragment SwapHop on SwapHop {
+  id
+  tokenIn
+  tokenOut
+  poolId
+  fee
+  hooks
+  tickSpacing
+  hopIndex
+}

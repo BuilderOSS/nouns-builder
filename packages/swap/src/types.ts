@@ -226,6 +226,16 @@ type ClankerTokenInfo = BaseCoinInfo & {
 export type CoinInfo = EthCoinInfo | WethCoinInfo | ZoraCoinInfo | ClankerTokenInfo
 
 /**
+ * Minimal token info used for swap option selection.
+ */
+export type TokenInfo = {
+  address: Address
+  symbol: string
+  name: string
+  type: CoinType
+}
+
+/**
  * Pool key for Uniswap V4
  */
 export type PoolKey = {
@@ -248,4 +258,16 @@ export type PoolMaxSwapAmountResult = {
   tick: number
   /** Available liquidity */
   liquidity: bigint
+}
+
+/**
+ * Swap option for a coin
+ */
+export interface SwapOption {
+  /** Token info including address, symbol, and type */
+  token: TokenInfo
+  /** Swap path for this token <-> coin */
+  path: SwapPath
+  /** True if this is a direct swap (single hop or no hop) */
+  isDirectSwap: boolean
 }
