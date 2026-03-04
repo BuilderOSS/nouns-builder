@@ -37,8 +37,8 @@ function normalizeHopsForTradeDirection(
       tokenIn: hop.tokenIn as AddressType,
       tokenOut: hop.tokenOut as AddressType,
       poolId: hop.poolId as AddressType,
-      fee: hop.fee ? BigInt(hop.fee) : undefined,
-      hooks: hop.hooks as AddressType | undefined,
+      fee: hop.fee != null ? BigInt(hop.fee) : undefined,
+      hooks: hop.hooks ? (hop.hooks as AddressType) : undefined,
       tickSpacing: hop.tickSpacing ?? undefined,
     }))
   }
@@ -49,7 +49,7 @@ function normalizeHopsForTradeDirection(
     tokenOut: hop.tokenIn as AddressType,
     poolId: hop.poolId as AddressType,
     fee: hop.fee ? BigInt(hop.fee) : undefined,
-    hooks: hop.hooks as AddressType | undefined,
+    hooks: hop.hooks ? (hop.hooks as AddressType) : undefined,
     tickSpacing: hop.tickSpacing ?? undefined,
   }))
 }
@@ -221,6 +221,8 @@ export function convertSwapRouteToOptions(
       isDirectSwap: paymentOption.isDirectSwap,
     })
   }
+
+  options.reverse()
 
   // Add ETH option based on the WETH option (same hops), but token is native ETH
   const wethOpt = paymentOptions.find((opt) => {

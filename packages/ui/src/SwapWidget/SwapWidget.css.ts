@@ -5,6 +5,9 @@ export const swapInputContainer = style([
   atoms({
     p: 'x4',
     borderRadius: 'phat',
+    borderColor: 'border',
+    borderWidth: 'normal',
+    borderStyle: 'solid',
     backgroundColor: 'background1',
   }),
 ])

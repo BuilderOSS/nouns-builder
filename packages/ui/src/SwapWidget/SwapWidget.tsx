@@ -11,7 +11,7 @@ import {
 import { SwapError, SwapErrorCode, SwapErrorMessages } from '@buildeross/swap'
 import { CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedForSaleOfZoraCoins } from '@buildeross/utils/coining'
-import { formatPrice } from '@buildeross/utils/numbers'
+import { formatPrice, formatTokenAmount } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Address, erc20Abi, formatEther, parseEther } from 'viem'
@@ -190,6 +190,11 @@ export const SwapWidget = ({
   const inputBalance = isBuying
     ? balanceMap.get(selectedPaymentToken.toLowerCase())
     : balanceMap.get(coinAddress.toLowerCase())
+  const coinBalance = balanceMap.get(coinAddress.toLowerCase())
+  const receiveTokenBalance = isBuying
+    ? coinBalance
+    : balanceMap.get(selectedPaymentToken.toLowerCase())
+  const receiveTokenSymbol = isBuying ? symbol : (selectedOption?.token.symbol ?? 'ETH')
 
   // Use the path from the selected option
   const path = selectedOption?.path ?? null
@@ -333,7 +338,7 @@ export const SwapWidget = ({
               opt.token.address.toLowerCase() === selectedPaymentToken.toLowerCase()
           )?.token.symbol || 'ETH'
         : symbol
-      return `Amount exceeds pool limit (max: ${parseFloat(formatEther(poolMaxAmount!)).toFixed(4)} ${tokenSymbol})`
+      return `Amount exceeds pool limit (max: ${formatTokenAmount(formatEther(poolMaxAmount!))} ${tokenSymbol})`
     }
     if (!userAddress) {
       return 'Please connect your wallet'
@@ -469,6 +474,9 @@ export const SwapWidget = ({
     return amount * price
   }, [amountOut, isBuying, coinAddress, selectedPaymentToken, getTokenUsdPrice])
 
+  const hasValidQuote =
+    !!amountOut && amountOut > 0n && !exceedsBalance && !exceedsPoolLimit
+
   // Create dropdown options for payment tokens with balances
   const tokenOptions: SelectOption<Address>[] = useMemo(() => {
     return swapOptions.map((option) => {
@@ -483,7 +491,7 @@ export const SwapWidget = ({
       // Format label with balance if available
       let label: string
       if (balance !== undefined) {
-        const formattedBalance = parseFloat(formatEther(balance)).toFixed(4)
+        const formattedBalance = formatTokenAmount(formatEther(balance))
         label = `${displayName} (${formattedBalance} ${token.symbol})`
       } else {
         label = displayName
@@ -570,7 +578,7 @@ export const SwapWidget = ({
           </Text>
           {inputBalance !== undefined && (
             <Text variant="paragraph-xs" color="text4">
-              Balance: {parseFloat(formatEther(inputBalance)).toFixed(4)}
+              Balance: {formatTokenAmount(formatEther(inputBalance))}
             </Text>
           )}
         </Flex>
@@ -613,7 +621,7 @@ export const SwapWidget = ({
           !isLoadingPoolMax && (
             <Box mt="x2">
               <Text variant="paragraph-xs" color="warning">
-                Pool limit: {parseFloat(formatEther(poolMaxAmount)).toFixed(4)}{' '}
+                Pool limit: {formatTokenAmount(formatEther(poolMaxAmount))}{' '}
                 {isBuying
                   ? swapOptions.find(
                       (opt) =>
@@ -628,32 +636,31 @@ export const SwapWidget = ({
       </Box>
 
       {/* Output Display */}
-      {amountOut && amountOut > 0n && !exceedsBalance && !exceedsPoolLimit && (
-        <Box className={swapInputContainer} mt="x4">
-          <Text variant="label-sm" color="text3" mb="x2">
+      <Box className={swapInputContainer} mt="x4">
+        <Flex justify="space-between" align="center" mb="x2">
+          <Text variant="label-sm" color="text3">
             You receive (estimated)
           </Text>
-          <Text variant="heading-sm">
-            {parseFloat(formatEther(amountOut)).toFixed(6)}
-          </Text>
-          <Flex justify="space-between" align="center" mt="x1">
-            <Text variant="paragraph-sm" color="text4">
-              {isBuying
-                ? symbol
-                : swapOptions.find(
-                    (opt) =>
-                      opt.token.address.toLowerCase() ===
-                      selectedPaymentToken.toLowerCase()
-                  )?.token.symbol || 'ETH'}
+          {userAddress && receiveTokenBalance !== undefined && (
+            <Text variant="paragraph-xs" color="text4">
+              Balance: {formatTokenAmount(formatEther(receiveTokenBalance))}
             </Text>
-            {outputUsdValue !== null && (
-              <Text variant="paragraph-sm" color="text4">
-                ≈ {formatPrice(outputUsdValue)}
-              </Text>
-            )}
-          </Flex>
-        </Box>
-      )}
+          )}
+        </Flex>
+        <Text variant="heading-sm">
+          {hasValidQuote && amountOut ? formatTokenAmount(formatEther(amountOut)) : '--'}
+        </Text>
+        <Flex justify="space-between" align="center" mt="x1">
+          <Text variant="paragraph-sm" color="text4">
+            {receiveTokenSymbol}
+          </Text>
+          {hasValidQuote && outputUsdValue !== null && (
+            <Text variant="paragraph-sm" color="text4">
+              ≈ {formatPrice(outputUsdValue)}
+            </Text>
+          )}
+        </Flex>
+      </Box>
 
       {/* Pending Transaction Message */}
       {pendingTxHash && (
