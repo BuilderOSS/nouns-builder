@@ -24,7 +24,8 @@ export type ProposalLinkHandler = (
 
 export type ProposalCreateLinkHandler = (
   chainId: CHAIN_ID,
-  daoTokenAddress: AddressType
+  daoTokenAddress: AddressType,
+  stage?: 'draft' | 'transactions'
 ) => LinkOptions
 
 export type ProfileLinkHandler = (address: AddressType) => LinkOptions

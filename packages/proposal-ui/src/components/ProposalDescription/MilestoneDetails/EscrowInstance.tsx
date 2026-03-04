@@ -59,7 +59,7 @@ export const EscrowInstance = ({
 }: EscrowInstanceProps) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { addTransaction } = useProposalStore()
+  const { startProposalDraft } = useProposalStore()
   const { address } = useAccount()
   const config = useConfig()
   const { getProposalLink } = useLinks()
@@ -139,12 +139,15 @@ export const EscrowInstance = ({
         transactions: [releaseMilestone],
       }
 
-      addTransaction(releaseEscrowTxnData)
+      startProposalDraft({
+        transactions: [releaseEscrowTxnData],
+        disabled: false,
+      })
       onOpenProposalReview()
     },
     [
       onOpenProposalReview,
-      addTransaction,
+      startProposalDraft,
       invoiceData?.title,
       invoiceAddress,
       currentMilestone,

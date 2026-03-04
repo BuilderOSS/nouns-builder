@@ -84,15 +84,8 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
 
           return (
             <>
-              <Box display={{ '@initial': 'none', '@768': 'block' }}>
-                <DroposalPreview formik={formik} editionType={editionType} />
-              </Box>
-              <Text
-                mb="x8"
-                ml="x2"
-                style={{ marginTop: -30 }}
-                className={defaultHelperTextStyle}
-              >
+              <DroposalPreview formik={formik} editionType={editionType} />
+              <Text mb="x8" ml="x2" className={defaultHelperTextStyle}>
                 This droposal uses the ZORA 721 Contract.{' '}
                 <a
                   target="_blank"

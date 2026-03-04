@@ -19,7 +19,7 @@ export const DroposalPreview: React.FC<DroposalPreviewProps> = ({
     formik.values
   return (
     <StickyPreviewContainer align="stretch">
-      <Stack gap="x4">
+      <Stack gap="x6">
         <ContentPreview
           name={name || 'Collection name'}
           description={description || 'description'}
@@ -28,7 +28,7 @@ export const DroposalPreview: React.FC<DroposalPreviewProps> = ({
           mediaMimeType={mediaType}
           type="drop"
         />
-        <Flex mt="x4">
+        <Flex w="100%" justify="flex-end">
           <Box>
             <Text fontSize={12} color="text4" style={{ fontWeight: 'bold' }}>
               EDITION PRICE

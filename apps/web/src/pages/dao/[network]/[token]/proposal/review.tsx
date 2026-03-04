@@ -144,6 +144,29 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     }
   }, [handleCloseSuccessModal, proposalIdCreated])
 
+  useEffect(() => {
+    if (proposalIdCreated !== undefined) return
+    if (transactions.length > 0) return
+    if (title?.trim() || summary?.trim()) return
+
+    void push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        stage: 'draft',
+      },
+    })
+  }, [
+    proposalIdCreated,
+    transactions.length,
+    title,
+    summary,
+    push,
+    chain.slug,
+    addresses.token,
+  ])
+
   if (isLoading) return null
 
   if (!address)

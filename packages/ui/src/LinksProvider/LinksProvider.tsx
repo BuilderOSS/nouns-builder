@@ -80,9 +80,14 @@ const defaultGetCoinCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) 
   }
 }
 
-const defaultGetProposalCreateLink = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+const defaultGetProposalCreateLink = (
+  chainId: CHAIN_ID,
+  tokenAddress: AddressType,
+  stage?: 'draft' | 'transactions'
+) => {
+  const baseHref = `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`
   return {
-    href: `${BASE_URL}/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
+    href: stage ? `${baseHref}?stage=${stage}` : baseHref,
   }
 }
 

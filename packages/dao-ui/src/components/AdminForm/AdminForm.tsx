@@ -59,7 +59,7 @@ const vetoerAnimation = {
 }
 
 export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) => {
-  const createProposal = useProposalStore((state) => state.createProposal)
+  const startProposalDraft = useProposalStore((state) => state.startProposalDraft)
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
 
@@ -289,7 +289,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
       addresses.auction as Address
     )
 
-    createProposal({
+    startProposalDraft({
       disabled: false,
       title: undefined,
       summary: undefined,

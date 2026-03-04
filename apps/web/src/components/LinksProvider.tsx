@@ -51,9 +51,10 @@ export const LinksProvider: React.FC<LinksProviderProps> = ({ children }) => {
   )
 
   const getProposalCreateLink = React.useCallback(
-    (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+    (chainId: CHAIN_ID, tokenAddress: AddressType, stage?: 'draft' | 'transactions') => {
+      const baseHref = `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`
       return {
-        href: `/dao/${chainIdToSlug(chainId)}/${tokenAddress}/proposal/create`,
+        href: stage ? `${baseHref}?stage=${stage}` : baseHref,
       }
     },
     []

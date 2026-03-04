@@ -203,6 +203,52 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const canStartTransactions = missingDraftRequirements.length === 0
   const canContinueToReview = missingReviewRequirements.length === 0
+  const isMissingTitle = !title?.trim()
+  const isMissingDescription = !summary?.trim()
+  const isMissingTransactions = transactions.length === 0
+
+  const continueHelperText = useMemo(() => {
+    if (createStage === 'draft') {
+      if (!isMissingTitle && !isMissingDescription) return null
+      if (isMissingTitle && isMissingDescription) {
+        return 'To continue, add a title and description.'
+      }
+      if (isMissingTitle) {
+        return 'To continue, add a title.'
+      }
+      return 'To continue, add a description.'
+    }
+
+    if (!isMissingTitle && !isMissingDescription && !isMissingTransactions) {
+      return null
+    }
+
+    if (isMissingTransactions && !isMissingTitle && !isMissingDescription) {
+      return 'To continue, add at least one transaction.'
+    }
+
+    if (!isMissingTransactions && isMissingTitle && isMissingDescription) {
+      return 'To continue, add a title and description.'
+    }
+
+    if (!isMissingTransactions && isMissingTitle) {
+      return 'To continue, add a title.'
+    }
+
+    if (!isMissingTransactions && isMissingDescription) {
+      return 'To continue, add a description.'
+    }
+
+    if (isMissingTitle && isMissingDescription && isMissingTransactions) {
+      return 'To continue, add a title, description, and at least one transaction.'
+    }
+
+    if (isMissingTransactions && isMissingTitle) {
+      return 'To continue, add a title and at least one transaction.'
+    }
+
+    return 'To continue, add a description and at least one transaction.'
+  }, [createStage, isMissingDescription, isMissingTitle, isMissingTransactions])
 
   React.useEffect(() => {
     if (transactionType) {
@@ -349,6 +395,24 @@ const CreateProposalPage: NextPageWithLayout = () => {
         }}
       />
 
+      {continueHelperText && (
+        <Flex align={'center'} gap={'x2'} mb={'x4'}>
+          <Text variant={'paragraph-sm'} color={'text3'}>
+            {continueHelperText}
+          </Text>
+          {createStage === 'transactions' && (isMissingTitle || isMissingDescription) && (
+            <Text
+              variant={'paragraph-sm'}
+              color={'text3'}
+              style={{ cursor: 'pointer', textDecoration: 'underline' }}
+              onClick={() => setCreateStage('draft')}
+            >
+              Go to Write Proposal
+            </Text>
+          )}
+        </Flex>
+      )}
+
       {createStage === 'draft' ? (
         <Stack
           w={'100%'}
@@ -387,8 +451,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
                     </Box>
                     <Button
                       variant="secondary"
-                      h={'x18'}
-                      minH={'x18'}
+                      h={'x19'}
+                      minH={'x19'}
                       px={'x4'}
                       aria-label={'Cancel editing transaction'}
                       onClick={resetTransactionType}
