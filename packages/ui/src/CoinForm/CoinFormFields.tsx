@@ -1,7 +1,8 @@
 import { DEFAULT_CLANKER_TARGET_FDV } from '@buildeross/utils'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
+import FieldError from '../Fields/FieldError'
 import NumberInput from '../Fields/NumberInput'
 import TextArea from '../Fields/TextArea'
 import TextInput from '../Fields/TextInput'
@@ -19,6 +20,121 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
 }) => {
   const [showAdvancedFdv, setShowAdvancedFdv] = React.useState(false)
   const [showPropertiesSection, setShowPropertiesSection] = React.useState(false)
+  const propertyRowIdRef = React.useRef(0)
+  const [propertyRows, setPropertyRows] = React.useState<
+    Array<{
+      id: number
+      key: string
+      value: string
+    }>
+  >([])
+
+  const getRowsFromProperties = React.useCallback(
+    (properties?: Record<string, string>) => {
+      const rows = Object.entries(properties || {}).map(([key, value]) => ({
+        id: propertyRowIdRef.current++,
+        key,
+        value,
+      }))
+
+      if (rows.length === 0) {
+        return [{ id: propertyRowIdRef.current++, key: '', value: '' }]
+      }
+
+      return rows
+    },
+    []
+  )
+
+  const validatePropertyRows = React.useCallback(
+    (rows: Array<{ id: number; key: string; value: string }>) => {
+      const keySet = new Set<string>()
+
+      for (const row of rows) {
+        const key = row.key.trim()
+        const value = row.value.trim()
+
+        if (!key && !value) {
+          continue
+        }
+
+        if (!key || !value) {
+          return 'Each custom property needs both a key and a value.'
+        }
+
+        const normalizedKey = key.toLowerCase()
+        if (keySet.has(normalizedKey)) {
+          return 'Custom property keys must be unique.'
+        }
+
+        keySet.add(normalizedKey)
+      }
+
+      return undefined
+    },
+    []
+  )
+
+  const rowsToProperties = React.useCallback(
+    (rows: Array<{ id: number; key: string; value: string }>) =>
+      rows.reduce<Record<string, string>>((acc, row) => {
+        const key = row.key.trim()
+        const value = row.value.trim()
+        if (key && value) {
+          acc[key] = value
+        }
+
+        return acc
+      }, {}),
+    []
+  )
+
+  const arePropertiesEqual = React.useCallback(
+    (left: Record<string, string>, right: Record<string, string>) => {
+      const leftKeys = Object.keys(left)
+      const rightKeys = Object.keys(right)
+
+      if (leftKeys.length !== rightKeys.length) {
+        return false
+      }
+
+      return leftKeys.every((key) => left[key] === right[key])
+    },
+    []
+  )
+
+  const syncPropertyRows = React.useCallback(
+    (rows: Array<{ id: number; key: string; value: string }>) => {
+      setPropertyRows(rows)
+
+      const properties = rowsToProperties(rows)
+
+      formik.setFieldTouched('properties', true, false)
+      formik.setFieldValue('properties', properties, false)
+      formik.setFieldError('properties', validatePropertyRows(rows))
+    },
+    [formik, rowsToProperties, validatePropertyRows]
+  )
+
+  const propertiesError =
+    formik.touched.properties && typeof formik.errors.properties === 'string'
+      ? formik.errors.properties
+      : undefined
+
+  React.useEffect(() => {
+    const formikProperties = formik.values.properties || {}
+    const currentProperties = rowsToProperties(propertyRows)
+
+    if (!arePropertiesEqual(formikProperties, currentProperties)) {
+      setPropertyRows(getRowsFromProperties(formikProperties))
+    }
+  }, [
+    arePropertiesEqual,
+    formik.values.properties,
+    getRowsFromProperties,
+    propertyRows,
+    rowsToProperties,
+  ])
 
   // Handle media upload to store mime type
   const handleMediaUploadStart = React.useCallback(
@@ -199,7 +315,15 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
               on={showPropertiesSection}
               onToggle={() => {
                 const next = !showPropertiesSection
-                if (!next) formik.setFieldValue('properties', {})
+                if (!next) {
+                  setPropertyRows([])
+                  formik.setFieldTouched('properties', false, false)
+                  formik.setFieldValue('properties', {}, false)
+                  formik.setFieldError('properties', undefined)
+                }
+                if (next && propertyRows.length === 0) {
+                  setPropertyRows(getRowsFromProperties(formik.values.properties))
+                }
                 setShowPropertiesSection(next)
               }}
             />
@@ -207,41 +331,71 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
 
           {showPropertiesSection && (
             <Flex direction="column" gap="x2">
-              {Object.entries(formik.values.properties || {}).map(
-                ([key, value], index) => (
-                  <Flex key={index} gap="x2">
+              {propertyRows.map((row, index) => (
+                <Flex key={row.id} gap="x2" align="center">
+                  <Box flex={1} style={{ marginBottom: '-32px' }}>
                     <TextInput
                       id={`property-key-${index}`}
-                      value={key}
+                      value={row.key}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const newProps = { ...formik.values.properties }
-                        delete newProps[key]
-                        newProps[e.target.value] = value as string
-                        formik.setFieldValue('properties', newProps)
+                        const nextRows = propertyRows.map((item) =>
+                          item.id === row.id ? { ...item, key: e.target.value } : item
+                        )
+
+                        syncPropertyRows(nextRows)
                       }}
                       placeholder="Key"
                       formik={formik}
                     />
+                  </Box>
+                  <Box flex={1} style={{ marginBottom: '-32px' }}>
                     <TextInput
                       id={`property-value-${index}`}
-                      value={value as string}
+                      value={row.value}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const newProps = { ...formik.values.properties }
-                        newProps[key] = e.target.value
-                        formik.setFieldValue('properties', newProps)
+                        const nextRows = propertyRows.map((item) =>
+                          item.id === row.id ? { ...item, value: e.target.value } : item
+                        )
+
+                        syncPropertyRows(nextRows)
                       }}
                       placeholder="Value"
                       formik={formik}
                     />
-                  </Flex>
-                )
-              )}
+                  </Box>
+                  {propertyRows.length > 1 && (
+                    <Flex align="center" justify="center">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const nextRows = propertyRows.filter(
+                            (item) => item.id !== row.id
+                          )
+                          syncPropertyRows(nextRows)
+                        }}
+                        style={{
+                          minWidth: '32px',
+                          paddingLeft: '4px',
+                          paddingRight: '4px',
+                        }}
+                        aria-label={`Remove property ${index + 1}`}
+                      >
+                        <Icon id="cross" />
+                      </Button>
+                    </Flex>
+                  )}
+                </Flex>
+              ))}
               <Box
                 as="button"
                 type="button"
                 onClick={() => {
-                  const newProps = { ...formik.values.properties, '': '' }
-                  formik.setFieldValue('properties', newProps)
+                  syncPropertyRows([
+                    ...propertyRows,
+                    { id: propertyRowIdRef.current++, key: '', value: '' },
+                  ])
                 }}
                 style={{
                   padding: '8px',
@@ -253,6 +407,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
               >
                 + Add Property
               </Box>
+              {propertiesError && <FieldError message={propertiesError} />}
             </Flex>
           )}
         </Box>
