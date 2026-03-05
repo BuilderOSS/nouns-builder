@@ -17,6 +17,8 @@ interface LikeButtonProps {
   onLikeSuccess?: (txHash: string, amount: bigint) => void
 }
 
+type LikePopupMode = 'like' | 'alreadyLiked'
+
 const LikeButton: React.FC<LikeButtonProps> = ({
   coinAddress,
   // symbol,
@@ -66,6 +68,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const px = effectiveSize === 'lg' ? 'x6' : effectiveSize === 'xs' ? 'x3' : 'x4'
 
   const isLiked = hasBalance || justLiked
+  const popupInitialMode: LikePopupMode = isLiked ? 'alreadyLiked' : 'like'
 
   // Determine which heart icon to show
   const heartIcon = isLiked ? 'heartFilled' : 'heart'
@@ -108,7 +111,6 @@ const LikeButton: React.FC<LikeButtonProps> = ({
         size={size}
         style={{ minWidth: 'unset', opacity: 1 }}
         px={px}
-        disabled={isLiked}
       >
         <motion.div
           key={heartIcon}
@@ -135,6 +137,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
             chainId={chainId}
             onClose={handleClosePopup}
             onLikeSuccess={onLikeSuccessInner}
+            initialMode={popupInitialMode}
           />
         )}
       </PopUp>

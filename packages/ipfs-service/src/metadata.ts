@@ -1,5 +1,11 @@
 import { getFetchableUrls } from './gateway'
 
+export interface IpfsMetadataAttribute {
+  trait_type: string
+  value: string | number | boolean | null
+  display_type?: string
+}
+
 export interface IpfsMetadata {
   name?: string
   description?: string
@@ -7,14 +13,12 @@ export interface IpfsMetadata {
   imageUrl?: string
   animation_url?: string
   external_url?: string
+  properties?: Record<string, string | number | boolean | null>
   // Media type fields
   media_type?: string
   content_type?: string
   mimeType?: string
-  attributes?: Array<{
-    trait_type: string
-    value: string | number
-  }>
+  attributes?: IpfsMetadataAttribute[]
 }
 
 /**

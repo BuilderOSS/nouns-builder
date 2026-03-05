@@ -134,6 +134,27 @@ export const CoinInfo = ({
     isLoading: isMediaTypeLoading,
   } = useMediaType(animationUrl, metadata)
 
+  const propertyEntries = useMemo(() => {
+    if (!metadata) return []
+
+    if (metadata.properties) {
+      return Object.entries(metadata.properties)
+        .map(([key, value]) => ({ key: String(key).trim(), value: String(value).trim() }))
+        .filter((entry) => entry.key && entry.value)
+    }
+
+    if (!metadata.attributes?.length) {
+      return []
+    }
+
+    return metadata.attributes
+      .map((attribute) => ({
+        key: String(attribute.trait_type || '').trim(),
+        value: String(attribute.value ?? '').trim(),
+      }))
+      .filter((entry) => entry.key && entry.value)
+  }, [metadata])
+
   // Determine what media to show - prefer animation_url over image
   const shouldUseMediaPreview =
     animationUrl && mediaType && animationFetchableUrl && !isMediaTypeLoading
@@ -332,6 +353,33 @@ export const CoinInfo = ({
             </Text>
           </Box>
         </>
+      )}
+
+      {/* Properties */}
+      {propertyEntries.length > 0 && (
+        <Box mb="x3">
+          <Text variant="label-sm" color="text3" mb="x2">
+            Properties
+          </Text>
+          <Flex wrap="wrap" gap="x2">
+            {propertyEntries.map((property) => (
+              <Box
+                key={`${property.key}-${property.value}`}
+                px="x3"
+                py="x2"
+                borderRadius="curved"
+                borderStyle="solid"
+                borderWidth="normal"
+                borderColor="border"
+                backgroundColor="background1"
+              >
+                <Text variant="paragraph-sm" color="text2">
+                  {property.key}: {property.value}
+                </Text>
+              </Box>
+            ))}
+          </Flex>
+        </Box>
       )}
 
       {/* Created Date */}
