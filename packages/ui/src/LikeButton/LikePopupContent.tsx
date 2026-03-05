@@ -12,6 +12,7 @@ interface LikePopupContentProps {
   chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
   onClose: () => void
   onLikeSuccess?: (txHash: string, amount: bigint) => void
+  initialMode?: 'like' | 'alreadyLiked'
 }
 
 export const LikePopupContent: React.FC<LikePopupContentProps> = ({
@@ -19,6 +20,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
   chainId,
   onClose,
   onLikeSuccess,
+  initialMode = 'like',
 }) => {
   // Transaction state
   const [selectedAmount, setSelectedAmount] = useState<bigint | null>(null)
@@ -175,7 +177,6 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
     }
   }, [txSuccess, onClose])
 
-  // Loading state
   if (isLoadingData) {
     return (
       <Box
@@ -267,9 +268,20 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
       }}
     >
       <Stack gap="x2">
-        <Text variant="label-sm" align="center" style={{ fontWeight: 500 }}>
-          Like with
-        </Text>
+        {initialMode === 'alreadyLiked' ? (
+          <Stack gap="x1" align="center">
+            <Text variant="label-sm" align="center" style={{ fontWeight: 500 }}>
+              You already liked this coin
+            </Text>
+            <Text variant="paragraph-xs" color="text3" align="center">
+              Buy more with
+            </Text>
+          </Stack>
+        ) : (
+          <Text variant="label-sm" align="center" style={{ fontWeight: 500 }}>
+            Like with
+          </Text>
+        )}
         <Flex gap="x2" justify="center">
           {presetAmounts.map((preset) => {
             const isSelected = selectedAmount === preset.eth
