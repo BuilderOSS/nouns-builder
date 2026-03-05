@@ -1,4 +1,3 @@
-import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import {
   type ClankerTokenFragment,
@@ -38,7 +37,7 @@ export const useClankerTokensFull = ({
     : undefined
 
   const { data, error, isLoading, isValidating, mutate } = useSWR(
-    !!collectionAddress && enabled && isChainSupported && COINING_ENABLED
+    !!collectionAddress && enabled && isChainSupported
       ? ([SWR_KEYS.CLANKER_TOKENS_FULL, chainId, collectionAddress, first] as const)
       : null,
     async ([, _chainId, _collectionAddress, _first]) =>

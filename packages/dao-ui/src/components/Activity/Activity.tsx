@@ -39,7 +39,7 @@ export const Activity: React.FC<ActivityProps> = ({
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
 
-  const { createProposal } = useProposalStore()
+  const { startProposalDraft } = useProposalStore()
   const { address } = useAccount()
   const { query } = useQueryParams()
   const page: number = query.page ? Number(query.page) : 1
@@ -81,12 +81,7 @@ export const Activity: React.FC<ActivityProps> = ({
   })
 
   const handleProposalCreation = () => {
-    createProposal({
-      title: undefined,
-      summary: undefined,
-      disabled: false,
-      transactions: [],
-    })
+    startProposalDraft()
     onOpenProposalCreate()
   }
 

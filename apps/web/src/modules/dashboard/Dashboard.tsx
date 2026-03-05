@@ -6,7 +6,7 @@ import {
   useEnsData,
 } from '@buildeross/hooks'
 import { ProposalState } from '@buildeross/sdk/contract'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AddressType } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Stack, Text } from '@buildeross/zord'
@@ -23,11 +23,7 @@ import { UserProfileCard } from './UserProfileCard'
 
 export type DashboardDaoProps = DashboardDaoWithState
 
-export type DashboardProps = {
-  handleOpenCreateProposal: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
-}
-
-export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }) => {
+export const Dashboard: React.FC = () => {
   const { address } = useAccount()
   const { displayName, ensAvatar } = useEnsData(address)
   const [openAccordion, setOpenAccordion] = React.useState<'daos' | 'proposals' | null>(
@@ -118,10 +114,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ handleOpenCreateProposal }
           key={dao.tokenAddress}
           {...dao}
           userAddress={address as AddressType}
-          onOpenCreateProposal={handleOpenCreateProposal}
         />
       ))
-  }, [sortedDaos, address, handleOpenCreateProposal, hasLiveProposals])
+  }, [sortedDaos, address, hasLiveProposals])
 
   // Main content - always show Feed
   const mainContent = <Feed enableFilters />

@@ -1,0 +1,10 @@
+fragment PaymentOption on PaymentOption {
+  id
+  tokenAddress
+  tokenType
+  tokenName
+  tokenSymbol
+  startHopIndex
+  endHopIndex
+  isDirectSwap
+}

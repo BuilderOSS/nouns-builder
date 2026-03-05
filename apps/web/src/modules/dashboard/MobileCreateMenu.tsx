@@ -1,4 +1,3 @@
-import { COINING_ENABLED } from '@buildeross/constants/coining'
 import type { AddressType } from '@buildeross/types'
 import { Icon, Stack, Text } from '@buildeross/zord'
 import Link from 'next/link'
@@ -19,9 +18,7 @@ export interface MobileCreateMenuProps {
 
 export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({ userAddress }) => {
   const [selectorOpen, setSelectorOpen] = useState(false)
-  const [actionType, setActionType] = useState<'post' | 'proposal'>(
-    COINING_ENABLED ? 'post' : 'proposal'
-  )
+  const [actionType, setActionType] = useState<'post' | 'proposal'>('post')
 
   const handleCreatePost = () => {
     setActionType('post')
@@ -39,17 +36,15 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({ userAddress 
         <Text className={createMenuTitle}>What would you like to create?</Text>
 
         <div className={createMenuGrid}>
-          {COINING_ENABLED && (
-            <button className={createMenuCard} onClick={handleCreatePost} type="button">
-              <Icon id="brush" className={createMenuCardIcon} />
-              <Text fontSize="18" fontWeight="label">
-                Create Post
-              </Text>
-              <Text fontSize="14" color="text3">
-                Share updates and content with your DAO community
-              </Text>
-            </button>
-          )}
+          <button className={createMenuCard} onClick={handleCreatePost} type="button">
+            <Icon id="brush" className={createMenuCardIcon} />
+            <Text fontSize="18" fontWeight="label">
+              Create Post
+            </Text>
+            <Text fontSize="14" color="text3">
+              Share updates and content with your DAO community
+            </Text>
+          </button>
 
           <button className={createMenuCard} onClick={handleCreateProposal} type="button">
             <Icon id="checkInCircle" className={createMenuCardIcon} />

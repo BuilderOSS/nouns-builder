@@ -240,11 +240,18 @@ export function buildSwapRoute(coinAddress: Bytes, timestamp: BigInt): SwapRoute
       continue
     }
 
-    // Determine token type
-    let tokenType = CoinType.WETH
+    let tokenType = CoinType.UNKNOWN
+    let tokenName = 'Unknown Token'
+    let tokenSymbol = 'UNKNOWN'
     const info = loadCoinInfo(tokenBytes)
-    if (info) {
+    if (!info) {
+      log.warning('Payment option has missing coin info, using UNKNOWN metadata: {}', [
+        tokenAddr,
+      ])
+    } else {
       tokenType = info.type
+      tokenName = info.name
+      tokenSymbol = info.symbol
     }
 
     // Create payment option
@@ -253,6 +260,8 @@ export function buildSwapRoute(coinAddress: Bytes, timestamp: BigInt): SwapRoute
     option.route = routeId
     option.tokenAddress = tokenBytes
     option.tokenType = tokenType
+    option.tokenName = tokenName
+    option.tokenSymbol = tokenSymbol
     option.startHopIndex = startHopIndex
     option.endHopIndex = endHopIndex
     option.isDirectSwap = endHopIndex - startHopIndex == 0 // Single hop = direct swap

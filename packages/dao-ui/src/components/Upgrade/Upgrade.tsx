@@ -26,7 +26,7 @@ export const Upgrade = ({
   addresses: DaoContractAddresses
   onOpenProposalReview: () => void
 }) => {
-  const createProposal = useProposalStore((state) => state.createProposal)
+  const startProposalDraft = useProposalStore((state) => state.startProposalDraft)
   const chain = useChainStore((x) => x.chain)
 
   const {
@@ -49,7 +49,7 @@ export const Upgrade = ({
     )
 
   const handleUpgrade = (): void => {
-    createProposal({
+    startProposalDraft({
       transactions: [upgradeTransaction!],
       disabled: true,
       title: `Nouns Builder Upgrade v${latest} ${dayjs().format('YYYY-MM-DD')}`,

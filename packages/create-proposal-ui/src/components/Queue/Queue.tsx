@@ -55,7 +55,7 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
   }
 
   return (
-    <Stack style={{ maxWidth: 500, borderRadius: 16 }}>
+    <Stack style={{ borderRadius: 16 }}>
       <Flex justify={'space-between'} mb={embedded ? 'x5' : 'x6'}>
         <Text
           variant={embedded ? 'heading-xs' : undefined}

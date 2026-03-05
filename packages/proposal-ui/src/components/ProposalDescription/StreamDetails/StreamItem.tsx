@@ -75,7 +75,7 @@ export const StreamItem = ({
 }: StreamItemProps) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { addTransaction } = useProposalStore()
+  const { startProposalDraft } = useProposalStore()
   const { address } = useAccount()
   const config = useConfig()
   const { getProposalLink } = useLinks()
@@ -211,9 +211,16 @@ export const StreamItem = ({
       transactions: [cancelTransaction],
     }
 
-    addTransaction(cancelTxnData)
-    onOpenProposalReview()
-  }, [onOpenProposalReview, addTransaction, lockupAddress, liveData])
+    startProposalDraft({
+      transactions: [cancelTxnData],
+      disabled: false,
+    })
+    try {
+      await onOpenProposalReview()
+    } catch (error) {
+      console.error('Failed to open proposal review:', error)
+    }
+  }, [onOpenProposalReview, startProposalDraft, lockupAddress, liveData])
 
   const recipientDisplay = recipientName || walletSnippet(stream.recipient)
 

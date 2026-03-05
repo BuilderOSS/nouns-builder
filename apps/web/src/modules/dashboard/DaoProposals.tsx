@@ -1,5 +1,5 @@
 import { type DashboardDaoWithState } from '@buildeross/hooks'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { AddressType } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -18,17 +18,15 @@ export const DaoProposals = ({
   proposals,
   chainId,
   userAddress,
-  onOpenCreateProposal,
 }: DashboardDaoWithState & {
   userAddress?: AddressType
-  onOpenCreateProposal?: (chainId: CHAIN_ID, tokenAddress: AddressType) => void
 }) => {
-  const { getDaoLink } = useLinks()
+  const { getDaoLink, getProposalCreateLink } = useLinks()
 
   return (
     <Box>
       <Flex justify={'space-between'} mb={'x3'} align="center">
-        <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
+        <Link align="center" link={getDaoLink?.(chainId, tokenAddress)} isExternal>
           {contractImage ? (
             <Box mr="x2">
               <FallbackImage
@@ -49,16 +47,16 @@ export const DaoProposals = ({
           </Text>
         </Link>
 
-        {onOpenCreateProposal && (
-          <Button
-            variant="outline"
-            borderRadius="curved"
-            size={'sm'}
-            onClick={() => onOpenCreateProposal(chainId, tokenAddress)}
-          >
-            Create Proposal
-          </Button>
-        )}
+        <Button
+          as={Link}
+          link={getProposalCreateLink?.(chainId, tokenAddress)}
+          isExternal
+          variant="outline"
+          borderRadius="curved"
+          size={'sm'}
+        >
+          Create Proposal
+        </Button>
       </Flex>
       <Stack gap="x2">
         {proposals.map((proposal) => (

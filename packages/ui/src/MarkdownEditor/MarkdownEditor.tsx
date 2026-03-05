@@ -95,7 +95,28 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
       </Flex>
 
       {!ReactMdeComp ? (
-        <>{fallback ?? <MarkdownDisplay>{value}</MarkdownDisplay>}</>
+        fallback ? (
+          <>{fallback}</>
+        ) : disabled ? (
+          <MarkdownDisplay>{value}</MarkdownDisplay>
+        ) : (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            aria-label={typeof inputLabel === 'string' ? inputLabel : 'Markdown editor'}
+            style={{
+              width: '100%',
+              minHeight: 220,
+              resize: 'vertical',
+              borderRadius: 12,
+              border: '1px solid #d8d8d8',
+              padding: 12,
+              fontSize: 16,
+              fontFamily: 'inherit',
+              lineHeight: 1.5,
+            }}
+          />
+        )
       ) : (
         <ReactMdeComp
           readOnly={disabled}

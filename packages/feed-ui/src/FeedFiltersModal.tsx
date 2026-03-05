@@ -1,5 +1,4 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { COINING_ENABLED } from '@buildeross/constants/coining'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
@@ -175,7 +174,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
 
   const eventTypeLabels = useMemo(() => {
     let entries = Object.entries(EVENT_TYPE_LABELS)
-    if (hasNoCoinSupportedChains(formik.values.chainIds) || !COINING_ENABLED) {
+    if (hasNoCoinSupportedChains(formik.values.chainIds)) {
       entries = entries.filter(
         ([eventType]) => !COIN_EVENT_TYPES.includes(eventType as FeedEventType)
       )

@@ -21,13 +21,15 @@ type Actions = {
   addTransactions: (builderTransactions: BuilderTransaction[]) => void
   removeTransaction: (index: number) => void
   removeAllTransactions: () => void
-  createProposal: ({
-    title,
-    summary,
-    disabled,
-    transactions,
-  }: Pick<State, 'title' | 'summary' | 'transactions' | 'disabled'>) => void
   clearProposal: () => void
+  setTitle: (title?: string) => void
+  setSummary: (summary?: string) => void
+  setDraftMetadata: ({ title, summary }: Pick<State, 'title' | 'summary'>) => void
+  startProposalDraft: (
+    draft?: Partial<
+      Pick<State, 'title' | 'summary' | 'transactions' | 'disabled' | 'transactionType'>
+    >
+  ) => void
   setTransactionType: (type: TransactionFormType | null) => void
   resetTransactionType: () => void
 }
@@ -62,9 +64,20 @@ export const useProposalStore = create<State & Actions>()(
       removeAllTransactions: () => {
         set(() => ({ transactions: [] }))
       },
-      createProposal: ({ title, summary, disabled, transactions }) =>
-        set({ title, summary, disabled, transactions }),
       clearProposal: () => set(() => ({ ...initialState })),
+      setTitle: (title) => set({ title }),
+      setSummary: (summary) => set({ summary }),
+      setDraftMetadata: ({ title, summary }) => set({ title, summary }),
+      startProposalDraft: (draft = {}) => {
+        const sanitizedDraft = Object.fromEntries(
+          Object.entries(draft).filter(([, value]) => value !== undefined)
+        ) as Partial<State>
+
+        set(() => ({
+          ...initialState,
+          ...sanitizedDraft,
+        }))
+      },
       setTransactionType: (type) => set({ transactionType: type }),
       resetTransactionType: () => set({ transactionType: null }),
     }),

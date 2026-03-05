@@ -82,7 +82,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 
       justLikedTimeoutRef.current = setTimeout(() => {
         setJustLiked(false)
-      }, 3000)
+      }, 10000)
     },
     [onLikeSuccess]
   )
