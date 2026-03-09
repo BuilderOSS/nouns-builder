@@ -20,6 +20,7 @@ export enum TransactionType {
   ADD_ARTWORK = 'add-artwork',
   PIN_TREASURY_ASSET = 'pin-treasury-asset',
   STREAM_TOKENS = 'stream-tokens',
+  AIRDROP_TOKENS = 'airdrop-tokens',
   CREATOR_COIN = 'creator-coin',
   CONTENT_COIN = 'content-coin',
 }
