@@ -4,6 +4,12 @@ import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   MobileProposalActionBar,
+  PROPOSAL_SUMMARY_REQUIRED_ERROR,
+  PROPOSAL_TITLE_FORMAT_ERROR,
+  PROPOSAL_TITLE_MAX_ERROR,
+  PROPOSAL_TITLE_MAX_LENGTH,
+  PROPOSAL_TITLE_REGEX,
+  PROPOSAL_TITLE_REQUIRED_ERROR,
   ProposalDraftForm,
   ProposalStageIndicator,
   Queue,
@@ -180,16 +186,49 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const missingDraftRequirements = useMemo(() => {
     const requirements: string[] = []
 
-    if (!title?.trim()) {
+    const normalizedTitle = title?.trim() || ''
+    const normalizedSummary = summary?.trim() || ''
+
+    if (!normalizedTitle) {
       requirements.push('add a proposal title')
+    } else if (!PROPOSAL_TITLE_REGEX.test(normalizedTitle)) {
+      requirements.push('fix the proposal title format')
+    } else if (normalizedTitle.length > PROPOSAL_TITLE_MAX_LENGTH) {
+      requirements.push('shorten the proposal title')
     }
 
-    if (!summary?.trim()) {
+    if (!normalizedSummary) {
       requirements.push('add a proposal summary')
     }
 
     return requirements
   }, [title, summary])
+
+  const titleError = useMemo(() => {
+    const normalizedTitle = title?.trim() || ''
+
+    if (!normalizedTitle) {
+      return PROPOSAL_TITLE_REQUIRED_ERROR
+    }
+
+    if (!PROPOSAL_TITLE_REGEX.test(normalizedTitle)) {
+      return PROPOSAL_TITLE_FORMAT_ERROR
+    }
+
+    if (normalizedTitle.length > PROPOSAL_TITLE_MAX_LENGTH) {
+      return PROPOSAL_TITLE_MAX_ERROR
+    }
+
+    return undefined
+  }, [title])
+
+  const summaryError = useMemo(() => {
+    const normalizedSummary = summary?.trim() || ''
+    if (!normalizedSummary) {
+      return PROPOSAL_SUMMARY_REQUIRED_ERROR
+    }
+    return undefined
+  }, [summary])
 
   const missingReviewRequirements = useMemo(() => {
     const requirements = [...missingDraftRequirements]
@@ -406,6 +445,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
             summary={summary || ''}
             onTitleChange={setTitle}
             onSummaryChange={setSummary}
+            titleError={titleError}
+            summaryError={summaryError}
           />
         </Stack>
       ) : (

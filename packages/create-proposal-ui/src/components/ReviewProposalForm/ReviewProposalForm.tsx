@@ -83,6 +83,7 @@ export const ReviewProposalForm = ({
   const [proposing, setProposing] = useState<boolean>(false)
   const [skipSimulation, setSkipSimulation] = useState<boolean>(SKIP_SIMULATION)
   const [isEditingMetadata, setIsEditingMetadata] = useState<boolean>(false)
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false)
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
@@ -424,14 +425,48 @@ export const ReviewProposalForm = ({
                 </Flex>
               )}
 
+              {hasAttemptedSubmit && Object.keys(formik.errors).length > 0 && (
+                <Stack mb={'x4'} gap={'x1'}>
+                  {Object.entries(formik.errors).map(([key, value]) => (
+                    <Text key={key} color={'negative'}>
+                      - {String(value)}
+                    </Text>
+                  ))}
+                </Stack>
+              )}
+
               <ContractButton
                 chainId={chain.id}
                 mt={'x3'}
                 width={'100%'}
                 borderRadius={'curved'}
                 loading={simulating}
-                disabled={simulating || proposing}
-                handleClick={formik.handleSubmit}
+                disabled={
+                  simulating ||
+                  proposing ||
+                  !formik.values.title?.trim() ||
+                  !formik.values.summary?.trim() ||
+                  !formik.values.transactions?.length
+                }
+                handleClick={async () => {
+                  setHasAttemptedSubmit(true)
+                  const errors = await formik.validateForm()
+
+                  if (Object.keys(errors).length > 0) {
+                    formik.setTouched(
+                      {
+                        title: true,
+                        summary: true,
+                      },
+                      true
+                    )
+                    setError(undefined)
+                    return
+                  }
+
+                  setError(undefined)
+                  await formik.submitForm()
+                }}
                 h={'x15'}
                 display={{ '@initial': 'none', '@768': 'flex' }}
               >
@@ -460,9 +495,32 @@ export const ReviewProposalForm = ({
                 onReset={onResetMobile}
                 showContinue
                 onContinue={() => {
-                  void formik.handleSubmit()
+                  setHasAttemptedSubmit(true)
+                  void (async () => {
+                    const errors = await formik.validateForm()
+                    if (Object.keys(errors).length > 0) {
+                      formik.setTouched(
+                        {
+                          title: true,
+                          summary: true,
+                        },
+                        true
+                      )
+                      setError(undefined)
+                      return
+                    }
+
+                    setError(undefined)
+                    await formik.submitForm()
+                  })()
                 }}
-                continueDisabled={simulating || proposing}
+                continueDisabled={
+                  simulating ||
+                  proposing ||
+                  !formik.values.title?.trim() ||
+                  !formik.values.summary?.trim() ||
+                  !formik.values.transactions?.length
+                }
                 continueLoading={simulating}
                 continueLabel={'Submit Proposal'}
               />
