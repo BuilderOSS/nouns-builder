@@ -42,7 +42,7 @@
     "build": "tsup",
     "clean": "rm -rf dist .turbo",
     "lint": "pnpm type-check && eslint src --fix",
-    "postbuild": "cp src/globals.d.ts dist/",
+    "postbuild": "node -e \"require('fs').copyFileSync('src/globals.d.ts', 'dist/globals.d.ts')\"",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts",
