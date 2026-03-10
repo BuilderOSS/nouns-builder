@@ -121,6 +121,12 @@ export const AirdropItem = ({
       const { StandardMerkleTree } = await import('@openzeppelin/merkle-tree')
       const dump = typeof rawTree === 'string' ? JSON.parse(rawTree) : rawTree
       const tree = StandardMerkleTree.load(dump)
+      const loadedRoot = tree.root.toLowerCase()
+      const trustedRoot = airdrop.merkleRoot.toLowerCase()
+
+      if (loadedRoot !== trustedRoot) {
+        throw new Error('Merkle root mismatch')
+      }
 
       return {
         tree,
@@ -243,6 +249,10 @@ export const AirdropItem = ({
     chainId,
     refetchClaimState,
   ])
+
+  const openExternal = useCallback((url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }, [])
 
   const campaignBalanceDisplay =
     currentBalance !== undefined
@@ -478,22 +488,26 @@ export const AirdropItem = ({
 
       {isExecuted && airdrop.campaignAddress && (
         <Stack direction="row" gap="x2" wrap>
-          <a href={sablierCampaignHref} target="_blank" rel="noreferrer">
-            <Button variant="primary" size="sm">
-              Check Eligibility & Claim
-              <Icon id="arrowTopRight" />
-            </Button>
-          </a>
-          <a
-            href={`${ETHERSCAN_BASE_URL[chainId]}/address/${airdrop.campaignAddress}`}
-            target="_blank"
-            rel="noreferrer"
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => openExternal(sablierCampaignHref)}
           >
-            <Button variant="secondary" size="sm">
-              View Campaign Contract
-              <Icon id="arrowTopRight" />
-            </Button>
-          </a>
+            View Airdrop on Sablier
+            <Icon id="arrowTopRight" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() =>
+              openExternal(
+                `${ETHERSCAN_BASE_URL[chainId]}/address/${airdrop.campaignAddress}`
+              )
+            }
+          >
+            View Airdrop Contract
+            <Icon id="arrowTopRight" />
+          </Button>
         </Stack>
       )}
 

@@ -110,25 +110,29 @@ export const useAirdropData = (
             const nextCalldata = proposal.calldatas?.[index + 1]
             const nextTarget = proposal.targets?.[index + 1]
 
-            if (
-              nextCalldata &&
-              nextTarget &&
-              toLower(nextTarget) === toLower(params.token)
-            ) {
-              const transferDecoded = decodeFunctionData({
-                abi: erc20Abi,
-                data: nextCalldata as Hex,
-              })
+            try {
+              if (
+                nextCalldata &&
+                nextTarget &&
+                toLower(nextTarget) === toLower(params.token)
+              ) {
+                const transferDecoded = decodeFunctionData({
+                  abi: erc20Abi,
+                  data: nextCalldata as Hex,
+                })
 
-              if (transferDecoded.functionName === 'transfer' && transferDecoded.args) {
-                const [to, amount] = transferDecoded.args as [Address, bigint]
-                fundingTransfer = {
-                  token: params.token,
-                  to,
-                  amount,
-                  transactionIndex: index + 1,
+                if (transferDecoded.functionName === 'transfer' && transferDecoded.args) {
+                  const [to, amount] = transferDecoded.args as [Address, bigint]
+                  fundingTransfer = {
+                    token: params.token,
+                    to,
+                    amount,
+                    transactionIndex: index + 1,
+                  }
                 }
               }
+            } catch {
+              // Ignore malformed/unknown next tx while preserving decoded campaign data.
             }
 
             return {
@@ -183,25 +187,29 @@ export const useAirdropData = (
           const nextCalldata = proposal.calldatas?.[index + 1]
           const nextTarget = proposal.targets?.[index + 1]
 
-          if (
-            nextCalldata &&
-            nextTarget &&
-            toLower(nextTarget) === toLower(params.token)
-          ) {
-            const transferDecoded = decodeFunctionData({
-              abi: erc20Abi,
-              data: nextCalldata as Hex,
-            })
+          try {
+            if (
+              nextCalldata &&
+              nextTarget &&
+              toLower(nextTarget) === toLower(params.token)
+            ) {
+              const transferDecoded = decodeFunctionData({
+                abi: erc20Abi,
+                data: nextCalldata as Hex,
+              })
 
-            if (transferDecoded.functionName === 'transfer' && transferDecoded.args) {
-              const [to, amount] = transferDecoded.args as [Address, bigint]
-              fundingTransfer = {
-                token: params.token,
-                to,
-                amount,
-                transactionIndex: index + 1,
+              if (transferDecoded.functionName === 'transfer' && transferDecoded.args) {
+                const [to, amount] = transferDecoded.args as [Address, bigint]
+                fundingTransfer = {
+                  token: params.token,
+                  to,
+                  amount,
+                  transactionIndex: index + 1,
+                }
               }
             }
+          } catch {
+            // Ignore malformed/unknown next tx while preserving decoded campaign data.
           }
 
           return {

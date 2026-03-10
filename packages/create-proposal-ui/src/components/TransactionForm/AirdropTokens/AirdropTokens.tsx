@@ -3,7 +3,7 @@ import { uploadJson } from '@buildeross/ipfs-service/upload'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
-import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
+import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -22,8 +22,8 @@ import {
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
 import type { FormikHelpers, FormikProps } from 'formik'
-import { FieldArray, Form, Formik } from 'formik'
-import { useCallback, useMemo, useState } from 'react'
+import { FieldArray, Form, Formik, useFormikContext } from 'formik'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Address,
   encodeFunctionData,
@@ -43,6 +43,7 @@ import { AirdropTokensDetailsDisplay } from './AirdropTokensDetailsDisplay'
 const DECIMAL_REGEX = /^(\d+\.?\d*|\.\d+)$/
 const MAX_RECIPIENTS = 100
 const ZERO_PERCENT = 0n
+const WRAPPED_NATIVE_DISPLAY_SYMBOL = 'WETH'
 
 type ResolvedRecipient = {
   address: Address
@@ -53,6 +54,35 @@ const daysToSeconds = (days: number): number => Math.floor(days * 24 * 60 * 60)
 
 const dateStringToUnix = (dateValue: string): number =>
   Math.floor(new Date(dateValue).getTime() / 1000)
+
+const SyncAdminAddressFromEscrowDelegate = ({
+  escrowDelegate,
+  treasuryAddress,
+}: {
+  escrowDelegate?: string | null
+  treasuryAddress?: string | null
+}) => {
+  const formik = useFormikContext<AirdropTokensValues>()
+
+  useEffect(() => {
+    const preferred = escrowDelegate || treasuryAddress || ''
+    if (!preferred) return
+
+    const current = String(formik.values.adminAddress || '')
+    const touched = Boolean(formik.touched.adminAddress)
+
+    const manuallyEdited =
+      current.length > 0 &&
+      current !== String(treasuryAddress || '') &&
+      current !== String(escrowDelegate || '')
+
+    if (!touched && !manuallyEdited && current !== preferred) {
+      formik.setFieldValue('adminAddress', preferred, false)
+    }
+  }, [escrowDelegate, treasuryAddress, formik])
+
+  return null
+}
 
 export const AirdropTokens: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
@@ -72,21 +102,24 @@ export const AirdropTokens: React.FC = () => {
     treasuryAddress: addresses.treasury,
   })
 
-  const initialValues: AirdropTokensValues = {
-    airdropType: 'instant',
-    campaignName: '',
-    adminAddress: escrowDelegate || addresses.treasury || '',
-    campaignStartDate: '',
-    expirationDate: '',
-    vestingStartDate: '',
-    totalDurationDays: 365,
-    cliffDurationDays: 0,
-    cancelable: true,
-    transferable: false,
-    tokenAddress: undefined,
-    tokenMetadata: undefined,
-    recipients: [{ recipientAddress: '', amount: '' }],
-  }
+  const initialValues: AirdropTokensValues = useMemo(
+    () => ({
+      airdropType: 'instant',
+      campaignName: '',
+      adminAddress: addresses.treasury || '',
+      campaignStartDate: '',
+      expirationDate: '',
+      vestingStartDate: '',
+      totalDurationDays: 365,
+      cliffDurationDays: 0,
+      cancelable: true,
+      transferable: false,
+      tokenAddress: undefined,
+      tokenMetadata: undefined,
+      recipients: [{ recipientAddress: '', amount: '' }],
+    }),
+    [addresses.treasury]
+  )
 
   const handleCsvParsed = useCallback(
     (records: CsvRecord[], formik: FormikProps<AirdropTokensValues>) => {
@@ -196,6 +229,7 @@ export const AirdropTokens: React.FC = () => {
     const isEth = isNativeEth(values.tokenMetadata.address)
     const tokenDecimals = values.tokenMetadata.decimals
     const tokenSymbol = values.tokenMetadata.symbol
+    const displaySymbol = isEth ? WRAPPED_NATIVE_DISPLAY_SYMBOL : tokenSymbol
     const wrappedTokenAddress = isEth ? getWrappedTokenAddress(chain.id) : null
 
     if (isEth && !wrappedTokenAddress) {
@@ -385,8 +419,8 @@ export const AirdropTokens: React.FC = () => {
     const formattedTotal = formatCryptoVal(formatUnits(totalAmount, tokenDecimals))
     const summary =
       values.airdropType === 'instant'
-        ? `Create Instant airdrop of ${formattedTotal} ${tokenSymbol} to ${resolvedRecipients.length} recipients`
-        : `Create LL airdrop of ${formattedTotal} ${tokenSymbol} to ${resolvedRecipients.length} recipients`
+        ? `Create Instant airdrop of ${formattedTotal} ${displaySymbol} to ${resolvedRecipients.length} recipients`
+        : `Create LL airdrop of ${formattedTotal} ${displaySymbol} to ${resolvedRecipients.length} recipients`
 
     addTransaction({
       type: TransactionType.AIRDROP_TOKENS,
@@ -404,7 +438,7 @@ export const AirdropTokens: React.FC = () => {
     <Box w={'100%'}>
       <Formik
         initialValues={initialValues}
-        enableReinitialize={true}
+        enableReinitialize={false}
         validationSchema={airdropTokensSchema()}
         onSubmit={handleSubmit}
         validateOnBlur
@@ -413,7 +447,11 @@ export const AirdropTokens: React.FC = () => {
       >
         {(formik) => {
           const decimals = formik.values.tokenMetadata?.decimals ?? 18
-          const symbol = formik.values.tokenMetadata?.symbol ?? ''
+          const rawSymbol = formik.values.tokenMetadata?.symbol ?? ''
+          const isEth =
+            !!formik.values.tokenMetadata?.address &&
+            isNativeEth(formik.values.tokenMetadata.address)
+          const symbol = isEth ? WRAPPED_NATIVE_DISPLAY_SYMBOL : rawSymbol
           const balance = formik.values.tokenMetadata?.balance ?? 0n
           const isValid = formik.values.tokenMetadata?.isValid ?? false
 
@@ -459,6 +497,10 @@ export const AirdropTokens: React.FC = () => {
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Form>
+                <SyncAdminAddressFromEscrowDelegate
+                  escrowDelegate={escrowDelegate}
+                  treasuryAddress={addresses.treasury}
+                />
                 <Stack gap={'x5'}>
                   <AirdropTokensDetailsDisplay
                     totalAmountWithSymbol={totalAmountString}
@@ -501,6 +543,10 @@ export const AirdropTokens: React.FC = () => {
                         <Text>LL (Linear Vesting)</Text>
                       </label>
                     </Flex>
+                    <Text variant="paragraph-sm" color="text3" mt="x2">
+                      Instant sends claimable tokens immediately. LL creates a linear
+                      vesting stream when users claim.
+                    </Text>
                   </Box>
 
                   <SmartInput
@@ -515,378 +561,421 @@ export const AirdropTokens: React.FC = () => {
                         ? formik.errors.campaignName
                         : undefined
                     }
+                    helperText="Displayed as the campaign name in Sablier and proposal details."
                   />
 
                   <TokenSelectionForm />
-
-                  <SmartInput
-                    type={FIELD_TYPES.TEXT}
-                    formik={formik}
-                    {...formik.getFieldProps('adminAddress')}
-                    id="adminAddress"
-                    inputLabel="Admin Address"
-                    placeholder="0x... or ENS name"
-                    isAddress={true}
-                    helperText="Defaults to escrow delegate; admin can claw back after expiration."
-                    errorMessage={
-                      formik.touched.adminAddress && formik.errors.adminAddress
-                        ? formik.errors.adminAddress
-                        : undefined
-                    }
-                  />
-
-                  <Flex direction="column" gap="x4">
-                    <label
-                      style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
-                    >
-                      <Text variant="label-sm">Campaign Start Date</Text>
-                      <input
-                        type="datetime-local"
-                        value={formik.values.campaignStartDate}
-                        onChange={(e) =>
-                          formik.setFieldValue('campaignStartDate', e.target.value)
-                        }
-                      />
-                    </label>
-                    {formik.touched.campaignStartDate &&
-                      formik.errors.campaignStartDate && (
-                        <Text color="negative">- {formik.errors.campaignStartDate}</Text>
-                      )}
-
-                    <label
-                      style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
-                    >
-                      <Text variant="label-sm">Expiration Date</Text>
-                      <input
-                        type="datetime-local"
-                        value={formik.values.expirationDate}
-                        onChange={(e) =>
-                          formik.setFieldValue('expirationDate', e.target.value)
-                        }
-                      />
-                    </label>
-                    {formik.touched.expirationDate && formik.errors.expirationDate && (
-                      <Text color="negative">- {formik.errors.expirationDate}</Text>
-                    )}
-                  </Flex>
-
-                  {formik.values.airdropType === 'll' && (
-                    <Stack gap={'x4'}>
-                      <label
-                        style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
-                      >
-                        <Text variant="label-sm">Vesting Start Date</Text>
-                        <input
-                          type="datetime-local"
-                          value={formik.values.vestingStartDate || ''}
-                          onChange={(e) =>
-                            formik.setFieldValue('vestingStartDate', e.target.value)
-                          }
-                        />
-                      </label>
-
+                  {formik.values.tokenMetadata?.isValid ? (
+                    <>
                       <SmartInput
-                        type={FIELD_TYPES.NUMBER}
+                        type={FIELD_TYPES.TEXT}
                         formik={formik}
-                        {...formik.getFieldProps('totalDurationDays')}
-                        id="totalDurationDays"
-                        inputLabel="Total Duration (days)"
-                        placeholder="365"
-                        min={1}
-                        step={1}
+                        {...formik.getFieldProps('adminAddress')}
+                        id="adminAddress"
+                        inputLabel="Admin / Delegate"
+                        placeholder="0x... or ENS name"
+                        isAddress={true}
+                        helperText="This wallet will control the airdrop campaign. It can cancel streams (if enabled), claw back after expiration, and manage campaign settings."
                         errorMessage={
-                          formik.touched.totalDurationDays &&
-                          formik.errors.totalDurationDays
-                            ? String(formik.errors.totalDurationDays)
+                          formik.touched.adminAddress && formik.errors.adminAddress
+                            ? formik.errors.adminAddress
                             : undefined
                         }
                       />
 
-                      <SmartInput
-                        type={FIELD_TYPES.NUMBER}
+                      <DatePicker
+                        {...formik.getFieldProps('campaignStartDate')}
+                        placeholder={'yyyy-mm-dd'}
+                        inputLabel={'Campaign Start Date'}
                         formik={formik}
-                        {...formik.getFieldProps('cliffDurationDays')}
-                        id="cliffDurationDays"
-                        inputLabel="Cliff Duration (days)"
-                        placeholder="0"
-                        min={0}
-                        step={1}
+                        id={'campaignStartDate'}
+                        autoSubmit={false}
+                        dateFormat="Y-m-d"
                         errorMessage={
-                          formik.touched.cliffDurationDays &&
-                          formik.errors.cliffDurationDays
-                            ? String(formik.errors.cliffDurationDays)
+                          formik.touched.campaignStartDate &&
+                          formik.errors.campaignStartDate
+                            ? formik.errors.campaignStartDate
                             : undefined
                         }
+                        helperText="Claims are blocked until this date."
                       />
 
-                      <label
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formik.values.cancelable}
-                          onChange={(e) =>
-                            formik.setFieldValue('cancelable', e.target.checked)
-                          }
-                        />
-                        <Text>Cancelable</Text>
-                      </label>
-
-                      <label
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formik.values.transferable}
-                          onChange={(e) =>
-                            formik.setFieldValue('transferable', e.target.checked)
-                          }
-                        />
-                        <Text>Transferable</Text>
-                      </label>
-
-                      <Text variant="paragraph-sm" color="text3">
-                        Stream shape is fixed to linear for this version. Start and cliff
-                        unlock percentages are fixed to 0%.
-                      </Text>
-                    </Stack>
-                  )}
-
-                  <Box mt={'x5'}>
-                    <CsvUpload
-                      onCsvParsed={(records) => handleCsvParsed(records, formik)}
-                      onError={handleCsvError}
-                      disabled={formik.isValidating || formik.isSubmitting}
-                      templateFilename="sablier_airdrop.csv"
-                      templateContent="address,amount&#10;0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e,42.5&#10;0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe,85.25"
-                      maxRecords={MAX_RECIPIENTS}
-                      validateAmount={(amount, rowIndex) => {
-                        if (!amount) return `Row ${rowIndex + 1}: Missing amount`
-                        if (!DECIMAL_REGEX.test(amount)) {
-                          return `Row ${rowIndex + 1}: Invalid amount format (use decimal, no scientific notation)`
+                      <DatePicker
+                        {...formik.getFieldProps('expirationDate')}
+                        placeholder={'yyyy-mm-dd'}
+                        inputLabel={'Expiration Date'}
+                        formik={formik}
+                        id={'expirationDate'}
+                        autoSubmit={false}
+                        dateFormat="Y-m-d"
+                        errorMessage={
+                          formik.touched.expirationDate && formik.errors.expirationDate
+                            ? formik.errors.expirationDate
+                            : undefined
                         }
-                        const num = parseFloat(amount)
-                        if (isNaN(num) || num <= 0) {
-                          return `Row ${rowIndex + 1}: Amount must be greater than 0`
-                        }
-                        return null
-                      }}
-                    />
+                        helperText="Claims stop after this date; admin can claw back remaining funds."
+                      />
 
-                    {csvError && (
-                      <Box
-                        mt="x3"
-                        p="x3"
-                        backgroundColor="negative"
-                        borderRadius="curved"
-                      >
-                        <Text
-                          color="onNegative"
-                          fontSize="14"
-                          style={{ whiteSpace: 'pre-line' }}
-                        >
-                          {csvError}
-                        </Text>
-                      </Box>
-                    )}
+                      {formik.values.airdropType === 'll' && (
+                        <Stack gap={'x4'}>
+                          <DatePicker
+                            {...formik.getFieldProps('vestingStartDate')}
+                            placeholder={'yyyy-mm-dd'}
+                            inputLabel={'Vesting Start Date'}
+                            formik={formik}
+                            id={'vestingStartDate'}
+                            autoSubmit={false}
+                            dateFormat="Y-m-d"
+                            errorMessage={
+                              formik.touched.vestingStartDate &&
+                              formik.errors.vestingStartDate
+                                ? formik.errors.vestingStartDate
+                                : undefined
+                            }
+                            helperText="Vesting schedule anchor for LL streams. Claiming later can unlock accrued portions immediately."
+                          />
 
-                    <FieldArray name="recipients">
-                      {({ push, remove }) => (
-                        <>
-                          <Box mt="x6">
-                            <Flex justify="space-between" align="center" mb="x4">
-                              <Text fontWeight="display">Recipients</Text>
-                              <Text fontSize="14" color="text3">
-                                {formik.values.recipients.length} recipient
-                                {formik.values.recipients.length === 1 ? '' : 's'} •{' '}
-                                {totalAmountString || '0'}
+                          <SmartInput
+                            type={FIELD_TYPES.NUMBER}
+                            formik={formik}
+                            {...formik.getFieldProps('totalDurationDays')}
+                            id="totalDurationDays"
+                            inputLabel="Total Duration (days)"
+                            placeholder="365"
+                            min={1}
+                            step={1}
+                            errorMessage={
+                              formik.touched.totalDurationDays &&
+                              formik.errors.totalDurationDays
+                                ? String(formik.errors.totalDurationDays)
+                                : undefined
+                            }
+                            helperText="Total length of the vesting stream, counted from vesting start date."
+                          />
+
+                          <SmartInput
+                            type={FIELD_TYPES.NUMBER}
+                            formik={formik}
+                            {...formik.getFieldProps('cliffDurationDays')}
+                            id="cliffDurationDays"
+                            inputLabel="Cliff Duration (days)"
+                            placeholder="0"
+                            min={0}
+                            step={1}
+                            errorMessage={
+                              formik.touched.cliffDurationDays &&
+                              formik.errors.cliffDurationDays
+                                ? String(formik.errors.cliffDurationDays)
+                                : undefined
+                            }
+                            helperText="No vesting unlocks before the cliff. Use 0 for immediate linear vesting."
+                          />
+
+                          <Text variant="label-sm" mb="x1">
+                            Stream Options
+                          </Text>
+
+                          <label
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formik.values.cancelable}
+                              onChange={(e) =>
+                                formik.setFieldValue('cancelable', e.target.checked)
+                              }
+                            />
+                            <Box>
+                              <Text fontWeight="label">Cancelable</Text>
+                              <Text variant="paragraph-sm" color="text3">
+                                Allow admin to cancel streams and recover remaining
+                                unvested tokens
                               </Text>
-                            </Flex>
+                            </Box>
+                          </label>
 
-                            <Flex direction="column" gap="x4">
-                              {formik.values.recipients.map((_recipient, index) => {
-                                const getFieldError = (
-                                  fieldName: keyof AirdropRecipientFormValues
-                                ): string | undefined => {
-                                  const recipientError = formik.errors.recipients?.[index]
-                                  if (
-                                    !recipientError ||
-                                    typeof recipientError === 'string'
-                                  ) {
-                                    return undefined
-                                  }
-                                  const error = (recipientError as any)[fieldName]
-                                  return error ? String(error) : undefined
-                                }
-
-                                return (
-                                  <Box
-                                    key={index}
-                                    p="x4"
-                                    borderRadius="curved"
-                                    borderStyle="solid"
-                                    borderWidth="thin"
-                                    borderColor="border"
-                                    backgroundColor="background1"
-                                  >
-                                    <Flex align="center" gap="x3">
-                                      <Box flex="2" style={{ marginBottom: '-32px' }}>
-                                        <SmartInput
-                                          type={FIELD_TYPES.TEXT}
-                                          formik={formik}
-                                          {...formik.getFieldProps(
-                                            `recipients.${index}.recipientAddress`
-                                          )}
-                                          id={`recipients.${index}.recipientAddress`}
-                                          inputLabel={
-                                            index === 0 ? 'Recipient Address' : ''
-                                          }
-                                          placeholder={'0x... or ENS name'}
-                                          isAddress={true}
-                                          errorMessage={
-                                            formik.touched.recipients?.[index]
-                                              ?.recipientAddress
-                                              ? getFieldError('recipientAddress')
-                                              : undefined
-                                          }
-                                        />
-                                      </Box>
-
-                                      <Box flex="1" style={{ marginBottom: '-32px' }}>
-                                        <SmartInput
-                                          id={`recipients.${index}.amount`}
-                                          inputLabel={index === 0 ? 'Amount' : ''}
-                                          type={FIELD_TYPES.TEXT}
-                                          formik={formik}
-                                          {...formik.getFieldProps(
-                                            `recipients.${index}.amount`
-                                          )}
-                                          placeholder={'0'}
-                                          errorMessage={
-                                            formik.touched.recipients?.[index]?.amount
-                                              ? getFieldError('amount')
-                                              : undefined
-                                          }
-                                        />
-                                      </Box>
-
-                                      {formik.values.recipients.length > 1 && (
-                                        <Flex h="100%" align="center" justify="center">
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => remove(index)}
-                                            disabled={
-                                              formik.isValidating || formik.isSubmitting
-                                            }
-                                            style={{
-                                              alignSelf:
-                                                index === 0 ? 'flex-end' : 'center',
-                                              paddingRight: '4px',
-                                              paddingLeft: '4px',
-                                              minWidth: '32px',
-                                              marginTop: index === 0 ? '32px' : '0',
-                                            }}
-                                          >
-                                            <Icon id="cross" />
-                                          </Button>
-                                        </Flex>
-                                      )}
-                                    </Flex>
-                                  </Box>
-                                )
-                              })}
-
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAddRecipient(push)}
-                                disabled={
-                                  formik.isValidating ||
-                                  formik.isSubmitting ||
-                                  formik.values.recipients.length >= MAX_RECIPIENTS
-                                }
-                                style={{ alignSelf: 'flex-start' }}
-                              >
-                                <Icon id="plus" />
-                                Add Recipient
-                              </Button>
-                            </Flex>
-                          </Box>
-                        </>
+                          <label
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '8px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formik.values.transferable}
+                              onChange={(e) =>
+                                formik.setFieldValue('transferable', e.target.checked)
+                              }
+                            />
+                            <Box>
+                              <Text fontWeight="label">Transferable</Text>
+                              <Text variant="paragraph-sm" color="text3">
+                                Allow recipients to transfer their vested stream NFT
+                              </Text>
+                            </Box>
+                          </label>
+                        </Stack>
                       )}
-                    </FieldArray>
-                  </Box>
 
-                  {!factorySupported && (
-                    <Text color="negative">
-                      - This network does not currently support the selected Sablier
-                      airdrop type.
+                      <Box mt={'x5'}>
+                        <CsvUpload
+                          onCsvParsed={(records) => handleCsvParsed(records, formik)}
+                          onError={handleCsvError}
+                          disabled={formik.isValidating || formik.isSubmitting}
+                          templateFilename="sablier_airdrop.csv"
+                          templateContent="address,amount&#10;0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e,42.5&#10;0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe,85.25"
+                          maxRecords={MAX_RECIPIENTS}
+                          validateAmount={(amount, rowIndex) => {
+                            if (!amount) return `Row ${rowIndex + 1}: Missing amount`
+                            if (!DECIMAL_REGEX.test(amount)) {
+                              return `Row ${rowIndex + 1}: Invalid amount format (use decimal, no scientific notation)`
+                            }
+                            const num = parseFloat(amount)
+                            if (isNaN(num) || num <= 0) {
+                              return `Row ${rowIndex + 1}: Amount must be greater than 0`
+                            }
+                            return null
+                          }}
+                        />
+
+                        {csvError && (
+                          <Box
+                            mt="x3"
+                            p="x3"
+                            backgroundColor="negative"
+                            borderRadius="curved"
+                          >
+                            <Text
+                              color="onNegative"
+                              fontSize="14"
+                              style={{ whiteSpace: 'pre-line' }}
+                            >
+                              {csvError}
+                            </Text>
+                          </Box>
+                        )}
+
+                        <FieldArray name="recipients">
+                          {({ push, remove }) => (
+                            <>
+                              <Box mt="x6">
+                                <Flex justify="space-between" align="center" mb="x4">
+                                  <Text fontWeight="display">Recipients</Text>
+                                  <Text fontSize="14" color="text3">
+                                    {formik.values.recipients.length} recipient
+                                    {formik.values.recipients.length === 1
+                                      ? ''
+                                      : 's'} • {totalAmountString || '0'}
+                                  </Text>
+                                </Flex>
+
+                                <Flex direction="column" gap="x4">
+                                  {formik.values.recipients.map((_recipient, index) => {
+                                    const getFieldError = (
+                                      fieldName: keyof AirdropRecipientFormValues
+                                    ): string | undefined => {
+                                      const recipientError =
+                                        formik.errors.recipients?.[index]
+                                      if (
+                                        !recipientError ||
+                                        typeof recipientError === 'string'
+                                      ) {
+                                        return undefined
+                                      }
+                                      const error = (recipientError as any)[fieldName]
+                                      return error ? String(error) : undefined
+                                    }
+
+                                    return (
+                                      <Box
+                                        key={index}
+                                        p="x4"
+                                        borderRadius="curved"
+                                        borderStyle="solid"
+                                        borderWidth="thin"
+                                        borderColor="border"
+                                        backgroundColor="background1"
+                                      >
+                                        <Flex align="center" gap="x3">
+                                          <Box flex="2" style={{ marginBottom: '-32px' }}>
+                                            <SmartInput
+                                              type={FIELD_TYPES.TEXT}
+                                              formik={formik}
+                                              {...formik.getFieldProps(
+                                                `recipients.${index}.recipientAddress`
+                                              )}
+                                              id={`recipients.${index}.recipientAddress`}
+                                              inputLabel={
+                                                index === 0 ? 'Recipient Address' : ''
+                                              }
+                                              placeholder={'0x... or ENS name'}
+                                              isAddress={true}
+                                              errorMessage={
+                                                formik.touched.recipients?.[index]
+                                                  ?.recipientAddress
+                                                  ? getFieldError('recipientAddress')
+                                                  : undefined
+                                              }
+                                            />
+                                          </Box>
+
+                                          <Box flex="1" style={{ marginBottom: '-32px' }}>
+                                            <SmartInput
+                                              id={`recipients.${index}.amount`}
+                                              inputLabel={index === 0 ? 'Amount' : ''}
+                                              type={FIELD_TYPES.TEXT}
+                                              formik={formik}
+                                              {...formik.getFieldProps(
+                                                `recipients.${index}.amount`
+                                              )}
+                                              placeholder={'0'}
+                                              errorMessage={
+                                                formik.touched.recipients?.[index]?.amount
+                                                  ? getFieldError('amount')
+                                                  : undefined
+                                              }
+                                            />
+                                          </Box>
+
+                                          {formik.values.recipients.length > 1 && (
+                                            <Flex
+                                              h="100%"
+                                              align="center"
+                                              justify="center"
+                                            >
+                                              <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => remove(index)}
+                                                disabled={
+                                                  formik.isValidating ||
+                                                  formik.isSubmitting
+                                                }
+                                                style={{
+                                                  alignSelf:
+                                                    index === 0 ? 'flex-end' : 'center',
+                                                  paddingRight: '4px',
+                                                  paddingLeft: '4px',
+                                                  minWidth: '32px',
+                                                  marginTop: index === 0 ? '32px' : '0',
+                                                }}
+                                              >
+                                                <Icon id="cross" />
+                                              </Button>
+                                            </Flex>
+                                          )}
+                                        </Flex>
+                                      </Box>
+                                    )
+                                  })}
+
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleAddRecipient(push)}
+                                    disabled={
+                                      formik.isValidating ||
+                                      formik.isSubmitting ||
+                                      formik.values.recipients.length >= MAX_RECIPIENTS
+                                    }
+                                    style={{ alignSelf: 'flex-start' }}
+                                  >
+                                    <Icon id="plus" />
+                                    Add Recipient
+                                  </Button>
+                                </Flex>
+                              </Box>
+                            </>
+                          )}
+                        </FieldArray>
+                      </Box>
+                    </>
+                  ) : (
+                    <Text variant="paragraph-sm" color="text3">
+                      Select a token to continue configuring this airdrop.
                     </Text>
                   )}
 
-                  {!!formik.status && (
-                    <Text color="negative">- {String(formik.status)}</Text>
-                  )}
+                  {formik.values.tokenMetadata?.isValid && (
+                    <>
+                      {!factorySupported && (
+                        <Text color="negative">
+                          - This network does not currently support the selected Sablier
+                          airdrop type.
+                        </Text>
+                      )}
 
-                  <Button
-                    mt={'x9'}
-                    variant={'outline'}
-                    borderRadius={'curved'}
-                    type="submit"
-                    disabled={
-                      formik.isSubmitting ||
-                      !formik.values.tokenMetadata?.isValid ||
-                      formik.values.recipients.length === 0 ||
-                      !!balanceError ||
-                      !!csvError ||
-                      !factorySupported ||
-                      Object.keys(allErrors).length > 0
-                    }
-                  >
-                    {formik.isSubmitting
-                      ? 'Adding Transaction to Queue...'
-                      : 'Add Transaction to Queue'}
-                  </Button>
+                      {!!formik.status && (
+                        <Text color="negative">- {String(formik.status)}</Text>
+                      )}
 
-                  {!formik.isValidating && Object.keys(allErrors).length > 0 && (
-                    <Stack mt="x2" gap="x1">
-                      {Object.entries(allErrors).flatMap(([key, error]) => {
-                        if (typeof error === 'string') {
-                          return [
-                            <Text key={key} color="negative" textAlign="left">
-                              - {error}
-                            </Text>,
-                          ]
+                      <Button
+                        mt={'x9'}
+                        variant={'outline'}
+                        borderRadius={'curved'}
+                        type="submit"
+                        disabled={
+                          formik.isSubmitting ||
+                          !formik.values.tokenMetadata?.isValid ||
+                          formik.values.recipients.length === 0 ||
+                          !!balanceError ||
+                          !!csvError ||
+                          !factorySupported ||
+                          Object.keys(allErrors).length > 0
                         }
+                      >
+                        {formik.isSubmitting
+                          ? 'Adding Transaction to Queue...'
+                          : 'Add Transaction to Queue'}
+                      </Button>
 
-                        if (key === 'recipients' && Array.isArray(error)) {
-                          return error.flatMap((recipientError, index) => {
-                            if (
-                              typeof recipientError === 'object' &&
-                              recipientError !== null
-                            ) {
-                              return Object.entries(recipientError).map(
-                                ([field, msg]) => (
-                                  <Text
-                                    key={`recipient-${index}-${field}`}
-                                    color="negative"
-                                    textAlign="left"
-                                  >
-                                    - Recipient {index + 1} {field}: {String(msg)}
-                                  </Text>
-                                )
-                              )
+                      {!formik.isValidating && Object.keys(allErrors).length > 0 && (
+                        <Stack mt="x2" gap="x1">
+                          {Object.entries(allErrors).flatMap(([key, error]) => {
+                            if (typeof error === 'string') {
+                              return [
+                                <Text key={key} color="negative" textAlign="left">
+                                  - {error}
+                                </Text>,
+                              ]
                             }
-                            return []
-                          })
-                        }
 
-                        return []
-                      })}
-                    </Stack>
+                            if (key === 'recipients' && Array.isArray(error)) {
+                              return error.flatMap((recipientError, index) => {
+                                if (
+                                  typeof recipientError === 'object' &&
+                                  recipientError !== null
+                                ) {
+                                  return Object.entries(recipientError).map(
+                                    ([field, msg]) => (
+                                      <Text
+                                        key={`recipient-${index}-${field}`}
+                                        color="negative"
+                                        textAlign="left"
+                                      >
+                                        - Recipient {index + 1} {field}: {String(msg)}
+                                      </Text>
+                                    )
+                                  )
+                                }
+                                return []
+                              })
+                            }
+
+                            return []
+                          })}
+                        </Stack>
+                      )}
+                    </>
                   )}
 
                   {formik.values.recipients.length === 1 &&

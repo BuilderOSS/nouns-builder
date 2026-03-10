@@ -1,5 +1,8 @@
 import type { AddressType } from '@buildeross/types'
-import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
+import {
+  addressValidationOptionalSchema,
+  addressValidationSchemaWithError,
+} from '@buildeross/utils/yup'
 import * as yup from 'yup'
 
 import { TokenMetadataFormValidated, TokenMetadataSchema } from '../../shared'
@@ -43,10 +46,7 @@ export const RecipientFormSchema = yup.object({
 
 const sendTokensSchema = () =>
   yup.object({
-    tokenAddress: addressValidationSchemaWithError(
-      'Token address is invalid.',
-      'Token address is required.'
-    ).optional(),
+    tokenAddress: addressValidationOptionalSchema,
     tokenMetadata: TokenMetadataSchema.optional(),
     recipients: yup
       .array()

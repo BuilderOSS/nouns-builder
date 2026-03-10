@@ -28,7 +28,13 @@ export const AirdropDetails = ({ proposal }: AirdropDetailsProps) => {
       Array.from(
         new Set(
           airdrops
-            .map((airdrop) => getAddress(airdrop.token))
+            .map((airdrop) => {
+              try {
+                return getAddress(airdrop.token)
+              } catch {
+                return null
+              }
+            })
             .filter((address): address is Address => !!address)
         )
       ),
@@ -91,6 +97,8 @@ export const AirdropDetails = ({ proposal }: AirdropDetailsProps) => {
     const map = new Map<string, bigint>()
     let resultIndex = 0
 
+    // `balanceResults` is built from the same filtered list used in `balanceContracts`
+    // (only airdrops with a campaignAddress), so we only advance resultIndex for that subset.
     for (const airdrop of airdropsWithMetadata) {
       if (!airdrop.campaignAddress) continue
       const result = balanceResults[resultIndex]
