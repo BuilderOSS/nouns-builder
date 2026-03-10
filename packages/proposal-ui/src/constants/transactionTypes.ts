@@ -135,7 +135,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
   [TransactionType.AIRDROP_TOKENS]: {
     title: 'Airdrop Tokens',
     subTitle: 'Distribute tokens with Sablier merkle campaigns',
-    icon: 'airdrop',
+    icon: 'airdropSablier',
     iconBackdrop: 'rgba(243, 139, 0, 0.1)',
   },
   [TransactionType.CREATOR_COIN]: {

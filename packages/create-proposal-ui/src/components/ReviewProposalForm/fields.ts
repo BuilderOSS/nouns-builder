@@ -25,9 +25,10 @@ export interface FormValues {
 
 export const validationSchema = Yup.object().shape({
   title: Yup.string()
+    .trim()
     .required(PROPOSAL_TITLE_REQUIRED_ERROR)
     .matches(PROPOSAL_TITLE_REGEX, PROPOSAL_TITLE_FORMAT_ERROR)
     .max(PROPOSAL_TITLE_MAX_LENGTH, PROPOSAL_TITLE_MAX_ERROR),
-  summary: Yup.string().optional().required(PROPOSAL_SUMMARY_REQUIRED_ERROR),
+  summary: Yup.string().trim().optional().required(PROPOSAL_SUMMARY_REQUIRED_ERROR),
   transactions: Yup.array().min(1, 'Minimum one transaction required'),
 })

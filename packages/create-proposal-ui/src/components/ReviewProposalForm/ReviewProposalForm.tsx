@@ -298,234 +298,245 @@ export const ReviewProposalForm = ({
           validateOnBlur={false}
           onSubmit={onSubmit}
         >
-          {(formik) => (
-            <form onSubmit={formik.handleSubmit} style={{ width: '100%' }}>
-              <Flex
-                justify={'space-between'}
-                align={'center'}
-                className={defaultInputLabelStyle}
-              >
-                <label>Proposal Preview</label>
-                <Button
-                  size={'sm'}
-                  variant={'secondary'}
-                  onClick={() => setIsEditingMetadata((state) => !state)}
-                >
-                  <Icon id={isEditingMetadata ? 'check' : 'pencil'} />
-                  {isEditingMetadata ? 'Done' : 'Edit'}
-                </Button>
-              </Flex>
-              <Stack
-                gap={'x3'}
-                p={'x4'}
-                mb={'x8'}
-                borderColor={'border'}
-                borderStyle={'solid'}
-                borderWidth={'normal'}
-                borderRadius={'curved'}
-              >
-                {isEditingMetadata ? (
-                  <ProposalDraftForm
-                    title={formik.values.title || ''}
-                    summary={formik.values.summary || ''}
-                    onTitleChange={(value) => {
-                      formik.setFieldValue('title', value)
-                      setTitle(value)
-                    }}
-                    onSummaryChange={(value) => {
-                      formik.setFieldValue('summary', value)
-                      setSummary(value)
-                    }}
-                    disabled={disabledForm}
-                    titleError={formik.errors['title']}
-                    summaryError={formik.errors['summary']}
-                  />
-                ) : (
-                  (() => {
-                    const { targets, calldata, values } = prepareProposalTransactions(
-                      formik.values.transactions
-                    )
-
-                    const previewProposal = {
-                      proposer: (address ||
-                        '0x0000000000000000000000000000000000000000') as `0x${string}`,
-                      description: formik.values.summary || '',
-                      title: formik.values.title || '',
-                      targets,
-                      calldatas: calldata,
-                      values: values.map((value) => value.toString()),
-                    } as unknown as Proposal
-
-                    return (
-                      <ProposalDescription
-                        title={formik.values.title || ''}
-                        proposal={previewProposal}
-                        collection={addresses.token || ''}
-                        onOpenProposalReview={async () => undefined}
-                        isPreview
-                      />
-                    )
-                  })()
-                )}
-              </Stack>
-
-              <Transactions
-                disabled={disabledForm}
-                transactions={transactions}
-                simulations={failedSimulations}
-                simulationError={simulationError}
-              />
-
-              <label className={defaultInputLabelStyle}>
-                Governance Timeline (estimated)
-              </label>
-              <Stack
-                gap={'x2'}
-                p={'x4'}
-                mb={'x8'}
-                borderColor={'border'}
-                borderStyle={'solid'}
-                borderWidth={'normal'}
-                borderRadius={'curved'}
-              >
-                <Flex justify={'space-between'} align={'center'} mt={'x1'}>
-                  <Text color={'text3'}>Submitted:</Text>
-                  <Text>{formatTimestamp(nowTimestamp)}</Text>
-                </Flex>
-                <Flex justify={'space-between'} align={'center'}>
-                  <Text color={'text3'}>Voting starts: </Text>
-                  <Text>{formatTimestamp(estimatedVotingStartsAt)}</Text>
-                </Flex>
-                <Flex justify={'space-between'} align={'center'}>
-                  <Text color={'text3'}>Voting ends: </Text>
-                  <Text>{formatTimestamp(estimatedVotingEndsAt)}</Text>
-                </Flex>
-                <Flex justify={'space-between'} align={'center'}>
-                  <Text color={'text3'}>Earliest execution: </Text>
-                  <Text>{formatTimestamp(estimatedEarliestExecutionAt)}</Text>
-                </Flex>
-              </Stack>
-
-              {(!!simulationError || failedSimulations.length > 0) && (
-                <Flex mt={'x4'} align={'center'} justify={'center'} gap={'x2'} pb={'x4'}>
-                  <Flex
-                    align={'center'}
-                    justify={'center'}
-                    className={
-                      checkboxStyleVariants[skipSimulation ? 'confirmed' : 'default']
-                    }
-                    onClick={() => setSkipSimulation((s) => !s)}
-                  >
-                    {skipSimulation && <Icon fill="background1" id="check" />}
-                  </Flex>
-
-                  <Flex className={checkboxHelperText}>
-                    I understand the risks and want to submit without simulation.
-                  </Flex>
-                </Flex>
-              )}
-
-              {hasAttemptedSubmit && Object.keys(formik.errors).length > 0 && (
-                <Stack mb={'x4'} gap={'x1'}>
-                  {Object.entries(formik.errors).map(([key, value]) => (
-                    <Text key={key} color={'negative'}>
-                      - {String(value)}
-                    </Text>
-                  ))}
-                </Stack>
-              )}
-
-              <ContractButton
-                chainId={chain.id}
-                mt={'x3'}
-                width={'100%'}
-                borderRadius={'curved'}
-                loading={simulating}
-                disabled={
-                  simulating ||
-                  proposing ||
-                  !formik.values.title?.trim() ||
-                  !formik.values.summary?.trim() ||
-                  !formik.values.transactions?.length
+          {(formik) =>
+            (() => {
+              const flattenErrorMessages = (value: unknown): string[] => {
+                if (!value) return []
+                if (typeof value === 'string') return [value]
+                if (Array.isArray(value)) {
+                  return value.flatMap((item) => flattenErrorMessages(item))
                 }
-                handleClick={async () => {
-                  setHasAttemptedSubmit(true)
-                  const errors = await formik.validateForm()
+                if (typeof value === 'object') {
+                  return Object.values(value as Record<string, unknown>).flatMap((item) =>
+                    flattenErrorMessages(item)
+                  )
+                }
+                return []
+              }
 
-                  if (Object.keys(errors).length > 0) {
-                    formik.setTouched(
-                      {
-                        title: true,
-                        summary: true,
-                      },
-                      true
-                    )
-                    setError(undefined)
-                    return
-                  }
+              const validationMessages = flattenErrorMessages(formik.errors)
 
+              const validateAndSubmit = async () => {
+                setHasAttemptedSubmit(true)
+                const errors = await formik.validateForm()
+
+                if (Object.keys(errors).length > 0) {
+                  formik.setTouched(
+                    {
+                      title: true,
+                      summary: true,
+                    },
+                    true
+                  )
                   setError(undefined)
-                  await formik.submitForm()
-                }}
-                h={'x15'}
-                display={{ '@initial': 'none', '@768': 'flex' }}
-              >
-                <Box>{'Submit Proposal'}</Box>
-                {!!votes && (
-                  <Box
-                    position={'absolute'}
-                    right={{ '@initial': 'x2', '@768': 'x4' }}
-                    px={'x3'}
-                    py={'x1'}
-                    borderRadius={'normal'}
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                    }}
-                  >
-                    {Number(votes)} Votes
-                  </Box>
-                )}
-              </ContractButton>
-
-              <MobileProposalActionBar
-                showBack={!!onBackMobile}
-                onBack={onBackMobile}
-                showQueue={false}
-                showReset={!!onResetMobile}
-                onReset={onResetMobile}
-                showContinue
-                onContinue={() => {
-                  setHasAttemptedSubmit(true)
-                  void (async () => {
-                    const errors = await formik.validateForm()
-                    if (Object.keys(errors).length > 0) {
-                      formik.setTouched(
-                        {
-                          title: true,
-                          summary: true,
-                        },
-                        true
-                      )
-                      setError(undefined)
-                      return
-                    }
-
-                    setError(undefined)
-                    await formik.submitForm()
-                  })()
-                }}
-                continueDisabled={
-                  simulating ||
-                  proposing ||
-                  !formik.values.title?.trim() ||
-                  !formik.values.summary?.trim() ||
-                  !formik.values.transactions?.length
+                  return
                 }
-                continueLoading={simulating}
-                continueLabel={'Submit Proposal'}
-              />
-            </form>
-          )}
+
+                setError(undefined)
+                await formik.submitForm()
+              }
+
+              return (
+                <form onSubmit={formik.handleSubmit} style={{ width: '100%' }}>
+                  <Flex
+                    justify={'space-between'}
+                    align={'center'}
+                    className={defaultInputLabelStyle}
+                  >
+                    <label>Proposal Preview</label>
+                    <Button
+                      size={'sm'}
+                      variant={'secondary'}
+                      onClick={() => setIsEditingMetadata((state) => !state)}
+                    >
+                      <Icon id={isEditingMetadata ? 'check' : 'pencil'} />
+                      {isEditingMetadata ? 'Done' : 'Edit'}
+                    </Button>
+                  </Flex>
+                  <Stack
+                    gap={'x3'}
+                    p={'x4'}
+                    mb={'x8'}
+                    borderColor={'border'}
+                    borderStyle={'solid'}
+                    borderWidth={'normal'}
+                    borderRadius={'curved'}
+                  >
+                    {isEditingMetadata ? (
+                      <ProposalDraftForm
+                        title={formik.values.title || ''}
+                        summary={formik.values.summary || ''}
+                        onTitleChange={(value) => {
+                          formik.setFieldValue('title', value)
+                          setTitle(value)
+                        }}
+                        onSummaryChange={(value) => {
+                          formik.setFieldValue('summary', value)
+                          setSummary(value)
+                        }}
+                        disabled={disabledForm}
+                        titleError={formik.errors['title']}
+                        summaryError={formik.errors['summary']}
+                      />
+                    ) : (
+                      (() => {
+                        const { targets, calldata, values } = prepareProposalTransactions(
+                          formik.values.transactions
+                        )
+
+                        const previewProposal = {
+                          proposer: (address ||
+                            '0x0000000000000000000000000000000000000000') as `0x${string}`,
+                          description: formik.values.summary || '',
+                          title: formik.values.title || '',
+                          targets,
+                          calldatas: calldata,
+                          values: values.map((value) => value.toString()),
+                        } as unknown as Proposal
+
+                        return (
+                          <ProposalDescription
+                            title={formik.values.title || ''}
+                            proposal={previewProposal}
+                            collection={addresses.token || ''}
+                            onOpenProposalReview={async () => undefined}
+                            isPreview
+                          />
+                        )
+                      })()
+                    )}
+                  </Stack>
+
+                  <Transactions
+                    disabled={disabledForm}
+                    transactions={transactions}
+                    simulations={failedSimulations}
+                    simulationError={simulationError}
+                  />
+
+                  <label className={defaultInputLabelStyle}>
+                    Governance Timeline (estimated)
+                  </label>
+                  <Stack
+                    gap={'x2'}
+                    p={'x4'}
+                    mb={'x8'}
+                    borderColor={'border'}
+                    borderStyle={'solid'}
+                    borderWidth={'normal'}
+                    borderRadius={'curved'}
+                  >
+                    <Flex justify={'space-between'} align={'center'} mt={'x1'}>
+                      <Text color={'text3'}>Submitted:</Text>
+                      <Text>{formatTimestamp(nowTimestamp)}</Text>
+                    </Flex>
+                    <Flex justify={'space-between'} align={'center'}>
+                      <Text color={'text3'}>Voting starts: </Text>
+                      <Text>{formatTimestamp(estimatedVotingStartsAt)}</Text>
+                    </Flex>
+                    <Flex justify={'space-between'} align={'center'}>
+                      <Text color={'text3'}>Voting ends: </Text>
+                      <Text>{formatTimestamp(estimatedVotingEndsAt)}</Text>
+                    </Flex>
+                    <Flex justify={'space-between'} align={'center'}>
+                      <Text color={'text3'}>Earliest execution: </Text>
+                      <Text>{formatTimestamp(estimatedEarliestExecutionAt)}</Text>
+                    </Flex>
+                  </Stack>
+
+                  {(!!simulationError || failedSimulations.length > 0) && (
+                    <Flex
+                      mt={'x4'}
+                      align={'center'}
+                      justify={'center'}
+                      gap={'x2'}
+                      pb={'x4'}
+                    >
+                      <Flex
+                        align={'center'}
+                        justify={'center'}
+                        className={
+                          checkboxStyleVariants[skipSimulation ? 'confirmed' : 'default']
+                        }
+                        onClick={() => setSkipSimulation((s) => !s)}
+                      >
+                        {skipSimulation && <Icon fill="background1" id="check" />}
+                      </Flex>
+
+                      <Flex className={checkboxHelperText}>
+                        I understand the risks and want to submit without simulation.
+                      </Flex>
+                    </Flex>
+                  )}
+
+                  {hasAttemptedSubmit && validationMessages.length > 0 && (
+                    <Stack mb={'x4'} gap={'x1'}>
+                      {validationMessages.map((message, index) => (
+                        <Text key={`${message}-${index}`} color={'negative'}>
+                          - {message}
+                        </Text>
+                      ))}
+                    </Stack>
+                  )}
+
+                  <ContractButton
+                    chainId={chain.id}
+                    mt={'x3'}
+                    width={'100%'}
+                    borderRadius={'curved'}
+                    loading={simulating}
+                    disabled={
+                      simulating ||
+                      proposing ||
+                      !formik.values.title?.trim() ||
+                      !formik.values.summary?.trim() ||
+                      !formik.values.transactions?.length
+                    }
+                    handleClick={validateAndSubmit}
+                    h={'x15'}
+                    display={{ '@initial': 'none', '@768': 'flex' }}
+                  >
+                    <Box>{'Submit Proposal'}</Box>
+                    {!!votes && (
+                      <Box
+                        position={'absolute'}
+                        right={{ '@initial': 'x2', '@768': 'x4' }}
+                        px={'x3'}
+                        py={'x1'}
+                        borderRadius={'normal'}
+                        style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                        }}
+                      >
+                        {Number(votes)} Votes
+                      </Box>
+                    )}
+                  </ContractButton>
+
+                  <MobileProposalActionBar
+                    showBack={!!onBackMobile}
+                    onBack={onBackMobile}
+                    showQueue={false}
+                    showReset={!!onResetMobile}
+                    onReset={onResetMobile}
+                    showContinue
+                    onContinue={() => {
+                      void validateAndSubmit()
+                    }}
+                    continueDisabled={
+                      simulating ||
+                      proposing ||
+                      !formik.values.title?.trim() ||
+                      !formik.values.summary?.trim() ||
+                      !formik.values.transactions?.length
+                    }
+                    continueLoading={simulating}
+                    continueLabel={'Submit Proposal'}
+                  />
+                </form>
+              )
+            })()
+          }
         </Formik>
       </Flex>
 

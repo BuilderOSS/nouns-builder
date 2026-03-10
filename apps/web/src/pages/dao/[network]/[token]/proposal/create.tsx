@@ -242,9 +242,9 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const canStartTransactions = missingDraftRequirements.length === 0
   const canContinueToReview = missingReviewRequirements.length === 0
-  const isMissingTitle = !title?.trim()
-  const isMissingDescription = !summary?.trim()
-  const isMissingTransactions = transactions.length === 0
+
+  const hasDraftBlockers = missingDraftRequirements.length > 0
+  const hasTitleDraftBlocker = !!titleError
 
   const joinRequirements = (requirements: string[]) => {
     if (requirements.length === 1) return requirements[0]
@@ -253,18 +253,19 @@ const CreateProposalPage: NextPageWithLayout = () => {
   }
 
   const continueHelperText = useMemo(() => {
-    const requiredMissing: string[] = []
-
-    if (isMissingTitle) requiredMissing.push('a title')
-    if (isMissingDescription) requiredMissing.push('a description')
-    if (createStage === 'transactions' && isMissingTransactions) {
-      requiredMissing.push('at least one transaction')
+    if (createStage === 'draft') {
+      if (!missingDraftRequirements.length) return null
+      return `To continue, ${joinRequirements(missingDraftRequirements)}.`
     }
 
-    if (!requiredMissing.length) return null
+    if (!missingReviewRequirements.length) return null
 
-    return `To continue, add ${joinRequirements(requiredMissing)}.`
-  }, [createStage, isMissingDescription, isMissingTitle, isMissingTransactions])
+    if (hasDraftBlockers) {
+      return `To continue, fix proposal metadata (${joinRequirements(missingDraftRequirements)}) and queue at least one transaction if needed.`
+    }
+
+    return `To continue, ${joinRequirements(missingReviewRequirements)}.`
+  }, [createStage, hasDraftBlockers, missingDraftRequirements, missingReviewRequirements])
 
   React.useEffect(() => {
     if (transactionType) {
@@ -416,14 +417,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
           <Text variant={'paragraph-sm'} color={'text3'}>
             {continueHelperText}
           </Text>
-          {createStage === 'transactions' && (isMissingTitle || isMissingDescription) && (
+          {createStage === 'transactions' && hasDraftBlockers && (
             <Text
               variant={'paragraph-sm'}
               color={'text3'}
               style={{ cursor: 'pointer', textDecoration: 'underline' }}
               onClick={() => setCreateStage('draft')}
             >
-              Go to Write Proposal
+              {hasTitleDraftBlocker
+                ? 'Fix title in Write Proposal'
+                : 'Go to Write Proposal'}
             </Text>
           )}
         </Flex>
