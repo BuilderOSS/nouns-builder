@@ -178,7 +178,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
               const isHidden = isDaoHidden(dao.chainId, dao.collectionAddress)
               return (
                 <Flex
-                  key={dao.collectionAddress}
+                  key={`${dao.chainId}:${dao.collectionAddress}`}
                   align="center"
                   justify="space-between"
                   className={daoButton}
@@ -220,9 +220,11 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                       {chainMeta?.icon && (
                         <NextImage
                           src={chainMeta.icon}
-                          layout="fixed"
-                          objectFit="contain"
-                          style={{ borderRadius: '12px', maxHeight: '16px' }}
+                          style={{
+                            borderRadius: '12px',
+                            maxHeight: '16px',
+                            objectFit: 'contain',
+                          }}
                           alt=""
                           height={14}
                           width={14}
@@ -284,9 +286,9 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                           hideDao(dao.chainId, dao.collectionAddress)
                         }
                       }}
-                      title={isHidden ? 'Pin to shortlist' : 'Unpin from shortlist'}
-                      aria-label={`${isHidden ? 'Pin' : 'Unpin'} ${dao.name} ${
-                        isHidden ? 'to' : 'from'
+                      title={isHidden ? 'Unpin from shortlist' : 'Pin to shortlist'}
+                      aria-label={`${isHidden ? 'Unpin' : 'Pin'} ${dao.name} ${
+                        isHidden ? 'from' : 'to'
                       } shortlist`}
                     >
                       <Icon

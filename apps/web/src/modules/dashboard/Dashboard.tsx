@@ -282,7 +282,7 @@ export const Dashboard: React.FC = () => {
       <Stack gap="x6">
         <UserProfileCard
           address={address}
-          daoCount={daosForDisplay.length}
+          daoCount={sortedDaos.length}
           ensName={displayName}
           ensAvatar={ensAvatar}
         />

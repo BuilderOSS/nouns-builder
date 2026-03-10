@@ -298,9 +298,11 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                               {chainMeta?.icon && (
                                 <NextImage
                                   src={chainMeta.icon}
-                                  layout="fixed"
-                                  objectFit="contain"
-                                  style={{ borderRadius: '12px', maxHeight: '16px' }}
+                                  style={{
+                                    borderRadius: '12px',
+                                    maxHeight: '16px',
+                                    objectFit: 'contain',
+                                  }}
                                   alt=""
                                   height={16}
                                   width={16}

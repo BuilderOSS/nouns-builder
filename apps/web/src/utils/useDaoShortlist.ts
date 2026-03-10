@@ -10,6 +10,13 @@ const getDaoShortlistItemKey = (chainId: number, collectionAddress: string) =>
 
 const SHORTLIST_EVENT = 'dao-shortlist:update'
 
+type ShortlistEventDetail = {
+  hiddenStorageKey?: string
+  pinnedStorageKey?: string
+  hiddenDaoKeys?: string[]
+  pinnedDaoKeys?: string[]
+}
+
 export const useDaoShortlist = (address?: string) => {
   const hiddenStorageKey = React.useMemo(
     () => (address ? getDaoShortlistStorageKey(address) : undefined),
@@ -66,16 +73,17 @@ export const useDaoShortlist = (address?: string) => {
     if ((!hiddenStorageKey && !pinnedStorageKey) || typeof window === 'undefined') return
 
     const onShortlistUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<{
-        hiddenStorageKey: string
-        pinnedStorageKey: string
-        hiddenDaoKeys: string[]
-        pinnedDaoKeys: string[]
-      }>
-      if (customEvent.detail?.hiddenStorageKey === hiddenStorageKey) {
+      const customEvent = event as CustomEvent<ShortlistEventDetail>
+      if (
+        customEvent.detail?.hiddenStorageKey === hiddenStorageKey &&
+        customEvent.detail.hiddenDaoKeys
+      ) {
         setHiddenDaoKeys(customEvent.detail.hiddenDaoKeys)
       }
-      if (customEvent.detail?.pinnedStorageKey === pinnedStorageKey) {
+      if (
+        customEvent.detail?.pinnedStorageKey === pinnedStorageKey &&
+        customEvent.detail.pinnedDaoKeys
+      ) {
         setPinnedDaoKeys(customEvent.detail.pinnedDaoKeys.slice(0, 3))
       }
     }
@@ -118,9 +126,7 @@ export const useDaoShortlist = (address?: string) => {
           new CustomEvent(SHORTLIST_EVENT, {
             detail: {
               hiddenStorageKey,
-              pinnedStorageKey,
               hiddenDaoKeys: nextHiddenDaos,
-              pinnedDaoKeys,
             },
           })
         )
@@ -128,7 +134,7 @@ export const useDaoShortlist = (address?: string) => {
         console.error('Failed to persist hidden DAO shortlist state', e)
       }
     },
-    [hiddenStorageKey, pinnedStorageKey, pinnedDaoKeys]
+    [hiddenStorageKey]
   )
 
   const persistPinnedDaos = React.useCallback(
@@ -142,9 +148,7 @@ export const useDaoShortlist = (address?: string) => {
         window.dispatchEvent(
           new CustomEvent(SHORTLIST_EVENT, {
             detail: {
-              hiddenStorageKey,
               pinnedStorageKey,
-              hiddenDaoKeys,
               pinnedDaoKeys: limitedPinnedDaos,
             },
           })
@@ -153,7 +157,7 @@ export const useDaoShortlist = (address?: string) => {
         console.error('Failed to persist pinned DAO shortlist state', e)
       }
     },
-    [hiddenStorageKey, hiddenDaoKeys, pinnedStorageKey]
+    [pinnedStorageKey]
   )
 
   const isDaoHidden = React.useCallback(

@@ -198,9 +198,9 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
           size="xs"
           p="x0"
           onClick={onToggleHidden}
-          title={isHidden ? 'Pin to shortlist' : 'Unpin from shortlist'}
-          aria-label={`${isHidden ? 'Pin' : 'Unpin'} ${currentAuction.token.name} ${
-            isHidden ? 'to' : 'from'
+          title={isHidden ? 'Unpin from shortlist' : 'Pin to shortlist'}
+          aria-label={`${isHidden ? 'Unpin' : 'Pin'} ${currentAuction.token.name} ${
+            isHidden ? 'from' : 'to'
           } shortlist`}
         >
           <Icon id={isHidden ? 'plus' : 'dash'} size="sm" />
