@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+﻿import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { auctionAbi } from '@buildeross/sdk/contract'
@@ -6,7 +6,7 @@ import { AddressType } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
 import React, { useState } from 'react'
@@ -27,10 +27,26 @@ import {
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
+  isHidden: boolean
+  isPinned: boolean
+  pinLimitReached: boolean
+  onTogglePin: () => void
+  onToggleHidden: () => void
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
-  const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
+  const {
+    currentAuction,
+    chainId,
+    auctionAddress,
+    handleMutate,
+    tokenAddress,
+    isHidden,
+    isPinned,
+    pinLimitReached,
+    onTogglePin,
+    onToggleHidden,
+  } = props
 
   const { getAuctionLink } = useLinks()
   const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
@@ -78,7 +94,18 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   }
 
   if (!currentAuction) {
-    return <AuctionPaused {...props} tokenAddress={tokenAddress} chain={chain} />
+    return (
+      <AuctionPaused
+        {...props}
+        tokenAddress={tokenAddress}
+        chain={chain}
+        isHidden={isHidden}
+        isPinned={isPinned}
+        pinLimitReached={pinLimitReached}
+        onTogglePin={onTogglePin}
+        onToggleHidden={onToggleHidden}
+      />
+    )
   }
 
   const bidText = currentAuction.highestBid?.amount
@@ -88,7 +115,36 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const tokenImage = currentAuction?.token?.image
 
   return (
-    <Flex className={outerAuctionCard} direction="column" align="stretch">
+    <Flex
+      className={outerAuctionCard}
+      direction="column"
+      align="stretch"
+      style={{ position: 'relative' }}
+    >
+      <Flex
+        align="center"
+        gap="x1"
+        style={{ position: 'absolute', right: '12px', top: '12px' }}
+      >
+        {chain.icon && (
+          <Image
+            src={chain.icon}
+            style={{
+              borderRadius: '50%',
+              maxHeight: '16px',
+              maxWidth: '16px',
+              objectFit: 'contain',
+            }}
+            alt={chain.name}
+            height={16}
+            width={16}
+          />
+        )}
+        <Text fontSize={12} color="text3">
+          {chain.name}
+        </Text>
+      </Flex>
+
       <Link
         link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
         isExternal
@@ -119,28 +175,38 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
                 </Flex>
               )}
             </Box>
-            <Flex align="center" gap="x1">
-              {chain.icon && (
-                <Image
-                  src={chain.icon}
-                  style={{
-                    borderRadius: '50%',
-                    maxHeight: '16px',
-                    maxWidth: '16px',
-                    objectFit: 'contain',
-                  }}
-                  alt={chain.name}
-                  height={16}
-                  width={16}
-                />
-              )}
-              <Text fontSize={12} color="text3">
-                {chain.name}
-              </Text>
-            </Flex>
           </Flex>
         </Flex>
       </Link>
+
+      <Flex justify="flex-end" align="center" gap="x1" mb="x1">
+        <Button
+          variant="ghost"
+          size="xs"
+          p="x0"
+          onClick={onTogglePin}
+          disabled={!isPinned && pinLimitReached}
+          title={isPinned ? 'Unpin from top' : pinLimitReached ? 'Pin limit reached (3)' : 'Pin to top'}
+          aria-label={`${isPinned ? 'Unpin' : 'Pin'} ${currentAuction.token.name} ${
+            isPinned ? 'from' : 'to'
+          } top`}
+        >
+          <Icon id="pin" size="sm" fill={isPinned ? 'primary' : 'text3'} />
+        </Button>
+        <Button
+          variant="ghost"
+          size="xs"
+          p="x0"
+          onClick={onToggleHidden}
+          title={isHidden ? 'Pin to shortlist' : 'Unpin from shortlist'}
+          aria-label={`${isHidden ? 'Pin' : 'Unpin'} ${currentAuction.token.name} ${
+            isHidden ? 'to' : 'from'
+          } shortlist`}
+        >
+          <Icon id={isHidden ? 'plus' : 'dash'} size="sm" />
+        </Button>
+      </Flex>
+
       <Flex className={bidBox}>
         <BidActionButton {...props} isOver={isOver} isEnded={isEnded} />
       </Flex>
@@ -167,3 +233,5 @@ const DashCountdown = ({
     </Text>
   )
 }
+
+
