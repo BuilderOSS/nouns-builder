@@ -70,7 +70,6 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
       <Box
         position={'sticky'}
         pb={'x6'}
-        zIndex={HERO_CONTENT_LAYER}
         borderBottomColor={'border'}
         borderBottomStyle={'solid'}
         borderBottomWidth={'normal'}
@@ -79,6 +78,7 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
           transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
+          zIndex: HERO_CONTENT_LAYER,
         }}
         backgroundColor={'background1'}
       >

@@ -640,7 +640,7 @@ export const AirdropTokens: React.FC = () => {
                             formik={formik}
                             {...formik.getFieldProps('totalDurationDays')}
                             id="totalDurationDays"
-                            inputLabel="Total Duration (days)"
+                            inputLabel="Vesting Duration (days)"
                             placeholder="365"
                             min={1}
                             step={1}
