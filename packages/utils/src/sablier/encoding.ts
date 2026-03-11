@@ -1,6 +1,6 @@
 import { Address, encodeFunctionData, Hex } from 'viem'
 
-import { batchLockupAbi } from './constants'
+import { batchLockupAbi, factoryMerkleInstantAbi, factoryMerkleLLAbi } from './constants'
 import { toUD2x18 } from './math'
 
 /**
@@ -58,6 +58,47 @@ export interface CreateWithTimestampsLDParams {
   startTime: number // unix timestamp
   endTime: number // unix timestamp
   exponent: number // Exponent for exponential curve (UD2x18: 0 to ~18.446744073709551615)
+}
+
+export interface CreateMerkleInstantParams {
+  campaignName: string
+  campaignStartTime: number
+  expiration: number
+  initialAdmin: Address
+  ipfsCID: string
+  merkleRoot: `0x${string}`
+  token: Address
+}
+
+export interface CreateMerkleLLParams {
+  campaignName: string
+  campaignStartTime: number
+  cancelable: boolean
+  cliffDuration: number
+  cliffUnlockPercentage: bigint
+  expiration: number
+  initialAdmin: Address
+  ipfsCID: string
+  lockup: Address
+  merkleRoot: `0x${string}`
+  shape: string
+  startUnlockPercentage: bigint
+  token: Address
+  totalDuration: number
+  transferable: boolean
+  vestingStartTime: number
+}
+
+function validateUint40(value: number, name: string): void {
+  const UINT40_MAX = 1_099_511_627_775
+
+  if (!Number.isInteger(value)) {
+    throw new Error(`${name} must be an integer, got ${value}`)
+  }
+
+  if (value < 0 || value > UINT40_MAX) {
+    throw new Error(`${name} must be between 0 and ${UINT40_MAX}, got ${value}`)
+  }
 }
 
 /**
@@ -229,5 +270,77 @@ export function encodeCreateWithTimestampsLD(
     abi: batchLockupAbi,
     functionName: 'createWithTimestampsLD',
     args: [lockupDynamicAddress, tokenAddress, batch],
+  })
+}
+
+/**
+ * Encode createMerkleInstant calldata for Sablier airdrops factory
+ */
+export function encodeCreateMerkleInstant(
+  params: CreateMerkleInstantParams,
+  aggregateAmount: bigint,
+  recipientCount: bigint
+): Hex {
+  validateUint40(params.campaignStartTime, 'campaignStartTime')
+  validateUint40(params.expiration, 'expiration')
+
+  return encodeFunctionData({
+    abi: factoryMerkleInstantAbi,
+    functionName: 'createMerkleInstant',
+    args: [
+      {
+        campaignName: params.campaignName,
+        campaignStartTime: params.campaignStartTime,
+        expiration: params.expiration,
+        initialAdmin: params.initialAdmin,
+        ipfsCID: params.ipfsCID,
+        merkleRoot: params.merkleRoot,
+        token: params.token,
+      },
+      aggregateAmount,
+      recipientCount,
+    ],
+  })
+}
+
+/**
+ * Encode createMerkleLL calldata for Sablier airdrops factory
+ */
+export function encodeCreateMerkleLL(
+  params: CreateMerkleLLParams,
+  aggregateAmount: bigint,
+  recipientCount: bigint
+): Hex {
+  validateUint40(params.campaignStartTime, 'campaignStartTime')
+  validateUint40(params.cliffDuration, 'cliffDuration')
+  validateUint40(params.expiration, 'expiration')
+  validateUint40(params.totalDuration, 'totalDuration')
+  validateUint40(params.vestingStartTime, 'vestingStartTime')
+
+  return encodeFunctionData({
+    abi: factoryMerkleLLAbi,
+    functionName: 'createMerkleLL',
+    args: [
+      {
+        campaignName: params.campaignName,
+        campaignStartTime: params.campaignStartTime,
+        cancelable: params.cancelable,
+        cliffDuration: params.cliffDuration,
+        cliffUnlockPercentage: params.cliffUnlockPercentage,
+        expiration: params.expiration,
+        initialAdmin: params.initialAdmin,
+        ipfsCID: params.ipfsCID,
+        lockup: params.lockup,
+        merkleRoot: params.merkleRoot,
+        shape: params.shape,
+        startUnlockPercentage: params.startUnlockPercentage,
+        token: params.token,
+        totalDuration: params.totalDuration,
+        transferable: params.transferable,
+        vestingStartTime: params.vestingStartTime,
+      },
+      aggregateAmount,
+      recipientCount,
+    ],
   })
 }

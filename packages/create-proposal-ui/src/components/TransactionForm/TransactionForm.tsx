@@ -2,6 +2,7 @@ import { useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 
 import { AddArtwork } from './AddArtwork'
+import { AirdropTokens } from './AirdropTokens'
 import { ContentCoin } from './ContentCoin'
 import { CreatorCoin } from './CreatorCoin'
 import { CustomTransaction } from './CustomTransaction'
@@ -26,6 +27,7 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.SEND_TOKENS,
   TransactionType.SEND_NFT,
   TransactionType.STREAM_TOKENS,
+  TransactionType.AIRDROP_TOKENS,
   TransactionType.MILESTONE_PAYMENTS,
   TransactionType.MINT_GOVERNANCE_TOKENS,
   TransactionType.WALLET_CONNECT,
@@ -50,6 +52,7 @@ const FORMS: Record<TransactionFormType, React.FC> = {
   [TransactionType.SEND_NFT]: SendNft,
   [TransactionType.SEND_TOKENS]: SendTokens,
   [TransactionType.STREAM_TOKENS]: StreamTokens,
+  [TransactionType.AIRDROP_TOKENS]: AirdropTokens,
   [TransactionType.MILESTONE_PAYMENTS]: MilestonePayments,
   [TransactionType.NOMINATE_DELEGATE]: NominateEscrowDelegate,
   [TransactionType.WALLET_CONNECT]: WalletConnect,

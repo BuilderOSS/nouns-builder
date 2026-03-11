@@ -8,6 +8,7 @@ import { defaultInputLabelStyle } from '../styles'
 
 export type MarkdownEditorProps = {
   onChange: (value: string) => void
+  onBlur?: () => void
   value: string
   inputLabel: string | ReactElement
   errorMessage?: string
@@ -52,6 +53,7 @@ function pickReactMde(mod: any): React.ComponentType<any> | null {
 
 export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   onChange,
+  onBlur,
   value,
   inputLabel,
   errorMessage = '',
@@ -89,7 +91,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
   }, [])
 
   return (
-    <Stack pb={'x5'}>
+    <Stack pb={'x5'} onBlurCapture={onBlur}>
       <Flex justify={'space-between'}>
         <label className={defaultInputLabelStyle}>{inputLabel}</label>
       </Flex>

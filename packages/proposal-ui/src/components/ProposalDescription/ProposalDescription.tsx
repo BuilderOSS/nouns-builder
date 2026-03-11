@@ -17,7 +17,10 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
-import { getSablierContracts } from '@buildeross/utils/sablier/contracts'
+import {
+  getSablierAirdropFactories,
+  getSablierContracts,
+} from '@buildeross/utils/sablier/contracts'
 import { atoms, Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
@@ -25,6 +28,7 @@ import useSWR from 'swr'
 import { zeroAddress } from 'viem'
 
 import { propPageWrapper } from '../styles.css'
+import { AirdropDetails } from './AirdropDetails'
 import { CoinDetails } from './CoinDetails'
 import { DropDetails } from './DropDetails'
 import { MilestoneDetails } from './MilestoneDetails'
@@ -83,6 +87,19 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         (sablierContracts.batchLockup &&
           toLower(target) === toLower(sablierContracts.batchLockup)) ||
         (sablierContracts.lockup && toLower(target) === toLower(sablierContracts.lockup))
+    )
+  }, [proposal.targets, chain.id])
+
+  // Check if proposal has Sablier airdrop creation transactions
+  const hasSablierAirdrop = useMemo(() => {
+    if (!proposal.targets) return false
+
+    const { factoryMerkleInstant, factoryMerkleLL } = getSablierAirdropFactories(chain.id)
+
+    return proposal.targets.some(
+      (target) =>
+        (factoryMerkleInstant && toLower(target) === toLower(factoryMerkleInstant)) ||
+        (factoryMerkleLL && toLower(target) === toLower(factoryMerkleLL))
     )
   }, [proposal.targets, chain.id])
 
@@ -165,6 +182,8 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
             onOpenProposalReview={onOpenProposalReview}
           />
         )}
+
+        {hasSablierAirdrop && <AirdropDetails proposal={proposal} />}
 
         {hasCoinCreation && <CoinDetails proposal={proposal} />}
 

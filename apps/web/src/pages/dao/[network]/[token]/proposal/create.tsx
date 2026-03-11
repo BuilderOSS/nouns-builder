@@ -4,6 +4,12 @@ import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   MobileProposalActionBar,
+  PROPOSAL_SUMMARY_REQUIRED_ERROR,
+  PROPOSAL_TITLE_FORMAT_ERROR,
+  PROPOSAL_TITLE_MAX_ERROR,
+  PROPOSAL_TITLE_MAX_LENGTH,
+  PROPOSAL_TITLE_REGEX,
+  PROPOSAL_TITLE_REQUIRED_ERROR,
   ProposalDraftForm,
   ProposalStageIndicator,
   Queue,
@@ -15,6 +21,7 @@ import {
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
+import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
@@ -43,6 +50,37 @@ const createSelectOption = (type: TransactionType) => ({
   icon: <TransactionTypeIcon transactionType={type} />,
 })
 
+const normalizeTitle = (value?: string | null) => (value || '').trim()
+const normalizeSummary = (value?: string | null) => (value || '').trim()
+
+const validateTitle = (value?: string | null): string | undefined => {
+  const normalizedTitle = normalizeTitle(value)
+
+  if (!normalizedTitle) {
+    return PROPOSAL_TITLE_REQUIRED_ERROR
+  }
+
+  if (!PROPOSAL_TITLE_REGEX.test(normalizedTitle)) {
+    return PROPOSAL_TITLE_FORMAT_ERROR
+  }
+
+  if (normalizedTitle.length > PROPOSAL_TITLE_MAX_LENGTH) {
+    return PROPOSAL_TITLE_MAX_ERROR
+  }
+
+  return undefined
+}
+
+const validateSummary = (value?: string | null): string | undefined => {
+  const normalizedSummary = normalizeSummary(value)
+
+  if (!normalizedSummary) {
+    return PROPOSAL_SUMMARY_REQUIRED_ERROR
+  }
+
+  return undefined
+}
+
 const CreateProposalPage: NextPageWithLayout = () => {
   const { query, push } = useRouter()
   const addresses = useDaoStore((x) => x.addresses)
@@ -69,6 +107,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
       ? 'transactions'
       : 'draft'
   )
+  const [titleTouched, setTitleTouched] = React.useState(false)
+  const [summaryTouched, setSummaryTouched] = React.useState(false)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -83,6 +123,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
   })
 
   const { address } = useAccount()
+  const scrollDirection = useScrollDirection()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
@@ -180,16 +221,31 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const missingDraftRequirements = useMemo(() => {
     const requirements: string[] = []
 
-    if (!title?.trim()) {
+    const titleValidationError = validateTitle(title)
+    if (titleValidationError === PROPOSAL_TITLE_REQUIRED_ERROR) {
       requirements.push('add a proposal title')
+    } else if (titleValidationError === PROPOSAL_TITLE_FORMAT_ERROR) {
+      requirements.push('fix the proposal title format')
+    } else if (titleValidationError === PROPOSAL_TITLE_MAX_ERROR) {
+      requirements.push('shorten the proposal title')
     }
 
-    if (!summary?.trim()) {
+    if (validateSummary(summary)) {
       requirements.push('add a proposal summary')
     }
 
     return requirements
   }, [title, summary])
+
+  const titleError = useMemo(() => {
+    if (!titleTouched) return undefined
+    return validateTitle(title)
+  }, [title, titleTouched])
+
+  const summaryError = useMemo(() => {
+    if (!summaryTouched) return undefined
+    return validateSummary(summary)
+  }, [summary, summaryTouched])
 
   const missingReviewRequirements = useMemo(() => {
     const requirements = [...missingDraftRequirements]
@@ -203,9 +259,21 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const canStartTransactions = missingDraftRequirements.length === 0
   const canContinueToReview = missingReviewRequirements.length === 0
-  const isMissingTitle = !title?.trim()
-  const isMissingDescription = !summary?.trim()
-  const isMissingTransactions = transactions.length === 0
+
+  const canEnterStage = useMemo(
+    () => ({
+      draft: true,
+      transactions: canStartTransactions,
+      review: canContinueToReview,
+    }),
+    [canStartTransactions, canContinueToReview]
+  )
+
+  const canContinueFromCurrentStage =
+    createStage === 'draft' ? canEnterStage.transactions : canEnterStage.review
+
+  const hasDraftBlockers = missingDraftRequirements.length > 0
+  const hasTitleDraftBlocker = !!validateTitle(title)
 
   const joinRequirements = (requirements: string[]) => {
     if (requirements.length === 1) return requirements[0]
@@ -214,18 +282,24 @@ const CreateProposalPage: NextPageWithLayout = () => {
   }
 
   const continueHelperText = useMemo(() => {
-    const requiredMissing: string[] = []
-
-    if (isMissingTitle) requiredMissing.push('a title')
-    if (isMissingDescription) requiredMissing.push('a description')
-    if (createStage === 'transactions' && isMissingTransactions) {
-      requiredMissing.push('at least one transaction')
+    if (createStage === 'draft') {
+      if (!missingDraftRequirements.length) return null
+      return `To continue, ${joinRequirements(missingDraftRequirements)}.`
     }
 
-    if (!requiredMissing.length) return null
+    if (!missingReviewRequirements.length) return null
 
-    return `To continue, add ${joinRequirements(requiredMissing)}.`
-  }, [createStage, isMissingDescription, isMissingTitle, isMissingTransactions])
+    if (hasDraftBlockers) {
+      return `To continue, fix proposal metadata (${joinRequirements(missingDraftRequirements)}) and queue at least one transaction if needed.`
+    }
+
+    return `To continue, ${joinRequirements(missingReviewRequirements)}.`
+  }, [createStage, hasDraftBlockers, missingDraftRequirements, missingReviewRequirements])
+
+  // Keep the right queue column below both sticky top nav and sticky create header row.
+  // - nav visible: 80px nav + ~96px heading row
+  // - nav hidden: ~96px heading row
+  const queueStickyTopOffset = scrollDirection === 'down' ? 120 : 200
 
   React.useEffect(() => {
     if (transactionType) {
@@ -279,15 +353,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const onContinueStep = useCallback(async () => {
     if (createStage === 'draft') {
-      if (!canStartTransactions) return
+      if (!canEnterStage.transactions) return
       setCreateStage('transactions')
       setFurthestStage('transactions')
       return
     }
 
-    if (!canContinueToReview) return
+    if (!canEnterStage.review) return
     await openProposalReviewPage()
-  }, [createStage, canStartTransactions, canContinueToReview, openProposalReviewPage])
+  }, [createStage, canEnterStage, openProposalReviewPage])
 
   const onBackStep = useCallback(() => {
     if (createStage === 'transactions') {
@@ -297,17 +371,31 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const onResetProposal = useCallback(() => {
     clearProposal()
+    setTitleTouched(false)
+    setSummaryTouched(false)
     setCreateStage('draft')
     setFurthestStage('draft')
   }, [clearProposal])
 
   const onStageSelect = useCallback(
     (stage: 'draft' | 'transactions' | 'review') => {
-      if (stage === 'review') return
-      if (stage === 'transactions' && furthestStage !== 'transactions') return
-      setCreateStage(stage)
+      if (stage === 'draft') {
+        setCreateStage('draft')
+        return
+      }
+
+      if (stage === 'transactions') {
+        if (!canEnterStage.transactions) return
+        setCreateStage('transactions')
+        setFurthestStage('transactions')
+        return
+      }
+
+      if (createStage !== 'transactions') return
+      if (!canEnterStage.review) return
+      void openProposalReviewPage()
     },
-    [furthestStage]
+    [canEnterStage, createStage, openProposalReviewPage]
   )
 
   if (isLoading) return null
@@ -349,9 +437,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
         backDisabled={createStage === 'draft'}
         showReset
         onReset={onResetProposal}
-        continueDisabled={
-          createStage === 'draft' ? !canStartTransactions : !canContinueToReview
-        }
+        continueDisabled={!canContinueFromCurrentStage}
         onContinue={onContinueStep}
         hideActionsOnMobile
         queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
@@ -362,11 +448,12 @@ const CreateProposalPage: NextPageWithLayout = () => {
         showOnboardingCallout
         onStageSelect={onStageSelect}
         isStageClickable={(stage) => {
-          if (stage === 'draft') {
-            return furthestStage === 'transactions' && createStage !== 'draft'
-          }
+          if (stage === 'draft') return createStage !== 'draft'
           if (stage === 'transactions') {
-            return furthestStage === 'transactions' && createStage !== 'transactions'
+            return createStage !== 'transactions' && canEnterStage.transactions
+          }
+          if (stage === 'review') {
+            return createStage === 'transactions' && canEnterStage.review
           }
           return false
         }}
@@ -377,15 +464,24 @@ const CreateProposalPage: NextPageWithLayout = () => {
           <Text variant={'paragraph-sm'} color={'text3'}>
             {continueHelperText}
           </Text>
-          {createStage === 'transactions' && (isMissingTitle || isMissingDescription) && (
-            <Text
-              variant={'paragraph-sm'}
-              color={'text3'}
-              style={{ cursor: 'pointer', textDecoration: 'underline' }}
+          {createStage === 'transactions' && hasDraftBlockers && (
+            <Button
+              variant={'ghost'}
+              size={'sm'}
               onClick={() => setCreateStage('draft')}
+              style={{
+                minHeight: 'auto',
+                height: 'auto',
+                padding: 0,
+                textDecoration: 'underline',
+              }}
             >
-              Go to Write Proposal
-            </Text>
+              <Text variant={'paragraph-sm'} color={'text3'}>
+                {hasTitleDraftBlocker
+                  ? 'Fix title in Write Proposal'
+                  : 'Go to Write Proposal'}
+              </Text>
+            </Button>
           )}
         </Flex>
       )}
@@ -406,6 +502,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
             summary={summary || ''}
             onTitleChange={setTitle}
             onSummaryChange={setSummary}
+            onTitleBlur={() => setTitleTouched(true)}
+            onSummaryBlur={() => setSummaryTouched(true)}
+            titleError={titleError}
+            summaryError={summaryError}
           />
         </Stack>
       ) : (
@@ -493,7 +593,14 @@ const CreateProposalPage: NextPageWithLayout = () => {
           }
           rightColumn={
             transactions.length > 0 && !transactionType ? (
-              <Box className={styles.hideOnMobile}>
+              <Box
+                className={styles.hideOnMobile}
+                position={'sticky'}
+                style={{
+                  top: `${queueStickyTopOffset}px`,
+                  transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              >
                 <Queue embedded />
               </Box>
             ) : undefined
@@ -512,9 +619,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
         onContinue={() => {
           void onContinueStep()
         }}
-        continueDisabled={
-          createStage === 'draft' ? !canStartTransactions : !canContinueToReview
-        }
+        continueDisabled={!canContinueFromCurrentStage}
         continueLabel={'Continue'}
       />
     </Stack>

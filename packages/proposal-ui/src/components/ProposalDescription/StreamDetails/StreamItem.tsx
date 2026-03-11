@@ -1,5 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { useEthUsdPrice } from '@buildeross/hooks/useEthUsdPrice'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
@@ -9,6 +10,7 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { StreamGraph } from '@buildeross/ui/Graph'
 import { useLinks } from '@buildeross/ui/LinksProvider'
+import { Tooltip } from '@buildeross/ui/Tooltip'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { lockupAbi, StreamStatus } from '@buildeross/utils/sablier/constants'
@@ -28,6 +30,7 @@ import { Address, encodeFunctionData, formatUnits, isAddressEqual } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
+import { formatFeeDisplay } from '../utils/feeDisplay'
 import { SenderDelegation } from './SenderDelegation'
 import { gridStyle, linkStyle } from './StreamItem.css'
 
@@ -78,6 +81,7 @@ export const StreamItem = ({
   const { startProposalDraft } = useProposalStore()
   const { address } = useAccount()
   const config = useConfig()
+  const { price: ethUsdPrice } = useEthUsdPrice()
   const { getProposalLink } = useLinks()
 
   const { hasThreshold } = useVotes({
@@ -119,6 +123,10 @@ export const StreamItem = ({
 
   const duration = endTime - startTime
   const hasCliff = cliffTime > 0
+  const withdrawFee = useMemo(
+    () => formatFeeDisplay(liveData?.minFeeWei ?? 0n, ethUsdPrice),
+    [liveData?.minFeeWei, ethUsdPrice]
+  )
 
   // Check if stream is exponential (from LockupDynamic config or liveData)
   const exponent = useMemo(() => {
@@ -520,15 +528,26 @@ export const StreamItem = ({
             liveData.withdrawableAmount > 0n &&
             !liveData.wasCanceled &&
             !liveData.isDepleted && (
-              <ContractButton
-                chainId={chain.id}
-                variant="primary"
-                handleClick={() => handleWithdraw()}
-                disabled={withdrawingStreamId === liveData.streamId}
-                loading={withdrawingStreamId === liveData.streamId}
-              >
-                Withdraw Available Funds
-              </ContractButton>
+              <Stack gap="x2">
+                <Stack direction="row" align="center" gap="x1">
+                  <Text variant="paragraph-sm">
+                    Withdraw Fee: {withdrawFee.ethValue} ETH (≈ {withdrawFee.usdLabel})
+                  </Text>
+                  <Tooltip>
+                    Fee charged by Sablier for withdrawing from the stream.
+                  </Tooltip>
+                </Stack>
+
+                <ContractButton
+                  chainId={chain.id}
+                  variant="primary"
+                  handleClick={() => handleWithdraw()}
+                  disabled={withdrawingStreamId === liveData.streamId}
+                  loading={withdrawingStreamId === liveData.streamId}
+                >
+                  Withdraw Available Funds
+                </ContractButton>
+              </Stack>
             )}
 
           {/* Cancel button for sender */}

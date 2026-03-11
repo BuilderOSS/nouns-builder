@@ -1,5 +1,8 @@
 import { AddressType } from '@buildeross/types'
-import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
+import {
+  addressValidationOptionalSchema,
+  addressValidationSchemaWithError,
+} from '@buildeross/utils/yup'
 import { FormikHelpers } from 'formik'
 import * as yup from 'yup'
 
@@ -98,10 +101,7 @@ export const MilestonePaymentsFormSchema = yup.object({
       return value?.toLowerCase() !== this?.parent?.clientAddress?.toLowerCase()
     }
   ),
-  tokenAddress: addressValidationSchemaWithError(
-    'Token address is invalid.',
-    'Token address is required.'
-  ).optional(),
+  tokenAddress: addressValidationOptionalSchema,
   tokenMetadata: TokenMetadataSchema.optional(),
   safetyValveDate: yup
     .date()
