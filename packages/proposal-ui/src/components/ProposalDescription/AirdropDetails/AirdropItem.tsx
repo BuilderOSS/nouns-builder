@@ -99,10 +99,11 @@ export const AirdropItem = ({
     </Text>
   )
 
-  const ipfsHref = airdrop.ipfsCID ? `https://ipfs.io/ipfs/${airdrop.ipfsCID}` : ''
   const sablierCampaignHref = airdrop.campaignAddress
     ? `https://app.sablier.com/airdrops/campaign/${airdrop.campaignAddress}-${chainId}`
     : ''
+  const tokenEtherscanHref = `${ETHERSCAN_BASE_URL[chainId]}/token/${airdrop.token}`
+  const adminEtherscanHref = `${ETHERSCAN_BASE_URL[chainId]}/address/${airdrop.initialAdmin}`
 
   const {
     data: ipfsData,
@@ -283,7 +284,9 @@ export const AirdropItem = ({
           <Text variant="label-sm" color="tertiary">
             Token:
           </Text>
-          <Text variant="label-sm">{symbol || walletSnippet(airdrop.token)}</Text>
+          <a href={tokenEtherscanHref} target="_blank" rel="noreferrer">
+            <Text variant="label-sm">{symbol || walletSnippet(airdrop.token)}</Text>
+          </a>
         </Stack>
       </Stack>
 
@@ -298,7 +301,9 @@ export const AirdropItem = ({
           <Text variant="label-sm" color="tertiary">
             Admin:
           </Text>
-          <Text variant="label-sm">{walletSnippet(airdrop.initialAdmin)}</Text>
+          <a href={adminEtherscanHref} target="_blank" rel="noreferrer">
+            <Text variant="label-sm">{walletSnippet(airdrop.initialAdmin)}</Text>
+          </a>
         </Stack>
       </Stack>
 
@@ -358,26 +363,6 @@ export const AirdropItem = ({
         </Stack>
       )}
 
-      <Stack direction="column" gap="x1">
-        <Text variant="label-sm" color="tertiary">
-          Merkle Root
-        </Text>
-        <Text variant="paragraph-sm" style={{ wordBreak: 'break-all' }}>
-          {airdrop.merkleRoot}
-        </Text>
-      </Stack>
-
-      <Stack direction="column" gap="x1">
-        <Text variant="label-sm" color="tertiary">
-          IPFS CID
-        </Text>
-        <a href={ipfsHref} target="_blank" rel="noreferrer">
-          <Text variant="paragraph-sm" style={{ wordBreak: 'break-all' }}>
-            {airdrop.ipfsCID}
-          </Text>
-        </a>
-      </Stack>
-
       {isExecuted && campaignBalanceDisplay && (
         <Box
           p="x3"
@@ -385,7 +370,9 @@ export const AirdropItem = ({
           backgroundColor="background2"
           borderWidth="normal"
           borderStyle="solid"
-          borderColor={fundingState === 'underfunded' ? 'negative' : 'border'}
+          borderColor={
+            fundingState === 'underfunded' && !hasAnyClaims ? 'negative' : 'border'
+          }
         >
           <Stack gap="x1">
             <Text variant="label-sm" color="tertiary">
@@ -445,16 +432,15 @@ export const AirdropItem = ({
             {!!address && eligibleLeaf && (
               <Stack gap="x1">
                 <Text variant="paragraph-sm" color="positive">
-                  You are eligible for this airdrop.
+                  {hasClaimed
+                    ? 'You have already claimed this airdrop.'
+                    : 'You are eligible for this airdrop.'}
                 </Text>
                 <Text variant="paragraph-sm">
                   Claim Amount:{' '}
                   {symbol
                     ? `${formatCryptoVal(formatUnits(eligibleLeaf.amount, decimals))} ${symbol}`
                     : formatUnits(eligibleLeaf.amount, decimals)}
-                </Text>
-                <Text variant="paragraph-sm">
-                  Claim Index: {eligibleLeaf.index.toString()}
                 </Text>
                 <Text variant="paragraph-sm">
                   Claim Status:{' '}
