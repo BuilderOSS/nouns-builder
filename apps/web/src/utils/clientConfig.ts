@@ -10,6 +10,7 @@ import {
   safeWallet,
   walletConnectWallet,
 } from '@rainbow-me/rainbowkit/wallets'
+import { Attribution } from 'ox/erc8021'
 import { createConfig, CreateConnectorFn } from 'wagmi'
 
 const appName = 'Nouns Builder'
@@ -53,9 +54,17 @@ const connectors: CreateConnectorFn[] = [
   miniAppConnector as unknown as CreateConnectorFn,
 ]
 
+const baseBuilderCode = process.env.NEXT_PUBLIC_BASE_BUILDER_CODE?.trim()
+const dataSuffix = baseBuilderCode
+  ? Attribution.toDataSuffix({
+      codes: [baseBuilderCode],
+    })
+  : undefined
+
 export const clientConfig = createConfig({
   ssr: true,
   chains,
   transports,
   connectors,
+  ...(dataSuffix ? { dataSuffix } : {}),
 })
