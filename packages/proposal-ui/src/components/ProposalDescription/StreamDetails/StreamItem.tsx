@@ -30,9 +30,9 @@ import { Address, encodeFunctionData, formatUnits, isAddressEqual } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
+import { formatFeeDisplay } from '../utils/feeDisplay'
 import { SenderDelegation } from './SenderDelegation'
 import { gridStyle, linkStyle } from './StreamItem.css'
-import { formatFeeDisplay } from '../utils/feeDisplay'
 
 interface StreamItemProps {
   stream: StreamConfig

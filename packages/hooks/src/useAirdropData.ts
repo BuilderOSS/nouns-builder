@@ -10,7 +10,8 @@ import {
 import { getSablierAirdropFactories } from '@buildeross/utils/sablier/contracts'
 import { useMemo } from 'react'
 import useSWR from 'swr'
-import { Address, decodeEventLog, decodeFunctionData, Hex } from 'viem'
+import { Address, decodeEventLog, decodeFunctionData, Hex, parseAbi } from 'viem'
+import { useReadContracts } from 'wagmi'
 
 export type AirdropCampaignType = 'instant' | 'll'
 
@@ -46,15 +47,24 @@ export interface AirdropInstanceData {
   vestingStartTime?: number
   // Populated when execution tx is available
   campaignAddress?: Address
+  minFeeWei?: bigint
+  firstClaimTime?: bigint
+  currentBalance?: bigint
 }
 
 export type AirdropDataResult = {
   isCreateTx: boolean
   airdrops: AirdropInstanceData[]
   isLoadingCampaignAddresses: boolean
+  isLoadingCampaignLiveData: boolean
 }
 
 const toLower = (value?: string | null): string => (value || '').toLowerCase()
+
+const merkleCampaignReadAbi = parseAbi([
+  'function calculateMinFeeWei() view returns (uint256)',
+  'function firstClaimTime() view returns (uint40)',
+])
 
 export const useAirdropData = (
   chainId: CHAIN_ID,
@@ -307,9 +317,92 @@ export const useAirdropData = (
     [airdrops, campaignAddresses]
   )
 
+  const isExecuted = !!proposal.executionTransactionHash
+
+  const campaignLiveContracts = useMemo(
+    () =>
+      isExecuted
+        ? airdropsWithAddresses.flatMap((airdrop) => {
+            if (!airdrop.campaignAddress) return []
+
+            return [
+              {
+                address: airdrop.campaignAddress,
+                abi: merkleCampaignReadAbi,
+                functionName: 'calculateMinFeeWei' as const,
+                args: [],
+                chainId,
+              },
+              {
+                address: airdrop.campaignAddress,
+                abi: merkleCampaignReadAbi,
+                functionName: 'firstClaimTime' as const,
+                args: [],
+                chainId,
+              },
+              {
+                address: airdrop.token,
+                abi: erc20Abi,
+                functionName: 'balanceOf' as const,
+                args: [airdrop.campaignAddress],
+                chainId,
+              },
+            ]
+          })
+        : [],
+    [isExecuted, airdropsWithAddresses, chainId]
+  )
+
+  const { data: campaignLiveResults, isLoading: isLoadingCampaignLiveData } =
+    useReadContracts({
+      contracts: campaignLiveContracts,
+      allowFailure: true,
+      query: {
+        enabled: campaignLiveContracts.length > 0,
+        staleTime: 30_000,
+        refetchOnWindowFocus: false,
+      },
+    })
+
+  const airdropsWithLiveData = useMemo(() => {
+    if (!campaignLiveResults || !isExecuted) {
+      return airdropsWithAddresses
+    }
+
+    let resultIndex = 0
+
+    return airdropsWithAddresses.map((airdrop) => {
+      if (!airdrop.campaignAddress) {
+        return airdrop
+      }
+
+      const minFeeResult = campaignLiveResults[resultIndex]
+      const firstClaimTimeResult = campaignLiveResults[resultIndex + 1]
+      const balanceResult = campaignLiveResults[resultIndex + 2]
+      resultIndex += 3
+
+      return {
+        ...airdrop,
+        minFeeWei:
+          minFeeResult?.status === 'success'
+            ? (minFeeResult.result as bigint)
+            : undefined,
+        firstClaimTime:
+          firstClaimTimeResult?.status === 'success'
+            ? BigInt(firstClaimTimeResult.result as number | bigint)
+            : undefined,
+        currentBalance:
+          balanceResult?.status === 'success'
+            ? (balanceResult.result as bigint)
+            : undefined,
+      }
+    })
+  }, [campaignLiveResults, isExecuted, airdropsWithAddresses])
+
   return {
     isCreateTx: airdrops.length > 0,
-    airdrops: airdropsWithAddresses,
+    airdrops: airdropsWithLiveData,
     isLoadingCampaignAddresses,
+    isLoadingCampaignLiveData,
   }
 }

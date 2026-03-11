@@ -30,13 +30,10 @@ interface AirdropItemProps {
   isExecuted: boolean
   chainId: CHAIN_ID
   tokenMetadata?: TokenMetadata
-  currentBalance?: bigint
 }
 
 const merkleCampaignAbi = parseAbi([
-  'function firstClaimTime() view returns (uint40)',
   'function hasClaimed(uint256 index) view returns (bool)',
-  'function calculateMinFeeWei() view returns (uint256)',
   'function claim(uint256 index, address recipient, uint128 amount, bytes32[] merkleProof) payable',
 ])
 
@@ -82,7 +79,6 @@ export const AirdropItem = ({
   isExecuted,
   chainId,
   tokenMetadata,
-  currentBalance,
 }: AirdropItemProps) => {
   const { address } = useAccount()
   const config = useConfig()
@@ -177,13 +173,6 @@ export const AirdropItem = ({
               args: [eligibleLeaf.index],
               chainId,
             },
-            {
-              address: airdrop.campaignAddress,
-              abi: merkleCampaignAbi,
-              functionName: 'calculateMinFeeWei' as const,
-              args: [],
-              chainId,
-            },
           ]
         : [],
     [isExecuted, airdrop.campaignAddress, eligibleLeaf, chainId]
@@ -199,44 +188,20 @@ export const AirdropItem = ({
     },
   })
 
-  const { data: campaignMetaReadResults } = useReadContracts({
-    contracts:
-      isExecuted && airdrop.campaignAddress
-        ? [
-            {
-              address: airdrop.campaignAddress,
-              abi: merkleCampaignAbi,
-              functionName: 'firstClaimTime' as const,
-              args: [],
-              chainId,
-            },
-          ]
-        : [],
-    allowFailure: true,
-    query: {
-      enabled: isExecuted && !!airdrop.campaignAddress,
-      staleTime: 15_000,
-      refetchOnWindowFocus: false,
-    },
-  })
-
   const hasClaimed =
     claimReadResults?.[0]?.status === 'success'
       ? Boolean(claimReadResults[0].result)
       : false
 
-  const minFeeWei =
-    claimReadResults?.[1]?.status === 'success'
-      ? (claimReadResults[1].result as bigint)
-      : 0n
+  const minFeeWei = airdrop.minFeeWei ?? 0n
   const claimFee = formatFeeDisplay(minFeeWei, ethUsdPrice)
 
   const now = Math.floor(Date.now() / 1000)
   const notStarted = airdrop.campaignStartTime > now
   const expired = airdrop.expiration > 0 && airdrop.expiration <= now
   const hasBalanceForClaim =
-    currentBalance !== undefined && eligibleLeaf
-      ? currentBalance >= eligibleLeaf.amount
+    airdrop.currentBalance !== undefined && eligibleLeaf
+      ? airdrop.currentBalance >= eligibleLeaf.amount
       : false
 
   const isClaimable =
@@ -283,23 +248,20 @@ export const AirdropItem = ({
   }, [])
 
   const campaignBalanceDisplay =
-    currentBalance !== undefined
+    airdrop.currentBalance !== undefined
       ? symbol
-        ? `${formatCryptoVal(formatUnits(currentBalance, decimals))} ${symbol}`
-        : formatUnits(currentBalance, decimals)
+        ? `${formatCryptoVal(formatUnits(airdrop.currentBalance, decimals))} ${symbol}`
+        : formatUnits(airdrop.currentBalance, decimals)
       : null
 
   const fundingState =
-    currentBalance === undefined
+    airdrop.currentBalance === undefined
       ? null
-      : currentBalance >= airdrop.aggregateAmount
+      : airdrop.currentBalance >= airdrop.aggregateAmount
         ? 'funded'
         : 'underfunded'
 
-  const firstClaimTime =
-    campaignMetaReadResults?.[0]?.status === 'success'
-      ? BigInt(campaignMetaReadResults[0].result as number | bigint)
-      : 0n
+  const firstClaimTime = airdrop.firstClaimTime ?? 0n
   const hasAnyClaims = firstClaimTime > 0n
 
   const showUnderfundedWarning =
