@@ -1,6 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": ["**/.env.*local"],
+  "globalDependencies": ["**/.env", "**/.env.*local"],
   "globalEnv": [
     "ANALYZE",
     "PINATA_API_KEY",
@@ -21,6 +21,7 @@
     "NEXT_PUBLIC_GOLDSKY_PROJECT_ID",
     "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
     "NEXT_PUBLIC_WALLET_CONNECT_METADATA",
+    "NEXT_PUBLIC_BASE_BUILDER_CODE",
     "NEXT_PUBLIC_ZORA_COINS_SDK_API_KEY",
     "SENTRY_DSN",
     "SENTRY_ORG",
