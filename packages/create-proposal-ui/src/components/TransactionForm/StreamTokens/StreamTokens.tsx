@@ -23,8 +23,8 @@ import {
 } from '@buildeross/utils/sablier'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
-import { FieldArray, Form, Formik } from 'formik'
-import { useCallback, useMemo } from 'react'
+import { FieldArray, Form, Formik, useFormikContext } from 'formik'
+import { useCallback, useEffect, useMemo } from 'react'
 import {
   Address,
   encodeFunctionData,
@@ -50,6 +50,35 @@ const truncateAddress = (addr: string) => {
   return snippet
 }
 
+const SyncSenderAddressFromEscrowDelegate = ({
+  escrowDelegate,
+  treasuryAddress,
+}: {
+  escrowDelegate?: string | null
+  treasuryAddress?: string | null
+}) => {
+  const formik = useFormikContext<StreamTokensValues>()
+
+  useEffect(() => {
+    const preferred = escrowDelegate || treasuryAddress || ''
+    if (!preferred) return
+
+    const current = String(formik.values.senderAddress || '')
+    const touched = Boolean(formik.touched.senderAddress)
+
+    const manuallyEdited =
+      current.length > 0 &&
+      current !== String(treasuryAddress || '') &&
+      current !== String(escrowDelegate || '')
+
+    if (!touched && !manuallyEdited && current !== preferred) {
+      formik.setFieldValue('senderAddress', preferred, false)
+    }
+  }, [escrowDelegate, treasuryAddress, formik])
+
+  return null
+}
+
 export const StreamTokens: React.FC = () => {
   const addTransaction = useProposalStore((state) => state.addTransaction)
   const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
@@ -73,25 +102,28 @@ export const StreamTokens: React.FC = () => {
     treasuryAddress: addresses.treasury,
   })
 
-  const initialValues: StreamTokensValues = {
-    senderAddress: escrowDelegate || addresses.treasury || '',
-    tokenAddress: undefined,
-    tokenMetadata: undefined,
-    durationType: 'days',
-    cancelable: true,
-    transferable: false,
-    useExponential: false,
-    invertExponent: false,
-    exponent: undefined,
-    streams: [
-      {
-        recipientAddress: '',
-        amount: '',
-        durationDays: 30,
-        cliffDays: 0,
-      },
-    ],
-  }
+  const initialValues: StreamTokensValues = useMemo(
+    () => ({
+      senderAddress: addresses.treasury || '',
+      tokenAddress: undefined,
+      tokenMetadata: undefined,
+      durationType: 'days',
+      cancelable: true,
+      transferable: false,
+      useExponential: false,
+      invertExponent: false,
+      exponent: undefined,
+      streams: [
+        {
+          recipientAddress: '',
+          amount: '',
+          durationDays: 30,
+          cliffDays: 0,
+        },
+      ],
+    }),
+    [addresses.treasury]
+  )
 
   const handleAddStream = useCallback((push: (obj: StreamFormValues) => void) => {
     push({
@@ -585,7 +617,7 @@ export const StreamTokens: React.FC = () => {
     <Box w={'100%'}>
       <Formik
         initialValues={initialValues}
-        enableReinitialize={true}
+        enableReinitialize={false}
         validationSchema={streamTokensSchema()}
         onSubmit={handleSubmit}
         validateOnBlur
@@ -655,6 +687,10 @@ export const StreamTokens: React.FC = () => {
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Form>
+                <SyncSenderAddressFromEscrowDelegate
+                  escrowDelegate={escrowDelegate}
+                  treasuryAddress={addresses.treasury}
+                />
                 <Stack gap={'x5'}>
                   <StreamTokensDetailsDisplay
                     balanceError={balanceError}

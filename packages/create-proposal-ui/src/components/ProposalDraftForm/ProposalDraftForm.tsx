@@ -8,6 +8,8 @@ type ProposalDraftFormProps = {
   summary: string
   onTitleChange: (value: string) => void
   onSummaryChange: (value: string) => void
+  onTitleBlur?: () => void
+  onSummaryBlur?: () => void
   titleError?: string
   summaryError?: string
   disabled?: boolean
@@ -18,6 +20,8 @@ export const ProposalDraftForm: React.FC<ProposalDraftFormProps> = ({
   summary,
   onTitleChange,
   onSummaryChange,
+  onTitleBlur,
+  onSummaryBlur,
   titleError,
   summaryError,
   disabled,
@@ -30,12 +34,14 @@ export const ProposalDraftForm: React.FC<ProposalDraftFormProps> = ({
         inputLabel={'Title'}
         disabled={disabled}
         onChange={(e) => onTitleChange(e.target.value)}
+        onBlur={onTitleBlur ? () => onTitleBlur() : undefined}
         errorMessage={titleError}
       />
 
       <MarkdownEditor
         value={summary}
         onChange={onSummaryChange}
+        onBlur={onSummaryBlur}
         disabled={disabled}
         inputLabel={'Description'}
         errorMessage={summaryError}

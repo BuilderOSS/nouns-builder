@@ -1,5 +1,8 @@
 import type { AddressType } from '@buildeross/types'
-import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
+import {
+  addressValidationOptionalSchema,
+  addressValidationSchemaWithError,
+} from '@buildeross/utils/yup'
 import * as yup from 'yup'
 
 import { TokenMetadataFormValidated, TokenMetadataSchema } from '../../shared'
@@ -76,10 +79,7 @@ const streamTokensSchema = () =>
       'Sender address is invalid.',
       'Sender address is required.'
     ),
-    tokenAddress: addressValidationSchemaWithError(
-      'Token address is invalid.',
-      'Token address is required.'
-    ).optional(),
+    tokenAddress: addressValidationOptionalSchema,
     tokenMetadata: TokenMetadataSchema.optional(),
     durationType: yup
       .string()

@@ -4,9 +4,9 @@ import { Accordion } from '@buildeross/ui/Accordion'
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
-import { FieldArray, Form, Formik } from 'formik'
+import { FieldArray, Form, Formik, useFormikContext } from 'formik'
 import { truncate } from 'lodash'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatUnits, parseUnits } from 'viem'
 
 import { TokenSelectionForm } from '../../shared'
@@ -16,8 +16,38 @@ import {
   MilestoneFormValues,
   MilestonePaymentsFormProps,
   MilestonePaymentsFormSchema,
+  MilestonePaymentsFormValues,
 } from './MilestonePayments.schema'
 import { MilestonePaymentsDetailsDisplay } from './MilestonePaymentsDetailsDisplay'
+
+const SyncClientAddressFromEscrowDelegate = ({
+  escrowDelegate,
+  treasury,
+}: {
+  escrowDelegate?: string | null
+  treasury?: string | null
+}) => {
+  const formik = useFormikContext<MilestonePaymentsFormValues>()
+
+  useEffect(() => {
+    const preferred = escrowDelegate || treasury || ''
+    if (!preferred) return
+
+    const current = String(formik.values.clientAddress || '')
+    const touched = Boolean(formik.touched.clientAddress)
+
+    const manuallyEdited =
+      current.length > 0 &&
+      current !== String(treasury || '') &&
+      current !== String(escrowDelegate || '')
+
+    if (!touched && !manuallyEdited && current !== preferred) {
+      formik.setFieldValue('clientAddress', preferred, false)
+    }
+  }, [escrowDelegate, treasury, formik])
+
+  return null
+}
 
 const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
   onSubmit,
@@ -34,6 +64,14 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
     tokenAddress: token,
     treasuryAddress: treasury,
   })
+
+  const initialValues = useMemo(
+    () => ({
+      ...getInitialMilestonePaymentsFormState(),
+      clientAddress: treasury || '',
+    }),
+    [treasury]
+  )
 
   const handleAddMilestone = useCallback(
     (
@@ -59,11 +97,8 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
   return (
     <Box>
       <Formik
-        initialValues={{
-          ...getInitialMilestonePaymentsFormState(),
-          clientAddress: escrowDelegate || treasury || '',
-        }}
-        enableReinitialize={true}
+        initialValues={initialValues}
+        enableReinitialize={false}
         validationSchema={MilestonePaymentsFormSchema}
         onSubmit={onSubmit}
         validateOnMount={false}
@@ -123,6 +158,10 @@ const MilestonePaymentsForm: React.FC<MilestonePaymentsFormProps> = ({
               style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
             >
               <Form>
+                <SyncClientAddressFromEscrowDelegate
+                  escrowDelegate={escrowDelegate}
+                  treasury={treasury}
+                />
                 <Stack gap={'x5'}>
                   <MilestonePaymentsDetailsDisplay
                     escrowAmountError={escrowAmountError}

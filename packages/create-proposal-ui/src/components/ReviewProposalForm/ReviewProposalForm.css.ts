@@ -36,3 +36,20 @@ export const checkboxHelperText = style([
     fontWeight: 700,
   },
 ])
+
+export const checkboxLabel = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+  cursor: 'pointer',
+})
+
+export const visuallyHiddenCheckbox = style({
+  position: 'absolute',
+  opacity: 0,
+  width: 1,
+  height: 1,
+  margin: 0,
+  pointerEvents: 'none',
+})

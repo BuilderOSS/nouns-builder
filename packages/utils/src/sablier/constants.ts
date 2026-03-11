@@ -29,12 +29,23 @@ export const LATEST_LOCKUP_RELEASE: Sablier.EVM.Release = sablier.releases.getLa
   protocol: 'lockup',
 })
 
+// Get the latest airdrops release from Sablier package (synchronous)
+export const LATEST_AIRDROPS_RELEASE: Sablier.EVM.Release = sablier.releases.getLatest({
+  protocol: 'airdrops',
+})
+
 // Sablier Lockup contract ABI (includes all functions we need)
 // This is the unified contract that replaced LockupLinear, LockupDynamic, etc.
 export const lockupAbi = LATEST_LOCKUP_RELEASE.abi.SablierLockup as Abi
 
 // Sablier BatchLockup contract ABI for creating multiple streams
 export const batchLockupAbi = LATEST_LOCKUP_RELEASE.abi.SablierBatchLockup as Abi
+
+// Sablier Airdrops factory ABIs
+export const factoryMerkleInstantAbi = LATEST_AIRDROPS_RELEASE.abi
+  .SablierFactoryMerkleInstant as Abi
+export const factoryMerkleLLAbi = LATEST_AIRDROPS_RELEASE.abi
+  .SablierFactoryMerkleLL as Abi
 
 // Stream status enum
 export enum StreamStatus {

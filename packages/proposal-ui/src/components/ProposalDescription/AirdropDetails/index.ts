@@ -1,0 +1,1 @@
+export { AirdropDetails } from './AirdropDetails'

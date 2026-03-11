@@ -15,6 +15,7 @@ interface TextInputProps {
   value: string | number
   inputLabel?: string | ReactElement
   onChange: ChangeEventHandler<HTMLInputElement>
+  onBlur?: ChangeEventHandler<HTMLInputElement>
   formik?: FormikProps<any>
   errorMessage?: any
   placeholder?: string
@@ -28,6 +29,7 @@ const TextInput: React.FC<TextInputProps> = ({
   value,
   inputLabel,
   onChange,
+  onBlur,
   errorMessage,
   placeholder,
   disabled = false,
@@ -42,6 +44,7 @@ const TextInput: React.FC<TextInputProps> = ({
         id={id}
         type="text"
         onChange={onChange}
+        onBlur={onBlur}
         value={value}
         className={`${inputStyleVariants[!!errorMessage ? 'error' : 'default']}`}
         placeholder={placeholder || ''}

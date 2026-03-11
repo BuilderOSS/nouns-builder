@@ -41,6 +41,20 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   })
 
   const { transactions, disabled, title, summary, clearProposal } = useProposalStore()
+  const [proposalHydrated, setProposalHydrated] = useState(false)
+
+  useEffect(() => {
+    if (useProposalStore.persist.hasHydrated()) {
+      setProposalHydrated(true)
+      return
+    }
+
+    const unsubscribe = useProposalStore.persist.onFinishHydration(() => {
+      setProposalHydrated(true)
+    })
+
+    return unsubscribe
+  }, [])
 
   const onOpenCreatePage = useCallback(async () => {
     await push({
@@ -145,6 +159,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   }, [handleCloseSuccessModal, proposalIdCreated])
 
   useEffect(() => {
+    if (!proposalHydrated) return
     if (proposalIdCreated !== undefined) return
     if (transactions.length > 0) return
     if (title?.trim() || summary?.trim()) return
@@ -158,6 +173,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       },
     })
   }, [
+    proposalHydrated,
     proposalIdCreated,
     transactions.length,
     title,
