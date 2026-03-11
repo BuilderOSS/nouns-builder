@@ -336,7 +336,7 @@ export const SubmitVoteForm: React.FC<{
 
               <ContractButton
                 chainId={chainId}
-                disabled={!values.choice || isSubmitting}
+                disabled={values.choice === undefined || isSubmitting}
                 w="100%"
                 size="lg"
                 mt="x8"

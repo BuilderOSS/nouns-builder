@@ -1,4 +1,5 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
+import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, ButtonProps, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -14,7 +15,7 @@ export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type'> & {
   onConnectWallet?: () => void
 }
 
-type ErrorType = 'not_connected' | 'wrong_chain'
+type ErrorType = 'not_connected' | 'connector_invalid' | 'wrong_chain'
 
 type ErrorState = {
   type: ErrorType
@@ -34,8 +35,9 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
     },
     forwardedRef
   ) => {
-    const { address: userAddress, chain: userChain } = useAccount()
+    const { address: userAddress, chain: userChain, connector } = useAccount()
     const { openConnectModal } = useConnectModal()
+    const disconnectWallet = useWalletDisconnect()
 
     const chainName = useMemo(() => {
       const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
@@ -72,6 +74,12 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
           message: 'Please connect your wallet to continue.',
         }
       }
+      if (!connector) {
+        return {
+          type: 'connector_invalid',
+          message: 'Wallet session expired. Reconnect to continue.',
+        }
+      }
       if (userChain?.id !== chainId) {
         return {
           type: 'wrong_chain',
@@ -79,7 +87,7 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
         }
       }
       return null
-    }, [userAddress, userChain?.id, chainId, chainName])
+    }, [userAddress, userChain?.id, connector, chainId, chainName])
 
     // Auto-close popup when error resolves (e.g., user manually switches chain)
     useEffect(() => {
@@ -111,6 +119,22 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
 
       if (errorState.type === 'not_connected') {
         setPopupOpen(false)
+        setSwitchError(null)
+        if (onConnectWallet) {
+          onConnectWallet()
+        } else if (openConnectModal) {
+          openConnectModal()
+        }
+      } else if (errorState.type === 'connector_invalid') {
+        setPopupOpen(false)
+        setSwitchError(null)
+
+        try {
+          disconnectWallet()
+        } catch (error) {
+          console.error('ContractButton: reconnect disconnect error', error)
+        }
+
         if (onConnectWallet) {
           onConnectWallet()
         } else if (openConnectModal) {
@@ -135,13 +159,23 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
           }
         )
       }
-    }, [errorState, onConnectWallet, openConnectModal, switchChain, chainId, chainName])
+    }, [
+      errorState,
+      onConnectWallet,
+      openConnectModal,
+      switchChain,
+      chainId,
+      chainName,
+      disconnectWallet,
+    ])
 
     const getActionButtonText = () => {
       if (!errorState) return null
       switch (errorState.type) {
         case 'not_connected':
           return 'Connect Wallet'
+        case 'connector_invalid':
+          return 'Reconnect Wallet'
         case 'wrong_chain':
           return `Switch to ${chainName}`
         default:
