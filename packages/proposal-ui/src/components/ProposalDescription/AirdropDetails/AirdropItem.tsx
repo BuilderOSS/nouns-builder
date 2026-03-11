@@ -1,9 +1,11 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { AirdropInstanceData } from '@buildeross/hooks/useAirdropData'
+import { useEthUsdPrice } from '@buildeross/hooks/useEthUsdPrice'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
 import { type CHAIN_ID, TokenMetadata } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { Tooltip } from '@buildeross/ui/Tooltip'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Icon, Stack, Text } from '@buildeross/zord'
@@ -20,6 +22,8 @@ import {
 import { useAccount, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
+import { formatFeeDisplay } from '../utils/feeDisplay'
+
 interface AirdropItemProps {
   airdrop: AirdropInstanceData
   index: number
@@ -30,6 +34,7 @@ interface AirdropItemProps {
 }
 
 const merkleCampaignAbi = parseAbi([
+  'function firstClaimTime() view returns (uint40)',
   'function hasClaimed(uint256 index) view returns (bool)',
   'function calculateMinFeeWei() view returns (uint256)',
   'function claim(uint256 index, address recipient, uint128 amount, bytes32[] merkleProof) payable',
@@ -81,6 +86,7 @@ export const AirdropItem = ({
 }: AirdropItemProps) => {
   const { address } = useAccount()
   const config = useConfig()
+  const { price: ethUsdPrice } = useEthUsdPrice()
   const [isClaiming, setIsClaiming] = useState(false)
 
   const decimals = tokenMetadata?.decimals ?? 18
@@ -193,6 +199,27 @@ export const AirdropItem = ({
     },
   })
 
+  const { data: campaignMetaReadResults } = useReadContracts({
+    contracts:
+      isExecuted && airdrop.campaignAddress
+        ? [
+            {
+              address: airdrop.campaignAddress,
+              abi: merkleCampaignAbi,
+              functionName: 'firstClaimTime' as const,
+              args: [],
+              chainId,
+            },
+          ]
+        : [],
+    allowFailure: true,
+    query: {
+      enabled: isExecuted && !!airdrop.campaignAddress,
+      staleTime: 15_000,
+      refetchOnWindowFocus: false,
+    },
+  })
+
   const hasClaimed =
     claimReadResults?.[0]?.status === 'success'
       ? Boolean(claimReadResults[0].result)
@@ -202,6 +229,7 @@ export const AirdropItem = ({
     claimReadResults?.[1]?.status === 'success'
       ? (claimReadResults[1].result as bigint)
       : 0n
+  const claimFee = formatFeeDisplay(minFeeWei, ethUsdPrice)
 
   const now = Math.floor(Date.now() / 1000)
   const notStarted = airdrop.campaignStartTime > now
@@ -267,6 +295,18 @@ export const AirdropItem = ({
       : currentBalance >= airdrop.aggregateAmount
         ? 'funded'
         : 'underfunded'
+
+  const firstClaimTime =
+    campaignMetaReadResults?.[0]?.status === 'success'
+      ? BigInt(campaignMetaReadResults[0].result as number | bigint)
+      : 0n
+  const hasAnyClaims = firstClaimTime > 0n
+
+  const showUnderfundedWarning =
+    fundingState === 'underfunded' &&
+    !hasAnyClaims &&
+    !(eligibleLeaf && hasClaimed) &&
+    !(eligibleLeaf && !hasClaimed && hasBalanceForClaim)
 
   const description = (
     <Stack gap="x3">
@@ -392,9 +432,14 @@ export const AirdropItem = ({
             <Text variant="paragraph-sm">
               {campaignBalanceDisplay} / {amountDisplay}
             </Text>
-            {fundingState === 'underfunded' && (
+            {showUnderfundedWarning && (
               <Text variant="label-sm" color="negative">
                 Campaign is not fully funded yet.
+              </Text>
+            )}
+            {fundingState === 'underfunded' && hasAnyClaims && (
+              <Text variant="label-sm" color="text3">
+                Campaign has prior claims; remaining balance is shown above.
               </Text>
             )}
           </Stack>
@@ -464,9 +509,12 @@ export const AirdropItem = ({
                             : 'Not claimable right now'}
                 </Text>
                 {!hasClaimed && (
-                  <Text variant="paragraph-sm">
-                    Min Fee: {formatUnits(minFeeWei, 18)} ETH
-                  </Text>
+                  <Stack direction="row" align="center" gap="x1">
+                    <Text variant="paragraph-sm">
+                      Claim Fee: {claimFee.ethValue} ETH (≈ {claimFee.usdLabel})
+                    </Text>
+                    <Tooltip>Fee charged by Sablier for claiming the airdrop.</Tooltip>
+                  </Stack>
                 )}
 
                 {!hasClaimed && (
