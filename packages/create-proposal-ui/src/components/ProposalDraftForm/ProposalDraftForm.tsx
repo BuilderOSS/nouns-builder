@@ -8,6 +8,8 @@ type ProposalDraftFormProps = {
   summary: string
   onTitleChange: (value: string) => void
   onSummaryChange: (value: string) => void
+  onTitleBlur?: () => void
+  onSummaryBlur?: () => void
   titleError?: string
   summaryError?: string
   disabled?: boolean
@@ -18,13 +20,12 @@ export const ProposalDraftForm: React.FC<ProposalDraftFormProps> = ({
   summary,
   onTitleChange,
   onSummaryChange,
+  onTitleBlur,
+  onSummaryBlur,
   titleError,
   summaryError,
   disabled,
 }) => {
-  const [titleTouched, setTitleTouched] = React.useState(false)
-  const [summaryTouched, setSummaryTouched] = React.useState(false)
-
   return (
     <Stack width={'100%'}>
       <TextInput
@@ -32,26 +33,18 @@ export const ProposalDraftForm: React.FC<ProposalDraftFormProps> = ({
         value={title}
         inputLabel={'Title'}
         disabled={disabled}
-        onChange={(e) => {
-          if (!titleTouched) {
-            setTitleTouched(true)
-          }
-          onTitleChange(e.target.value)
-        }}
-        errorMessage={titleTouched ? titleError : undefined}
+        onChange={(e) => onTitleChange(e.target.value)}
+        onBlur={onTitleBlur ? () => onTitleBlur() : undefined}
+        errorMessage={titleError}
       />
 
       <MarkdownEditor
         value={summary}
-        onChange={(value) => {
-          if (!summaryTouched) {
-            setSummaryTouched(true)
-          }
-          onSummaryChange(value)
-        }}
+        onChange={onSummaryChange}
+        onBlur={onSummaryBlur}
         disabled={disabled}
         inputLabel={'Description'}
-        errorMessage={summaryTouched ? summaryError : undefined}
+        errorMessage={summaryError}
       />
     </Stack>
   )

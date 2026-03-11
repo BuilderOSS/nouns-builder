@@ -50,6 +50,37 @@ const createSelectOption = (type: TransactionType) => ({
   icon: <TransactionTypeIcon transactionType={type} />,
 })
 
+const normalizeTitle = (value?: string | null) => (value || '').trim()
+const normalizeSummary = (value?: string | null) => (value || '').trim()
+
+const validateTitle = (value?: string | null): string | undefined => {
+  const normalizedTitle = normalizeTitle(value)
+
+  if (!normalizedTitle) {
+    return PROPOSAL_TITLE_REQUIRED_ERROR
+  }
+
+  if (!PROPOSAL_TITLE_REGEX.test(normalizedTitle)) {
+    return PROPOSAL_TITLE_FORMAT_ERROR
+  }
+
+  if (normalizedTitle.length > PROPOSAL_TITLE_MAX_LENGTH) {
+    return PROPOSAL_TITLE_MAX_ERROR
+  }
+
+  return undefined
+}
+
+const validateSummary = (value?: string | null): string | undefined => {
+  const normalizedSummary = normalizeSummary(value)
+
+  if (!normalizedSummary) {
+    return PROPOSAL_SUMMARY_REQUIRED_ERROR
+  }
+
+  return undefined
+}
+
 const CreateProposalPage: NextPageWithLayout = () => {
   const { query, push } = useRouter()
   const addresses = useDaoStore((x) => x.addresses)
@@ -76,6 +107,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
       ? 'transactions'
       : 'draft'
   )
+  const [titleTouched, setTitleTouched] = React.useState(false)
+  const [summaryTouched, setSummaryTouched] = React.useState(false)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -188,18 +221,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const missingDraftRequirements = useMemo(() => {
     const requirements: string[] = []
 
-    const normalizedTitle = title?.trim() || ''
-    const normalizedSummary = summary?.trim() || ''
-
-    if (!normalizedTitle) {
+    const titleValidationError = validateTitle(title)
+    if (titleValidationError === PROPOSAL_TITLE_REQUIRED_ERROR) {
       requirements.push('add a proposal title')
-    } else if (!PROPOSAL_TITLE_REGEX.test(normalizedTitle)) {
+    } else if (titleValidationError === PROPOSAL_TITLE_FORMAT_ERROR) {
       requirements.push('fix the proposal title format')
-    } else if (normalizedTitle.length > PROPOSAL_TITLE_MAX_LENGTH) {
+    } else if (titleValidationError === PROPOSAL_TITLE_MAX_ERROR) {
       requirements.push('shorten the proposal title')
     }
 
-    if (!normalizedSummary) {
+    if (validateSummary(summary)) {
       requirements.push('add a proposal summary')
     }
 
@@ -207,30 +238,14 @@ const CreateProposalPage: NextPageWithLayout = () => {
   }, [title, summary])
 
   const titleError = useMemo(() => {
-    const normalizedTitle = title?.trim() || ''
-
-    if (!normalizedTitle) {
-      return PROPOSAL_TITLE_REQUIRED_ERROR
-    }
-
-    if (!PROPOSAL_TITLE_REGEX.test(normalizedTitle)) {
-      return PROPOSAL_TITLE_FORMAT_ERROR
-    }
-
-    if (normalizedTitle.length > PROPOSAL_TITLE_MAX_LENGTH) {
-      return PROPOSAL_TITLE_MAX_ERROR
-    }
-
-    return undefined
-  }, [title])
+    if (!titleTouched) return undefined
+    return validateTitle(title)
+  }, [title, titleTouched])
 
   const summaryError = useMemo(() => {
-    const normalizedSummary = summary?.trim() || ''
-    if (!normalizedSummary) {
-      return PROPOSAL_SUMMARY_REQUIRED_ERROR
-    }
-    return undefined
-  }, [summary])
+    if (!summaryTouched) return undefined
+    return validateSummary(summary)
+  }, [summary, summaryTouched])
 
   const missingReviewRequirements = useMemo(() => {
     const requirements = [...missingDraftRequirements]
@@ -258,7 +273,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     createStage === 'draft' ? canEnterStage.transactions : canEnterStage.review
 
   const hasDraftBlockers = missingDraftRequirements.length > 0
-  const hasTitleDraftBlocker = !!titleError
+  const hasTitleDraftBlocker = !!validateTitle(title)
 
   const joinRequirements = (requirements: string[]) => {
     if (requirements.length === 1) return requirements[0]
@@ -356,6 +371,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const onResetProposal = useCallback(() => {
     clearProposal()
+    setTitleTouched(false)
+    setSummaryTouched(false)
     setCreateStage('draft')
     setFurthestStage('draft')
   }, [clearProposal])
@@ -448,16 +465,23 @@ const CreateProposalPage: NextPageWithLayout = () => {
             {continueHelperText}
           </Text>
           {createStage === 'transactions' && hasDraftBlockers && (
-            <Text
-              variant={'paragraph-sm'}
-              color={'text3'}
-              style={{ cursor: 'pointer', textDecoration: 'underline' }}
+            <Button
+              variant={'ghost'}
+              size={'sm'}
               onClick={() => setCreateStage('draft')}
+              style={{
+                minHeight: 'auto',
+                height: 'auto',
+                padding: 0,
+                textDecoration: 'underline',
+              }}
             >
-              {hasTitleDraftBlocker
-                ? 'Fix title in Write Proposal'
-                : 'Go to Write Proposal'}
-            </Text>
+              <Text variant={'paragraph-sm'} color={'text3'}>
+                {hasTitleDraftBlocker
+                  ? 'Fix title in Write Proposal'
+                  : 'Go to Write Proposal'}
+              </Text>
+            </Button>
           )}
         </Flex>
       )}
@@ -478,6 +502,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
             summary={summary || ''}
             onTitleChange={setTitle}
             onSummaryChange={setSummary}
+            onTitleBlur={() => setTitleTouched(true)}
+            onSummaryBlur={() => setSummaryTouched(true)}
             titleError={titleError}
             summaryError={summaryError}
           />

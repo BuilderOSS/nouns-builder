@@ -30,7 +30,12 @@ import {
 import { MobileProposalActionBar } from '../MobileProposalActionBar'
 import { ProposalDraftForm } from '../ProposalDraftForm'
 import { ERROR_CODE, FormValues, validationSchema } from './fields'
-import { checkboxHelperText, checkboxStyleVariants } from './ReviewProposalForm.css'
+import {
+  checkboxHelperText,
+  checkboxLabel,
+  checkboxStyleVariants,
+  visuallyHiddenCheckbox,
+} from './ReviewProposalForm.css'
 import { Transactions } from './Transactions'
 
 interface ReviewProposalProps {
@@ -337,7 +342,13 @@ export const ReviewProposalForm = ({
               }
 
               return (
-                <form onSubmit={formik.handleSubmit} style={{ width: '100%' }}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    void validateAndSubmit()
+                  }}
+                  style={{ width: '100%' }}
+                >
                   <Flex
                     justify={'space-between'}
                     align={'center'}
@@ -368,10 +379,12 @@ export const ReviewProposalForm = ({
                         summary={formik.values.summary || ''}
                         onTitleChange={(value) => {
                           formik.setFieldValue('title', value)
+                          void formik.validateField('title')
                           setTitle(value)
                         }}
                         onSummaryChange={(value) => {
                           formik.setFieldValue('summary', value)
+                          void formik.validateField('summary')
                           setSummary(value)
                         }}
                         disabled={disabledForm}
@@ -452,18 +465,28 @@ export const ReviewProposalForm = ({
                       gap={'x2'}
                       pb={'x4'}
                     >
-                      <Flex
-                        align={'center'}
-                        justify={'center'}
-                        className={
-                          checkboxStyleVariants[skipSimulation ? 'confirmed' : 'default']
-                        }
-                        onClick={() => setSkipSimulation((s) => !s)}
-                      >
-                        {skipSimulation && <Icon fill="background1" id="check" />}
-                      </Flex>
+                      <label className={checkboxLabel}>
+                        <input
+                          type="checkbox"
+                          checked={skipSimulation}
+                          onChange={(e) => setSkipSimulation(e.target.checked)}
+                          className={visuallyHiddenCheckbox}
+                          aria-describedby="skip-simulation-helper"
+                        />
+                        <Flex
+                          align={'center'}
+                          justify={'center'}
+                          className={
+                            checkboxStyleVariants[
+                              skipSimulation ? 'confirmed' : 'default'
+                            ]
+                          }
+                        >
+                          {skipSimulation && <Icon fill="background1" id="check" />}
+                        </Flex>
+                      </label>
 
-                      <Flex className={checkboxHelperText}>
+                      <Flex id="skip-simulation-helper" className={checkboxHelperText}>
                         I understand the risks and want to submit without simulation.
                       </Flex>
                     </Flex>
@@ -485,13 +508,7 @@ export const ReviewProposalForm = ({
                     width={'100%'}
                     borderRadius={'curved'}
                     loading={simulating}
-                    disabled={
-                      simulating ||
-                      proposing ||
-                      !formik.values.title?.trim() ||
-                      !formik.values.summary?.trim() ||
-                      !formik.values.transactions?.length
-                    }
+                    disabled={simulating || proposing || formik.isSubmitting}
                     handleClick={validateAndSubmit}
                     h={'x15'}
                     display={{ '@initial': 'none', '@768': 'flex' }}
@@ -523,13 +540,7 @@ export const ReviewProposalForm = ({
                     onContinue={() => {
                       void validateAndSubmit()
                     }}
-                    continueDisabled={
-                      simulating ||
-                      proposing ||
-                      !formik.values.title?.trim() ||
-                      !formik.values.summary?.trim() ||
-                      !formik.values.transactions?.length
-                    }
+                    continueDisabled={simulating || proposing || formik.isSubmitting}
                     continueLoading={simulating}
                     continueLabel={'Submit Proposal'}
                   />

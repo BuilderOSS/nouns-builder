@@ -1,3 +1,4 @@
+import { HERO_CONTENT_LAYER } from '@buildeross/constants'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { ProposalNavigation } from '@buildeross/proposal-ui'
 import { useProposalStore } from '@buildeross/stores'
@@ -69,13 +70,15 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
       <Box
         position={'sticky'}
         pb={'x6'}
+        zIndex={HERO_CONTENT_LAYER}
+        borderBottomColor={'border'}
+        borderBottomStyle={'solid'}
+        borderBottomWidth={'normal'}
         style={{
           top: `${stickyTopOffset}px`,
           transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-          zIndex: 30,
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.06)',
         }}
         backgroundColor={'background1'}
       >
