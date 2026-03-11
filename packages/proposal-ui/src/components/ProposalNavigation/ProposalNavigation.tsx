@@ -49,7 +49,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
   const [name, daoImage] = unpackOptionalArray(contractData, 2)
 
   return (
-    <Flex w={'100%'} mt={'x8'} gap="x4" className={responsiveFlex}>
+    <Flex w={'100%'} mt={'x6'} gap="x4" className={responsiveFlex}>
       <Box
         as="button"
         onClick={handleBack}
