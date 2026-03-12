@@ -357,8 +357,8 @@ pnpm install
 # Build the package
 pnpm build
 
-# Development build with watch
-pnpm dev
+# Run tests
+pnpm test
 
 # Run type checking
 pnpm type-check
@@ -370,7 +370,8 @@ pnpm lint
 ### Scripts
 
 - `pnpm build` - Build the package for production
-- `pnpm dev` - Build in watch mode for development
+- `pnpm test` - Run test suite with Vitest
+- `pnpm test:watch` - Run tests in watch mode
 - `pnpm type-check` - Run TypeScript type checking
 - `pnpm lint` - Run ESLint with auto-fix
 - `pnpm clean` - Remove build artifacts
@@ -388,12 +389,16 @@ pnpm lint
 
 ### Peer Dependencies
 
-- `react` ^19.1.0
-- `react-dom` ^19.1.0
-- `viem` ^2.30.0
-- `swr` ^2.3.3
-- `next` ^15.3.2
-- `wagmi` ^2.15.4
+- `@buildeross/constants` >=0.3.0
+- `@buildeross/ipfs-service` >=0.3.0
+- `@buildeross/sdk` >=0.3.0
+- `@buildeross/types` >=0.3.0
+- `@buildeross/utils` >=0.3.0
+- `@types/lodash` ^4.17.17
+- `react` ^19.2.1
+- `react-dom` ^19.2.1
+- `viem` ^2.47.1
+- `wagmi` ^2.18.1
 
 ## Hook Categories
 

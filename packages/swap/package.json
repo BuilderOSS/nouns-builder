@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/swap",
   "description": "Swap utilities for ZoraCoins and ClankerTokens",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "devDependencies": {
     "@buildeross/constants": "workspace:*",
     "@buildeross/eslint-config-custom": "workspace:*",
@@ -35,9 +35,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": "0.2.2",
-    "@buildeross/sdk": "0.2.2",
-    "@buildeross/types": "0.2.2",
+    "@buildeross/constants": ">=0.3.0",
+    "@buildeross/sdk": ">=0.3.0",
+    "@buildeross/types": ">=0.3.0",
     "viem": "^2.47.1"
   },
   "publishConfig": {

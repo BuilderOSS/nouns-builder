@@ -81,11 +81,12 @@ pnpm run update
 
 ### Peer Dependencies
 
-- `viem`: ^2.30.0
+- `react`: ^19.2.1
+- `react-dom`: ^19.2.1
+- `viem`: ^2.47.1
 
 ### Development Dependencies
 
-- `react`: ^19.1.0 (for hook usage)
 - TypeScript and ESLint configurations
 
 ## API Reference

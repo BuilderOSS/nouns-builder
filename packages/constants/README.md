@@ -90,9 +90,6 @@ pnpm install
 # Build the package
 pnpm build
 
-# Development build with watch
-pnpm dev
-
 # Run type checking
 pnpm type-check
 
@@ -103,7 +100,6 @@ pnpm lint
 ### Scripts
 
 - `pnpm build` - Build the package for production
-- `pnpm dev` - Build in watch mode for development
 - `pnpm type-check` - Run TypeScript type checking
 - `pnpm lint` - Run ESLint with auto-fix
 - `pnpm clean` - Remove build artifacts
@@ -116,7 +112,7 @@ pnpm lint
 
 ### Peer Dependencies
 
-- `wagmi`: ^2.15.4 (for chain configurations)
+- `wagmi`: ^2.18.1 (for chain configurations)
 
 ## Exported Constants
 

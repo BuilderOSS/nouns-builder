@@ -89,8 +89,9 @@ pnpm lint
 
 ### Peer Dependencies
 
-- `next`: ^15.3.2
-- `react`: ^19.1.0
+- `next`: ^15.5.9
+- `react`: ^19.2.1
+- `react-dom`: ^19.2.1
 
 ### Runtime Dependencies
 
