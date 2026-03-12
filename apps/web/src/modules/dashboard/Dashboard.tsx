@@ -9,8 +9,9 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
-import { Box, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
+import { useDaoShortlist } from 'src/utils/useDaoShortlist'
 import { useAccount } from 'wagmi'
 
 import { CreateActions } from './CreateActions'
@@ -29,6 +30,16 @@ export const Dashboard: React.FC = () => {
   const [openAccordion, setOpenAccordion] = React.useState<'daos' | 'proposals' | null>(
     null
   )
+  const [showHiddenDaos, setShowHiddenDaos] = React.useState(false)
+  const {
+    isDaoHidden,
+    hideDao,
+    unhideDao,
+    isDaoPinned,
+    pinDao,
+    unpinDao,
+    pinLimitReached,
+  } = useDaoShortlist(address)
 
   const {
     daos,
@@ -49,22 +60,63 @@ export const Dashboard: React.FC = () => {
     })
   }, [daos])
 
-  const auctionCards = useMemo(() => {
-    if (!address || !sortedDaos.length) return null
+  const visibleDaos = useMemo(
+    () => sortedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.tokenAddress)),
+    [sortedDaos, isDaoHidden]
+  )
+  const hiddenDaosCount = sortedDaos.length - visibleDaos.length
+  const daosForDisplay = useMemo(() => {
+    const filteredDaos = showHiddenDaos ? sortedDaos : visibleDaos
+    const pinnedDaos = filteredDaos.filter((dao) =>
+      isDaoPinned(dao.chainId, dao.tokenAddress)
+    )
+    const unpinnedDaos = filteredDaos.filter(
+      (dao) => !isDaoPinned(dao.chainId, dao.tokenAddress)
+    )
+    return [...pinnedDaos, ...unpinnedDaos]
+  }, [showHiddenDaos, sortedDaos, visibleDaos, isDaoPinned])
 
-    return sortedDaos.map((dao) => (
-      <DaoAuctionCard
-        // React diffing wasn't catching new auctions starting, so this
-        // long key is to help rerender when new auction starts
-        key={`auctionCard:${dao.tokenAddress}:${dao}:${
-          dao?.currentAuction?.endTime || 0
-        }`}
-        {...dao}
-        userAddress={address}
-        handleMutate={mutate}
-      />
-    ))
-  }, [sortedDaos, address, mutate])
+  const auctionCards = useMemo(() => {
+    if (!address || !daosForDisplay.length) return null
+
+    return daosForDisplay.map((dao) => {
+      const isHidden = isDaoHidden(dao.chainId, dao.tokenAddress)
+      const isPinned = isDaoPinned(dao.chainId, dao.tokenAddress)
+      return (
+        <Box key={`auctionCard:${dao.tokenAddress}:${dao?.currentAuction?.endTime || 0}`}>
+          <DaoAuctionCard
+            {...dao}
+            userAddress={address}
+            handleMutate={mutate}
+            isHidden={isHidden}
+            isPinned={isPinned}
+            pinLimitReached={pinLimitReached}
+            onTogglePin={() =>
+              isPinned
+                ? unpinDao(dao.chainId, dao.tokenAddress)
+                : pinDao(dao.chainId, dao.tokenAddress)
+            }
+            onToggleHidden={() =>
+              isHidden
+                ? unhideDao(dao.chainId, dao.tokenAddress)
+                : hideDao(dao.chainId, dao.tokenAddress)
+            }
+          />
+        </Box>
+      )
+    })
+  }, [
+    daosForDisplay,
+    address,
+    mutate,
+    isDaoHidden,
+    isDaoPinned,
+    pinLimitReached,
+    unpinDao,
+    pinDao,
+    unhideDao,
+    hideDao,
+  ])
 
   const hasLiveProposals = useMemo(() => {
     if (!sortedDaos.length) return false
@@ -238,8 +290,21 @@ export const Dashboard: React.FC = () => {
 
         <AccordionItem
           title="DAOs"
-          summary={`${sortedDaos.length} DAO${sortedDaos.length !== 1 ? 's' : ''}`}
-          description={<Stack gap="x1">{auctionCards}</Stack>}
+          summary={`${daosForDisplay.length} DAO${daosForDisplay.length !== 1 ? 's' : ''}${
+            hiddenDaosCount > 0 ? ` (${hiddenDaosCount} hidden)` : ''
+          }`}
+          description={
+            <Stack gap="x2">
+              <Stack gap="x1">{auctionCards}</Stack>
+              {hiddenDaosCount > 0 && (
+                <Button variant="ghost" size="xs" onClick={() => setShowHiddenDaos((x) => !x)}>
+                  {showHiddenDaos
+                    ? 'Hide hidden DAOs'
+                    : `Show hidden DAOs (${hiddenDaosCount})`}
+                </Button>
+              )}
+            </Stack>
+          }
           titleFontSize={18}
           mb={'x0'}
           isOpen={openAccordion === 'daos'}

@@ -91,8 +91,8 @@
   "scripts": {
     "analyze": "ANALYZE=true next build",
     "build": "next build",
-    "clean": "rm -rf .next .turbo",
-    "dev": "pnpm clean && NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "clean": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true }); require('fs').rmSync('.turbo', { recursive: true, force: true })\"",
+    "dev": "pnpm clean && node --max-old-space-size=4096 ./node_modules/next/dist/bin/next dev",
     "lint": "pnpm type-check && eslint --fix .",
     "start": "next start",
     "test": "vitest run",

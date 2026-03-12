@@ -1,4 +1,4 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+﻿import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constants/layers'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
@@ -12,6 +12,7 @@ import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import { useDaoShortlist } from 'src/utils/useDaoShortlist'
 import { formatUnits } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
@@ -52,6 +53,25 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     : undefined
 
   const { daos } = useUserDaos({ address })
+  const [showHiddenDaos, setShowHiddenDaos] = React.useState(false)
+  const { isDaoHidden, hideDao, unhideDao, isDaoPinned, pinDao, unpinDao, pinLimitReached } =
+    useDaoShortlist(address)
+  const hiddenDaosCount = React.useMemo(
+    () => daos.filter((dao) => isDaoHidden(dao.chainId, dao.collectionAddress)).length,
+    [daos, isDaoHidden]
+  )
+  const shortlistDaos = React.useMemo(() => {
+    const filteredDaos = showHiddenDaos
+      ? daos
+      : daos.filter((dao) => !isDaoHidden(dao.chainId, dao.collectionAddress))
+    const pinnedDaos = filteredDaos.filter((dao) =>
+      isDaoPinned(dao.chainId, dao.collectionAddress)
+    )
+    const unpinnedDaos = filteredDaos.filter(
+      (dao) => !isDaoPinned(dao.chainId, dao.collectionAddress)
+    )
+    return [...pinnedDaos, ...unpinnedDaos]
+  }, [daos, showHiddenDaos, isDaoHidden, isDaoPinned])
 
   const handleOpenMenu = React.useCallback(
     (open: boolean) => {
@@ -153,59 +173,145 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   }
             }
           >
-            {daos.map((dao, index) => {
+            {shortlistDaos.map((dao, index) => {
               const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
+              const isHidden = isDaoHidden(dao.chainId, dao.collectionAddress)
               return (
-                <Link
-                  key={dao.collectionAddress}
-                  href={`/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
-                  passHref
-                  style={{ width: '100%' }}
+                <Flex
+                  key={`${dao.chainId}:${dao.collectionAddress}`}
+                  align="center"
+                  justify="space-between"
+                  className={daoButton}
+                  style={{ borderRadius: '8px', width: '100%' }}
+                  pr="x2"
+                  gap="x2"
                 >
-                  <Flex
-                    direction={'row'}
-                    align={'center'}
-                    cursor={'pointer'}
-                    id={`close-modal-${index}`}
-                    color={'text1'}
-                    gap={'x4'}
-                    className={daoButton}
-                    pr="x2"
-                    style={{
-                      borderRadius: '8px',
-                      width: '100%',
-                    }}
+                  <Link
+                    href={`/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
+                    passHref
+                    style={{ width: '100%', textDecoration: 'none' }}
                   >
-                    <DaoAvatar
-                      collectionAddress={dao.collectionAddress}
-                      size={'40'}
-                      auctionAddress={dao.auctionAddress}
-                      chainId={dao.chainId}
-                    />
-                    <Flex align="center" justify="space-between" flex="1">
-                      <Text fontWeight={'display'}>{dao.name}</Text>
-                      <Flex align="center" gap="x1">
-                        {chainMeta?.icon && (
-                          <NextImage
-                            src={chainMeta?.icon}
-                            layout="fixed"
-                            objectFit="contain"
-                            style={{ borderRadius: '12px', maxHeight: '16px' }}
-                            alt=""
-                            height={16}
-                            width={16}
-                          />
-                        )}
-                        <Text fontSize={12} color="text3">
-                          {chainMeta?.name}
-                        </Text>
+                    <Flex
+                      direction={'row'}
+                      align={'center'}
+                      cursor={'pointer'}
+                      id={`close-modal-${index}`}
+                      color={'text1'}
+                      gap={'x4'}
+                      justify={'space-between'}
+                    >
+                      <Flex align="center" gap="x4" style={{ minWidth: 0 }}>
+                        <DaoAvatar
+                          collectionAddress={dao.collectionAddress}
+                          size={'40'}
+                          auctionAddress={dao.auctionAddress}
+                          chainId={dao.chainId}
+                        />
+                        <Text fontWeight={'display'}>{dao.name}</Text>
                       </Flex>
                     </Flex>
+                  </Link>
+                  <Flex
+                    align="center"
+                    gap="x1"
+                    style={{ minWidth: '72px', justifyContent: 'flex-end' }}
+                  >
+                    <Flex width="x4" height="x4" align="center" justify="center">
+                      {chainMeta?.icon && (
+                        <NextImage
+                          src={chainMeta.icon}
+                          style={{
+                            borderRadius: '12px',
+                            maxHeight: '16px',
+                            objectFit: 'contain',
+                          }}
+                          alt=""
+                          height={14}
+                          width={14}
+                        />
+                      )}
+                    </Flex>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      p="x0"
+                      style={{ width: '18px', height: '18px', minWidth: '18px' }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (isDaoPinned(dao.chainId, dao.collectionAddress)) {
+                          unpinDao(dao.chainId, dao.collectionAddress)
+                        } else {
+                          pinDao(dao.chainId, dao.collectionAddress)
+                        }
+                      }}
+                      disabled={
+                        !isDaoPinned(dao.chainId, dao.collectionAddress) && pinLimitReached
+                      }
+                      title={
+                        isDaoPinned(dao.chainId, dao.collectionAddress)
+                          ? 'Unpin from top'
+                          : pinLimitReached
+                            ? 'Pin limit reached (3)'
+                            : 'Pin to top'
+                      }
+                      aria-label={`${
+                        isDaoPinned(dao.chainId, dao.collectionAddress) ? 'Unpin' : 'Pin'
+                      } ${dao.name} ${
+                        isDaoPinned(dao.chainId, dao.collectionAddress) ? 'from' : 'to'
+                      } top`}
+                    >
+                      <Icon
+                        id="pin"
+                        size="sm"
+                        style={{ transform: 'scale(0.9)' }}
+                        fill={
+                          isDaoPinned(dao.chainId, dao.collectionAddress)
+                            ? 'primary'
+                            : 'text3'
+                        }
+                      />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      p="x0"
+                      style={{ width: '16px', height: '16px', minWidth: '16px' }}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (isHidden) {
+                          unhideDao(dao.chainId, dao.collectionAddress)
+                        } else {
+                          hideDao(dao.chainId, dao.collectionAddress)
+                        }
+                      }}
+                      title={isHidden ? 'Unpin from shortlist' : 'Pin to shortlist'}
+                      aria-label={`${isHidden ? 'Unpin' : 'Pin'} ${dao.name} ${
+                        isHidden ? 'from' : 'to'
+                      } shortlist`}
+                    >
+                      <Icon
+                        id={isHidden ? 'plus' : 'dash'}
+                        size="sm"
+                        style={{ transform: 'scale(0.8)' }}
+                      />
+                    </Button>
                   </Flex>
-                </Link>
+                </Flex>
               )
             })}
           </Flex>
+          {hiddenDaosCount > 0 && (
+            <Button
+              variant="ghost"
+              size="xs"
+              style={{ minHeight: '20px', fontSize: '11px', padding: '2px 6px' }}
+              onClick={() => setShowHiddenDaos((x) => !x)}
+            >
+              {showHiddenDaos ? 'Hide hidden DAOs' : `Show hidden DAOs (${hiddenDaosCount})`}
+            </Button>
+          )}
           <Box color="border" borderStyle="solid" borderWidth="thin" />
         </>
       )}
@@ -484,3 +590,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     </>
   )
 }
+
+
+
