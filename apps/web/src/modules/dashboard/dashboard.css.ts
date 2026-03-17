@@ -23,6 +23,11 @@ export const outerAuctionCard = style([
   },
 ])
 
+export const hiddenAuctionCard = style({
+  backgroundColor: theme.colors.background2,
+  borderColor: theme.colors.neutralHover,
+})
+
 export const proposalCardVariants = {
   default: style({
     transition: 'border-color 0.15s ease-in-out',

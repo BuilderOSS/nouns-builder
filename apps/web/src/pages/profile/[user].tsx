@@ -7,7 +7,7 @@ import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { myDaosRequest, tokensQuery } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
-import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { Pagination } from '@buildeross/ui/Pagination'
@@ -15,30 +15,29 @@ import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
-import NextImage from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { Meta } from 'src/components/Meta'
+import { ProfileDaoList } from 'src/components/ProfileDaoList'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import {
   daosContainer,
   loadingSkeleton,
   noTokensContainer,
-  profileDaoLink,
   responsiveGrid,
   tokenContainer,
 } from 'src/styles/profile.css'
 import useSWR, { unstable_serialize } from 'swr'
 import { isAddress } from 'viem'
+import { useAccount } from 'wagmi'
 
 interface ProfileProps {
   userAddress: string
   userName: string
   ogImageURL: string
 }
-
 const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   userAddress,
   userName,
@@ -46,10 +45,12 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
 }) => {
   const chain = useChainStore((x) => x.chain)
   const { query, push, pathname } = useRouter()
+  const { address: connectedAddress } = useAccount()
 
   const page = query.page as string
 
   const { ensName, ensAvatar } = useEnsData(userAddress)
+  const isOwnProfile = connectedAddress?.toLowerCase() === userAddress.toLowerCase()
 
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
@@ -245,9 +246,6 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
             </Flex>
 
             <Flex mt="x8" direction="column" align="flex-start">
-              <Text mb="x4" fontWeight={'display'}>
-                DAOs
-              </Text>
               {isLoadingDaos ? (
                 <Box
                   backgroundColor="background2"
@@ -257,65 +255,11 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   borderRadius="normal"
                 />
               ) : daos && daos?.length > 0 ? (
-                <Flex direction="column" gap="x3" w="100%">
-                  {daos.map((dao) => {
-                    const chainMeta = PUBLIC_DEFAULT_CHAINS.find(
-                      (chain) => chain.id === dao.chainId
-                    )
-                    return (
-                      <Link
-                        key={dao.collectionAddress}
-                        href={`${BASE_URL}/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
-                        style={{
-                          textDecoration: 'none',
-                          color: 'inherit',
-                          width: '100%',
-                        }}
-                      >
-                        <Flex
-                          align="center"
-                          gap="x3"
-                          p="x3"
-                          borderRadius="curved"
-                          borderStyle="solid"
-                          borderWidth="thin"
-                          borderColor="border"
-                          cursor="pointer"
-                          style={{
-                            transition: 'all 0.2s ease',
-                          }}
-                          className={profileDaoLink}
-                        >
-                          <DaoAvatar
-                            collectionAddress={dao.collectionAddress}
-                            size="48"
-                            auctionAddress={dao.auctionAddress}
-                            chainId={dao.chainId}
-                          />
-                          <Flex align="center" justify="space-between" flex="1">
-                            <Text fontWeight="display">{dao.name}</Text>
-                            <Flex align="center" gap="x1">
-                              {chainMeta?.icon && (
-                                <NextImage
-                                  src={chainMeta.icon}
-                                  layout="fixed"
-                                  objectFit="contain"
-                                  style={{ borderRadius: '12px', maxHeight: '16px' }}
-                                  alt=""
-                                  height={16}
-                                  width={16}
-                                />
-                              )}
-                              <Text fontSize={12} color="text3">
-                                {chainMeta?.name}
-                              </Text>
-                            </Flex>
-                          </Flex>
-                        </Flex>
-                      </Link>
-                    )
-                  })}
-                </Flex>
+                <ProfileDaoList
+                  daos={daos}
+                  isOwnProfile={isOwnProfile}
+                  userAddress={userAddress}
+                />
               ) : (
                 <Text>No DAO tokens owned.</Text>
               )}
