@@ -1,4 +1,4 @@
-import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
+import { CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SectionHandler } from '@buildeross/dao-ui'
 import { Feed } from '@buildeross/feed-ui'
