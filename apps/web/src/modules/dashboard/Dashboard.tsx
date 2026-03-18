@@ -282,6 +282,7 @@ export const Dashboard: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="xs"
+                  style={{ minHeight: '20px', fontSize: '11px', padding: '2px 6px' }}
                   onClick={() => setShowHiddenDaos((x) => !x)}
                 >
                   {showHiddenDaos
