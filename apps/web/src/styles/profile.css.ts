@@ -115,3 +115,10 @@ export const daoEditorDoneButton = style({
     },
   },
 })
+
+export const daoVisibilityToggleButton = style({
+  minHeight: '20px',
+  fontSize: '11px',
+  padding: '2px 6px',
+  alignSelf: 'center',
+})

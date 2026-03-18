@@ -14,6 +14,7 @@ import {
   daoEditorRow,
   daoEditorSpacer,
   daoEditorSpacerActive,
+  daoVisibilityToggleButton,
   profileDaoLink,
   profileHiddenDaoLink,
 } from 'src/styles/profile.css'
@@ -630,7 +631,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
         <Button
           variant="ghost"
           size="xs"
-          style={{ alignSelf: 'flex-start' }}
+          className={daoVisibilityToggleButton}
           onClick={() => setShowHiddenDaos((current) => !current)}
         >
           {showHiddenDaos ? 'Hide hidden DAOs' : `Show hidden DAOs (${hiddenDaosCount})`}
