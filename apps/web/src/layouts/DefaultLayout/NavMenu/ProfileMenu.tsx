@@ -12,6 +12,7 @@ import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/utils/useDaoListPreferences'
 import { formatUnits } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
@@ -54,7 +55,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     : undefined
 
   const { daos } = useUserDaos({ address })
-  const [showHiddenDaos, setShowHiddenDaos] = React.useState(false)
+  const [isHiddenDaosOpen, setIsHiddenDaosOpen] = React.useState(false)
   const { isDaoHidden, sortDaos, groupHiddenDaosLast } = useDaoListPreferences(address)
   const chainSortedDaos = React.useMemo(
     () =>
@@ -71,26 +72,29 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         .length,
     [chainSortedDaos, isDaoHidden]
   )
-  const shortlistDaos = React.useMemo(() => {
+  const orderedDaos = React.useMemo(() => {
     const orderedDaos = sortDaos(
       chainSortedDaos,
       (dao) => dao.collectionAddress,
       (dao) => dao.chainId
     )
-    const displayOrderedDaos = groupHiddenDaosLast(
+
+    return groupHiddenDaosLast(
       orderedDaos,
       (dao) => dao.collectionAddress,
       (dao) => dao.chainId
     )
+  }, [chainSortedDaos, sortDaos, groupHiddenDaosLast])
 
-    if (showHiddenDaos) {
-      return displayOrderedDaos
-    }
+  const visibleDaos = React.useMemo(
+    () => orderedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.collectionAddress)),
+    [orderedDaos, isDaoHidden]
+  )
 
-    return displayOrderedDaos.filter(
-      (dao) => !isDaoHidden(dao.chainId, dao.collectionAddress)
-    )
-  }, [chainSortedDaos, showHiddenDaos, isDaoHidden, sortDaos, groupHiddenDaosLast])
+  const hiddenDaos = React.useMemo(
+    () => orderedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.collectionAddress)),
+    [orderedDaos, isDaoHidden]
+  )
 
   const handleOpenMenu = React.useCallback(
     (open: boolean) => {
@@ -192,16 +196,15 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   }
             }
           >
-            {shortlistDaos.map((dao, index) => {
+            {visibleDaos.map((dao, index) => {
               const daoKey = `${dao.chainId}:${dao.collectionAddress}`
               const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
-              const isHidden = isDaoHidden(dao.chainId, dao.collectionAddress)
               return (
                 <Flex
                   key={daoKey}
                   align="center"
                   justify="space-between"
-                  className={[daoButton, isHidden && hiddenDaoButton]}
+                  className={daoButton}
                   style={{ borderRadius: '8px', width: '100%' }}
                   pr="x2"
                   gap="x2"
@@ -255,19 +258,80 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                 </Flex>
               )
             })}
+            {hiddenDaosCount > 0 && (
+              <HiddenDaoDisclosure
+                count={hiddenDaosCount}
+                isOpen={isHiddenDaosOpen}
+                onToggle={() => setIsHiddenDaosOpen((x) => !x)}
+              >
+                <Flex direction="column" gap="x2" w="100%">
+                  {hiddenDaos.map((dao, index) => {
+                    const daoKey = `${dao.chainId}:${dao.collectionAddress}`
+                    const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
+
+                    return (
+                      <Flex
+                        key={daoKey}
+                        align="center"
+                        justify="space-between"
+                        className={[daoButton, hiddenDaoButton]}
+                        style={{ borderRadius: '8px', width: '100%' }}
+                        pr="x2"
+                        gap="x2"
+                      >
+                        <Link
+                          href={`/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
+                          passHref
+                          style={{ width: '100%', textDecoration: 'none' }}
+                        >
+                          <Flex
+                            direction={'row'}
+                            align={'center'}
+                            cursor={'pointer'}
+                            id={`close-modal-hidden-${index}`}
+                            color={'text1'}
+                            gap={'x4'}
+                            justify={'space-between'}
+                          >
+                            <Flex align="center" gap="x4" style={{ minWidth: 0 }}>
+                              <DaoAvatar
+                                collectionAddress={dao.collectionAddress}
+                                size={'40'}
+                                auctionAddress={dao.auctionAddress}
+                                chainId={dao.chainId}
+                              />
+                              <Text fontWeight={'display'}>{dao.name}</Text>
+                            </Flex>
+                          </Flex>
+                        </Link>
+                        <Flex
+                          align="center"
+                          gap="x1"
+                          style={{ minWidth: '24px', justifyContent: 'flex-end' }}
+                        >
+                          <Flex width="x4" height="x4" align="center" justify="center">
+                            {chainMeta?.icon && (
+                              <NextImage
+                                src={chainMeta.icon}
+                                style={{
+                                  borderRadius: '12px',
+                                  maxHeight: '16px',
+                                  objectFit: 'contain',
+                                }}
+                                alt=""
+                                height={16}
+                                width={16}
+                              />
+                            )}
+                          </Flex>
+                        </Flex>
+                      </Flex>
+                    )
+                  })}
+                </Flex>
+              </HiddenDaoDisclosure>
+            )}
           </Flex>
-          {hiddenDaosCount > 0 && (
-            <Button
-              variant="ghost"
-              size="xs"
-              style={{ minHeight: '20px', fontSize: '11px', padding: '2px 6px' }}
-              onClick={() => setShowHiddenDaos((x) => !x)}
-            >
-              {showHiddenDaos
-                ? 'Hide hidden DAOs'
-                : `Show hidden DAOs (${hiddenDaosCount})`}
-            </Button>
-          )}
           <Box color="border" borderStyle="solid" borderWidth="thin" />
         </>
       )}

@@ -9,8 +9,9 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
-import { Box, Button, Stack, Text } from '@buildeross/zord'
+import { Box, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
+import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/utils/useDaoListPreferences'
 import { useAccount } from 'wagmi'
 
@@ -30,7 +31,7 @@ export const Dashboard: React.FC = () => {
   const [openAccordion, setOpenAccordion] = React.useState<'daos' | 'proposals' | null>(
     null
   )
-  const [showHiddenDaos, setShowHiddenDaos] = React.useState(false)
+  const [isHiddenDaosOpen, setIsHiddenDaosOpen] = React.useState(false)
   const { isDaoHidden, sortDaos, groupHiddenDaosLast } = useDaoListPreferences(address)
 
   const {
@@ -73,32 +74,45 @@ export const Dashboard: React.FC = () => {
     () => sortedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.tokenAddress)),
     [sortedDaos, isDaoHidden]
   )
+  const hiddenDaos = useMemo(
+    () => sortedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.tokenAddress)),
+    [sortedDaos, isDaoHidden]
+  )
   const hiddenDaosCount = sortedDaos.length - visibleDaos.length
-  const daosForDisplay = useMemo(() => {
-    if (showHiddenDaos) {
-      return sortedDaos
-    }
-
-    return visibleDaos
-  }, [showHiddenDaos, sortedDaos, visibleDaos])
 
   const auctionCards = useMemo(() => {
-    if (!address || !daosForDisplay.length) return null
+    if (!address || !visibleDaos.length) return null
 
-    return daosForDisplay.map((dao) => {
-      const isHidden = isDaoHidden(dao.chainId, dao.tokenAddress)
+    return visibleDaos.map((dao) => {
       return (
         <Box key={`auctionCard:${dao.tokenAddress}:${dao?.currentAuction?.endTime || 0}`}>
           <DaoAuctionCard
             {...dao}
             userAddress={address}
             handleMutate={mutate}
-            isHidden={isHidden}
+            isHidden={false}
           />
         </Box>
       )
     })
-  }, [daosForDisplay, address, mutate, isDaoHidden])
+  }, [visibleDaos, address, mutate])
+
+  const hiddenAuctionCards = useMemo(() => {
+    if (!address || !hiddenDaos.length) return null
+
+    return hiddenDaos.map((dao) => {
+      return (
+        <Box key={`hiddenAuctionCard:${dao.tokenAddress}:${dao?.currentAuction?.endTime || 0}`}>
+          <DaoAuctionCard
+            {...dao}
+            userAddress={address}
+            handleMutate={mutate}
+            isHidden={true}
+          />
+        </Box>
+      )
+    })
+  }, [hiddenDaos, address, mutate])
 
   const hasLiveProposals = useMemo(() => {
     if (!sortedDaos.length) return false
@@ -272,23 +286,20 @@ export const Dashboard: React.FC = () => {
 
         <AccordionItem
           title="DAOs"
-          summary={`${daosForDisplay.length} DAO${daosForDisplay.length !== 1 ? 's' : ''}${
+          summary={`${visibleDaos.length} DAO${visibleDaos.length !== 1 ? 's' : ''}${
             hiddenDaosCount > 0 ? ` (${hiddenDaosCount} hidden)` : ''
           }`}
           description={
             <Stack gap="x2">
               <Stack gap="x1">{auctionCards}</Stack>
               {hiddenDaosCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  style={{ minHeight: '20px', fontSize: '11px', padding: '2px 6px' }}
-                  onClick={() => setShowHiddenDaos((x) => !x)}
+                <HiddenDaoDisclosure
+                  count={hiddenDaosCount}
+                  isOpen={isHiddenDaosOpen}
+                  onToggle={() => setIsHiddenDaosOpen((x) => !x)}
                 >
-                  {showHiddenDaos
-                    ? 'Hide hidden DAOs'
-                    : `Show hidden DAOs (${hiddenDaosCount})`}
-                </Button>
+                  <Stack gap="x1">{hiddenAuctionCards}</Stack>
+                </HiddenDaoDisclosure>
               )}
             </Stack>
           }
