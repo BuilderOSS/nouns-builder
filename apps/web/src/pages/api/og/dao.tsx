@@ -46,7 +46,6 @@ const getTreasuryBalance = async (
     blockTag: 'latest',
   })
 
-  // Convert to ETH value
   const balanceInWei = BigInt(result.value)
   const balanceInEth = formatEther(balanceInWei)
   const data = formatCryptoVal(balanceInEth)

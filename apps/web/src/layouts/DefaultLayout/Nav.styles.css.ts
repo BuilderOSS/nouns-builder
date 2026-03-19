@@ -165,6 +165,15 @@ export const daoButton = style({
   },
 })
 
+export const hiddenDaoButton = style({
+  background: color.background2,
+  selectors: {
+    '&:hover': {
+      background: color.ghostHover,
+    },
+  },
+})
+
 export const navLogo = style({
   zIndex: z.NAV_LAYER,
   position: 'relative',

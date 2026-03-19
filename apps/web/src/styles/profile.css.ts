@@ -58,3 +58,62 @@ export const profileDaoLink = style({
     },
   },
 })
+
+export const profileHiddenDaoLink = style({
+  backgroundColor: color.background2,
+})
+
+export const daoEditorRow = style({
+  width: '100%',
+})
+
+export const daoEditorButtonGroup = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  flexShrink: 0,
+})
+
+export const daoEditorIconButton = style({
+  minWidth: '28px',
+  width: '28px',
+  height: '28px',
+  padding: '0',
+})
+
+export const daoEditorDragHandle = style({
+  cursor: 'grab',
+  touchAction: 'none',
+  selectors: {
+    '&:active': {
+      cursor: 'grabbing',
+    },
+  },
+})
+
+export const daoEditorDragging = style({
+  position: 'relative',
+})
+
+export const daoEditorSpacer = style({
+  height: '0',
+  transition: 'height 0.12s ease-out',
+})
+
+export const daoEditorSpacerActive = style({
+  height: '18px',
+})
+
+export const daoEditorDoneButton = style({
+  borderColor: '#2563eb',
+  color: '#2563eb',
+  backgroundColor: 'rgba(37, 99, 235, 0.06)',
+  selectors: {
+    '&:hover': {
+      borderColor: '#1d4ed8',
+      color: '#1d4ed8',
+      backgroundColor: 'rgba(37, 99, 235, 0.1)',
+    },
+  },
+})
+
