@@ -5,6 +5,7 @@ import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { createPortal } from 'react-dom'
+import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import {
   daoEditorButtonGroup,
   daoEditorDoneButton,
@@ -14,7 +15,6 @@ import {
   daoEditorRow,
   daoEditorSpacer,
   daoEditorSpacerActive,
-  daoVisibilityToggleButton,
   profileDaoLink,
   profileHiddenDaoLink,
 } from 'src/styles/profile.css'
@@ -40,6 +40,7 @@ type DragOverlayState = {
 type DragMeta = {
   daoKey: string
   pointerOffsetY: number
+  pointerId: number
 }
 
 type RowMetric = {
@@ -202,7 +203,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
   userAddress,
 }) => {
   const [isEditingDaos, setIsEditingDaos] = React.useState(false)
-  const [showHiddenDaos, setShowHiddenDaos] = React.useState(false)
+  const [isHiddenDaosOpen, setIsHiddenDaosOpen] = React.useState(false)
   const [activeDragKey, setActiveDragKey] = React.useState<string | null>(null)
   const [dragInsertIndex, setDragInsertIndex] = React.useState<number | null>(null)
   const [dragOverlay, setDragOverlay] = React.useState<DragOverlayState | null>(null)
@@ -211,6 +212,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     useDaoListPreferences(userAddress)
 
   const overlayRef = React.useRef<HTMLDivElement | null>(null)
+  const listRef = React.useRef<HTMLDivElement | null>(null)
   const rowRefs = React.useRef<Record<string, HTMLDivElement | null>>({})
   const dragMetaRef = React.useRef<DragMeta | null>(null)
   const latestPointerYRef = React.useRef(0)
@@ -248,13 +250,17 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     [isDaoHidden, orderedDaos]
   )
 
-  const daosForDisplay = React.useMemo(() => {
-    if (isEditingDaos || showHiddenDaos) {
-      return orderedDaos
-    }
+  const visibleDaos = React.useMemo(
+    () => orderedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.collectionAddress)),
+    [isDaoHidden, orderedDaos]
+  )
 
-    return orderedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.collectionAddress))
-  }, [isDaoHidden, isEditingDaos, orderedDaos, showHiddenDaos])
+  const hiddenDaos = React.useMemo(
+    () => orderedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.collectionAddress)),
+    [isDaoHidden, orderedDaos]
+  )
+
+  const daosForDisplay = isEditingDaos ? orderedDaos : visibleDaos
 
   const getDaoKey = React.useCallback(
     (chainId: number, collectionAddress: string) =>
@@ -344,10 +350,14 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
   React.useEffect(() => {
     if (!dragOverlay || !dragMetaRef.current) {
       document.body.style.userSelect = ''
+      document.body.style.touchAction = ''
+      document.documentElement.style.overscrollBehavior = ''
       return
     }
 
     document.body.style.userSelect = 'none'
+    document.body.style.touchAction = 'none'
+    document.documentElement.style.overscrollBehavior = 'none'
 
     const computeRowMetrics = () => {
       rowMetricsRef.current = orderedDaos
@@ -392,13 +402,18 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       const scrollContainer = scrollContainerRef.current
       if (!scrollContainer) return
 
-      const threshold = 72
-      const maxSpeed = 18
+      const threshold = 56
+      const maxSpeed = 14
       let delta = 0
+      const listRect = listRef.current?.getBoundingClientRect()
 
       if (scrollContainer === window) {
-        const topDistance = latestPointerYRef.current
-        const bottomDistance = window.innerHeight - latestPointerYRef.current
+        const boundsTop = listRect ? Math.max(listRect.top, 0) : 0
+        const boundsBottom = listRect
+          ? Math.min(listRect.bottom, window.innerHeight)
+          : window.innerHeight
+        const topDistance = latestPointerYRef.current - boundsTop
+        const bottomDistance = boundsBottom - latestPointerYRef.current
 
         if (topDistance < threshold) {
           delta = -Math.min(maxSpeed, ((threshold - topDistance) / threshold) * maxSpeed)
@@ -415,8 +430,10 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       } else {
         const element = scrollContainer as HTMLElement
         const rect = element.getBoundingClientRect()
-        const topDistance = latestPointerYRef.current - rect.top
-        const bottomDistance = rect.bottom - latestPointerYRef.current
+        const boundsTop = listRect ? Math.max(rect.top, listRect.top) : rect.top
+        const boundsBottom = listRect ? Math.min(rect.bottom, listRect.bottom) : rect.bottom
+        const topDistance = latestPointerYRef.current - boundsTop
+        const bottomDistance = boundsBottom - latestPointerYRef.current
 
         if (topDistance < threshold) {
           delta = -Math.min(maxSpeed, ((threshold - topDistance) / threshold) * maxSpeed)
@@ -444,6 +461,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     }
 
     const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerId !== dragMetaRef.current?.pointerId) return
       latestPointerYRef.current = event.clientY
 
       if (rafRef.current === null) {
@@ -459,7 +477,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       computeRowMetrics()
     }
 
-    const handlePointerUp = () => {
+    const finishDrag = () => {
       const dragMeta = dragMetaRef.current
       if (!dragMeta) return
 
@@ -490,13 +508,32 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       setDragOverlay(null)
     }
 
+    const handlePointerUp = (event: PointerEvent) => {
+      if (event.pointerId !== dragMetaRef.current?.pointerId) return
+      finishDrag()
+    }
+
+    const handlePointerCancel = (event: PointerEvent) => {
+      if (event.pointerId !== dragMetaRef.current?.pointerId) return
+      finishDrag()
+    }
+
+    const handleTouchMove = (event: TouchEvent) => {
+      if (!dragMetaRef.current || !event.cancelable) return
+      event.preventDefault()
+    }
+
     window.addEventListener('pointermove', handlePointerMove)
     window.addEventListener('pointerup', handlePointerUp)
+    window.addEventListener('pointercancel', handlePointerCancel)
     window.addEventListener('scroll', handleViewportChange, true)
     window.addEventListener('resize', handleViewportChange)
+    window.addEventListener('touchmove', handleTouchMove, { passive: false })
 
     return () => {
       document.body.style.userSelect = ''
+      document.body.style.touchAction = ''
+      document.documentElement.style.overscrollBehavior = ''
       if (rafRef.current !== null) {
         window.cancelAnimationFrame(rafRef.current)
         rafRef.current = null
@@ -507,8 +544,10 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       }
       window.removeEventListener('pointermove', handlePointerMove)
       window.removeEventListener('pointerup', handlePointerUp)
+      window.removeEventListener('pointercancel', handlePointerCancel)
       window.removeEventListener('scroll', handleViewportChange, true)
       window.removeEventListener('resize', handleViewportChange)
+      window.removeEventListener('touchmove', handleTouchMove)
     }
   }, [dragOverlay, getDaoKey, getInsertIndexForPointer, moveDaoToIndex, orderedDaos])
 
@@ -534,12 +573,14 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       if (!rowNode) return
 
       event.preventDefault()
+      event.currentTarget.setPointerCapture(event.pointerId)
       const rect = rowNode.getBoundingClientRect()
       scrollContainerRef.current = getScrollableAncestor(rowNode)
       latestPointerYRef.current = event.clientY
       dragMetaRef.current = {
         daoKey,
         pointerOffsetY: event.clientY - rect.top,
+        pointerId: event.pointerId,
       }
       setActiveDragKey(daoKey)
       setDragInsertIndex(
@@ -562,7 +603,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
   }, [])
 
   return (
-    <Flex direction="column" gap="x3" w="100%">
+    <Flex ref={listRef} direction="column" gap="x3" w="100%">
       <Flex mb="x4" w="100%" align="center" justify="space-between" gap="x2">
         <Text fontWeight="display">DAOs</Text>
         {isOwnProfile && daos.length > 0 ? (
@@ -628,14 +669,45 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       ) : null}
 
       {hiddenDaosCount > 0 && !isEditingDaos ? (
-        <Button
-          variant="ghost"
-          size="xs"
-          className={daoVisibilityToggleButton}
-          onClick={() => setShowHiddenDaos((current) => !current)}
+        <HiddenDaoDisclosure
+          count={hiddenDaosCount}
+          isOpen={isHiddenDaosOpen}
+          onToggle={() => setIsHiddenDaosOpen((current) => !current)}
         >
-          {showHiddenDaos ? 'Hide hidden DAOs' : `Show hidden DAOs (${hiddenDaosCount})`}
-        </Button>
+          <Flex direction="column" gap="x3" w="100%">
+            {hiddenDaos.map((dao) => {
+              const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
+              const row = (
+                <ProfileDaoListRow
+                  chainIcon={chainIconsById.get(dao.chainId)}
+                  dao={dao}
+                  daoKey={daoKey}
+                  isDragging={false}
+                  isEditing={false}
+                  isHidden={true}
+                  isInsertGapActive={false}
+                  onToggleHidden={handleToggleHidden}
+                  onPointerDown={handlePointerDown}
+                />
+              )
+
+              return (
+                <Box key={daoKey}>
+                  <Link
+                    href={`/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`}
+                    style={{
+                      color: 'inherit',
+                      textDecoration: 'none',
+                      width: '100%',
+                    }}
+                  >
+                    {row}
+                  </Link>
+                </Box>
+              )
+            })}
+          </Flex>
+        </HiddenDaoDisclosure>
       ) : null}
 
       {dragOverlay && draggedDao
