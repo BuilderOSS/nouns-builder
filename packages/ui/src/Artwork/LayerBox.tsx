@@ -6,10 +6,11 @@ import React from 'react'
 
 import {
   artworkSettingsBox,
-  artworkSettingsBoxDropping,
+  artworkSettingsBoxDragging,
+  artworkSettingsDragHandle,
+  artworkSettingsDragHandleActive,
   artworkSettingsImageThumb,
   artworkSettingsName,
-  artworkSettingsNameDropping,
   artworkSettingsPropertyCount,
   artworkSettingsPropertyName,
 } from './Artwork.css'
@@ -26,24 +27,21 @@ export const getLayerName = (idx: number, layers?: OrderedTraits): string => {
   return `Layer #${idx}`
 }
 
-export interface DragAndDropProps {
-  draggedFrom?: number
-  draggedTo?: number | null
-  isDragging?: boolean
-  originalOrder?: OrderedTraits
-  updatedOrder?: OrderedTraits
-}
-
 interface LayerBoxProps {
   trait: string
   properties: string[]
   ipfs: ImageProps[]
-  setDragAndDrop: (props: DragAndDropProps) => void
-  dragAndDrop: DragAndDropProps | null
   orderedLayers: OrderedTraits
-  setOrderedLayers: (orderedLayers: OrderedTraits) => void
   index: number
+  isDragInProgress: boolean
+  isDragging: boolean
+  onDragHandlePointerDown: (
+    event: React.PointerEvent<HTMLButtonElement>,
+    index: number
+  ) => void
+  setRowRef?: (index: number, node: HTMLDivElement | null) => void
 }
+
 const propertiesVariants = {
   initial: {
     height: 0,
@@ -59,167 +57,122 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
   trait,
   properties,
   ipfs,
-  setDragAndDrop,
-  dragAndDrop,
   orderedLayers,
-  setOrderedLayers,
   index,
+  isDragInProgress,
+  isDragging,
+  onDragHandlePointerDown,
+  setRowRef,
 }) => {
-  /*  toggle property animation  */
   const [isOpen, setIsOpen] = React.useState(false)
 
-  /* Handle Drag and Drop to Reorder Properties */
-  const onDragStart = React.useCallback(
-    (e: any) => {
-      const initialPosition = Number(e.currentTarget.dataset.position)
-      setDragAndDrop({
-        ...dragAndDrop,
-
-        draggedFrom: initialPosition,
-        isDragging: true,
-        originalOrder: orderedLayers,
-      })
-
-      /*  firefox compatibility */
-      e.dataTransfer.setData('text/html', '')
-    },
-    [dragAndDrop, orderedLayers, setDragAndDrop]
-  )
-
-  const onDragOver = React.useCallback(
-    (e: any) => {
-      e.preventDefault()
-
-      let updatedOrder = orderedLayers
-
-      const draggedFrom = dragAndDrop?.draggedFrom
-      if (!draggedFrom && draggedFrom !== 0) return
-
-      const draggedTo = Number(e.currentTarget.dataset.position)
-
-      const itemDragged = updatedOrder[draggedFrom]
-
-      const remainingItems = updatedOrder.filter(
-        (item) => updatedOrder.indexOf(item) !== draggedFrom
-      )
-
-      updatedOrder = [
-        ...remainingItems.slice(0, draggedTo),
-        itemDragged,
-        ...remainingItems.slice(draggedTo),
-      ]
-
-      if (draggedTo !== dragAndDrop?.draggedTo) {
-        setDragAndDrop({
-          ...dragAndDrop,
-          updatedOrder,
-          draggedTo,
-        })
-      }
-    },
-    [dragAndDrop, orderedLayers, setDragAndDrop]
-  )
-
-  const onDrop = React.useCallback(() => {
-    if (!dragAndDrop?.updatedOrder) return
-    setOrderedLayers(dragAndDrop.updatedOrder)
-
-    setDragAndDrop({
-      ...dragAndDrop,
-      draggedFrom: 0,
-      draggedTo: null,
-      isDragging: false,
-    })
-  }, [dragAndDrop, setOrderedLayers, setDragAndDrop])
-
-  /*  listen for if section is being dropped in drop area */
-  const isDropping = React.useMemo(() => {
-    return dragAndDrop && dragAndDrop.draggedTo === Number(index)
-  }, [dragAndDrop, index])
-
-  /*  close section if is dragging */
   React.useEffect(() => {
-    if (dragAndDrop?.isDragging) {
+    if (isDragInProgress) {
       setIsOpen(false)
     }
-  }, [dragAndDrop])
+  }, [isDragInProgress])
 
   const handleToggle = React.useCallback(() => {
+    if (isDragInProgress) return
     setIsOpen((bool) => !bool)
-  }, [])
+  }, [isDragInProgress])
+
+  const handleRowRef = React.useCallback(
+    (node: HTMLDivElement | null) => {
+      setRowRef?.(index, node)
+    },
+    [index, setRowRef]
+  )
+
+  const handleDragHandlePointerDown = React.useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
+      onDragHandlePointerDown(event, index)
+    },
+    [index, onDragHandlePointerDown]
+  )
+
+  const handleDragHandleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+    },
+    []
+  )
 
   return (
     <Flex
-      direction={'column'}
+      ref={handleRowRef}
+      direction="column"
       key={trait}
-      p={'x4'}
-      mb={'x5'}
-      className={isDropping ? artworkSettingsBoxDropping : artworkSettingsBox}
-      draggable={true}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      data-position={index}
+      p="x4"
+      mb="x5"
+      className={[
+        artworkSettingsBox,
+        isDragging ? artworkSettingsBoxDragging : undefined,
+      ]}
     >
       <Flex
         fontSize={18}
-        justify={isDropping ? 'center' : 'space-between'}
-        align={'center'}
-        className={isDropping ? artworkSettingsNameDropping : artworkSettingsName}
+        justify="space-between"
+        align="center"
+        className={artworkSettingsName}
         onClick={handleToggle}
       >
-        <Flex align={'center'}>
-          <Box mr={'x2'}>
-            {isDropping
-              ? `Drag Here - Set as ${getLayerName(index, orderedLayers)}`
-              : `${trait} (${properties?.length} variants)`}
-          </Box>
-          {!isDropping ? (
-            isOpen ? (
-              <Icon id="chevronUp" />
-            ) : (
-              <Icon id="chevronDown" />
-            )
-          ) : null}
+        <Flex align="center">
+          <Box mr="x2">{`${trait} (${properties?.length} variants)`}</Box>
+          {isOpen ? <Icon id="chevronUp" /> : <Icon id="chevronDown" />}
         </Flex>
-        {!isDropping && (
-          <Flex align={'center'} fontSize={12}>
-            <Box mr={'x4'}>{getLayerName(index, orderedLayers)}</Box>
-            <Icon id="move" />
-          </Flex>
-        )}
+        <Flex
+          as="button"
+          type="button"
+          align="center"
+          fontSize={12}
+          className={[
+            artworkSettingsDragHandle,
+            isDragInProgress ? artworkSettingsDragHandleActive : undefined,
+          ]}
+          onPointerDown={handleDragHandlePointerDown}
+          onClick={handleDragHandleClick}
+          style={{
+            cursor: isDragInProgress ? 'grabbing' : 'grab',
+            background: 'transparent',
+            border: 0,
+            padding: 0,
+          }}
+          aria-label={`Drag to reorder ${trait}`}
+        >
+          <Box mr="x4">{getLayerName(index, orderedLayers)}</Box>
+          <Icon id="move" />
+        </Flex>
       </Flex>
       <motion.div
         variants={propertiesVariants}
-        initial={'initial'}
+        initial="initial"
         animate={isOpen ? 'open' : 'initial'}
         style={{ maxHeight: '500px' }}
       >
         {properties?.map((property) => {
-          const index = ipfs?.map((e) => e.name).indexOf(property)
-          const image = ipfs?.[index]?.uri
+          const propertyIndex = ipfs?.map((image) => image.name).indexOf(property)
+          const image = ipfs?.[propertyIndex]?.uri
           const src = getFetchableUrls(image)?.[0]
           return (
-            <Flex gap={'x2'} key={property} justify={'center'} align={'center'}>
-              <Flex
-                align={'center'}
-                fontSize={14}
-                className={artworkSettingsPropertyName}
-              >
+            <Flex gap="x2" key={property} justify="center" align="center">
+              <Flex align="center" fontSize={14} className={artworkSettingsPropertyName}>
                 {property}
               </Flex>
               <Flex
-                align={'center'}
-                justify={'center'}
+                align="center"
+                justify="center"
                 className={artworkSettingsPropertyCount}
               >
-                {src && (
+                {src ? (
                   <img
                     src={src}
                     className={artworkSettingsImageThumb}
                     alt={`${property} thumbnail image`}
                   />
-                )}
+                ) : null}
               </Flex>
             </Flex>
           )

@@ -92,7 +92,7 @@
     "analyze": "ANALYZE=true next build",
     "build": "next build",
     "clean": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true }); require('fs').rmSync('.turbo', { recursive: true, force: true });\"",
-    "dev": "pnpm exec next dev",
+    "dev": "pnpm clean && pnpm exec next dev",
     "lint": "pnpm type-check && eslint --fix .",
     "start": "next start",
     "test": "vitest run",

@@ -91,7 +91,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const feedSection = {
     title: 'Feed',
     component: [
-      <Flex key="feed" w="100%" direction="column" align="center">
+      <Flex key="feed" w="100%" direction="column" align="center" px="x2">
         <Box w="100%" style={{ maxWidth: '912px' }}>
           <Feed actor={userAddress as AddressType} />
         </Box>
@@ -103,7 +103,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const tokensSection = {
     title: 'Tokens',
     component: [
-      <Box key="tokens" w="100%">
+      <Box key="tokens" w="100%" px="x2">
         {hasDaos && (
           <>
             {isLoadingTokens ? (
@@ -206,7 +206,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
         >
           <Box
             mt={{ '@initial': 'x12', '@768': 'x32' }}
-            pr={{ '@768': 'x8', '@1024': 'x16' }}
+            pr={{ '@768': 'x8' }}
             className={daosContainer}
           >
             <Flex

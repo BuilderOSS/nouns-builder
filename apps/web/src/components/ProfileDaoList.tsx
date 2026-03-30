@@ -8,13 +8,16 @@ import { createPortal } from 'react-dom'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import {
   daoEditorButtonGroup,
+  daoEditorButtonGroupDragging,
   daoEditorDoneButton,
   daoEditorDragging,
   daoEditorDragHandle,
+  daoEditorDragHandleActive,
   daoEditorIconButton,
   daoEditorRow,
   daoEditorSpacer,
   daoEditorSpacerActive,
+  daoEditorSpacerLabel,
   profileDaoLink,
   profileHiddenDaoLink,
 } from 'src/styles/profile.css'
@@ -58,9 +61,11 @@ type ProfileDaoListRowProps = {
   chainIcon?: string
   dao: ProfileDaoListItem
   daoKey: string
+  isDragInProgress: boolean
   isDragging: boolean
   isEditing: boolean
   isHidden: boolean
+  insertGapLabel?: string
   isInsertGapActive: boolean
   onPointerDown: (event: React.PointerEvent<HTMLButtonElement>, daoKey: string) => void
   onToggleHidden: (dao: ProfileDaoListItem, isHidden: boolean) => void
@@ -72,9 +77,11 @@ const ProfileDaoListRow = React.memo(
     chainIcon,
     dao,
     daoKey,
+    isDragInProgress,
     isDragging,
     isEditing,
     isHidden,
+    insertGapLabel,
     isInsertGapActive,
     onPointerDown,
     onToggleHidden,
@@ -101,9 +108,11 @@ const ProfileDaoListRow = React.memo(
     return (
       <Box className={daoEditorRow}>
         {isEditing ? (
-          <Box
-            className={[daoEditorSpacer, isInsertGapActive && daoEditorSpacerActive]}
-          />
+          <Box className={[daoEditorSpacer, isInsertGapActive && daoEditorSpacerActive]}>
+            {isInsertGapActive && insertGapLabel ? (
+              <Text className={daoEditorSpacerLabel}>{insertGapLabel}</Text>
+            ) : null}
+          </Box>
         ) : null}
         <Flex
           ref={handleRowRef}
@@ -117,12 +126,11 @@ const ProfileDaoListRow = React.memo(
           style={{
             transition: 'opacity 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease',
             opacity: isDragging ? 0.42 : isHidden ? 0.7 : 1,
-            cursor: isEditing ? 'auto' : 'pointer',
           }}
           className={[
-            profileDaoLink,
-            isHidden && profileHiddenDaoLink,
-            isDragging && daoEditorDragging,
+            !isEditing ? profileDaoLink : undefined,
+            isHidden ? profileHiddenDaoLink : undefined,
+            isDragging ? daoEditorDragging : undefined,
           ]}
         >
           <Flex align="center" gap="x3" flex="1" style={{ minWidth: 0 }}>
@@ -149,12 +157,18 @@ const ProfileDaoListRow = React.memo(
             </Flex>
           </Flex>
           {isEditing ? (
-            <Flex className={daoEditorButtonGroup}>
+            <Flex
+              className={[
+                daoEditorButtonGroup,
+                isDragInProgress ? daoEditorButtonGroupDragging : undefined,
+              ]}
+            >
               <Button
                 size="xs"
                 variant="ghost"
                 className={daoEditorIconButton}
                 onClick={handleToggleHidden}
+                disabled={isDragInProgress}
                 aria-label={`${isHidden ? 'Show' : 'Hide'} ${dao.name}`}
               >
                 <Icon id={isHidden ? 'plus' : 'dash'} size="sm" />
@@ -162,11 +176,16 @@ const ProfileDaoListRow = React.memo(
               <Button
                 size="xs"
                 variant="ghost"
-                className={[daoEditorIconButton, daoEditorDragHandle]}
+                className={[
+                  daoEditorIconButton,
+                  daoEditorDragHandle,
+                  isDragInProgress ? daoEditorDragHandleActive : undefined,
+                ]}
+                style={{ cursor: isDragInProgress ? 'grabbing' : 'grab' }}
                 onPointerDown={handlePointerDown}
                 aria-label={`Drag to reorder ${dao.name}`}
               >
-                <Icon id="dots" size="sm" style={{ transform: 'rotate(90deg)' }} />
+                <Icon id="move" size="sm" style={{ transform: 'rotate(90deg)' }} />
               </Button>
             </Flex>
           ) : null}
@@ -351,12 +370,16 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     if (!dragOverlay || !dragMetaRef.current) {
       document.body.style.userSelect = ''
       document.body.style.touchAction = ''
+      document.body.style.removeProperty('cursor')
+      document.documentElement.style.removeProperty('cursor')
       document.documentElement.style.overscrollBehavior = ''
       return
     }
 
     document.body.style.userSelect = 'none'
     document.body.style.touchAction = 'none'
+    document.body.style.setProperty('cursor', 'grabbing', 'important')
+    document.documentElement.style.setProperty('cursor', 'grabbing', 'important')
     document.documentElement.style.overscrollBehavior = 'none'
 
     const computeRowMetrics = () => {
@@ -431,7 +454,9 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
         const element = scrollContainer as HTMLElement
         const rect = element.getBoundingClientRect()
         const boundsTop = listRect ? Math.max(rect.top, listRect.top) : rect.top
-        const boundsBottom = listRect ? Math.min(rect.bottom, listRect.bottom) : rect.bottom
+        const boundsBottom = listRect
+          ? Math.min(rect.bottom, listRect.bottom)
+          : rect.bottom
         const topDistance = latestPointerYRef.current - boundsTop
         const bottomDistance = boundsBottom - latestPointerYRef.current
 
@@ -533,6 +558,8 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     return () => {
       document.body.style.userSelect = ''
       document.body.style.touchAction = ''
+      document.body.style.removeProperty('cursor')
+      document.documentElement.style.removeProperty('cursor')
       document.documentElement.style.overscrollBehavior = ''
       if (rafRef.current !== null) {
         window.cancelAnimationFrame(rafRef.current)
@@ -602,6 +629,21 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     rowRefs.current[daoKey] = node
   }, [])
 
+  const getDropPositionLabel = React.useCallback(
+    (insertIndex: number) => {
+      if (!activeDragKey) return undefined
+
+      const fromIndex = orderedDaos.findIndex(
+        (dao) => getDaoKey(dao.chainId, dao.collectionAddress) === activeDragKey
+      )
+      if (fromIndex < 0) return undefined
+
+      const adjustedInsertIndex = insertIndex > fromIndex ? insertIndex - 1 : insertIndex
+      return `Drop here - position #${adjustedInsertIndex + 1}`
+    },
+    [activeDragKey, getDaoKey, orderedDaos]
+  )
+
   return (
     <Flex ref={listRef} direction="column" gap="x3" w="100%">
       <Flex mb="x4" w="100%" align="center" justify="space-between" gap="x2">
@@ -611,6 +653,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
             size="sm"
             variant="outline"
             className={isEditingDaos ? daoEditorDoneButton : undefined}
+            disabled={activeDragKey !== null}
             onClick={() => setIsEditingDaos((current) => !current)}
           >
             {isEditingDaos ? 'Done' : 'Edit'}
@@ -627,9 +670,11 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
             chainIcon={chainIconsById.get(dao.chainId)}
             dao={dao}
             daoKey={daoKey}
+            isDragInProgress={activeDragKey !== null}
             isDragging={isDragging}
             isEditing={isEditingDaos}
             isHidden={isHidden}
+            insertGapLabel={isEditingDaos ? getDropPositionLabel(index) : undefined}
             isInsertGapActive={dragInsertIndex === index && activeDragKey !== null}
             onToggleHidden={handleToggleHidden}
             onPointerDown={handlePointerDown}
@@ -665,7 +710,13 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
               activeDragKey !== null &&
               daoEditorSpacerActive,
           ]}
-        />
+        >
+          {dragInsertIndex === daosForDisplay.length && activeDragKey !== null ? (
+            <Text className={daoEditorSpacerLabel}>
+              {getDropPositionLabel(daosForDisplay.length)}
+            </Text>
+          ) : null}
+        </Box>
       ) : null}
 
       {hiddenDaosCount > 0 && !isEditingDaos ? (
@@ -682,9 +733,11 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                   chainIcon={chainIconsById.get(dao.chainId)}
                   dao={dao}
                   daoKey={daoKey}
+                  isDragInProgress={false}
                   isDragging={false}
                   isEditing={false}
                   isHidden={true}
+                  insertGapLabel={undefined}
                   isInsertGapActive={false}
                   onToggleHidden={handleToggleHidden}
                   onPointerDown={handlePointerDown}
@@ -732,12 +785,14 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                     chainIcon={chainIconsById.get(draggedDao.chainId)}
                     dao={draggedDao}
                     daoKey={dragOverlay.daoKey}
+                    isDragInProgress={false}
                     isDragging={false}
                     isEditing={false}
                     isHidden={isDaoHidden(
                       draggedDao.chainId,
                       draggedDao.collectionAddress
                     )}
+                    insertGapLabel={undefined}
                     isInsertGapActive={false}
                     onToggleHidden={() => undefined}
                     onPointerDown={() => undefined}

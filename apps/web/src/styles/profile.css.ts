@@ -51,6 +51,7 @@ export const responsiveGrid = style({
 })
 
 export const profileDaoLink = style({
+  cursor: 'pointer',
   backgroundColor: color.background1,
   selectors: {
     '&:hover': {
@@ -60,7 +61,7 @@ export const profileDaoLink = style({
 })
 
 export const profileHiddenDaoLink = style({
-  backgroundColor: color.background2,
+  backgroundColor: color.borderOnImage,
 })
 
 export const daoEditorRow = style({
@@ -74,34 +75,57 @@ export const daoEditorButtonGroup = style({
   flexShrink: 0,
 })
 
+export const daoEditorButtonGroupDragging = style({
+  pointerEvents: 'none',
+})
+
 export const daoEditorIconButton = style({
   minWidth: '28px',
   width: '28px',
   height: '28px',
   padding: '0',
+  selectors: {
+    '&[disabled]': {
+      cursor: 'inherit',
+    },
+  },
 })
 
 export const daoEditorDragHandle = style({
   cursor: 'grab',
   touchAction: 'none',
-  selectors: {
-    '&:active': {
-      cursor: 'grabbing',
-    },
-  },
+})
+
+export const daoEditorDragHandleActive = style({
+  cursor: 'grabbing',
 })
 
 export const daoEditorDragging = style({
+  border: '2px solid #1CB687',
+  cursor: 'grabbing',
   position: 'relative',
 })
 
 export const daoEditorSpacer = style({
   height: '0',
-  transition: 'height 0.12s ease-out',
+  transition: 'height 0.12s ease-out, margin 0.12s ease-out',
 })
 
 export const daoEditorSpacerActive = style({
-  height: '18px',
+  height: '34px',
+  marginBottom: '10px',
+  borderRadius: '10px',
+  border: '2px dashed #1CB687',
+  backgroundColor: 'rgba(28, 182, 135, 0.08)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+})
+
+export const daoEditorSpacerLabel = style({
+  fontSize: '12px',
+  fontWeight: 700,
+  color: '#127D5D',
 })
 
 export const daoEditorDoneButton = style({
@@ -116,4 +140,3 @@ export const daoEditorDoneButton = style({
     },
   },
 })
-

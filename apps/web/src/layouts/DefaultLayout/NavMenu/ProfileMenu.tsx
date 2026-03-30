@@ -267,7 +267,9 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                 <Flex direction="column" gap="x2" w="100%">
                   {hiddenDaos.map((dao, index) => {
                     const daoKey = `${dao.chainId}:${dao.collectionAddress}`
-                    const chainMeta = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === dao.chainId)
+                    const chainMeta = PUBLIC_DEFAULT_CHAINS.find(
+                      (c) => c.id === dao.chainId
+                    )
 
                     return (
                       <Flex

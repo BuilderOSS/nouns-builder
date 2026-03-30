@@ -1,7 +1,6 @@
 const { createVanillaExtractPlugin } = require('@vanilla-extract/next-plugin')
 const { withSentryConfig } = require('@sentry/nextjs')
 const createBundleAnalyzerPlugin = require('@next/bundle-analyzer')
-const path = require('path')
 const webpack = require('webpack')
 
 const {
@@ -137,14 +136,6 @@ const basicConfig = {
     })
 
     config.resolve.fallback = { fs: false, net: false, tls: false }
-    config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-      // MetaMask's SDK references React Native AsyncStorage even in web bundles.
-      '@react-native-async-storage/async-storage': path.resolve(
-        __dirname,
-        'src/shims/reactNativeAsyncStorage.js'
-      ),
-    }
 
     config.externals = config.externals || []
     config.externals.push('pino-pretty')

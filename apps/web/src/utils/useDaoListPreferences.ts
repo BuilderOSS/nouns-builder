@@ -166,7 +166,9 @@ export const useDaoListPreferences = (address?: string) => {
     (nextHiddenDaos: PreferenceUpdater) => {
       setHiddenDaoKeys((currentHiddenDaos) => {
         const resolvedHiddenDaos =
-          typeof nextHiddenDaos === 'function' ? nextHiddenDaos(currentHiddenDaos) : nextHiddenDaos
+          typeof nextHiddenDaos === 'function'
+            ? nextHiddenDaos(currentHiddenDaos)
+            : nextHiddenDaos
         const dedupedHiddenDaos = Array.from(new Set(resolvedHiddenDaos))
         persistHiddenDaosToStorage(dedupedHiddenDaos)
         return dedupedHiddenDaos
@@ -179,7 +181,9 @@ export const useDaoListPreferences = (address?: string) => {
     (nextOrderedDaos: PreferenceUpdater) => {
       setOrderedDaoKeys((currentOrderedDaos) => {
         const resolvedOrderedDaos =
-          typeof nextOrderedDaos === 'function' ? nextOrderedDaos(currentOrderedDaos) : nextOrderedDaos
+          typeof nextOrderedDaos === 'function'
+            ? nextOrderedDaos(currentOrderedDaos)
+            : nextOrderedDaos
         const dedupedOrderedDaos = Array.from(new Set(resolvedOrderedDaos))
         persistOrderedDaosToStorage(dedupedOrderedDaos)
         return dedupedOrderedDaos

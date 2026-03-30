@@ -53,22 +53,19 @@ export const Dashboard: React.FC = () => {
     })
   }, [daos])
 
-  const sortedDaos = useMemo(
-    () => {
-      const orderedDaos = sortDaos(
-        chainSortedDaos,
-        (dao) => dao.tokenAddress,
-        (dao) => dao.chainId
-      )
+  const sortedDaos = useMemo(() => {
+    const orderedDaos = sortDaos(
+      chainSortedDaos,
+      (dao) => dao.tokenAddress,
+      (dao) => dao.chainId
+    )
 
-      return groupHiddenDaosLast(
-        orderedDaos,
-        (dao) => dao.tokenAddress,
-        (dao) => dao.chainId
-      )
-    },
-    [chainSortedDaos, sortDaos, groupHiddenDaosLast]
-  )
+    return groupHiddenDaosLast(
+      orderedDaos,
+      (dao) => dao.tokenAddress,
+      (dao) => dao.chainId
+    )
+  }, [chainSortedDaos, sortDaos, groupHiddenDaosLast])
 
   const visibleDaos = useMemo(
     () => sortedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.tokenAddress)),
@@ -102,7 +99,9 @@ export const Dashboard: React.FC = () => {
 
     return hiddenDaos.map((dao) => {
       return (
-        <Box key={`hiddenAuctionCard:${dao.tokenAddress}:${dao?.currentAuction?.endTime || 0}`}>
+        <Box
+          key={`hiddenAuctionCard:${dao.tokenAddress}:${dao?.currentAuction?.endTime || 0}`}
+        >
           <DaoAuctionCard
             {...dao}
             userAddress={address}
