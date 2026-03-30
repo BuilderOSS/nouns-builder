@@ -415,8 +415,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   return (
     <Stack
-      mt={'x24'}
-      mb={'x20'}
+      mb={'x8'}
       pb={{ '@initial': 'x30', '@768': 'x0' }}
       w={'100%'}
       px={'x3'}
