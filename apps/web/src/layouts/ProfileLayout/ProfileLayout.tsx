@@ -5,7 +5,7 @@ import { LayoutWrapper } from '../LayoutWrapper'
 
 export function ProfileLayout({ children }: { children: ReactNode }) {
   return (
-    <BaseLayout px={'x4'} pt={{ '@initial': 'x20', '@480': 'x16' }}>
+    <BaseLayout px={'x4'} pt={'x20'}>
       {children}
     </BaseLayout>
   )

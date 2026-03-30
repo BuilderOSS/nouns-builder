@@ -5,6 +5,10 @@ import { style } from '@vanilla-extract/css'
 export const NavContainer = style([
   atoms({ m: 'auto', maxW: '100%' }),
   {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100%',
     zIndex: z.NAV_LAYER,
   },
 ])
@@ -12,10 +16,8 @@ export const NavContainer = style([
 export const NavWrapper = style([
   atoms({
     py: { '@initial': 'x3', '@768': 'x5' },
-    px: 'x4',
-    backgroundColor: 'background1',
+    px: 'x8',
     width: '100%',
-    position: 'absolute',
   }),
   {
     height: '80px',
