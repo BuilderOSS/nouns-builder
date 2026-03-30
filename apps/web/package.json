@@ -53,7 +53,8 @@
     "sharp": "^0.34.2",
     "swr": "^2.3.3",
     "viem": "^2.47.1",
-    "wagmi": "^2.18.1"
+    "wagmi": "^2.18.1",
+    "zustand": "^5.0.4"
   },
   "devDependencies": {
     "@buildeross/eslint-config-custom": "workspace:*",
@@ -91,8 +92,8 @@
   "scripts": {
     "analyze": "ANALYZE=true next build",
     "build": "next build",
-    "clean": "rm -rf .next .turbo",
-    "dev": "pnpm clean && NODE_OPTIONS='--max-old-space-size=4096' next dev",
+    "clean": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true }); require('fs').rmSync('.turbo', { recursive: true, force: true });\"",
+    "dev": "pnpm clean && pnpm exec next dev",
     "lint": "pnpm type-check && eslint --fix .",
     "start": "next start",
     "test": "vitest run",

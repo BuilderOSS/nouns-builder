@@ -21,16 +21,25 @@ import {
   daoAvatar,
   daoAvatarBox,
   daoTokenName,
+  hiddenAuctionCard,
   outerAuctionCard,
 } from './dashboard.css'
 
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
   handleMutate: () => void
+  isHidden: boolean
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
-  const { currentAuction, chainId, auctionAddress, handleMutate, tokenAddress } = props
+  const {
+    currentAuction,
+    chainId,
+    auctionAddress,
+    handleMutate,
+    tokenAddress,
+    isHidden,
+  } = props
 
   const { getAuctionLink } = useLinks()
   const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
@@ -78,7 +87,14 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   }
 
   if (!currentAuction) {
-    return <AuctionPaused {...props} tokenAddress={tokenAddress} chain={chain} />
+    return (
+      <AuctionPaused
+        {...props}
+        tokenAddress={tokenAddress}
+        chain={chain}
+        isHidden={isHidden}
+      />
+    )
   }
 
   const bidText = currentAuction.highestBid?.amount
@@ -88,7 +104,36 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const tokenImage = currentAuction?.token?.image
 
   return (
-    <Flex className={outerAuctionCard} direction="column" align="stretch">
+    <Flex
+      className={[outerAuctionCard, isHidden && hiddenAuctionCard]}
+      direction="column"
+      align="stretch"
+      style={{ position: 'relative' }}
+    >
+      <Flex
+        align="center"
+        gap="x1"
+        style={{ position: 'absolute', right: '12px', top: '12px' }}
+      >
+        {chain.icon && (
+          <Image
+            src={chain.icon}
+            style={{
+              borderRadius: '50%',
+              maxHeight: '16px',
+              maxWidth: '16px',
+              objectFit: 'contain',
+            }}
+            alt={chain.name}
+            height={16}
+            width={16}
+          />
+        )}
+        <Text fontSize={12} color="text3">
+          {chain.name}
+        </Text>
+      </Flex>
+
       <Link
         link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
         isExternal
@@ -119,28 +164,10 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
                 </Flex>
               )}
             </Box>
-            <Flex align="center" gap="x1">
-              {chain.icon && (
-                <Image
-                  src={chain.icon}
-                  style={{
-                    borderRadius: '50%',
-                    maxHeight: '16px',
-                    maxWidth: '16px',
-                    objectFit: 'contain',
-                  }}
-                  alt={chain.name}
-                  height={16}
-                  width={16}
-                />
-              )}
-              <Text fontSize={12} color="text3">
-                {chain.name}
-              </Text>
-            </Flex>
           </Flex>
         </Flex>
       </Link>
+
       <Flex className={bidBox}>
         <BidActionButton {...props} isOver={isOver} isEnded={isEnded} />
       </Flex>

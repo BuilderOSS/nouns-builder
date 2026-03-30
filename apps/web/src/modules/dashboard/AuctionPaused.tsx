@@ -6,19 +6,55 @@ import Image from 'next/image'
 import React from 'react'
 
 import { DashboardDaoProps } from './Dashboard'
-import { bidBox, daoAvatarBox, daoTokenName, outerAuctionCard } from './dashboard.css'
+import {
+  bidBox,
+  daoAvatarBox,
+  daoTokenName,
+  hiddenAuctionCard,
+  outerAuctionCard,
+} from './dashboard.css'
 
 type PausedType = DashboardDaoProps & {
   chain: Chain
   tokenAddress: AddressType
+  isHidden: boolean
 }
 
-export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
+export const AuctionPaused = ({ name, tokenAddress, chain, isHidden }: PausedType) => {
   const Paused = icons.pause
   const { getDaoLink } = useLinks()
 
   return (
-    <Flex className={outerAuctionCard} direction="column" align="stretch">
+    <Flex
+      className={[outerAuctionCard, isHidden && hiddenAuctionCard]}
+      direction="column"
+      align="stretch"
+      style={{ position: 'relative' }}
+    >
+      <Flex
+        align="center"
+        gap="x1"
+        style={{ position: 'absolute', right: '12px', top: '12px' }}
+      >
+        {chain.icon && (
+          <Image
+            src={chain.icon}
+            style={{
+              borderRadius: '50%',
+              maxHeight: '16px',
+              maxWidth: '16px',
+              objectFit: 'contain',
+            }}
+            alt={chain.name}
+            height={16}
+            width={16}
+          />
+        )}
+        <Text fontSize={12} color="text3">
+          {chain.name}
+        </Text>
+      </Flex>
+
       <Link link={getDaoLink(chain.id, tokenAddress)} style={{ width: '100%' }}>
         <Flex align="center" gap="x2" mb="x3" w="100%" justify="space-between">
           <Flex align="center" gap="x2">
@@ -42,27 +78,9 @@ export const AuctionPaused = ({ name, tokenAddress, chain }: PausedType) => {
               <Text className={daoTokenName}>{name}</Text>
             </Flex>
           </Flex>
-          <Flex align="center" gap="x1">
-            {chain.icon && (
-              <Image
-                src={chain.icon}
-                style={{
-                  borderRadius: '50%',
-                  maxHeight: '16px',
-                  maxWidth: '16px',
-                  objectFit: 'contain',
-                }}
-                alt={chain.name}
-                height={16}
-                width={16}
-              />
-            )}
-            <Text fontSize={12} color="text3">
-              {chain.name}
-            </Text>
-          </Flex>
         </Flex>
       </Link>
+
       <Flex
         className={bidBox}
         gap="x2"
