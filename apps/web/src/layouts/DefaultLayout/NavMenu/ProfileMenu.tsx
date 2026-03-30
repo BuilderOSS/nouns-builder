@@ -37,6 +37,81 @@ interface ProfileMenuProps {
   onSetActiveDropdown: (menu: MenuType | undefined) => void
 }
 
+type DaoRowItem = {
+  chainId: number
+  collectionAddress: string
+  auctionAddress: string
+  name: string
+}
+
+type DaoRowProps = {
+  dao: DaoRowItem
+  index: number
+  isHidden: boolean
+}
+
+const DaoRow: React.FC<DaoRowProps> = ({ dao, index, isHidden }) => {
+  const chainMeta = PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === dao.chainId)
+
+  return (
+    <Flex
+      align="center"
+      justify="space-between"
+      className={isHidden ? [daoButton, hiddenDaoButton] : daoButton}
+      style={{ borderRadius: '8px', width: '100%' }}
+      pr="x2"
+      gap="x2"
+    >
+      <Link
+        href={`/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
+        passHref
+        style={{ width: '100%', textDecoration: 'none' }}
+      >
+        <Flex
+          direction={'row'}
+          align={'center'}
+          cursor={'pointer'}
+          id={isHidden ? `close-modal-hidden-${index}` : `close-modal-${index}`}
+          color={'text1'}
+          gap={'x4'}
+          justify={'space-between'}
+        >
+          <Flex align="center" gap="x4" style={{ minWidth: 0 }}>
+            <DaoAvatar
+              collectionAddress={dao.collectionAddress}
+              size={'40'}
+              auctionAddress={dao.auctionAddress}
+              chainId={dao.chainId}
+            />
+            <Text fontWeight={'display'}>{dao.name}</Text>
+          </Flex>
+        </Flex>
+      </Link>
+      <Flex
+        align="center"
+        gap="x1"
+        style={{ minWidth: '24px', justifyContent: 'flex-end' }}
+      >
+        <Flex width="x4" height="x4" align="center" justify="center">
+          {chainMeta?.icon && (
+            <NextImage
+              src={chainMeta.icon}
+              style={{
+                borderRadius: '12px',
+                maxHeight: '16px',
+                objectFit: 'contain',
+              }}
+              alt=""
+              height={16}
+              width={16}
+            />
+          )}
+        </Flex>
+      </Flex>
+    </Flex>
+  )
+}
+
 export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   activeDropdown,
   onOpenMenu,
@@ -66,12 +141,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
       }),
     [daos]
   )
-  const hiddenDaosCount = React.useMemo(
-    () =>
-      chainSortedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.collectionAddress))
-        .length,
-    [chainSortedDaos, isDaoHidden]
-  )
+
   const orderedDaos = React.useMemo(() => {
     const orderedDaos = sortDaos(
       chainSortedDaos,
@@ -132,72 +202,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   }, [isMobile, activeDropdown])
 
   const onDisconnect = useWalletDisconnect()
-
-  const DaoRow: React.FC<{
-    dao: (typeof daos)[number]
-    index: number
-    isHidden: boolean
-  }> = ({ dao, index, isHidden }) => {
-    const chainMeta = PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === dao.chainId)
-
-    return (
-      <Flex
-        align="center"
-        justify="space-between"
-        className={isHidden ? [daoButton, hiddenDaoButton] : daoButton}
-        style={{ borderRadius: '8px', width: '100%' }}
-        pr="x2"
-        gap="x2"
-      >
-        <Link
-          href={`/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
-          passHref
-          style={{ width: '100%', textDecoration: 'none' }}
-        >
-          <Flex
-            direction={'row'}
-            align={'center'}
-            cursor={'pointer'}
-            id={isHidden ? `close-modal-hidden-${index}` : `close-modal-${index}`}
-            color={'text1'}
-            gap={'x4'}
-            justify={'space-between'}
-          >
-            <Flex align="center" gap="x4" style={{ minWidth: 0 }}>
-              <DaoAvatar
-                collectionAddress={dao.collectionAddress}
-                size={'40'}
-                auctionAddress={dao.auctionAddress}
-                chainId={dao.chainId}
-              />
-              <Text fontWeight={'display'}>{dao.name}</Text>
-            </Flex>
-          </Flex>
-        </Link>
-        <Flex
-          align="center"
-          gap="x1"
-          style={{ minWidth: '24px', justifyContent: 'flex-end' }}
-        >
-          <Flex width="x4" height="x4" align="center" justify="center">
-            {chainMeta?.icon && (
-              <NextImage
-                src={chainMeta.icon}
-                style={{
-                  borderRadius: '12px',
-                  maxHeight: '16px',
-                  objectFit: 'contain',
-                }}
-                alt=""
-                height={16}
-                width={16}
-              />
-            )}
-          </Flex>
-        </Flex>
-      </Flex>
-    )
-  }
 
   const renderConnectedUser = () => (
     <>
@@ -270,9 +274,9 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                 isHidden={false}
               />
             ))}
-            {hiddenDaosCount > 0 && (
+            {hiddenDaos.length > 0 && (
               <HiddenDaoDisclosure
-                count={hiddenDaosCount}
+                count={hiddenDaos.length}
                 isOpen={isHiddenDaosOpen}
                 onToggle={() => setIsHiddenDaosOpen((x) => !x)}
               >

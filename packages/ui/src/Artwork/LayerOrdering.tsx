@@ -99,7 +99,6 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
   const rowRefs = React.useRef<Record<number, HTMLDivElement | null>>({})
   const dragMetaRef = React.useRef<DragMeta | null>(null)
   const latestPointerYRef = React.useRef(0)
-  const dragInsertIndexRef = React.useRef<number | null>(null)
   const rafRef = React.useRef<number | null>(null)
   const autoScrollRafRef = React.useRef<number | null>(null)
   const rowMetricsRef = React.useRef<RowMetric[]>([])
@@ -110,10 +109,6 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
     if (activeDragIndex === null) return null
     return orderedLayers[activeDragIndex] || null
   }, [activeDragIndex, orderedLayers])
-
-  React.useEffect(() => {
-    dragInsertIndexRef.current = dragInsertIndex
-  }, [dragInsertIndex])
 
   React.useEffect(() => {
     orderedLayersRef.current = orderedLayers
@@ -274,8 +269,13 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
       const dragMeta = dragMetaRef.current
       if (!dragMeta) return
 
-      const insertIndex = dragInsertIndexRef.current
-      if (insertIndex !== null) {
+      computeRowMetrics()
+      const insertIndex = getInsertIndexForPointer(
+        latestPointerYRef.current,
+        dragMeta.fromIndex
+      )
+
+      if (insertIndex >= 0) {
         setOrderedLayers(
           moveLayerToIndex(orderedLayersRef.current, dragMeta.fromIndex, insertIndex)
         )

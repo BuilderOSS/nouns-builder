@@ -69,6 +69,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
   setRowRef,
 }) => {
   const [isOpen, setIsOpen] = React.useState(false)
+  const isExpanded = isOpen && !isDragInProgress
 
   React.useEffect(() => {
     if (isDragInProgress) {
@@ -143,7 +144,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
       >
         <Flex align="center">
           <Box mr="x2">{`${trait} (${properties?.length} variants)`}</Box>
-          {isOpen ? <Icon id="chevronUp" /> : <Icon id="chevronDown" />}
+          {isExpanded ? <Icon id="chevronUp" /> : <Icon id="chevronDown" />}
         </Flex>
         <Flex
           as="button"
@@ -172,7 +173,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
       <motion.div
         variants={propertiesVariants}
         initial="initial"
-        animate={isOpen ? 'open' : 'initial'}
+        animate={isExpanded ? 'open' : 'initial'}
         style={{ maxHeight: '500px' }}
       >
         {properties?.map((property) => {
