@@ -1,4 +1,4 @@
-﻿import { AddressType, Chain } from '@buildeross/types'
+import { AddressType, Chain } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { atoms, Box, Flex, Icon, icons, Text } from '@buildeross/zord'

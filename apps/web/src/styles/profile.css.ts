@@ -101,7 +101,7 @@ export const daoEditorDragHandleActive = style({
 })
 
 export const daoEditorDragging = style({
-  border: '2px solid #1CB687',
+  border: `2px solid ${color.positive}`,
   cursor: 'grabbing',
   position: 'relative',
 })
@@ -115,8 +115,8 @@ export const daoEditorSpacerActive = style({
   height: '34px',
   marginBottom: '10px',
   borderRadius: '10px',
-  border: '2px dashed #1CB687',
-  backgroundColor: 'rgba(28, 182, 135, 0.08)',
+  border: `2px dashed ${color.positive}`,
+  backgroundColor: color.positiveDisabled,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -125,18 +125,5 @@ export const daoEditorSpacerActive = style({
 export const daoEditorSpacerLabel = style({
   fontSize: '12px',
   fontWeight: 700,
-  color: '#127D5D',
-})
-
-export const daoEditorDoneButton = style({
-  borderColor: '#2563eb',
-  color: '#2563eb',
-  backgroundColor: 'rgba(37, 99, 235, 0.06)',
-  selectors: {
-    '&:hover': {
-      borderColor: '#1d4ed8',
-      color: '#1d4ed8',
-      backgroundColor: 'rgba(37, 99, 235, 0.1)',
-    },
-  },
+  color: color.positiveActive,
 })

@@ -75,7 +75,7 @@ export const Dashboard: React.FC = () => {
     () => sortedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.tokenAddress)),
     [sortedDaos, isDaoHidden]
   )
-  const hiddenDaosCount = sortedDaos.length - visibleDaos.length
+  const hiddenDaosCount = hiddenDaos.length
 
   const auctionCards = useMemo(() => {
     if (!address || !visibleDaos.length) return null

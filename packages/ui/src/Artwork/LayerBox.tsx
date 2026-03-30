@@ -35,6 +35,8 @@ interface LayerBoxProps {
   index: number
   isDragInProgress: boolean
   isDragging: boolean
+  onMoveDown?: () => void
+  onMoveUp?: () => void
   onDragHandlePointerDown: (
     event: React.PointerEvent<HTMLButtonElement>,
     index: number
@@ -61,6 +63,8 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
   index,
   isDragInProgress,
   isDragging,
+  onMoveDown,
+  onMoveUp,
   onDragHandlePointerDown,
   setRowRef,
 }) => {
@@ -100,6 +104,24 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
     []
   )
 
+  const handleDragHandleKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (isDragInProgress) return
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        onMoveUp?.()
+        return
+      }
+
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        onMoveDown?.()
+      }
+    },
+    [isDragInProgress, onMoveDown, onMoveUp]
+  )
+
   return (
     <Flex
       ref={handleRowRef}
@@ -134,6 +156,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
           ]}
           onPointerDown={handleDragHandlePointerDown}
           onClick={handleDragHandleClick}
+          onKeyDown={handleDragHandleKeyDown}
           style={{
             cursor: isDragInProgress ? 'grabbing' : 'grab',
             background: 'transparent',

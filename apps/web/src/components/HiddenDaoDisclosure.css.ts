@@ -18,6 +18,7 @@ export const hiddenDaoDisclosureTrigger = style({
   color: 'inherit',
   textAlign: 'left',
   transition: 'background-color 0.12s ease',
+  cursor: 'pointer',
   selectors: {
     '&:hover': {
       backgroundColor: color.background2,

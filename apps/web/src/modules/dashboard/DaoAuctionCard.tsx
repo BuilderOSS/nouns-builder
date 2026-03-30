@@ -1,4 +1,4 @@
-﻿import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { auctionAbi } from '@buildeross/sdk/contract'

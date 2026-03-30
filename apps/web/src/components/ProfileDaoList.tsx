@@ -13,7 +13,6 @@ import {
 import {
   daoEditorButtonGroup,
   daoEditorButtonGroupDragging,
-  daoEditorDoneButton,
   daoEditorDragging,
   daoEditorDragHandle,
   daoEditorDragHandleActive,
@@ -65,8 +64,11 @@ type ProfileDaoListRowProps = {
   isDragging: boolean
   isEditing: boolean
   isHidden: boolean
+  isReorderable?: boolean
   insertGapLabel?: string
   isInsertGapActive: boolean
+  onMoveDown?: () => void
+  onMoveUp?: () => void
   onPointerDown: (event: React.PointerEvent<HTMLButtonElement>, daoKey: string) => void
   onToggleHidden: (dao: ProfileDaoListItem, isHidden: boolean) => void
   setRowRef?: (daoKey: string, node: HTMLDivElement | null) => void
@@ -81,8 +83,11 @@ const ProfileDaoListRow = React.memo(
     isDragging,
     isEditing,
     isHidden,
+    isReorderable = true,
     insertGapLabel,
     isInsertGapActive,
+    onMoveDown,
+    onMoveUp,
     onPointerDown,
     onToggleHidden,
     setRowRef,
@@ -96,6 +101,26 @@ const ProfileDaoListRow = React.memo(
         onPointerDown(event, daoKey)
       },
       [daoKey, onPointerDown]
+    )
+
+    const handleDragHandleKeyDown = React.useCallback(
+      (event: React.KeyboardEvent<HTMLButtonElement>) => {
+        if (isDragInProgress) return
+
+        if (event.key === 'ArrowUp') {
+          if (!isReorderable) return
+          event.preventDefault()
+          onMoveUp?.()
+          return
+        }
+
+        if (event.key === 'ArrowDown') {
+          if (!isReorderable) return
+          event.preventDefault()
+          onMoveDown?.()
+        }
+      },
+      [isDragInProgress, isReorderable, onMoveDown, onMoveUp]
     )
 
     const handleRowRef = React.useCallback(
@@ -173,20 +198,23 @@ const ProfileDaoListRow = React.memo(
               >
                 <Icon id={isHidden ? 'plus' : 'dash'} size="sm" />
               </Button>
-              <Button
-                size="xs"
-                variant="ghost"
-                className={[
-                  daoEditorIconButton,
-                  daoEditorDragHandle,
-                  isDragInProgress ? daoEditorDragHandleActive : undefined,
-                ]}
-                style={{ cursor: isDragInProgress ? 'grabbing' : 'grab' }}
-                onPointerDown={handlePointerDown}
-                aria-label={`Drag to reorder ${dao.name}`}
-              >
-                <Icon id="move" size="sm" style={{ transform: 'rotate(90deg)' }} />
-              </Button>
+              {isReorderable ? (
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  className={[
+                    daoEditorIconButton,
+                    daoEditorDragHandle,
+                    isDragInProgress ? daoEditorDragHandleActive : undefined,
+                  ]}
+                  style={{ cursor: isDragInProgress ? 'grabbing' : 'grab' }}
+                  onPointerDown={handlePointerDown}
+                  onKeyDown={handleDragHandleKeyDown}
+                  aria-label={`Drag to reorder ${dao.name}`}
+                >
+                  <Icon id="move" size="sm" style={{ transform: 'rotate(90deg)' }} />
+                </Button>
+              ) : null}
             </Flex>
           ) : null}
         </Flex>
@@ -227,7 +255,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
   const [dragInsertIndex, setDragInsertIndex] = React.useState<number | null>(null)
   const [dragOverlay, setDragOverlay] = React.useState<DragOverlayState | null>(null)
 
-  const { groupHiddenDaosLast, isDaoHidden, persistOrderedDaos, setDaoHidden, sortDaos } =
+  const { isDaoHidden, persistOrderedDaos, setDaoHidden, sortDaos } =
     useDaoListPreferences(userAddress)
 
   const overlayRef = React.useRef<HTMLDivElement | null>(null)
@@ -249,37 +277,31 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     []
   )
 
-  const orderedDaos = React.useMemo(() => {
-    const sortedOrderedDaos = sortDaos(
-      daos,
-      (dao) => dao.collectionAddress,
-      (dao) => dao.chainId
-    )
-
-    return groupHiddenDaosLast(
-      sortedOrderedDaos,
-      (dao) => dao.collectionAddress,
-      (dao) => dao.chainId
-    )
-  }, [daos, groupHiddenDaosLast, sortDaos])
-
-  const hiddenDaosCount = React.useMemo(
+  const sortedOrderedDaos = React.useMemo(
     () =>
-      orderedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.collectionAddress)).length,
-    [isDaoHidden, orderedDaos]
-  )
-
-  const visibleDaos = React.useMemo(
-    () => orderedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.collectionAddress)),
-    [isDaoHidden, orderedDaos]
+      sortDaos(
+        daos,
+        (dao) => dao.collectionAddress,
+        (dao) => dao.chainId
+      ),
+    [daos, sortDaos]
   )
 
   const hiddenDaos = React.useMemo(
-    () => orderedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.collectionAddress)),
-    [isDaoHidden, orderedDaos]
+    () =>
+      sortedOrderedDaos.filter((dao) => isDaoHidden(dao.chainId, dao.collectionAddress)),
+    [sortedOrderedDaos, isDaoHidden]
   )
 
-  const daosForDisplay = isEditingDaos ? orderedDaos : visibleDaos
+  const hiddenDaosCount = hiddenDaos.length
+
+  const visibleDaos = React.useMemo(
+    () =>
+      sortedOrderedDaos.filter((dao) => !isDaoHidden(dao.chainId, dao.collectionAddress)),
+    [sortedOrderedDaos, isDaoHidden]
+  )
+
+  const daosForDisplay = visibleDaos
 
   const getDaoKey = React.useCallback(
     (chainId: number, collectionAddress: string) =>
@@ -308,8 +330,8 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       if (
         fromIndex < 0 ||
         toIndex < 0 ||
-        fromIndex >= daos.length ||
-        toIndex > daos.length ||
+        fromIndex >= visibleDaos.length ||
+        toIndex > visibleDaos.length ||
         fromIndex === toIndex
       ) {
         return
@@ -321,31 +343,51 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
           (dao) => dao.collectionAddress,
           (dao) => dao.chainId
         )
-        const currentOrderedDaos = groupHiddenDaosLast(
-          sortedCurrentDaos,
-          (dao) => dao.collectionAddress,
-          (dao) => dao.chainId
+        const currentVisibleDaos = sortedCurrentDaos.filter(
+          (dao) => !isDaoHidden(dao.chainId, dao.collectionAddress)
+        )
+        const currentHiddenDaos = sortedCurrentDaos.filter((dao) =>
+          isDaoHidden(dao.chainId, dao.collectionAddress)
         )
 
         if (
           fromIndex < 0 ||
           toIndex < 0 ||
-          fromIndex >= currentOrderedDaos.length ||
-          toIndex > currentOrderedDaos.length ||
+          fromIndex >= currentVisibleDaos.length ||
+          toIndex > currentVisibleDaos.length ||
           fromIndex === toIndex
         ) {
           return currentOrderedDaoKeys
         }
 
-        const nextDaos = [...currentOrderedDaos]
+        const nextDaos = [...currentVisibleDaos]
         const [movedDao] = nextDaos.splice(fromIndex, 1)
         nextDaos.splice(toIndex, 0, movedDao)
 
-        return nextDaos.map((dao) => getDaoKey(dao.chainId, dao.collectionAddress))
+        return [...nextDaos, ...currentHiddenDaos].map((dao) =>
+          getDaoKey(dao.chainId, dao.collectionAddress)
+        )
       })
     },
-    [daos, getDaoKey, groupHiddenDaosLast, persistOrderedDaos, sortDaos]
+    [daos, getDaoKey, isDaoHidden, persistOrderedDaos, sortDaos, visibleDaos.length]
   )
+
+  React.useEffect(() => {
+    if (!activeDragKey) return
+
+    const existsInVisibleList = visibleDaos.some(
+      (dao) => getDaoKey(dao.chainId, dao.collectionAddress) === activeDragKey
+    )
+
+    if (existsInVisibleList) return
+
+    setActiveDragKey(null)
+    setDragInsertIndex(null)
+    setDragOverlay(null)
+    dragMetaRef.current = null
+    rowMetricsRef.current = []
+    scrollContainerRef.current = null
+  }, [activeDragKey, getDaoKey, visibleDaos])
 
   React.useEffect(() => {
     dragInsertIndexRef.current = dragInsertIndex
@@ -383,7 +425,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     document.documentElement.style.overscrollBehavior = 'none'
 
     const computeRowMetrics = () => {
-      rowMetricsRef.current = orderedDaos
+      rowMetricsRef.current = visibleDaos
         .map((dao) => {
           const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
           const row = rowRefs.current[daoKey]
@@ -500,13 +542,17 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
 
     const handleViewportChange = () => {
       computeRowMetrics()
+
+      if (rafRef.current === null) {
+        rafRef.current = window.requestAnimationFrame(flushDragFrame)
+      }
     }
 
     const finishDrag = () => {
       const dragMeta = dragMetaRef.current
       if (!dragMeta) return
 
-      const fromIndex = orderedDaos.findIndex(
+      const fromIndex = visibleDaos.findIndex(
         (dao) => getDaoKey(dao.chainId, dao.collectionAddress) === dragMeta.daoKey
       )
       const insertIndex = dragInsertIndexRef.current
@@ -576,22 +622,70 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       window.removeEventListener('resize', handleViewportChange)
       window.removeEventListener('touchmove', handleTouchMove)
     }
-  }, [dragOverlay, getDaoKey, getInsertIndexForPointer, moveDaoToIndex, orderedDaos])
+  }, [dragOverlay, getDaoKey, getInsertIndexForPointer, moveDaoToIndex, visibleDaos])
 
   const draggedDao = React.useMemo(() => {
     if (!activeDragKey) return null
     return (
-      orderedDaos.find(
+      visibleDaos.find(
         (dao) => getDaoKey(dao.chainId, dao.collectionAddress) === activeDragKey
       ) || null
     )
-  }, [activeDragKey, getDaoKey, orderedDaos])
+  }, [activeDragKey, getDaoKey, visibleDaos])
+
+  const moveDaoAcrossVisibilityBoundary = React.useCallback(
+    (dao: ProfileDaoListItem, isHidden: boolean) => {
+      const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
+
+      persistOrderedDaos((currentOrderedDaoKeys) => {
+        const sortedCurrentDaos = sortDaos(
+          daos,
+          (item) => item.collectionAddress,
+          (item) => item.chainId
+        )
+
+        const targetDao =
+          sortedCurrentDaos.find(
+            (item) => getDaoKey(item.chainId, item.collectionAddress) === daoKey
+          ) || dao
+
+        const remainingDaos = sortedCurrentDaos.filter(
+          (item) => getDaoKey(item.chainId, item.collectionAddress) !== daoKey
+        )
+        const remainingVisibleDaos = remainingDaos.filter(
+          (item) => !isDaoHidden(item.chainId, item.collectionAddress)
+        )
+        const remainingHiddenDaos = remainingDaos.filter((item) =>
+          isDaoHidden(item.chainId, item.collectionAddress)
+        )
+
+        const nextOrderedDaos = isHidden
+          ? [...remainingVisibleDaos, targetDao, ...remainingHiddenDaos]
+          : [...remainingVisibleDaos, ...remainingHiddenDaos, targetDao]
+
+        const nextOrderedDaoKeys = nextOrderedDaos.map((item) =>
+          getDaoKey(item.chainId, item.collectionAddress)
+        )
+
+        if (
+          nextOrderedDaoKeys.length === currentOrderedDaoKeys.length &&
+          nextOrderedDaoKeys.every((key, index) => key === currentOrderedDaoKeys[index])
+        ) {
+          return currentOrderedDaoKeys
+        }
+
+        return nextOrderedDaoKeys
+      })
+    },
+    [daos, getDaoKey, isDaoHidden, persistOrderedDaos, sortDaos]
+  )
 
   const handleToggleHidden = React.useCallback(
     (dao: ProfileDaoListItem, isHidden: boolean) => {
+      moveDaoAcrossVisibilityBoundary(dao, isHidden)
       setDaoHidden(dao.chainId, dao.collectionAddress, !isHidden)
     },
-    [setDaoHidden]
+    [moveDaoAcrossVisibilityBoundary, setDaoHidden]
   )
 
   const handlePointerDown = React.useCallback(
@@ -611,7 +705,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       }
       setActiveDragKey(daoKey)
       setDragInsertIndex(
-        orderedDaos.findIndex(
+        visibleDaos.findIndex(
           (item) => getDaoKey(item.chainId, item.collectionAddress) === daoKey
         )
       )
@@ -622,7 +716,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
         y: rect.top,
       })
     },
-    [getDaoKey, orderedDaos]
+    [getDaoKey, visibleDaos]
   )
 
   const setRowRef = React.useCallback((daoKey: string, node: HTMLDivElement | null) => {
@@ -633,7 +727,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     (insertIndex: number) => {
       if (!activeDragKey) return undefined
 
-      const fromIndex = orderedDaos.findIndex(
+      const fromIndex = visibleDaos.findIndex(
         (dao) => getDaoKey(dao.chainId, dao.collectionAddress) === activeDragKey
       )
       if (fromIndex < 0) return undefined
@@ -641,7 +735,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
       const adjustedInsertIndex = insertIndex > fromIndex ? insertIndex - 1 : insertIndex
       return `Drop here - position #${adjustedInsertIndex + 1}`
     },
-    [activeDragKey, getDaoKey, orderedDaos]
+    [activeDragKey, getDaoKey, visibleDaos]
   )
 
   return (
@@ -652,10 +746,10 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
           <Button
             size="sm"
             variant="outline"
-            className={isEditingDaos ? daoEditorDoneButton : undefined}
             disabled={activeDragKey !== null}
             onClick={() => setIsEditingDaos((current) => !current)}
           >
+            <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
             {isEditingDaos ? 'Done' : 'Edit'}
           </Button>
         ) : null}
@@ -674,6 +768,11 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
             isDragging={isDragging}
             isEditing={isEditingDaos}
             isHidden={isHidden}
+            isReorderable={isEditingDaos}
+            onMoveUp={isEditingDaos ? () => moveDaoToIndex(index, index - 1) : undefined}
+            onMoveDown={
+              isEditingDaos ? () => moveDaoToIndex(index, index + 1) : undefined
+            }
             insertGapLabel={isEditingDaos ? getDropPositionLabel(index) : undefined}
             isInsertGapActive={dragInsertIndex === index && activeDragKey !== null}
             onToggleHidden={handleToggleHidden}
@@ -719,7 +818,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
         </Box>
       ) : null}
 
-      {hiddenDaosCount > 0 && !isEditingDaos ? (
+      {hiddenDaosCount > 0 ? (
         <HiddenDaoDisclosure
           count={hiddenDaosCount}
           isOpen={isHiddenDaosOpen}
@@ -733,10 +832,13 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                   chainIcon={chainIconsById.get(dao.chainId)}
                   dao={dao}
                   daoKey={daoKey}
-                  isDragInProgress={false}
+                  isDragInProgress={activeDragKey !== null}
                   isDragging={false}
-                  isEditing={false}
+                  isEditing={isEditingDaos}
                   isHidden={true}
+                  isReorderable={false}
+                  onMoveUp={undefined}
+                  onMoveDown={undefined}
                   insertGapLabel={undefined}
                   isInsertGapActive={false}
                   onToggleHidden={handleToggleHidden}
@@ -746,16 +848,20 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
 
               return (
                 <Box key={daoKey}>
-                  <Link
-                    href={`/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`}
-                    style={{
-                      color: 'inherit',
-                      textDecoration: 'none',
-                      width: '100%',
-                    }}
-                  >
-                    {row}
-                  </Link>
+                  {isEditingDaos ? (
+                    row
+                  ) : (
+                    <Link
+                      href={`/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`}
+                      style={{
+                        color: 'inherit',
+                        textDecoration: 'none',
+                        width: '100%',
+                      }}
+                    >
+                      {row}
+                    </Link>
+                  )}
                 </Box>
               )
             })}
@@ -792,6 +898,9 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                       draggedDao.chainId,
                       draggedDao.collectionAddress
                     )}
+                    isReorderable={false}
+                    onMoveUp={undefined}
+                    onMoveDown={undefined}
                     insertGapLabel={undefined}
                     isInsertGapActive={false}
                     onToggleHidden={() => undefined}

@@ -2,13 +2,13 @@ import { atoms, vars } from '@buildeross/zord'
 import { keyframes, style } from '@vanilla-extract/css'
 
 export const artworkSettingsBox = style({
-  border: '2px solid #F2F2F2',
+  border: `2px solid ${vars.color.border}`,
   borderRadius: '10px',
 })
 
 export const artworkSettingsBoxDragging = style({
   opacity: 0.45,
-  borderColor: '#1CB687',
+  borderColor: vars.color.positive,
 })
 
 export const artworkSettingsDropSpacer = style({
@@ -20,21 +20,21 @@ export const artworkSettingsDropSpacerActive = style({
   height: '36px',
   marginBottom: '12px',
   borderRadius: '10px',
-  border: '2px dashed #1CB687',
-  backgroundColor: 'rgba(28, 182, 135, 0.08)',
+  border: `2px dashed ${vars.color.positive}`,
+  backgroundColor: vars.color.positiveDisabled,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
 })
 
 export const artworkSettingsDropLabel = style({
-  color: '#127D5D',
+  color: vars.color.positiveActive,
   fontWeight: 700,
   fontSize: '13px',
 })
 
 export const artworkSettingsName = style({
-  color: '#4D4D4D',
+  color: vars.color.text2,
   fontWeight: 700,
   selectors: {
     '&:hover': {

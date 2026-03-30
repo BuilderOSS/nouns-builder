@@ -104,6 +104,7 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
   const autoScrollRafRef = React.useRef<number | null>(null)
   const rowMetricsRef = React.useRef<RowMetric[]>([])
   const scrollContainerRef = React.useRef<HTMLElement | Window | null>(null)
+  const orderedLayersRef = React.useRef(orderedLayers)
 
   const draggedLayer = React.useMemo(() => {
     if (activeDragIndex === null) return null
@@ -113,6 +114,10 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
   React.useEffect(() => {
     dragInsertIndexRef.current = dragInsertIndex
   }, [dragInsertIndex])
+
+  React.useEffect(() => {
+    orderedLayersRef.current = orderedLayers
+  }, [orderedLayers])
 
   React.useEffect(() => {
     if (!dragOverlay || !dragMetaRef.current) {
@@ -131,7 +136,7 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
     document.documentElement.style.overscrollBehavior = 'none'
 
     const computeRowMetrics = () => {
-      rowMetricsRef.current = orderedLayers
+      rowMetricsRef.current = orderedLayersRef.current
         .map((_, index) => {
           const row = rowRefs.current[index]
           if (!row) return null
@@ -267,7 +272,9 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
 
       const insertIndex = dragInsertIndexRef.current
       if (insertIndex !== null) {
-        setOrderedLayers(moveLayerToIndex(orderedLayers, dragMeta.fromIndex, insertIndex))
+        setOrderedLayers(
+          moveLayerToIndex(orderedLayersRef.current, dragMeta.fromIndex, insertIndex)
+        )
       }
 
       if (rafRef.current !== null) {
@@ -329,7 +336,7 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
       window.removeEventListener('resize', handleViewportChange)
       window.removeEventListener('touchmove', handleTouchMove)
     }
-  }, [dragOverlay, orderedLayers, setOrderedLayers])
+  }, [dragOverlay, setOrderedLayers])
 
   const handleDragHandlePointerDown = React.useCallback(
     (event: React.PointerEvent<HTMLButtonElement>, index: number) => {
@@ -360,6 +367,26 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
   const setRowRef = React.useCallback((index: number, node: HTMLDivElement | null) => {
     rowRefs.current[index] = node
   }, [])
+
+  const moveLayerByOffset = React.useCallback(
+    (fromIndex: number, offset: number) => {
+      const layers = orderedLayersRef.current
+      const nextIndex = fromIndex + offset
+
+      if (
+        fromIndex < 0 ||
+        fromIndex >= layers.length ||
+        nextIndex < 0 ||
+        nextIndex >= layers.length
+      ) {
+        return
+      }
+
+      const insertIndex = offset > 0 ? nextIndex + 1 : nextIndex
+      setOrderedLayers(moveLayerToIndex(layers, fromIndex, insertIndex))
+    },
+    [setOrderedLayers]
+  )
 
   if (!images) return null
 
@@ -395,6 +422,8 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
               index={index}
               isDragInProgress={isDragInProgress}
               isDragging={activeDragIndex === index}
+              onMoveUp={() => moveLayerByOffset(index, -1)}
+              onMoveDown={() => moveLayerByOffset(index, 1)}
               onDragHandlePointerDown={handleDragHandlePointerDown}
               setRowRef={setRowRef}
             />
@@ -423,6 +452,7 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
               <Box
                 ref={overlayRef}
                 p="x4"
+                backgroundColor="background1"
                 className={artworkSettingsBox}
                 style={{
                   opacity: 0.82,
@@ -435,7 +465,6 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
                   width: dragOverlay.width,
                   zIndex: 9999,
                   boxShadow: '0 18px 38px rgba(0, 0, 0, 0.16)',
-                  backgroundColor: '#fff',
                 }}
               >
                 <Text>{draggedLayer.trait}</Text>

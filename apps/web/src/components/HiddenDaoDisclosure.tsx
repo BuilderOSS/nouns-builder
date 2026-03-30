@@ -23,6 +23,8 @@ export const HiddenDaoDisclosure: React.FC<HiddenDaoDisclosureProps> = ({
   isOpen,
   onToggle,
 }) => {
+  const panelId = React.useId()
+
   return (
     <Box className={hiddenDaoDisclosure}>
       <Box
@@ -31,6 +33,7 @@ export const HiddenDaoDisclosure: React.FC<HiddenDaoDisclosureProps> = ({
         className={hiddenDaoDisclosureTrigger}
         onClick={onToggle}
         aria-expanded={isOpen}
+        aria-controls={panelId}
       >
         <Flex
           align="center"
@@ -44,7 +47,11 @@ export const HiddenDaoDisclosure: React.FC<HiddenDaoDisclosureProps> = ({
         </Flex>
         <Text fontWeight="display">{`Hidden DAOs (${count})`}</Text>
       </Box>
-      {isOpen ? <Box className={hiddenDaoDisclosureContent}>{children}</Box> : null}
+      {isOpen ? (
+        <Box id={panelId} className={hiddenDaoDisclosureContent}>
+          {children}
+        </Box>
+      ) : null}
     </Box>
   )
 }
