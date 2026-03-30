@@ -344,9 +344,6 @@ pnpm install
 # Build the package
 pnpm build
 
-# Development build with watch
-pnpm dev
-
 # Run type checking
 pnpm type-check
 
@@ -357,7 +354,6 @@ pnpm lint
 ### Scripts
 
 - `pnpm build` - Build the package for production
-- `pnpm dev` - Build in watch mode for development
 - `pnpm type-check` - Run TypeScript type checking
 - `pnpm lint` - Run ESLint with auto-fix
 - `pnpm clean` - Remove build artifacts
@@ -366,7 +362,7 @@ pnpm lint
 
 ### Peer Dependencies
 
-- `viem`: ^2.30.0 - Ethereum library for type compatibility
+- `viem`: ^2.47.1 - Ethereum library for type compatibility
 
 ### Development Dependencies
 

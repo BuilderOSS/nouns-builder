@@ -602,8 +602,8 @@ pnpm install
 # Build the package
 pnpm build
 
-# Development build with watch
-pnpm dev
+# Run type checking
+pnpm type-check
 
 # Build icons from SVGs
 pnpm build-icons
@@ -615,9 +615,8 @@ pnpm lint
 ### Scripts
 
 - `pnpm build` - Build the package for production
-- `pnpm dev` - Build in watch mode for development
 - `pnpm build-icons` - Generate React components from SVG icons
-- `pnpm dev:types` - Generate TypeScript declarations
+- `pnpm type-check` - Run TypeScript type checking
 - `pnpm lint` - Run ESLint with auto-fix
 - `pnpm clean` - Remove build artifacts and dependencies
 
@@ -635,8 +634,8 @@ pnpm lint
 
 ### Peer Dependencies
 
-- `react` ^19.1.0
-- `react-dom` ^19.1.0
+- `react` ^19.2.1
+- `react-dom` ^19.2.1
 
 ### Development Dependencies
 

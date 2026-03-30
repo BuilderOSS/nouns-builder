@@ -17,12 +17,27 @@ You can also find the [nouns protocol code here](https://github.com/ourzora/noun
 
 `packages`
 
-- `blocklist`: Package to check for sanctioned wallet addresses
-- `analytics`: Shareable analytics package
-- `zord`: Shareable ui components
-- `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `tsconfig`: `tsconfig.json`s used throughout the monorepo
-- `ipfs-service`: api for image uploads to ipfs
+- `analytics`: shared analytics helpers
+- `auction-ui`: auction UI package
+- `blocklist`: OFAC/sanctions blocklist helpers
+- `constants`: shared constants and config
+- `create-dao-ui`: create DAO flow UI package
+- `create-proposal-ui`: create proposal flow UI package
+- `dao-ui`: DAO UI package
+- `eslint-config-custom`: shared ESLint config
+- `feed-ui`: feed UI package
+- `hooks`: shared React hooks
+- `ipfs-service`: IPFS upload and URL helpers
+- `proposal-ui`: proposal UI package
+- `sdk`: contract + subgraph SDK
+- `stores`: shared state stores
+- `swap`: swap utilities
+- `test-fixtures`: shared test fixtures
+- `tsconfig`: shared TypeScript configs
+- `types`: shared TypeScript types
+- `ui`: shared UI component package
+- `utils`: shared utility helpers
+- `zord`: design system components
 
 ## @buildeross/\* Package Ecosystem
 

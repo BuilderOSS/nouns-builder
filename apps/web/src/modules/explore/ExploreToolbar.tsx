@@ -62,7 +62,7 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
           </Flex>
 
           <Box
-            w={'100vw'}
+            w={'100%'}
             mb={'x5'}
             style={{ borderBottom: `2px solid ${vars.color.border}` }}
           />

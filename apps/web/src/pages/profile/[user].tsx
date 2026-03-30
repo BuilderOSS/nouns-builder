@@ -193,7 +193,6 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
         justify={'space-around'}
         width="100%"
         position={{ '@initial': 'relative', '@768': 'fixed' }}
-        px={{ '@initial': 'x0', '@768': 'x8' }}
         h={{ '@initial': 'unset', '@768': '100vh' }}
       >
         <Flex
@@ -201,6 +200,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
           direction={{ '@initial': 'column', '@768': 'row' }}
           height={{ '@initial': 'unset', '@768': '100%' }}
           style={{ maxWidth: '1440px' }}
+          px={{ '@initial': 'x0', '@768': 'x8' }}
           position={'relative'}
         >
           <Box

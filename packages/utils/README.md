@@ -302,9 +302,6 @@ pnpm install
 # Build the package
 pnpm build
 
-# Development build with watch
-pnpm dev
-
 # Run tests
 pnpm test
 
@@ -318,7 +315,6 @@ pnpm lint
 ### Scripts
 
 - `pnpm build` - Build the package for production
-- `pnpm dev` - Build in watch mode for development
 - `pnpm test` - Run test suite with Vitest
 - `pnpm test:watch` - Run tests in watch mode
 - `pnpm type-check` - Run TypeScript type checking
@@ -337,8 +333,8 @@ pnpm lint
 
 ### Peer Dependencies
 
-- `viem` ^2.30.0 - Ethereum library
-- `wagmi` ^2.15.4 - React hooks for Ethereum
+- `viem` ^2.47.1 - Ethereum library
+- `wagmi` ^2.18.1 - React hooks for Ethereum
 - `yup` ^1.6.1 - Schema validation
 
 ### Development Dependencies

@@ -7,7 +7,7 @@ import { NextPageWithLayout } from './_app'
 
 const ExplorePage: NextPageWithLayout = () => {
   return (
-    <Flex direction={'column'} align={'center'} mt={'x5'} minH={'100vh'}>
+    <Flex direction={'column'} align={'center'} mt={'x5'}>
       <Meta title={'Explore'} type={'website'} path={'/explore'} />
       <Explore />
     </Flex>
