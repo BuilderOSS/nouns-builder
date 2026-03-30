@@ -22,6 +22,13 @@ type DaoListPreferencesActions = {
     hidden: boolean
   ) => void
   persistOrderedDaos: (address: string, nextOrderedDaos: PreferenceUpdater) => void
+  updateDaoVisibilityAndOrder: (
+    address: string,
+    chainId: number,
+    collectionAddress: string,
+    hidden: boolean,
+    nextOrderedDaoKeys: string[]
+  ) => void
   clearAddress: (address: string) => void
 }
 
@@ -115,6 +122,45 @@ export const useDaoListPreferencesStore = create<DaoListPreferencesStore>()(
               [normalizedAddress]: {
                 ...currentPreferences,
                 orderedDaoKeys: nextOrderedDaoKeys,
+              },
+            },
+          }
+        })
+      },
+      updateDaoVisibilityAndOrder: (
+        address: string,
+        chainId: number,
+        collectionAddress: string,
+        hidden: boolean,
+        nextOrderedDaoKeys: string[]
+      ) => {
+        const normalizedAddress = normalizeAddress(address)
+        const daoKey = getDaoListPreferenceItemKey(chainId, collectionAddress)
+
+        set((state: DaoListPreferencesStore) => {
+          const currentPreferences = getAddressPreferences(
+            state.prefsByAddress,
+            normalizedAddress
+          )
+          const nextHiddenDaoKeys = hidden
+            ? dedupeKeys([...currentPreferences.hiddenDaoKeys, daoKey])
+            : currentPreferences.hiddenDaoKeys.filter((key) => key !== daoKey)
+          const dedupedOrderedDaoKeys = dedupeKeys(nextOrderedDaoKeys)
+
+          if (
+            areSameKeys(nextHiddenDaoKeys, currentPreferences.hiddenDaoKeys) &&
+            areSameKeys(dedupedOrderedDaoKeys, currentPreferences.orderedDaoKeys)
+          ) {
+            return state
+          }
+
+          return {
+            prefsByAddress: {
+              ...state.prefsByAddress,
+              [normalizedAddress]: {
+                ...currentPreferences,
+                hiddenDaoKeys: nextHiddenDaoKeys,
+                orderedDaoKeys: dedupedOrderedDaoKeys,
               },
             },
           }

@@ -155,11 +155,15 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
         if (rowMetric.index === fromIndex) continue
 
         if (pointerY < rowMetric.midpoint) {
-          return index
+          return rowMetric.index
         }
       }
 
-      return rowMetricsRef.current.length
+      if (rowMetricsRef.current.length === 0) {
+        return 0
+      }
+
+      return rowMetricsRef.current[rowMetricsRef.current.length - 1].index + 1
     }
 
     computeRowMetrics()
@@ -340,6 +344,9 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
 
   const handleDragHandlePointerDown = React.useCallback(
     (event: React.PointerEvent<HTMLButtonElement>, index: number) => {
+      if (!event.isPrimary) return
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+
       const rowNode = rowRefs.current[index]
       if (!rowNode) return
 

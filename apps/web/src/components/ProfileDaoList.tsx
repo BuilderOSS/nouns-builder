@@ -255,7 +255,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
   const [dragInsertIndex, setDragInsertIndex] = React.useState<number | null>(null)
   const [dragOverlay, setDragOverlay] = React.useState<DragOverlayState | null>(null)
 
-  const { isDaoHidden, persistOrderedDaos, setDaoHidden, sortDaos } =
+  const { isDaoHidden, persistOrderedDaos, sortDaos, updateDaoVisibilityAndOrder } =
     useDaoListPreferences(userAddress)
 
   const overlayRef = React.useRef<HTMLDivElement | null>(null)
@@ -633,63 +633,60 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     )
   }, [activeDragKey, getDaoKey, visibleDaos])
 
-  const moveDaoAcrossVisibilityBoundary = React.useCallback(
-    (dao: ProfileDaoListItem, isHidden: boolean) => {
+  const getOrderedKeysAfterVisibilityChange = React.useCallback(
+    (dao: ProfileDaoListItem, isHidden: boolean): string[] => {
       const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
 
-      persistOrderedDaos((currentOrderedDaoKeys) => {
-        const sortedCurrentDaos = sortDaos(
-          daos,
-          (item) => item.collectionAddress,
-          (item) => item.chainId
-        )
+      const sortedCurrentDaos = sortDaos(
+        daos,
+        (item) => item.collectionAddress,
+        (item) => item.chainId
+      )
 
-        const targetDao =
-          sortedCurrentDaos.find(
-            (item) => getDaoKey(item.chainId, item.collectionAddress) === daoKey
-          ) || dao
+      const targetDao =
+        sortedCurrentDaos.find(
+          (item) => getDaoKey(item.chainId, item.collectionAddress) === daoKey
+        ) || dao
 
-        const remainingDaos = sortedCurrentDaos.filter(
-          (item) => getDaoKey(item.chainId, item.collectionAddress) !== daoKey
-        )
-        const remainingVisibleDaos = remainingDaos.filter(
-          (item) => !isDaoHidden(item.chainId, item.collectionAddress)
-        )
-        const remainingHiddenDaos = remainingDaos.filter((item) =>
-          isDaoHidden(item.chainId, item.collectionAddress)
-        )
+      const remainingDaos = sortedCurrentDaos.filter(
+        (item) => getDaoKey(item.chainId, item.collectionAddress) !== daoKey
+      )
+      const remainingVisibleDaos = remainingDaos.filter(
+        (item) => !isDaoHidden(item.chainId, item.collectionAddress)
+      )
+      const remainingHiddenDaos = remainingDaos.filter((item) =>
+        isDaoHidden(item.chainId, item.collectionAddress)
+      )
 
-        const nextOrderedDaos = isHidden
-          ? [...remainingVisibleDaos, targetDao, ...remainingHiddenDaos]
-          : [...remainingVisibleDaos, ...remainingHiddenDaos, targetDao]
+      const nextOrderedDaos = isHidden
+        ? [...remainingVisibleDaos, targetDao, ...remainingHiddenDaos]
+        : [...remainingVisibleDaos, ...remainingHiddenDaos, targetDao]
 
-        const nextOrderedDaoKeys = nextOrderedDaos.map((item) =>
-          getDaoKey(item.chainId, item.collectionAddress)
-        )
-
-        if (
-          nextOrderedDaoKeys.length === currentOrderedDaoKeys.length &&
-          nextOrderedDaoKeys.every((key, index) => key === currentOrderedDaoKeys[index])
-        ) {
-          return currentOrderedDaoKeys
-        }
-
-        return nextOrderedDaoKeys
-      })
+      return nextOrderedDaos.map((item) =>
+        getDaoKey(item.chainId, item.collectionAddress)
+      )
     },
-    [daos, getDaoKey, isDaoHidden, persistOrderedDaos, sortDaos]
+    [daos, getDaoKey, isDaoHidden, sortDaos]
   )
 
   const handleToggleHidden = React.useCallback(
     (dao: ProfileDaoListItem, isHidden: boolean) => {
-      moveDaoAcrossVisibilityBoundary(dao, isHidden)
-      setDaoHidden(dao.chainId, dao.collectionAddress, !isHidden)
+      const nextOrderedDaoKeys = getOrderedKeysAfterVisibilityChange(dao, isHidden)
+      updateDaoVisibilityAndOrder(
+        dao.chainId,
+        dao.collectionAddress,
+        !isHidden,
+        nextOrderedDaoKeys
+      )
     },
-    [moveDaoAcrossVisibilityBoundary, setDaoHidden]
+    [getOrderedKeysAfterVisibilityChange, updateDaoVisibilityAndOrder]
   )
 
   const handlePointerDown = React.useCallback(
     (event: React.PointerEvent<HTMLButtonElement>, daoKey: string) => {
+      if (!event.isPrimary) return
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+
       const rowNode = rowRefs.current[daoKey]
       if (!rowNode) return
 

@@ -169,7 +169,7 @@ export const hiddenDaoButton = style({
   background: color.background2,
   selectors: {
     '&:hover': {
-      background: color.ghostHover,
+      background: color.neutralHover,
     },
   },
 })

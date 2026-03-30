@@ -24,11 +24,16 @@ type GroupHiddenDaosLastFn = <T>(
 
 export type DaoListPreferences = {
   hiddenDaoKeys: string[]
-  hiddenDaoCount: number
   orderedDaoKeys: string[]
   isDaoHidden: (chainId: number, collectionAddress: string) => boolean
   setDaoHidden: (chainId: number, collectionAddress: string, hidden: boolean) => void
   persistOrderedDaos: (nextOrderedDaos: PreferenceUpdater) => void
+  updateDaoVisibilityAndOrder: (
+    chainId: number,
+    collectionAddress: string,
+    hidden: boolean,
+    nextOrderedDaoKeys: string[]
+  ) => void
   sortDaos: DaoSortFn
   groupHiddenDaosLast: GroupHiddenDaosLastFn
 }
@@ -62,6 +67,9 @@ export const useDaoListPreferences = (address?: string): DaoListPreferences => {
   const persistOrderedDaosForAddress = useDaoListPreferencesStore(
     (state: DaoListPreferencesStore) => state.persistOrderedDaos
   )
+  const updateDaoVisibilityAndOrderForAddress = useDaoListPreferencesStore(
+    (state: DaoListPreferencesStore) => state.updateDaoVisibilityAndOrder
+  )
 
   const hiddenDaoKeySet = React.useMemo(() => new Set(hiddenDaoKeys), [hiddenDaoKeys])
   const orderedDaoKeySet = React.useMemo(() => new Set(orderedDaoKeys), [orderedDaoKeys])
@@ -80,6 +88,25 @@ export const useDaoListPreferences = (address?: string): DaoListPreferences => {
       persistOrderedDaosForAddress(normalizedAddress, nextOrderedDaos)
     },
     [normalizedAddress, persistOrderedDaosForAddress]
+  )
+
+  const updateDaoVisibilityAndOrder = React.useCallback(
+    (
+      chainId: number,
+      collectionAddress: string,
+      hidden: boolean,
+      nextOrderedDaoKeys: string[]
+    ) => {
+      if (!normalizedAddress) return
+      updateDaoVisibilityAndOrderForAddress(
+        normalizedAddress,
+        chainId,
+        collectionAddress,
+        hidden,
+        nextOrderedDaoKeys
+      )
+    },
+    [normalizedAddress, updateDaoVisibilityAndOrderForAddress]
   )
 
   const isDaoHidden = React.useCallback(
@@ -143,11 +170,11 @@ export const useDaoListPreferences = (address?: string): DaoListPreferences => {
 
   return {
     hiddenDaoKeys,
-    hiddenDaoCount: hiddenDaoKeys.length,
     orderedDaoKeys,
     isDaoHidden,
     setDaoHidden,
     persistOrderedDaos,
+    updateDaoVisibilityAndOrder,
     sortDaos,
     groupHiddenDaosLast,
   }

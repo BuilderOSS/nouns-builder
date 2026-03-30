@@ -25,7 +25,6 @@ export const outerAuctionCard = style([
 
 export const hiddenAuctionCard = style({
   backgroundColor: theme.colors.background2,
-  borderColor: theme.colors.neutralHover,
 })
 
 export const proposalCardVariants = {
