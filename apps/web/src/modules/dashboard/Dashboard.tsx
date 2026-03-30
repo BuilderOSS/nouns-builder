@@ -12,7 +12,7 @@ import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
-import { useDaoListPreferences } from 'src/utils/useDaoListPreferences'
+import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { useAccount } from 'wagmi'
 
 import { CreateActions } from './CreateActions'

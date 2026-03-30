@@ -13,7 +13,7 @@ import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
-import { useDaoListPreferences } from 'src/utils/useDaoListPreferences'
+import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { formatUnits } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 

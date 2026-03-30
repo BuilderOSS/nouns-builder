@@ -7,6 +7,10 @@ import React from 'react'
 import { createPortal } from 'react-dom'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import {
+  getDaoListPreferenceItemKey,
+  useDaoListPreferences,
+} from 'src/hooks/useDaoListPreferences'
+import {
   daoEditorButtonGroup,
   daoEditorButtonGroupDragging,
   daoEditorDoneButton,
@@ -21,10 +25,6 @@ import {
   profileDaoLink,
   profileHiddenDaoLink,
 } from 'src/styles/profile.css'
-import {
-  getDaoListPreferenceItemKey,
-  useDaoListPreferences,
-} from 'src/utils/useDaoListPreferences'
 
 type ProfileDaoListItem = {
   auctionAddress: string
