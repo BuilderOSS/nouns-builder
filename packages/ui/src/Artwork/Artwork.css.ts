@@ -2,18 +2,39 @@ import { atoms, vars } from '@buildeross/zord'
 import { keyframes, style } from '@vanilla-extract/css'
 
 export const artworkSettingsBox = style({
-  border: '2px solid #F2F2F2',
+  border: `2px solid ${vars.color.border}`,
   borderRadius: '10px',
 })
 
-export const artworkSettingsBoxDropping = style({
-  border: '2px solid #1CB687',
+export const artworkSettingsBoxDragging = style({
+  opacity: 0.45,
+  borderColor: vars.color.positive,
+})
+
+export const artworkSettingsDropSpacer = style({
+  height: '0',
+  transition: 'height 0.12s ease-out, margin 0.12s ease-out',
+})
+
+export const artworkSettingsDropSpacerActive = style({
+  height: '36px',
+  marginBottom: '12px',
   borderRadius: '10px',
-  background: '#1CB687',
+  border: `2px dashed ${vars.color.positive}`,
+  backgroundColor: vars.color.positiveDisabled,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+})
+
+export const artworkSettingsDropLabel = style({
+  color: vars.color.positiveActive,
+  fontWeight: 700,
+  fontSize: '13px',
 })
 
 export const artworkSettingsName = style({
-  color: '#4D4D4D',
+  color: vars.color.text2,
   fontWeight: 700,
   selectors: {
     '&:hover': {
@@ -22,15 +43,13 @@ export const artworkSettingsName = style({
   },
 })
 
-export const artworkSettingsNameDropping = style({
-  color: '#fff',
-  fontWeight: 700,
-  textAlign: 'center',
-  selectors: {
-    '&:hover': {
-      cursor: 'pointer',
-    },
-  },
+export const artworkSettingsDragHandle = style({
+  cursor: 'grab',
+  touchAction: 'none',
+})
+
+export const artworkSettingsDragHandleActive = style({
+  cursor: 'grabbing',
 })
 
 export const artworkSettingsPropertyName = style({

@@ -20,7 +20,7 @@ export const sidebar = style({
 globalStyle(`${sidebar}[data-header-visible="true"] [data-accordion-content]`, {
   '@media': {
     '(min-width: 1024px)': {
-      maxHeight: 'calc(100vh - 516px)',
+      maxHeight: 'calc(100vh - 596px)',
       overflowY: 'auto',
       overflowX: 'hidden',
       transition: 'max-height 150ms cubic-bezier(0.4, 0, 0.2, 1)',
@@ -32,7 +32,7 @@ globalStyle(`${sidebar}[data-header-visible="true"] [data-accordion-content]`, {
 globalStyle(`${sidebar}[data-header-visible="false"] [data-accordion-content]`, {
   '@media': {
     '(min-width: 1024px)': {
-      maxHeight: 'calc(100vh - 436px)', // 500px - 80px = 420px
+      maxHeight: 'calc(100vh - 506px)', // 500px - 80px = 420px
       overflowY: 'auto',
       overflowX: 'hidden',
       transition: 'max-height 150ms cubic-bezier(0.4, 0, 0.2, 1)',
