@@ -9,7 +9,7 @@ import { AnimatedModal } from '@buildeross/ui/Modal'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex } from '@buildeross/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { formatEther, parseEther } from 'viem'
@@ -50,6 +50,7 @@ const InnerPlaceBid = ({
   const [creatingBid, setCreatingBid] = useState(false)
   const [showWarning, setShowWarning] = useState(false)
   const [bidAmount, setBidAmount] = React.useState<string | undefined>(undefined)
+  const [bidError, setBidError] = useState<string | null>(null)
 
   const auctionContractParams = {
     abi: auctionAbi,
@@ -94,6 +95,19 @@ const InnerPlaceBid = ({
     () => valueToCalculateWarning * 5n,
     [valueToCalculateWarning]
   )
+  const bidAmountInWei = useMemo(() => {
+    if (!bidAmount) return undefined
+
+    try {
+      return parseEther(bidAmount)
+    } catch {
+      return undefined
+    }
+  }, [bidAmount])
+  const hasInsufficientBalance = useMemo(() => {
+    if (!bidAmountInWei || !balance?.value) return false
+    return bidAmountInWei > balance.value
+  }, [bidAmountInWei, balance?.value])
 
   const createBidTransaction = useCallback(async () => {
     if (!isMinBid || !bidAmount || !tokenAddress || !auctionAddress) return
@@ -139,6 +153,12 @@ const InnerPlaceBid = ({
       onSuccess?.()
     } catch (error) {
       console.error(error)
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('insufficient funds')
+      ) {
+        setBidError('Insufficient ETH balance for this bid.')
+      }
     } finally {
       setCreatingBid(false)
       setShowWarning(false)
@@ -159,15 +179,31 @@ const InnerPlaceBid = ({
   const handleCreateBid = useCallback(async () => {
     if (!isMinBid || !bidAmount || creatingBid) return
 
-    const amountInWei = parseEther(bidAmount)
+    if (hasInsufficientBalance) {
+      setBidError('Insufficient ETH balance for this bid.')
+      return
+    }
+
+    const amountInWei = bidAmountInWei
+
+    if (!amountInWei) return
 
     if (amountInWei && minAmountForWarning && amountInWei > minAmountForWarning) {
       setShowWarning(true)
       return
     }
 
+    setBidError(null)
     await createBidTransaction()
-  }, [isMinBid, bidAmount, creatingBid, minAmountForWarning, createBidTransaction])
+  }, [
+    isMinBid,
+    bidAmount,
+    creatingBid,
+    hasInsufficientBalance,
+    bidAmountInWei,
+    minAmountForWarning,
+    createBidTransaction,
+  ])
 
   useEffect(() => {
     document.body.style.overflow = !!showWarning ? 'hidden' : 'unset'
@@ -217,7 +253,26 @@ const InnerPlaceBid = ({
                 className={bidInput}
                 min={formattedMinBid}
                 max={formatEther(balance?.value ?? 0n)}
-                onChange={(event) => setBidAmount(event.target.value)}
+                onChange={(event) => {
+                  const nextBidAmount = event.target.value
+                  setBidAmount(nextBidAmount)
+
+                  if (!nextBidAmount) {
+                    setBidError(null)
+                    return
+                  }
+
+                  try {
+                    const nextBidAmountInWei = parseEther(nextBidAmount)
+                    if (balance?.value && nextBidAmountInWei > balance.value) {
+                      setBidError('Insufficient ETH balance for this bid.')
+                    } else {
+                      setBidError(null)
+                    }
+                  } catch {
+                    setBidError(null)
+                  }
+                }}
               />
               <Box position="absolute" style={{ top: 0, right: 0, bottom: 0 }}>
                 <Flex align={'center'} height={'100%'} pr={'x4'} fontWeight={'display'}>
@@ -225,6 +280,11 @@ const InnerPlaceBid = ({
                 </Flex>
               </Box>
             </Box>
+            {bidError ? (
+              <Text variant="paragraph-sm" color="negative" mt="x2">
+                {bidError}
+              </Text>
+            ) : null}
           </form>
           <Flex w="100%" wrap="wrap" mt="x2">
             <ContractButton
@@ -232,7 +292,9 @@ const InnerPlaceBid = ({
               className={auctionActionButtonVariants['bid']}
               size="lg"
               handleClick={handleCreateBid}
-              disabled={address && isValidChain ? !isValidBid : false}
+              disabled={
+                address && isValidChain ? !isValidBid || hasInsufficientBalance : false
+              }
               mt={{ '@initial': 'x2', '@768': 'x0' }}
             >
               Place bid
