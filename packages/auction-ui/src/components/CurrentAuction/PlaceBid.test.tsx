@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PlaceBid } from './PlaceBid'
 
 const mockMutate = vi.fn()
+let mockBalanceValue = parseEther('1')
 
 vi.mock('swr', () => ({
   default: vi.fn(() => ({ data: undefined })),
@@ -23,7 +24,7 @@ vi.mock('wagmi', async (importOriginal) => {
       address: '0x1234',
       chain: { id: CHAIN_ID.ETHEREUM },
     }),
-    useBalance: () => ({ data: { value: parseEther('1') } }),
+    useBalance: () => ({ data: { value: mockBalanceValue } }),
     useConfig: () => ({}),
     useReadContracts: () => ({ data: [parseEther('1'), 10n] }),
   }
@@ -79,6 +80,7 @@ vi.mock('@buildeross/zord', () => ({
 describe('PlaceBid', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockBalanceValue = parseEther('1')
   })
 
   it('shows insufficient balance error while typing a higher bid', async () => {
@@ -100,6 +102,73 @@ describe('PlaceBid', () => {
     expect(
       (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
     ).toBe(true)
+  })
+
+  it('shows helper text when bid amount is empty', () => {
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    expect(screen.getByText('Enter at least 1 ETH to place a bid.')).toBeTruthy()
+    expect(
+      (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
+    ).toBe(true)
+  })
+
+  it('shows helper text when bid is below minimum', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    await user.type(screen.getByRole('spinbutton'), '0.5')
+
+    expect(screen.getByText('Bid must be at least 1 ETH.')).toBeTruthy()
+    expect(
+      (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
+    ).toBe(true)
+  })
+
+  it('clears helper text when bid becomes valid and affordable', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    const input = screen.getByRole('spinbutton')
+
+    await user.type(input, '0.5')
+    expect(screen.getByText('Bid must be at least 1 ETH.')).toBeTruthy()
+
+    await user.clear(input)
+    await user.type(input, '1')
+
+    expect(screen.queryByText('Bid must be at least 1 ETH.')).toBeNull()
+    expect(screen.queryByText('Enter at least 1 ETH to place a bid.')).toBeNull()
+    expect(screen.queryByText('Insufficient ETH balance for this bid.')).toBeNull()
+    expect(
+      (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
+    ).toBe(false)
   })
 
   it('clears insufficient balance error when bid is reduced within balance', async () => {
@@ -127,5 +196,27 @@ describe('PlaceBid', () => {
     expect(
       (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
     ).toBe(false)
+  })
+
+  it('shows insufficient balance state when wallet balance is zero', async () => {
+    const user = userEvent.setup()
+    mockBalanceValue = 0n
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    await user.type(screen.getByRole('spinbutton'), '1')
+
+    expect(screen.getByText('Insufficient ETH balance for this bid.')).toBeTruthy()
+    expect(
+      (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
+    ).toBe(true)
   })
 })

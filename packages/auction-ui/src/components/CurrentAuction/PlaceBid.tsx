@@ -30,6 +30,12 @@ interface PlaceBidProps {
   onSuccess?: () => void
 }
 
+const INSUFFICIENT_BALANCE_ERROR = 'Insufficient ETH balance for this bid.'
+const ENTER_BID_HELPER_TEXT = (formattedMinBid: string) =>
+  `Enter at least ${formattedMinBid} ETH to place a bid.`
+const MIN_BID_HELPER_TEXT = (formattedMinBid: string) =>
+  `Bid must be at least ${formattedMinBid} ETH.`
+
 const InnerPlaceBid = ({
   chainId,
   highestBid,
@@ -105,7 +111,7 @@ const InnerPlaceBid = ({
     }
   }, [bidAmount])
   const hasInsufficientBalance = useMemo(() => {
-    if (!bidAmountInWei || !balance?.value) return false
+    if (bidAmountInWei == null || balance?.value == null) return false
     return bidAmountInWei > balance.value
   }, [bidAmountInWei, balance?.value])
 
@@ -157,7 +163,7 @@ const InnerPlaceBid = ({
         error instanceof Error &&
         error.message.toLowerCase().includes('insufficient funds')
       ) {
-        setBidError('Insufficient ETH balance for this bid.')
+        setBidError(INSUFFICIENT_BALANCE_ERROR)
       }
     } finally {
       setCreatingBid(false)
@@ -180,13 +186,13 @@ const InnerPlaceBid = ({
     if (!isMinBid || !bidAmount || creatingBid) return
 
     if (hasInsufficientBalance) {
-      setBidError('Insufficient ETH balance for this bid.')
+      setBidError(INSUFFICIENT_BALANCE_ERROR)
       return
     }
 
     const amountInWei = bidAmountInWei
 
-    if (!amountInWei) return
+    if (amountInWei == null) return
 
     if (amountInWei && minAmountForWarning && amountInWei > minAmountForWarning) {
       setShowWarning(true)
@@ -211,6 +217,25 @@ const InnerPlaceBid = ({
 
   const isValidBid = bidAmount && isMinBid
   const isValidChain = wagmiChain?.id === chainId
+  const hasBidAmount = !!bidAmount
+  const shouldDisableBidButton =
+    address && isValidChain ? !isValidBid || hasInsufficientBalance : false
+  const disabledBidMessage = useMemo(() => {
+    if (!(address && isValidChain)) return null
+    if (hasInsufficientBalance) return INSUFFICIENT_BALANCE_ERROR
+    if (!hasBidAmount) return ENTER_BID_HELPER_TEXT(formattedMinBid)
+    if (!isMinBid) return MIN_BID_HELPER_TEXT(formattedMinBid)
+    return null
+  }, [
+    address,
+    isValidChain,
+    hasInsufficientBalance,
+    hasBidAmount,
+    formattedMinBid,
+    isMinBid,
+  ])
+  const helperText = bidError || disabledBidMessage
+  const helperTextColor = bidError || hasInsufficientBalance ? 'negative' : 'tertiary'
 
   // Build share URL with referral parameter if user is connected
   const shareUrl = useMemo(() => {
@@ -264,8 +289,8 @@ const InnerPlaceBid = ({
 
                   try {
                     const nextBidAmountInWei = parseEther(nextBidAmount)
-                    if (balance?.value && nextBidAmountInWei > balance.value) {
-                      setBidError('Insufficient ETH balance for this bid.')
+                    if (balance?.value != null && nextBidAmountInWei > balance.value) {
+                      setBidError(INSUFFICIENT_BALANCE_ERROR)
                     } else {
                       setBidError(null)
                     }
@@ -280,9 +305,9 @@ const InnerPlaceBid = ({
                 </Flex>
               </Box>
             </Box>
-            {bidError ? (
-              <Text variant="paragraph-sm" color="negative" mt="x2">
-                {bidError}
+            {helperText ? (
+              <Text variant="paragraph-sm" color={helperTextColor} mt="x2">
+                {helperText}
               </Text>
             ) : null}
           </form>
@@ -292,9 +317,7 @@ const InnerPlaceBid = ({
               className={auctionActionButtonVariants['bid']}
               size="lg"
               handleClick={handleCreateBid}
-              disabled={
-                address && isValidChain ? !isValidBid || hasInsufficientBalance : false
-              }
+              disabled={shouldDisableBidButton}
               mt={{ '@initial': 'x2', '@768': 'x0' }}
             >
               Place bid
