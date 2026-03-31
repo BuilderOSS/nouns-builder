@@ -9,7 +9,7 @@ import { AnimatedModal } from '@buildeross/ui/Modal'
 import { ShareButton } from '@buildeross/ui/ShareButton'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex } from '@buildeross/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { formatEther, parseEther } from 'viem'
@@ -29,6 +29,12 @@ interface PlaceBidProps {
   highestBid?: bigint
   onSuccess?: () => void
 }
+
+const INSUFFICIENT_BALANCE_ERROR = 'Insufficient ETH balance for this bid.'
+const ENTER_BID_HELPER_TEXT = (formattedMinBid: string) =>
+  `Enter at least ${formattedMinBid} ETH to place a bid.`
+const MIN_BID_HELPER_TEXT = (formattedMinBid: string) =>
+  `Bid must be at least ${formattedMinBid} ETH.`
 
 const InnerPlaceBid = ({
   chainId,
@@ -50,6 +56,7 @@ const InnerPlaceBid = ({
   const [creatingBid, setCreatingBid] = useState(false)
   const [showWarning, setShowWarning] = useState(false)
   const [bidAmount, setBidAmount] = React.useState<string | undefined>(undefined)
+  const [bidError, setBidError] = useState<string | null>(null)
 
   const auctionContractParams = {
     abi: auctionAbi,
@@ -94,6 +101,19 @@ const InnerPlaceBid = ({
     () => valueToCalculateWarning * 5n,
     [valueToCalculateWarning]
   )
+  const bidAmountInWei = useMemo(() => {
+    if (!bidAmount) return undefined
+
+    try {
+      return parseEther(bidAmount)
+    } catch {
+      return undefined
+    }
+  }, [bidAmount])
+  const hasInsufficientBalance = useMemo(() => {
+    if (bidAmountInWei == null || balance?.value == null) return false
+    return bidAmountInWei > balance.value
+  }, [bidAmountInWei, balance?.value])
 
   const createBidTransaction = useCallback(async () => {
     if (!isMinBid || !bidAmount || !tokenAddress || !auctionAddress) return
@@ -139,6 +159,12 @@ const InnerPlaceBid = ({
       onSuccess?.()
     } catch (error) {
       console.error(error)
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('insufficient funds')
+      ) {
+        setBidError(INSUFFICIENT_BALANCE_ERROR)
+      }
     } finally {
       setCreatingBid(false)
       setShowWarning(false)
@@ -159,15 +185,31 @@ const InnerPlaceBid = ({
   const handleCreateBid = useCallback(async () => {
     if (!isMinBid || !bidAmount || creatingBid) return
 
-    const amountInWei = parseEther(bidAmount)
+    if (hasInsufficientBalance) {
+      setBidError(INSUFFICIENT_BALANCE_ERROR)
+      return
+    }
+
+    const amountInWei = bidAmountInWei
+
+    if (amountInWei == null) return
 
     if (amountInWei && minAmountForWarning && amountInWei > minAmountForWarning) {
       setShowWarning(true)
       return
     }
 
+    setBidError(null)
     await createBidTransaction()
-  }, [isMinBid, bidAmount, creatingBid, minAmountForWarning, createBidTransaction])
+  }, [
+    isMinBid,
+    bidAmount,
+    creatingBid,
+    hasInsufficientBalance,
+    bidAmountInWei,
+    minAmountForWarning,
+    createBidTransaction,
+  ])
 
   useEffect(() => {
     document.body.style.overflow = !!showWarning ? 'hidden' : 'unset'
@@ -175,6 +217,25 @@ const InnerPlaceBid = ({
 
   const isValidBid = bidAmount && isMinBid
   const isValidChain = wagmiChain?.id === chainId
+  const hasBidAmount = !!bidAmount
+  const shouldDisableBidButton =
+    address && isValidChain ? !isValidBid || hasInsufficientBalance : false
+  const disabledBidMessage = useMemo(() => {
+    if (!(address && isValidChain)) return null
+    if (hasInsufficientBalance) return INSUFFICIENT_BALANCE_ERROR
+    if (!hasBidAmount) return ENTER_BID_HELPER_TEXT(formattedMinBid)
+    if (!isMinBid) return MIN_BID_HELPER_TEXT(formattedMinBid)
+    return null
+  }, [
+    address,
+    isValidChain,
+    hasInsufficientBalance,
+    hasBidAmount,
+    formattedMinBid,
+    isMinBid,
+  ])
+  const helperText = bidError || disabledBidMessage
+  const helperTextColor = bidError || hasInsufficientBalance ? 'negative' : 'tertiary'
 
   // Build share URL with referral parameter if user is connected
   const shareUrl = useMemo(() => {
@@ -217,7 +278,26 @@ const InnerPlaceBid = ({
                 className={bidInput}
                 min={formattedMinBid}
                 max={formatEther(balance?.value ?? 0n)}
-                onChange={(event) => setBidAmount(event.target.value)}
+                onChange={(event) => {
+                  const nextBidAmount = event.target.value
+                  setBidAmount(nextBidAmount)
+
+                  if (!nextBidAmount) {
+                    setBidError(null)
+                    return
+                  }
+
+                  try {
+                    const nextBidAmountInWei = parseEther(nextBidAmount)
+                    if (balance?.value != null && nextBidAmountInWei > balance.value) {
+                      setBidError(INSUFFICIENT_BALANCE_ERROR)
+                    } else {
+                      setBidError(null)
+                    }
+                  } catch {
+                    setBidError(null)
+                  }
+                }}
               />
               <Box position="absolute" style={{ top: 0, right: 0, bottom: 0 }}>
                 <Flex align={'center'} height={'100%'} pr={'x4'} fontWeight={'display'}>
@@ -225,6 +305,11 @@ const InnerPlaceBid = ({
                 </Flex>
               </Box>
             </Box>
+            {helperText ? (
+              <Text variant="paragraph-sm" color={helperTextColor} mt="x2">
+                {helperText}
+              </Text>
+            ) : null}
           </form>
           <Flex w="100%" wrap="wrap" mt="x2">
             <ContractButton
@@ -232,7 +317,7 @@ const InnerPlaceBid = ({
               className={auctionActionButtonVariants['bid']}
               size="lg"
               handleClick={handleCreateBid}
-              disabled={address && isValidChain ? !isValidBid : false}
+              disabled={shouldDisableBidButton}
               mt={{ '@initial': 'x2', '@768': 'x0' }}
             >
               Place bid
