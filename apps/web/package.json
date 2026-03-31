@@ -26,7 +26,7 @@
     "@farcaster/hub-nodejs": "^0.13.5",
     "@fontsource/inter": "5.2.5",
     "@fontsource/londrina-solid": "^5.2.5",
-    "@rainbow-me/rainbowkit": "^2.2.5",
+    "@rainbow-me/rainbowkit": "^2.2.10",
     "@sentry/nextjs": "^9.22.0",
     "@smartinvoicexyz/types": "^0.1.27",
     "@tanstack/react-query": "^5.90.3",
