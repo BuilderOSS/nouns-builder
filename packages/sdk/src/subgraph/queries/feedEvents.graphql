@@ -1,10 +1,5 @@
 query feedEvents($first: Int!, $where: FeedEvent_filter) {
-  feedEvents(
-    first: $first
-    where: $where
-    orderBy: timestamp
-    orderDirection: desc
-  ) {
+  feedEvents(first: $first, where: $where, orderBy: timestamp, orderDirection: desc) {
     __typename
     id
     type
@@ -30,6 +25,9 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         timeCreated
         title
         description
+        metadata
+        representedAddress
+        discussionUrl
         proposer
       }
     }
@@ -41,6 +39,9 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         timeCreated
         title
         description
+        metadata
+        representedAddress
+        discussionUrl
         proposer
       }
       vote {
@@ -57,6 +58,9 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         timeCreated
         title
         description
+        metadata
+        representedAddress
+        discussionUrl
         proposer
       }
       update {
@@ -73,6 +77,9 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         timeCreated
         title
         description
+        metadata
+        representedAddress
+        discussionUrl
         proposer
       }
     }

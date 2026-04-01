@@ -3,6 +3,9 @@ fragment Proposal on Proposal {
   againstVotes
   calldatas
   description
+  metadata
+  representedAddress
+  discussionUrl
   descriptionHash
   executableFrom
   expiresAt
@@ -21,7 +24,7 @@ fragment Proposal on Proposal {
   snapshotBlockNumber
   transactionHash
   executedAt
-  executionTransactionHash  
+  executionTransactionHash
   vetoTransactionHash
   cancelTransactionHash
   dao {
