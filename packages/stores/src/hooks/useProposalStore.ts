@@ -13,6 +13,9 @@ type State = {
   disabled: boolean
   title?: string
   summary?: string
+  representedAddress?: string
+  discussionUrl?: string
+  representedAddressEnabled: boolean
   transactionType: TransactionFormType | null
 }
 
@@ -24,10 +27,34 @@ type Actions = {
   clearProposal: () => void
   setTitle: (title?: string) => void
   setSummary: (summary?: string) => void
-  setDraftMetadata: ({ title, summary }: Pick<State, 'title' | 'summary'>) => void
+  setRepresentedAddress: (representedAddress?: string) => void
+  setDiscussionUrl: (discussionUrl?: string) => void
+  setRepresentedAddressEnabled: (representedAddressEnabled: boolean) => void
+  setDraftMetadata: (
+    draftMetadata: Partial<
+      Pick<
+        State,
+        | 'title'
+        | 'summary'
+        | 'representedAddress'
+        | 'discussionUrl'
+        | 'representedAddressEnabled'
+      >
+    >
+  ) => void
   startProposalDraft: (
     draft?: Partial<
-      Pick<State, 'title' | 'summary' | 'transactions' | 'disabled' | 'transactionType'>
+      Pick<
+        State,
+        | 'title'
+        | 'summary'
+        | 'representedAddress'
+        | 'discussionUrl'
+        | 'representedAddressEnabled'
+        | 'transactions'
+        | 'disabled'
+        | 'transactionType'
+      >
     >
   ) => void
   setTransactionType: (type: TransactionFormType | null) => void
@@ -37,6 +64,9 @@ type Actions = {
 const initialState: State = {
   summary: undefined,
   title: undefined,
+  representedAddress: undefined,
+  discussionUrl: undefined,
+  representedAddressEnabled: false,
   disabled: false,
   transactions: [],
   transactionType: null,
@@ -67,7 +97,11 @@ export const useProposalStore = create<State & Actions>()(
       clearProposal: () => set(() => ({ ...initialState })),
       setTitle: (title) => set({ title }),
       setSummary: (summary) => set({ summary }),
-      setDraftMetadata: ({ title, summary }) => set({ title, summary }),
+      setRepresentedAddress: (representedAddress) => set({ representedAddress }),
+      setDiscussionUrl: (discussionUrl) => set({ discussionUrl }),
+      setRepresentedAddressEnabled: (representedAddressEnabled) =>
+        set({ representedAddressEnabled }),
+      setDraftMetadata: (draftMetadata) => set(draftMetadata),
       startProposalDraft: (draft = {}) => {
         const sanitizedDraft = Object.fromEntries(
           Object.entries(draft).filter(([, value]) => value !== undefined)
@@ -89,6 +123,9 @@ export const useProposalStore = create<State & Actions>()(
         disabled: state.disabled,
         title: state.title,
         summary: state.summary,
+        representedAddress: state.representedAddress,
+        discussionUrl: state.discussionUrl,
+        representedAddressEnabled: state.representedAddressEnabled,
         transactionType: state.transactionType,
       }),
     }

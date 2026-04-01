@@ -42,6 +42,9 @@ interface ReviewProposalProps {
   disabled: boolean
   title?: string
   summary?: string
+  representedAddress?: string
+  discussionUrl?: string
+  representedAddressEnabled: boolean
   transactions: BuilderTransaction[]
   onProposalCreated: (proposalId: string | null) => void
   onBackMobile?: () => void
@@ -70,6 +73,9 @@ export const ReviewProposalForm = ({
   disabled: disabledForm,
   title,
   summary,
+  representedAddress,
+  discussionUrl,
+  representedAddressEnabled,
   transactions,
   onProposalCreated,
   onBackMobile,
@@ -79,7 +85,14 @@ export const ReviewProposalForm = ({
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
   const { address } = useAccount()
-  const { clearProposal, setTitle, setSummary } = useProposalStore()
+  const {
+    clearProposal,
+    setTitle,
+    setSummary,
+    setRepresentedAddress,
+    setDiscussionUrl,
+    setRepresentedAddressEnabled,
+  } = useProposalStore()
 
   const [error, setError] = useState<string | undefined>()
   const [simulationError, setSimulationError] = useState<string | undefined>()
@@ -195,7 +208,17 @@ export const ReviewProposalForm = ({
           targets: targets,
           values: transactionValues,
           calldatas: calldata as Hex[],
-          description: values.title + '&&' + values.summary,
+          description: JSON.stringify({
+            version: 1,
+            title: values.title?.trim() || '',
+            description: values.summary?.trim() || '',
+            ...(values.representedAddressEnabled && values.representedAddress?.trim()
+              ? { representedAddress: values.representedAddress.trim() }
+              : {}),
+            ...(values.discussionUrl?.trim()
+              ? { discussionUrl: values.discussionUrl.trim() }
+              : {}),
+          }),
         }
 
         const data = await simulateContract(config, {
@@ -297,7 +320,14 @@ export const ReviewProposalForm = ({
       <Flex direction={'column'} width={'100%'}>
         <Formik
           validationSchema={validationSchema}
-          initialValues={{ summary: summary || '', title: title || '', transactions }}
+          initialValues={{
+            summary: summary || '',
+            title: title || '',
+            representedAddress: representedAddress || '',
+            discussionUrl: discussionUrl || '',
+            representedAddressEnabled,
+            transactions,
+          }}
           validateOnMount={false}
           validateOnChange={false}
           validateOnBlur={false}
@@ -330,6 +360,8 @@ export const ReviewProposalForm = ({
                     {
                       title: true,
                       summary: true,
+                      representedAddress: true,
+                      discussionUrl: true,
                     },
                     true
                   )
@@ -377,6 +409,11 @@ export const ReviewProposalForm = ({
                       <ProposalDraftForm
                         title={formik.values.title || ''}
                         summary={formik.values.summary || ''}
+                        representedAddress={formik.values.representedAddress || ''}
+                        discussionUrl={formik.values.discussionUrl || ''}
+                        representedAddressEnabled={
+                          formik.values.representedAddressEnabled || false
+                        }
                         onTitleChange={(value) => {
                           formik.setFieldValue('title', value)
                           void formik.validateField('title')
@@ -387,9 +424,34 @@ export const ReviewProposalForm = ({
                           void formik.validateField('summary')
                           setSummary(value)
                         }}
+                        onRepresentedAddressEnabledChange={(value) => {
+                          formik.setFieldValue('representedAddressEnabled', value)
+                          void formik.validateField('representedAddress')
+                          setRepresentedAddressEnabled(value)
+                          if (!value) {
+                            formik.setFieldValue('representedAddress', '')
+                            setRepresentedAddress(undefined)
+                          }
+                        }}
+                        onRepresentedAddressChange={(value) => {
+                          formik.setFieldValue('representedAddress', value)
+                          void formik.validateField('representedAddress')
+                          setRepresentedAddress(value)
+                        }}
+                        onDiscussionUrlChange={(value) => {
+                          formik.setFieldValue('discussionUrl', value)
+                          void formik.validateField('discussionUrl')
+                          setDiscussionUrl(value)
+                        }}
                         disabled={disabledForm}
                         titleError={formik.errors['title']}
                         summaryError={formik.errors['summary']}
+                        representedAddressError={
+                          formik.errors['representedAddress'] as string | undefined
+                        }
+                        discussionUrlError={
+                          formik.errors['discussionUrl'] as string | undefined
+                        }
                       />
                     ) : (
                       (() => {

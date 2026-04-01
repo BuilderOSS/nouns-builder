@@ -4,6 +4,9 @@ import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   MobileProposalActionBar,
+  PROPOSAL_DISCUSSION_URL_FORMAT_ERROR,
+  PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR,
+  PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR,
   PROPOSAL_SUMMARY_REQUIRED_ERROR,
   PROPOSAL_TITLE_FORMAT_ERROR,
   PROPOSAL_TITLE_MAX_ERROR,
@@ -40,7 +43,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
 import * as styles from 'src/styles/create.css'
-import { isAddressEqual } from 'viem'
+import { isAddress, isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
 const createSelectOption = (type: TransactionType) => ({
@@ -52,6 +55,17 @@ const createSelectOption = (type: TransactionType) => ({
 
 const normalizeTitle = (value?: string | null) => (value || '').trim()
 const normalizeSummary = (value?: string | null) => (value || '').trim()
+const normalizeRepresentedAddress = (value?: string | null) => (value || '').trim()
+const normalizeDiscussionUrl = (value?: string | null) => (value || '').trim()
+
+const isValidDiscussionUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
 
 const validateTitle = (value?: string | null): string | undefined => {
   const normalizedTitle = normalizeTitle(value)
@@ -81,6 +95,41 @@ const validateSummary = (value?: string | null): string | undefined => {
   return undefined
 }
 
+const validateRepresentedAddress = (
+  value?: string | null,
+  representedAddressEnabled?: boolean
+): string | undefined => {
+  if (!representedAddressEnabled) {
+    return undefined
+  }
+
+  const normalizedRepresentedAddress = normalizeRepresentedAddress(value)
+
+  if (!normalizedRepresentedAddress) {
+    return PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR
+  }
+
+  if (!isAddress(normalizedRepresentedAddress, { strict: false })) {
+    return PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR
+  }
+
+  return undefined
+}
+
+const validateDiscussionUrl = (value?: string | null): string | undefined => {
+  const normalizedDiscussionUrl = normalizeDiscussionUrl(value)
+
+  if (!normalizedDiscussionUrl) {
+    return undefined
+  }
+
+  if (!isValidDiscussionUrl(normalizedDiscussionUrl)) {
+    return PROPOSAL_DISCUSSION_URL_FORMAT_ERROR
+  }
+
+  return undefined
+}
+
 const CreateProposalPage: NextPageWithLayout = () => {
   const { query, push } = useRouter()
   const addresses = useDaoStore((x) => x.addresses)
@@ -92,8 +141,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const transactions = useProposalStore((x) => x.transactions)
   const title = useProposalStore((x) => x.title)
   const summary = useProposalStore((x) => x.summary)
+  const representedAddress = useProposalStore((x) => x.representedAddress)
+  const discussionUrl = useProposalStore((x) => x.discussionUrl)
+  const representedAddressEnabled = useProposalStore((x) => x.representedAddressEnabled)
   const setTitle = useProposalStore((x) => x.setTitle)
   const setSummary = useProposalStore((x) => x.setSummary)
+  const setRepresentedAddress = useProposalStore((x) => x.setRepresentedAddress)
+  const setDiscussionUrl = useProposalStore((x) => x.setDiscussionUrl)
+  const setRepresentedAddressEnabled = useProposalStore(
+    (x) => x.setRepresentedAddressEnabled
+  )
   const clearProposal = useProposalStore((x) => x.clearProposal)
 
   const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
@@ -109,6 +166,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
   )
   const [titleTouched, setTitleTouched] = React.useState(false)
   const [summaryTouched, setSummaryTouched] = React.useState(false)
+  const [representedAddressTouched, setRepresentedAddressTouched] = React.useState(false)
+  const [discussionUrlTouched, setDiscussionUrlTouched] = React.useState(false)
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -234,8 +293,26 @@ const CreateProposalPage: NextPageWithLayout = () => {
       requirements.push('add a proposal summary')
     }
 
+    const representedAddressValidationError = validateRepresentedAddress(
+      representedAddress,
+      representedAddressEnabled
+    )
+    if (
+      representedAddressValidationError === PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR
+    ) {
+      requirements.push('add the represented wallet address')
+    } else if (
+      representedAddressValidationError === PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR
+    ) {
+      requirements.push('fix the represented wallet address')
+    }
+
+    if (validateDiscussionUrl(discussionUrl)) {
+      requirements.push('fix the discussion URL')
+    }
+
     return requirements
-  }, [title, summary])
+  }, [title, summary, representedAddress, representedAddressEnabled, discussionUrl])
 
   const titleError = useMemo(() => {
     if (!titleTouched) return undefined
@@ -246,6 +323,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
     if (!summaryTouched) return undefined
     return validateSummary(summary)
   }, [summary, summaryTouched])
+
+  const representedAddressError = useMemo(() => {
+    if (!representedAddressTouched) return undefined
+    return validateRepresentedAddress(representedAddress, representedAddressEnabled)
+  }, [representedAddress, representedAddressEnabled, representedAddressTouched])
+
+  const discussionUrlError = useMemo(() => {
+    if (!discussionUrlTouched) return undefined
+    return validateDiscussionUrl(discussionUrl)
+  }, [discussionUrl, discussionUrlTouched])
 
   const missingReviewRequirements = useMemo(() => {
     const requirements = [...missingDraftRequirements]
@@ -373,6 +460,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
     clearProposal()
     setTitleTouched(false)
     setSummaryTouched(false)
+    setRepresentedAddressTouched(false)
+    setDiscussionUrlTouched(false)
     setCreateStage('draft')
     setFurthestStage('draft')
   }, [clearProposal])
@@ -499,12 +588,28 @@ const CreateProposalPage: NextPageWithLayout = () => {
           <ProposalDraftForm
             title={title || ''}
             summary={summary || ''}
+            representedAddress={representedAddress || ''}
+            discussionUrl={discussionUrl || ''}
+            representedAddressEnabled={representedAddressEnabled}
             onTitleChange={setTitle}
             onSummaryChange={setSummary}
+            onRepresentedAddressChange={setRepresentedAddress}
+            onDiscussionUrlChange={setDiscussionUrl}
+            onRepresentedAddressEnabledChange={(value) => {
+              setRepresentedAddressEnabled(value)
+              setRepresentedAddressTouched(true)
+              if (!value) {
+                setRepresentedAddress(undefined)
+              }
+            }}
             onTitleBlur={() => setTitleTouched(true)}
             onSummaryBlur={() => setSummaryTouched(true)}
+            onRepresentedAddressBlur={() => setRepresentedAddressTouched(true)}
+            onDiscussionUrlBlur={() => setDiscussionUrlTouched(true)}
             titleError={titleError}
             summaryError={summaryError}
+            representedAddressError={representedAddressError}
+            discussionUrlError={discussionUrlError}
           />
         </Stack>
       ) : (
