@@ -1,4 +1,12 @@
-import { Address, BigInt, Bytes, dataSource, log } from '@graphprotocol/graph-ts'
+import {
+  Address,
+  BigInt,
+  Bytes,
+  JSONValueKind,
+  dataSource,
+  json,
+  log,
+} from '@graphprotocol/graph-ts'
 
 import {
   DAO,
@@ -47,13 +55,60 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   }
   proposal.calldatas = calldatas.length > 1 ? calldatas : null
 
-  let split = event.params.description.split('&&')
-  let title = split.length > 0 && split[0].length > 0 ? split[0] : null
-  let description = split.length > 1 && split[1].length > 0 ? split[1] : null
+  let descriptionMetadata = event.params.description
+  let title: string | null = null
+  let description: string | null = null
+  let representedAddress: string | null = null
+  let discussionUrl: string | null = null
+
+  let parsedDescriptionResult = json.try_fromString(event.params.description)
+
+  if (
+    !parsedDescriptionResult.isError &&
+    parsedDescriptionResult.value.kind == JSONValueKind.OBJECT
+  ) {
+    let parsedDescription = parsedDescriptionResult.value.toObject()
+
+    let parsedTitle = parsedDescription.get('title')
+    if (parsedTitle && parsedTitle.kind == JSONValueKind.STRING) {
+      let parsedTitleValue = parsedTitle.toString()
+      title = parsedTitleValue.length > 0 ? parsedTitleValue : null
+    }
+
+    let parsedBody = parsedDescription.get('description')
+    if (parsedBody && parsedBody.kind == JSONValueKind.STRING) {
+      let parsedBodyValue = parsedBody.toString()
+      description = parsedBodyValue.length > 0 ? parsedBodyValue : null
+    }
+
+    let parsedRepresentedAddress = parsedDescription.get('representedAddress')
+    if (
+      parsedRepresentedAddress &&
+      parsedRepresentedAddress.kind == JSONValueKind.STRING
+    ) {
+      let parsedRepresentedAddressValue = parsedRepresentedAddress.toString()
+      representedAddress =
+        parsedRepresentedAddressValue.length > 0 ? parsedRepresentedAddressValue : null
+    }
+
+    let parsedDiscussionUrl = parsedDescription.get('discussionUrl')
+    if (parsedDiscussionUrl && parsedDiscussionUrl.kind == JSONValueKind.STRING) {
+      let parsedDiscussionUrlValue = parsedDiscussionUrl.toString()
+      discussionUrl =
+        parsedDiscussionUrlValue.length > 0 ? parsedDiscussionUrlValue : null
+    }
+  } else {
+    let split = event.params.description.split('&&')
+    title = split.length > 0 && split[0].length > 0 ? split[0] : null
+    description = split.length > 1 && split[1].length > 0 ? split[1] : null
+  }
 
   proposal.values = event.params.values
   proposal.title = title
   proposal.description = description
+  proposal.metadata = descriptionMetadata
+  proposal.representedAddress = representedAddress
+  proposal.discussionUrl = discussionUrl
   proposal.descriptionHash = event.params.descriptionHash
   proposal.proposer = event.params.proposal.proposer
   proposal.timeCreated = event.params.proposal.timeCreated

@@ -104,6 +104,9 @@ type Proposal @entity {
   calldatas: String
   title: String
   description: String
+  metadata: String
+  representedAddress: String
+  discussionUrl: String
   descriptionHash: Bytes!
   proposer: Bytes!
   timeCreated: BigInt!
