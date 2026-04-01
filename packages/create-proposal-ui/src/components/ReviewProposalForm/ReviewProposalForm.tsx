@@ -464,6 +464,8 @@ export const ReviewProposalForm = ({
                             '0x0000000000000000000000000000000000000000') as `0x${string}`,
                           description: formik.values.summary || '',
                           title: formik.values.title || '',
+                          representedAddress: formik.values.representedAddress || null,
+                          discussionUrl: formik.values.discussionUrl || null,
                           targets,
                           calldatas: calldata,
                           values: values.map((value) => value.toString()),

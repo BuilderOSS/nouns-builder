@@ -52,6 +52,9 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   isPreview = false,
 }) => {
   const { displayName } = useEnsData(proposal.proposer)
+  const { displayName: representedDisplayName } = useEnsData(
+    proposal.representedAddress || undefined
+  )
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
 
@@ -166,6 +169,12 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
             <Text fontSize={28} fontWeight={'display'}>
               {title}
             </Text>
+            <Text color={'text3'} mt={'x2'}>
+              by {displayName}
+              {proposal.representedAddress
+                ? ` on behalf of ${representedDisplayName}`
+                : ''}
+            </Text>
           </Section>
         )}
 
@@ -199,6 +208,14 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Paragraph>
         </Section>
 
+        {proposal.discussionUrl && (
+          <Section title="Discussion">
+            <a href={proposal.discussionUrl} rel="noreferrer" target="_blank">
+              {proposal.discussionUrl}
+            </a>
+          </Section>
+        )}
+
         <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
           <Flex direction={'row'} placeItems={'center'}>
             <Box
@@ -227,6 +244,18 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
               >
                 {displayName}
               </a>
+              {proposal.representedAddress && (
+                <Text color={'text3'}>
+                  on behalf of{' '}
+                  <a
+                    href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.representedAddress}`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {representedDisplayName}
+                  </a>
+                </Text>
+              )}
             </Box>
           </Flex>
         </Section>
