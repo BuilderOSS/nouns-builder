@@ -13,12 +13,14 @@ import { type SimulationOutput } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
+import { getEnsAddress } from '@buildeross/utils/ens'
 import { handleGMTOffset, unpackOptionalArray } from '@buildeross/utils/helpers'
+import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import { Formik } from 'formik'
+import { Formik, type FormikProps } from 'formik'
 import React, { useState } from 'react'
-import { decodeEventLog, type Hex } from 'viem'
+import { decodeEventLog, getAddress, type Hex, isAddress } from 'viem'
 import { useAccount, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -295,6 +297,41 @@ export const ReviewProposalForm = ({
     ]
   )
 
+  const resolveAndStoreRepresentedAddress = React.useCallback(
+    async (formik: FormikProps<FormValues>) => {
+      if (!formik.values.representedAddressEnabled) {
+        setRepresentedAddress(undefined)
+        return true
+      }
+
+      const rawValue = (formik.values.representedAddress || '').trim()
+
+      if (!rawValue) {
+        setRepresentedAddress(undefined)
+        return true
+      }
+
+      try {
+        const resolved = await getEnsAddress(rawValue, getProvider(chain.id))
+        if (!resolved || !isAddress(resolved, { strict: false })) {
+          await formik.setFieldError('representedAddress', 'Enter a valid wallet address')
+          return false
+        }
+
+        const normalizedAddress = getAddress(resolved)
+        if (normalizedAddress !== formik.values.representedAddress) {
+          await formik.setFieldValue('representedAddress', normalizedAddress)
+        }
+        setRepresentedAddress(normalizedAddress)
+        return true
+      } catch {
+        await formik.setFieldError('representedAddress', 'Enter a valid wallet address')
+        return false
+      }
+    },
+    [chain.id, setRepresentedAddress]
+  )
+
   if (isLoading) return null
 
   const tokensNeeded = Number(proposalVotesRequired ?? 0n)
@@ -407,51 +444,27 @@ export const ReviewProposalForm = ({
                   >
                     {isEditingMetadata ? (
                       <ProposalDraftForm
-                        title={formik.values.title || ''}
-                        summary={formik.values.summary || ''}
-                        representedAddress={formik.values.representedAddress || ''}
-                        discussionUrl={formik.values.discussionUrl || ''}
-                        representedAddressEnabled={
-                          formik.values.representedAddressEnabled || false
-                        }
+                        formik={formik}
                         onTitleChange={(value) => {
-                          formik.setFieldValue('title', value)
-                          void formik.validateField('title')
                           setTitle(value)
                         }}
                         onSummaryChange={(value) => {
-                          formik.setFieldValue('summary', value)
-                          void formik.validateField('summary')
                           setSummary(value)
                         }}
                         onRepresentedAddressEnabledChange={(value) => {
-                          formik.setFieldValue('representedAddressEnabled', value)
-                          void formik.validateField('representedAddress')
                           setRepresentedAddressEnabled(value)
                           if (!value) {
-                            formik.setFieldValue('representedAddress', '')
+                            void formik.setFieldValue('representedAddress', '')
                             setRepresentedAddress(undefined)
                           }
                         }}
-                        onRepresentedAddressChange={(value) => {
-                          formik.setFieldValue('representedAddress', value)
-                          void formik.validateField('representedAddress')
-                          setRepresentedAddress(value)
+                        onRepresentedAddressBlur={async () => {
+                          await resolveAndStoreRepresentedAddress(formik)
                         }}
                         onDiscussionUrlChange={(value) => {
-                          formik.setFieldValue('discussionUrl', value)
-                          void formik.validateField('discussionUrl')
                           setDiscussionUrl(value)
                         }}
                         disabled={disabledForm}
-                        titleError={formik.errors['title']}
-                        summaryError={formik.errors['summary']}
-                        representedAddressError={
-                          formik.errors['representedAddress'] as string | undefined
-                        }
-                        discussionUrlError={
-                          formik.errors['discussionUrl'] as string | undefined
-                        }
                       />
                     ) : (
                       (() => {

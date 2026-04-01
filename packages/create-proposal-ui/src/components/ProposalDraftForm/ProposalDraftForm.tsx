@@ -1,70 +1,74 @@
 import { FIELD_TYPES, SmartInput, TextInput } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { Box, Stack, Text } from '@buildeross/zord'
+import { FormikProps } from 'formik'
 import React from 'react'
 
-type ProposalDraftFormProps = {
-  title: string
-  summary: string
-  representedAddress: string
-  discussionUrl: string
+export type ProposalDraftFormValues = {
+  title?: string
+  summary?: string
+  representedAddress?: string
+  discussionUrl?: string
   representedAddressEnabled: boolean
-  onTitleChange: (value: string) => void
-  onSummaryChange: (value: string) => void
-  onRepresentedAddressChange: (value: string) => void
-  onDiscussionUrlChange: (value: string) => void
-  onRepresentedAddressEnabledChange: (value: boolean) => void
-  onTitleBlur?: () => void
-  onSummaryBlur?: () => void
-  onRepresentedAddressBlur?: () => void
-  onDiscussionUrlBlur?: () => void
-  titleError?: string
-  summaryError?: string
-  representedAddressError?: string
-  discussionUrlError?: string
+}
+
+type ProposalDraftFormProps<T extends ProposalDraftFormValues> = {
+  formik: FormikProps<T>
+  onRepresentedAddressBlur?: () => Promise<void> | void
+  onRepresentedAddressEnabledChange?: (value: boolean) => void
+  onTitleChange?: (value: string) => void
+  onSummaryChange?: (value: string) => void
+  onDiscussionUrlChange?: (value: string) => void
   disabled?: boolean
 }
 
-export const ProposalDraftForm: React.FC<ProposalDraftFormProps> = ({
-  title,
-  summary,
-  representedAddress,
-  discussionUrl,
-  representedAddressEnabled,
+const getFieldError = (
+  error: unknown,
+  touched: boolean | undefined
+): string | undefined => {
+  if (!touched || typeof error !== 'string') return undefined
+  return error
+}
+
+export const ProposalDraftForm = <T extends ProposalDraftFormValues>({
+  formik,
+  onRepresentedAddressEnabledChange,
   onTitleChange,
   onSummaryChange,
-  onRepresentedAddressChange,
   onDiscussionUrlChange,
-  onRepresentedAddressEnabledChange,
-  onTitleBlur,
-  onSummaryBlur,
   onRepresentedAddressBlur,
-  onDiscussionUrlBlur,
-  titleError,
-  summaryError,
-  representedAddressError,
-  discussionUrlError,
   disabled,
-}) => {
+}: ProposalDraftFormProps<T>) => {
   return (
     <Stack width={'100%'}>
       <TextInput
         id={'title'}
-        value={title}
+        value={formik.values.title || ''}
         inputLabel={'Title'}
         disabled={disabled}
-        onChange={(e) => onTitleChange(e.target.value)}
-        onBlur={onTitleBlur ? () => onTitleBlur() : undefined}
-        errorMessage={titleError}
+        onChange={(event) => {
+          formik.handleChange(event)
+          onTitleChange?.(event.target.value)
+        }}
+        onBlur={formik.handleBlur}
+        errorMessage={getFieldError(formik.errors.title, Boolean(formik.touched.title))}
       />
 
       <MarkdownEditor
-        value={summary}
-        onChange={onSummaryChange}
-        onBlur={onSummaryBlur}
+        value={formik.values.summary || ''}
+        onChange={(value) => {
+          void formik.setFieldValue('summary', value)
+          onSummaryChange?.(value)
+        }}
+        onBlur={() => {
+          void formik.setFieldTouched('summary', true)
+        }}
         disabled={disabled}
         inputLabel={'Description'}
-        errorMessage={summaryError}
+        errorMessage={getFieldError(
+          formik.errors.summary,
+          Boolean(formik.touched.summary)
+        )}
       />
 
       <Box mb={'x6'}>
@@ -78,9 +82,12 @@ export const ProposalDraftForm: React.FC<ProposalDraftFormProps> = ({
         >
           <input
             type="checkbox"
-            checked={representedAddressEnabled}
+            checked={!!formik.values.representedAddressEnabled}
             disabled={disabled}
-            onChange={(event) => onRepresentedAddressEnabledChange(event.target.checked)}
+            onChange={(event) => {
+              void formik.setFieldValue('representedAddressEnabled', event.target.checked)
+              onRepresentedAddressEnabledChange?.(event.target.checked)
+            }}
           />
           <Text variant={'paragraph-md'}>
             Are you submitting this proposal on behalf of someone else?
@@ -88,32 +95,48 @@ export const ProposalDraftForm: React.FC<ProposalDraftFormProps> = ({
         </label>
       </Box>
 
-      {representedAddressEnabled && (
+      {formik.values.representedAddressEnabled && (
         <SmartInput
           type={FIELD_TYPES.TEXT}
+          formik={formik}
+          {...formik.getFieldProps('representedAddress')}
           id={'representedAddress'}
-          value={representedAddress}
           inputLabel={'Represented Address'}
-          placeholder={'0x...'}
-          onChange={(event) =>
-            onRepresentedAddressChange((event.target as HTMLInputElement).value)
-          }
-          onBlur={onRepresentedAddressBlur ? () => onRepresentedAddressBlur() : undefined}
+          placeholder={'0x... or ENS name'}
+          onBlur={async (event) => {
+            formik.handleBlur(event)
+            await onRepresentedAddressBlur?.()
+          }}
           disabled={disabled}
           isAddress
-          errorMessage={representedAddressError}
+          helperText={
+            'Address of the person or entity you are representing in this proposal.'
+          }
+          errorMessage={getFieldError(
+            formik.errors.representedAddress,
+            Boolean(formik.touched.representedAddress)
+          )}
         />
       )}
 
       <TextInput
         id={'discussionUrl'}
-        value={discussionUrl}
+        value={formik.values.discussionUrl || ''}
         inputLabel={'Discussion URL (optional)'}
         disabled={disabled}
-        onChange={(event) => onDiscussionUrlChange(event.target.value)}
-        onBlur={onDiscussionUrlBlur ? () => onDiscussionUrlBlur() : undefined}
+        onChange={(event) => {
+          formik.handleChange(event)
+          onDiscussionUrlChange?.(event.target.value)
+        }}
+        onBlur={formik.handleBlur}
         placeholder={'https://'}
-        errorMessage={discussionUrlError}
+        helperText={
+          'Link to a proposal discussion thread (forum, Farcaster, etc). Please do not use IPFS URLs.'
+        }
+        errorMessage={getFieldError(
+          formik.errors.discussionUrl,
+          Boolean(formik.touched.discussionUrl)
+        )}
       />
     </Stack>
   )

@@ -22,10 +22,10 @@ export const ERROR_CODE: Record<string, string> = {
 }
 
 export interface FormValues {
-  summary?: string
-  title?: string
-  representedAddress?: string
-  discussionUrl?: string
+  summary: string
+  title: string
+  representedAddress: string
+  discussionUrl: string
   representedAddressEnabled: boolean
   transactions: BuilderTransaction[]
 }
