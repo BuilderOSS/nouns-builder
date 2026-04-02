@@ -7518,7 +7518,39 @@ export type ProposalFragment = {
   againstVotes: number
   calldatas?: string | null
   description?: string | null
+  representedAddress?: string | null
+  discussionUrl?: string | null
+  descriptionHash: any
+  executableFrom?: any | null
+  expiresAt?: any | null
+  forVotes: number
+  proposalId: any
+  proposalNumber: number
+  proposalThreshold: any
+  proposer: any
+  quorumVotes: any
+  targets: Array<any>
+  timeCreated: any
+  title?: string | null
+  values: Array<any>
+  voteEnd: any
+  voteStart: any
+  snapshotBlockNumber: any
+  transactionHash: any
+  executedAt?: any | null
+  executionTransactionHash?: any | null
+  vetoTransactionHash?: any | null
+  cancelTransactionHash?: any | null
+  dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+}
+
+export type ProposalDetailFragment = {
+  __typename?: 'Proposal'
   metadata?: string | null
+  abstainVotes: number
+  againstVotes: number
+  calldatas?: string | null
+  description?: string | null
   representedAddress?: string | null
   discussionUrl?: string | null
   descriptionHash: any
@@ -8314,7 +8346,6 @@ export type DaosForDashboardQuery = {
       againstVotes: number
       calldatas?: string | null
       description?: string | null
-      metadata?: string | null
       representedAddress?: string | null
       discussionUrl?: string | null
       descriptionHash: any
@@ -8531,7 +8562,6 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
-          metadata?: string | null
           representedAddress?: string | null
           discussionUrl?: string | null
           proposer: any
@@ -8563,7 +8593,6 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
-          metadata?: string | null
           representedAddress?: string | null
           discussionUrl?: string | null
           proposer: any
@@ -8595,7 +8624,6 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
-          metadata?: string | null
           representedAddress?: string | null
           discussionUrl?: string | null
           proposer: any
@@ -8633,7 +8661,6 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
-          metadata?: string | null
           representedAddress?: string | null
           discussionUrl?: string | null
           proposer: any
@@ -8803,11 +8830,11 @@ export type ProposalQuery = {
   __typename?: 'Query'
   proposal?: {
     __typename?: 'Proposal'
+    metadata?: string | null
     abstainVotes: number
     againstVotes: number
     calldatas?: string | null
     description?: string | null
-    metadata?: string | null
     representedAddress?: string | null
     discussionUrl?: string | null
     descriptionHash: any
@@ -8867,11 +8894,11 @@ export type ProposalOgMetadataQuery = {
   __typename?: 'Query'
   proposals: Array<{
     __typename?: 'Proposal'
+    metadata?: string | null
     abstainVotes: number
     againstVotes: number
     calldatas?: string | null
     description?: string | null
-    metadata?: string | null
     representedAddress?: string | null
     discussionUrl?: string | null
     descriptionHash: any
@@ -8929,7 +8956,6 @@ export type ProposalsQuery = {
     againstVotes: number
     calldatas?: string | null
     description?: string | null
-    metadata?: string | null
     representedAddress?: string | null
     discussionUrl?: string | null
     descriptionHash: any
@@ -9483,7 +9509,6 @@ export const ProposalFragmentDoc = gql`
     againstVotes
     calldatas
     description
-    metadata
     representedAddress
     discussionUrl
     descriptionHash
@@ -9512,6 +9537,13 @@ export const ProposalFragmentDoc = gql`
       tokenAddress
     }
   }
+`
+export const ProposalDetailFragmentDoc = gql`
+  fragment ProposalDetail on Proposal {
+    ...Proposal
+    metadata
+  }
+  ${ProposalFragmentDoc}
 `
 export const ProposalVoteFragmentDoc = gql`
   fragment ProposalVote on ProposalVote {
@@ -10221,7 +10253,6 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
-          metadata
           representedAddress
           discussionUrl
           proposer
@@ -10234,7 +10265,6 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
-          metadata
           representedAddress
           discussionUrl
           proposer
@@ -10252,7 +10282,6 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
-          metadata
           representedAddress
           discussionUrl
           proposer
@@ -10270,7 +10299,6 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
-          metadata
           representedAddress
           discussionUrl
           proposer
@@ -10424,13 +10452,13 @@ export const PropdatesDocument = gql`
 export const ProposalDocument = gql`
   query proposal($proposalId: ID!) {
     proposal(id: $proposalId) {
-      ...Proposal
+      ...ProposalDetail
       votes {
         ...ProposalVote
       }
     }
   }
-  ${ProposalFragmentDoc}
+  ${ProposalDetailFragmentDoc}
   ${ProposalVoteFragmentDoc}
 `
 export const ProposalByExecutionTxHashDocument = gql`
@@ -10456,7 +10484,7 @@ export const ProposalByExecutionTxHashDocument = gql`
 export const ProposalOgMetadataDocument = gql`
   query proposalOGMetadata($where: Proposal_filter!, $first: Int!) {
     proposals(where: $where, first: $first) {
-      ...Proposal
+      ...ProposalDetail
       votes {
         ...ProposalVote
       }
@@ -10471,7 +10499,7 @@ export const ProposalOgMetadataDocument = gql`
       }
     }
   }
-  ${ProposalFragmentDoc}
+  ${ProposalDetailFragmentDoc}
   ${ProposalVoteFragmentDoc}
 `
 export const ProposalsDocument = gql`

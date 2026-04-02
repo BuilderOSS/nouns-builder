@@ -313,6 +313,13 @@ export const ReviewProposalForm = ({
 
       try {
         const resolved = await getEnsAddress(rawValue, getProvider(chain.id))
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
         if (!resolved || !isAddress(resolved, { strict: false })) {
           await formik.setFieldError('representedAddress', 'Enter a valid wallet address')
           return false
@@ -325,6 +332,13 @@ export const ReviewProposalForm = ({
         setRepresentedAddress(normalizedAddress)
         return true
       } catch {
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
         await formik.setFieldError('representedAddress', 'Enter a valid wallet address')
         return false
       }
@@ -390,6 +404,16 @@ export const ReviewProposalForm = ({
 
               const validateAndSubmit = async () => {
                 setHasAttemptedSubmit(true)
+                const resolved = await resolveAndStoreRepresentedAddress(formik)
+                if (!resolved) {
+                  formik.setTouched(
+                    {
+                      representedAddress: true,
+                    },
+                    true
+                  )
+                  return
+                }
                 const errors = await formik.validateForm()
 
                 if (Object.keys(errors).length > 0) {

@@ -1,6 +1,6 @@
 query proposalOGMetadata($where: Proposal_filter!, $first: Int!) {
   proposals(where: $where, first: $first) {
-    ...Proposal
+    ...ProposalDetail
     votes {
       ...ProposalVote
     }

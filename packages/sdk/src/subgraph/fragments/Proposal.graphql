@@ -3,7 +3,6 @@ fragment Proposal on Proposal {
   againstVotes
   calldatas
   description
-  metadata
   representedAddress
   discussionUrl
   descriptionHash

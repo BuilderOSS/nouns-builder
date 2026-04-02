@@ -15,6 +15,7 @@ export type ProposalDraftFormValues = {
 type ProposalDraftFormProps<T extends ProposalDraftFormValues> = {
   formik: FormikProps<T>
   onRepresentedAddressBlur?: () => Promise<void> | void
+  onRepresentedAddressChange?: (value: string) => void
   onRepresentedAddressEnabledChange?: (value: boolean) => void
   onTitleChange?: (value: string) => void
   onSummaryChange?: (value: string) => void
@@ -32,6 +33,7 @@ const getFieldError = (
 
 export const ProposalDraftForm = <T extends ProposalDraftFormValues>({
   formik,
+  onRepresentedAddressChange,
   onRepresentedAddressEnabledChange,
   onTitleChange,
   onSummaryChange,
@@ -125,6 +127,10 @@ export const ProposalDraftForm = <T extends ProposalDraftFormValues>({
           {...formik.getFieldProps('representedAddress')}
           id={'representedAddress'}
           placeholder={'0x... or ENS name'}
+          onChange={(event) => {
+            formik.handleChange(event)
+            onRepresentedAddressChange?.((event.target as HTMLInputElement).value)
+          }}
           onBlur={async (event) => {
             formik.handleBlur(event)
             await onRepresentedAddressBlur?.()

@@ -44,6 +44,21 @@ type ProposalDescriptionProps = {
   isPreview?: boolean
 }
 
+const getSafeDiscussionUrl = (value?: string | null): string | null => {
+  if (!value) return null
+
+  try {
+    const parsed = new URL(value)
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return null
+    }
+
+    return value
+  } catch {
+    return null
+  }
+}
+
 export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   title,
   proposal,
@@ -57,6 +72,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   )
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
+  const safeDiscussionUrl = getSafeDiscussionUrl(proposal.discussionUrl)
 
   const enableDecodedTransactions = !isPreview
   const { decodedTransactions } = useDecodedTransactions(
@@ -208,10 +224,10 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Paragraph>
         </Section>
 
-        {proposal.discussionUrl && (
+        {safeDiscussionUrl && (
           <Section title="Discussion">
-            <a href={proposal.discussionUrl} rel="noreferrer" target="_blank">
-              {proposal.discussionUrl}
+            <a href={safeDiscussionUrl} rel="noreferrer" target="_blank">
+              {safeDiscussionUrl}
             </a>
           </Section>
         )}

@@ -175,6 +175,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
       ? 'transactions'
       : 'draft'
   )
+  const draftFormikRef = React.useRef<FormikProps<DraftFormValues> | null>(null)
+  const [draftRepresentedAddressInput, setDraftRepresentedAddressInput] = React.useState(
+    representedAddress || ''
+  )
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -301,7 +305,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     }
 
     const representedAddressValidationError = validateRepresentedAddress(
-      representedAddress,
+      draftRepresentedAddressInput,
       representedAddressEnabled
     )
     if (
@@ -319,7 +323,13 @@ const CreateProposalPage: NextPageWithLayout = () => {
     }
 
     return requirements
-  }, [title, summary, representedAddress, representedAddressEnabled, discussionUrl])
+  }, [
+    title,
+    summary,
+    draftRepresentedAddressInput,
+    representedAddressEnabled,
+    discussionUrl,
+  ])
 
   const missingReviewRequirements = useMemo(() => {
     const requirements = [...missingDraftRequirements]
@@ -393,6 +403,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
     }
   }, [query?.stage, furthestStage])
 
+  React.useEffect(() => {
+    setDraftRepresentedAddressInput(representedAddress || '')
+  }, [representedAddress])
+
   const openDaoActivityPage = useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]`,
@@ -425,18 +439,6 @@ const CreateProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
-  const onContinueStep = useCallback(async () => {
-    if (createStage === 'draft') {
-      if (!canEnterStage.transactions) return
-      setCreateStage('transactions')
-      setFurthestStage('transactions')
-      return
-    }
-
-    if (!canEnterStage.review) return
-    await openProposalReviewPage()
-  }, [createStage, canEnterStage, openProposalReviewPage])
-
   const onBackStep = useCallback(() => {
     if (createStage === 'transactions') {
       setCreateStage('draft')
@@ -445,6 +447,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const onResetProposal = useCallback(() => {
     clearProposal()
+    setDraftRepresentedAddressInput('')
     setCreateStage('draft')
     setFurthestStage('draft')
   }, [clearProposal])
@@ -453,6 +456,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     async (formik: FormikProps<DraftFormValues>) => {
       if (!formik.values.representedAddressEnabled) {
         setRepresentedAddress(undefined)
+        setDraftRepresentedAddressInput('')
         return true
       }
 
@@ -460,11 +464,19 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
       if (!rawValue) {
         setRepresentedAddress(undefined)
+        setDraftRepresentedAddressInput('')
         return true
       }
 
       try {
         const resolved = await getEnsAddress(rawValue, getProvider(chain.id))
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
         if (!resolved || !isAddress(resolved, { strict: false })) {
           void formik.setFieldError(
             'representedAddress',
@@ -478,8 +490,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
           void formik.setFieldValue('representedAddress', normalizedAddress)
         }
         setRepresentedAddress(normalizedAddress)
+        setDraftRepresentedAddressInput(normalizedAddress)
         return true
       } catch {
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
         void formik.setFieldError(
           'representedAddress',
           PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR
@@ -489,6 +509,27 @@ const CreateProposalPage: NextPageWithLayout = () => {
     },
     [chain.id, setRepresentedAddress]
   )
+
+  const onContinueStep = useCallback(async () => {
+    if (createStage === 'draft') {
+      if (draftFormikRef.current) {
+        const resolved = await resolveAndStoreRepresentedAddress(draftFormikRef.current)
+        if (!resolved) return
+      }
+      if (!canEnterStage.transactions) return
+      setCreateStage('transactions')
+      setFurthestStage('transactions')
+      return
+    }
+
+    if (!canEnterStage.review) return
+    await openProposalReviewPage()
+  }, [
+    createStage,
+    canEnterStage,
+    openProposalReviewPage,
+    resolveAndStoreRepresentedAddress,
+  ])
 
   const onStageSelect = useCallback(
     (stage: 'draft' | 'transactions' | 'review') => {
@@ -647,30 +688,40 @@ const CreateProposalPage: NextPageWithLayout = () => {
             }}
             onSubmit={() => undefined}
           >
-            {(formik) => (
-              <ProposalDraftForm
-                formik={formik}
-                onTitleChange={(value) => {
-                  setTitle(value)
-                }}
-                onSummaryChange={(value) => {
-                  setSummary(value)
-                }}
-                onDiscussionUrlChange={(value) => {
-                  setDiscussionUrl(value)
-                }}
-                onRepresentedAddressEnabledChange={(value) => {
-                  setRepresentedAddressEnabled(value)
-                  if (!value) {
-                    setRepresentedAddress(undefined)
-                    void formik.setFieldValue('representedAddress', '')
-                  }
-                }}
-                onRepresentedAddressBlur={async () => {
-                  await resolveAndStoreRepresentedAddress(formik)
-                }}
-              />
-            )}
+            {(formik) =>
+              (() => {
+                draftFormikRef.current = formik
+
+                return (
+                  <ProposalDraftForm
+                    formik={formik}
+                    onTitleChange={(value) => {
+                      setTitle(value)
+                    }}
+                    onSummaryChange={(value) => {
+                      setSummary(value)
+                    }}
+                    onRepresentedAddressChange={(value) => {
+                      setDraftRepresentedAddressInput(value)
+                    }}
+                    onDiscussionUrlChange={(value) => {
+                      setDiscussionUrl(value)
+                    }}
+                    onRepresentedAddressEnabledChange={(value) => {
+                      setRepresentedAddressEnabled(value)
+                      if (!value) {
+                        setRepresentedAddress(undefined)
+                        setDraftRepresentedAddressInput('')
+                        void formik.setFieldValue('representedAddress', '')
+                      }
+                    }}
+                    onRepresentedAddressBlur={async () => {
+                      await resolveAndStoreRepresentedAddress(formik)
+                    }}
+                  />
+                )
+              })()
+            }
           </Formik>
         </Stack>
       ) : (
