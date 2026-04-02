@@ -71,13 +71,36 @@ export const ProposalDraftForm = <T extends ProposalDraftFormValues>({
         )}
       />
 
-      <Box mb={'x6'}>
+      <Box mt={'x6'}>
+        <TextInput
+          id={'discussionUrl'}
+          value={formik.values.discussionUrl || ''}
+          inputLabel={'Discussion URL (optional)'}
+          disabled={disabled}
+          onChange={(event) => {
+            formik.handleChange(event)
+            onDiscussionUrlChange?.(event.target.value)
+          }}
+          onBlur={formik.handleBlur}
+          placeholder={'https://'}
+          helperText={
+            'Link to the proposal discussion (Forum, Farcaster, Discord, etc). Please do not use IPFS URLs.'
+          }
+          errorMessage={getFieldError(
+            formik.errors.discussionUrl,
+            Boolean(formik.touched.discussionUrl)
+          )}
+        />
+      </Box>
+
+      <Box mb={'x4'}>
         <label
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
             cursor: disabled ? 'default' : 'pointer',
+            fontWeight: 700,
           }}
         >
           <input
@@ -89,7 +112,7 @@ export const ProposalDraftForm = <T extends ProposalDraftFormValues>({
               onRepresentedAddressEnabledChange?.(event.target.checked)
             }}
           />
-          <Text variant={'paragraph-md'}>
+          <Text variant={'paragraph-md'} fontWeight={'label'}>
             Are you submitting this proposal on behalf of someone else?
           </Text>
         </label>
@@ -101,7 +124,6 @@ export const ProposalDraftForm = <T extends ProposalDraftFormValues>({
           formik={formik}
           {...formik.getFieldProps('representedAddress')}
           id={'representedAddress'}
-          inputLabel={'Represented Address'}
           placeholder={'0x... or ENS name'}
           onBlur={async (event) => {
             formik.handleBlur(event)
@@ -118,26 +140,6 @@ export const ProposalDraftForm = <T extends ProposalDraftFormValues>({
           )}
         />
       )}
-
-      <TextInput
-        id={'discussionUrl'}
-        value={formik.values.discussionUrl || ''}
-        inputLabel={'Discussion URL (optional)'}
-        disabled={disabled}
-        onChange={(event) => {
-          formik.handleChange(event)
-          onDiscussionUrlChange?.(event.target.value)
-        }}
-        onBlur={formik.handleBlur}
-        placeholder={'https://'}
-        helperText={
-          'Link to a proposal discussion thread (forum, Farcaster, etc). Please do not use IPFS URLs.'
-        }
-        errorMessage={getFieldError(
-          formik.errors.discussionUrl,
-          Boolean(formik.touched.discussionUrl)
-        )}
-      />
     </Stack>
   )
 }
