@@ -1517,6 +1517,7 @@ export enum ClankerToken_OrderBy {
 
 export enum CoinType {
   ClankerToken = 'CLANKER_TOKEN',
+  Unknown = 'UNKNOWN',
   Weth = 'WETH',
   ZoraCoin = 'ZORA_COIN',
 }
@@ -2818,6 +2819,7 @@ export type Proposal = {
   dao: Dao
   description?: Maybe<Scalars['String']['output']>
   descriptionHash: Scalars['Bytes']['output']
+  discussionUrl?: Maybe<Scalars['String']['output']>
   executableFrom?: Maybe<Scalars['BigInt']['output']>
   executed: Scalars['Boolean']['output']
   executedAt?: Maybe<Scalars['BigInt']['output']>
@@ -2825,6 +2827,7 @@ export type Proposal = {
   expiresAt?: Maybe<Scalars['BigInt']['output']>
   forVotes: Scalars['Int']['output']
   id: Scalars['ID']['output']
+  metadata?: Maybe<Scalars['String']['output']>
   proposalId: Scalars['Bytes']['output']
   proposalNumber: Scalars['Int']['output']
   proposalThreshold: Scalars['BigInt']['output']
@@ -2833,6 +2836,7 @@ export type Proposal = {
   queuedAt?: Maybe<Scalars['BigInt']['output']>
   queuedTransactionHash?: Maybe<Scalars['Bytes']['output']>
   quorumVotes: Scalars['BigInt']['output']
+  representedAddress?: Maybe<Scalars['String']['output']>
   snapshotBlockNumber: Scalars['BigInt']['output']
   targets: Array<Scalars['Bytes']['output']>
   timeCreated: Scalars['BigInt']['output']
@@ -3005,6 +3009,7 @@ export enum ProposalCreatedEvent_OrderBy {
   ProposalCanceledAt = 'proposal__canceledAt',
   ProposalDescription = 'proposal__description',
   ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
   ProposalExecutableFrom = 'proposal__executableFrom',
   ProposalExecuted = 'proposal__executed',
   ProposalExecutedAt = 'proposal__executedAt',
@@ -3012,6 +3017,7 @@ export enum ProposalCreatedEvent_OrderBy {
   ProposalExpiresAt = 'proposal__expiresAt',
   ProposalForVotes = 'proposal__forVotes',
   ProposalId = 'proposal__id',
+  ProposalMetadata = 'proposal__metadata',
   ProposalProposalId = 'proposal__proposalId',
   ProposalProposalNumber = 'proposal__proposalNumber',
   ProposalProposalThreshold = 'proposal__proposalThreshold',
@@ -3020,6 +3026,7 @@ export enum ProposalCreatedEvent_OrderBy {
   ProposalQueuedAt = 'proposal__queuedAt',
   ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
   ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
   ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
   ProposalTimeCreated = 'proposal__timeCreated',
   ProposalTitle = 'proposal__title',
@@ -3175,6 +3182,7 @@ export enum ProposalExecutedEvent_OrderBy {
   ProposalCanceledAt = 'proposal__canceledAt',
   ProposalDescription = 'proposal__description',
   ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
   ProposalExecutableFrom = 'proposal__executableFrom',
   ProposalExecuted = 'proposal__executed',
   ProposalExecutedAt = 'proposal__executedAt',
@@ -3182,6 +3190,7 @@ export enum ProposalExecutedEvent_OrderBy {
   ProposalExpiresAt = 'proposal__expiresAt',
   ProposalForVotes = 'proposal__forVotes',
   ProposalId = 'proposal__id',
+  ProposalMetadata = 'proposal__metadata',
   ProposalProposalId = 'proposal__proposalId',
   ProposalProposalNumber = 'proposal__proposalNumber',
   ProposalProposalThreshold = 'proposal__proposalThreshold',
@@ -3190,6 +3199,7 @@ export enum ProposalExecutedEvent_OrderBy {
   ProposalQueuedAt = 'proposal__queuedAt',
   ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
   ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
   ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
   ProposalTimeCreated = 'proposal__timeCreated',
   ProposalTitle = 'proposal__title',
@@ -3340,6 +3350,7 @@ export enum ProposalUpdate_OrderBy {
   ProposalCanceledAt = 'proposal__canceledAt',
   ProposalDescription = 'proposal__description',
   ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
   ProposalExecutableFrom = 'proposal__executableFrom',
   ProposalExecuted = 'proposal__executed',
   ProposalExecutedAt = 'proposal__executedAt',
@@ -3347,6 +3358,7 @@ export enum ProposalUpdate_OrderBy {
   ProposalExpiresAt = 'proposal__expiresAt',
   ProposalForVotes = 'proposal__forVotes',
   ProposalId = 'proposal__id',
+  ProposalMetadata = 'proposal__metadata',
   ProposalProposalId = 'proposal__proposalId',
   ProposalProposalNumber = 'proposal__proposalNumber',
   ProposalProposalThreshold = 'proposal__proposalThreshold',
@@ -3355,6 +3367,7 @@ export enum ProposalUpdate_OrderBy {
   ProposalQueuedAt = 'proposal__queuedAt',
   ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
   ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
   ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
   ProposalTimeCreated = 'proposal__timeCreated',
   ProposalTitle = 'proposal__title',
@@ -3531,6 +3544,7 @@ export enum ProposalUpdatedEvent_OrderBy {
   ProposalCanceledAt = 'proposal__canceledAt',
   ProposalDescription = 'proposal__description',
   ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
   ProposalExecutableFrom = 'proposal__executableFrom',
   ProposalExecuted = 'proposal__executed',
   ProposalExecutedAt = 'proposal__executedAt',
@@ -3538,6 +3552,7 @@ export enum ProposalUpdatedEvent_OrderBy {
   ProposalExpiresAt = 'proposal__expiresAt',
   ProposalForVotes = 'proposal__forVotes',
   ProposalId = 'proposal__id',
+  ProposalMetadata = 'proposal__metadata',
   ProposalProposalId = 'proposal__proposalId',
   ProposalProposalNumber = 'proposal__proposalNumber',
   ProposalProposalThreshold = 'proposal__proposalThreshold',
@@ -3546,6 +3561,7 @@ export enum ProposalUpdatedEvent_OrderBy {
   ProposalQueuedAt = 'proposal__queuedAt',
   ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
   ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
   ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
   ProposalTimeCreated = 'proposal__timeCreated',
   ProposalTitle = 'proposal__title',
@@ -3695,6 +3711,7 @@ export enum ProposalVote_OrderBy {
   ProposalCanceledAt = 'proposal__canceledAt',
   ProposalDescription = 'proposal__description',
   ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
   ProposalExecutableFrom = 'proposal__executableFrom',
   ProposalExecuted = 'proposal__executed',
   ProposalExecutedAt = 'proposal__executedAt',
@@ -3702,6 +3719,7 @@ export enum ProposalVote_OrderBy {
   ProposalExpiresAt = 'proposal__expiresAt',
   ProposalForVotes = 'proposal__forVotes',
   ProposalId = 'proposal__id',
+  ProposalMetadata = 'proposal__metadata',
   ProposalProposalId = 'proposal__proposalId',
   ProposalProposalNumber = 'proposal__proposalNumber',
   ProposalProposalThreshold = 'proposal__proposalThreshold',
@@ -3710,6 +3728,7 @@ export enum ProposalVote_OrderBy {
   ProposalQueuedAt = 'proposal__queuedAt',
   ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
   ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
   ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
   ProposalTimeCreated = 'proposal__timeCreated',
   ProposalTitle = 'proposal__title',
@@ -3890,6 +3909,7 @@ export enum ProposalVotedEvent_OrderBy {
   ProposalCanceledAt = 'proposal__canceledAt',
   ProposalDescription = 'proposal__description',
   ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
   ProposalExecutableFrom = 'proposal__executableFrom',
   ProposalExecuted = 'proposal__executed',
   ProposalExecutedAt = 'proposal__executedAt',
@@ -3897,6 +3917,7 @@ export enum ProposalVotedEvent_OrderBy {
   ProposalExpiresAt = 'proposal__expiresAt',
   ProposalForVotes = 'proposal__forVotes',
   ProposalId = 'proposal__id',
+  ProposalMetadata = 'proposal__metadata',
   ProposalProposalId = 'proposal__proposalId',
   ProposalProposalNumber = 'proposal__proposalNumber',
   ProposalProposalThreshold = 'proposal__proposalThreshold',
@@ -3905,6 +3926,7 @@ export enum ProposalVotedEvent_OrderBy {
   ProposalQueuedAt = 'proposal__queuedAt',
   ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
   ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
   ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
   ProposalTimeCreated = 'proposal__timeCreated',
   ProposalTitle = 'proposal__title',
@@ -4041,6 +4063,26 @@ export type Proposal_Filter = {
   description_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   description_starts_with?: InputMaybe<Scalars['String']['input']>
   description_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_contains?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_ends_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_gt?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_gte?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_in?: InputMaybe<Array<Scalars['String']['input']>>
+  discussionUrl_lt?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_lte?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_contains?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  discussionUrl_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_starts_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   executableFrom?: InputMaybe<Scalars['BigInt']['input']>
   executableFrom_gt?: InputMaybe<Scalars['BigInt']['input']>
   executableFrom_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -4095,6 +4137,26 @@ export type Proposal_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>
   id_not?: InputMaybe<Scalars['ID']['input']>
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  metadata?: InputMaybe<Scalars['String']['input']>
+  metadata_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_gt?: InputMaybe<Scalars['String']['input']>
+  metadata_gte?: InputMaybe<Scalars['String']['input']>
+  metadata_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_lt?: InputMaybe<Scalars['String']['input']>
+  metadata_lte?: InputMaybe<Scalars['String']['input']>
+  metadata_not?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   or?: InputMaybe<Array<InputMaybe<Proposal_Filter>>>
   proposalId?: InputMaybe<Scalars['Bytes']['input']>
   proposalId_contains?: InputMaybe<Scalars['Bytes']['input']>
@@ -4162,6 +4224,26 @@ export type Proposal_Filter = {
   quorumVotes_lte?: InputMaybe<Scalars['BigInt']['input']>
   quorumVotes_not?: InputMaybe<Scalars['BigInt']['input']>
   quorumVotes_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  representedAddress?: InputMaybe<Scalars['String']['input']>
+  representedAddress_contains?: InputMaybe<Scalars['String']['input']>
+  representedAddress_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_ends_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_gt?: InputMaybe<Scalars['String']['input']>
+  representedAddress_gte?: InputMaybe<Scalars['String']['input']>
+  representedAddress_in?: InputMaybe<Array<Scalars['String']['input']>>
+  representedAddress_lt?: InputMaybe<Scalars['String']['input']>
+  representedAddress_lte?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_contains?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  representedAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_starts_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   snapshotBlockNumber?: InputMaybe<Scalars['BigInt']['input']>
   snapshotBlockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
   snapshotBlockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -4297,6 +4379,7 @@ export enum Proposal_OrderBy {
   DaoVoterCount = 'dao__voterCount',
   Description = 'description',
   DescriptionHash = 'descriptionHash',
+  DiscussionUrl = 'discussionUrl',
   ExecutableFrom = 'executableFrom',
   Executed = 'executed',
   ExecutedAt = 'executedAt',
@@ -4304,6 +4387,7 @@ export enum Proposal_OrderBy {
   ExpiresAt = 'expiresAt',
   ForVotes = 'forVotes',
   Id = 'id',
+  Metadata = 'metadata',
   ProposalId = 'proposalId',
   ProposalNumber = 'proposalNumber',
   ProposalThreshold = 'proposalThreshold',
@@ -4312,6 +4396,7 @@ export enum Proposal_OrderBy {
   QueuedAt = 'queuedAt',
   QueuedTransactionHash = 'queuedTransactionHash',
   QuorumVotes = 'quorumVotes',
+  RepresentedAddress = 'representedAddress',
   SnapshotBlockNumber = 'snapshotBlockNumber',
   Targets = 'targets',
   TimeCreated = 'timeCreated',
@@ -7433,6 +7518,41 @@ export type ProposalFragment = {
   againstVotes: number
   calldatas?: string | null
   description?: string | null
+  representedAddress?: string | null
+  discussionUrl?: string | null
+  descriptionHash: any
+  executableFrom?: any | null
+  expiresAt?: any | null
+  forVotes: number
+  proposalId: any
+  proposalNumber: number
+  proposalThreshold: any
+  proposer: any
+  quorumVotes: any
+  targets: Array<any>
+  timeCreated: any
+  title?: string | null
+  values: Array<any>
+  voteEnd: any
+  voteStart: any
+  snapshotBlockNumber: any
+  transactionHash: any
+  executedAt?: any | null
+  executionTransactionHash?: any | null
+  vetoTransactionHash?: any | null
+  cancelTransactionHash?: any | null
+  dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+}
+
+export type ProposalDetailFragment = {
+  __typename?: 'Proposal'
+  metadata?: string | null
+  abstainVotes: number
+  againstVotes: number
+  calldatas?: string | null
+  description?: string | null
+  representedAddress?: string | null
+  discussionUrl?: string | null
   descriptionHash: any
   executableFrom?: any | null
   expiresAt?: any | null
@@ -8226,6 +8346,8 @@ export type DaosForDashboardQuery = {
       againstVotes: number
       calldatas?: string | null
       description?: string | null
+      representedAddress?: string | null
+      discussionUrl?: string | null
       descriptionHash: any
       executableFrom?: any | null
       forVotes: number
@@ -8440,6 +8562,8 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
+          representedAddress?: string | null
+          discussionUrl?: string | null
           proposer: any
         }
         dao: {
@@ -8469,6 +8593,8 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
+          representedAddress?: string | null
+          discussionUrl?: string | null
           proposer: any
         }
         dao: {
@@ -8498,6 +8624,8 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
+          representedAddress?: string | null
+          discussionUrl?: string | null
           proposer: any
         }
         update: {
@@ -8533,6 +8661,8 @@ export type FeedEventsQuery = {
           timeCreated: any
           title?: string | null
           description?: string | null
+          representedAddress?: string | null
+          discussionUrl?: string | null
           proposer: any
         }
         vote: {
@@ -8700,10 +8830,13 @@ export type ProposalQuery = {
   __typename?: 'Query'
   proposal?: {
     __typename?: 'Proposal'
+    metadata?: string | null
     abstainVotes: number
     againstVotes: number
     calldatas?: string | null
     description?: string | null
+    representedAddress?: string | null
+    discussionUrl?: string | null
     descriptionHash: any
     executableFrom?: any | null
     expiresAt?: any | null
@@ -8761,10 +8894,13 @@ export type ProposalOgMetadataQuery = {
   __typename?: 'Query'
   proposals: Array<{
     __typename?: 'Proposal'
+    metadata?: string | null
     abstainVotes: number
     againstVotes: number
     calldatas?: string | null
     description?: string | null
+    representedAddress?: string | null
+    discussionUrl?: string | null
     descriptionHash: any
     executableFrom?: any | null
     expiresAt?: any | null
@@ -8820,6 +8956,8 @@ export type ProposalsQuery = {
     againstVotes: number
     calldatas?: string | null
     description?: string | null
+    representedAddress?: string | null
+    discussionUrl?: string | null
     descriptionHash: any
     executableFrom?: any | null
     expiresAt?: any | null
@@ -9272,6 +9410,14 @@ export const AuctionBidFragmentDoc = gql`
     bidder
   }
 `
+export const ClankerTokenCardFragmentDoc = gql`
+  fragment ClankerTokenCard on ClankerToken {
+    tokenAddress
+    tokenName
+    tokenSymbol
+    tokenImage
+  }
+`
 export const ClankerTokenHolderFragmentDoc = gql`
   fragment ClankerTokenHolder on ClankerTokenHolder {
     id
@@ -9280,20 +9426,10 @@ export const ClankerTokenHolderFragmentDoc = gql`
     updatedAt
     updatedAtBlock
     token {
-      tokenAddress
-      tokenName
-      tokenSymbol
-      tokenImage
+      ...ClankerTokenCard
     }
   }
-`
-export const ClankerTokenCardFragmentDoc = gql`
-  fragment ClankerTokenCard on ClankerToken {
-    tokenAddress
-    tokenName
-    tokenSymbol
-    tokenImage
-  }
+  ${ClankerTokenCardFragmentDoc}
 `
 export const ClankerTokenFragmentDoc = gql`
   fragment ClankerToken on ClankerToken {
@@ -9373,6 +9509,8 @@ export const ProposalFragmentDoc = gql`
     againstVotes
     calldatas
     description
+    representedAddress
+    discussionUrl
     descriptionHash
     executableFrom
     expiresAt
@@ -9399,6 +9537,13 @@ export const ProposalFragmentDoc = gql`
       tokenAddress
     }
   }
+`
+export const ProposalDetailFragmentDoc = gql`
+  fragment ProposalDetail on Proposal {
+    ...Proposal
+    metadata
+  }
+  ${ProposalFragmentDoc}
 `
 export const ProposalVoteFragmentDoc = gql`
   fragment ProposalVote on ProposalVote {
@@ -10108,6 +10253,8 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
+          representedAddress
+          discussionUrl
           proposer
         }
       }
@@ -10118,6 +10265,8 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
+          representedAddress
+          discussionUrl
           proposer
         }
         vote {
@@ -10133,6 +10282,8 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
+          representedAddress
+          discussionUrl
           proposer
         }
         update {
@@ -10148,6 +10299,8 @@ export const FeedEventsDocument = gql`
           timeCreated
           title
           description
+          representedAddress
+          discussionUrl
           proposer
         }
       }
@@ -10299,13 +10452,13 @@ export const PropdatesDocument = gql`
 export const ProposalDocument = gql`
   query proposal($proposalId: ID!) {
     proposal(id: $proposalId) {
-      ...Proposal
+      ...ProposalDetail
       votes {
         ...ProposalVote
       }
     }
   }
-  ${ProposalFragmentDoc}
+  ${ProposalDetailFragmentDoc}
   ${ProposalVoteFragmentDoc}
 `
 export const ProposalByExecutionTxHashDocument = gql`
@@ -10331,7 +10484,7 @@ export const ProposalByExecutionTxHashDocument = gql`
 export const ProposalOgMetadataDocument = gql`
   query proposalOGMetadata($where: Proposal_filter!, $first: Int!) {
     proposals(where: $where, first: $first) {
-      ...Proposal
+      ...ProposalDetail
       votes {
         ...ProposalVote
       }
@@ -10346,7 +10499,7 @@ export const ProposalOgMetadataDocument = gql`
       }
     }
   }
-  ${ProposalFragmentDoc}
+  ${ProposalDetailFragmentDoc}
   ${ProposalVoteFragmentDoc}
 `
 export const ProposalsDocument = gql`

@@ -4,6 +4,9 @@ import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   MobileProposalActionBar,
+  PROPOSAL_DISCUSSION_URL_FORMAT_ERROR,
+  PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR,
+  PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR,
   PROPOSAL_SUMMARY_REQUIRED_ERROR,
   PROPOSAL_TITLE_FORMAT_ERROR,
   PROPOSAL_TITLE_MAX_ERROR,
@@ -31,8 +34,11 @@ import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
+import { getEnsAddress } from '@buildeross/utils/ens'
+import { getProvider } from '@buildeross/utils/provider'
 import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Formik, FormikProps } from 'formik'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
@@ -40,7 +46,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
 import * as styles from 'src/styles/create.css'
-import { isAddressEqual } from 'viem'
+import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
 const createSelectOption = (type: TransactionType) => ({
@@ -52,6 +58,17 @@ const createSelectOption = (type: TransactionType) => ({
 
 const normalizeTitle = (value?: string | null) => (value || '').trim()
 const normalizeSummary = (value?: string | null) => (value || '').trim()
+const normalizeRepresentedAddress = (value?: string | null) => (value || '').trim()
+const normalizeDiscussionUrl = (value?: string | null) => (value || '').trim()
+
+const isValidDiscussionUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
 
 const validateTitle = (value?: string | null): string | undefined => {
   const normalizedTitle = normalizeTitle(value)
@@ -81,6 +98,49 @@ const validateSummary = (value?: string | null): string | undefined => {
   return undefined
 }
 
+const validateRepresentedAddress = (
+  value?: string | null,
+  representedAddressEnabled?: boolean
+): string | undefined => {
+  if (!representedAddressEnabled) {
+    return undefined
+  }
+
+  const normalizedRepresentedAddress = normalizeRepresentedAddress(value)
+
+  if (!normalizedRepresentedAddress) {
+    return PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR
+  }
+
+  if (!isAddress(normalizedRepresentedAddress, { strict: false })) {
+    return PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR
+  }
+
+  return undefined
+}
+
+const validateDiscussionUrl = (value?: string | null): string | undefined => {
+  const normalizedDiscussionUrl = normalizeDiscussionUrl(value)
+
+  if (!normalizedDiscussionUrl) {
+    return undefined
+  }
+
+  if (!isValidDiscussionUrl(normalizedDiscussionUrl)) {
+    return PROPOSAL_DISCUSSION_URL_FORMAT_ERROR
+  }
+
+  return undefined
+}
+
+type DraftFormValues = {
+  title: string
+  summary: string
+  representedAddress: string
+  discussionUrl: string
+  representedAddressEnabled: boolean
+}
+
 const CreateProposalPage: NextPageWithLayout = () => {
   const { query, push } = useRouter()
   const addresses = useDaoStore((x) => x.addresses)
@@ -92,8 +152,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const transactions = useProposalStore((x) => x.transactions)
   const title = useProposalStore((x) => x.title)
   const summary = useProposalStore((x) => x.summary)
+  const representedAddress = useProposalStore((x) => x.representedAddress)
+  const discussionUrl = useProposalStore((x) => x.discussionUrl)
+  const representedAddressEnabled = useProposalStore((x) => x.representedAddressEnabled)
   const setTitle = useProposalStore((x) => x.setTitle)
   const setSummary = useProposalStore((x) => x.setSummary)
+  const setRepresentedAddress = useProposalStore((x) => x.setRepresentedAddress)
+  const setDiscussionUrl = useProposalStore((x) => x.setDiscussionUrl)
+  const setRepresentedAddressEnabled = useProposalStore(
+    (x) => x.setRepresentedAddressEnabled
+  )
   const clearProposal = useProposalStore((x) => x.clearProposal)
 
   const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
@@ -107,8 +175,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
       ? 'transactions'
       : 'draft'
   )
-  const [titleTouched, setTitleTouched] = React.useState(false)
-  const [summaryTouched, setSummaryTouched] = React.useState(false)
+  const draftFormikRef = React.useRef<FormikProps<DraftFormValues> | null>(null)
+  const [draftRepresentedAddressInput, setDraftRepresentedAddressInput] = React.useState(
+    representedAddress || ''
+  )
 
   const { data: paused } = useReadContract({
     abi: auctionAbi,
@@ -234,18 +304,32 @@ const CreateProposalPage: NextPageWithLayout = () => {
       requirements.push('add a proposal summary')
     }
 
+    const representedAddressValidationError = validateRepresentedAddress(
+      draftRepresentedAddressInput,
+      representedAddressEnabled
+    )
+    if (
+      representedAddressValidationError === PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR
+    ) {
+      requirements.push('add the represented wallet address')
+    } else if (
+      representedAddressValidationError === PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR
+    ) {
+      requirements.push('fix the represented wallet address')
+    }
+
+    if (validateDiscussionUrl(discussionUrl)) {
+      requirements.push('fix the discussion URL')
+    }
+
     return requirements
-  }, [title, summary])
-
-  const titleError = useMemo(() => {
-    if (!titleTouched) return undefined
-    return validateTitle(title)
-  }, [title, titleTouched])
-
-  const summaryError = useMemo(() => {
-    if (!summaryTouched) return undefined
-    return validateSummary(summary)
-  }, [summary, summaryTouched])
+  }, [
+    title,
+    summary,
+    draftRepresentedAddressInput,
+    representedAddressEnabled,
+    discussionUrl,
+  ])
 
   const missingReviewRequirements = useMemo(() => {
     const requirements = [...missingDraftRequirements]
@@ -319,6 +403,10 @@ const CreateProposalPage: NextPageWithLayout = () => {
     }
   }, [query?.stage, furthestStage])
 
+  React.useEffect(() => {
+    setDraftRepresentedAddressInput(representedAddress || '')
+  }, [representedAddress])
+
   const openDaoActivityPage = useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]`,
@@ -351,18 +439,6 @@ const CreateProposalPage: NextPageWithLayout = () => {
     })
   }, [push, chain.slug, addresses.token])
 
-  const onContinueStep = useCallback(async () => {
-    if (createStage === 'draft') {
-      if (!canEnterStage.transactions) return
-      setCreateStage('transactions')
-      setFurthestStage('transactions')
-      return
-    }
-
-    if (!canEnterStage.review) return
-    await openProposalReviewPage()
-  }, [createStage, canEnterStage, openProposalReviewPage])
-
   const onBackStep = useCallback(() => {
     if (createStage === 'transactions') {
       setCreateStage('draft')
@@ -371,11 +447,89 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   const onResetProposal = useCallback(() => {
     clearProposal()
-    setTitleTouched(false)
-    setSummaryTouched(false)
+    setDraftRepresentedAddressInput('')
     setCreateStage('draft')
     setFurthestStage('draft')
   }, [clearProposal])
+
+  const resolveAndStoreRepresentedAddress = useCallback(
+    async (formik: FormikProps<DraftFormValues>) => {
+      if (!formik.values.representedAddressEnabled) {
+        setRepresentedAddress(undefined)
+        setDraftRepresentedAddressInput('')
+        return true
+      }
+
+      const rawValue = (formik.values.representedAddress || '').trim()
+
+      if (!rawValue) {
+        setRepresentedAddress(undefined)
+        setDraftRepresentedAddressInput('')
+        return true
+      }
+
+      try {
+        const resolved = await getEnsAddress(rawValue, getProvider(chain.id))
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
+        if (!resolved || !isAddress(resolved, { strict: false })) {
+          void formik.setFieldError(
+            'representedAddress',
+            PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR
+          )
+          return false
+        }
+
+        const normalizedAddress = getAddress(resolved)
+        if (normalizedAddress !== formik.values.representedAddress) {
+          void formik.setFieldValue('representedAddress', normalizedAddress)
+        }
+        setRepresentedAddress(normalizedAddress)
+        setDraftRepresentedAddressInput(normalizedAddress)
+        return true
+      } catch {
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
+        void formik.setFieldError(
+          'representedAddress',
+          PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR
+        )
+        return false
+      }
+    },
+    [chain.id, setRepresentedAddress]
+  )
+
+  const onContinueStep = useCallback(async () => {
+    if (createStage === 'draft') {
+      if (draftFormikRef.current) {
+        const resolved = await resolveAndStoreRepresentedAddress(draftFormikRef.current)
+        if (!resolved) return
+      }
+      if (!canEnterStage.transactions) return
+      setCreateStage('transactions')
+      setFurthestStage('transactions')
+      return
+    }
+
+    if (!canEnterStage.review) return
+    await openProposalReviewPage()
+  }, [
+    createStage,
+    canEnterStage,
+    openProposalReviewPage,
+    resolveAndStoreRepresentedAddress,
+  ])
 
   const onStageSelect = useCallback(
     (stage: 'draft' | 'transactions' | 'review') => {
@@ -496,16 +650,79 @@ const CreateProposalPage: NextPageWithLayout = () => {
           borderRadius={'curved'}
           gap={'x2'}
         >
-          <ProposalDraftForm
-            title={title || ''}
-            summary={summary || ''}
-            onTitleChange={setTitle}
-            onSummaryChange={setSummary}
-            onTitleBlur={() => setTitleTouched(true)}
-            onSummaryBlur={() => setSummaryTouched(true)}
-            titleError={titleError}
-            summaryError={summaryError}
-          />
+          <Formik<DraftFormValues>
+            initialValues={{
+              title: title || '',
+              summary: summary || '',
+              representedAddress: representedAddress || '',
+              discussionUrl: discussionUrl || '',
+              representedAddressEnabled,
+            }}
+            enableReinitialize
+            validateOnBlur
+            validateOnChange
+            validate={(values) => {
+              const errors: Partial<Record<keyof DraftFormValues, string>> = {}
+              const titleValidationError = validateTitle(values.title)
+              if (titleValidationError) errors.title = titleValidationError
+
+              const summaryValidationError = validateSummary(values.summary)
+              if (summaryValidationError) errors.summary = summaryValidationError
+
+              const representedAddressValidationError = validateRepresentedAddress(
+                values.representedAddress,
+                values.representedAddressEnabled
+              )
+              if (representedAddressValidationError) {
+                errors.representedAddress = representedAddressValidationError
+              }
+
+              const discussionUrlValidationError = validateDiscussionUrl(
+                values.discussionUrl
+              )
+              if (discussionUrlValidationError) {
+                errors.discussionUrl = discussionUrlValidationError
+              }
+
+              return errors
+            }}
+            onSubmit={() => undefined}
+          >
+            {(formik) =>
+              (() => {
+                draftFormikRef.current = formik
+
+                return (
+                  <ProposalDraftForm
+                    formik={formik}
+                    onTitleChange={(value) => {
+                      setTitle(value)
+                    }}
+                    onSummaryChange={(value) => {
+                      setSummary(value)
+                    }}
+                    onRepresentedAddressChange={(value) => {
+                      setDraftRepresentedAddressInput(value)
+                    }}
+                    onDiscussionUrlChange={(value) => {
+                      setDiscussionUrl(value)
+                    }}
+                    onRepresentedAddressEnabledChange={(value) => {
+                      setRepresentedAddressEnabled(value)
+                      if (!value) {
+                        setRepresentedAddress(undefined)
+                        setDraftRepresentedAddressInput('')
+                        void formik.setFieldValue('representedAddress', '')
+                      }
+                    }}
+                    onRepresentedAddressBlur={async () => {
+                      await resolveAndStoreRepresentedAddress(formik)
+                    }}
+                  />
+                )
+              })()
+            }
+          </Formik>
         </Stack>
       ) : (
         <TwoColumnLayout

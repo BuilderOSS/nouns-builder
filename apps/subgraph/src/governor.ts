@@ -2,9 +2,9 @@ import {
   Address,
   BigInt,
   Bytes,
-  JSONValueKind,
   dataSource,
   json,
+  JSONValueKind,
   log,
 } from '@graphprotocol/graph-ts'
 

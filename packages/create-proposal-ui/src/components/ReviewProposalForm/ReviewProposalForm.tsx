@@ -13,12 +13,14 @@ import { type SimulationOutput } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
+import { getEnsAddress } from '@buildeross/utils/ens'
 import { handleGMTOffset, unpackOptionalArray } from '@buildeross/utils/helpers'
+import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
-import { Formik } from 'formik'
+import { Formik, type FormikProps } from 'formik'
 import React, { useState } from 'react'
-import { decodeEventLog, type Hex } from 'viem'
+import { decodeEventLog, getAddress, type Hex, isAddress } from 'viem'
 import { useAccount, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -42,6 +44,9 @@ interface ReviewProposalProps {
   disabled: boolean
   title?: string
   summary?: string
+  representedAddress?: string
+  discussionUrl?: string
+  representedAddressEnabled: boolean
   transactions: BuilderTransaction[]
   onProposalCreated: (proposalId: string | null) => void
   onBackMobile?: () => void
@@ -70,6 +75,9 @@ export const ReviewProposalForm = ({
   disabled: disabledForm,
   title,
   summary,
+  representedAddress,
+  discussionUrl,
+  representedAddressEnabled,
   transactions,
   onProposalCreated,
   onBackMobile,
@@ -79,7 +87,14 @@ export const ReviewProposalForm = ({
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
   const { address } = useAccount()
-  const { clearProposal, setTitle, setSummary } = useProposalStore()
+  const {
+    clearProposal,
+    setTitle,
+    setSummary,
+    setRepresentedAddress,
+    setDiscussionUrl,
+    setRepresentedAddressEnabled,
+  } = useProposalStore()
 
   const [error, setError] = useState<string | undefined>()
   const [simulationError, setSimulationError] = useState<string | undefined>()
@@ -195,7 +210,17 @@ export const ReviewProposalForm = ({
           targets: targets,
           values: transactionValues,
           calldatas: calldata as Hex[],
-          description: values.title + '&&' + values.summary,
+          description: JSON.stringify({
+            version: 1,
+            title: values.title?.trim() || '',
+            description: values.summary?.trim() || '',
+            ...(values.representedAddressEnabled && values.representedAddress?.trim()
+              ? { representedAddress: values.representedAddress.trim() }
+              : {}),
+            ...(values.discussionUrl?.trim()
+              ? { discussionUrl: values.discussionUrl.trim() }
+              : {}),
+          }),
         }
 
         const data = await simulateContract(config, {
@@ -272,6 +297,55 @@ export const ReviewProposalForm = ({
     ]
   )
 
+  const resolveAndStoreRepresentedAddress = React.useCallback(
+    async (formik: FormikProps<FormValues>) => {
+      if (!formik.values.representedAddressEnabled) {
+        setRepresentedAddress(undefined)
+        return true
+      }
+
+      const rawValue = (formik.values.representedAddress || '').trim()
+
+      if (!rawValue) {
+        setRepresentedAddress(undefined)
+        return true
+      }
+
+      try {
+        const resolved = await getEnsAddress(rawValue, getProvider(chain.id))
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
+        if (!resolved || !isAddress(resolved, { strict: false })) {
+          await formik.setFieldError('representedAddress', 'Enter a valid wallet address')
+          return false
+        }
+
+        const normalizedAddress = getAddress(resolved)
+        if (normalizedAddress !== formik.values.representedAddress) {
+          await formik.setFieldValue('representedAddress', normalizedAddress)
+        }
+        setRepresentedAddress(normalizedAddress)
+        return true
+      } catch {
+        const currentValue =
+          (
+            formik.getFieldMeta('representedAddress').value as string | undefined
+          )?.trim() || ''
+        if (currentValue !== rawValue) {
+          return false
+        }
+        await formik.setFieldError('representedAddress', 'Enter a valid wallet address')
+        return false
+      }
+    },
+    [chain.id, setRepresentedAddress]
+  )
+
   if (isLoading) return null
 
   const tokensNeeded = Number(proposalVotesRequired ?? 0n)
@@ -297,7 +371,14 @@ export const ReviewProposalForm = ({
       <Flex direction={'column'} width={'100%'}>
         <Formik
           validationSchema={validationSchema}
-          initialValues={{ summary: summary || '', title: title || '', transactions }}
+          initialValues={{
+            summary: summary || '',
+            title: title || '',
+            representedAddress: representedAddress || '',
+            discussionUrl: discussionUrl || '',
+            representedAddressEnabled,
+            transactions,
+          }}
           validateOnMount={false}
           validateOnChange={false}
           validateOnBlur={false}
@@ -323,6 +404,16 @@ export const ReviewProposalForm = ({
 
               const validateAndSubmit = async () => {
                 setHasAttemptedSubmit(true)
+                const resolved = await resolveAndStoreRepresentedAddress(formik)
+                if (!resolved) {
+                  formik.setTouched(
+                    {
+                      representedAddress: true,
+                    },
+                    true
+                  )
+                  return
+                }
                 const errors = await formik.validateForm()
 
                 if (Object.keys(errors).length > 0) {
@@ -330,6 +421,8 @@ export const ReviewProposalForm = ({
                     {
                       title: true,
                       summary: true,
+                      representedAddress: true,
+                      discussionUrl: true,
                     },
                     true
                   )
@@ -375,21 +468,27 @@ export const ReviewProposalForm = ({
                   >
                     {isEditingMetadata ? (
                       <ProposalDraftForm
-                        title={formik.values.title || ''}
-                        summary={formik.values.summary || ''}
+                        formik={formik}
                         onTitleChange={(value) => {
-                          formik.setFieldValue('title', value)
-                          void formik.validateField('title')
                           setTitle(value)
                         }}
                         onSummaryChange={(value) => {
-                          formik.setFieldValue('summary', value)
-                          void formik.validateField('summary')
                           setSummary(value)
                         }}
+                        onRepresentedAddressEnabledChange={(value) => {
+                          setRepresentedAddressEnabled(value)
+                          if (!value) {
+                            void formik.setFieldValue('representedAddress', '')
+                            setRepresentedAddress(undefined)
+                          }
+                        }}
+                        onRepresentedAddressBlur={async () => {
+                          await resolveAndStoreRepresentedAddress(formik)
+                        }}
+                        onDiscussionUrlChange={(value) => {
+                          setDiscussionUrl(value)
+                        }}
                         disabled={disabledForm}
-                        titleError={formik.errors['title']}
-                        summaryError={formik.errors['summary']}
                       />
                     ) : (
                       (() => {
@@ -402,6 +501,8 @@ export const ReviewProposalForm = ({
                             '0x0000000000000000000000000000000000000000') as `0x${string}`,
                           description: formik.values.summary || '',
                           title: formik.values.title || '',
+                          representedAddress: formik.values.representedAddress || null,
+                          discussionUrl: formik.values.discussionUrl || null,
                           targets,
                           calldatas: calldata,
                           values: values.map((value) => value.toString()),

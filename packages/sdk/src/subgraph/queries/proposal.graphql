@@ -1,6 +1,6 @@
 query proposal($proposalId: ID!) {
   proposal(id: $proposalId) {
-    ...Proposal
+    ...ProposalDetail
     votes {
       ...ProposalVote
     }
