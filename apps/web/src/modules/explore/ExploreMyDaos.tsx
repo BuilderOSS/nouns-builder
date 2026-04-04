@@ -1,17 +1,19 @@
-import { DaoCard } from '@buildeross/dao-ui'
 import { useExploreUserDaos as useMyDaos } from '@buildeross/hooks/useExploreUserDaos'
 import { Grid } from '@buildeross/zord'
 import React from 'react'
-import { formatEther } from 'viem'
+import { useFavoriteDaos } from 'src/utils/useFavoriteDaos'
 import { useAccount } from 'wagmi'
 
 import { exploreGrid } from './Explore.css'
+import { ExploreDaoCard } from './ExploreDaoCard'
 import { ExploreNoDaos } from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
 import { ExploreToolbar } from './ExploreToolbar'
 
 export const ExploreMyDaos = () => {
   const { address } = useAccount()
+  const { hasReachedFavoriteLimit, isDaoFavorited, toggleFavorite } =
+    useFavoriteDaos(address)
 
   const { daos, isLoading } = useMyDaos({ address })
 
@@ -23,21 +25,18 @@ export const ExploreMyDaos = () => {
       ) : daos?.length ? (
         <Grid className={exploreGrid} mb={'x16'}>
           {daos.map((dao) => {
-            const bid = dao.highestBid?.amount ?? undefined
-            const bidInEth = bid ? formatEther(bid) : undefined
             if (!dao.chainId) return null
 
             return (
-              <DaoCard
-                key={dao.dao.tokenAddress}
-                chainId={dao.chainId}
-                tokenId={dao.token?.tokenId ?? undefined}
-                tokenImage={dao.token?.image ?? undefined}
-                tokenName={dao.token?.name ?? undefined}
-                collectionName={dao.dao.name ?? undefined}
-                collectionAddress={dao.dao.tokenAddress}
-                bid={bidInEth}
-                endTime={dao.endTime ?? undefined}
+              <ExploreDaoCard
+                key={`${dao.chainId}:${dao.dao.tokenAddress.toLowerCase()}`}
+                dao={dao}
+                isFavorited={isDaoFavorited(dao.chainId, dao.dao.tokenAddress)}
+                disableFavorite={
+                  hasReachedFavoriteLimit &&
+                  !isDaoFavorited(dao.chainId, dao.dao.tokenAddress)
+                }
+                onFavoriteToggle={toggleFavorite}
               />
             )
           })}

@@ -1,12 +1,20 @@
 import { atoms, color, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
+const favoriteActiveBlue = '#0085FF'
+
 export const card = style({
   transition: 'all 0.15s ease-in-out',
   ':hover': {
     boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
   },
 })
+
+export const cardWrapper = style({
+  position: 'relative',
+  height: '100%',
+})
+
 export const daoImage = style({
   position: 'relative',
   '::after': {
@@ -62,4 +70,51 @@ export const auction = style([
 export const detail = style({
   flexBasis: '50%',
   flexGrow: 0,
+})
+
+export const favoriteButton = style({
+  position: 'absolute',
+  top: 12,
+  right: 12,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: 36,
+  height: 36,
+  borderRadius: 999,
+  border: '1px solid rgba(0, 0, 0, 0.08)',
+  background: 'rgba(255, 255, 255, 0.94)',
+  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+  cursor: 'pointer',
+  transition: 'transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease',
+  zIndex: 1,
+  ':hover': {
+    transform: 'scale(1.04)',
+    boxShadow: '0 10px 28px rgba(0, 0, 0, 0.16)',
+  },
+  ':focus-visible': {
+    outline: `2px solid ${theme.colors.text1}`,
+    outlineOffset: 2,
+  },
+  ':disabled': {
+    cursor: 'not-allowed',
+    opacity: 0.55,
+    transform: 'none',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+  },
+})
+
+export const favoriteButtonActive = style({
+  background: favoriteActiveBlue,
+  borderColor: favoriteActiveBlue,
+})
+
+export const favoriteIcon = style({
+  width: 18,
+  height: 18,
+  color: theme.colors.text1,
+})
+
+export const favoriteIconActive = style({
+  color: theme.colors.background1,
 })

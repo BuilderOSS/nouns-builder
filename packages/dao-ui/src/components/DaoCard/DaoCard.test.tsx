@@ -1,5 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import dayjs from 'dayjs'
 import React from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -87,5 +87,23 @@ describe('Dao card', () => {
     expect(screen.queryByText(/Winning bid/)).toBeInTheDocument()
     expect(screen.queryByText(/2.00 ETH/)).toBeInTheDocument()
     expect(screen.queryByText(/Ends in/)).not.toBeInTheDocument()
+  })
+
+  it('should call favorite toggle when provided', () => {
+    const onFavoriteToggle = vi.fn()
+
+    render(
+      <DaoCard
+        chainId={CHAIN_ID.FOUNDRY}
+        collectionAddress="0x123"
+        tokenName="Token name"
+        collectionName="Collection name"
+        onFavoriteToggle={onFavoriteToggle}
+      />
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /add token name to favorites/i }))
+
+    expect(onFavoriteToggle).toHaveBeenCalledTimes(1)
   })
 })
