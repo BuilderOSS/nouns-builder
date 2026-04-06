@@ -36,7 +36,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": ">=0.3.0"
+    "@buildeross/constants": "0.3.0"
   },
   "publishConfig": {
     "access": "public"

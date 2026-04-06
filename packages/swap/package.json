@@ -35,9 +35,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": ">=0.3.0",
-    "@buildeross/sdk": ">=0.3.0",
-    "@buildeross/types": ">=0.3.0",
+    "@buildeross/constants": "0.3.0",
+    "@buildeross/sdk": "0.3.0",
+    "@buildeross/types": "0.3.0",
     "viem": "^2.47.1"
   },
   "publishConfig": {

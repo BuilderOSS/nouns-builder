@@ -32,7 +32,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/types": ">=0.3.0",
+    "@buildeross/types": "0.3.0",
     "wagmi": "^2.18.1"
   },
   "publishConfig": {

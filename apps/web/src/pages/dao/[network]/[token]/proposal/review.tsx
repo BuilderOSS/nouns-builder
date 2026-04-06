@@ -40,7 +40,16 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     governorAddress: addresses.governor,
   })
 
-  const { transactions, disabled, title, summary, clearProposal } = useProposalStore()
+  const {
+    transactions,
+    disabled,
+    title,
+    summary,
+    representedAddress,
+    discussionUrl,
+    representedAddressEnabled,
+    clearProposal,
+  } = useProposalStore()
   const [proposalHydrated, setProposalHydrated] = useState(false)
 
   useEffect(() => {
@@ -235,6 +244,9 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           transactions={transactions}
           title={title}
           summary={summary}
+          representedAddress={representedAddress}
+          discussionUrl={discussionUrl}
+          representedAddressEnabled={representedAddressEnabled}
           onProposalCreated={onProposalCreated}
           onBackMobile={() => void onOpenCreateStage('transactions')}
           onResetMobile={() => void onResetProposal()}
