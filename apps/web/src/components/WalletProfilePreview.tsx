@@ -1,7 +1,8 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { walletSnippet } from '@buildeross/utils'
-import { Box, Flex, PopUp, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
+import Link from 'next/link'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 
@@ -46,6 +47,7 @@ const fetcher = async (url: string): Promise<WalletProfilePreviewResponse> => {
 }
 
 const compactAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`
+const PREVIEW_MIN_WIDTH = '248px'
 
 export const WalletProfilePreview = ({
   address,
@@ -55,6 +57,7 @@ export const WalletProfilePreview = ({
   inline = false,
 }: WalletProfilePreviewProps) => {
   const [open, setOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null)
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -103,11 +106,36 @@ export const WalletProfilePreview = ({
   }
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
     return () => {
+      window.removeEventListener('resize', handleResize)
       clearOpenTimeout()
       clearCloseTimeout()
     }
   }, [])
+
+  const handleTriggerClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (!isMobile) return
+
+    event.preventDefault()
+    event.stopPropagation()
+    clearOpenTimeout()
+    clearCloseTimeout()
+    setOpen((current) => !current)
+  }
+
+  const handleTriggerPointerDown = (event: React.PointerEvent<HTMLElement>) => {
+    if (!isMobile) return
+
+    event.preventDefault()
+    event.stopPropagation()
+  }
 
   return (
     <>
@@ -115,28 +143,32 @@ export const WalletProfilePreview = ({
         as={inline ? 'span' : 'div'}
         ref={setTriggerElement}
         style={{ minWidth: 0 }}
-        onMouseEnter={handleOpen}
-        onMouseLeave={handleClose}
+        onMouseEnter={isMobile ? undefined : handleOpen}
+        onMouseLeave={isMobile ? undefined : handleClose}
+        onPointerDownCapture={handleTriggerPointerDown}
+        onClickCapture={handleTriggerClick}
       >
         {children}
       </Box>
       <PopUp
         open={open}
+        onOpenChange={setOpen}
         triggerRef={triggerElement}
         placement="bottom"
-        showBackdrop={false}
+        showBackdrop={isMobile}
         padding="x0"
         offsetY={10}
+        viewportPadding={isMobile ? 16 : 0}
       >
         <Box
           p="x2"
           style={{
             width: 'fit-content',
-            minWidth: '264px',
+            minWidth: PREVIEW_MIN_WIDTH,
             maxWidth: 'calc(100vw - 32px)',
           }}
-          onMouseEnter={handleOpen}
-          onMouseLeave={handleClose}
+          onMouseEnter={isMobile ? undefined : handleOpen}
+          onMouseLeave={isMobile ? undefined : handleClose}
         >
           <Flex align="center" gap="x2" mb="x2">
             <Avatar address={address} src={avatarSrc} size="40" />
@@ -213,6 +245,25 @@ export const WalletProfilePreview = ({
             {data?.stats.totalDaos ?? 0} DAOs, {data?.stats.totalProposals ?? 0} proposals,{' '}
             {data?.stats.totalVotes ?? 0} votes
           </Text>
+
+          {isMobile ? (
+            <Box mt="x2" pt="x2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>
+              <Button
+                as={Link}
+                href={`/profile/${address}`}
+                variant="outline"
+                size="sm"
+                w="100%"
+                style={{ minWidth: 0, textDecoration: 'none' }}
+                onClick={() => setOpen(false)}
+              >
+                <Flex align="center" justify="space-between" gap="x2" w="100%">
+                  <Text>View Profile</Text>
+                  <Icon id="arrowRight" size="sm" />
+                </Flex>
+              </Button>
+            </Box>
+          ) : null}
         </Box>
       </PopUp>
     </>
