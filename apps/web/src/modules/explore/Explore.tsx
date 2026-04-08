@@ -4,7 +4,7 @@ import { Pagination } from '@buildeross/ui/Pagination'
 import { Box, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useFavoriteDaos } from 'src/utils/useFavoriteDaos'
+import { useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
 import { useAccount } from 'wagmi'
 
 import { exploreGrid, searchContainer } from './Explore.css'

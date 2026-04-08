@@ -1,8 +1,6 @@
 import { atoms, color, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
-const favoriteActiveBlue = '#0085FF'
-
 export const card = style({
   transition: 'all 0.15s ease-in-out',
   ':hover': {
@@ -104,17 +102,8 @@ export const favoriteButton = style({
   },
 })
 
-export const favoriteButtonActive = style({
-  background: favoriteActiveBlue,
-  borderColor: favoriteActiveBlue,
-})
-
 export const favoriteIcon = style({
-  width: 18,
-  height: 18,
-  color: theme.colors.text1,
-})
-
-export const favoriteIconActive = style({
-  color: theme.colors.background1,
+  width: 20,
+  height: 'auto',
+  display: 'block',
 })

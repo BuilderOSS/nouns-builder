@@ -16,9 +16,7 @@ import {
   cardWrapper,
   daoImage,
   favoriteButton,
-  favoriteButtonActive,
   favoriteIcon,
-  favoriteIconActive,
   name,
   title,
 } from './DaoCard.css'
@@ -171,29 +169,18 @@ export const DaoCard = ({
       {onFavoriteToggle ? (
         <button
           type="button"
-          className={[favoriteButton, isFavorited && favoriteButtonActive]
-            .filter(Boolean)
-            .join(' ')}
+          className={favoriteButton}
           aria-label={favoriteLabel}
           title={favoriteLabel}
           onClick={onFavoriteToggle}
           disabled={favoriteDisabled}
         >
-          <svg
-            viewBox="0 0 24 24"
+          <img
+            src={isFavorited ? '/filled.svg' : '/outlined.svg'}
+            alt=""
             aria-hidden="true"
-            className={[favoriteIcon, isFavorited && favoriteIconActive]
-              .filter(Boolean)
-              .join(' ')}
-          >
-            <path
-              d="M12 2.75l2.85 5.77 6.37.93-4.61 4.49 1.09 6.34L12 17.29l-5.7 2.99 1.09-6.34-4.61-4.49 6.37-.93L12 2.75z"
-              fill={isFavorited ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinejoin="round"
-            />
-          </svg>
+            className={favoriteIcon}
+          />
         </button>
       ) : null}
     </Box>

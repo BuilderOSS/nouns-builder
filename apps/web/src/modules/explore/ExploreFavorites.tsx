@@ -1,6 +1,6 @@
 import { Box, Grid, Text } from '@buildeross/zord'
 import React from 'react'
-import { useFavoriteDaos } from 'src/utils/useFavoriteDaos'
+import { useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
 import { useAccount } from 'wagmi'
 
 import { exploreGrid } from './Explore.css'

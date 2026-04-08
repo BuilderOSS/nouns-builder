@@ -9,7 +9,7 @@ import {
   buildFavoriteDao,
   FAVORITE_DAO_LIMIT,
   type FavoriteDao,
-} from 'src/utils/useFavoriteDaos'
+} from 'src/hooks/useFavoriteDaos'
 import { formatEther } from 'viem'
 
 type ExploreDaoCardProps = {
