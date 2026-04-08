@@ -8,6 +8,7 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { useMemo } from 'react'
 
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 import { PropDateReplyCard } from './PropDateReplyCard'
 
@@ -55,13 +56,19 @@ export const PropDateCard = ({
       gap="x4"
     >
       <Flex justify="space-between" align="center" wrap="wrap" gap="x2">
-        <Flex align="center" gap="x2">
-          <Avatar address={propDate.creator} src={ensAvatar} size="28" />
-          <Text fontWeight="display">{ensName || walletSnippet(propDate.creator)}</Text>
+        <ProposalWalletProfilePreview
+          address={propDate.creator as `0x${string}`}
+          displayName={ensName || walletSnippet(propDate.creator)}
+          avatarSrc={ensAvatar}
+        >
+          <Flex align="center" gap="x2">
+            <Avatar address={propDate.creator} src={ensAvatar} size="28" />
+            <Text fontWeight="display">{ensName || walletSnippet(propDate.creator)}</Text>
           <Text variant="label-sm" color="text3">
             • {formatTimeAgo(propDate.timeCreated)}
           </Text>
-        </Flex>
+          </Flex>
+        </ProposalWalletProfilePreview>
         {milestoneTitle && (
           <Flex
             borderStyle="solid"
@@ -91,7 +98,6 @@ export const PropDateCard = ({
           <MarkdownDisplay>{propDate.message}</MarkdownDisplay>
         </Box>
       )}
-      {/* Render replies if any */}
       {repliesSorted && repliesSorted.length > 0 && (
         <Box mt="x4" ml="x4" style={{ borderLeft: '4px solid var(--colors-border)' }}>
           {repliesSorted.map((reply: PropDate) => (

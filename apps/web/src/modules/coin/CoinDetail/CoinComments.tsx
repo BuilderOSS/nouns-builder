@@ -8,6 +8,7 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { Address } from 'viem'
 
+import { WalletProfilePreview } from '../../../components/WalletProfilePreview'
 import { CoinCommentForm } from './CoinCommentForm'
 import {
   commentAuthor,
@@ -51,12 +52,18 @@ const CommentCard: React.FC<{
     <Box className={commentCard}>
       <Flex className={commentHeader} align="center" justify="space-between">
         <Link link={getProfileLink(userAddress as Address)}>
-          <Flex align="center" gap="x1" className={commentAuthor}>
-            <Avatar address={userAddress as Address} src={avatarSrc} size="20" />
-            <Text fontWeight="display" fontSize="16">
-              {author}
-            </Text>
-          </Flex>
+          <WalletProfilePreview
+            address={userAddress as Address}
+            displayName={author}
+            avatarSrc={avatarSrc}
+          >
+            <Flex align="center" gap="x1" className={commentAuthor}>
+              <Avatar address={userAddress as Address} src={avatarSrc} size="20" />
+              <Text fontWeight="display" fontSize="16">
+                {author}
+              </Text>
+            </Flex>
+          </WalletProfilePreview>
         </Link>
         <Text variant="label-sm" color="text4">
           {timeAgo}

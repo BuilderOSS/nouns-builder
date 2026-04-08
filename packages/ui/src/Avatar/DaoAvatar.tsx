@@ -90,6 +90,7 @@ export function DaoAvatar({
   return (
     <Box
       className={['zora-avatar', squareAvatar({ size, variant }), className]}
+      style={{ background }}
       borderColor={'border'}
       borderWidth={'thin'}
       borderStyle={'solid'}

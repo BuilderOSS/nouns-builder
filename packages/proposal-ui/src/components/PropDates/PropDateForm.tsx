@@ -26,6 +26,7 @@ import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import * as Yup from 'yup'
 
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
 
 const propDateValidationSchema = Yup.object().shape({
@@ -51,7 +52,6 @@ const getErrorMessage = (error: unknown): string => {
   if (!error) return 'An unknown error occurred.'
   if (typeof error === 'string') return error
   if (typeof error === 'object' && error !== null) {
-    // Type assertion with Record to handle potential properties
     const errorObj = error as Record<string, unknown>
     if ('shortMessage' in errorObj && typeof errorObj.shortMessage === 'string') {
       return errorObj.shortMessage
@@ -106,7 +106,6 @@ export const PropDateForm = ({
   const storeChain = useChainStore((x) => x.chain)
   const storeAddresses = useDaoStore((x) => x.addresses)
 
-  // Use props if provided, otherwise fall back to store
   const chainId = chainIdProp ?? storeChain.id
   const tokenAddress = addressesProp?.token ?? storeAddresses.token
 
@@ -320,7 +319,6 @@ export const PropDateForm = ({
           </Form>
         )}
       </Formik>
-      {/* Transaction Status Modal */}
       <AnimatedModal
         open={isSubmitting || isTxSuccess}
         close={isSubmitting ? undefined : handleCloseModal}
@@ -380,12 +378,18 @@ const ReplyTo = ({
       }}
       gap="x2"
     >
-      <Flex align="center" gap="x1">
-        <Avatar address={creator} src={ensAvatar || undefined} size="16" />
-        <Text variant={'label-sm'} fontWeight="label">
-          {ensName || walletSnippet(creator)}
-        </Text>
-      </Flex>
+      <ProposalWalletProfilePreview
+        address={creator as `0x${string}`}
+        displayName={ensName || walletSnippet(creator)}
+        avatarSrc={ensAvatar}
+      >
+        <Flex align="center" gap="x1">
+          <Avatar address={creator} src={ensAvatar || undefined} size="16" />
+          <Text variant={'label-sm'} fontWeight="label">
+            {ensName || walletSnippet(creator)}
+          </Text>
+        </Flex>
+      </ProposalWalletProfilePreview>
       <Box style={{ fontSize: '14px' }} pl="x2">
         <Box className={messageStyle}>
           <MarkdownDisplay>{message}</MarkdownDisplay>

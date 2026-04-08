@@ -4,6 +4,7 @@ import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 
+import { WalletProfilePreview } from '../../components/WalletProfilePreview'
 import { profileCard, profileInfo, statsRow } from './UserProfileCard.css'
 
 export interface UserProfileCardProps {
@@ -23,19 +24,21 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
   return (
     <Box as={Link} className={profileCard} href={`/profile/${address}`}>
-      <Flex gap="x3" align="center">
-        <Avatar address={address} src={ensAvatar} size="48" />
-        <Stack className={profileInfo} gap="x1">
-          <Text fontSize="18" fontWeight="label">
-            {displayName}
-          </Text>
-          {daoCount >= 0 && (
-            <Text fontSize="14" color="text3" className={statsRow}>
-              Member of {daoCount} DAO{daoCount !== 1 ? 's' : ''}
+      <WalletProfilePreview address={address} displayName={ensName} avatarSrc={ensAvatar}>
+        <Flex gap="x3" align="center">
+          <Avatar address={address} src={ensAvatar} size="48" />
+          <Stack className={profileInfo} gap="x1">
+            <Text fontSize="18" fontWeight="label">
+              {displayName}
             </Text>
-          )}
-        </Stack>
-      </Flex>
+            {daoCount >= 0 && (
+              <Text fontSize="14" color="text3" className={statsRow}>
+                Member of {daoCount} DAO{daoCount !== 1 ? 's' : ''}
+              </Text>
+            )}
+          </Stack>
+        </Flex>
+      </WalletProfilePreview>
     </Box>
   )
 }

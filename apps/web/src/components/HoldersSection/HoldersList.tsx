@@ -6,6 +6,7 @@ import { formatCryptoVal, walletSnippet } from '@buildeross/utils'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { formatEther } from 'viem'
 
+import { WalletProfilePreview } from '../WalletProfilePreview'
 import { holderLink } from './HoldersList.css'
 
 interface Holder {
@@ -72,22 +73,28 @@ const HolderItem = ({ address, balance, isDrop = false }: HolderItemProps) => {
         borderRadius="curved"
         className={holderLink}
       >
-        <Flex align="center" gap="x2" flex={1} minWidth={0}>
-          <Avatar address={address} src={ensAvatar} size="32" />
-          <Box minWidth={0} flex={1}>
-            <Text
-              variant="paragraph-sm"
-              fontWeight="display"
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {displayName || walletSnippet(address)}
-            </Text>
-          </Box>
-        </Flex>
+        <WalletProfilePreview
+          address={address}
+          displayName={displayName}
+          avatarSrc={ensAvatar}
+        >
+          <Flex align="center" gap="x2" flex={1} minWidth={0}>
+            <Avatar address={address} src={ensAvatar} size="32" />
+            <Box minWidth={0} flex={1}>
+              <Text
+                variant="paragraph-sm"
+                fontWeight="display"
+                style={{
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {displayName || walletSnippet(address)}
+              </Text>
+            </Box>
+          </Flex>
+        </WalletProfilePreview>
         <Flex direction="column" align="flex-end" flexShrink={0}>
           <Text variant="paragraph-sm" fontWeight="display">
             {isDrop ? balance.toString() : formatBalance(balance)}
