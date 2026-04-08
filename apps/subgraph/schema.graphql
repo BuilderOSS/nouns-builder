@@ -4,6 +4,7 @@ type DAO @entity {
   symbol: String!
   totalSupply: Int!
   description: String!
+  metadata: String
   contractImage: String!
   projectURI: String!
   tokenAddress: Bytes!
@@ -30,6 +31,14 @@ type DAO @entity {
   clankerTokens: [ClankerToken!]! @derivedFrom(field: "dao")
   zoraCoins: [ZoraCoin!]! @derivedFrom(field: "dao")
   zoraDrops: [ZoraDrop!]! @derivedFrom(field: "dao")
+  links: [DAOLink!]! @derivedFrom(field: "dao")
+}
+
+type DAOLink @entity {
+  id: ID!
+  dao: DAO!
+  key: String!
+  url: String!
 }
 
 type _Schema_
