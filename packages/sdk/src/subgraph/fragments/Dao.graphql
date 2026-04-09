@@ -1,6 +1,10 @@
 fragment DAO on DAO {
   name
   contractImage
+  links {
+    key
+    url
+  }
   tokenAddress
   metadataAddress
   treasuryAddress
