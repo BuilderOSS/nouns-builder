@@ -1,7 +1,9 @@
+import { DaoLinkInput, DaoLinksField } from '@buildeross/ui'
 import { SmartInput } from '@buildeross/ui/Fields'
+import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { SingleImageUpload } from '@buildeross/ui/SingleImageUpload'
 import { isEmpty } from '@buildeross/utils/helpers'
-import { Flex, Stack } from '@buildeross/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 import { Form, Formik } from 'formik'
 import React, { BaseSyntheticEvent } from 'react'
 
@@ -22,6 +24,8 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ title }) => {
     daoName: general?.daoName || '',
     daoSymbol: general?.daoSymbol || '',
     daoWebsite: general?.daoWebsite || '',
+    projectDescription: general?.projectDescription || '',
+    links: general?.links || [],
   }
   const handleSubmit = (values: GeneralFormValues) => {
     setGeneral(values)
@@ -115,10 +119,56 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ title }) => {
                 placeholder={'https://www.nouns.wtf'}
                 disabled={false}
               />
+
+              <MarkdownEditor
+                value={formik.values.projectDescription}
+                onChange={(value: string) =>
+                  formik.setFieldValue('projectDescription', value)
+                }
+                inputLabel={'DAO Description'}
+                errorMessage={
+                  formik.touched['projectDescription'] &&
+                  formik.errors['projectDescription']
+                    ? formik.errors['projectDescription']
+                    : undefined
+                }
+              />
+
+              <DaoLinksField
+                value={formik.values.links}
+                onChange={(links: DaoLinkInput[]) => formik.setFieldValue('links', links)}
+                onBlur={() => formik.setFieldTouched('links', true, false)}
+                inputLabel={'Additional links (optional)'}
+                helperText={
+                  'Add social or community links in addition to your primary DAO Website.'
+                }
+                getFieldError={(index: number, field: 'key' | 'url') =>
+                  (formik.touched.links as any)?.[index]?.[field]
+                    ? (formik.errors.links as any)?.[index]?.[field]
+                    : undefined
+                }
+                errorMessage={
+                  typeof formik.errors.links === 'string'
+                    ? formik.errors.links
+                    : undefined
+                }
+              />
+
+              <Text variant={'label-xs'} color={'text3'}>
+                Tip: use "DAO Website" above for your main site, then add socials/docs
+                here.
+              </Text>
             </Stack>
             <FormNavButtons
               nextDisabled={!isEmpty(formik.errors) || formik.isSubmitting}
-              showReset={Object.values(formik.values).some((v) => v !== '')}
+              showReset={
+                formik.values.daoAvatar !== '' ||
+                formik.values.daoName !== '' ||
+                formik.values.daoSymbol !== '' ||
+                formik.values.daoWebsite !== '' ||
+                formik.values.projectDescription !== '' ||
+                formik.values.links.length > 0
+              }
               onAfterReset={() =>
                 formik.resetForm({
                   values: {
@@ -126,6 +176,8 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ title }) => {
                     daoName: '',
                     daoSymbol: '',
                     daoWebsite: '',
+                    projectDescription: '',
+                    links: [],
                   },
                 })
               }

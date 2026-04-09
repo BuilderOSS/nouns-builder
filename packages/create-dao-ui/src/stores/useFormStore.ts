@@ -58,6 +58,8 @@ const initialState = {
     daoName: '',
     daoSymbol: '',
     daoWebsite: '',
+    projectDescription: '',
+    links: [],
   },
   auctionSettings: {
     auctionDuration: {
@@ -97,8 +99,6 @@ const initialState = {
   founderRewardRecipient: '',
   founderRewardBps: 0,
   setUpArtwork: {
-    projectDescription: '',
-    links: [],
     artwork: [],
     collectionName: '',
     externalUrl: '',
@@ -164,7 +164,7 @@ export const useFormStore = create(
     {
       name: `nouns-builder-create-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`,
       storage: createJSONStorage(() => localStorage),
-      version: 3,
+      version: 4,
       migrate: (persistedState: any, version: number) => {
         if (version < 2 && persistedState?.setUpArtwork !== undefined) {
           persistedState = {
@@ -177,11 +177,29 @@ export const useFormStore = create(
         }
 
         if (version < 3 && persistedState?.setUpArtwork !== undefined) {
-          return {
+          persistedState = {
             ...persistedState,
             setUpArtwork: {
               ...persistedState.setUpArtwork,
               links: persistedState.setUpArtwork.links ?? [],
+            },
+          }
+        }
+
+        if (version < 4) {
+          const migratedDescription =
+            persistedState?.general?.projectDescription ||
+            persistedState?.setUpArtwork?.projectDescription ||
+            ''
+          const migratedLinks =
+            persistedState?.general?.links ?? persistedState?.setUpArtwork?.links ?? []
+
+          return {
+            ...persistedState,
+            general: {
+              ...persistedState?.general,
+              projectDescription: migratedDescription,
+              links: migratedLinks,
             },
           }
         }

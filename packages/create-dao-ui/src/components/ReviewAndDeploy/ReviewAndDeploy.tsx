@@ -139,10 +139,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
           sanitizeStringForJSON(general?.daoName),
           general?.daoSymbol.replace('$', ''),
           sanitizeStringForJSON(
-            serializeDaoMetadata(
-              setUpArtwork?.projectDescription || '',
-              setUpArtwork?.links || []
-            )
+            serializeDaoMetadata(general?.projectDescription || '', general?.links || [])
           ),
           general?.daoAvatar ?? '',
           sanitizeStringForJSON(general?.daoWebsite ?? ''),
@@ -154,7 +151,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
       general?.daoSymbol,
       general?.daoAvatar,
       general?.daoWebsite,
-      setUpArtwork?.projectDescription,
+      general?.projectDescription,
+      general?.links,
     ]
   )
 
@@ -388,6 +386,18 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               <ReviewItem label="Dao Name" value={general?.daoName} />
               <ReviewItem label="Dao Symbol" value={general?.daoSymbol} />
               <ReviewItem label="Dao Website" value={general?.daoWebsite} />
+              <ReviewItem
+                label="Project Description"
+                value={general?.projectDescription || 'None'}
+              />
+              <ReviewItem
+                label="Additional Links"
+                value={
+                  general?.links?.length
+                    ? general.links.map((link) => `${link.key}: ${link.url}`).join(', ')
+                    : 'None'
+                }
+              />
             </ReviewSection>
 
             <ReviewSection subHeading="Auction Settings">
@@ -454,20 +464,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
             </ReviewSection>
 
             <ReviewSection subHeading="Set Up Artwork">
-              <ReviewItem
-                label="Project Description"
-                value={setUpArtwork.projectDescription}
-              />
-              <ReviewItem
-                label="Links"
-                value={
-                  setUpArtwork.links?.length
-                    ? setUpArtwork.links
-                        .map((link) => `${link.key}: ${link.url}`)
-                        .join(', ')
-                    : 'None'
-                }
-              />
               <ReviewItem label="Artwork" value={<PreviewArtwork />} />
               <ReviewItem label="Files Length" value={setUpArtwork.filesLength} />
             </ReviewSection>
