@@ -6,9 +6,10 @@ import { iconAnchor } from '../../styles/About.css'
 interface IconAnchor {
   href: string
   name: IconType
+  label?: string
 }
 
-const IconAnchor: React.FC<IconAnchor> = ({ href, name }) => {
+const IconAnchor: React.FC<IconAnchor> = ({ href, name, label }) => {
   return (
     <Button
       variant="circleSolid"
@@ -19,6 +20,8 @@ const IconAnchor: React.FC<IconAnchor> = ({ href, name }) => {
       href={href}
       w="x10"
       className={iconAnchor}
+      title={label || href}
+      aria-label={label || href}
     >
       <Flex
         backgroundColor="background2"
@@ -36,21 +39,55 @@ const IconAnchor: React.FC<IconAnchor> = ({ href, name }) => {
 
 interface ExternalLinksProps {
   address?: string
-  links?: {
-    website?: string
-    discord?: string
-    twitter?: string
-  }
+  links?: Record<string, string>
+}
+
+const normalizeLinkKey = (key: string): string => {
+  const normalized = key.trim().toLowerCase()
+  return normalized === 'twitter' ? 'x' : normalized
+}
+
+const getIconForLinkKey = (key: string): IconType => {
+  if (key === 'x') return 'twitter'
+  if (key === 'discord') return 'discord'
+  if (key === 'github') return 'github'
+  if (key === 'farcaster') return 'globe'
+  if (key === 'docs' || key === 'notion') return 'globe'
+  if (key === 'forum' || key === 'discourse') return 'globe'
+  if (key === 'website') return 'globe'
+  return 'question'
 }
 
 export const ExternalLinks: React.FC<ExternalLinksProps> = ({ links }) => {
+  const normalizedLinks = React.useMemo(() => {
+    const entries = Object.entries(links || {})
+    const next: Record<string, string> = {}
+
+    for (const [rawKey, rawUrl] of entries) {
+      const key = normalizeLinkKey(rawKey)
+      const url = rawUrl?.trim?.() || ''
+
+      if (!key || !url) continue
+      if (!next[key]) {
+        next[key] = url
+      }
+    }
+
+    return next
+  }, [links])
+
   return (
     <Flex direction={{ '@initial': 'column', '@768': 'row' }} justify="center">
-      {links ? (
+      {Object.keys(normalizedLinks).length ? (
         <Flex mr={{ '@initial': 'x0', '@768': 'x2' }}>
-          {links?.twitter ? <IconAnchor href={links?.twitter} name="twitter" /> : null}
-          {links?.discord ? <IconAnchor href={links?.discord} name="discord" /> : null}
-          {links?.website ? <IconAnchor href={links?.website} name="globe" /> : null}
+          {Object.entries(normalizedLinks).map(([key, url]) => (
+            <IconAnchor
+              href={url}
+              name={getIconForLinkKey(key)}
+              label={key}
+              key={`${key}-${url}`}
+            />
+          ))}
         </Flex>
       ) : null}
     </Flex>

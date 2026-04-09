@@ -13,6 +13,7 @@ export interface AdminFormValues {
   daoAvatar: string
   daoWebsite: string
   projectDescription: string
+  daoLinks: { key: string; url: string }[]
   rendererBase: string
   auctionDuration: Duration
   auctionReservePrice: number
@@ -92,6 +93,20 @@ export const adminValidationSchema = () =>
     ),
     daoAvatar: Yup.string(),
     projectDescription: Yup.string().required('*').max(5000, '< 5000 characters'),
+    daoLinks: Yup.array()
+      .of(
+        Yup.object().shape({
+          key: Yup.string().trim().required('*'),
+          url: urlValidationSchema.required('*'),
+        })
+      )
+      .test('unique-link-keys', 'Link keys should be unique.', (values) => {
+        const keys = (values || [])
+          .map((link) => link?.key?.trim()?.toLowerCase() || '')
+          .filter(Boolean)
+
+        return keys.length === new Set(keys).size
+      }),
     daoWebsite: urlValidationSchema,
     rendererBase: urlValidationSchema,
     vetoer: Yup.string().when('vetoPower', {

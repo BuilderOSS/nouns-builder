@@ -27,7 +27,7 @@ import {
   fromSeconds,
   unpackOptionalArray,
 } from '@buildeross/utils/helpers'
-import { Flex, Stack, Text } from '@buildeross/zord'
+import { Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
@@ -35,6 +35,7 @@ import React, { BaseSyntheticEvent } from 'react'
 import { Address, encodeFunctionData, formatEther, zeroAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
+import { parseDaoMetadataString, serializeDaoMetadata } from '../../utils/daoMetadata'
 import {
   AdminFormValues,
   adminValidationSchema,
@@ -136,10 +137,16 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     tokenData,
     5
   )
+  const parsedDaoMetadata = parseDaoMetadataString(description)
 
   const initialValues: AdminFormValues = {
     /* artwork */
-    projectDescription: description?.replace(/\\n/g, String.fromCharCode(13, 10)) || '',
+    projectDescription:
+      parsedDaoMetadata.description?.replace(/\\n/g, String.fromCharCode(13, 10)) || '',
+    daoLinks: Object.entries(parsedDaoMetadata.links).map(([key, url]) => ({
+      key,
+      url: String(url),
+    })),
     // artwork: []
 
     /* metadata */
@@ -230,6 +237,10 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
         continue
       }
 
+      if (field === 'projectDescription' || field === 'daoLinks') {
+        continue
+      }
+
       if (field === 'vetoer') {
         value = await getEnsAddress(value as string)
       }
@@ -280,6 +291,28 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
             tx.transactions[0].functionSignature !== 'updateVetoer'
         )
       }
+    }
+
+    const hasDescriptionMetadataChanges =
+      !isEqual(values.projectDescription, initialValues.projectDescription) ||
+      !isEqual(values.daoLinks, initialValues.daoLinks)
+
+    if (hasDescriptionMetadataChanges) {
+      transactions.push({
+        type: TransactionType.CUSTOM,
+        transactions: [
+          {
+            functionSignature: 'updateDescription',
+            target: addresses.metadata as AddressType,
+            calldata: encodeFunctionData({
+              abi: metadataAbi,
+              functionName: 'updateDescription',
+              args: [serializeDaoMetadata(values.projectDescription, values.daoLinks)],
+            }),
+            value: '',
+          },
+        ],
+      })
     }
 
     formik?.setSubmitting(true)
@@ -345,6 +378,88 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                     />
                   )}
                 </Field>
+
+                <FieldArray name="daoLinks">
+                  {({ remove, push }) => (
+                    <Stack>
+                      <Flex justify={'space-between'} align={'center'}>
+                        <Text variant={'label-md'}>DAO Links (optional)</Text>
+                        <button
+                          type="button"
+                          onClick={() => push({ key: '', url: '' })}
+                          style={{
+                            border: 'none',
+                            background: 'transparent',
+                            cursor: 'pointer',
+                            color: 'inherit',
+                          }}
+                        >
+                          + Add link
+                        </button>
+                      </Flex>
+
+                      {(formik.values.daoLinks || []).map((_, index) => (
+                        <Flex key={`dao-link-${index}`} gap={'x2'} align={'center'}>
+                          <SmartInput
+                            {...formik.getFieldProps(`daoLinks.${index}.key`)}
+                            inputLabel={index === 0 ? 'Link key' : ''}
+                            type={FIELD_TYPES.TEXT}
+                            formik={formik}
+                            id={`daoLinks.${index}.key`}
+                            onChange={({ target }: BaseSyntheticEvent) => {
+                              formik.setFieldValue(`daoLinks.${index}.key`, target.value)
+                            }}
+                            onBlur={formik.handleBlur}
+                            errorMessage={
+                              (formik.touched.daoLinks as any)?.[index]?.key
+                                ? (formik.errors.daoLinks as any)?.[index]?.key
+                                : undefined
+                            }
+                            placeholder={'x / discord / github / docs / ...'}
+                          />
+
+                          <SmartInput
+                            {...formik.getFieldProps(`daoLinks.${index}.url`)}
+                            inputLabel={index === 0 ? 'Link URL' : ''}
+                            type={FIELD_TYPES.TEXT}
+                            formik={formik}
+                            id={`daoLinks.${index}.url`}
+                            onChange={({ target }: BaseSyntheticEvent) => {
+                              formik.setFieldValue(`daoLinks.${index}.url`, target.value)
+                            }}
+                            onBlur={formik.handleBlur}
+                            errorMessage={
+                              (formik.touched.daoLinks as any)?.[index]?.url
+                                ? (formik.errors.daoLinks as any)?.[index]?.url
+                                : undefined
+                            }
+                            placeholder={'https://...'}
+                          />
+
+                          <button
+                            type="button"
+                            onClick={() => remove(index)}
+                            style={{
+                              border: 'none',
+                              background: 'transparent',
+                              cursor: 'pointer',
+                              color: 'inherit',
+                            }}
+                            aria-label={`Remove link ${index + 1}`}
+                          >
+                            <Icon id="cross" />
+                          </button>
+                        </Flex>
+                      ))}
+
+                      {typeof formik.errors.daoLinks === 'string' ? (
+                        <Text variant={'label-xs'} color={'negative'}>
+                          {formik.errors.daoLinks}
+                        </Text>
+                      ) : null}
+                    </Stack>
+                  )}
+                </FieldArray>
 
                 <SmartInput
                   {...formik.getFieldProps('daoWebsite')}

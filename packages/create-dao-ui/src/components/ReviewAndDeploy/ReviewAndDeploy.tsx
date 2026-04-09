@@ -26,6 +26,7 @@ import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
+import { serializeDaoMetadata } from '../../utils/daoMetadata'
 import { TokenAllocation } from '../AllocationForm'
 import { FAST_DAO_TIMINGS } from '../AuctionSettingsForm/fastDaoTimings'
 import { FormNavButtons } from '../FormNavButtons'
@@ -137,7 +138,12 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         [
           sanitizeStringForJSON(general?.daoName),
           general?.daoSymbol.replace('$', ''),
-          sanitizeStringForJSON(setUpArtwork?.projectDescription),
+          sanitizeStringForJSON(
+            serializeDaoMetadata(
+              setUpArtwork?.projectDescription || '',
+              setUpArtwork?.links || []
+            )
+          ),
           general?.daoAvatar ?? '',
           sanitizeStringForJSON(general?.daoWebsite ?? ''),
           RENDERER_BASE,
@@ -451,6 +457,16 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               <ReviewItem
                 label="Project Description"
                 value={setUpArtwork.projectDescription}
+              />
+              <ReviewItem
+                label="Links"
+                value={
+                  setUpArtwork.links?.length
+                    ? setUpArtwork.links
+                        .map((link) => `${link.key}: ${link.url}`)
+                        .join(', ')
+                    : 'None'
+                }
               />
               <ReviewItem label="Artwork" value={<PreviewArtwork />} />
               <ReviewItem label="Files Length" value={setUpArtwork.filesLength} />
