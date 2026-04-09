@@ -1,4 +1,4 @@
-import { JSONValueKind, TypedMap, json } from '@graphprotocol/graph-ts'
+import { json, JSONValueKind, TypedMap } from '@graphprotocol/graph-ts'
 
 export class ParsedDaoMetadata {
   description: string
@@ -17,12 +17,23 @@ function isSupportedUrl(value: string): boolean {
 export function parseDaoMetadata(rawDescription: string): ParsedDaoMetadata {
   let links = new TypedMap<string, string>()
   let parsedResult = json.try_fromString(rawDescription)
-
-  if (parsedResult.isError || parsedResult.value.kind != JSONValueKind.OBJECT) {
+  if (parsedResult.isError) {
     return new ParsedDaoMetadata(rawDescription, links)
   }
 
-  let parsed = parsedResult.value.toObject()
+  let parsedValue = parsedResult.value
+  if (parsedValue.kind == JSONValueKind.STRING) {
+    let nestedResult = json.try_fromString(parsedValue.toString())
+    if (!nestedResult.isError) {
+      parsedValue = nestedResult.value
+    }
+  }
+
+  if (parsedValue.kind != JSONValueKind.OBJECT) {
+    return new ParsedDaoMetadata(rawDescription, links)
+  }
+
+  let parsed = parsedValue.toObject()
 
   let nextDescription = rawDescription
   let parsedDescription = parsed.get('description')

@@ -138,9 +138,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         [
           sanitizeStringForJSON(general?.daoName),
           general?.daoSymbol.replace('$', ''),
-          sanitizeStringForJSON(
-            serializeDaoMetadata(general?.projectDescription || '', general?.links || [])
-          ),
+          serializeDaoMetadata(general?.projectDescription || '', general?.links || []),
           general?.daoAvatar ?? '',
           sanitizeStringForJSON(general?.daoWebsite ?? ''),
           RENDERER_BASE,

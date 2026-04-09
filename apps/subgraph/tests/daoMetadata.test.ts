@@ -109,6 +109,26 @@ describe('Metadata description parsing', () => {
     assert.entityCount('DAOLink', 0)
   })
 
+  test('parses double-encoded json metadata payloads', () => {
+    initializeTestWithDao()
+
+    const metadata =
+      '"{\\"version\\":1,\\"description\\":\\"double encoded\\",\\"links\\":{\\"x\\":\\"https://x.com/nouns\\",\\"github\\":\\"https://github.com/nouns\\"}}"'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'double encoded')
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'metadata', metadata)
+    assert.entityCount('DAOLink', 2)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://x.com/nouns')
+    assert.fieldEquals(
+      'DAOLink',
+      TOKEN_ADDRESS + '-github',
+      'url',
+      'https://github.com/nouns'
+    )
+  })
+
   test('replaces previous links on metadata update', () => {
     initializeTestWithDao()
 
