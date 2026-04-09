@@ -230,6 +230,7 @@ type AuctionBid @entity {
   transactionHash: Bytes!
   amount: BigInt!
   bidder: Bytes!
+  comment: String
   auction: Auction!
   bidTime: BigInt!
 }
