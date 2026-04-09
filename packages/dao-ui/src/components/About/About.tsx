@@ -15,6 +15,7 @@ import { Address, formatEther } from 'viem'
 import { useAccount, useBalance, useReadContracts } from 'wagmi'
 
 import { about, daoInfo, daoName, statisticContent } from '../../styles/About.css'
+import { parseDaoMetadataString } from '../../utils/daoMetadata'
 import { MembersList } from '../MembersList'
 import { responsiveGrid } from './About.css'
 import { DaoDescription } from './DaoDescription'
@@ -65,7 +66,14 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
 
   const [name, totalSupply, founders, daoImage, description, contractURI] =
     unpackOptionalArray(contractData, 6)
+  const parsedDaoMetadata = parseDaoMetadataString(description)
   const parsedContractURI = parseContractURI(contractURI)
+  const externalLinks = {
+    ...parsedDaoMetadata.links,
+    ...(parsedContractURI?.external_url
+      ? { website: parsedContractURI.external_url }
+      : {}),
+  }
 
   const { data: balance } = useBalance({
     address: treasury as Address,
@@ -125,7 +133,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         </Flex>
 
         <Box display={{ '@initial': 'none', '@768': 'block' }}>
-          <ExternalLinks links={{ website: parsedContractURI?.external_url }} />
+          <ExternalLinks links={externalLinks} />
         </Box>
       </Flex>
 
@@ -160,13 +168,13 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         />
       </Flex>
 
-      <DaoDescription description={description} />
+      <DaoDescription description={parsedDaoMetadata.description} />
 
       <Box
         mt={{ '@initial': 'x4', '@768': 'x6' }}
         display={{ '@initial': 'block', '@768': 'none' }}
       >
-        <ExternalLinks links={{ website: parsedContractURI?.external_url }} />
+        <ExternalLinks links={externalLinks} />
       </Box>
       {!!membershipInfo && (
         <Membership {...membershipInfo} totalSupply={Number(totalSupply)} />

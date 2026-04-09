@@ -98,6 +98,7 @@ const initialState = {
   founderRewardBps: 0,
   setUpArtwork: {
     projectDescription: '',
+    links: [],
     artwork: [],
     collectionName: '',
     externalUrl: '',
@@ -163,10 +164,10 @@ export const useFormStore = create(
     {
       name: `nouns-builder-create-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`,
       storage: createJSONStorage(() => localStorage),
-      version: 2,
+      version: 3,
       migrate: (persistedState: any, version: number) => {
         if (version < 2 && persistedState?.setUpArtwork !== undefined) {
-          return {
+          persistedState = {
             ...persistedState,
             setUpArtwork: {
               ...persistedState.setUpArtwork,
@@ -174,6 +175,17 @@ export const useFormStore = create(
             },
           }
         }
+
+        if (version < 3 && persistedState?.setUpArtwork !== undefined) {
+          return {
+            ...persistedState,
+            setUpArtwork: {
+              ...persistedState.setUpArtwork,
+              links: persistedState.setUpArtwork.links ?? [],
+            },
+          }
+        }
+
         return persistedState
       },
     }

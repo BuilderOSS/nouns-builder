@@ -1,5 +1,7 @@
+import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
-import { Field, FieldProps, Form, Formik } from 'formik'
+import { Box, Flex, Icon, Text } from '@buildeross/zord'
+import { Field, FieldArray, FieldProps, Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React from 'react'
 
@@ -25,9 +27,23 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
 
   const initialValues = {
     projectDescription: setUpArtwork?.projectDescription || '',
+    links: setUpArtwork?.links || [],
     artwork: setUpArtwork?.artwork || [],
     filesLength: setUpArtwork?.filesLength || '',
     fileType: setUpArtwork?.fileType || '',
+  }
+
+  const getLinkIcon = (
+    key: string
+  ): 'twitter' | 'discord' | 'github' | 'globe' | 'question' => {
+    const normalized = key.trim().toLowerCase()
+    if (normalized === 'x' || normalized === 'twitter') return 'twitter'
+    if (normalized === 'discord') return 'discord'
+    if (normalized === 'github') return 'github'
+    if (normalized === 'farcaster') return 'globe'
+    if (normalized === 'docs' || normalized === 'notion') return 'globe'
+    if (normalized === 'forum' || normalized === 'discourse') return 'globe'
+    return 'question'
   }
 
   const handlePrevious = () => {
@@ -40,6 +56,7 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
     setSetUpArtwork({
       ...setUpArtwork,
       projectDescription: values.projectDescription,
+      links: values.links,
     })
   }
 
@@ -72,6 +89,84 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
               )
             }}
           </Field>
+
+          <FieldArray name="links">
+            {({ push, remove }) => (
+              <Box mt={'x6'} mb={'x4'}>
+                <Flex justify={'space-between'} align={'center'} mb={'x2'}>
+                  <Text variant={'label-md'}>DAO Links (optional)</Text>
+                  <button
+                    type="button"
+                    onClick={() => push({ key: '', url: '' })}
+                    style={{
+                      border: 'none',
+                      background: 'transparent',
+                      cursor: 'pointer',
+                      color: 'inherit',
+                    }}
+                  >
+                    + Add link
+                  </button>
+                </Flex>
+
+                <Text variant={'paragraph-sm'} color={'text3'} mb={'x3'}>
+                  Add social or community links as key/value pairs (x, discord, farcaster,
+                  github, docs, forum, etc).
+                </Text>
+
+                <Flex direction={'column'} gap={'x2'}>
+                  {formik.values.links.map((link, index) => (
+                    <Flex key={`${index}-${link.key}`} align={'center'} gap={'x2'}>
+                      <Icon id={getLinkIcon(link.key)} />
+                      <SmartInput
+                        id={`links.${index}.key`}
+                        type={FIELD_TYPES.TEXT}
+                        formik={formik}
+                        {...formik.getFieldProps(`links.${index}.key`)}
+                        placeholder={'key'}
+                        errorMessage={
+                          (formik.touched.links as any)?.[index]?.key
+                            ? (formik.errors.links as any)?.[index]?.key
+                            : undefined
+                        }
+                      />
+                      <SmartInput
+                        id={`links.${index}.url`}
+                        type={FIELD_TYPES.TEXT}
+                        formik={formik}
+                        {...formik.getFieldProps(`links.${index}.url`)}
+                        placeholder={'https://...'}
+                        errorMessage={
+                          (formik.touched.links as any)?.[index]?.url
+                            ? (formik.errors.links as any)?.[index]?.url
+                            : undefined
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() => remove(index)}
+                        style={{
+                          border: 'none',
+                          background: 'transparent',
+                          cursor: 'pointer',
+                          color: 'inherit',
+                        }}
+                        aria-label={`Remove link ${index + 1}`}
+                      >
+                        <Icon id="cross" />
+                      </button>
+                    </Flex>
+                  ))}
+                </Flex>
+
+                {typeof formik.errors.links === 'string' ? (
+                  <Text variant={'label-xs'} color={'negative'} mt={'x2'}>
+                    {formik.errors.links}
+                  </Text>
+                ) : null}
+              </Box>
+            )}
+          </FieldArray>
 
           <ArtworkUpload
             inputLabel={'Artwork'}
