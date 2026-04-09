@@ -18,6 +18,7 @@ interface BasePopUpProps {
   triggerClassName?: string // Add className to the trigger element, specifically
   onOpenChange?: (state: boolean) => void
   showBackdrop?: boolean
+  viewportPadding?: number
 }
 
 export type PopUpProps = BasePopUpProps &
@@ -46,6 +47,7 @@ export function PopUp({
   onOpenChange,
   wrapperClassName,
   showBackdrop = true,
+  viewportPadding = 0,
 }: PopUpProps) {
   const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null)
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null)
@@ -63,6 +65,7 @@ export function PopUp({
         name: 'preventOverflow',
         options: {
           rootBoundary: 'viewport',
+          padding: viewportPadding,
         },
       },
     ],

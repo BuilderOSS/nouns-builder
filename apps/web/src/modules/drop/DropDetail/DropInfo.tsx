@@ -17,6 +17,7 @@ import { Address, formatEther, isAddressEqual } from 'viem'
 
 import { HoldersSection } from '../../../components/HoldersSection'
 import { ProposalLink } from '../../../components/ProposalLink'
+import { WalletProfilePreview } from '../../../components/WalletProfilePreview'
 import { dropHeader, dropImageContainer, onlyDesktop } from './DropDetail.css'
 
 interface DropInfoProps {
@@ -145,16 +146,22 @@ export const DropInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <Flex align="center">
-            <Avatar
-              address={proposal.proposer as Address}
-              src={proposerAvatar}
-              size="28"
-            />
-            <Text fontWeight="display" ml="x2">
-              {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
-            </Text>
-          </Flex>
+          <WalletProfilePreview
+            address={proposal.proposer as Address}
+            displayName={proposerDisplayName}
+            avatarSrc={proposerAvatar}
+          >
+            <Flex align="center">
+              <Avatar
+                address={proposal.proposer as Address}
+                src={proposerAvatar}
+                size="28"
+              />
+              <Text fontWeight="display" ml="x2">
+                {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
+              </Text>
+            </Flex>
+          </WalletProfilePreview>
         </Box>
       ) : (
         <Box mb="x3">
@@ -162,12 +169,18 @@ export const DropInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <Flex align="center">
-            <Avatar address={drop.creator as Address} src={creatorAvatar} size="28" />
-            <Text fontWeight="display" ml="x2">
-              {creatorDisplayName || walletSnippet(drop.creator as Address)}
-            </Text>
-          </Flex>
+          <WalletProfilePreview
+            address={drop.creator as Address}
+            displayName={creatorDisplayName}
+            avatarSrc={creatorAvatar}
+          >
+            <Flex align="center">
+              <Avatar address={drop.creator as Address} src={creatorAvatar} size="28" />
+              <Text fontWeight="display" ml="x2">
+                {creatorDisplayName || walletSnippet(drop.creator as Address)}
+              </Text>
+            </Flex>
+          </WalletProfilePreview>
         </Box>
       )}
 

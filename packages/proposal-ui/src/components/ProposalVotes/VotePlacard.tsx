@@ -2,10 +2,11 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { atoms, Flex, Grid, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Grid, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { votePlacardReason } from './VoterParticipation.css'
 
 const variants = {
@@ -82,12 +83,27 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
       >
         {vote.support}
       </Text>
-      <Flex align={'center'} style={{ gridColumn: 'span 4 / span 4' }}>
-        <Avatar address={vote.voter} src={ensAvatar} size="28" />
-        <Text fontWeight="display" ml="x2">
-          {ensName || walletSnippet(vote.voter)}
-        </Text>
-      </Flex>
+      <Box style={{ gridColumn: 'span 4 / span 4' }}>
+        <Box
+          onPointerDownCapture={(event: React.PointerEvent<HTMLDivElement>) =>
+            event.stopPropagation()
+          }
+          onClickCapture={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}
+        >
+          <ProposalWalletProfilePreview
+            address={vote.voter as `0x${string}`}
+            displayName={ensName || walletSnippet(vote.voter)}
+            avatarSrc={ensAvatar}
+          >
+            <Flex align={'center'}>
+              <Avatar address={vote.voter} src={ensAvatar} size="28" />
+              <Text fontWeight="display" ml="x2">
+                {ensName || walletSnippet(vote.voter)}
+              </Text>
+            </Flex>
+          </ProposalWalletProfilePreview>
+        </Box>
+      </Box>
 
       <Flex
         align={'center'}

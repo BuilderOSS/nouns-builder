@@ -3,8 +3,10 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Icon, Label, Text } from '@buildeross/zord'
 
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { ProposalNavigation } from '../ProposalNavigation'
 import { ProposalStatus } from '../ProposalStatus'
 
@@ -32,7 +34,9 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({
 }) => {
   const { title, proposer, proposalNumber } = proposal
 
-  const { displayName: proposerDisplayName } = useEnsData(proposer)
+  const { displayName: proposerDisplayName, ensAvatar: proposerAvatar } = useEnsData(
+    proposer
+  )
   const chain = useChainStore((x) => x.chain)
 
   const displayTransactionHash = getDisplayTransactionHash(proposal)
@@ -80,15 +84,21 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({
         <Flex direction={'row'} align={'center'} justify={'space-between'}>
           <Flex direction={'row'} align={'flex-end'} gap={'x1'}>
             <Text color={'text3'}>By</Text>
-            <Box fontWeight={'display'}>
-              <a
-                href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposer}`}
-                rel="noreferrer"
-                target="_blank"
-              >
-                {proposerDisplayName}
-              </a>
-            </Box>
+            <ProposalWalletProfilePreview
+              address={proposer as `0x${string}`}
+              displayName={proposerDisplayName || walletSnippet(proposer)}
+              avatarSrc={proposerAvatar}
+            >
+              <Box fontWeight={'display'}>
+                <a
+                  href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposer}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {proposerDisplayName || walletSnippet(proposer)}
+                </a>
+              </Box>
+            </ProposalWalletProfilePreview>
           </Flex>
         </Flex>
       </Flex>

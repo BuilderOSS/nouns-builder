@@ -21,12 +21,14 @@ import {
   getSablierAirdropFactories,
   getSablierContracts,
 } from '@buildeross/utils/sablier/contracts'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { zeroAddress } from 'viem'
 
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { propPageWrapper } from '../styles.css'
 import { AirdropDetails } from './AirdropDetails'
 import { CoinDetails } from './CoinDetails'
@@ -66,7 +68,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   onOpenProposalReview,
   isPreview = false,
 }) => {
-  const { displayName } = useEnsData(proposal.proposer)
+  const { displayName, ensAvatar } = useEnsData(proposal.proposer)
   const { displayName: representedDisplayName } = useEnsData(
     proposal.representedAddress || undefined
   )
@@ -233,47 +235,53 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         )}
 
         <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
-          <Flex direction={'row'} placeItems={'center'}>
-            <Box
-              backgroundColor="background2"
-              width={'x8'}
-              height={'x8'}
-              mr={'x2'}
-              borderRadius={'small'}
-              position="relative"
-            >
-              {!!tokenImage && !error && (
-                <img
-                  alt="proposer"
-                  src={tokenImage}
-                  className={atoms({ borderRadius: 'small' })}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              )}
-            </Box>
-
-            <Box>
-              <a
-                href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.proposer}`}
-                rel="noreferrer"
-                target="_blank"
+          <ProposalWalletProfilePreview
+            address={proposal.proposer as `0x${string}`}
+            displayName={displayName || walletSnippet(proposal.proposer)}
+            avatarSrc={ensAvatar}
+          >
+            <Flex direction={'row'} placeItems={'center'}>
+              <Box
+                backgroundColor="background2"
+                width={'x8'}
+                height={'x8'}
+                mr={'x2'}
+                borderRadius={'small'}
+                position="relative"
               >
-                {displayName}
-              </a>
-              {proposal.representedAddress && (
-                <Text color={'text3'}>
-                  on behalf of{' '}
-                  <a
-                    href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.representedAddress}`}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {representedDisplayName}
-                  </a>
-                </Text>
-              )}
-            </Box>
-          </Flex>
+                {!!tokenImage && !error && (
+                  <img
+                    alt="proposer"
+                    src={tokenImage}
+                    className={atoms({ borderRadius: 'small' })}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                )}
+              </Box>
+
+              <Box>
+                <a
+                  href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.proposer}`}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  {displayName || walletSnippet(proposal.proposer)}
+                </a>
+                {proposal.representedAddress && (
+                  <Text color={'text3'}>
+                    on behalf of{' '}
+                    <a
+                      href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.representedAddress}`}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {representedDisplayName || walletSnippet(proposal.representedAddress)}
+                    </a>
+                  </Text>
+                )}
+              </Box>
+            </Flex>
+          </ProposalWalletProfilePreview>
         </Section>
 
         {!isPreview && (

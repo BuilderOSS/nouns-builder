@@ -29,6 +29,7 @@ import { Address } from 'viem'
 
 import { HoldersSection } from '../../../components/HoldersSection'
 import { ProposalLink } from '../../../components/ProposalLink'
+import { WalletProfilePreview } from '../../../components/WalletProfilePreview'
 import { CoinComments } from './CoinComments'
 import { coinHeader, coinImageContainer, onlyDesktop, statsGrid } from './CoinDetail.css'
 
@@ -224,16 +225,22 @@ export const CoinInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <Flex align="center">
-            <Avatar
-              address={proposal.proposer as Address}
-              src={proposerAvatar}
-              size="28"
-            />
-            <Text fontWeight="display" ml="x2">
-              {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
-            </Text>
-          </Flex>
+          <WalletProfilePreview
+            address={proposal.proposer as Address}
+            displayName={proposerDisplayName}
+            avatarSrc={proposerAvatar}
+          >
+            <Flex align="center">
+              <Avatar
+                address={proposal.proposer as Address}
+                src={proposerAvatar}
+                size="28"
+              />
+              <Text fontWeight="display" ml="x2">
+                {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
+              </Text>
+            </Flex>
+          </WalletProfilePreview>
         </Box>
       ) : (
         <Box mb="x3">
@@ -241,12 +248,22 @@ export const CoinInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <Flex align="center">
-            <Avatar address={creatorAddress as Address} src={creatorAvatar} size="28" />
-            <Text fontWeight="display" ml="x2">
-              {creatorDisplayName || walletSnippet(creatorAddress as Address)}
-            </Text>
-          </Flex>
+          {creatorAddress ? (
+            <WalletProfilePreview
+              address={creatorAddress}
+              displayName={creatorDisplayName}
+              avatarSrc={creatorAvatar}
+            >
+              <Flex align="center">
+                <Avatar address={creatorAddress} src={creatorAvatar} size="28" />
+                <Text fontWeight="display" ml="x2">
+                  {creatorDisplayName || walletSnippet(creatorAddress)}
+                </Text>
+              </Flex>
+            </WalletProfilePreview>
+          ) : (
+            <Text fontWeight="display">Unknown creator</Text>
+          )}
         </Box>
       )}
 
