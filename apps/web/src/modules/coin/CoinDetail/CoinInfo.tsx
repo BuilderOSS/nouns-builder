@@ -248,18 +248,22 @@ export const CoinInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <WalletProfilePreview
-            address={creatorAddress as Address}
-            displayName={creatorDisplayName}
-            avatarSrc={creatorAvatar}
-          >
-            <Flex align="center">
-              <Avatar address={creatorAddress as Address} src={creatorAvatar} size="28" />
-              <Text fontWeight="display" ml="x2">
-                {creatorDisplayName || walletSnippet(creatorAddress as Address)}
-              </Text>
-            </Flex>
-          </WalletProfilePreview>
+          {creatorAddress ? (
+            <WalletProfilePreview
+              address={creatorAddress}
+              displayName={creatorDisplayName}
+              avatarSrc={creatorAvatar}
+            >
+              <Flex align="center">
+                <Avatar address={creatorAddress} src={creatorAvatar} size="28" />
+                <Text fontWeight="display" ml="x2">
+                  {creatorDisplayName || walletSnippet(creatorAddress)}
+                </Text>
+              </Flex>
+            </WalletProfilePreview>
+          ) : (
+            <Text fontWeight="display">Unknown creator</Text>
+          )}
         </Box>
       )}
 

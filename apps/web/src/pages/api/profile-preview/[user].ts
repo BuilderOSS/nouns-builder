@@ -1,4 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS, PUBLIC_IS_TESTNET, PUBLIC_SUBGRAPH_URL } from '@buildeross/constants'
+import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { AddressType } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
@@ -6,10 +7,21 @@ import { withCors } from 'src/utils/api/cors'
 import { isAddress, keccak256 } from 'viem'
 
 const CACHE_TTL_SECONDS = 300
+const REQUEST_TIMEOUT_MS = 5000
 const CACHE_PREFIX = PUBLIC_IS_TESTNET
   ? 'testnet:profile-preview:user'
   : 'profile-preview:user'
 const PAGE_SIZE = 500
+const PROFILE_PREVIEW_ALLOWED_ORIGINS = Array.from(
+  new Set([
+    BASE_URL,
+    'https://nouns.build',
+    'https://testnet.nouns.build',
+    '*.vercel.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ])
+)
 
 const DAO_ACTIVITY_QUERY = `
   query DaoActivity($owner: Bytes!, $first: Int!, $skip: Int!) {
@@ -58,6 +70,11 @@ interface ChainPreviewResult {
   }
 }
 
+interface ProfilePreviewResponse extends ChainPreviewResult {
+  partial?: boolean
+  failedChains?: number[]
+}
+
 const createCacheKey = (address: AddressType) =>
   `${CACHE_PREFIX}:${keccak256(address).slice(0, 18)}`
 
@@ -66,16 +83,30 @@ const requestSubgraph = async <TData>(
   query: string,
   variables: Record<string, string | number>
 ): Promise<TData> => {
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+  let response: Response
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+      }),
+      signal: controller.signal,
+    })
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Subgraph request timed out after ${REQUEST_TIMEOUT_MS}ms`)
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   if (!response.ok) {
     throw new Error(`Subgraph request failed with status ${response.status}`)
@@ -219,38 +250,53 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   try {
     if (redis) {
-      const cached = await redis.get(cacheKey)
-      if (cached) {
-        res.setHeader(
-          'Cache-Control',
-          `public, max-age=${CACHE_TTL_SECONDS}, stale-while-revalidate=${Math.floor(CACHE_TTL_SECONDS / 2)}`
-        )
-        return res.status(200).json(JSON.parse(cached))
+      try {
+        const cached = await redis.get(cacheKey)
+        if (cached) {
+          res.setHeader(
+            'Cache-Control',
+            `public, max-age=${CACHE_TTL_SECONDS}, stale-while-revalidate=${Math.floor(CACHE_TTL_SECONDS / 2)}`
+          )
+          return res.status(200).json(JSON.parse(cached))
+        }
+      } catch (error) {
+        console.error('Profile preview cache read failed:', error)
       }
     }
 
-    const results = await Promise.all(
-      PUBLIC_DEFAULT_CHAINS.map((chain) =>
-        fetchChainPreview(chain.id, address).catch((error) => {
-          console.error(`Profile preview fetch failed for chain ${chain.id}`, error)
-          return {
-            topDaos: [],
-            stats: {
-              totalDaos: 0,
-              totalVotes: 0,
-              totalProposals: 0,
-            },
-          }
-        })
-      )
+    const settledResults = await Promise.allSettled(
+      PUBLIC_DEFAULT_CHAINS.map((chain) => fetchChainPreview(chain.id, address))
     )
 
-    const response = {
-      topDaos: results
+    const successfulResults: ChainPreviewResult[] = []
+    const failedChains: number[] = []
+
+    settledResults.forEach((result, index) => {
+      const chainId = PUBLIC_DEFAULT_CHAINS[index]?.id
+
+      if (!chainId) return
+
+      if (result.status === 'fulfilled') {
+        successfulResults.push(result.value)
+      } else {
+        failedChains.push(chainId)
+        console.error(`Profile preview fetch failed for chain ${chainId}`, result.reason)
+      }
+    })
+
+    if (!successfulResults.length) {
+      return res.status(502).json({
+        error: 'Profile preview unavailable',
+        failedChains,
+      })
+    }
+
+    const response: ProfilePreviewResponse = {
+      topDaos: successfulResults
         .flatMap((result) => result.topDaos)
         .sort((a, b) => b.daoTokenCount - a.daoTokenCount)
         .slice(0, 4),
-      stats: results.reduce(
+      stats: successfulResults.reduce(
         (acc, result) => ({
           totalDaos: acc.totalDaos + result.stats.totalDaos,
           totalVotes: acc.totalVotes + result.stats.totalVotes,
@@ -264,8 +310,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       ),
     }
 
+    if (failedChains.length) {
+      response.partial = true
+      response.failedChains = failedChains
+    }
+
     if (redis) {
-      await redis.setex(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(response))
+      try {
+        await redis.setex(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(response))
+      } catch (error) {
+        console.error('Profile preview cache write failed:', error)
+      }
     }
 
     res.setHeader(
@@ -280,4 +335,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default withCors()(handler)
+export default withCors({ allowedOrigins: PROFILE_PREVIEW_ALLOWED_ORIGINS })(handler)

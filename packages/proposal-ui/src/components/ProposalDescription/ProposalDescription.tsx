@@ -21,6 +21,7 @@ import {
   getSablierAirdropFactories,
   getSablierContracts,
 } from '@buildeross/utils/sablier/contracts'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
@@ -236,7 +237,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
           <ProposalWalletProfilePreview
             address={proposal.proposer as `0x${string}`}
-            displayName={displayName || proposal.proposer}
+            displayName={displayName || walletSnippet(proposal.proposer)}
             avatarSrc={ensAvatar}
           >
             <Flex direction={'row'} placeItems={'center'}>
@@ -264,7 +265,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                   rel="noreferrer"
                   target="_blank"
                 >
-                  {displayName || proposal.proposer}
+                  {displayName || walletSnippet(proposal.proposer)}
                 </a>
                 {proposal.representedAddress && (
                   <Text color={'text3'}>
@@ -274,7 +275,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                       rel="noreferrer"
                       target="_blank"
                     >
-                      {representedDisplayName}
+                      {representedDisplayName || walletSnippet(proposal.representedAddress)}
                     </a>
                   </Text>
                 )}

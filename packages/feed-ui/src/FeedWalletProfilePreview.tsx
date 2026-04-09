@@ -29,6 +29,8 @@ interface WalletProfilePreviewResponse {
     totalVotes: number
     totalProposals: number
   }
+  partial?: boolean
+  failedChains?: number[]
 }
 
 const fetcher = async (url: string): Promise<WalletProfilePreviewResponse> => {
@@ -38,13 +40,22 @@ const fetcher = async (url: string): Promise<WalletProfilePreviewResponse> => {
     },
   })
 
-  const body = await response.json()
+  const rawBody = await response.text()
+  let body: Partial<WalletProfilePreviewResponse> & { error?: string } = {}
 
-  if (!response.ok) {
-    throw new Error(body?.error || 'Failed to load wallet preview')
+  if (rawBody) {
+    try {
+      body = JSON.parse(rawBody)
+    } catch {
+      body = { error: rawBody }
+    }
   }
 
-  return body
+  if (!response.ok) {
+    throw new Error(body?.error || `Failed to load wallet preview (${response.status})`)
+  }
+
+  return body as WalletProfilePreviewResponse
 }
 
 const compactAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`

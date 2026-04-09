@@ -84,18 +84,25 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
         {vote.support}
       </Text>
       <Box style={{ gridColumn: 'span 4 / span 4' }}>
-        <ProposalWalletProfilePreview
-          address={vote.voter as `0x${string}`}
-          displayName={ensName || walletSnippet(vote.voter)}
-          avatarSrc={ensAvatar}
+        <Box
+          onPointerDownCapture={(event: React.PointerEvent<HTMLDivElement>) =>
+            event.stopPropagation()
+          }
+          onClickCapture={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}
         >
-          <Flex align={'center'}>
-            <Avatar address={vote.voter} src={ensAvatar} size="28" />
-            <Text fontWeight="display" ml="x2">
-              {ensName || walletSnippet(vote.voter)}
-            </Text>
-          </Flex>
-        </ProposalWalletProfilePreview>
+          <ProposalWalletProfilePreview
+            address={vote.voter as `0x${string}`}
+            displayName={ensName || walletSnippet(vote.voter)}
+            avatarSrc={ensAvatar}
+          >
+            <Flex align={'center'}>
+              <Avatar address={vote.voter} src={ensAvatar} size="28" />
+              <Text fontWeight="display" ml="x2">
+                {ensName || walletSnippet(vote.voter)}
+              </Text>
+            </Flex>
+          </ProposalWalletProfilePreview>
+        </Box>
       </Box>
 
       <Flex

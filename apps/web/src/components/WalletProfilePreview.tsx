@@ -28,6 +28,8 @@ interface WalletProfilePreviewResponse {
     totalVotes: number
     totalProposals: number
   }
+  partial?: boolean
+  failedChains?: number[]
 }
 
 const fetcher = async (url: string): Promise<WalletProfilePreviewResponse> => {
@@ -37,13 +39,22 @@ const fetcher = async (url: string): Promise<WalletProfilePreviewResponse> => {
     },
   })
 
-  const body = await response.json()
+  const rawBody = await response.text()
+  let body: Partial<WalletProfilePreviewResponse> & { error?: string } = {}
 
-  if (!response.ok) {
-    throw new Error(body?.error || 'Failed to load wallet preview')
+  if (rawBody) {
+    try {
+      body = JSON.parse(rawBody)
+    } catch {
+      body = { error: rawBody }
+    }
   }
 
-  return body
+  if (!response.ok) {
+    throw new Error(body?.error || `Failed to load wallet preview (${response.status})`)
+  }
+
+  return body as WalletProfilePreviewResponse
 }
 
 const compactAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`
@@ -145,8 +156,11 @@ export const WalletProfilePreview = ({
         style={{ minWidth: 0 }}
         onMouseEnter={isMobile ? undefined : handleOpen}
         onMouseLeave={isMobile ? undefined : handleClose}
+        onFocusCapture={isMobile ? undefined : handleOpen}
+        onBlurCapture={isMobile ? undefined : handleClose}
         onPointerDownCapture={handleTriggerPointerDown}
         onClickCapture={handleTriggerClick}
+        tabIndex={inline ? undefined : 0}
       >
         {children}
       </Box>
@@ -231,9 +245,7 @@ export const WalletProfilePreview = ({
             )}
           </Box>
 
-          <Text
-            variant="paragraph-sm"
-            color="text3"
+          <Box
             pt="x1"
             style={{
               borderTop: '1px solid rgba(0, 0, 0, 0.08)',
@@ -242,9 +254,21 @@ export const WalletProfilePreview = ({
               whiteSpace: 'nowrap',
             }}
           >
-            {data?.stats.totalDaos ?? 0} DAOs, {data?.stats.totalProposals ?? 0} proposals,{' '}
-            {data?.stats.totalVotes ?? 0} votes
-          </Text>
+            {isLoading ? (
+              <Text variant="paragraph-sm" color="text3">
+                Loading profile...
+              </Text>
+            ) : error ? (
+              <Text variant="paragraph-sm" color="text3">
+                Profile preview unavailable
+              </Text>
+            ) : data ? (
+              <Text variant="paragraph-sm" color="text3">
+                {data.stats.totalDaos} DAOs, {data.stats.totalProposals} proposals,{' '}
+                {data.stats.totalVotes} votes
+              </Text>
+            ) : null}
+          </Box>
 
           {isMobile ? (
             <Box mt="x2" pt="x2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>

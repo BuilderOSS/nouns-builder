@@ -1,5 +1,6 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { Avatar } from '@buildeross/ui/Avatar'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -12,6 +13,7 @@ interface BidderProps {
 
 export const Bidder: React.FC<BidderProps> = ({ address }) => {
   const { displayName, ensAvatar } = useEnsData(address)
+  const resolvedDisplayName = displayName || walletSnippet(address as `0x${string}`)
 
   return (
     <AuctionWalletProfilePreview
@@ -25,7 +27,7 @@ export const Bidder: React.FC<BidderProps> = ({ address }) => {
         </Box>
         <Text className={recentBidder} variant="paragraph-md">
           <a href={`/profile/${address}`} target="_blank" rel="noopener noreferrer">
-            {displayName}
+            {resolvedDisplayName}
           </a>
         </Text>
       </Flex>
