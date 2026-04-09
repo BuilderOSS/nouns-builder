@@ -1,14 +1,19 @@
-query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_filter, $whereSimple: DAO_filter) {
-  daoSearch(
-    text: $text
-    first: $first
-    skip: $skip
-    where: $where
-  ) {
+query exploreDaosSearch(
+  $text: String!
+  $first: Int!
+  $skip: Int!
+  $where: DAO_filter
+  $whereSimple: DAO_filter
+) {
+  daoSearch(text: $text, first: $first, skip: $skip, where: $where) {
     tokenAddress
     name
     symbol
     description
+    links {
+      key
+      url
+    }
     projectURI
     treasuryAddress
     auctionAddress
@@ -28,15 +33,15 @@ query exploreDaosSearch($text: String!, $first: Int!, $skip: Int!, $where: DAO_f
       }
     }
   }
-  daos(
-    first: $first
-    skip: $skip
-    where: $whereSimple
-  ) {
+  daos(first: $first, skip: $skip, where: $whereSimple) {
     tokenAddress
     name
     symbol
     description
+    links {
+      key
+      url
+    }
     projectURI
     treasuryAddress
     auctionAddress
