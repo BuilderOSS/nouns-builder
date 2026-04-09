@@ -38,16 +38,37 @@ export const parseDaoMetadataString = (
     return { description: '', links: {} }
   }
 
+  const parseObject = (value: string): Record<string, unknown> | undefined => {
+    try {
+      const parsed = JSON.parse(value) as unknown
+
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>
+      }
+
+      if (typeof parsed === 'string') {
+        const nestedParsed = JSON.parse(parsed) as unknown
+        if (
+          nestedParsed &&
+          typeof nestedParsed === 'object' &&
+          !Array.isArray(nestedParsed)
+        ) {
+          return nestedParsed as Record<string, unknown>
+        }
+      }
+
+      return undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  const parsed = parseObject(raw)
+  if (!parsed) {
+    return { description: raw, links: {} }
+  }
+
   try {
-    const parsed = JSON.parse(raw) as {
-      description?: unknown
-      links?: unknown
-    }
-
-    if (!parsed || typeof parsed !== 'object') {
-      return { description: raw, links: {} }
-    }
-
     const description =
       typeof parsed.description === 'string' && parsed.description.length > 0
         ? parsed.description
