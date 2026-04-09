@@ -1,16 +1,16 @@
 import React from 'react'
 import {
+  buildFavoriteDao,
   FAVORITE_DAO_LIMIT,
   FavoriteDao,
   FavoriteDaosStore,
-  buildFavoriteDao,
   getFavoriteDaoKey,
   useFavoriteDaosStore,
 } from 'src/stores/favoriteDaosStore'
 
 const EMPTY_FAVORITES: FavoriteDao[] = []
 
-export { FAVORITE_DAO_LIMIT, buildFavoriteDao, getFavoriteDaoKey, type FavoriteDao }
+export { buildFavoriteDao, FAVORITE_DAO_LIMIT, type FavoriteDao, getFavoriteDaoKey }
 
 export const useFavoriteDaos = (address?: string) => {
   const normalizedAddress = React.useMemo(() => address?.toLowerCase(), [address])
