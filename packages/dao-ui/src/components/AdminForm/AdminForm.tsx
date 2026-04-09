@@ -12,6 +12,7 @@ import {
   useProposalStore,
 } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
+import { DaoLinkInput, DaoLinksField } from '@buildeross/ui'
 import {
   DaysHoursMinsSecs,
   FIELD_TYPES,
@@ -27,7 +28,7 @@ import {
   fromSeconds,
   unpackOptionalArray,
 } from '@buildeross/utils/helpers'
-import { Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
 import isEqual from 'lodash/isEqual'
@@ -380,83 +381,29 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                 </Field>
 
                 <FieldArray name="daoLinks">
-                  {({ remove, push }) => (
+                  {() => (
                     <Stack>
-                      <Flex justify={'space-between'} align={'center'}>
-                        <Text variant={'label-md'}>DAO Links (optional)</Text>
-                        <button
-                          type="button"
-                          onClick={() => push({ key: '', url: '' })}
-                          style={{
-                            border: 'none',
-                            background: 'transparent',
-                            cursor: 'pointer',
-                            color: 'inherit',
-                          }}
-                        >
-                          + Add link
-                        </button>
-                      </Flex>
-
-                      {(formik.values.daoLinks || []).map((_, index) => (
-                        <Flex key={`dao-link-${index}`} gap={'x2'} align={'center'}>
-                          <SmartInput
-                            {...formik.getFieldProps(`daoLinks.${index}.key`)}
-                            inputLabel={index === 0 ? 'Link key' : ''}
-                            type={FIELD_TYPES.TEXT}
-                            formik={formik}
-                            id={`daoLinks.${index}.key`}
-                            onChange={({ target }: BaseSyntheticEvent) => {
-                              formik.setFieldValue(`daoLinks.${index}.key`, target.value)
-                            }}
-                            onBlur={formik.handleBlur}
-                            errorMessage={
-                              (formik.touched.daoLinks as any)?.[index]?.key
-                                ? (formik.errors.daoLinks as any)?.[index]?.key
-                                : undefined
-                            }
-                            placeholder={'x / discord / github / docs / ...'}
-                          />
-
-                          <SmartInput
-                            {...formik.getFieldProps(`daoLinks.${index}.url`)}
-                            inputLabel={index === 0 ? 'Link URL' : ''}
-                            type={FIELD_TYPES.TEXT}
-                            formik={formik}
-                            id={`daoLinks.${index}.url`}
-                            onChange={({ target }: BaseSyntheticEvent) => {
-                              formik.setFieldValue(`daoLinks.${index}.url`, target.value)
-                            }}
-                            onBlur={formik.handleBlur}
-                            errorMessage={
-                              (formik.touched.daoLinks as any)?.[index]?.url
-                                ? (formik.errors.daoLinks as any)?.[index]?.url
-                                : undefined
-                            }
-                            placeholder={'https://...'}
-                          />
-
-                          <button
-                            type="button"
-                            onClick={() => remove(index)}
-                            style={{
-                              border: 'none',
-                              background: 'transparent',
-                              cursor: 'pointer',
-                              color: 'inherit',
-                            }}
-                            aria-label={`Remove link ${index + 1}`}
-                          >
-                            <Icon id="cross" />
-                          </button>
-                        </Flex>
-                      ))}
-
-                      {typeof formik.errors.daoLinks === 'string' ? (
-                        <Text variant={'label-xs'} color={'negative'}>
-                          {formik.errors.daoLinks}
-                        </Text>
-                      ) : null}
+                      <DaoLinksField
+                        value={formik.values.daoLinks || []}
+                        onChange={(daoLinks: DaoLinkInput[]) =>
+                          formik.setFieldValue('daoLinks', daoLinks)
+                        }
+                        onBlur={() => formik.setFieldTouched('daoLinks', true, false)}
+                        inputLabel={'DAO Links (optional)'}
+                        helperText={
+                          'Use DAO Website for your main site, then add socials/docs here.'
+                        }
+                        getFieldError={(index: number, field: 'key' | 'url') =>
+                          (formik.touched.daoLinks as any)?.[index]?.[field]
+                            ? (formik.errors.daoLinks as any)?.[index]?.[field]
+                            : undefined
+                        }
+                        errorMessage={
+                          typeof formik.errors.daoLinks === 'string'
+                            ? formik.errors.daoLinks
+                            : undefined
+                        }
+                      />
                     </Stack>
                   )}
                 </FieldArray>

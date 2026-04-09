@@ -6,6 +6,8 @@ export interface GeneralFormValues {
   daoName: string
   daoSymbol: string
   daoWebsite?: string
+  projectDescription: string
+  links: { key: string; url: string }[]
 }
 
 export const generalValidationSchema = Yup.object().shape({
@@ -16,4 +18,19 @@ export const generalValidationSchema = Yup.object().shape({
     .matches(/^[$]*[a-zA-Z0-9_-]*$/i)
     .required('*'),
   daoWebsite: urlValidationSchema,
+  projectDescription: Yup.string().required('*').max(5000, '< 5000 characters'),
+  links: Yup.array()
+    .of(
+      Yup.object().shape({
+        key: Yup.string().trim().required('*'),
+        url: urlValidationSchema.required('*'),
+      })
+    )
+    .test('unique-link-keys', 'Link keys should be unique.', (values) => {
+      const keys = (values || [])
+        .map((link) => link?.key?.trim()?.toLowerCase() || '')
+        .filter(Boolean)
+
+      return keys.length === new Set(keys).size
+    }),
 })
