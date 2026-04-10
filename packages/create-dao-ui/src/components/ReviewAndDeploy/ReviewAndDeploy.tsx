@@ -26,6 +26,7 @@ import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
+import { serializeDaoMetadata } from '../../utils/daoMetadata'
 import { TokenAllocation } from '../AllocationForm'
 import { FAST_DAO_TIMINGS } from '../AuctionSettingsForm/fastDaoTimings'
 import { FormNavButtons } from '../FormNavButtons'
@@ -137,7 +138,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         [
           sanitizeStringForJSON(general?.daoName),
           general?.daoSymbol.replace('$', ''),
-          sanitizeStringForJSON(setUpArtwork?.projectDescription),
+          serializeDaoMetadata(general?.projectDescription || '', general?.links || []),
           general?.daoAvatar ?? '',
           sanitizeStringForJSON(general?.daoWebsite ?? ''),
           RENDERER_BASE,
@@ -148,7 +149,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
       general?.daoSymbol,
       general?.daoAvatar,
       general?.daoWebsite,
-      setUpArtwork?.projectDescription,
+      general?.projectDescription,
+      general?.links,
     ]
   )
 
@@ -382,6 +384,18 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               <ReviewItem label="Dao Name" value={general?.daoName} />
               <ReviewItem label="Dao Symbol" value={general?.daoSymbol} />
               <ReviewItem label="Dao Website" value={general?.daoWebsite} />
+              <ReviewItem
+                label="Project Description"
+                value={general?.projectDescription || 'None'}
+              />
+              <ReviewItem
+                label="Additional Links"
+                value={
+                  general?.links?.length
+                    ? general.links.map((link) => `${link.key}: ${link.url}`).join(', ')
+                    : 'None'
+                }
+              />
             </ReviewSection>
 
             <ReviewSection subHeading="Auction Settings">
@@ -448,10 +462,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
             </ReviewSection>
 
             <ReviewSection subHeading="Set Up Artwork">
-              <ReviewItem
-                label="Project Description"
-                value={setUpArtwork.projectDescription}
-              />
               <ReviewItem label="Artwork" value={<PreviewArtwork />} />
               <ReviewItem label="Files Length" value={setUpArtwork.filesLength} />
             </ReviewSection>

@@ -56,11 +56,11 @@ import Sliders from './assets/sliders.svg'
 import Spanner from './assets/spanner.svg'
 import Swap from './assets/swap.svg'
 import Trash from './assets/trash.svg'
-import Twitter from './assets/twitter.svg'
 import WalletConnect from './assets/wallet-connect.svg'
 import WalletConnectOutline from './assets/wallet-connect-outline.svg'
 import Warning from './assets/warning.svg'
 import Warning16 from './assets/warning-16.svg'
+import Twitter from './assets/x.svg'
 
 export const icons = {
   airdrop: Airdrop,

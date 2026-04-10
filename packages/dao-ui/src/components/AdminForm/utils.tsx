@@ -53,6 +53,11 @@ export const formValuesToTransactionMap: FormValuesTransactionMap = {
         args: [sanitizeStringForJSON(value)],
       }),
   },
+  daoLinks: {
+    functionSignature: 'updateDescription',
+    getTarget: () => undefined,
+    constructCalldata: () => undefined,
+  },
   rendererBase: {
     functionSignature: 'updateRendererBase',
     getTarget: (addresses) => addresses.metadata as AddressType,

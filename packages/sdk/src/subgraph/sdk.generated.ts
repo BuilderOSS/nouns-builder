@@ -65,6 +65,7 @@ export type AuctionBid = {
   auction: Auction
   bidTime: Scalars['BigInt']['output']
   bidder: Scalars['Bytes']['output']
+  comment?: Maybe<Scalars['String']['output']>
   id: Scalars['ID']['output']
   transactionHash: Scalars['Bytes']['output']
 }
@@ -214,6 +215,7 @@ export enum AuctionBidPlacedEvent_OrderBy {
   BidAmount = 'bid__amount',
   BidBidTime = 'bid__bidTime',
   BidBidder = 'bid__bidder',
+  BidComment = 'bid__comment',
   BidId = 'bid__id',
   BidTransactionHash = 'bid__transactionHash',
   BlockNumber = 'blockNumber',
@@ -223,6 +225,7 @@ export enum AuctionBidPlacedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -292,6 +295,26 @@ export type AuctionBid_Filter = {
   bidder_not?: InputMaybe<Scalars['Bytes']['input']>
   bidder_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   bidder_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  comment?: InputMaybe<Scalars['String']['input']>
+  comment_contains?: InputMaybe<Scalars['String']['input']>
+  comment_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_ends_with?: InputMaybe<Scalars['String']['input']>
+  comment_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_gt?: InputMaybe<Scalars['String']['input']>
+  comment_gte?: InputMaybe<Scalars['String']['input']>
+  comment_in?: InputMaybe<Array<Scalars['String']['input']>>
+  comment_lt?: InputMaybe<Scalars['String']['input']>
+  comment_lte?: InputMaybe<Scalars['String']['input']>
+  comment_not?: InputMaybe<Scalars['String']['input']>
+  comment_not_contains?: InputMaybe<Scalars['String']['input']>
+  comment_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  comment_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  comment_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  comment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_starts_with?: InputMaybe<Scalars['String']['input']>
+  comment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   id?: InputMaybe<Scalars['ID']['input']>
   id_gt?: InputMaybe<Scalars['ID']['input']>
   id_gte?: InputMaybe<Scalars['ID']['input']>
@@ -325,6 +348,7 @@ export enum AuctionBid_OrderBy {
   AuctionStartTime = 'auction__startTime',
   BidTime = 'bidTime',
   Bidder = 'bidder',
+  Comment = 'comment',
   Id = 'id',
   TransactionHash = 'transactionHash',
 }
@@ -519,6 +543,7 @@ export enum AuctionCreatedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -684,6 +709,7 @@ export enum AuctionSettledEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -852,6 +878,7 @@ export enum Auction_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -871,6 +898,7 @@ export enum Auction_OrderBy {
   HighestBidAmount = 'highestBid__amount',
   HighestBidBidTime = 'highestBid__bidTime',
   HighestBidBidder = 'highestBid__bidder',
+  HighestBidComment = 'highestBid__comment',
   HighestBidId = 'highestBid__id',
   HighestBidTransactionHash = 'highestBid__transactionHash',
   Id = 'id',
@@ -889,6 +917,7 @@ export enum Auction_OrderBy {
   WinningBidAmount = 'winningBid__amount',
   WinningBidBidTime = 'winningBid__bidTime',
   WinningBidBidder = 'winningBid__bidder',
+  WinningBidComment = 'winningBid__comment',
   WinningBidId = 'winningBid__id',
   WinningBidTransactionHash = 'winningBid__transactionHash',
 }
@@ -1076,6 +1105,7 @@ export enum ClankerTokenCreatedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -1477,6 +1507,7 @@ export enum ClankerToken_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -1535,6 +1566,8 @@ export type Dao = {
   feedEvents: Array<FeedEvent>
   governorAddress: Scalars['Bytes']['output']
   id: Scalars['ID']['output']
+  links: Array<DaoLink>
+  metadata?: Maybe<Scalars['String']['output']>
   metadataAddress: Scalars['Bytes']['output']
   metadataProperties?: Maybe<Array<MetadataProperty>>
   name: Scalars['String']['output']
@@ -1587,6 +1620,14 @@ export type DaoFeedEventsArgs = {
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<FeedEvent_Filter>
+}
+
+export type DaoLinksArgs = {
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<DaoLink_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  where?: InputMaybe<DaoLink_Filter>
 }
 
 export type DaoMetadataPropertiesArgs = {
@@ -1651,6 +1692,115 @@ export type DaoZoraDropsArgs = {
   orderDirection?: InputMaybe<OrderDirection>
   skip?: InputMaybe<Scalars['Int']['input']>
   where?: InputMaybe<ZoraDrop_Filter>
+}
+
+export type DaoLink = {
+  __typename?: 'DAOLink'
+  dao: Dao
+  id: Scalars['ID']['output']
+  key: Scalars['String']['output']
+  url: Scalars['String']['output']
+}
+
+export type DaoLink_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<DaoLink_Filter>>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  key?: InputMaybe<Scalars['String']['input']>
+  key_contains?: InputMaybe<Scalars['String']['input']>
+  key_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  key_ends_with?: InputMaybe<Scalars['String']['input']>
+  key_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  key_gt?: InputMaybe<Scalars['String']['input']>
+  key_gte?: InputMaybe<Scalars['String']['input']>
+  key_in?: InputMaybe<Array<Scalars['String']['input']>>
+  key_lt?: InputMaybe<Scalars['String']['input']>
+  key_lte?: InputMaybe<Scalars['String']['input']>
+  key_not?: InputMaybe<Scalars['String']['input']>
+  key_not_contains?: InputMaybe<Scalars['String']['input']>
+  key_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  key_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  key_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  key_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  key_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  key_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  key_starts_with?: InputMaybe<Scalars['String']['input']>
+  key_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  or?: InputMaybe<Array<InputMaybe<DaoLink_Filter>>>
+  url?: InputMaybe<Scalars['String']['input']>
+  url_contains?: InputMaybe<Scalars['String']['input']>
+  url_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  url_ends_with?: InputMaybe<Scalars['String']['input']>
+  url_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  url_gt?: InputMaybe<Scalars['String']['input']>
+  url_gte?: InputMaybe<Scalars['String']['input']>
+  url_in?: InputMaybe<Array<Scalars['String']['input']>>
+  url_lt?: InputMaybe<Scalars['String']['input']>
+  url_lte?: InputMaybe<Scalars['String']['input']>
+  url_not?: InputMaybe<Scalars['String']['input']>
+  url_not_contains?: InputMaybe<Scalars['String']['input']>
+  url_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  url_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  url_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  url_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  url_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  url_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  url_starts_with?: InputMaybe<Scalars['String']['input']>
+  url_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum DaoLink_OrderBy {
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  Key = 'key',
+  Url = 'url',
 }
 
 export type DaoTokenOwner = {
@@ -1745,6 +1895,7 @@ export enum DaoTokenOwner_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -1843,6 +1994,7 @@ export enum DaoVoter_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -1977,6 +2129,8 @@ export type Dao_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>
   id_not?: InputMaybe<Scalars['ID']['input']>
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  links_?: InputMaybe<DaoLink_Filter>
+  metadata?: InputMaybe<Scalars['String']['input']>
   metadataAddress?: InputMaybe<Scalars['Bytes']['input']>
   metadataAddress_contains?: InputMaybe<Scalars['Bytes']['input']>
   metadataAddress_gt?: InputMaybe<Scalars['Bytes']['input']>
@@ -1994,6 +2148,25 @@ export type Dao_Filter = {
   metadataProperties_not?: InputMaybe<Array<Scalars['String']['input']>>
   metadataProperties_not_contains?: InputMaybe<Array<Scalars['String']['input']>>
   metadataProperties_not_contains_nocase?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_gt?: InputMaybe<Scalars['String']['input']>
+  metadata_gte?: InputMaybe<Scalars['String']['input']>
+  metadata_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_lt?: InputMaybe<Scalars['String']['input']>
+  metadata_lte?: InputMaybe<Scalars['String']['input']>
+  metadata_not?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   name?: InputMaybe<Scalars['String']['input']>
   name_contains?: InputMaybe<Scalars['String']['input']>
   name_contains_nocase?: InputMaybe<Scalars['String']['input']>
@@ -2156,6 +2329,8 @@ export enum Dao_OrderBy {
   FeedEvents = 'feedEvents',
   GovernorAddress = 'governorAddress',
   Id = 'id',
+  Links = 'links',
+  Metadata = 'metadata',
   MetadataAddress = 'metadataAddress',
   MetadataProperties = 'metadataProperties',
   Name = 'name',
@@ -2276,6 +2451,7 @@ export enum DaoMultisigUpdate_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -2402,6 +2578,7 @@ export enum FeedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -2643,6 +2820,7 @@ export enum MetadataProperty_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -2987,6 +3165,7 @@ export enum ProposalCreatedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -3160,6 +3339,7 @@ export enum ProposalExecutedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -3522,6 +3702,7 @@ export enum ProposalUpdatedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -3887,6 +4068,7 @@ export enum ProposalVotedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -4365,6 +4547,7 @@ export enum Proposal_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -4439,6 +4622,8 @@ export type Query = {
   daoMultisigUpdate?: Maybe<DaoMultisigUpdate>
   daoMultisigUpdates: Array<DaoMultisigUpdate>
   daoSearch: Array<Dao>
+  daolink?: Maybe<DaoLink>
+  daolinks: Array<DaoLink>
   daos: Array<Dao>
   daotokenOwner?: Maybe<DaoTokenOwner>
   daotokenOwners: Array<DaoTokenOwner>
@@ -4669,6 +4854,22 @@ export type QueryDaoSearchArgs = {
   subgraphError?: _SubgraphErrorPolicy_
   text: Scalars['String']['input']
   where?: InputMaybe<Dao_Filter>
+}
+
+export type QueryDaolinkArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryDaolinksArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<DaoLink_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<DaoLink_Filter>
 }
 
 export type QueryDaosArgs = {
@@ -5194,6 +5395,7 @@ export enum Snapshot_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -5713,6 +5915,7 @@ export enum Token_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -5894,6 +6097,7 @@ export enum TreasuryAssetPin_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -6072,6 +6276,7 @@ export enum ZoraCoinCreatedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -6521,6 +6726,7 @@ export enum ZoraCoin_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -6718,6 +6924,7 @@ export enum ZoraDropCreatedEvent_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -7332,6 +7539,7 @@ export enum ZoraDrop_OrderBy {
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
   DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
   DaoMetadataAddress = 'dao__metadataAddress',
   DaoName = 'dao__name',
   DaoOwnerCount = 'dao__ownerCount',
@@ -7411,6 +7619,7 @@ export type AuctionBidFragment = {
   id: string
   amount: any
   bidder: any
+  comment?: string | null
 }
 
 export type ClankerTokenFragment = {
@@ -7490,6 +7699,7 @@ export type DaoFragment = {
   treasuryAddress: any
   auctionAddress: any
   governorAddress: any
+  links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
 }
 
 export type ExploreDaoFragment = {
@@ -7871,6 +8081,7 @@ export type AuctionBidsQuery = {
       id: string
       amount: any
       bidder: any
+      comment?: string | null
     }> | null
   } | null
 }
@@ -8057,7 +8268,16 @@ export type DaoInfoQueryVariables = Exact<{
 
 export type DaoInfoQuery = {
   __typename?: 'Query'
-  dao?: { __typename?: 'DAO'; totalSupply: number; ownerCount: number } | null
+  dao?: {
+    __typename?: 'DAO'
+    name: string
+    description: string
+    contractImage: string
+    projectURI: string
+    totalSupply: number
+    ownerCount: number
+    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+  } | null
 }
 
 export type DaoMembersListQueryVariables = Exact<{
@@ -8178,6 +8398,7 @@ export type DaoOgMetadataQuery = {
     auctionAddress: any
     treasuryAddress: any
     governorAddress: any
+    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
   } | null
 }
 
@@ -8202,6 +8423,7 @@ export type ExploreDaosSearchQuery = {
     auctionAddress: any
     governorAddress: any
     metadataAddress: any
+    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
     tokens: Array<{
       __typename?: 'Token'
       tokenId: any
@@ -8226,6 +8448,7 @@ export type ExploreDaosSearchQuery = {
     auctionAddress: any
     governorAddress: any
     metadataAddress: any
+    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
     tokens: Array<{
       __typename?: 'Token'
       tokenId: any
@@ -8375,6 +8598,7 @@ export type DaosForDashboardQuery = {
       highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
       token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
     } | null
+    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
   }>
 }
 
@@ -8395,6 +8619,7 @@ export type DaosForUserQuery = {
     treasuryAddress: any
     auctionAddress: any
     governorAddress: any
+    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
   }>
 }
 
@@ -8440,7 +8665,13 @@ export type FeedEventsQuery = {
             image?: string | null
           }
         }
-        bid: { __typename?: 'AuctionBid'; amount: any; bidTime: any; bidder: any }
+        bid: {
+          __typename?: 'AuctionBid'
+          amount: any
+          bidTime: any
+          bidder: any
+          comment?: string | null
+        }
         dao: {
           __typename?: 'DAO'
           auctionAddress: any
@@ -9093,6 +9324,7 @@ export type TokenWithDaoQuery = {
       auctionAddress: any
       treasuryAddress: any
       governorAddress: any
+      links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
     }
   } | null
 }
@@ -9408,6 +9640,7 @@ export const AuctionBidFragmentDoc = gql`
     id
     amount
     bidder
+    comment
   }
 `
 export const ClankerTokenCardFragmentDoc = gql`
@@ -9478,6 +9711,10 @@ export const DaoFragmentDoc = gql`
   fragment DAO on DAO {
     name
     contractImage
+    links {
+      key
+      url
+    }
     tokenAddress
     metadataAddress
     treasuryAddress
@@ -9909,6 +10146,14 @@ export const DaoClankerTokensFullDocument = gql`
 export const DaoInfoDocument = gql`
   query daoInfo($tokenAddress: ID!) {
     dao(id: $tokenAddress) {
+      name
+      description
+      contractImage
+      projectURI
+      links {
+        key
+        url
+      }
       totalSupply
       ownerCount
     }
@@ -10028,6 +10273,10 @@ export const DaoOgMetadataDocument = gql`
     dao(id: $tokenAddress) {
       name
       description
+      links {
+        key
+        url
+      }
       contractImage
       totalSupply
       ownerCount
@@ -10053,6 +10302,10 @@ export const ExploreDaosSearchDocument = gql`
       name
       symbol
       description
+      links {
+        key
+        url
+      }
       projectURI
       treasuryAddress
       auctionAddress
@@ -10077,6 +10330,10 @@ export const ExploreDaosSearchDocument = gql`
       name
       symbol
       description
+      links {
+        key
+        url
+      }
       projectURI
       treasuryAddress
       auctionAddress
@@ -10332,6 +10589,7 @@ export const FeedEventsDocument = gql`
           amount
           bidTime
           bidder
+          comment
         }
       }
       ... on AuctionSettledEvent {
@@ -10561,6 +10819,10 @@ export const TokenWithDaoDocument = gql`
       dao {
         name
         description
+        links {
+          key
+          url
+        }
         contractImage
         totalSupply
         ownerCount

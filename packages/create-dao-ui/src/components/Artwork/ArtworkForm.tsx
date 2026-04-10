@@ -1,5 +1,4 @@
-import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
-import { Field, FieldProps, Form, Formik } from 'formik'
+import { Form, Formik } from 'formik'
 import isEmpty from 'lodash/isEmpty'
 import React from 'react'
 
@@ -24,7 +23,6 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
   } = useFormStore()
 
   const initialValues = {
-    projectDescription: setUpArtwork?.projectDescription || '',
     artwork: setUpArtwork?.artwork || [],
     filesLength: setUpArtwork?.filesLength || '',
     fileType: setUpArtwork?.fileType || '',
@@ -39,7 +37,9 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
     setActiveSection(activeSection + 1)
     setSetUpArtwork({
       ...setUpArtwork,
-      projectDescription: values.projectDescription,
+      artwork: values.artwork,
+      filesLength: values.filesLength,
+      fileType: values.fileType,
     })
   }
 
@@ -55,24 +55,6 @@ export const Artwork: React.FC<ArtworkProps> = ({ title }) => {
     >
       {(formik) => (
         <Form>
-          <Field name="projectDescription" id={'projectDescription'}>
-            {({ field }: FieldProps) => {
-              return (
-                <MarkdownEditor
-                  value={field.value}
-                  onChange={(value: string) => formik.setFieldValue(field.name, value)}
-                  inputLabel={'DAO Description'}
-                  errorMessage={
-                    formik.touched?.projectDescription &&
-                    formik.errors?.projectDescription
-                      ? formik.errors?.projectDescription
-                      : undefined
-                  }
-                />
-              )
-            }}
-          </Field>
-
           <ArtworkUpload
             inputLabel={'Artwork'}
             formik={formik}

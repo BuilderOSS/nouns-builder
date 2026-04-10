@@ -133,6 +133,14 @@ describe('Auction bid comment parsing', () => {
     assert.assertTrue(parseAuctionBidComment(short) == null)
   })
 
+  test('returns null for malformed utf8 payload', () => {
+    const malformedUtf8 = Bytes.fromHexString(
+      '0x' + CREATE_BID_SELECTOR + TOKEN_ID_WORD + 'fffeff'
+    )
+
+    assert.assertTrue(parseAuctionBidComment(malformedUtf8) == null)
+  })
+
   test('indexes parsed bid comment in AuctionBid entity', () => {
     clearStore()
     setupDataSourceContext()

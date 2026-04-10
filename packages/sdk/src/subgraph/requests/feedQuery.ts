@@ -147,6 +147,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
         tokenId: event.auction.token.tokenId.toString(),
         bidder: event.bid.bidder,
         amount: event.bid.amount.toString(),
+        bidComment: event.bid.comment?.trim() || undefined,
         tokenName: event.auction.token.name,
         tokenImage: event.auction.token.image || '',
       }

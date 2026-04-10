@@ -112,6 +112,7 @@ export type AuctionBidPlacedFeedItem = BaseFeedItem & {
   tokenId: string
   bidder: AddressType
   amount: string
+  bidComment?: string
   tokenName: string
   tokenImage: string
 }

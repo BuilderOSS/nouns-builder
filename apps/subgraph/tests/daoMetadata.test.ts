@@ -54,6 +54,7 @@ function seedDao(initialDescription: string): void {
 
 function createDescriptionUpdatedEvent(newDescription: string): DescriptionUpdated {
   const event = newTypedMockEvent<DescriptionUpdated>()
+  event.address = Address.fromString(METADATA_ADDRESS)
   event.parameters = [
     new ethereum.EventParam(
       'prevDescription',
@@ -65,11 +66,15 @@ function createDescriptionUpdatedEvent(newDescription: string): DescriptionUpdat
   return event
 }
 
+function initializeTestWithDao(initialDescription: string = 'legacy description'): void {
+  clearStore()
+  setupDataSourceContext()
+  seedDao(initialDescription)
+}
+
 describe('Metadata description parsing', () => {
   test('parses JSON metadata and stores sanitized links', () => {
-    clearStore()
-    setupDataSourceContext()
-    seedDao('legacy description')
+    initializeTestWithDao()
 
     const metadata =
       '{"version":1,"description":"JSON dao description","links":{"x":"https://x.com/nouns","docs":"https://docs.example.com","invalid":"javascript:alert(1)","empty":""}}'
@@ -91,9 +96,7 @@ describe('Metadata description parsing', () => {
   })
 
   test('falls back to plain description when JSON parsing fails', () => {
-    clearStore()
-    setupDataSourceContext()
-    seedDao('legacy description')
+    initializeTestWithDao()
 
     const description = 'Simple DAO description text'
     handleDescriptionUpdated(createDescriptionUpdatedEvent(description))
@@ -106,10 +109,28 @@ describe('Metadata description parsing', () => {
     assert.entityCount('DAOLink', 0)
   })
 
+  test('parses double-encoded json metadata payloads', () => {
+    initializeTestWithDao()
+
+    const metadata =
+      '"{\\"version\\":1,\\"description\\":\\"double encoded\\",\\"links\\":{\\"x\\":\\"https://x.com/nouns\\",\\"github\\":\\"https://github.com/nouns\\"}}"'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'double encoded')
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'metadata', metadata)
+    assert.entityCount('DAOLink', 2)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://x.com/nouns')
+    assert.fieldEquals(
+      'DAOLink',
+      TOKEN_ADDRESS + '-github',
+      'url',
+      'https://github.com/nouns'
+    )
+  })
+
   test('replaces previous links on metadata update', () => {
-    clearStore()
-    setupDataSourceContext()
-    seedDao('legacy description')
+    initializeTestWithDao()
 
     const firstMetadata =
       '{"version":1,"description":"first","links":{"x":"https://x.com/nouns","docs":"https://docs.example.com"}}'
@@ -130,9 +151,7 @@ describe('Metadata description parsing', () => {
   })
 
   test('normalizes duplicate keys and keeps latest value', () => {
-    clearStore()
-    setupDataSourceContext()
-    seedDao('legacy description')
+    initializeTestWithDao()
 
     const metadata =
       '{"version":1,"description":"with duplicate keys","links":{"X":"https://x.com/old","x":"https://x.com/new"}}'
@@ -145,9 +164,7 @@ describe('Metadata description parsing', () => {
   })
 
   test('ignores malformed and unsafe links', () => {
-    clearStore()
-    setupDataSourceContext()
-    seedDao('legacy description')
+    initializeTestWithDao()
 
     const metadata =
       '{"version":1,"description":"link filtering","links":{"docs":"https://docs.example.com","badProtocol":"ftp://example.com","script":"javascript:alert(1)","empty":"","arr":["https://example.com"],"obj":{"url":"https://example.com"},"num":123}}'
@@ -164,9 +181,7 @@ describe('Metadata description parsing', () => {
   })
 
   test('uses raw json as description when description key is missing', () => {
-    clearStore()
-    setupDataSourceContext()
-    seedDao('legacy description')
+    initializeTestWithDao()
 
     const metadata = '{"version":1,"links":{"github":"https://github.com/nouns"}}'
 
@@ -184,9 +199,7 @@ describe('Metadata description parsing', () => {
   })
 
   test('removes links when moving from json metadata to plain description', () => {
-    clearStore()
-    setupDataSourceContext()
-    seedDao('legacy description')
+    initializeTestWithDao()
 
     const firstMetadata =
       '{"version":1,"description":"first","links":{"x":"https://x.com/nouns","docs":"https://docs.example.com"}}'
