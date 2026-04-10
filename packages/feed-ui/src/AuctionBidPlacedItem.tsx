@@ -11,6 +11,7 @@ import { formatEther } from 'viem'
 import {
   feedItemContentHorizontal,
   feedItemImage,
+  feedItemMeta,
   feedItemSubtitle,
   feedItemTitle,
 } from './Feed.css'
@@ -45,6 +46,9 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
             {displayName} bid {formattedAmount} ETH
           </Text>
           <Text className={feedItemSubtitle}>{item.tokenName}</Text>
+          {item.bidComment ? (
+            <Text className={feedItemMeta}>{item.bidComment}</Text>
+          ) : null}
         </Stack>
       </Stack>
     </LinkWrapper>
