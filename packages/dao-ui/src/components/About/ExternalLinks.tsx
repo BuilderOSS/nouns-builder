@@ -47,6 +47,9 @@ const normalizeLinkKey = (key: string): string => {
   return normalized === 'twitter' ? 'x' : normalized
 }
 
+const normalizeUrlForDedupe = (url: string): string =>
+  url.trim().replace(/\/+$/, '').toLowerCase()
+
 const getIconForLinkKey = (key: string): IconType => {
   if (key === 'x') return 'twitter'
   if (key === 'discord') return 'discord'
@@ -62,14 +65,18 @@ export const ExternalLinks: React.FC<ExternalLinksProps> = ({ links }) => {
   const normalizedLinks = React.useMemo(() => {
     const entries = Object.entries(links || {})
     const next: Record<string, string> = {}
+    const usedUrls: Record<string, boolean> = {}
 
     for (const [rawKey, rawUrl] of entries) {
       const key = normalizeLinkKey(rawKey)
       const url = rawUrl?.trim?.() || ''
+      const normalizedUrl = normalizeUrlForDedupe(url)
 
       if (!key || !url) continue
+      if (usedUrls[normalizedUrl]) continue
       if (!next[key]) {
         next[key] = url
+        usedUrls[normalizedUrl] = true
       }
     }
 
