@@ -2,8 +2,9 @@ import { CHAIN_ID } from '@buildeross/types'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import { parseEther } from 'viem'
+import { parseEther, stringToHex } from 'viem'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { PlaceBid } from './PlaceBid'
 
@@ -81,6 +82,9 @@ describe('PlaceBid', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockBalanceValue = parseEther('1')
+    vi.mocked(simulateContract).mockResolvedValue({ request: {} as any } as any)
+    vi.mocked(writeContract).mockResolvedValue('0x1234' as `0x${string}`)
+    vi.mocked(waitForTransactionReceipt).mockResolvedValue({} as any)
   })
 
   it('shows insufficient balance error while typing a higher bid', async () => {
@@ -218,5 +222,81 @@ describe('PlaceBid', () => {
     expect(
       (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
     ).toBe(true)
+  })
+
+  it('appends comment bytes as dataSuffix for createBid', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    await user.type(screen.getByRole('spinbutton'), '1')
+    await user.type(screen.getByPlaceholderText('Add a bid comment (optional)'), 'gm')
+    await user.click(screen.getByRole('button', { name: 'Place bid' }))
+
+    expect(simulateContract).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        functionName: 'createBid',
+        dataSuffix: stringToHex('gm'),
+      })
+    )
+  })
+
+  it('appends comment bytes as dataSuffix for createBidWithReferral', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+        referral={'0x0000000000000000000000000000000000000003'}
+      />
+    )
+
+    await user.type(screen.getByRole('spinbutton'), '1')
+    await user.type(screen.getByPlaceholderText('Add a bid comment (optional)'), 'hello')
+    await user.click(screen.getByRole('button', { name: 'Place bid' }))
+
+    expect(simulateContract).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        functionName: 'createBidWithReferral',
+        dataSuffix: stringToHex('hello'),
+      })
+    )
+  })
+
+  it('does not set dataSuffix when comment is blank', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    await user.type(screen.getByRole('spinbutton'), '1')
+    await user.type(screen.getByPlaceholderText('Add a bid comment (optional)'), '   ')
+    await user.click(screen.getByRole('button', { name: 'Place bid' }))
+
+    expect(simulateContract).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.not.objectContaining({ dataSuffix: expect.anything() })
+    )
   })
 })
