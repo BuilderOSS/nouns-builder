@@ -12,7 +12,7 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { formatEther, parseEther } from 'viem'
+import { formatEther, parseEther, stringToHex } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -56,6 +56,7 @@ const InnerPlaceBid = ({
   const [creatingBid, setCreatingBid] = useState(false)
   const [showWarning, setShowWarning] = useState(false)
   const [bidAmount, setBidAmount] = React.useState<string | undefined>(undefined)
+  const [bidComment, setBidComment] = React.useState<string>('')
   const [bidError, setBidError] = useState<string | null>(null)
 
   const auctionContractParams = {
@@ -110,6 +111,12 @@ const InnerPlaceBid = ({
       return undefined
     }
   }, [bidAmount])
+  const bidCommentDataSuffix = useMemo(() => {
+    const trimmedComment = bidComment.trim()
+    if (!trimmedComment) return undefined
+
+    return stringToHex(trimmedComment)
+  }, [bidComment])
   const hasInsufficientBalance = useMemo(() => {
     if (bidAmountInWei == null || balance?.value == null) return false
     return bidAmountInWei > balance.value
@@ -130,6 +137,7 @@ const InnerPlaceBid = ({
           args: [BigInt(tokenId), referral],
           value: parseEther(bidAmount),
           chainId,
+          ...(bidCommentDataSuffix ? { dataSuffix: bidCommentDataSuffix } : {}),
         })
         txHash = await writeContract(config, data.request)
       } else {
@@ -140,6 +148,7 @@ const InnerPlaceBid = ({
           args: [BigInt(tokenId)],
           value: parseEther(bidAmount),
           chainId,
+          ...(bidCommentDataSuffix ? { dataSuffix: bidCommentDataSuffix } : {}),
         })
         txHash = await writeContract(config, data.request)
       }
@@ -178,6 +187,7 @@ const InnerPlaceBid = ({
     tokenAddress,
     tokenId,
     chainId,
+    bidCommentDataSuffix,
     mutate,
     onSuccess,
   ])
@@ -304,6 +314,23 @@ const InnerPlaceBid = ({
                   ETH
                 </Flex>
               </Box>
+            </Box>
+            <Box mt="x2" mr={{ '@initial': 'x0', '@768': 'x2' }}>
+              <textarea
+                placeholder="Add a bid comment (optional)"
+                value={bidComment}
+                maxLength={280}
+                rows={3}
+                onChange={(event) => setBidComment(event.target.value)}
+                style={{
+                  width: '100%',
+                  border: '1px solid #d9d9d9',
+                  borderRadius: 8,
+                  padding: 12,
+                  font: 'inherit',
+                  resize: 'vertical',
+                }}
+              />
             </Box>
             {helperText ? (
               <Text variant="paragraph-sm" color={helperTextColor} mt="x2">
