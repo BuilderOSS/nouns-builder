@@ -12,6 +12,7 @@ describe('Dao card', () => {
   })
 
   afterEach(() => {
+    vi.useRealTimers()
     vi.restoreAllMocks()
   })
 
