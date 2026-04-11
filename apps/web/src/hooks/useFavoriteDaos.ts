@@ -56,7 +56,7 @@ export const useFavoriteDaos = (address?: string) => {
         return {
           didToggle: false as const,
           isFavorited: false as const,
-          reason: 'limit' as const,
+          reason: 'no_wallet' as const,
         }
       }
 

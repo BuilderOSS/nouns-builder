@@ -1,10 +1,10 @@
 import { Box, Grid, Text } from '@buildeross/zord'
 import React from 'react'
-import { useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
+import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
 import { useAccount } from 'wagmi'
 
 import { exploreGrid } from './Explore.css'
-import { ExploreDaoCard, FAVORITE_DAO_LIMIT } from './ExploreDaoCard'
+import { ExploreDaoCard } from './ExploreDaoCard'
 import { ExploreToolbar } from './ExploreToolbar'
 
 export const ExploreFavorites = () => {

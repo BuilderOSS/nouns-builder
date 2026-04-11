@@ -12,6 +12,7 @@ import { ExploreToolbar } from './ExploreToolbar'
 
 export const ExploreMyDaos = () => {
   const { address } = useAccount()
+  const isWalletConnected = Boolean(address)
   const { hasReachedFavoriteLimit, isDaoFavorited, toggleFavorite } =
     useFavoriteDaos(address)
 
@@ -36,7 +37,7 @@ export const ExploreMyDaos = () => {
                   hasReachedFavoriteLimit &&
                   !isDaoFavorited(dao.chainId, dao.dao.tokenAddress)
                 }
-                onFavoriteToggle={toggleFavorite}
+                onFavoriteToggle={isWalletConnected ? toggleFavorite : undefined}
               />
             )
           })}

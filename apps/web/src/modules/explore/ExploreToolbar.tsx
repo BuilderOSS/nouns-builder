@@ -42,6 +42,7 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 h={'100%'}
                 mb={'x4'}
                 mx={'x4'}
+                aria-current={pathname === '/explore' ? 'page' : undefined}
                 style={{
                   borderBottom: pathname === '/explore' ? `2px solid black` : `0px`,
                 }}
@@ -54,6 +55,7 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 h={'100%'}
                 mb={'x4'}
                 mx={'x4'}
+                aria-current={pathname === '/mydaos' ? 'page' : undefined}
                 style={{
                   borderBottom: pathname === '/mydaos' ? `2px solid black` : `0px`,
                 }}
@@ -66,6 +68,7 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 h={'100%'}
                 mb={'x4'}
                 mx={'x4'}
+                aria-current={pathname === '/favorites' ? 'page' : undefined}
                 style={{
                   borderBottom: pathname === '/favorites' ? `2px solid black` : `0px`,
                 }}

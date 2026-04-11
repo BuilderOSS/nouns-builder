@@ -7,7 +7,9 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 
 export const FAVORITE_DAO_LIMIT = 10
 
-const FAVORITE_DAOS_STORE_IDENTIFIER = `favorite-daos-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`
+const FAVORITE_DAOS_STORE_NAMESPACE =
+  process.env.NEXT_PUBLIC_NETWORK_TYPE?.trim().toLowerCase() || 'default'
+const FAVORITE_DAOS_STORE_IDENTIFIER = `favorite-daos-${FAVORITE_DAOS_STORE_NAMESPACE}`
 const LEGACY_FAVORITE_DAOS_STORAGE_KEY_PREFIX = 'favorite-daos:'
 
 export type FavoriteDao = {
@@ -30,7 +32,7 @@ type ToggleFavoriteResult =
   | {
       didToggle: false
       isFavorited: false
-      reason: 'limit'
+      reason: 'limit' | 'no_wallet'
     }
 
 type FavoriteDaosState = {
@@ -60,10 +62,38 @@ export const getFavoriteDaoKey = (
 ) => getFavoriteItemKey(favorite.chainId, favorite.collectionAddress)
 
 const isFavoriteDao = (value: unknown): value is FavoriteDao => {
-  if (!value || typeof value !== 'object') return false
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+
+  const allowedKeys = new Set<keyof FavoriteDao>([
+    'chainId',
+    'collectionAddress',
+    'tokenId',
+    'tokenName',
+    'tokenImage',
+    'collectionName',
+    'bid',
+    'endTime',
+  ])
+
+  const keys = Object.keys(value)
+  if (keys.some((key) => !allowedKeys.has(key as keyof FavoriteDao))) {
+    return false
+  }
 
   const item = value as FavoriteDao
-  return typeof item.chainId === 'number' && typeof item.collectionAddress === 'string'
+  return (
+    typeof item.chainId === 'number' &&
+    typeof item.collectionAddress === 'string' &&
+    (typeof item.tokenId === 'undefined' ||
+      typeof item.tokenId === 'number' ||
+      typeof item.tokenId === 'string') &&
+    (typeof item.tokenName === 'undefined' || typeof item.tokenName === 'string') &&
+    (typeof item.tokenImage === 'undefined' || typeof item.tokenImage === 'string') &&
+    (typeof item.collectionName === 'undefined' ||
+      typeof item.collectionName === 'string') &&
+    (typeof item.bid === 'undefined' || typeof item.bid === 'string') &&
+    (typeof item.endTime === 'undefined' || typeof item.endTime === 'number')
+  )
 }
 
 const parseStoredFavorites = (storedValue: string | null): FavoriteDao[] => {

@@ -80,15 +80,16 @@ export const favoriteButton = style({
   width: 36,
   height: 36,
   borderRadius: 999,
-  border: '1px solid rgba(0, 0, 0, 0.08)',
-  background: 'rgba(255, 255, 255, 0.94)',
-  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
+  border: `1px solid ${theme.colors.border}`,
+  background: theme.colors.background2,
+  boxShadow: `0 8px 24px ${theme.colors.ghostHover}`,
   cursor: 'pointer',
   transition: 'transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease',
   zIndex: 1,
   ':hover': {
     transform: 'scale(1.04)',
-    boxShadow: '0 10px 28px rgba(0, 0, 0, 0.16)',
+    borderColor: theme.colors.neutralHover,
+    boxShadow: `0 10px 28px ${theme.colors.ghostHover}`,
   },
   ':focus-visible': {
     outline: `2px solid ${theme.colors.text1}`,
@@ -98,7 +99,9 @@ export const favoriteButton = style({
     cursor: 'not-allowed',
     opacity: 0.55,
     transform: 'none',
-    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+    borderColor: theme.colors.border,
+    background: theme.colors.background2,
+    boxShadow: `0 8px 24px ${theme.colors.ghostHover}`,
   },
 })
 

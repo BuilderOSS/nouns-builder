@@ -171,6 +171,7 @@ export const DaoCard = ({
           type="button"
           className={favoriteButton}
           aria-label={favoriteLabel}
+          aria-pressed={isFavorited}
           title={favoriteLabel}
           onClick={onFavoriteToggle}
           disabled={favoriteDisabled}

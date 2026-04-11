@@ -5,11 +5,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { AddressType } from '@buildeross/types'
 import React from 'react'
-import {
-  buildFavoriteDao,
-  FAVORITE_DAO_LIMIT,
-  type FavoriteDao,
-} from 'src/hooks/useFavoriteDaos'
+import { buildFavoriteDao, type FavoriteDao } from 'src/hooks/useFavoriteDaos'
 import { formatEther } from 'viem'
 
 type ExploreDaoCardProps = {
@@ -57,5 +53,3 @@ export const ExploreDaoCard: React.FC<ExploreDaoCardProps> = ({
     />
   )
 }
-
-export { FAVORITE_DAO_LIMIT }
