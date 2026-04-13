@@ -1,8 +1,6 @@
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { Box, Button, Flex } from '@buildeross/zord'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Box, Button, Flex } from '@buildeross/zord'
-import React, { useEffect, useRef } from 'react'
 
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
 
@@ -31,7 +29,7 @@ export const DaoDescription = ({ description }: { description?: string }) => {
     return ''
   }, [description])
 
-  if (!correctedDescription) return null
+  if (!description || description.trim() === '') return null
 
   return (
     <Flex direction="column" align="flex-end">

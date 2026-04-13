@@ -44,7 +44,9 @@ describe('parseDaoMetadataString', () => {
     expect(parsed.description).toBe('legacy description')
     expect(parsed.links).toEqual({})
   })
+})
 
+describe('serializeDaoMetadata', () => {
   it('serializes to frontmatter markdown', () => {
     const serialized = serializeDaoMetadata('The main description', [
       { key: 'twitter', url: 'https://x.com/nouns' },

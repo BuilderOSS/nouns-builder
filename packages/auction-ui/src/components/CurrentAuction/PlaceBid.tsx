@@ -36,6 +36,8 @@ interface PlaceBidProps {
 }
 
 const INSUFFICIENT_BALANCE_ERROR = 'Insufficient ETH balance for this bid.'
+const INVALID_COMMENT_ERROR =
+  'Bid comment contains unsupported characters. Please retype your comment.'
 const ENTER_BID_HELPER_TEXT = (formattedMinBid: string) =>
   `Enter at least ${formattedMinBid} ETH to place a bid.`
 const MIN_BID_HELPER_TEXT = (formattedMinBid: string) =>
@@ -63,6 +65,7 @@ const InnerPlaceBid = ({
   const [bidAmount, setBidAmount] = React.useState<string | undefined>(undefined)
   const [bidComment, setBidComment] = React.useState<string>('')
   const [bidError, setBidError] = useState<string | null>(null)
+  const [bidCommentError, setBidCommentError] = useState<string | null>(null)
 
   const auctionContractParams = {
     abi: auctionAbi,
@@ -119,6 +122,7 @@ const InnerPlaceBid = ({
   const bidCommentDataSuffix = useMemo(() => {
     const trimmedComment = bidComment.trim()
     if (!trimmedComment) return undefined
+    if (trimmedComment.includes('\uFFFD')) return undefined
 
     return stringToHex(trimmedComment)
   }, [bidComment])
@@ -199,6 +203,7 @@ const InnerPlaceBid = ({
 
   const handleCreateBid = useCallback(async () => {
     if (!isMinBid || !bidAmount || creatingBid) return
+    if (bidCommentError) return
 
     if (hasInsufficientBalance) {
       setBidError(INSUFFICIENT_BALANCE_ERROR)
@@ -224,20 +229,34 @@ const InnerPlaceBid = ({
     bidAmountInWei,
     minAmountForWarning,
     createBidTransaction,
+    bidCommentError,
   ])
 
   useEffect(() => {
     document.body.style.overflow = !!showWarning ? 'hidden' : 'unset'
   }, [showWarning])
 
+  useEffect(() => {
+    const trimmedComment = bidComment.trim()
+    if (trimmedComment && trimmedComment.includes('\uFFFD')) {
+      setBidCommentError(INVALID_COMMENT_ERROR)
+      return
+    }
+
+    setBidCommentError(null)
+  }, [bidComment])
+
   const isValidBid = bidAmount && isMinBid
   const isValidChain = wagmiChain?.id === chainId
   const hasBidAmount = !!bidAmount
   const shouldDisableBidButton =
-    address && isValidChain ? !isValidBid || hasInsufficientBalance : false
+    address && isValidChain
+      ? !isValidBid || hasInsufficientBalance || !!bidCommentError
+      : false
   const disabledBidMessage = useMemo(() => {
     if (!(address && isValidChain)) return null
     if (hasInsufficientBalance) return INSUFFICIENT_BALANCE_ERROR
+    if (bidCommentError) return bidCommentError
     if (!hasBidAmount) return ENTER_BID_HELPER_TEXT(formattedMinBid)
     if (!isMinBid) return MIN_BID_HELPER_TEXT(formattedMinBid)
     return null
@@ -245,12 +264,14 @@ const InnerPlaceBid = ({
     address,
     isValidChain,
     hasInsufficientBalance,
+    bidCommentError,
     hasBidAmount,
     formattedMinBid,
     isMinBid,
   ])
-  const helperText = bidError || disabledBidMessage
-  const helperTextColor = bidError || hasInsufficientBalance ? 'negative' : 'tertiary'
+  const helperText = bidError || bidCommentError || disabledBidMessage
+  const helperTextColor =
+    bidError || bidCommentError || hasInsufficientBalance ? 'negative' : 'tertiary'
 
   // Build share URL with referral parameter if user is connected
   const shareUrl = useMemo(() => {
@@ -322,6 +343,8 @@ const InnerPlaceBid = ({
             </Box>
             <Box mt="x2" mr={{ '@initial': 'x0', '@768': 'x2' }}>
               <textarea
+                id="bid-comment"
+                aria-label="Add a bid comment"
                 placeholder="Add a bid comment (optional)"
                 value={bidComment}
                 maxLength={280}

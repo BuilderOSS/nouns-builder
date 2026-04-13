@@ -294,9 +294,36 @@ describe('PlaceBid', () => {
     await user.type(screen.getByPlaceholderText('Add a bid comment (optional)'), '   ')
     await user.click(screen.getByRole('button', { name: 'Place bid' }))
 
-    expect(simulateContract).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.not.objectContaining({ dataSuffix: expect.anything() })
+    const [, request] = vi.mocked(simulateContract).mock.calls[0]
+    expect(request).not.toHaveProperty('dataSuffix')
+  })
+
+  it('shows validation error and blocks submit for invalid replacement characters', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
     )
+
+    await user.type(screen.getByRole('spinbutton'), '1')
+    await user.type(screen.getByLabelText('Add a bid comment'), '\uFFFD')
+
+    expect(
+      screen.getByText(
+        'Bid comment contains unsupported characters. Please retype your comment.'
+      )
+    ).toBeTruthy()
+    expect(
+      (screen.getByRole('button', { name: 'Place bid' }) as HTMLButtonElement).disabled
+    ).toBe(true)
+
+    await user.click(screen.getByRole('button', { name: 'Place bid' }))
+    expect(simulateContract).not.toHaveBeenCalled()
   })
 })

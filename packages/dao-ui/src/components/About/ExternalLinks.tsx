@@ -46,8 +46,46 @@ const normalizeLinkKey = (key: string): string => {
   return normalized === 'twitter' ? 'x' : normalized
 }
 
-const normalizeUrlForDedupe = (url: string): string =>
-  url.trim().replace(/\/+$/, '').toLowerCase()
+const isHttpProtocol = (protocol: string): boolean =>
+  protocol === 'http:' || protocol === 'https:'
+
+const normalizeUrlForHref = (url: string): string => {
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+
+  try {
+    const parsed = new URL(trimmed)
+    const protocol = parsed.protocol.toLowerCase()
+
+    if (!isHttpProtocol(protocol)) return ''
+
+    return parsed.toString()
+  } catch {
+    return ''
+  }
+}
+
+const normalizeUrlForDedupe = (url: string): string => {
+  const trimmed = url.trim()
+  if (!trimmed) return ''
+
+  try {
+    const parsed = new URL(trimmed)
+    const protocol = parsed.protocol.toLowerCase()
+
+    if (!isHttpProtocol(protocol)) return ''
+
+    const pathname =
+      parsed.pathname.length > 1 ? parsed.pathname.replace(/\/+$/, '') : parsed.pathname
+
+    const hostname = parsed.hostname.toLowerCase()
+    const port = parsed.port ? `:${parsed.port}` : ''
+
+    return `${protocol}//${hostname}${port}${pathname}${parsed.search}${parsed.hash}`
+  } catch {
+    return ''
+  }
+}
 
 const getIconForLinkKey = (key: string): IconType => {
   if (key === 'x') return 'twitter'
@@ -66,12 +104,13 @@ export const ExternalLinks: React.FC<ExternalLinksProps> = ({ links }) => {
     const next: Record<string, string> = {}
     const usedUrls: Record<string, boolean> = {}
 
-    for (const [rawKey, rawUrl] of entries) {
+    for (let i = entries.length - 1; i >= 0; i -= 1) {
+      const [rawKey, rawUrl] = entries[i]
       const key = normalizeLinkKey(rawKey)
-      const url = rawUrl?.trim?.() || ''
+      const url = normalizeUrlForHref(rawUrl || '')
       const normalizedUrl = normalizeUrlForDedupe(url)
 
-      if (!key || !url) continue
+      if (!key || !url || !normalizedUrl) continue
       if (usedUrls[normalizedUrl]) continue
       if (!next[key]) {
         next[key] = url
