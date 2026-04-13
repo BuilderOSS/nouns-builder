@@ -1,7 +1,7 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
-import { useLinks } from '@buildeross/ui/LinksProvider'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
+import { useLinks } from '@buildeross/ui/LinksProvider'
+import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { walletSnippet } from '@buildeross/utils'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -58,7 +58,8 @@ const fetcher = async (url: string): Promise<WalletProfilePreviewResponse> => {
   return body as WalletProfilePreviewResponse
 }
 
-const compactAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`
+const compactAddress = (address: string) =>
+  `${address.slice(0, 6)}...${address.slice(-6)}`
 const PREVIEW_MIN_WIDTH = '248px'
 
 export const FeedWalletProfilePreview = ({
@@ -185,7 +186,9 @@ export const FeedWalletProfilePreview = ({
         >
           <Flex align="center" gap="x2" mb="x2">
             <Avatar address={address} src={avatarSrc} size="40" />
-            <Box style={{ minWidth: 0, textAlign: 'left', maxWidth: 'calc(100vw - 120px)' }}>
+            <Box
+              style={{ minWidth: 0, textAlign: 'left', maxWidth: 'calc(100vw - 120px)' }}
+            >
               <Text variant="heading-xs" style={{ whiteSpace: 'nowrap' }}>
                 {resolvedName}
               </Text>
@@ -255,8 +258,8 @@ export const FeedWalletProfilePreview = ({
               whiteSpace: 'nowrap',
             }}
           >
-            {data?.stats.totalDaos ?? 0} DAOs, {data?.stats.totalProposals ?? 0} proposals,{' '}
-            {data?.stats.totalVotes ?? 0} votes
+            {data?.stats.totalDaos ?? 0} DAOs, {data?.stats.totalProposals ?? 0}{' '}
+            proposals, {data?.stats.totalVotes ?? 0} votes
           </Text>
 
           {isMobile ? (

@@ -10,8 +10,8 @@ import React from 'react'
 import { formatEther, zeroAddress } from 'viem'
 
 import { feedItemContentHorizontal, feedItemImage, feedItemTitle } from './Feed.css'
-import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 import { ImageSkeleton } from './FeedSkeleton'
+import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 
 interface AuctionSettledItemProps {
   item: AuctionSettledFeedItem

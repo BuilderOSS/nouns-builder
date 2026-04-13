@@ -8,8 +8,8 @@ import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { useMemo } from 'react'
 
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { PropDateReplyCard } from './PropDateReplyCard'
 
 export const PropDateCard = ({
@@ -64,9 +64,9 @@ export const PropDateCard = ({
           <Flex align="center" gap="x2">
             <Avatar address={propDate.creator} src={ensAvatar} size="28" />
             <Text fontWeight="display">{ensName || walletSnippet(propDate.creator)}</Text>
-          <Text variant="label-sm" color="text3">
-            • {formatTimeAgo(propDate.timeCreated)}
-          </Text>
+            <Text variant="label-sm" color="text3">
+              • {formatTimeAgo(propDate.timeCreated)}
+            </Text>
           </Flex>
         </ProposalWalletProfilePreview>
         {milestoneTitle && (

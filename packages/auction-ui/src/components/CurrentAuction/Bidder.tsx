@@ -4,8 +4,8 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 
-import { AuctionWalletProfilePreview } from '../AuctionWalletProfilePreview'
 import { recentBidder } from '../Auction.css'
+import { AuctionWalletProfilePreview } from '../AuctionWalletProfilePreview'
 
 interface BidderProps {
   address: string

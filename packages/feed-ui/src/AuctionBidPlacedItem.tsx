@@ -15,8 +15,8 @@ import {
   feedItemSubtitle,
   feedItemTitle,
 } from './Feed.css'
-import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 import { ImageSkeleton } from './FeedSkeleton'
+import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 
 interface AuctionBidPlacedItemProps {
   item: AuctionBidPlacedFeedItem

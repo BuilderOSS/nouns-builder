@@ -6,9 +6,9 @@ import { useChainStore } from '@buildeross/stores'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Icon, Label, Text } from '@buildeross/zord'
 
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { ProposalNavigation } from '../ProposalNavigation'
 import { ProposalStatus } from '../ProposalStatus'
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 
 interface ProposalHeaderProps {
   proposal: Proposal
@@ -34,9 +34,8 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({
 }) => {
   const { title, proposer, proposalNumber } = proposal
 
-  const { displayName: proposerDisplayName, ensAvatar: proposerAvatar } = useEnsData(
-    proposer
-  )
+  const { displayName: proposerDisplayName, ensAvatar: proposerAvatar } =
+    useEnsData(proposer)
   const chain = useChainStore((x) => x.chain)
 
   const displayTransactionHash = getDisplayTransactionHash(proposal)

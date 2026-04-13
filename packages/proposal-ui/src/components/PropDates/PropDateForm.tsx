@@ -26,8 +26,8 @@ import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import * as Yup from 'yup'
 
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 
 const propDateValidationSchema = Yup.object().shape({
   milestoneId: Yup.number(),

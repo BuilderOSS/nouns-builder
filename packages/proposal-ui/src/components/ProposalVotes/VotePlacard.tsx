@@ -88,7 +88,9 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
           onPointerDownCapture={(event: React.PointerEvent<HTMLDivElement>) =>
             event.stopPropagation()
           }
-          onClickCapture={(event: React.MouseEvent<HTMLDivElement>) => event.stopPropagation()}
+          onClickCapture={(event: React.MouseEvent<HTMLDivElement>) =>
+            event.stopPropagation()
+          }
         >
           <ProposalWalletProfilePreview
             address={vote.voter as `0x${string}`}

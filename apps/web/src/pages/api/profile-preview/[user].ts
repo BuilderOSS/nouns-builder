@@ -1,4 +1,8 @@
-import { PUBLIC_DEFAULT_CHAINS, PUBLIC_IS_TESTNET, PUBLIC_SUBGRAPH_URL } from '@buildeross/constants'
+import {
+  PUBLIC_DEFAULT_CHAINS,
+  PUBLIC_IS_TESTNET,
+  PUBLIC_SUBGRAPH_URL,
+} from '@buildeross/constants'
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { AddressType } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -216,7 +220,10 @@ const fetchChainPreview = async (
     totalProposals += response.proposals.length
     totalVotes += response.proposalVotes.length
 
-    if (response.proposals.length < PAGE_SIZE && response.proposalVotes.length < PAGE_SIZE) {
+    if (
+      response.proposals.length < PAGE_SIZE &&
+      response.proposalVotes.length < PAGE_SIZE
+    ) {
       break
     }
 

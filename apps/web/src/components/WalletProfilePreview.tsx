@@ -57,7 +57,8 @@ const fetcher = async (url: string): Promise<WalletProfilePreviewResponse> => {
   return body as WalletProfilePreviewResponse
 }
 
-const compactAddress = (address: string) => `${address.slice(0, 6)}...${address.slice(-6)}`
+const compactAddress = (address: string) =>
+  `${address.slice(0, 6)}...${address.slice(-6)}`
 const PREVIEW_MIN_WIDTH = '248px'
 
 export const WalletProfilePreview = ({
@@ -186,7 +187,9 @@ export const WalletProfilePreview = ({
         >
           <Flex align="center" gap="x2" mb="x2">
             <Avatar address={address} src={avatarSrc} size="40" />
-            <Box style={{ minWidth: 0, textAlign: 'left', maxWidth: 'calc(100vw - 120px)' }}>
+            <Box
+              style={{ minWidth: 0, textAlign: 'left', maxWidth: 'calc(100vw - 120px)' }}
+            >
               <Text variant="heading-xs" style={{ whiteSpace: 'nowrap' }}>
                 {resolvedName}
               </Text>

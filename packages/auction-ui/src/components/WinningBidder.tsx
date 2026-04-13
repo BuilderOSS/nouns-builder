@@ -3,8 +3,8 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { Box, Flex, Icon } from '@buildeross/zord'
 import { zeroAddress } from 'viem'
 
-import { AuctionWalletProfilePreview } from './AuctionWalletProfilePreview'
 import { AuctionDetail } from './AuctionDetail'
+import { AuctionWalletProfilePreview } from './AuctionWalletProfilePreview'
 
 export const WinningBidder = ({ owner }: { owner?: string }) => {
   const { displayName, ensAvatar } = useEnsData(owner)

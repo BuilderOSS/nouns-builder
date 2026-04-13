@@ -17,11 +17,11 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import {
   getSablierAirdropFactories,
   getSablierContracts,
 } from '@buildeross/utils/sablier/contracts'
-import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
@@ -275,7 +275,8 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                       rel="noreferrer"
                       target="_blank"
                     >
-                      {representedDisplayName || walletSnippet(proposal.representedAddress)}
+                      {representedDisplayName ||
+                        walletSnippet(proposal.representedAddress)}
                     </a>
                   </Text>
                 )}

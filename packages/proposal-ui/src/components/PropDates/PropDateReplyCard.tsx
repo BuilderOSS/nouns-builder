@@ -6,8 +6,8 @@ import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
+import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 
 export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
   const { ensName, ensAvatar } = useEnsData(reply.creator)
@@ -32,8 +32,8 @@ export const PropDateReplyCard = ({ reply }: { reply: PropDate }) => {
         >
           <Flex align="center" gap="x2" mb="x1">
             <Text fontWeight="display">{ensName || walletSnippet(reply.creator)}</Text>
-          <Text variant="label-sm" color="text3">
-            • {formatTimeAgo(reply.timeCreated)}
+            <Text variant="label-sm" color="text3">
+              • {formatTimeAgo(reply.timeCreated)}
             </Text>
           </Flex>
         </ProposalWalletProfilePreview>
