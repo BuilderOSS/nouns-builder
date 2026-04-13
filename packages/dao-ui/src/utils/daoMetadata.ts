@@ -73,10 +73,7 @@ export const parseDaoMetadataString = (
   }
 
   try {
-    const description =
-      typeof parsed.description === 'string' && parsed.description.length > 0
-        ? parsed.description
-        : raw
+    const description = typeof parsed.description === 'string' ? parsed.description : raw
 
     const linkEntries =
       parsed.links && typeof parsed.links === 'object'

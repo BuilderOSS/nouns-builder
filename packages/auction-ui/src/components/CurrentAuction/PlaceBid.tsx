@@ -16,7 +16,12 @@ import { formatEther, parseEther, stringToHex } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { auctionActionButtonVariants, bidForm, bidInput } from '../Auction.css'
+import {
+  auctionActionButtonVariants,
+  bidCommentInput,
+  bidForm,
+  bidInput,
+} from '../Auction.css'
 import { WarningModal } from './WarningModal'
 
 interface PlaceBidProps {
@@ -321,15 +326,8 @@ const InnerPlaceBid = ({
                 value={bidComment}
                 maxLength={280}
                 rows={3}
+                className={bidCommentInput}
                 onChange={(event) => setBidComment(event.target.value)}
-                style={{
-                  width: '100%',
-                  border: '1px solid #d9d9d9',
-                  borderRadius: 8,
-                  padding: 12,
-                  font: 'inherit',
-                  resize: 'vertical',
-                }}
               />
             </Box>
             {helperText ? (

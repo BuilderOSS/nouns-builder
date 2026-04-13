@@ -164,6 +164,9 @@ export const useFormStore = create(
     {
       name: `nouns-builder-create-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`,
       storage: createJSONStorage(() => localStorage),
+      // Version history note: v3 was used for an intermediate links migration;
+      // current v4 keeps sequential guards (<2, <3, <4) so older persisted states
+      // still migrate correctly through each step.
       version: 4,
       migrate: (persistedState: any, version: number) => {
         if (version < 2 && persistedState?.setUpArtwork !== undefined) {

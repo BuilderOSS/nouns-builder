@@ -214,6 +214,33 @@ export const bidInput = style([
   }),
 ])
 
+export const bidCommentInput = style([
+  {
+    width: '100%',
+    border: `1px solid ${vars.color.border}`,
+    borderRadius: 12,
+    boxSizing: 'border-box',
+    outline: 'none',
+    resize: 'vertical',
+    font: 'inherit',
+    selectors: {
+      '&::placeholder': {
+        color: theme.colors.tertiary,
+      },
+      '&:focus': {
+        borderColor: vars.color.accent,
+        backgroundColor: vars.color.background1,
+      },
+    },
+  },
+  atoms({
+    backgroundColor: 'background2',
+    p: 'x3',
+    fontSize: 16,
+    lineHeight: 24,
+  }),
+])
+
 export const auctionImg = style([
   {
     '@media': {

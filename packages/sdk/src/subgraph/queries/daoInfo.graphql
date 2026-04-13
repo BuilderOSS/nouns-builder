@@ -5,6 +5,7 @@ query daoInfo($tokenAddress: ID!) {
     contractImage
     projectURI
     links {
+      id
       key
       url
     }

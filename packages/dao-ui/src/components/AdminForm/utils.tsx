@@ -54,6 +54,8 @@ export const formValuesToTransactionMap: FormValuesTransactionMap = {
       }),
   },
   daoLinks: {
+    // daoLinks updates are intentionally handled in AdminForm.tsx via serializeDaoMetadata;
+    // this placeholder keeps the map shape consistent while skipping standalone calldata here.
     functionSignature: 'updateDescription',
     getTarget: () => undefined,
     constructCalldata: () => undefined,

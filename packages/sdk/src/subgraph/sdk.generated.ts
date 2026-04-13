@@ -7699,7 +7699,7 @@ export type DaoFragment = {
   treasuryAddress: any
   auctionAddress: any
   governorAddress: any
-  links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+  links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
 }
 
 export type ExploreDaoFragment = {
@@ -8276,7 +8276,7 @@ export type DaoInfoQuery = {
     projectURI: string
     totalSupply: number
     ownerCount: number
-    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
   } | null
 }
 
@@ -8398,7 +8398,7 @@ export type DaoOgMetadataQuery = {
     auctionAddress: any
     treasuryAddress: any
     governorAddress: any
-    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
   } | null
 }
 
@@ -8423,7 +8423,7 @@ export type ExploreDaosSearchQuery = {
     auctionAddress: any
     governorAddress: any
     metadataAddress: any
-    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
     tokens: Array<{
       __typename?: 'Token'
       tokenId: any
@@ -8448,7 +8448,7 @@ export type ExploreDaosSearchQuery = {
     auctionAddress: any
     governorAddress: any
     metadataAddress: any
-    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
     tokens: Array<{
       __typename?: 'Token'
       tokenId: any
@@ -8598,7 +8598,7 @@ export type DaosForDashboardQuery = {
       highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
       token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
     } | null
-    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
   }>
 }
 
@@ -8619,7 +8619,7 @@ export type DaosForUserQuery = {
     treasuryAddress: any
     auctionAddress: any
     governorAddress: any
-    links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
   }>
 }
 
@@ -9324,7 +9324,7 @@ export type TokenWithDaoQuery = {
       auctionAddress: any
       treasuryAddress: any
       governorAddress: any
-      links: Array<{ __typename?: 'DAOLink'; key: string; url: string }>
+      links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
     }
   } | null
 }
@@ -9712,6 +9712,7 @@ export const DaoFragmentDoc = gql`
     name
     contractImage
     links {
+      id
       key
       url
     }
@@ -10151,6 +10152,7 @@ export const DaoInfoDocument = gql`
       contractImage
       projectURI
       links {
+        id
         key
         url
       }
@@ -10274,6 +10276,7 @@ export const DaoOgMetadataDocument = gql`
       name
       description
       links {
+        id
         key
         url
       }
@@ -10303,6 +10306,7 @@ export const ExploreDaosSearchDocument = gql`
       symbol
       description
       links {
+        id
         key
         url
       }
@@ -10331,6 +10335,7 @@ export const ExploreDaosSearchDocument = gql`
       symbol
       description
       links {
+        id
         key
         url
       }
@@ -10820,6 +10825,7 @@ export const TokenWithDaoDocument = gql`
         name
         description
         links {
+          id
           key
           url
         }

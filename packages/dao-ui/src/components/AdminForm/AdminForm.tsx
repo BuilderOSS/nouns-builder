@@ -388,7 +388,13 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                         onChange={(daoLinks: DaoLinkInput[]) =>
                           formik.setFieldValue('daoLinks', daoLinks)
                         }
-                        onBlur={() => formik.setFieldTouched('daoLinks', true, false)}
+                        onBlur={(index, field) =>
+                          formik.setFieldTouched(
+                            `daoLinks.${index}.${field}`,
+                            true,
+                            false
+                          )
+                        }
                         inputLabel={'DAO Links (optional)'}
                         helperText={
                           'Use DAO Website for your main site, then add socials/docs here.'

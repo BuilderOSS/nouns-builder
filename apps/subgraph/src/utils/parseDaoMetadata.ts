@@ -38,9 +38,7 @@ export function parseDaoMetadata(rawDescription: string): ParsedDaoMetadata {
   let nextDescription = rawDescription
   let parsedDescription = parsed.get('description')
   if (parsedDescription && parsedDescription.kind == JSONValueKind.STRING) {
-    let parsedDescriptionValue = parsedDescription.toString()
-    nextDescription =
-      parsedDescriptionValue.length > 0 ? parsedDescriptionValue : rawDescription
+    nextDescription = parsedDescription.toString()
   }
 
   let parsedLinks = parsed.get('links')
@@ -50,6 +48,7 @@ export function parseDaoMetadata(rawDescription: string): ParsedDaoMetadata {
     for (let i = 0; i < parsedLinksObject.entries.length; i++) {
       let entry = parsedLinksObject.entries[i]
       let key = entry.key.trim().toLowerCase()
+      if (key == 'twitter') key = 'x'
       if (key.length == 0) continue
 
       if (entry.value.kind != JSONValueKind.STRING) continue

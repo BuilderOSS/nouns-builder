@@ -1,6 +1,8 @@
 import { urlValidationSchema } from '@buildeross/utils/yup'
 import * as Yup from 'yup'
 
+import { normalizeLinkKey } from '../../utils/daoMetadata'
+
 export interface GeneralFormValues {
   daoAvatar?: string
   daoName: string
@@ -28,7 +30,7 @@ export const generalValidationSchema = Yup.object().shape({
     )
     .test('unique-link-keys', 'Link keys should be unique.', (values) => {
       const keys = (values || [])
-        .map((link) => link?.key?.trim()?.toLowerCase() || '')
+        .map((link) => normalizeLinkKey(link?.key || ''))
         .filter(Boolean)
 
       return keys.length === new Set(keys).size

@@ -4,7 +4,7 @@ import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { SingleImageUpload } from '@buildeross/ui/SingleImageUpload'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Flex, Stack, Text } from '@buildeross/zord'
-import { Form, Formik } from 'formik'
+import { Form, Formik, getIn } from 'formik'
 import React, { BaseSyntheticEvent } from 'react'
 
 import { useFormStore } from '../../stores'
@@ -137,16 +137,18 @@ export const GeneralForm: React.FC<GeneralFormProps> = ({ title }) => {
               <DaoLinksField
                 value={formik.values.links}
                 onChange={(links: DaoLinkInput[]) => formik.setFieldValue('links', links)}
-                onBlur={() => formik.setFieldTouched('links', true, false)}
+                onBlur={(index, field) =>
+                  formik.setFieldTouched(`links.${index}.${field}`, true, false)
+                }
                 inputLabel={'Additional links (optional)'}
                 helperText={
                   'Add social or community links in addition to your primary DAO Website.'
                 }
-                getFieldError={(index: number, field: 'key' | 'url') =>
-                  (formik.touched.links as any)?.[index]?.[field]
-                    ? (formik.errors.links as any)?.[index]?.[field]
-                    : undefined
-                }
+                getFieldError={(index: number, field: 'key' | 'url') => {
+                  const error = getIn(formik.errors, `links.${index}.${field}`)
+                  const touched = getIn(formik.touched, `links.${index}.${field}`)
+                  return touched && typeof error === 'string' ? error : undefined
+                }}
                 errorMessage={
                   typeof formik.errors.links === 'string'
                     ? formik.errors.links

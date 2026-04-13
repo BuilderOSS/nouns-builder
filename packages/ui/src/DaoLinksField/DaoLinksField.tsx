@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Icon, IconType, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, IconType, Text, vars } from '@buildeross/zord'
 import React from 'react'
 
 export type DaoLinkInput = {
@@ -12,7 +12,9 @@ export type KnownDaoLinkKey =
   | 'github'
   | 'farcaster'
   | 'docs'
+  | 'notion'
   | 'forum'
+  | 'discourse'
   | 'website'
 
 type KnownDaoLinkOption = {
@@ -29,7 +31,9 @@ const KNOWN_DAO_LINK_OPTIONS: KnownDaoLinkOption[] = [
   { key: 'github', label: 'GitHub', icon: 'github' },
   { key: 'farcaster', label: 'Farcaster', icon: 'globe' },
   { key: 'docs', label: 'Docs', icon: 'globe' },
+  { key: 'notion', label: 'Notion', icon: 'globe' },
   { key: 'forum', label: 'Forum', icon: 'globe' },
+  { key: 'discourse', label: 'Discourse', icon: 'globe' },
   { key: 'website', label: 'Website', icon: 'globe' },
 ]
 
@@ -46,7 +50,7 @@ const getIconForKey = (key: string): IconType => getKnownOption(key)?.icon || 'q
 interface DaoLinksFieldProps {
   value: DaoLinkInput[]
   onChange: (next: DaoLinkInput[]) => void
-  onBlur?: () => void
+  onBlur?: (index: number, field: 'key' | 'url') => void
   inputLabel?: string
   helperText?: string
   addButtonLabel?: string
@@ -125,14 +129,15 @@ export const DaoLinksField: React.FC<DaoLinksFieldProps> = ({
 
                       updateLinkAtIndex(index, { ...link, key: nextValue })
                     }}
-                    onBlur={onBlur}
+                    onBlur={() => onBlur?.(index, 'key')}
                     style={{
-                      border: '1px solid #dcdcdc',
-                      borderRadius: 8,
-                      padding: '12px',
+                      border: `1px solid ${vars.color.border}`,
+                      borderRadius: vars.radii.curved,
+                      padding: vars.space.x3,
                       minHeight: 48,
                       minWidth: 150,
-                      backgroundColor: 'white',
+                      backgroundColor: vars.color.background1,
+                      color: vars.color.text1,
                     }}
                   >
                     {KNOWN_DAO_LINK_OPTIONS.map((option) => (
@@ -151,14 +156,16 @@ export const DaoLinksField: React.FC<DaoLinksFieldProps> = ({
                       onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                         updateLinkAtIndex(index, { ...link, key: event.target.value })
                       }}
-                      onBlur={onBlur}
+                      onBlur={() => onBlur?.(index, 'key')}
                       placeholder={keyPlaceholder}
                       style={{
-                        border: '1px solid #dcdcdc',
-                        borderRadius: 8,
-                        padding: '12px',
+                        border: `1px solid ${vars.color.border}`,
+                        borderRadius: vars.radii.curved,
+                        padding: vars.space.x3,
                         minHeight: 48,
                         width: '100%',
+                        backgroundColor: vars.color.background1,
+                        color: vars.color.text1,
                       }}
                     />
                   ) : null}
@@ -170,14 +177,16 @@ export const DaoLinksField: React.FC<DaoLinksFieldProps> = ({
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                       updateLinkAtIndex(index, { ...link, url: event.target.value })
                     }}
-                    onBlur={onBlur}
+                    onBlur={() => onBlur?.(index, 'url')}
                     placeholder={urlPlaceholder}
                     style={{
-                      border: '1px solid #dcdcdc',
-                      borderRadius: 8,
-                      padding: '12px',
+                      border: `1px solid ${vars.color.border}`,
+                      borderRadius: vars.radii.curved,
+                      padding: vars.space.x3,
                       minHeight: 48,
                       width: '100%',
+                      backgroundColor: vars.color.background1,
+                      color: vars.color.text1,
                     }}
                   />
 

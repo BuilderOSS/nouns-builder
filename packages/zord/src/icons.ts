@@ -122,6 +122,7 @@ export const icons = {
   swap: Swap,
   trash: Trash,
   twitter: Twitter,
+  x: Twitter,
   walletConnect: WalletConnect,
   walletConnectOutline: WalletConnectOutline,
   warning: Warning,

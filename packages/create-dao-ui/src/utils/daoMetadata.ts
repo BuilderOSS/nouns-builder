@@ -3,7 +3,7 @@ export type DaoLinkInput = {
   url: string
 }
 
-const normalizeLinkKey = (key: string): string => {
+export const normalizeLinkKey = (key: string): string => {
   const normalized = key.trim().toLowerCase()
   return normalized === 'twitter' ? 'x' : normalized
 }

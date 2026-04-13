@@ -38,7 +38,6 @@ const IconAnchor: React.FC<IconAnchor> = ({ href, name, label }) => {
 }
 
 interface ExternalLinksProps {
-  address?: string
   links?: Record<string, string>
 }
 

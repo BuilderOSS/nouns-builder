@@ -11,6 +11,7 @@ query tokenWithDao($id: ID!) {
       name
       description
       links {
+        id
         key
         url
       }

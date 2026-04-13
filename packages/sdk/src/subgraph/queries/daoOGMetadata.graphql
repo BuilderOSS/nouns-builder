@@ -3,6 +3,7 @@ query daoOGMetadata($tokenAddress: ID!) {
     name
     description
     links {
+      id
       key
       url
     }
