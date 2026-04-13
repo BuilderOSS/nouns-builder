@@ -18,6 +18,7 @@ import {
   ReservePriceUpdated as ReservePriceUpdatedEvent,
   TimeBufferUpdated as TimeBufferUpdatedEvent,
 } from '../generated/templates/Auction/Auction'
+import { parseAuctionBidComment } from './utils/parseAuctionBidComment'
 
 export function handleAuctionCreated(event: AuctionCreatedEvent): void {
   let context = dataSource.context()
@@ -107,6 +108,7 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   bid.transactionHash = event.transaction.hash
   bid.amount = event.params.amount
   bid.bidder = event.params.bidder
+  bid.comment = parseAuctionBidComment(event.transaction.input)
   bid.auction = `${tokenAddress}:${event.params.tokenId.toString()}`
   bid.bidTime = event.block.timestamp
   bid.save()

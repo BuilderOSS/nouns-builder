@@ -14,7 +14,9 @@ import {
   PropertyAdded as PropertyAddedEvent,
 } from '../generated/templates/MetadataRendererV1/MetadataRendererV1'
 import { Token as TokenContract } from '../generated/templates/Token/Token'
+import { parseDaoMetadata } from './utils/parseDaoMetadata'
 import { setTokenMetadata } from './utils/setTokenMetadata'
+import { syncDaoLinks } from './utils/syncDaoLinks'
 
 export function handleContractImageUpdated(event: ContractImageUpdatedEvent): void {
   let context = dataSource.context()
@@ -39,8 +41,12 @@ export function handleDescriptionUpdated(event: DescriptionUpdatedEvent): void {
   let dao = DAO.load(context.getString('tokenAddress'))
   if (dao == null) return
 
-  dao.description = event.params.newDescription
+  let parsedMetadata = parseDaoMetadata(event.params.newDescription)
+  let previousMetadata = dao.metadata != null ? dao.metadata! : ''
+  dao.description = parsedMetadata.description
+  dao.metadata = event.params.newDescription
   dao.save()
+  syncDaoLinks(dao.id, previousMetadata, event.params.newDescription)
 }
 
 export function handleMetadataUpdate(event: MetadataUpdateEvent): void {
