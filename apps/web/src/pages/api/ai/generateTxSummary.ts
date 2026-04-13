@@ -1,4 +1,3 @@
-import { gateway } from '@ai-sdk/gateway'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import type {
@@ -12,13 +11,9 @@ import type { DecodedEscrowData } from '@buildeross/utils/escrow'
 import { formatBpsValue, formatTokenValue } from '@buildeross/utils/formatArgs'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
-import { generateText } from 'ai'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { getRedisConnection } from 'src/services/redisConnection'
+import { AI_MODEL, generateCachedAiText } from 'src/utils/api/ai/summaries'
 import { withRateLimit } from 'src/utils/api/rateLimit'
-import { keccak256, toHex } from 'viem'
-
-const AI_MODEL = process.env.AI_MODEL || 'openai/gpt-4-turbo'
 
 type RequestBody = {
   chainId: CHAIN_ID
@@ -28,14 +23,6 @@ type RequestBody = {
   tokenMetadata?: TokenMetadata
   nftMetadata?: SerializedNftMetadata
   escrowData?: DecodedEscrowData
-}
-
-const safeStringify = (v: unknown) =>
-  JSON.stringify(v, (_k, val) => (typeof val === 'bigint' ? val.toString() : val))
-
-const getCacheKey = (data: RequestBody, model: string) => {
-  const hash = keccak256(toHex(`${safeStringify(data)}:${model}`))
-  return `ai:txSummary:${hash}`
 }
 
 /**
@@ -276,27 +263,14 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const prompt = generatePrompt(requestData)
     const model = AI_MODEL
 
-    const redisConnection = getRedisConnection()
-    const cacheKey = getCacheKey(requestData, model)
-
-    // Check cache first
-    let cachedText = await redisConnection?.get(cacheKey)
-
-    if (cachedText) {
-      return res.status(200).json({ text: cachedText })
-    }
-
-    // Generate new text if not in cache
-    const result = await generateText({
-      model: gateway(model),
+    const text = await generateCachedAiText({
+      namespace: 'ai:txSummary',
+      data: requestData,
       prompt,
-      abortSignal: AbortSignal.timeout(30000),
+      model,
     })
 
-    // Cache the generated text for 30 days
-    await redisConnection?.setex(cacheKey, 60 * 60 * 24 * 30, result.text)
-
-    res.status(200).json({ text: result.text })
+    res.status(200).json({ text })
   } catch (error) {
     console.error(`Error generating transaction summary:`, error)
 

@@ -146,23 +146,23 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const transactionType = useProposalStore((x) => x.transactionType)
-  const setTransactionType = useProposalStore((x) => x.setTransactionType)
-  const resetTransactionType = useProposalStore((x) => x.resetTransactionType)
-  const transactions = useProposalStore((x) => x.transactions)
-  const title = useProposalStore((x) => x.title)
-  const summary = useProposalStore((x) => x.summary)
-  const representedAddress = useProposalStore((x) => x.representedAddress)
-  const discussionUrl = useProposalStore((x) => x.discussionUrl)
-  const representedAddressEnabled = useProposalStore((x) => x.representedAddressEnabled)
-  const setTitle = useProposalStore((x) => x.setTitle)
-  const setSummary = useProposalStore((x) => x.setSummary)
-  const setRepresentedAddress = useProposalStore((x) => x.setRepresentedAddress)
-  const setDiscussionUrl = useProposalStore((x) => x.setDiscussionUrl)
-  const setRepresentedAddressEnabled = useProposalStore(
-    (x) => x.setRepresentedAddressEnabled
-  )
-  const clearProposal = useProposalStore((x) => x.clearProposal)
+  const {
+    transactionType,
+    setTransactionType,
+    resetTransactionType,
+    transactions,
+    title,
+    summary,
+    representedAddress,
+    discussionUrl,
+    representedAddressEnabled,
+    setTitle,
+    setSummary,
+    setRepresentedAddress,
+    setDiscussionUrl,
+    setRepresentedAddressEnabled,
+    clearProposal,
+  } = useProposalStore()
 
   const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
   const [createStage, setCreateStage] = React.useState<'draft' | 'transactions'>(() =>

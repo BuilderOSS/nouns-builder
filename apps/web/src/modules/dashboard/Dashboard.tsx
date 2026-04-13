@@ -130,7 +130,9 @@ export const Dashboard: React.FC = () => {
       dao.proposals.some(
         (proposal) =>
           proposal.state === ProposalState.Active &&
-          !proposal.votes.some((vote) => vote.voter === address.toLowerCase())
+          !proposal.votes.some(
+            (vote: { voter: string }) => vote.voter === address.toLowerCase()
+          )
       )
     )
   }, [sortedDaos, address])

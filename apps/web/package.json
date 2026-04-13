@@ -42,6 +42,7 @@
     "flatpickr": "^4.6.13",
     "formik": "^2.4.6",
     "framer-motion": "^12.12.1",
+    "graphql-request": "^7.1.2",
     "ioredis": "^5.8.1",
     "next": "^15.5.9",
     "nextjs-progressbar": "^0.0.16",

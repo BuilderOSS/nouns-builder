@@ -43,6 +43,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   const { address: signerAddress } = useAccount()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
+  const chainIdKey = chain.id as keyof typeof MERKLE_RESERVE_MINTER
 
   const auctionContractParams = {
     abi: auctionAbi,
@@ -64,12 +65,12 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
       {
         ...tokenContractParams,
         functionName: 'minter',
-        args: [MERKLE_RESERVE_MINTER[chain.id]],
+        args: [MERKLE_RESERVE_MINTER[chainIdKey]],
       },
       {
         ...tokenContractParams,
         functionName: 'minter',
-        args: [ERC721_REDEEM_MINTER[chain.id]],
+        args: [ERC721_REDEEM_MINTER[chainIdKey]],
       },
     ] as const,
   })
@@ -112,13 +113,13 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   const handleMinterEnabled = React.useCallback(
     async (minterAddress: AddressType) => {
       // Navigate to appropriate tab when minter is enabled
-      if (minterAddress === MERKLE_RESERVE_MINTER[chain.id]) {
+      if (minterAddress === MERKLE_RESERVE_MINTER[chainIdKey]) {
         await openTab('merkle-reserve')
-      } else if (minterAddress === ERC721_REDEEM_MINTER[chain.id]) {
+      } else if (minterAddress === ERC721_REDEEM_MINTER[chainIdKey]) {
         await openTab('erc721-redeem')
       }
     },
-    [chain.id, openTab]
+    [chainIdKey, openTab]
   )
 
   const openTokenPage = React.useCallback(
