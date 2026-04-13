@@ -39,6 +39,14 @@ export const ExploreDaoCard: React.FC<ExploreDaoCardProps> = ({
     ? (dao.highestBid?.amount ?? undefined)
     : (favorite.bid ?? undefined)
   const bidInEth = bid ? formatEther(BigInt(bid)) : undefined
+  const endTimeNum = React.useMemo(() => {
+    if (typeof favorite.endTime === 'number') return favorite.endTime
+    if (typeof favorite.endTime === 'string') {
+      const parsed = Number(favorite.endTime)
+      return Number.isNaN(parsed) ? undefined : parsed
+    }
+    return undefined
+  }, [favorite.endTime])
   const [showDisabledFavoriteTooltip, setShowDisabledFavoriteTooltip] =
     React.useState(false)
   const cardRef = React.useRef<HTMLDivElement | null>(null)
@@ -62,7 +70,7 @@ export const ExploreDaoCard: React.FC<ExploreDaoCardProps> = ({
           tokenName={favorite.tokenName}
           collectionName={favorite.collectionName}
           bid={bidInEth}
-          endTime={favorite.endTime}
+          endTime={endTimeNum}
           isFavorited={isFavorited}
           favoriteDisabled={disableFavorite}
           onFavoriteToggle={

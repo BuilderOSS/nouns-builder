@@ -19,7 +19,11 @@ export const ExploreFavorites = () => {
     [favorites]
   )
 
-  const { data: liveFavoriteDaos } = useSWR<{ daos: FavoriteDao[] }>(
+  const {
+    data: liveFavoriteDaos,
+    isLoading,
+    error: loadError,
+  } = useSWR<{ daos: FavoriteDao[] }>(
     favoritesParam
       ? `/api/favorite-daos?favorites=${encodeURIComponent(favoritesParam)}`
       : null,
@@ -60,18 +64,28 @@ export const ExploreFavorites = () => {
         >
           Connect your wallet to view your favorite DAOs.
         </Text>
-      ) : mergedFavorites.length ? (
+      ) : mergedFavorites.length || isLoading ? (
         <Box style={{ width: '100%', maxWidth: 912 }}>
-          <Grid className={exploreGrid}>
-            {mergedFavorites.map((favorite) => (
-              <ExploreDaoCard
-                key={`${favorite.chainId}:${favorite.collectionAddress.toLowerCase()}`}
-                dao={favorite}
-                isFavorited={isDaoFavorited(favorite.chainId, favorite.collectionAddress)}
-                onFavoriteToggle={toggleFavorite}
-              />
-            ))}
-          </Grid>
+          {mergedFavorites.length > 0 && (
+            <Grid className={exploreGrid}>
+              {mergedFavorites.map((favorite) => (
+                <ExploreDaoCard
+                  key={`${favorite.chainId}:${favorite.collectionAddress.toLowerCase()}`}
+                  dao={favorite}
+                  isFavorited={isDaoFavorited(
+                    favorite.chainId,
+                    favorite.collectionAddress
+                  )}
+                  onFavoriteToggle={toggleFavorite}
+                />
+              ))}
+            </Grid>
+          )}
+          {loadError && (
+            <Text variant="paragraph-sm" color="negative" align="left" mt="x4">
+              Failed to load latest data. Showing cached favorites.
+            </Text>
+          )}
           <Text variant="paragraph-sm" color="tertiary" align="left" mt="x4" mb="x16">
             {favoriteCount}/{FAVORITE_DAO_LIMIT} favorites used
           </Text>

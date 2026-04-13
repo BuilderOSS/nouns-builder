@@ -19,7 +19,7 @@ export type FavoriteDao = {
   tokenImage?: string
   collectionName?: string
   bid?: string
-  endTime?: number
+  endTime?: number | string
 }
 
 type PersistedFavoriteDao = Pick<
@@ -31,6 +31,28 @@ type PersistedFavoriteDao = Pick<
   | 'tokenImage'
   | 'collectionName'
 >
+
+const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === 'object' && !Array.isArray(value)
+
+const isValidPersistedState = (value: unknown): value is FavoriteDaosPersistedState => {
+  if (!isObjectRecord(value)) return false
+
+  const favoritesByAddress = value.favoritesByAddress
+  if (!isObjectRecord(favoritesByAddress)) return false
+
+  for (const favorites of Object.values(favoritesByAddress)) {
+    if (!Array.isArray(favorites)) return false
+
+    for (const favorite of favorites) {
+      if (!isObjectRecord(favorite)) return false
+      if (typeof favorite.chainId !== 'number') return false
+      if (typeof favorite.collectionAddress !== 'string') return false
+    }
+  }
+
+  return true
+}
 
 type ToggleFavoriteResult =
   | {
@@ -203,6 +225,12 @@ export const useFavoriteDaosStore = create<FavoriteDaosStore>()(
       name: FAVORITE_DAOS_STORE_IDENTIFIER,
       version: 1,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persistedState: unknown, version: number): FavoriteDaosPersistedState => {
+        if (version !== 1 || !isValidPersistedState(persistedState)) {
+          return { favoritesByAddress: {} }
+        }
+        return persistedState as FavoriteDaosPersistedState
+      },
       partialize: (state: FavoriteDaosStore): FavoriteDaosPersistedState => ({
         favoritesByAddress: Object.entries(state.favoritesByAddress).reduce<
           Record<string, PersistedFavoriteDao[]>

@@ -15,10 +15,27 @@ type FavoriteDaoDetails = {
   tokenImage?: string
   collectionName?: string
   bid?: string
-  endTime?: number
+  endTime?: number | string
 }
 
 const MAX_FAVORITES = 10
+const SUBGRAPH_TIMEOUT_MS = 8000
+
+const callWithTimeout = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+  let timeoutId: NodeJS.Timeout | undefined
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`Subgraph call timed out after ${timeoutMs}ms`))
+    }, timeoutMs)
+  })
+
+  try {
+    return await Promise.race([promise, timeoutPromise])
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
+  }
+}
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method !== 'GET') {
@@ -69,31 +86,41 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     await Promise.all(
       Array.from(favoritesByChain.entries()).map(
         async ([chainId, collectionAddresses]) => {
-          const response = await SubgraphSDK.connect(chainId).findAuctionsForDaos({
-            daos: collectionAddresses,
-          })
+          try {
+            const response = await callWithTimeout(
+              SubgraphSDK.connect(chainId).findAuctionsForDaos({
+                daos: collectionAddresses,
+              }),
+              SUBGRAPH_TIMEOUT_MS
+            )
 
-          response.auctions.forEach((auction) => {
-            const collectionAddress = auction.dao.tokenAddress.toLowerCase()
-            const bid = auction.highestBid?.amount
+            response.auctions.forEach((auction) => {
+              const collectionAddress = auction.dao.tokenAddress.toLowerCase()
+              const bid = auction.highestBid?.amount
 
-            daoDetailsByKey.set(`${chainId}:${collectionAddress}`, {
-              chainId,
-              collectionAddress,
-              tokenId:
-                typeof auction.token?.tokenId === 'bigint'
-                  ? auction.token.tokenId.toString()
-                  : (auction.token?.tokenId ?? undefined),
-              tokenImage: auction.token?.image ?? undefined,
-              tokenName: auction.token?.name ?? undefined,
-              collectionName: auction.dao.name ?? undefined,
-              bid: bid ? bid.toString() : undefined,
-              endTime:
-                typeof auction.endTime === 'bigint'
-                  ? Number(auction.endTime)
-                  : (auction.endTime ?? undefined),
+              daoDetailsByKey.set(`${chainId}:${collectionAddress}`, {
+                chainId,
+                collectionAddress,
+                tokenId:
+                  typeof auction.token?.tokenId === 'bigint'
+                    ? auction.token.tokenId.toString()
+                    : (auction.token?.tokenId ?? undefined),
+                tokenImage: auction.token?.image ?? undefined,
+                tokenName: auction.token?.name ?? undefined,
+                collectionName: auction.dao.name ?? undefined,
+                bid: bid ? bid.toString() : undefined,
+                endTime:
+                  typeof auction.endTime === 'bigint'
+                    ? auction.endTime.toString()
+                    : (auction.endTime ?? undefined),
+              })
             })
-          })
+          } catch (err) {
+            console.error(
+              `Timeout or error fetching favorites for chain ${chainId}:`,
+              err
+            )
+          }
         }
       )
     )

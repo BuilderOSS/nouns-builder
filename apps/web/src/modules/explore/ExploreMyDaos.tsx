@@ -37,7 +37,7 @@ export const ExploreMyDaos = () => {
                   hasReachedFavoriteLimit &&
                   !isDaoFavorited(dao.chainId, dao.dao.tokenAddress)
                 }
-                favoriteDisabledTooltip={`Favorite limit reached (${FAVORITE_DAO_LIMIT})`}
+                favoriteDisabledTooltip={`You can only favorite ${FAVORITE_DAO_LIMIT} DAOs. Remove one to add another.`}
                 onFavoriteToggle={isWalletConnected ? toggleFavorite : undefined}
               />
             )
