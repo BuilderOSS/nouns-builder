@@ -1,7 +1,6 @@
+import { normalizeLinkKey } from '@buildeross/utils/daoMetadata'
 import { urlValidationSchema } from '@buildeross/utils/yup'
 import * as Yup from 'yup'
-
-import { normalizeLinkKey } from '../../utils/daoMetadata'
 
 export interface GeneralFormValues {
   daoAvatar?: string

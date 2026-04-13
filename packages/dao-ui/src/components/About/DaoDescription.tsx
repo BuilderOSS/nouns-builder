@@ -1,16 +1,14 @@
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { isPossibleMarkdown } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
-import HTMLReactParser from 'html-react-parser'
+import { Box, Button, Flex } from '@buildeross/zord'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Box, Button, Flex } from '@buildeross/zord'
+import React, { useEffect, useRef } from 'react'
 
-import { daoDescription as plainDescription } from '../../styles/About.css'
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
 
 export const DaoDescription = ({ description }: { description?: string }) => {
   const [isOverHeight, setIsOverHeight] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const trimmedDescription = description?.trim()
 
   const textRef = useRef<HTMLDivElement>(null)
 
@@ -28,26 +26,12 @@ export const DaoDescription = ({ description }: { description?: string }) => {
       // Text processing on the backend (possibly subgraph) will sometimes replace
       // \n with \\n, which will break markdown.
       // This effect is intermittent, so this catches any instance where it happens
-      return description.replace(/\\n/g, '\n').replace(/\\r/g, '\r')
+      return description.trim().replace(/\\n/g, '\n').replace(/\\r/g, '\r')
     }
+    return ''
   }, [description])
 
-  // This regex check is large. Memoizing it for perf
-  const isMarkdown = useMemo(() => {
-    if (!trimmedDescription) return false
-    return isPossibleMarkdown(trimmedDescription)
-  }, [trimmedDescription])
-
-  if (!trimmedDescription || !correctedDescription) return null
-
-  if (!isMarkdown)
-    return (
-      <Box mt={{ '@initial': 'x4', '@768': 'x6' }}>
-        <Text className={plainDescription}>
-          {HTMLReactParser(trimmedDescription.replace(/\\n/g, '<br />'))}
-        </Text>
-      </Box>
-    )
+  if (!correctedDescription) return null
 
   return (
     <Flex direction="column" align="flex-end">

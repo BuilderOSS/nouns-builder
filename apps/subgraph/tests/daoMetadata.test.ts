@@ -73,15 +73,15 @@ function initializeTestWithDao(initialDescription: string = 'legacy description'
 }
 
 describe('Metadata description parsing', () => {
-  test('parses JSON metadata and stores sanitized links', () => {
+  test('parses markdown frontmatter and stores sanitized links', () => {
     initializeTestWithDao()
 
     const metadata =
-      '{"version":1,"description":"JSON dao description","links":{"x":"https://x.com/nouns","docs":"https://docs.example.com","invalid":"javascript:alert(1)","empty":""}}'
+      '---\nlinks:\n  x: https://x.com/nouns\n  docs: https://docs.example.com\n  invalid: javascript:alert(1)\n  empty:\n---\n\nMarkdown dao description'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
 
-    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'JSON dao description')
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'Markdown dao description')
     assert.fieldEquals('DAO', TOKEN_ADDRESS, 'metadata', metadata)
     assert.entityCount('DAOLink', 2)
     assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'key', 'x')
@@ -95,7 +95,7 @@ describe('Metadata description parsing', () => {
     )
   })
 
-  test('falls back to plain description when JSON parsing fails', () => {
+  test('falls back to plain description when no frontmatter exists', () => {
     initializeTestWithDao()
 
     const description = 'Simple DAO description text'
@@ -109,18 +109,16 @@ describe('Metadata description parsing', () => {
     assert.entityCount('DAOLink', 0)
   })
 
-  test('parses double-encoded json metadata payloads', () => {
+  test('keeps empty body when frontmatter has links only', () => {
     initializeTestWithDao()
 
-    const metadata =
-      '"{\\"version\\":1,\\"description\\":\\"double encoded\\",\\"links\\":{\\"x\\":\\"https://x.com/nouns\\",\\"github\\":\\"https://github.com/nouns\\"}}"'
+    const metadata = '---\nlinks:\n  github: https://github.com/nouns\n---\n\n'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
 
-    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'double encoded')
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', '')
     assert.fieldEquals('DAO', TOKEN_ADDRESS, 'metadata', metadata)
-    assert.entityCount('DAOLink', 2)
-    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://x.com/nouns')
+    assert.entityCount('DAOLink', 1)
     assert.fieldEquals(
       'DAOLink',
       TOKEN_ADDRESS + '-github',
@@ -133,9 +131,9 @@ describe('Metadata description parsing', () => {
     initializeTestWithDao()
 
     const firstMetadata =
-      '{"version":1,"description":"first","links":{"x":"https://x.com/nouns","docs":"https://docs.example.com"}}'
+      '---\nlinks:\n  x: https://x.com/nouns\n  docs: https://docs.example.com\n---\n\nfirst'
     const secondMetadata =
-      '{"version":1,"description":"second","links":{"github":"https://github.com/nouns"}}'
+      '---\nlinks:\n  github: https://github.com/nouns\n---\n\nsecond'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(firstMetadata))
     handleDescriptionUpdated(createDescriptionUpdatedEvent(secondMetadata))
@@ -154,7 +152,7 @@ describe('Metadata description parsing', () => {
     initializeTestWithDao()
 
     const metadata =
-      '{"version":1,"description":"with duplicate keys","links":{"X":"https://x.com/old","x":"https://x.com/new"}}'
+      '---\nlinks:\n  X: https://x.com/old\n  x: https://x.com/new\n---\n\nwith duplicate keys'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
 
@@ -163,11 +161,65 @@ describe('Metadata description parsing', () => {
     assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://x.com/new')
   })
 
+  test('canonicalizes twitter key to x', () => {
+    initializeTestWithDao()
+
+    const metadata = '---\nlinks:\n  twitter: https://x.com/nouns\n---\n\nbody'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.entityCount('DAOLink', 1)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'key', 'x')
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://x.com/nouns')
+  })
+
+  test('parses escaped frontmatter payloads from contract storage', () => {
+    initializeTestWithDao()
+
+    const metadata =
+      '---\\nlinks:\\n  github: https://github.com\\n  x: https://twitter.com\\n---\\n\\nhello world'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'hello world')
+    assert.entityCount('DAOLink', 2)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-github', 'url', 'https://github.com')
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://twitter.com')
+  })
+
+  test('parses frontmatter with CRLF line endings', () => {
+    initializeTestWithDao()
+
+    const metadata =
+      '---\r\nlinks:\r\n  github: https://github.com\r\n  x: https://twitter.com\r\n---\r\n\r\nhello world'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'hello world')
+    assert.entityCount('DAOLink', 2)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-github', 'url', 'https://github.com')
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://twitter.com')
+  })
+
+  test('parses escaped frontmatter with CRLF line endings', () => {
+    initializeTestWithDao()
+
+    const metadata =
+      '---\\r\\nlinks:\\r\\n  github: https://github.com\\r\\n  x: https://twitter.com\\r\\n---\\r\\n\\r\\nhello world'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'hello world')
+    assert.entityCount('DAOLink', 2)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-github', 'url', 'https://github.com')
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://twitter.com')
+  })
+
   test('ignores malformed and unsafe links', () => {
     initializeTestWithDao()
 
     const metadata =
-      '{"version":1,"description":"link filtering","links":{"docs":"https://docs.example.com","badProtocol":"ftp://example.com","script":"javascript:alert(1)","empty":"","arr":["https://example.com"],"obj":{"url":"https://example.com"},"num":123}}'
+      '---\nlinks:\n  docs: https://docs.example.com\n  badProtocol: ftp://example.com\n  script: javascript:alert(1)\n  empty:\n---\n\nlink filtering'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
 
@@ -180,29 +232,24 @@ describe('Metadata description parsing', () => {
     )
   })
 
-  test('uses raw json as description when description key is missing', () => {
+  test('uses raw text when frontmatter is malformed', () => {
     initializeTestWithDao()
 
-    const metadata = '{"version":1,"links":{"github":"https://github.com/nouns"}}'
+    const metadata =
+      '---\nlinks:\n  github: https://github.com/nouns\n\nmissing closing delimiter'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
 
     assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', metadata)
     assert.fieldEquals('DAO', TOKEN_ADDRESS, 'metadata', metadata)
-    assert.entityCount('DAOLink', 1)
-    assert.fieldEquals(
-      'DAOLink',
-      TOKEN_ADDRESS + '-github',
-      'url',
-      'https://github.com/nouns'
-    )
+    assert.entityCount('DAOLink', 0)
   })
 
-  test('removes links when moving from json metadata to plain description', () => {
+  test('removes links when moving from frontmatter metadata to plain description', () => {
     initializeTestWithDao()
 
     const firstMetadata =
-      '{"version":1,"description":"first","links":{"x":"https://x.com/nouns","docs":"https://docs.example.com"}}'
+      '---\nlinks:\n  x: https://x.com/nouns\n  docs: https://docs.example.com\n---\n\nfirst'
     const plainDescription = 'now plain description only'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(firstMetadata))

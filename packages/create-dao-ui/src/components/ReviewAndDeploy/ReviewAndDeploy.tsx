@@ -8,6 +8,7 @@ import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { isTestnetChain } from '@buildeross/utils/chains'
+import { serializeDaoMetadata } from '@buildeross/utils/daoMetadata'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
@@ -26,7 +27,6 @@ import { useAccount, useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
-import { serializeDaoMetadata } from '../../utils/daoMetadata'
 import { TokenAllocation } from '../AllocationForm'
 import { FAST_DAO_TIMINGS } from '../AuctionSettingsForm/fastDaoTimings'
 import { FormNavButtons } from '../FormNavButtons'
@@ -138,7 +138,9 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         [
           sanitizeStringForJSON(general?.daoName),
           general?.daoSymbol.replace('$', ''),
-          serializeDaoMetadata(general?.projectDescription || '', general?.links || []),
+          sanitizeStringForJSON(
+            serializeDaoMetadata(general?.projectDescription || '', general?.links || [])
+          ),
           general?.daoAvatar ?? '',
           sanitizeStringForJSON(general?.daoWebsite ?? ''),
           RENDERER_BASE,

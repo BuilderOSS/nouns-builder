@@ -22,12 +22,17 @@ import {
 } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { SingleImageUpload } from '@buildeross/ui/SingleImageUpload'
+import {
+  parseDaoMetadataString,
+  serializeDaoMetadata,
+} from '@buildeross/utils/daoMetadata'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   compareAndReturn,
   fromSeconds,
   unpackOptionalArray,
 } from '@buildeross/utils/helpers'
+import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -36,7 +41,6 @@ import React, { BaseSyntheticEvent } from 'react'
 import { Address, encodeFunctionData, formatEther, zeroAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
-import { parseDaoMetadataString, serializeDaoMetadata } from '../../utils/daoMetadata'
 import {
   AdminFormValues,
   adminValidationSchema,
@@ -308,7 +312,11 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
             calldata: encodeFunctionData({
               abi: metadataAbi,
               functionName: 'updateDescription',
-              args: [serializeDaoMetadata(values.projectDescription, values.daoLinks)],
+              args: [
+                sanitizeStringForJSON(
+                  serializeDaoMetadata(values.projectDescription, values.daoLinks)
+                ),
+              ],
             }),
             value: '',
           },
