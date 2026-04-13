@@ -12,7 +12,7 @@ import {
   type ZoraCoinFragment,
 } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -22,14 +22,12 @@ import { ShareButton } from '@buildeross/ui/ShareButton'
 import { formatCryptoVal } from '@buildeross/utils'
 import { DEFAULT_CLANKER_TOTAL_SUPPLY } from '@buildeross/utils/coining/clankerCreator'
 import { DEFAULT_ZORA_TOTAL_SUPPLY } from '@buildeross/utils/coining/zoraContent'
-import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Grid, Icon, Spinner, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address } from 'viem'
 
 import { HoldersSection } from '../../../components/HoldersSection'
 import { ProposalLink } from '../../../components/ProposalLink'
-import { WalletProfilePreview } from '../../../components/WalletProfilePreview'
 import { CoinComments } from './CoinComments'
 import { coinHeader, coinImageContainer, onlyDesktop, statsGrid } from './CoinDetail.css'
 
@@ -225,22 +223,13 @@ export const CoinInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <WalletProfilePreview
+          <WalletIdentityWithPreview
             address={proposal.proposer as Address}
             displayName={proposerDisplayName}
             avatarSrc={proposerAvatar}
-          >
-            <Flex align="center">
-              <Avatar
-                address={proposal.proposer as Address}
-                src={proposerAvatar}
-                size="28"
-              />
-              <Text fontWeight="display" ml="x2">
-                {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
-              </Text>
-            </Flex>
-          </WalletProfilePreview>
+            avatarSize="28"
+            mobileTapBehavior="toggle"
+          />
         </Box>
       ) : (
         <Box mb="x3">
@@ -249,18 +238,13 @@ export const CoinInfo = ({
             Created by
           </Text>
           {creatorAddress ? (
-            <WalletProfilePreview
+            <WalletIdentityWithPreview
               address={creatorAddress}
               displayName={creatorDisplayName}
               avatarSrc={creatorAvatar}
-            >
-              <Flex align="center">
-                <Avatar address={creatorAddress} src={creatorAvatar} size="28" />
-                <Text fontWeight="display" ml="x2">
-                  {creatorDisplayName || walletSnippet(creatorAddress)}
-                </Text>
-              </Flex>
-            </WalletProfilePreview>
+              avatarSize="28"
+              mobileTapBehavior="toggle"
+            />
           ) : (
             <Text fontWeight="display">Unknown creator</Text>
           )}

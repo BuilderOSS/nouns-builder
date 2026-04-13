@@ -9,7 +9,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { awaitSubgraphSync, MessageType } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentity } from '@buildeross/ui'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
@@ -27,7 +27,6 @@ import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagm
 import * as Yup from 'yup'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 
 const propDateValidationSchema = Yup.object().shape({
   milestoneId: Yup.number(),
@@ -378,18 +377,15 @@ const ReplyTo = ({
       }}
       gap="x2"
     >
-      <ProposalWalletProfilePreview
+      <WalletIdentity
         address={creator as `0x${string}`}
         displayName={ensName || walletSnippet(creator)}
-        avatarSrc={ensAvatar}
-      >
-        <Flex align="center" gap="x1">
-          <Avatar address={creator} src={ensAvatar || undefined} size="16" />
-          <Text variant={'label-sm'} fontWeight="label">
-            {ensName || walletSnippet(creator)}
-          </Text>
-        </Flex>
-      </ProposalWalletProfilePreview>
+        avatarSrc={ensAvatar || undefined}
+        avatarSize="16"
+        nameVariant="label-sm"
+        nameWeight="label"
+        gap="x1"
+      />
       <Box style={{ fontSize: '14px' }} pl="x2">
         <Box className={messageStyle}>
           <MarkdownDisplay>{message}</MarkdownDisplay>

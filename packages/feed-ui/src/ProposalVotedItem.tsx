@@ -1,9 +1,9 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { ProposalVotedFeedItem } from '@buildeross/types'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { walletSnippet } from '@buildeross/utils'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -13,7 +13,6 @@ import {
   feedItemTextContentWrapper,
   feedItemTitle,
 } from './Feed.css'
-import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 
 interface ProposalVotedItemProps {
   item: ProposalVotedFeedItem
@@ -48,14 +47,12 @@ export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) =>
         <Stack gap="x2">
           <Flex className={feedItemTitle} gap="x1" align="center" wrap="wrap">
             <Text>
-              <FeedWalletProfilePreview
+              <WalletIdentityWithPreview
                 address={item.voter}
                 displayName={displayName}
                 avatarSrc={ensAvatar}
                 inline
-              >
-                <Box as="span">{displayName || walletSnippet(item.voter)}</Box>
-              </FeedWalletProfilePreview>{' '}
+              />{' '}
               voted
             </Text>
             <Text color={getVoteColor(item.support)}>{item.support}</Text>

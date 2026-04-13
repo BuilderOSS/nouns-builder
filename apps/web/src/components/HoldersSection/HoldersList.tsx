@@ -1,12 +1,11 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks'
 import { useChainStore } from '@buildeross/stores'
-import { Avatar } from '@buildeross/ui/Avatar'
-import { formatCryptoVal, walletSnippet } from '@buildeross/utils'
-import { Box, Flex, Icon, Text } from '@buildeross/zord'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
+import { formatCryptoVal } from '@buildeross/utils'
+import { Flex, Icon, Text } from '@buildeross/zord'
 import { formatEther } from 'viem'
 
-import { WalletProfilePreview } from '../WalletProfilePreview'
 import { holderLink } from './HoldersList.css'
 
 interface Holder {
@@ -68,28 +67,14 @@ const HolderItem = ({ address, balance, isDrop = false }: HolderItemProps) => {
       borderRadius="curved"
       className={holderLink}
     >
-      <WalletProfilePreview
+      <WalletIdentityWithPreview
         address={address}
         displayName={displayName}
         avatarSrc={ensAvatar}
-      >
-        <Flex align="center" gap="x2" flex={1} minWidth={0}>
-          <Avatar address={address} src={ensAvatar} size="32" />
-          <Box minWidth={0} flex={1}>
-            <Text
-              variant="paragraph-sm"
-              fontWeight="display"
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {displayName || walletSnippet(address)}
-            </Text>
-          </Box>
-        </Flex>
-      </WalletProfilePreview>
+        avatarSize="32"
+        nameVariant="paragraph-sm"
+        mobileTapBehavior="toggle"
+      />
       <Flex align="center" gap="x2" flexShrink={0}>
         <Flex direction="column" align="flex-end" flexShrink={0}>
           <Text variant="paragraph-sm" fontWeight="display">

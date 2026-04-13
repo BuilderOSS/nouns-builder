@@ -1,12 +1,11 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { atoms, Box, Flex, Grid, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { votePlacardReason } from './VoterParticipation.css'
 
 const variants = {
@@ -92,18 +91,12 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
             event.stopPropagation()
           }
         >
-          <ProposalWalletProfilePreview
+          <WalletIdentityWithPreview
             address={vote.voter as `0x${string}`}
             displayName={ensName || walletSnippet(vote.voter)}
             avatarSrc={ensAvatar}
-          >
-            <Flex align={'center'}>
-              <Avatar address={vote.voter} src={ensAvatar} size="28" />
-              <Text fontWeight="display" ml="x2">
-                {ensName || walletSnippet(vote.voter)}
-              </Text>
-            </Flex>
-          </ProposalWalletProfilePreview>
+            avatarSize="28"
+          />
         </Box>
       </Box>
 

@@ -1,9 +1,9 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { AuctionSettledFeedItem } from '@buildeross/types'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
-import { walletSnippet } from '@buildeross/utils'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
@@ -11,7 +11,6 @@ import { formatEther, zeroAddress } from 'viem'
 
 import { feedItemContentHorizontal, feedItemImage, feedItemTitle } from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
-import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 
 interface AuctionSettledItemProps {
   item: AuctionSettledFeedItem
@@ -44,14 +43,12 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
               `Auction for ${item.tokenName} settled`
             ) : (
               <>
-                <FeedWalletProfilePreview
+                <WalletIdentityWithPreview
                   address={item.winner}
                   displayName={displayName}
                   avatarSrc={ensAvatar}
                   inline
-                >
-                  <Box as="span">{displayName || walletSnippet(item.winner)}</Box>
-                </FeedWalletProfilePreview>{' '}
+                />{' '}
                 won {item.tokenName}
                 {formattedAmount ? ` for ${formattedAmount} ETH` : ''}
               </>

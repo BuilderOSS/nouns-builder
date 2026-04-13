@@ -16,6 +16,7 @@ import {
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
+import { WalletProfilePreview } from '@buildeross/ui/WalletProfilePreview'
 import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import {
@@ -28,7 +29,6 @@ import React, { useMemo } from 'react'
 import useSWR from 'swr'
 import { zeroAddress } from 'viem'
 
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 import { propPageWrapper } from '../styles.css'
 import { AirdropDetails } from './AirdropDetails'
 import { CoinDetails } from './CoinDetails'
@@ -235,7 +235,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         )}
 
         <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
-          <ProposalWalletProfilePreview
+          <WalletProfilePreview
             address={proposal.proposer as `0x${string}`}
             displayName={displayName || walletSnippet(proposal.proposer)}
             avatarSrc={ensAvatar}
@@ -282,7 +282,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                 )}
               </Box>
             </Flex>
-          </ProposalWalletProfilePreview>
+          </WalletProfilePreview>
         </Section>
 
         {!isPreview && (

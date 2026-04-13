@@ -1,9 +1,9 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { AuctionBidPlacedFeedItem } from '@buildeross/types'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
-import { walletSnippet } from '@buildeross/utils'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
@@ -16,7 +16,6 @@ import {
   feedItemTitle,
 } from './Feed.css'
 import { ImageSkeleton } from './FeedSkeleton'
-import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 
 interface AuctionBidPlacedItemProps {
   item: AuctionBidPlacedFeedItem
@@ -44,14 +43,12 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
           <Text className={feedItemTitle}>
-            <FeedWalletProfilePreview
+            <WalletIdentityWithPreview
               address={item.bidder}
               displayName={displayName}
               avatarSrc={ensAvatar}
               inline
-            >
-              <Box as="span">{displayName || walletSnippet(item.bidder)}</Box>
-            </FeedWalletProfilePreview>{' '}
+            />{' '}
             bid {formattedAmount} ETH
           </Text>
           <Text className={feedItemSubtitle}>{item.tokenName}</Text>

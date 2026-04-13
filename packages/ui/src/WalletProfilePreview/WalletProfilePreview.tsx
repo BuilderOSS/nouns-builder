@@ -1,10 +1,12 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { walletSnippet } from '@buildeross/utils'
 import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
-import Link from 'next/link'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
+
+import { Avatar, DaoAvatar } from '../Avatar'
+import { useLinks } from '../LinksProvider'
+import { LinkWrapper as Link } from '../LinkWrapper'
 
 interface WalletProfilePreviewProps {
   address: `0x${string}`
@@ -12,6 +14,7 @@ interface WalletProfilePreviewProps {
   displayName?: string
   avatarSrc?: string | null
   inline?: boolean
+  mobileTapBehavior?: 'passthrough' | 'toggle'
 }
 
 interface WalletProfilePreviewResponse {
@@ -61,18 +64,30 @@ const compactAddress = (address: string) =>
   `${address.slice(0, 6)}...${address.slice(-6)}`
 const PREVIEW_MIN_WIDTH = '248px'
 
+const isInteractiveTarget = (target: EventTarget | null) => {
+  if (!(target instanceof Element)) return false
+
+  return Boolean(
+    target.closest(
+      'a, button, input, select, textarea, label, [role="button"], [role="link"], [data-wallet-preview-ignore="true"]'
+    )
+  )
+}
+
 export const WalletProfilePreview = ({
   address,
   children,
   displayName,
   avatarSrc,
   inline = false,
+  mobileTapBehavior = 'passthrough',
 }: WalletProfilePreviewProps) => {
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null)
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { getProfileLink } = useLinks()
   const { data, error, isLoading } = useSWR(
     open ? `/api/profile-preview/${address}` : null,
     fetcher,
@@ -135,6 +150,10 @@ export const WalletProfilePreview = ({
   const handleTriggerClick = (event: React.MouseEvent<HTMLElement>) => {
     if (!isMobile) return
 
+    if (mobileTapBehavior !== 'toggle' || isInteractiveTarget(event.target)) {
+      return
+    }
+
     event.preventDefault()
     event.stopPropagation()
     clearOpenTimeout()
@@ -144,6 +163,10 @@ export const WalletProfilePreview = ({
 
   const handleTriggerPointerDown = (event: React.PointerEvent<HTMLElement>) => {
     if (!isMobile) return
+
+    if (mobileTapBehavior !== 'toggle' || isInteractiveTarget(event.target)) {
+      return
+    }
 
     event.preventDefault()
     event.stopPropagation()
@@ -248,7 +271,9 @@ export const WalletProfilePreview = ({
             )}
           </Box>
 
-          <Box
+          <Text
+            variant="paragraph-sm"
+            color="text3"
             pt="x1"
             style={{
               borderTop: '1px solid rgba(0, 0, 0, 0.08)',
@@ -257,38 +282,26 @@ export const WalletProfilePreview = ({
               whiteSpace: 'nowrap',
             }}
           >
-            {isLoading ? (
-              <Text variant="paragraph-sm" color="text3">
-                Loading profile...
-              </Text>
-            ) : error ? (
-              <Text variant="paragraph-sm" color="text3">
-                Profile preview unavailable
-              </Text>
-            ) : data ? (
-              <Text variant="paragraph-sm" color="text3">
-                {data.stats.totalDaos} DAOs, {data.stats.totalProposals} proposals,{' '}
-                {data.stats.totalVotes} votes
-              </Text>
-            ) : null}
-          </Box>
+            {data?.stats.totalDaos ?? 0} DAOs, {data?.stats.totalProposals ?? 0}{' '}
+            proposals, {data?.stats.totalVotes ?? 0} votes
+          </Text>
 
           {isMobile ? (
             <Box mt="x2" pt="x2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>
-              <Button
-                as={Link}
-                href={`/profile/${address}`}
-                variant="outline"
-                size="sm"
-                w="100%"
-                style={{ minWidth: 0, textDecoration: 'none' }}
-                onClick={() => setOpen(false)}
-              >
-                <Flex align="center" justify="space-between" gap="x2" w="100%">
-                  <Text>View Profile</Text>
-                  <Icon id="arrowRight" size="sm" />
-                </Flex>
-              </Button>
+              <Link link={getProfileLink(address)} style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  w="100%"
+                  style={{ minWidth: 0 }}
+                  onClick={() => setOpen(false)}
+                >
+                  <Flex align="center" justify="space-between" gap="x2" w="100%">
+                    <Text>View Profile</Text>
+                    <Icon id="arrowRight" size="sm" />
+                  </Flex>
+                </Button>
+              </Link>
             </Box>
           ) : null}
         </Box>

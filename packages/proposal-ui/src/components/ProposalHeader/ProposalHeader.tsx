@@ -3,12 +3,12 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore } from '@buildeross/stores'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Flex, Icon, Label, Text } from '@buildeross/zord'
+import { Flex, Icon, Label, Text } from '@buildeross/zord'
 
 import { ProposalNavigation } from '../ProposalNavigation'
 import { ProposalStatus } from '../ProposalStatus'
-import { ProposalWalletProfilePreview } from '../ProposalWalletProfilePreview'
 
 interface ProposalHeaderProps {
   proposal: Proposal
@@ -83,21 +83,11 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({
         <Flex direction={'row'} align={'center'} justify={'space-between'}>
           <Flex direction={'row'} align={'flex-end'} gap={'x1'}>
             <Text color={'text3'}>By</Text>
-            <ProposalWalletProfilePreview
+            <WalletIdentityWithPreview
               address={proposer as `0x${string}`}
               displayName={proposerDisplayName || walletSnippet(proposer)}
               avatarSrc={proposerAvatar}
-            >
-              <Box fontWeight={'display'}>
-                <a
-                  href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposer}`}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {proposerDisplayName || walletSnippet(proposer)}
-                </a>
-              </Box>
-            </ProposalWalletProfilePreview>
+            />
           </Flex>
         </Flex>
       </Flex>

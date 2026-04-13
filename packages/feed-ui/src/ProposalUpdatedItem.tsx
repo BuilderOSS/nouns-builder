@@ -1,10 +1,10 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { usePropdateMessage } from '@buildeross/hooks/usePropdateMessage'
 import type { ProposalUpdatePostedFeedItem } from '@buildeross/types'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { walletSnippet } from '@buildeross/utils'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -14,7 +14,6 @@ import {
   feedItemTextContentWrapper,
   feedItemTitle,
 } from './Feed.css'
-import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 
 interface ProposalUpdatedItemProps {
   item: ProposalUpdatePostedFeedItem
@@ -35,14 +34,12 @@ export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
           <Text className={feedItemTitle}>
-            <FeedWalletProfilePreview
+            <WalletIdentityWithPreview
               address={item.actor}
               displayName={displayName}
               avatarSrc={ensAvatar}
               inline
-            >
-              <Box as="span">{displayName || walletSnippet(item.actor)}</Box>
-            </FeedWalletProfilePreview>{' '}
+            />{' '}
             posted an update
           </Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>

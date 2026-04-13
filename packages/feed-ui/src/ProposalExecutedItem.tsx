@@ -1,9 +1,9 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { ProposalExecutedFeedItem } from '@buildeross/types'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { walletSnippet } from '@buildeross/utils'
 import { Box, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -13,7 +13,6 @@ import {
   feedItemTextContentWrapper,
   feedItemTitle,
 } from './Feed.css'
-import { FeedWalletProfilePreview } from './FeedWalletProfilePreview'
 
 interface ProposalExecutedItemProps {
   item: ProposalExecutedFeedItem
@@ -33,14 +32,12 @@ export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
           <Text className={feedItemTitle}>
-            <FeedWalletProfilePreview
+            <WalletIdentityWithPreview
               address={item.actor}
               displayName={displayName}
               avatarSrc={ensAvatar}
               inline
-            >
-              <Box as="span">{displayName || walletSnippet(item.actor)}</Box>
-            </FeedWalletProfilePreview>{' '}
+            />{' '}
             executed this proposal
           </Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
