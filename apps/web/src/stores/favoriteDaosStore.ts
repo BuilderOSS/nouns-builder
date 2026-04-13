@@ -217,7 +217,9 @@ export const useFavoriteDaosStore = create<FavoriteDaosStore>()(
 
         const normalizedAddress = normalizeAddress(address)
         const storageKey = getLegacyFavoriteDaosStorageKey(normalizedAddress)
-        const storedFavorites = parseStoredFavorites(window.localStorage.getItem(storageKey))
+        const storedFavorites = parseStoredFavorites(
+          window.localStorage.getItem(storageKey)
+        )
 
         if (!storedFavorites.length) return
 
