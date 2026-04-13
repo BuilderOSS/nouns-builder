@@ -26,18 +26,9 @@ export const useFavoriteDaos = (address?: string) => {
     )
   )
 
-  const hydrateLegacyFavorites = useFavoriteDaosStore(
-    (state: FavoriteDaosStore) => state.hydrateLegacyFavorites
-  )
   const toggleFavoriteForAddress = useFavoriteDaosStore(
     (state: FavoriteDaosStore) => state.toggleFavorite
   )
-
-  React.useEffect(() => {
-    if (!normalizedAddress) return
-
-    hydrateLegacyFavorites(normalizedAddress)
-  }, [hydrateLegacyFavorites, normalizedAddress])
 
   const favoriteKeys = React.useMemo(
     () => new Set(favorites.map((favorite) => getFavoriteDaoKey(favorite))),

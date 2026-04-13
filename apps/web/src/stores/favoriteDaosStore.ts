@@ -10,8 +10,6 @@ export const FAVORITE_DAO_LIMIT = 10
 const FAVORITE_DAOS_STORE_NAMESPACE =
   process.env.NEXT_PUBLIC_NETWORK_TYPE?.trim().toLowerCase() || 'default'
 const FAVORITE_DAOS_STORE_IDENTIFIER = `favorite-daos-${FAVORITE_DAOS_STORE_NAMESPACE}`
-const LEGACY_FAVORITE_DAOS_STORAGE_KEY_PREFIX = 'favorite-daos:'
-const FAVORITE_DAOS_STORE_VERSION = 1
 
 export type FavoriteDao = {
   chainId: number
@@ -23,6 +21,16 @@ export type FavoriteDao = {
   bid?: string
   endTime?: number
 }
+
+type PersistedFavoriteDao = Pick<
+  FavoriteDao,
+  | 'chainId'
+  | 'collectionAddress'
+  | 'tokenId'
+  | 'tokenName'
+  | 'tokenImage'
+  | 'collectionName'
+>
 
 type ToggleFavoriteResult =
   | {
@@ -42,11 +50,12 @@ type FavoriteDaosState = {
 
 type FavoriteDaosActions = {
   toggleFavorite: (address: string, favorite: FavoriteDao) => ToggleFavoriteResult
-  hydrateLegacyFavorites: (address: string) => void
   clearAddress: (address: string) => void
 }
 
-type FavoriteDaosPersistedState = Pick<FavoriteDaosState, 'favoritesByAddress'>
+type FavoriteDaosPersistedState = {
+  favoritesByAddress: Record<string, PersistedFavoriteDao[]>
+}
 
 export type FavoriteDaosStore = FavoriteDaosState & FavoriteDaosActions
 
@@ -54,66 +63,12 @@ const EMPTY_FAVORITES: FavoriteDao[] = []
 
 const normalizeAddress = (address: string): string => address.toLowerCase()
 
-const getLegacyFavoriteDaosStorageKey = (address: string) =>
-  `${LEGACY_FAVORITE_DAOS_STORAGE_KEY_PREFIX}${normalizeAddress(address)}`
-
 const getFavoriteItemKey = (chainId: number, collectionAddress: string) =>
   `${chainId}:${collectionAddress.toLowerCase()}`
 
 export const getFavoriteDaoKey = (
   favorite: Pick<FavoriteDao, 'chainId' | 'collectionAddress'>
 ) => getFavoriteItemKey(favorite.chainId, favorite.collectionAddress)
-
-const isObjectRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === 'object' && !Array.isArray(value)
-
-const isFavoriteDao = (value: unknown): value is FavoriteDao => {
-  if (!isObjectRecord(value)) return false
-
-  const allowedKeys = new Set<keyof FavoriteDao>([
-    'chainId',
-    'collectionAddress',
-    'tokenId',
-    'tokenName',
-    'tokenImage',
-    'collectionName',
-    'bid',
-    'endTime',
-  ])
-
-  const keys = Object.keys(value)
-  if (keys.some((key) => !allowedKeys.has(key as keyof FavoriteDao))) {
-    return false
-  }
-
-  const item = value as FavoriteDao
-  return (
-    typeof item.chainId === 'number' &&
-    typeof item.collectionAddress === 'string' &&
-    (typeof item.tokenId === 'undefined' ||
-      typeof item.tokenId === 'number' ||
-      typeof item.tokenId === 'string') &&
-    (typeof item.tokenName === 'undefined' || typeof item.tokenName === 'string') &&
-    (typeof item.tokenImage === 'undefined' || typeof item.tokenImage === 'string') &&
-    (typeof item.collectionName === 'undefined' ||
-      typeof item.collectionName === 'string') &&
-    (typeof item.bid === 'undefined' || typeof item.bid === 'string') &&
-    (typeof item.endTime === 'undefined' || typeof item.endTime === 'number')
-  )
-}
-
-const parseStoredFavorites = (storedValue: string | null): FavoriteDao[] => {
-  if (!storedValue) return EMPTY_FAVORITES
-
-  try {
-    const parsed = JSON.parse(storedValue)
-    if (!Array.isArray(parsed)) return EMPTY_FAVORITES
-
-    return parsed.filter(isFavoriteDao)
-  } catch {
-    return EMPTY_FAVORITES
-  }
-}
 
 const dedupeFavorites = (favorites: FavoriteDao[]): FavoriteDao[] => {
   const seenKeys = new Set<string>()
@@ -130,42 +85,14 @@ const dedupeFavorites = (favorites: FavoriteDao[]): FavoriteDao[] => {
 const sanitizeFavorites = (favorites: FavoriteDao[]): FavoriteDao[] =>
   dedupeFavorites(favorites).slice(0, FAVORITE_DAO_LIMIT)
 
-const sanitizeFavoritesByAddress = (value: unknown): Record<string, FavoriteDao[]> => {
-  if (!isObjectRecord(value)) return {}
-
-  return Object.entries(value).reduce<Record<string, FavoriteDao[]>>(
-    (nextFavoritesByAddress, [address, favorites]) => {
-      const sanitizedFavorites = sanitizeFavorites(
-        Array.isArray(favorites) ? favorites.filter(isFavoriteDao) : EMPTY_FAVORITES
-      )
-
-      if (!sanitizedFavorites.length) return nextFavoritesByAddress
-
-      nextFavoritesByAddress[normalizeAddress(address)] = sanitizedFavorites
-      return nextFavoritesByAddress
-    },
-    {}
-  )
-}
-
-const parsePersistedFavoriteDaosState = (
-  persistedState: unknown,
-  version: number
-): FavoriteDaosPersistedState => {
-  if (!isObjectRecord(persistedState)) {
-    return { favoritesByAddress: {} }
-  }
-
-  if (version < 1) {
-    return {
-      favoritesByAddress: sanitizeFavoritesByAddress(persistedState),
-    }
-  }
-
-  return {
-    favoritesByAddress: sanitizeFavoritesByAddress(persistedState.favoritesByAddress),
-  }
-}
+const toPersistedFavoriteDao = (favorite: FavoriteDao): PersistedFavoriteDao => ({
+  chainId: favorite.chainId,
+  collectionAddress: favorite.collectionAddress,
+  tokenId: favorite.tokenId,
+  tokenName: favorite.tokenName,
+  tokenImage: favorite.tokenImage,
+  collectionName: favorite.collectionName,
+})
 
 const getFavoritesForAddress = (
   favoritesByAddress: Record<string, FavoriteDao[]>,
@@ -255,36 +182,6 @@ export const useFavoriteDaosStore = create<FavoriteDaosStore>()(
 
         return toggleResult
       },
-      hydrateLegacyFavorites: (address: string) => {
-        if (typeof window === 'undefined') return
-
-        const normalizedAddress = normalizeAddress(address)
-        const storageKey = getLegacyFavoriteDaosStorageKey(normalizedAddress)
-        const storedFavorites = parseStoredFavorites(
-          window.localStorage.getItem(storageKey)
-        )
-
-        if (!storedFavorites.length) return
-
-        set((state: FavoriteDaosStore) => {
-          if (state.favoritesByAddress[normalizedAddress]?.length) {
-            return state
-          }
-
-          return {
-            favoritesByAddress: {
-              ...state.favoritesByAddress,
-              [normalizedAddress]: sanitizeFavorites(storedFavorites),
-            },
-          }
-        })
-
-        try {
-          window.localStorage.removeItem(storageKey)
-        } catch (error) {
-          console.error('Failed to clean up legacy favorite DAO state', error)
-        }
-      },
       clearAddress: (address: string) => {
         const normalizedAddress = normalizeAddress(address)
 
@@ -304,16 +201,15 @@ export const useFavoriteDaosStore = create<FavoriteDaosStore>()(
     }),
     {
       name: FAVORITE_DAOS_STORE_IDENTIFIER,
-      version: FAVORITE_DAOS_STORE_VERSION,
+      version: 1,
       storage: createJSONStorage(() => localStorage),
-      migrate: (persistedState: unknown, version: number) =>
-        parsePersistedFavoriteDaosState(persistedState, version),
-      merge: (persistedState: unknown, currentState: FavoriteDaosStore) => ({
-        ...currentState,
-        ...parsePersistedFavoriteDaosState(persistedState, FAVORITE_DAOS_STORE_VERSION),
-      }),
       partialize: (state: FavoriteDaosStore): FavoriteDaosPersistedState => ({
-        favoritesByAddress: state.favoritesByAddress,
+        favoritesByAddress: Object.entries(state.favoritesByAddress).reduce<
+          Record<string, PersistedFavoriteDao[]>
+        >((nextFavoritesByAddress, [address, favorites]) => {
+          nextFavoritesByAddress[address] = favorites.map(toPersistedFavoriteDao)
+          return nextFavoritesByAddress
+        }, {}),
       }),
     }
   )

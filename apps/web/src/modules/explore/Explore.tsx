@@ -4,7 +4,7 @@ import { Pagination } from '@buildeross/ui/Pagination'
 import { Box, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
+import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
 import { useAccount } from 'wagmi'
 
 import { exploreGrid, searchContainer } from './Explore.css'
@@ -177,6 +177,7 @@ export const Explore: React.FC = () => {
                     hasReachedFavoriteLimit &&
                     !isDaoFavorited(dao.chainId, dao.dao.tokenAddress)
                   }
+                  favoriteDisabledTooltip={`Favorite limit reached (${FAVORITE_DAO_LIMIT})`}
                   onFavoriteToggle={address ? toggleFavorite : undefined}
                 />
               )

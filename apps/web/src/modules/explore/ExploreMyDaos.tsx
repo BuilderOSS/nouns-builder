@@ -1,7 +1,7 @@
 import { useExploreUserDaos as useMyDaos } from '@buildeross/hooks/useExploreUserDaos'
 import { Grid } from '@buildeross/zord'
 import React from 'react'
-import { useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
+import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
 import { useAccount } from 'wagmi'
 
 import { exploreGrid } from './Explore.css'
@@ -37,6 +37,7 @@ export const ExploreMyDaos = () => {
                   hasReachedFavoriteLimit &&
                   !isDaoFavorited(dao.chainId, dao.dao.tokenAddress)
                 }
+                favoriteDisabledTooltip={`Favorite limit reached (${FAVORITE_DAO_LIMIT})`}
                 onFavoriteToggle={isWalletConnected ? toggleFavorite : undefined}
               />
             )
