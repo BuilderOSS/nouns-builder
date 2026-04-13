@@ -14,7 +14,9 @@ import { Auction as AuctionContract } from '../generated/templates/Auction/Aucti
 import { MetadataRendererBase as MetadataRendererBaseContract } from '../generated/templates/MetadataRendererBase/MetadataRendererBase'
 import { Token as TokenContract } from '../generated/templates/Token/Token'
 import { createMetadataRendererTemplate } from './utils/createMetadataRendererTemplate'
+import { parseDaoMetadata } from './utils/parseDaoMetadata'
 import { setTokenMetadata } from './utils/setTokenMetadata'
+import { syncDaoLinks } from './utils/syncDaoLinks'
 
 export function handleDAODeployed(event: DAODeployedEvent): void {
   let tokenContract = TokenContract.bind(event.params.token)
@@ -39,7 +41,10 @@ export function handleDAODeployed(event: DAODeployedEvent): void {
   dao.governorAddress = event.params.governor
   dao.name = tokenContract.name()
   dao.symbol = tokenContract.symbol()
-  dao.description = metadataContract.description()
+  let daoMetadata = metadataContract.description()
+  let parsedMetadata = parseDaoMetadata(daoMetadata)
+  dao.description = parsedMetadata.description
+  dao.metadata = daoMetadata
   dao.totalSupply = 0
   dao.contractImage = metadataContract.contractImage()
   dao.projectURI = metadataContract.projectURI()
@@ -51,6 +56,7 @@ export function handleDAODeployed(event: DAODeployedEvent): void {
   dao.auctionConfig = auctionConfig.id
 
   dao.save()
+  syncDaoLinks(dao.id, '', daoMetadata)
 
   let tokenCtx = new DataSourceContext()
   tokenCtx.setString('metadataAddress', event.params.metadata.toHexString())
@@ -82,11 +88,16 @@ export function handleMetadataRendererUpdated(event: MetadataRendererUpdatedEven
   let tokenContract = TokenContract.bind(tokenAddress.value)
 
   // Update DAO metadata
-  dao.description = metadataContract.description()
+  let nextMetadata = metadataContract.description()
+  let parsedMetadata = parseDaoMetadata(nextMetadata)
+  let previousMetadata = dao.metadata != null ? dao.metadata! : ''
+  dao.description = parsedMetadata.description
+  dao.metadata = nextMetadata
   dao.contractImage = metadataContract.contractImage()
   dao.projectURI = metadataContract.projectURI()
 
   dao.save()
+  syncDaoLinks(dao.id, previousMetadata, nextMetadata)
 
   // Update token metadata
   let totalSupply = tokenContract.totalSupply()
