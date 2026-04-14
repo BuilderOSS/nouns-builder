@@ -3,7 +3,7 @@ import { atoms, color } from '@buildeross/zord'
 import { keyframes, style } from '@vanilla-extract/css'
 
 const darkSurface = '#2a2b31'
-const darkSurfaceHover = '#34363d'
+const darkSurfaceHover = '#67676d'
 const darkSurfaceBorder = '#4a4d57'
 
 const slideIn = keyframes({
@@ -123,6 +123,15 @@ export const disconnectButton = style([
     selectors: {
       '&:hover': {
         background: `rgba(240, 50, 50, 0.1) !important`,
+      },
+      'html[data-theme-mode="dark"] &': {
+        background: color.negative,
+        color: color.background1,
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        background: '#ffffff !important',
+        color: color.negative,
+        borderColor: color.negative,
       },
     },
   },

@@ -1,12 +1,32 @@
-import { style } from '@vanilla-extract/css'
+import { globalStyle, style } from '@vanilla-extract/css'
+
+const darkFooterSurface = '#1f2024'
+const darkFooterSurfaceHover = '#34363d'
+const darkFooterBorder = '#4a4d57'
+
+export const homeFooterWrapper = style({
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: darkFooterSurface,
+      color: '#ffffff',
+    },
+  },
+})
 
 export const getStartedButton = style({
   fontSize: 26,
   background: 'rgba(255,255,255,.3)',
   selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: darkFooterSurfaceHover,
+      color: '#ffffff',
+    },
     '&:hover': {
       background: 'rgba(255,255,255,.35)',
       cursor: 'pointer',
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: '#3b3e47',
     },
   },
   '@media': {
@@ -19,12 +39,31 @@ export const getStartedButton = style({
 
 export const homeFooterLinks = style({
   selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: '#ffffff',
+    },
     '&:hover': {
       color: '#fff',
       opacity: 0.8,
       cursor: 'pointer',
     },
   },
+})
+
+export const homeFooterSocialIcon = style({
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: '#34363d',
+      color: '#ffffff',
+      fill: '#ffffff',
+    },
+  },
+})
+
+export const homeFooterGithubIcon = style({})
+
+globalStyle(`html[data-theme-mode="dark"] ${homeFooterGithubIcon} svg`, {
+  filter: 'invert(1)',
 })
 
 export const homeFooterInnerWrapper = style({
@@ -36,6 +75,11 @@ export const homeFooterInnerWrapper = style({
 })
 
 export const footerHeading = style({
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: '#ffffff',
+    },
+  },
   '@media': {
     '(max-width: 768px)': {
       maxWidth: 246,
@@ -67,6 +111,11 @@ export const footerRightWrapper = style({
       marginTop: 32,
       borderTop: '2px solid #333333',
       paddingRight: 0,
+    },
+  },
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: darkFooterBorder,
     },
   },
 })

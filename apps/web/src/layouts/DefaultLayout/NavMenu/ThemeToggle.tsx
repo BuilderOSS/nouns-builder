@@ -29,7 +29,7 @@ export const ThemeToggle = () => {
       aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
       aria-pressed={isDarkMode}
     >
-      <Text fontSize={20} lineHeight="20" color="text2" aria-hidden="true">
+      <Text fontSize={20} color="text2" aria-hidden="true" style={{ lineHeight: 1 }}>
         {isDarkMode ? '☾' : '☀'}
       </Text>
     </Flex>

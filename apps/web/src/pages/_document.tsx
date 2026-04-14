@@ -4,12 +4,10 @@ import { DEFAULT_THEME_MODE, THEME_STORAGE_KEY } from 'src/theme/theme'
 
 export default class MyDocument extends Document {
   render() {
-    const themeInitScript = `
+    const themeAttributeInitScript = `
       (function() {
         var storageKey = '${THEME_STORAGE_KEY}';
         var defaultMode = '${DEFAULT_THEME_MODE}';
-        var lightThemeClass = '${lightTheme}';
-        var darkThemeClass = '${darkTheme}';
         var mode = defaultMode;
 
         try {
@@ -23,6 +21,18 @@ export default class MyDocument extends Document {
 
         document.documentElement.dataset.themeMode = mode;
         document.documentElement.style.colorScheme = mode;
+      })();
+    `
+
+    const themeBodyClassScript = `
+      (function() {
+        var lightThemeClass = '${lightTheme}';
+        var darkThemeClass = '${darkTheme}';
+        var mode = document.documentElement.dataset.themeMode || '${DEFAULT_THEME_MODE}';
+
+        if (!document.body) {
+          return;
+        }
 
         var themeClass = mode === 'dark' ? darkThemeClass : lightThemeClass;
         document.body.classList.remove(lightThemeClass, darkThemeClass);
@@ -31,8 +41,9 @@ export default class MyDocument extends Document {
     `
 
     return (
-      <Html>
+      <Html suppressHydrationWarning={true}>
         <Head>
+          <script dangerouslySetInnerHTML={{ __html: themeAttributeInitScript }} />
           <link
             rel="preload"
             href="/fonts/pt-root-ui_bold.woff2"
@@ -56,7 +67,7 @@ export default class MyDocument extends Document {
           />
         </Head>
         <body className={`${root} ${baseTheme} ${lightTheme}`} style={{ margin: 0 }}>
-          <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+          <script dangerouslySetInnerHTML={{ __html: themeBodyClassScript }} />
           <Main />
           <NextScript />
         </body>

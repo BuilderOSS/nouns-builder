@@ -1,5 +1,5 @@
 import { atoms, vars } from '@buildeross/zord'
-import { keyframes, style } from '@vanilla-extract/css'
+import { globalStyle, keyframes, style } from '@vanilla-extract/css'
 
 export const artworkSettingsBox = style({
   border: `2px solid ${vars.color.border}`,
@@ -109,6 +109,19 @@ export const layerSelectStyle = style([
   },
 ])
 
+globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}`, {
+  color: '#1f2024 !important',
+})
+
+globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}:focus`, {
+  color: '#1f2024 !important',
+  outline: 'none',
+})
+
+globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle} option`, {
+  color: '#1f2024 !important',
+})
+
 export const previewHeadingStyle = style([
   atoms({
     mb: 'x6',
@@ -138,6 +151,10 @@ export const selectTraitNameStyle = style([
     // top: '28%',
   },
 ])
+
+globalStyle(`html[data-theme-mode='dark'] ${selectTraitNameStyle}`, {
+  color: '#1f2024 !important',
+})
 
 export const selectTraitNameWrapper = style({
   maxHeight: 400,
@@ -259,6 +276,10 @@ export const artworkPreviewGenerateButton = style({
   selectors: {
     '&:hover': {
       cursor: 'pointer',
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      backgroundColor: '#5b5b61',
+      borderColor: '#5b5b61',
     },
   },
 })

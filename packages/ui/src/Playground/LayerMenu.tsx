@@ -1,6 +1,6 @@
 import { ImageProps, SelectedTraitsProps } from '@buildeross/types'
 import { atoms, Box, Flex, Icon, Stack } from '@buildeross/zord'
-import React, { BaseSyntheticEvent, useCallback } from 'react'
+import React, { BaseSyntheticEvent, useCallback, useEffect, useState } from 'react'
 
 import {
   layerSelectStyle,
@@ -13,11 +13,31 @@ interface LayerProps {
   images: ImageProps[]
 }
 
+const darkSelectText = '#1f2024'
+
 export const LayerMenu: React.FC<{
   layers: LayerProps[]
   selectedTraits: SelectedTraitsProps[]
   setSelectedTraits: (selectedTraits: SelectedTraitsProps[]) => void
 }> = ({ layers, selectedTraits, setSelectedTraits }) => {
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    const updateThemeMode = () => {
+      setIsDarkMode(document.documentElement.dataset.themeMode === 'dark')
+    }
+
+    updateThemeMode()
+
+    const observer = new MutationObserver(updateThemeMode)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme-mode'],
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
   const handleChange = useCallback(
     (e: BaseSyntheticEvent, images: ImageProps[], trait: string) => {
       const isRandom = Number.isNaN(Number(e.target.value))
@@ -70,6 +90,7 @@ export const LayerMenu: React.FC<{
                   pointerEvents: 'none',
                 }),
               ]}
+              style={isDarkMode ? { color: darkSelectText } : undefined}
             >
               <Icon id="chevronDown" />
             </Flex>
@@ -79,12 +100,28 @@ export const LayerMenu: React.FC<{
               name={trait}
               defaultValue="Random"
               onChange={(e: BaseSyntheticEvent) => handleChange(e, images, trait)}
+              style={
+                isDarkMode
+                  ? {
+                      color: darkSelectText,
+                      WebkitTextFillColor: darkSelectText,
+                    }
+                  : undefined
+              }
             >
-              <option key="random-property" value="random">
+              <option
+                key="random-property"
+                value="random"
+                style={isDarkMode ? { color: darkSelectText } : undefined}
+              >
                 Random
               </option>
               {images.map((image: ImageProps, index: number) => (
-                <option key={image.name} value={index}>
+                <option
+                  key={image.name}
+                  value={index}
+                  style={isDarkMode ? { color: darkSelectText } : undefined}
+                >
                   {image.name}
                 </option>
               ))}
