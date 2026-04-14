@@ -192,6 +192,10 @@ const InnerPlaceBid = ({
 
       await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chainId, tokenAddress.toLowerCase()])
 
+      setBidAmount(undefined)
+      setBidComment('')
+      setBidError(null)
+
       // Call onSuccess callback if provided
       onSuccess?.()
     } catch (error) {
@@ -331,6 +335,7 @@ const InnerPlaceBid = ({
                 placeholder={`${formattedMinBid} ETH or more`}
                 type={'number'}
                 className={bidInput}
+                value={bidAmount ?? ''}
                 min={formattedMinBid}
                 max={formatEther(balance?.value ?? 0n)}
                 onChange={(event) => {

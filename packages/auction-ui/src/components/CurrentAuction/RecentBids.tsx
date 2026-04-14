@@ -4,7 +4,7 @@ import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { AllBids } from '../AllBids'
-import { allRecentBidsButton, recentBid } from '../Auction.css'
+import { allRecentBidsButton, recentBid, recentBidRow } from '../Auction.css'
 import { Bidder } from './Bidder'
 
 interface RecentBidsProps {
@@ -12,16 +12,23 @@ interface RecentBidsProps {
 }
 
 export const RecentBids: React.FC<RecentBidsProps> = ({ bids }) => {
+  const [showAllBidsModal, setShowAllBidsModal] = React.useState(false)
+  const inlineBids = bids.slice(0, 2)
+  const bidsCountLabel = bids.length === 1 ? '1 bid' : `${bids.length} bids`
+  const shouldShowAllBidsButtonOnMobile = bids.length > 1
+  const shouldShowAllBidsButtonOnDesktop = bids.length > 2
+  const shouldShowAllBidsButton =
+    shouldShowAllBidsButtonOnMobile || shouldShowAllBidsButtonOnDesktop
+
   return bids.length ? (
     <Box mt="x3">
       <Stack>
-        {bids.slice(0, 3).map(({ amount, bidder, id, comment }) => (
+        {inlineBids.map(({ amount, bidder, id, comment }) => (
           <Flex
             direction="column"
             align="center"
-            py="x2"
             key={`${bidder}_${amount}_${id}`}
-            className={recentBid}
+            className={`${recentBid} ${recentBidRow}`}
           >
             <Flex align="center" justify="space-between" width="100%">
               <Bidder address={bidder} />
@@ -52,17 +59,34 @@ export const RecentBids: React.FC<RecentBidsProps> = ({ bids }) => {
             ) : null}
           </Flex>
         ))}
-        <Flex mt="x4" align="center" justify="center" className={recentBid}>
-          <AnimatedModal
-            trigger={
-              <button type="button" className={allRecentBidsButton}>
-                View All Bids
-              </button>
-            }
+        {shouldShowAllBidsButton ? (
+          <Flex
+            mt="x4"
+            align="center"
+            justify="center"
+            className={recentBid}
+            display={{
+              '@initial': shouldShowAllBidsButtonOnMobile ? 'flex' : 'none',
+              '@768': shouldShowAllBidsButtonOnDesktop ? 'flex' : 'none',
+            }}
           >
-            <AllBids bids={bids} />
-          </AnimatedModal>
-        </Flex>
+            <AnimatedModal
+              open={showAllBidsModal}
+              close={() => setShowAllBidsModal(false)}
+              trigger={
+                <button
+                  type="button"
+                  className={allRecentBidsButton}
+                  onClick={() => setShowAllBidsModal(true)}
+                >
+                  {`View all ${bidsCountLabel}`}
+                </button>
+              }
+            >
+              <AllBids bids={bids} onClose={() => setShowAllBidsModal(false)} />
+            </AnimatedModal>
+          </Flex>
+        ) : null}
       </Stack>
     </Box>
   ) : (

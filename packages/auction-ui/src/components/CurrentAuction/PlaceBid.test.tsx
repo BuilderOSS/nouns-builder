@@ -1,5 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import { parseEther, stringToHex } from 'viem'
@@ -296,6 +296,37 @@ describe('PlaceBid', () => {
 
     const [, request] = vi.mocked(simulateContract).mock.calls[0]
     expect(request).not.toHaveProperty('dataSuffix')
+  })
+
+  it('resets bid amount and comment after a successful bid', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    const amountInput = screen.getByRole('spinbutton') as HTMLInputElement
+    const commentInput = screen.getByLabelText('Add a bid comment') as HTMLTextAreaElement
+
+    await user.type(amountInput, '1')
+    await user.type(commentInput, 'gm')
+    await user.click(screen.getByRole('button', { name: 'Place bid' }))
+
+    await waitFor(() => {
+      const currentAmountInput = screen.getByRole('spinbutton') as HTMLInputElement
+      const currentCommentInput = screen.getByLabelText(
+        'Add a bid comment'
+      ) as HTMLTextAreaElement
+
+      expect(currentAmountInput.value).toBe('')
+      expect(currentCommentInput.value).toBe('')
+    })
   })
 
   it('shows validation error and blocks submit for invalid replacement characters', async () => {

@@ -281,6 +281,12 @@ export const recentBid = style({
   },
 })
 
+export const recentBidRow = style({
+  paddingTop: vars.space.x3,
+  paddingBottom: vars.space.x3,
+  borderBottom: `1px solid ${vars.color.border}`,
+})
+
 export const recentBidder = style({
   fontWeight: 700,
 })

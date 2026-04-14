@@ -1,13 +1,17 @@
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Button, Flex } from '@buildeross/zord'
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 
 import { AllBids } from './AllBids'
 
 export const BidHistory = ({ bids }: { bids: AuctionBidFragment[] }) => {
+  const [showBidHistoryModal, setShowBidHistoryModal] = React.useState(false)
+
   return (
     <AnimatedModal
+      open={showBidHistoryModal}
+      close={() => setShowBidHistoryModal(false)}
       trigger={
         <Button
           fontSize={18}
@@ -15,12 +19,13 @@ export const BidHistory = ({ bids }: { bids: AuctionBidFragment[] }) => {
           variant="secondary"
           borderRadius="curved"
           h="x14"
+          onClick={() => setShowBidHistoryModal(true)}
         >
           Bid history
         </Button>
       }
     >
-      <AllBids bids={bids} />
+      <AllBids bids={bids} onClose={() => setShowBidHistoryModal(false)} />
     </AnimatedModal>
   )
 }
