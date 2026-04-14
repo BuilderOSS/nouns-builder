@@ -1,4 +1,4 @@
-import { JSONValueKind, TypedMap, json } from '@graphprotocol/graph-ts'
+import { json, JSONValueKind, TypedMap } from '@graphprotocol/graph-ts'
 
 export class ParsedDaoMetadata {
   description: string

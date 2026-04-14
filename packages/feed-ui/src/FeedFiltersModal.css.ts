@@ -136,9 +136,9 @@ export const filterItem = style([
     selectors: {
       'html[data-theme-mode="dark"] &': {
         backgroundColor: '#2a2b31',
-        ':hover': {
-          backgroundColor: '#3b3e47',
-        },
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        backgroundColor: '#3b3e47',
       },
     },
   },

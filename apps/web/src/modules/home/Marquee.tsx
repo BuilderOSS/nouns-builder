@@ -11,7 +11,9 @@ import {
   CollectiveDark,
   Creation,
   CreationDark,
+  darkWord,
   GreenClover,
+  lightWord,
   NounsGlasses,
   Of,
   OfDark,
@@ -23,15 +25,17 @@ import {
   TheDark,
   Unlock,
   UnlockDark,
-  darkWord,
-  lightWord,
 } from './Marquee.css'
 
 export const Marquee = () => {
   return (
     <Flex direction={'column'} align={'center'} mt={{ '@initial': 'x4', '@768': 'x32' }}>
       <Flex gap={'x2'} mb={'x1'}>
-        <Image src={'/home/unlock.svg'} alt={'unlock'} className={`${Unlock} ${lightWord}`} />
+        <Image
+          src={'/home/unlock.svg'}
+          alt={'unlock'}
+          className={`${Unlock} ${lightWord}`}
+        />
         <Image
           src={'/home/unlock-dark.svg'}
           alt={''}
@@ -173,7 +177,11 @@ export const Marquee = () => {
           alt={'small nouns glasses logo'}
           className={NounsGlasses}
         />
-        <Image src={'/home/creation.svg'} alt={'creation'} className={`${Creation} ${lightWord}`} />
+        <Image
+          src={'/home/creation.svg'}
+          alt={'creation'}
+          className={`${Creation} ${lightWord}`}
+        />
         <Image
           src={'/home/creation-dark.svg'}
           alt={''}

@@ -5,10 +5,10 @@ import Head from 'next/head'
 import Image from 'next/image'
 import React from 'react'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
+import { bridgeActionButton, bridgeCardBody } from 'src/styles/bridge.css'
 import { useAccount, useBalance } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
-import { bridgeActionButton, bridgeCardBody } from 'src/styles/bridge.css'
 
 const networks = [
   {
@@ -95,10 +95,7 @@ const NetworkCard: React.FC<{
       >
         <Image alt="bridge-logo" style={{ width: 200 }} src={bridgeLogo} />
       </Flex>
-      <Stack
-        p="x5"
-        className={bridgeCardBody}
-      >
+      <Stack p="x5" className={bridgeCardBody}>
         <Flex align={'center'} justify={'space-between'} w="100%">
           <Box>
             <Box as={'span'} fontWeight={'display'}>
