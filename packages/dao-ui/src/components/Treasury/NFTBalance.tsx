@@ -1,3 +1,4 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnrichedPinnedAssets } from '@buildeross/hooks/useEnrichedPinnedAssets'
 import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
@@ -5,16 +6,19 @@ import { usePinnedAssets } from '@buildeross/hooks/usePinnedAssets'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { skeletonAnimation } from '@buildeross/ui/styles'
-import { Box, Flex, Grid, Icon, Text } from '@buildeross/zord'
-import React, { useMemo } from 'react'
+import { Box, Button, Flex, Grid, Icon, Text } from '@buildeross/zord'
+import React, { useMemo, useState } from 'react'
 
 import { erc721AssetsWrapper } from './Treasury.css'
 
 export const NFTBalance: React.FC = () => {
+  const [showSpamNfts, setShowSpamNfts] = useState(PUBLIC_IS_TESTNET)
   const { addresses } = useDaoStore()
   const owner = addresses.treasury
   const chain = useChainStore((x) => x.chain)
-  const { nfts: allNfts, isLoading: nftsLoading } = useNFTBalance(chain.id, owner)
+  const { nfts: allNfts, isLoading: nftsLoading } = useNFTBalance(chain.id, owner, {
+    filterSpam: !showSpamNfts,
+  })
 
   // Fetch pinned assets
   const { pinnedAssets, isLoading: pinnedLoading } = usePinnedAssets(
@@ -111,6 +115,9 @@ export const NFTBalance: React.FC = () => {
         <Text fontSize={28} fontWeight={'display'}>
           NFTs
         </Text>
+        <Button variant="secondary" size="sm" onClick={() => setShowSpamNfts((x) => !x)}>
+          {showSpamNfts ? 'Hide spam NFTs' : 'Show spam NFTs'}
+        </Button>
       </Flex>
 
       {isLoading && numNfts === 0 && (
