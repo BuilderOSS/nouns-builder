@@ -38,10 +38,26 @@ interface PlaceBidProps {
 const INSUFFICIENT_BALANCE_ERROR = 'Insufficient ETH balance for this bid.'
 const INVALID_COMMENT_ERROR =
   'Bid comment contains unsupported characters. Please retype your comment.'
+const MAX_BID_COMMENT_BYTES = 140
 const ENTER_BID_HELPER_TEXT = (formattedMinBid: string) =>
   `Enter at least ${formattedMinBid} ETH to place a bid.`
 const MIN_BID_HELPER_TEXT = (formattedMinBid: string) =>
   `Bid must be at least ${formattedMinBid} ETH.`
+
+const truncateToMaxBytes = (value: string, maxBytes: number) => {
+  const encoder = new TextEncoder()
+  let byteLength = 0
+  let truncated = ''
+
+  for (const char of value) {
+    const charLength = encoder.encode(char).length
+    if (byteLength + charLength > maxBytes) break
+    truncated += char
+    byteLength += charLength
+  }
+
+  return truncated
+}
 
 const InnerPlaceBid = ({
   chainId,
@@ -123,6 +139,9 @@ const InnerPlaceBid = ({
     const trimmedComment = bidComment.trim()
     if (!trimmedComment) return undefined
     if (trimmedComment.includes('\uFFFD')) return undefined
+    if (new TextEncoder().encode(trimmedComment).length > MAX_BID_COMMENT_BYTES) {
+      return undefined
+    }
 
     return stringToHex(trimmedComment)
   }, [bidComment])
@@ -347,10 +366,14 @@ const InnerPlaceBid = ({
                 aria-label="Add a bid comment"
                 placeholder="Add a bid comment (optional)"
                 value={bidComment}
-                maxLength={280}
+                maxLength={MAX_BID_COMMENT_BYTES}
                 rows={3}
                 className={bidCommentInput}
-                onChange={(event) => setBidComment(event.target.value)}
+                onChange={(event) =>
+                  setBidComment(
+                    truncateToMaxBytes(event.target.value, MAX_BID_COMMENT_BYTES)
+                  )
+                }
               />
             </Box>
             {helperText ? (

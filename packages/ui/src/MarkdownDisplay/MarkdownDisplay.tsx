@@ -9,10 +9,18 @@ export type MarkdownDisplayProps = {
   disableLinks?: boolean
 }
 
+const FRONTMATTER_PATTERN = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n)?/
+
+const stripLeadingFrontmatter = (markdown: string) => {
+  return markdown.replace(FRONTMATTER_PATTERN, '')
+}
+
 export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({
   children,
   disableLinks = false,
 }) => {
+  const markdown = stripLeadingFrontmatter(children)
+
   return (
     <ReactMarkdown
       rehypePlugins={[rehypeRaw, rehypeSanitize]}
@@ -25,7 +33,7 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({
           : undefined
       }
     >
-      {children}
+      {markdown}
     </ReactMarkdown>
   )
 }

@@ -1,6 +1,6 @@
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { Box, Button, Flex } from '@buildeross/zord'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
 
@@ -9,15 +9,7 @@ export const DaoDescription = ({ description }: { description?: string }) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const textRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (
-      textRef.current &&
-      textRef?.current?.scrollHeight > textRef?.current?.clientHeight
-    ) {
-      setIsOverHeight(true)
-    }
-  }, [description])
+  const contentRef = useRef<HTMLDivElement>(null)
 
   const correctedDescription = useMemo(() => {
     if (typeof description === 'string') {
@@ -29,14 +21,48 @@ export const DaoDescription = ({ description }: { description?: string }) => {
     return ''
   }, [description])
 
+  const collapsedHeight = useMemo(() => {
+    return Number.parseInt(UNEXPANDED_BOX_HEIGHT, 10)
+  }, [])
+
+  const updateOverflowState = useCallback(() => {
+    const contentHeight = contentRef.current?.scrollHeight || 0
+    setIsOverHeight(contentHeight > collapsedHeight)
+  }, [collapsedHeight])
+
+  useEffect(() => {
+    setIsExpanded(false)
+  }, [correctedDescription])
+
+  useEffect(() => {
+    updateOverflowState()
+
+    let observer: ResizeObserver | null = null
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => {
+        updateOverflowState()
+      })
+
+      if (textRef.current) observer.observe(textRef.current)
+      if (contentRef.current) observer.observe(contentRef.current)
+    }
+
+    window.addEventListener('resize', updateOverflowState)
+
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', updateOverflowState)
+    }
+  }, [correctedDescription, updateOverflowState])
+
   if (!description || description.trim() === '') return null
 
   return (
     <Flex direction="column" align="flex-end">
       <Box
         mt={{ '@initial': 'x4', '@768': 'x6' }}
-        py="x2"
-        px={{ '@initial': 'x2', '@768': 'x4' }}
+        py="x4"
+        px="x4"
         borderRadius={'phat'}
         borderStyle={'solid'}
         borderWidth={'normal'}
@@ -45,10 +71,11 @@ export const DaoDescription = ({ description }: { description?: string }) => {
         width="100%"
         className={!isExpanded && isOverHeight ? fadingEffect : ''}
         style={{
-          maxHeight: isExpanded ? '100%' : UNEXPANDED_BOX_HEIGHT,
+          maxHeight: isExpanded ? 'none' : UNEXPANDED_BOX_HEIGHT,
+          overflow: isExpanded ? 'visible' : 'hidden',
         }}
       >
-        <Box className={daoDescription}>
+        <Box className={daoDescription} ref={contentRef}>
           <MarkdownDisplay>{correctedDescription}</MarkdownDisplay>
         </Box>
       </Box>

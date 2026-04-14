@@ -326,4 +326,27 @@ describe('PlaceBid', () => {
     await user.click(screen.getByRole('button', { name: 'Place bid' }))
     expect(simulateContract).not.toHaveBeenCalled()
   })
+
+  it('limits bid comments to 140 bytes', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <PlaceBid
+        chainId={CHAIN_ID.ETHEREUM}
+        auctionAddress={'0x0000000000000000000000000000000000000001'}
+        tokenAddress={'0x0000000000000000000000000000000000000002'}
+        tokenId="1"
+        daoName="Test DAO"
+      />
+    )
+
+    const commentInput = screen.getByPlaceholderText(
+      'Add a bid comment (optional)'
+    ) as HTMLTextAreaElement
+
+    await user.type(commentInput, '😀'.repeat(40))
+
+    expect(commentInput.maxLength).toBe(140)
+    expect(new TextEncoder().encode(commentInput.value).length).toBeLessThanOrEqual(140)
+  })
 })

@@ -11,7 +11,7 @@ const createSubgraphUrl = (name: string, version = VERSION): string =>
 
 export const PUBLIC_SUBGRAPH_URL: Map<CHAIN_ID, string> = new Map([
   [CHAIN_ID.ETHEREUM, createSubgraphUrl('nouns-builder-ethereum-mainnet')],
-  [CHAIN_ID.SEPOLIA, createSubgraphUrl('nouns-builder-ethereum-sepolia', '0.1.16')],
+  [CHAIN_ID.SEPOLIA, createSubgraphUrl('nouns-builder-ethereum-sepolia')],
   [CHAIN_ID.OPTIMISM, createSubgraphUrl('nouns-builder-optimism-mainnet')],
   [CHAIN_ID.OPTIMISM_SEPOLIA, createSubgraphUrl('nouns-builder-optimism-sepolia')],
   [CHAIN_ID.BASE, createSubgraphUrl('nouns-builder-base-mainnet')],
