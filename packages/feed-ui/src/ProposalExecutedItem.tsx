@@ -1,6 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { ProposalExecutedFeedItem } from '@buildeross/types'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
@@ -20,7 +19,7 @@ interface ProposalExecutedItemProps {
 
 export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
-  const { displayName, ensAvatar } = useEnsData(item.actor)
+  const { displayName } = useEnsData(item.actor)
 
   const description = item.proposalDescription?.trim()
 
@@ -31,15 +30,7 @@ export const ProposalExecutedItem: React.FC<ProposalExecutedItemProps> = ({ item
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
-          <Text className={feedItemTitle}>
-            <WalletIdentityWithPreview
-              address={item.actor}
-              displayName={displayName}
-              avatarSrc={ensAvatar}
-              inline
-            />{' '}
-            executed this proposal
-          </Text>
+          <Text className={feedItemTitle}>{displayName} executed this proposal</Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
           {description && (
             <Box className={feedItemTextContentWrapper}>

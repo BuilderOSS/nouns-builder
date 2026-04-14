@@ -1,6 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { ProposalVotedFeedItem } from '@buildeross/types'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
@@ -20,7 +19,7 @@ interface ProposalVotedItemProps {
 
 export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
-  const { displayName, ensAvatar } = useEnsData(item.voter)
+  const { displayName } = useEnsData(item.voter)
 
   const reason = item.reason?.trim()
 
@@ -46,15 +45,7 @@ export const ProposalVotedItem: React.FC<ProposalVotedItemProps> = ({ item }) =>
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
           <Flex className={feedItemTitle} gap="x1" align="center" wrap="wrap">
-            <Text>
-              <WalletIdentityWithPreview
-                address={item.voter}
-                displayName={displayName}
-                avatarSrc={ensAvatar}
-                inline
-              />{' '}
-              voted
-            </Text>
+            <Text>{displayName} voted</Text>
             <Text color={getVoteColor(item.support)}>{item.support}</Text>
             <Text>with {item.weight} votes</Text>
           </Flex>

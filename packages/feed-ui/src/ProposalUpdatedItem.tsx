@@ -1,7 +1,6 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { usePropdateMessage } from '@buildeross/hooks/usePropdateMessage'
 import type { ProposalUpdatePostedFeedItem } from '@buildeross/types'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
@@ -21,7 +20,7 @@ interface ProposalUpdatedItemProps {
 
 export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
-  const { displayName, ensAvatar } = useEnsData(item.actor)
+  const { displayName } = useEnsData(item.actor)
   const { parsedContent, isLoading } = usePropdateMessage(item.messageType, item.message)
 
   const displayContent = isLoading ? '' : parsedContent
@@ -33,15 +32,7 @@ export const ProposalUpdatedItem: React.FC<ProposalUpdatedItemProps> = ({ item }
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
-          <Text className={feedItemTitle}>
-            <WalletIdentityWithPreview
-              address={item.actor}
-              displayName={displayName}
-              avatarSrc={ensAvatar}
-              inline
-            />{' '}
-            posted an update
-          </Text>
+          <Text className={feedItemTitle}>{displayName} posted an update</Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
           {displayContent && (
             <Box className={feedItemTextContentWrapper}>

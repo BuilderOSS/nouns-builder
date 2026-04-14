@@ -1,6 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { ProposalCreatedFeedItem } from '@buildeross/types'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
@@ -20,7 +19,7 @@ interface ProposalCreatedItemProps {
 
 export const ProposalCreatedItem: React.FC<ProposalCreatedItemProps> = ({ item }) => {
   const { getProposalLink } = useLinks()
-  const { displayName, ensAvatar } = useEnsData(item.proposer)
+  const { displayName } = useEnsData(item.proposer)
 
   const description = item.proposalDescription?.trim()
 
@@ -31,15 +30,7 @@ export const ProposalCreatedItem: React.FC<ProposalCreatedItemProps> = ({ item }
     >
       <Stack gap="x3" w="100%">
         <Stack gap="x2">
-          <Text className={feedItemTitle}>
-            <WalletIdentityWithPreview
-              address={item.proposer}
-              displayName={displayName}
-              avatarSrc={ensAvatar}
-              inline
-            />{' '}
-            proposed
-          </Text>
+          <Text className={feedItemTitle}>{displayName} proposed</Text>
           <Text className={feedItemSubtitle}>{item.proposalTitle}</Text>
           {description && (
             <Box className={feedItemTextContentWrapper}>

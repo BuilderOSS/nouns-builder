@@ -1,6 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { AuctionSettledFeedItem } from '@buildeross/types'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
@@ -18,7 +17,7 @@ interface AuctionSettledItemProps {
 
 export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) => {
   const { getAuctionLink } = useLinks()
-  const { displayName, ensAvatar } = useEnsData(item.winner)
+  const { displayName } = useEnsData(item.winner)
 
   const formattedAmount =
     BigInt(item.amount) > 0n ? formatCryptoVal(formatEther(BigInt(item.amount))) : null
@@ -43,13 +42,7 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
               `Auction for ${item.tokenName} settled`
             ) : (
               <>
-                <WalletIdentityWithPreview
-                  address={item.winner}
-                  displayName={displayName}
-                  avatarSrc={ensAvatar}
-                  inline
-                />{' '}
-                won {item.tokenName}
+                {displayName} won {item.tokenName}
                 {formattedAmount ? ` for ${formattedAmount} ETH` : ''}
               </>
             )}

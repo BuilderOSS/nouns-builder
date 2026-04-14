@@ -1,6 +1,5 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import type { AuctionBidPlacedFeedItem } from '@buildeross/types'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
@@ -23,7 +22,7 @@ interface AuctionBidPlacedItemProps {
 
 export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item }) => {
   const { getAuctionLink } = useLinks()
-  const { displayName, ensAvatar } = useEnsData(item.bidder)
+  const { displayName } = useEnsData(item.bidder)
 
   const formattedAmount = formatCryptoVal(formatEther(BigInt(item.amount)))
 
@@ -43,13 +42,7 @@ export const AuctionBidPlacedItem: React.FC<AuctionBidPlacedItemProps> = ({ item
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
           <Text className={feedItemTitle}>
-            <WalletIdentityWithPreview
-              address={item.bidder}
-              displayName={displayName}
-              avatarSrc={ensAvatar}
-              inline
-            />{' '}
-            bid {formattedAmount} ETH
+            {displayName} bid {formattedAmount} ETH
           </Text>
           <Text className={feedItemSubtitle}>{item.tokenName}</Text>
         </Stack>
