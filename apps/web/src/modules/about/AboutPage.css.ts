@@ -19,6 +19,7 @@ export const page = style({
   padding: '48px 16px 96px',
   boxSizing: 'border-box',
   background: '#FFFFFF',
+  overflowX: 'clip',
   '@media': {
     'screen and (min-width: 768px)': {
       padding: '64px 24px 120px',
@@ -29,6 +30,8 @@ export const page = style({
 export const container = style({
   maxWidth: '1180px',
   margin: '0 auto',
+  width: '100%',
+  minWidth: 0,
 })
 
 export const centeredImageWrap = style({
@@ -94,13 +97,16 @@ export const eyebrow = style({
 
 export const sectionTitle = style({
   fontFamily: 'ptRoot, sans-serif',
-  fontSize: '32px',
-  lineHeight: 1.05,
-  whiteSpace: 'nowrap',
+  fontSize: '28px',
+  lineHeight: 1.08,
+  whiteSpace: 'normal',
+  overflowWrap: 'anywhere',
   color: '#111111',
   '@media': {
     'screen and (min-width: 768px)': {
       fontSize: '44px',
+      whiteSpace: 'nowrap',
+      overflowWrap: 'normal',
     },
   },
 })
@@ -119,7 +125,12 @@ export const introCopyNoWrap = style({
   fontSize: '17px',
   lineHeight: 1.6,
   color: '#5C5648',
-  whiteSpace: 'nowrap',
+  whiteSpace: 'normal',
+  '@media': {
+    'screen and (min-width: 960px)': {
+      whiteSpace: 'nowrap',
+    },
+  },
 })
 
 export const hero = style({
@@ -139,15 +150,17 @@ export const heroCopy = style({
   flexDirection: 'column',
   gap: '20px',
   paddingTop: '8px',
+  minWidth: 0,
 })
 
 export const heroTitle = style({
   fontFamily: 'ptRoot, sans-serif',
-  fontSize: '44px',
-  lineHeight: 0.98,
+  fontSize: '36px',
+  lineHeight: 1,
   letterSpacing: '-0.03em',
   color: '#111111',
   maxWidth: '760px',
+  overflowWrap: 'anywhere',
   '@media': {
     'screen and (min-width: 768px)': {
       fontSize: '60px',
@@ -157,9 +170,15 @@ export const heroTitle = style({
 
 export const heroText = style({
   maxWidth: '640px',
-  fontSize: '18px',
-  lineHeight: 1.65,
+  fontSize: '16px',
+  lineHeight: 1.6,
   color: '#4C463B',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      fontSize: '18px',
+      lineHeight: 1.65,
+    },
+  },
 })
 
 export const heroHighlightList = style({
@@ -173,7 +192,7 @@ export const heroHighlightList = style({
 
 export const heroHighlight = style({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: '10px',
   fontSize: '15px',
   lineHeight: 1.5,
@@ -256,9 +275,15 @@ export const heroPanel = style({
   borderRadius: '28px',
   border: '1px solid #E6E1D4',
   background: '#F8FBFF',
-  padding: '22px',
-  minHeight: '420px',
+  padding: '14px',
+  minHeight: 'auto',
   boxShadow: '0 10px 24px rgba(17, 17, 17, 0.04)',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      padding: '22px',
+      minHeight: '420px',
+    },
+  },
 })
 
 export const heroPanelGlow = style({
@@ -273,13 +298,13 @@ export const montageGrid = style({
   position: 'relative',
   zIndex: 1,
   display: 'grid',
-  gap: '14px',
-  gridTemplateColumns: '1.05fr 0.95fr',
-  gridTemplateAreas: '"primary side" "footer footer"',
+  gap: '12px',
+  gridTemplateColumns: '1fr',
+  gridTemplateAreas: '"primary" "side" "footer"',
   '@media': {
-    'screen and (max-width: 540px)': {
-      gridTemplateColumns: '1fr',
-      gridTemplateAreas: '"primary" "side" "footer"',
+    'screen and (min-width: 541px)': {
+      gridTemplateColumns: '1.05fr 0.95fr',
+      gridTemplateAreas: '"primary side" "footer footer"',
     },
   },
 })
@@ -288,18 +313,29 @@ export const montageCard = style({
   borderRadius: '20px',
   border: '1px solid rgba(17, 17, 17, 0.08)',
   background: 'rgba(255, 255, 255, 0.92)',
-  padding: '18px',
+  padding: '16px',
   boxShadow: '0 6px 16px rgba(17, 17, 17, 0.04)',
+  minWidth: 0,
+  '@media': {
+    'screen and (min-width: 768px)': {
+      padding: '18px',
+    },
+  },
 })
 
 export const montagePrimary = style({
   gridArea: 'primary',
-  minHeight: '150px',
+  minHeight: 'unset',
 })
 
 export const montageSide = style({
   gridArea: 'side',
-  minHeight: '220px',
+  minHeight: '180px',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      minHeight: '220px',
+    },
+  },
 })
 
 export const montageSecondary = style({
@@ -309,18 +345,28 @@ export const montageSecondary = style({
 
 export const montageFooter = style({
   gridArea: 'footer',
-  minHeight: '180px',
+  minHeight: '120px',
   padding: '10px',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      minHeight: '180px',
+    },
+  },
 })
 
 export const logoMarquee = style({
   width: '100%',
   height: '100%',
-  minHeight: '160px',
+  minHeight: '96px',
   overflow: 'hidden',
   borderRadius: '16px',
   background:
     'linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%)',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      minHeight: '160px',
+    },
+  },
 })
 
 export const logoMarqueeTrack = style({
@@ -344,18 +390,24 @@ export const logoMarqueeTrack = style({
 export const logoMarqueeInner = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '18px',
+  gap: '12px',
   width: 'max-content',
   minWidth: '100%',
   height: '100%',
-  padding: '22px 0',
+  padding: '14px 0',
   animation: `${marqueeScroll} 28s linear infinite`,
+  '@media': {
+    'screen and (min-width: 768px)': {
+      gap: '18px',
+      padding: '22px 0',
+    },
+  },
 })
 
 export const logoMarqueeItem = style({
-  width: '86px',
-  height: '86px',
-  borderRadius: '22px',
+  width: '64px',
+  height: '64px',
+  borderRadius: '18px',
   overflow: 'hidden',
   background: '#FFFFFF',
   border: '1px solid rgba(37, 99, 235, 0.08)',
@@ -364,6 +416,13 @@ export const logoMarqueeItem = style({
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
+  '@media': {
+    'screen and (min-width: 768px)': {
+      width: '86px',
+      height: '86px',
+      borderRadius: '22px',
+    },
+  },
 })
 
 export const logoMarqueeImage = style({
@@ -382,12 +441,17 @@ export const montageLabel = style({
 })
 
 export const montageValue = style({
-  marginTop: '10px',
   fontFamily: 'ptRoot, sans-serif',
-  fontSize: '28px',
+  fontSize: '24px',
   lineHeight: 1,
   whiteSpace: 'pre-line',
   color: '#111111',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      marginTop: '10px',
+      fontSize: '28px',
+    },
+  },
 })
 
 export const montageBody = style({
@@ -500,9 +564,14 @@ export const statValue = style({
   zIndex: 1,
   marginTop: '18px',
   fontFamily: 'ptRoot, sans-serif',
-  fontSize: '42px',
+  fontSize: '36px',
   lineHeight: 1,
   color: '#111111',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      fontSize: '42px',
+    },
+  },
 })
 
 export const statDetail = style({
@@ -611,18 +680,24 @@ export const daoCard = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '18px',
-  minHeight: '360px',
+  minHeight: '320px',
   borderRadius: '22px',
   border: '1px solid #E6E1D4',
   background: '#FFFFFF',
   padding: '18px',
   boxShadow: '0 8px 18px rgba(17, 17, 17, 0.04)',
+  minWidth: 0,
   transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
   selectors: {
     '&:hover': {
       transform: 'translateY(-1px)',
       borderColor: '#D7D0C0',
       boxShadow: '0 10px 22px rgba(17, 17, 17, 0.05)',
+    },
+  },
+  '@media': {
+    'screen and (min-width: 768px)': {
+      minHeight: '360px',
     },
   },
 })
@@ -688,6 +763,7 @@ export const daoName = style({
   fontSize: '20px',
   lineHeight: 1.05,
   color: '#111111',
+  overflowWrap: 'anywhere',
 })
 
 export const daoDescription = style({
@@ -727,7 +803,8 @@ export const daoSignalValue = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '18px',
   lineHeight: 1.2,
-  whiteSpace: 'nowrap',
+  whiteSpace: 'normal',
+  overflowWrap: 'anywhere',
   color: '#111111',
 })
 
@@ -749,7 +826,7 @@ export const scrollRow = style({
   display: 'grid',
   gap: '16px',
   gridAutoFlow: 'column',
-  gridAutoColumns: 'minmax(280px, 1fr)',
+  gridAutoColumns: 'minmax(84vw, 1fr)',
   overflowX: 'auto',
   paddingBottom: '8px',
   scrollSnapType: 'x mandatory',
@@ -763,6 +840,9 @@ export const scrollRow = style({
     },
   },
   '@media': {
+    'screen and (min-width: 640px)': {
+      gridAutoColumns: 'minmax(280px, 1fr)',
+    },
     'screen and (min-width: 1080px)': {
       gridAutoColumns: 'minmax(280px, 320px)',
     },
@@ -773,13 +853,14 @@ export const coiningCard = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '16px',
-  minHeight: '360px',
+  minHeight: '320px',
   scrollSnapAlign: 'start',
   borderRadius: '22px',
   border: '1px solid #E6E1D4',
   background: '#FFFFFF',
   padding: '18px',
   boxShadow: '0 8px 18px rgba(17, 17, 17, 0.04)',
+  minWidth: 0,
   transition: 'transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease',
   selectors: {
     '&:hover': {
@@ -788,17 +869,27 @@ export const coiningCard = style({
       boxShadow: '0 10px 22px rgba(17, 17, 17, 0.05)',
     },
   },
+  '@media': {
+    'screen and (min-width: 768px)': {
+      minHeight: '360px',
+    },
+  },
 })
 
 export const coiningPreview = style({
   position: 'relative',
-  minHeight: '220px',
+  minHeight: '180px',
   borderRadius: '22px',
   overflow: 'hidden',
   padding: '18px',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      minHeight: '220px',
+    },
+  },
 })
 
 export const coiningPreviewTop = style({
@@ -836,9 +927,15 @@ export const coiningNetworkBadge = style({
 export const coiningPreviewTitle = style({
   maxWidth: '10ch',
   fontFamily: 'ptRoot, sans-serif',
-  fontSize: '32px',
+  fontSize: '26px',
   lineHeight: 0.95,
   color: '#111111',
+  overflowWrap: 'anywhere',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      fontSize: '32px',
+    },
+  },
 })
 
 export const coiningMeta = style({
@@ -920,9 +1017,15 @@ export const statusBadge = style({
 
 export const droposalTitle = style({
   fontFamily: 'ptRoot, sans-serif',
-  fontSize: '24px',
+  fontSize: '20px',
   lineHeight: 1.05,
   color: '#111111',
+  overflowWrap: 'anywhere',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      fontSize: '24px',
+    },
+  },
 })
 
 export const droposalSummary = style({
@@ -1021,7 +1124,10 @@ export const compactValueGrid = style({
   gap: '16px',
   gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
   '@media': {
-    'screen and (min-width: 768px)': {
+    'screen and (min-width: 700px)': {
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    },
+    'screen and (min-width: 1080px)': {
       gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
     },
   },
@@ -1035,7 +1141,13 @@ export const useCaseGrid = style({
   gap: '16px',
   gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
   '@media': {
-    'screen and (min-width: 768px)': {
+    'screen and (min-width: 640px)': {
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    },
+    'screen and (min-width: 900px)': {
+      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    },
+    'screen and (min-width: 1180px)': {
       gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
     },
   },
@@ -1051,15 +1163,22 @@ export const valueCard = style({
 })
 
 export const compactValueCard = style({
-  minHeight: '160px',
+  minHeight: '136px',
   borderRadius: '20px',
   border: '1px solid #E6E1D4',
   background: '#FFFFFF',
-  padding: '20px',
+  padding: '18px',
   boxShadow: '0 8px 18px rgba(17, 17, 17, 0.04)',
   display: 'flex',
   flexDirection: 'column',
   gap: '12px',
+  minWidth: 0,
+  '@media': {
+    'screen and (min-width: 768px)': {
+      minHeight: '160px',
+      padding: '20px',
+    },
+  },
 })
 
 export const valueTitle = style({
@@ -1161,6 +1280,7 @@ export const finalCtaContent = style({
   display: 'grid',
   gap: '24px',
   alignItems: 'center',
+  minWidth: 0,
   '@media': {
     'screen and (min-width: 980px)': {
       gridTemplateColumns: 'minmax(0, 1fr) auto',
@@ -1171,12 +1291,15 @@ export const finalCtaContent = style({
 
 export const finalCtaTitle = style({
   fontFamily: 'ptRoot, sans-serif',
-  fontSize: '36px',
-  lineHeight: 0.98,
-  whiteSpace: 'nowrap',
+  fontSize: '32px',
+  lineHeight: 1,
+  whiteSpace: 'normal',
+  overflowWrap: 'anywhere',
   '@media': {
     'screen and (min-width: 768px)': {
       fontSize: '52px',
+      whiteSpace: 'nowrap',
+      overflowWrap: 'normal',
     },
   },
 })
@@ -1192,11 +1315,18 @@ export const finalChecklist = style({
 
 export const finalChecklistItem = style({
   display: 'flex',
-  alignItems: 'center',
+  alignItems: 'flex-start',
   gap: '10px',
-  fontSize: '17px',
-  lineHeight: 1.6,
+  fontSize: '15px',
+  lineHeight: 1.55,
   color: 'rgba(255, 255, 255, 0.78)',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      alignItems: 'center',
+      fontSize: '17px',
+      lineHeight: 1.6,
+    },
+  },
 })
 
 export const finalChecklistMarker = style({
@@ -1290,6 +1420,7 @@ export const subLink = style({
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
+  width: 'fit-content',
   selectors: {
     '&:hover': {
       color: '#FFFFFF',
