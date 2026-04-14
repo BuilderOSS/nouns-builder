@@ -1,15 +1,21 @@
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { Box, Button, Flex } from '@buildeross/zord'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
+
+const FRONTMATTER_PATTERN = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n)?/
+
+const stripLeadingFrontmatter = (markdown: string): string => {
+  return markdown.replace(FRONTMATTER_PATTERN, '')
+}
 
 export const DaoDescription = ({ description }: { description?: string }) => {
   const [isOverHeight, setIsOverHeight] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const textRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const descriptionContentId = useId()
 
   const correctedDescription = useMemo(() => {
     if (typeof description === 'string') {
@@ -21,18 +27,22 @@ export const DaoDescription = ({ description }: { description?: string }) => {
     return ''
   }, [description])
 
+  const displayDescription = useMemo(() => {
+    return stripLeadingFrontmatter(correctedDescription)
+  }, [correctedDescription])
+
   const collapsedHeight = useMemo(() => {
     return Number.parseInt(UNEXPANDED_BOX_HEIGHT, 10)
   }, [])
 
   const updateOverflowState = useCallback(() => {
-    const contentHeight = contentRef.current?.scrollHeight || 0
+    const contentHeight = containerRef.current?.scrollHeight || 0
     setIsOverHeight(contentHeight > collapsedHeight)
   }, [collapsedHeight])
 
   useEffect(() => {
     setIsExpanded(false)
-  }, [correctedDescription])
+  }, [displayDescription])
 
   useEffect(() => {
     updateOverflowState()
@@ -43,8 +53,7 @@ export const DaoDescription = ({ description }: { description?: string }) => {
         updateOverflowState()
       })
 
-      if (textRef.current) observer.observe(textRef.current)
-      if (contentRef.current) observer.observe(contentRef.current)
+      if (containerRef.current) observer.observe(containerRef.current)
     }
 
     window.addEventListener('resize', updateOverflowState)
@@ -53,9 +62,9 @@ export const DaoDescription = ({ description }: { description?: string }) => {
       observer?.disconnect()
       window.removeEventListener('resize', updateOverflowState)
     }
-  }, [correctedDescription, updateOverflowState])
+  }, [displayDescription, updateOverflowState])
 
-  if (!description || description.trim() === '') return null
+  if (!displayDescription.trim()) return null
 
   return (
     <Flex direction="column" align="flex-end">
@@ -67,7 +76,8 @@ export const DaoDescription = ({ description }: { description?: string }) => {
         borderStyle={'solid'}
         borderWidth={'normal'}
         borderColor={'border'}
-        ref={textRef}
+        ref={containerRef}
+        id={descriptionContentId}
         width="100%"
         className={!isExpanded && isOverHeight ? fadingEffect : ''}
         style={{
@@ -75,8 +85,8 @@ export const DaoDescription = ({ description }: { description?: string }) => {
           overflow: isExpanded ? 'visible' : 'hidden',
         }}
       >
-        <Box className={daoDescription} ref={contentRef}>
-          <MarkdownDisplay>{correctedDescription}</MarkdownDisplay>
+        <Box className={daoDescription}>
+          <MarkdownDisplay>{displayDescription}</MarkdownDisplay>
         </Box>
       </Box>
       {isOverHeight && (
@@ -85,6 +95,8 @@ export const DaoDescription = ({ description }: { description?: string }) => {
           onClick={() => setIsExpanded(!isExpanded)}
           size="sm"
           px={'x0'}
+          aria-expanded={isExpanded}
+          aria-controls={descriptionContentId}
         >
           {isExpanded ? 'Collapse' : 'Read More'}
         </Button>

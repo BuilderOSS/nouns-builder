@@ -31,7 +31,17 @@ describe('DaoDescription', () => {
     fireEvent.click(toggleButton)
 
     expect(screen.getByRole('button', { name: 'Collapse' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Collapse' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    )
     expect(container.style.maxHeight).toBe('none')
     expect(container.style.overflow).toBe('visible')
+  })
+
+  it('does not render when description is empty after normalization', () => {
+    const { container } = render(<DaoDescription description={'\\n'} />)
+
+    expect(container.textContent?.trim()).toBe('')
   })
 })

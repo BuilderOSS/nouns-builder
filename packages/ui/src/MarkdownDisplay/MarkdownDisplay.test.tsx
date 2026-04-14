@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest'
 import { MarkdownDisplay } from './MarkdownDisplay'
 
 describe('MarkdownDisplay', () => {
-  it('does not render leading YAML frontmatter', () => {
-    render(
+  it('renders leading YAML frontmatter verbatim', () => {
+    const { container } = render(
       <MarkdownDisplay>{`---
 links:
   github: https://github.com/random
@@ -16,16 +16,15 @@ links:
 Other text goes here`}</MarkdownDisplay>
     )
 
-    expect(screen.queryByText('links:')).not.toBeInTheDocument()
-    expect(screen.queryByText(/github:/i)).not.toBeInTheDocument()
-    expect(screen.queryByText(/twitter:/i)).not.toBeInTheDocument()
+    expect(container.textContent).toContain('links:')
+    expect(container.textContent).toContain('github: https://github.com/random')
+    expect(container.textContent).toContain('twitter: https://twitter.com/random')
     expect(screen.getByText('Other text goes here')).toBeInTheDocument()
   })
 
   it('renders markdown content without frontmatter as-is', () => {
-    render(<MarkdownDisplay>{'Hello **world**'}</MarkdownDisplay>)
+    const { container } = render(<MarkdownDisplay>{'Hello **world**'}</MarkdownDisplay>)
 
-    expect(screen.getByText('Hello')).toBeInTheDocument()
-    expect(screen.getByText('world')).toBeInTheDocument()
+    expect(container.textContent).toContain('Hello world')
   })
 })
