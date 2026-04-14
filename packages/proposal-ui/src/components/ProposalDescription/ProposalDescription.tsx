@@ -3,7 +3,6 @@ import {
   PUBLIC_ZORA_NFT_CREATOR,
   ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants/addresses'
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
@@ -14,9 +13,9 @@ import {
   Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { WalletProfilePreview } from '@buildeross/ui/WalletProfilePreview'
 import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import {
@@ -69,9 +68,8 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   isPreview = false,
 }) => {
   const { displayName, ensAvatar } = useEnsData(proposal.proposer)
-  const { displayName: representedDisplayName } = useEnsData(
-    proposal.representedAddress || undefined
-  )
+  const { displayName: representedDisplayName, ensAvatar: representedEnsAvatar } =
+    useEnsData(proposal.representedAddress || undefined)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const safeDiscussionUrl = getSafeDiscussionUrl(proposal.discussionUrl)
@@ -187,12 +185,41 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
             <Text fontSize={28} fontWeight={'display'}>
               {title}
             </Text>
-            <Text color={'text3'} mt={'x2'}>
-              by {displayName}
-              {proposal.representedAddress
-                ? ` on behalf of ${representedDisplayName}`
-                : ''}
-            </Text>
+            <Flex
+              color={'text3'}
+              mt={'x2'}
+              align="center"
+              gap="x1"
+              wrap
+              style={{ minWidth: 0 }}
+            >
+              <Text color={'text3'}>By</Text>
+              <WalletIdentityWithPreview
+                address={proposal.proposer as `0x${string}`}
+                displayName={displayName || walletSnippet(proposal.proposer)}
+                avatarSrc={ensAvatar}
+                avatarSize="20"
+                nameVariant="paragraph-sm"
+                mobileTapBehavior="toggle"
+                inline
+              />
+              {proposal.representedAddress && (
+                <>
+                  <Text color={'text3'}>on behalf of</Text>
+                  <WalletIdentityWithPreview
+                    address={proposal.representedAddress as `0x${string}`}
+                    displayName={
+                      representedDisplayName || walletSnippet(proposal.representedAddress)
+                    }
+                    avatarSrc={representedEnsAvatar}
+                    avatarSize="20"
+                    nameVariant="paragraph-sm"
+                    mobileTapBehavior="toggle"
+                    inline
+                  />
+                </>
+              )}
+            </Flex>
           </Section>
         )}
 
@@ -235,54 +262,49 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         )}
 
         <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
-          <WalletProfilePreview
-            address={proposal.proposer as `0x${string}`}
-            displayName={displayName || walletSnippet(proposal.proposer)}
-            avatarSrc={ensAvatar}
-          >
-            <Flex direction={'row'} placeItems={'center'}>
-              <Box
-                backgroundColor="background2"
-                width={'x8'}
-                height={'x8'}
-                mr={'x2'}
-                borderRadius={'small'}
-                position="relative"
-              >
-                {!!tokenImage && !error && (
-                  <img
-                    alt="proposer"
-                    src={tokenImage}
-                    className={atoms({ borderRadius: 'small' })}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                )}
-              </Box>
+          <Flex direction={'row'} placeItems={'center'}>
+            <Box
+              backgroundColor="background2"
+              width={'x8'}
+              height={'x8'}
+              mr={'x2'}
+              borderRadius={'small'}
+              position="relative"
+            >
+              {!!tokenImage && !error && (
+                <img
+                  alt="proposer"
+                  src={tokenImage}
+                  className={atoms({ borderRadius: 'small' })}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              )}
+            </Box>
 
-              <Box>
-                <a
-                  href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.proposer}`}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {displayName || walletSnippet(proposal.proposer)}
-                </a>
-                {proposal.representedAddress && (
-                  <Text color={'text3'}>
-                    on behalf of{' '}
-                    <a
-                      href={`${ETHERSCAN_BASE_URL[chain.id]}/address/${proposal.representedAddress}`}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      {representedDisplayName ||
-                        walletSnippet(proposal.representedAddress)}
-                    </a>
-                  </Text>
-                )}
-              </Box>
+            <Flex direction="column" gap="x1" style={{ minWidth: 0 }}>
+              <WalletIdentityWithPreview
+                address={proposal.proposer as `0x${string}`}
+                displayName={displayName || walletSnippet(proposal.proposer)}
+                avatarSrc={ensAvatar}
+                mobileTapBehavior="toggle"
+                inline
+              />
+              {proposal.representedAddress && (
+                <Flex align="center" gap="x1" wrap style={{ minWidth: 0 }}>
+                  <Text color={'text3'}>on behalf of</Text>
+                  <WalletIdentityWithPreview
+                    address={proposal.representedAddress as `0x${string}`}
+                    displayName={
+                      representedDisplayName || walletSnippet(proposal.representedAddress)
+                    }
+                    avatarSrc={representedEnsAvatar}
+                    mobileTapBehavior="toggle"
+                    inline
+                  />
+                </Flex>
+              )}
             </Flex>
-          </WalletProfilePreview>
+          </Flex>
         </Section>
 
         {!isPreview && (

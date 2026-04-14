@@ -183,7 +183,7 @@ export const WalletProfilePreview = ({
       <Box
         as={inline ? 'span' : 'div'}
         ref={setTriggerElement}
-        style={{ minWidth: 0 }}
+        style={{ minWidth: 0, cursor: 'pointer' }}
         onMouseEnter={isMobile ? undefined : handleOpen}
         onMouseLeave={isMobile ? undefined : handleClose}
         onFocusCapture={isMobile ? undefined : handleOpen}

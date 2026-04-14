@@ -17,6 +17,7 @@ export const Bidder: React.FC<BidderProps> = ({ address }) => {
       displayName={resolvedDisplayName}
       avatarSrc={ensAvatar}
       avatarSize="32"
+      mobileTapBehavior="toggle"
     />
   )
 }

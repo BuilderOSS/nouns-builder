@@ -54,17 +54,25 @@ export const PropDateCard = ({
       mt="x4"
       gap="x4"
     >
-      <Flex justify="space-between" align="center" wrap="wrap" gap="x2">
-        <WalletIdentityWithPreview
-          address={propDate.creator as `0x${string}`}
-          displayName={ensName || walletSnippet(propDate.creator)}
-          avatarSrc={ensAvatar}
-          avatarSize="28"
-          mobileTapBehavior="toggle"
-        />
-        <Text variant="label-sm" color="text3">
-          • {formatTimeAgo(propDate.timeCreated)}
-        </Text>
+      <Flex justify="space-between" align="center" gap="x2" style={{ minWidth: 0 }}>
+        <Flex align="center" gap="x2" style={{ minWidth: 0 }}>
+          <Box style={{ minWidth: 0 }}>
+            <WalletIdentityWithPreview
+              address={propDate.creator as `0x${string}`}
+              displayName={ensName || walletSnippet(propDate.creator)}
+              avatarSrc={ensAvatar}
+              avatarSize="28"
+              mobileTapBehavior="toggle"
+            />
+          </Box>
+          <Text
+            variant="label-sm"
+            color="text3"
+            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+          >
+            • {formatTimeAgo(propDate.timeCreated)}
+          </Text>
+        </Flex>
         {milestoneTitle && (
           <Flex
             borderStyle="solid"
@@ -75,8 +83,12 @@ export const PropDateCard = ({
             color="text3"
             borderColor="border"
             align="center"
+            style={{ maxWidth: 220, flexShrink: 0 }}
           >
-            <Text variant="label-sm" style={{ fontWeight: 600 }}>
+            <Text
+              variant="label-sm"
+              style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
               {milestoneTitle}
             </Text>
           </Flex>

@@ -17,6 +17,7 @@ export const WinningBidder = ({ owner }: { owner?: string }) => {
           displayName={displayName}
           avatarSrc={ensAvatar}
           avatarSize="24"
+          mobileTapBehavior="toggle"
         />
       )}
     </AuctionDetail>

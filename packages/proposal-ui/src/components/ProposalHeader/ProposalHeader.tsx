@@ -81,7 +81,7 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({
           </Text>
         </Flex>
         <Flex direction={'row'} align={'center'} justify={'space-between'}>
-          <Flex direction={'row'} align={'flex-end'} gap={'x1'}>
+          <Flex direction={'row'} align={'center'} gap={'x2'}>
             <Text color={'text3'}>By</Text>
             <WalletIdentityWithPreview
               address={proposer as `0x${string}`}
