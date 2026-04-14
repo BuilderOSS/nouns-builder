@@ -30,12 +30,12 @@ export const daoImage = style({
 })
 
 export const border = style({
-  border: '2px solid #4a4d57',
+  border: `2px solid ${theme.colors.border}`,
   transition: 'all 0.15s ease-in-out',
   borderTop: 'none',
   selectors: {
     [`${card}:hover &`]: {
-      borderColor: '#5b5b61',
+      borderColor: theme.colors.border,
     },
   },
 })
