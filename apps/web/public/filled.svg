@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 467 186" width="420" height="167" aria-hidden="true">
+  <!-- Outer frame -->
+  <path
+    d="M291.788 0v62h-29.179V0H87.536v62H0v93h29.179V93h58.357v93H262.61V93h29.179v93H466.86V0z"
+    fill="black"
+    stroke="black"
+    stroke-width="8"
+    stroke-linejoin="round"
+  />
+
+  <!-- Left lens -->
+  <path
+    d="M116.715 31h116.715v124H116.715z"
+    fill="black"
+  />
+
+  <!-- Right lens -->
+  <path
+    d="M320.966 31h116.715v124H320.966z"
+    fill="black"
+  />
+</svg>
