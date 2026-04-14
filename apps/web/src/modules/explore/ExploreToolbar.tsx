@@ -41,7 +41,8 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 mb={'x4'}
                 mx={'x4'}
                 style={{
-                  borderBottom: pathname === '/explore' ? `2px solid black` : `0px`,
+                  borderBottom:
+                    pathname === '/explore' ? `2px solid ${vars.color.text1}` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">Explore</Text>
@@ -53,7 +54,8 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 mb={'x4'}
                 mx={'x4'}
                 style={{
-                  borderBottom: pathname === '/mydaos' ? `2px solid black` : `0px`,
+                  borderBottom:
+                    pathname === '/mydaos' ? `2px solid ${vars.color.text1}` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">My DAOs</Text>

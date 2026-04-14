@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi'
 import { ConnectButton } from '../ConnectButton'
 import { ChainMenu } from './ChainMenu'
 import { ProfileMenu } from './ProfileMenu'
+import { ThemeToggle } from './ThemeToggle'
 import { MenuType } from './types'
 
 export const NavMenu = () => {
@@ -27,6 +28,7 @@ export const NavMenu = () => {
 
   return (
     <Flex align={'center'} direction={'row'} gap={'x4'}>
+      <ThemeToggle />
       <ChainMenu
         activeDropdown={activeDropdown}
         onOpenMenu={onOpenMenu}

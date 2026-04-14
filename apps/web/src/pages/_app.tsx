@@ -28,6 +28,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
+import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
@@ -70,11 +71,13 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
               options={{ showSpinner: false }}
             />
             <FrameProvider>
-              <LinksProvider>
-                <LinkComponentProvider LinkComponent={Link}>
-                  {getLayout(<Component {...pageProps} err={err} />)}
-                </LinkComponentProvider>
-              </LinksProvider>
+              <AppThemeProvider>
+                <LinksProvider>
+                  <LinkComponentProvider LinkComponent={Link}>
+                    {getLayout(<Component {...pageProps} err={err} />)}
+                  </LinkComponentProvider>
+                </LinksProvider>
+              </AppThemeProvider>
             </FrameProvider>
           </SWRConfig>
           <NetworkController.Mainnet>

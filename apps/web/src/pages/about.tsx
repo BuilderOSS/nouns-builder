@@ -1,6 +1,6 @@
 import { useChainStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { Box, Stack } from '@buildeross/zord'
+import { Box, Stack, vars } from '@buildeross/zord'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -70,7 +70,7 @@ const AboutPage: NextPageWithLayout = () => {
             py={'x4'}
             px={'x6'}
             fontSize={18}
-            style={{ background: '#000', color: '#fff' }}
+            style={{ background: vars.color.accent, color: vars.color.onAccent }}
             className={whyCreateButton}
             mb={'x12'}
             handleClick={handleCreateClick}

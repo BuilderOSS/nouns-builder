@@ -27,6 +27,8 @@ import {
   myDaosWrapper,
   navButton,
   navMenuBurger,
+  navPopUpWrapper,
+  navPrimaryActionButton,
   profileRow,
 } from '../Nav.styles.css'
 import { MenuType } from './types'
@@ -297,7 +299,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         </>
       )}
       <Link href="/create" passHref style={{ width: '100%' }}>
-        <Button id={'close-modal'} w={'100%'}>
+        <Button id={'close-modal'} w={'100%'} className={navPrimaryActionButton}>
           Create a DAO
         </Button>
       </Link>
@@ -506,7 +508,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         px={'x8'}
         gap={'x3'}
         backgroundColor="background1"
-        className={mobileMenuSlideIn}
+        className={[mobileMenuSlideIn, navPopUpWrapper]}
         style={{
           width: '100vw',
           maxHeight: '100vh',
@@ -560,6 +562,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           trigger={triggerElement}
           close={activeDropdown !== MenuType.PROFILE_MENU}
           onOpenChange={handleOpenMenu}
+          wrapperClassName={navPopUpWrapper}
         >
           <Flex direction={'column'} p={'x4'} gap={'x4'} style={{ width: 320 }}>
             {address ? renderConnectedUser() : <ConnectButton />}
