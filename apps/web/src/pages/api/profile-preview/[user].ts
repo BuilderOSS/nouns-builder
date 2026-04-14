@@ -3,7 +3,6 @@ import {
   PUBLIC_IS_TESTNET,
   PUBLIC_SUBGRAPH_URL,
 } from '@buildeross/constants'
-import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { AddressType } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
@@ -16,16 +15,6 @@ const CACHE_PREFIX = PUBLIC_IS_TESTNET
   ? 'testnet:profile-preview:user'
   : 'profile-preview:user'
 const PAGE_SIZE = 500
-const PROFILE_PREVIEW_ALLOWED_ORIGINS = Array.from(
-  new Set([
-    BASE_URL,
-    'https://nouns.build',
-    'https://testnet.nouns.build',
-    '*.vercel.app',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ])
-)
 
 const DAO_ACTIVITY_QUERY = `
   query DaoActivity($owner: Bytes!, $first: Int!, $skip: Int!) {
@@ -342,4 +331,4 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default withCors({ allowedOrigins: PROFILE_PREVIEW_ALLOWED_ORIGINS })(handler)
+export default withCors()(handler)

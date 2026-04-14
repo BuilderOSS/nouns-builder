@@ -91,6 +91,8 @@ export const WalletProfilePreview = ({
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null)
+  const triggerRef = useRef<HTMLElement | null>(null)
+  const panelRef = useRef<HTMLDivElement | null>(null)
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { getProfileLink, getDaoLink } = useLinks()
@@ -178,16 +180,46 @@ export const WalletProfilePreview = ({
     event.stopPropagation()
   }
 
+  const setTriggerRefs = (element: HTMLElement | null) => {
+    triggerRef.current = element
+    setTriggerElement(element)
+  }
+
+  const focusIsWithinPreview = (target: EventTarget | null) => {
+    if (!(target instanceof Node)) return false
+
+    return Boolean(
+      triggerRef.current?.contains(target) || panelRef.current?.contains(target)
+    )
+  }
+
+  const handleFocusCapture = () => {
+    if (isMobile) return
+    handleOpen()
+  }
+
+  const handleBlurCapture = (event: React.FocusEvent<HTMLElement>) => {
+    if (isMobile) return
+
+    const nextFocusedTarget = event.relatedTarget || document.activeElement
+
+    if (focusIsWithinPreview(nextFocusedTarget)) {
+      return
+    }
+
+    handleClose()
+  }
+
   return (
     <>
       <Box
         as={inline ? 'span' : 'div'}
-        ref={setTriggerElement}
+        ref={setTriggerRefs}
         style={{ minWidth: 0, cursor: 'pointer' }}
         onMouseEnter={isMobile ? undefined : handleOpen}
         onMouseLeave={isMobile ? undefined : handleClose}
-        onFocusCapture={isMobile ? undefined : handleOpen}
-        onBlurCapture={isMobile ? undefined : handleClose}
+        onFocusCapture={handleFocusCapture}
+        onBlurCapture={handleBlurCapture}
         onPointerDownCapture={handleTriggerPointerDown}
         onClickCapture={handleTriggerClick}
         tabIndex={inline ? undefined : 0}
@@ -206,6 +238,7 @@ export const WalletProfilePreview = ({
         viewportPadding={isMobile ? 16 : 0}
       >
         <Box
+          ref={panelRef}
           p="x2"
           style={{
             width: 'fit-content',
@@ -220,6 +253,8 @@ export const WalletProfilePreview = ({
           }
           onMouseEnter={isMobile ? undefined : handleOpen}
           onMouseLeave={isMobile ? undefined : handleClose}
+          onFocusCapture={handleFocusCapture}
+          onBlurCapture={handleBlurCapture}
         >
           <Link
             link={getProfileLink(address)}
@@ -284,20 +319,22 @@ export const WalletProfilePreview = ({
             )}
           </Box>
 
-          <Text
-            variant="paragraph-sm"
-            color="text3"
-            pt="x1"
-            style={{
-              borderTop: '1px solid rgba(0, 0, 0, 0.08)',
-              lineHeight: 1.25,
-              textAlign: 'left',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {data?.stats.totalDaos ?? 0} DAOs, {data?.stats.totalProposals ?? 0}{' '}
-            proposals, {data?.stats.totalVotes ?? 0} votes
-          </Text>
+          {data?.stats ? (
+            <Text
+              variant="paragraph-sm"
+              color="text3"
+              pt="x1"
+              style={{
+                borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+                lineHeight: 1.25,
+                textAlign: 'left',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {data.stats.totalDaos} DAOs, {data.stats.totalProposals} proposals,{' '}
+              {data.stats.totalVotes} votes
+            </Text>
+          ) : null}
         </Box>
       </PopUp>
     </>
