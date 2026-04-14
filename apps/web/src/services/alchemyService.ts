@@ -29,8 +29,10 @@ const getTokenMetadataKey = (chainId: CHAIN_ID, address: string) =>
 const getTokenBalancesKey = (chainId: CHAIN_ID, address: string) =>
   `alchemy:token-balances:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
 
-const getNftBalancesKey = (chainId: CHAIN_ID, address: string) =>
-  `alchemy:nft-balances:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
+const getNftBalancesKey = (chainId: CHAIN_ID, address: string, filterSpam: boolean) =>
+  `alchemy:nft-balances:${chainTypeTag}:${chainId}:${address.toLowerCase()}:${
+    filterSpam ? 'spam-filtered' : 'spam-unfiltered'
+  }`
 
 const getNftMetadataKey = (chainId: CHAIN_ID, contractAddress: string, tokenId: string) =>
   `alchemy:nft-metadata:${chainTypeTag}:${chainId}:${contractAddress.toLowerCase()}:${tokenId}`
@@ -260,7 +262,7 @@ export const getCachedNFTBalance = async (
   const useCache = options?.useCache ?? true
   const filterSpam = options?.filterSpam ?? true
 
-  const cacheKey = getNftBalancesKey(chainId, address)
+  const cacheKey = getNftBalancesKey(chainId, address, filterSpam)
   const redis = getRedisConnection()
 
   if (useCache) {
@@ -529,7 +531,10 @@ const MINIMUM_USD_VALUE = 5
 
 export const getEnrichedTokenBalances = async (
   chainId: CHAIN_ID,
-  address: AddressType
+  address: AddressType,
+  options?: {
+    filterLowValue?: boolean
+  }
 ): Promise<CachedResult<SerializedTokenBalance[]> | null> => {
   // Get token balances
   const balancesResult = await getCachedTokenBalances(chainId, address)
@@ -581,12 +586,13 @@ export const getEnrichedTokenBalances = async (
     })
     .filter(Boolean) as EnrichedTokenBalance[]
 
-  // Filter by minimum USD value (only on mainnet, show all tokens on testnet)
-  const filteredBalances = PUBLIC_IS_TESTNET
-    ? enrichedBalances
-    : enrichedBalances.filter(
+  const filterLowValue = options?.filterLowValue ?? (PUBLIC_IS_TESTNET ? false : true)
+
+  const filteredBalances = filterLowValue
+    ? enrichedBalances.filter(
         (balance) => parseFloat(balance.valueInUSD) >= MINIMUM_USD_VALUE
       )
+    : enrichedBalances
 
   // Parse the data to ensure JSON serialization safety
   const parsedBalances = parseTokenBalanceData(filteredBalances)
