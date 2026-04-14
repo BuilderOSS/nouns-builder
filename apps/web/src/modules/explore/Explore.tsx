@@ -1,13 +1,14 @@
-import { DaoCard } from '@buildeross/dao-ui'
 import { useDaoSearch, useExplore } from '@buildeross/hooks'
 import { useChainStore } from '@buildeross/stores'
 import { Pagination } from '@buildeross/ui/Pagination'
 import { Box, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { formatEther } from 'viem'
+import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
+import { useAccount } from 'wagmi'
 
 import { exploreGrid, searchContainer } from './Explore.css'
+import { ExploreDaoCard } from './ExploreDaoCard'
 import { ExploreNoDaos } from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
 import { ExploreToolbar } from './ExploreToolbar'
@@ -25,6 +26,9 @@ export const Explore: React.FC = () => {
   const orderBy = Array.isArray(urlOrderBy) ? urlOrderBy[0] : urlOrderBy
   const urlSearch = Array.isArray(rawUrlSearch) ? rawUrlSearch[0] : rawUrlSearch
   const chain = useChainStore((x) => x.chain)
+  const { address } = useAccount()
+  const { hasReachedFavoriteLimit, isDaoFavorited, toggleFavorite } =
+    useFavoriteDaos(address)
   const [searchInput, setSearchInput] = useState('')
   const [activeSearchQuery, setActiveSearchQuery] = useState('')
 
@@ -164,20 +168,17 @@ export const Explore: React.FC = () => {
         <>
           <Grid className={exploreGrid}>
             {displayDaos.map((dao) => {
-              const bid = dao.highestBid?.amount ?? undefined
-              const bidInEth = bid ? formatEther(bid) : undefined
-
               return (
-                <DaoCard
-                  chainId={chain.id}
-                  key={dao.dao.tokenAddress}
-                  tokenId={dao.token?.tokenId ?? undefined}
-                  tokenImage={dao.token?.image ?? undefined}
-                  tokenName={dao.token?.name ?? undefined}
-                  collectionName={dao.dao.name ?? undefined}
-                  collectionAddress={dao.dao.tokenAddress}
-                  bid={bidInEth}
-                  endTime={dao.endTime ?? undefined}
+                <ExploreDaoCard
+                  key={`${dao.chainId}:${dao.dao.tokenAddress.toLowerCase()}`}
+                  dao={dao}
+                  isFavorited={isDaoFavorited(dao.chainId, dao.dao.tokenAddress)}
+                  disableFavorite={
+                    hasReachedFavoriteLimit &&
+                    !isDaoFavorited(dao.chainId, dao.dao.tokenAddress)
+                  }
+                  favoriteDisabledTooltip={`You can only favorite ${FAVORITE_DAO_LIMIT} DAOs. Remove one to add another.`}
+                  onFavoriteToggle={address ? toggleFavorite : undefined}
                 />
               )
             })}

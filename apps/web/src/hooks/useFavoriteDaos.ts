@@ -1,0 +1,66 @@
+import React from 'react'
+import {
+  buildFavoriteDao,
+  FAVORITE_DAO_LIMIT,
+  FavoriteDao,
+  FavoriteDaosStore,
+  getFavoriteDaoKey,
+  useFavoriteDaosStore,
+} from 'src/stores/favoriteDaosStore'
+
+const EMPTY_FAVORITES: FavoriteDao[] = []
+
+export { buildFavoriteDao, FAVORITE_DAO_LIMIT, type FavoriteDao, getFavoriteDaoKey }
+
+export const useFavoriteDaos = (address?: string) => {
+  const normalizedAddress = React.useMemo(() => address?.toLowerCase(), [address])
+
+  const favorites = useFavoriteDaosStore(
+    React.useCallback(
+      (state: FavoriteDaosStore): FavoriteDao[] => {
+        if (!normalizedAddress) return EMPTY_FAVORITES
+
+        return state.favoritesByAddress[normalizedAddress] ?? EMPTY_FAVORITES
+      },
+      [normalizedAddress]
+    )
+  )
+
+  const toggleFavoriteForAddress = useFavoriteDaosStore(
+    (state: FavoriteDaosStore) => state.toggleFavorite
+  )
+
+  const favoriteKeys = React.useMemo(
+    () => new Set(favorites.map((favorite) => getFavoriteDaoKey(favorite))),
+    [favorites]
+  )
+
+  const isDaoFavorited = React.useCallback(
+    (chainId: number, collectionAddress: string) =>
+      favoriteKeys.has(`${chainId}:${collectionAddress.toLowerCase()}`),
+    [favoriteKeys]
+  )
+
+  const toggleFavorite = React.useCallback(
+    (favorite: FavoriteDao) => {
+      if (!normalizedAddress) {
+        return {
+          didToggle: false as const,
+          isFavorited: false as const,
+          reason: 'no_wallet' as const,
+        }
+      }
+
+      return toggleFavoriteForAddress(normalizedAddress, favorite)
+    },
+    [normalizedAddress, toggleFavoriteForAddress]
+  )
+
+  return {
+    favorites,
+    favoriteCount: favorites.length,
+    hasReachedFavoriteLimit: favorites.length >= FAVORITE_DAO_LIMIT,
+    isDaoFavorited,
+    toggleFavorite,
+  }
+}
