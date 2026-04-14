@@ -1,7 +1,5 @@
 import { useEnsData, useZoraCoinComments } from '@buildeross/hooks'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
-import { useLinks } from '@buildeross/ui/LinksProvider'
-import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
@@ -39,7 +37,6 @@ const CommentCard: React.FC<{
   }
 }> = ({ comment, timestamp, userAddress, userProfile }) => {
   const { displayName, ensAvatar } = useEnsData(userAddress as Address)
-  const { getProfileLink } = useLinks()
 
   const timeAgo = formatTimeAgo(timestamp)
   const author =
@@ -50,16 +47,15 @@ const CommentCard: React.FC<{
   return (
     <Box className={commentCard}>
       <Box className={commentHeader}>
-        <Link link={getProfileLink(userAddress as Address)}>
-          <WalletIdentityWithPreview
-            address={userAddress as Address}
-            displayName={author}
-            avatarSrc={avatarSrc}
-            className={commentAuthor}
-            avatarSize="20"
-            nameStyle={{ fontSize: '16px' }}
-          />
-        </Link>
+        <WalletIdentityWithPreview
+          address={userAddress as Address}
+          displayName={author}
+          avatarSrc={avatarSrc}
+          className={commentAuthor}
+          avatarSize="20"
+          nameStyle={{ fontSize: '16px' }}
+          mobileTapBehavior="toggle"
+        />
         <Text variant="label-sm" color="text4">
           {timeAgo}
         </Text>

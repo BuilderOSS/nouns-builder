@@ -1,3 +1,4 @@
+import type { PopUpProps } from '@buildeross/zord'
 import { type ComponentProps } from 'react'
 
 import { type AvatarProps } from '../Avatar'
@@ -17,6 +18,8 @@ export interface WalletIdentityWithPreviewProps {
   gap?: ComponentProps<typeof WalletIdentity>['gap']
   inline?: boolean
   mobileTapBehavior?: 'passthrough' | 'toggle'
+  placement?: PopUpProps['placement']
+  allowFlip?: boolean
 }
 
 export const WalletIdentityWithPreview = ({
@@ -32,6 +35,8 @@ export const WalletIdentityWithPreview = ({
   gap,
   inline = false,
   mobileTapBehavior = 'passthrough',
+  placement,
+  allowFlip,
 }: WalletIdentityWithPreviewProps) => {
   return (
     <WalletProfilePreview
@@ -40,6 +45,8 @@ export const WalletIdentityWithPreview = ({
       avatarSrc={avatarSrc}
       inline={inline}
       mobileTapBehavior={mobileTapBehavior}
+      placement={placement}
+      allowFlip={allowFlip}
     >
       <WalletIdentity
         address={address}

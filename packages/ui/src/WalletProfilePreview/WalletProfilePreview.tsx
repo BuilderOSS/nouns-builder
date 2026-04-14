@@ -1,12 +1,14 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils'
-import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
+import type { PopUpProps } from '@buildeross/zord'
+import { Box, PopUp, Text } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 
 import { Avatar, DaoAvatar } from '../Avatar'
 import { useLinks } from '../LinksProvider'
 import { LinkWrapper as Link } from '../LinkWrapper'
+import { daoLink, profileHeaderLink } from './WalletProfilePreview.css'
 
 interface WalletProfilePreviewProps {
   address: `0x${string}`
@@ -15,6 +17,8 @@ interface WalletProfilePreviewProps {
   avatarSrc?: string | null
   inline?: boolean
   mobileTapBehavior?: 'passthrough' | 'toggle'
+  placement?: PopUpProps['placement']
+  allowFlip?: boolean
 }
 
 interface WalletProfilePreviewResponse {
@@ -81,13 +85,15 @@ export const WalletProfilePreview = ({
   avatarSrc,
   inline = false,
   mobileTapBehavior = 'passthrough',
+  placement = 'bottom-start',
+  allowFlip = true,
 }: WalletProfilePreviewProps) => {
   const [open, setOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [triggerElement, setTriggerElement] = useState<HTMLElement | null>(null)
   const openTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const { getProfileLink } = useLinks()
+  const { getProfileLink, getDaoLink } = useLinks()
   const { data, error, isLoading } = useSWR(
     open ? `/api/profile-preview/${address}` : null,
     fetcher,
@@ -192,7 +198,8 @@ export const WalletProfilePreview = ({
         open={open}
         onOpenChange={setOpen}
         triggerRef={triggerElement}
-        placement="bottom"
+        placement={placement}
+        allowFlip={allowFlip}
         showBackdrop={isMobile}
         padding="x0"
         offsetY={10}
@@ -205,10 +212,20 @@ export const WalletProfilePreview = ({
             minWidth: PREVIEW_MIN_WIDTH,
             maxWidth: 'calc(100vw - 32px)',
           }}
+          onPointerDownCapture={(event: React.PointerEvent<HTMLDivElement>) =>
+            event.stopPropagation()
+          }
+          onClickCapture={(event: React.MouseEvent<HTMLDivElement>) =>
+            event.stopPropagation()
+          }
           onMouseEnter={isMobile ? undefined : handleOpen}
           onMouseLeave={isMobile ? undefined : handleClose}
         >
-          <Flex align="center" gap="x2" mb="x2">
+          <Link
+            link={getProfileLink(address)}
+            className={profileHeaderLink}
+            onClick={() => setOpen(false)}
+          >
             <Avatar address={address} src={avatarSrc} size="40" />
             <Box
               style={{ minWidth: 0, textAlign: 'left', maxWidth: 'calc(100vw - 120px)' }}
@@ -220,7 +237,7 @@ export const WalletProfilePreview = ({
                 {compactAddress(address)}
               </Text>
             </Box>
-          </Flex>
+          </Link>
 
           <Box mb="x2" pt="x1" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>
             <Text variant="label-sm" color="text3" mb="x1">
@@ -244,15 +261,11 @@ export const WalletProfilePreview = ({
                 }}
               >
                 {data.topDaos.map((dao) => (
-                  <Flex
+                  <Link
                     key={`${dao.chainId}:${dao.collectionAddress}`}
-                    direction="column"
-                    align="center"
-                    justify="center"
-                    gap="x0"
-                    py="x0"
-                    px="x0"
-                    style={{ minWidth: 0, textAlign: 'center', width: '100%' }}
+                    link={getDaoLink(dao.chainId, dao.collectionAddress)}
+                    className={daoLink}
+                    onClick={() => setOpen(false)}
                   >
                     <DaoAvatar
                       src={dao.contractImage || undefined}
@@ -261,7 +274,7 @@ export const WalletProfilePreview = ({
                       chainId={dao.chainId}
                       size="52"
                     />
-                  </Flex>
+                  </Link>
                 ))}
               </Box>
             ) : (
@@ -285,25 +298,6 @@ export const WalletProfilePreview = ({
             {data?.stats.totalDaos ?? 0} DAOs, {data?.stats.totalProposals ?? 0}{' '}
             proposals, {data?.stats.totalVotes ?? 0} votes
           </Text>
-
-          {isMobile ? (
-            <Box mt="x2" pt="x2" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>
-              <Link link={getProfileLink(address)} style={{ textDecoration: 'none' }}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  w="100%"
-                  style={{ minWidth: 0 }}
-                  onClick={() => setOpen(false)}
-                >
-                  <Flex align="center" justify="space-between" gap="x2" w="100%">
-                    <Text>View Profile</Text>
-                    <Icon id="arrowRight" size="sm" />
-                  </Flex>
-                </Button>
-              </Link>
-            </Box>
-          ) : null}
         </Box>
       </PopUp>
     </>

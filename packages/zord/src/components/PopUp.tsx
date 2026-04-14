@@ -19,6 +19,7 @@ interface BasePopUpProps {
   onOpenChange?: (state: boolean) => void
   showBackdrop?: boolean
   viewportPadding?: number
+  allowFlip?: boolean
 }
 
 export type PopUpProps = BasePopUpProps &
@@ -48,6 +49,7 @@ export function PopUp({
   wrapperClassName,
   showBackdrop = true,
   viewportPadding = 0,
+  allowFlip = true,
 }: PopUpProps) {
   const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null)
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null)
@@ -60,6 +62,10 @@ export function PopUp({
         options: {
           offset: [offsetX, offsetY],
         },
+      },
+      {
+        name: 'flip',
+        enabled: allowFlip,
       },
       {
         name: 'preventOverflow',
