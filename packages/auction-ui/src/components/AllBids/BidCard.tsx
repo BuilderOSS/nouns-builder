@@ -1,22 +1,25 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
 
 export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
   const { displayName, ensAvatar } = useEnsData(bid?.bidder)
+  const resolvedDisplayName = displayName || walletSnippet(bid.bidder as `0x${string}`)
 
   return (
     <Flex direction={'column'} my="x4" align="center" style={{ height: 35 }}>
       <Flex direction="row" width={'100%'} align="center" justify="space-between">
-        <Flex direction="row" align="center">
-          <Avatar address={bid.bidder} src={ensAvatar} size="28" />
-          <Text mx="x2" variant="paragraph-md">
-            {displayName}
-          </Text>
-        </Flex>
+        <WalletIdentityWithPreview
+          address={bid.bidder as `0x${string}`}
+          displayName={resolvedDisplayName}
+          avatarSrc={ensAvatar}
+          avatarSize="28"
+          mobileTapBehavior="toggle"
+        />
         <Flex direction="row" align="center">
           <Flex
             as="a"

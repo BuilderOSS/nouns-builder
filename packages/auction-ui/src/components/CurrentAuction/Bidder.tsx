@@ -1,9 +1,7 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { Avatar } from '@buildeross/ui/Avatar'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import React from 'react'
-
-import { recentBidder } from '../Auction.css'
 
 interface BidderProps {
   address: string
@@ -11,17 +9,15 @@ interface BidderProps {
 
 export const Bidder: React.FC<BidderProps> = ({ address }) => {
   const { displayName, ensAvatar } = useEnsData(address)
+  const resolvedDisplayName = displayName || walletSnippet(address as `0x${string}`)
 
   return (
-    <Flex align="center">
-      <Box mr="x2">
-        <Avatar address={address} src={ensAvatar} size="32" />
-      </Box>
-      <Text className={recentBidder} variant="paragraph-md">
-        <a href={`/profile/${address}`} target="_blank" rel="noopener noreferrer">
-          {displayName}
-        </a>
-      </Text>
-    </Flex>
+    <WalletIdentityWithPreview
+      address={address as `0x${string}`}
+      displayName={resolvedDisplayName}
+      avatarSrc={ensAvatar}
+      avatarSize="32"
+      mobileTapBehavior="toggle"
+    />
   )
 }

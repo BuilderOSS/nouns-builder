@@ -2,14 +2,15 @@ import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import HTMLReactParser from 'html-react-parser'
-import React, { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { daoDescription as plainDescription } from '../../styles/About.css'
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
 
 export const DaoDescription = ({ description }: { description?: string }) => {
-  const [isOverHeight, setIsOverHeight] = React.useState(false)
-  const [isExpanded, setIsExpanded] = React.useState(false)
+  const [isOverHeight, setIsOverHeight] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const trimmedDescription = description?.trim()
 
   const textRef = useRef<HTMLDivElement>(null)
 
@@ -22,7 +23,7 @@ export const DaoDescription = ({ description }: { description?: string }) => {
     }
   }, [description])
 
-  const correctedDescription = React.useMemo(() => {
+  const correctedDescription = useMemo(() => {
     if (typeof description === 'string') {
       // Text processing on the backend (possibly subgraph) will sometimes replace
       // \n with \\n, which will break markdown.
@@ -33,16 +34,17 @@ export const DaoDescription = ({ description }: { description?: string }) => {
 
   // This regex check is large. Memoizing it for perf
   const isMarkdown = useMemo(() => {
-    if (!description) return false
-    return isPossibleMarkdown(description)
-  }, [description])
-  if (!correctedDescription || !description) return null
+    if (!trimmedDescription) return false
+    return isPossibleMarkdown(trimmedDescription)
+  }, [trimmedDescription])
+
+  if (!trimmedDescription || !correctedDescription) return null
 
   if (!isMarkdown)
     return (
       <Box mt={{ '@initial': 'x4', '@768': 'x6' }}>
         <Text className={plainDescription}>
-          {HTMLReactParser(description.replace(/\\n/g, '<br />'))}
+          {HTMLReactParser(trimmedDescription.replace(/\\n/g, '<br />'))}
         </Text>
       </Box>
     )
