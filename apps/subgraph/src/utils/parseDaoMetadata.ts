@@ -77,6 +77,18 @@ function normalizeNewlines(raw: string): string {
   return output
 }
 
+function leadingWhitespaceCount(value: string): i32 {
+  let count = 0
+
+  for (let i = 0; i < value.length; i++) {
+    let char = value.charAt(i)
+    if (char != ' ' && char != '\t') break
+    count += 1
+  }
+
+  return count
+}
+
 export function parseDaoMetadata(rawDescription: string): ParsedDaoMetadata {
   let links = new TypedMap<string, string>()
   let normalizedDescription = normalizeNewlines(unescapeDescription(rawDescription))
@@ -104,7 +116,9 @@ export function parseDaoMetadata(rawDescription: string): ParsedDaoMetadata {
     let trimmed = line.trim()
     if (trimmed.length == 0) continue
 
-    if (!line.startsWith('  ')) {
+    let indentation = leadingWhitespaceCount(line)
+
+    if (indentation == 0) {
       inLinksSection = trimmed == 'links:'
       continue
     }
@@ -112,10 +126,10 @@ export function parseDaoMetadata(rawDescription: string): ParsedDaoMetadata {
     if (!inLinksSection) continue
 
     let separatorIndex = line.indexOf(':')
-    if (separatorIndex <= 2) continue
+    if (separatorIndex <= indentation) continue
 
     let key = line
-      .substr(2, separatorIndex - 2)
+      .substr(indentation, separatorIndex - indentation)
       .trim()
       .toLowerCase()
     if (key == 'twitter') key = 'x'

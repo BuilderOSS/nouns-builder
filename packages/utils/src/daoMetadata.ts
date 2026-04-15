@@ -100,10 +100,24 @@ const parseFrontmatter = (
   const links: DaoLinkInput[] = []
   let inLinksSection = false
 
+  const leadingWhitespaceCount = (value: string): number => {
+    let count = 0
+
+    while (count < value.length) {
+      const char = value[count]
+      if (char !== ' ' && char !== '\t') break
+      count += 1
+    }
+
+    return count
+  }
+
   for (const line of lines) {
     if (!line.trim()) continue
 
-    if (!line.startsWith('  ')) {
+    const indentation = leadingWhitespaceCount(line)
+
+    if (indentation === 0) {
       inLinksSection = line.trim() === 'links:'
       continue
     }
@@ -111,9 +125,9 @@ const parseFrontmatter = (
     if (!inLinksSection) continue
 
     const separatorIndex = line.indexOf(':')
-    if (separatorIndex <= 2) continue
+    if (separatorIndex <= indentation) continue
 
-    const key = line.slice(2, separatorIndex).trim()
+    const key = line.slice(indentation, separatorIndex).trim()
     const url = line.slice(separatorIndex + 1).trim()
     links.push({ key, url })
   }

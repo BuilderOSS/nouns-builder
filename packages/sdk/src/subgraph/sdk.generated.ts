@@ -8272,6 +8272,7 @@ export type DaoInfoQuery = {
     __typename?: 'DAO'
     name: string
     description: string
+    metadata?: string | null
     contractImage: string
     projectURI: string
     totalSupply: number
@@ -10149,6 +10150,7 @@ export const DaoInfoDocument = gql`
     dao(id: $tokenAddress) {
       name
       description
+      metadata
       contractImage
       projectURI
       links {

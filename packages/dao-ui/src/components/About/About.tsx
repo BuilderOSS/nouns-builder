@@ -70,10 +70,10 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
     }
   )
 
-  const parsedDaoMetadata = parseDaoMetadataString(data?.description)
+  const parsedDaoMetadata = parseDaoMetadataString(data?.metadata || data?.description)
   const externalLinks = {
-    ...parsedDaoMetadata.links,
     ...Object.fromEntries((data?.links || []).map((link) => [link.key, link.url])),
+    ...parsedDaoMetadata.links,
     ...(data?.projectURI ? { website: data.projectURI } : {}),
   }
 

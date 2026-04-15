@@ -187,6 +187,20 @@ describe('Metadata description parsing', () => {
     assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://twitter.com')
   })
 
+  test('parses frontmatter links with single-space indentation', () => {
+    initializeTestWithDao()
+
+    const metadata =
+      '---\nlinks:\n github: https://github.com\n x: https://twitter.com\n---\n\nhello world'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'hello world')
+    assert.entityCount('DAOLink', 2)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-github', 'url', 'https://github.com')
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://twitter.com')
+  })
+
   test('parses frontmatter with CRLF line endings', () => {
     initializeTestWithDao()
 
@@ -206,6 +220,20 @@ describe('Metadata description parsing', () => {
 
     const metadata =
       '---\\r\\nlinks:\\r\\n  github: https://github.com\\r\\n  x: https://twitter.com\\r\\n---\\r\\n\\r\\nhello world'
+
+    handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
+
+    assert.fieldEquals('DAO', TOKEN_ADDRESS, 'description', 'hello world')
+    assert.entityCount('DAOLink', 2)
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-github', 'url', 'https://github.com')
+    assert.fieldEquals('DAOLink', TOKEN_ADDRESS + '-x', 'url', 'https://twitter.com')
+  })
+
+  test('parses escaped frontmatter links with single-space indentation', () => {
+    initializeTestWithDao()
+
+    const metadata =
+      '---\\nlinks:\\n github: https://github.com\\n x: https://twitter.com\\n---\\n\\nhello world'
 
     handleDescriptionUpdated(createDescriptionUpdatedEvent(metadata))
 

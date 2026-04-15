@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { parseDaoMetadataString, serializeDaoMetadata } from './daoMetadata'
+import { sanitizeStringForJSON } from './sanitize'
 
 describe('parseDaoMetadataString', () => {
   it('parses markdown frontmatter links', () => {
@@ -38,6 +39,18 @@ describe('parseDaoMetadataString', () => {
     })
   })
 
+  it('parses frontmatter links with single-space indentation', () => {
+    const parsed = parseDaoMetadataString(
+      '---\nlinks:\n github: https://github.com\n x: https://twitter.com\n---\n\nhello world'
+    )
+
+    expect(parsed.description).toBe('hello world')
+    expect(parsed.links).toEqual({
+      github: 'https://github.com',
+      x: 'https://twitter.com',
+    })
+  })
+
   it('falls back to plain description text', () => {
     const parsed = parseDaoMetadataString('legacy description')
 
@@ -56,5 +69,22 @@ describe('serializeDaoMetadata', () => {
     expect(serialized).toBe(
       '---\nlinks:\n  x: https://x.com/nouns\n  github: https://github.com/nouns\n---\n\nThe main description'
     )
+  })
+
+  it('parses serialized metadata after contract-bound sanitization', () => {
+    const descriptionArg = serializeDaoMetadata('Line 1\nLine 2', [
+      { key: 'github', url: 'https://github.com/nouns' },
+      { key: 'twitter', url: 'https://x.com/nouns' },
+    ])
+    const sanitizedForContract = sanitizeStringForJSON(descriptionArg)
+
+    expect(sanitizedForContract.includes('\\n')).toBe(true)
+
+    const parsed = parseDaoMetadataString(sanitizedForContract)
+    expect(parsed.links).toEqual({
+      github: 'https://github.com/nouns',
+      x: 'https://x.com/nouns',
+    })
+    expect(parsed.description).toBe('Line 1\nLine 2')
   })
 })
