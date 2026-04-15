@@ -1,4 +1,4 @@
-import { atoms, color, theme } from '@buildeross/zord'
+import { atoms, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const card = style({
@@ -36,12 +36,12 @@ export const daoImage = style({
 })
 
 export const border = style({
-  border: `2px solid ${color.border}`,
+  border: `2px solid ${theme.colors.border}`,
   transition: 'all 0.15s ease-in-out',
   borderTop: 'none',
   selectors: {
     [`${card}:hover &`]: {
-      borderColor: theme.colors.neutralHover,
+      borderColor: theme.colors.border,
     },
   },
 })

@@ -2,6 +2,10 @@ import * as z from '@buildeross/constants/layers'
 import { atoms, color } from '@buildeross/zord'
 import { keyframes, style } from '@vanilla-extract/css'
 
+const darkSurface = '#2a2b31'
+const darkSurfaceHover = '#67676d'
+const darkSurfaceBorder = '#4a4d57'
+
 const slideIn = keyframes({
   '0%': { transform: 'translateY(-100%)' },
   '100%': { transform: 'translateY(0)' },
@@ -94,8 +98,15 @@ export const navMenuBurger = style([
     transition:
       'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
     selectors: {
+      'html[data-theme-mode="dark"] &': {
+        background: darkSurface,
+        borderColor: darkSurfaceBorder,
+      },
       '&:hover': {
         background: color.ghostHover,
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        background: darkSurfaceHover,
       },
     },
   },
@@ -112,6 +123,15 @@ export const disconnectButton = style([
     selectors: {
       '&:hover': {
         background: `rgba(240, 50, 50, 0.1) !important`,
+      },
+      'html[data-theme-mode="dark"] &': {
+        background: color.negative,
+        color: color.background1,
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        background: '#ffffff !important',
+        color: color.negative,
+        borderColor: color.negative,
       },
     },
   },
@@ -159,8 +179,14 @@ export const daoButton = style({
   transition:
     'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
   selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: darkSurface,
+    },
     '&:hover': {
       background: color.background2,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: darkSurfaceHover,
     },
   },
 })
@@ -168,8 +194,14 @@ export const daoButton = style({
 export const hiddenDaoButton = style({
   background: color.background2,
   selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: '#24262c',
+    },
     '&:hover': {
       background: color.neutralHover,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: darkSurfaceHover,
     },
   },
 })
@@ -177,6 +209,15 @@ export const hiddenDaoButton = style({
 export const navLogo = style({
   zIndex: z.NAV_LAYER,
   position: 'relative',
+})
+
+export const navLogoGlyph = style({
+  transition: 'filter 0.2s ease-in-out',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      filter: 'invert(1)',
+    },
+  },
 })
 
 export const profileRow = style([
@@ -189,8 +230,14 @@ export const profileRow = style([
     transition:
       'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
     selectors: {
+      'html[data-theme-mode="dark"] &': {
+        background: darkSurface,
+      },
       '&:hover': {
         background: color.background2,
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        background: darkSurfaceHover,
       },
     },
   },
@@ -217,10 +264,70 @@ export const footerLogoTextRight = style({
 export const chainPopUpButton = style({
   transition:
     'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
-  background: 'white',
+  background: color.background1,
   selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: darkSurface,
+      borderColor: darkSurfaceBorder,
+    },
     '&:hover': {
       background: color.background2,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: darkSurfaceHover,
+    },
+  },
+})
+
+export const themeToggleButton = style([
+  atoms({
+    borderStyle: 'solid',
+    borderColor: 'border',
+    borderWidth: 'normal',
+    borderRadius: 'round',
+    h: 'x10',
+    w: 'x10',
+  }),
+  {
+    appearance: 'none',
+    background: color.background1,
+    color: color.text1,
+    cursor: 'pointer',
+    transition:
+      'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        background: darkSurface,
+        borderColor: darkSurfaceBorder,
+      },
+      '&:hover': {
+        background: color.background2,
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        background: darkSurfaceHover,
+      },
+    },
+  },
+])
+
+export const navPopUpWrapper = style({
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: darkSurface,
+      border: `1px solid ${darkSurfaceBorder}`,
+    },
+  },
+})
+
+export const navPrimaryActionButton = style({
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: darkSurfaceHover,
+      color: '#ffffff',
+      borderColor: darkSurfaceBorder,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: '#3b3e47',
     },
   },
 })

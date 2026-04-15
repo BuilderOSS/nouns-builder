@@ -44,7 +44,8 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 mx={'x4'}
                 aria-current={pathname === '/explore' ? 'page' : undefined}
                 style={{
-                  borderBottom: pathname === '/explore' ? `2px solid black` : `0px`,
+                  borderBottom:
+                    pathname === '/explore' ? `2px solid ${vars.color.text1}` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">Explore</Text>
@@ -57,7 +58,8 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 mx={'x4'}
                 aria-current={pathname === '/mydaos' ? 'page' : undefined}
                 style={{
-                  borderBottom: pathname === '/mydaos' ? `2px solid black` : `0px`,
+                  borderBottom:
+                    pathname === '/mydaos' ? `2px solid ${vars.color.text1}` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">My DAOs</Text>

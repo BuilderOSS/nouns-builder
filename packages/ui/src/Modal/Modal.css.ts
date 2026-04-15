@@ -27,6 +27,12 @@ export const defaultAnimatedModalContent = style({
   height: 'auto',
   maxHeight: '90vh',
   zIndex: z.MODAL_CONTENT_LAYER,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: '#1f2024',
+      border: '1px solid #4a4d57',
+    },
+  },
   '@media': {
     'screen and (max-width: 768px)': {
       width: 'calc(100% - 50px)',

@@ -3,7 +3,7 @@ import { Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-import { actionButtons, daoButton } from './CreateActions.css'
+import { actionButtons, createPostButton, daoButton } from './CreateActions.css'
 import { DaoSelectorModal } from './DaoSelectorModal'
 
 export interface CreateActionsProps {
@@ -28,7 +28,12 @@ export const CreateActions: React.FC<CreateActionsProps> = ({ userAddress }) => 
     <>
       <Flex direction="column" className={actionButtons} gap="x3">
         <Flex gap="x3">
-          <Button onClick={handleCreatePost} variant="primary" style={{ flex: 1 }}>
+          <Button
+            onClick={handleCreatePost}
+            variant="primary"
+            style={{ flex: 1 }}
+            className={createPostButton}
+          >
             Create Post
           </Button>
           <Button onClick={handleCreateProposal} variant="outline" style={{ flex: 1 }}>

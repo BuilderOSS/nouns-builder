@@ -8,7 +8,12 @@ import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { useAccount, useSwitchChain } from 'wagmi'
 
-import { chainPopUpButton, navButton, wrongNetworkButton } from '../Nav.styles.css'
+import {
+  chainPopUpButton,
+  navButton,
+  navPopUpWrapper,
+  wrongNetworkButton,
+} from '../Nav.styles.css'
 import { MenuType } from './types'
 
 interface ChainMenuProps {
@@ -129,6 +134,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
         placement="bottom-end"
         close={activeDropdown !== MenuType.CHAIN_MENU}
         onOpenChange={(open) => onOpenMenu(open, MenuType.CHAIN_MENU)}
+        wrapperClassName={navPopUpWrapper}
         trigger={
           <Flex
             borderColor="border"

@@ -7,12 +7,22 @@ export const modalHeader = style([
   }),
   {
     borderBottom: `1px solid ${vars.color.border}`,
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        borderBottom: '1px solid #4a4d57',
+      },
+    },
   },
 ])
 
 export const modalTitle = style({
   fontSize: '20px',
   fontWeight: 600,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text1,
+    },
+  },
 })
 
 export const filterSummary = style([
@@ -25,6 +35,11 @@ export const filterSummary = style([
     flexWrap: 'wrap',
     fontSize: '14px',
     color: vars.color.text3,
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        color: vars.color.text2,
+      },
+    },
   },
 ])
 
@@ -38,6 +53,12 @@ export const summaryChip = style([
   {
     backgroundColor: vars.color.background2,
     fontSize: '12px',
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        backgroundColor: '#2a2b31',
+        color: vars.color.text1,
+      },
+    },
   },
 ])
 
@@ -52,6 +73,11 @@ export const modalBody = style([
     flexDirection: 'column',
     maxHeight: '60vh',
     overflowY: 'auto',
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        backgroundColor: '#1f2024',
+      },
+    },
   },
 ])
 
@@ -68,6 +94,11 @@ export const filterSection = style([
 export const sectionLabel = style({
   fontSize: '14px',
   fontWeight: 600,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text1,
+    },
+  },
 })
 
 export const filterGrid = style([
@@ -98,8 +129,17 @@ export const filterItem = style([
     alignItems: 'center',
     gap: '12px',
     transition: 'all 0.2s ease',
+    backgroundColor: 'transparent',
     ':hover': {
       backgroundColor: vars.color.background2,
+    },
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        backgroundColor: '#2a2b31',
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        backgroundColor: '#3b3e47',
+      },
     },
   },
 ])
@@ -120,6 +160,11 @@ export const modalFooter = style([
     display: 'flex',
     justifyContent: 'flex-end',
     borderTop: `1px solid ${vars.color.border}`,
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        borderTop: '1px solid #4a4d57',
+      },
+    },
   },
 ])
 

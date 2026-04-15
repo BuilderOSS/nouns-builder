@@ -249,7 +249,7 @@ var { colors, shadows } = colorTheme({
   // negative: '#ff00ff',
   // warning: '#9f00ff',
   foreground: '#ffffff',
-  background: '#000000',
+  background: '#1f2024',
   accent: '#ffffff',
   // accent: '#00ffff',
   positive: '#1CB687',

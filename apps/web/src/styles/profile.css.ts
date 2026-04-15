@@ -54,14 +54,28 @@ export const profileDaoLink = style({
   cursor: 'pointer',
   backgroundColor: color.background1,
   selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: '#5b5b61',
+      borderColor: '#5b5b61',
+    },
     '&:hover': {
       backgroundColor: color.background2,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      backgroundColor: '#5b5b61',
+      borderColor: '#5b5b61',
     },
   },
 })
 
 export const profileHiddenDaoLink = style({
   backgroundColor: color.borderOnImage,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: '#44444a',
+      borderColor: '#44444a',
+    },
+  },
 })
 
 export const daoEditorRow = style({

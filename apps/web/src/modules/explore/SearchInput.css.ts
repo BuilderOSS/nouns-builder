@@ -1,3 +1,4 @@
+import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const searchInputWrapper = style({
@@ -9,21 +10,22 @@ export const searchInputWrapper = style({
 export const searchInputStyle = style({
   height: 64,
   width: '100%',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '12px',
   fontSize: 16,
   paddingLeft: 16,
   paddingRight: 80, // Space for search icon
   boxSizing: 'border-box',
-  border: '2px solid #fff',
+  border: `2px solid ${vars.color.background1}`,
+  color: vars.color.text1,
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
     '&::placeholder': {
-      color: '#B3B3B3',
+      color: vars.color.text3,
     },
   },
 })
@@ -80,7 +82,7 @@ export const helperTextStyle = style({
   left: 16,
   marginTop: 4,
   fontSize: 14,
-  color: '#808080',
+  color: vars.color.text3,
   transition: 'opacity 0.2s ease-in-out',
   pointerEvents: 'none',
   whiteSpace: 'nowrap',
