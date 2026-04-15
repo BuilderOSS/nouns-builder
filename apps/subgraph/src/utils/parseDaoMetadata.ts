@@ -1,4 +1,4 @@
-import { json, JSONValueKind, TypedMap } from '@graphprotocol/graph-ts'
+import { TypedMap } from '@graphprotocol/graph-ts'
 
 export class ParsedDaoMetadata {
   description: string
@@ -14,41 +14,132 @@ function isSupportedUrl(value: string): boolean {
   return value.startsWith('https://') || value.startsWith('http://')
 }
 
+function unescapeDescription(raw: string): string {
+  let output = ''
+
+  for (let i = 0; i < raw.length; i++) {
+    let char = raw.charAt(i)
+
+    if (char != '\\' || i + 1 >= raw.length) {
+      output += char
+      continue
+    }
+
+    let next = raw.charAt(i + 1)
+
+    if (next == 'n') {
+      output += '\n'
+      i += 1
+      continue
+    }
+
+    if (next == 'r') {
+      output += '\r'
+      i += 1
+      continue
+    }
+
+    if (next == 't') {
+      output += '\t'
+      i += 1
+      continue
+    }
+
+    if (next == '"' || next == '\\') {
+      output += next
+      i += 1
+      continue
+    }
+
+    output += char
+  }
+
+  return output
+}
+
+function normalizeNewlines(raw: string): string {
+  let output = ''
+
+  for (let i = 0; i < raw.length; i++) {
+    let char = raw.charAt(i)
+
+    if (char == '\r') {
+      if (i + 1 < raw.length && raw.charAt(i + 1) == '\n') {
+        i += 1
+      }
+      output += '\n'
+      continue
+    }
+
+    output += char
+  }
+
+  return output
+}
+
+function leadingWhitespaceCount(value: string): i32 {
+  let count = 0
+
+  for (let i = 0; i < value.length; i++) {
+    let char = value.charAt(i)
+    if (char != ' ' && char != '\t') break
+    count += 1
+  }
+
+  return count
+}
+
 export function parseDaoMetadata(rawDescription: string): ParsedDaoMetadata {
   let links = new TypedMap<string, string>()
-  let parsedResult = json.try_fromString(rawDescription)
+  let normalizedDescription = normalizeNewlines(unescapeDescription(rawDescription))
 
-  if (parsedResult.isError || parsedResult.value.kind != JSONValueKind.OBJECT) {
-    return new ParsedDaoMetadata(rawDescription, links)
+  if (!normalizedDescription.startsWith('---\n')) {
+    return new ParsedDaoMetadata(normalizedDescription, links)
   }
 
-  let parsed = parsedResult.value.toObject()
-
-  let nextDescription = rawDescription
-  let parsedDescription = parsed.get('description')
-  if (parsedDescription && parsedDescription.kind == JSONValueKind.STRING) {
-    let parsedDescriptionValue = parsedDescription.toString()
-    nextDescription =
-      parsedDescriptionValue.length > 0 ? parsedDescriptionValue : rawDescription
+  let frontmatterEnd = normalizedDescription.indexOf('\n---\n')
+  if (frontmatterEnd < 0) {
+    return new ParsedDaoMetadata(normalizedDescription, links)
   }
 
-  let parsedLinks = parsed.get('links')
-  if (parsedLinks && parsedLinks.kind == JSONValueKind.OBJECT) {
-    let parsedLinksObject = parsedLinks.toObject()
+  let frontmatterBody = normalizedDescription.substr(4, frontmatterEnd - 4)
+  let description = normalizedDescription.substr(frontmatterEnd + 5)
+  if (description.startsWith('\n')) {
+    description = description.substr(1)
+  }
+  let lines = frontmatterBody.split('\n')
 
-    for (let i = 0; i < parsedLinksObject.entries.length; i++) {
-      let entry = parsedLinksObject.entries[i]
-      let key = entry.key.trim().toLowerCase()
-      if (key.length == 0) continue
+  let inLinksSection = false
 
-      if (entry.value.kind != JSONValueKind.STRING) continue
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i]
+    let trimmed = line.trim()
+    if (trimmed.length == 0) continue
 
-      let value = entry.value.toString().trim()
-      if (value.length == 0 || !isSupportedUrl(value)) continue
+    let indentation = leadingWhitespaceCount(line)
 
-      links.set(key, value)
+    if (indentation == 0) {
+      inLinksSection = trimmed == 'links:'
+      continue
     }
+
+    if (!inLinksSection) continue
+
+    let separatorIndex = line.indexOf(':')
+    if (separatorIndex <= indentation) continue
+
+    let key = line
+      .substr(indentation, separatorIndex - indentation)
+      .trim()
+      .toLowerCase()
+    if (key == 'twitter') key = 'x'
+    if (key.length == 0) continue
+
+    let value = line.substr(separatorIndex + 1).trim()
+    if (value.length == 0 || !isSupportedUrl(value)) continue
+
+    links.set(key, value)
   }
 
-  return new ParsedDaoMetadata(nextDescription, links)
+  return new ParsedDaoMetadata(description, links)
 }

@@ -9,9 +9,10 @@ import React from 'react'
 export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
   const { displayName, ensAvatar } = useEnsData(bid?.bidder)
   const resolvedDisplayName = displayName || walletSnippet(bid.bidder as `0x${string}`)
+  const comment = bid.comment?.trim()
 
   return (
-    <Flex direction={'column'} my="x4" align="center" style={{ height: 35 }}>
+    <Flex direction={'column'} my="x4" align="center">
       <Flex direction="row" width={'100%'} align="center" justify="space-between">
         <WalletIdentityWithPreview
           address={bid.bidder as `0x${string}`}
@@ -34,6 +35,17 @@ export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
           </Flex>
         </Flex>
       </Flex>
+      {comment ? (
+        <Box mt="x2" width="100%">
+          <Text
+            variant="paragraph-sm"
+            color="secondary"
+            style={{ wordBreak: 'break-word' }}
+          >
+            {comment}
+          </Text>
+        </Box>
+      ) : null}
       <Box
         mt="x2"
         style={{

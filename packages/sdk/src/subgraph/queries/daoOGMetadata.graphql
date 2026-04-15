@@ -2,6 +2,11 @@ query daoOGMetadata($tokenAddress: ID!) {
   dao(id: $tokenAddress) {
     name
     description
+    links {
+      id
+      key
+      url
+    }
     contractImage
     totalSupply
     ownerCount

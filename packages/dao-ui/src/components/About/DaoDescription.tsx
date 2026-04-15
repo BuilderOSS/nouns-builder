@@ -1,73 +1,92 @@
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { isPossibleMarkdown } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
-import HTMLReactParser from 'html-react-parser'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { Box, Button, Flex } from '@buildeross/zord'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
-import { daoDescription as plainDescription } from '../../styles/About.css'
 import { daoDescription, fadingEffect, UNEXPANDED_BOX_HEIGHT } from './mdRender.css'
+
+const FRONTMATTER_PATTERN = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n)?/
+
+const stripLeadingFrontmatter = (markdown: string): string => {
+  return markdown.replace(FRONTMATTER_PATTERN, '')
+}
 
 export const DaoDescription = ({ description }: { description?: string }) => {
   const [isOverHeight, setIsOverHeight] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const trimmedDescription = description?.trim()
 
-  const textRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (
-      textRef.current &&
-      textRef?.current?.scrollHeight > textRef?.current?.clientHeight
-    ) {
-      setIsOverHeight(true)
-    }
-  }, [description])
+  const containerRef = useRef<HTMLDivElement>(null)
+  const descriptionContentId = useId()
 
   const correctedDescription = useMemo(() => {
     if (typeof description === 'string') {
       // Text processing on the backend (possibly subgraph) will sometimes replace
       // \n with \\n, which will break markdown.
       // This effect is intermittent, so this catches any instance where it happens
-      return description.replace(/\\n/g, '\n').replace(/\\r/g, '\r')
+      return description.trim().replace(/\\n/g, '\n').replace(/\\r/g, '\r')
     }
+    return ''
   }, [description])
 
-  // This regex check is large. Memoizing it for perf
-  const isMarkdown = useMemo(() => {
-    if (!trimmedDescription) return false
-    return isPossibleMarkdown(trimmedDescription)
-  }, [trimmedDescription])
+  const displayDescription = useMemo(() => {
+    return stripLeadingFrontmatter(correctedDescription)
+  }, [correctedDescription])
 
-  if (!trimmedDescription || !correctedDescription) return null
+  const collapsedHeight = useMemo(() => {
+    return Number.parseInt(UNEXPANDED_BOX_HEIGHT, 10)
+  }, [])
 
-  if (!isMarkdown)
-    return (
-      <Box mt={{ '@initial': 'x4', '@768': 'x6' }}>
-        <Text className={plainDescription}>
-          {HTMLReactParser(trimmedDescription.replace(/\\n/g, '<br />'))}
-        </Text>
-      </Box>
-    )
+  const updateOverflowState = useCallback(() => {
+    const contentHeight = containerRef.current?.scrollHeight || 0
+    setIsOverHeight(contentHeight > collapsedHeight)
+  }, [collapsedHeight])
+
+  useEffect(() => {
+    setIsExpanded(false)
+  }, [displayDescription])
+
+  useEffect(() => {
+    updateOverflowState()
+
+    let observer: ResizeObserver | null = null
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => {
+        updateOverflowState()
+      })
+
+      if (containerRef.current) observer.observe(containerRef.current)
+    }
+
+    window.addEventListener('resize', updateOverflowState)
+
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', updateOverflowState)
+    }
+  }, [displayDescription, updateOverflowState])
+
+  if (!displayDescription.trim()) return null
 
   return (
     <Flex direction="column" align="flex-end">
       <Box
         mt={{ '@initial': 'x4', '@768': 'x6' }}
-        py="x2"
-        px={{ '@initial': 'x2', '@768': 'x4' }}
+        py="x4"
+        px="x4"
         borderRadius={'phat'}
         borderStyle={'solid'}
         borderWidth={'normal'}
         borderColor={'border'}
-        ref={textRef}
+        ref={containerRef}
+        id={descriptionContentId}
         width="100%"
         className={!isExpanded && isOverHeight ? fadingEffect : ''}
         style={{
-          maxHeight: isExpanded ? '100%' : UNEXPANDED_BOX_HEIGHT,
+          maxHeight: isExpanded ? 'none' : UNEXPANDED_BOX_HEIGHT,
+          overflow: isExpanded ? 'visible' : 'hidden',
         }}
       >
         <Box className={daoDescription}>
-          <MarkdownDisplay>{correctedDescription}</MarkdownDisplay>
+          <MarkdownDisplay>{displayDescription}</MarkdownDisplay>
         </Box>
       </Box>
       {isOverHeight && (
@@ -76,6 +95,8 @@ export const DaoDescription = ({ description }: { description?: string }) => {
           onClick={() => setIsExpanded(!isExpanded)}
           size="sm"
           px={'x0'}
+          aria-expanded={isExpanded}
+          aria-controls={descriptionContentId}
         >
           {isExpanded ? 'Collapse' : 'Read More'}
         </Button>

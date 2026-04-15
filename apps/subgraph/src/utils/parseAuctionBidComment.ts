@@ -14,6 +14,12 @@ function readCommentFromInput(input: Bytes, argsLength: i32): string | null {
 
   const commentBytes = changetype<Bytes>(input.subarray(commentOffset))
   const comment = commentBytes.toString()
+
+  const replacementChar = String.fromCharCode(0xfffd)
+  if (comment.indexOf(replacementChar) != -1) {
+    return null
+  }
+
   return comment.length > 0 ? comment : null
 }
 

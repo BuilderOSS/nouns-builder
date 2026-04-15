@@ -12,6 +12,7 @@ import {
   useProposalStore,
 } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
+import { DaoLinkInput, DaoLinksField } from '@buildeross/ui'
 import {
   DaysHoursMinsSecs,
   FIELD_TYPES,
@@ -21,12 +22,17 @@ import {
 } from '@buildeross/ui/Fields'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { SingleImageUpload } from '@buildeross/ui/SingleImageUpload'
+import {
+  parseDaoMetadataString,
+  serializeDaoMetadata,
+} from '@buildeross/utils/daoMetadata'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
   compareAndReturn,
   fromSeconds,
   unpackOptionalArray,
 } from '@buildeross/utils/helpers'
+import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import { Field, FieldArray, FieldProps, Formik, FormikValues } from 'formik'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -136,10 +142,16 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     tokenData,
     5
   )
+  const parsedDaoMetadata = parseDaoMetadataString(description)
 
   const initialValues: AdminFormValues = {
     /* artwork */
-    projectDescription: description?.replace(/\\n/g, String.fromCharCode(13, 10)) || '',
+    projectDescription:
+      parsedDaoMetadata.description?.replace(/\\n/g, String.fromCharCode(13, 10)) || '',
+    daoLinks: Object.entries(parsedDaoMetadata.links).map(([key, url]) => ({
+      key,
+      url: String(url),
+    })),
     // artwork: []
 
     /* metadata */
@@ -230,6 +242,10 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
         continue
       }
 
+      if (field === 'projectDescription' || field === 'daoLinks') {
+        continue
+      }
+
       if (field === 'vetoer') {
         value = await getEnsAddress(value as string)
       }
@@ -280,6 +296,32 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
             tx.transactions[0].functionSignature !== 'updateVetoer'
         )
       }
+    }
+
+    const hasDescriptionMetadataChanges =
+      !isEqual(values.projectDescription, initialValues.projectDescription) ||
+      !isEqual(values.daoLinks, initialValues.daoLinks)
+
+    if (hasDescriptionMetadataChanges) {
+      transactions.push({
+        type: TransactionType.CUSTOM,
+        transactions: [
+          {
+            functionSignature: 'updateDescription',
+            target: addresses.metadata as AddressType,
+            calldata: encodeFunctionData({
+              abi: metadataAbi,
+              functionName: 'updateDescription',
+              args: [
+                sanitizeStringForJSON(
+                  serializeDaoMetadata(values.projectDescription, values.daoLinks)
+                ),
+              ],
+            }),
+            value: '',
+          },
+        ],
+      })
     }
 
     formik?.setSubmitting(true)
@@ -345,6 +387,40 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                     />
                   )}
                 </Field>
+
+                <FieldArray name="daoLinks">
+                  {() => (
+                    <Stack>
+                      <DaoLinksField
+                        value={formik.values.daoLinks || []}
+                        onChange={(daoLinks: DaoLinkInput[]) =>
+                          formik.setFieldValue('daoLinks', daoLinks)
+                        }
+                        onBlur={(index, field) =>
+                          formik.setFieldTouched(
+                            `daoLinks.${index}.${field}`,
+                            true,
+                            false
+                          )
+                        }
+                        inputLabel={'DAO Links (optional)'}
+                        helperText={
+                          'Use DAO Website for your main site, then add socials/docs here.'
+                        }
+                        getFieldError={(index: number, field: 'key' | 'url') =>
+                          (formik.touched.daoLinks as any)?.[index]?.[field]
+                            ? (formik.errors.daoLinks as any)?.[index]?.[field]
+                            : undefined
+                        }
+                        errorMessage={
+                          typeof formik.errors.daoLinks === 'string'
+                            ? formik.errors.daoLinks
+                            : undefined
+                        }
+                      />
+                    </Stack>
+                  )}
+                </FieldArray>
 
                 <SmartInput
                   {...formik.getFieldProps('daoWebsite')}

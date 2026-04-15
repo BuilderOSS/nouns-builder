@@ -18,7 +18,6 @@ import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID, ProposalCreateStage } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
-import { isPossibleMarkdown } from '@buildeross/utils/helpers'
 import { Flex } from '@buildeross/zord'
 import { GetServerSideProps, GetServerSidePropsResult } from 'next'
 import { useRouter } from 'next/router'
@@ -35,7 +34,6 @@ interface TokenPageProps {
   collection: AddressType
   token: TokenWithDao
   name: string
-  description: string
   addresses: DaoContractAddresses
   ogImageURL: string
   chainId: CHAIN_ID
@@ -45,7 +43,6 @@ interface TokenPageProps {
 const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   collection,
   token,
-  description,
   name,
   addresses,
   ogImageURL,
@@ -216,21 +213,10 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   ])
 
   const ogDescription = useMemo(() => {
-    if (!description) return ''
-    const isMarkdown = isPossibleMarkdown(description)
-
-    // DAO descriptions are full of MD syntax and do not provide a pleasant
-    // reading experience for social embeds. For this, we'll check if the
-    // description is markdown and if so, we'll provide a generic description
-    if (isMarkdown) {
-      return `${
-        name || 'This DAO'
-      } was created on Nouns Builder. Please click the link to see more.`
-    }
-    // remove line breaks and formatting from og description
-    const cleanDesc = description.replace(/(\r\n|\n|\r|\t|\v|\f|\\n)/gm, '')
-    return cleanDesc.length > 111 ? `${cleanDesc.slice(0, 111)}...` : cleanDesc
-  }, [description, name])
+    return `${
+      name || 'This DAO'
+    } was created on Nouns Builder. Please click the link to see more.`
+  }, [name])
 
   const activeTab = query.tab ? (query.tab as string) : 'about'
   const path = `/dao/${chain.slug}/${addresses.token}/${token.tokenId}?tab=${activeTab}`
@@ -335,7 +321,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
 
     const {
       name,
-      description,
       contractImage,
       totalSupply,
       ownerCount,
@@ -380,7 +365,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       collection,
       name,
       token,
-      description: description || '',
       addresses,
       ogImageURL,
       chainId: chain.id,
@@ -390,6 +374,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       props,
     }
   } catch (e) {
+    console.error(`Error fetching token ${network}/${collection}/${tokenId}`, e)
     return {
       notFound: true,
     }

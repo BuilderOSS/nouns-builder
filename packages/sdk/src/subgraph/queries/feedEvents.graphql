@@ -109,6 +109,7 @@ query feedEvents($first: Int!, $where: FeedEvent_filter) {
         amount
         bidTime
         bidder
+        comment
       }
     }
 
