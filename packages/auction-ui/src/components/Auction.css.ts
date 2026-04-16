@@ -10,10 +10,7 @@ export const auctionWrap = atoms({
   flexDirection: 'column',
   width: '100%',
   justifyContent: { '@initial': 'flex-start', '@768': 'center' },
-  mb: {
-    '@initial': 'x9',
-    '@768': 'x0',
-  },
+  mb: 'x12',
 })
 
 export const auctionWrapVariants = styleVariants({
@@ -30,8 +27,7 @@ export const auctionWrapVariants = styleVariants({
       '@media': {
         [media.min768]: {
           minHeight: 482,
-          maxHeight: 1000,
-          height: '85vh',
+          height: 'auto',
         },
       },
     },

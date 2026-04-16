@@ -259,6 +259,7 @@ export const WalletProfilePreview = ({
           <Link
             link={getProfileLink(address)}
             className={profileHeaderLink}
+            isExternal
             onClick={() => setOpen(false)}
           >
             <Avatar address={address} src={avatarSrc} size="40" />
@@ -300,6 +301,7 @@ export const WalletProfilePreview = ({
                     key={`${dao.chainId}:${dao.collectionAddress}`}
                     link={getDaoLink(dao.chainId, dao.collectionAddress)}
                     className={daoLink}
+                    isExternal
                     onClick={() => setOpen(false)}
                   >
                     <DaoAvatar
