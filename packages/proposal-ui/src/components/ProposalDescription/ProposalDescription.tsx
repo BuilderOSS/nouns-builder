@@ -307,15 +307,13 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Flex>
         </Section>
 
-        {!isPreview && (
-          <Section title="Proposed Transactions">
-            <DecodedTransactions
-              decodedTransactions={decodedTransactions}
-              chainId={chain.id}
-              addresses={addresses}
-            />
-          </Section>
-        )}
+        <Section title="Proposed Transactions">
+          <DecodedTransactions
+            decodedTransactions={decodedTransactions}
+            chainId={chain.id}
+            addresses={addresses}
+          />
+        </Section>
       </Flex>
     </Flex>
   )
