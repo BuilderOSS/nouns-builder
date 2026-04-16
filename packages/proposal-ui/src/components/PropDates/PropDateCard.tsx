@@ -1,6 +1,6 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { type PropDate } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -54,11 +54,22 @@ export const PropDateCard = ({
       mt="x4"
       gap="x4"
     >
-      <Flex justify="space-between" align="center" wrap="wrap" gap="x2">
-        <Flex align="center" gap="x2">
-          <Avatar address={propDate.creator} src={ensAvatar} size="28" />
-          <Text fontWeight="display">{ensName || walletSnippet(propDate.creator)}</Text>
-          <Text variant="label-sm" color="text3">
+      <Flex justify="space-between" align="center" gap="x2" style={{ minWidth: 0 }}>
+        <Flex align="center" gap="x2" style={{ minWidth: 0 }}>
+          <Box style={{ minWidth: 0 }}>
+            <WalletIdentityWithPreview
+              address={propDate.creator as `0x${string}`}
+              displayName={ensName || walletSnippet(propDate.creator)}
+              avatarSrc={ensAvatar}
+              avatarSize="28"
+              mobileTapBehavior="toggle"
+            />
+          </Box>
+          <Text
+            variant="label-sm"
+            color="text3"
+            style={{ whiteSpace: 'nowrap', flexShrink: 0 }}
+          >
             • {formatTimeAgo(propDate.timeCreated)}
           </Text>
         </Flex>
@@ -72,8 +83,12 @@ export const PropDateCard = ({
             color="text3"
             borderColor="border"
             align="center"
+            style={{ maxWidth: 220, flexShrink: 0 }}
           >
-            <Text variant="label-sm" style={{ fontWeight: 600 }}>
+            <Text
+              variant="label-sm"
+              style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
               {milestoneTitle}
             </Text>
           </Flex>
@@ -91,7 +106,6 @@ export const PropDateCard = ({
           <MarkdownDisplay>{propDate.message}</MarkdownDisplay>
         </Box>
       )}
-      {/* Render replies if any */}
       {repliesSorted && repliesSorted.length > 0 && (
         <Box mt="x4" ml="x4" style={{ borderLeft: '4px solid var(--colors-border)' }}>
           {repliesSorted.map((reply: PropDate) => (

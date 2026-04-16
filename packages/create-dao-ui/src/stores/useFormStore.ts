@@ -58,6 +58,8 @@ const initialState = {
     daoName: '',
     daoSymbol: '',
     daoWebsite: '',
+    projectDescription: '',
+    links: [],
   },
   auctionSettings: {
     auctionDuration: {
@@ -97,7 +99,6 @@ const initialState = {
   founderRewardRecipient: '',
   founderRewardBps: 0,
   setUpArtwork: {
-    projectDescription: '',
     artwork: [],
     collectionName: '',
     externalUrl: '',
@@ -163,10 +164,13 @@ export const useFormStore = create(
     {
       name: `nouns-builder-create-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`,
       storage: createJSONStorage(() => localStorage),
-      version: 2,
+      // Version history note: v3 was used for an intermediate links migration;
+      // current v4 keeps sequential guards (<2, <3, <4) so older persisted states
+      // still migrate correctly through each step.
+      version: 4,
       migrate: (persistedState: any, version: number) => {
         if (version < 2 && persistedState?.setUpArtwork !== undefined) {
-          return {
+          persistedState = {
             ...persistedState,
             setUpArtwork: {
               ...persistedState.setUpArtwork,
@@ -174,6 +178,35 @@ export const useFormStore = create(
             },
           }
         }
+
+        if (version < 3 && persistedState?.setUpArtwork !== undefined) {
+          persistedState = {
+            ...persistedState,
+            setUpArtwork: {
+              ...persistedState.setUpArtwork,
+              links: persistedState.setUpArtwork.links ?? [],
+            },
+          }
+        }
+
+        if (version < 4) {
+          const migratedDescription =
+            persistedState?.general?.projectDescription ||
+            persistedState?.setUpArtwork?.projectDescription ||
+            ''
+          const migratedLinks =
+            persistedState?.general?.links ?? persistedState?.setUpArtwork?.links ?? []
+
+          return {
+            ...persistedState,
+            general: {
+              ...persistedState?.general,
+              projectDescription: migratedDescription,
+              links: migratedLinks,
+            },
+          }
+        }
+
         return persistedState
       },
     }

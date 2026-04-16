@@ -10,10 +10,7 @@ export const auctionWrap = atoms({
   flexDirection: 'column',
   width: '100%',
   justifyContent: { '@initial': 'flex-start', '@768': 'center' },
-  mb: {
-    '@initial': 'x9',
-    '@768': 'x0',
-  },
+  mb: 'x12',
 })
 
 export const auctionWrapVariants = styleVariants({
@@ -30,8 +27,7 @@ export const auctionWrapVariants = styleVariants({
       '@media': {
         [media.min768]: {
           minHeight: 482,
-          maxHeight: 1000,
-          height: '85vh',
+          height: 'auto',
         },
       },
     },
@@ -214,6 +210,33 @@ export const bidInput = style([
   }),
 ])
 
+export const bidCommentInput = style([
+  {
+    width: '100%',
+    border: `1px solid ${vars.color.border}`,
+    borderRadius: 12,
+    boxSizing: 'border-box',
+    outline: 'none',
+    resize: 'vertical',
+    font: 'inherit',
+    selectors: {
+      '&::placeholder': {
+        color: theme.colors.tertiary,
+      },
+      '&:focus': {
+        borderColor: vars.color.accent,
+        backgroundColor: vars.color.background1,
+      },
+    },
+  },
+  atoms({
+    backgroundColor: 'background2',
+    p: 'x3',
+    fontSize: 16,
+    lineHeight: 24,
+  }),
+])
+
 export const auctionImg = style([
   {
     '@media': {
@@ -252,6 +275,12 @@ export const recentBid = style({
       },
     },
   },
+})
+
+export const recentBidRow = style({
+  paddingTop: vars.space.x3,
+  paddingBottom: vars.space.x3,
+  borderBottom: `1px solid ${vars.color.border}`,
 })
 
 export const recentBidder = style({

@@ -1,3 +1,4 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnrichedPinnedAssets } from '@buildeross/hooks/useEnrichedPinnedAssets'
 import { usePinnedAssets } from '@buildeross/hooks/usePinnedAssets'
@@ -6,20 +7,22 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Avatar, NameAvatar } from '@buildeross/ui/Avatar'
 import { skeletonAnimation } from '@buildeross/ui/styles'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Flex, Grid, Icon, Text } from '@buildeross/zord'
-import React, { useMemo } from 'react'
+import { Box, Button, Flex, Grid, Icon, Text } from '@buildeross/zord'
+import React, { useMemo, useState } from 'react'
 import { formatUnits } from 'viem'
 
 import { statisticContent } from '../../styles/About.css'
 import { erc20AssetsWrapper } from './Treasury.css'
 
 export const TokenBalance: React.FC = () => {
+  const [showLowValueTokens, setShowLowValueTokens] = useState(PUBLIC_IS_TESTNET)
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const owner = addresses.treasury
   const { balances, isLoading: balancesLoading } = useTokenBalances(
     chain.id,
-    addresses.treasury
+    addresses.treasury,
+    { filterLowValue: !showLowValueTokens }
   )
 
   // Fetch pinned assets
@@ -100,13 +103,20 @@ export const TokenBalance: React.FC = () => {
         <Text fontSize={28} fontWeight={'display'}>
           Tokens
         </Text>
-        {numBalances > 0 && (
-          <Flex direction={'column'} align="start">
+        <Flex align="center" gap="x3" justify="flex-end" style={{ flexWrap: 'wrap' }}>
+          {numBalances > 0 && (
             <Text className={statisticContent} fontWeight={'display'}>
               ${totalUSD ? totalUSD : ' '}
             </Text>
-          </Flex>
-        )}
+          )}
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setShowLowValueTokens((x) => !x)}
+          >
+            {showLowValueTokens ? 'Hide tiny balances' : 'Show tiny balances'}
+          </Button>
+        </Flex>
       </Flex>
 
       {isLoading && numBalances === 0 && (
