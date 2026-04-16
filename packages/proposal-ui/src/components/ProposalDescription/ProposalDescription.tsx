@@ -261,7 +261,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Section>
         )}
 
-        <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
+        <Section title="Proposer">
           <Flex direction={'row'} placeItems={'center'}>
             <Box
               backgroundColor="background2"
@@ -307,15 +307,13 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Flex>
         </Section>
 
-        {!isPreview && (
-          <Section title="Proposed Transactions">
-            <DecodedTransactions
-              decodedTransactions={decodedTransactions}
-              chainId={chain.id}
-              addresses={addresses}
-            />
-          </Section>
-        )}
+        <Section title="Proposed Transactions">
+          <DecodedTransactions
+            decodedTransactions={decodedTransactions}
+            chainId={chain.id}
+            addresses={addresses}
+          />
+        </Section>
       </Flex>
     </Flex>
   )
