@@ -47,9 +47,10 @@ export const MilestoneItem = ({
   const isNext = currentMilestone === index
   const amount = milestoneAmounts?.[index] ?? 0n
   const decimals = tokenMetadata?.decimals ?? 18
+  const formattedAmount = formatCryptoVal(formatUnits(amount, decimals))
   const amountDisplay = tokenMetadata?.symbol
-    ? `${formatCryptoVal(formatUnits(amount, decimals))} ${tokenMetadata.symbol}`
-    : amount.toString()
+    ? `${formattedAmount} ${tokenMetadata.symbol}`
+    : formattedAmount
 
   const renderReleaseButton = () => {
     if (isReleased) {

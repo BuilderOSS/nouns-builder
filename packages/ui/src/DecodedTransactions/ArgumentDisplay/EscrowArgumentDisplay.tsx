@@ -24,8 +24,10 @@ export const EscrowArgumentDisplay: React.FC<EscrowArgumentDisplayProps> = ({
 }) => {
   const formatAmount = useCallback(
     (amount: bigint) => {
-      if (!tokenMetadata) return amount.toString()
-      return `${formatCryptoVal(formatUnits(amount, tokenMetadata.decimals))} ${tokenMetadata.symbol}`
+      const decimals = tokenMetadata?.decimals ?? 18
+      const formatted = formatCryptoVal(formatUnits(amount, decimals))
+      if (!tokenMetadata) return formatted
+      return `${formatted} ${tokenMetadata.symbol}`
     },
     [tokenMetadata]
   )
