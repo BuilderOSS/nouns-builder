@@ -58,7 +58,7 @@ export const StreamArgumentDisplay: React.FC<StreamArgumentDisplayProps> = ({
     (amount: bigint) => {
       const decimals = tokenMetadata?.decimals ?? 18
       const formatted = formatCryptoVal(formatUnits(amount, decimals))
-      if (!tokenMetadata) return formatted
+      if (!tokenMetadata?.symbol) return formatted
       return `${formatted} ${tokenMetadata.symbol}`
     },
     [tokenMetadata]
