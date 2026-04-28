@@ -210,44 +210,17 @@ export function isEqual(a: any, b: any): boolean {
  * */
 
 export const compareAndReturn = (initialValues: {}, values: {}) => {
-  const updates = Object.entries(initialValues).reduce((acc: {}[] = [], cv: any) => {
-    const _field = cv[0]
-    const _value = cv[1]
-    let _values: any[] = Object.entries(values)
-    const value = _values.filter((item) => item[0] === _field)[0][1]
+  return Object.entries(initialValues).reduce(
+    (acc: { field: string; value: unknown }[], [field, initialValue]) => {
+      const value = (values as Record<string, unknown>)[field]
 
-    if (!isEqual(_value, value)) {
-      if (typeof value !== 'object') {
-        if (_value.toString() !== value.toString()) {
-          acc.push({
-            field: _field,
-            value: value,
-          })
-        }
-      } else {
-        const initValueObject: any[] = Object.entries(_value)
-        const valueObject: any[] = Object.entries(value)
-        initValueObject.reduce((_acc: any[] = [], _cv: any[]) => {
-          const _f = _cv[0]
-          const _v = _cv[1].toString()
-          const v = valueObject.filter((item) => item[0] === _f)[0]?.[1].toString()
-
-          if (!isEqual(_v, v)) {
-            acc.push({
-              field: _field,
-              value: value,
-            })
-          }
-        }, [])
+      if (!isEqual(initialValue, value)) {
+        acc.push({ field, value })
       }
-    }
 
-    return acc
-  }, [])
-
-  return updates.filter(
-    (object, index) =>
-      index === updates.findIndex((obj) => JSON.stringify(obj) === JSON.stringify(object))
+      return acc
+    },
+    []
   )
 }
 

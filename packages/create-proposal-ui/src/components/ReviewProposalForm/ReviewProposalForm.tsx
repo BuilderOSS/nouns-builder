@@ -467,29 +467,37 @@ export const ReviewProposalForm = ({
                     borderRadius={'curved'}
                   >
                     {isEditingMetadata ? (
-                      <ProposalDraftForm
-                        formik={formik}
-                        onTitleChange={(value) => {
-                          setTitle(value)
-                        }}
-                        onSummaryChange={(value) => {
-                          setSummary(value)
-                        }}
-                        onRepresentedAddressEnabledChange={(value) => {
-                          setRepresentedAddressEnabled(value)
-                          if (!value) {
-                            void formik.setFieldValue('representedAddress', '')
-                            setRepresentedAddress(undefined)
-                          }
-                        }}
-                        onRepresentedAddressBlur={async () => {
-                          await resolveAndStoreRepresentedAddress(formik)
-                        }}
-                        onDiscussionUrlChange={(value) => {
-                          setDiscussionUrl(value)
-                        }}
-                        disabled={disabledForm}
-                      />
+                      <>
+                        <ProposalDraftForm
+                          formik={formik}
+                          onTitleChange={(value) => {
+                            setTitle(value)
+                          }}
+                          onSummaryChange={(value) => {
+                            setSummary(value)
+                          }}
+                          onRepresentedAddressEnabledChange={(value) => {
+                            setRepresentedAddressEnabled(value)
+                            if (!value) {
+                              void formik.setFieldValue('representedAddress', '')
+                              setRepresentedAddress(undefined)
+                            }
+                          }}
+                          onRepresentedAddressBlur={async () => {
+                            await resolveAndStoreRepresentedAddress(formik)
+                          }}
+                          onDiscussionUrlChange={(value) => {
+                            setDiscussionUrl(value)
+                          }}
+                          disabled={disabledForm}
+                        />
+                        <Transactions
+                          disabled={disabledForm}
+                          transactions={transactions}
+                          simulations={failedSimulations}
+                          simulationError={simulationError}
+                        />
+                      </>
                     ) : (
                       (() => {
                         const { targets, calldata, values } = prepareProposalTransactions(
@@ -512,7 +520,6 @@ export const ReviewProposalForm = ({
                           <ProposalDescription
                             title={formik.values.title || ''}
                             proposal={previewProposal}
-                            collection={addresses.token || ''}
                             onOpenProposalReview={async () => undefined}
                             isPreview
                           />
@@ -520,13 +527,6 @@ export const ReviewProposalForm = ({
                       })()
                     )}
                   </Stack>
-
-                  <Transactions
-                    disabled={disabledForm}
-                    transactions={transactions}
-                    simulations={failedSimulations}
-                    simulationError={simulationError}
-                  />
 
                   <label className={defaultInputLabelStyle}>
                     Governance Timeline (estimated)

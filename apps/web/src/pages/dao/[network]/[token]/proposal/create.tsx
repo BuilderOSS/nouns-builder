@@ -740,6 +740,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
                         options={options}
                         customLabel={TRANSACTION_TYPES[transactionType].title}
                         onChange={(value: TransactionType) => setTransactionType(value)}
+                        positioning="absolute"
                       />
                     </Box>
                     <Button

@@ -1,8 +1,7 @@
 import { BuilderTransaction } from '@buildeross/stores'
-import { SimulationOutput } from '@buildeross/types'
+import { SimulationOutput, TransactionType } from '@buildeross/types'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { Flex, Stack } from '@buildeross/zord'
-import { Field } from 'formik'
 
 import { SimulationError, TransactionCard } from '../TransactionCard'
 
@@ -37,16 +36,14 @@ export const Transactions = ({
               <TransactionCard
                 key={`${transaction.type}-${i}`}
                 simulationError={error}
-                disabled={disabled || transaction.type === 'upgrade'}
+                disabled={
+                  disabled ||
+                  transaction.type === TransactionType.UPGRADE ||
+                  transaction.type === TransactionType.UPDATE_MINTER
+                }
                 transaction={transaction}
                 simulationUrl={simulation?.url}
-              >
-                <Field
-                  name={`transactions[${i}]`}
-                  type="hidden"
-                  value={JSON.stringify(transaction.transactions)}
-                />
-              </TransactionCard>
+              />
             )
           })}
         </Stack>

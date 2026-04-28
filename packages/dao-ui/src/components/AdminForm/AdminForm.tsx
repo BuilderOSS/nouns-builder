@@ -350,14 +350,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
       validateOnMount
     >
       {(formik) => {
-        const founderChanges = isEqual(
-          formik.initialValues.founderAllocation,
-          formik.values.founderAllocation
-        )
-          ? 0
-          : 1
-        const changes =
-          compareAndReturn(formik.initialValues, formik.values).length + founderChanges
+        const changes = compareAndReturn(formik.initialValues, formik.values).length
 
         return (
           <Flex direction={'column'} w={'100%'}>

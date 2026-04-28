@@ -5,9 +5,7 @@ import {
 } from '@buildeross/constants/addresses'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import {
-  Proposal,
-} from '@buildeross/sdk/subgraph'
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
@@ -35,7 +33,8 @@ import { StreamDetails } from './StreamDetails'
 type ProposalDescriptionProps = {
   title?: string
   proposal: Proposal
-  collection: string
+  // DEPRECATED: Will be removed in the future, use `addresses.token` instead
+  collection?: string
   onOpenProposalReview: () => Promise<void>
   isPreview?: boolean
 }
@@ -58,7 +57,6 @@ const getSafeDiscussionUrl = (value?: string | null): string | null => {
 export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   title,
   proposal,
-  collection,
   onOpenProposalReview,
   isPreview = false,
 }) => {
@@ -69,12 +67,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   const { addresses } = useDaoStore()
   const safeDiscussionUrl = getSafeDiscussionUrl(proposal.discussionUrl)
 
-  const enableDecodedTransactions = !isPreview
-  const { decodedTransactions } = useDecodedTransactions(
-    chain.id,
-    proposal,
-    enableDecodedTransactions
-  )
+  const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
 
   // Check if proposal has escrow milestone transactions
   const hasEscrowMilestone = useMemo(() => {
@@ -165,7 +158,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
               color={'text3'}
               mt={'x2'}
               align="center"
-              gap="x1"
+              gap="x2"
               wrap
               style={{ minWidth: 0 }}
             >
@@ -179,22 +172,6 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                 mobileTapBehavior="toggle"
                 inline
               />
-              {proposal.representedAddress && (
-                <>
-                  <Text color={'text3'}>on behalf of</Text>
-                  <WalletIdentityWithPreview
-                    address={proposal.representedAddress as `0x${string}`}
-                    displayName={
-                      representedDisplayName || walletSnippet(proposal.representedAddress)
-                    }
-                    avatarSrc={representedEnsAvatar}
-                    avatarSize="20"
-                    nameVariant="paragraph-sm"
-                    mobileTapBehavior="toggle"
-                    inline
-                  />
-                </>
-              )}
             </Flex>
           </Section>
         )}
@@ -237,7 +214,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Section>
         )}
 
-        <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
+        <Section title="Proposer">
           <Flex direction={'row'} placeItems={'center'}>
             <Flex direction="column" gap="x1" style={{ minWidth: 0 }}>
               <WalletIdentityWithPreview
@@ -248,7 +225,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                 inline
               />
               {proposal.representedAddress && (
-                <Flex align="center" gap="x1" wrap style={{ minWidth: 0 }}>
+                <Flex align="center" gap="x2" wrap style={{ minWidth: 0 }}>
                   <Text color={'text3'}>on behalf of</Text>
                   <WalletIdentityWithPreview
                     address={proposal.representedAddress as `0x${string}`}
@@ -265,15 +242,13 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Flex>
         </Section>
 
-        {!isPreview && (
-          <Section title="Proposed Transactions">
-            <DecodedTransactions
-              decodedTransactions={decodedTransactions}
-              chainId={chain.id}
-              addresses={addresses}
-            />
-          </Section>
-        )}
+        <Section title="Proposed Transactions" mb={isPreview ? 'x0' : undefined}>
+          <DecodedTransactions
+            decodedTransactions={decodedTransactions}
+            chainId={chain.id}
+            addresses={addresses}
+          />
+        </Section>
       </Flex>
     </Flex>
   )

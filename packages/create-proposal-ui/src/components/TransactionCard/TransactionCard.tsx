@@ -1,6 +1,6 @@
 import { BuilderTransaction } from '@buildeross/types'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
-import React, { ReactNode } from 'react'
+import React from 'react'
 
 import { TransactionTypeIcon } from './TransactionTypeIcon'
 
@@ -15,7 +15,6 @@ interface TransactionCardProps {
   simulationError?: SimulationError
   transaction: BuilderTransaction
   disabled?: boolean
-  children?: ReactNode
 }
 
 export const TransactionCard: React.FC<TransactionCardProps> = ({
@@ -24,7 +23,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   simulationUrl,
   transaction,
   disabled,
-  children,
 }) => {
   const showCardAction = handleRemove && !disabled
 
@@ -57,7 +55,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
           >
             {summary}
           </Text>
-          {children}
         </Flex>
 
         {showCardAction && (
