@@ -104,6 +104,18 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
 
   const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
 
+  const parsedProposalMetadata = useMemo<
+    ProposalDescriptionMetadataV1 | undefined
+  >(() => {
+    if (!proposalMetadata) return undefined
+
+    try {
+      return JSON.parse(proposalMetadata) as ProposalDescriptionMetadataV1
+    } catch (_error) {
+      return undefined
+    }
+  }, [proposalMetadata])
+
   const metadataBundles = useMemo(() => {
     if (isPreview) {
       return (previewTransactions || []).map((transaction) => ({
@@ -113,27 +125,20 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
       }))
     }
 
-    if (!proposalMetadata) return undefined
+    const bundles = parsedProposalMetadata?.transactionBundles
 
-    try {
-      const parsed = JSON.parse(proposalMetadata) as ProposalDescriptionMetadataV1
-      const bundles = parsed.transactionBundles
+    if (!Array.isArray(bundles)) return undefined
 
-      if (!Array.isArray(bundles)) return undefined
+    const isValid = bundles.every(
+      (bundle) =>
+        bundle &&
+        typeof bundle.type === 'string' &&
+        typeof bundle.callCount === 'number' &&
+        bundle.callCount > 0
+    )
 
-      const isValid = bundles.every(
-        (bundle) =>
-          bundle &&
-          typeof bundle.type === 'string' &&
-          typeof bundle.callCount === 'number' &&
-          bundle.callCount > 0
-      )
-
-      return isValid ? bundles : undefined
-    } catch (_error) {
-      return undefined
-    }
-  }, [isPreview, previewTransactions, proposalMetadata])
+    return isValid ? bundles : undefined
+  }, [isPreview, parsedProposalMetadata, previewTransactions])
 
   const bundlesWithRanges = useMemo(() => {
     if (!decodedTransactions?.length || !metadataBundles?.length) return undefined
@@ -173,21 +178,15 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
       }
     }
 
-    if (!proposalMetadata) return undefined
-
-    try {
-      return JSON.parse(proposalMetadata) as ProposalDescriptionMetadataV1
-    } catch (_error) {
-      return undefined
-    }
+    return parsedProposalMetadata
   }, [
     isPreview,
     metadataBundles,
+    parsedProposalMetadata,
     proposal.description,
     proposal.discussionUrl,
     proposal.representedAddress,
     proposal.title,
-    proposalMetadata,
     title,
   ])
 

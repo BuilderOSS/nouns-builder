@@ -210,18 +210,20 @@ export function isEqual(a: any, b: any): boolean {
  * */
 
 export const compareAndReturn = (initialValues: {}, values: {}) => {
-  return Object.entries(initialValues).reduce(
-    (acc: { field: string; value: unknown }[], [field, initialValue]) => {
-      const value = (values as Record<string, unknown>)[field]
+  const initial = initialValues as Record<string, unknown>
+  const next = values as Record<string, unknown>
+  const fields = new Set([...Object.keys(initial), ...Object.keys(next)])
 
-      if (!isEqual(initialValue, value)) {
-        acc.push({ field, value })
-      }
+  return [...fields].reduce((acc: { field: string; value: unknown }[], field) => {
+    const initialValue = initial[field]
+    const value = next[field]
 
-      return acc
-    },
-    []
-  )
+    if (!isEqual(initialValue, value)) {
+      acc.push({ field, value })
+    }
+
+    return acc
+  }, [])
 }
 
 /*
