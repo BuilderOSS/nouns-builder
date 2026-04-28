@@ -259,6 +259,27 @@ export const DecodedDisplay: React.FC<{
 
   return (
     <Stack style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+      <Flex justify="flex-end" px="x3" pt="x2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          px="x2"
+          onClick={() => setShowRawCalldata((state) => !state)}
+          aria-pressed={showRawCalldata}
+          title={
+            showRawCalldata ? 'Switch to decoded view' : 'Switch to raw calldata view'
+          }
+          aria-label={
+            showRawCalldata ? 'Switch to decoded view' : 'Switch to raw calldata view'
+          }
+        >
+          <Flex align="center" gap="x1">
+            <Icon id="swap" style={{ width: 16, height: 16 }} />
+            <Text as="span">{showRawCalldata ? 'Decoded' : 'Raw'}</Text>
+          </Flex>
+        </Button>
+      </Flex>
       <Flex direction="row" gap="x0">
         <Text
           as="span"
@@ -286,70 +307,60 @@ export const DecodedDisplay: React.FC<{
               <Text display={{ '@initial': 'none', '@768': 'flex' }}>{target}</Text>
             </a>
           </Box>
-          <Flex align="center" gap="x0">
-            {`.${transaction.functionName}`}
-            <button
-              type="button"
-              onClick={() => setShowRawCalldata((state) => !state)}
-              title={showRawCalldata ? 'Hide raw calldata' : 'Show raw calldata'}
-              aria-label={showRawCalldata ? 'Hide raw calldata' : 'Show raw calldata'}
-              style={{
-                marginLeft: 8,
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                padding: 6,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Icon id="swap" style={{ width: 16, height: 16 }} />
-            </button>
-            {value !== '0' && transaction.functionName !== 'send' && (
-              <Flex align="center" gap="x1">
-                <Text color="accent">{`{ value:`}</Text>
-                <img
-                  src="/chains/ethereum.svg"
-                  alt="ETH"
-                  loading="lazy"
-                  decoding="async"
-                  width="16px"
-                  height="16px"
-                  style={{ maxWidth: '16px', maxHeight: '16px', objectFit: 'contain' }}
-                />
-                <Text color="accent">{`${formatCryptoVal(formatEther(BigInt(value)))} ETH }`}</Text>
+          {!showRawCalldata && (
+            <>
+              <Text>{`.${transaction.functionName}`}</Text>
+              <Flex align="center" gap="x0">
+                {value !== '0' && transaction.functionName !== 'send' && (
+                  <Flex align="center" gap="x1">
+                    <Text color="accent">{`{ value:`}</Text>
+                    <img
+                      src="/chains/ethereum.svg"
+                      alt="ETH"
+                      loading="lazy"
+                      decoding="async"
+                      width="16px"
+                      height="16px"
+                      style={{
+                        maxWidth: '16px',
+                        maxHeight: '16px',
+                        objectFit: 'contain',
+                      }}
+                    />
+                    <Text color="accent">{`${formatCryptoVal(formatEther(BigInt(value)))} ETH }`}</Text>
+                  </Flex>
+                )}
+                {`(`}
+                {sortedArgs.length === 0 ? `)` : null}
               </Flex>
-            )}
-            {`(`}
-            {sortedArgs.length === 0 ? `)` : null}
-          </Flex>
 
-          <Stack pl={'x4'} gap={'x1'}>
-            {sortedArgs.map((argKey, i) => {
-              const arg = transaction.args[argKey]
+              <Stack pl={'x4'} gap={'x1'}>
+                {sortedArgs.map((argKey, i) => {
+                  const arg = transaction.args[argKey]
 
-              return (
-                <ArgumentDisplay
-                  chainId={chainId}
-                  key={`${argKey}-${arg.name}-${i}`}
-                  arg={arg}
-                  target={target}
-                  functionName={transaction.functionName}
-                  tokenMetadata={tokenMetadata}
-                  nftMetadata={nftMetadata}
-                  escrowData={escrowData}
-                  streamData={streamData}
-                />
-              )
-            })}
-          </Stack>
+                  return (
+                    <ArgumentDisplay
+                      chainId={chainId}
+                      key={`${argKey}-${arg.name}-${i}`}
+                      arg={arg}
+                      target={target}
+                      functionName={transaction.functionName}
+                      tokenMetadata={tokenMetadata}
+                      nftMetadata={nftMetadata}
+                      escrowData={escrowData}
+                      streamData={streamData}
+                    />
+                  )
+                })}
+              </Stack>
 
-          {sortedArgs.length > 0 ? `)` : null}
+              {sortedArgs.length > 0 ? `)` : null}
+            </>
+          )}
 
           {showRawCalldata && (
             <Stack
-              mt="x2"
+              mt="x1"
               gap="x1"
               p="x2"
               backgroundColor="background2"
