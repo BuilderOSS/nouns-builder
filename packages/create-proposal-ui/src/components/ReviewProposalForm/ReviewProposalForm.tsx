@@ -4,7 +4,7 @@ import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import {
-  BuilderTransaction,
+  TransactionBundle,
   useChainStore,
   useDaoStore,
   useProposalStore,
@@ -46,7 +46,7 @@ interface ReviewProposalProps {
   representedAddress?: string
   discussionUrl?: string
   representedAddressEnabled: boolean
-  transactions: BuilderTransaction[]
+  transactions: TransactionBundle[]
   onProposalCreated: (proposalId: string | null) => void
   onBackMobile?: () => void
   onResetMobile?: () => void

@@ -12,6 +12,7 @@ describe('Review Card', () => {
         disabled={true}
         transaction={{
           summary: 'This is a transaction summary',
+          title: 'Upgrade Proposal',
           type: TransactionType.UPGRADE,
           transactions: [],
         }}
@@ -32,6 +33,7 @@ describe('Review Card', () => {
         handleRemove={mockRemoveFn}
         transaction={{
           summary: 'This is a transaction summary',
+          title: 'Upgrade Proposal',
           type: TransactionType.UPGRADE,
           transactions: [],
         }}
@@ -53,6 +55,8 @@ describe('Review Card', () => {
         disabled={false}
         transaction={{
           type: TransactionType.CUSTOM,
+          title: 'Custom Transaction',
+          summary: 'fnc',
           transactions: [
             {
               functionSignature: 'test()',

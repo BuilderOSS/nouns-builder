@@ -371,6 +371,7 @@ export const ContentCoin: React.FC = () => {
       // 9. Add transaction to proposal queue
       addTransaction({
         type: TransactionType.CONTENT_COIN,
+        title: 'Content Coin',
         summary: `Create ${values.symbol} Content Coin`,
         transactions: [transaction],
       })

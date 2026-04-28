@@ -1,4 +1,4 @@
-import { BuilderTransaction, useProposalStore } from '@buildeross/stores'
+import { TransactionBundle, useProposalStore } from '@buildeross/stores'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Alert } from '../../Alert'
 
 export interface UpgradeRequiredProps {
-  transaction?: BuilderTransaction
+  transaction?: TransactionBundle
   latest?: string
   date?: string
   totalContractUpgrades?: number

@@ -39,6 +39,7 @@ export const MigrateDAOForm: React.FC = () => {
     if (!transactions || !settled) return
     addTransaction({
       type: TransactionType.MIGRATION,
+      title: 'Migration',
       summary: 'Migrate to L2',
       transactions,
     })

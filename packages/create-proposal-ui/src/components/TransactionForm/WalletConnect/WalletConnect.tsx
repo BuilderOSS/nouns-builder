@@ -281,6 +281,7 @@ export const WalletConnect: React.FC = () => {
 
       addTransaction({
         type: TransactionType.WALLET_CONNECT,
+        title: 'WalletConnect',
         summary,
         transactions: [
           {

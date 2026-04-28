@@ -8,10 +8,10 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import {
-  BuilderTransaction,
   ProposalDescriptionMetadataV1,
   ProposalTransactionBundle,
   SimulationOutput,
+  TransactionBundle,
 } from '@buildeross/types'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
@@ -45,7 +45,7 @@ type ProposalDescriptionProps = {
   onOpenProposalReview: () => Promise<void>
   isPreview?: boolean
   showMetadataSections?: boolean
-  previewTransactions?: BuilderTransaction[]
+  previewTransactions?: TransactionBundle[]
   previewSimulations?: SimulationOutput[]
 }
 

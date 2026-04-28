@@ -1,4 +1,4 @@
-import { BuilderTransaction } from '@buildeross/types'
+import { TransactionBundle } from '@buildeross/types'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -13,7 +13,7 @@ interface TransactionCardProps {
   handleRemove?: () => void
   simulationUrl?: string
   simulationError?: SimulationError
-  transaction: BuilderTransaction
+  transaction: TransactionBundle
   disabled?: boolean
 }
 

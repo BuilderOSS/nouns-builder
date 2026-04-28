@@ -538,6 +538,7 @@ export const CreatorCoin: React.FC = () => {
       // Add transaction to proposal queue
       addTransaction({
         type: TransactionType.CREATOR_COIN,
+        title: 'Creator Coin',
         summary: `Create ${values.symbol} Creator Coin via Clanker`,
         transactions: [transaction],
       })
@@ -574,6 +575,7 @@ export const CreatorCoin: React.FC = () => {
 
           addTransaction({
             type: TransactionType.PIN_TREASURY_ASSET,
+            title: 'Pin Treasury Asset',
             summary: `Pin ${values.symbol} creator coin to treasury`,
             transactions: [
               {

@@ -1,15 +1,15 @@
-import type { BuilderTransaction, TransactionType } from '@buildeross/types'
+import type { TransactionBundle, TransactionType } from '@buildeross/types'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-export type { BuilderTransaction }
+export type { TransactionBundle }
 
 export type TransactionFormType = TransactionType
 
 export const PROPOSAL_STORE_IDENTIFIER = `nouns-builder-proposal-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`
 
 type State = {
-  transactions: BuilderTransaction[]
+  transactions: TransactionBundle[]
   disabled: boolean
   title?: string
   summary?: string
@@ -20,8 +20,8 @@ type State = {
 }
 
 type Actions = {
-  addTransaction: (builderTransaction: BuilderTransaction) => void
-  addTransactions: (builderTransactions: BuilderTransaction[]) => void
+  addTransaction: (builderTransaction: TransactionBundle) => void
+  addTransactions: (builderTransactions: TransactionBundle[]) => void
   removeTransaction: (index: number) => void
   removeAllTransactions: () => void
   clearProposal: () => void
@@ -72,18 +72,45 @@ const initialState: State = {
   transactionType: null,
 }
 
+const toTitleCase = (value: string) =>
+  value
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+
+const defaultBundleTitle = (type: TransactionType) =>
+  toTitleCase(String(type).replace(/-/g, ' '))
+
+const normalizeBundle = (bundle: TransactionBundle): TransactionBundle => {
+  const title = bundle.title?.trim() || defaultBundleTitle(bundle.type)
+  const summary =
+    bundle.summary?.trim() ||
+    bundle.transactions
+      .map((txn) => txn.functionSignature)
+      .filter(Boolean)
+      .join(', ') ||
+    title
+
+  return {
+    ...bundle,
+    title,
+    summary,
+  }
+}
+
 export const useProposalStore = create<State & Actions>()(
   persist(
     (set) => ({
       ...initialState,
-      addTransaction: (transaction: BuilderTransaction) => {
+      addTransaction: (transaction: TransactionBundle) => {
         set((state) => ({
-          transactions: [...state.transactions, transaction],
+          transactions: [...state.transactions, normalizeBundle(transaction)],
         }))
       },
-      addTransactions: (transaction: BuilderTransaction[]) => {
+      addTransactions: (transaction: TransactionBundle[]) => {
         set((state) => ({
-          transactions: [...state.transactions, ...transaction],
+          transactions: [...state.transactions, ...transaction.map(normalizeBundle)],
         }))
       },
       removeTransaction: (index) => {
@@ -110,6 +137,7 @@ export const useProposalStore = create<State & Actions>()(
         set(() => ({
           ...initialState,
           ...sanitizedDraft,
+          transactions: (sanitizedDraft.transactions || []).map(normalizeBundle),
         }))
       },
       setTransactionType: (type) => set({ transactionType: type }),
