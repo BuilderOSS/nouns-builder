@@ -3,14 +3,10 @@ import {
   PUBLIC_ZORA_NFT_CREATOR,
   ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants/addresses'
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import {
-  OrderDirection,
   Proposal,
-  SubgraphSDK,
-  Token_OrderBy,
 } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
@@ -22,10 +18,9 @@ import {
   getSablierAirdropFactories,
   getSablierContracts,
 } from '@buildeross/utils/sablier/contracts'
-import { atoms, Box, Flex, Paragraph, Text } from '@buildeross/zord'
+import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
-import useSWR from 'swr'
 import { zeroAddress } from 'viem'
 
 import { propPageWrapper } from '../styles.css'
@@ -150,25 +145,6 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
     )
   }, [proposal.targets, chain.id])
 
-  const { data: tokenImage, error } = useSWR(
-    !!collection && !!proposal.proposer
-      ? ([SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposal.proposer] as const)
-      : null,
-    async ([_key, _chainId, _collection, _proposer]) => {
-      const data = await SubgraphSDK.connect(_chainId).tokens({
-        where: {
-          owner: _proposer.toLowerCase(),
-          tokenContract: _collection.toLowerCase(),
-        },
-        first: 1,
-        orderBy: Token_OrderBy.MintedAt,
-        orderDirection: OrderDirection.Asc,
-      })
-      return data?.tokens?.[0]?.image
-    },
-    { revalidateOnFocus: false }
-  )
-
   return (
     <Flex
       direction="column"
@@ -263,24 +239,6 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
 
         <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
           <Flex direction={'row'} placeItems={'center'}>
-            <Box
-              backgroundColor="background2"
-              width={'x8'}
-              height={'x8'}
-              mr={'x2'}
-              borderRadius={'small'}
-              position="relative"
-            >
-              {!!tokenImage && !error && (
-                <img
-                  alt="proposer"
-                  src={tokenImage}
-                  className={atoms({ borderRadius: 'small' })}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              )}
-            </Box>
-
             <Flex direction="column" gap="x1" style={{ minWidth: 0 }}>
               <WalletIdentityWithPreview
                 address={proposal.proposer as `0x${string}`}
