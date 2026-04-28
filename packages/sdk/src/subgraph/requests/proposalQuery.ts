@@ -2,10 +2,13 @@ import { CHAIN_ID } from '@buildeross/types'
 
 import { getProposalState, ProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
-import { ProposalFragment, ProposalVoteFragment as ProposalVote } from '../sdk.generated'
+import {
+  ProposalDetailFragment,
+  ProposalVoteFragment as ProposalVote,
+} from '../sdk.generated'
 
 export type Proposal = Omit<
-  ProposalFragment,
+  ProposalDetailFragment,
   | 'transactionHash'
   | 'executionTransactionHash'
   | 'cancelTransactionHash'
@@ -31,7 +34,10 @@ export type Proposal = Omit<
   votes?: ProposalVote[]
 }
 
-export const formatAndFetchState = async (chainId: CHAIN_ID, data: ProposalFragment) => {
+export const formatAndFetchState = async (
+  chainId: CHAIN_ID,
+  data: ProposalDetailFragment
+) => {
   const { executableFrom, expiresAt, calldatas, executionTransactionHash, ...proposal } =
     data
 

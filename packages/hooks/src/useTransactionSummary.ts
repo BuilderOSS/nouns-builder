@@ -4,8 +4,11 @@ import type {
   CHAIN_ID,
   DaoContractAddresses,
   DecodedArgs,
+  ProposalDescriptionMetadataV1,
+  ProposalTransactionBundleContext,
 } from '@buildeross/types'
 import type { DecodedEscrowData } from '@buildeross/utils/escrow'
+import type { StreamConfig } from '@buildeross/utils/sablier'
 import useSWR from 'swr'
 
 import type { SerializedNftMetadata } from './useNftMetadata'
@@ -20,6 +23,14 @@ export type TransactionSummaryData = {
   tokenMetadata?: TokenMetadata
   nftMetadata?: SerializedNftMetadata | null
   escrowData?: DecodedEscrowData | null
+  streamData?: {
+    lockupAddress: `0x${string}`
+    tokenAddress: `0x${string}`
+    streams: StreamConfig[]
+    isDurationsMode: boolean
+  }
+  proposalMetadata?: ProposalDescriptionMetadataV1
+  bundleContext?: ProposalTransactionBundleContext
 }
 
 // AI Summary fetcher function

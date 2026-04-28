@@ -2,7 +2,14 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import { useTransactionSummary } from '@buildeross/hooks/useTransactionSummary'
-import { CHAIN_ID, DaoContractAddresses, DecodedTransactionData } from '@buildeross/types'
+import {
+  CHAIN_ID,
+  DaoContractAddresses,
+  DecodedTransactionData,
+  ProposalDescriptionMetadataV1,
+  ProposalTransactionBundleContext,
+  SimulationOutput,
+} from '@buildeross/types'
 import {
   decodeEscrowData,
   decodeEscrowDataLegacy,
@@ -18,7 +25,7 @@ import {
   parseStreamDataConfigTimestampsLD,
   type StreamConfig,
 } from '@buildeross/utils/sablier'
-import { atoms, Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { atoms, Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
 
@@ -45,11 +52,26 @@ const getParserFromFunctionName = (
 export const DecodedDisplay: React.FC<{
   chainId: CHAIN_ID
   addresses: DaoContractAddresses
+  proposalMetadata?: ProposalDescriptionMetadataV1
+  bundleContext?: ProposalTransactionBundleContext
+  simulation?: SimulationOutput
   transaction: DecodedTransactionData
   target: `0x${string}`
   value: string
   index: number
-}> = ({ chainId, addresses, transaction, target, value, index }) => {
+}> = ({
+  chainId,
+  addresses,
+  proposalMetadata,
+  bundleContext,
+  simulation,
+  transaction,
+  target,
+  value,
+  index,
+}) => {
+  const [showRawCalldata, setShowRawCalldata] = React.useState(false)
+
   const sortedArgs = React.useMemo(() => {
     const keys = Object.keys(transaction.args)
     const inOrder = (transaction.argOrder as string[]).filter((k) => keys.includes(k))
@@ -211,6 +233,8 @@ export const DecodedDisplay: React.FC<{
       nftMetadata: nftMetadata || undefined,
       escrowData: escrowData || undefined,
       streamData: streamData || undefined,
+      proposalMetadata,
+      bundleContext,
     }
   }, [
     transaction,
@@ -221,6 +245,8 @@ export const DecodedDisplay: React.FC<{
     nftMetadata,
     escrowData,
     streamData,
+    proposalMetadata,
+    bundleContext,
     isLoadingMetadata,
   ])
 
@@ -262,6 +288,24 @@ export const DecodedDisplay: React.FC<{
           </Box>
           <Flex align="center" gap="x0">
             {`.${transaction.functionName}`}
+            <button
+              type="button"
+              onClick={() => setShowRawCalldata((state) => !state)}
+              title={showRawCalldata ? 'Hide raw calldata' : 'Show raw calldata'}
+              aria-label={showRawCalldata ? 'Hide raw calldata' : 'Show raw calldata'}
+              style={{
+                marginLeft: 8,
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                padding: 6,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Icon id="swap" style={{ width: 16, height: 16 }} />
+            </button>
             {value !== '0' && transaction.functionName !== 'send' && (
               <Flex align="center" gap="x1">
                 <Text color="accent">{`{ value:`}</Text>
@@ -302,8 +346,45 @@ export const DecodedDisplay: React.FC<{
           </Stack>
 
           {sortedArgs.length > 0 ? `)` : null}
+
+          {showRawCalldata && (
+            <Stack
+              mt="x2"
+              gap="x1"
+              p="x2"
+              backgroundColor="background2"
+              borderRadius="curved"
+            >
+              <Text fontWeight="heading" color="text3">
+                Raw calldata
+              </Text>
+              <Text
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-all',
+                  overflowWrap: 'anywhere',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {transaction.encodedData || 'Unavailable'}
+              </Text>
+            </Stack>
+          )}
         </Stack>
       </Flex>
+
+      {simulation && simulation.status === false && (
+        <Box color="text3" px="x3" pb="x2">
+          <Text>Simulation indicates this call may fail.</Text>
+          {!!simulation.url && (
+            <Text>
+              <a href={simulation.url} target="_blank" rel="noreferrer">
+                View simulation details
+              </a>
+            </Text>
+          )}
+        </Box>
+      )}
 
       {!isLoadingMetadata &&
         !DISABLE_AI_SUMMARY &&

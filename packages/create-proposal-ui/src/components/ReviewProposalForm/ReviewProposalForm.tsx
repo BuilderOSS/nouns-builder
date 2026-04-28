@@ -1,5 +1,5 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { ProposalDescription } from '@buildeross/proposal-ui'
+import { ProposalDescription, TRANSACTION_TYPES } from '@buildeross/proposal-ui'
 import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
@@ -38,7 +38,6 @@ import {
   checkboxStyleVariants,
   visuallyHiddenCheckbox,
 } from './ReviewProposalForm.css'
-import { Transactions } from './Transactions'
 
 interface ReviewProposalProps {
   disabled: boolean
@@ -69,6 +68,23 @@ const logError = async (e: unknown) => {
 const formatTimestamp = (timestamp?: number) => {
   if (timestamp === undefined || timestamp === null) return 'Unavailable'
   return `${dayjs.unix(timestamp).format('MMM D, YYYY h:mm A')} ${handleGMTOffset()}`
+}
+
+const normalizeForCompare = (value?: string) =>
+  (value || '')
+    .toLowerCase()
+    .replace(/[\s\-_.:;,!?'"`~()\[\]{}]+/g, ' ')
+    .trim()
+
+const dedupeBundleSummary = (
+  summary: string | undefined,
+  fallback: string | undefined
+) => {
+  if (!summary) return undefined
+  if (!fallback) return summary
+  return normalizeForCompare(summary) === normalizeForCompare(fallback)
+    ? undefined
+    : summary
 }
 
 export const ReviewProposalForm = ({
@@ -214,6 +230,14 @@ export const ReviewProposalForm = ({
             version: 1,
             title: values.title?.trim() || '',
             description: values.summary?.trim() || '',
+            transactionBundles: values.transactions.map((transaction) => ({
+              type: transaction.type,
+              summary: dedupeBundleSummary(
+                transaction.summary,
+                TRANSACTION_TYPES[transaction.type]?.subTitle
+              ),
+              callCount: transaction.transactions.length,
+            })),
             ...(values.representedAddressEnabled && values.representedAddress?.trim()
               ? { representedAddress: values.representedAddress.trim() }
               : {}),
@@ -466,66 +490,63 @@ export const ReviewProposalForm = ({
                     borderWidth={'normal'}
                     borderRadius={'curved'}
                   >
-                    {isEditingMetadata ? (
-                      <>
-                        <ProposalDraftForm
-                          formik={formik}
-                          onTitleChange={(value) => {
-                            setTitle(value)
-                          }}
-                          onSummaryChange={(value) => {
-                            setSummary(value)
-                          }}
-                          onRepresentedAddressEnabledChange={(value) => {
-                            setRepresentedAddressEnabled(value)
-                            if (!value) {
-                              void formik.setFieldValue('representedAddress', '')
-                              setRepresentedAddress(undefined)
-                            }
-                          }}
-                          onRepresentedAddressBlur={async () => {
-                            await resolveAndStoreRepresentedAddress(formik)
-                          }}
-                          onDiscussionUrlChange={(value) => {
-                            setDiscussionUrl(value)
-                          }}
-                          disabled={disabledForm}
-                        />
-                        <Transactions
-                          disabled={disabledForm}
-                          transactions={transactions}
-                          simulations={failedSimulations}
-                          simulationError={simulationError}
-                        />
-                      </>
-                    ) : (
-                      (() => {
-                        const { targets, calldata, values } = prepareProposalTransactions(
-                          formik.values.transactions
-                        )
+                    {(() => {
+                      const { targets, calldata, values } = prepareProposalTransactions(
+                        formik.values.transactions
+                      )
 
-                        const previewProposal = {
-                          proposer: (address ||
-                            '0x0000000000000000000000000000000000000000') as `0x${string}`,
-                          description: formik.values.summary || '',
-                          title: formik.values.title || '',
-                          representedAddress: formik.values.representedAddress || null,
-                          discussionUrl: formik.values.discussionUrl || null,
-                          targets,
-                          calldatas: calldata,
-                          values: values.map((value) => value.toString()),
-                        } as unknown as Proposal
+                      const previewProposal = {
+                        proposer: (address ||
+                          '0x0000000000000000000000000000000000000000') as `0x${string}`,
+                        description: formik.values.summary || '',
+                        title: formik.values.title || '',
+                        representedAddress: formik.values.representedAddress || null,
+                        discussionUrl: formik.values.discussionUrl || null,
+                        targets,
+                        calldatas: calldata,
+                        values: values.map((value) => value.toString()),
+                      } as unknown as Proposal
 
-                        return (
+                      return (
+                        <>
+                          {isEditingMetadata && (
+                            <ProposalDraftForm
+                              formik={formik}
+                              onTitleChange={(value) => {
+                                setTitle(value)
+                              }}
+                              onSummaryChange={(value) => {
+                                setSummary(value)
+                              }}
+                              onRepresentedAddressEnabledChange={(value) => {
+                                setRepresentedAddressEnabled(value)
+                                if (!value) {
+                                  void formik.setFieldValue('representedAddress', '')
+                                  setRepresentedAddress(undefined)
+                                }
+                              }}
+                              onRepresentedAddressBlur={async () => {
+                                await resolveAndStoreRepresentedAddress(formik)
+                              }}
+                              onDiscussionUrlChange={(value) => {
+                                setDiscussionUrl(value)
+                              }}
+                              disabled={disabledForm}
+                            />
+                          )}
+
                           <ProposalDescription
                             title={formik.values.title || ''}
                             proposal={previewProposal}
                             onOpenProposalReview={async () => undefined}
                             isPreview
+                            showMetadataSections={!isEditingMetadata}
+                            previewTransactions={formik.values.transactions}
+                            previewSimulations={failedSimulations}
                           />
-                        )
-                      })()
-                    )}
+                        </>
+                      )
+                    })()}
                   </Stack>
 
                   <label className={defaultInputLabelStyle}>
