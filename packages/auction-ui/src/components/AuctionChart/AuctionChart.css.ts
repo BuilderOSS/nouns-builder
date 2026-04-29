@@ -1,4 +1,5 @@
 import { skeletonAnimation } from '@buildeross/ui/styles'
+import { vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 const tabBase = style({
@@ -12,7 +13,7 @@ const tabBase = style({
   },
 })
 const selected = style({
-  borderBottom: '2px solid black !important',
+  borderBottom: `2px solid ${vars.color.text1} !important`,
 })
 const unselected = style({
   borderBottom: '2px solid transparent !important',

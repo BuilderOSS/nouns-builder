@@ -99,7 +99,7 @@ export const auctionTextVariants = styleVariants({
       fontWeight: 400,
       fontSize: '1rem',
       whiteSpace: 'nowrap',
-      color: 'rgba(0, 0, 0, 0.39)',
+      color: vars.color.secondary,
     },
   ],
 

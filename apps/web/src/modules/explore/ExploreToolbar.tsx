@@ -72,7 +72,8 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 mx={'x4'}
                 aria-current={pathname === '/favorites' ? 'page' : undefined}
                 style={{
-                  borderBottom: pathname === '/favorites' ? `2px solid black` : `0px`,
+                  borderBottom:
+                    pathname === '/favorites' ? `2px solid ${vars.color.text1}` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">Favorites</Text>

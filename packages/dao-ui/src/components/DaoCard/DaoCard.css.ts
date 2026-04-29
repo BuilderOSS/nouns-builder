@@ -109,4 +109,5 @@ export const favoriteIcon = style({
   width: 20,
   height: 'auto',
   display: 'block',
+  color: theme.colors.text1,
 })

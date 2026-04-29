@@ -368,6 +368,21 @@ globalStyle('input, textarea, select', {
   fontFamily: 'inherit',
 })
 
+globalStyle('.zord-select select', {
+  color: vars.color.text1,
+  backgroundColor: vars.color.background2,
+})
+
+globalStyle('.zord-select select option', {
+  color: vars.color.text1,
+  backgroundColor: vars.color.background1,
+})
+
+globalStyle('.zord-select select option:checked', {
+  color: vars.color.text1,
+  backgroundColor: vars.color.background2,
+})
+
 globalStyle(
   'input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button',
   {
