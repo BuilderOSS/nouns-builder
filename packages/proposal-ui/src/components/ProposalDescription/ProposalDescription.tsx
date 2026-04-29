@@ -27,7 +27,7 @@ import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
 import { zeroAddress } from 'viem'
 
-import { TRANSACTION_TYPES } from '../../constants'
+import { normalizeTextForCompare, TRANSACTION_TYPES } from '../../constants'
 import { propPageWrapper } from '../styles.css'
 import { TransactionTypeIcon } from '../TransactionTypeIcon'
 import { AirdropDetails } from './AirdropDetails'
@@ -71,16 +71,10 @@ const getSafeDiscussionUrl = (value?: string | null): string | null => {
   }
 }
 
-const normalizeForCompare = (value?: string) =>
-  (value || '')
-    .toLowerCase()
-    .replace(/[\s\-_.:;,!?'"`~()\[\]{}]+/g, ' ')
-    .trim()
-
 const getBundleIntent = (summary: string | undefined, fallback: string | undefined) => {
   if (!summary) return fallback
   if (!fallback) return summary
-  return normalizeForCompare(summary) === normalizeForCompare(fallback)
+  return normalizeTextForCompare(summary) === normalizeTextForCompare(fallback)
     ? fallback
     : summary
 }
@@ -141,6 +135,9 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         bundle &&
         typeof bundle.type === 'string' &&
         typeof bundle.callCount === 'number' &&
+        (bundle.summary === undefined ||
+          bundle.summary === null ||
+          typeof bundle.summary === 'string') &&
         bundle.callCount > 0
     )
 

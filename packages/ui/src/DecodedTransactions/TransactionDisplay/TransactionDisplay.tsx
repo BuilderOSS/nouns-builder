@@ -160,13 +160,7 @@ export const TransactionDisplay: React.FC<
       <SimulationWarning simulation={simulation} />
 
       <TransactionAiSummary
-        isVisible={
-          isDecoded &&
-          !isLoadingMetadata &&
-          !DISABLE_AI_SUMMARY &&
-          !errorSummary &&
-          !isGeneratingSummary
-        }
+        isVisible={isDecoded && !isLoadingMetadata && !DISABLE_AI_SUMMARY}
         isGeneratingSummary={isGeneratingSummary}
         aiSummary={aiSummary}
         errorSummary={errorSummary}

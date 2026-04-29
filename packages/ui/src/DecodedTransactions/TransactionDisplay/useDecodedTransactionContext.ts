@@ -53,7 +53,13 @@ export const useDecodedTransactionContext = ({
     const raw = arg?.value
     if (!raw || typeof raw !== 'string' || !raw.startsWith('0x')) return null
 
-    const legacy = getEscrowBundlerLegacy(chainId)
+    let legacy: `0x${string}` | undefined
+    try {
+      legacy = getEscrowBundlerLegacy(chainId)
+    } catch (_error) {
+      legacy = undefined
+    }
+
     const decoder =
       legacy && target.toLowerCase() === legacy.toLowerCase()
         ? decodeEscrowDataLegacy

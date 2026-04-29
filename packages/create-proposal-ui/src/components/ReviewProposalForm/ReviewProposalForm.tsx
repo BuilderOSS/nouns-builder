@@ -1,5 +1,9 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { ProposalDescription, TRANSACTION_TYPES } from '@buildeross/proposal-ui'
+import {
+  normalizeTextForCompare,
+  ProposalDescription,
+  TRANSACTION_TYPES,
+} from '@buildeross/proposal-ui'
 import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
@@ -70,19 +74,13 @@ const formatTimestamp = (timestamp?: number) => {
   return `${dayjs.unix(timestamp).format('MMM D, YYYY h:mm A')} ${handleGMTOffset()}`
 }
 
-const normalizeForCompare = (value?: string) =>
-  (value || '')
-    .toLowerCase()
-    .replace(/[\s\-_.:;,!?'"`~()\[\]{}]+/g, ' ')
-    .trim()
-
 const dedupeBundleSummary = (
   summary: string | undefined,
   fallback: string | undefined
 ) => {
   if (!summary) return undefined
   if (!fallback) return summary
-  return normalizeForCompare(summary) === normalizeForCompare(fallback)
+  return normalizeTextForCompare(summary) === normalizeTextForCompare(fallback)
     ? undefined
     : summary
 }
