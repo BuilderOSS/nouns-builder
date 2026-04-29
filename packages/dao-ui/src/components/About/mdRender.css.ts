@@ -1,3 +1,4 @@
+import { vars } from '@buildeross/zord'
 import { globalStyle, style } from '@vanilla-extract/css'
 
 export const daoDescription = style({
@@ -7,7 +8,7 @@ export const daoDescription = style({
 globalStyle(`${daoDescription} :is(h1)`, {
   fontSize: '2.6rem',
   fontWeight: 700,
-  borderBottom: '1px solid #f0f0f0',
+  borderBottom: `1px solid ${vars.color.border}`,
   lineHeight: '1.8',
   marginBottom: 18,
   '@media': {
@@ -20,7 +21,7 @@ globalStyle(`${daoDescription} :is(h1)`, {
 globalStyle(`${daoDescription} :is(h2)`, {
   fontSize: '2.1rem',
   fontWeight: 700,
-  borderBottom: '1px solid #f0f0f0',
+  borderBottom: `1px solid ${vars.color.border}`,
   lineHeight: '1.6',
   marginBottom: 16,
   '@media': {
@@ -86,16 +87,16 @@ globalStyle(`${daoDescription} > p`, {
 })
 
 globalStyle(`${daoDescription} code`, {
-  backgroundColor: 'rgba(0, 0, 0, 0.08)',
+  backgroundColor: `color-mix(in srgb, ${vars.color.text1} 8%, transparent)`,
   padding: '0.2em 0.4em',
   borderRadius: '6px',
   fontFamily: 'monospace!important',
 })
 
 globalStyle(`${daoDescription} blockquote`, {
-  color: '#808080',
+  color: vars.color.text3,
   padding: '0 1em',
-  borderLeft: '0.25em solid #808080',
+  borderLeft: `0.25em solid ${vars.color.text3}`,
   margin: 0,
   marginBottom: 20,
 })
@@ -113,6 +114,6 @@ export const fadingEffect = style({
     left: '0',
     width: '100%',
     height: '80px',
-    background: 'linear-gradient(to top, white, transparent)',
+    background: `linear-gradient(to top, ${vars.color.background1}, transparent)`,
   },
 })

@@ -107,7 +107,13 @@ export const favoriteButton = style({
 
 export const favoriteIcon = style({
   width: 20,
-  height: 'auto',
-  display: 'block',
-  color: theme.colors.text1,
+  height: 20,
+  display: 'inline-block',
+  backgroundColor: theme.colors.text1,
+  WebkitMaskSize: 'contain',
+  maskSize: 'contain',
+  WebkitMaskRepeat: 'no-repeat',
+  maskRepeat: 'no-repeat',
+  WebkitMaskPosition: 'center',
+  maskPosition: 'center',
 })

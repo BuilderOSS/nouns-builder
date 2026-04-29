@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { keyframes, style, styleVariants } from '@vanilla-extract/css'
 
 const deployButtonBase = style({
@@ -29,7 +29,7 @@ export const deployContractButtonStyle = styleVariants({
 
 export const deployCheckboxWrapperStyle = style({
   borderRadius: '16px',
-  border: `1px solid #F2F2F2`,
+  border: `1px solid ${vars.color.background2}`,
 })
 
 export const deployCheckboxStyle = style({
@@ -37,16 +37,16 @@ export const deployCheckboxStyle = style({
   height: 26,
   width: 26,
   minWidth: 26,
-  border: `1px solid #000`,
+  border: `1px solid ${vars.color.text1}`,
   borderRadius: '5px',
   selectors: {
-    '&:hover': { cursor: 'pointer', background: '#000' },
+    '&:hover': { cursor: 'pointer', background: vars.color.text1 },
   },
 })
 
 export const deployCheckboxStyleVariants = styleVariants({
   default: [deployCheckboxStyle],
-  confirmed: [deployCheckboxStyle, { background: '#000' }],
+  confirmed: [deployCheckboxStyle, { background: vars.color.text1 }],
 })
 
 export const deployCheckboxHelperText = style([
@@ -55,6 +55,6 @@ export const deployCheckboxHelperText = style([
   }),
   {
     lineHeight: '24px',
-    color: '#808080',
+    color: vars.color.text3,
   },
 ])

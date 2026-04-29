@@ -1,10 +1,10 @@
 import * as z from '@buildeross/constants/layers'
-import { atoms, color } from '@buildeross/zord'
+import { atoms, color, vars } from '@buildeross/zord'
 import { keyframes, style } from '@vanilla-extract/css'
 
-const darkSurface = '#2a2b31'
-const darkSurfaceHover = '#67676d'
-const darkSurfaceBorder = '#4a4d57'
+const darkSurface = vars.color.background2
+const darkSurfaceHover = vars.color.neutralHover
+const darkSurfaceBorder = vars.color.border
 
 const slideIn = keyframes({
   '0%': { transform: 'translateY(-100%)' },
@@ -57,7 +57,7 @@ export const activeNavAvatar = style([
     borderRadius: 'round',
   }),
   {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: vars.color.backdrop,
     zIndex: z.NAV_BUTTON_LAYER + 1,
   },
 ])
@@ -122,14 +122,14 @@ export const disconnectButton = style([
     background: color.ghost,
     selectors: {
       '&:hover': {
-        background: `rgba(240, 50, 50, 0.1) !important`,
+        background: `${vars.color.negativeDisabled} !important`,
       },
       'html[data-theme-mode="dark"] &': {
         background: color.negative,
         color: color.background1,
       },
       'html[data-theme-mode="dark"] &:hover': {
-        background: '#ffffff !important',
+        background: `${vars.color.background1} !important`,
         color: color.negative,
         borderColor: color.negative,
       },
@@ -195,7 +195,7 @@ export const hiddenDaoButton = style({
   background: color.background2,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      background: '#24262c',
+      background: color.background2,
     },
     '&:hover': {
       background: color.neutralHover,
@@ -323,11 +323,11 @@ export const navPrimaryActionButton = style({
   selectors: {
     'html[data-theme-mode="dark"] &': {
       background: darkSurfaceHover,
-      color: '#ffffff',
+      color: color.background1,
       borderColor: darkSurfaceBorder,
     },
     'html[data-theme-mode="dark"] &:hover': {
-      background: '#3b3e47',
+      background: darkSurfaceHover,
     },
   },
 })
@@ -335,11 +335,11 @@ export const navPrimaryActionButton = style({
 export const wrongNetworkButton = style({
   transition:
     'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
-  background: `rgba(240, 50, 50, 0.1)`,
+  background: vars.color.negativeDisabled,
   color: color.negative,
   selectors: {
     '&:hover': {
-      background: `rgba(240, 50, 50, 0.3)`,
+      background: vars.color.negative,
     },
   },
 })

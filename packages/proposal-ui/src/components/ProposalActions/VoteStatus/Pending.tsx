@@ -42,7 +42,8 @@ const Pending: React.FC<PendingProps> = ({ voteStart, proposalId }) => {
         borderStyle={'solid'}
         px={'x2'}
         py={'x4'}
-        style={{ background: '#FBFBFB', maxHeight: 40, minWidth: 124 }}
+        backgroundColor={'background1'}
+        style={{ maxHeight: 40, minWidth: 124 }}
       >
         <Text
           fontWeight={'display'}

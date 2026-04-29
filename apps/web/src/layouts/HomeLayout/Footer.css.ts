@@ -1,32 +1,33 @@
+import { vars } from '@buildeross/zord'
 import { globalStyle, style } from '@vanilla-extract/css'
 
-const darkFooterSurface = '#1f2024'
-const darkFooterSurfaceHover = '#34363d'
-const darkFooterBorder = '#4a4d57'
+const darkFooterSurface = vars.color.background1
+const darkFooterSurfaceHover = vars.color.background2
+const darkFooterBorder = vars.color.border
 
 export const homeFooterWrapper = style({
   selectors: {
     'html[data-theme-mode="dark"] &': {
       background: darkFooterSurface,
-      color: '#ffffff',
+      color: vars.color.text1,
     },
   },
 })
 
 export const getStartedButton = style({
   fontSize: 26,
-  background: 'rgba(255,255,255,.3)',
+  background: vars.color.backdrop,
   selectors: {
     'html[data-theme-mode="dark"] &': {
       background: darkFooterSurfaceHover,
-      color: '#ffffff',
+      color: vars.color.text1,
     },
     '&:hover': {
-      background: 'rgba(255,255,255,.35)',
+      background: vars.color.neutralHover,
       cursor: 'pointer',
     },
     'html[data-theme-mode="dark"] &:hover': {
-      background: '#3b3e47',
+      background: vars.color.background2,
     },
   },
   '@media': {
@@ -40,10 +41,10 @@ export const getStartedButton = style({
 export const homeFooterLinks = style({
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      color: '#ffffff',
+      color: vars.color.text1,
     },
     '&:hover': {
-      color: '#fff',
+      color: vars.color.text1,
       opacity: 0.8,
       cursor: 'pointer',
     },
@@ -53,9 +54,9 @@ export const homeFooterLinks = style({
 export const homeFooterSocialIcon = style({
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      background: '#34363d',
-      color: '#ffffff',
-      fill: '#ffffff',
+      background: vars.color.background2,
+      color: vars.color.text1,
+      fill: vars.color.text1,
     },
   },
 })
@@ -77,7 +78,7 @@ export const homeFooterInnerWrapper = style({
 export const footerHeading = style({
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      color: '#ffffff',
+      color: vars.color.text1,
     },
   },
   '@media': {
@@ -109,7 +110,7 @@ export const footerRightWrapper = style({
       alignItems: 'center',
       paddingTop: 32,
       marginTop: 32,
-      borderTop: '2px solid #333333',
+      borderTop: `2px solid ${vars.color.border}`,
       paddingRight: 0,
     },
   },

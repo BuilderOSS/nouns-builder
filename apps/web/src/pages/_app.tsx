@@ -18,6 +18,7 @@ import 'react-mde/lib/styles/css/react-mde-all.css'
 import { VercelAnalytics } from '@buildeross/analytics'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
+import { vars } from '@buildeross/zord'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { NextPage } from 'next'
@@ -63,7 +64,7 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
         <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
           <SWRConfig value={{ fallback }}>
             <NextNProgress
-              color={'#008BFF'}
+              color={vars.color.primary}
               startPosition={0.125}
               stopDelayMs={200}
               height={2}

@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const confirmRemoveHeadingStyle = style({
@@ -9,7 +9,7 @@ export const confirmRemoveHeadingStyle = style({
 })
 
 export const confirmRemoveHelper = style({
-  color: '#808080',
+  color: vars.color.text3,
   fontSize: 16,
   lineHeight: '24px',
   marginBottom: 8,
@@ -27,8 +27,8 @@ export const dismissButton = style([
     fontFamily: 'Inter, sans-serif!important',
     width: '100%',
     borderRadius: '12px',
-    background: '#FFF',
-    color: '#000',
+    background: vars.color.background1,
+    color: vars.color.text1,
   },
   atoms({
     mb: 'x2',

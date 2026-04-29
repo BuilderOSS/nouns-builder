@@ -63,23 +63,23 @@ export function parseBgColor(state: ProposalState) {
     case ProposalState.Active:
     case ProposalState.Succeeded:
       return {
-        borderColor: 'rgba(28, 182, 135, 0.1)',
+        borderColor: theme.colors.positiveDisabled,
         color: theme.colors.positive,
       }
     case ProposalState.Defeated:
       return {
-        borderColor: 'rgba(240, 50, 50, 0.1)',
+        borderColor: theme.colors.negativeDisabled,
         color: theme.colors.negative,
       }
     case ProposalState.Executed:
       return {
-        borderColor: 'rgba(37, 124, 237, 0.1)',
-        color: '#257CED',
+        borderColor: theme.colors.background2,
+        color: theme.colors.primary,
       }
     case ProposalState.Queued:
       return {
-        borderColor: '#F2E2F7',
-        color: '#D16BE1',
+        borderColor: theme.colors.neutral,
+        color: theme.colors.secondary,
       }
     case ProposalState.Expired:
     default:

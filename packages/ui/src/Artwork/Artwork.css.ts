@@ -55,18 +55,18 @@ export const artworkSettingsDragHandleActive = style({
 export const artworkSettingsPropertyName = style({
   height: 50,
   width: '100%',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '15px',
   fontSize: 16,
   paddingLeft: 24,
   boxSizing: 'border-box',
-  border: '2px solid #fff',
-  color: '#808080',
+  border: `2px solid ${vars.color.background1}`,
+  color: vars.color.text3,
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
   },
 })
@@ -80,13 +80,13 @@ export const artworkSettingsPropertyCount = style({
   width: 80,
   borderRadius: '15px',
   fontSize: 16,
-  border: '2px solid #fff',
+  border: `2px solid ${vars.color.background1}`,
   maxWidth: '100px',
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
   },
 })
@@ -101,7 +101,7 @@ export const layerSelectStyle = style([
   }),
   {
     minHeight: 62,
-    background: '#F2F2F2',
+    background: vars.color.background2,
     border: 0,
     borderRadius: '12px',
     boxSizing: 'border-box',
@@ -110,16 +110,16 @@ export const layerSelectStyle = style([
 ])
 
 globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}`, {
-  color: '#1f2024 !important',
+  color: `${vars.color.text1} !important`,
 })
 
 globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}:focus`, {
-  color: '#1f2024 !important',
+  color: `${vars.color.text1} !important`,
   outline: 'none',
 })
 
 globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle} option`, {
-  color: '#1f2024 !important',
+  color: `${vars.color.text1} !important`,
 })
 
 export const previewHeadingStyle = style([
@@ -145,7 +145,7 @@ export const selectTraitNameStyle = style([
   }),
   {
     zIndex: 1,
-    color: '#808080',
+    color: vars.color.text3,
     opacity: 0.6,
     fontWeight: 400,
     // top: '28%',
@@ -153,7 +153,7 @@ export const selectTraitNameStyle = style([
 ])
 
 globalStyle(`html[data-theme-mode='dark'] ${selectTraitNameStyle}`, {
-  color: '#1f2024 !important',
+  color: `${vars.color.text1} !important`,
 })
 
 export const selectTraitNameWrapper = style({
@@ -167,7 +167,7 @@ export const previewGeneratedImageStyle = style({
   width: 175,
   borderRadius: '16px',
   overflow: 'hidden',
-  boxShadow: '2px 2px 2px rgba(0, 0, 0, 0.25)',
+  boxShadow: `2px 2px 2px ${vars.color.backdrop}`,
 })
 
 export const previewModalWrapperStyle = style({
@@ -239,8 +239,8 @@ export const artworkPreviewPanel = style([
   {
     minHeight: '100vh',
     width: '50vw',
-    borderRight: '2px solid #F2F2F2',
-    background: '#fff',
+    borderRight: `2px solid ${vars.color.background2}`,
+    background: vars.color.background1,
     '@media': {
       'screen and (max-width: 768px)': {
         width: '100%',
@@ -257,7 +257,7 @@ export const artworkPreviewPanel = style([
 export const artworkPreviewImageWrapper = style({
   width: 448,
   height: 448,
-  background: '#f2f2f2',
+  background: vars.color.background2,
   borderRadius: '12px',
   overflow: 'hidden',
   '@media': {
@@ -278,8 +278,8 @@ export const artworkPreviewGenerateButton = style({
       cursor: 'pointer',
     },
     'html[data-theme-mode="dark"] &:hover': {
-      backgroundColor: '#5b5b61',
-      borderColor: '#5b5b61',
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.background2,
     },
   },
 })

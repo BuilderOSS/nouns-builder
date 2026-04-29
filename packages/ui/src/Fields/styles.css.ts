@@ -9,12 +9,12 @@ export const defaultFormAdvancedToggle = style({
   fontSize: 16,
   lineHeight: '24px',
   fontWeight: 700,
-  backgroundColor: 'white',
-  color: 'black',
+  backgroundColor: vars.color.background1,
+  color: vars.color.text1,
   selectors: {
     '&:hover': {
       cursor: 'pointer',
-      backgroundColor: '#eee !important',
+      backgroundColor: `${vars.color.background2} !important`,
     },
   },
 })
@@ -35,20 +35,20 @@ export const defaultFieldsetStyle = style({
 export const defaultTextAreaStyle = style({
   minHeight: 250,
   resize: 'none',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '15px',
   fontSize: 16,
   paddingLeft: 24,
   paddingTop: 25,
   boxSizing: 'border-box',
-  border: '2px solid #fff',
+  border: `2px solid ${vars.color.background1}`,
   whiteSpace: 'pre-line',
   wordBreak: 'break-word',
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
   },
 })
@@ -56,18 +56,18 @@ export const defaultTextAreaStyle = style({
 export const defaultTextAreaErrorStyle = style({
   minHeight: 250,
   resize: 'none',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '15px',
   fontSize: 16,
   paddingLeft: 24,
   paddingTop: 25,
   boxSizing: 'border-box',
-  border: '2px solid #ff0015',
+  border: `2px solid ${vars.color.negative}`,
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
   },
 })
@@ -75,20 +75,20 @@ export const defaultTextAreaErrorStyle = style({
 export const defaultInputStyle = style({
   height: 64,
   width: '100%',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '12px',
   fontSize: 16,
   paddingLeft: 16,
   boxSizing: 'border-box',
-  border: '2px solid #fff',
+  border: `2px solid ${vars.color.background1}`,
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
     '&::placeholder': {
-      color: '#B3B3B3',
+      color: vars.color.text4,
     },
     '&:disabled': {
       opacity: 0.4,
@@ -100,17 +100,17 @@ export const defaultInputStyle = style({
 export const defaultInputErrorStyle = style({
   height: 64,
   width: '100%',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '15px',
   fontSize: 16,
   paddingLeft: 16,
   boxSizing: 'border-box',
-  border: '2px solid #ff0015',
+  border: `2px solid ${vars.color.negative}`,
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
     '&:disabled': {
       opacity: 0.4,
@@ -148,7 +148,7 @@ export const defaultFileDownloadStyle = style([
 ])
 
 export const defaultInputErrorMessageStyle = style({
-  color: '#ff0015',
+  color: vars.color.negative,
 })
 
 export const defaultUploadStyle = style({
@@ -156,12 +156,12 @@ export const defaultUploadStyle = style({
 })
 
 export const uploadErrorBox = style({
-  color: '#ff0015',
+  color: vars.color.negative,
   boxSizing: 'border-box',
 })
 
 export const uploadSuccessBox = style({
-  color: '#1CB687',
+  color: vars.color.positive,
   boxSizing: 'border-box',
 })
 
@@ -169,7 +169,7 @@ export const defaultUploadButtonStyle = style({
   display: 'flex',
   flexDirection: 'row-reverse',
   alignItems: 'center',
-  background: '#F2F2F2',
+  background: vars.color.background2,
   fontWeight: 700,
   boxSizing: 'border-box',
   borderRadius: '10px',
@@ -181,7 +181,7 @@ export const defaultUploadButtonStyle = style({
 export const defaultHelperTextStyle = style({
   fontSize: 16,
   lineHeight: '24px',
-  color: '#808080',
+  color: vars.color.text3,
   boxSizing: 'border-box',
   padding: '10px 0',
   whiteSpace: 'pre-line',
@@ -190,25 +190,25 @@ export const defaultHelperTextStyle = style({
 export const numberInputStyle = style({
   height: 64,
   width: '100%',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '15px',
   fontSize: 16,
   paddingLeft: 24,
   paddingRight: 25,
   boxSizing: 'border-box',
-  border: '2px solid #fff',
+  border: `2px solid ${vars.color.background1}`,
   overflow: 'hidden',
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
     '&::-webkit-input-placeholder': {
       textAlign: 'right',
     },
     '&::placeholder': {
-      color: '#B3B3B3',
+      color: vars.color.text4,
     },
     '&:disabled': {
       cursor: 'not-allowed',
@@ -217,25 +217,25 @@ export const numberInputStyle = style({
 })
 
 export const errorMessageStyle = style({
-  color: '#ff0015',
+  color: vars.color.negative,
   fontSize: '10px',
 })
 
 export const numberInputErrorStyle = style({
   height: 64,
   width: '100%',
-  backgroundColor: '#F2F2F2',
+  backgroundColor: vars.color.background2,
   borderRadius: '15px',
   fontSize: 16,
   paddingLeft: 24,
   paddingRight: 25,
   boxSizing: 'border-box',
-  border: '2px solid #ff0015',
+  border: `2px solid ${vars.color.negative}`,
   selectors: {
     '&:focus': {
       outline: 'none',
-      backgroundColor: '#FFF',
-      borderColor: '#E6E6E6',
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
     },
     '&::-webkit-input-placeholder': {
       textAlign: 'right',
@@ -247,17 +247,17 @@ export const numberInputErrorStyle = style({
 })
 
 export const dropAreaStyle = style({
-  border: '2px solid #fff',
+  border: `2px solid ${vars.color.background1}`,
   borderRadius: '10px',
 })
 
 export const dropAreaErrorStyle = style({
-  border: '2px solid #ff0015',
+  border: `2px solid ${vars.color.negative}`,
   borderRadius: '10px',
 })
 
 export const noneSelectedStyle = style({
-  color: '#B3B3B3',
+  color: vars.color.text4,
 })
 
 export const placeholderStyle = style({
@@ -294,7 +294,7 @@ export const inputCheckIcon = styleVariants({
       height: 24,
       width: 24,
       borderRadius: '12px',
-      backgroundColor: '#1CB687',
+      backgroundColor: vars.color.positive,
     },
   ],
 })
@@ -319,31 +319,31 @@ export const confirmRemoveHeadingStyle = style({
 })
 
 export const confirmRemoveHelper = style({
-  color: '#808080',
+  color: vars.color.text3,
   fontSize: 16,
   lineHeight: '24px',
   marginBottom: 8,
 })
 
-const pointer = {
-  background: '#F2F2F2',
-  border: '2px solid #F2F2F2',
+const pointer = style({
+  background: vars.color.background2,
+  border: `2px solid ${vars.color.background2}`,
   selectors: {
     '&:hover': {
       cursor: 'pointer',
-      border: '2px solid #8c8c8c',
+      border: `2px solid ${vars.color.text3}`,
     },
   },
-}
+})
 
 export const radioStyles = styleVariants({
   default: [pointer],
-  active: [pointer, { border: '2px solid #000' }],
+  active: [pointer, { border: `2px solid ${vars.color.text1}` }],
 })
 
 export const adminStickySaveWrapper = style({
-  borderTop: '2px solid #F2F2F2',
-  background: '#fff',
+  borderTop: `2px solid ${vars.color.background2}`,
+  background: vars.color.background1,
   zIndex: 1,
   '@media': {
     '(max-width: 768px)': {
@@ -376,16 +376,16 @@ export const deployCheckboxStyle = style({
   height: 26,
   width: 26,
   minWidth: 26,
-  border: `1px solid #000`,
+  border: `1px solid ${vars.color.text1}`,
   borderRadius: '5px',
   selectors: {
-    '&:hover': { cursor: 'pointer', background: '#000' },
+    '&:hover': { cursor: 'pointer', background: vars.color.text1 },
   },
 })
 
 export const deployCheckboxStyleVariants = styleVariants({
   default: [deployCheckboxStyle],
-  confirmed: [deployCheckboxStyle, { background: '#000' }],
+  confirmed: [deployCheckboxStyle, { background: vars.color.text1 }],
 })
 
 export const deployCheckboxHelperText = style([
@@ -394,7 +394,7 @@ export const deployCheckboxHelperText = style([
   }),
   {
     lineHeight: '24px',
-    color: '#808080',
+    color: vars.color.text3,
   },
 ])
 

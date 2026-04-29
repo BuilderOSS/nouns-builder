@@ -1,4 +1,5 @@
 import * as z from '@buildeross/constants/layers'
+import { vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const animatedModal = style({
@@ -22,15 +23,15 @@ export const animatedModalTrigger = style({
 })
 
 export const defaultAnimatedModalContent = style({
-  background: '#fff',
+  background: vars.color.background1,
   maxWidth: 'calc(100vw - 50px)',
   height: 'auto',
   maxHeight: '90vh',
   zIndex: z.MODAL_CONTENT_LAYER,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      background: '#1f2024',
-      border: '1px solid #4a4d57',
+      background: vars.color.background1,
+      border: `1px solid ${vars.color.border}`,
     },
   },
   '@media': {

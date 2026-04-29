@@ -1,7 +1,7 @@
 import { vars } from '@buildeross/zord'
 import { globalStyle, style } from '@vanilla-extract/css'
 
-const darkBridgeHover = '#67676d'
+const darkBridgeHover = vars.color.neutralHover
 
 export const bridgeCardBody = style({
   borderBottomLeftRadius: '0.8rem',
@@ -21,18 +21,18 @@ export const bridgeActionButton = style({
 })
 
 globalStyle(`html[data-theme-mode="dark"] .${bridgeActionButton}:hover svg`, {
-  fill: '#ffffff',
+  fill: vars.color.text1,
 })
 
 globalStyle(`html[data-theme-mode="dark"] .${bridgeActionButton}:hover path`, {
-  fill: '#ffffff',
-  stroke: '#ffffff',
+  fill: vars.color.text1,
+  stroke: vars.color.text1,
 })
 
 globalStyle(`html[data-theme-mode="dark"] .${bridgeActionButton}:hover polyline`, {
-  stroke: '#ffffff',
+  stroke: vars.color.text1,
 })
 
 globalStyle(`html[data-theme-mode="dark"] .${bridgeActionButton}:hover line`, {
-  stroke: '#ffffff',
+  stroke: vars.color.text1,
 })

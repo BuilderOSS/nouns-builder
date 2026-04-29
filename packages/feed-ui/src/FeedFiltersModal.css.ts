@@ -9,7 +9,7 @@ export const modalHeader = style([
     borderBottom: `1px solid ${vars.color.border}`,
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        borderBottom: '1px solid #4a4d57',
+        borderBottom: `1px solid ${vars.color.border}`,
       },
     },
   },
@@ -55,7 +55,7 @@ export const summaryChip = style([
     fontSize: '12px',
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        backgroundColor: '#2a2b31',
+        backgroundColor: vars.color.background2,
         color: vars.color.text1,
       },
     },
@@ -75,7 +75,7 @@ export const modalBody = style([
     overflowY: 'auto',
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        backgroundColor: '#1f2024',
+        backgroundColor: vars.color.background1,
       },
     },
   },
@@ -135,10 +135,10 @@ export const filterItem = style([
     },
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        backgroundColor: '#2a2b31',
+        backgroundColor: vars.color.background2,
       },
       'html[data-theme-mode="dark"] &:hover': {
-        backgroundColor: '#3b3e47',
+        backgroundColor: vars.color.neutralHover,
       },
     },
   },
@@ -162,7 +162,7 @@ export const modalFooter = style([
     borderTop: `1px solid ${vars.color.border}`,
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        borderTop: '1px solid #4a4d57',
+        borderTop: `1px solid ${vars.color.border}`,
       },
     },
   },

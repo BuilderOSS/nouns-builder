@@ -1,4 +1,4 @@
-import { atoms, color, space } from '@buildeross/zord'
+import { atoms, color, space, vars } from '@buildeross/zord'
 import { globalStyle, style } from '@vanilla-extract/css'
 
 export const selectorContainer = style({
@@ -33,17 +33,17 @@ export const daoItem = style([
     backgroundColor: color.background2,
 
     ':hover': {
-      backgroundColor: '#5b5b61',
+      backgroundColor: vars.color.background2,
     },
   },
 ])
 
 globalStyle(`html[data-theme-mode='dark'] ${daoItem}`, {
-  backgroundColor: '#5b5b61',
+  backgroundColor: vars.color.background2,
 })
 
 globalStyle(`html[data-theme-mode='dark'] ${daoItem}:hover`, {
-  backgroundColor: '#67676d',
+  backgroundColor: vars.color.neutralHover,
 })
 
 export const daoImage = style({

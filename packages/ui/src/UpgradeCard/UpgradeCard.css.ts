@@ -1,8 +1,8 @@
-import { media } from '@buildeross/zord'
+import { media, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const card = style({
-  borderColor: 'rgba(37, 124, 237, 0.4)',
+  borderColor: vars.color.primary,
 })
 
 export const image = style({
@@ -10,7 +10,7 @@ export const image = style({
 })
 
 export const btn = style({
-  backgroundColor: '#257CED',
+  backgroundColor: vars.color.primary,
   order: 2,
   '@media': {
     [media.min768]: { order: 3 },

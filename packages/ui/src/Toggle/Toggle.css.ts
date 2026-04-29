@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const toggleStyle = style([
@@ -8,7 +8,7 @@ export const toggleStyle = style([
     borderRadius: 'round',
   }),
   {
-    border: '2px solid #000',
+    border: `2px solid ${vars.color.text1}`,
     boxSizing: 'border-box',
     selectors: {
       '&:hover': {
@@ -19,14 +19,17 @@ export const toggleStyle = style([
 ])
 
 export const toggleContainer = styleVariants({
-  off: [toggleStyle, { justifyContent: 'flex-start', background: '#FFF' }],
-  on: [toggleStyle, { justifyContent: 'flex-end', background: '#000' }],
+  off: [
+    toggleStyle,
+    { justifyContent: 'flex-start', background: vars.color.background1 },
+  ],
+  on: [toggleStyle, { justifyContent: 'flex-end', background: vars.color.text1 }],
 })
 
 export const plainToggleButton = style([
   {
-    border: '2px solid #000',
-    background: '#F2F2F2',
+    border: `2px solid ${vars.color.text1}`,
+    background: vars.color.background2,
     marginTop: '-2px',
     marginLeft: '-2px',
     marginRight: '-2px',

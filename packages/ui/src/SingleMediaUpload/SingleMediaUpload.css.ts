@@ -1,3 +1,4 @@
+import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const defaultUploadStyle = style({
@@ -5,7 +6,7 @@ export const defaultUploadStyle = style({
 })
 
 export const uploadErrorBox = style({
-  color: '#ff0015',
+  color: vars.color.negative,
   boxSizing: 'border-box',
 })
 
@@ -13,7 +14,7 @@ export const singleMediaUploadWrapper = style({
   height: 64,
   width: '100%',
   borderRadius: 15,
-  background: '#F2F2F2',
+  background: vars.color.background2,
   overflow: 'hidden',
   selectors: {
     '&:hover': {

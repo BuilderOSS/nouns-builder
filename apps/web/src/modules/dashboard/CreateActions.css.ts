@@ -1,7 +1,7 @@
 import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
-const darkButtonHover = '#67676d'
+const darkButtonHover = vars.color.neutralHover
 
 export const actionButtons = style({
   width: '100%',

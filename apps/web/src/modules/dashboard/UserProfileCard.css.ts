@@ -1,7 +1,7 @@
-import { atoms, color, space } from '@buildeross/zord'
+import { atoms, color, space, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
-const dashboardActionGrey = '#5b5b61'
+const dashboardActionGrey = vars.color.background2
 
 export const profileCard = style([
   atoms({

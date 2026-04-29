@@ -1,7 +1,7 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils'
 import type { PopUpProps } from '@buildeross/zord'
-import { Box, PopUp, Text } from '@buildeross/zord'
+import { Box, PopUp, Text, vars } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 
@@ -275,7 +275,7 @@ export const WalletProfilePreview = ({
             </Box>
           </Link>
 
-          <Box mb="x2" pt="x1" style={{ borderTop: '1px solid rgba(0, 0, 0, 0.08)' }}>
+          <Box mb="x2" pt="x1" style={{ borderTop: `1px solid ${vars.color.border}` }}>
             <Text variant="label-sm" color="text3" mb="x1">
               Top DAOs
             </Text>
@@ -327,7 +327,7 @@ export const WalletProfilePreview = ({
               color="text3"
               pt="x1"
               style={{
-                borderTop: '1px solid rgba(0, 0, 0, 0.08)',
+                borderTop: `1px solid ${vars.color.border}`,
                 lineHeight: 1.25,
                 textAlign: 'left',
                 whiteSpace: 'nowrap',

@@ -1,5 +1,5 @@
 import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
-import { Box, Flex, Stack } from '@buildeross/zord'
+import { Box, Flex, Stack, vars } from '@buildeross/zord'
 import React, { ReactElement } from 'react'
 
 import { FieldError } from '../Fields'
@@ -119,7 +119,7 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
               minHeight: 220,
               resize: 'vertical',
               borderRadius: 12,
-              border: '1px solid #d8d8d8',
+              border: `1px solid ${vars.color.border}`,
               padding: 12,
               fontSize: 16,
               fontFamily: 'inherit',

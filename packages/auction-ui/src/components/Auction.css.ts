@@ -172,12 +172,12 @@ export const auctionActionButtonVariants = styleVariants({
   ],
   bidding: [
     auctionActionButton,
-    { width: '100%', background: '#F1F1F1', color: '#B3B3B3' },
+    { width: '100%', background: vars.color.background2, color: vars.color.text4 },
   ],
   settle: [auctionActionButton, { width: '100%' }],
   settling: [
     auctionActionButton,
-    { width: '100%', background: '#F1F1F1', color: '#808080' },
+    { width: '100%', background: vars.color.background2, color: vars.color.text3 },
   ],
   dashSettle: { borderRadius: '12px', width: '100%' },
 })
@@ -295,14 +295,14 @@ export const allRecentBidsButton = style([
     cursor: 'pointer',
   }),
   {
-    backgroundColor: '#ffffff',
-    border: '1px solid #f2f2f2',
+    backgroundColor: vars.color.background1,
+    border: `1px solid ${vars.color.border}`,
     fontWeight: 800,
     transition: 'background-color 100ms',
     fontSize: 16,
     selectors: {
       '&:hover': {
-        backgroundColor: '#f2f2f2',
+        backgroundColor: vars.color.background2,
       },
     },
   },
@@ -312,7 +312,7 @@ export const tokenImage = style({
   borderRadius: 12,
   overflow: 'hidden',
   '::after': {
-    boxShadow: '0px 0px 0px 2px rgba(0, 0, 0, 0.04) inset',
+    boxShadow: `0px 0px 0px 2px ${vars.color.borderOnImage} inset`,
     content: '',
     display: 'block',
     height: '100%',

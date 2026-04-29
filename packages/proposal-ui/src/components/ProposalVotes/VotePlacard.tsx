@@ -2,7 +2,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { atoms, Box, Flex, Grid, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Grid, Text, vars } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
@@ -142,7 +142,7 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 minWidth: '80%',
-                backgroundColor: '#F9F9F9',
+                backgroundColor: vars.color.background2,
               }}
             >
               {vote.reason}

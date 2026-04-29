@@ -30,8 +30,8 @@ export const searchInput = style([
     },
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        backgroundColor: '#2a2b31',
-        borderColor: '#4a4d57',
+        backgroundColor: vars.color.background2,
+        borderColor: vars.color.border,
         color: vars.color.text1,
       },
     },
@@ -67,10 +67,10 @@ export const daoItem = style([
     },
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        backgroundColor: '#2a2b31',
+        backgroundColor: vars.color.background2,
       },
       'html[data-theme-mode="dark"] &:hover': {
-        backgroundColor: '#3b3e47',
+        backgroundColor: vars.color.neutralHover,
       },
     },
   },
@@ -138,7 +138,7 @@ export const chip = style([
     fontSize: '12px',
     selectors: {
       'html[data-theme-mode="dark"] &': {
-        backgroundColor: '#2a2b31',
+        backgroundColor: vars.color.background2,
         color: vars.color.text1,
       },
     },

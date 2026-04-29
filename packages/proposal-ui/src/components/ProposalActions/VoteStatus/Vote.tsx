@@ -16,7 +16,10 @@ const voteStyleMap: Record<
     iconColor: 'negative',
     text: (
       <span>
-        You voted <span style={{ color: '#E40003' }}>against</span>
+        You voted{' '}
+        <Text as="span" color="negative">
+          against
+        </Text>
       </span>
     ),
   },
@@ -25,7 +28,10 @@ const voteStyleMap: Record<
     iconColor: 'positive',
     text: (
       <span>
-        You voted <span style={{ color: '#1CB687' }}>for</span>
+        You voted{' '}
+        <Text as="span" color="positive">
+          for
+        </Text>
       </span>
     ),
   },
