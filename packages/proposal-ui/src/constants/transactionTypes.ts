@@ -103,7 +103,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
   [TransactionType.CUSTOM]: {
     title: 'Custom Transaction',
     subTitle: 'Any other type of transaction',
-    icon: 'plus',
+    icon: 'code-brackets',
     iconBackdrop: color.ghostHover,
     iconFill: 'icon1',
   },

@@ -22,13 +22,6 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
   const formattedAmount =
     BigInt(item.amount) > 0n ? formatCryptoVal(formatEther(BigInt(item.amount))) : null
 
-  const winnerTitle = formattedAmount
-    ? `${displayName} won ${item.tokenName} for ${formattedAmount} ETH`
-    : `${displayName} won ${item.tokenName}`
-
-  const title =
-    item.winner === zeroAddress ? `Auction for ${item.tokenName} settled` : winnerTitle
-
   return (
     <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)} isExternal>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
@@ -44,7 +37,16 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
 
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
-          <Text className={feedItemTitle}>{title}</Text>
+          <Text className={feedItemTitle}>
+            {item.winner === zeroAddress ? (
+              `Auction for ${item.tokenName} settled`
+            ) : (
+              <>
+                {displayName} won {item.tokenName}
+                {formattedAmount ? ` for ${formattedAmount} ETH` : ''}
+              </>
+            )}
+          </Text>
         </Stack>
       </Stack>
     </LinkWrapper>

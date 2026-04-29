@@ -215,6 +215,7 @@ export const StreamItem = ({
 
     const cancelTxnData = {
       type: TransactionType.CUSTOM,
+      title: 'Custom Transaction',
       summary: `Cancel Sablier Stream #${liveData.streamId}`,
       transactions: [cancelTransaction],
     }

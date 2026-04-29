@@ -32,11 +32,15 @@ export type NFTBalanceReturnType = {
 
 const fetchNFTBalance = async (
   chainId: CHAIN_ID,
-  address: Address
+  address: Address,
+  filterSpam?: boolean
 ): Promise<SerializedNft[]> => {
   const params = new URLSearchParams()
   params.set('chainId', chainId.toString())
   params.set('address', address)
+  if (typeof filterSpam === 'boolean') {
+    params.set('filterSpam', String(filterSpam))
+  }
 
   const response = await fetch(
     `${BASE_URL}/api/alchemy/nft-balances?${params.toString()}`
@@ -50,14 +54,21 @@ const fetchNFTBalance = async (
 
 export const useNFTBalance = (
   chainId?: CHAIN_ID,
-  address?: Address
+  address?: Address,
+  options?: {
+    filterSpam?: boolean
+  }
 ): NFTBalanceReturnType => {
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     !!address && !!chainId && isAddress(address)
-      ? ([SWR_KEYS.NFT_BALANCES, chainId, address] as const)
+      ? ([SWR_KEYS.NFT_BALANCES, chainId, address, options?.filterSpam] as const)
       : null,
-    async ([, _chainId, _address]) =>
-      fetchNFTBalance(_chainId as CHAIN_ID, _address as Address),
+    async ([, _chainId, _address, _filterSpam]) =>
+      fetchNFTBalance(
+        _chainId as CHAIN_ID,
+        _address as Address,
+        _filterSpam as boolean | undefined
+      ),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

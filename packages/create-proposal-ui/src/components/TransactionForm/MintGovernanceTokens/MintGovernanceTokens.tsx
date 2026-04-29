@@ -88,6 +88,7 @@ export const MintGovernanceTokens: React.FC = () => {
     if (!isMinter && doesNotContainUpdateMinter) {
       addTransaction({
         type: TransactionType.UPDATE_MINTER,
+        title: 'Update Minter',
         summary: `Authorize DAO Treasury to mint new tokens`,
         transactions: [updateMinterTransaction],
       })
@@ -129,6 +130,7 @@ export const MintGovernanceTokens: React.FC = () => {
 
     addTransaction({
       type: TransactionType.MINT_GOVERNANCE_TOKENS,
+      title: 'Mint Governance Tokens',
       summary,
       transactions: mintTransactions,
     })

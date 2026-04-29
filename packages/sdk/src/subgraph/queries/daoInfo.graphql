@@ -1,5 +1,15 @@
 query daoInfo($tokenAddress: ID!) {
   dao(id: $tokenAddress) {
+    name
+    description
+    metadata
+    contractImage
+    projectURI
+    links {
+      id
+      key
+      url
+    }
     totalSupply
     ownerCount
   }

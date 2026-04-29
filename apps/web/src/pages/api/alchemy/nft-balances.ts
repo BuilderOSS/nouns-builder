@@ -6,6 +6,13 @@ import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
 
+const parseBooleanParam = (value: string | string[] | undefined): boolean | undefined => {
+  if (typeof value !== 'string') return undefined
+  if (value === 'true') return true
+  if (value === 'false') return false
+  return undefined
+}
+
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, address } = req.query
 
@@ -24,8 +31,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
+    const filterSpam =
+      parseBooleanParam(req.query.filterSpam) ?? (PUBLIC_IS_TESTNET ? false : true)
+
     const options = {
-      filterSpam: PUBLIC_IS_TESTNET ? false : true,
+      filterSpam,
       useCache: true,
     }
     const result = await getCachedNFTBalance(

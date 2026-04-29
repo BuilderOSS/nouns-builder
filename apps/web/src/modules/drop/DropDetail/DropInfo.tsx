@@ -3,14 +3,13 @@ import { useEnsData, useMediaType, useProposalByExecutionTx } from '@buildeross/
 import { type ZoraDropFragment } from '@buildeross/sdk/subgraph'
 import { useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { MediaPreview } from '@buildeross/ui/MediaPreview'
 import { ShareButton } from '@buildeross/ui/ShareButton'
-import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useMemo } from 'react'
 import { Address, formatEther, isAddressEqual } from 'viem'
@@ -145,16 +144,13 @@ export const DropInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <Flex align="center">
-            <Avatar
-              address={proposal.proposer as Address}
-              src={proposerAvatar}
-              size="28"
-            />
-            <Text fontWeight="display" ml="x2">
-              {proposerDisplayName || walletSnippet(proposal.proposer as Address)}
-            </Text>
-          </Flex>
+          <WalletIdentityWithPreview
+            address={proposal.proposer as Address}
+            displayName={proposerDisplayName}
+            avatarSrc={proposerAvatar}
+            avatarSize="28"
+            mobileTapBehavior="toggle"
+          />
         </Box>
       ) : (
         <Box mb="x3">
@@ -162,12 +158,13 @@ export const DropInfo = ({
           <Text variant="label-sm" color="text3" mb="x2">
             Created by
           </Text>
-          <Flex align="center">
-            <Avatar address={drop.creator as Address} src={creatorAvatar} size="28" />
-            <Text fontWeight="display" ml="x2">
-              {creatorDisplayName || walletSnippet(drop.creator as Address)}
-            </Text>
-          </Flex>
+          <WalletIdentityWithPreview
+            address={drop.creator as Address}
+            displayName={creatorDisplayName}
+            avatarSrc={creatorAvatar}
+            avatarSize="28"
+            mobileTapBehavior="toggle"
+          />
         </Box>
       )}
 

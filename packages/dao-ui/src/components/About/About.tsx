@@ -1,13 +1,13 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
-import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { parseDaoMetadataString } from '@buildeross/utils/daoMetadata'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { parseContractURI } from '@buildeross/utils/parseContractURI'
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
@@ -29,7 +29,7 @@ export type AboutProps = {
 
 export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
   const {
-    addresses: { token, treasury, metadata },
+    addresses: { token, treasury },
   } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const { address } = useAccount()
@@ -45,27 +45,12 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
     address: token as Address,
     chainId: chain.id,
   }
-  const metadataContractParams = {
-    abi: metadataAbi,
-    address: metadata as Address,
-    chainId: chain.id,
-  }
-
-  const { data: contractData } = useReadContracts({
+  const { data: foundersData } = useReadContracts({
     allowFailure: false,
-    contracts: [
-      { ...tokenContractParams, functionName: 'name' },
-      { ...tokenContractParams, functionName: 'totalSupply' },
-      { ...tokenContractParams, functionName: 'getFounders' },
-      { ...metadataContractParams, functionName: 'contractImage' },
-      { ...metadataContractParams, functionName: 'description' },
-      { ...metadataContractParams, functionName: 'contractURI' },
-    ] as const,
+    contracts: [{ ...tokenContractParams, functionName: 'getFounders' }] as const,
   })
 
-  const [name, totalSupply, founders, daoImage, description, contractURI] =
-    unpackOptionalArray(contractData, 6)
-  const parsedContractURI = parseContractURI(contractURI)
+  const [founders] = unpackOptionalArray(foundersData, 1)
 
   const { data: balance } = useBalance({
     address: treasury as Address,
@@ -81,15 +66,24 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         })
         .then((x) => x.dao)
 
-      return {
-        ownerCount: res?.ownerCount,
-      }
+      return res
     }
   )
 
+  const parsedDaoMetadata = parseDaoMetadataString(data?.metadata || data?.description)
+  const externalLinks = {
+    ...Object.fromEntries((data?.links || []).map((link) => [link.key, link.url])),
+    ...parsedDaoMetadata.links,
+    ...(data?.projectURI ? { website: data.projectURI } : {}),
+  }
+
+  const name = data?.name
+  const daoImage = data?.contractImage
   const ownerCount = data?.ownerCount || '0'
   const totalSupplyDisplay =
-    totalSupply && Number(totalSupply) > 0 ? Number(totalSupply).toString() : '0'
+    data?.totalSupply && Number(data.totalSupply) > 0
+      ? Number(data.totalSupply).toString()
+      : '0'
 
   const treasuryBalance = React.useMemo(() => {
     return balance ? `${formatCryptoVal(formatEther(balance.value))} ETH` : ''
@@ -125,7 +119,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         </Flex>
 
         <Box display={{ '@initial': 'none', '@768': 'block' }}>
-          <ExternalLinks links={{ website: parsedContractURI?.external_url }} />
+          <ExternalLinks links={externalLinks} />
         </Box>
       </Flex>
 
@@ -160,16 +154,18 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
         />
       </Flex>
 
-      <DaoDescription description={description} />
+      <DaoDescription
+        description={parsedDaoMetadata.description || data?.description || ''}
+      />
 
       <Box
         mt={{ '@initial': 'x4', '@768': 'x6' }}
         display={{ '@initial': 'block', '@768': 'none' }}
       >
-        <ExternalLinks links={{ website: parsedContractURI?.external_url }} />
+        <ExternalLinks links={externalLinks} />
       </Box>
       {!!membershipInfo && (
-        <Membership {...membershipInfo} totalSupply={Number(totalSupply)} />
+        <Membership {...membershipInfo} totalSupply={Number(data?.totalSupply || 0)} />
       )}
       <Text
         variant="heading-xs"
@@ -192,8 +188,8 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
           No founders allocation set.
         </Text>
       )}
-      {!!totalSupply && Number(totalSupply) > 0 && (
-        <MembersList totalSupply={Number(totalSupply)} />
+      {!!data?.totalSupply && Number(data.totalSupply) > 0 && (
+        <MembersList totalSupply={Number(data.totalSupply)} />
       )}
     </Box>
   )

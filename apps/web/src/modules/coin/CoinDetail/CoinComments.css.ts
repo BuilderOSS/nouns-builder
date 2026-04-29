@@ -26,6 +26,9 @@ export const commentCard = style([
 
 export const commentHeader = style([
   atoms({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     mb: 'x1',
   }),
 ])

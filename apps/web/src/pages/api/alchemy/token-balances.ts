@@ -1,8 +1,16 @@
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getEnrichedTokenBalances } from 'src/services/alchemyService'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
+
+const parseBooleanParam = (value: string | string[] | undefined): boolean | undefined => {
+  if (typeof value !== 'string') return undefined
+  if (value === 'true') return true
+  if (value === 'false') return false
+  return undefined
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, address } = req.query
@@ -18,9 +26,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
+    const filterLowValue =
+      parseBooleanParam(req.query.filterLowValue) ?? (PUBLIC_IS_TESTNET ? false : true)
+
     const result = await getEnrichedTokenBalances(
       chainIdNum as CHAIN_ID,
-      address as `0x${string}`
+      address as `0x${string}`,
+      { filterLowValue }
     )
 
     // Handle null result (unsupported chain or missing API key)

@@ -107,6 +107,7 @@ export const NominateEscrowDelegate: React.FC = () => {
 
       addTransaction({
         type: TransactionType.NOMINATE_DELEGATE,
+        title: 'Nominate Delegate',
         summary: `Nominate ${displayName} as the delegate`,
         transactions: [attest],
       })

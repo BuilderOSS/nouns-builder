@@ -12,6 +12,7 @@ import ChevronLeft from './assets/chevron-left.svg'
 import ChevronRight from './assets/chevron-right.svg'
 import ChevronUp from './assets/chevron-up.svg'
 import Code from './assets/code.svg'
+import CodeBrackets from './assets/code-brackets.svg'
 import Collection from './assets/collection.svg'
 import ContentCoin from './assets/content-coin.svg'
 import Copy from './assets/copy.svg'
@@ -56,11 +57,11 @@ import Sliders from './assets/sliders.svg'
 import Spanner from './assets/spanner.svg'
 import Swap from './assets/swap.svg'
 import Trash from './assets/trash.svg'
-import Twitter from './assets/twitter.svg'
 import WalletConnect from './assets/wallet-connect.svg'
 import WalletConnectOutline from './assets/wallet-connect-outline.svg'
 import Warning from './assets/warning.svg'
 import Warning16 from './assets/warning-16.svg'
+import Twitter from './assets/x.svg'
 
 export const icons = {
   airdrop: Airdrop,
@@ -77,6 +78,7 @@ export const icons = {
   chevronRight: ChevronRight,
   chevronUp: ChevronUp,
   code: Code,
+  'code-brackets': CodeBrackets,
   contentCoin: ContentCoin,
   collection: Collection,
   copy: Copy,
@@ -122,6 +124,7 @@ export const icons = {
   swap: Swap,
   trash: Trash,
   twitter: Twitter,
+  x: Twitter,
   walletConnect: WalletConnect,
   walletConnectOutline: WalletConnectOutline,
   warning: Warning,

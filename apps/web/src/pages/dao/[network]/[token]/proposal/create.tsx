@@ -18,7 +18,6 @@ import {
   Queue,
   TRANSACTION_FORM_OPTIONS,
   TransactionForm,
-  TransactionTypeIcon,
   TwoColumnLayout,
 } from '@buildeross/create-proposal-ui'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
@@ -26,7 +25,11 @@ import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
+import {
+  TRANSACTION_TYPES,
+  TransactionType,
+  TransactionTypeIcon,
+} from '@buildeross/proposal-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
@@ -53,7 +56,7 @@ const createSelectOption = (type: TransactionType) => ({
   value: type,
   label: TRANSACTION_TYPES[type].title,
   description: TRANSACTION_TYPES[type].subTitle,
-  icon: <TransactionTypeIcon transactionType={type} />,
+  icon: <TransactionTypeIcon transactionType={type} withVerticalMargin />,
 })
 
 const normalizeTitle = (value?: string | null) => (value || '').trim()
@@ -740,6 +743,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
                         options={options}
                         customLabel={TRANSACTION_TYPES[transactionType].title}
                         onChange={(value: TransactionType) => setTransactionType(value)}
+                        positioning="absolute"
                       />
                     </Box>
                     <Button

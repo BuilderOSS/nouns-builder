@@ -219,6 +219,7 @@ export const MilestonePayments: React.FC = () => {
       try {
         addTransaction({
           type: TransactionType.MILESTONE_PAYMENTS,
+          title: 'Milestone Payments',
           summary: `Create and fund new Escrow with ${formattedAmount} ${tokenSymbol}`,
           transactions,
         })

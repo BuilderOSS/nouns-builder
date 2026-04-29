@@ -59,6 +59,8 @@ export const CustomTransaction: React.FC = () => {
     if (customTransaction?.function?.name === 'sendEth(address)') {
       return {
         type: TransactionType.SEND_TOKENS,
+        title: 'Send Tokens',
+        summary: 'Send ETH transfer',
         transactions: [
           {
             functionSignature: 'sendEth(address)',
@@ -73,6 +75,8 @@ export const CustomTransaction: React.FC = () => {
     if (customTransaction?.function?.name === 'call(address,calldata)') {
       return {
         type: TransactionType.CUSTOM,
+        title: 'Custom Transaction',
+        summary: 'Execute custom transaction',
         transactions: [
           {
             functionSignature: 'call(address,calldata)',
@@ -85,8 +89,11 @@ export const CustomTransaction: React.FC = () => {
     }
 
     if (customTransaction?.contract) {
+      const functionName = customTransaction.function.name
       return {
         type: TransactionType.CUSTOM,
+        title: 'Custom Transaction',
+        summary: functionName ? `Call ${functionName}` : 'Execute custom transaction',
         transactions: [
           {
             functionSignature: customTransaction.function.name,

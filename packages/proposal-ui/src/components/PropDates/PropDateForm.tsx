@@ -9,7 +9,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { awaitSubgraphSync, MessageType } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentity } from '@buildeross/ui'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
@@ -51,7 +51,6 @@ const getErrorMessage = (error: unknown): string => {
   if (!error) return 'An unknown error occurred.'
   if (typeof error === 'string') return error
   if (typeof error === 'object' && error !== null) {
-    // Type assertion with Record to handle potential properties
     const errorObj = error as Record<string, unknown>
     if ('shortMessage' in errorObj && typeof errorObj.shortMessage === 'string') {
       return errorObj.shortMessage
@@ -106,7 +105,6 @@ export const PropDateForm = ({
   const storeChain = useChainStore((x) => x.chain)
   const storeAddresses = useDaoStore((x) => x.addresses)
 
-  // Use props if provided, otherwise fall back to store
   const chainId = chainIdProp ?? storeChain.id
   const tokenAddress = addressesProp?.token ?? storeAddresses.token
 
@@ -320,7 +318,6 @@ export const PropDateForm = ({
           </Form>
         )}
       </Formik>
-      {/* Transaction Status Modal */}
       <AnimatedModal
         open={isSubmitting || isTxSuccess}
         close={isSubmitting ? undefined : handleCloseModal}
@@ -380,12 +377,15 @@ const ReplyTo = ({
       }}
       gap="x2"
     >
-      <Flex align="center" gap="x1">
-        <Avatar address={creator} src={ensAvatar || undefined} size="16" />
-        <Text variant={'label-sm'} fontWeight="label">
-          {ensName || walletSnippet(creator)}
-        </Text>
-      </Flex>
+      <WalletIdentity
+        address={creator as `0x${string}`}
+        displayName={ensName || walletSnippet(creator)}
+        avatarSrc={ensAvatar || undefined}
+        avatarSize="16"
+        nameVariant="label-sm"
+        nameWeight="label"
+        gap="x1"
+      />
       <Box style={{ fontSize: '14px' }} pl="x2">
         <Box className={messageStyle}>
           <MarkdownDisplay>{message}</MarkdownDisplay>

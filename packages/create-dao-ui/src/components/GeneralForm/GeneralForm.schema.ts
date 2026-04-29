@@ -1,3 +1,4 @@
+import { normalizeLinkKey } from '@buildeross/utils/daoMetadata'
 import { urlValidationSchema } from '@buildeross/utils/yup'
 import * as Yup from 'yup'
 
@@ -6,6 +7,8 @@ export interface GeneralFormValues {
   daoName: string
   daoSymbol: string
   daoWebsite?: string
+  projectDescription: string
+  links: { key: string; url: string }[]
 }
 
 export const generalValidationSchema = Yup.object().shape({
@@ -16,4 +19,19 @@ export const generalValidationSchema = Yup.object().shape({
     .matches(/^[$]*[a-zA-Z0-9_-]*$/i)
     .required('*'),
   daoWebsite: urlValidationSchema,
+  projectDescription: Yup.string().required('*').max(5000, '< 5000 characters'),
+  links: Yup.array()
+    .of(
+      Yup.object().shape({
+        key: Yup.string().trim().required('*'),
+        url: urlValidationSchema.required('*'),
+      })
+    )
+    .test('unique-link-keys', 'Link keys should be unique.', (values) => {
+      const keys = (values || [])
+        .map((link) => normalizeLinkKey(link?.key || ''))
+        .filter(Boolean)
+
+      return keys.length === new Set(keys).size
+    }),
 })
