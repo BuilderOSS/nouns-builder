@@ -78,6 +78,7 @@ export const PinTreasuryAsset: React.FC = () => {
 
       addTransaction({
         type: TransactionType.PIN_TREASURY_ASSET,
+        title: 'Pin Treasury Asset',
         summary,
         transactions: [
           {

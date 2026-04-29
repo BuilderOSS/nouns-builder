@@ -206,6 +206,7 @@ export const SendTokens: React.FC = () => {
     try {
       addTransaction({
         type: TransactionType.SEND_TOKENS,
+        title: 'Send Tokens',
         summary,
         transactions,
       })

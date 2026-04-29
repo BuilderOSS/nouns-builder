@@ -1,10 +1,14 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { ProposalDescription } from '@buildeross/proposal-ui'
+import {
+  normalizeTextForCompare,
+  ProposalDescription,
+  TRANSACTION_TYPES,
+} from '@buildeross/proposal-ui'
 import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import {
-  BuilderTransaction,
+  TransactionBundle,
   useChainStore,
   useDaoStore,
   useProposalStore,
@@ -38,7 +42,6 @@ import {
   checkboxStyleVariants,
   visuallyHiddenCheckbox,
 } from './ReviewProposalForm.css'
-import { Transactions } from './Transactions'
 
 interface ReviewProposalProps {
   disabled: boolean
@@ -47,7 +50,7 @@ interface ReviewProposalProps {
   representedAddress?: string
   discussionUrl?: string
   representedAddressEnabled: boolean
-  transactions: BuilderTransaction[]
+  transactions: TransactionBundle[]
   onProposalCreated: (proposalId: string | null) => void
   onBackMobile?: () => void
   onResetMobile?: () => void
@@ -69,6 +72,17 @@ const logError = async (e: unknown) => {
 const formatTimestamp = (timestamp?: number) => {
   if (timestamp === undefined || timestamp === null) return 'Unavailable'
   return `${dayjs.unix(timestamp).format('MMM D, YYYY h:mm A')} ${handleGMTOffset()}`
+}
+
+const dedupeBundleSummary = (
+  summary: string | undefined,
+  fallback: string | undefined
+) => {
+  if (!summary) return undefined
+  if (!fallback) return summary
+  return normalizeTextForCompare(summary) === normalizeTextForCompare(fallback)
+    ? undefined
+    : summary
 }
 
 export const ReviewProposalForm = ({
@@ -99,6 +113,9 @@ export const ReviewProposalForm = ({
   const [error, setError] = useState<string | undefined>()
   const [simulationError, setSimulationError] = useState<string | undefined>()
   const [simulating, setSimulating] = useState<boolean>(false)
+  const [previewSimulations, setPreviewSimulations] = useState<Array<SimulationOutput>>(
+    []
+  )
   const [failedSimulations, setFailedSimulations] = useState<Array<SimulationOutput>>([])
   const [proposing, setProposing] = useState<boolean>(false)
   const [skipSimulation, setSkipSimulation] = useState<boolean>(SKIP_SIMULATION)
@@ -152,6 +169,7 @@ export const ReviewProposalForm = ({
 
       setError(undefined)
       setSimulationError(undefined)
+      setPreviewSimulations([])
       setFailedSimulations([])
 
       if (!hasThreshold) {
@@ -185,6 +203,9 @@ export const ReviewProposalForm = ({
             setSimulationError('Error simulating transactions: ' + simulationResult.error)
             return
           }
+
+          setPreviewSimulations(simulationResult?.simulations || [])
+
           if (simulationResult?.success === false) {
             const failed =
               simulationResult?.simulations.filter(({ status }) => status === false) || []
@@ -214,6 +235,14 @@ export const ReviewProposalForm = ({
             version: 1,
             title: values.title?.trim() || '',
             description: values.summary?.trim() || '',
+            transactionBundles: values.transactions.map((transaction) => ({
+              type: transaction.type,
+              summary: dedupeBundleSummary(
+                transaction.summary,
+                TRANSACTION_TYPES[transaction.type]?.subTitle
+              ),
+              callCount: transaction.transactions.length,
+            })),
             ...(values.representedAddressEnabled && values.representedAddress?.trim()
               ? { representedAddress: values.representedAddress.trim() }
               : {}),
@@ -401,6 +430,7 @@ export const ReviewProposalForm = ({
               }
 
               const validationMessages = flattenErrorMessages(formik.errors)
+              const hasSimulationFailures = failedSimulations.length > 0
 
               const validateAndSubmit = async () => {
                 setHasAttemptedSubmit(true)
@@ -466,67 +496,64 @@ export const ReviewProposalForm = ({
                     borderWidth={'normal'}
                     borderRadius={'curved'}
                   >
-                    {isEditingMetadata ? (
-                      <ProposalDraftForm
-                        formik={formik}
-                        onTitleChange={(value) => {
-                          setTitle(value)
-                        }}
-                        onSummaryChange={(value) => {
-                          setSummary(value)
-                        }}
-                        onRepresentedAddressEnabledChange={(value) => {
-                          setRepresentedAddressEnabled(value)
-                          if (!value) {
-                            void formik.setFieldValue('representedAddress', '')
-                            setRepresentedAddress(undefined)
-                          }
-                        }}
-                        onRepresentedAddressBlur={async () => {
-                          await resolveAndStoreRepresentedAddress(formik)
-                        }}
-                        onDiscussionUrlChange={(value) => {
-                          setDiscussionUrl(value)
-                        }}
-                        disabled={disabledForm}
-                      />
-                    ) : (
-                      (() => {
-                        const { targets, calldata, values } = prepareProposalTransactions(
-                          formik.values.transactions
-                        )
+                    {(() => {
+                      const { targets, calldata, values } = prepareProposalTransactions(
+                        formik.values.transactions
+                      )
 
-                        const previewProposal = {
-                          proposer: (address ||
-                            '0x0000000000000000000000000000000000000000') as `0x${string}`,
-                          description: formik.values.summary || '',
-                          title: formik.values.title || '',
-                          representedAddress: formik.values.representedAddress || null,
-                          discussionUrl: formik.values.discussionUrl || null,
-                          targets,
-                          calldatas: calldata,
-                          values: values.map((value) => value.toString()),
-                        } as unknown as Proposal
+                      const previewProposal = {
+                        proposer: (address ||
+                          '0x0000000000000000000000000000000000000000') as `0x${string}`,
+                        description: formik.values.summary || '',
+                        title: formik.values.title || '',
+                        representedAddress: formik.values.representedAddress || null,
+                        discussionUrl: formik.values.discussionUrl || null,
+                        targets,
+                        calldatas: calldata,
+                        values: values.map((value) => value.toString()),
+                      } as unknown as Proposal
 
-                        return (
+                      return (
+                        <>
+                          {isEditingMetadata && (
+                            <ProposalDraftForm
+                              formik={formik}
+                              onTitleChange={(value) => {
+                                setTitle(value)
+                              }}
+                              onSummaryChange={(value) => {
+                                setSummary(value)
+                              }}
+                              onRepresentedAddressEnabledChange={(value) => {
+                                setRepresentedAddressEnabled(value)
+                                if (!value) {
+                                  void formik.setFieldValue('representedAddress', '')
+                                  setRepresentedAddress(undefined)
+                                }
+                              }}
+                              onRepresentedAddressBlur={async () => {
+                                await resolveAndStoreRepresentedAddress(formik)
+                              }}
+                              onDiscussionUrlChange={(value) => {
+                                setDiscussionUrl(value)
+                              }}
+                              disabled={disabledForm}
+                            />
+                          )}
+
                           <ProposalDescription
                             title={formik.values.title || ''}
                             proposal={previewProposal}
-                            collection={addresses.token || ''}
                             onOpenProposalReview={async () => undefined}
                             isPreview
+                            showMetadataSections={!isEditingMetadata}
+                            previewTransactions={formik.values.transactions}
+                            previewSimulations={previewSimulations}
                           />
-                        )
-                      })()
-                    )}
+                        </>
+                      )
+                    })()}
                   </Stack>
-
-                  <Transactions
-                    disabled={disabledForm}
-                    transactions={transactions}
-                    simulations={failedSimulations}
-                    simulationError={simulationError}
-                  />
 
                   <label className={defaultInputLabelStyle}>
                     Governance Timeline (estimated)
@@ -558,39 +585,43 @@ export const ReviewProposalForm = ({
                     </Flex>
                   </Stack>
 
-                  {(!!simulationError || failedSimulations.length > 0) && (
-                    <Flex
-                      mt={'x4'}
-                      align={'center'}
-                      justify={'center'}
-                      gap={'x2'}
-                      pb={'x4'}
-                    >
-                      <label className={checkboxLabel}>
-                        <input
-                          type="checkbox"
-                          checked={skipSimulation}
-                          onChange={(e) => setSkipSimulation(e.target.checked)}
-                          className={visuallyHiddenCheckbox}
-                          aria-describedby="skip-simulation-helper"
-                        />
-                        <Flex
-                          align={'center'}
-                          justify={'center'}
-                          className={
-                            checkboxStyleVariants[
-                              skipSimulation ? 'confirmed' : 'default'
-                            ]
-                          }
-                        >
-                          {skipSimulation && <Icon fill="background1" id="check" />}
-                        </Flex>
-                      </label>
+                  {(!!simulationError || hasSimulationFailures) && (
+                    <Stack mt={'x4'} gap={'x2'} pb={'x4'} w="100%" align="center">
+                      <Text color={'warning'} textAlign={'center'}>
+                        <Text as="span" fontWeight={'label'}>
+                          Warning:
+                        </Text>
+                        <Text as="span">
+                          {' Simulation indicates this proposal may fail to execute.'}
+                        </Text>
+                      </Text>
+                      <Flex align={'center'} justify={'center'} gap={'x2'}>
+                        <label className={checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            checked={skipSimulation}
+                            onChange={(e) => setSkipSimulation(e.target.checked)}
+                            className={visuallyHiddenCheckbox}
+                            aria-describedby="skip-simulation-helper"
+                          />
+                          <Flex
+                            align={'center'}
+                            justify={'center'}
+                            className={
+                              checkboxStyleVariants[
+                                skipSimulation ? 'confirmed' : 'default'
+                              ]
+                            }
+                          >
+                            {skipSimulation && <Icon fill="background1" id="check" />}
+                          </Flex>
+                        </label>
 
-                      <Flex id="skip-simulation-helper" className={checkboxHelperText}>
-                        I understand the risks and want to submit without simulation.
+                        <Flex id="skip-simulation-helper" className={checkboxHelperText}>
+                          I understand the risks and want to submit anyway.
+                        </Flex>
                       </Flex>
-                    </Flex>
+                    </Stack>
                   )}
 
                   {hasAttemptedSubmit && validationMessages.length > 0 && (

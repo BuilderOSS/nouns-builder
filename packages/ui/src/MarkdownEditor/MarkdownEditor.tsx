@@ -1,5 +1,5 @@
 import { getFetchableUrls, uploadFile } from '@buildeross/ipfs-service'
-import { Flex, Stack } from '@buildeross/zord'
+import { Box, Flex, Stack } from '@buildeross/zord'
 import React, { ReactElement } from 'react'
 
 import { FieldError } from '../Fields'
@@ -90,6 +90,12 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
     }
   }, [])
 
+  const previewContainerStyle: React.CSSProperties = {
+    maxHeight: 420,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+  }
+
   return (
     <Stack pb={'x5'} onBlurCapture={onBlur}>
       <Flex justify={'space-between'}>
@@ -100,7 +106,9 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
         fallback ? (
           <>{fallback}</>
         ) : disabled ? (
-          <MarkdownDisplay>{value}</MarkdownDisplay>
+          <Box style={previewContainerStyle}>
+            <MarkdownDisplay>{value}</MarkdownDisplay>
+          </Box>
         ) : (
           <textarea
             value={value}
@@ -126,9 +134,15 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           onChange={onChange}
           selectedTab={!disabled ? selectedTab : 'preview'}
           onTabChange={setSelectedTab}
-          generateMarkdownPreview={async (markdown: string) => (
-            <MarkdownDisplay>{markdown}</MarkdownDisplay>
-          )}
+          generateMarkdownPreview={async (markdown: string) => {
+            const effectiveTab = disabled ? 'preview' : selectedTab
+
+            return (
+              <Box style={effectiveTab === 'preview' ? previewContainerStyle : undefined}>
+                <MarkdownDisplay>{markdown}</MarkdownDisplay>
+              </Box>
+            )
+          }}
           childProps={{ writeButton: { tabIndex: -1 } }}
           paste={{ saveImage, accept: 'image/*' }}
         />

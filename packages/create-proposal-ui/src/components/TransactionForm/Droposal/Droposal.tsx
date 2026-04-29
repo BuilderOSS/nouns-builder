@@ -100,6 +100,7 @@ export const Droposal: React.FC = () => {
 
     addTransaction({
       type: TransactionType.DROPOSAL,
+      title: 'Droposal: Single Edition',
       summary: 'Create a droposal',
       transactions: [createEdition],
     })

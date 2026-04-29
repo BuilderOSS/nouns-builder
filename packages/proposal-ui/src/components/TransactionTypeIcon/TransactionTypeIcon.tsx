@@ -1,16 +1,21 @@
-import { TRANSACTION_TYPES, TransactionType } from '@buildeross/proposal-ui'
+import { TransactionType } from '@buildeross/types'
 import { color, Flex, Icon } from '@buildeross/zord'
+
+import { TRANSACTION_TYPES } from '../../constants'
 
 interface TransactionTypeIconProps {
   transactionType: TransactionType
   large?: boolean
+  withVerticalMargin?: boolean
 }
 
 export const TransactionTypeIcon: React.FC<TransactionTypeIconProps> = ({
   transactionType,
   large,
+  withVerticalMargin = false,
 }) => {
   const metadata = TRANSACTION_TYPES[transactionType]
+
   return (
     <Flex
       align={'center'}
@@ -21,12 +26,12 @@ export const TransactionTypeIcon: React.FC<TransactionTypeIconProps> = ({
       style={{
         backgroundColor: metadata?.iconBackdrop ?? color.ghostHover,
       }}
-      my={'x4'}
+      my={withVerticalMargin ? 'x4' : undefined}
       minH={large ? 'x13' : 'x10'}
       minW={large ? 'x13' : 'x10'}
       flexShrink={0}
     >
-      <Icon id={metadata?.icon ?? 'plus'} fill={metadata?.iconFill ?? 'transparent'} />
+      <Icon id={metadata?.icon ?? 'code'} fill={metadata?.iconFill ?? 'transparent'} />
     </Flex>
   )
 }

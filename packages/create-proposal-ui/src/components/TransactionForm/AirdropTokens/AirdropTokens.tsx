@@ -424,6 +424,7 @@ export const AirdropTokens: React.FC = () => {
 
     addTransaction({
       type: TransactionType.AIRDROP_TOKENS,
+      title: 'Airdrop Tokens',
       summary,
       transactions,
     })

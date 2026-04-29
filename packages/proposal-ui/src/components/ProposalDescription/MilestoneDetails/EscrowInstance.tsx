@@ -135,6 +135,7 @@ export const EscrowInstance = ({
 
       const releaseEscrowTxnData = {
         type: TransactionType.RELEASE_ESCROW_MILESTONE,
+        title: 'Release Milestone Payment',
         summary: `Release Milestone #${milestone + 1} for ${invoiceData?.title}`,
         transactions: [releaseMilestone],
       }

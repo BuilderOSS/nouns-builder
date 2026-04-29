@@ -12,6 +12,7 @@ describe('Review Card', () => {
         disabled={true}
         transaction={{
           summary: 'This is a transaction summary',
+          title: 'Upgrade Proposal',
           type: TransactionType.UPGRADE,
           transactions: [],
         }}
@@ -32,6 +33,7 @@ describe('Review Card', () => {
         handleRemove={mockRemoveFn}
         transaction={{
           summary: 'This is a transaction summary',
+          title: 'Upgrade Proposal',
           type: TransactionType.UPGRADE,
           transactions: [],
         }}
@@ -47,12 +49,14 @@ describe('Review Card', () => {
     expect(mockRemoveFn).toHaveBeenCalled()
   })
 
-  it('should render a review transaction card with a function names given no summary', () => {
+  it('should render function names when summary is empty', () => {
     render(
       <TransactionCard
         disabled={false}
         transaction={{
           type: TransactionType.CUSTOM,
+          title: 'Custom Transaction',
+          summary: '',
           transactions: [
             {
               functionSignature: 'test()',

@@ -1,8 +1,7 @@
-import { BuilderTransaction } from '@buildeross/types'
+import { TransactionTypeIcon } from '@buildeross/proposal-ui'
+import { TransactionBundle } from '@buildeross/types'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
-import React, { ReactNode } from 'react'
-
-import { TransactionTypeIcon } from './TransactionTypeIcon'
+import React from 'react'
 
 export enum SimulationError {
   SimulationFailed, // Whole simulation has failed
@@ -13,9 +12,8 @@ interface TransactionCardProps {
   handleRemove?: () => void
   simulationUrl?: string
   simulationError?: SimulationError
-  transaction: BuilderTransaction
+  transaction: TransactionBundle
   disabled?: boolean
-  children?: ReactNode
 }
 
 export const TransactionCard: React.FC<TransactionCardProps> = ({
@@ -24,7 +22,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
   simulationUrl,
   transaction,
   disabled,
-  children,
 }) => {
   const showCardAction = handleRemove && !disabled
 
@@ -49,7 +46,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
         px={'x4'}
       >
         <Flex align={'center'} gap={'x2'}>
-          <TransactionTypeIcon transactionType={type} />
+          <TransactionTypeIcon transactionType={type} withVerticalMargin />
           <Text
             variant={'paragraph-md'}
             style={{ marginBottom: '2px', textOverflow: 'ellipsis' }}
@@ -57,7 +54,6 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
           >
             {summary}
           </Text>
-          {children}
         </Flex>
 
         {showCardAction && (
