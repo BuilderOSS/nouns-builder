@@ -4,7 +4,7 @@ import { useDaoStore } from '@buildeross/stores'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Text, vars } from '@buildeross/zord'
 import React, { useState } from 'react'
 import {
   useAccount,
@@ -256,7 +256,9 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
                     padding: '8px',
                     marginTop: '8px',
                     borderRadius: '4px',
-                    border: validationError ? '1px solid #EF4444' : '1px solid #ccc',
+                    border: validationError
+                      ? `1px solid ${vars.color.negative}`
+                      : `1px solid ${vars.color.border}`,
                   }}
                 />
                 {validationError && (

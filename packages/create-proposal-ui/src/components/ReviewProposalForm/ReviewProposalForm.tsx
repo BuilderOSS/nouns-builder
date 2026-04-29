@@ -20,7 +20,7 @@ import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { handleGMTOffset, unpackOptionalArray } from '@buildeross/utils/helpers'
 import { getProvider } from '@buildeross/utils/provider'
-import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text, vars } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { Formik, type FormikProps } from 'formik'
 import React, { useState } from 'react'
@@ -654,7 +654,7 @@ export const ReviewProposalForm = ({
                         py={'x1'}
                         borderRadius={'normal'}
                         style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                          backgroundColor: `color-mix(in srgb, ${vars.color.onAccent} 30%, transparent)`,
                         }}
                       >
                         {Number(votes)} Votes

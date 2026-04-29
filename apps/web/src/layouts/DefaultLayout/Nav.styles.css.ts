@@ -2,7 +2,7 @@ import * as z from '@buildeross/constants/layers'
 import { atoms, color, vars } from '@buildeross/zord'
 import { keyframes, style } from '@vanilla-extract/css'
 
-const darkSurface = vars.color.background2
+const darkSurface = vars.color.background1
 const darkSurfaceHover = vars.color.neutralHover
 const darkSurfaceBorder = vars.color.border
 

@@ -340,22 +340,33 @@ export function DropdownSelect<T extends React.Key>({
               border: 0,
               background: 'transparent',
               width: '100%',
+              display: 'flex',
+              alignItems: 'center',
               textAlign: 'left',
               padding: 0,
               margin: 0,
             }}
           >
             <Flex
+              flex={1}
+              minWidth={0}
               pl={'x4'}
               direction={'row'}
               align={'center'}
               height={'x18'}
-              width={'100%'}
               fontSize={16}
               fontWeight={'display'}
             >
               {selectedOption?.icon && <Flex pr={'x4'}>{selectedOption.icon}</Flex>}
-              {displayLabel}
+              <Box
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {displayLabel}
+              </Box>
             </Flex>
             {isLoading ? (
               <Flex

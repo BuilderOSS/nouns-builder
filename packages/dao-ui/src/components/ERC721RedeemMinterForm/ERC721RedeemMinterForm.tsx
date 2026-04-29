@@ -4,7 +4,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractLink } from '@buildeross/ui/ContractLink'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Stack, Text, vars } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { formatEther, isAddressEqual, zeroAddress } from 'viem'
 import { useConfig, useReadContract } from 'wagmi'
@@ -154,7 +154,7 @@ export const ERC721RedeemMinterForm: React.FC = () => {
             <Box className={settingsLabel}>Status</Box>
             <Box
               className={settingsValue}
-              style={{ color: isActive ? 'green' : 'orange' }}
+              style={{ color: isActive ? vars.color.positive : vars.color.warning }}
             >
               {isActive ? 'Active' : 'Inactive'}
             </Box>
@@ -189,7 +189,14 @@ export const ERC721RedeemMinterForm: React.FC = () => {
       )}
 
       {!isActive && (
-        <Box mt="x4" p="x4" style={{ background: '#FFF3CD', borderRadius: '8px' }}>
+        <Box
+          mt="x4"
+          p="x4"
+          style={{
+            background: `color-mix(in srgb, ${vars.color.warning} 18%, transparent)`,
+            borderRadius: '8px',
+          }}
+        >
           <Text color="text1" fontSize="14">
             Minting is not currently active. The minting period is from{' '}
             {formatDate(mintStart)} to {formatDate(mintEnd)}.

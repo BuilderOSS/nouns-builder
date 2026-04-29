@@ -14,8 +14,7 @@ const pendingColor = keyframes({
 })
 
 export const deployPendingButtonStyle = style({
-  background:
-    'linear-gradient(90deg, rgba(0,3,242,1) 0%, rgba(207,187,21,1) 31%, rgba(85,219,9,1) 52%, rgba(255,0,0,1) 91%);',
+  background: `linear-gradient(90deg, ${vars.color.primary} 0%, ${vars.color.warning} 31%, ${vars.color.positive} 52%, ${vars.color.negative} 91%)`,
   animation: `${pendingColor} 12s ease infinite`,
   backgroundSize: '400% 400%',
 })
