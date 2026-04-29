@@ -227,7 +227,11 @@ const useDecodedTxPayload = (txPayload: WCPayload | null) => {
 }
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
-  const { decodedTransaction: decoded } = useDecodedTxPayload(txPayload)
+  const {
+    decodedTransaction: decoded,
+    isLoading: isDecodingTransaction,
+    isValidating,
+  } = useDecodedTxPayload(txPayload)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const transactions = useMemo(() => (decoded ? [decoded] : []), [decoded])
@@ -243,6 +247,7 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
         chainId={chain.id}
         addresses={addresses}
         decodedTransactions={transactions}
+        isDecoding={isDecodingTransaction || isValidating}
       />
     </Box>
   )

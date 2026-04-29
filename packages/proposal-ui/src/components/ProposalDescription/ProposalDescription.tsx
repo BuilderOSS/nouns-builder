@@ -102,7 +102,13 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   const { addresses } = useDaoStore()
   const safeDiscussionUrl = getSafeDiscussionUrl(proposal.discussionUrl)
 
-  const { decodedTransactions } = useDecodedTransactions(chain.id, proposal)
+  const {
+    decodedTransactions,
+    isLoading: isDecodingTransactions,
+    isValidating,
+  } = useDecodedTransactions(chain.id, proposal)
+
+  const isDecoding = isDecodingTransactions || isValidating
 
   const parsedProposalMetadata = useMemo<
     ProposalDescriptionMetadataV1 | undefined
@@ -434,6 +440,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                         decodedTransactions={bundleDecodedTransactions}
                         chainId={chain.id}
                         addresses={addresses}
+                        isDecoding={isDecoding}
                         startIndex={bundle.start}
                         proposalMetadata={proposalMetadataForSummary}
                         simulationByIndex={failedSimulationByIndex}
@@ -455,6 +462,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
               decodedTransactions={decodedTransactions}
               chainId={chain.id}
               addresses={addresses}
+              isDecoding={isDecoding}
               proposalMetadata={proposalMetadataForSummary}
               simulationByIndex={failedSimulationByIndex}
             />

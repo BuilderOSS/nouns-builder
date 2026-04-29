@@ -19,6 +19,7 @@ interface DecodedTransactionProps {
   proposalMetadata?: ProposalDescriptionMetadataV1
   bundleContext?: Omit<ProposalTransactionBundleContext, 'positionInBundle'>
   simulationByIndex?: Record<number, SimulationOutput>
+  isDecoding?: boolean
 }
 
 export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
@@ -29,6 +30,7 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
   proposalMetadata,
   bundleContext,
   simulationByIndex,
+  isDecoding = false,
 }) => {
   return (
     <Stack
@@ -58,6 +60,7 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
             <TransactionDisplay
               chainId={chainId}
               addresses={addresses}
+              isDecoding={isDecoding}
               index={index}
               proposalMetadata={proposalMetadata}
               bundleContext={
