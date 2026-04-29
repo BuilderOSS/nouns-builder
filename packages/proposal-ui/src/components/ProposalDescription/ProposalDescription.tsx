@@ -22,13 +22,14 @@ import {
   getSablierAirdropFactories,
   getSablierContracts,
 } from '@buildeross/utils/sablier/contracts'
-import { atoms, Box, Flex, Icon, Paragraph, Stack, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Paragraph, Stack, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
 import { zeroAddress } from 'viem'
 
 import { TRANSACTION_TYPES } from '../../constants'
 import { propPageWrapper } from '../styles.css'
+import { TransactionTypeIcon } from '../TransactionTypeIcon'
 import { AirdropDetails } from './AirdropDetails'
 import { CoinDetails } from './CoinDetails'
 import { DropDetails } from './DropDetails'
@@ -416,22 +417,12 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                     align="stretch"
                   >
                     <Flex align="center" gap="x2">
-                      <Flex
-                        align="center"
-                        justify="center"
-                        h="x10"
-                        w="x10"
-                        borderRadius="round"
-                        style={{ backgroundColor: transactionTypeMeta?.iconBackdrop }}
-                      >
-                        <Icon
-                          id={transactionTypeMeta?.icon || 'code'}
-                          fill={transactionTypeMeta?.iconFill || 'icon1'}
-                        />
-                      </Flex>
+                      <TransactionTypeIcon transactionType={bundle.type} />
                       <Stack gap="x1">
                         <Text fontWeight="heading">{bundleIntent || bundle.type}</Text>
-                        <Text color="text3">{bundle.callCount} call(s)</Text>
+                        <Text color="text3">
+                          {bundle.callCount} {bundle.callCount === 1 ? 'call' : 'calls'}
+                        </Text>
                       </Stack>
                     </Flex>
 

@@ -1,8 +1,7 @@
+import { TransactionTypeIcon } from '@buildeross/proposal-ui'
 import { TransactionBundle } from '@buildeross/types'
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
-
-import { TransactionTypeIcon } from './TransactionTypeIcon'
 
 export enum SimulationError {
   SimulationFailed, // Whole simulation has failed
@@ -47,7 +46,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = ({
         px={'x4'}
       >
         <Flex align={'center'} gap={'x2'}>
-          <TransactionTypeIcon transactionType={type} />
+          <TransactionTypeIcon transactionType={type} withVerticalMargin />
           <Text
             variant={'paragraph-md'}
             style={{ marginBottom: '2px', textOverflow: 'ellipsis' }}
