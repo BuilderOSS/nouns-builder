@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const defaultFormAdvancedWrapper = style({
@@ -305,8 +305,10 @@ export const defaultSelectStyle = style({
 })
 
 export const defaultDropdownSelectOptionStyle = style({
+  backgroundColor: vars.color.background1,
+  color: vars.color.text1,
   ':hover': {
-    backgroundColor: '#F2F2F2',
+    backgroundColor: vars.color.background2,
   },
 })
 
