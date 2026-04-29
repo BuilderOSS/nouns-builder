@@ -49,14 +49,14 @@ describe('Review Card', () => {
     expect(mockRemoveFn).toHaveBeenCalled()
   })
 
-  it('should render a review transaction card with a function names given no summary', () => {
+  it('should render function names when summary is empty', () => {
     render(
       <TransactionCard
         disabled={false}
         transaction={{
           type: TransactionType.CUSTOM,
           title: 'Custom Transaction',
-          summary: 'fnc',
+          summary: '',
           transactions: [
             {
               functionSignature: 'test()',

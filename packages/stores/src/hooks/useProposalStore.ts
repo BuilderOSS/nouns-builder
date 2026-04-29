@@ -7,6 +7,7 @@ export type { TransactionBundle }
 export type TransactionFormType = TransactionType
 
 export const PROPOSAL_STORE_IDENTIFIER = `nouns-builder-proposal-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`
+const PROPOSAL_STORE_VERSION = 1
 
 type State = {
   transactions: TransactionBundle[]
@@ -99,6 +100,37 @@ const normalizeBundle = (bundle: TransactionBundle): TransactionBundle => {
   }
 }
 
+type PersistedProposalState = Partial<
+  Pick<
+    State,
+    | 'transactions'
+    | 'disabled'
+    | 'title'
+    | 'summary'
+    | 'representedAddress'
+    | 'discussionUrl'
+    | 'representedAddressEnabled'
+    | 'transactionType'
+  >
+>
+
+const migratePersistedState = (persistedState: unknown): PersistedProposalState => {
+  if (!persistedState || typeof persistedState !== 'object') {
+    return {}
+  }
+
+  const state = persistedState as PersistedProposalState
+
+  return {
+    ...state,
+    transactions: Array.isArray(state.transactions)
+      ? state.transactions.map((transaction) =>
+          normalizeBundle(transaction as TransactionBundle)
+        )
+      : [],
+  }
+}
+
 export const useProposalStore = create<State & Actions>()(
   persist(
     (set) => ({
@@ -145,6 +177,8 @@ export const useProposalStore = create<State & Actions>()(
     }),
     {
       name: PROPOSAL_STORE_IDENTIFIER,
+      version: PROPOSAL_STORE_VERSION,
+      migrate: (persistedState) => migratePersistedState(persistedState),
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         transactions: state.transactions,

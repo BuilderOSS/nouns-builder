@@ -115,6 +115,9 @@ export const ReviewProposalForm = ({
   const [error, setError] = useState<string | undefined>()
   const [simulationError, setSimulationError] = useState<string | undefined>()
   const [simulating, setSimulating] = useState<boolean>(false)
+  const [previewSimulations, setPreviewSimulations] = useState<Array<SimulationOutput>>(
+    []
+  )
   const [failedSimulations, setFailedSimulations] = useState<Array<SimulationOutput>>([])
   const [proposing, setProposing] = useState<boolean>(false)
   const [skipSimulation, setSkipSimulation] = useState<boolean>(SKIP_SIMULATION)
@@ -168,6 +171,7 @@ export const ReviewProposalForm = ({
 
       setError(undefined)
       setSimulationError(undefined)
+      setPreviewSimulations([])
       setFailedSimulations([])
 
       if (!hasThreshold) {
@@ -201,6 +205,9 @@ export const ReviewProposalForm = ({
             setSimulationError('Error simulating transactions: ' + simulationResult.error)
             return
           }
+
+          setPreviewSimulations(simulationResult?.simulations || [])
+
           if (simulationResult?.success === false) {
             const failed =
               simulationResult?.simulations.filter(({ status }) => status === false) || []
@@ -425,6 +432,7 @@ export const ReviewProposalForm = ({
               }
 
               const validationMessages = flattenErrorMessages(formik.errors)
+              const hasSimulationFailures = failedSimulations.length > 0
 
               const validateAndSubmit = async () => {
                 setHasAttemptedSubmit(true)
@@ -542,7 +550,7 @@ export const ReviewProposalForm = ({
                             isPreview
                             showMetadataSections={!isEditingMetadata}
                             previewTransactions={formik.values.transactions}
-                            previewSimulations={failedSimulations}
+                            previewSimulations={previewSimulations}
                           />
                         </>
                       )
@@ -579,7 +587,7 @@ export const ReviewProposalForm = ({
                     </Flex>
                   </Stack>
 
-                  {(!!simulationError || failedSimulations.length > 0) && (
+                  {(!!simulationError || hasSimulationFailures) && (
                     <Flex
                       mt={'x4'}
                       align={'center'}

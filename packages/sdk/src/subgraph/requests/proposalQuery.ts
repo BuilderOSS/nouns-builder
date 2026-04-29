@@ -4,6 +4,7 @@ import { getProposalState, ProposalState } from '../../contract/requests/getProp
 import { SDK } from '../client'
 import {
   ProposalDetailFragment,
+  ProposalFragment,
   ProposalVoteFragment as ProposalVote,
 } from '../sdk.generated'
 
@@ -36,7 +37,7 @@ export type Proposal = Omit<
 
 export const formatAndFetchState = async (
   chainId: CHAIN_ID,
-  data: ProposalDetailFragment
+  data: ProposalFragment | ProposalDetailFragment
 ) => {
   const { executableFrom, expiresAt, calldatas, executionTransactionHash, ...proposal } =
     data

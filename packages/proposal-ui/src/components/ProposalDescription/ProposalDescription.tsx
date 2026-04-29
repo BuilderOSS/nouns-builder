@@ -170,7 +170,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
     if (isPreview) {
       return {
         version: 1,
-        title: proposal.title || title || '',
+        title: title ?? proposal.title ?? '',
         description: proposal.description || '',
         representedAddress: proposal.representedAddress || undefined,
         discussionUrl: proposal.discussionUrl || undefined,

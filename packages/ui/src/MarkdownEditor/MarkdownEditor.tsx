@@ -134,11 +134,15 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           onChange={onChange}
           selectedTab={!disabled ? selectedTab : 'preview'}
           onTabChange={setSelectedTab}
-          generateMarkdownPreview={async (markdown: string) => (
-            <Box style={selectedTab === 'preview' ? previewContainerStyle : undefined}>
-              <MarkdownDisplay>{markdown}</MarkdownDisplay>
-            </Box>
-          )}
+          generateMarkdownPreview={async (markdown: string) => {
+            const effectiveTab = disabled ? 'preview' : selectedTab
+
+            return (
+              <Box style={effectiveTab === 'preview' ? previewContainerStyle : undefined}>
+                <MarkdownDisplay>{markdown}</MarkdownDisplay>
+              </Box>
+            )
+          }}
           childProps={{ writeButton: { tabIndex: -1 } }}
           paste={{ saveImage, accept: 'image/*' }}
         />
