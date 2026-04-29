@@ -407,6 +407,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                     })}
                     p="x3"
                     gap="x3"
+                    align="stretch"
                   >
                     <Flex align="center" gap="x2">
                       <Flex
@@ -418,7 +419,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                         style={{ backgroundColor: transactionTypeMeta?.iconBackdrop }}
                       >
                         <Icon
-                          id={transactionTypeMeta?.icon || 'plus'}
+                          id={transactionTypeMeta?.icon || 'code'}
                           fill={transactionTypeMeta?.iconFill || 'icon1'}
                         />
                       </Flex>

@@ -16,7 +16,6 @@ import {
   getEscrowBundlerLegacy,
 } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { formatCryptoVal } from '@buildeross/utils/numbers'
 import {
   getSablierContracts,
   parseStreamDataConfigDurations,
@@ -257,13 +256,21 @@ export const DecodedDisplay: React.FC<{
     mutate: regenerateSummary,
   } = useTransactionSummary(transactionData)
 
+  const isSendWithValue =
+    transaction.functionName === 'send' &&
+    sortedArgs.length === 1 &&
+    sortedArgs[0] === 'value' &&
+    value === transaction.args['value'].value
+
+  const isFailedSimulation = simulation && simulation.status === false
+
   return (
-    <Stack style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-      <Flex justify="flex-end" px="x3" pt="x2">
+    <Stack style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }} w="100%">
+      <Flex justify="flex-end" position="absolute" right="x1" top="x1">
         <Button
           type="button"
-          variant="ghost"
-          size="sm"
+          variant="secondary"
+          size="xs"
           px="x2"
           onClick={() => setShowRawCalldata((state) => !state)}
           aria-pressed={showRawCalldata}
@@ -275,12 +282,14 @@ export const DecodedDisplay: React.FC<{
           }
         >
           <Flex align="center" gap="x1">
-            <Icon id="swap" style={{ width: 16, height: 16 }} />
-            <Text as="span">{showRawCalldata ? 'Decoded' : 'Raw'}</Text>
+            <Icon id="swap" style={{ width: 20, height: 20 }} mb="x1" />
+            <Text as="span" fontSize="14">
+              {showRawCalldata ? 'Decoded' : 'Raw'}
+            </Text>
           </Flex>
         </Button>
       </Flex>
-      <Flex direction="row" gap="x0">
+      <Flex direction="row" gap="x0" w="100%">
         <Text
           as="span"
           fontWeight="heading"
@@ -290,7 +299,7 @@ export const DecodedDisplay: React.FC<{
         >
           {index + 1}.
         </Text>
-        <Stack style={{ maxWidth: 900 }} gap={'x1'} px={'x3'} py={'x3'}>
+        <Stack gap={'x1'} px={'x3'} py={'x3'} w="100%">
           <Box
             color={'secondary'}
             fontWeight={'heading'}
@@ -308,12 +317,101 @@ export const DecodedDisplay: React.FC<{
             </a>
           </Box>
           {!showRawCalldata && (
-            <>
-              <Text>{`.${transaction.functionName}`}</Text>
-              <Flex align="center" gap="x0">
-                {value !== '0' && transaction.functionName !== 'send' && (
-                  <Flex align="center" gap="x1">
-                    <Text color="accent">{`{ value:`}</Text>
+            <Stack
+              mt="x1"
+              gap="x1"
+              p="x2"
+              w="100%"
+              className={atoms({
+                borderColor: 'border',
+                borderStyle: 'solid',
+                borderWidth: 'normal',
+                borderRadius: 'curved',
+                backgroundColor: 'background1',
+              })}
+            >
+              <Flex align="center" gap="x1" wrap="wrap">
+                <Text fontWeight="heading" color="text1">
+                  {`.${transaction.functionName}`}
+                </Text>
+                <Flex align="center" gap="x0">
+                  {value !== '0' && (
+                    <Flex align="center" gap="x1" flexShrink={0}>
+                      <Text color="accent" as="span">{`{ value: `}</Text>
+                      <img
+                        src="/chains/ethereum.svg"
+                        alt="ETH"
+                        loading="lazy"
+                        decoding="async"
+                        width="16px"
+                        height="16px"
+                        style={{
+                          maxWidth: '16px',
+                          maxHeight: '16px',
+                          objectFit: 'contain',
+                          display: 'inline-block',
+                        }}
+                      />
+                      <Text color="accent" as="span">
+                        {`${formatEther(BigInt(value))} ETH }`}
+                      </Text>
+                    </Flex>
+                  )}
+                  {sortedArgs.length === 0 || isSendWithValue ? `()` : null}
+                </Flex>
+              </Flex>
+
+              {!isSendWithValue && (
+                <>
+                  {sortedArgs.length > 0 ? `(` : null}
+
+                  <Stack pl={'x4'} gap={'x1'}>
+                    {sortedArgs.map((argKey, i) => {
+                      const arg = transaction.args[argKey]
+
+                      return (
+                        <ArgumentDisplay
+                          chainId={chainId}
+                          key={`${argKey}-${arg.name}-${i}`}
+                          arg={arg}
+                          target={target}
+                          functionName={transaction.functionName}
+                          tokenMetadata={tokenMetadata}
+                          nftMetadata={nftMetadata}
+                          escrowData={escrowData}
+                          streamData={streamData}
+                        />
+                      )
+                    })}
+                  </Stack>
+
+                  {sortedArgs.length > 0 ? `)` : null}
+                </>
+              )}
+            </Stack>
+          )}
+
+          {showRawCalldata && (
+            <Stack
+              mt="x1"
+              gap="x1"
+              p="x2"
+              w="100%"
+              className={atoms({
+                borderColor: 'border',
+                borderStyle: 'solid',
+                borderWidth: 'normal',
+                borderRadius: 'curved',
+                backgroundColor: 'background1',
+              })}
+            >
+              <Flex align="center" gap="x1" wrap="wrap">
+                <Text fontWeight="heading" color="text3">
+                  Raw calldata
+                </Text>
+                {value !== '0' && (
+                  <Flex align="center" gap="x1" flexShrink={0}>
+                    <Text color="accent" as="span">{`{ value: `}</Text>
                     <img
                       src="/chains/ethereum.svg"
                       alt="ETH"
@@ -325,50 +423,15 @@ export const DecodedDisplay: React.FC<{
                         maxWidth: '16px',
                         maxHeight: '16px',
                         objectFit: 'contain',
+                        display: 'inline-block',
                       }}
                     />
-                    <Text color="accent">{`${formatCryptoVal(formatEther(BigInt(value)))} ETH }`}</Text>
+                    <Text color="accent" as="span">
+                      {`${formatEther(BigInt(value))} ETH }`}
+                    </Text>
                   </Flex>
                 )}
-                {`(`}
-                {sortedArgs.length === 0 ? `)` : null}
               </Flex>
-
-              <Stack pl={'x4'} gap={'x1'}>
-                {sortedArgs.map((argKey, i) => {
-                  const arg = transaction.args[argKey]
-
-                  return (
-                    <ArgumentDisplay
-                      chainId={chainId}
-                      key={`${argKey}-${arg.name}-${i}`}
-                      arg={arg}
-                      target={target}
-                      functionName={transaction.functionName}
-                      tokenMetadata={tokenMetadata}
-                      nftMetadata={nftMetadata}
-                      escrowData={escrowData}
-                      streamData={streamData}
-                    />
-                  )
-                })}
-              </Stack>
-
-              {sortedArgs.length > 0 ? `)` : null}
-            </>
-          )}
-
-          {showRawCalldata && (
-            <Stack
-              mt="x1"
-              gap="x1"
-              p="x2"
-              backgroundColor="background2"
-              borderRadius="curved"
-            >
-              <Text fontWeight="heading" color="text3">
-                Raw calldata
-              </Text>
               <Text
                 style={{
                   whiteSpace: 'pre-wrap',
@@ -384,17 +447,25 @@ export const DecodedDisplay: React.FC<{
         </Stack>
       </Flex>
 
-      {simulation && simulation.status === false && (
-        <Box color="text3" px="x3" pb="x2">
-          <Text>Simulation indicates this call may fail.</Text>
+      {isFailedSimulation && (
+        <Flex
+          color="warning"
+          px="x3"
+          pb="x2"
+          gap="x2"
+          wrap="wrap"
+          align="center"
+          w="100%"
+        >
+          <Text fontWeight="label">Simulation indicates this call may fail.</Text>
           {!!simulation.url && (
-            <Text>
+            <Text flexShrink={0}>
               <a href={simulation.url} target="_blank" rel="noreferrer">
                 View simulation details
               </a>
             </Text>
           )}
-        </Box>
+        </Flex>
       )}
 
       {!isLoadingMetadata &&

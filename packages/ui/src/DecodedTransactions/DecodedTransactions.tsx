@@ -32,23 +32,28 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
 }) => {
   return (
     <Stack
-      style={{ maxWidth: 900, wordBreak: 'break-word', overflowWrap: 'break-word' }}
+      style={{ wordBreak: 'break-word', overflowWrap: 'break-word', width: '100%' }}
       gap="x4"
     >
       {decodedTransactions?.map((decoded, i) => {
         const index = startIndex + i
+        const simulation = simulationByIndex?.[index]
+        const isFailedSimulation = simulation && simulation.status === false
 
         return (
           <Flex
             direction="row"
+            position="relative"
             gap="x2"
+            w="100%"
+            key={`${decoded.target}-${index}`}
             className={atoms({
-              borderColor: 'border',
+              borderColor: isFailedSimulation ? 'warning' : 'border',
               borderStyle: 'solid',
               borderWidth: 'normal',
               borderRadius: 'curved',
+              backgroundColor: 'background2',
             })}
-            key={`${decoded.target}-${index}`}
           >
             <TransactionDisplay
               chainId={chainId}
@@ -63,7 +68,7 @@ export const DecodedTransactions: React.FC<DecodedTransactionProps> = ({
                     }
                   : undefined
               }
-              simulation={simulationByIndex?.[index]}
+              simulation={simulation}
               {...decoded}
             />
           </Flex>

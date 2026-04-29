@@ -36,7 +36,14 @@ export const TransactionDisplay: React.FC<
 
     return (
       <NonDecodedDisplay
-        {...{ chainId, target: decoded.target, calldata, value: decoded.value, index }}
+        {...{
+          chainId,
+          target: decoded.target,
+          calldata,
+          value: decoded.value,
+          simulation,
+          index,
+        }}
       />
     )
   }
