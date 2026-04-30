@@ -9,7 +9,10 @@ import React from 'react'
 
 import { MarkdownDisplay } from '../../MarkdownDisplay/MarkdownDisplay'
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
-import { markdownContent } from './UpdateDescriptionArgumentDisplay.css'
+import {
+  markdownBoxHeight,
+  markdownContent,
+} from './UpdateDescriptionArgumentDisplay.css'
 
 interface UpdateDescriptionArgumentDisplayProps {
   arg: DecodedArg
@@ -72,7 +75,7 @@ export const UpdateDescriptionArgumentDisplay: React.FC<
             borderWidth="normal"
             borderColor="border"
             borderRadius="curved"
-            style={{ maxHeight: '220px', overflowY: 'auto' }}
+            className={markdownBoxHeight}
           >
             <Box className={markdownContent}>
               <MarkdownDisplay>{parsedDescription}</MarkdownDisplay>
