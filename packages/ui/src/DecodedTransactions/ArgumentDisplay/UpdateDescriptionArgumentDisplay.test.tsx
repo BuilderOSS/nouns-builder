@@ -29,6 +29,8 @@ describe('UpdateDescriptionArgumentDisplay', () => {
 
     expect(screen.getByText('github:')).toBeInTheDocument()
     expect(screen.getByText('x:')).toBeInTheDocument()
+    expect(screen.getByText('Links')).toBeInTheDocument()
+    expect(screen.getByText('Description')).toBeInTheDocument()
 
     expect(
       screen.getByRole('heading', { name: 'This is a TEST DAO' })
@@ -51,6 +53,7 @@ describe('UpdateDescriptionArgumentDisplay', () => {
     )
 
     expect(screen.getByText('_newDescription:')).toBeInTheDocument()
+    expect(screen.getByText('Description')).toBeInTheDocument()
     expect(screen.getByText('Just a plain description string')).toBeInTheDocument()
   })
 })

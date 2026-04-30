@@ -1,9 +1,10 @@
 import { DecodedArg } from '@buildeross/types'
-import { Flex, Icon, IconType, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, IconType, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { MarkdownDisplay } from '../../MarkdownDisplay/MarkdownDisplay'
 import { BaseArgumentDisplay } from './BaseArgumentDisplay'
+import { markdownContent } from './UpdateDescriptionArgumentDisplay.css'
 
 interface UpdateDescriptionArgumentDisplayProps {
   arg: DecodedArg
@@ -155,13 +156,22 @@ export const UpdateDescriptionArgumentDisplay: React.FC<
 
       {parsedLinks.length > 0 ? (
         <Stack pl="x4" gap="x1">
+          <Text variant="label-sm" color="text3">
+            Links
+          </Text>
           {parsedLinks.map((link) => (
             <Flex key={`${link.key}-${link.href}`} align="center" gap="x2" wrap="wrap">
               <Icon id={getIconForLinkKey(link.key)} />
               <Text>{link.key}:</Text>
-              <a href={link.href} target="_blank" rel="noopener noreferrer">
+              <Text
+                as="a"
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ overflowWrap: 'anywhere' }}
+              >
                 {link.href}
-              </a>
+              </Text>
             </Flex>
           ))}
         </Stack>
@@ -169,7 +179,21 @@ export const UpdateDescriptionArgumentDisplay: React.FC<
 
       {parsedDescription ? (
         <Stack pl="x4" gap="x1">
-          <MarkdownDisplay>{parsedDescription}</MarkdownDisplay>
+          <Text variant="label-sm" color="text3">
+            Description
+          </Text>
+          <Box
+            p="x3"
+            borderStyle="solid"
+            borderWidth="normal"
+            borderColor="border"
+            borderRadius="curved"
+            style={{ maxHeight: '220px', overflowY: 'auto' }}
+          >
+            <Box className={markdownContent}>
+              <MarkdownDisplay>{parsedDescription}</MarkdownDisplay>
+            </Box>
+          </Box>
         </Stack>
       ) : null}
     </Stack>
