@@ -3,6 +3,11 @@ export type DaoLinkInput = {
   url: string
 }
 
+export type ParsedDaoMetadataLink = {
+  key: string
+  href: string
+}
+
 export const normalizeLinkKey = (key: string): string => {
   const normalized = key.trim().toLowerCase()
   return normalized === 'twitter' ? 'x' : normalized
@@ -158,4 +163,41 @@ export const serializeDaoMetadata = (
 ): string => {
   const normalizedLinks = normalizeDaoLinks(links)
   return `${buildFrontmatterLinks(normalizedLinks)}${description.trim()}`
+}
+
+export const mapDaoLinkKeyToIcon = (key: string): string => {
+  const normalized = normalizeLinkKey(key)
+
+  if (normalized === 'x') return 'twitter'
+  if (normalized === 'discord') return 'discord'
+  if (normalized === 'github') return 'github'
+  if (normalized === 'farcaster') return 'globe'
+  if (normalized === 'docs' || normalized === 'notion') return 'globe'
+  if (normalized === 'forum' || normalized === 'discourse') return 'globe'
+  if (normalized === 'website') return 'globe'
+  return 'question'
+}
+
+export const toDisplayDaoLinks = (
+  links: Record<string, string>
+): ParsedDaoMetadataLink[] => {
+  const entries = Object.entries(links)
+  const deduped: ParsedDaoMetadataLink[] = []
+  const usedHrefs: Record<string, boolean> = {}
+
+  for (let i = entries.length - 1; i >= 0; i -= 1) {
+    const [key, href] = entries[i]
+    const normalizedKey = normalizeLinkKey(key)
+    const normalizedHref = href.trim()
+
+    if (!normalizedKey || !normalizedHref || !isHttpUrl(normalizedHref)) continue
+
+    const displayHref = new URL(normalizedHref).toString()
+    if (usedHrefs[displayHref]) continue
+
+    usedHrefs[displayHref] = true
+    deduped.push({ key: normalizedKey, href: displayHref })
+  }
+
+  return deduped.reverse()
 }
