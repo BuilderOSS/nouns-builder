@@ -285,7 +285,9 @@ export function DropdownSelect<T extends React.Key>({
           aria-expanded={disabled ? undefined : showOptions}
           aria-controls={disabled ? undefined : listboxId}
           aria-labelledby={inputLabelId}
-          aria-label={ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : undefined)}
+          aria-label={
+            ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : undefined)
+          }
           aria-activedescendant={
             !disabled && showOptions && activeIndex >= 0
               ? `${listboxId}-option-${activeIndex}`
@@ -320,37 +322,37 @@ export function DropdownSelect<T extends React.Key>({
           backgroundColor={'background1'}
           cursor={disabled ? 'auto' : 'pointer'}
         >
-            <Box
-              as="button"
-              id={triggerId}
-              ref={triggerRef}
-              type="button"
-              disabled={disabled}
-              aria-haspopup={disabled ? undefined : 'listbox'}
-              aria-expanded={disabled ? undefined : showOptions}
-              aria-controls={disabled ? undefined : listboxId}
-              aria-labelledby={inputLabelId}
-              aria-label={
-                ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : displayLabel)
-              }
-              aria-activedescendant={
-                !disabled && showOptions && activeIndex >= 0
-                  ? `${listboxId}-option-${activeIndex}`
-                  : undefined
-              }
-              onKeyDown={disabled ? undefined : handleTriggerKeyDown}
-              onClick={
-                disabled
-                  ? undefined
-                  : () => {
-                      if (showOptions) {
-                        closeOptions()
-                      } else {
-                        openOptions()
-                      }
+          <Box
+            as="button"
+            id={triggerId}
+            ref={triggerRef}
+            type="button"
+            disabled={disabled}
+            aria-haspopup={disabled ? undefined : 'listbox'}
+            aria-expanded={disabled ? undefined : showOptions}
+            aria-controls={disabled ? undefined : listboxId}
+            aria-labelledby={inputLabelId}
+            aria-label={
+              ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : displayLabel)
+            }
+            aria-activedescendant={
+              !disabled && showOptions && activeIndex >= 0
+                ? `${listboxId}-option-${activeIndex}`
+                : undefined
+            }
+            onKeyDown={disabled ? undefined : handleTriggerKeyDown}
+            onClick={
+              disabled
+                ? undefined
+                : () => {
+                    if (showOptions) {
+                      closeOptions()
+                    } else {
+                      openOptions()
                     }
-              }
-              style={{
+                  }
+            }
+            style={{
               border: 0,
               background: 'transparent',
               width: '100%',

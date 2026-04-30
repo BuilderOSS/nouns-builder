@@ -50,6 +50,10 @@ export const defaultTextAreaStyle = style({
       backgroundColor: vars.color.background1,
       borderColor: vars.color.border,
     },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
+    },
   },
 })
 
@@ -69,6 +73,10 @@ export const defaultTextAreaErrorStyle = style({
       backgroundColor: vars.color.background1,
       borderColor: vars.color.negative,
     },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
+    },
   },
 })
 
@@ -86,6 +94,10 @@ export const defaultInputStyle = style({
       outline: 'none',
       backgroundColor: vars.color.background1,
       borderColor: vars.color.border,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
     },
     '&::placeholder': {
       color: vars.color.text4,
@@ -111,6 +123,10 @@ export const defaultInputErrorStyle = style({
       outline: 'none',
       backgroundColor: vars.color.background1,
       borderColor: vars.color.negative,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
     },
     '&:disabled': {
       opacity: 0.4,
@@ -204,6 +220,10 @@ export const numberInputStyle = style({
       backgroundColor: vars.color.background1,
       borderColor: vars.color.border,
     },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
+    },
     '&::-webkit-input-placeholder': {
       textAlign: 'right',
     },
@@ -236,6 +256,10 @@ export const numberInputErrorStyle = style({
       outline: 'none',
       backgroundColor: vars.color.background1,
       borderColor: vars.color.negative,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.accent}`,
+      outlineOffset: '2px',
     },
     '&::-webkit-input-placeholder': {
       textAlign: 'right',

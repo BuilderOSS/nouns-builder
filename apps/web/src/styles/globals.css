@@ -36,6 +36,14 @@ body {
   --connect-button-bg: #000;
   --connect-button-bg-hover: #111;
   --connect-button-text: #fff;
+  --flatpickr-surface: #fff;
+  --flatpickr-border: #f2f2f2;
+  --flatpickr-text: #000;
+  --flatpickr-muted: #808080;
+  --flatpickr-hover: #f2f2f2;
+  --flatpickr-selected-bg: #000;
+  --flatpickr-selected-text: #fff;
+  --flatpickr-backdrop-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
 }
 
 html[data-theme-mode='dark'] {
@@ -43,6 +51,14 @@ html[data-theme-mode='dark'] {
   --connect-button-bg: #34363d;
   --connect-button-bg-hover: #3b3e47;
   --connect-button-text: #fff;
+  --flatpickr-surface: #1f2024;
+  --flatpickr-border: #3f4047;
+  --flatpickr-text: #fff;
+  --flatpickr-muted: #808188;
+  --flatpickr-hover: #313239;
+  --flatpickr-selected-bg: #fff;
+  --flatpickr-selected-text: #1f2024;
+  --flatpickr-backdrop-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
 a {
@@ -90,4 +106,3 @@ input[type="number"] {
   cursor: pointer;
   background: var(--connect-button-bg-hover);
 }
-

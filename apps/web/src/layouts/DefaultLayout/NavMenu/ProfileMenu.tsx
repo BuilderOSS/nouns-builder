@@ -8,7 +8,7 @@ import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, PopUp, Text, vars } from '@buildeross/zord'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -459,7 +459,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             position: 'relative',
             zIndex: NAV_BUTTON_LAYER + 1,
             borderRadius: '50%',
-            borderColor: 'rgba(0, 0, 0, 0.5)',
+            borderColor: vars.color.border,
           }}
           className={daoButton}
         >
@@ -501,7 +501,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           width: '100vw',
           height: '100vh',
           zIndex: MOBILE_PROFILE_MENU_LAYER - 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: vars.color.backdrop,
         }}
         onClick={() => onSetActiveDropdown(undefined)}
       />

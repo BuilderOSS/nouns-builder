@@ -2,7 +2,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
-import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, PopUp, Stack, Text, vars } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
@@ -148,7 +148,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
             height={'x10'}
             px="x2"
             className={chainPopUpButton}
-            style={isWrongNetwork ? { borderColor: '#F03232' } : undefined}
+            style={isWrongNetwork ? { borderColor: vars.color.negative } : undefined}
           >
             <Flex align={'center'}>
               <Box h="x6" w="x6">

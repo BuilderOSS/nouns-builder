@@ -20,7 +20,7 @@ export const baseButton = style([
     userSelect: 'none',
     selectors: {
       '&:focus-visible': {
-        outline: '2px solid rgb(32, 103, 243)',
+        outline: `2px solid ${vars.color.accent}`,
         outlineStyle: 'auto',
       },
       '&:active': {
@@ -227,11 +227,11 @@ export const buttonVariants = {
       selectors: {
         '&[disabled]': {
           color: vars.color.secondary,
-          backgroundColor: 'ghostHoverDisabled',
+          backgroundColor: vars.color.ghostDisabled,
         },
         '&:not([disabled]):hover': {
           cursor: 'pointer',
-          backgroundColor: 'ghostHover',
+          backgroundColor: vars.color.ghostHover,
         },
       },
     },
