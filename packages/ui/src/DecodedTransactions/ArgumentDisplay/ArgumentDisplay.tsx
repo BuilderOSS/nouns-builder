@@ -18,6 +18,7 @@ import { EscrowArgumentDisplay } from './EscrowArgumentDisplay'
 import { NFTArgumentDisplay } from './NFTArgumentDisplay'
 import { PoolConfigArgumentDisplay } from './PoolConfigArgumentDisplay'
 import { DecodedStreamBatch, StreamArgumentDisplay } from './StreamArgumentDisplay'
+import { UpdateDescriptionArgumentDisplay } from './UpdateDescriptionArgumentDisplay'
 
 const toLower = (str: string) => str.toLowerCase()
 
@@ -122,6 +123,14 @@ export const ArgumentDisplay: React.FC<ArgumentDisplayProps> = ({
         escrowData={escrowData}
       />
     )
+  }
+
+  if (
+    functionName === 'updateDescription' &&
+    arg.name === '_newDescription' &&
+    typeof arg.value === 'string'
+  ) {
+    return <UpdateDescriptionArgumentDisplay arg={arg} />
   }
 
   if (
