@@ -2,6 +2,8 @@ import { ProposalVoteSupport as Support } from '@buildeross/sdk/subgraph'
 import { Atoms, Flex, Icon, IconType, Text } from '@buildeross/zord'
 import { ReactNode } from 'react'
 
+import { VoteLabel } from '../../../VoteLabel'
+
 interface VoteProps {
   support: Support
   weight: number
@@ -15,30 +17,20 @@ const voteStyleMap: Record<
     iconId: 'cross',
     iconColor: 'negative',
     text: (
-      <span>
-        You voted{' '}
-        <Text as="span" color="negative">
-          against
-        </Text>
-      </span>
+      <VoteLabel voteType={Support.Against} />
     ),
   },
   [Support.For]: {
     iconId: 'check',
     iconColor: 'positive',
     text: (
-      <span>
-        You voted{' '}
-        <Text as="span" color="positive">
-          for
-        </Text>
-      </span>
+      <VoteLabel voteType={Support.For} />
     ),
   },
   [Support.Abstain]: {
     iconId: 'dash',
     iconColor: 'tertiary',
-    text: 'You abstained from voting',
+    text: <VoteLabel voteType={Support.Abstain} />,
   },
 }
 

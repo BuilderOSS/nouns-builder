@@ -14,7 +14,7 @@ export const checkboxStyle = style({
   border: `1px solid ${vars.color.text1}`,
   borderRadius: '5px',
   selectors: {
-    '&:hover': { cursor: 'pointer', background: vars.color.text1 },
+    '&:hover, &:focus-visible': { cursor: 'pointer', background: vars.color.text1 },
   },
 })
 

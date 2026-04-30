@@ -36,6 +36,7 @@ export const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
         pathname,
         query: {
           ...query,
+          sortKey: selectionToOrderBy(selection),
           orderBy: selectionToOrderBy(selection),
         },
       })

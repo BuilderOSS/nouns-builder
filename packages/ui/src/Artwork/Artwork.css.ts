@@ -113,9 +113,10 @@ globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}`, {
   color: `${vars.color.text1} !important`,
 })
 
-globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}:focus`, {
+globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}:focus-visible`, {
   color: `${vars.color.text1} !important`,
-  outline: 'none',
+  outline: `2px solid ${vars.color.text1}`,
+  outlineOffset: '2px',
 })
 
 globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle} option`, {

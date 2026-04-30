@@ -10,7 +10,7 @@ export const uploadNotificationWrapper = style({
   overflow: 'hidden',
   '@media': {
     '(max-width: 768px)': {
-      background: vars.color.background1,
+      backgroundColor: vars.color.background1,
       bottom: 0,
       paddingTop: 5,
       paddingBottom: 5,

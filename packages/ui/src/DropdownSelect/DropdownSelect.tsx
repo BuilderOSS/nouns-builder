@@ -70,9 +70,11 @@ export interface SelectOption<T> {
 }
 
 interface DropdownSelectProps<T> {
+  id?: string
   value?: T
   options: SelectOption<T>[]
   inputLabel?: string | ReactElement
+  ariaLabel?: string
   onChange: (value: T) => void
   disabled?: boolean
   isLoading?: boolean
@@ -85,10 +87,12 @@ interface DropdownSelectProps<T> {
 }
 
 export function DropdownSelect<T extends React.Key>({
+  id,
   value,
   onChange,
   options,
   inputLabel,
+  ariaLabel,
   disabled = false,
   isLoading = false,
   positioning = 'inline',
@@ -103,6 +107,7 @@ export function DropdownSelect<T extends React.Key>({
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
   const listboxId = useId()
+  const triggerId = id ?? `${listboxId}-trigger`
   const inputLabelId = inputLabel ? `${listboxId}-label` : undefined
 
   const handleOptionSelect = (option: SelectOption<T>) => {
@@ -270,31 +275,34 @@ export function DropdownSelect<T extends React.Key>({
       {variant === 'button' ? (
         // Button variant - use actual Button component
         <Button
+          id={triggerId}
           ref={triggerRef}
           variant={buttonVariant}
           size={buttonSize}
           disabled={disabled}
           loading={isLoading}
-          aria-haspopup="listbox"
-          aria-expanded={showOptions}
-          aria-controls={listboxId}
+          aria-haspopup={disabled ? undefined : 'listbox'}
+          aria-expanded={disabled ? undefined : showOptions}
+          aria-controls={disabled ? undefined : listboxId}
           aria-labelledby={inputLabelId}
-          aria-label={typeof inputLabel === 'string' ? inputLabel : undefined}
+          aria-label={ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : undefined)}
           aria-activedescendant={
-            showOptions && activeIndex >= 0
+            !disabled && showOptions && activeIndex >= 0
               ? `${listboxId}-option-${activeIndex}`
               : undefined
           }
-          onKeyDown={handleTriggerKeyDown}
-          onClick={() => {
-            if (!disabled) {
-              if (showOptions) {
-                closeOptions()
-              } else {
-                openOptions()
-              }
-            }
-          }}
+          onKeyDown={disabled ? undefined : handleTriggerKeyDown}
+          onClick={
+            disabled
+              ? undefined
+              : () => {
+                  if (showOptions) {
+                    closeOptions()
+                  } else {
+                    openOptions()
+                  }
+                }
+          }
           icon={showOptions ? 'chevronUp' : 'chevronDown'}
           iconAlign="right"
         >
@@ -312,31 +320,37 @@ export function DropdownSelect<T extends React.Key>({
           backgroundColor={'background1'}
           cursor={disabled ? 'auto' : 'pointer'}
         >
-          <Box
-            as="button"
-            ref={triggerRef}
-            type="button"
-            aria-haspopup="listbox"
-            aria-expanded={showOptions}
-            aria-controls={listboxId}
-            aria-labelledby={inputLabelId}
-            aria-label={typeof inputLabel === 'string' ? inputLabel : displayLabel}
-            aria-activedescendant={
-              showOptions && activeIndex >= 0
-                ? `${listboxId}-option-${activeIndex}`
-                : undefined
-            }
-            onKeyDown={handleTriggerKeyDown}
-            onClick={() => {
-              if (!disabled) {
-                if (showOptions) {
-                  closeOptions()
-                } else {
-                  openOptions()
-                }
+            <Box
+              as="button"
+              id={triggerId}
+              ref={triggerRef}
+              type="button"
+              disabled={disabled}
+              aria-haspopup={disabled ? undefined : 'listbox'}
+              aria-expanded={disabled ? undefined : showOptions}
+              aria-controls={disabled ? undefined : listboxId}
+              aria-labelledby={inputLabelId}
+              aria-label={
+                ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : displayLabel)
               }
-            }}
-            style={{
+              aria-activedescendant={
+                !disabled && showOptions && activeIndex >= 0
+                  ? `${listboxId}-option-${activeIndex}`
+                  : undefined
+              }
+              onKeyDown={disabled ? undefined : handleTriggerKeyDown}
+              onClick={
+                disabled
+                  ? undefined
+                  : () => {
+                      if (showOptions) {
+                        closeOptions()
+                      } else {
+                        openOptions()
+                      }
+                    }
+              }
+              style={{
               border: 0,
               background: 'transparent',
               width: '100%',
@@ -388,7 +402,7 @@ export function DropdownSelect<T extends React.Key>({
               />
             )}
           </Box>
-          {positioning === 'inline' && (
+          {positioning === 'inline' && showOptions && (
             <motion.div
               id={listboxId}
               role="listbox"

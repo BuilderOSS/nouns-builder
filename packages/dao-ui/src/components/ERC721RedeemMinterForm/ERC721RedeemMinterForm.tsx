@@ -194,7 +194,7 @@ export const ERC721RedeemMinterForm: React.FC = () => {
           p="x4"
           style={{
             background: `color-mix(in srgb, ${vars.color.warning} 18%, transparent)`,
-            borderRadius: '8px',
+            borderRadius: vars.radii.curved,
           }}
         >
           <Text color="text1" fontSize="14">

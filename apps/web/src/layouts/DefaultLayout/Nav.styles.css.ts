@@ -323,7 +323,7 @@ export const navPrimaryActionButton = style({
   selectors: {
     'html[data-theme-mode="dark"] &': {
       background: darkSurfaceHover,
-      color: color.background1,
+      color: color.foreground1,
       borderColor: darkSurfaceBorder,
     },
     'html[data-theme-mode="dark"] &:hover': {

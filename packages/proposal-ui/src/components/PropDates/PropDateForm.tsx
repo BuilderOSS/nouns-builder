@@ -257,8 +257,12 @@ export const PropDateForm = ({
 
               {!replyTo && !!invoiceData?.milestones && (
                 <Flex direction={'column'} pb="x8">
-                  <label className={defaultInputLabelStyle}>Milestone (optional)</label>
+                  <label htmlFor="propdate-milestone" className={defaultInputLabelStyle}>
+                    Milestone (optional)
+                  </label>
                   <DropdownSelect
+                    id="propdate-milestone"
+                    ariaLabel="Milestone (optional)"
                     value={String(formik.values.milestoneId)}
                     onChange={(nextValue) => {
                       formik.setFieldValue('milestoneId', Number(nextValue))

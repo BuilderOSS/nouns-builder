@@ -1,6 +1,27 @@
 import { vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
+const circleBackgroundBorder = {
+  backgroundColor: vars.color.background1,
+  border: `2px solid ${vars.color.background1}`,
+}
+
+const circleBorderMobile = {
+  '@media': {
+    'screen and (max-width: 768px)': {
+      border: `2px solid ${vars.color.background2}`,
+    },
+  },
+}
+
+const lastCircleSelector = {
+  selectors: {
+    '&:before': {
+      content: 'none',
+    },
+  },
+}
+
 const flowTitleBase = style({
   position: 'absolute',
   fontSize: 18,
@@ -27,8 +48,7 @@ export const flowTitleVariant = styleVariants({
 })
 
 const flowFulfilledCircle = style({
-  backgroundColor: vars.color.background1,
-  border: `2px solid ${vars.color.background1}`,
+  ...circleBackgroundBorder,
   selectors: {
     '&:hover': {
       cursor: 'pointer',
@@ -37,8 +57,7 @@ const flowFulfilledCircle = style({
 })
 
 const flowFulfilledCircleLast = style({
-  backgroundColor: vars.color.background1,
-  border: `2px solid ${vars.color.background1}`,
+  ...circleBackgroundBorder,
 
   selectors: {
     '&:before': {
@@ -70,31 +89,18 @@ const flowCircleLast = style({
       border: `2px solid ${vars.color.background2}`,
     },
   },
-  selectors: {
-    '&:before': {
-      content: 'none',
-    },
-  },
+  ...lastCircleSelector,
 })
 
 const flowCircleActive = style({
-  backgroundColor: vars.color.background1,
-  border: `2px solid ${vars.color.background1}`,
-  '@media': {
-    'screen and (max-width: 768px)': {
-      border: `2px solid ${vars.color.background2}`,
-    },
-  },
+  ...circleBackgroundBorder,
+  ...circleBorderMobile,
 })
 
 const flowCircleActiveLast = style({
-  backgroundColor: vars.color.background1,
-  border: `2px solid ${vars.color.background1}`,
-  selectors: {
-    '&:before': {
-      content: 'none',
-    },
-  },
+  ...circleBackgroundBorder,
+  ...circleBorderMobile,
+  ...lastCircleSelector,
 })
 
 const circleBase = style({

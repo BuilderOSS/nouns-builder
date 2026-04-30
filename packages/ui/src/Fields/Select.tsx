@@ -16,9 +16,18 @@ const FormSelect: React.FC<{
     options?.find((opt: { name: string }) => opt.name === id)?.options ?? []
 
   const handleChange = (selectedName: string) => {
+    if (selectedName === '') {
+      formik.setFieldValue(id, '')
+      return
+    }
+
     if (!optionsArray.length) return
     const method = optionsArray.find((option) => option.name === selectedName)
-    if (!method) return
+    if (!method) {
+      formik.setFieldValue(id, '')
+      return
+    }
+
     formik.setFieldValue(id, { name: method.name, inputs: method.inputs })
   }
 
@@ -26,6 +35,8 @@ const FormSelect: React.FC<{
     <Flex direction={'column'}>
       <label htmlFor={id}>{inputLabel}</label>
       <DropdownSelect
+        id={id}
+        ariaLabel={typeof inputLabel === 'string' ? inputLabel : undefined}
         value={value?.name ?? ''}
         onChange={handleChange}
         options={[

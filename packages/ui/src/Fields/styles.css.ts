@@ -67,7 +67,7 @@ export const defaultTextAreaErrorStyle = style({
     '&:focus': {
       outline: 'none',
       backgroundColor: vars.color.background1,
-      borderColor: vars.color.border,
+      borderColor: vars.color.negative,
     },
   },
 })
@@ -110,7 +110,7 @@ export const defaultInputErrorStyle = style({
     '&:focus': {
       outline: 'none',
       backgroundColor: vars.color.background1,
-      borderColor: vars.color.border,
+      borderColor: vars.color.negative,
     },
     '&:disabled': {
       opacity: 0.4,
@@ -235,7 +235,7 @@ export const numberInputErrorStyle = style({
     '&:focus': {
       outline: 'none',
       backgroundColor: vars.color.background1,
-      borderColor: vars.color.border,
+      borderColor: vars.color.negative,
     },
     '&::-webkit-input-placeholder': {
       textAlign: 'right',
