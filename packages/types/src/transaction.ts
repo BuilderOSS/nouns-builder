@@ -32,8 +32,9 @@ export type Transaction = {
   calldata: string
 }
 
-export type BuilderTransaction = {
+export type TransactionBundle = {
   type: TransactionType
+  title: string
+  summary: string
   transactions: Transaction[]
-  summary?: string
 }

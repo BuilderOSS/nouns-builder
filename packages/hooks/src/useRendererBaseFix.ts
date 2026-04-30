@@ -4,10 +4,10 @@ import { metadataAbi, ProposalState } from '@buildeross/sdk/contract'
 import { getProposals, type Proposal } from '@buildeross/sdk/subgraph'
 import type {
   AddressType,
-  BuilderTransaction,
   CHAIN_ID,
   DaoContractAddresses,
   Transaction,
+  TransactionBundle,
 } from '@buildeross/types'
 import { TransactionType } from '@buildeross/types'
 import isUndefined from 'lodash/isUndefined'
@@ -18,7 +18,7 @@ import { useReadContract } from 'wagmi'
 
 interface RendererBaseFix {
   shouldFix: boolean
-  transaction?: BuilderTransaction
+  transaction?: TransactionBundle
   description?: string
   activeProposalId?: string
 }
@@ -93,8 +93,9 @@ export const useRendererBaseFix = ({
     value: '',
   }
 
-  const fixRendererBaseTransaction: BuilderTransaction = {
+  const fixRendererBaseTransaction: TransactionBundle = {
     type: TransactionType.FIX_RENDERER_BASE,
+    title: 'Fix Metadata Renderer Base',
     summary: 'Fix Metadata Renderer Base',
     transactions: [updateRendererBase],
   }

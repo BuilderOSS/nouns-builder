@@ -3,16 +3,16 @@ import {
   PUBLIC_ZORA_NFT_CREATOR,
   ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants/addresses'
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import {
-  OrderDirection,
-  Proposal,
-  SubgraphSDK,
-  Token_OrderBy,
-} from '@buildeross/sdk/subgraph'
+import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
+import {
+  ProposalDescriptionMetadataV1,
+  ProposalTransactionBundle,
+  SimulationOutput,
+  TransactionBundle,
+} from '@buildeross/types'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
@@ -22,13 +22,14 @@ import {
   getSablierAirdropFactories,
   getSablierContracts,
 } from '@buildeross/utils/sablier/contracts'
-import { atoms, Box, Flex, Paragraph, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Paragraph, Stack, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
-import useSWR from 'swr'
 import { zeroAddress } from 'viem'
 
+import { normalizeTextForCompare, TRANSACTION_TYPES } from '../../constants'
 import { propPageWrapper } from '../styles.css'
+import { TransactionTypeIcon } from '../TransactionTypeIcon'
 import { AirdropDetails } from './AirdropDetails'
 import { CoinDetails } from './CoinDetails'
 import { DropDetails } from './DropDetails'
@@ -40,9 +41,19 @@ import { StreamDetails } from './StreamDetails'
 type ProposalDescriptionProps = {
   title?: string
   proposal: Proposal
-  collection: string
+  // DEPRECATED: Will be removed in the future, use `addresses.token` instead
+  collection?: string
   onOpenProposalReview: () => Promise<void>
   isPreview?: boolean
+  showMetadataSections?: boolean
+  previewTransactions?: TransactionBundle[]
+  previewSimulations?: SimulationOutput[]
+}
+
+type BundleWithRange = ProposalTransactionBundle & {
+  bundleIndex: number
+  start: number
+  end: number
 }
 
 const getSafeDiscussionUrl = (value?: string | null): string | null => {
@@ -60,13 +71,25 @@ const getSafeDiscussionUrl = (value?: string | null): string | null => {
   }
 }
 
+const getBundleIntent = (summary: string | undefined, fallback: string | undefined) => {
+  if (!summary) return fallback
+  if (!fallback) return summary
+  return normalizeTextForCompare(summary) === normalizeTextForCompare(fallback)
+    ? fallback
+    : summary
+}
+
 export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   title,
   proposal,
-  collection,
   onOpenProposalReview,
   isPreview = false,
+  showMetadataSections = true,
+  previewTransactions,
+  previewSimulations,
 }) => {
+  const proposalMetadata = (proposal as Proposal & { metadata?: string | null }).metadata
+
   const { displayName, ensAvatar } = useEnsData(proposal.proposer)
   const { displayName: representedDisplayName, ensAvatar: representedEnsAvatar } =
     useEnsData(proposal.representedAddress || undefined)
@@ -74,12 +97,113 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
   const { addresses } = useDaoStore()
   const safeDiscussionUrl = getSafeDiscussionUrl(proposal.discussionUrl)
 
-  const enableDecodedTransactions = !isPreview
-  const { decodedTransactions } = useDecodedTransactions(
-    chain.id,
-    proposal,
-    enableDecodedTransactions
-  )
+  const {
+    decodedTransactions,
+    isLoading: isDecodingTransactions,
+    isValidating,
+  } = useDecodedTransactions(chain.id, proposal)
+
+  const isDecoding = isDecodingTransactions || isValidating
+
+  const parsedProposalMetadata = useMemo<
+    ProposalDescriptionMetadataV1 | undefined
+  >(() => {
+    if (!proposalMetadata) return undefined
+
+    try {
+      return JSON.parse(proposalMetadata) as ProposalDescriptionMetadataV1
+    } catch (_error) {
+      return undefined
+    }
+  }, [proposalMetadata])
+
+  const metadataBundles = useMemo(() => {
+    if (isPreview) {
+      return (previewTransactions || []).map((transaction) => ({
+        type: transaction.type,
+        summary: transaction.summary,
+        callCount: transaction.transactions.length,
+      }))
+    }
+
+    const bundles = parsedProposalMetadata?.transactionBundles
+
+    if (!Array.isArray(bundles)) return undefined
+
+    const isValid = bundles.every(
+      (bundle) =>
+        bundle &&
+        typeof bundle.type === 'string' &&
+        typeof bundle.callCount === 'number' &&
+        (bundle.summary === undefined ||
+          bundle.summary === null ||
+          typeof bundle.summary === 'string') &&
+        bundle.callCount > 0
+    )
+
+    return isValid ? bundles : undefined
+  }, [isPreview, parsedProposalMetadata, previewTransactions])
+
+  const bundlesWithRanges = useMemo(() => {
+    if (!decodedTransactions?.length || !metadataBundles?.length) return undefined
+
+    let cursor = 0
+    const ranges: BundleWithRange[] = []
+
+    for (let bundleIndex = 0; bundleIndex < metadataBundles.length; bundleIndex++) {
+      const bundle = metadataBundles[bundleIndex]
+      const start = cursor
+      const end = cursor + bundle.callCount
+      ranges.push({ ...bundle, bundleIndex, start, end })
+      cursor = end
+    }
+
+    if (cursor !== decodedTransactions.length) {
+      console.warn(
+        'Proposal metadata bundle count mismatch; falling back to decoded-only.'
+      )
+      return undefined
+    }
+
+    return ranges
+  }, [decodedTransactions, metadataBundles])
+
+  const proposalMetadataForSummary = useMemo<
+    ProposalDescriptionMetadataV1 | undefined
+  >(() => {
+    if (isPreview) {
+      return {
+        version: 1,
+        title: title ?? proposal.title ?? '',
+        description: proposal.description || '',
+        representedAddress: proposal.representedAddress || undefined,
+        discussionUrl: proposal.discussionUrl || undefined,
+        transactionBundles: metadataBundles,
+      }
+    }
+
+    return parsedProposalMetadata
+  }, [
+    isPreview,
+    metadataBundles,
+    parsedProposalMetadata,
+    proposal.description,
+    proposal.discussionUrl,
+    proposal.representedAddress,
+    proposal.title,
+    title,
+  ])
+
+  const failedSimulationByIndex = useMemo(() => {
+    if (!isPreview || !previewSimulations?.length) return {}
+
+    return previewSimulations
+      .filter((simulation) => simulation.status === false)
+      .reduce<Record<number, SimulationOutput>>((acc, simulation) => {
+        acc[simulation.index] = simulation
+        return acc
+      }, {})
+  }, [isPreview, previewSimulations])
 
   // Check if proposal has escrow milestone transactions
   const hasEscrowMilestone = useMemo(() => {
@@ -150,25 +274,6 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
     )
   }, [proposal.targets, chain.id])
 
-  const { data: tokenImage, error } = useSWR(
-    !!collection && !!proposal.proposer
-      ? ([SWR_KEYS.TOKEN_IMAGE, chain.id, collection, proposal.proposer] as const)
-      : null,
-    async ([_key, _chainId, _collection, _proposer]) => {
-      const data = await SubgraphSDK.connect(_chainId).tokens({
-        where: {
-          owner: _proposer.toLowerCase(),
-          tokenContract: _collection.toLowerCase(),
-        },
-        first: 1,
-        orderBy: Token_OrderBy.MintedAt,
-        orderDirection: OrderDirection.Asc,
-      })
-      return data?.tokens?.[0]?.image
-    },
-    { revalidateOnFocus: false }
-  )
-
   return (
     <Flex
       direction="column"
@@ -180,7 +285,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         direction={'column'}
         mt={isPreview ? undefined : { '@initial': 'x6', '@768': 'x13' }}
       >
-        {title && (
+        {showMetadataSections && title && (
           <Section title="Title">
             <Text fontSize={28} fontWeight={'display'}>
               {title}
@@ -189,7 +294,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
               color={'text3'}
               mt={'x2'}
               align="center"
-              gap="x1"
+              gap="x2"
               wrap
               style={{ minWidth: 0 }}
             >
@@ -203,57 +308,45 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
                 mobileTapBehavior="toggle"
                 inline
               />
-              {proposal.representedAddress && (
-                <>
-                  <Text color={'text3'}>on behalf of</Text>
-                  <WalletIdentityWithPreview
-                    address={proposal.representedAddress as `0x${string}`}
-                    displayName={
-                      representedDisplayName || walletSnippet(proposal.representedAddress)
-                    }
-                    avatarSrc={representedEnsAvatar}
-                    avatarSize="20"
-                    nameVariant="paragraph-sm"
-                    mobileTapBehavior="toggle"
-                    inline
-                  />
-                </>
-              )}
             </Flex>
           </Section>
         )}
 
-        {hasEscrowMilestone && (
+        {showMetadataSections && hasEscrowMilestone && (
           <MilestoneDetails
             proposal={proposal}
             onOpenProposalReview={onOpenProposalReview}
           />
         )}
 
-        {hasSablierStream && (
+        {showMetadataSections && hasSablierStream && (
           <StreamDetails
             proposal={proposal}
             onOpenProposalReview={onOpenProposalReview}
           />
         )}
 
-        {hasSablierAirdrop && <AirdropDetails proposal={proposal} />}
+        {showMetadataSections && hasSablierAirdrop && (
+          <AirdropDetails proposal={proposal} />
+        )}
 
-        {hasCoinCreation && <CoinDetails proposal={proposal} />}
+        {showMetadataSections && hasCoinCreation && <CoinDetails proposal={proposal} />}
 
-        {hasDropCreation && <DropDetails proposal={proposal} />}
+        {showMetadataSections && hasDropCreation && <DropDetails proposal={proposal} />}
 
-        <Section title="Description">
-          <Paragraph overflow={'auto'}>
-            {proposal.description && (
-              <Box className={proposalDescription}>
-                <MarkdownDisplay>{proposal.description}</MarkdownDisplay>
-              </Box>
-            )}
-          </Paragraph>
-        </Section>
+        {showMetadataSections && (
+          <Section title="Description">
+            <Paragraph overflow={'auto'}>
+              {proposal.description && (
+                <Box className={proposalDescription}>
+                  <MarkdownDisplay>{proposal.description}</MarkdownDisplay>
+                </Box>
+              )}
+            </Paragraph>
+          </Section>
+        )}
 
-        {safeDiscussionUrl && (
+        {showMetadataSections && safeDiscussionUrl && (
           <Section title="Discussion">
             <a href={safeDiscussionUrl} rel="noreferrer" target="_blank">
               {safeDiscussionUrl}
@@ -261,61 +354,108 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
           </Section>
         )}
 
-        <Section title="Proposer" mb={isPreview ? 'x0' : undefined}>
-          <Flex direction={'row'} placeItems={'center'}>
-            <Box
-              backgroundColor="background2"
-              width={'x8'}
-              height={'x8'}
-              mr={'x2'}
-              borderRadius={'small'}
-              position="relative"
-            >
-              {!!tokenImage && !error && (
-                <img
-                  alt="proposer"
-                  src={tokenImage}
-                  className={atoms({ borderRadius: 'small' })}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        {showMetadataSections && (
+          <Section title="Proposer">
+            <Flex direction={'row'} placeItems={'center'}>
+              <Flex direction="column" gap="x1" style={{ minWidth: 0 }}>
+                <WalletIdentityWithPreview
+                  address={proposal.proposer as `0x${string}`}
+                  displayName={displayName || walletSnippet(proposal.proposer)}
+                  avatarSrc={ensAvatar}
+                  mobileTapBehavior="toggle"
+                  inline
                 />
-              )}
-            </Box>
-
-            <Flex direction="column" gap="x1" style={{ minWidth: 0 }}>
-              <WalletIdentityWithPreview
-                address={proposal.proposer as `0x${string}`}
-                displayName={displayName || walletSnippet(proposal.proposer)}
-                avatarSrc={ensAvatar}
-                mobileTapBehavior="toggle"
-                inline
-              />
-              {proposal.representedAddress && (
-                <Flex align="center" gap="x1" wrap style={{ minWidth: 0 }}>
-                  <Text color={'text3'}>on behalf of</Text>
-                  <WalletIdentityWithPreview
-                    address={proposal.representedAddress as `0x${string}`}
-                    displayName={
-                      representedDisplayName || walletSnippet(proposal.representedAddress)
-                    }
-                    avatarSrc={representedEnsAvatar}
-                    mobileTapBehavior="toggle"
-                    inline
-                  />
-                </Flex>
-              )}
+                {proposal.representedAddress && (
+                  <Flex align="center" gap="x2" wrap style={{ minWidth: 0 }}>
+                    <Text color={'text3'}>on behalf of</Text>
+                    <WalletIdentityWithPreview
+                      address={proposal.representedAddress as `0x${string}`}
+                      displayName={
+                        representedDisplayName ||
+                        walletSnippet(proposal.representedAddress)
+                      }
+                      avatarSrc={representedEnsAvatar}
+                      mobileTapBehavior="toggle"
+                      inline
+                    />
+                  </Flex>
+                )}
+              </Flex>
             </Flex>
-          </Flex>
-        </Section>
+          </Section>
+        )}
 
-        {!isPreview && (
-          <Section title="Proposed Transactions">
+        <Section title="Proposed Transactions" mb={isPreview ? 'x0' : undefined}>
+          {bundlesWithRanges?.length ? (
+            <Stack gap="x4">
+              {bundlesWithRanges.map((bundle) => {
+                const transactionTypeMeta =
+                  TRANSACTION_TYPES[bundle.type as keyof typeof TRANSACTION_TYPES]
+                const bundleIntent = getBundleIntent(
+                  bundle.summary,
+                  transactionTypeMeta?.subTitle || transactionTypeMeta?.title
+                )
+                const bundleDecodedTransactions = decodedTransactions?.slice(
+                  bundle.start,
+                  bundle.end
+                )
+
+                return (
+                  <Stack
+                    key={`${bundle.bundleIndex}-${bundle.type}-${bundle.start}`}
+                    className={atoms({
+                      borderColor: 'border',
+                      borderStyle: 'solid',
+                      borderWidth: 'normal',
+                      borderRadius: 'curved',
+                    })}
+                    p="x3"
+                    gap="x3"
+                    align="stretch"
+                  >
+                    <Flex align="center" gap="x2">
+                      <TransactionTypeIcon transactionType={bundle.type} />
+                      <Stack gap="x1">
+                        <Text fontWeight="heading">{bundleIntent || bundle.type}</Text>
+                        <Text color="text3">
+                          {bundle.callCount} {bundle.callCount === 1 ? 'call' : 'calls'}
+                        </Text>
+                      </Stack>
+                    </Flex>
+
+                    {!!bundleDecodedTransactions?.length && (
+                      <DecodedTransactions
+                        decodedTransactions={bundleDecodedTransactions}
+                        chainId={chain.id}
+                        addresses={addresses}
+                        isDecoding={isDecoding}
+                        startIndex={bundle.start}
+                        proposalMetadata={proposalMetadataForSummary}
+                        simulationByIndex={failedSimulationByIndex}
+                        bundleContext={{
+                          bundleIndex: bundle.bundleIndex,
+                          bundleType: bundle.type,
+                          bundleIntent,
+                          bundleTypeTitle: transactionTypeMeta?.title,
+                          bundleCallCount: bundle.callCount,
+                        }}
+                      />
+                    )}
+                  </Stack>
+                )
+              })}
+            </Stack>
+          ) : (
             <DecodedTransactions
               decodedTransactions={decodedTransactions}
               chainId={chain.id}
               addresses={addresses}
+              isDecoding={isDecoding}
+              proposalMetadata={proposalMetadataForSummary}
+              simulationByIndex={failedSimulationByIndex}
             />
-          </Section>
-        )}
+          )}
+        </Section>
       </Flex>
     </Flex>
   )

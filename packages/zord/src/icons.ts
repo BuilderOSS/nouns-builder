@@ -12,6 +12,7 @@ import ChevronLeft from './assets/chevron-left.svg'
 import ChevronRight from './assets/chevron-right.svg'
 import ChevronUp from './assets/chevron-up.svg'
 import Code from './assets/code.svg'
+import CodeBrackets from './assets/code-brackets.svg'
 import Collection from './assets/collection.svg'
 import ContentCoin from './assets/content-coin.svg'
 import Copy from './assets/copy.svg'
@@ -77,6 +78,7 @@ export const icons = {
   chevronRight: ChevronRight,
   chevronUp: ChevronUp,
   code: Code,
+  'code-brackets': CodeBrackets,
   contentCoin: ContentCoin,
   collection: Collection,
   copy: Copy,

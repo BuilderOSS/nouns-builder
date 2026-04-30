@@ -525,6 +525,7 @@ export const SendNft: React.FC = () => {
 
       addTransaction({
         type: TransactionType.SEND_NFT,
+        title: 'Send NFTs',
         summary: `Send ${amountText}${currentNftMetadata.name} #${values.tokenId} (${nftType}) to ${walletSnippet(recipient)}`,
         transactions: [
           {

@@ -6,7 +6,7 @@ import {
   treasuryAbi,
 } from '@buildeross/sdk/contract'
 import {
-  BuilderTransaction,
+  TransactionBundle,
   useChainStore,
   useDaoStore,
   useProposalStore,
@@ -182,7 +182,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
   }
 
   const withPauseUnpause = (
-    transactions: BuilderTransaction[],
+    transactions: TransactionBundle[],
     auctionAddress: Address
   ) => {
     const targetAddresses = transactions
@@ -195,6 +195,8 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
 
     const pause = {
       type: TransactionType.CUSTOM,
+      title: 'Pause Auctions',
+      summary: 'Pause auctions',
       transactions: [
         {
           functionSignature: 'pause()',
@@ -210,6 +212,8 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
 
     const unpause = {
       type: TransactionType.CUSTOM,
+      title: 'Resume Auctions',
+      summary: 'Resume auctions',
       transactions: [
         {
           functionSignature: 'unpause()',
@@ -231,7 +235,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     values: AdminFormValues,
     formik: FormikValues | undefined
   ) => {
-    let transactions: BuilderTransaction[] = []
+    let transactions: TransactionBundle[] = []
 
     let field: keyof AdminFormValues
 
@@ -273,6 +277,8 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
       if (target)
         transactions.push({
           type: TransactionType.CUSTOM,
+          title: 'Custom Transaction',
+          summary: transactionProperties.functionSignature,
           transactions: [
             {
               functionSignature: transactionProperties.functionSignature,
@@ -286,13 +292,12 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
       // removes burnVetoer from the list of transactions if updateVetoer is present
       if (field === 'vetoer') {
         transactions = transactions.filter(
-          (tx: BuilderTransaction) =>
-            tx.transactions[0].functionSignature !== 'burnVetoer'
+          (tx: TransactionBundle) => tx.transactions[0].functionSignature !== 'burnVetoer'
         )
       }
       if (field === 'vetoPower') {
         transactions = transactions.filter(
-          (tx: BuilderTransaction) =>
+          (tx: TransactionBundle) =>
             tx.transactions[0].functionSignature !== 'updateVetoer'
         )
       }
@@ -305,6 +310,8 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     if (hasDescriptionMetadataChanges) {
       transactions.push({
         type: TransactionType.CUSTOM,
+        title: 'Update Description',
+        summary: 'Update proposal description metadata',
         transactions: [
           {
             functionSignature: 'updateDescription',
@@ -350,14 +357,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
       validateOnMount
     >
       {(formik) => {
-        const founderChanges = isEqual(
-          formik.initialValues.founderAllocation,
-          formik.values.founderAllocation
-        )
-          ? 0
-          : 1
-        const changes =
-          compareAndReturn(formik.initialValues, formik.values).length + founderChanges
+        const changes = compareAndReturn(formik.initialValues, formik.values).length
 
         return (
           <Flex direction={'column'} w={'100%'}>

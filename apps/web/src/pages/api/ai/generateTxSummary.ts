@@ -5,6 +5,8 @@ import type {
   CHAIN_ID,
   DaoContractAddresses,
   DecodedArgs,
+  ProposalDescriptionMetadataV1,
+  ProposalTransactionBundleContext,
   SerializedNftMetadata,
   TokenMetadata,
 } from '@buildeross/types'
@@ -28,6 +30,8 @@ type RequestBody = {
   tokenMetadata?: TokenMetadata
   nftMetadata?: SerializedNftMetadata
   escrowData?: DecodedEscrowData
+  proposalMetadata?: ProposalDescriptionMetadataV1
+  bundleContext?: ProposalTransactionBundleContext
 }
 
 const safeStringify = (v: unknown) =>
@@ -109,6 +113,21 @@ const formatArgs = (args: DecodedArgs) => {
   }
 }
 
+const formatBundleMetadata = (proposalMetadata?: ProposalDescriptionMetadataV1) => {
+  const bundles = proposalMetadata?.transactionBundles
+  if (!bundles?.length) return ''
+
+  try {
+    const json = JSON.stringify(bundles, null, 2)
+    const MAX_CHARS = 3000
+    const bounded =
+      json.length > MAX_CHARS ? `${json.slice(0, MAX_CHARS)}\n... [truncated]` : json
+    return `Proposal Bundle Metadata JSON (context only):\n${bounded}\n`
+  } catch {
+    return ''
+  }
+}
+
 const generatePrompt = (data: RequestBody): string => {
   const {
     chainId,
@@ -118,6 +137,8 @@ const generatePrompt = (data: RequestBody): string => {
     tokenMetadata,
     nftMetadata,
     escrowData,
+    proposalMetadata,
+    bundleContext,
   } = data
 
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
@@ -149,6 +170,7 @@ Writing Rules:
 - Be clear, simple, and factual — avoid technical jargon, markdown, or speculation.
 - If token symbol or amount is missing, use general words like "tokens" or "assets".
 - Only use relevant argument data to describe the transaction’s action.
+- If bundle context is provided, use it only to clarify intent and avoid redundant phrasing.
 
 ---
 
@@ -189,10 +211,30 @@ Transaction Overview:
 Function: ${transaction.functionName} | Network: ${chain.name} (ID: ${chain.id})  
 Target: ${target} ${contractType}
 
+${
+  bundleContext
+    ? `Bundle Context:
+- Bundle type: ${bundleContext.bundleTypeTitle || bundleContext.bundleType}
+- Bundle intent: ${bundleContext.bundleIntent || 'N/A'}
+- Call position: ${bundleContext.positionInBundle} of ${bundleContext.bundleCallCount}
+`
+    : ''
+}
+
 Below are the transaction arguments — use only the relevant information to describe the action:
 ${formatArgs(transaction.args)}
 
 ${formatAmounts(data)}
+
+${
+  proposalMetadata?.transactionBundles?.length
+    ? `Proposal Metadata (for context only):
+- Includes ${proposalMetadata.transactionBundles.length} transaction bundle(s)
+`
+    : ''
+}
+
+${formatBundleMetadata(proposalMetadata)}
 
 ${
   tokenMetadata

@@ -37,6 +37,7 @@ export const PauseAuctionsForm: React.FC = () => {
 
     addTransaction({
       type: TransactionType.PAUSE_AUCTIONS,
+      title: 'Pause Auctions',
       summary: 'Pause auctions',
       transactions: [pause],
     })
@@ -66,11 +67,13 @@ export const PauseAuctionsForm: React.FC = () => {
     if (reduceDelay) {
       addTransaction({
         type: TransactionType.CUSTOM,
+        title: 'Custom Transaction',
         summary: 'Change Voting Period to 2 Days',
         transactions: [votingPeriod],
       })
       addTransaction({
         type: TransactionType.CUSTOM,
+        title: 'Custom Transaction',
         summary: 'Change Voting Delay to 2 Days',
         transactions: [votingDelay],
       })

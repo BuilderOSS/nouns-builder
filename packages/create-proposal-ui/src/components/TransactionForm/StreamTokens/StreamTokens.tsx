@@ -572,6 +572,7 @@ export const StreamTokens: React.FC = () => {
     try {
       addTransaction({
         type: TransactionType.STREAM_TOKENS,
+        title: 'Stream Tokens',
         summary,
         transactions,
       })

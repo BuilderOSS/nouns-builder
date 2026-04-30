@@ -50,6 +50,7 @@ export const BridgeTreasuryForm: React.FC<BridgeTreasuryFormProps> = ({
 
     addTransaction({
       type: TransactionType.MIGRATION,
+      title: 'Migration',
       summary: `Bridge ${values.amount.toString()} ETH to L2 DAO`,
       transactions: [
         {

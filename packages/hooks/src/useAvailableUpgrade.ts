@@ -8,10 +8,10 @@ import { auctionAbi, managerAbi, ProposalState } from '@buildeross/sdk/contract'
 import { getProposals, type Proposal } from '@buildeross/sdk/subgraph'
 import type {
   AddressType,
-  BuilderTransaction,
   CHAIN_ID,
   DaoContractAddresses,
   Transaction,
+  TransactionBundle,
 } from '@buildeross/types'
 import { TransactionType } from '@buildeross/types'
 import intersection from 'lodash/intersection'
@@ -25,7 +25,7 @@ import { useReadContracts } from 'wagmi'
 
 interface AvailableUpgrade {
   shouldUpgrade: boolean
-  transaction?: BuilderTransaction
+  transaction?: TransactionBundle
   currentVersions?: DaoVersions
   latest?: string
   date?: string
@@ -259,6 +259,7 @@ export const useAvailableUpgrade = ({
 
   const upgrade = {
     type: TransactionType.UPGRADE,
+    title: 'Upgrade Proposal',
     summary: `Upgrade contracts to Nouns Builder v${managerVersion}`,
     transactions: withPauseUnpause(paused, upgradeTransactions),
   }
