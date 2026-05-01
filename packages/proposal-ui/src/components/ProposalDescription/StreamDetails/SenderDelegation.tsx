@@ -55,7 +55,7 @@ export const SenderDelegation = ({
           >
             <Button variant="secondary" size="sm">
               View Proposal As Safe App
-              <Icon id="arrowTopRight" />
+              <Icon id="arrow-top-right" />
             </Button>
           </a>
         </Stack>

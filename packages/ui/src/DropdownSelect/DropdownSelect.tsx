@@ -117,6 +117,7 @@ export function DropdownSelect<T extends React.Key>({
 
   const selectedOption = options.find((option) => option.value === value)
   const displayLabel = customLabel ?? selectedOption?.label ?? 'Select option'
+  const isInteractive = !disabled && !isLoading
   const selectedIndex = useMemo(
     () => options.findIndex((option) => option.value === value),
     [options, value]
@@ -281,21 +282,21 @@ export function DropdownSelect<T extends React.Key>({
           size={buttonSize}
           disabled={disabled}
           loading={isLoading}
-          aria-haspopup={disabled ? undefined : 'listbox'}
-          aria-expanded={disabled ? undefined : showOptions}
-          aria-controls={disabled ? undefined : listboxId}
+          aria-haspopup={isInteractive ? 'listbox' : undefined}
+          aria-expanded={isInteractive ? showOptions : undefined}
+          aria-controls={isInteractive ? listboxId : undefined}
           aria-labelledby={inputLabelId}
           aria-label={
             ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : undefined)
           }
           aria-activedescendant={
-            !disabled && showOptions && activeIndex >= 0
+            isInteractive && showOptions && activeIndex >= 0
               ? `${listboxId}-option-${activeIndex}`
               : undefined
           }
-          onKeyDown={disabled ? undefined : handleTriggerKeyDown}
+          onKeyDown={isInteractive ? handleTriggerKeyDown : undefined}
           onClick={
-            disabled
+            !isInteractive
               ? undefined
               : () => {
                   if (showOptions) {
@@ -305,7 +306,7 @@ export function DropdownSelect<T extends React.Key>({
                   }
                 }
           }
-          icon={showOptions ? 'chevronUp' : 'chevronDown'}
+          icon={showOptions ? 'chevron-up' : 'chevron-down'}
           iconAlign="right"
         >
           {displayLabel}
@@ -320,29 +321,29 @@ export function DropdownSelect<T extends React.Key>({
           borderWidth={'normal'}
           borderColor={'border'}
           backgroundColor={'background1'}
-          cursor={disabled ? 'auto' : 'pointer'}
+          cursor={isInteractive ? 'pointer' : 'auto'}
         >
           <Box
             as="button"
             id={triggerId}
             ref={triggerRef}
             type="button"
-            disabled={disabled}
-            aria-haspopup={disabled ? undefined : 'listbox'}
-            aria-expanded={disabled ? undefined : showOptions}
-            aria-controls={disabled ? undefined : listboxId}
+            disabled={disabled || isLoading}
+            aria-haspopup={isInteractive ? 'listbox' : undefined}
+            aria-expanded={isInteractive ? showOptions : undefined}
+            aria-controls={isInteractive ? listboxId : undefined}
             aria-labelledby={inputLabelId}
             aria-label={
               ariaLabel ?? (typeof inputLabel === 'string' ? inputLabel : displayLabel)
             }
             aria-activedescendant={
-              !disabled && showOptions && activeIndex >= 0
+              isInteractive && showOptions && activeIndex >= 0
                 ? `${listboxId}-option-${activeIndex}`
                 : undefined
             }
-            onKeyDown={disabled ? undefined : handleTriggerKeyDown}
+            onKeyDown={isInteractive ? handleTriggerKeyDown : undefined}
             onClick={
-              disabled
+              !isInteractive
                 ? undefined
                 : () => {
                     if (showOptions) {
@@ -397,7 +398,7 @@ export function DropdownSelect<T extends React.Key>({
               </Flex>
             ) : (
               <Icon
-                id={showOptions ? 'chevronUp' : 'chevronDown'}
+                id={showOptions ? 'chevron-up' : 'chevron-down'}
                 size={'md'}
                 align={'center'}
                 pr={'x4'}

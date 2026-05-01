@@ -76,7 +76,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
   [TransactionType.PAUSE_AUCTIONS]: {
     title: 'Pause Auctions',
     subTitle: 'Pause auctions',
-    icon: 'pauseTemplate',
+    icon: 'pause-template',
     iconBackdrop: iconBackdrop(color.warning),
   },
   [TransactionType.FIX_RENDERER_BASE]: {
@@ -88,7 +88,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
   [TransactionType.RESUME_AUCTIONS]: {
     title: 'Resume Auctions',
     subTitle: 'Resume paused auctions',
-    icon: 'resumeTemplate',
+    icon: 'resume-template',
     iconBackdrop: iconBackdrop(color.warning),
   },
   [TransactionType.REPLACE_ARTWORK]: {
@@ -119,7 +119,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
   [TransactionType.WALLET_CONNECT]: {
     title: 'WalletConnect',
     subTitle: 'Connect to dApps and execute transactions via WalletConnect',
-    icon: 'walletConnectOutline',
+    icon: 'wallet-connect-outline',
     iconBackdrop: iconBackdrop(color.accent),
   },
   [TransactionType.PIN_TREASURY_ASSET]: {
@@ -138,19 +138,19 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
   [TransactionType.AIRDROP_TOKENS]: {
     title: 'Airdrop Tokens',
     subTitle: 'Distribute tokens with Sablier merkle campaigns',
-    icon: 'airdropSablier',
+    icon: 'airdrop-sablier',
     iconBackdrop: iconBackdrop(color.warning),
   },
   [TransactionType.CREATOR_COIN]: {
     title: 'Creator Coin',
     subTitle: 'Create a proposal to mint Creator Coin',
-    icon: 'creatorCoin',
+    icon: 'creator-coin',
     iconBackdrop: iconBackdrop(color.accent),
   },
   [TransactionType.CONTENT_COIN]: {
     title: 'Content Coin',
     subTitle: 'Create a proposal to mint Content Coin',
-    icon: 'contentCoin',
+    icon: 'content-coin',
     iconBackdrop: iconBackdrop(color.accent),
   },
 }

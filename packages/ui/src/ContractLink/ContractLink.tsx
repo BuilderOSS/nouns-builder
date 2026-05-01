@@ -74,7 +74,7 @@ export const ContractLink = ({
           target="_blank"
           rel="noreferrer"
         >
-          <Icon id="arrowTopRight" fill="text4" />
+          <Icon id="arrow-top-right" fill="text4" />
         </a>
         <CopyButton text={address} variant={'icon'} />
       </Flex>

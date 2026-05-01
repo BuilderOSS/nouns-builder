@@ -26,7 +26,7 @@ type KnownDaoLinkOption = {
 const CUSTOM_LINK_KEY = '__custom__'
 
 const KNOWN_DAO_LINK_OPTIONS: KnownDaoLinkOption[] = [
-  { key: 'x', label: 'X', icon: 'twitter' },
+  { key: 'x', label: 'X', icon: 'x' },
   { key: 'discord', label: 'Discord', icon: 'discord' },
   { key: 'github', label: 'GitHub', icon: 'github' },
   { key: 'farcaster', label: 'Farcaster', icon: 'globe' },

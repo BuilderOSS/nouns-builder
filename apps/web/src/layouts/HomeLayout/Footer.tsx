@@ -81,7 +81,7 @@ export const Footer = () => {
           <Grid columns={3} gap="x3">
             <a href={'https://twitter.com/nounsbuilder'} target="_blank" rel="noreferrer">
               <Icon
-                id="twitter"
+                id="x"
                 backgroundColor="background1"
                 borderRadius="round"
                 p="x2"

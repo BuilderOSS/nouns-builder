@@ -83,7 +83,7 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
             onClick={onPrev}
             aria-label="Back"
           >
-            <Icon id="arrowLeft" />
+            <Icon id="arrow-left" />
           </Button>
         )}
 

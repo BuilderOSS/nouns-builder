@@ -332,7 +332,7 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
                       mb={'x8'}
                     >
                       Advanced Settings
-                      <Icon id={showAdvanced ? 'chevronUp' : 'chevronDown'} />
+                      <Icon id={showAdvanced ? 'chevron-up' : 'chevron-down'} />
                     </Button>
                   </Flex>
                   <motion.div

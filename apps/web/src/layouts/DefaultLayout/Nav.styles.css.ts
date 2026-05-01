@@ -126,10 +126,10 @@ export const disconnectButton = style([
       },
       'html[data-theme-mode="dark"] &': {
         background: color.negative,
-        color: color.background1,
+        color: color.text1,
       },
       'html[data-theme-mode="dark"] &:hover': {
-        background: `${vars.color.background1} !important`,
+        background: `${vars.color.text1} !important`,
         color: color.negative,
         borderColor: color.negative,
       },

@@ -30,7 +30,7 @@ export const Tile: React.FC<ProposalTileProps> = (props) => {
           <Text fontSize={16} fontWeight={'display'}>
             {title}
           </Text>
-          {icon && <Icon id={icon} size="sm" color="text3" fill="transparent" />}
+          {icon && <Icon id={icon} size="sm" fill="text3" />}
         </Flex>
         <Text
           className={

@@ -238,7 +238,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               mb={'x8'}
             >
               Advanced Settings
-              <Icon id={showAdvanced ? 'chevronUp' : 'chevronDown'} />
+              <Icon id={showAdvanced ? 'chevron-up' : 'chevron-down'} />
             </Button>
             <motion.div
               className={defaultFormAdvancedWrapper}

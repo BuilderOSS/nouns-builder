@@ -41,7 +41,7 @@ export const ReviewSection: React.FC<{
       >
         {subHeading}
         <Flex align={'center'} justify={'center'} ml={'auto'}>
-          {(!isOpen && <Icon id="chevronDown" />) || <Icon id="chevronUp" />}
+          {(!isOpen && <Icon id="chevron-down" />) || <Icon id="chevron-up" />}
         </Flex>
       </Flex>
 

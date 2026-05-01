@@ -196,6 +196,7 @@ const XValues = React.memo(
             <Text
               style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
               fontSize={{ '@initial': 20, '@768': 12 }}
+              color="text1"
               key={index}
               as="text"
               variant="eyebrow"

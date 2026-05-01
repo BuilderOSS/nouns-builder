@@ -88,7 +88,7 @@ const normalizeUrlForDedupe = (url: string): string => {
 }
 
 const getIconForLinkKey = (key: string): IconType => {
-  if (key === 'x') return 'twitter'
+  if (key === 'x') return 'x'
   if (key === 'discord') return 'discord'
   if (key === 'github') return 'github'
   if (key === 'farcaster') return 'globe'

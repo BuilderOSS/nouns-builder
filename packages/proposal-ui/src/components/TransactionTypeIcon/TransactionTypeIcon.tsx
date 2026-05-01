@@ -15,6 +15,7 @@ export const TransactionTypeIcon: React.FC<TransactionTypeIconProps> = ({
   withVerticalMargin = false,
 }) => {
   const metadata = TRANSACTION_TYPES[transactionType]
+  const defaultFill = metadata?.iconFill ?? 'icon1'
 
   return (
     <Flex
@@ -31,7 +32,7 @@ export const TransactionTypeIcon: React.FC<TransactionTypeIconProps> = ({
       minW={large ? 'x13' : 'x10'}
       flexShrink={0}
     >
-      <Icon id={metadata?.icon ?? 'code'} fill={metadata?.iconFill ?? 'transparent'} />
+      <Icon id={metadata?.icon ?? 'code'} fill={defaultFill} />
     </Flex>
   )
 }

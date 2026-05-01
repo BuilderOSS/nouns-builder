@@ -13,7 +13,7 @@ export const Tooltip = ({ children }: { children: string }) => {
         onMouseLeave={() => setShowTooltip(false)}
         ref={triggerRef}
       >
-        <Icon id="info-16" size="sm" />
+        <Icon id="info-16" size="sm" fill="text3" />
       </Box>
       <PopUp
         open={showTooltip}

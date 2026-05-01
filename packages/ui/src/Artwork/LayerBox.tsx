@@ -144,7 +144,7 @@ export const LayerBox: React.FC<LayerBoxProps> = ({
       >
         <Flex align="center">
           <Box mr="x2">{`${trait} (${properties?.length} variants)`}</Box>
-          {isExpanded ? <Icon id="chevronUp" /> : <Icon id="chevronDown" />}
+          {isExpanded ? <Icon id="chevron-up" /> : <Icon id="chevron-down" />}
         </Flex>
         <Flex
           as="button"

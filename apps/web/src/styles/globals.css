@@ -84,7 +84,7 @@ input[type="number"] {
 #connect-button-wrapper * button {
   background: var(--connect-button-bg);
   border: 0;
-  font-family: 'ptRoot', 'Arial', 'Helvetica', 'sans-serif' !important;
+  font-family: ptRoot, Arial, Helvetica, sans-serif !important;
   color: var(--connect-button-text);
   font-weight: 700;
   box-shadow: none;

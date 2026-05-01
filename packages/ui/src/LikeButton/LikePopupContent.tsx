@@ -212,7 +212,7 @@ export const LikePopupContent: React.FC<LikePopupContentProps> = ({
             animate={{ scale: 1 }}
             transition={{ duration: 0.2 }}
           >
-            <Icon id="checkInCircle" size="md" />
+            <Icon id="check-in-circle" size="md" />
           </motion.div>
           <Text variant="label-md" align="center" style={{ fontWeight: 500 }}>
             Liked!

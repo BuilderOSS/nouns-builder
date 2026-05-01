@@ -228,6 +228,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({
           <Text
             style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
             fontSize={16}
+            color="text1"
             key={`${index}-amount`}
             as="text"
             variant="eyebrow"
@@ -241,6 +242,7 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({
           <Text
             style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
             fontSize={12}
+            color="text2"
             key={`${index}-date`}
             as="text"
             variant="eyebrow"

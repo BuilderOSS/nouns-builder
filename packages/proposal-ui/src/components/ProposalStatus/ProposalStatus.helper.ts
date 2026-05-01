@@ -60,7 +60,15 @@ export function parseState(state: ProposalState) {
 export function parseBgColor(state: ProposalState) {
   switch (state) {
     case ProposalState.Pending:
+      return {
+        borderColor: theme.colors.warningDisabled,
+        color: theme.colors.warning,
+      }
     case ProposalState.Active:
+      return {
+        borderColor: theme.colors.accentDisabled,
+        color: theme.colors.accent,
+      }
     case ProposalState.Succeeded:
       return {
         borderColor: theme.colors.positiveDisabled,
@@ -73,8 +81,8 @@ export function parseBgColor(state: ProposalState) {
       }
     case ProposalState.Executed:
       return {
-        borderColor: theme.colors.background2,
-        color: theme.colors.primary,
+        borderColor: theme.colors.positiveDisabled,
+        color: theme.colors.positive,
       }
     case ProposalState.Queued:
       return {

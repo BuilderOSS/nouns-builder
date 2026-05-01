@@ -166,7 +166,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
                 </Text>
               </Flex>
               <Box h="x6" w="x6" ml="x2">
-                <Icon id={'chevronDown'} fill={'tertiary'} pointerEvents="none" />
+                <Icon id={'chevron-down'} fill={'tertiary'} pointerEvents="none" />
               </Box>
             </Flex>
           </Flex>

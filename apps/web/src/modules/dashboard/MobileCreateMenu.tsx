@@ -47,7 +47,7 @@ export const MobileCreateMenu: React.FC<MobileCreateMenuProps> = ({ userAddress 
           </button>
 
           <button className={createMenuCard} onClick={handleCreateProposal} type="button">
-            <Icon id="checkInCircle" className={createMenuCardIcon} />
+            <Icon id="check-in-circle" className={createMenuCardIcon} />
             <Text fontSize="18" fontWeight="label">
               Create Proposal
             </Text>
