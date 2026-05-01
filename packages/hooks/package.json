@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/hooks",
   "description": "Shared React hooks for BuilderOSS apps",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "dependencies": {
     "@smartinvoicexyz/types": "^0.1.27",
     "@zoralabs/coins-sdk": "^0.4.3",
@@ -53,11 +53,11 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": "0.3.0",
-    "@buildeross/ipfs-service": "0.3.0",
-    "@buildeross/sdk": "0.3.0",
-    "@buildeross/types": "0.3.0",
-    "@buildeross/utils": "0.3.0",
+    "@buildeross/constants": "0.3.1",
+    "@buildeross/ipfs-service": "0.3.1",
+    "@buildeross/sdk": "0.3.1",
+    "@buildeross/types": "0.3.1",
+    "@buildeross/utils": "0.3.1",
     "@types/lodash": "^4.17.17",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
