@@ -7,7 +7,6 @@ import {
   footerLeftWrapper,
   footerRightWrapper,
   getStartedButton,
-  homeFooterGithubIcon,
   homeFooterInnerWrapper,
   homeFooterLinks,
   homeFooterSocialIcon,
@@ -107,7 +106,7 @@ export const Footer = () => {
                 backgroundColor="background1"
                 borderRadius="round"
                 p="x2"
-                className={[homeFooterSocialIcon, homeFooterGithubIcon]}
+                className={homeFooterSocialIcon}
               />
             </a>
           </Grid>

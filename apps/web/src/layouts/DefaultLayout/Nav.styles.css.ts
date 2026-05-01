@@ -185,9 +185,11 @@ export const daoButton = style({
 
 export const hiddenDaoButton = style({
   background: color.background2,
+  border: `1px solid ${color.border}`,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      background: color.background2,
+      background: vars.color.backdrop,
+      borderColor: darkSurfaceBorder,
     },
     '&:hover': {
       background: color.neutralHover,

@@ -3,7 +3,7 @@ import {
   calculateStreamedAmountLL,
   Segment,
 } from '@buildeross/utils/sablier'
-import { Text } from '@buildeross/zord'
+import { Text, vars } from '@buildeross/zord'
 import React, { useCallback, useMemo } from 'react'
 import { formatUnits } from 'viem'
 
@@ -226,9 +226,13 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({
       return (
         <>
           <Text
-            style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
+            style={{
+              transition: 'opacity 0.5s',
+              opacity: cursorOpacity,
+              fill: vars.color.accent,
+            }}
             fontSize={16}
-            color="text1"
+            color="accent"
             key={`${index}-amount`}
             as="text"
             variant="eyebrow"
@@ -240,9 +244,13 @@ export const StreamGraph: React.FC<StreamGraphProps> = ({
             {formatDynamicDecimals(point.y)} {symbol}
           </Text>
           <Text
-            style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
+            style={{
+              transition: 'opacity 0.5s',
+              opacity: cursorOpacity,
+              fill: vars.color.accent,
+            }}
             fontSize={12}
-            color="text2"
+            color="accent"
             key={`${index}-date`}
             as="text"
             variant="eyebrow"

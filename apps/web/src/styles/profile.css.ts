@@ -54,10 +54,6 @@ export const profileDaoLink = style({
   cursor: 'pointer',
   backgroundColor: color.background1,
   selectors: {
-    'html[data-theme-mode="dark"] &': {
-      backgroundColor: vars.color.background2,
-      borderColor: vars.color.background2,
-    },
     '&:hover': {
       backgroundColor: color.background2,
     },
@@ -69,11 +65,16 @@ export const profileDaoLink = style({
 })
 
 export const profileHiddenDaoLink = style({
-  backgroundColor: color.borderOnImage,
+  backgroundColor: color.background2,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      backgroundColor: vars.color.border,
-      borderColor: vars.color.border,
+      backgroundColor: vars.color.backdrop,
+    },
+    '&:hover': {
+      backgroundColor: color.neutralHover,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      backgroundColor: vars.color.neutralHover,
     },
   },
 })

@@ -1,4 +1,4 @@
-import { Box, color, Text } from '@buildeross/zord'
+import { Box, Text, vars } from '@buildeross/zord'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { formatEther } from 'viem'
 
@@ -127,11 +127,11 @@ export const AuctionGraph = ({
           paddingY
         }
         r="3"
-        fill={color.accent}
+        fill={vars.color.text1}
         style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
       />
       <line
-        stroke={color.accent}
+        stroke={vars.color.text1}
         strokeWidth={STROKE}
         x1={visibleIndex * (chartWidth / chartData.length) + paddingX}
         x2={visibleIndex * (chartWidth / chartData.length) + paddingX}
@@ -145,7 +145,7 @@ export const AuctionGraph = ({
         key={startTime}
         ref={lineRef}
         fill="none"
-        stroke={chartData ? color.accent : 'transparent'}
+        stroke={chartData ? vars.color.text1 : 'transparent'}
         strokeWidth={STROKE}
         points={points}
         className={graphOnLoadStyles}
@@ -194,9 +194,13 @@ const XValues = React.memo(
             FONT_SIZE
           return (
             <Text
-              style={{ transition: 'opacity 0.5s', opacity: cursorOpacity }}
+              style={{
+                transition: 'opacity 0.5s',
+                opacity: cursorOpacity,
+                fill: vars.color.accent,
+              }}
               fontSize={{ '@initial': 20, '@768': 12 }}
-              color="text1"
+              color="accent"
               key={index}
               as="text"
               variant="eyebrow"

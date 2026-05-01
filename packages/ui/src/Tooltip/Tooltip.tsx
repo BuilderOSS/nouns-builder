@@ -10,10 +10,14 @@ export const Tooltip = ({ children }: { children: string }) => {
       <Box
         cursor="pointer"
         onMouseOver={() => setShowTooltip(true)}
+        onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
+        onFocus={() => setShowTooltip(true)}
+        onBlur={() => setShowTooltip(false)}
         ref={triggerRef}
+        tabIndex={0}
       >
-        <Icon id="info-16" size="sm" fill="text3" />
+        <Icon id="question" size="sm" fill="text3" />
       </Box>
       <PopUp
         open={showTooltip}

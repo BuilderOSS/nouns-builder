@@ -66,8 +66,8 @@ export function parseBgColor(state: ProposalState) {
       }
     case ProposalState.Active:
       return {
-        borderColor: theme.colors.accentDisabled,
-        color: theme.colors.accent,
+        borderColor: '#0085FF',
+        color: '#0085FF',
       }
     case ProposalState.Succeeded:
       return {

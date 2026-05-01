@@ -1,33 +1,30 @@
 import { vars } from '@buildeross/zord'
-import { globalStyle, style } from '@vanilla-extract/css'
+import { style } from '@vanilla-extract/css'
 
-const darkFooterSurface = vars.color.background1
 const darkFooterSurfaceHover = vars.color.background2
 const darkFooterBorder = vars.color.border
 
 export const homeFooterWrapper = style({
-  selectors: {
-    'html[data-theme-mode="dark"] &': {
-      background: darkFooterSurface,
-      color: vars.color.text1,
-    },
-  },
+  background: vars.color.onNeutral,
 })
 
 export const getStartedButton = style({
   fontSize: 26,
-  background: vars.color.backdrop,
+  background: vars.color.background1,
+  color: vars.color.text1,
+  border: `1px solid ${vars.color.border}`,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      background: darkFooterSurfaceHover,
+      background: vars.color.background1,
       color: vars.color.text1,
+      borderColor: vars.color.background1,
     },
     '&:hover': {
       background: vars.color.neutralHover,
       cursor: 'pointer',
     },
     'html[data-theme-mode="dark"] &:hover': {
-      background: vars.color.background2,
+      background: vars.color.neutralHover,
     },
   },
   '@media': {
@@ -40,11 +37,8 @@ export const getStartedButton = style({
 
 export const homeFooterLinks = style({
   selectors: {
-    'html[data-theme-mode="dark"] &': {
-      color: vars.color.text1,
-    },
     '&:hover': {
-      color: vars.color.text1,
+      color: 'inherit',
       opacity: 0.8,
       cursor: 'pointer',
     },
@@ -52,19 +46,21 @@ export const homeFooterLinks = style({
 })
 
 export const homeFooterSocialIcon = style({
+  transition: 'background-color 0.1s ease-in-out',
   selectors: {
+    '&:hover': {
+      background: vars.color.neutralHover,
+      cursor: 'pointer',
+    },
     'html[data-theme-mode="dark"] &': {
-      background: vars.color.background2,
+      background: vars.color.background1,
       color: vars.color.text1,
       fill: vars.color.text1,
     },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: darkFooterSurfaceHover,
+    },
   },
-})
-
-export const homeFooterGithubIcon = style({})
-
-globalStyle(`html[data-theme-mode="dark"] ${homeFooterGithubIcon} svg`, {
-  filter: 'invert(1)',
 })
 
 export const homeFooterInnerWrapper = style({
@@ -76,11 +72,6 @@ export const homeFooterInnerWrapper = style({
 })
 
 export const footerHeading = style({
-  selectors: {
-    'html[data-theme-mode="dark"] &': {
-      color: vars.color.text1,
-    },
-  },
   '@media': {
     '(max-width: 768px)': {
       maxWidth: 246,

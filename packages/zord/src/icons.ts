@@ -4,11 +4,9 @@ import Brush from './assets/brand/brush.svg'
 import Collection from './assets/brand/collection.svg'
 import ContentCoin from './assets/brand/content-coin.svg'
 import CreatorCoin from './assets/brand/creator-coin.svg'
-import Discord from './assets/brand/discord.svg'
 import Erc20 from './assets/brand/erc20.svg'
 import Escrow from './assets/brand/escrow.svg'
 import Eth from './assets/brand/eth.svg'
-import Github from './assets/brand/github.svg'
 import Handshake from './assets/brand/handshake.svg'
 import Migrate from './assets/brand/migrate.svg'
 import Nft from './assets/brand/nft.svg'
@@ -34,15 +32,16 @@ import Copy from './assets/monochrome/copy.svg'
 import Cross from './assets/monochrome/cross.svg'
 import Cross16 from './assets/monochrome/cross-16.svg'
 import Dash from './assets/monochrome/dash.svg'
+import Discord from './assets/monochrome/discord.svg'
 import Dots from './assets/monochrome/dots.svg'
 import Download from './assets/monochrome/download.svg'
 import Ellipsis from './assets/monochrome/ellipsis.svg'
 import External from './assets/monochrome/external-16.svg'
+import Github from './assets/monochrome/github.svg'
 import Globe from './assets/monochrome/globe.svg'
 import HandlebarCircle from './assets/monochrome/handlebar-circle.svg'
 import Heart from './assets/monochrome/heart.svg'
 import HeartFilled from './assets/monochrome/heart-filled.svg'
-import Info16 from './assets/monochrome/info-16.svg'
 import Move from './assets/monochrome/move.svg'
 import NewWindow from './assets/monochrome/new-window.svg'
 import Noggles from './assets/monochrome/noggles.svg'
@@ -100,7 +99,6 @@ export const icons = {
   handshake: Handshake,
   heart: Heart,
   'heart-filled': HeartFilled,
-  'info-16': Info16,
   migrate: Migrate,
   move: Move,
   'new-window': NewWindow,

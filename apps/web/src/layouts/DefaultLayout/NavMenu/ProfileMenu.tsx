@@ -249,7 +249,55 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     </>
   )
 
-  const renderUserContent = (isMobileFullscreen = false) => (
+  const renderConnectedUserStatic = () => (
+    <>
+      <Flex
+        direction={'column'}
+        align={'stretch'}
+        gap={'x2'}
+        style={{ paddingBottom: '8px' }}
+      >
+        <Flex direction={'row'} align={'center'} justify={'space-between'} w={'100%'}>
+          <Link
+            href={`/profile/${address}`}
+            passHref
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ textDecoration: 'none', flex: 1 }}
+          >
+            <Flex
+              direction={'row'}
+              align={'center'}
+              className={profileRow}
+              aria-label="Open profile"
+            >
+              <Avatar address={address!} src={ensAvatar} size={'40'} />
+              <Flex direction={'column'} ml={'x2'}>
+                <Text fontWeight={'display'}>{displayName}</Text>
+                <Text variant={'paragraph-md'} color={'tertiary'}>
+                  {userBalance}
+                </Text>
+              </Flex>
+            </Flex>
+          </Link>
+          <CopyButton text={address!} />
+        </Flex>
+
+        <Button
+          className={disconnectButton}
+          variant={'outline'}
+          color="negative"
+          onClick={onDisconnect}
+          id={'close-modal'}
+        >
+          Disconnect
+        </Button>
+      </Flex>
+      <Box color="border" borderStyle="solid" borderWidth="thin" />
+    </>
+  )
+
+  const renderUserContent = (isMobileFullscreen = false, showCreateButton = true) => (
     <>
       {daos.length > 0 && (
         <>
@@ -261,10 +309,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             style={
               isMobileFullscreen
                 ? {
-                    maxHeight: '50vh',
                     width: '100%',
-                    overflow: 'auto',
-                    WebkitOverflowScrolling: 'touch',
                   }
                 : {
                     width: '100%',
@@ -301,11 +346,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           <Box color="border" borderStyle="solid" borderWidth="thin" />
         </>
       )}
-      <Link href="/create" passHref style={{ width: '100%' }}>
-        <Button id={'close-modal'} w={'100%'} variant="primary">
-          Create a DAO
-        </Button>
-      </Link>
+      {showCreateButton && (
+        <Link href="/create" passHref style={{ width: '100%' }}>
+          <Button id={'close-modal'} w={'100%'} variant="primary">
+            Create a DAO
+          </Button>
+        </Link>
+      )}
     </>
   )
 
@@ -509,23 +556,54 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         direction={'column'}
         py={'x4'}
         px={'x8'}
-        gap={'x3'}
         backgroundColor="background1"
         className={[mobileMenuSlideIn, navPopUpWrapper]}
         style={{
           width: '100vw',
+          height: '100dvh',
           maxHeight: '100vh',
           position: 'fixed',
           top: 0,
           left: 0,
           zIndex: MOBILE_PROFILE_MENU_LAYER,
           paddingTop: '80px',
+          paddingBottom: '16px',
+          boxSizing: 'border-box',
           shadow: 'medium',
         }}
       >
-        {address ? renderConnectedUser() : <ConnectButton />}
-        {renderNavLinks()}
-        {address && renderUserContent(true)}
+        {address && renderConnectedUserStatic()}
+        <Flex
+          direction="column"
+          gap="x3"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: '8px',
+          }}
+        >
+          {!address && <ConnectButton />}
+          {renderNavLinks()}
+          {address && renderUserContent(true, false)}
+        </Flex>
+        {address && (
+          <Box
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              background: vars.color.background1,
+              paddingTop: '8px',
+            }}
+          >
+            <Link href="/create" passHref style={{ width: '100%' }}>
+              <Button id={'close-modal'} w={'100%'} variant="primary">
+                Create a DAO
+              </Button>
+            </Link>
+          </Box>
+        )}
       </Flex>
     </>
   )
