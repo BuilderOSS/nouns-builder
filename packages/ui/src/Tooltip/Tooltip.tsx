@@ -16,8 +16,9 @@ export const Tooltip = ({ children }: { children: string }) => {
         onBlur={() => setShowTooltip(false)}
         ref={triggerRef}
         tabIndex={0}
+        color="text3"
       >
-        <Icon id="question" size="sm" fill="text3" />
+        <Icon id="question" size="sm" />
       </Box>
       <PopUp
         open={showTooltip}

@@ -63,14 +63,14 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     title: 'Upgrade Proposal',
     subTitle: 'Upgrade dao contracts',
     icon: 'plus',
-    iconBackdrop: color.ghostHover,
+    iconBackdrop: iconBackdrop(color.accent),
     iconFill: 'icon1',
   },
   [TransactionType.UPDATE_MINTER]: {
     title: 'Update Minter',
     subTitle: 'Update token minter',
     icon: 'plus',
-    iconBackdrop: color.ghostHover,
+    iconBackdrop: iconBackdrop(color.accent),
     iconFill: 'icon1',
   },
   [TransactionType.PAUSE_AUCTIONS]: {
@@ -83,7 +83,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     title: 'Fix Metadata Renderer Base',
     subTitle: 'Restore NFT image visibility on external marketplaces',
     icon: 'spanner',
-    iconBackdrop: color.ghostHover,
+    iconBackdrop: iconBackdrop(color.warning),
   },
   [TransactionType.RESUME_AUCTIONS]: {
     title: 'Resume Auctions',
@@ -107,7 +107,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     title: 'Custom Transaction',
     subTitle: 'Any other type of transaction',
     icon: 'code-brackets',
-    iconBackdrop: color.ghostHover,
+    iconBackdrop: iconBackdrop(color.accent),
     iconFill: 'icon1',
   },
   [TransactionType.MIGRATION]: {

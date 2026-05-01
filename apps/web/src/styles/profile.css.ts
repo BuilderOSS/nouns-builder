@@ -52,7 +52,6 @@ export const responsiveGrid = style({
 
 export const profileDaoLink = style({
   cursor: 'pointer',
-  backgroundColor: color.background1,
   selectors: {
     '&:hover': {
       backgroundColor: color.background2,

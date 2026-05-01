@@ -10,10 +10,11 @@ interface ProposalTileProps {
   children?: ReactNode | TextProps
   variant?: 'for' | 'against' | 'abstain'
   icon?: IconType
+  className?: string
 }
 
 export const Tile: React.FC<ProposalTileProps> = (props) => {
-  const { title, subtitle, subtext, children, variant, icon } = props
+  const { title, subtitle, subtext, children, variant, icon, className } = props
 
   return (
     <Flex
@@ -24,6 +25,7 @@ export const Tile: React.FC<ProposalTileProps> = (props) => {
       borderStyle={'solid'}
       borderRadius={'curved'}
       justify={{ '@initial': 'space-between', '@768': 'flex-start' }}
+      className={className}
     >
       <Flex w={children ? '100%' : 'auto'} direction={'column'}>
         <Flex align={'center'} gap={'x2'} mb={{ '@initial': 'x2', '@768': 'x4' }}>

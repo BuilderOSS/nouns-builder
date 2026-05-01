@@ -132,7 +132,6 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                   >
                     <Box>
                       <Box
-                        backgroundColor="background2"
                         width={'100%'}
                         height={'auto'}
                         aspectRatio={1 / 1}
