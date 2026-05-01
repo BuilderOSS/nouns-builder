@@ -460,6 +460,7 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
                 ref={overlayRef}
                 p="x4"
                 backgroundColor="background1"
+                boxShadow="medium"
                 className={artworkSettingsBox}
                 style={{
                   opacity: 0.82,
@@ -471,7 +472,6 @@ export const LayerOrdering: React.FC<LayerOrderingProps> = ({
                   willChange: 'transform',
                   width: dragOverlay.width,
                   zIndex: 9999,
-                  boxShadow: '0 18px 38px rgba(0, 0, 0, 0.16)',
                 }}
               >
                 <Text>{draggedLayer.trait}</Text>

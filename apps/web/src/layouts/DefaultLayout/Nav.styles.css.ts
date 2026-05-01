@@ -115,23 +115,15 @@ export const navMenuBurger = style([
 export const disconnectButton = style([
   atoms({
     borderColor: 'negative',
+    color: 'negative',
   }),
   {
     transition:
       'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
-    background: color.ghost,
+    background: 'transparent',
     selectors: {
       '&:hover': {
         background: `${vars.color.negativeDisabled} !important`,
-      },
-      'html[data-theme-mode="dark"] &': {
-        background: color.negative,
-        color: color.text1,
-      },
-      'html[data-theme-mode="dark"] &:hover': {
-        background: `${vars.color.text1} !important`,
-        color: color.negative,
-        borderColor: color.negative,
       },
     },
   },
@@ -315,19 +307,6 @@ export const navPopUpWrapper = style({
     'html[data-theme-mode="dark"] &': {
       background: darkSurface,
       border: `1px solid ${darkSurfaceBorder}`,
-    },
-  },
-})
-
-export const navPrimaryActionButton = style({
-  selectors: {
-    'html[data-theme-mode="dark"] &': {
-      background: darkSurfaceHover,
-      color: color.text1,
-      borderColor: darkSurfaceBorder,
-    },
-    'html[data-theme-mode="dark"] &:hover': {
-      background: darkSurfaceHover,
     },
   },
 })

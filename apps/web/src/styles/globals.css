@@ -48,9 +48,9 @@ body {
 
 html[data-theme-mode='dark'] {
   --app-link-hover: #fff;
-  --connect-button-bg: #34363d;
-  --connect-button-bg-hover: #3b3e47;
-  --connect-button-text: #fff;
+  --connect-button-bg: #fff;
+  --connect-button-bg-hover: #f2f2f2;
+  --connect-button-text: #1f2024;
   --flatpickr-surface: #1f2024;
   --flatpickr-border: #3f4047;
   --flatpickr-text: #fff;

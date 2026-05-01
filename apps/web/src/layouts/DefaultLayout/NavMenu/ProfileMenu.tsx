@@ -28,7 +28,6 @@ import {
   navButton,
   navMenuBurger,
   navPopUpWrapper,
-  navPrimaryActionButton,
   profileRow,
 } from '../Nav.styles.css'
 import { MenuType } from './types'
@@ -303,7 +302,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         </>
       )}
       <Link href="/create" passHref style={{ width: '100%' }}>
-        <Button id={'close-modal'} w={'100%'} className={navPrimaryActionButton}>
+        <Button id={'close-modal'} w={'100%'} variant="primary">
           Create a DAO
         </Button>
       </Link>
