@@ -15,6 +15,7 @@ import 'src/styles/styles.css'
 import 'flatpickr/dist/flatpickr.css'
 import 'src/styles/flatpickr-theme.css'
 import 'react-mde/lib/styles/css/react-mde-all.css'
+import 'src/styles/react-mde-theme.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'

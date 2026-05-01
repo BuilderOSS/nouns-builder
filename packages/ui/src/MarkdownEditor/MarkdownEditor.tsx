@@ -128,24 +128,28 @@ export const MarkdownEditor: React.FC<MarkdownEditorProps> = ({
           />
         )
       ) : (
-        <ReactMdeComp
-          readOnly={disabled}
-          value={value}
-          onChange={onChange}
-          selectedTab={!disabled ? selectedTab : 'preview'}
-          onTabChange={setSelectedTab}
-          generateMarkdownPreview={async (markdown: string) => {
-            const effectiveTab = disabled ? 'preview' : selectedTab
+        <div className="markdown-editor-wrapper">
+          <ReactMdeComp
+            readOnly={disabled}
+            value={value}
+            onChange={onChange}
+            selectedTab={!disabled ? selectedTab : 'preview'}
+            onTabChange={setSelectedTab}
+            generateMarkdownPreview={async (markdown: string) => {
+              const effectiveTab = disabled ? 'preview' : selectedTab
 
-            return (
-              <Box style={effectiveTab === 'preview' ? previewContainerStyle : undefined}>
-                <MarkdownDisplay>{markdown}</MarkdownDisplay>
-              </Box>
-            )
-          }}
-          childProps={{ writeButton: { tabIndex: -1 } }}
-          paste={{ saveImage, accept: 'image/*' }}
-        />
+              return (
+                <Box
+                  style={effectiveTab === 'preview' ? previewContainerStyle : undefined}
+                >
+                  <MarkdownDisplay>{markdown}</MarkdownDisplay>
+                </Box>
+              )
+            }}
+            childProps={{ writeButton: { tabIndex: -1 } }}
+            paste={{ saveImage, accept: 'image/*' }}
+          />
+        </div>
       )}
 
       {!!errorMessage && <FieldError message={errorMessage} />}
