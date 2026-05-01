@@ -168,7 +168,7 @@ export const serializeDaoMetadata = (
 export const mapDaoLinkKeyToIcon = (key: string): string => {
   const normalized = normalizeLinkKey(key)
 
-  if (normalized === 'x') return 'twitter'
+  if (normalized === 'x') return 'x'
   if (normalized === 'discord') return 'discord'
   if (normalized === 'github') return 'github'
   if (normalized === 'farcaster') return 'globe'
