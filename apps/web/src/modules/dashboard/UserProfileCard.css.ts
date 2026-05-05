@@ -1,5 +1,7 @@
-import { atoms, color, space } from '@buildeross/zord'
+import { atoms, color, space, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
+
+const dashboardActionGrey = vars.color.background2
 
 export const profileCard = style([
   atoms({
@@ -11,9 +13,16 @@ export const profileCard = style([
   }),
   {
     cursor: 'pointer',
-    transition: 'background-color 0.15s ease',
+    transition: 'background-color 0.15s ease, border-color 0.15s ease',
     ':hover': {
-      backgroundColor: color.border,
+      backgroundColor: color.background2,
+      borderColor: color.background2,
+    },
+    selectors: {
+      'html[data-theme-mode="dark"] &:hover': {
+        backgroundColor: dashboardActionGrey,
+        borderColor: dashboardActionGrey,
+      },
     },
   },
 ])

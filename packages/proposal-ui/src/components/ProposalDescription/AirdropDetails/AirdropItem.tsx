@@ -490,7 +490,7 @@ export const AirdropItem = ({
             onClick={() => openExternal(sablierCampaignHref)}
           >
             View Airdrop on Sablier
-            <Icon id="arrowTopRight" />
+            <Icon id="arrow-top-right" />
           </Button>
           <Button
             variant="secondary"
@@ -502,7 +502,7 @@ export const AirdropItem = ({
             }
           >
             View Airdrop Contract
-            <Icon id="arrowTopRight" />
+            <Icon id="arrow-top-right" />
           </Button>
         </Stack>
       )}

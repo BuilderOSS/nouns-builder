@@ -1,10 +1,32 @@
+import { vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
+
+const circleBackgroundBorder = {
+  backgroundColor: vars.color.background1,
+  border: `2px solid ${vars.color.background1}`,
+}
+
+const circleBorderMobile = {
+  '@media': {
+    'screen and (max-width: 768px)': {
+      border: `2px solid ${vars.color.background2}`,
+    },
+  },
+}
+
+const lastCircleSelector = {
+  selectors: {
+    '&:before': {
+      content: 'none',
+    },
+  },
+}
 
 const flowTitleBase = style({
   position: 'absolute',
   fontSize: 18,
   fontWeight: 700,
-  color: '#FFF',
+  color: vars.color.onAccent,
   top: 30,
   opacity: 0.8,
   '@media': {
@@ -21,13 +43,12 @@ export const flowTitleVariant = styleVariants({
   active: [flowTitleBase, { opacity: 1 }],
   default: [flowTitleBase],
   fulfilled: [flowTitleBase, { opacity: 1 }],
-  preview: [flowTitleBase, { color: '#DADADA' }],
-  previewActive: [flowTitleBase, { color: '#000' }],
+  preview: [flowTitleBase, { color: vars.color.text4 }],
+  previewActive: [flowTitleBase, { color: vars.color.text1 }],
 })
 
 const flowFulfilledCircle = style({
-  backgroundColor: '#FFF',
-  border: '2px solid #FFF',
+  ...circleBackgroundBorder,
   selectors: {
     '&:hover': {
       cursor: 'pointer',
@@ -36,8 +57,7 @@ const flowFulfilledCircle = style({
 })
 
 const flowFulfilledCircleLast = style({
-  backgroundColor: '#FFF',
-  border: '2px solid #FFF',
+  ...circleBackgroundBorder,
 
   selectors: {
     '&:before': {
@@ -50,55 +70,42 @@ const flowFulfilledCircleLast = style({
 })
 
 const flowCircle = style({
-  backgroundColor: 'rgba(255,255,255, 0)',
-  border: '2px solid #FFF',
+  backgroundColor: 'transparent',
+  border: `2px solid ${vars.color.background1}`,
   '@media': {
     'screen and (max-width: 768px)': {
-      backgroundColor: '#FFF',
-      border: '2px solid #F2F2F2',
+      backgroundColor: vars.color.background1,
+      border: `2px solid ${vars.color.background2}`,
     },
   },
 })
 
 const flowCircleLast = style({
-  backgroundColor: 'rgba(255,255,255, 0)',
-  border: '2px solid #FFF',
+  backgroundColor: 'transparent',
+  border: `2px solid ${vars.color.background1}`,
   '@media': {
     'screen and (max-width: 768px)': {
-      backgroundColor: '#FFF',
-      border: '2px solid #F2F2F2',
+      backgroundColor: vars.color.background1,
+      border: `2px solid ${vars.color.background2}`,
     },
   },
-  selectors: {
-    '&:before': {
-      content: 'none',
-    },
-  },
+  ...lastCircleSelector,
 })
 
 const flowCircleActive = style({
-  backgroundColor: '#FFF',
-  border: '2px solid #FFF',
-  '@media': {
-    'screen and (max-width: 768px)': {
-      border: '2px solid #F2F2F2',
-    },
-  },
+  ...circleBackgroundBorder,
+  ...circleBorderMobile,
 })
 
 const flowCircleActiveLast = style({
-  backgroundColor: '#FFF',
-  border: '2px solid #FFF',
-  selectors: {
-    '&:before': {
-      content: 'none',
-    },
-  },
+  ...circleBackgroundBorder,
+  ...circleBorderMobile,
+  ...lastCircleSelector,
 })
 
 const circleBase = style({
   position: 'relative',
-  color: '#1CB687',
+  color: vars.color.positive,
   borderRadius: '100%',
 })
 
@@ -109,8 +116,8 @@ export const circleVariant = styleVariants({
   flowCircleActiveLast: [circleBase, flowCircleActiveLast],
   flowFulfilledCircle: [circleBase, flowFulfilledCircle],
   flowFulfilledCircleLast: [circleBase, flowFulfilledCircleLast],
-  preview: [circleBase, { backgroundColor: '#DADADA' }],
-  previewActive: [circleBase, { backgroundColor: '#000' }],
+  preview: [circleBase, { backgroundColor: vars.color.text4 }],
+  previewActive: [circleBase, { backgroundColor: vars.color.text1 }],
 })
 
 const flowSectionWrapper = style({
@@ -125,7 +132,7 @@ const flowSectionWrapper = style({
       top: '50%',
       marginTop: -1,
       width: 516,
-      border: '1px dashed #FFF',
+      border: `1px dashed ${vars.color.background1}`,
       opacity: 0.7,
       '@media': {
         '(max-width: 1080px)': {
@@ -156,7 +163,7 @@ export const flowSectionWrapperVariants = styleVariants({
           top: '50%',
           marginTop: -1,
           width: 516,
-          border: '1px dashed #B3B3B3',
+          border: `1px dashed ${vars.color.text4}`,
           '@media': {
             '(max-width: 1080px)': {
               width: 368,

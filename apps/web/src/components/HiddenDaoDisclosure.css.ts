@@ -1,4 +1,4 @@
-import { color } from '@buildeross/zord'
+import { color, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const hiddenDaoDisclosure = style({
@@ -22,6 +22,9 @@ export const hiddenDaoDisclosureTrigger = style({
   selectors: {
     '&:hover': {
       backgroundColor: color.background2,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      backgroundColor: vars.color.neutralHover,
     },
   },
 })

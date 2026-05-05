@@ -3,7 +3,7 @@ import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Flex, Icon, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, Text, vars } from '@buildeross/zord'
 import React from 'react'
 
 export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
@@ -49,7 +49,7 @@ export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
       <Box
         mt="x2"
         style={{
-          borderBottom: '1px solid #B3B3B3',
+          borderBottom: `1px solid ${vars.color.text4}`,
           width: '100%',
           opacity: 0.5,
         }}

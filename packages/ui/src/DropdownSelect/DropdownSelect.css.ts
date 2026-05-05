@@ -11,7 +11,7 @@ const baseDropdownMenu = style({
   backgroundColor: theme.colors.background1,
   border: `2px solid ${theme.colors.border}`,
   borderRadius: '12px',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  boxShadow: theme.shadows.medium,
   maxHeight: '300px',
   overflowY: 'auto',
   color: theme.colors.text1,

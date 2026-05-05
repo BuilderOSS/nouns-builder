@@ -2,13 +2,18 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
-import { Box, Flex, Icon, PopUp, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Icon, PopUp, Stack, Text, vars } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { useAccount, useSwitchChain } from 'wagmi'
 
-import { chainPopUpButton, navButton, wrongNetworkButton } from '../Nav.styles.css'
+import {
+  chainPopUpButton,
+  navButton,
+  navPopUpWrapper,
+  wrongNetworkButton,
+} from '../Nav.styles.css'
 import { MenuType } from './types'
 
 interface ChainMenuProps {
@@ -129,6 +134,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
         placement="bottom-end"
         close={activeDropdown !== MenuType.CHAIN_MENU}
         onOpenChange={(open) => onOpenMenu(open, MenuType.CHAIN_MENU)}
+        wrapperClassName={navPopUpWrapper}
         trigger={
           <Flex
             borderColor="border"
@@ -142,7 +148,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
             height={'x10'}
             px="x2"
             className={chainPopUpButton}
-            style={isWrongNetwork ? { borderColor: '#F03232' } : undefined}
+            style={isWrongNetwork ? { borderColor: vars.color.negative } : undefined}
           >
             <Flex align={'center'}>
               <Box h="x6" w="x6">
@@ -160,7 +166,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
                 </Text>
               </Flex>
               <Box h="x6" w="x6" ml="x2">
-                <Icon id={'chevronDown'} fill={'tertiary'} pointerEvents="none" />
+                <Icon id={'chevron-down'} fill={'tertiary'} pointerEvents="none" />
               </Box>
             </Flex>
           </Flex>

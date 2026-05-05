@@ -1,5 +1,5 @@
 import * as z from '@buildeross/constants/layers'
-import { atoms } from '@buildeross/zord'
+import { atoms, color } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const NavContainer = style([
@@ -29,7 +29,7 @@ export const NavWrapper = style([
 export const uploadNotificationWrapper = style({
   '@media': {
     '(max-width: 768px)': {
-      background: '#fff',
+      background: color.background1,
       bottom: 0,
       paddingTop: 5,
       paddingBottom: 5,
@@ -40,4 +40,13 @@ export const uploadNotificationWrapper = style({
 export const navLogo = style({
   zIndex: z.NAV_LAYER,
   position: 'relative',
+})
+
+export const navLogoGlyph = style({
+  transition: 'filter 0.2s ease-in-out',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      filter: 'invert(1)',
+    },
+  },
 })

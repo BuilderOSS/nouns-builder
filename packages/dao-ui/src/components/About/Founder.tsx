@@ -51,7 +51,7 @@ export const Founder: React.FC<FounderProps> = ({ wallet, ownershipPct, vestExpi
           onMouseOver={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >
-          <Icon id="info-16" size="sm" />
+          <Icon id="question" size="sm" fill="text3" />
         </Box>
         <PopUp open={showTooltip} trigger={<></>}>
           <Box>{`In effect until ${vestDate}`}</Box>

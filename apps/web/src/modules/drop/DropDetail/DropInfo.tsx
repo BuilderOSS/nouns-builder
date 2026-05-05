@@ -232,7 +232,7 @@ export const DropInfo = ({
                   </Box>
                 )}
                 {daoName}
-                <Icon id="arrowTopRight" />
+                <Icon id="arrow-top-right" />
               </Button>
             </Link>
           </Box>

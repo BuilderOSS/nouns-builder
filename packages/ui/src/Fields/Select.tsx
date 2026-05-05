@@ -2,7 +2,7 @@ import { Flex } from '@buildeross/zord'
 import { FormikProps } from 'formik'
 import React, { ReactElement } from 'react'
 
-import { defaultSelectStyle } from './styles.css'
+import { DropdownSelect } from '../DropdownSelect'
 
 //TODO:: this is very specific logic to selecting from contract.interface.fragments, this component could be abstracted
 const FormSelect: React.FC<{
@@ -15,29 +15,40 @@ const FormSelect: React.FC<{
   const optionsArray: any[] =
     options?.find((opt: { name: string }) => opt.name === id)?.options ?? []
 
-  const handleChange = (e: any) => {
+  const handleChange = (selectedName: string) => {
+    if (selectedName === '') {
+      formik.setFieldValue(id, '')
+      return
+    }
+
     if (!optionsArray.length) return
-    const method = optionsArray.find((option) => option.name === e.target.value)
-    if (!method) return
+    const method = optionsArray.find((option) => option.name === selectedName)
+    if (!method) {
+      formik.setFieldValue(id, '')
+      return
+    }
+
     formik.setFieldValue(id, { name: method.name, inputs: method.inputs })
   }
 
   return (
     <Flex direction={'column'}>
       <label htmlFor={id}>{inputLabel}</label>
-      <select
+      <DropdownSelect
         id={id}
-        className={defaultSelectStyle}
+        ariaLabel={typeof inputLabel === 'string' ? inputLabel : undefined}
         value={value?.name ?? ''}
         onChange={handleChange}
-      >
-        <option></option>
-        {optionsArray?.map((option: any) => (
-          <option value={option.name} key={option.name}>
-            {option.name}
-          </option>
-        ))}
-      </select>
+        options={[
+          { label: 'Select option', value: '' },
+          ...optionsArray.map((option: any) => ({
+            label: option.name,
+            value: option.name,
+          })),
+        ]}
+        customLabel={value?.name || 'Select option'}
+        positioning="absolute"
+      />
     </Flex>
   )
 }

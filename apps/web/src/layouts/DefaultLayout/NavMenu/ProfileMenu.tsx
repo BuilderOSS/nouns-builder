@@ -8,7 +8,7 @@ import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Button, Flex, Icon, PopUp, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, PopUp, Text, vars } from '@buildeross/zord'
 import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
@@ -27,6 +27,7 @@ import {
   myDaosWrapper,
   navButton,
   navMenuBurger,
+  navPopUpWrapper,
   profileRow,
 } from '../Nav.styles.css'
 import { MenuType } from './types'
@@ -205,9 +206,14 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
   const onDisconnect = useWalletDisconnect()
 
-  const renderConnectedUser = () => (
+  const renderConnectedUserCommon = ({ isStatic = false }: { isStatic?: boolean }) => (
     <>
-      <Flex direction={'column'} align={'stretch'} gap={'x2'}>
+      <Flex
+        direction={'column'}
+        align={'stretch'}
+        gap={'x2'}
+        style={isStatic ? { paddingBottom: '8px' } : undefined}
+      >
         <Flex direction={'row'} align={'center'} justify={'space-between'} w={'100%'}>
           <Link
             href={`/profile/${address}`}
@@ -248,7 +254,11 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     </>
   )
 
-  const renderUserContent = (isMobileFullscreen = false) => (
+  const renderConnectedUser = () => renderConnectedUserCommon({ isStatic: false })
+
+  const renderConnectedUserStatic = () => renderConnectedUserCommon({ isStatic: true })
+
+  const renderUserContent = (isMobileFullscreen = false, showCreateButton = true) => (
     <>
       {daos.length > 0 && (
         <>
@@ -260,10 +270,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             style={
               isMobileFullscreen
                 ? {
-                    maxHeight: '50vh',
                     width: '100%',
-                    overflow: 'auto',
-                    WebkitOverflowScrolling: 'touch',
                   }
                 : {
                     width: '100%',
@@ -300,11 +307,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           <Box color="border" borderStyle="solid" borderWidth="thin" />
         </>
       )}
-      <Link href="/create" passHref style={{ width: '100%' }}>
-        <Button id={'close-modal'} w={'100%'}>
-          Create a DAO
-        </Button>
-      </Link>
+      {showCreateButton && (
+        <Link href="/create" passHref style={{ width: '100%' }}>
+          <Button id={'close-modal'} w={'100%'} variant="primary">
+            Create a DAO
+          </Button>
+        </Link>
+      )}
     </>
   )
 
@@ -457,7 +466,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             position: 'relative',
             zIndex: NAV_BUTTON_LAYER + 1,
             borderRadius: '50%',
-            borderColor: 'rgba(0, 0, 0, 0.5)',
+            borderColor: vars.color.border,
           }}
           className={daoButton}
         >
@@ -499,7 +508,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           width: '100vw',
           height: '100vh',
           zIndex: MOBILE_PROFILE_MENU_LAYER - 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          backgroundColor: vars.color.backdrop,
         }}
         onClick={() => onSetActiveDropdown(undefined)}
       />
@@ -508,23 +517,54 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         direction={'column'}
         py={'x4'}
         px={'x8'}
-        gap={'x3'}
         backgroundColor="background1"
-        className={mobileMenuSlideIn}
+        className={[mobileMenuSlideIn, navPopUpWrapper]}
         style={{
           width: '100vw',
+          height: '100dvh',
           maxHeight: '100vh',
           position: 'fixed',
           top: 0,
           left: 0,
           zIndex: MOBILE_PROFILE_MENU_LAYER,
           paddingTop: '80px',
+          paddingBottom: '16px',
+          boxSizing: 'border-box',
           shadow: 'medium',
         }}
       >
-        {address ? renderConnectedUser() : <ConnectButton />}
-        {renderNavLinks()}
-        {address && renderUserContent(true)}
+        {address && renderConnectedUserStatic()}
+        <Flex
+          direction="column"
+          gap="x3"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: '8px',
+          }}
+        >
+          {!address && <ConnectButton />}
+          {renderNavLinks()}
+          {address && renderUserContent(true, false)}
+        </Flex>
+        {address && (
+          <Box
+            style={{
+              position: 'sticky',
+              bottom: 0,
+              background: vars.color.background1,
+              paddingTop: '8px',
+            }}
+          >
+            <Link href="/create" passHref style={{ width: '100%' }}>
+              <Button id={'close-modal'} w={'100%'} variant="primary">
+                Create a DAO
+              </Button>
+            </Link>
+          </Box>
+        )}
       </Flex>
     </>
   )
@@ -564,6 +604,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           trigger={triggerElement}
           close={activeDropdown !== MenuType.PROFILE_MENU}
           onOpenChange={handleOpenMenu}
+          wrapperClassName={navPopUpWrapper}
         >
           <Flex direction={'column'} p={'x4'} gap={'x4'} style={{ width: 320 }}>
             {address ? renderConnectedUser() : <ConnectButton />}

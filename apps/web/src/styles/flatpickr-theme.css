@@ -1,0 +1,87 @@
+.flatpickr-calendar {
+  background: var(--flatpickr-surface);
+  border: 1px solid var(--flatpickr-border);
+  box-shadow: var(--flatpickr-backdrop-shadow);
+}
+
+.flatpickr-calendar::before,
+.flatpickr-calendar::after {
+  border-bottom-color: var(--flatpickr-surface);
+}
+
+.flatpickr-months .flatpickr-month,
+.flatpickr-weekdays,
+span.flatpickr-weekday,
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year,
+.flatpickr-time input,
+.flatpickr-time .flatpickr-am-pm {
+  color: var(--flatpickr-text);
+  background: var(--flatpickr-surface);
+}
+
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+  fill: var(--flatpickr-text);
+}
+
+.flatpickr-day,
+.flatpickr-time .numInputWrapper span.arrowUp::after,
+.flatpickr-time .numInputWrapper span.arrowDown::after {
+  color: var(--flatpickr-text);
+}
+
+.flatpickr-day.flatpickr-disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay,
+.flatpickr-day.notAllowed,
+.flatpickr-time .flatpickr-am-pm.flatpickr-disabled,
+.flatpickr-time .flatpickr-am-pm.flatpickr-disabled:hover {
+  color: var(--flatpickr-muted);
+}
+
+.flatpickr-day:hover,
+.flatpickr-day:focus,
+.flatpickr-time input:hover,
+.flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+  background: var(--flatpickr-hover);
+  border-color: var(--flatpickr-hover);
+}
+
+.flatpickr-day.today {
+  border-color: var(--flatpickr-text);
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+  background: var(--flatpickr-selected-bg);
+  border-color: var(--flatpickr-selected-bg);
+  color: var(--flatpickr-selected-text);
+}
+
+.flatpickr-time {
+  border-top: 1px solid var(--flatpickr-border);
+}
+
+.flatpickr-time input:focus,
+.flatpickr-time .flatpickr-am-pm:focus {
+  background: var(--flatpickr-hover);
+}

@@ -1,13 +1,13 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const confirmResetCloseButton = style({
   padding: 0,
   minWidth: 'unset',
   background: 'transparent',
-  color: '#000',
+  color: vars.color.text1,
   selectors: {
-    '&:hover': { background: 'transparent', color: '#808080' },
+    '&:hover': { background: 'transparent', color: vars.color.text3 },
   },
 })
 
@@ -19,7 +19,7 @@ export const confirmResetHeadingStyle = style({
 })
 
 export const confirmResetHelperStyle = style({
-  color: '#808080',
+  color: vars.color.text3,
   fontSize: 16,
   lineHeight: '24px',
   marginBottom: 8,
@@ -37,8 +37,8 @@ export const dismissResetButton = style([
     fontFamily: 'Inter, sans-serif!important',
     width: '100%',
     borderRadius: '12px',
-    background: '#FFF',
-    color: '#000',
+    background: vars.color.background1,
+    color: vars.color.text1,
   },
   atoms({
     mb: 'x2',

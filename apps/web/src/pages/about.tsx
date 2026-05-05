@@ -1,13 +1,13 @@
 import { useChainStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { Box, Stack } from '@buildeross/zord'
+import { Box, Stack, vars } from '@buildeross/zord'
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
-import { whyCreateButton, whyTextStyle } from 'src/styles/about.css'
+import { darkWhy, lightWhy, whyCreateButton, whyTextStyle } from 'src/styles/about.css'
 
 import { NextPageWithLayout } from './_app'
 
@@ -35,7 +35,21 @@ const AboutPage: NextPageWithLayout = () => {
           width={'100%'}
           px={'x4'}
         >
-          <Image src={'/why.svg'} alt="why" style={{ alignSelf: 'center' }} width={500} />
+          <Image
+            src={'/why.svg'}
+            alt="why"
+            style={{ alignSelf: 'center' }}
+            width={500}
+            className={lightWhy}
+          />
+          <Image
+            src={'/why-dark.svg'}
+            alt={''}
+            aria-hidden={true}
+            style={{ alignSelf: 'center' }}
+            width={500}
+            className={darkWhy}
+          />
 
           <Box>
             Nouns Builder makes it easy for communities and collectives to create Nounish
@@ -70,7 +84,7 @@ const AboutPage: NextPageWithLayout = () => {
             py={'x4'}
             px={'x6'}
             fontSize={18}
-            style={{ background: '#000', color: '#fff' }}
+            style={{ background: vars.color.accent, color: vars.color.onAccent }}
             className={whyCreateButton}
             mb={'x12'}
             handleClick={handleCreateClick}

@@ -36,7 +36,7 @@ import {
   FEE_CONFIGS,
   isChainIdSupportedByCoining,
 } from '@buildeross/utils'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Stack, Text, vars } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { type ClankerTokenV4, FEE_CONFIGS as SDK_FEE_CONFIGS } from 'clanker-sdk'
 import { Clanker } from 'clanker-sdk/v4'
@@ -58,6 +58,9 @@ import { ZodError } from 'zod'
 import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
 
 const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
+
+const warningSurface = `color-mix(in srgb, ${vars.color.warning} 14%, transparent)`
+const negativeSurface = `color-mix(in srgb, ${vars.color.negative} 14%, transparent)`
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -630,11 +633,7 @@ export const CreatorCoin: React.FC = () => {
   if (!isChainSupported) {
     return (
       <Box w="100%">
-        <Box
-          p="x6"
-          borderRadius="curved"
-          style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
-        >
+        <Box p="x6" borderRadius="curved" style={{ backgroundColor: warningSurface }}>
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
@@ -727,7 +726,7 @@ export const CreatorCoin: React.FC = () => {
                   <Box
                     p="x4"
                     borderRadius="curved"
-                    style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
+                    style={{ backgroundColor: negativeSurface }}
                   >
                     <Text
                       variant="paragraph-sm"
@@ -758,7 +757,7 @@ export const CreatorCoin: React.FC = () => {
                   <Box
                     p="x4"
                     borderRadius="curved"
-                    style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
+                    style={{ backgroundColor: negativeSurface }}
                   >
                     <Text
                       variant="paragraph-sm"
@@ -778,7 +777,7 @@ export const CreatorCoin: React.FC = () => {
                   <Box
                     p="x4"
                     borderRadius="curved"
-                    style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
+                    style={{ backgroundColor: warningSurface }}
                   >
                     <Text variant="paragraph-sm" color="warning">
                       Treasury address not found. Please connect to a DAO.
@@ -791,7 +790,7 @@ export const CreatorCoin: React.FC = () => {
                   <Box
                     p="x4"
                     borderRadius="curved"
-                    style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
+                    style={{ backgroundColor: warningSurface }}
                   >
                     <Text variant="paragraph-sm" color="warning">
                       Fetching current ETH price...
@@ -804,7 +803,7 @@ export const CreatorCoin: React.FC = () => {
                   <Box
                     p="x4"
                     borderRadius="curved"
-                    style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
+                    style={{ backgroundColor: warningSurface }}
                   >
                     <Text variant="paragraph-sm" color="warning">
                       Fetching Builder token price...
@@ -817,7 +816,7 @@ export const CreatorCoin: React.FC = () => {
                   <Box
                     p="x4"
                     borderRadius="curved"
-                    style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
+                    style={{ backgroundColor: negativeSurface }}
                   >
                     <Text
                       variant="paragraph-sm"

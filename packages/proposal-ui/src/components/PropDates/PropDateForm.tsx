@@ -11,12 +11,13 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { WalletIdentity } from '@buildeross/ui'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Select, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Field, FieldProps, Form, Formik } from 'formik'
@@ -256,21 +257,31 @@ export const PropDateForm = ({
 
               {!replyTo && !!invoiceData?.milestones && (
                 <Flex direction={'column'} pb="x8">
-                  <label className={defaultInputLabelStyle}>Milestone (optional)</label>
-                  <Select
-                    {...formik.getFieldProps(`milestoneId`)}
-                    id="milestoneId"
-                    defaultValue="-1"
-                  >
-                    <option key="not-specific-milestone" value={-1}>
-                      No specific milestone
-                    </option>
-                    {invoiceData.milestones.map((milestone, i) => (
-                      <option key={milestone.title} value={i}>
-                        {milestone.title}
-                      </option>
-                    ))}
-                  </Select>
+                  <label htmlFor="propdate-milestone" className={defaultInputLabelStyle}>
+                    Milestone (optional)
+                  </label>
+                  <DropdownSelect
+                    id="propdate-milestone"
+                    ariaLabel="Milestone (optional)"
+                    value={String(formik.values.milestoneId)}
+                    onChange={(nextValue) => {
+                      formik.setFieldValue('milestoneId', Number(nextValue))
+                    }}
+                    options={[
+                      { label: 'No specific milestone', value: '-1' },
+                      ...invoiceData.milestones.map((milestone, i) => ({
+                        label: milestone.title ?? `Milestone ${i + 1}`,
+                        value: String(i),
+                      })),
+                    ]}
+                    customLabel={
+                      formik.values.milestoneId >= 0
+                        ? invoiceData.milestones[formik.values.milestoneId]?.title ||
+                          `Milestone ${formik.values.milestoneId + 1}`
+                        : 'No specific milestone'
+                    }
+                    positioning="absolute"
+                  />
                 </Flex>
               )}
 

@@ -33,21 +33,21 @@ export const voteModalOption = style({
   cursor: 'pointer',
   selectors: {
     '&:hover': {
-      borderColor: '#000000',
+      borderColor: vars.color.text1,
     },
     '&[data-is-active-negative="true"]': {
-      backgroundColor: '#F03232',
-      color: '#ffffff',
-      borderColor: '#F03232 !important',
+      backgroundColor: vars.color.negative,
+      color: vars.color.onNegative,
+      borderColor: `${vars.color.negative} !important`,
     },
     '&[data-is-active-positive="true"]': {
-      backgroundColor: '#1CB687',
-      color: '#ffffff',
-      borderColor: '#1CB687 !important',
+      backgroundColor: vars.color.positive,
+      color: vars.color.onPositive,
+      borderColor: `${vars.color.positive} !important`,
     },
     '&[data-is-active-neutral="true"]': {
       backgroundColor: vars.color.neutral,
-      borderColor: '#000000',
+      borderColor: vars.color.text1,
     },
   },
 })

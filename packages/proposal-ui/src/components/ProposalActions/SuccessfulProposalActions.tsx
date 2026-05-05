@@ -104,10 +104,10 @@ export const SuccessfulProposalActions: React.FC<SuccessfulProposalActionsProps>
 
   const getBorderColor = (proposal: Proposal) => {
     if (proposal.state === ProposalState.Succeeded) {
-      return '#F2E2F7'
+      return vars.color.neutral
     }
     if (isProposalExecutable(proposal)) {
-      return '#D3E5FB'
+      return vars.color.primary
     }
     if (proposal.state === ProposalState.Queued) {
       return vars.color.border
@@ -171,7 +171,7 @@ export const SuccessfulProposalActions: React.FC<SuccessfulProposalActionsProps>
             borderStyle={'solid'}
             px={'x2'}
             py={'x4'}
-            style={{ background: '#FBFBFB', maxHeight: 40, minWidth: 124 }}
+            style={{ background: vars.color.background1, maxHeight: 40, minWidth: 124 }}
           >
             <Text
               fontWeight={'display'}
@@ -223,7 +223,7 @@ export const SuccessfulProposalActions: React.FC<SuccessfulProposalActionsProps>
                 end={expiresAt!}
                 onEnd={onEnd}
                 style={{
-                  color: '#257CED',
+                  color: vars.color.primary,
                   fontWeight: 700,
                   fontVariantNumeric: 'tabular-nums',
                   fontFeatureSettings: 'tnum',

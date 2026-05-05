@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const artworkPreviewPanel = style([
@@ -13,8 +13,8 @@ export const artworkPreviewPanel = style([
   {
     minHeight: '100vh',
     width: '50vw',
-    borderRight: '2px solid #F2F2F2',
-    background: '#fff',
+    borderRight: `2px solid ${vars.color.background2}`,
+    background: vars.color.background1,
     '@media': {
       'screen and (max-width: 768px)': {
         width: '100%',

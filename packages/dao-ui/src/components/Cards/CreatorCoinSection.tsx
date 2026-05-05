@@ -61,7 +61,7 @@ export const CreatorCoinSection = ({
         </Button>
       )}
       <Link link={getCoinLink(chainId, tokenAddress)}>
-        <Button variant="outline" icon="arrowRight" iconAlign="right">
+        <Button variant="outline" icon="arrow-right" iconAlign="right">
           View Details
         </Button>
       </Link>

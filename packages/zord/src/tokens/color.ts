@@ -59,6 +59,8 @@ export const color = {
   warningDisabled: '#F9DEB1',
   onWarning: '#FFFFFF',
   onWarningDisabled: '#DDB777',
+
+  warningStrong: '#EC714B',
 }
 
 // export const color = {

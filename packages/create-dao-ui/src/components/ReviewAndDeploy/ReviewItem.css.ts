@@ -1,3 +1,4 @@
+import { vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const infoSectionStyle = style({
@@ -32,7 +33,7 @@ export const infoSectionLabelStyle = style({
   fontWeight: 500,
   textTransform: 'uppercase',
   letterSpacing: '.05em',
-  color: '#4D4D4D',
+  color: vars.color.text2,
 })
 
 export const infoSectionValueStyle = style({

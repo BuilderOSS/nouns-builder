@@ -51,7 +51,7 @@ export const MobileProposalActionBar: React.FC<MobileProposalActionBarProps> = (
             disabled={backDisabled}
             onClick={onBack}
           >
-            <Icon id="arrowLeft" />
+            <Icon id="arrow-left" />
           </Button>
         )}
 

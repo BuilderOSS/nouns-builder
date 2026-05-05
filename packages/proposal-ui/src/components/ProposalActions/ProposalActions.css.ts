@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 const proposalActionButton = style([
@@ -26,29 +26,29 @@ export const proposalActionButtonVariants = styleVariants({
   cancel: [
     proposalActionButton,
     {
-      background: '#F2F2F2',
-      color: '#000000',
+      background: vars.color.background2,
+      color: vars.color.text1,
       minWidth: 149,
     },
   ],
   queue: [
     proposalActionButton,
     {
-      background: '#D16BE1',
+      background: vars.color.secondary,
       width: '100%',
     },
   ],
   execute: [
     proposalActionButton,
     {
-      background: '#257CED',
+      background: vars.color.primary,
       width: '100%',
     },
   ],
 })
 
 export const cancelButtonBorder = style({
-  borderTop: '2px solid #F2F2F2',
+  borderTop: `2px solid ${vars.color.background2}`,
   '@media': {
     '(min-width: 768px)': {
       borderTop: 'none',

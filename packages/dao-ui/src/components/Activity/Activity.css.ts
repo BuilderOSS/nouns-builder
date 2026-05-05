@@ -1,3 +1,4 @@
+import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const proposalFormTitle = style({
@@ -14,10 +15,10 @@ export const proposalFormTitle = style({
 export const delegateBtn = style({
   fontFamily: 'ptRoot !important',
   height: '40px !important',
-  color: '#000 !important',
-  backgroundColor: '#FFF !important',
+  color: `${vars.color.text1} !important`,
+  backgroundColor: `${vars.color.background1} !important`,
   ':hover': {
-    backgroundColor: '#F9F9F9 !important',
+    backgroundColor: `${vars.color.background2} !important`,
   },
   '@media': {
     '(max-width: 420px)': {
@@ -28,9 +29,9 @@ export const delegateBtn = style({
 })
 
 export const currentDelegateBtn = style({
-  backgroundColor: '#FFF !important',
+  backgroundColor: `${vars.color.background1} !important`,
   ':hover': {
-    backgroundColor: '#F9F9F9 !important',
+    backgroundColor: `${vars.color.background2} !important`,
   },
 })
 

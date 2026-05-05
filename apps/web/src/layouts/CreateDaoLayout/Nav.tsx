@@ -7,7 +7,7 @@ import React from 'react'
 import NogglesLogo from '../assets/builder-framed.svg'
 import TestnetLogo from '../assets/testnet.svg'
 import { NavMenu } from '../DefaultLayout/NavMenu'
-import { NavContainer, navLogo, NavWrapper } from './Nav.styles.css'
+import { NavContainer, navLogo, navLogoGlyph, NavWrapper } from './Nav.styles.css'
 
 export const Nav = () => {
   const isMounted = useIsMounted()
@@ -21,8 +21,7 @@ export const Nav = () => {
           <Link href={'/'} passHref>
             <Stack className={navLogo}>
               <NogglesLogo
-                fill={'black'}
-                className={atoms({ width: 'x23', cursor: 'pointer' })}
+                className={`${atoms({ width: 'x23', cursor: 'pointer' })} ${navLogoGlyph}`}
               />
               <NetworkController.Testnet>
                 <TestnetLogo

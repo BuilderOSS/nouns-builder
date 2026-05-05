@@ -101,8 +101,8 @@ export const AccordionItem: React.FC<{
         )}
         <Flex align="center" gap="x2">
           {showWarning && <Icon id="warning-16" fill="warning" size="sm" />}
-          {(isOpen && <Icon id="chevronUp" cursor={'pointer'} />) || (
-            <Icon id="chevronDown" cursor={'pointer'} />
+          {(isOpen && <Icon id="chevron-up" cursor={'pointer'} />) || (
+            <Icon id="chevron-down" cursor={'pointer'} />
           )}
         </Flex>
       </Flex>

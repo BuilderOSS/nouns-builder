@@ -1,9 +1,10 @@
 import * as z from '@buildeross/constants/layers'
+import { vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const animatedModal = style({
   position: 'fixed',
-  background: 'rgba(0, 0, 0, 0.3)',
+  background: vars.color.backdrop,
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
   height: '100vh',
@@ -22,11 +23,17 @@ export const animatedModalTrigger = style({
 })
 
 export const defaultAnimatedModalContent = style({
-  background: '#fff',
+  background: vars.color.background1,
   maxWidth: 'calc(100vw - 50px)',
   height: 'auto',
   maxHeight: '90vh',
   zIndex: z.MODAL_CONTENT_LAYER,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: vars.color.background1,
+      border: `1px solid ${vars.color.border}`,
+    },
+  },
   '@media': {
     'screen and (max-width: 768px)': {
       width: 'calc(100% - 50px)',

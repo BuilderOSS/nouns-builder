@@ -1,5 +1,16 @@
-import { atoms, media } from '@buildeross/zord'
+import { atoms, media, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
+
+export const proposalTileHover = style([
+  {
+    cursor: 'pointer',
+    backgroundColor: 'transparent',
+    transition: 'background-color 0.2s ease-in-out',
+    ':hover': {
+      backgroundColor: vars.color.border,
+    },
+  },
+])
 
 export const proposalTileSubtitle = style([
   atoms({

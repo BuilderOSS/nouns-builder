@@ -4,7 +4,7 @@ import {
   DEFAULT_VESTING_DAYS,
   FEE_CONFIG_OPTIONS,
 } from '@buildeross/utils'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Stack, Text, vars } from '@buildeross/zord'
 import React from 'react'
 import { formatEther } from 'viem'
 
@@ -62,10 +62,10 @@ export const ClankerCoinFormFields: React.FC<CoinFormFieldsProps> = ({
             style={{
               width: '100%',
               padding: '12px',
-              border: '1px solid #e5e5e5',
+              border: `1px solid ${vars.color.border}`,
               borderRadius: '8px',
               fontSize: '16px',
-              backgroundColor: 'white',
+              backgroundColor: vars.color.background1,
             }}
           >
             {FEE_CONFIG_OPTIONS.map((option) => (

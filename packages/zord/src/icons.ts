@@ -1,88 +1,87 @@
-import Airdrop from './assets/airdrop.svg'
-import AirdropSablier from './assets/airdrop-sablier.svg'
-import ArrowLeft from './assets/arrow-left.svg'
-import ArrowRight from './assets/arrow-right.svg'
-import ArrowTopRight from './assets/arrow-top-right.svg'
-import Brush from './assets/brush.svg'
-import Burger from './assets/burger.svg'
-import Check from './assets/check.svg'
-import CheckInCircle from './assets/check-in-circle.svg'
-import ChevronDown from './assets/chevron-down.svg'
-import ChevronLeft from './assets/chevron-left.svg'
-import ChevronRight from './assets/chevron-right.svg'
-import ChevronUp from './assets/chevron-up.svg'
-import Code from './assets/code.svg'
-import CodeBrackets from './assets/code-brackets.svg'
-import Collection from './assets/collection.svg'
-import ContentCoin from './assets/content-coin.svg'
-import Copy from './assets/copy.svg'
-import CreatorCoin from './assets/creator-coin.svg'
-import Cross from './assets/cross.svg'
-import Cross16 from './assets/cross-16.svg'
-import Dash from './assets/dash.svg'
-import Discord from './assets/discord.svg'
-import Dots from './assets/dots.svg'
-import Download from './assets/download.svg'
-import Ellipsis from './assets/ellipsis.svg'
-import Erc20 from './assets/erc20.svg'
-import Escrow from './assets/escrow.svg'
-import Eth from './assets/eth.svg'
-import External from './assets/external-16.svg'
-import Github from './assets/github.svg'
-import Globe from './assets/globe.svg'
-import HandlebarCircle from './assets/handlebar-circle.svg'
-import Handshake from './assets/handshake.svg'
-import Heart from './assets/heart.svg'
-import HeartFilled from './assets/heart-filled.svg'
-import Info16 from './assets/info-16.svg'
-import Migrate from './assets/migrate.svg'
-import Move from './assets/move.svg'
-import NewWindow from './assets/new-window.svg'
-import Nft from './assets/nft.svg'
-import Noggles from './assets/noggles.svg'
-import Pause from './assets/pause.svg'
-import PauseTemplate from './assets/pause-template.svg'
-import Pencil from './assets/pencil.svg'
-import Pin from './assets/pin.svg'
-import Play from './assets/play.svg'
-import Plus from './assets/plus.svg'
-import Question from './assets/question.svg'
-import Queue from './assets/queue.svg'
-import Refresh from './assets/refresh.svg'
-import ResumeTemplate from './assets/resume-template.svg'
-import Sablier from './assets/sablier.svg'
-import Search from './assets/search.svg'
-import Share from './assets/share.svg'
-import Sliders from './assets/sliders.svg'
-import Spanner from './assets/spanner.svg'
-import Swap from './assets/swap.svg'
-import Trash from './assets/trash.svg'
-import WalletConnect from './assets/wallet-connect.svg'
-import WalletConnectOutline from './assets/wallet-connect-outline.svg'
-import Warning from './assets/warning.svg'
-import Warning16 from './assets/warning-16.svg'
-import Twitter from './assets/x.svg'
+import Airdrop from './assets/brand/airdrop.svg'
+import AirdropSablier from './assets/brand/airdrop-sablier.svg'
+import Brush from './assets/brand/brush.svg'
+import Collection from './assets/brand/collection.svg'
+import ContentCoin from './assets/brand/content-coin.svg'
+import CreatorCoin from './assets/brand/creator-coin.svg'
+import Erc20 from './assets/brand/erc20.svg'
+import Escrow from './assets/brand/escrow.svg'
+import Eth from './assets/brand/eth.svg'
+import Handshake from './assets/brand/handshake.svg'
+import Migrate from './assets/brand/migrate.svg'
+import Nft from './assets/brand/nft.svg'
+import PauseTemplate from './assets/brand/pause-template.svg'
+import ResumeTemplate from './assets/brand/resume-template.svg'
+import Sablier from './assets/brand/sablier.svg'
+import WalletConnect from './assets/brand/wallet-connect.svg'
+import WalletConnectOutline from './assets/brand/wallet-connect-outline.svg'
+import Twitter from './assets/brand/x.svg'
+import ArrowLeft from './assets/monochrome/arrow-left.svg'
+import ArrowRight from './assets/monochrome/arrow-right.svg'
+import ArrowTopRight from './assets/monochrome/arrow-top-right.svg'
+import Burger from './assets/monochrome/burger.svg'
+import Check from './assets/monochrome/check.svg'
+import CheckInCircle from './assets/monochrome/check-in-circle.svg'
+import ChevronDown from './assets/monochrome/chevron-down.svg'
+import ChevronLeft from './assets/monochrome/chevron-left.svg'
+import ChevronRight from './assets/monochrome/chevron-right.svg'
+import ChevronUp from './assets/monochrome/chevron-up.svg'
+import Code from './assets/monochrome/code.svg'
+import CodeBrackets from './assets/monochrome/code-brackets.svg'
+import Copy from './assets/monochrome/copy.svg'
+import Cross from './assets/monochrome/cross.svg'
+import Cross16 from './assets/monochrome/cross-16.svg'
+import Dash from './assets/monochrome/dash.svg'
+import Discord from './assets/monochrome/discord.svg'
+import Dots from './assets/monochrome/dots.svg'
+import Download from './assets/monochrome/download.svg'
+import Ellipsis from './assets/monochrome/ellipsis.svg'
+import External from './assets/monochrome/external-16.svg'
+import Github from './assets/monochrome/github.svg'
+import Globe from './assets/monochrome/globe.svg'
+import HandlebarCircle from './assets/monochrome/handlebar-circle.svg'
+import Heart from './assets/monochrome/heart.svg'
+import HeartFilled from './assets/monochrome/heart-filled.svg'
+import Move from './assets/monochrome/move.svg'
+import NewWindow from './assets/monochrome/new-window.svg'
+import Noggles from './assets/monochrome/noggles.svg'
+import Pause from './assets/monochrome/pause.svg'
+import Pencil from './assets/monochrome/pencil.svg'
+import Pin from './assets/monochrome/pin.svg'
+import Play from './assets/monochrome/play.svg'
+import Plus from './assets/monochrome/plus.svg'
+import Question from './assets/monochrome/question.svg'
+import Queue from './assets/monochrome/queue.svg'
+import Refresh from './assets/monochrome/refresh.svg'
+import Search from './assets/monochrome/search.svg'
+import Share from './assets/monochrome/share.svg'
+import Sliders from './assets/monochrome/sliders.svg'
+import Spanner from './assets/monochrome/spanner.svg'
+import Swap from './assets/monochrome/swap.svg'
+import Trash from './assets/monochrome/trash.svg'
+import Warning from './assets/monochrome/warning.svg'
+import Warning16 from './assets/monochrome/warning-16.svg'
 
 export const icons = {
   airdrop: Airdrop,
-  airdropSablier: AirdropSablier,
-  arrowLeft: ArrowLeft,
-  arrowRight: ArrowRight,
-  arrowTopRight: ArrowTopRight,
+  'airdrop-sablier': AirdropSablier,
+  'arrow-left': ArrowLeft,
+  'arrow-right': ArrowRight,
+  'arrow-top-right': ArrowTopRight,
   brush: Brush,
   burger: Burger,
   check: Check,
-  checkInCircle: CheckInCircle,
-  chevronDown: ChevronDown,
-  chevronLeft: ChevronLeft,
-  chevronRight: ChevronRight,
-  chevronUp: ChevronUp,
+  'check-in-circle': CheckInCircle,
+  'chevron-down': ChevronDown,
+  'chevron-left': ChevronLeft,
+  'chevron-right': ChevronRight,
+  'chevron-up': ChevronUp,
   code: Code,
   'code-brackets': CodeBrackets,
-  contentCoin: ContentCoin,
+  'content-coin': ContentCoin,
   collection: Collection,
   copy: Copy,
-  creatorCoin: CreatorCoin,
+  'creator-coin': CreatorCoin,
   cross: Cross,
   'cross-16': Cross16,
   dash: Dash,
@@ -96,18 +95,17 @@ export const icons = {
   'external-16': External,
   github: Github,
   globe: Globe,
-  handlebarCircle: HandlebarCircle,
+  'handlebar-circle': HandlebarCircle,
   handshake: Handshake,
   heart: Heart,
-  heartFilled: HeartFilled,
-  'info-16': Info16,
+  'heart-filled': HeartFilled,
   migrate: Migrate,
   move: Move,
-  newWindow: NewWindow,
+  'new-window': NewWindow,
   nft: Nft,
   noggles: Noggles,
   pause: Pause,
-  pauseTemplate: PauseTemplate,
+  'pause-template': PauseTemplate,
   pencil: Pencil,
   pin: Pin,
   play: Play,
@@ -115,7 +113,7 @@ export const icons = {
   queue: Queue,
   question: Question,
   refresh: Refresh,
-  resumeTemplate: ResumeTemplate,
+  'resume-template': ResumeTemplate,
   sablier: Sablier,
   search: Search,
   share: Share,
@@ -123,10 +121,9 @@ export const icons = {
   spanner: Spanner,
   swap: Swap,
   trash: Trash,
-  twitter: Twitter,
   x: Twitter,
-  walletConnect: WalletConnect,
-  walletConnectOutline: WalletConnectOutline,
+  'wallet-connect': WalletConnect,
+  'wallet-connect-outline': WalletConnectOutline,
   warning: Warning,
   'warning-16': Warning16,
 }

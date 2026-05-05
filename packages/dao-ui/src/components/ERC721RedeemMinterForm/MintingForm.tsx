@@ -1,7 +1,7 @@
 import { erc721RedeemMinterAbi } from '@buildeross/sdk/contract'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { Box, Flex, Text, vars } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { formatEther } from 'viem'
 import { useAccount, useConfig, useReadContract } from 'wagmi'
@@ -139,7 +139,14 @@ export const MintingForm: React.FC<MintingFormProps> = ({
       )}
 
       {mintSuccess && (
-        <Box mt="x4" p="x4" style={{ background: '#D4EDDA', borderRadius: '8px' }}>
+        <Box
+          mt="x4"
+          p="x4"
+          style={{
+            background: `color-mix(in srgb, ${vars.color.positive} 18%, transparent)`,
+            borderRadius: '8px',
+          }}
+        >
           <Text color="text1" fontSize="14" fontWeight="label">
             ✓ Minting successful! Your tokens have been minted.
           </Text>

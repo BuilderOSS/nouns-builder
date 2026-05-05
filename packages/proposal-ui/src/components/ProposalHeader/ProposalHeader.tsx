@@ -46,7 +46,7 @@ export const ProposalHeader: React.FC<ProposalHeaderProps> = ({
         {...proposal}
         showTime={proposal.state === ProposalState.Executed}
       />
-      {!!displayTransactionHash && <Icon fill="text3" id="arrowTopRight" />}
+      {!!displayTransactionHash && <Icon fill="text3" id="arrow-top-right" />}
     </Flex>
   )
 

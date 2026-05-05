@@ -43,7 +43,7 @@ export const HiddenDaoDisclosure: React.FC<HiddenDaoDisclosureProps> = ({
             isOpen ? hiddenDaoDisclosureChevronOpen : hiddenDaoDisclosureChevronClosed,
           ]}
         >
-          <Icon id="chevronDown" size="sm" />
+          <Icon id="chevron-down" size="sm" />
         </Flex>
         <Text fontWeight="display">{`Hidden DAOs (${count})`}</Text>
       </Box>
