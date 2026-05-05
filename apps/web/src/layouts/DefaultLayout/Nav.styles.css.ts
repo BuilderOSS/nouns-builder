@@ -316,11 +316,13 @@ export const navPopUpWrapper = style({
 export const wrongNetworkButton = style({
   transition:
     'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
-  background: vars.color.negativeDisabled,
-  color: color.negative,
+  borderWidth: 'normal',
+  borderStyle: 'solid',
+  borderColor: vars.color.negative,
+  color: vars.color.negative,
   selectors: {
     '&:hover': {
-      background: vars.color.negative,
+      background: vars.color.negativeDisabled,
     },
   },
 })

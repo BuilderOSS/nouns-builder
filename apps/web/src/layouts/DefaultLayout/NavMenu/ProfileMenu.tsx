@@ -206,56 +206,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
   const onDisconnect = useWalletDisconnect()
 
-  const renderConnectedUser = () => (
-    <>
-      <Flex direction={'column'} align={'stretch'} gap={'x2'}>
-        <Flex direction={'row'} align={'center'} justify={'space-between'} w={'100%'}>
-          <Link
-            href={`/profile/${address}`}
-            passHref
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ textDecoration: 'none', flex: 1 }}
-          >
-            <Flex
-              direction={'row'}
-              align={'center'}
-              className={profileRow}
-              aria-label="Open profile"
-            >
-              <Avatar address={address!} src={ensAvatar} size={'40'} />
-              <Flex direction={'column'} ml={'x2'}>
-                <Text fontWeight={'display'}>{displayName}</Text>
-                <Text variant={'paragraph-md'} color={'tertiary'}>
-                  {userBalance}
-                </Text>
-              </Flex>
-            </Flex>
-          </Link>
-          <CopyButton text={address!} />
-        </Flex>
-
-        <Button
-          className={disconnectButton}
-          variant={'outline'}
-          color="negative"
-          onClick={onDisconnect}
-          id={'close-modal'}
-        >
-          Disconnect
-        </Button>
-      </Flex>
-      <Box color="border" borderStyle="solid" borderWidth="thin" />
-    </>
-  )
-
-  const renderConnectedUserStatic = () => (
+  const renderConnectedUserCommon = ({ isStatic = false }: { isStatic?: boolean }) => (
     <>
       <Flex
         direction={'column'}
         align={'stretch'}
         gap={'x2'}
-        style={{ paddingBottom: '8px' }}
+        style={isStatic ? { paddingBottom: '8px' } : undefined}
       >
         <Flex direction={'row'} align={'center'} justify={'space-between'} w={'100%'}>
           <Link
@@ -296,6 +253,10 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
       <Box color="border" borderStyle="solid" borderWidth="thin" />
     </>
   )
+
+  const renderConnectedUser = () => renderConnectedUserCommon({ isStatic: false })
+
+  const renderConnectedUserStatic = () => renderConnectedUserCommon({ isStatic: true })
 
   const renderUserContent = (isMobileFullscreen = false, showCreateButton = true) => (
     <>

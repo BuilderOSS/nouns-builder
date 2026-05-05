@@ -195,6 +195,7 @@ export const theme = createThemeContract({
     warningDisabled: '',
     onWarning: '',
     onWarningDisabled: '',
+    warningStrong: '',
     negative: '',
     negativeHover: '',
     negativeActive: '',

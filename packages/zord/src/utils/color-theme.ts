@@ -38,6 +38,7 @@ export function colorThemeVars({
   positive = '#1CB687',
   negative = '#F03232',
   warning = '#F5A623',
+  warningStrong = '#EC714B',
 }) {
   return {
     background1: background,
@@ -105,6 +106,8 @@ export function colorThemeVars({
     warningDisabled: mix(0.7, warning, background),
     onWarning: background,
     onWarningDisabled: mix(0.6, warning, background),
+
+    warningStrong: warningStrong,
   }
 }
 
@@ -153,6 +156,8 @@ export function colorTheme(colorProps: { [x: string]: string }) {
       warningDisabled: tokens.warningDisabled,
       onWarning: tokens.onWarning,
       onWarningDisabled: tokens.onWarningDisabled,
+
+      warningStrong: tokens.warningStrong,
 
       negative: tokens.negative,
       negativeHover: tokens.negativeHover,

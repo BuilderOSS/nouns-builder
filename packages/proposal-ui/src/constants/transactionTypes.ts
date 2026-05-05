@@ -83,6 +83,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     title: 'Fix Metadata Renderer Base',
     subTitle: 'Restore NFT image visibility on external marketplaces',
     icon: 'spanner',
+    iconFill: 'warningStrong',
     iconBackdrop: iconBackdrop(color.warning),
   },
   [TransactionType.RESUME_AUCTIONS]: {
@@ -114,7 +115,7 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     title: 'Migration',
     subTitle: 'Migrate from L1 to L2',
     icon: 'migrate',
-    iconBackdrop: `color-mix(in srgb, ${color.warning} 10%, transparent)`,
+    iconBackdrop: iconBackdrop(color.warning),
   },
   [TransactionType.WALLET_CONNECT]: {
     title: 'WalletConnect',
