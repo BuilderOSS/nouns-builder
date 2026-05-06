@@ -118,6 +118,7 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
           data-testid="file-upload"
           name="file"
           type="file"
+          accept={acceptableMIME.join(',')}
           ref={fileInputRef}
           multiple={false}
           onChange={(event) => {

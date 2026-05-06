@@ -294,7 +294,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         topics: deployEvent?.topics ?? [],
         data: deployEvent?.data ?? '0x',
       })
-    } catch { }
+    } catch {}
 
     const deployedAddresses = parsedEvent?.args
 
@@ -476,7 +476,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                   justify={'center'}
                   className={
                     deployCheckboxStyleVariants[
-                    hasConfirmedTerms ? 'confirmed' : 'default'
+                      hasConfirmedTerms ? 'confirmed' : 'default'
                     ]
                   }
                   onClick={() => setHasConfirmedTerms((bool) => !bool)}
@@ -509,7 +509,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                   justify={'center'}
                   className={
                     deployCheckboxStyleVariants[
-                    hasConfirmedChain ? 'confirmed' : 'default'
+                      hasConfirmedChain ? 'confirmed' : 'default'
                     ]
                   }
                   onClick={() => setHasConfirmedChain((bool) => !bool)}
@@ -535,7 +535,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     justify={'center'}
                     className={
                       deployCheckboxStyleVariants[
-                      hasConfirmedRewards ? 'confirmed' : 'default'
+                        hasConfirmedRewards ? 'confirmed' : 'default'
                       ]
                     }
                     onClick={() => setHasConfirmedRewards((bool) => !bool)}
@@ -571,7 +571,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     justify={'center'}
                     className={
                       deployCheckboxStyleVariants[
-                      hasConfirmedFastDAO ? 'confirmed' : 'default'
+                        hasConfirmedFastDAO ? 'confirmed' : 'default'
                       ]
                     }
                     onClick={() => setHasConfirmedFastDAO((bool) => !bool)}

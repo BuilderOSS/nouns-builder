@@ -23,7 +23,7 @@ export const PreviewArtwork: React.FC = () => {
   }, [orderedLayers])
 
   return (
-    <Flex direction="column" gap="x2" fontSize="sm">
+    <Flex direction="column" gap="x2">
       <Box>{filesCount} PNG files</Box>
       <Box>{traitCategoriesCount} trait categories</Box>
       <Box>{totalTraitOptions} total trait options</Box>

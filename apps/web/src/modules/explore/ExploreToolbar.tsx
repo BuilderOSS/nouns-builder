@@ -28,7 +28,7 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
       align={'center'}
       style={{ maxWidth: 912 }}
     >
-      <Flex direction={'row'} w={'100%'} justify={'space-between'}>
+      <Flex direction={'row'} w={'100%'} justify={'space-between'} align={'center'}>
         <Box fontSize={28} fontWeight={'heading'} mb={'x8'}>
           {title}
         </Box>

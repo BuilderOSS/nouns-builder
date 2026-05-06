@@ -69,6 +69,8 @@ export interface SelectOption<T> {
   icon?: ReactNode
 }
 
+type DropdownHeight = 'x18' | 'x14' | 'x12' | 'x10'
+
 interface DropdownSelectProps<T> {
   id?: string
   value?: T
@@ -84,6 +86,8 @@ interface DropdownSelectProps<T> {
   buttonVariant?: ButtonProps['variant']
   buttonSize?: ButtonProps['size']
   align?: 'left' | 'right'
+  height?: DropdownHeight
+  minWidth?: string
 }
 
 export function DropdownSelect<T extends React.Key>({
@@ -101,6 +105,8 @@ export function DropdownSelect<T extends React.Key>({
   buttonVariant = 'primary',
   buttonSize = 'md',
   align = 'left',
+  height = 'x18',
+  minWidth = '200px',
 }: React.PropsWithChildren<DropdownSelectProps<T>>) {
   const [showOptions, setShowOptions] = useState(false)
   const [activeIndex, setActiveIndex] = useState<number>(-1)
@@ -229,8 +235,8 @@ export function DropdownSelect<T extends React.Key>({
         direction={'row'}
         align={'center'}
         py={option.description ? 'x3' : undefined}
-        height={option.description ? undefined : 'x18'}
-        minHeight={'x18'}
+        height={option.description ? undefined : height}
+        minHeight={height}
         width={'100%'}
         gap={option.description ? 'x3' : undefined}
         fontSize={option.description ? undefined : 16}
@@ -370,7 +376,7 @@ export function DropdownSelect<T extends React.Key>({
               pl={'x4'}
               direction={'row'}
               align={'center'}
-              height={'x18'}
+              height={height}
               fontSize={16}
               fontWeight={'display'}
             >
@@ -432,6 +438,9 @@ export function DropdownSelect<T extends React.Key>({
               exit={'init'}
               variants={absoluteVariants}
               className={absoluteDropdownMenu[align]}
+              style={{
+                minWidth: minWidth,
+              }}
             >
               {renderOptions(dropdownOption)}
             </motion.div>

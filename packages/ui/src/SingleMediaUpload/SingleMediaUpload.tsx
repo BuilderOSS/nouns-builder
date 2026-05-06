@@ -103,7 +103,9 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   return (
     <Flex mb={'x8'}>
       <Stack width={'100%'}>
-        <label className={defaultInputLabelStyle}>{inputLabel}</label>
+        <label className={defaultInputLabelStyle} htmlFor={`file-upload-${id}`}>
+          {inputLabel}
+        </label>
         <Flex
           as={'button'}
           type="button"
@@ -157,6 +159,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
           data-testid={`file-upload-${id}`}
           name="file"
           type="file"
+          accept={acceptableMIME.join(',')}
           ref={fileInputRef}
           multiple={false}
           onChange={(event) => {

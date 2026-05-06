@@ -25,10 +25,23 @@ export function Radio<T extends React.Key | boolean>({
     formik.setFieldValue(id, val)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const currentIndex = options.findIndex((opt) => opt.value === value)
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault()
+      const nextIndex = (currentIndex + 1) % options.length
+      handleSelection(options[nextIndex].value)
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault()
+      const prevIndex = currentIndex <= 0 ? options.length - 1 : currentIndex - 1
+      handleSelection(options[prevIndex].value)
+    }
+  }
+
   return (
     <Stack mb={'x8'}>
       {inputLabel && <label className={defaultInputLabelStyle}>{inputLabel}</label>}
-      <Flex direction={flexDirection}>
+      <Flex direction={flexDirection} role="radiogroup" onKeyDown={handleKeyDown}>
         {options.map((option) => (
           <Flex
             as={'button'}
@@ -48,7 +61,9 @@ export function Radio<T extends React.Key | boolean>({
               ]
             }
             onClick={() => handleSelection(option.value)}
-            aria-pressed={value !== undefined && option.value === value}
+            role="radio"
+            aria-checked={value !== undefined && option.value === value}
+            tabIndex={value !== undefined && option.value === value ? 0 : -1}
           >
             {option.label}
           </Flex>

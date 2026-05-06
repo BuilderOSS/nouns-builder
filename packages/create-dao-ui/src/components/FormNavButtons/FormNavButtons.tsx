@@ -42,7 +42,7 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
   const [isMounted, setIsMounted] = useState(false)
   const { resetForm } = useFormStore()
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     setIsMounted(true)
   }, [])
 

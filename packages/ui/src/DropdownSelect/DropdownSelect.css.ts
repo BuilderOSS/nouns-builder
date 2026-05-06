@@ -6,7 +6,6 @@ const baseDropdownMenu = style({
   position: 'absolute',
   top: 'calc(100% + 4px)',
   width: '100%',
-  minWidth: '200px',
   zIndex: z.DROPDOWN_MENU_LAYER,
   backgroundColor: theme.colors.background1,
   border: `2px solid ${theme.colors.border}`,

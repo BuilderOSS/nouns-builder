@@ -87,6 +87,7 @@ export const DaoCard = ({
           aspectRatio={1 / 1}
           position="relative"
           overflow={'hidden'}
+          borderRadius={'curved'}
           className={daoImage}
         >
           <FallbackImage
