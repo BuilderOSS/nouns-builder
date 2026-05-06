@@ -38,6 +38,7 @@ type DroposalHighlightsSectionProps = {
   title?: string
   copy?: string
   linkLabel?: string
+  showStatusBadge?: boolean
 }
 
 export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps> = ({
@@ -46,6 +47,7 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
   title = 'Drops turn releases into onchain distribution',
   copy = 'Launch collectible drops that turn media, editions, and releases into distribution, ownership, and treasury growth for decentralized communities.',
   linkLabel = 'View drop',
+  showStatusBadge = true,
 }) => {
   const highlights = items?.length ? items : dropHighlights
 
@@ -64,9 +66,11 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
                 >
                   {proposal.dao}
                 </Text>
-                <Text className={statusBadge} style={statusStyles[proposal.status]}>
-                  {proposal.status}
-                </Text>
+                {showStatusBadge ? (
+                  <Text className={statusBadge} style={statusStyles[proposal.status]}>
+                    {proposal.status}
+                  </Text>
+                ) : null}
                 {getChainLogoSrc(proposal.category) ? (
                   <Box className={daoChainBadge} title={proposal.category}>
                     <Box

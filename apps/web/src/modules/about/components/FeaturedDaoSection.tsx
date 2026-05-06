@@ -4,10 +4,12 @@ import React from 'react'
 import {
   activeTabButton,
   daoGrid,
+  mobileStatsHeading,
   sectionInlineCopy,
   sectionInlineRow,
   sectionTitle,
   sectionTitleOnly,
+  statsBlock,
   tabButton,
   tabs,
 } from '../AboutPage.css'
@@ -74,7 +76,11 @@ export const FeaturedDaoSection: React.FC<FeaturedDaoSectionProps> = ({
         ))}
       </Box>
 
-      <Box mt="x8">
+      <Text as="h3" className={mobileStatsHeading}>
+        Protocol Stats
+      </Text>
+
+      <Box className={statsBlock}>
         <EcosystemStatGrid stats={stats ?? []} />
       </Box>
     </Box>

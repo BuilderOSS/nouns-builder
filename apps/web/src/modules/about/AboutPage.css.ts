@@ -622,6 +622,13 @@ export const tabs = style({
   display: 'flex',
   flexWrap: 'wrap',
   gap: '10px',
+  '@media': {
+    'screen and (max-width: 520px)': {
+      width: '100%',
+      flexWrap: 'nowrap',
+      gap: '6px',
+    },
+  },
 })
 
 export const tabButton = style({
@@ -641,6 +648,15 @@ export const tabButton = style({
       backgroundColor: color.background2,
     },
     '&:focus-visible': focusRing,
+  },
+  '@media': {
+    'screen and (max-width: 520px)': {
+      flex: '1 1 0',
+      minWidth: 0,
+      minHeight: '38px',
+      padding: '8px 6px',
+      fontSize: '13px',
+    },
   },
 })
 
@@ -667,6 +683,32 @@ export const daoGrid = style({
     },
     'screen and (min-width: 1080px)': {
       gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    },
+  },
+})
+
+export const mobileStatsHeading = style({
+  display: 'block',
+  margin: '28px 0 14px',
+  fontFamily: 'ptRoot, sans-serif',
+  fontSize: '24px',
+  lineHeight: 1.1,
+  color: '#111111',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      display: 'none',
+    },
+  },
+})
+
+export const statsBlock = style({
+  marginTop: '28px',
+  '@media': {
+    'screen and (max-width: 767px)': {
+      marginTop: 0,
+    },
+    'screen and (min-width: 768px)': {
+      marginTop: '48px',
     },
   },
 })
@@ -1162,20 +1204,20 @@ export const valueCard = style({
 })
 
 export const compactValueCard = style({
-  minHeight: '136px',
+  minHeight: '96px',
   borderRadius: '12px',
   border: standardBorder,
   background: color.background1,
-  padding: '18px',
+  padding: '16px',
   boxShadow: 'none',
   display: 'flex',
   flexDirection: 'column',
-  gap: '12px',
+  gap: '10px',
   minWidth: 0,
   '@media': {
     'screen and (min-width: 768px)': {
-      minHeight: '160px',
-      padding: '20px',
+      minHeight: '108px',
+      padding: '18px',
     },
   },
 })

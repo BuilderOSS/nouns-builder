@@ -80,7 +80,10 @@ export const AboutPageView: React.FC = () => {
         </Box>
 
         <Box className={section}>
-          <DroposalHighlightsSection items={showcaseData?.drops} />
+          <DroposalHighlightsSection
+            items={showcaseData?.drops}
+            showStatusBadge={false}
+          />
         </Box>
 
         <Box className={section}>
