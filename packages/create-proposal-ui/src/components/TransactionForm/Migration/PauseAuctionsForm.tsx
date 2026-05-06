@@ -106,10 +106,15 @@ export const PauseAuctionsForm: React.FC = () => {
       )}
       <Flex align={'center'} justify={'flex-start'} gap={'x4'} mt="x2" mb="x8">
         <Flex
+          as={'button'}
+          type="button"
           align={'center'}
           justify={'center'}
           className={checkboxStyleVariants[reduceDelay ? 'confirmed' : 'default']}
           onClick={() => setReduceDelay((bool) => !bool)}
+          aria-pressed={reduceDelay}
+          aria-label="Reduce voting delay and period"
+          style={{ borderWidth: 0, padding: 0 }}
         >
           {reduceDelay && <Icon fill="background1" id="check" />}
         </Flex>

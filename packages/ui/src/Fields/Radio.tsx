@@ -31,6 +31,8 @@ export function Radio<T extends React.Key | boolean>({
       <Flex direction={flexDirection}>
         {options.map((option) => (
           <Flex
+            as={'button'}
+            type="button"
             key={option.value.toString()}
             align={'center'}
             justify={'center'}
@@ -46,6 +48,8 @@ export function Radio<T extends React.Key | boolean>({
               ]
             }
             onClick={() => handleSelection(option.value)}
+            aria-pressed={value !== undefined && option.value === value}
+            style={{ borderWidth: 0, padding: 0 }}
           >
             {option.label}
           </Flex>
