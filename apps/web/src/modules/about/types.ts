@@ -43,8 +43,9 @@ export type CoiningHighlight = {
 
 export type DroposalStatus =
   | 'Active'
-  | 'Passed'
-  | 'Funded'
+  | 'Succeeded'
+  | 'Queued'
+  | 'Defeated'
   | 'Executed'
   | 'Trending'
   | 'Live'

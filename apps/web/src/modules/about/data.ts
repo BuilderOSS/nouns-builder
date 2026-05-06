@@ -117,7 +117,7 @@ export const proposalHighlights: DroposalHighlight[] = [
     title: 'Operator tooling sprint for treasury reporting',
     dao: 'BuilderDAO',
     amount: '42 voters',
-    status: 'Funded',
+    status: 'Queued',
     summary:
       'Shared treasury analytics and operator tooling improve governance workflows across Builder DAOs.',
     href: '/explore?search=builderdao',
@@ -128,7 +128,7 @@ export const proposalHighlights: DroposalHighlight[] = [
     title: 'Mini grants for local Nouns Fest activations',
     dao: 'Nouns Fest',
     amount: '18 voters',
-    status: 'Passed',
+    status: 'Succeeded',
     summary:
       'Regional teams get budget for activations, documentation, and post-event publishing.',
     href: '/explore?search=nouns%20fest',
@@ -150,7 +150,7 @@ export const proposalHighlights: DroposalHighlight[] = [
     title: 'Residency round for new onchain builders',
     dao: 'Far House',
     amount: '30 voters',
-    status: 'Trending',
+    status: 'Defeated',
     summary:
       'Funds a cohort of builders experimenting with coining, drops, and governance flows.',
     href: '/explore?search=far%20house',

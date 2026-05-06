@@ -60,6 +60,9 @@ type ShowcaseProposal = {
   timeCreated: string
   voteEnd: string
   voteCount: number
+  forVotes: number
+  againstVotes: number
+  quorumVotes: string
   queued: boolean
   executed: boolean
   canceled: boolean
@@ -132,6 +135,9 @@ const ABOUT_SHOWCASE_QUERY = gql`
       timeCreated
       voteEnd
       voteCount
+      forVotes
+      againstVotes
+      quorumVotes
       queued
       executed
       canceled
@@ -191,9 +197,14 @@ const deriveProposalStatus = (
 ): DroposalStatus | null => {
   if (proposal.canceled || proposal.vetoed) return null
   if (proposal.executed) return 'Executed'
-  if (proposal.queued) return 'Funded'
+  if (proposal.queued) return 'Queued'
   if (Number(proposal.voteEnd) > now) return 'Active'
-  return 'Passed'
+
+  const passed =
+    proposal.forVotes > proposal.againstVotes &&
+    BigInt(proposal.forVotes) >= BigInt(proposal.quorumVotes)
+
+  return passed ? 'Succeeded' : 'Defeated'
 }
 
 const fetchShowcaseDataForChain = async (

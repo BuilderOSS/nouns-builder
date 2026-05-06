@@ -23,8 +23,9 @@ import { SectionIntro } from './SectionIntro'
 
 const statusStyles: Record<DroposalHighlight['status'], React.CSSProperties> = {
   Active: { background: '#FFF2BF', color: '#6A5300' },
-  Passed: { background: '#DDF7E7', color: '#0F5B37' },
-  Funded: { background: '#DCE6FF', color: '#1D3F84' },
+  Succeeded: { background: '#DDF7E7', color: '#0F5B37' },
+  Queued: { background: '#DCE6FF', color: '#1D3F84' },
+  Defeated: { background: '#F2F4F7', color: '#4F5B6C' },
   Executed: { background: '#ECE7FF', color: '#44348F' },
   Trending: { background: '#FFE1D7', color: '#7D2E0B' },
   Live: { background: '#DDF7E7', color: '#0F5B37' },
