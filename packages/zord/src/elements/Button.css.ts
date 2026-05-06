@@ -29,7 +29,6 @@ export const baseButton = style([
       '&[disabled]': {
         cursor: 'not-allowed',
         pointerEvents: 'none',
-        opacity: 0.6,
       },
       '&[disabled]:active': {
         transform: 'unset',
@@ -109,6 +108,10 @@ export const buttonVariants = {
   primary: style([
     {
       selectors: {
+        '&[disabled]': {
+          backgroundColor: vars.color.accentDisabled,
+          color: vars.color.onAccent,
+        },
         '&:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.accentHover,
@@ -123,6 +126,10 @@ export const buttonVariants = {
   secondary: style([
     {
       selectors: {
+        '&[disabled]': {
+          backgroundColor: vars.color.neutralDisabled,
+          color: vars.color.onNeutralDisabled,
+        },
         '&:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.neutralHover,
@@ -137,6 +144,10 @@ export const buttonVariants = {
   secondaryAccent: style([
     {
       selectors: {
+        '&[disabled]': {
+          backgroundColor: vars.color.neutralDisabled,
+          color: vars.color.onNeutralDisabled,
+        },
         '&:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.neutralHover,
@@ -151,6 +162,10 @@ export const buttonVariants = {
   positive: style([
     {
       selectors: {
+        '&[disabled]': {
+          backgroundColor: vars.color.positiveDisabled,
+          color: vars.color.onPositive,
+        },
         '&:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.positiveHover,
@@ -165,6 +180,10 @@ export const buttonVariants = {
   destructive: style([
     {
       selectors: {
+        '&[disabled]': {
+          backgroundColor: vars.color.negativeDisabled,
+          color: vars.color.onNegative,
+        },
         '&:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.negativeHover,
@@ -179,6 +198,10 @@ export const buttonVariants = {
   outline: style([
     {
       selectors: {
+        '&[disabled]': {
+          color: vars.color.onNeutralDisabled,
+          borderColor: vars.color.neutralDisabled,
+        },
         '&:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.background2,
@@ -250,6 +273,11 @@ export const buttonVariants = {
   ghost: style([
     {
       selectors: {
+        '&[disabled]': {
+          color: vars.color.onGhostDisabled,
+          backgroundColor: vars.color.ghostDisabled,
+          borderColor: vars.color.ghostDisabled,
+        },
         '&:hover, &:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.ghostHover,
