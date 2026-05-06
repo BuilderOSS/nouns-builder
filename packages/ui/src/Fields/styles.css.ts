@@ -29,7 +29,6 @@ export const defaultFieldsetStyle = style({
   position: 'relative',
   border: 0,
   padding: 0,
-  overflow: 'hidden',
 })
 
 export const defaultTextAreaStyle = style({
@@ -51,7 +50,7 @@ export const defaultTextAreaStyle = style({
       borderColor: vars.color.border,
     },
     '&:focus-visible': {
-      outline: `2px solid ${vars.color.accent}`,
+      outline: `2px solid ${vars.color.focusRing}`,
       outlineOffset: '2px',
     },
   },
@@ -74,7 +73,7 @@ export const defaultTextAreaErrorStyle = style({
       borderColor: vars.color.negative,
     },
     '&:focus-visible': {
-      outline: `2px solid ${vars.color.accent}`,
+      outline: `2px solid ${vars.color.focusRing}`,
       outlineOffset: '2px',
     },
   },
@@ -96,7 +95,7 @@ export const defaultInputStyle = style({
       borderColor: vars.color.border,
     },
     '&:focus-visible': {
-      outline: `2px solid ${vars.color.accent}`,
+      outline: `2px solid ${vars.color.focusRing}`,
       outlineOffset: '2px',
     },
     '&::placeholder': {
@@ -125,7 +124,7 @@ export const defaultInputErrorStyle = style({
       borderColor: vars.color.negative,
     },
     '&:focus-visible': {
-      outline: `2px solid ${vars.color.accent}`,
+      outline: `2px solid ${vars.color.focusRing}`,
       outlineOffset: '2px',
     },
     '&:disabled': {
@@ -213,7 +212,6 @@ export const numberInputStyle = style({
   paddingRight: 25,
   boxSizing: 'border-box',
   border: `2px solid ${vars.color.background1}`,
-  overflow: 'hidden',
   selectors: {
     '&:focus': {
       outline: 'none',
@@ -221,7 +219,7 @@ export const numberInputStyle = style({
       borderColor: vars.color.border,
     },
     '&:focus-visible': {
-      outline: `2px solid ${vars.color.accent}`,
+      outline: `2px solid ${vars.color.focusRing}`,
       outlineOffset: '2px',
     },
     '&::-webkit-input-placeholder': {
@@ -258,7 +256,7 @@ export const numberInputErrorStyle = style({
       borderColor: vars.color.negative,
     },
     '&:focus-visible': {
-      outline: `2px solid ${vars.color.accent}`,
+      outline: `2px solid ${vars.color.focusRing}`,
       outlineOffset: '2px',
     },
     '&::-webkit-input-placeholder': {

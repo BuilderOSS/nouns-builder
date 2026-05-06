@@ -20,7 +20,7 @@ export const baseButton = style([
     userSelect: 'none',
     selectors: {
       '&:focus-visible': {
-        outline: `2px solid ${vars.color.accent}`,
+        outline: `2px solid ${vars.color.focusRing}`,
         outlineStyle: 'auto',
       },
       '&:active': {

@@ -175,6 +175,8 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
         <Stack my="x4" mx="x2">
           {isWrongNetwork && selectedChain && (
             <Flex
+              as="button"
+              type="button"
               className={wrongNetworkButton}
               fontWeight={'label'}
               borderRadius="normal"
@@ -185,12 +187,15 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
               mb="x2"
               align={'center'}
               justify={'center'}
+              style={{ borderRadius: '8px' }}
             >
               {`Switch to ${selectedChain.name}`}
             </Flex>
           )}
           {PUBLIC_DEFAULT_CHAINS.map((chain, i, chains) => (
             <Flex
+              as="button"
+              type="button"
               key={chain.id}
               className={chainPopUpButton}
               borderRadius="normal"
@@ -207,6 +212,9 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
               mb={i !== chains.length - 1 ? 'x2' : undefined}
               align={'center'}
               justify={'space-between'}
+              disabled={hasNetwork && !isSelectedChain(chain.id)}
+              aria-current={selectedChain.id === chain.id ? 'true' : undefined}
+              style={{ border: 0, width: '100%', textAlign: 'left' }}
             >
               <Flex align={'center'}>
                 <Box h="x6" w="x6" mr="x2">

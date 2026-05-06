@@ -96,9 +96,20 @@ export function PopUp({
     <>
       {triggerRef === undefined && (
         <Box
+          role="button"
+          tabIndex={0}
+          aria-expanded={openState}
+          aria-haspopup="menu"
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation()
             setOpenState(!openState)
+          }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              e.stopPropagation()
+              setOpenState((prev) => !prev)
+            }
           }}
           ref={setTriggerElement}
           className={[triggerClassName]}

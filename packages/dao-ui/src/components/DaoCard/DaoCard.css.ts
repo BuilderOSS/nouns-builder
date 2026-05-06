@@ -92,7 +92,7 @@ export const favoriteButton = style({
     boxShadow: `0 10px 28px ${theme.colors.ghostHover}`,
   },
   ':focus-visible': {
-    outline: `2px solid ${theme.colors.text1}`,
+    outline: `2px solid ${theme.colors.focusRing}`,
     outlineOffset: 2,
   },
   ':disabled': {

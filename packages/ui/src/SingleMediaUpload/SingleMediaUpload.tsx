@@ -41,6 +41,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   const [isUploading, setIsUploading] = React.useState<boolean>(false)
   const [fileName, setFileName] = React.useState<string | undefined>()
   const [progress, setProgress] = React.useState<number>(0)
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -104,12 +105,14 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
       <Stack width={'100%'}>
         <label className={defaultInputLabelStyle}>{inputLabel}</label>
         <Flex
-          as={'label'}
+          as={'button'}
+          type="button"
           direction={'column'}
           position={'relative'}
           justify={'center'}
           className={singleMediaUploadWrapper}
-          htmlFor={`file-upload-${id}`}
+          onClick={() => fileInputRef.current?.click()}
+          aria-label={typeof inputLabel === 'string' ? inputLabel : 'Upload media'}
         >
           {!isUploading && isMounted && !value && (
             <Flex mx="x4" align={'center'} justify={'space-between'}>
@@ -153,6 +156,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
             data-testid={`file-upload-${id}`}
             name="file"
             type="file"
+            ref={fileInputRef}
             multiple={false}
             onChange={(event) => {
               handleFileUpload(event.currentTarget.files)

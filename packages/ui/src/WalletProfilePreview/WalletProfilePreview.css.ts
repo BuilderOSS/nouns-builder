@@ -17,7 +17,7 @@ export const profileHeaderLink = style([
       backgroundColor: theme.colors.background2,
     },
     ':focus-visible': {
-      outline: `2px solid ${theme.colors.accent}`,
+      outline: `2px solid ${theme.colors.focusRing}`,
       outlineOffset: '2px',
     },
   },
@@ -37,7 +37,7 @@ export const daoLink = style([
       backgroundColor: theme.colors.background2,
     },
     ':focus-visible': {
-      outline: `2px solid ${theme.colors.accent}`,
+      outline: `2px solid ${theme.colors.focusRing}`,
       outlineOffset: '2px',
     },
   },

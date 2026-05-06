@@ -22,6 +22,7 @@ export const color = {
   accentHover: '#282828',
   accentActive: '#333333',
   accentDisabled: '#505050',
+  focusRing: '#0085FF',
   onAccent: '#FFFFFF',
   onAccentDisabled: '#ABABAB',
 
