@@ -490,7 +490,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                 </Flex>
 
                 <Flex className={deployCheckboxHelperText}>
-                  [I have reviewed and acknowledge and agree to the{' '}
+                  I have reviewed and acknowledge and agree to the{' '}
                   <a
                     href={'/legal'}
                     target="_blank"
@@ -499,7 +499,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                   >
                     Nouns Builder Terms of Service
                   </a>
-                  ]
                 </Flex>
               </Flex>
             </Flex>
@@ -606,21 +605,20 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                 {deploymentError}
               </Flex>
             )}
-
-            <FormNavButtons hasPrev onPrev={handlePrev}>
-              <ContractButton
-                chainId={chain.id}
-                handleClick={handleDeploy}
-                flex={1}
-                disabled={isDisabled}
-                className={
-                  deployContractButtonStyle[isPendingTransaction ? 'pending' : 'default']
-                }
-              >
-                {`${isPendingTransaction ? 'Deploying' : 'Deploy'} Contracts (1 of 2)`}
-              </ContractButton>
-            </FormNavButtons>
           </Flex>
+          <FormNavButtons hasPrev onPrev={handlePrev}>
+            <ContractButton
+              chainId={chain.id}
+              handleClick={handleDeploy}
+              flex={1}
+              disabled={isDisabled}
+              className={
+                deployContractButtonStyle[isPendingTransaction ? 'pending' : 'default']
+              }
+            >
+              {`${isPendingTransaction ? 'Deploying' : 'Deploy'} Contracts (1 of 2)`}
+            </ContractButton>
+          </FormNavButtons>
         </Box>
       ) : (
         <SuccessfulDeploy title={title} onSuccessfulDeploy={handleSuccessfulDeploy} />
