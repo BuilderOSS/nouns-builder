@@ -44,7 +44,7 @@ body {
   --flatpickr-selected-bg: #000;
   --flatpickr-selected-text: #fff;
   --flatpickr-backdrop-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
-  --focus-ring-color: #0085ff;
+  --focus-ring-color: #0085ff; /* vars.color.focusRing holds the canonical tokenized value; update both in sync */
   --mde-border: #c8ccd0;
   --mde-header-bg: #f9f9f9;
   --mde-surface: #fff;
@@ -71,7 +71,7 @@ html[data-theme-mode='dark'] {
   --flatpickr-selected-bg: #fff;
   --flatpickr-selected-text: #1f2024;
   --flatpickr-backdrop-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
-  --focus-ring-color: #0085ff;
+  --focus-ring-color: #0085ff; /* vars.color.focusRing holds the canonical tokenized value; update both in sync */
   --mde-border: #3f4047;
   --mde-header-bg: #2a2b30;
   --mde-surface: #1f2024;

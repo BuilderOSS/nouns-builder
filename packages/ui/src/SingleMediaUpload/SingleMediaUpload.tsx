@@ -149,20 +149,20 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
               </Text>
             </Flex>
           )}
-
-          <input
-            className={defaultUploadStyle}
-            id={`file-upload-${id}`}
-            data-testid={`file-upload-${id}`}
-            name="file"
-            type="file"
-            ref={fileInputRef}
-            multiple={false}
-            onChange={(event) => {
-              handleFileUpload(event.currentTarget.files)
-            }}
-          />
         </Flex>
+
+        <input
+          className={defaultUploadStyle}
+          id={`file-upload-${id}`}
+          data-testid={`file-upload-${id}`}
+          name="file"
+          type="file"
+          ref={fileInputRef}
+          multiple={false}
+          onChange={(event) => {
+            handleFileUpload(event.currentTarget.files)
+          }}
+        />
         {helperText && !uploadMediaError && (
           <Box className={defaultHelperTextStyle}>{helperText}</Box>
         )}

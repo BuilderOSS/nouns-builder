@@ -348,6 +348,7 @@ export const confirmRemoveHelper = style({
 })
 
 const pointer = style({
+  padding: 0,
   background: vars.color.background2,
   border: `2px solid ${vars.color.background2}`,
   selectors: {

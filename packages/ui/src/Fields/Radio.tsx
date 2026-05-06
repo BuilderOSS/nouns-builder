@@ -49,7 +49,6 @@ export function Radio<T extends React.Key | boolean>({
             }
             onClick={() => handleSelection(option.value)}
             aria-pressed={value !== undefined && option.value === value}
-            style={{ borderWidth: 0, padding: 0 }}
           >
             {option.label}
           </Flex>

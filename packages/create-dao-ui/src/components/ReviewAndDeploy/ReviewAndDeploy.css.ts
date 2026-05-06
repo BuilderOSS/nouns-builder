@@ -38,6 +38,7 @@ export const deployCheckboxStyle = style({
   minWidth: 26,
   border: `1px solid ${vars.color.text1}`,
   borderRadius: '5px',
+  padding: 0,
   selectors: {
     '&:hover': { cursor: 'pointer', background: vars.color.text1 },
   },

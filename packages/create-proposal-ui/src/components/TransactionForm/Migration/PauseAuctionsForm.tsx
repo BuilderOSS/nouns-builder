@@ -114,7 +114,6 @@ export const PauseAuctionsForm: React.FC = () => {
           onClick={() => setReduceDelay((bool) => !bool)}
           aria-pressed={reduceDelay}
           aria-label="Reduce voting delay and period"
-          style={{ borderWidth: 0, padding: 0 }}
         >
           {reduceDelay && <Icon fill="background1" id="check" />}
         </Flex>

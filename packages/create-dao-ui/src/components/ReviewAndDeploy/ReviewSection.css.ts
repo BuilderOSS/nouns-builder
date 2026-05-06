@@ -11,11 +11,6 @@ const reviewSectionStyle = style({
       borderColor: vars.color.text1,
     },
   },
-  '@media': {
-    '(max-width: 768px)': {
-      padding: '10px',
-    },
-  },
 })
 
 export const reviewSectionStyleVariants = styleVariants({

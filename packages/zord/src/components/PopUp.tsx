@@ -20,6 +20,7 @@ interface BasePopUpProps {
   showBackdrop?: boolean
   viewportPadding?: number
   allowFlip?: boolean
+  ariaHasPopup?: 'menu' | 'listbox' | 'dialog' | 'tree' | 'grid' | true | false
 }
 
 export type PopUpProps = BasePopUpProps &
@@ -50,6 +51,7 @@ export function PopUp({
   showBackdrop = true,
   viewportPadding = 0,
   allowFlip = true,
+  ariaHasPopup = 'menu',
 }: PopUpProps) {
   const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null)
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null)
@@ -99,7 +101,7 @@ export function PopUp({
           role="button"
           tabIndex={0}
           aria-expanded={openState}
-          aria-haspopup="menu"
+          aria-haspopup={ariaHasPopup}
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation()
             setOpenState(!openState)

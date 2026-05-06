@@ -484,13 +484,12 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                   onClick={() => setHasConfirmedTerms((bool) => !bool)}
                   aria-pressed={hasConfirmedTerms}
                   aria-label="Confirm terms of service"
-                  style={{ borderWidth: 0, padding: 0 }}
                 >
                   {hasConfirmedTerms && <Icon fill="background1" id="check" />}
                 </Flex>
 
                 <Flex className={deployCheckboxHelperText}>
-                  I have reviewed and acknowledge and agree to the{' '}
+                  I have reviewed, acknowledge, and agree to the{' '}
                   <a
                     href={'/legal'}
                     target="_blank"
@@ -518,7 +517,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                   onClick={() => setHasConfirmedChain((bool) => !bool)}
                   aria-pressed={hasConfirmedChain}
                   aria-label="Confirm deployment chain"
-                  style={{ borderWidth: 0, padding: 0 }}
                 >
                   {hasConfirmedChain && <Icon fill="background1" id="check" />}
                 </Flex>
@@ -545,7 +543,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     onClick={() => setHasConfirmedRewards((bool) => !bool)}
                     aria-pressed={hasConfirmedRewards}
                     aria-label="Confirm rewards documentation"
-                    style={{ borderWidth: 0, padding: 0 }}
                   >
                     {hasConfirmedRewards && <Icon fill="background1" id="check" />}
                   </Flex>
@@ -582,7 +579,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     onClick={() => setHasConfirmedFastDAO((bool) => !bool)}
                     aria-pressed={hasConfirmedFastDAO}
                     aria-label="Confirm fast DAO timings"
-                    style={{ borderWidth: 0, padding: 0 }}
                   >
                     {hasConfirmedFastDAO && <Icon fill="background1" id="check" />}
                   </Flex>

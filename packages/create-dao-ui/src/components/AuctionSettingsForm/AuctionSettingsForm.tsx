@@ -215,7 +215,6 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                     onClick={() => handleFastDAOToggle(formik)}
                     aria-pressed={enableFastDAO}
                     aria-label="Enable Fast DAO"
-                    style={{ borderWidth: 0, padding: 0 }}
                   >
                     {enableFastDAO && <Icon fill="background1" id="check" />}
                   </Flex>

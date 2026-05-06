@@ -110,20 +110,20 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
               </Flex>
             </>
           )}
-
-          <input
-            className={defaultUploadStyle}
-            id={`${id}-file-upload`}
-            data-testid="file-upload"
-            name="file"
-            type="file"
-            ref={fileInputRef}
-            multiple={false}
-            onChange={(event) => {
-              handleFileUpload(event.currentTarget.files)
-            }}
-          />
         </Flex>
+
+        <input
+          className={defaultUploadStyle}
+          id={`${id}-file-upload`}
+          data-testid="file-upload"
+          name="file"
+          type="file"
+          ref={fileInputRef}
+          multiple={false}
+          onChange={(event) => {
+            handleFileUpload(event.currentTarget.files)
+          }}
+        />
 
         {uploadArtworkError && (
           <Box data-testid="error-msg" p={'x4'} fontSize={12} className={uploadErrorBox}>

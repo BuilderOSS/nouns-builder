@@ -23,6 +23,7 @@ interface FormNavButtonsProps {
   children?: React.ReactNode
   showReset?: boolean
   onAfterReset?: () => void
+  formId?: string
 }
 
 export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
@@ -35,12 +36,13 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
   children,
   showReset = true,
   onAfterReset,
+  formId,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const { resetForm } = useFormStore()
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     setIsMounted(true)
   }, [])
 
@@ -56,7 +58,12 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
       return
     }
 
-    document.querySelector('form')?.requestSubmit()
+    if (formId) {
+      ;(document.getElementById(formId) as HTMLFormElement)?.requestSubmit()
+    } else {
+      const form = document.querySelector('form')
+      if (form) (form as HTMLFormElement).requestSubmit()
+    }
   }
 
   return (
