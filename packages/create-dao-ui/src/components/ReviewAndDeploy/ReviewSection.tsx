@@ -6,7 +6,7 @@ import { reviewSectionStyleVariants, reviewSectionSubHeading } from './ReviewSec
 
 export const ReviewSection: React.FC<{
   subHeading: string
-  children: ReactNode[]
+  children: ReactNode
 }> = ({ subHeading, children }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const variants = {
