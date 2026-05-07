@@ -202,7 +202,6 @@ export const bidInput = style([
       },
       '&:focus': {
         outline: `2px solid ${vars.color.focusRing}`,
-        outlineStyle: 'auto',
       },
     },
   },
@@ -231,7 +230,6 @@ export const bidCommentInput = style([
         borderColor: vars.color.accent,
         backgroundColor: vars.color.background1,
         outline: `2px solid ${vars.color.focusRing}`,
-        outlineStyle: 'auto',
       },
     },
   },

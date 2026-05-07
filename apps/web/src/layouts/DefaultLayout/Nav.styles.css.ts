@@ -279,6 +279,12 @@ export const chainPopUpItem = style({
   textAlign: 'left',
   font: 'inherit',
   appearance: 'none',
+  selectors: {
+    '&:disabled': {
+      pointerEvents: 'auto',
+      cursor: 'not-allowed',
+    },
+  },
 })
 
 export const themeToggleButton = style([

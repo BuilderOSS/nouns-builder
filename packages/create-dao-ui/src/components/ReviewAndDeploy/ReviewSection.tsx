@@ -31,6 +31,15 @@ export const ReviewSection: React.FC<{
       borderColor={'primary'}
       className={reviewSectionStyleVariants[isOpen ? 'open' : 'default']}
       onClick={() => setIsOpen((bool) => !bool)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          setIsOpen((bool) => !bool)
+        }
+      }}
+      aria-expanded={isOpen}
     >
       <Flex
         align={'center'}

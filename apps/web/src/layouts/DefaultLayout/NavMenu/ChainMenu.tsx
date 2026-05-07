@@ -200,20 +200,13 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
               className={[chainPopUpButton, chainPopUpItem]}
               borderRadius="normal"
               onClick={() => onChainChange(chain.id)}
-              cursor={
-                hasNetwork
-                  ? isSelectedChain(chain.id)
-                    ? undefined
-                    : 'not-allowed'
-                  : 'pointer'
-              }
               height={'x10'}
               px="x4"
               mb={i !== chains.length - 1 ? 'x2' : undefined}
               align={'center'}
               justify={'space-between'}
               disabled={hasNetwork && !isSelectedChain(chain.id)}
-              aria-current={selectedChain.id === chain.id ? 'true' : undefined}
+              aria-current={selectedChain.id === chain.id ? 'location' : undefined}
             >
               <Flex align={'center'}>
                 <Box h="x6" w="x6" mr="x2">
