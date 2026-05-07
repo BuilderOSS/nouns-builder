@@ -57,7 +57,12 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
 
       <Box className={droposalList}>
         {highlights.map((proposal) => (
-          <Box className={droposalCard} key={proposal.id}>
+          <Link
+            aria-label={`${linkLabel}: ${proposal.title}`}
+            className={droposalCard}
+            href={proposal.href}
+            key={proposal.id}
+          >
             <Box>
               <Box className={droposalMeta}>
                 <Text
@@ -94,11 +99,11 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
 
             <Box className={droposalAside}>
               <Text className={droposalTitle}>{proposal.amount}</Text>
-              <Link className={cardLink} href={proposal.href}>
+              <Text as="span" className={cardLink}>
                 {linkLabel}
-              </Link>
+              </Text>
             </Box>
-          </Box>
+          </Link>
         ))}
       </Box>
     </Box>

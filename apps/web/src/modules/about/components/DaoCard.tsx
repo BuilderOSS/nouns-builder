@@ -1,4 +1,4 @@
-import { FallbackImage } from '@buildeross/ui'
+import { FallbackImage, MarkdownDisplay } from '@buildeross/ui'
 import { Box, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
@@ -26,7 +26,7 @@ type DaoCardProps = {
 
 export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
   return (
-    <Box className={daoCard}>
+    <Link aria-label={`View ${dao.name}`} className={daoCard} href={dao.href}>
       <Box className={daoTop}>
         <Flex className={daoIdentity}>
           <Box
@@ -45,7 +45,9 @@ export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
           </Box>
           <Box>
             <Text className={daoName}>{dao.name}</Text>
-            <Text className={daoDescription}>{dao.description}</Text>
+            <Box className={daoDescription}>
+              <MarkdownDisplay disableLinks>{dao.description}</MarkdownDisplay>
+            </Box>
           </Box>
         </Flex>
         {dao.chainIcon ? (
@@ -65,9 +67,9 @@ export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
         <Text className={daoSignalValue}>{dao.signalValue}</Text>
       </Box>
 
-      <Link className={cardLink} href={dao.href}>
+      <Text as="span" className={cardLink}>
         View DAO
-      </Link>
-    </Box>
+      </Text>
+    </Link>
   )
 }

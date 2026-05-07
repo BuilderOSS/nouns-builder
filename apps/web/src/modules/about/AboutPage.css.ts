@@ -1,5 +1,5 @@
 import { color, theme } from '@buildeross/zord'
-import { keyframes, style } from '@vanilla-extract/css'
+import { globalStyle, keyframes, style } from '@vanilla-extract/css'
 
 const focusRing = {
   outline: `2px solid ${theme.colors.border}`,
@@ -8,6 +8,8 @@ const focusRing = {
 
 const standardBorder = '2px solid #111111'
 const standardBorderThin = '1px solid #111111'
+const softBlueBackground = '#E8F4FF'
+const softBlueBorder = '#296BFF'
 
 const marqueeScroll = keyframes({
   '0%': {
@@ -266,8 +268,8 @@ export const secondaryButton = style({
   selectors: {
     '&:hover': {
       cursor: 'pointer',
-      backgroundColor: color.background2,
-      borderColor: theme.colors.neutralHover,
+      backgroundColor: softBlueBackground,
+      borderColor: softBlueBorder,
     },
     '&:focus-visible': focusRing,
   },
@@ -358,7 +360,7 @@ export const logoMarquee = style({
   minHeight: '96px',
   overflow: 'hidden',
   borderRadius: '10px',
-  background: color.background2,
+  background: color.background1,
   '@media': {
     'screen and (min-width: 768px)': {
       minHeight: '160px',
@@ -377,7 +379,7 @@ export const logoMarqueeTrack = style({
       position: 'absolute',
       inset: 0,
       background:
-        'linear-gradient(90deg, rgba(242, 242, 242, 1) 0%, rgba(242, 242, 242, 0) 10%, rgba(242, 242, 242, 0) 90%, rgba(242, 242, 242, 1) 100%)',
+        'linear-gradient(90deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 10%, rgba(255, 255, 255, 0) 90%, rgba(255, 255, 255, 1) 100%)',
       zIndex: 2,
       pointerEvents: 'none',
     },
@@ -407,7 +409,6 @@ export const logoMarqueeItem = style({
   borderRadius: '12px',
   overflow: 'hidden',
   background: color.background1,
-  border: standardBorderThin,
   boxShadow: 'none',
   display: 'flex',
   alignItems: 'center',
@@ -500,6 +501,7 @@ export const heroFooterValue = style({
 
 export const statGrid = style({
   display: 'grid',
+  width: '100%',
   gap: '16px',
   gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
   '@media': {
@@ -524,8 +526,8 @@ export const statCard = style({
   transition: 'border-color 0.15s ease, background-color 0.15s ease',
   selectors: {
     '&:hover': {
-      borderColor: theme.colors.neutralHover,
-      backgroundColor: color.background2,
+      borderColor: softBlueBorder,
+      backgroundColor: softBlueBackground,
     },
   },
 })
@@ -644,8 +646,8 @@ export const tabButton = style({
   selectors: {
     '&:hover': {
       cursor: 'pointer',
-      borderColor: theme.colors.neutralHover,
-      backgroundColor: color.background2,
+      borderColor: softBlueBorder,
+      backgroundColor: softBlueBackground,
     },
     '&:focus-visible': focusRing,
   },
@@ -661,13 +663,13 @@ export const tabButton = style({
 })
 
 export const activeTabButton = style({
-  background: color.background2,
-  borderColor: theme.colors.neutralHover,
+  background: softBlueBackground,
+  borderColor: softBlueBorder,
   color: '#111111',
   selectors: {
     '&:hover': {
-      borderColor: theme.colors.neutralHover,
-      backgroundColor: color.background2,
+      borderColor: softBlueBorder,
+      backgroundColor: softBlueBackground,
       color: '#111111',
     },
   },
@@ -675,6 +677,7 @@ export const activeTabButton = style({
 
 export const daoGrid = style({
   display: 'grid',
+  width: '100%',
   gap: '16px',
   gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
   '@media': {
@@ -724,12 +727,16 @@ export const daoCard = style({
   padding: '18px',
   boxShadow: 'none',
   minWidth: 0,
+  color: 'inherit',
+  textDecoration: 'none',
   transition: 'border-color 0.15s ease, background-color 0.15s ease',
   selectors: {
     '&:hover': {
-      borderColor: theme.colors.neutralHover,
-      backgroundColor: color.background2,
+      borderColor: softBlueBorder,
+      backgroundColor: softBlueBackground,
+      cursor: 'pointer',
     },
+    '&:focus-visible': focusRing,
   },
   '@media': {
     'screen and (min-width: 768px)': {
@@ -806,6 +813,15 @@ export const daoDescription = style({
   fontSize: '14px',
   lineHeight: 1.6,
   color: '#666666',
+})
+
+globalStyle(`${daoDescription} p`, {
+  margin: 0,
+})
+
+globalStyle(`${daoDescription} strong`, {
+  fontWeight: 700,
+  color: '#555555',
 })
 
 export const badge = style({
@@ -900,12 +916,16 @@ export const coiningCard = style({
   padding: '18px',
   boxShadow: 'none',
   minWidth: 0,
+  color: 'inherit',
+  textDecoration: 'none',
   transition: 'border-color 0.15s ease, background-color 0.15s ease',
   selectors: {
     '&:hover': {
-      borderColor: theme.colors.neutralHover,
-      backgroundColor: color.background2,
+      borderColor: softBlueBorder,
+      backgroundColor: softBlueBackground,
+      cursor: 'pointer',
     },
+    '&:focus-visible': focusRing,
   },
   '@media': {
     'screen and (min-width: 768px)': {
@@ -1022,12 +1042,16 @@ export const droposalCard = style({
   background: color.background1,
   padding: '18px',
   boxShadow: 'none',
+  color: 'inherit',
+  textDecoration: 'none',
   transition: 'border-color 0.15s ease, background-color 0.15s ease',
   selectors: {
     '&:hover': {
-      borderColor: theme.colors.neutralHover,
-      backgroundColor: color.background2,
+      borderColor: softBlueBorder,
+      backgroundColor: softBlueBackground,
+      cursor: 'pointer',
     },
+    '&:focus-visible': focusRing,
   },
   '@media': {
     'screen and (min-width: 880px)': {
@@ -1122,7 +1146,7 @@ export const stepMarker = style({
   alignItems: 'center',
   justifyContent: 'center',
   background: '#296BFF',
-  border: standardBorderThin,
+  border: 'none',
   color: '#FFFFFF',
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '18px',
@@ -1157,12 +1181,13 @@ export const valueGrid = style({
   },
 })
 
-export const compactValueGrid = style({
+export const featureStrip = style({
+  position: 'relative',
   display: 'grid',
   width: '100%',
   maxWidth: '100%',
   alignSelf: 'stretch',
-  gap: '16px',
+  gap: '18px',
   gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
   '@media': {
     'screen and (min-width: 700px)': {
@@ -1170,8 +1195,53 @@ export const compactValueGrid = style({
     },
     'screen and (min-width: 1080px)': {
       gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+      gap: '24px',
     },
   },
+})
+
+export const featureItem = style({
+  display: 'grid',
+  gridTemplateColumns: '42px minmax(0, 1fr)',
+  gap: '12px',
+  alignItems: 'center',
+  minWidth: 0,
+  '@media': {
+    'screen and (min-width: 700px)': {
+      gridTemplateColumns: '42px minmax(0, 1fr)',
+      justifyItems: 'stretch',
+      alignItems: 'center',
+      gap: '12px',
+    },
+  },
+})
+
+export const featureIconBadge = style({
+  position: 'relative',
+  zIndex: 1,
+  width: '42px',
+  height: '42px',
+  borderRadius: '14px',
+  background: color.background2,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#111111',
+})
+
+globalStyle(`${featureIconBadge} svg`, {
+  width: '20px',
+  height: '20px',
+  display: 'block',
+})
+
+export const featureLabel = style({
+  fontFamily: 'ptRoot, sans-serif',
+  fontSize: '17px',
+  lineHeight: 1.2,
+  fontWeight: 700,
+  color: '#111111',
+  overflowWrap: 'anywhere',
 })
 
 export const useCaseGrid = style({
@@ -1440,8 +1510,8 @@ export const ghostButton = style({
   selectors: {
     '&:hover': {
       cursor: 'pointer',
-      backgroundColor: color.background2,
-      borderColor: theme.colors.neutralHover,
+      backgroundColor: softBlueBackground,
+      borderColor: softBlueBorder,
     },
     '&:focus-visible': focusRing,
   },

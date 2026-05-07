@@ -26,7 +26,11 @@ export const CoiningCard: React.FC<CoiningCardProps> = ({ item }) => {
   const chainLogoSrc = getChainLogoSrc(item.chainLabel)
 
   return (
-    <Box className={coiningCard}>
+    <Link
+      aria-label={`View post: ${item.title}`}
+      className={coiningCard}
+      href={item.href}
+    >
       <Box className={coiningPreview} style={{ background: item.surface }}>
         <Box className={coiningPreviewTop}>
           <Text className={coiningPreviewMark}>{item.amount}</Text>
@@ -51,9 +55,9 @@ export const CoiningCard: React.FC<CoiningCardProps> = ({ item }) => {
         </Text>
       </Box>
 
-      <Link className={cardLink} href={item.href}>
+      <Text as="span" className={cardLink}>
         View post
-      </Link>
-    </Box>
+      </Text>
+    </Link>
   )
 }
