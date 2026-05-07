@@ -200,6 +200,10 @@ export const bidInput = style([
       '&::placeholder': {
         color: theme.colors.tertiary,
       },
+      '&:focus': {
+        outline: `2px solid ${vars.color.focusRing}`,
+        outlineStyle: 'auto',
+      },
     },
   },
   atoms({
@@ -226,6 +230,8 @@ export const bidCommentInput = style([
       '&:focus': {
         borderColor: vars.color.accent,
         backgroundColor: vars.color.background1,
+        outline: `2px solid ${vars.color.focusRing}`,
+        outlineStyle: 'auto',
       },
     },
   },

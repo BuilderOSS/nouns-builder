@@ -14,7 +14,7 @@ export const sectionTitle = style({
   fontSize: '14px',
   fontWeight: 600,
   marginBottom: space.x3,
-  color: color.text2,
+  color: color.text1,
 })
 
 export const daoItem = style([
