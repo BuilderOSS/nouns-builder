@@ -126,9 +126,6 @@ const getInitials = (name: string) =>
     .map((part) => part[0]?.toUpperCase() ?? '')
     .join('')
 
-const getSurface = (index: number) =>
-  ['#EFF6FF', '#DBEAFE', '#BFDBFE', '#E0F2FE'][index % 4]
-
 const FEATURED_DAO_CONFIG: readonly FeaturedDaoConfigItem[] = [
   {
     name: 'Builder DAO',
@@ -232,7 +229,7 @@ const createDaoDescriptionResolver = () => {
 const mapDao = (
   dao: DaoQueryItem,
   chainId: CHAIN_ID,
-  index: number,
+  _index: number,
   signalLabel: string,
   signalValue: string,
   badge: string,
@@ -249,8 +246,6 @@ const mapDao = (
   signalValue,
   href: buildDaoHref(chainId, dao.tokenAddress),
   badge,
-  surface: getSurface(index),
-  textAccent: '#1E3A8A',
   initials: getInitials(dao.name || 'DAO'),
   imageUrl: dao.contractImage || dao.latestToken[0]?.image || null,
   recentAuctionImage:
@@ -358,8 +353,6 @@ const buildFeaturedDaos = async (
           signalValue: item.signalValue,
           href: '/explore',
           badge: 'Featured',
-          surface: getSurface(index),
-          textAccent: '#1E3A8A',
           initials: getInitials(item.name),
           imageUrl: null,
           recentAuctionImage: null,
@@ -505,8 +498,6 @@ const buildActiveDaos = async (
           signalValue: `${Math.max(1, Math.round((Number(item.dao.endTime) - now) / 3600))}h left`,
           href: buildDaoHref(item.chainId, item.dao.dao.tokenAddress),
           badge: 'Active',
-          surface: getSurface(index),
-          textAccent: '#1E3A8A',
           initials: getInitials(item.dao.dao.name || item.dao.token?.name || 'DAO'),
           imageUrl: matchingDao?.dao.contractImage || item.dao.token?.image || null,
           recentAuctionImage: item.dao.token?.image || null,

@@ -5,6 +5,7 @@ import React from 'react'
 import {
   badge,
   cardLink,
+  daoBadge,
   daoChainBadge,
   daoChainBadgeImage,
   droposalAside,
@@ -14,22 +15,30 @@ import {
   droposalSummary,
   droposalTitle,
   mutedText,
+  statusActive,
+  statusDefeated,
+  statusExecuted,
+  statusLive,
+  statusQueued,
+  statusRecent,
   statusBadge,
+  statusSucceeded,
+  statusTrending,
 } from '../AboutPage.css'
 import { dropHighlights } from '../data'
 import { DroposalHighlight } from '../types'
 import { getChainLogoSrc } from '../utils'
 import { SectionIntro } from './SectionIntro'
 
-const statusStyles: Record<DroposalHighlight['status'], React.CSSProperties> = {
-  Active: { background: '#FFF2BF', color: '#6A5300' },
-  Succeeded: { background: '#DDF7E7', color: '#0F5B37' },
-  Queued: { background: '#DCE6FF', color: '#1D3F84' },
-  Defeated: { background: '#F2F4F7', color: '#4F5B6C' },
-  Executed: { background: '#ECE7FF', color: '#44348F' },
-  Trending: { background: '#FFE1D7', color: '#7D2E0B' },
-  Live: { background: '#DDF7E7', color: '#0F5B37' },
-  Recent: { background: '#DCE6FF', color: '#1D3F84' },
+const statusClassByType: Record<DroposalHighlight['status'], string> = {
+  Active: statusActive,
+  Succeeded: statusSucceeded,
+  Queued: statusQueued,
+  Defeated: statusDefeated,
+  Executed: statusExecuted,
+  Trending: statusTrending,
+  Live: statusLive,
+  Recent: statusRecent,
 }
 
 type DroposalHighlightsSectionProps = {
@@ -65,14 +74,13 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
           >
             <Box>
               <Box className={droposalMeta}>
-                <Text
-                  className={badge}
-                  style={{ background: '#F7F3E8', color: '#4F4738' }}
-                >
+                <Text className={`${badge} ${daoBadge}`}>
                   {proposal.dao}
                 </Text>
                 {showStatusBadge ? (
-                  <Text className={statusBadge} style={statusStyles[proposal.status]}>
+                  <Text
+                    className={`${statusBadge} ${statusClassByType[proposal.status]}`}
+                  >
                     {proposal.status}
                   </Text>
                 ) : null}

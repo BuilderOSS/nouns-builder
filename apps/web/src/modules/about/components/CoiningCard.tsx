@@ -8,6 +8,10 @@ import {
   coiningMeta,
   coiningNetworkBadge,
   coiningPreview,
+  coiningPreviewSurfaceA,
+  coiningPreviewSurfaceB,
+  coiningPreviewSurfaceC,
+  coiningPreviewSurfaceD,
   coiningPreviewMark,
   coiningPreviewTitle,
   coiningPreviewTop,
@@ -24,6 +28,10 @@ type CoiningCardProps = {
 
 export const CoiningCard: React.FC<CoiningCardProps> = ({ item }) => {
   const chainLogoSrc = getChainLogoSrc(item.chainLabel)
+  const previewSurfaceClass =
+    [coiningPreviewSurfaceA, coiningPreviewSurfaceB, coiningPreviewSurfaceC, coiningPreviewSurfaceD][
+      Number(item.id.replace(/\D/g, '')) % 4 || 0
+    ]
 
   return (
     <Link
@@ -31,7 +39,7 @@ export const CoiningCard: React.FC<CoiningCardProps> = ({ item }) => {
       className={coiningCard}
       href={item.href}
     >
-      <Box className={coiningPreview} style={{ background: item.surface }}>
+      <Box className={`${coiningPreview} ${previewSurfaceClass}`}>
         <Box className={coiningPreviewTop}>
           <Text className={coiningPreviewMark}>{item.amount}</Text>
           {chainLogoSrc ? (

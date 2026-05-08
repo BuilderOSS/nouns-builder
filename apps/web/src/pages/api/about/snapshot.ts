@@ -186,7 +186,6 @@ const buildSnapshotResponse = async (): Promise<AboutSnapshotResponse> => {
         label: 'DAOs launched',
         value: compactNumber(totalDaos),
         detail: 'Live DAO count indexed across Builder-supported public networks.',
-        accent: '#2563EB',
         icon: '🚀',
       },
       {
@@ -195,7 +194,6 @@ const buildSnapshotResponse = async (): Promise<AboutSnapshotResponse> => {
         value: compactEth(totalAuctionSales),
         detail:
           'Cumulative native-token auction sales flowing into community treasuries.',
-        accent: '#2563EB',
         icon: '💰',
       },
       {
@@ -203,7 +201,6 @@ const buildSnapshotResponse = async (): Promise<AboutSnapshotResponse> => {
         label: 'Active auctions',
         value: compactNumber(activeAuctions),
         detail: 'Current live auctions still accepting bids across the ecosystem.',
-        accent: '#2563EB',
         icon: '⏰',
       },
       {
@@ -211,7 +208,6 @@ const buildSnapshotResponse = async (): Promise<AboutSnapshotResponse> => {
         label: 'Governance proposals',
         value: compactNumber(totalProposals),
         detail: 'Total proposals created across DAOs using Builder governance.',
-        accent: '#2563EB',
         icon: '📜',
       },
       {
@@ -219,7 +215,6 @@ const buildSnapshotResponse = async (): Promise<AboutSnapshotResponse> => {
         label: 'Members holding tokens',
         value: compactNumber(totalMembers),
         detail: 'Distinct DAO token holders participating across Builder communities.',
-        accent: '#2563EB',
         icon: '👥',
       },
       {
@@ -227,7 +222,6 @@ const buildSnapshotResponse = async (): Promise<AboutSnapshotResponse> => {
         label: 'Tokens auctioned',
         value: compactNumber(totalTokens),
         detail: 'Member tokens minted and distributed through recurring auctions.',
-        accent: '#2563EB',
         icon: '🔥',
       },
     ],

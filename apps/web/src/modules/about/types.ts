@@ -3,7 +3,6 @@ export type AboutStat = {
   label: string
   value: string
   detail: string
-  accent: string
   icon: string
 }
 
@@ -17,8 +16,6 @@ export type AboutDao = {
   signalValue: string
   href: string
   badge: string
-  surface: string
-  textAccent: string
   initials: string
   imageUrl?: string | null
   recentAuctionImage?: string | null
@@ -36,8 +33,6 @@ export type CoiningHighlight = {
   amount: string
   href: string
   eyebrow: string
-  accent: string
-  surface: string
   previewLabel: string
 }
 

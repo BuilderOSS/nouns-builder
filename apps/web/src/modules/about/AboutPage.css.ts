@@ -1,15 +1,15 @@
-import { color, theme } from '@buildeross/zord'
+import { theme } from '@buildeross/zord'
 import { globalStyle, keyframes, style } from '@vanilla-extract/css'
 
 const focusRing = {
-  outline: `2px solid ${theme.colors.border}`,
+  outline: `2px solid ${theme.colors.focusRing}`,
   outlineOffset: '2px',
 }
 
-const standardBorder = '2px solid #111111'
-const standardBorderThin = '1px solid #111111'
-const softBlueBackground = '#E8F4FF'
-const softBlueBorder = '#296BFF'
+const standardBorder = `2px solid ${theme.colors.border}`
+const standardBorderThin = `1px solid ${theme.colors.border}`
+const softBlueBackground = `color-mix(in srgb, ${theme.colors.focusRing} 14%, ${theme.colors.background1})`
+const softBlueBorder = theme.colors.focusRing
 
 const marqueeScroll = keyframes({
   '0%': {
@@ -24,7 +24,7 @@ export const page = style({
   width: '100%',
   padding: '48px 16px 96px',
   boxSizing: 'border-box',
-  background: color.background1,
+  background: theme.colors.background1,
   overflowX: 'clip',
   '@media': {
     'screen and (min-width: 768px)': {
@@ -91,13 +91,13 @@ export const eyebrow = style({
   width: 'fit-content',
   borderRadius: '999px',
   padding: '4px 10px',
-  background: color.background2,
+  background: theme.colors.background2,
   border: standardBorderThin,
   fontSize: '12px',
   lineHeight: '16px',
   letterSpacing: '0.04em',
   textTransform: 'uppercase',
-  color: '#666666',
+  color: theme.colors.text3,
   fontWeight: 700,
 })
 
@@ -107,7 +107,7 @@ export const sectionTitle = style({
   lineHeight: 1.04,
   whiteSpace: 'normal',
   overflowWrap: 'anywhere',
-  color: '#111111',
+  color: theme.colors.text1,
   '@media': {
     'screen and (min-width: 768px)': {
       fontSize: '40px',
@@ -124,13 +124,13 @@ export const sectionTitleOnly = style({
 export const sectionCopy = style({
   fontSize: '16px',
   lineHeight: 1.55,
-  color: '#666666',
+  color: theme.colors.text3,
 })
 
 export const introCopyNoWrap = style({
   fontSize: '16px',
   lineHeight: 1.55,
-  color: '#666666',
+  color: theme.colors.text3,
   whiteSpace: 'normal',
   '@media': {
     'screen and (min-width: 960px)': {
@@ -164,7 +164,7 @@ export const heroTitle = style({
   fontSize: '36px',
   lineHeight: 1,
   letterSpacing: '-0.03em',
-  color: '#111111',
+  color: theme.colors.text1,
   maxWidth: '760px',
   overflowWrap: 'anywhere',
   '@media': {
@@ -178,7 +178,7 @@ export const heroText = style({
   maxWidth: '640px',
   fontSize: '16px',
   lineHeight: 1.6,
-  color: '#666666',
+  color: theme.colors.text3,
   '@media': {
     'screen and (min-width: 768px)': {
       fontSize: '18px',
@@ -202,14 +202,14 @@ export const heroHighlight = style({
   gap: '10px',
   fontSize: '14px',
   lineHeight: 1.5,
-  color: '#444444',
+  color: theme.colors.text2,
 })
 
 export const heroHighlightDot = style({
   width: '8px',
   height: '8px',
   borderRadius: '999px',
-  background: '#111111',
+  background: theme.colors.text1,
   flexShrink: 0,
   marginTop: '6px',
 })
@@ -222,17 +222,17 @@ export const primaryButton = style({
   padding: '10px 16px',
   borderRadius: '999px',
   border: standardBorderThin,
-  color: '#FFFFFF',
-  background: '#111111',
+  color: theme.colors.background1,
+  background: theme.colors.text1,
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
   transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
   selectors: {
     '&:hover': {
-      borderColor: '#111111',
-      backgroundColor: '#333333',
-      color: '#FFFFFF',
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.text2,
+      color: theme.colors.background1,
     },
     '&:focus-visible': focusRing,
   },
@@ -259,8 +259,8 @@ export const secondaryButton = style({
   padding: '10px 16px',
   borderRadius: '999px',
   border: standardBorderThin,
-  color: '#111111',
-  background: color.background1,
+  color: theme.colors.text1,
+  background: theme.colors.background1,
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
@@ -280,7 +280,7 @@ export const heroPanel = style({
   overflow: 'hidden',
   borderRadius: '16px',
   border: standardBorder,
-  background: color.background2,
+  background: theme.colors.background2,
   padding: '14px',
   minHeight: 'auto',
   boxShadow: 'none',
@@ -317,7 +317,7 @@ export const montageGrid = style({
 export const montageCard = style({
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '16px',
   boxShadow: 'none',
   minWidth: 0,
@@ -360,7 +360,7 @@ export const logoMarquee = style({
   minHeight: '96px',
   overflow: 'hidden',
   borderRadius: '10px',
-  background: color.background1,
+  background: theme.colors.background1,
   '@media': {
     'screen and (min-width: 768px)': {
       minHeight: '160px',
@@ -408,7 +408,7 @@ export const logoMarqueeItem = style({
   height: '64px',
   borderRadius: '12px',
   overflow: 'hidden',
-  background: color.background1,
+  background: theme.colors.background1,
   boxShadow: 'none',
   display: 'flex',
   alignItems: 'center',
@@ -434,7 +434,7 @@ export const montageLabel = style({
   fontSize: '12px',
   letterSpacing: '0.08em',
   textTransform: 'uppercase',
-  color: '#808080',
+  color: theme.colors.text4,
   fontWeight: 700,
 })
 
@@ -443,7 +443,7 @@ export const montageValue = style({
   fontSize: '24px',
   lineHeight: 1,
   whiteSpace: 'pre-line',
-  color: '#111111',
+  color: theme.colors.text1,
   '@media': {
     'screen and (min-width: 768px)': {
       marginTop: '10px',
@@ -456,7 +456,7 @@ export const montageBody = style({
   marginTop: '10px',
   fontSize: '14px',
   lineHeight: 1.55,
-  color: '#666666',
+  color: theme.colors.text3,
 })
 
 export const daoMiniList = style({
@@ -472,7 +472,7 @@ export const daoMiniCard = style({
   gap: '12px',
   padding: '12px 14px',
   borderRadius: '16px',
-  background: '#EFF6FF',
+  background: theme.colors.background2,
 })
 
 export const daoMiniAvatar = style({
@@ -484,7 +484,7 @@ export const daoMiniAvatar = style({
   justifyContent: 'center',
   fontWeight: 700,
   fontSize: '14px',
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const heroFooterStat = style({
@@ -496,7 +496,7 @@ export const heroFooterStat = style({
 export const heroFooterValue = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '24px',
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const statGrid = style({
@@ -520,7 +520,7 @@ export const statCard = style({
   minHeight: '178px',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '22px',
   boxShadow: 'none',
   transition: 'border-color 0.15s ease, background-color 0.15s ease',
@@ -547,6 +547,13 @@ export const statAccent = style({
   lineHeight: 1,
 })
 
+export const statAccentDao = style({ background: theme.colors.background2 })
+export const statAccentTreasury = style({ background: theme.colors.positive })
+export const statAccentAuction = style({ background: theme.colors.warning })
+export const statAccentProposal = style({ background: theme.colors.accent })
+export const statAccentMembers = style({ background: theme.colors.negative })
+export const statAccentTokens = style({ background: theme.colors.accent })
+
 export const statLabel = style({
   position: 'relative',
   zIndex: 1,
@@ -554,7 +561,7 @@ export const statLabel = style({
   fontWeight: 700,
   letterSpacing: '0.06em',
   textTransform: 'uppercase',
-  color: '#808080',
+  color: theme.colors.text4,
 })
 
 export const statValue = style({
@@ -564,7 +571,7 @@ export const statValue = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '36px',
   lineHeight: 1,
-  color: '#111111',
+  color: theme.colors.text1,
   '@media': {
     'screen and (min-width: 768px)': {
       fontSize: '42px',
@@ -579,7 +586,7 @@ export const statDetail = style({
   maxWidth: '28ch',
   fontSize: '14px',
   lineHeight: 1.55,
-  color: '#5A5347',
+  color: theme.colors.text3,
 })
 
 export const sectionTopRow = style({
@@ -616,7 +623,7 @@ export const sectionInlineCopy = style({
   maxWidth: '760px',
   fontSize: '16px',
   lineHeight: 1.55,
-  color: '#666666',
+  color: theme.colors.text3,
   margin: 0,
 })
 
@@ -637,11 +644,11 @@ export const tabButton = style({
   minHeight: '42px',
   borderRadius: '999px',
   border: standardBorderThin,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '10px 16px',
   fontSize: '14px',
   fontWeight: 700,
-  color: '#111111',
+  color: theme.colors.text1,
   transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
   selectors: {
     '&:hover': {
@@ -665,12 +672,12 @@ export const tabButton = style({
 export const activeTabButton = style({
   background: softBlueBackground,
   borderColor: softBlueBorder,
-  color: '#111111',
+  color: theme.colors.text1,
   selectors: {
     '&:hover': {
       borderColor: softBlueBorder,
       backgroundColor: softBlueBackground,
-      color: '#111111',
+      color: theme.colors.text1,
     },
   },
 })
@@ -696,7 +703,7 @@ export const mobileStatsHeading = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '24px',
   lineHeight: 1.1,
-  color: '#111111',
+  color: theme.colors.text1,
   '@media': {
     'screen and (min-width: 768px)': {
       display: 'none',
@@ -723,7 +730,7 @@ export const daoCard = style({
   minHeight: '320px',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '18px',
   boxShadow: 'none',
   minWidth: 0,
@@ -757,7 +764,7 @@ export const daoChainBadge = style({
   height: '34px',
   borderRadius: '10px',
   border: standardBorderThin,
-  background: color.background1,
+  background: theme.colors.background1,
   boxShadow: 'none',
   display: 'inline-flex',
   alignItems: 'center',
@@ -794,6 +801,23 @@ export const daoAvatar = style({
   overflow: 'hidden',
 })
 
+export const daoAvatarSurfaceA = style({
+  background: theme.colors.background2,
+  color: theme.colors.text1,
+})
+export const daoAvatarSurfaceB = style({
+  background: theme.colors.accent,
+  color: theme.colors.text1,
+})
+export const daoAvatarSurfaceC = style({
+  background: theme.colors.positive,
+  color: theme.colors.text1,
+})
+export const daoAvatarSurfaceD = style({
+  background: theme.colors.warning,
+  color: theme.colors.text1,
+})
+
 export const daoAvatarImage = style({
   width: '100%',
   height: '100%',
@@ -805,14 +829,14 @@ export const daoName = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '20px',
   lineHeight: 1.05,
-  color: '#111111',
+  color: theme.colors.text1,
   overflowWrap: 'anywhere',
 })
 
 export const daoDescription = style({
   fontSize: '14px',
   lineHeight: 1.6,
-  color: '#666666',
+  color: theme.colors.text3,
 })
 
 globalStyle(`${daoDescription} p`, {
@@ -821,7 +845,7 @@ globalStyle(`${daoDescription} p`, {
 
 globalStyle(`${daoDescription} strong`, {
   fontWeight: 700,
-  color: '#555555',
+  color: theme.colors.text2,
 })
 
 export const badge = style({
@@ -840,14 +864,14 @@ export const daoSignal = style({
   marginTop: 'auto',
   padding: '14px 16px',
   borderRadius: '10px',
-  background: color.background2,
+  background: theme.colors.background2,
 })
 
 export const daoSignalLabel = style({
   fontSize: '12px',
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
-  color: '#808080',
+  color: theme.colors.text4,
   fontWeight: 700,
 })
 
@@ -857,7 +881,7 @@ export const daoSignalValue = style({
   lineHeight: 1.2,
   whiteSpace: 'normal',
   overflowWrap: 'anywhere',
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const cardLink = style({
@@ -865,7 +889,7 @@ export const cardLink = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '10px',
-  color: '#111111',
+  color: theme.colors.text1,
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
@@ -890,7 +914,7 @@ export const scrollRow = style({
       height: '10px',
     },
     '&::-webkit-scrollbar-thumb': {
-      background: '#D6D1C4',
+      background: theme.colors.border,
       borderRadius: '999px',
     },
   },
@@ -912,7 +936,7 @@ export const coiningCard = style({
   scrollSnapAlign: 'start',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '18px',
   boxShadow: 'none',
   minWidth: 0,
@@ -951,6 +975,11 @@ export const coiningPreview = style({
   },
 })
 
+export const coiningPreviewSurfaceA = style({ background: theme.colors.accent })
+export const coiningPreviewSurfaceB = style({ background: theme.colors.warning })
+export const coiningPreviewSurfaceC = style({ background: theme.colors.positive })
+export const coiningPreviewSurfaceD = style({ background: theme.colors.background2 })
+
 export const coiningPreviewTop = style({
   display: 'flex',
   alignItems: 'flex-start',
@@ -962,12 +991,12 @@ export const coiningPreviewMark = style({
   alignSelf: 'flex-start',
   display: 'inline-flex',
   borderRadius: '999px',
-  background: color.background1,
+  background: theme.colors.background1,
   border: standardBorderThin,
   padding: '6px 10px',
   fontSize: '12px',
   fontWeight: 700,
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const coiningNetworkBadge = style({
@@ -975,7 +1004,7 @@ export const coiningNetworkBadge = style({
   height: '34px',
   borderRadius: '10px',
   border: standardBorderThin,
-  background: color.background1,
+  background: theme.colors.background1,
   boxShadow: 'none',
   display: 'inline-flex',
   alignItems: 'center',
@@ -989,7 +1018,7 @@ export const coiningPreviewTitle = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '26px',
   lineHeight: 0.95,
-  color: '#111111',
+  color: theme.colors.text1,
   overflowWrap: 'anywhere',
   '@media': {
     'screen and (min-width: 768px)': {
@@ -1008,13 +1037,13 @@ export const coiningTitle = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '22px',
   lineHeight: 1.05,
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const mutedText = style({
   fontSize: '14px',
   lineHeight: 1.6,
-  color: '#666666',
+  color: theme.colors.text3,
 })
 
 export const amountPill = style({
@@ -1022,8 +1051,8 @@ export const amountPill = style({
   width: 'fit-content',
   borderRadius: '999px',
   padding: '7px 12px',
-  background: color.background2,
-  color: '#111111',
+  background: theme.colors.background2,
+  color: theme.colors.text1,
   border: standardBorderThin,
   fontSize: '13px',
   fontWeight: 700,
@@ -1039,7 +1068,7 @@ export const droposalCard = style({
   gap: '14px',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '18px',
   boxShadow: 'none',
   color: 'inherit',
@@ -1079,11 +1108,40 @@ export const statusBadge = style({
   fontWeight: 700,
 })
 
+export const statusLive = style({ background: theme.colors.positive, color: theme.colors.text1 })
+export const statusRecent = style({ background: theme.colors.accent, color: theme.colors.text1 })
+export const statusActive = style({ background: theme.colors.warning, color: theme.colors.text1 })
+export const statusSucceeded = style({
+  background: theme.colors.positive,
+  color: theme.colors.text1,
+})
+export const statusQueued = style({
+  background: theme.colors.background2,
+  color: theme.colors.text1,
+})
+export const statusDefeated = style({
+  background: theme.colors.background2,
+  color: theme.colors.text2,
+})
+export const statusExecuted = style({
+  background: theme.colors.background2,
+  color: theme.colors.text1,
+})
+export const statusTrending = style({
+  background: theme.colors.negative,
+  color: theme.colors.text1,
+})
+
+export const daoBadge = style({
+  background: theme.colors.background2,
+  color: theme.colors.text2,
+})
+
 export const droposalTitle = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '20px',
   lineHeight: 1.05,
-  color: '#111111',
+  color: theme.colors.text1,
   overflowWrap: 'anywhere',
   '@media': {
     'screen and (min-width: 768px)': {
@@ -1095,7 +1153,7 @@ export const droposalTitle = style({
 export const droposalSummary = style({
   fontSize: '15px',
   lineHeight: 1.65,
-  color: '#5A5348',
+  color: theme.colors.text3,
   maxWidth: '72ch',
 })
 
@@ -1126,7 +1184,7 @@ export const stepCard = style({
   minHeight: '170px',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '22px',
   boxShadow: 'none',
 })
@@ -1145,9 +1203,9 @@ export const stepMarker = style({
   borderRadius: '10px',
   alignItems: 'center',
   justifyContent: 'center',
-  background: '#296BFF',
+  background: theme.colors.accent,
   border: 'none',
-  color: '#FFFFFF',
+  color: theme.colors.background1,
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '18px',
   flexShrink: 0,
@@ -1157,14 +1215,14 @@ export const stepTitle = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '28px',
   lineHeight: 1.02,
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const stepBody = style({
   marginTop: '14px',
   fontSize: '15px',
   lineHeight: 1.65,
-  color: '#666666',
+  color: theme.colors.text3,
 })
 
 export const valueGrid = style({
@@ -1222,11 +1280,11 @@ export const featureIconBadge = style({
   width: '42px',
   height: '42px',
   borderRadius: '14px',
-  background: color.background2,
+  background: theme.colors.background2,
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 globalStyle(`${featureIconBadge} svg`, {
@@ -1240,7 +1298,7 @@ export const featureLabel = style({
   fontSize: '17px',
   lineHeight: 1.2,
   fontWeight: 700,
-  color: '#111111',
+  color: theme.colors.text1,
   overflowWrap: 'anywhere',
 })
 
@@ -1268,7 +1326,7 @@ export const valueCard = style({
   minHeight: '150px',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '20px',
   boxShadow: 'none',
 })
@@ -1277,7 +1335,7 @@ export const compactValueCard = style({
   minHeight: '96px',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '16px',
   boxShadow: 'none',
   display: 'flex',
@@ -1296,14 +1354,14 @@ export const valueTitle = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '24px',
   lineHeight: 1.05,
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const compactValueTitle = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '18px',
   lineHeight: 1.2,
-  color: '#111111',
+  color: theme.colors.text1,
   display: '-webkit-box',
   overflow: 'hidden',
   WebkitLineClamp: 3,
@@ -1332,7 +1390,7 @@ export const activityCard = style({
   gap: '10px',
   borderRadius: '12px',
   border: standardBorder,
-  background: color.background1,
+  background: theme.colors.background1,
   padding: '18px',
   '@media': {
     'screen and (min-width: 820px)': {
@@ -1350,8 +1408,8 @@ export const activityMeta = style({
   padding: '6px 10px',
   fontSize: '12px',
   fontWeight: 700,
-  background: color.background2,
-  color: '#666666',
+  background: theme.colors.background2,
+  color: theme.colors.text3,
   border: standardBorderThin,
 })
 
@@ -1359,7 +1417,7 @@ export const activityTitle = style({
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '22px',
   lineHeight: 1.08,
-  color: '#111111',
+  color: theme.colors.text1,
 })
 
 export const finalCta = style({
@@ -1367,8 +1425,8 @@ export const finalCta = style({
   overflow: 'hidden',
   borderRadius: '16px',
   border: standardBorder,
-  background: color.background2,
-  color: '#111111',
+  background: theme.colors.background2,
+  color: theme.colors.text1,
   padding: '30px 22px',
   boxShadow: 'none',
   '@media': {
@@ -1430,7 +1488,7 @@ export const finalChecklistItem = style({
   gap: '10px',
   fontSize: '15px',
   lineHeight: 1.55,
-  color: '#666666',
+  color: theme.colors.text3,
   '@media': {
     'screen and (min-width: 768px)': {
       alignItems: 'center',
@@ -1442,7 +1500,7 @@ export const finalChecklistItem = style({
 
 export const finalChecklistMarker = style({
   minWidth: '24px',
-  color: '#111111',
+  color: theme.colors.text1,
   fontWeight: 700,
 })
 
@@ -1470,17 +1528,17 @@ export const lightButton = style({
   padding: '10px 16px',
   borderRadius: '999px',
   border: standardBorderThin,
-  background: '#111111',
-  color: '#FFFFFF',
+  background: theme.colors.text1,
+  color: theme.colors.background1,
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
   transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
   selectors: {
     '&:hover': {
-      borderColor: '#111111',
-      backgroundColor: '#333333',
-      color: '#FFFFFF',
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.text2,
+      color: theme.colors.background1,
     },
     '&:focus-visible': focusRing,
   },
@@ -1489,7 +1547,7 @@ export const lightButton = style({
 export const finalPrimaryButton = style([
   lightButton,
   {
-    borderColor: '#111111',
+    borderColor: theme.colors.border,
   },
 ])
 
@@ -1500,8 +1558,8 @@ export const ghostButton = style({
   minHeight: '42px',
   padding: '10px 16px',
   borderRadius: '999px',
-  background: color.background1,
-  color: '#111111',
+  background: theme.colors.background1,
+  color: theme.colors.text1,
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
@@ -1518,27 +1576,27 @@ export const ghostButton = style({
 })
 
 export const subLink = style({
-  color: '#666666',
+  color: theme.colors.text3,
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
   width: 'fit-content',
   selectors: {
     '&:hover': {
-      color: '#111111',
+      color: theme.colors.text1,
     },
     '&:focus-visible': focusRing,
   },
 })
 
 export const heroSubLink = style({
-  color: '#666666',
+  color: theme.colors.text3,
   fontSize: '14px',
   fontWeight: 700,
   textDecoration: 'none',
   selectors: {
     '&:hover': {
-      color: '#111111',
+      color: theme.colors.text1,
     },
     '&:focus-visible': focusRing,
   },
@@ -1547,5 +1605,68 @@ export const heroSubLink = style({
 export const helperText = style({
   fontSize: '14px',
   lineHeight: 1.55,
-  color: '#5B6477',
+  color: theme.colors.text3,
+})
+
+export const governanceCopy = style({
+  maxWidth: '720px',
+  fontSize: '17px',
+  lineHeight: 1.6,
+  color: theme.colors.text3,
+})
+
+export const governanceLink = style({
+  color: theme.colors.accent,
+  textDecoration: 'underline',
+})
+
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} :is(${sectionTitle}, ${heroTitle}, ${montageValue}, ${heroFooterValue}, ${statValue}, ${tabButton}, ${activeTabButton}, ${mobileStatsHeading}, ${daoName}, ${daoSignalValue}, ${coiningPreviewMark}, ${coiningPreviewTitle}, ${coiningTitle}, ${amountPill}, ${droposalTitle}, ${stepTitle}, ${featureItem}, ${governanceLink}, ${lightButton}, ${ghostButton})`,
+  {
+    color: theme.colors.text1,
+  }
+)
+
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} :is(${sectionCopy}, ${introCopyNoWrap}, ${heroText}, ${heroHighlight}, ${montageBody}, ${statLabel}, ${statDetail}, ${sectionInlineCopy}, ${daoDescription}, ${daoSignalLabel}, ${mutedText}, ${droposalSummary}, ${stepBody}, ${subLink}, ${heroSubLink}, ${helperText}, ${governanceCopy})`,
+  {
+    color: theme.colors.text3,
+  }
+)
+
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} :is(${heroHighlightDot}, ${stepMarker})`,
+  {
+    background: theme.colors.text1,
+  }
+)
+
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} :is(${primaryButton}, ${lightButton})`,
+  {
+    background: theme.colors.text1,
+    color: theme.colors.background1,
+    borderColor: theme.colors.border,
+  }
+)
+
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} :is(${secondaryButton}, ${ghostButton})`,
+  {
+    background: theme.colors.background1,
+    color: theme.colors.text1,
+    borderColor: theme.colors.border,
+  }
+)
+
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} :is(${daoMiniCard}, ${stepCard})`,
+  {
+    background: theme.colors.background2,
+  }
+)
+
+globalStyle(`html[data-theme-mode="dark"] ${logoMarqueeTrack}::before`, {
+  background:
+    'linear-gradient(90deg, rgba(31, 32, 36, 1) 0%, rgba(31, 32, 36, 0) 10%, rgba(31, 32, 36, 0) 90%, rgba(31, 32, 36, 1) 100%)',
 })

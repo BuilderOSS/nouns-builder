@@ -6,6 +6,8 @@ import {
   centeredImage,
   centeredImageWrap,
   container,
+  governanceCopy,
+  governanceLink,
   page,
   section,
 } from './AboutPage.css'
@@ -95,15 +97,7 @@ export const AboutPageView: React.FC = () => {
             eyebrowText="Governance"
             title="All made possible thanks to Builder DAO"
           />
-          <Box
-            as="p"
-            style={{
-              maxWidth: '720px',
-              fontSize: '17px',
-              lineHeight: 1.6,
-              color: '#5C5648',
-            }}
-          >
+          <Box as="p" className={governanceCopy}>
             This public good tooling and the Nouns Builder Protocol are maintained and
             governed by{' '}
             <Box
@@ -111,7 +105,7 @@ export const AboutPageView: React.FC = () => {
               href="https://nouns.build/dao/base/0xe8af882f2f5c79580230710ac0e2344070099432"
               rel="noreferrer"
               target="_blank"
-              style={{ color: '#2563EB', textDecoration: 'underline' }}
+              className={governanceLink}
             >
               Builder DAO
             </Box>
@@ -121,7 +115,7 @@ export const AboutPageView: React.FC = () => {
               href="https://nouns.build/dao/ethereum/0xdf9b7d26c8fc806b1ae6273684556761ff02d422/vote/66"
               rel="noreferrer"
               target="_blank"
-              style={{ color: '#2563EB', textDecoration: 'underline' }}
+              className={governanceLink}
             >
               here
             </Box>
