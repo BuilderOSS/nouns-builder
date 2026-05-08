@@ -1,5 +1,5 @@
 import { skeletonAnimation } from '@buildeross/ui/styles'
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const feed = style([
@@ -25,7 +25,7 @@ export const cardWrapper = style({
   position: 'relative',
   selectors: {
     '&:hover': {
-      backgroundColor: '#fafafa',
+      backgroundColor: vars.color.background2,
       cursor: 'pointer',
     },
   },

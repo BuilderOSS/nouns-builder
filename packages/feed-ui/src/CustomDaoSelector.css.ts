@@ -23,9 +23,17 @@ export const searchInput = style([
     border: `1px solid ${vars.color.border}`,
     fontSize: '14px',
     transition: 'border-color 0.2s ease',
+    backgroundColor: vars.color.background1,
     ':focus': {
       outline: 'none',
       borderColor: vars.color.primary,
+    },
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        backgroundColor: vars.color.background2,
+        borderColor: vars.color.border,
+        color: vars.color.text1,
+      },
     },
   },
 ])
@@ -53,8 +61,17 @@ export const daoItem = style([
     alignItems: 'center',
     gap: '12px',
     transition: 'all 0.2s ease',
+    backgroundColor: 'transparent',
     ':hover': {
       backgroundColor: vars.color.background2,
+    },
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        backgroundColor: vars.color.background2,
+      },
+      'html[data-theme-mode="dark"] &:hover': {
+        backgroundColor: vars.color.neutralHover,
+      },
     },
   },
 ])
@@ -89,6 +106,11 @@ export const daoAddress = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text2,
+    },
+  },
 })
 
 export const selectedChips = style([
@@ -114,6 +136,12 @@ export const chip = style([
     gap: '6px',
     backgroundColor: vars.color.background2,
     fontSize: '12px',
+    selectors: {
+      'html[data-theme-mode="dark"] &': {
+        backgroundColor: vars.color.background2,
+        color: vars.color.text1,
+      },
+    },
   },
 ])
 
@@ -140,10 +168,20 @@ export const emptyState = style({
   textAlign: 'center',
   color: vars.color.text3,
   fontSize: '14px',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text2,
+    },
+  },
 })
 
 export const sectionTitle = style({
   fontSize: '14px',
   fontWeight: 600,
   color: vars.color.text1,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text1,
+    },
+  },
 })

@@ -1,8 +1,8 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { ProposalVoteFragment, ProposalVoteSupport } from '@buildeross/sdk/subgraph'
-import { Avatar } from '@buildeross/ui/Avatar'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { atoms, Flex, Grid, Text } from '@buildeross/zord'
+import { atoms, Box, Flex, Grid, Text, vars } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 
@@ -82,12 +82,23 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
       >
         {vote.support}
       </Text>
-      <Flex align={'center'} style={{ gridColumn: 'span 4 / span 4' }}>
-        <Avatar address={vote.voter} src={ensAvatar} size="28" />
-        <Text fontWeight="display" ml="x2">
-          {ensName || walletSnippet(vote.voter)}
-        </Text>
-      </Flex>
+      <Box style={{ gridColumn: 'span 4 / span 4' }}>
+        <Box
+          onPointerDownCapture={(event: React.PointerEvent<HTMLDivElement>) =>
+            event.stopPropagation()
+          }
+          onClickCapture={(event: React.MouseEvent<HTMLDivElement>) =>
+            event.stopPropagation()
+          }
+        >
+          <WalletIdentityWithPreview
+            address={vote.voter as `0x${string}`}
+            displayName={ensName || walletSnippet(vote.voter)}
+            avatarSrc={ensAvatar}
+            avatarSize="28"
+          />
+        </Box>
+      </Box>
 
       <Flex
         align={'center'}
@@ -131,7 +142,7 @@ export const VotePlacard: React.FC<VotePlacardProps> = ({ vote, totalVotes }) =>
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 minWidth: '80%',
-                backgroundColor: '#F9F9F9',
+                backgroundColor: vars.color.background2,
               }}
             >
               {vote.reason}

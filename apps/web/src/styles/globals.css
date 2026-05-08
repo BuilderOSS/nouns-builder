@@ -31,13 +31,67 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root {
+  --app-link-hover: #000;
+  --connect-button-bg: #000;
+  --connect-button-bg-hover: #111;
+  --connect-button-text: #fff;
+  --flatpickr-surface: #fff;
+  --flatpickr-border: #f2f2f2;
+  --flatpickr-text: #000;
+  --flatpickr-muted: #808080;
+  --flatpickr-hover: #f2f2f2;
+  --flatpickr-selected-bg: #000;
+  --flatpickr-selected-text: #fff;
+  --flatpickr-backdrop-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+  --focus-ring-color: #0085ff; /* vars.color.focusRing holds the canonical tokenized value; update both in sync */
+  --mde-border: #c8ccd0;
+  --mde-header-bg: #f9f9f9;
+  --mde-surface: #fff;
+  --mde-text: #000;
+  --mde-muted: #808080;
+  --mde-tab-text: #808080;
+  --mde-tab-active-text: #000;
+  --mde-icon-color: #242729;
+  --mde-icon-hover-color: #000;
+  --mde-code-bg: rgba(0, 0, 0, 0.04);
+  --mde-link-color: #4078c0;
+}
+
+html[data-theme-mode='dark'] {
+  --app-link-hover: #fff;
+  --connect-button-bg: #fff;
+  --connect-button-bg-hover: #f2f2f2;
+  --connect-button-text: #1f2024;
+  --flatpickr-surface: #1f2024;
+  --flatpickr-border: #3f4047;
+  --flatpickr-text: #fff;
+  --flatpickr-muted: #808188;
+  --flatpickr-hover: #313239;
+  --flatpickr-selected-bg: #fff;
+  --flatpickr-selected-text: #1f2024;
+  --flatpickr-backdrop-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  --focus-ring-color: #0085ff; /* vars.color.focusRing holds the canonical tokenized value; update both in sync */
+  --mde-border: #3f4047;
+  --mde-header-bg: #2a2b30;
+  --mde-surface: #1f2024;
+  --mde-text: #fff;
+  --mde-muted: #808188;
+  --mde-tab-text: #808188;
+  --mde-tab-active-text: #fff;
+  --mde-icon-color: #c0c1c8;
+  --mde-icon-hover-color: #fff;
+  --mde-code-bg: #2a2b30;
+  --mde-link-color: #6ea8fe;
+}
+
 a {
   color: inherit;
   text-decoration: none;
 }
 
 a:hover {
-  color: #000;
+  color: var(--app-link-hover);
 }
 
 input::-webkit-outer-spin-button,
@@ -52,10 +106,10 @@ input[type="number"] {
 
 #connect-button-wrapper * div,
 #connect-button-wrapper * button {
-  background: #000;
+  background: var(--connect-button-bg);
   border: 0;
-  font-family: 'ptRoot', 'Arial', 'Helvetica', 'sans-serif' !important;
-  color: #fff;
+  font-family: ptRoot, Arial, Helvetica, sans-serif !important;
+  color: var(--connect-button-text);
   font-weight: 700;
   box-shadow: none;
   font-size: 16px;
@@ -74,5 +128,5 @@ input[type="number"] {
 #connect-button-wrapper * div:hover,
 #connect-button-wrapper * button:hover {
   cursor: pointer;
+  background: var(--connect-button-bg-hover);
 }
-

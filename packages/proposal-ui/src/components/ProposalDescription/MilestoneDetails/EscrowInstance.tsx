@@ -135,6 +135,7 @@ export const EscrowInstance = ({
 
       const releaseEscrowTxnData = {
         type: TransactionType.RELEASE_ESCROW_MILESTONE,
+        title: 'Release Milestone Payment',
         summary: `Release Milestone #${milestone + 1} for ${invoiceData?.title}`,
         transactions: [releaseMilestone],
       }
@@ -242,7 +243,7 @@ export const EscrowInstance = ({
             <a href={invoiceUrl} target="_blank" rel="noreferrer">
               <Button variant="secondary" size="sm">
                 View Smart Invoice
-                <Icon id="arrowTopRight" />
+                <Icon id="arrow-top-right" />
               </Button>
             </a>
           ) : (
@@ -256,7 +257,7 @@ export const EscrowInstance = ({
                   >
                     <Button variant="secondary" size="sm">
                       View Smart Invoice As Safe App
-                      <Icon id="arrowTopRight" />
+                      <Icon id="arrow-top-right" />
                     </Button>
                   </a>
                   {!isClientConnected && (
@@ -267,7 +268,7 @@ export const EscrowInstance = ({
                     >
                       <Button variant="secondary" size="sm">
                         View Proposal As Safe App
-                        <Icon id="arrowTopRight" />
+                        <Icon id="arrow-top-right" />
                       </Button>
                     </a>
                   )}
@@ -276,7 +277,7 @@ export const EscrowInstance = ({
                 <a href={invoiceUrl} target="_blank" rel="noreferrer">
                   <Button variant="secondary" size="sm">
                     View Smart Invoice
-                    <Icon id="arrowTopRight" />
+                    <Icon id="arrow-top-right" />
                   </Button>
                 </a>
               )}

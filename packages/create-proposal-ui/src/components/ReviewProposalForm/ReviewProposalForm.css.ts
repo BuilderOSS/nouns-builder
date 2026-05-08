@@ -10,25 +10,25 @@ export const checkboxStyle = style([
     borderRadius: '5px',
     cursor: 'pointer',
     selectors: {
-      '&:hover': { background: color.negative },
+      '&:hover': { background: color.warning },
     },
   },
   atoms({
     borderWidth: 'thin',
     borderStyle: 'solid',
-    borderColor: 'negative',
+    borderColor: 'warning',
   }),
 ])
 
 export const checkboxStyleVariants = styleVariants({
   default: [checkboxStyle],
-  confirmed: [checkboxStyle, atoms({ backgroundColor: 'negative' })],
+  confirmed: [checkboxStyle, atoms({ backgroundColor: 'warning' })],
 })
 
 export const checkboxHelperText = style([
   atoms({
     display: 'inline',
-    color: 'negative',
+    color: 'warning',
   }),
   {
     lineHeight: '24px',

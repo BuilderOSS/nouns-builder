@@ -34,6 +34,7 @@ export const ResumeAuctions: React.FC = () => {
 
       addTransaction({
         type: TransactionType.RESUME_AUCTIONS,
+        title: 'Resume Auctions',
         summary: 'Resume auctions',
         transactions: [pause],
       })

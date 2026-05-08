@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { usePopper } from 'react-popper'
 
 import { Atoms } from '../atoms.css'
-import { Box, Button, Icon } from '../elements'
+import { Box, Flex, Icon } from '../elements'
 import { container } from './PopUp.css'
 
 interface BasePopUpProps {
@@ -18,6 +18,9 @@ interface BasePopUpProps {
   triggerClassName?: string // Add className to the trigger element, specifically
   onOpenChange?: (state: boolean) => void
   showBackdrop?: boolean
+  viewportPadding?: number
+  allowFlip?: boolean
+  ariaHasPopup?: 'menu' | 'listbox' | 'dialog' | 'tree' | 'grid' | true | false
 }
 
 export type PopUpProps = BasePopUpProps &
@@ -46,6 +49,9 @@ export function PopUp({
   onOpenChange,
   wrapperClassName,
   showBackdrop = true,
+  viewportPadding = 0,
+  allowFlip = true,
+  ariaHasPopup = 'menu',
 }: PopUpProps) {
   const [triggerElement, setTriggerElement] = useState<HTMLDivElement | null>(null)
   const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(null)
@@ -60,9 +66,14 @@ export function PopUp({
         },
       },
       {
+        name: 'flip',
+        enabled: allowFlip,
+      },
+      {
         name: 'preventOverflow',
         options: {
           rootBoundary: 'viewport',
+          padding: viewportPadding,
         },
       },
     ],
@@ -87,23 +98,35 @@ export function PopUp({
     <>
       {triggerRef === undefined && (
         <Box
-          onClick={(e: React.MouseEvent) => {
-            e.stopPropagation()
-            setOpenState(!openState)
-          }}
           ref={setTriggerElement}
           className={[triggerClassName]}
+          role="button"
+          tabIndex={0}
+          aria-expanded={openState}
+          aria-haspopup={ariaHasPopup}
+          onClick={(e: React.MouseEvent) => {
+            e.stopPropagation()
+            setOpenState((prev) => !prev)
+          }}
+          onKeyDown={(e: React.KeyboardEvent) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              e.stopPropagation()
+              setOpenState((prev) => !prev)
+            }
+          }}
         >
           {trigger || (
-            <Button
-              variant="ghost"
-              size="sm"
+            <Flex
+              display="inline-flex"
+              alignItems="center"
+              justifyContent="center"
               borderRadius="round"
               p="x3"
               style={{ minWidth: 0, height: 'auto' }}
             >
               <Icon id="dots" size="md" />
-            </Button>
+            </Flex>
           )}
         </Box>
       )}

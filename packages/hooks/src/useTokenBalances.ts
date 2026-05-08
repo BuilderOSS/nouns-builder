@@ -25,11 +25,15 @@ export type TokenBalancesReturnType = {
 
 const fetchTokenBalances = async (
   chainId: CHAIN_ID,
-  address: Address
+  address: Address,
+  filterLowValue?: boolean
 ): Promise<TokenBalance[]> => {
   const params = new URLSearchParams()
   params.set('chainId', chainId.toString())
   params.set('address', address)
+  if (typeof filterLowValue === 'boolean') {
+    params.set('filterLowValue', String(filterLowValue))
+  }
 
   const response = await fetch(
     `${BASE_URL}/api/alchemy/token-balances?${params.toString()}`
@@ -43,14 +47,21 @@ const fetchTokenBalances = async (
 
 export const useTokenBalances = (
   chainId?: CHAIN_ID,
-  address?: Address
+  address?: Address,
+  options?: {
+    filterLowValue?: boolean
+  }
 ): TokenBalancesReturnType => {
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     !!address && !!chainId && isAddress(address)
-      ? ([SWR_KEYS.TOKEN_BALANCES, chainId, address] as const)
+      ? ([SWR_KEYS.TOKEN_BALANCES, chainId, address, options?.filterLowValue] as const)
       : null,
-    async ([, _chainId, _address]) =>
-      fetchTokenBalances(_chainId as CHAIN_ID, _address as Address),
+    async ([, _chainId, _address, _filterLowValue]) =>
+      fetchTokenBalances(
+        _chainId as CHAIN_ID,
+        _address as Address,
+        _filterLowValue as boolean | undefined
+      ),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

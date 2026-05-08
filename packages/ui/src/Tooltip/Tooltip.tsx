@@ -1,7 +1,13 @@
 import { Box, Icon, PopUp } from '@buildeross/zord'
 import { useRef, useState } from 'react'
 
-export const Tooltip = ({ children }: { children: string }) => {
+export const Tooltip = ({
+  children,
+  label = 'Help',
+}: {
+  children: string
+  label?: string
+}) => {
   const [showTooltip, setShowTooltip] = useState(false)
   const triggerRef = useRef<HTMLDivElement | null>(null)
 
@@ -10,10 +16,16 @@ export const Tooltip = ({ children }: { children: string }) => {
       <Box
         cursor="pointer"
         onMouseOver={() => setShowTooltip(true)}
+        onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
+        onFocus={() => setShowTooltip(true)}
+        onBlur={() => setShowTooltip(false)}
         ref={triggerRef}
+        tabIndex={0}
+        color="text3"
+        aria-label={label}
       >
-        <Icon id="info-16" size="sm" />
+        <Icon id="question" size="sm" aria-hidden />
       </Box>
       <PopUp
         open={showTooltip}

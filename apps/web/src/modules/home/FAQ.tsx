@@ -50,7 +50,7 @@ export const FAQ = () => {
               target="_blank"
               rel="noreferrer noopener"
             >
-              <Icon id="newWindow" />
+              <Icon id="new-window" />
               <Text ml="x2">Artwork starter kit</Text>
             </a>
           </Flex>

@@ -129,6 +129,7 @@ export const AddArtwork: React.FC = () => {
 
     addTransaction({
       type: TransactionType.ADD_ARTWORK,
+      title: 'Add Artwork',
       summary: 'Add artwork',
       transactions: formattedTransactions,
     })

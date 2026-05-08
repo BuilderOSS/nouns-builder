@@ -71,7 +71,7 @@ const LikeButton: React.FC<LikeButtonProps> = ({
   const popupInitialMode: LikePopupMode = isLiked ? 'alreadyLiked' : 'like'
 
   // Determine which heart icon to show
-  const heartIcon = isLiked ? 'heartFilled' : 'heart'
+  const heartIcon = isLiked ? 'heart-filled' : 'heart'
 
   const onLikeSuccessInner = useCallback(
     (txHash: string, amount: bigint) => {

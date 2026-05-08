@@ -8,6 +8,7 @@ import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { isTestnetChain } from '@buildeross/utils/chains'
+import { serializeDaoMetadata } from '@buildeross/utils/daoMetadata'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
 import { sanitizeStringForJSON } from '@buildeross/utils/sanitize'
@@ -97,7 +98,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     contributionAllocation,
     general,
     auctionSettings,
-    setUpArtwork,
     setActiveSection,
     activeSection,
     fulfilledSections,
@@ -137,7 +137,9 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         [
           sanitizeStringForJSON(general?.daoName),
           general?.daoSymbol.replace('$', ''),
-          sanitizeStringForJSON(setUpArtwork?.projectDescription),
+          sanitizeStringForJSON(
+            serializeDaoMetadata(general?.projectDescription || '', general?.links || [])
+          ),
           general?.daoAvatar ?? '',
           sanitizeStringForJSON(general?.daoWebsite ?? ''),
           RENDERER_BASE,
@@ -148,7 +150,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
       general?.daoSymbol,
       general?.daoAvatar,
       general?.daoWebsite,
-      setUpArtwork?.projectDescription,
+      general?.projectDescription,
+      general?.links,
     ]
   )
 
@@ -382,6 +385,18 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               <ReviewItem label="Dao Name" value={general?.daoName} />
               <ReviewItem label="Dao Symbol" value={general?.daoSymbol} />
               <ReviewItem label="Dao Website" value={general?.daoWebsite} />
+              <ReviewItem
+                label="Project Description"
+                value={general?.projectDescription || 'None'}
+              />
+              <ReviewItem
+                label="Additional Links"
+                value={
+                  general?.links?.length
+                    ? general.links.map((link) => `${link.key}: ${link.url}`).join(', ')
+                    : 'None'
+                }
+              />
             </ReviewSection>
 
             <ReviewSection subHeading="Auction Settings">
@@ -448,18 +463,15 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
             </ReviewSection>
 
             <ReviewSection subHeading="Set Up Artwork">
-              <ReviewItem
-                label="Project Description"
-                value={setUpArtwork.projectDescription}
-              />
               <ReviewItem label="Artwork" value={<PreviewArtwork />} />
-              <ReviewItem label="Files Length" value={setUpArtwork.filesLength} />
             </ReviewSection>
           </Flex>
           <Flex direction={'column'} p={'x6'} className={deployCheckboxWrapperStyle}>
             <Flex>
               <Flex align={'center'} justify={'center'} gap={'x4'}>
                 <Flex
+                  as={'button'}
+                  type="button"
                   align={'center'}
                   justify={'center'}
                   className={
@@ -468,12 +480,14 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     ]
                   }
                   onClick={() => setHasConfirmedTerms((bool) => !bool)}
+                  aria-pressed={hasConfirmedTerms}
+                  aria-label="Confirm terms of service"
                 >
                   {hasConfirmedTerms && <Icon fill="background1" id="check" />}
                 </Flex>
 
                 <Flex className={deployCheckboxHelperText}>
-                  [I have reviewed and acknowledge and agree to the{' '}
+                  I have reviewed, acknowledge, and agree to the{' '}
                   <a
                     href={'/legal'}
                     target="_blank"
@@ -482,7 +496,6 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                   >
                     Nouns Builder Terms of Service
                   </a>
-                  ]
                 </Flex>
               </Flex>
             </Flex>
@@ -490,6 +503,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
             <Flex mt="x4">
               <Flex align={'center'} justify={'center'} gap={'x4'}>
                 <Flex
+                  as={'button'}
+                  type="button"
                   align={'center'}
                   justify={'center'}
                   className={
@@ -498,6 +513,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     ]
                   }
                   onClick={() => setHasConfirmedChain((bool) => !bool)}
+                  aria-pressed={hasConfirmedChain}
+                  aria-label="Confirm deployment chain"
                 >
                   {hasConfirmedChain && <Icon fill="background1" id="check" />}
                 </Flex>
@@ -512,6 +529,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               <Flex mt="x4">
                 <Flex align={'center'} justify={'center'} gap={'x4'}>
                   <Flex
+                    as={'button'}
+                    type="button"
                     align={'center'}
                     justify={'center'}
                     className={
@@ -520,6 +539,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                       ]
                     }
                     onClick={() => setHasConfirmedRewards((bool) => !bool)}
+                    aria-pressed={hasConfirmedRewards}
+                    aria-label="Confirm rewards documentation"
                   >
                     {hasConfirmedRewards && <Icon fill="background1" id="check" />}
                   </Flex>
@@ -544,6 +565,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               <Flex mt="x4">
                 <Flex align={'center'} justify={'center'} gap={'x4'}>
                   <Flex
+                    as={'button'}
+                    type="button"
                     align={'center'}
                     justify={'center'}
                     className={
@@ -552,6 +575,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                       ]
                     }
                     onClick={() => setHasConfirmedFastDAO((bool) => !bool)}
+                    aria-pressed={hasConfirmedFastDAO}
+                    aria-label="Confirm fast DAO timings"
                   >
                     {hasConfirmedFastDAO && <Icon fill="background1" id="check" />}
                   </Flex>
@@ -574,21 +599,20 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                 {deploymentError}
               </Flex>
             )}
-
-            <FormNavButtons hasPrev onPrev={handlePrev}>
-              <ContractButton
-                chainId={chain.id}
-                handleClick={handleDeploy}
-                flex={1}
-                disabled={isDisabled}
-                className={
-                  deployContractButtonStyle[isPendingTransaction ? 'pending' : 'default']
-                }
-              >
-                {`${isPendingTransaction ? 'Deploying' : 'Deploy'} Contracts (1 of 2)`}
-              </ContractButton>
-            </FormNavButtons>
           </Flex>
+          <FormNavButtons hasPrev onPrev={handlePrev}>
+            <ContractButton
+              chainId={chain.id}
+              handleClick={handleDeploy}
+              flex={1}
+              disabled={isDisabled}
+              className={
+                deployContractButtonStyle[isPendingTransaction ? 'pending' : 'default']
+              }
+            >
+              {`${isPendingTransaction ? 'Deploying' : 'Deploy'} Contracts (1 of 2)`}
+            </ContractButton>
+          </FormNavButtons>
         </Box>
       ) : (
         <SuccessfulDeploy title={title} onSuccessfulDeploy={handleSuccessfulDeploy} />

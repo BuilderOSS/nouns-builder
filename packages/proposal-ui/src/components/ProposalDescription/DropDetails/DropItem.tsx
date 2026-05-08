@@ -200,7 +200,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
         <a href={dropLink.href} className={linkStyle} target="_blank" rel="noreferrer">
           <Button variant="secondary" size="sm">
             View Drop Page
-            <Icon id="arrowTopRight" />
+            <Icon id="arrow-top-right" />
           </Button>
         </a>
       )}

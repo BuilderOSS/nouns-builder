@@ -298,6 +298,7 @@ export const TokenSelectionForm: React.FC = () => {
         inputLabel={'Select Token'}
         disabled={isLoadingTreasury}
         isLoading={isLoadingTreasury}
+        positioning="absolute"
       />
 
       {selectedTokenOption === 'custom' && (

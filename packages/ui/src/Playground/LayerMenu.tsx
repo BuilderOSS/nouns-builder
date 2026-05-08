@@ -1,12 +1,9 @@
 import { ImageProps, SelectedTraitsProps } from '@buildeross/types'
-import { atoms, Box, Flex, Icon, Stack } from '@buildeross/zord'
-import React, { BaseSyntheticEvent, useCallback } from 'react'
+import { Box, Stack } from '@buildeross/zord'
+import React, { useCallback } from 'react'
 
-import {
-  layerSelectStyle,
-  selectTraitNameStyle,
-  selectTraitNameWrapper,
-} from '../Artwork/Artwork.css'
+import { selectTraitNameStyle, selectTraitNameWrapper } from '../Artwork/Artwork.css'
+import { DropdownSelect, type SelectOption } from '../DropdownSelect'
 
 interface LayerProps {
   trait: string
@@ -19,11 +16,11 @@ export const LayerMenu: React.FC<{
   setSelectedTraits: (selectedTraits: SelectedTraitsProps[]) => void
 }> = ({ layers, selectedTraits, setSelectedTraits }) => {
   const handleChange = useCallback(
-    (e: BaseSyntheticEvent, images: ImageProps[], trait: string) => {
-      const isRandom = Number.isNaN(Number(e.target.value))
+    (selectedValue: string, images: ImageProps[], trait: string) => {
+      const isRandom = selectedValue === 'random'
       const imageIndex = isRandom
         ? Math.floor(Math.random() * images.length)
-        : Number(e.target.value)
+        : Number(selectedValue)
       const selectedImage = images[imageIndex]
 
       const traitIndex = selectedTraits.findIndex(
@@ -61,34 +58,19 @@ export const LayerMenu: React.FC<{
             >
               {trait}
             </Box>
-            <Flex
-              className={[
-                atoms({
-                  position: 'absolute',
-                  top: 'x3',
-                  right: 'x2',
-                  pointerEvents: 'none',
-                }),
+            <DropdownSelect
+              value="random"
+              onChange={(nextValue) => handleChange(String(nextValue), images, trait)}
+              options={[
+                { label: 'Random', value: 'random' } as SelectOption<string>,
+                ...images.map((image: ImageProps, index: number) => ({
+                  label: image.name,
+                  value: String(index),
+                })),
               ]}
-            >
-              <Icon id="chevronDown" />
-            </Flex>
-
-            <select
-              className={layerSelectStyle}
-              name={trait}
-              defaultValue="Random"
-              onChange={(e: BaseSyntheticEvent) => handleChange(e, images, trait)}
-            >
-              <option key="random-property" value="random">
-                Random
-              </option>
-              {images.map((image: ImageProps, index: number) => (
-                <option key={image.name} value={index}>
-                  {image.name}
-                </option>
-              ))}
-            </select>
+              customLabel={'Random'}
+              positioning="absolute"
+            />
           </Stack>
         )
       })}

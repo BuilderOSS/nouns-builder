@@ -62,7 +62,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
               hasPreviousToken ? auctionDateNavButtonWithHover : auctionDateNavButton
             }
           >
-            <Icon id="arrowLeft" style={hasPreviousToken ? {} : disabledStyle} />
+            <Icon id="arrow-left" style={hasPreviousToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
 
@@ -78,7 +78,7 @@ export const AuctionTokenPicker: React.FC<AuctionTokenPickerProps> = ({
               hasNextToken ? auctionDateNavButtonWithHover : auctionDateNavButton
             }
           >
-            <Icon id="arrowRight" style={hasNextToken ? {} : disabledStyle} />
+            <Icon id="arrow-right" style={hasNextToken ? {} : disabledStyle} />
           </Flex>
         </OptionalLink>
 

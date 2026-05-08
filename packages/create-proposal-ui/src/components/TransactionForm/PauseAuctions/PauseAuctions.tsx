@@ -34,6 +34,7 @@ export const PauseAuctions: React.FC = () => {
 
       addTransaction({
         type: TransactionType.PAUSE_AUCTIONS,
+        title: 'Pause Auctions',
         summary: 'Pause auctions',
         transactions: [pause],
       })

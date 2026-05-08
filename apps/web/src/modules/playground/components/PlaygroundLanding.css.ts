@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const landingContainer = style([
@@ -81,12 +81,12 @@ export const card = style([
     gap: '16px',
     minHeight: '240px',
     ':hover': {
-      outlineColor: 'var(--zord-colors-border-primary)',
+      outlineColor: vars.color.focusRing,
       transform: 'translateY(-4px)',
       boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
     },
     ':focus-visible': {
-      outlineColor: 'var(--zord-colors-border-primary)',
+      outlineColor: vars.color.focusRing,
       outlineOffset: '2px',
     },
   },

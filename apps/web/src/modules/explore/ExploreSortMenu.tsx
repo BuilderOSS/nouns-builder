@@ -1,5 +1,6 @@
 import { Auction_OrderBy } from '@buildeross/sdk/subgraph'
-import { Flex, Select } from '@buildeross/zord'
+import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
+import { Flex } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
 
@@ -30,12 +31,13 @@ export const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
   }, [])
 
   const handleSortChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
+    (selection: string) => {
       push({
         pathname,
         query: {
           ...query,
-          orderBy: selectionToOrderBy(e.target.value),
+          sortKey: selectionToOrderBy(selection),
+          orderBy: selectionToOrderBy(selection),
         },
       })
     },
@@ -56,17 +58,18 @@ export const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
 
   return (
     <Flex w={'auto'}>
-      <Select
-        name="Explore Sort"
-        defaultValue={defaultSort}
-        onChange={(e) => handleSortChange(e)}
-      >
-        {Object.values(SORT_KEY).map((value) => (
-          <option key={value} value={value}>
-            {value}
-          </option>
-        ))}
-      </Select>
+      <DropdownSelect
+        options={Object.values(SORT_KEY).map((value) => ({
+          label: value,
+          value,
+        }))}
+        value={defaultSort}
+        onChange={handleSortChange}
+        customLabel={defaultSort}
+        positioning="absolute"
+        height="x10"
+        minWidth="120px"
+      />
     </Flex>
   )
 }

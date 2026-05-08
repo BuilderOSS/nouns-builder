@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const heroBannerGrid = style([
@@ -122,7 +122,7 @@ export const heroBannerCreateDaoButton = style({
   selectors: {
     '&:hover': {
       cursor: 'pointer',
-      backgroundColor: '#808080',
+      backgroundColor: vars.color.ghostHover,
     },
   },
 })

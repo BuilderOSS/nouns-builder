@@ -12,11 +12,16 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
-import { formatEther, parseEther } from 'viem'
+import { formatEther, parseEther, stringToHex } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
-import { auctionActionButtonVariants, bidForm, bidInput } from '../Auction.css'
+import {
+  auctionActionButtonVariants,
+  bidCommentInput,
+  bidForm,
+  bidInput,
+} from '../Auction.css'
 import { WarningModal } from './WarningModal'
 
 interface PlaceBidProps {
@@ -31,10 +36,28 @@ interface PlaceBidProps {
 }
 
 const INSUFFICIENT_BALANCE_ERROR = 'Insufficient ETH balance for this bid.'
+const INVALID_COMMENT_ERROR =
+  'Bid comment contains unsupported characters. Please retype your comment.'
+const MAX_BID_COMMENT_BYTES = 140
 const ENTER_BID_HELPER_TEXT = (formattedMinBid: string) =>
   `Enter at least ${formattedMinBid} ETH to place a bid.`
 const MIN_BID_HELPER_TEXT = (formattedMinBid: string) =>
   `Bid must be at least ${formattedMinBid} ETH.`
+
+const truncateToMaxBytes = (value: string, maxBytes: number) => {
+  const encoder = new TextEncoder()
+  let byteLength = 0
+  let truncated = ''
+
+  for (const char of value) {
+    const charLength = encoder.encode(char).length
+    if (byteLength + charLength > maxBytes) break
+    truncated += char
+    byteLength += charLength
+  }
+
+  return truncated
+}
 
 const InnerPlaceBid = ({
   chainId,
@@ -56,7 +79,9 @@ const InnerPlaceBid = ({
   const [creatingBid, setCreatingBid] = useState(false)
   const [showWarning, setShowWarning] = useState(false)
   const [bidAmount, setBidAmount] = React.useState<string | undefined>(undefined)
+  const [bidComment, setBidComment] = React.useState<string>('')
   const [bidError, setBidError] = useState<string | null>(null)
+  const [bidCommentError, setBidCommentError] = useState<string | null>(null)
 
   const auctionContractParams = {
     abi: auctionAbi,
@@ -110,6 +135,16 @@ const InnerPlaceBid = ({
       return undefined
     }
   }, [bidAmount])
+  const bidCommentDataSuffix = useMemo(() => {
+    const trimmedComment = bidComment.trim()
+    if (!trimmedComment) return undefined
+    if (trimmedComment.includes('\uFFFD')) return undefined
+    if (new TextEncoder().encode(trimmedComment).length > MAX_BID_COMMENT_BYTES) {
+      return undefined
+    }
+
+    return stringToHex(trimmedComment)
+  }, [bidComment])
   const hasInsufficientBalance = useMemo(() => {
     if (bidAmountInWei == null || balance?.value == null) return false
     return bidAmountInWei > balance.value
@@ -130,6 +165,7 @@ const InnerPlaceBid = ({
           args: [BigInt(tokenId), referral],
           value: parseEther(bidAmount),
           chainId,
+          ...(bidCommentDataSuffix ? { dataSuffix: bidCommentDataSuffix } : {}),
         })
         txHash = await writeContract(config, data.request)
       } else {
@@ -140,6 +176,7 @@ const InnerPlaceBid = ({
           args: [BigInt(tokenId)],
           value: parseEther(bidAmount),
           chainId,
+          ...(bidCommentDataSuffix ? { dataSuffix: bidCommentDataSuffix } : {}),
         })
         txHash = await writeContract(config, data.request)
       }
@@ -154,6 +191,10 @@ const InnerPlaceBid = ({
       ])
 
       await mutate([SWR_KEYS.AVERAGE_WINNING_BID, chainId, tokenAddress.toLowerCase()])
+
+      setBidAmount(undefined)
+      setBidComment('')
+      setBidError(null)
 
       // Call onSuccess callback if provided
       onSuccess?.()
@@ -178,12 +219,14 @@ const InnerPlaceBid = ({
     tokenAddress,
     tokenId,
     chainId,
+    bidCommentDataSuffix,
     mutate,
     onSuccess,
   ])
 
   const handleCreateBid = useCallback(async () => {
     if (!isMinBid || !bidAmount || creatingBid) return
+    if (bidCommentError) return
 
     if (hasInsufficientBalance) {
       setBidError(INSUFFICIENT_BALANCE_ERROR)
@@ -209,20 +252,34 @@ const InnerPlaceBid = ({
     bidAmountInWei,
     minAmountForWarning,
     createBidTransaction,
+    bidCommentError,
   ])
 
   useEffect(() => {
     document.body.style.overflow = !!showWarning ? 'hidden' : 'unset'
   }, [showWarning])
 
+  useEffect(() => {
+    const trimmedComment = bidComment.trim()
+    if (trimmedComment && trimmedComment.includes('\uFFFD')) {
+      setBidCommentError(INVALID_COMMENT_ERROR)
+      return
+    }
+
+    setBidCommentError(null)
+  }, [bidComment])
+
   const isValidBid = bidAmount && isMinBid
   const isValidChain = wagmiChain?.id === chainId
   const hasBidAmount = !!bidAmount
   const shouldDisableBidButton =
-    address && isValidChain ? !isValidBid || hasInsufficientBalance : false
+    address && isValidChain
+      ? !isValidBid || hasInsufficientBalance || !!bidCommentError
+      : false
   const disabledBidMessage = useMemo(() => {
     if (!(address && isValidChain)) return null
     if (hasInsufficientBalance) return INSUFFICIENT_BALANCE_ERROR
+    if (bidCommentError) return bidCommentError
     if (!hasBidAmount) return ENTER_BID_HELPER_TEXT(formattedMinBid)
     if (!isMinBid) return MIN_BID_HELPER_TEXT(formattedMinBid)
     return null
@@ -230,12 +287,14 @@ const InnerPlaceBid = ({
     address,
     isValidChain,
     hasInsufficientBalance,
+    bidCommentError,
     hasBidAmount,
     formattedMinBid,
     isMinBid,
   ])
-  const helperText = bidError || disabledBidMessage
-  const helperTextColor = bidError || hasInsufficientBalance ? 'negative' : 'tertiary'
+  const helperText = bidError || bidCommentError || disabledBidMessage
+  const helperTextColor =
+    bidError || bidCommentError || hasInsufficientBalance ? 'negative' : 'tertiary'
 
   // Build share URL with referral parameter if user is connected
   const shareUrl = useMemo(() => {
@@ -276,6 +335,7 @@ const InnerPlaceBid = ({
                 placeholder={`${formattedMinBid} ETH or more`}
                 type={'number'}
                 className={bidInput}
+                value={bidAmount ?? ''}
                 min={formattedMinBid}
                 max={formatEther(balance?.value ?? 0n)}
                 onChange={(event) => {
@@ -304,6 +364,22 @@ const InnerPlaceBid = ({
                   ETH
                 </Flex>
               </Box>
+            </Box>
+            <Box mt="x2" mr={{ '@initial': 'x0', '@768': 'x2' }}>
+              <textarea
+                id="bid-comment"
+                aria-label="Add a bid comment"
+                placeholder="Add a bid comment (optional)"
+                value={bidComment}
+                maxLength={MAX_BID_COMMENT_BYTES}
+                rows={3}
+                className={bidCommentInput}
+                onChange={(event) =>
+                  setBidComment(
+                    truncateToMaxBytes(event.target.value, MAX_BID_COMMENT_BYTES)
+                  )
+                }
+              />
             </Box>
             {helperText ? (
               <Text variant="paragraph-sm" color={helperTextColor} mt="x2">

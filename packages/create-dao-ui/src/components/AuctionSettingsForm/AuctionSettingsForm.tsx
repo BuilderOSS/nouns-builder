@@ -205,12 +205,16 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               <Flex mt={'x4'} mb={'x4'}>
                 <Flex align={'center'} justify={'center'} gap={'x4'}>
                   <Flex
+                    as={'button'}
+                    type="button"
                     align={'center'}
                     justify={'center'}
                     className={
                       deployCheckboxStyleVariants[enableFastDAO ? 'confirmed' : 'default']
                     }
                     onClick={() => handleFastDAOToggle(formik)}
+                    aria-pressed={enableFastDAO}
+                    aria-label="Enable Fast DAO"
                   >
                     {enableFastDAO && <Icon fill="background1" id="check" />}
                   </Flex>
@@ -238,7 +242,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               mb={'x8'}
             >
               Advanced Settings
-              <Icon id={showAdvanced ? 'chevronUp' : 'chevronDown'} />
+              <Icon id={showAdvanced ? 'chevron-up' : 'chevron-down'} />
             </Button>
             <motion.div
               className={defaultFormAdvancedWrapper}

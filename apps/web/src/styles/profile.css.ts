@@ -1,5 +1,5 @@
 import { skeletonAnimation } from '@buildeross/ui/styles'
-import { color } from '@buildeross/zord'
+import { color, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const loadingSkeleton = style({
@@ -52,16 +52,30 @@ export const responsiveGrid = style({
 
 export const profileDaoLink = style({
   cursor: 'pointer',
-  backgroundColor: color.background1,
   selectors: {
     '&:hover': {
       backgroundColor: color.background2,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.background2,
     },
   },
 })
 
 export const profileHiddenDaoLink = style({
-  backgroundColor: color.borderOnImage,
+  backgroundColor: color.background2,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.backdrop,
+    },
+    '&:hover': {
+      backgroundColor: color.neutralHover,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      backgroundColor: vars.color.neutralHover,
+    },
+  },
 })
 
 export const daoEditorRow = style({

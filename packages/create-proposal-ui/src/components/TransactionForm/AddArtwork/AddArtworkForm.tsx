@@ -132,12 +132,17 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
               {!isTestnetDAO && (
                 <Flex align={'center'} justify={'center'} gap={'x4'} mt="x4">
                   <Flex
+                    as={'button'}
+                    type="button"
                     align={'center'}
                     justify={'center'}
                     className={
                       checkboxStyleVariants[hasConfirmed ? 'confirmed' : 'default']
                     }
                     onClick={() => setHasConfirmed((bool) => !bool)}
+                    aria-pressed={hasConfirmed}
+                    aria-label="Confirm testnet artwork addition"
+                    style={{ borderWidth: 0, padding: 0 }}
                   >
                     {hasConfirmed && <Icon fill="background1" id="check" />}
                   </Flex>

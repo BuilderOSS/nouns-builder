@@ -1,4 +1,4 @@
-import { AddressType, BuilderTransaction } from '@buildeross/types'
+import { AddressType, TransactionBundle } from '@buildeross/types'
 import { hexToBigInt } from 'viem'
 
 interface ProposalTransactions {
@@ -8,7 +8,7 @@ interface ProposalTransactions {
 }
 
 export const prepareProposalTransactions = (
-  transactions: BuilderTransaction[]
+  transactions: TransactionBundle[]
 ): ProposalTransactions => {
   const flattenedTransactions = transactions.flatMap((txn) => txn.transactions)
 

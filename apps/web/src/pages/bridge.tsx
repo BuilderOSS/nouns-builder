@@ -5,6 +5,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import React from 'react'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
+import { bridgeActionButton, bridgeCardBody } from 'src/styles/bridge.css'
 import { useAccount, useBalance } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
@@ -94,16 +95,7 @@ const NetworkCard: React.FC<{
       >
         <Image alt="bridge-logo" style={{ width: 200 }} src={bridgeLogo} />
       </Flex>
-      <Stack
-        p="x5"
-        style={{
-          borderBottomLeftRadius: '0.8rem',
-          borderBottomRightRadius: '0.8rem',
-          borderBottom: '2px solid rgb(242, 242, 242)',
-          borderLeft: '2px solid rgb(242, 242, 242)',
-          borderRight: '2px solid rgb(242, 242, 242)',
-        }}
-      >
+      <Stack p="x5" className={bridgeCardBody}>
         <Flex align={'center'} justify={'space-between'} w="100%">
           <Box>
             <Box as={'span'} fontWeight={'display'}>
@@ -121,7 +113,7 @@ const NetworkCard: React.FC<{
           rel="noreferrer"
           mt="x5"
         >
-          <Button w="100%">
+          <Button w="100%" className={bridgeActionButton}>
             <Flex align={'center'}>
               <Box>Bridge</Box>
               <Icon ml="x1" m="x0" size="sm" fill="neutral" id="external-16" />

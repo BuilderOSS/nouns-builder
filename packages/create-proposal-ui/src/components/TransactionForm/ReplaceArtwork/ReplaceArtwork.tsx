@@ -122,6 +122,7 @@ export const ReplaceArtwork: React.FC = () => {
 
     addTransaction({
       type: TransactionType.REPLACE_ARTWORK,
+      title: 'Replace Artwork',
       summary: 'Replace artwork',
       transactions: formattedTransactions,
     })

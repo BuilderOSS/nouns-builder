@@ -37,6 +37,7 @@ export const PauseAuctionsForm: React.FC = () => {
 
     addTransaction({
       type: TransactionType.PAUSE_AUCTIONS,
+      title: 'Pause Auctions',
       summary: 'Pause auctions',
       transactions: [pause],
     })
@@ -66,11 +67,13 @@ export const PauseAuctionsForm: React.FC = () => {
     if (reduceDelay) {
       addTransaction({
         type: TransactionType.CUSTOM,
+        title: 'Custom Transaction',
         summary: 'Change Voting Period to 2 Days',
         transactions: [votingPeriod],
       })
       addTransaction({
         type: TransactionType.CUSTOM,
+        title: 'Custom Transaction',
         summary: 'Change Voting Delay to 2 Days',
         transactions: [votingDelay],
       })
@@ -103,10 +106,14 @@ export const PauseAuctionsForm: React.FC = () => {
       )}
       <Flex align={'center'} justify={'flex-start'} gap={'x4'} mt="x2" mb="x8">
         <Flex
+          as={'button'}
+          type="button"
           align={'center'}
           justify={'center'}
           className={checkboxStyleVariants[reduceDelay ? 'confirmed' : 'default']}
           onClick={() => setReduceDelay((bool) => !bool)}
+          aria-pressed={reduceDelay}
+          aria-label="Reduce voting delay and period"
         >
           {reduceDelay && <Icon fill="background1" id="check" />}
         </Flex>

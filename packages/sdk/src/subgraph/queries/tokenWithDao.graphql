@@ -10,6 +10,11 @@ query tokenWithDao($id: ID!) {
     dao {
       name
       description
+      links {
+        id
+        key
+        url
+      }
       contractImage
       totalSupply
       ownerCount

@@ -25,6 +25,10 @@ export const searchInputStyle = style([
         outline: 'none',
         borderColor: vars.color.primary,
       },
+      '&:focus-visible': {
+        outline: `2px solid ${vars.color.focusRing}`,
+        outlineOffset: '2px',
+      },
     },
   },
 ])

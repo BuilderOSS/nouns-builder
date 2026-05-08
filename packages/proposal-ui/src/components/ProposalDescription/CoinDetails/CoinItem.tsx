@@ -131,7 +131,7 @@ export const CoinItem = ({ coin, index, isExecuted, chainId }: CoinItemProps) =>
         <a href={coinLink.href} className={linkStyle} target="_blank" rel="noreferrer">
           <Button variant="secondary" size="sm">
             View Coin Page
-            <Icon id="arrowTopRight" />
+            <Icon id="arrow-top-right" />
           </Button>
         </a>
       )}

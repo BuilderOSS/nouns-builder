@@ -15,6 +15,7 @@ import {
   Stack,
   Text,
   theme,
+  vars,
 } from '@buildeross/zord'
 import { Field, Formik } from 'formik'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -205,17 +206,25 @@ export const SubmitVoteForm: React.FC<{
       {
         text: `Cast ${votesAvailable} ${votesAvailable > 1 ? 'votes' : 'vote'} for`,
         value: Choice.FOR,
-        icon: { id: 'check', fill: 'positive', activeBackground: '#1A8967' },
+        icon: {
+          id: 'check',
+          fill: 'positive',
+          activeBackground: vars.color.positiveActive,
+        },
       },
       {
         text: `Cast ${votesAvailable} ${votesAvailable > 1 ? 'votes' : 'vote'} against`,
         value: Choice.AGAINST,
-        icon: { id: 'cross', fill: 'negative', activeBackground: '#CD2D2D' },
+        icon: {
+          id: 'cross',
+          fill: 'negative',
+          activeBackground: vars.color.negativeActive,
+        },
       },
       {
         text: 'Abstain from voting',
         value: Choice.ABSTAIN,
-        icon: { id: 'dash', fill: 'neutral', activeBackground: '#C4C4C4' },
+        icon: { id: 'dash', fill: 'neutral', activeBackground: vars.color.neutralHover },
       },
     ],
     [votesAvailable]

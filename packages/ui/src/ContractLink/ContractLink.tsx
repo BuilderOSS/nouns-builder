@@ -2,7 +2,7 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsName } from '@buildeross/hooks'
 import { CHAIN_ID } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Flex, FlexProps, Icon, Text } from '@buildeross/zord'
+import { Flex, FlexProps, Icon, Text, vars } from '@buildeross/zord'
 import React from 'react'
 
 import { CopyButton } from '../CopyButton'
@@ -57,7 +57,7 @@ export const ContractLink = ({
       borderColor={noBorder ? undefined : 'border'}
       borderStyle={noBorder ? undefined : 'solid'}
       borderWidth={noBorder ? undefined : 'normal'}
-      style={noBorder ? undefined : { backgroundColor: '#fafafa' }}
+      style={noBorder ? undefined : { backgroundColor: vars.color.background2 }}
       gap={size === 'xs' ? 'x1' : 'x2'}
     >
       {/* Mobile Layout - Show ens name if available, otherwise snippet address */}
@@ -74,7 +74,7 @@ export const ContractLink = ({
           target="_blank"
           rel="noreferrer"
         >
-          <Icon id="arrowTopRight" fill="text4" />
+          <Icon id="arrow-top-right" fill="text4" />
         </a>
         <CopyButton text={address} variant={'icon'} />
       </Flex>

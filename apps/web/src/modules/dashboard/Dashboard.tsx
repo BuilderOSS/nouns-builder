@@ -317,7 +317,7 @@ export const Dashboard: React.FC = () => {
               ? `${totalProposals} active proposal${totalProposals !== 1 ? 's' : ''}`
               : 'No active proposals'
           }
-          description={<Stack gap="x1">{proposalList}</Stack>}
+          description={<Stack gap="x3">{proposalList}</Stack>}
           titleFontSize={18}
           mb={'x0'}
           showWarning={hasProposalsNeedingVote}

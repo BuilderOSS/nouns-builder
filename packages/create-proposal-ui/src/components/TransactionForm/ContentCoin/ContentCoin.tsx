@@ -20,7 +20,7 @@ import {
   estimateTargetFdvUsd,
   isChainIdSupportedByCoining,
 } from '@buildeross/utils'
-import { Box, Button, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Stack, Text, vars } from '@buildeross/zord'
 import { createMetadataBuilder } from '@zoralabs/coins-sdk'
 import {
   coinFactoryConfig,
@@ -33,6 +33,9 @@ import { useReadContract } from 'wagmi'
 
 import { ContentCoinPreviewDisplay } from './ContentCoinPreviewDisplay'
 import { IPFSUploader } from './ipfsUploader'
+
+const warningSurface = `color-mix(in srgb, ${vars.color.warning} 14%, transparent)`
+const negativeSurface = `color-mix(in srgb, ${vars.color.negative} 14%, transparent)`
 
 /**
  * FormObserver component to watch form values and trigger callback
@@ -371,6 +374,7 @@ export const ContentCoin: React.FC = () => {
       // 9. Add transaction to proposal queue
       addTransaction({
         type: TransactionType.CONTENT_COIN,
+        title: 'Content Coin',
         summary: `Create ${values.symbol} Content Coin`,
         transactions: [transaction],
       })
@@ -393,11 +397,7 @@ export const ContentCoin: React.FC = () => {
   if (!isChainSupported) {
     return (
       <Box w="100%">
-        <Box
-          p="x6"
-          borderRadius="curved"
-          style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
-        >
+        <Box p="x6" borderRadius="curved" style={{ backgroundColor: warningSurface }}>
           <Stack gap="x2">
             <Text variant="heading-sm">Network Not Supported</Text>
             <Text variant="paragraph-md" color="text3">
@@ -413,11 +413,7 @@ export const ContentCoin: React.FC = () => {
   if (!latestClankerToken) {
     return (
       <Box w="100%">
-        <Box
-          p="x6"
-          borderRadius="curved"
-          style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
-        >
+        <Box p="x6" borderRadius="curved" style={{ backgroundColor: warningSurface }}>
           <Stack gap="x2">
             <Text variant="heading-sm">No Creator Coin Found</Text>
             <Text variant="paragraph-md" color="text3">
@@ -496,7 +492,7 @@ export const ContentCoin: React.FC = () => {
                     <Box
                       p="x4"
                       borderRadius="curved"
-                      style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
+                      style={{ backgroundColor: negativeSurface }}
                     >
                       <Text
                         variant="paragraph-sm"
@@ -516,7 +512,7 @@ export const ContentCoin: React.FC = () => {
                     <Box
                       p="x4"
                       borderRadius="curved"
-                      style={{ backgroundColor: 'rgba(255, 213, 79, 0.1)' }}
+                      style={{ backgroundColor: warningSurface }}
                     >
                       <Text variant="paragraph-sm" color="warning">
                         Treasury address not found. Please connect to a DAO.

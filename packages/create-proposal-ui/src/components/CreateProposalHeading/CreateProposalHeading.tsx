@@ -113,7 +113,7 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
                     disabled={backDisabled}
                     aria-label={backLabel}
                   >
-                    <Icon id="arrowLeft" />
+                    <Icon id="arrow-left" />
                   </Button>
                 )}
                 {showReset && onReset && (

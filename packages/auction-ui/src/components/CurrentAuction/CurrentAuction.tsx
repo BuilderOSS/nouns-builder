@@ -9,7 +9,7 @@ import { useReadContract } from 'wagmi'
 
 import { AuctionDetails } from '../AuctionDetails'
 import { BidAmount } from '../BidAmount'
-import { ActionsWrapper } from '../BidHistory'
+import { ActionsWrapper, BidHistory } from '../BidHistory'
 import { WinningBidder } from '../WinningBidder'
 import { AuctionCountdown } from './AuctionCountdown'
 import { PlaceBid } from './PlaceBid'
@@ -88,6 +88,7 @@ export const CurrentAuction = ({
             auctionAddress={auctionAddress}
             auctionPaused={auctionPaused}
           />
+          {!!bids && bids.length > 0 && <BidHistory bids={bids || []} />}
         </ActionsWrapper>
       </Fragment>
     )

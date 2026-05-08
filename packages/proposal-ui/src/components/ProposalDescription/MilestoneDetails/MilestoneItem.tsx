@@ -55,7 +55,7 @@ export const MilestoneItem = ({
     if (isReleased) {
       return (
         <Button variant="secondary" disabled>
-          <Icon id="checkInCircle" />
+          <Icon id="check-in-circle" />
           Milestone Released
         </Button>
       )

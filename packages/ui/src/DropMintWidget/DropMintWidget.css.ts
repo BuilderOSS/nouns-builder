@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const widgetContainer = style([
@@ -31,8 +31,8 @@ export const mintInput = style({
   selectors: {
     '&:focus': {
       outline: 'none',
-      borderColor: '#E6E6E6',
-      backgroundColor: 'white',
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background1,
     },
     '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
       WebkitAppearance: 'none',

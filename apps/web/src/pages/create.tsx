@@ -32,6 +32,7 @@ const CreatePage: NextPageWithLayout = () => {
   const { isGnosisSafe } = useIsGnosisSafe(address, chain.id)
 
   const { push } = useRouter()
+
   const handleSuccessfulDeploy = React.useCallback(
     async (token: string) => {
       await push({
@@ -86,7 +87,7 @@ const CreatePage: NextPageWithLayout = () => {
 
     const reviewAndDeploy: CreateFormSection = {
       title: 'Deploy',
-      subHeading: '[Confirm your contract settings before deploying your DAO]',
+      subHeading: 'Confirm your contract settings before deploying your DAO',
       form: (
         <ReviewAndDeploy
           key={'review-and-deploy'}

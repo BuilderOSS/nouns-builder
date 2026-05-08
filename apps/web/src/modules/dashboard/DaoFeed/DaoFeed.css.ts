@@ -1,5 +1,5 @@
 import { skeletonAnimation } from '@buildeross/ui/styles'
-import { atoms, media } from '@buildeross/zord'
+import { atoms, media, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const daoFeedSkeleton = style({
@@ -10,7 +10,7 @@ export const daoFeedSkeleton = style({
 export const emptyTile = style({
   borderRadius: 12,
   minHeight: 540,
-  backgroundColor: '#F9F9F9',
+  backgroundColor: vars.color.background2,
   selectors: {
     '&:first-child': {
       display: 'none',

@@ -1,14 +1,15 @@
+import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const animatedPanel = style({
   height: '100vh',
   width: '100vw',
   position: 'fixed',
-  background: '#fff',
+  background: vars.color.background1,
   top: 0,
   left: 0,
   transform: 'translateY(105%)',
-  boxShadow: '0px 12px 30px rgba(0, 0, 0, 0.3)',
+  boxShadow: `0px 12px 30px ${vars.color.backdrop}`,
   zIndex: 1,
 })
 

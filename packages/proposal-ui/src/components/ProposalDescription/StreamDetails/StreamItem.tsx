@@ -215,6 +215,7 @@ export const StreamItem = ({
 
     const cancelTxnData = {
       type: TransactionType.CUSTOM,
+      title: 'Custom Transaction',
       summary: `Cancel Sablier Stream #${liveData.streamId}`,
       transactions: [cancelTransaction],
     }
@@ -603,7 +604,7 @@ export const StreamItem = ({
                 >
                   <Button variant="secondary" size="sm">
                     View Stream As Safe App
-                    <Icon id="arrowTopRight" />
+                    <Icon id="arrow-top-right" />
                   </Button>
                 </a>
               ) : (
@@ -615,7 +616,7 @@ export const StreamItem = ({
                 >
                   <Button variant="secondary" size="sm">
                     View Stream on Sablier
-                    <Icon id="arrowTopRight" />
+                    <Icon id="arrow-top-right" />
                   </Button>
                 </a>
               )}

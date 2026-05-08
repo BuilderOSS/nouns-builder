@@ -92,12 +92,17 @@ const StickySave: React.FC<StickySaveProps> = ({
             <Flex direction={'column'} py={'x8'} px={'x4'} className={confirmFormWrapper}>
               <Flex align={'center'} justify={'center'} gap={'x4'}>
                 <Flex
+                  as={'button'}
+                  type="button"
                   align={'center'}
                   justify={'center'}
                   className={
                     deployCheckboxStyleVariants[hasConfirmed ? 'confirmed' : 'default']
                   }
                   onClick={handleConfirm}
+                  aria-pressed={hasConfirmed}
+                  aria-label="Confirm before save"
+                  style={{ borderWidth: 0, padding: 0 }}
                 >
                   {hasConfirmed && <Icon id="check" fill="background1" />}
                 </Flex>

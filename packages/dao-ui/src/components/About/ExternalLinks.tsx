@@ -1,3 +1,4 @@
+import { mapDaoLinkKeyToIcon, toDisplayDaoLinks } from '@buildeross/utils'
 import { Button, Flex, Icon, IconType } from '@buildeross/zord'
 import React from 'react'
 
@@ -6,9 +7,10 @@ import { iconAnchor } from '../../styles/About.css'
 interface IconAnchor {
   href: string
   name: IconType
+  label?: string
 }
 
-const IconAnchor: React.FC<IconAnchor> = ({ href, name }) => {
+const IconAnchor: React.FC<IconAnchor> = ({ href, name, label }) => {
   return (
     <Button
       variant="circleSolid"
@@ -19,6 +21,8 @@ const IconAnchor: React.FC<IconAnchor> = ({ href, name }) => {
       href={href}
       w="x10"
       className={iconAnchor}
+      title={label || href}
+      aria-label={label || href}
     >
       <Flex
         backgroundColor="background2"
@@ -35,22 +39,26 @@ const IconAnchor: React.FC<IconAnchor> = ({ href, name }) => {
 }
 
 interface ExternalLinksProps {
-  address?: string
-  links?: {
-    website?: string
-    discord?: string
-    twitter?: string
-  }
+  links?: Record<string, string>
 }
 
 export const ExternalLinks: React.FC<ExternalLinksProps> = ({ links }) => {
+  const normalizedLinks = React.useMemo(() => {
+    return toDisplayDaoLinks(links || {})
+  }, [links])
+
   return (
     <Flex direction={{ '@initial': 'column', '@768': 'row' }} justify="center">
-      {links ? (
+      {normalizedLinks.length ? (
         <Flex mr={{ '@initial': 'x0', '@768': 'x2' }}>
-          {links?.twitter ? <IconAnchor href={links?.twitter} name="twitter" /> : null}
-          {links?.discord ? <IconAnchor href={links?.discord} name="discord" /> : null}
-          {links?.website ? <IconAnchor href={links?.website} name="globe" /> : null}
+          {normalizedLinks.map(({ key, href }) => (
+            <IconAnchor
+              href={href}
+              name={mapDaoLinkKeyToIcon(key) as IconType}
+              label={key}
+              key={`${key}-${href}`}
+            />
+          ))}
         </Flex>
       ) : null}
     </Flex>

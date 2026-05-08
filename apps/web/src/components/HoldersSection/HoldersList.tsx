@@ -1,9 +1,9 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks'
 import { useChainStore } from '@buildeross/stores'
-import { Avatar } from '@buildeross/ui/Avatar'
-import { formatCryptoVal, walletSnippet } from '@buildeross/utils'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
+import { formatCryptoVal } from '@buildeross/utils'
+import { Flex, Icon, Text } from '@buildeross/zord'
 import { formatEther } from 'viem'
 
 import { holderLink } from './HoldersList.css'
@@ -58,43 +58,42 @@ const HolderItem = ({ address, balance, isDrop = false }: HolderItemProps) => {
   const chainId = chain.id
 
   return (
-    <a
-      href={`${ETHERSCAN_BASE_URL[chainId]}/address/${address}`}
-      target="_blank"
-      rel="noreferrer"
+    <Flex
+      align="center"
+      justify="space-between"
+      gap="x3"
+      py="x1"
+      px="x2"
+      borderRadius="curved"
+      className={holderLink}
     >
-      <Flex
-        align="center"
-        justify="space-between"
-        gap="x3"
-        py="x1"
-        px="x2"
-        borderRadius="curved"
-        className={holderLink}
-      >
-        <Flex align="center" gap="x2" flex={1} minWidth={0}>
-          <Avatar address={address} src={ensAvatar} size="32" />
-          <Box minWidth={0} flex={1}>
-            <Text
-              variant="paragraph-sm"
-              fontWeight="display"
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {displayName || walletSnippet(address)}
-            </Text>
-          </Box>
-        </Flex>
+      <WalletIdentityWithPreview
+        address={address}
+        displayName={displayName}
+        avatarSrc={ensAvatar}
+        avatarSize="32"
+        nameVariant="paragraph-sm"
+        mobileTapBehavior="toggle"
+      />
+      <Flex align="center" gap="x2" flexShrink={0}>
         <Flex direction="column" align="flex-end" flexShrink={0}>
           <Text variant="paragraph-sm" fontWeight="display">
             {isDrop ? balance.toString() : formatBalance(balance)}
           </Text>
         </Flex>
+        <a
+          href={`${ETHERSCAN_BASE_URL[chainId]}/address/${address}`}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`View ${address} on Etherscan`}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <Flex align="center" justify="center" color="text3">
+            <Icon id="external-16" size="sm" />
+          </Flex>
+        </a>
       </Flex>
-    </a>
+    </Flex>
   )
 }
 

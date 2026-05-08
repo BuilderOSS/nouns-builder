@@ -10,10 +10,19 @@ import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 
-import { auction, card, daoImage, name, title } from './DaoCard.css'
+import {
+  auction,
+  card,
+  cardWrapper,
+  daoImage,
+  favoriteButton,
+  favoriteIcon,
+  name,
+  title,
+} from './DaoCard.css'
 import { Detail } from './Detail'
 
-interface DaoCardProps {
+export interface DaoCardProps {
   chainId: CHAIN_ID
   collectionAddress: AddressType
   tokenId?: number | string | bigint
@@ -22,6 +31,9 @@ interface DaoCardProps {
   collectionName?: string
   bid?: BigNumberish
   endTime?: number
+  isFavorited?: boolean
+  favoriteDisabled?: boolean
+  onFavoriteToggle?: () => void
 }
 
 const Countdown = ({ end, onEnd }: { end: any; onEnd: () => void }) => {
@@ -37,6 +49,9 @@ export const DaoCard = ({
   collectionAddress,
   bid,
   endTime,
+  isFavorited = false,
+  favoriteDisabled = false,
+  onFavoriteToggle,
 }: DaoCardProps) => {
   const isMounted = useIsMounted()
   const [isEnded, setIsEnded] = useState(false)
@@ -50,100 +65,128 @@ export const DaoCard = ({
   if (!isMounted) return null
 
   const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
+  const favoriteLabelBase = tokenName ?? collectionName ?? 'DAO'
+  const favoriteLabel = isFavorited
+    ? `Remove ${favoriteLabelBase} from favorites`
+    : `Add ${favoriteLabelBase} to favorites`
 
   return (
-    <Link
-      direction="column"
-      link={getDaoLink?.(chainId, collectionAddress)}
-      borderRadius={'curved'}
-      height={'100%'}
-      overflow={'hidden'}
-      className={card}
-    >
-      <Box
-        backgroundColor="background2"
-        width={'100%'}
-        height={'auto'}
-        aspectRatio={1 / 1}
-        position="relative"
+    <Box className={cardWrapper}>
+      <Link
+        direction="column"
+        link={getDaoLink?.(chainId, collectionAddress)}
+        borderRadius={'curved'}
+        height={'100%'}
         overflow={'hidden'}
-        className={daoImage}
+        className={card}
       >
-        <FallbackImage
-          src={tokenImage}
-          sizes="100vw"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          alt={`${collectionName} image`}
-        />
-      </Box>
-
-      <Box pt="x4" position={'relative'} overflow={'hidden'} className={title}>
-        <Flex
-          width="100%"
-          minW={'x0'}
-          align="center"
-          justify="space-between"
-          px="x4"
-          mb={'x1'}
+        <Box
+          backgroundColor="background2"
+          width={'100%'}
+          height={'auto'}
+          aspectRatio={1 / 1}
+          position="relative"
+          overflow={'hidden'}
+          borderRadius={'curved'}
+          className={daoImage}
         >
-          <Box data-testid="token-name" flex={1}>
-            <Box
-              style={{ fontSize: 22, height: 27 }}
-              fontWeight={'display'}
-              className={name}
-            >
-              {tokenName ?? collectionName ?? null}
-            </Box>
-          </Box>
-        </Flex>
+          <FallbackImage
+            src={tokenImage}
+            sizes="100vw"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            alt={`${collectionName} image`}
+          />
+        </Box>
 
-        <Flex width="100%" align="center" justify="space-between" px="x4" mb={'x4'}>
-          <Paragraph
-            data-testid="collection-name"
-            color={'text3'}
-            className={name}
-            style={{ height: 24 }}
+        <Box pt="x4" position={'relative'} overflow={'hidden'} className={title}>
+          <Flex
+            width="100%"
+            minW={'x0'}
+            align="center"
+            justify="space-between"
+            px="x4"
+            mb={'x1'}
           >
-            {collectionName ?? null}
-          </Paragraph>
-          {chainMeta && (
-            <Flex align="center" gap="x1">
-              <img
-                src={chainMeta.icon}
-                style={{
-                  borderRadius: '12px',
-                  maxHeight: '16px',
-                  objectFit: 'contain',
-                  maxWidth: '16px',
-                }}
-                alt={chainMeta.name}
-                height={16}
-                width={16}
+            <Box data-testid="token-name" flex={1}>
+              <Box
+                style={{ fontSize: 22, height: 27 }}
+                fontWeight={'display'}
+                className={name}
+              >
+                {tokenName ?? collectionName ?? null}
+              </Box>
+            </Box>
+          </Flex>
+
+          <Flex width="100%" align="center" justify="space-between" px="x4" mb={'x4'}>
+            <Paragraph
+              data-testid="collection-name"
+              color={'text3'}
+              className={name}
+              style={{ height: 24 }}
+            >
+              {collectionName ?? null}
+            </Paragraph>
+            {chainMeta && (
+              <Flex align="center" gap="x1">
+                <img
+                  src={chainMeta.icon}
+                  style={{
+                    borderRadius: '12px',
+                    maxHeight: '16px',
+                    objectFit: 'contain',
+                    maxWidth: '16px',
+                  }}
+                  alt={chainMeta.name}
+                  height={16}
+                  width={16}
+                />
+                <Text fontSize={12} color="text3">
+                  {chainMeta.name}
+                </Text>
+              </Flex>
+            )}
+          </Flex>
+        </Box>
+
+        <Flex direction={'row'} width={'100%'} className={auction}>
+          {isEnded || isOver ? (
+            <Detail
+              title={'Winning bid'}
+              content={bid ? `${formatCryptoVal(bid)} ETH` : 'n/a'}
+            />
+          ) : (
+            <>
+              <Detail
+                title={'Highest bid'}
+                content={bid ? `${formatCryptoVal(bid)} ETH` : '0.00 ETH'}
               />
-              <Text fontSize={12} color="text3">
-                {chainMeta.name}
-              </Text>
-            </Flex>
+              <Countdown end={endTime} onEnd={onEnd} />
+            </>
           )}
         </Flex>
-      </Box>
+      </Link>
 
-      <Flex direction={'row'} width={'100%'} className={auction}>
-        {isEnded || isOver ? (
-          <Detail
-            title={'Winning bid'}
-            content={bid ? `${formatCryptoVal(bid)} ETH` : 'n/a'}
+      {onFavoriteToggle ? (
+        <button
+          type="button"
+          className={favoriteButton}
+          aria-label={favoriteLabel}
+          aria-pressed={isFavorited}
+          title={favoriteLabel}
+          onClick={onFavoriteToggle}
+          disabled={favoriteDisabled}
+        >
+          <span
+            aria-hidden="true"
+            className={favoriteIcon}
+            style={{
+              WebkitMaskImage: `url(${isFavorited ? '/filled.svg' : '/outlined.svg'})`,
+              maskImage: `url(${isFavorited ? '/filled.svg' : '/outlined.svg'})`,
+            }}
           />
-        ) : (
-          <>
-            <Detail
-              title={'Highest bid'}
-              content={bid ? `${formatCryptoVal(bid)} ETH` : '0.00 ETH'}
-            />
-            <Countdown end={endTime} onEnd={onEnd} />
-          </>
-        )}
-      </Flex>
-    </Link>
+        </button>
+      ) : null}
+    </Box>
   )
 }

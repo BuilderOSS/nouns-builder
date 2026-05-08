@@ -1,5 +1,5 @@
 import { DEFAULT_CLANKER_TARGET_FDV } from '@buildeross/utils'
-import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text, vars } from '@buildeross/zord'
 import React from 'react'
 
 import FieldError from '../Fields/FieldError'
@@ -280,10 +280,10 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #e5e5e5',
+                  border: `1px solid ${vars.color.border}`,
                   borderRadius: '8px',
                   fontSize: '16px',
-                  backgroundColor: 'white',
+                  backgroundColor: vars.color.background1,
                 }}
               >
                 {currencyOptions.map((option) => (
@@ -399,7 +399,7 @@ export const CoinFormFields: React.FC<CoinFormFieldsProps> = ({
                 }}
                 style={{
                   padding: '8px',
-                  border: '1px dashed #e5e5e5',
+                  border: `1px dashed ${vars.color.border}`,
                   borderRadius: '8px',
                   background: 'transparent',
                   cursor: 'pointer',

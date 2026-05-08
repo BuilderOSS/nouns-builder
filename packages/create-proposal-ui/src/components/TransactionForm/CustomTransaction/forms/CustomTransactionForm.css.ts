@@ -1,3 +1,4 @@
+import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const transactionFormButtonWithPrev = style({
@@ -12,16 +13,16 @@ export const transactionFormButtonWithPrev = style({
 })
 
 export const backButton = style({
-  background: '#f2f2f2',
+  background: vars.color.background2,
   boxSizing: 'border-box',
   width: 'auto',
   height: 40,
   borderRadius: '8px',
-  color: '#B3B3B3',
+  color: vars.color.text4,
   selectors: {
     '&:hover': {
       cursor: 'pointer',
-      color: '#000',
+      color: vars.color.text1,
     },
   },
 })

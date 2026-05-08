@@ -118,7 +118,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
             ) : (
               <div className={styles.statusContainer}>
                 <Icon
-                  id="checkInCircle"
+                  id="check-in-circle"
                   size="lg"
                   className={styles.successIcon}
                   color="positive"
@@ -188,7 +188,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
                 style={{ height: 32 }}
               />
             ) : (
-              <Icon id="walletConnect" size="lg" />
+              <Icon id="wallet-connect" size="lg" />
             )}
           </div>
           <div>{renderConnectionStatus}</div>
@@ -227,7 +227,11 @@ const useDecodedTxPayload = (txPayload: WCPayload | null) => {
 }
 
 const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
-  const { decodedTransaction: decoded } = useDecodedTxPayload(txPayload)
+  const {
+    decodedTransaction: decoded,
+    isLoading: isDecodingTransaction,
+    isValidating,
+  } = useDecodedTxPayload(txPayload)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const transactions = useMemo(() => (decoded ? [decoded] : []), [decoded])
@@ -243,6 +247,7 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
         chainId={chain.id}
         addresses={addresses}
         decodedTransactions={transactions}
+        isDecoding={isDecodingTransaction || isValidating}
       />
     </Box>
   )
@@ -281,6 +286,7 @@ export const WalletConnect: React.FC = () => {
 
       addTransaction({
         type: TransactionType.WALLET_CONNECT,
+        title: 'WalletConnect',
         summary,
         transactions: [
           {

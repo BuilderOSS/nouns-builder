@@ -9,11 +9,13 @@ import { ExploreSortMenu } from './ExploreSortMenu'
 interface ExploreToolbarProps {
   title: string
   showSort?: boolean
+  helperText?: string
 }
 
 export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
   title,
   showSort = false,
+  helperText,
 }) => {
   const { query, pathname } = useRouter()
   const { address } = useAccount()
@@ -26,7 +28,7 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
       align={'center'}
       style={{ maxWidth: 912 }}
     >
-      <Flex direction={'row'} w={'100%'} justify={'space-between'}>
+      <Flex direction={'row'} w={'100%'} justify={'space-between'} align={'center'}>
         <Box fontSize={28} fontWeight={'heading'} mb={'x8'}>
           {title}
         </Box>
@@ -40,8 +42,10 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 h={'100%'}
                 mb={'x4'}
                 mx={'x4'}
+                aria-current={pathname === '/explore' ? 'page' : undefined}
                 style={{
-                  borderBottom: pathname === '/explore' ? `2px solid black` : `0px`,
+                  borderBottom:
+                    pathname === '/explore' ? `2px solid ${vars.color.text1}` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">Explore</Text>
@@ -52,11 +56,27 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
                 h={'100%'}
                 mb={'x4'}
                 mx={'x4'}
+                aria-current={pathname === '/mydaos' ? 'page' : undefined}
                 style={{
-                  borderBottom: pathname === '/mydaos' ? `2px solid black` : `0px`,
+                  borderBottom:
+                    pathname === '/mydaos' ? `2px solid ${vars.color.text1}` : `0px`,
                 }}
               >
                 <Text variant="paragraph-md">My DAOs</Text>
+              </Box>
+            </Link>
+            <Link href={'/favorites'} passHref>
+              <Box
+                h={'100%'}
+                mb={'x4'}
+                mx={'x4'}
+                aria-current={pathname === '/favorites' ? 'page' : undefined}
+                style={{
+                  borderBottom:
+                    pathname === '/favorites' ? `2px solid ${vars.color.text1}` : `0px`,
+                }}
+              >
+                <Text variant="paragraph-md">Favorites</Text>
               </Box>
             </Link>
           </Flex>
@@ -68,6 +88,11 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
           />
         </>
       )}
+      {helperText ? (
+        <Text variant="paragraph-sm" color="tertiary" align="left" width="100%" mb="x5">
+          {helperText}
+        </Text>
+      ) : null}
     </Flex>
   )
 }

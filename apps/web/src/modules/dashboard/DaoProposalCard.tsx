@@ -142,7 +142,7 @@ const NeedsVote = ({
         onMouseLeave={() => setShowTooltip(false)}
       >
         <Icon
-          id={hasVoted ? 'checkInCircle' : 'warning-16'}
+          id={hasVoted ? 'check-in-circle' : 'warning-16'}
           fill={hasVoted ? 'positive' : 'warning'}
           style={{
             transform: hasVoted ? 'scale(0.8)' : 'scale(1)',

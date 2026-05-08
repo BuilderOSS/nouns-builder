@@ -78,7 +78,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={isFirst ? undefined : hoverButton}
         >
           <Flex style={{ height: 24, width: 24 }} placeItems="center" justify="center">
-            <Icon id="arrowLeft" style={{ opacity: isFirst ? 0.3 : 1 }} />
+            <Icon id="arrow-left" style={{ opacity: isFirst ? 0.3 : 1 }} />
           </Flex>
         </Flex>
       </Link>
@@ -102,7 +102,7 @@ export const Pagination: React.FC<PaginationProps> = ({
           className={isLast ? undefined : hoverButton}
         >
           <Flex style={{ height: 24, width: 24 }} placeItems="center" justify="center">
-            <Icon id="arrowRight" style={{ opacity: isLast ? 0.3 : 1 }} />
+            <Icon id="arrow-right" style={{ opacity: isLast ? 0.3 : 1 }} />
           </Flex>
         </Flex>
       </Link>

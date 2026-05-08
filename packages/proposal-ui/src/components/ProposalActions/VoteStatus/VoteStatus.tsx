@@ -5,7 +5,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { Flex, Text } from '@buildeross/zord'
+import { Flex, Text, vars } from '@buildeross/zord'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { getAddress } from 'viem'
 import { useAccount, useWatchContractEvent } from 'wagmi'
@@ -148,7 +148,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
           </Flex>
           <Text color={'text3'} pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }}>
             You have{' '}
-            <strong style={{ color: '#000000' }}>
+            <strong style={{ color: vars.color.text1 }}>
               {votesAvailable} {votesAvailable === 1 ? 'vote' : 'votes'}
             </strong>{' '}
             available for {daoName}

@@ -1,28 +1,47 @@
+'use client'
+
 import { atoms, Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import React from 'react'
 
 import {
   BlueSun,
   BlueWheel,
   Collective,
+  CollectiveDark,
   Creation,
+  CreationDark,
+  darkWord,
   GreenClover,
+  lightWord,
   NounsGlasses,
   Of,
+  OfDark,
   Possibilities,
+  PossibilitiesDark,
   PurpleGalaxy,
   PurpleStar,
   The,
+  TheDark,
   Unlock,
+  UnlockDark,
 } from './Marquee.css'
 
 export const Marquee = () => {
   return (
     <Flex direction={'column'} align={'center'} mt={{ '@initial': 'x4', '@768': 'x32' }}>
       <Flex gap={'x2'} mb={'x1'}>
-        <Image src={'/home/unlock.svg'} alt={'unlock'} className={Unlock} />
+        <Image
+          src={'/home/unlock.svg'}
+          alt={'unlock'}
+          className={`${Unlock} ${lightWord}`}
+        />
+        <Image
+          src={'/home/unlock-dark.svg'}
+          alt={''}
+          aria-hidden={true}
+          className={`${UnlockDark} ${darkWord}`}
+        />
         <motion.div
           className={atoms({ display: 'flex', alignItems: 'center' })}
           animate={{ rotate: 360 }}
@@ -36,7 +55,13 @@ export const Marquee = () => {
         </motion.div>
       </Flex>
       <Flex gap={'x2'} mb={'x1'}>
-        <Image src={'/home/the.svg'} alt={'the'} className={The} />
+        <Image src={'/home/the.svg'} alt={'the'} className={`${The} ${lightWord}`} />
+        <Image
+          src={'/home/the-dark.svg'}
+          alt={''}
+          aria-hidden={true}
+          className={`${TheDark} ${darkWord}`}
+        />
         <motion.div
           className={atoms({ display: 'flex', alignItems: 'center' })}
           animate={{ rotate: [36, 72, 108, 144, 180, 216, 252, 288, 324, 396] }}
@@ -51,11 +76,23 @@ export const Marquee = () => {
         <Image
           src={'/home/possibilities.svg'}
           alt={'possibilities'}
-          className={Possibilities}
+          className={`${Possibilities} ${lightWord}`}
+        />
+        <Image
+          src={'/home/possibilities-dark.svg'}
+          alt={''}
+          aria-hidden={true}
+          className={`${PossibilitiesDark} ${darkWord}`}
         />
       </Flex>
       <Flex gap={'x2'} mb={'x1'}>
-        <Image src={'/home/of.svg'} alt={'of'} className={Of} />
+        <Image src={'/home/of.svg'} alt={'of'} className={`${Of} ${lightWord}`} />
+        <Image
+          src={'/home/of-dark.svg'}
+          alt={''}
+          aria-hidden={true}
+          className={`${OfDark} ${darkWord}`}
+        />
         <motion.div
           className={atoms({ display: 'flex', alignItems: 'center' })}
           animate={{ rotate: -360 }}
@@ -71,7 +108,17 @@ export const Marquee = () => {
             className={GreenClover}
           />
         </motion.div>
-        <Image src={'/home/collective.svg'} alt={'collective'} className={Collective} />
+        <Image
+          src={'/home/collective.svg'}
+          alt={'collective'}
+          className={`${Collective} ${lightWord}`}
+        />
+        <Image
+          src={'/home/collective-dark.svg'}
+          alt={''}
+          aria-hidden={true}
+          className={`${CollectiveDark} ${darkWord}`}
+        />
 
         <Flex
           ml={{ '@initial': 'x4', '@768': 'x12' }}
@@ -130,7 +177,17 @@ export const Marquee = () => {
           alt={'small nouns glasses logo'}
           className={NounsGlasses}
         />
-        <Image src={'/home/creation.svg'} alt={'creation'} className={Creation} />
+        <Image
+          src={'/home/creation.svg'}
+          alt={'creation'}
+          className={`${Creation} ${lightWord}`}
+        />
+        <Image
+          src={'/home/creation-dark.svg'}
+          alt={''}
+          aria-hidden={true}
+          className={`${CreationDark} ${darkWord}`}
+        />
       </Flex>
     </Flex>
   )

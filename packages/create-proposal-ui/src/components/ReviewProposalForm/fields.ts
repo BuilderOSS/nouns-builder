@@ -1,4 +1,4 @@
-import { BuilderTransaction } from '@buildeross/types'
+import { TransactionBundle } from '@buildeross/types'
 import { isAddress } from 'viem'
 import * as Yup from 'yup'
 
@@ -27,7 +27,7 @@ export interface FormValues {
   representedAddress: string
   discussionUrl: string
   representedAddressEnabled: boolean
-  transactions: BuilderTransaction[]
+  transactions: TransactionBundle[]
 }
 
 const isValidDiscussionUrl = (value: string): boolean => {

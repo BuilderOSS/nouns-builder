@@ -59,9 +59,13 @@ export const statisticContent = style([
 export const iconAnchor = style([
   atoms({ mr: 'x2' }),
   {
+    transition: 'background-color 0.2s ease',
     selectors: {
       '&:last-of-type': {
         marginRight: 0,
+      },
+      '&:hover': {
+        backgroundColor: vars.color.neutralHover,
       },
     },
   },

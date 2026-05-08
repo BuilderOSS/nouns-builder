@@ -2,7 +2,7 @@ import { tokenAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { AnimatedModal } from '@buildeross/ui/Modal'
-import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text, vars } from '@buildeross/zord'
 import { useState } from 'react'
 import { Address } from 'viem'
 import { useReadContract } from 'wagmi'
@@ -107,7 +107,7 @@ export const VetoAction: React.FC<OwnerActionsProps> = ({
       borderStyle={'solid'}
       borderWidth={'normal'}
       borderRadius={'curved'}
-      style={{ borderColor: 'rgba(240, 50, 50, 0.1)' }}
+      style={{ borderColor: vars.color.negativeDisabled }}
     >
       <Text>
         You have{' '}

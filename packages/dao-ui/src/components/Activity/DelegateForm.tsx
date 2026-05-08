@@ -95,7 +95,7 @@ export const DelegateForm = ({ handleBack, handleUpdate }: DelegateFormProps) =>
             ) : (
               <Flex>
                 <Button variant="secondary" onClick={handleBack} size="lg">
-                  <Icon id="arrowLeft" />
+                  <Icon id="arrow-left" />
                 </Button>
                 <ContractButton
                   chainId={chain.id}

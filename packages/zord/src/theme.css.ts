@@ -181,6 +181,7 @@ export const theme = createThemeContract({
     accentHover: '',
     accentActive: '',
     accentDisabled: '',
+    focusRing: '',
     onAccent: '',
     onAccentDisabled: '',
     positive: '',
@@ -195,6 +196,7 @@ export const theme = createThemeContract({
     warningDisabled: '',
     onWarning: '',
     onWarningDisabled: '',
+    warningStrong: '',
     negative: '',
     negativeHover: '',
     negativeActive: '',
@@ -249,7 +251,7 @@ var { colors, shadows } = colorTheme({
   // negative: '#ff00ff',
   // warning: '#9f00ff',
   foreground: '#ffffff',
-  background: '#000000',
+  background: '#1f2024',
   accent: '#ffffff',
   // accent: '#00ffff',
   positive: '#1CB687',
@@ -366,6 +368,21 @@ globalStyle(
 
 globalStyle('input, textarea, select', {
   fontFamily: 'inherit',
+})
+
+globalStyle('.zord-select select', {
+  color: vars.color.text1,
+  backgroundColor: vars.color.background2,
+})
+
+globalStyle('.zord-select select option', {
+  color: vars.color.text1,
+  backgroundColor: vars.color.background1,
+})
+
+globalStyle('.zord-select select option:checked', {
+  color: vars.color.text1,
+  backgroundColor: vars.color.background2,
 })
 
 globalStyle(
