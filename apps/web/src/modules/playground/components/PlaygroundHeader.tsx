@@ -1,9 +1,9 @@
+import type { DaoListItem } from '@buildeross/ui'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { chainIdToSlug } from '@buildeross/utils/chains'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
-import type { DaoListItem } from 'src/modules/dashboard/SingleDaoSelector'
 
 import type { PlaygroundView } from '../PlaygroundPage'
 import { daoImageStyle, headerContainer, headerContent } from './PlaygroundHeader.css'

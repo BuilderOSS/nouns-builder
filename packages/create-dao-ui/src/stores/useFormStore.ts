@@ -31,6 +31,8 @@ export interface FormStoreState {
   setEnableFastDAO: (enableFastDAO: boolean) => void
   setUpArtwork: ArtworkFormValues
   setSetUpArtwork: (artwork: ArtworkFormValues) => void
+  artworkSource: 'upload' | 'dao'
+  setArtworkSource: (artworkSource: 'upload' | 'dao') => void
   ipfsUpload: IPFSUpload[]
   setIpfsUpload: (ipfsUpload: IPFSUpload[]) => void
   deployedDao: DaoContractAddresses
@@ -105,6 +107,7 @@ const initialState = {
     filesLength: '',
     fileType: '',
   },
+  artworkSource: 'upload' as const,
   ipfsUpload: [],
   orderedLayers: [],
   ipfsUploadProgress: 0,
@@ -146,6 +149,7 @@ export const useFormStore = create(
       setReservedUntilTokenId: (reservedUntilTokenId: string) =>
         set({ reservedUntilTokenId }),
       setSetUpArtwork: (artwork: ArtworkFormValues) => set({ setUpArtwork: artwork }),
+      setArtworkSource: (artworkSource: 'upload' | 'dao') => set({ artworkSource }),
       setIpfsUpload: (ipfsUpload: IPFSUpload[]) => set({ ipfsUpload }),
       setOrderedLayers: (orderedLayers: OrderedTraits) => {
         set({

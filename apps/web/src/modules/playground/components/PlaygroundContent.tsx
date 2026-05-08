@@ -1,8 +1,8 @@
 import { normalizeIPFSUrl } from '@buildeross/ipfs-service/url'
+import type { DaoListItem } from '@buildeross/ui'
 import { Playground } from '@buildeross/ui/Playground'
 import { Box, Button, Flex, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
-import type { DaoListItem } from 'src/modules/dashboard/SingleDaoSelector'
 
 import { usePlaygroundData } from '../hooks/usePlaygroundData'
 import {

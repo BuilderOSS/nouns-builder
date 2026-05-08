@@ -1,13 +1,12 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { COIN_SUPPORTED_CHAIN_IDS } from '@buildeross/constants/coining'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
-import { AnimatedModal } from '@buildeross/ui'
+import { AnimatedModal, type DaoListItem, SingleDaoSelector } from '@buildeross/ui'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 
 import { modalBody, modalFooter, modalHeader, modalTitle } from './DaoSelectorModal.css'
-import { type DaoListItem, SingleDaoSelector } from './SingleDaoSelector'
 
 export interface DaoSelectorModalProps {
   open: boolean

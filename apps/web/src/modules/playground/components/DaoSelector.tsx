@@ -1,10 +1,7 @@
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { type DaoListItem, SingleDaoSelector } from '@buildeross/ui'
 import { Box, Heading, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import {
-  type DaoListItem,
-  SingleDaoSelector,
-} from 'src/modules/dashboard/SingleDaoSelector'
 
 import { selectorContent, selectorWrapper } from './DaoSelector.css'
 

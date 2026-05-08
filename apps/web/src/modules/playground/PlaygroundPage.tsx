@@ -1,6 +1,6 @@
+import type { DaoListItem } from '@buildeross/ui'
 import { Box } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import type { DaoListItem } from 'src/modules/dashboard/SingleDaoSelector'
 import { useAccount } from 'wagmi'
 
 import { CustomArtworkUpload } from './components/CustomArtworkUpload'
