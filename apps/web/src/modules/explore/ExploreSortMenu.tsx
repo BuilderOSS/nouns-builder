@@ -67,6 +67,8 @@ export const ExploreSortMenu: React.FC<ExploreSortMenuProps> = () => {
         onChange={handleSortChange}
         customLabel={defaultSort}
         positioning="absolute"
+        height="x10"
+        minWidth="120px"
       />
     </Flex>
   )

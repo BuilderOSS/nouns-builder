@@ -10,6 +10,7 @@ import { useAccount, useSwitchChain } from 'wagmi'
 
 import {
   chainPopUpButton,
+  chainPopUpItem,
   navButton,
   navPopUpWrapper,
   wrongNetworkButton,
@@ -140,7 +141,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
             borderColor="border"
             borderStyle="solid"
             borderWidth="normal"
-            backgroundColor="background1"
+            backgroundColor="transparent"
             borderRadius="curved"
             cursor={'pointer'}
             align={'center'}
@@ -175,6 +176,8 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
         <Stack my="x4" mx="x2">
           {isWrongNetwork && selectedChain && (
             <Flex
+              as="button"
+              type="button"
               className={wrongNetworkButton}
               fontWeight={'label'}
               borderRadius="normal"
@@ -191,22 +194,19 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
           )}
           {PUBLIC_DEFAULT_CHAINS.map((chain, i, chains) => (
             <Flex
+              as="button"
+              type="button"
               key={chain.id}
-              className={chainPopUpButton}
+              className={[chainPopUpButton, chainPopUpItem]}
               borderRadius="normal"
               onClick={() => onChainChange(chain.id)}
-              cursor={
-                hasNetwork
-                  ? isSelectedChain(chain.id)
-                    ? undefined
-                    : 'not-allowed'
-                  : 'pointer'
-              }
               height={'x10'}
               px="x4"
               mb={i !== chains.length - 1 ? 'x2' : undefined}
               align={'center'}
               justify={'space-between'}
+              disabled={hasNetwork && !isSelectedChain(chain.id)}
+              aria-current={selectedChain.id === chain.id ? 'location' : undefined}
             >
               <Flex align={'center'}>
                 <Box h="x6" w="x6" mr="x2">

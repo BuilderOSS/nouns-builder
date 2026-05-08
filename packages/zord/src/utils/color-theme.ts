@@ -69,6 +69,7 @@ export function colorThemeVars({
     accentHover: mix(0.2, accent, background),
     accentActive: mix(0.3, accent, background),
     accentDisabled: mix(0.4, accent, background),
+    focusRing: '#0085FF',
     onAccent: background,
     onAccentDisabled: mix(0.6, accent, background),
 
@@ -140,6 +141,7 @@ export function colorTheme(colorProps: { [x: string]: string }) {
       accentHover: tokens.accentHover,
       accentActive: tokens.accentActive,
       accentDisabled: tokens.accentDisabled,
+      focusRing: tokens.focusRing,
       onAccent: tokens.onAccent,
       onAccentDisabled: tokens.onAccentDisabled,
 

@@ -115,7 +115,7 @@ globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}`, {
 
 globalStyle(`html[data-theme-mode='dark'] ${layerSelectStyle}:focus-visible`, {
   color: `${vars.color.text1} !important`,
-  outline: `2px solid ${vars.color.text1}`,
+  outline: `2px solid ${vars.color.focusRing}`,
   outlineOffset: '2px',
 })
 

@@ -24,6 +24,7 @@ describe('Single image upload', () => {
   })
 
   it('should upload a file successfully', async () => {
+    const user = userEvent.setup()
     mockUploadFn.mockResolvedValueOnce({ cid: '1234' })
 
     const file = new File(['hello'], 'hello.png', { type: 'image/png' })
@@ -50,7 +51,7 @@ describe('Single image upload', () => {
     expect(screen.queryByText(/Upload/)).toBeInTheDocument()
 
     const input = screen.getByTestId('file-upload') as HTMLInputElement
-    userEvent.upload(input, file)
+    await user.upload(input, file)
 
     await waitFor(() => {
       expect(input.files).toHaveLength(1)
@@ -61,6 +62,7 @@ describe('Single image upload', () => {
   })
 
   it('should render an error message given a rejected file upload', async () => {
+    const user = userEvent.setup()
     mockUploadFn.mockRejectedValueOnce(new Error('Error'))
 
     const file = new File(['hello'], 'hello.png', { type: 'image/png' })
@@ -87,9 +89,9 @@ describe('Single image upload', () => {
     expect(screen.queryByText(/Upload/)).toBeInTheDocument()
 
     const input = screen.getByTestId('file-upload') as HTMLInputElement
+    await user.upload(input, file)
 
     await waitFor(() => {
-      userEvent.upload(input, file)
       expect(input.files).toHaveLength(1)
     })
 
@@ -98,6 +100,7 @@ describe('Single image upload', () => {
   })
 
   it('should reject an unsupported file type', async () => {
+    const user = userEvent.setup({ applyAccept: false })
     const mockSubmitFn = vi.fn()
     const file = new File(['hello'], 'hello.txt', { type: 'text/plain' })
 
@@ -123,7 +126,7 @@ describe('Single image upload', () => {
     expect(screen.queryByText(/Upload/)).toBeInTheDocument()
 
     const input = screen.getByTestId('file-upload') as HTMLInputElement
-    userEvent.upload(input, file)
+    await user.upload(input, file)
 
     await waitFor(() => {
       expect(input.files).toHaveLength(1)

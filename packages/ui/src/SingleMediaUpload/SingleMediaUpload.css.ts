@@ -11,6 +11,8 @@ export const uploadErrorBox = style({
 })
 
 export const singleMediaUploadWrapper = style({
+  border: 0,
+  padding: 0,
   height: 64,
   width: '100%',
   borderRadius: 15,
@@ -19,6 +21,10 @@ export const singleMediaUploadWrapper = style({
   selectors: {
     '&:hover': {
       cursor: 'pointer',
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.focusRing}`,
+      outlineOffset: '2px',
     },
   },
 })

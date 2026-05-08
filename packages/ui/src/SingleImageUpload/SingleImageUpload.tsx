@@ -32,6 +32,7 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
   const [isMounted, setIsMounted] = useState(false)
   const [uploadArtworkError, setUploadArtworkError] = React.useState<any>()
   const [isUploading, setIsUploading] = React.useState<boolean>(false)
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -75,13 +76,15 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
     <Flex mb={'x8'}>
       <Stack align={'center'} width={'100%'}>
         <Flex
-          as={'label'}
+          as={'button'}
+          type="button"
           direction={'column'}
           position={'relative'}
           align={'center'}
           justify={'center'}
           className={singleImageUploadWrapperVariants[size]}
-          htmlFor="file-upload"
+          onClick={() => fileInputRef.current?.click()}
+          aria-label={typeof inputLabel === 'string' ? inputLabel : 'Upload image'}
         >
           {isUploading && <Spinner alignSelf={'center'} m={'x0'} />}
 
@@ -107,19 +110,21 @@ export const SingleImageUpload: React.FC<SingleImageUploadProps> = ({
               </Flex>
             </>
           )}
-
-          <input
-            className={defaultUploadStyle}
-            id="file-upload"
-            data-testid="file-upload"
-            name="file"
-            type="file"
-            multiple={true}
-            onChange={(event) => {
-              handleFileUpload(event.currentTarget.files)
-            }}
-          />
         </Flex>
+
+        <input
+          className={defaultUploadStyle}
+          id={`${id}-file-upload`}
+          data-testid="file-upload"
+          name="file"
+          type="file"
+          accept={acceptableMIME.join(',')}
+          ref={fileInputRef}
+          multiple={false}
+          onChange={(event) => {
+            handleFileUpload(event.currentTarget.files)
+          }}
+        />
 
         {uploadArtworkError && (
           <Box data-testid="error-msg" p={'x4'} fontSize={12} className={uploadErrorBox}>

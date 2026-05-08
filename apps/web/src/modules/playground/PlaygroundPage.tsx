@@ -49,7 +49,7 @@ export const PlaygroundPage: React.FC = () => {
   const isCustomView = view === 'custom'
 
   return (
-    <Box w="100%">
+    <Box w="100%" pb="x12">
       <PlaygroundHeader
         dao={selectedDao}
         view={view}

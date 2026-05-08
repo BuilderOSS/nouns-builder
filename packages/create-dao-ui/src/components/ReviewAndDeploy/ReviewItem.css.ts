@@ -33,7 +33,7 @@ export const infoSectionLabelStyle = style({
   fontWeight: 500,
   textTransform: 'uppercase',
   letterSpacing: '.05em',
-  color: vars.color.text2,
+  color: vars.color.text3,
 })
 
 export const infoSectionValueStyle = style({

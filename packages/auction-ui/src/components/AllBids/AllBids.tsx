@@ -38,7 +38,11 @@ export const AllBids: React.FC<AuctionAllBidsProps> = ({ bids, onClose }) => {
             style={{ maxHeight: 'min(70vh, 640px)' }}
           >
             {bids.map((bid: AuctionBidFragment) => (
-              <BidCard key={`${bid.bidder}_${bid.amount}_expanded`} bid={bid} />
+              <BidCard
+                key={`${bid.bidder}_${bid.amount}_expanded`}
+                bid={bid}
+                walletPreview={false}
+              />
             ))}
           </Flex>
         </>

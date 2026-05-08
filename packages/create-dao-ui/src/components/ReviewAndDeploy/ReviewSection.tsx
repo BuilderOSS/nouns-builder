@@ -6,7 +6,7 @@ import { reviewSectionStyleVariants, reviewSectionSubHeading } from './ReviewSec
 
 export const ReviewSection: React.FC<{
   subHeading: string
-  children: ReactNode[]
+  children: ReactNode
 }> = ({ subHeading, children }) => {
   const [isOpen, setIsOpen] = React.useState(false)
   const variants = {
@@ -31,6 +31,15 @@ export const ReviewSection: React.FC<{
       borderColor={'primary'}
       className={reviewSectionStyleVariants[isOpen ? 'open' : 'default']}
       onClick={() => setIsOpen((bool) => !bool)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          setIsOpen((bool) => !bool)
+        }
+      }}
+      aria-expanded={isOpen}
     >
       <Flex
         align={'center'}

@@ -181,6 +181,7 @@ export const theme = createThemeContract({
     accentHover: '',
     accentActive: '',
     accentDisabled: '',
+    focusRing: '',
     onAccent: '',
     onAccentDisabled: '',
     positive: '',

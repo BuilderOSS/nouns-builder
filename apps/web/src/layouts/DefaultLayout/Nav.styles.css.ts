@@ -273,6 +273,20 @@ export const chainPopUpButton = style({
   },
 })
 
+export const chainPopUpItem = style({
+  border: 0,
+  width: '100%',
+  textAlign: 'left',
+  font: 'inherit',
+  appearance: 'none',
+  selectors: {
+    '&:disabled': {
+      pointerEvents: 'auto',
+      cursor: 'not-allowed',
+    },
+  },
+})
+
 export const themeToggleButton = style([
   atoms({
     borderStyle: 'solid',
@@ -318,6 +332,7 @@ export const wrongNetworkButton = style({
     'border 0.1s ease-in-out, background 0.1s ease-in-out, transform 0.1s ease-out',
   borderWidth: 'normal',
   borderStyle: 'solid',
+  background: 'transparent',
   borderColor: vars.color.negative,
   color: vars.color.negative,
   selectors: {
