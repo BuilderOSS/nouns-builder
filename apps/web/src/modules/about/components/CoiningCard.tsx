@@ -42,7 +42,9 @@ export const CoiningCard: React.FC<CoiningCardProps> = ({ item }) => {
                 src={chainLogoSrc}
               />
             </Box>
-          ) : null}
+          ) : (
+            <Text className={mutedText}>{item.chainLabel}</Text>
+          )}
         </Box>
         <Text className={coiningPreviewTitle}>{item.previewLabel}</Text>
       </Box>

@@ -85,7 +85,10 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
       <SectionIntro eyebrowText={eyebrowText} title={title} copy={copy} />
 
       <Box className={droposalList}>
-        {highlights.map((proposal) => (
+        {highlights.map((proposal) => {
+          const chainLogoSrc = getChainLogoSrc(proposal.category)
+
+          return (
           <Link
             aria-label={`${linkLabel}: ${proposal.title}`}
             className={droposalCard}
@@ -103,13 +106,13 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
                     {proposal.status}
                   </Text>
                 ) : null}
-                {getChainLogoSrc(proposal.category) ? (
+                {chainLogoSrc ? (
                   <Box className={daoChainBadge} title={proposal.category}>
                     <Box
                       as="img"
                       alt={`${proposal.category} logo`}
                       className={daoChainBadgeImage}
-                      src={getChainLogoSrc(proposal.category) as string}
+                      src={chainLogoSrc}
                     />
                   </Box>
                 ) : (
@@ -128,7 +131,8 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
               <Text className={droposalTitle}>{proposal.amount}</Text>
             </Box>
           </Link>
-        ))}
+          )
+        })}
       </Box>
     </Box>
   )

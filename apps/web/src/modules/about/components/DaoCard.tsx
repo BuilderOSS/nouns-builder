@@ -22,7 +22,7 @@ import {
   daoTop,
 } from '../AboutPage.css'
 import { AboutDao } from '../types'
-import { toPlainText } from '../utils'
+import { getChainLogoSrc, toPlainText } from '../utils'
 
 type DaoCardProps = {
   dao: AboutDao
@@ -30,6 +30,7 @@ type DaoCardProps = {
 
 export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
   const plainDescription = toPlainText(dao.description)
+  const chainLogoSrc = getChainLogoSrc(dao.chainName) || dao.chainIcon
 
   const avatarSurfaceClass = [
     daoAvatarSurfaceA,
@@ -58,13 +59,13 @@ export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
             <Text className={daoDescription}>{plainDescription}</Text>
           </Box>
         </Flex>
-        {dao.chainIcon ? (
+        {chainLogoSrc ? (
           <Box className={daoChainBadge} title={dao.chainName || undefined}>
             <Box
               as="img"
               alt={dao.chainName ? `${dao.chainName} logo` : 'Network logo'}
               className={daoChainBadgeImage}
-              src={dao.chainIcon}
+              src={chainLogoSrc}
             />
           </Box>
         ) : null}

@@ -739,15 +739,10 @@ export const daoTop = style({
 export const daoChainBadge = style({
   width: '34px',
   height: '34px',
-  borderRadius: '10px',
-  border: standardBorderThin,
-  background: theme.colors.background1,
-  boxShadow: 'none',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
-  overflow: 'hidden',
 })
 
 export const daoChainBadgeImage = style({
@@ -981,15 +976,10 @@ export const coiningPreviewMark = style({
 export const coiningNetworkBadge = style({
   width: '34px',
   height: '34px',
-  borderRadius: '10px',
-  border: standardBorderThin,
-  background: theme.colors.background1,
-  boxShadow: 'none',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   flexShrink: 0,
-  overflow: 'hidden',
 })
 
 export const coiningPreviewTitle = style({
