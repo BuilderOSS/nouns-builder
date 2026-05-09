@@ -45,9 +45,7 @@ export const EcosystemStatGrid: React.FC<EcosystemStatGridProps> = ({ stats }) =
     <Box className={statGrid}>
       {stats.map((stat) => (
         <Box className={statCard} key={stat.id}>
-          <Box className={`${statAccent} ${getAccentClass(stat.id)}`}>
-            {stat.icon}
-          </Box>
+          <Box className={`${statAccent} ${getAccentClass(stat.id)}`}>{stat.icon}</Box>
           <Text className={statLabel}>{stat.label}</Text>
           <Text className={statValue}>{stat.value}</Text>
           <Text className={statDetail}>{stat.detail}</Text>

@@ -19,6 +19,7 @@ export const coiningHighlights: CoiningHighlight[] = [
     amount: '$1.8M market cap',
     href: '/explore?search=studio%20nouns',
     eyebrow: 'DAO paired coin',
+    surface: 'linear-gradient(135deg, #F9E7FF 0%, #D9EEFF 100%)',
     previewLabel: 'Creator pair',
   },
   {
@@ -30,6 +31,7 @@ export const coiningHighlights: CoiningHighlight[] = [
     amount: '$940K market cap',
     href: '/explore?search=camp%20nouns',
     eyebrow: 'DAO paired coin',
+    surface: 'linear-gradient(135deg, #FFF0CC 0%, #FFD9BF 100%)',
     previewLabel: 'Content pair',
   },
   {
@@ -41,6 +43,7 @@ export const coiningHighlights: CoiningHighlight[] = [
     amount: '$1.2M market cap',
     href: '/explore?search=builderdao',
     eyebrow: 'DAO paired coin',
+    surface: 'linear-gradient(135deg, #DFFFF0 0%, #D5F8FF 100%)',
     previewLabel: 'Onchain market',
   },
   {
@@ -52,6 +55,7 @@ export const coiningHighlights: CoiningHighlight[] = [
     amount: '$680K market cap',
     href: '/explore?search=nouns%20fest',
     eyebrow: 'DAO paired coin',
+    surface: 'linear-gradient(135deg, #E2EBFF 0%, #EDE8FF 100%)',
     previewLabel: 'Content pair',
   },
 ]

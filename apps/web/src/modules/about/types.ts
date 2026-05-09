@@ -33,6 +33,7 @@ export type CoiningHighlight = {
   amount: string
   href: string
   eyebrow: string
+  surface: string
   previewLabel: string
 }
 

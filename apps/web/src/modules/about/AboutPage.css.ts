@@ -550,9 +550,9 @@ export const statAccent = style({
 export const statAccentDao = style({ background: theme.colors.background2 })
 export const statAccentTreasury = style({ background: theme.colors.positive })
 export const statAccentAuction = style({ background: theme.colors.warning })
-export const statAccentProposal = style({ background: theme.colors.accent })
+export const statAccentProposal = style({ background: theme.colors.focusRing })
 export const statAccentMembers = style({ background: theme.colors.negative })
-export const statAccentTokens = style({ background: theme.colors.accent })
+export const statAccentTokens = style({ background: theme.colors.focusRing })
 
 export const statLabel = style({
   position: 'relative',
@@ -806,7 +806,7 @@ export const daoAvatarSurfaceA = style({
   color: theme.colors.text1,
 })
 export const daoAvatarSurfaceB = style({
-  background: theme.colors.accent,
+  background: `color-mix(in srgb, ${theme.colors.focusRing} 22%, ${theme.colors.background1})`,
   color: theme.colors.text1,
 })
 export const daoAvatarSurfaceC = style({
@@ -1103,38 +1103,16 @@ export const statusBadge = style({
   justifyContent: 'center',
   minWidth: '88px',
   borderRadius: '999px',
+  border: standardBorderThin,
   padding: '7px 12px',
   fontSize: '12px',
   fontWeight: 700,
-})
-
-export const statusLive = style({ background: theme.colors.positive, color: theme.colors.text1 })
-export const statusRecent = style({ background: theme.colors.accent, color: theme.colors.text1 })
-export const statusActive = style({ background: theme.colors.warning, color: theme.colors.text1 })
-export const statusSucceeded = style({
-  background: theme.colors.positive,
-  color: theme.colors.text1,
-})
-export const statusQueued = style({
-  background: theme.colors.background2,
-  color: theme.colors.text1,
-})
-export const statusDefeated = style({
-  background: theme.colors.background2,
-  color: theme.colors.text2,
-})
-export const statusExecuted = style({
-  background: theme.colors.background2,
-  color: theme.colors.text1,
-})
-export const statusTrending = style({
-  background: theme.colors.negative,
-  color: theme.colors.text1,
+  background: 'transparent',
 })
 
 export const daoBadge = style({
-  background: theme.colors.background2,
-  color: theme.colors.text2,
+  background: '#F7F3E8',
+  color: '#4F4738',
 })
 
 export const droposalTitle = style({
@@ -1203,7 +1181,7 @@ export const stepMarker = style({
   borderRadius: '10px',
   alignItems: 'center',
   justifyContent: 'center',
-  background: theme.colors.accent,
+  background: theme.colors.focusRing,
   border: 'none',
   color: theme.colors.background1,
   fontFamily: 'ptRoot, sans-serif',
@@ -1520,61 +1498,6 @@ export const finalActions = style({
   },
 })
 
-export const lightButton = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '42px',
-  padding: '10px 16px',
-  borderRadius: '999px',
-  border: standardBorderThin,
-  background: theme.colors.text1,
-  color: theme.colors.background1,
-  fontSize: '14px',
-  fontWeight: 700,
-  textDecoration: 'none',
-  transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
-  selectors: {
-    '&:hover': {
-      borderColor: theme.colors.border,
-      backgroundColor: theme.colors.text2,
-      color: theme.colors.background1,
-    },
-    '&:focus-visible': focusRing,
-  },
-})
-
-export const finalPrimaryButton = style([
-  lightButton,
-  {
-    borderColor: theme.colors.border,
-  },
-])
-
-export const ghostButton = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '42px',
-  padding: '10px 16px',
-  borderRadius: '999px',
-  background: theme.colors.background1,
-  color: theme.colors.text1,
-  fontSize: '14px',
-  fontWeight: 700,
-  textDecoration: 'none',
-  border: standardBorderThin,
-  transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
-  selectors: {
-    '&:hover': {
-      cursor: 'pointer',
-      backgroundColor: softBlueBackground,
-      borderColor: softBlueBorder,
-    },
-    '&:focus-visible': focusRing,
-  },
-})
-
 export const subLink = style({
   color: theme.colors.text3,
   fontSize: '14px',
@@ -1616,12 +1539,12 @@ export const governanceCopy = style({
 })
 
 export const governanceLink = style({
-  color: theme.colors.accent,
+  color: theme.colors.focusRing,
   textDecoration: 'underline',
 })
 
 globalStyle(
-  `html[data-theme-mode="dark"] ${page} :is(${sectionTitle}, ${heroTitle}, ${montageValue}, ${heroFooterValue}, ${statValue}, ${tabButton}, ${activeTabButton}, ${mobileStatsHeading}, ${daoName}, ${daoSignalValue}, ${coiningPreviewMark}, ${coiningPreviewTitle}, ${coiningTitle}, ${amountPill}, ${droposalTitle}, ${stepTitle}, ${featureItem}, ${governanceLink}, ${lightButton}, ${ghostButton})`,
+  `html[data-theme-mode="dark"] ${page} :is(${sectionTitle}, ${heroTitle}, ${montageValue}, ${heroFooterValue}, ${statValue}, ${tabButton}, ${activeTabButton}, ${mobileStatsHeading}, ${daoName}, ${daoSignalValue}, ${coiningPreviewMark}, ${coiningPreviewTitle}, ${coiningTitle}, ${amountPill}, ${droposalTitle}, ${stepTitle}, ${featureItem}, ${governanceLink})`,
   {
     color: theme.colors.text1,
   }
@@ -1634,37 +1557,37 @@ globalStyle(
   }
 )
 
-globalStyle(
-  `html[data-theme-mode="dark"] ${page} :is(${heroHighlightDot}, ${stepMarker})`,
-  {
-    background: theme.colors.text1,
-  }
-)
+globalStyle(`html[data-theme-mode="dark"] ${page} :is(${heroHighlightDot})`, {
+  background: theme.colors.text1,
+})
 
-globalStyle(
-  `html[data-theme-mode="dark"] ${page} :is(${primaryButton}, ${lightButton})`,
-  {
-    background: theme.colors.text1,
-    color: theme.colors.background1,
-    borderColor: theme.colors.border,
-  }
-)
+globalStyle(`html[data-theme-mode="dark"] ${page} :is(${primaryButton})`, {
+  background: theme.colors.text1,
+  color: theme.colors.background1,
+  borderColor: theme.colors.border,
+})
 
-globalStyle(
-  `html[data-theme-mode="dark"] ${page} :is(${secondaryButton}, ${ghostButton})`,
-  {
-    background: theme.colors.background1,
-    color: theme.colors.text1,
-    borderColor: theme.colors.border,
-  }
-)
+globalStyle(`html[data-theme-mode="dark"] ${page} :is(${primaryButton}):hover`, {
+  background: theme.colors.text2,
+  color: theme.colors.background1,
+  borderColor: theme.colors.border,
+})
 
-globalStyle(
-  `html[data-theme-mode="dark"] ${page} :is(${daoMiniCard}, ${stepCard})`,
-  {
-    background: theme.colors.background2,
-  }
-)
+globalStyle(`html[data-theme-mode="dark"] ${page} :is(${secondaryButton})`, {
+  background: theme.colors.background1,
+  color: theme.colors.text1,
+  borderColor: theme.colors.border,
+})
+
+globalStyle(`html[data-theme-mode="dark"] ${page} :is(${secondaryButton}):hover`, {
+  background: softBlueBackground,
+  color: theme.colors.text1,
+  borderColor: softBlueBorder,
+})
+
+globalStyle(`html[data-theme-mode="dark"] ${page} :is(${daoMiniCard}, ${stepCard})`, {
+  background: theme.colors.background2,
+})
 
 globalStyle(`html[data-theme-mode="dark"] ${logoMarqueeTrack}::before`, {
   background:

@@ -168,6 +168,13 @@ const compactEthAmount = (amountInEth: number) =>
     maximumFractionDigits: 1,
   }).format(amountInEth)} sold`
 
+const previewSurfaces = [
+  'linear-gradient(135deg, #F9E7FF 0%, #D9EEFF 100%)',
+  'linear-gradient(135deg, #FFF0CC 0%, #FFD9BF 100%)',
+  'linear-gradient(135deg, #DFFFF0 0%, #D5F8FF 100%)',
+  'linear-gradient(135deg, #E2EBFF 0%, #EDE8FF 100%)',
+]
+
 const cleanSentence = (value?: string | null) => {
   const base = value
     ?.replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
@@ -264,7 +271,7 @@ const buildCoiningHighlights = async (
     )
     .sort((a, b) => b.marketCapUsd - a.marketCapUsd)
     .slice(0, 4)
-    .map(({ coin, marketCapUsd }) => ({
+    .map(({ coin, marketCapUsd }, index) => ({
       id: `${coin.chainId}-${coin.id}`,
       title: coin.name,
       creator: walletSnippet(coin.caller as `0x${string}`),
@@ -274,6 +281,7 @@ const buildCoiningHighlights = async (
       amount: compactMarketCap(marketCapUsd),
       href: `/coin/${chainIdToSlug(coin.chainId)}/${coin.coinAddress}`,
       eyebrow: 'DAO paired coin',
+      surface: previewSurfaces[index % previewSurfaces.length],
       previewLabel: coin.symbol || 'Content coin',
     }))
 }

@@ -1,4 +1,4 @@
-import { Box, Text } from '@buildeross/zord'
+import { Box, Button, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 
@@ -11,9 +11,6 @@ import {
   finalCtaContent,
   finalCtaGlow,
   finalCtaTitle,
-  finalPrimaryButton,
-  ghostButton,
-  subLink,
 } from '../AboutPage.css'
 
 export const AboutFinalCta: React.FC = () => {
@@ -40,15 +37,21 @@ export const AboutFinalCta: React.FC = () => {
         </Box>
 
         <Box className={finalActions}>
-          <Link className={finalPrimaryButton} href="/create">
+          <Button as={Link} href="/create" variant="primary">
             Launch your DAO
-          </Link>
-          <Link className={ghostButton} href="/explore">
+          </Button>
+          <Button as={Link} href="/explore" variant="outline">
             Explore the ecosystem
-          </Link>
-          <Link className={subLink} href="https://docs.nouns.build">
+          </Button>
+          <Button
+            as="a"
+            href="https://docs.nouns.build"
+            rel="noreferrer"
+            target="_blank"
+            variant="ghost"
+          >
             Read the docs
-          </Link>
+          </Button>
         </Box>
       </Box>
     </Box>

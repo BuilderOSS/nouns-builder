@@ -116,6 +116,10 @@ export const buttonVariants = {
           cursor: 'pointer',
           backgroundColor: vars.color.accentHover,
         },
+        'html[data-theme-mode="dark"] &:not([disabled]):hover': {
+          backgroundColor: vars.color.neutralHover,
+          borderColor: vars.color.neutralHover,
+        },
       },
     },
     atoms({
@@ -139,6 +143,27 @@ export const buttonVariants = {
     atoms({
       color: 'primary',
       backgroundColor: 'background2',
+    }),
+  ]),
+  secondaryOutline: style([
+    {
+      selectors: {
+        '&[disabled]': {
+          color: vars.color.onNeutralDisabled,
+          borderColor: vars.color.neutralDisabled,
+          backgroundColor: 'transparent',
+        },
+        '&:not([disabled]):hover': {
+          cursor: 'pointer',
+          backgroundColor: vars.color.background2,
+        },
+      },
+    },
+    atoms({
+      color: 'primary',
+      borderColor: 'border',
+      borderWidth: 'normal',
+      backgroundColor: 'transparent',
     }),
   ]),
   secondaryAccent: style([
@@ -280,7 +305,7 @@ export const buttonVariants = {
         },
         '&:hover, &:not([disabled]):hover': {
           cursor: 'pointer',
-          backgroundColor: vars.color.ghostHover,
+          backgroundColor: vars.color.background2,
         },
       },
     },

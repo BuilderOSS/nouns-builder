@@ -6,11 +6,11 @@ import React from 'react'
 import {
   cardLink,
   daoAvatar,
+  daoAvatarImage,
   daoAvatarSurfaceA,
   daoAvatarSurfaceB,
   daoAvatarSurfaceC,
   daoAvatarSurfaceD,
-  daoAvatarImage,
   daoCard,
   daoChainBadge,
   daoChainBadgeImage,
@@ -29,10 +29,12 @@ type DaoCardProps = {
 }
 
 export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
-  const avatarSurfaceClass =
-    [daoAvatarSurfaceA, daoAvatarSurfaceB, daoAvatarSurfaceC, daoAvatarSurfaceD][
-      Number(dao.id.replace(/\D/g, '')) % 4 || 0
-    ]
+  const avatarSurfaceClass = [
+    daoAvatarSurfaceA,
+    daoAvatarSurfaceB,
+    daoAvatarSurfaceC,
+    daoAvatarSurfaceD,
+  ][Number(dao.id.replace(/\D/g, '')) % 4 || 0]
 
   return (
     <Link aria-label={`View ${dao.name}`} className={daoCard} href={dao.href}>

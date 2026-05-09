@@ -1,3 +1,5 @@
+import { getProposalStateColorStyle } from '@buildeross/proposal-ui'
+import { ProposalState } from '@buildeross/sdk/contract'
 import { Box, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
@@ -15,30 +17,25 @@ import {
   droposalSummary,
   droposalTitle,
   mutedText,
-  statusActive,
-  statusDefeated,
-  statusExecuted,
-  statusLive,
-  statusQueued,
-  statusRecent,
   statusBadge,
-  statusSucceeded,
-  statusTrending,
 } from '../AboutPage.css'
 import { dropHighlights } from '../data'
 import { DroposalHighlight } from '../types'
 import { getChainLogoSrc } from '../utils'
 import { SectionIntro } from './SectionIntro'
 
-const statusClassByType: Record<DroposalHighlight['status'], string> = {
-  Active: statusActive,
-  Succeeded: statusSucceeded,
-  Queued: statusQueued,
-  Defeated: statusDefeated,
-  Executed: statusExecuted,
-  Trending: statusTrending,
-  Live: statusLive,
-  Recent: statusRecent,
+const statusStyleByType: Record<
+  DroposalHighlight['status'],
+  { borderColor: string; color: string }
+> = {
+  Active: getProposalStateColorStyle(ProposalState.Active),
+  Succeeded: getProposalStateColorStyle(ProposalState.Succeeded),
+  Queued: getProposalStateColorStyle(ProposalState.Queued),
+  Defeated: getProposalStateColorStyle(ProposalState.Defeated),
+  Executed: getProposalStateColorStyle(ProposalState.Executed),
+  Trending: getProposalStateColorStyle(ProposalState.Defeated),
+  Live: getProposalStateColorStyle(ProposalState.Succeeded),
+  Recent: getProposalStateColorStyle(ProposalState.Active),
 }
 
 type DroposalHighlightsSectionProps = {
@@ -74,12 +71,11 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
           >
             <Box>
               <Box className={droposalMeta}>
-                <Text className={`${badge} ${daoBadge}`}>
-                  {proposal.dao}
-                </Text>
+                <Text className={`${badge} ${daoBadge}`}>{proposal.dao}</Text>
                 {showStatusBadge ? (
                   <Text
-                    className={`${statusBadge} ${statusClassByType[proposal.status]}`}
+                    className={statusBadge}
+                    style={statusStyleByType[proposal.status]}
                   >
                     {proposal.status}
                   </Text>

@@ -3,7 +3,7 @@ import { Button, Flex } from '@buildeross/zord'
 import Link from 'next/link'
 import React, { useState } from 'react'
 
-import { actionButtons, createPostButton, daoButton } from './CreateActions.css'
+import { actionButtons } from './CreateActions.css'
 import { DaoSelectorModal } from './DaoSelectorModal'
 
 export interface CreateActionsProps {
@@ -28,12 +28,7 @@ export const CreateActions: React.FC<CreateActionsProps> = ({ userAddress }) => 
     <>
       <Flex direction="column" className={actionButtons} gap="x3">
         <Flex gap="x3">
-          <Button
-            onClick={handleCreatePost}
-            variant="primary"
-            style={{ flex: 1 }}
-            className={createPostButton}
-          >
+          <Button onClick={handleCreatePost} variant="primary" style={{ flex: 1 }}>
             Create Post
           </Button>
           <Button onClick={handleCreateProposal} variant="outline" style={{ flex: 1 }}>
@@ -41,7 +36,7 @@ export const CreateActions: React.FC<CreateActionsProps> = ({ userAddress }) => 
           </Button>
         </Flex>
         <Link href="/create" style={{ width: '100%', flex: 1 }}>
-          <Button style={{ width: '100%' }} variant="outline" className={daoButton}>
+          <Button style={{ width: '100%' }} variant="secondaryOutline">
             Create a DAO
           </Button>
         </Link>

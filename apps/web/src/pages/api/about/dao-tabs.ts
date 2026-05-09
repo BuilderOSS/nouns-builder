@@ -476,7 +476,7 @@ const buildActiveDaos = async (
       .filter((item) => item.dao.endTime && Number(item.dao.endTime) > now)
       .sort((a, b) => Number(a.dao.endTime) - Number(b.dao.endTime))
       .slice(0, 4)
-      .map(async (item, index) => {
+      .map(async (item) => {
         const matchingDao = daoCandidates.find(
           (candidate) =>
             candidate.chainId === item.chainId &&
