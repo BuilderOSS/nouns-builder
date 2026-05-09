@@ -3,6 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import {
+  aboutCtaButton,
   finalActions,
   finalChecklist,
   finalChecklistItem,
@@ -37,15 +38,17 @@ export const AboutFinalCta: React.FC = () => {
         </Box>
 
         <Box className={finalActions}>
-          <Button as={Link} href="/create" variant="primary">
+          <Button as={Link} className={aboutCtaButton} href="/create" pill variant="primary">
             Launch your DAO
           </Button>
-          <Button as={Link} href="/explore" variant="outline">
+          <Button as={Link} className={aboutCtaButton} href="/explore" pill variant="outline">
             Explore the ecosystem
           </Button>
           <Button
             as="a"
+            className={aboutCtaButton}
             href="https://docs.nouns.build"
+            pill
             rel="noreferrer"
             target="_blank"
             variant="ghost"

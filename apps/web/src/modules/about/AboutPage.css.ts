@@ -50,6 +50,11 @@ export const centeredImage = style({
   maxWidth: '100%',
   height: 'auto',
   display: 'block',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      filter: 'invert(1)',
+    },
+  },
 })
 
 export const heroVennWrap = style({
@@ -67,6 +72,26 @@ export const heroVennImage = style({
   maxWidth: '260px',
   height: 'auto',
   display: 'block',
+})
+
+const darkModeSelector = 'html[data-theme-mode="dark"] &'
+
+export const aboutLightOnly = style({
+  display: 'block !important',
+  selectors: {
+    [darkModeSelector]: {
+      display: 'none !important',
+    },
+  },
+})
+
+export const aboutDarkOnly = style({
+  display: 'none !important',
+  selectors: {
+    [darkModeSelector]: {
+      display: 'block !important',
+    },
+  },
 })
 
 export const section = style({
@@ -214,30 +239,6 @@ export const heroHighlightDot = style({
   marginTop: '6px',
 })
 
-export const primaryButton = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '42px',
-  padding: '10px 16px',
-  borderRadius: '999px',
-  border: standardBorderThin,
-  color: theme.colors.background1,
-  background: theme.colors.text1,
-  fontSize: '14px',
-  fontWeight: 700,
-  textDecoration: 'none',
-  transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
-  selectors: {
-    '&:hover': {
-      borderColor: theme.colors.border,
-      backgroundColor: theme.colors.text2,
-      color: theme.colors.background1,
-    },
-    '&:focus-visible': focusRing,
-  },
-})
-
 export const heroActions = style({
   display: 'flex',
   flexDirection: 'column',
@@ -248,30 +249,6 @@ export const heroActions = style({
       flexDirection: 'row',
       alignItems: 'center',
     },
-  },
-})
-
-export const secondaryButton = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  minHeight: '42px',
-  padding: '10px 16px',
-  borderRadius: '999px',
-  border: standardBorderThin,
-  color: theme.colors.text1,
-  background: theme.colors.background1,
-  fontSize: '14px',
-  fontWeight: 700,
-  textDecoration: 'none',
-  transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
-  selectors: {
-    '&:hover': {
-      cursor: 'pointer',
-      backgroundColor: softBlueBackground,
-      borderColor: softBlueBorder,
-    },
-    '&:focus-visible': focusRing,
   },
 })
 
@@ -963,7 +940,7 @@ export const coiningPreview = style({
   minHeight: '180px',
   borderRadius: '10px',
   overflow: 'hidden',
-  padding: '18px',
+  padding: '16px',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
@@ -1014,7 +991,7 @@ export const coiningNetworkBadge = style({
 })
 
 export const coiningPreviewTitle = style({
-  maxWidth: '10ch',
+  maxWidth: '12ch',
   fontFamily: 'ptRoot, sans-serif',
   fontSize: '26px',
   lineHeight: 0.95,
@@ -1113,6 +1090,7 @@ export const statusBadge = style({
 export const daoBadge = style({
   background: '#F7F3E8',
   color: '#4F4738',
+  borderColor: theme.colors.text1,
 })
 
 export const droposalTitle = style({
@@ -1498,6 +1476,36 @@ export const finalActions = style({
   },
 })
 
+export const aboutCtaButton = style({
+  borderRadius: '999px',
+  transition: 'background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease',
+  selectors: {
+    '&:not([disabled]):hover': {
+      borderColor: theme.colors.focusRing,
+      backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 14%, ${theme.colors.background1})`,
+    },
+    '&:focus-visible': focusRing,
+  },
+})
+
+globalStyle(`${aboutCtaButton}.zord-button-primary:not([disabled]):hover`, {
+  borderColor: theme.colors.focusRing,
+  backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 82%, ${theme.colors.text1})`,
+  color: theme.colors.background1,
+})
+
+globalStyle(`${aboutCtaButton}.zord-button-outline:not([disabled]):hover`, {
+  borderColor: theme.colors.focusRing,
+  backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 14%, ${theme.colors.background1})`,
+  color: theme.colors.text1,
+})
+
+globalStyle(`${aboutCtaButton}.zord-button-ghost:not([disabled]):hover`, {
+  borderColor: theme.colors.focusRing,
+  backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 16%, ${theme.colors.background1})`,
+  color: theme.colors.text1,
+})
+
 export const subLink = style({
   color: theme.colors.text3,
   fontSize: '14px',
@@ -1544,7 +1552,7 @@ export const governanceLink = style({
 })
 
 globalStyle(
-  `html[data-theme-mode="dark"] ${page} :is(${sectionTitle}, ${heroTitle}, ${montageValue}, ${heroFooterValue}, ${statValue}, ${tabButton}, ${activeTabButton}, ${mobileStatsHeading}, ${daoName}, ${daoSignalValue}, ${coiningPreviewMark}, ${coiningPreviewTitle}, ${coiningTitle}, ${amountPill}, ${droposalTitle}, ${stepTitle}, ${featureItem}, ${governanceLink})`,
+  `html[data-theme-mode="dark"] ${page} :is(${sectionTitle}, ${heroTitle}, ${montageValue}, ${heroFooterValue}, ${statValue}, ${tabButton}, ${activeTabButton}, ${mobileStatsHeading}, ${daoName}, ${daoSignalValue}, ${coiningTitle}, ${amountPill}, ${droposalTitle}, ${stepTitle}, ${featureItem})`,
   {
     color: theme.colors.text1,
   }
@@ -1561,33 +1569,31 @@ globalStyle(`html[data-theme-mode="dark"] ${page} :is(${heroHighlightDot})`, {
   background: theme.colors.text1,
 })
 
-globalStyle(`html[data-theme-mode="dark"] ${page} :is(${primaryButton})`, {
-  background: theme.colors.text1,
-  color: theme.colors.background1,
-  borderColor: theme.colors.border,
-})
-
-globalStyle(`html[data-theme-mode="dark"] ${page} :is(${primaryButton}):hover`, {
-  background: theme.colors.text2,
-  color: theme.colors.background1,
-  borderColor: theme.colors.border,
-})
-
-globalStyle(`html[data-theme-mode="dark"] ${page} :is(${secondaryButton})`, {
-  background: theme.colors.background1,
+globalStyle(`html[data-theme-mode="dark"] ${page} ${aboutCtaButton}:not([disabled]):hover`, {
+  borderColor: theme.colors.focusRing,
+  backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 30%, ${theme.colors.background1})`,
   color: theme.colors.text1,
-  borderColor: theme.colors.border,
 })
 
-globalStyle(`html[data-theme-mode="dark"] ${page} :is(${secondaryButton}):hover`, {
-  background: softBlueBackground,
-  color: theme.colors.text1,
-  borderColor: softBlueBorder,
-})
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} ${aboutCtaButton}.zord-button-primary:not([disabled]):hover`,
+  {
+    borderColor: theme.colors.focusRing,
+    backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 70%, ${theme.colors.text1})`,
+    color: theme.colors.background1,
+  }
+)
 
 globalStyle(`html[data-theme-mode="dark"] ${page} :is(${daoMiniCard}, ${stepCard})`, {
   background: theme.colors.background2,
 })
+
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} :is(${coiningPreviewTitle})`,
+  {
+    color: theme.colors.background1,
+  }
+)
 
 globalStyle(`html[data-theme-mode="dark"] ${logoMarqueeTrack}::before`, {
   background:

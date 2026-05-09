@@ -271,7 +271,7 @@ export const builderUseCases: BuilderValueProp[] = [
   {
     id: 'media-collectives',
     title: 'Community owned brands',
-    imageSrc: '/noggles-square.png',
+    imageSrc: '/noggles-square.svg',
   },
   { id: 'creative-communities', title: 'Creative and media collectives', emoji: '🎨' },
   { id: 'events-local-groups', title: 'Local and event-based groups', emoji: '🎪' },

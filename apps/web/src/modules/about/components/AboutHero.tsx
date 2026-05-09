@@ -1,8 +1,11 @@
-import { Box, Text } from '@buildeross/zord'
+import { Box, Button, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 
 import {
+  aboutDarkOnly,
+  aboutLightOnly,
+  aboutCtaButton,
   hero,
   heroActions,
   heroCopy,
@@ -27,8 +30,6 @@ import {
   montagePrimary,
   montageSide,
   montageValue,
-  primaryButton,
-  secondaryButton,
 } from '../AboutPage.css'
 
 type AboutHeroProps = {
@@ -64,13 +65,19 @@ export const AboutHero: React.FC<AboutHeroProps> = ({ heroHighlights, heroLogos 
         </Box>
 
         <Box className={heroActions}>
-          <Link className={primaryButton} href="/create">
+          <Button as={Link} className={aboutCtaButton} href="/create" pill variant="primary">
             Launch a DAO
-          </Link>
+          </Button>
 
-          <Link className={secondaryButton} href="/explore">
+          <Button
+            as={Link}
+            className={aboutCtaButton}
+            href="/explore"
+            pill
+            variant="outline"
+          >
             Explore existing DAOs
-          </Link>
+          </Button>
         </Box>
       </Box>
 
@@ -89,8 +96,15 @@ export const AboutHero: React.FC<AboutHeroProps> = ({ heroHighlights, heroLogos 
               <Box
                 as="img"
                 alt="Auction, NFT, and DAO relationship diagram"
-                className={heroVennImage}
-                src="/images/about-divider.svg"
+                className={`${heroVennImage} ${aboutLightOnly}`}
+                src="/why.svg"
+              />
+              <Box
+                as="img"
+                alt=""
+                aria-hidden={true}
+                className={`${heroVennImage} ${aboutDarkOnly}`}
+                src="/why-dark.svg"
               />
             </Box>
           </Box>

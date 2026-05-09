@@ -2,6 +2,8 @@ import { Box, Text } from '@buildeross/zord'
 import React from 'react'
 
 import {
+  aboutDarkOnly,
+  aboutLightOnly,
   compactValueCard,
   compactValueEmoji,
   compactValueImage,
@@ -23,7 +25,23 @@ export const WhatYouCanBuildSection: React.FC = () => {
       <Box className={useCaseGrid}>
         {builderUseCases.map((item) => (
           <Box className={compactValueCard} key={item.id}>
-            {item.imageSrc ? (
+            {item.id === 'media-collectives' ? (
+              <>
+                <Box
+                  as="img"
+                  alt={item.title}
+                  className={`${compactValueImage} ${aboutLightOnly}`}
+                  src="/noggles-square.svg"
+                />
+                <Box
+                  as="img"
+                  alt=""
+                  aria-hidden={true}
+                  className={`${compactValueImage} ${aboutDarkOnly}`}
+                  src="/noggles-square-dark.svg"
+                />
+              </>
+            ) : item.imageSrc ? (
               <Box
                 as="img"
                 alt={item.title}
