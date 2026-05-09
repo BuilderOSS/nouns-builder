@@ -48,8 +48,8 @@ const statusStyleByType: Record<
     backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Executed).borderColor} 12%, transparent)`,
   },
   Trending: {
-    ...getProposalStateColorStyle(ProposalState.Defeated),
-    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Defeated).borderColor} 12%, transparent)`,
+    ...getProposalStateColorStyle(ProposalState.Succeeded),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Succeeded).borderColor} 12%, transparent)`,
   },
   Live: {
     ...getProposalStateColorStyle(ProposalState.Succeeded),

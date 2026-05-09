@@ -51,6 +51,7 @@ import { notFoundWrap } from 'src/styles/404.css'
 import * as styles from 'src/styles/create.css'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
+import { useShallow } from 'zustand/shallow'
 
 const createSelectOption = (type: TransactionType) => ({
   value: type,
@@ -165,7 +166,25 @@ const CreateProposalPage: NextPageWithLayout = () => {
     setDiscussionUrl,
     setRepresentedAddressEnabled,
     clearProposal,
-  } = useProposalStore()
+  } = useProposalStore(
+    useShallow((state) => ({
+      transactionType: state.transactionType,
+      setTransactionType: state.setTransactionType,
+      resetTransactionType: state.resetTransactionType,
+      transactions: state.transactions,
+      title: state.title,
+      summary: state.summary,
+      representedAddress: state.representedAddress,
+      discussionUrl: state.discussionUrl,
+      representedAddressEnabled: state.representedAddressEnabled,
+      setTitle: state.setTitle,
+      setSummary: state.setSummary,
+      setRepresentedAddress: state.setRepresentedAddress,
+      setDiscussionUrl: state.setDiscussionUrl,
+      setRepresentedAddressEnabled: state.setRepresentedAddressEnabled,
+      clearProposal: state.clearProposal,
+    }))
+  )
 
   const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
   const [createStage, setCreateStage] = React.useState<'draft' | 'transactions'>(() =>

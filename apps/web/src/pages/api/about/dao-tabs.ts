@@ -52,6 +52,28 @@ type CrossChainActiveDao = {
   dao: NonNullable<Awaited<ReturnType<typeof exploreDaosRequest>>>['daos'][number]
 }
 
+type SettledChainResult<T> = {
+  chainId: CHAIN_ID
+  value: T
+}
+
+const getFulfilledChainResults = <T>(
+  settledResults: PromiseSettledResult<SettledChainResult<T>>[],
+  context: string
+) =>
+  settledResults.flatMap((result) => {
+    if (result.status === 'fulfilled') {
+      return [result.value.value]
+    }
+
+    const reason = result.reason as { chainId?: CHAIN_ID; error?: unknown }
+    console.error(
+      `About dao tabs ${context} failed for chain ${String(reason?.chainId ?? 'unknown')}:`,
+      reason?.error || reason
+    )
+    return []
+  })
+
 type FeaturedDaoConfigItem = {
   name: string
   aliases?: readonly string[]
@@ -293,49 +315,76 @@ const fetchDaoCandidates = async (
 const fetchCrossChainDaoCandidates = async (
   options: { totalAuctionSalesGt?: string; first?: number } = {}
 ): Promise<CrossChainDaoCandidate[]> => {
-  const results = await Promise.all(
+  const settledResults = await Promise.allSettled(
     PUBLIC_DEFAULT_CHAINS.map(async (chain) => {
-      const daos = await fetchDaoCandidates(chain.id, options)
+      try {
+        const daos = await fetchDaoCandidates(chain.id, options)
 
-      return daos.map((dao) => ({ chainId: chain.id, dao }))
+        return {
+          chainId: chain.id,
+          value: daos.map((dao) => ({ chainId: chain.id, dao })),
+        }
+      } catch (error) {
+        throw { chainId: chain.id, error }
+      }
     })
   )
 
-  return results.flat()
+  return getFulfilledChainResults(settledResults, 'candidate fetch').flat()
 }
 
 const findFeaturedMatch = (targets: string[], candidates: CrossChainDaoCandidate[]) =>
   candidates.find((item) => isNameMatch(targets, item.dao.name))
 
 const fetchFeaturedMatch = async (targets: string[]) => {
-  const results = await Promise.all(
+  const settledResults = await Promise.allSettled(
     PUBLIC_DEFAULT_CHAINS.flatMap((chain) =>
       targets.map(async (target) => {
-        const daos = await fetchDaoCandidates(chain.id, {
-          first: 25,
-          nameContains: target,
-        })
+        try {
+          const daos = await fetchDaoCandidates(chain.id, {
+            first: 25,
+            nameContains: target,
+          })
 
-        return daos.map((dao) => ({ chainId: chain.id, dao }))
+          return {
+            chainId: chain.id,
+            value: daos.map((dao) => ({ chainId: chain.id, dao })),
+          }
+        } catch (error) {
+          throw { chainId: chain.id, error }
+        }
       })
     )
   )
 
-  return findFeaturedMatch(targets, results.flat())
+  return findFeaturedMatch(
+    targets,
+    getFulfilledChainResults(settledResults, 'featured match fetch').flat()
+  )
 }
 
 const buildFeaturedDaos = async (
   resolveDescription: ReturnType<typeof createDaoDescriptionResolver>
 ): Promise<AboutDaoTabsResponse['featured']> => {
-  const results = await Promise.all(
+  const settledResults = await Promise.allSettled(
     PUBLIC_DEFAULT_CHAINS.map(async (chain) => {
-      const daos = await fetchDaoCandidates(chain.id, { first: 800 })
+      try {
+        const daos = await fetchDaoCandidates(chain.id, { first: 800 })
 
-      return daos.map((dao) => ({ chainId: chain.id, dao }))
+        return {
+          chainId: chain.id,
+          value: daos.map((dao) => ({ chainId: chain.id, dao })),
+        }
+      } catch (error) {
+        throw { chainId: chain.id, error }
+      }
     })
   )
 
-  const featuredCandidates = results.flat()
+  const featuredCandidates = getFulfilledChainResults(
+    settledResults,
+    'featured candidate fetch'
+  ).flat()
 
   return Promise.all(
     FEATURED_DAO_CONFIG.map(async (item, index) => {
@@ -458,18 +507,28 @@ const buildActiveDaos = async (
   resolveDescription: ReturnType<typeof createDaoDescriptionResolver>
 ) => {
   const now = Math.floor(Date.now() / 1000)
-  const activeResults = await Promise.all(
+  const settledResults = await Promise.allSettled(
     PUBLIC_DEFAULT_CHAINS.map(async (chain) => {
-      const result = await exploreDaosRequest(chain.id, 12, 0, Auction_OrderBy.EndTime)
+      try {
+        const result = await exploreDaosRequest(chain.id, 12, 0, Auction_OrderBy.EndTime)
 
-      return (result?.daos ?? []).map((dao) => ({
-        chainId: chain.id,
-        dao,
-      }))
+        return {
+          chainId: chain.id,
+          value: (result?.daos ?? []).map((dao) => ({
+            chainId: chain.id,
+            dao,
+          })),
+        }
+      } catch (error) {
+        throw { chainId: chain.id, error }
+      }
     })
   )
 
-  const activeDaos = activeResults.flat() as CrossChainActiveDao[]
+  const activeDaos = getFulfilledChainResults(
+    settledResults,
+    'active dao fetch'
+  ).flat() as CrossChainActiveDao[]
 
   return Promise.all(
     activeDaos

@@ -291,7 +291,11 @@ const buildDropHighlights = (drops: CrossChainDrop[]): DroposalHighlight[] => {
 
   return drops
     .filter((drop) => drop.dao?.tokenAddress && drop.name)
-    .sort((a, b) => Number(b.totalSalesAmount || '0') - Number(a.totalSalesAmount || '0'))
+    .sort((a, b) => {
+      const aAmount = BigInt(a.totalSalesAmount || '0')
+      const bAmount = BigInt(b.totalSalesAmount || '0')
+      return bAmount > aAmount ? 1 : bAmount < aAmount ? -1 : 0
+    })
     .slice(0, 5)
     .map((drop) => ({
       id: `${drop.chainId}-${drop.id}`,
@@ -370,9 +374,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
+  const { maxAge, swr } = CACHE_TIMES.EXPLORE
+
   try {
     const payload = await buildShowcaseResponse()
-    const { maxAge, swr } = CACHE_TIMES.EXPLORE
 
     res.setHeader(
       'Cache-Control',
@@ -388,6 +393,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     })
   } catch (error) {
     console.error('About showcase error:', error)
+
+    res.setHeader(
+      'Cache-Control',
+      `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
+    )
 
     return res.status(200).json({
       coining: fallbackCoiningHighlights,

@@ -14,10 +14,20 @@ const fetcher = async (
   })
 
   const text = await response.text()
-  const body = text ? JSON.parse(text) : {}
+  let body: unknown = {}
+
+  try {
+    body = text ? JSON.parse(text) : {}
+  } catch {
+    body = text
+  }
 
   if (!response.ok) {
-    const err: HttpError = new Error(body?.error || response.statusText)
+    const err: HttpError = new Error(
+      typeof body === 'object' && body && 'error' in body
+        ? String((body as { error?: string }).error || response.statusText)
+        : response.statusText
+    )
     err.status = response.status
     err.body = body
     throw err

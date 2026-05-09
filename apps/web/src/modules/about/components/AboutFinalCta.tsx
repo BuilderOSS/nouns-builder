@@ -23,15 +23,21 @@ export const AboutFinalCta: React.FC = () => {
           <Text className={finalCtaTitle}>Start your DAO today</Text>
           <Box as="ol" className={finalChecklist}>
             <Box as="li" className={finalChecklistItem}>
-              <Text className={finalChecklistMarker}>1.</Text>
+              <Text aria-hidden="true" className={finalChecklistMarker}>
+                1.
+              </Text>
               <Text>Upload your art</Text>
             </Box>
             <Box as="li" className={finalChecklistItem}>
-              <Text className={finalChecklistMarker}>2.</Text>
+              <Text aria-hidden="true" className={finalChecklistMarker}>
+                2.
+              </Text>
               <Text>Set your parameters</Text>
             </Box>
             <Box as="li" className={finalChecklistItem}>
-              <Text className={finalChecklistMarker}>3.</Text>
+              <Text aria-hidden="true" className={finalChecklistMarker}>
+                3.
+              </Text>
               <Text>Launch your first auction</Text>
             </Box>
           </Box>

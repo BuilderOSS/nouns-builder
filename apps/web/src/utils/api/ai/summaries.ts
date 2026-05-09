@@ -1,10 +1,10 @@
 import { gateway } from '@ai-sdk/gateway'
 import { generateText } from 'ai'
 import { getRedisConnection } from 'src/services/redisConnection'
-import { keccak256, toHex } from 'viem'
 
 export const AI_MODEL = process.env.AI_MODEL || 'openai/gpt-4-turbo'
 const DEFAULT_CACHE_TTL_SECONDS = 60 * 60 * 24 * 30
+const MAX_DAO_DESCRIPTION_LENGTH = 2200
 
 const safeStringify = (value: unknown) =>
   JSON.stringify(value, (_key, item) =>
@@ -16,8 +16,15 @@ export const getAiCacheKey = (
   data: unknown,
   model: string = AI_MODEL
 ) => {
-  const hash = keccak256(toHex(`${safeStringify(data)}:${model}`))
-  return `${namespace}:${hash}`
+  const payload = `${namespace}:${model}:${safeStringify(data)}`
+  let hash = 2166136261
+
+  for (let i = 0; i < payload.length; i += 1) {
+    hash ^= payload.charCodeAt(i)
+    hash = Math.imul(hash, 16777619)
+  }
+
+  return `${namespace}:${(hash >>> 0).toString(16)}`
 }
 
 export const generateCachedAiText = async ({
@@ -36,7 +43,13 @@ export const generateCachedAiText = async ({
   const redisConnection = getRedisConnection()
   const cacheKey = getAiCacheKey(namespace, data, model)
 
-  const cachedText = await redisConnection?.get(cacheKey)
+  if (!redisConnection) {
+    console.warn(
+      `[ai-cache] Redis unavailable for namespace=${namespace} key=${cacheKey}; skipping cache.`
+    )
+  }
+
+  const cachedText = redisConnection ? await redisConnection.get(cacheKey) : null
 
   if (cachedText) {
     return cachedText
@@ -50,13 +63,18 @@ export const generateCachedAiText = async ({
 
   const text = result.text.trim().replace(/\s+/g, ' ')
 
-  await redisConnection?.setex(cacheKey, ttlSeconds, text)
+  if (redisConnection) {
+    await redisConnection.setex(cacheKey, ttlSeconds, text)
+  }
 
   return text
 }
 
-const trimDescription = (description: string, maxChars = 2200) =>
+const trimDescription = (description: string, maxChars = MAX_DAO_DESCRIPTION_LENGTH) =>
   description.trim().replace(/\s+/g, ' ').slice(0, maxChars)
+
+const sanitizeDescription = (description: string) =>
+  description.replace(/###|assistant\s*:|system\s*:|user\s*:/gi, '')
 
 const buildDaoDescriptionPrompt = (
   description: string
@@ -76,9 +94,22 @@ ${trimDescription(description)}
 Final Instruction:
 Respond with only the 1-2 sentence summary.`
 
-export const summarizeDaoDescription = async (description: string) =>
-  generateCachedAiText({
+export const summarizeDaoDescription = async (description: string) => {
+  if (description.length > MAX_DAO_DESCRIPTION_LENGTH) {
+    console.warn(
+      `[ai-cache] DAO description exceeded ${MAX_DAO_DESCRIPTION_LENGTH} chars; truncating before summarization.`
+    )
+  }
+
+  const cleaned = sanitizeDescription(trimDescription(description))
+
+  if (!cleaned.trim()) {
+    throw new Error('DAO description is empty after trimming/sanitization')
+  }
+
+  return generateCachedAiText({
     namespace: 'ai:daoDescription',
-    data: { description },
-    prompt: buildDaoDescriptionPrompt(description),
+    data: { description: cleaned },
+    prompt: buildDaoDescriptionPrompt(cleaned),
   })
+}

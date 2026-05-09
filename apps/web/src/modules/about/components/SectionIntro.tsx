@@ -1,7 +1,7 @@
 import { Box, Text } from '@buildeross/zord'
 import React from 'react'
 
-import { sectionCopy, sectionHeader, sectionTitle } from '../AboutPage.css'
+import { eyebrow, sectionCopy, sectionHeader, sectionTitle } from '../AboutPage.css'
 
 type SectionIntroProps = {
   eyebrowText: string
@@ -11,12 +11,14 @@ type SectionIntroProps = {
 }
 
 export const SectionIntro: React.FC<SectionIntroProps> = ({
+  eyebrowText,
   title,
   copy,
   copyClassName,
 }) => {
   return (
     <Box className={sectionHeader}>
+      <Text className={eyebrow}>{eyebrowText}</Text>
       <Text as="h2" className={sectionTitle}>
         {title}
       </Text>

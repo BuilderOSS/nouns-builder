@@ -88,6 +88,10 @@ const fetchChainSnapshot = async (subgraphUrl: string): Promise<SnapshotDao[]> =
   return data.daos ?? []
 }
 
+// TODO: This full scan of daoTokenOwners via paginated queries runs on every cache miss,
+// causing unbounded latency on the public API. Move this logic to a background job/cron that
+// periodically precomputes unique owner sets, then have the handler read that cached result.
+// Not done now because it requires a separate background process + persistence layer.
 const fetchUniqueOwnersForChain = async (subgraphUrl: string): Promise<Set<string>> => {
   const client = new GraphQLClient(subgraphUrl, {
     headers: { 'Content-Type': 'application/json' },
@@ -174,9 +178,13 @@ const buildSnapshotResponse = async (): Promise<AboutSnapshotResponse> => {
     }
   }
 
-  const totalMembers =
-    uniqueOwners.size ||
-    daos.reduce((total, dao) => total + Number(dao.ownerCount || 0), 0)
+  const allOwnerScansSucceeded = chainSnapshots.every((snapshot) => snapshot.uniqueOwners)
+  const fallbackTotalMembers = daos.reduce(
+    (total, dao) => total + Number(dao.ownerCount || 0),
+    0
+  )
+
+  const totalMembers = allOwnerScansSucceeded ? uniqueOwners.size : fallbackTotalMembers
   const totalTokens = daos.reduce((total, dao) => total + Number(dao.totalSupply || 0), 0)
 
   return {

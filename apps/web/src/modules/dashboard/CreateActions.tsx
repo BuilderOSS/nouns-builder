@@ -35,11 +35,14 @@ export const CreateActions: React.FC<CreateActionsProps> = ({ userAddress }) => 
             Create Proposal
           </Button>
         </Flex>
-        <Link href="/create" style={{ width: '100%', flex: 1 }}>
-          <Button style={{ width: '100%' }} variant="secondaryOutline">
-            Create a DAO
-          </Button>
-        </Link>
+        <Button
+          as={Link}
+          href="/create"
+          style={{ width: '100%', flex: 1 }}
+          variant="secondaryOutline"
+        >
+          Create a DAO
+        </Button>
       </Flex>
 
       <DaoSelectorModal

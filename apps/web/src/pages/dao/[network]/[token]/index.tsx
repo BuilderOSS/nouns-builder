@@ -44,6 +44,8 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const chainIdKey = chain.id as keyof typeof MERKLE_RESERVE_MINTER
+  const merkleMinter = MERKLE_RESERVE_MINTER[chainIdKey]
+  const redeemMinter = ERC721_REDEEM_MINTER[chainIdKey]
 
   const auctionContractParams = {
     abi: auctionAbi,
@@ -57,26 +59,40 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     chainId: chain.id,
   }
 
+  const contracts = [
+    { ...auctionContractParams, functionName: 'owner' as const },
+    { ...tokenContractParams, functionName: 'remainingTokensInReserve' as const },
+    ...(merkleMinter
+      ? ([
+          {
+            ...tokenContractParams,
+            functionName: 'minter' as const,
+            args: [merkleMinter] as const,
+          },
+        ] as const)
+      : []),
+    ...(redeemMinter
+      ? ([
+          {
+            ...tokenContractParams,
+            functionName: 'minter' as const,
+            args: [redeemMinter] as const,
+          },
+        ] as const)
+      : []),
+  ]
+
   const { data: contractData } = useReadContracts({
     allowFailure: false,
-    contracts: [
-      { ...auctionContractParams, functionName: 'owner' },
-      { ...tokenContractParams, functionName: 'remainingTokensInReserve' },
-      {
-        ...tokenContractParams,
-        functionName: 'minter',
-        args: [MERKLE_RESERVE_MINTER[chainIdKey]],
-      },
-      {
-        ...tokenContractParams,
-        functionName: 'minter',
-        args: [ERC721_REDEEM_MINTER[chainIdKey]],
-      },
-    ] as const,
+    contracts,
   })
 
-  const [owner, remainingTokensInReserve, isMerkleReserveMinter, isERC721RedeemMinter] =
-    unpackOptionalArray(contractData, 4)
+  const [owner, remainingTokensInReserve, ...minterStatus] = (unpackOptionalArray(
+    contractData,
+    contracts.length
+  ) ?? []) as [unknown, bigint | undefined, ...unknown[]]
+  const isMerkleReserveMinter = merkleMinter ? !!minterStatus[0] : false
+  const isERC721RedeemMinter = redeemMinter ? !!minterStatus[merkleMinter ? 1 : 0] : false
 
   // Separate read for signer minter status
   const { data: isSignerMinter } = useReadContract({
@@ -113,13 +129,13 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   const handleMinterEnabled = React.useCallback(
     async (minterAddress: AddressType) => {
       // Navigate to appropriate tab when minter is enabled
-      if (minterAddress === MERKLE_RESERVE_MINTER[chainIdKey]) {
+      if (merkleMinter && minterAddress === merkleMinter) {
         await openTab('merkle-reserve')
-      } else if (minterAddress === ERC721_REDEEM_MINTER[chainIdKey]) {
+      } else if (redeemMinter && minterAddress === redeemMinter) {
         await openTab('erc721-redeem')
       }
     },
-    [chainIdKey, openTab]
+    [merkleMinter, redeemMinter, openTab]
   )
 
   const openTokenPage = React.useCallback(

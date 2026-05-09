@@ -53,8 +53,5 @@
     "test": "turbo run test",
     "type-check": "turbo run type-check",
     "version-packages": "changeset version"
-  },
-  "dependencies": {
-    "remove-markdown": "^0.6.3"
   }
 }

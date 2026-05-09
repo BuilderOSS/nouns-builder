@@ -1,6 +1,8 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import removeMd from 'remove-markdown'
 
+// Normalize chain labels for fuzzy matching/deduplication:
+// lowercase, replace non-alphanumerics with spaces, then collapse/trim whitespace.
 const normalizeChainLabel = (value?: string | null) =>
   (value || '')
     .trim()
