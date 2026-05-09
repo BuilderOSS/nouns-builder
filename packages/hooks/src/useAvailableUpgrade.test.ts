@@ -602,4 +602,44 @@ describe('Use available upgrade hook', () => {
       },
     ])
   })
+
+  it('shows only latest version when multiple upgrades are available', async () => {
+    vi.mocked(useReadContracts).mockReturnValue({
+      data: [
+        false,
+        '2.0.0',
+        {
+          governor: '2.0.0',
+          treasury: '2.0.0',
+          metadata: '2.0.0',
+          auction: '2.0.0',
+          token: '2.0.0',
+        },
+        {
+          governor: '1.1.0',
+          treasury: '1.1.0',
+          metadata: '1.1.0',
+          auction: '1.1.0',
+          token: '1.1.0',
+        },
+        '0x1111111111111111111111111111111111111111',
+        '0x2222222222222222222222222222222222222222',
+        '0x3333333333333333333333333333333333333333',
+        '0x4444444444444444444444444444444444444444',
+        '0x5555555555555555555555555555555555555555',
+      ],
+      isError: false,
+      isLoading: false,
+    } as any)
+
+    const { result } = renderHook(() =>
+      useAvailableUpgrade({ chainId, addresses, contractVersion: '1.2.0' })
+    )
+
+    await waitFor(() => expect(result.current.latest).toBeTruthy())
+
+    expect(result.current.latest).toBe('2.0.0')
+    expect(result.current.shouldUpgrade).toBe(true)
+    expect(result.current.totalContractUpgrades).toBe(5)
+  })
 })
