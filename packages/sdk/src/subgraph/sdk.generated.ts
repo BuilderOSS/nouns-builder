@@ -30,6 +30,14 @@ export type Scalars = {
   Timestamp: { input: any; output: any }
 }
 
+/** Indicates whether the current, partially filled bucket should be included in the response. Defaults to `exclude` */
+export enum Aggregation_Current {
+  /** Exclude the current, partially filled bucket from the response */
+  Exclude = 'exclude',
+  /** Include the current, partially filled bucket in the response */
+  Include = 'include',
+}
+
 export enum Aggregation_Interval {
   Day = 'day',
   Hour = 'hour',
@@ -1283,10 +1291,8 @@ export type ClankerToken_Filter = {
   extensionsSupply_not?: InputMaybe<Scalars['BigInt']['input']>
   extensionsSupply_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   extensions_contains?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  extensions_contains_nocase?: InputMaybe<Array<Scalars['Bytes']['input']>>
   extensions_not?: InputMaybe<Array<Scalars['Bytes']['input']>>
   extensions_not_contains?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  extensions_not_contains_nocase?: InputMaybe<Array<Scalars['Bytes']['input']>>
   holders_?: InputMaybe<ClankerTokenHolder_Filter>
   id?: InputMaybe<Scalars['ID']['input']>
   id_gt?: InputMaybe<Scalars['ID']['input']>
@@ -4436,10 +4442,8 @@ export type Proposal_Filter = {
   snapshotBlockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   targets?: InputMaybe<Array<Scalars['Bytes']['input']>>
   targets_contains?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  targets_contains_nocase?: InputMaybe<Array<Scalars['Bytes']['input']>>
   targets_not?: InputMaybe<Array<Scalars['Bytes']['input']>>
   targets_not_contains?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  targets_not_contains_nocase?: InputMaybe<Array<Scalars['Bytes']['input']>>
   timeCreated?: InputMaybe<Scalars['BigInt']['input']>
   timeCreated_gt?: InputMaybe<Scalars['BigInt']['input']>
   timeCreated_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -4481,10 +4485,8 @@ export type Proposal_Filter = {
   updates_?: InputMaybe<ProposalUpdate_Filter>
   values?: InputMaybe<Array<Scalars['BigInt']['input']>>
   values_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>
-  values_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>
   values_not?: InputMaybe<Array<Scalars['BigInt']['input']>>
   values_not_contains?: InputMaybe<Array<Scalars['BigInt']['input']>>
-  values_not_contains_nocase?: InputMaybe<Array<Scalars['BigInt']['input']>>
   vetoTransactionHash?: InputMaybe<Scalars['Bytes']['input']>
   vetoTransactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
   vetoTransactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>

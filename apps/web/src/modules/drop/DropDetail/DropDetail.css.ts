@@ -41,12 +41,20 @@ export const dropInfoPanel = style([
     p: 'x6',
     borderRadius: 'curved',
     backgroundColor: 'background2',
+    borderColor: 'border',
+    borderWidth: 'thin',
+    borderStyle: 'solid',
   }),
 ])
 
 export const mintPanel = style([
   atoms({
+    p: 'x6',
     borderRadius: 'curved',
+    backgroundColor: 'background2',
+    borderColor: 'border',
+    borderWidth: 'thin',
+    borderStyle: 'solid',
   }),
   {
     '@media': {

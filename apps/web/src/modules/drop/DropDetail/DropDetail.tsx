@@ -122,6 +122,7 @@ export const DropDetail = ({
               saleEnd={saleEnd}
               editionSize={drop.editionSize}
               maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
+              unstyledContainer
             />
           </Box>
         </Box>
@@ -167,6 +168,7 @@ export const DropDetail = ({
             saleEnd={saleEnd}
             editionSize={drop.editionSize}
             maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
+            unstyledContainer
           />
         </Box>
       </AnimatedModal>

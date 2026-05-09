@@ -51,6 +51,7 @@ import { notFoundWrap } from 'src/styles/404.css'
 import * as styles from 'src/styles/create.css'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
+import { useShallow } from 'zustand/shallow'
 
 const createSelectOption = (type: TransactionType) => ({
   value: type,
@@ -149,23 +150,41 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
-  const transactionType = useProposalStore((x) => x.transactionType)
-  const setTransactionType = useProposalStore((x) => x.setTransactionType)
-  const resetTransactionType = useProposalStore((x) => x.resetTransactionType)
-  const transactions = useProposalStore((x) => x.transactions)
-  const title = useProposalStore((x) => x.title)
-  const summary = useProposalStore((x) => x.summary)
-  const representedAddress = useProposalStore((x) => x.representedAddress)
-  const discussionUrl = useProposalStore((x) => x.discussionUrl)
-  const representedAddressEnabled = useProposalStore((x) => x.representedAddressEnabled)
-  const setTitle = useProposalStore((x) => x.setTitle)
-  const setSummary = useProposalStore((x) => x.setSummary)
-  const setRepresentedAddress = useProposalStore((x) => x.setRepresentedAddress)
-  const setDiscussionUrl = useProposalStore((x) => x.setDiscussionUrl)
-  const setRepresentedAddressEnabled = useProposalStore(
-    (x) => x.setRepresentedAddressEnabled
+  const {
+    transactionType,
+    setTransactionType,
+    resetTransactionType,
+    transactions,
+    title,
+    summary,
+    representedAddress,
+    discussionUrl,
+    representedAddressEnabled,
+    setTitle,
+    setSummary,
+    setRepresentedAddress,
+    setDiscussionUrl,
+    setRepresentedAddressEnabled,
+    clearProposal,
+  } = useProposalStore(
+    useShallow((state) => ({
+      transactionType: state.transactionType,
+      setTransactionType: state.setTransactionType,
+      resetTransactionType: state.resetTransactionType,
+      transactions: state.transactions,
+      title: state.title,
+      summary: state.summary,
+      representedAddress: state.representedAddress,
+      discussionUrl: state.discussionUrl,
+      representedAddressEnabled: state.representedAddressEnabled,
+      setTitle: state.setTitle,
+      setSummary: state.setSummary,
+      setRepresentedAddress: state.setRepresentedAddress,
+      setDiscussionUrl: state.setDiscussionUrl,
+      setRepresentedAddressEnabled: state.setRepresentedAddressEnabled,
+      clearProposal: state.clearProposal,
+    }))
   )
-  const clearProposal = useProposalStore((x) => x.clearProposal)
 
   const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
   const [createStage, setCreateStage] = React.useState<'draft' | 'transactions'>(() =>

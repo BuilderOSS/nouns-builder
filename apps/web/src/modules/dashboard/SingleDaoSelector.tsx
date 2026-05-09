@@ -1,6 +1,7 @@
 import { COIN_SUPPORTED_CHAIN_IDS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { SearchInput } from '@buildeross/feed-ui'
 import { useDaoSearch, useDaosWithClankerTokens, useUserDaos } from '@buildeross/hooks'
+import type { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import type {
   AddressType,
   CHAIN_ID,
@@ -40,6 +41,7 @@ export interface SingleDaoSelectorProps {
 }
 
 const MIN_SEARCH_LENGTH = 3
+type MemberDao = MyDaosResponse[number]
 
 export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
   chainIds,
@@ -60,7 +62,7 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
 
   // Convert MyDaosResponse to DaoListItem format (before filtering)
   const allDaoItems: DaoListItem[] = useMemo(() => {
-    let items = memberDaos.map((dao) => ({
+    let items: DaoListItem[] = memberDaos.map((dao: MemberDao) => ({
       name: dao.name,
       image: dao.contractImage,
       address: dao.collectionAddress.toLowerCase() as AddressType,
@@ -84,13 +86,13 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
 
   // Group DAOs by chain for checking clanker tokens
   const daosByChain = useMemo(() => {
-    const grouped: Record<CHAIN_ID, DaoListItem[]> = {} as Record<CHAIN_ID, DaoListItem[]>
+    const grouped: Partial<Record<CHAIN_ID, DaoListItem[]>> = {}
     allDaoItems.forEach((dao) => {
       if (isChainIdSupportedByCoining(dao.chainId)) {
         if (!grouped[dao.chainId]) {
           grouped[dao.chainId] = []
         }
-        grouped[dao.chainId].push(dao)
+        grouped[dao.chainId]!.push(dao)
       }
     })
     return grouped
@@ -98,11 +100,11 @@ export const SingleDaoSelector: React.FC<SingleDaoSelectorProps> = ({
 
   // Fetch clanker tokens for each chain
   const chainQueries = COIN_SUPPORTED_CHAIN_IDS.map((chainId) => {
-    const daosOnChain = daosByChain[chainId] || []
+    const daosOnChain: DaoListItem[] = daosByChain[chainId as CHAIN_ID] || []
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useDaosWithClankerTokens({
       chainId,
-      daoAddresses: daosOnChain.map((dao) => dao.address),
+      daoAddresses: daosOnChain.map((dao: DaoListItem) => dao.address),
       enabled: actionType === 'post' && daosOnChain.length > 0,
     })
   })
