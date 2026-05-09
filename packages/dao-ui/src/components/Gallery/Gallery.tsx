@@ -127,6 +127,7 @@ const MintWidgetModal: React.FC<MintWidgetModalProps> = ({
           editionSize={drop.editionSize}
           maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
           onMintSuccess={handleCloseModal}
+          unstyledContainer
         />
       </Box>
     </AnimatedModal>

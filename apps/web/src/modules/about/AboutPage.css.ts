@@ -1561,11 +1561,14 @@ globalStyle(`html[data-theme-mode="dark"] ${page} :is(${heroHighlightDot})`, {
   background: theme.colors.text1,
 })
 
-globalStyle(`html[data-theme-mode="dark"] ${page} ${aboutCtaButton}:not([disabled]):hover`, {
-  borderColor: theme.colors.focusRing,
-  backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 30%, ${theme.colors.background1})`,
-  color: theme.colors.text1,
-})
+globalStyle(
+  `html[data-theme-mode="dark"] ${page} ${aboutCtaButton}:not([disabled]):hover`,
+  {
+    borderColor: theme.colors.focusRing,
+    backgroundColor: `color-mix(in srgb, ${theme.colors.focusRing} 30%, ${theme.colors.background1})`,
+    color: theme.colors.text1,
+  }
+)
 
 globalStyle(
   `html[data-theme-mode="dark"] ${page} ${aboutCtaButton}.zord-button-primary:not([disabled]):hover`,
@@ -1580,12 +1583,9 @@ globalStyle(`html[data-theme-mode="dark"] ${page} :is(${daoMiniCard}, ${stepCard
   background: theme.colors.background2,
 })
 
-globalStyle(
-  `html[data-theme-mode="dark"] ${page} :is(${coiningPreviewTitle})`,
-  {
-    color: theme.colors.background1,
-  }
-)
+globalStyle(`html[data-theme-mode="dark"] ${page} :is(${coiningPreviewTitle})`, {
+  color: theme.colors.background1,
+})
 
 globalStyle(`html[data-theme-mode="dark"] ${logoMarqueeTrack}::before`, {
   background:

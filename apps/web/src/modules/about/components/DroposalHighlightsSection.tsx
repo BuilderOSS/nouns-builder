@@ -89,48 +89,48 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
           const chainLogoSrc = getChainLogoSrc(proposal.category)
 
           return (
-          <Link
-            aria-label={`${linkLabel}: ${proposal.title}`}
-            className={droposalCard}
-            href={proposal.href}
-            key={proposal.id}
-          >
-            <Box>
-              <Box className={droposalMeta}>
-                <Text className={`${badge} ${daoBadge}`}>{proposal.dao}</Text>
-                {showStatusBadge ? (
-                  <Text
-                    className={statusBadge}
-                    style={statusStyleByType[proposal.status]}
-                  >
-                    {proposal.status}
-                  </Text>
-                ) : null}
-                {chainLogoSrc ? (
-                  <Box className={daoChainBadge} title={proposal.category}>
-                    <Box
-                      as="img"
-                      alt={`${proposal.category} logo`}
-                      className={daoChainBadgeImage}
-                      src={chainLogoSrc}
-                    />
-                  </Box>
-                ) : (
-                  <Text className={mutedText}>{proposal.category}</Text>
-                )}
+            <Link
+              aria-label={`${linkLabel}: ${proposal.title}`}
+              className={droposalCard}
+              href={proposal.href}
+              key={proposal.id}
+            >
+              <Box>
+                <Box className={droposalMeta}>
+                  <Text className={`${badge} ${daoBadge}`}>{proposal.dao}</Text>
+                  {showStatusBadge ? (
+                    <Text
+                      className={statusBadge}
+                      style={statusStyleByType[proposal.status]}
+                    >
+                      {proposal.status}
+                    </Text>
+                  ) : null}
+                  {chainLogoSrc ? (
+                    <Box className={daoChainBadge} title={proposal.category}>
+                      <Box
+                        as="img"
+                        alt={`${proposal.category} logo`}
+                        className={daoChainBadgeImage}
+                        src={chainLogoSrc}
+                      />
+                    </Box>
+                  ) : (
+                    <Text className={mutedText}>{proposal.category}</Text>
+                  )}
+                </Box>
+                <Text as="h3" className={droposalTitle} mt="x3">
+                  {proposal.title}
+                </Text>
+                <Text className={droposalSummary} mt="x2">
+                  {proposal.summary}
+                </Text>
               </Box>
-              <Text as="h3" className={droposalTitle} mt="x3">
-                {proposal.title}
-              </Text>
-              <Text className={droposalSummary} mt="x2">
-                {proposal.summary}
-              </Text>
-            </Box>
 
-            <Box className={droposalAside}>
-              <Text className={droposalTitle}>{proposal.amount}</Text>
-            </Box>
-          </Link>
+              <Box className={droposalAside}>
+                <Text className={droposalTitle}>{proposal.amount}</Text>
+              </Box>
+            </Link>
           )
         })}
       </Box>

@@ -17,6 +17,7 @@ import {
   quantityInputWrapper,
   successMessage,
   widgetContainer,
+  widgetContainerUnstyled,
 } from './DropMintWidget.css'
 
 export interface DropMintWidgetProps {
@@ -32,6 +33,7 @@ export interface DropMintWidgetProps {
   editionSize?: string
   maxPerAddress?: number
   onMintSuccess?: (txHash: string) => void
+  unstyledContainer?: boolean
 }
 
 export const DropMintWidget = ({
@@ -47,6 +49,7 @@ export const DropMintWidget = ({
   // editionSize,
   maxPerAddress,
   onMintSuccess,
+  unstyledContainer = false,
 }: DropMintWidgetProps) => {
   const [quantity, setQuantity] = useState(1)
   const [comment, setComment] = useState('')
@@ -119,7 +122,10 @@ export const DropMintWidget = ({
   }
 
   return (
-    <Stack gap="x4" className={widgetContainer}>
+    <Stack
+      gap="x4"
+      className={unstyledContainer ? widgetContainerUnstyled : widgetContainer}
+    >
       {/* Price */}
       <Box>
         <Text variant="label-sm" color="text3">
@@ -170,15 +176,18 @@ export const DropMintWidget = ({
               Quantity
             </Text>
             <Box className={quantityInputWrapper}>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={decrementQuantity}
-                disabled={quantity <= 1}
-                className={quantityButton}
-              >
-                -
-              </Button>
+              {quantity > 1 ? (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={decrementQuantity}
+                  className={quantityButton}
+                >
+                  -
+                </Button>
+              ) : (
+                <Box className={quantityButton} />
+              )}
               <Input
                 type="number"
                 min="1"
@@ -188,7 +197,7 @@ export const DropMintWidget = ({
                 className={mintInput}
               />
               <Button
-                variant="ghost"
+                variant="primary"
                 size="sm"
                 onClick={incrementQuantity}
                 disabled={maxPerAddress ? quantity >= maxPerAddress : false}

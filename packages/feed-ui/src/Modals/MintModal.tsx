@@ -74,6 +74,7 @@ export const MintModal: React.FC<MintModalProps> = ({
           editionSize={editionSize}
           maxPerAddress={maxPerAddress}
           onMintSuccess={onSuccessMint}
+          unstyledContainer
         />
       </Stack>
     </AnimatedModal>

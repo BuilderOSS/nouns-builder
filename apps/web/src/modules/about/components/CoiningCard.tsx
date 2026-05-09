@@ -55,7 +55,6 @@ export const CoiningCard: React.FC<CoiningCardProps> = ({ item }) => {
           By {item.creator} for {item.dao}
         </Text>
       </Box>
-
     </Link>
   )
 }

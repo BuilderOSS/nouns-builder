@@ -56,7 +56,7 @@ const CommentCard: React.FC<{
           nameStyle={{ fontSize: '16px' }}
           mobileTapBehavior="toggle"
         />
-        <Text variant="label-sm" color="text4">
+        <Text variant="label-sm" color="text3">
           {timeAgo}
         </Text>
       </Box>

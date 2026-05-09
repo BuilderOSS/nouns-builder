@@ -38,10 +38,22 @@ export const AboutFinalCta: React.FC = () => {
         </Box>
 
         <Box className={finalActions}>
-          <Button as={Link} className={aboutCtaButton} href="/create" pill variant="primary">
+          <Button
+            as={Link}
+            className={aboutCtaButton}
+            href="/create"
+            pill
+            variant="primary"
+          >
             Launch your DAO
           </Button>
-          <Button as={Link} className={aboutCtaButton} href="/explore" pill variant="outline">
+          <Button
+            as={Link}
+            className={aboutCtaButton}
+            href="/explore"
+            pill
+            variant="outline"
+          >
             Explore the ecosystem
           </Button>
           <Button

@@ -3,9 +3,9 @@ import Link from 'next/link'
 import React from 'react'
 
 import {
+  aboutCtaButton,
   aboutDarkOnly,
   aboutLightOnly,
-  aboutCtaButton,
   hero,
   heroActions,
   heroCopy,
@@ -65,7 +65,13 @@ export const AboutHero: React.FC<AboutHeroProps> = ({ heroHighlights, heroLogos 
         </Box>
 
         <Box className={heroActions}>
-          <Button as={Link} className={aboutCtaButton} href="/create" pill variant="primary">
+          <Button
+            as={Link}
+            className={aboutCtaButton}
+            href="/create"
+            pill
+            variant="primary"
+          >
             Launch a DAO
           </Button>
 
