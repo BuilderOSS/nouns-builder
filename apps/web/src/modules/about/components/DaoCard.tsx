@@ -4,7 +4,6 @@ import Link from 'next/link'
 import React from 'react'
 
 import {
-  cardLink,
   daoAvatar,
   daoAvatarImage,
   daoAvatarSurfaceA,
@@ -74,10 +73,6 @@ export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
         <Text className={daoSignalLabel}>{dao.signalLabel}</Text>
         <Text className={daoSignalValue}>{dao.signalValue}</Text>
       </Box>
-
-      <Text as="span" className={cardLink}>
-        View DAO
-      </Text>
     </Link>
   )
 }

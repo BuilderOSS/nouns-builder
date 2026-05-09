@@ -6,7 +6,6 @@ import React from 'react'
 
 import {
   badge,
-  cardLink,
   daoBadge,
   daoChainBadge,
   daoChainBadgeImage,
@@ -103,9 +102,6 @@ export const DroposalHighlightsSection: React.FC<DroposalHighlightsSectionProps>
 
             <Box className={droposalAside}>
               <Text className={droposalTitle}>{proposal.amount}</Text>
-              <Text as="span" className={cardLink}>
-                {linkLabel}
-              </Text>
             </Box>
           </Link>
         ))}

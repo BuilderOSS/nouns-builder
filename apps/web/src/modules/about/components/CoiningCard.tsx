@@ -3,7 +3,6 @@ import Link from 'next/link'
 import React from 'react'
 
 import {
-  cardLink,
   coiningCard,
   coiningMeta,
   coiningNetworkBadge,
@@ -55,9 +54,6 @@ export const CoiningCard: React.FC<CoiningCardProps> = ({ item }) => {
         </Text>
       </Box>
 
-      <Text as="span" className={cardLink}>
-        View post
-      </Text>
     </Link>
   )
 }
