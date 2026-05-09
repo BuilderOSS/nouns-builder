@@ -1,3 +1,5 @@
+import removeMd from 'remove-markdown'
+
 export const getChainLogoSrc = (chainName?: string | null) => {
   const normalized = chainName?.trim().toLowerCase()
 
@@ -14,3 +16,8 @@ export const getChainLogoSrc = (chainName?: string | null) => {
       return null
   }
 }
+
+export const toPlainText = (value?: string | null) =>
+  removeMd(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()

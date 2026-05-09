@@ -1,4 +1,4 @@
-import { FallbackImage, MarkdownDisplay } from '@buildeross/ui'
+import { FallbackImage } from '@buildeross/ui'
 import { Box, Flex, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
@@ -22,12 +22,15 @@ import {
   daoTop,
 } from '../AboutPage.css'
 import { AboutDao } from '../types'
+import { toPlainText } from '../utils'
 
 type DaoCardProps = {
   dao: AboutDao
 }
 
 export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
+  const plainDescription = toPlainText(dao.description)
+
   const avatarSurfaceClass = [
     daoAvatarSurfaceA,
     daoAvatarSurfaceB,
@@ -52,9 +55,7 @@ export const DaoCard: React.FC<DaoCardProps> = ({ dao }) => {
           </Box>
           <Box>
             <Text className={daoName}>{dao.name}</Text>
-            <Box className={daoDescription}>
-              <MarkdownDisplay disableLinks>{dao.description}</MarkdownDisplay>
-            </Box>
+            <Text className={daoDescription}>{plainDescription}</Text>
           </Box>
         </Flex>
         {dao.chainIcon ? (

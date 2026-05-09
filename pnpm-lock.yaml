@@ -18,6 +18,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      remove-markdown:
+        specifier: ^0.6.3
+        version: 0.6.3
     devDependencies:
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
@@ -236,6 +240,9 @@ importers:
       react-mde:
         specifier: ^11.5.0
         version: 11.5.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      remove-markdown:
+        specifier: ^0.6.3
+        version: 0.6.3
       sablier:
         specifier: ^2.0.1
         version: 2.0.1(@coral-xyz/anchor@0.30.1(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10))(@solana/web3.js@1.98.4(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10))(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))
@@ -10640,6 +10647,9 @@ packages:
 
   remedial@1.0.8:
     resolution: {integrity: sha512-/62tYiOe6DzS5BqVsNpH/nkGlX45C/Sp6V+NtiN6JQNS1Viay7cWkazmRkrQrdFj2eshDe96SIQNIoMxqhzBOg==}
+
+  remove-markdown@0.6.3:
+    resolution: {integrity: sha512-Qvp2p0Q1irE7AaJO7QemJe04HdObHylJrG+q4hszvPlYp7q4EvfINpEIaIEFdB+3XTDp1h6fiyT60ae00gmRow==}
 
   remove-trailing-separator@1.1.0:
     resolution: {integrity: sha512-/hS+Y0u3aOfIETiaiirUFwDBDzmXPvO+jAfKTitUngIPzdKc6Z0LoFjM/CK5PL4C+eKwHohlHAb6H0VFfmmUsw==}
@@ -24582,6 +24592,8 @@ snapshots:
       unified: 11.0.5
 
   remedial@1.0.8: {}
+
+  remove-markdown@0.6.3: {}
 
   remove-trailing-separator@1.1.0: {}
 

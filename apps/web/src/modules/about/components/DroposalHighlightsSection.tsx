@@ -25,16 +25,40 @@ import { SectionIntro } from './SectionIntro'
 
 const statusStyleByType: Record<
   DroposalHighlight['status'],
-  { borderColor: string; color: string }
+  { borderColor: string; color: string; backgroundColor: string }
 > = {
-  Active: getProposalStateColorStyle(ProposalState.Active),
-  Succeeded: getProposalStateColorStyle(ProposalState.Succeeded),
-  Queued: getProposalStateColorStyle(ProposalState.Queued),
-  Defeated: getProposalStateColorStyle(ProposalState.Defeated),
-  Executed: getProposalStateColorStyle(ProposalState.Executed),
-  Trending: getProposalStateColorStyle(ProposalState.Defeated),
-  Live: getProposalStateColorStyle(ProposalState.Succeeded),
-  Recent: getProposalStateColorStyle(ProposalState.Active),
+  Active: {
+    ...getProposalStateColorStyle(ProposalState.Active),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Active).borderColor} 12%, transparent)`,
+  },
+  Succeeded: {
+    ...getProposalStateColorStyle(ProposalState.Succeeded),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Succeeded).borderColor} 12%, transparent)`,
+  },
+  Queued: {
+    ...getProposalStateColorStyle(ProposalState.Queued),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Queued).borderColor} 12%, transparent)`,
+  },
+  Defeated: {
+    ...getProposalStateColorStyle(ProposalState.Defeated),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Defeated).borderColor} 12%, transparent)`,
+  },
+  Executed: {
+    ...getProposalStateColorStyle(ProposalState.Executed),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Executed).borderColor} 12%, transparent)`,
+  },
+  Trending: {
+    ...getProposalStateColorStyle(ProposalState.Defeated),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Defeated).borderColor} 12%, transparent)`,
+  },
+  Live: {
+    ...getProposalStateColorStyle(ProposalState.Succeeded),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Succeeded).borderColor} 12%, transparent)`,
+  },
+  Recent: {
+    ...getProposalStateColorStyle(ProposalState.Active),
+    backgroundColor: `color-mix(in srgb, ${getProposalStateColorStyle(ProposalState.Active).borderColor} 12%, transparent)`,
+  },
 }
 
 type DroposalHighlightsSectionProps = {

@@ -767,7 +767,7 @@ export const daoIdentity = style({
 export const daoAvatar = style({
   width: '52px',
   height: '52px',
-  borderRadius: '18px',
+  borderRadius: '999px',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -798,6 +798,7 @@ export const daoAvatarSurfaceD = style({
 export const daoAvatarImage = style({
   width: '100%',
   height: '100%',
+  borderRadius: 'inherit',
   objectFit: 'cover',
   display: 'block',
 })
@@ -811,6 +812,7 @@ export const daoName = style({
 })
 
 export const daoDescription = style({
+  marginTop: '6px',
   fontSize: '14px',
   lineHeight: 1.6,
   color: theme.colors.text3,
