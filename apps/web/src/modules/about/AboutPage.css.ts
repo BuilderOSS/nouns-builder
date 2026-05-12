@@ -1277,6 +1277,10 @@ export const valueCard = style({
   background: theme.colors.background1,
   padding: '20px',
   boxShadow: 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'stretch',
+  justifyContent: 'space-between',
 })
 
 export const compactValueCard = style({
@@ -1581,6 +1585,10 @@ globalStyle(
 
 globalStyle(`html[data-theme-mode="dark"] ${page} :is(${daoMiniCard}, ${stepCard})`, {
   background: theme.colors.background2,
+})
+
+globalStyle(`html[data-theme-mode="dark"] ${page} ${heroPanel}`, {
+  background: theme.colors.background1,
 })
 
 globalStyle(`html[data-theme-mode="dark"] ${page} :is(${coiningPreviewTitle})`, {
