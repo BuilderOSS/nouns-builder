@@ -604,7 +604,7 @@ export const StreamItem = ({
                 >
                   <Button variant="secondary" size="sm">
                     View Stream As Safe App
-                    <Icon id="arrowTopRight" />
+                    <Icon id="arrow-top-right" />
                   </Button>
                 </a>
               ) : (
@@ -616,7 +616,7 @@ export const StreamItem = ({
                 >
                   <Button variant="secondary" size="sm">
                     View Stream on Sablier
-                    <Icon id="arrowTopRight" />
+                    <Icon id="arrow-top-right" />
                   </Button>
                 </a>
               )}

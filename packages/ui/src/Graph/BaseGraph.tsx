@@ -1,4 +1,4 @@
-import { Box, color } from '@buildeross/zord'
+import { Box, vars } from '@buildeross/zord'
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { graphOnLoadStyles, svgBox } from './Graph.css'
@@ -39,7 +39,7 @@ export const BaseGraph: React.FC<BaseGraphProps> = ({
   width = 500,
   data,
   renderTooltip,
-  strokeColor = color.accent,
+  strokeColor = vars.color.text1,
   animationKey,
 }) => {
   const [visibleIndex, setVisibleIndex] = useState(0)

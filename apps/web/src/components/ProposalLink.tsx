@@ -35,7 +35,7 @@ export const ProposalLink = ({ proposal, chainId }: ProposalLinkProps) => {
           style={{ fontSize: '14px' }}
         >
           Proposal {proposal.proposalNumber}: {proposal.title}
-          <Icon id="arrowTopRight" />
+          <Icon id="arrow-top-right" />
         </Button>
       </Link>
     </Box>

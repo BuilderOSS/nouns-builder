@@ -14,18 +14,20 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({
   disableLinks = false,
 }) => {
   return (
-    <ReactMarkdown
-      rehypePlugins={[rehypeRaw, rehypeSanitize]}
-      remarkPlugins={[remarkGfm]}
-      components={
-        disableLinks
-          ? {
-              a: (props) => <span>{props.children}</span>,
-            }
-          : undefined
-      }
-    >
-      {children}
-    </ReactMarkdown>
+    <div className="markdown-display-wrapper">
+      <ReactMarkdown
+        rehypePlugins={[rehypeRaw, rehypeSanitize]}
+        remarkPlugins={[remarkGfm]}
+        components={
+          disableLinks
+            ? {
+                a: (props) => <span>{props.children}</span>,
+              }
+            : undefined
+        }
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
   )
 }

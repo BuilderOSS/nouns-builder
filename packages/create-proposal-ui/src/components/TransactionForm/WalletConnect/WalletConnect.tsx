@@ -118,7 +118,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
             ) : (
               <div className={styles.statusContainer}>
                 <Icon
-                  id="checkInCircle"
+                  id="check-in-circle"
                   size="lg"
                   className={styles.successIcon}
                   color="positive"
@@ -188,7 +188,7 @@ const WalletConnectForm = ({ formik, onTransactionReceived }: WalletConnectFormP
                 style={{ height: 32 }}
               />
             ) : (
-              <Icon id="walletConnect" size="lg" />
+              <Icon id="wallet-connect" size="lg" />
             )}
           </div>
           <div>{renderConnectionStatus}</div>

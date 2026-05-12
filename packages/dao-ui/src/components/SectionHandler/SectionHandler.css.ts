@@ -52,7 +52,7 @@ export const sectionTabVariants = styleVariants({
           height: 1,
           width: '100%',
           marginTop: '16px',
-          backgroundColor: '#000',
+          backgroundColor: vars.color.text1,
         },
       },
     },

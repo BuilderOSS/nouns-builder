@@ -58,7 +58,7 @@ export const ProposalNavigation: React.FC<ProposalNavigationProps> = ({
         style={{ background: 'none', border: 'none', padding: 0, flexShrink: 0 }}
       >
         <Flex direction={'row'} align={'center'} gap={'x2'}>
-          <Icon id="arrowLeft" />
+          <Icon id="arrow-left" />
 
           {daoImage ? (
             <Box flexShrink={0}>

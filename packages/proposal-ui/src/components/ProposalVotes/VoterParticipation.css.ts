@@ -1,9 +1,9 @@
-import { atoms } from '@buildeross/zord'
-import { style } from '@vanilla-extract/css'
+import { atoms, vars } from '@buildeross/zord'
+import { globalStyle, style } from '@vanilla-extract/css'
 
 export const VoterParticipationVariants = {
   positive: atoms({ color: 'positive' }),
-  neutral: style({ color: '#FF8E38' }),
+  neutral: style({ color: vars.color.warning }),
 }
 
 export const votePlacardReason = style({
@@ -13,4 +13,9 @@ export const votePlacardReason = style({
       gridColumn: '2 / span 6',
     },
   },
+})
+
+globalStyle(`html[data-theme-mode='dark'] ${votePlacardReason} > *`, {
+  backgroundColor: `${vars.color.background2} !important`,
+  color: `${vars.color.text1} !important`,
 })

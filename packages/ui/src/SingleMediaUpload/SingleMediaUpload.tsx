@@ -41,6 +41,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   const [isUploading, setIsUploading] = React.useState<boolean>(false)
   const [fileName, setFileName] = React.useState<string | undefined>()
   const [progress, setProgress] = React.useState<number>(0)
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     setIsMounted(true)
@@ -102,14 +103,18 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   return (
     <Flex mb={'x8'}>
       <Stack width={'100%'}>
-        <label className={defaultInputLabelStyle}>{inputLabel}</label>
+        <label className={defaultInputLabelStyle} htmlFor={`file-upload-${id}`}>
+          {inputLabel}
+        </label>
         <Flex
-          as={'label'}
+          as={'button'}
+          type="button"
           direction={'column'}
           position={'relative'}
           justify={'center'}
           className={singleMediaUploadWrapper}
-          htmlFor={`file-upload-${id}`}
+          onClick={() => fileInputRef.current?.click()}
+          aria-label={typeof inputLabel === 'string' ? inputLabel : 'Upload media'}
         >
           {!isUploading && isMounted && !value && (
             <Flex mx="x4" align={'center'} justify={'space-between'}>
@@ -146,19 +151,21 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
               </Text>
             </Flex>
           )}
-
-          <input
-            className={defaultUploadStyle}
-            id={`file-upload-${id}`}
-            data-testid={`file-upload-${id}`}
-            name="file"
-            type="file"
-            multiple={false}
-            onChange={(event) => {
-              handleFileUpload(event.currentTarget.files)
-            }}
-          />
         </Flex>
+
+        <input
+          className={defaultUploadStyle}
+          id={`file-upload-${id}`}
+          data-testid={`file-upload-${id}`}
+          name="file"
+          type="file"
+          accept={acceptableMIME.join(',')}
+          ref={fileInputRef}
+          multiple={false}
+          onChange={(event) => {
+            handleFileUpload(event.currentTarget.files)
+          }}
+        />
         {helperText && !uploadMediaError && (
           <Box className={defaultHelperTextStyle}>{helperText}</Box>
         )}

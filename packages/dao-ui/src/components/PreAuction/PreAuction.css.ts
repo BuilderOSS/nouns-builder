@@ -38,11 +38,11 @@ export const preAuctionButtonVariants = styleVariants({
       paddingLeft: 0,
       paddingRight: 0,
       background: vars.color.background2,
-      color: '#000',
+      color: vars.color.text1,
       selectors: {
         '&:hover': {
           opacity: 1,
-          backgroundColor: '#cdc9c9!important',
+          backgroundColor: `${vars.color.neutralHover}!important`,
         },
       },
     },
@@ -55,7 +55,7 @@ export const preAuctionWrapper = style({
 })
 
 export const preAuctionHelperText = style({
-  color: '#808080',
+  color: vars.color.text3,
   fontSize: 16,
   lineHeight: '24px',
 })
@@ -78,11 +78,11 @@ export const reserveInfoBox = style({
 export const reserveCount = style({
   fontSize: 24,
   fontWeight: 600,
-  color: '#000',
+  color: vars.color.text1,
   marginBottom: 4,
 })
 
 export const reserveLabel = style({
   fontSize: 14,
-  color: '#808080',
+  color: vars.color.text3,
 })

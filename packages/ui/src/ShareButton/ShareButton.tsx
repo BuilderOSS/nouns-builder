@@ -77,7 +77,7 @@ const ShareButton: React.FC<ShareButtonProps> = ({
             transition={{ duration: 0.2 }}
             exit={{ scale: 0 }}
           >
-            <Icon id="checkInCircle" size={iconSize} />
+            <Icon id="check-in-circle" size={iconSize} />
           </motion.div>
         )}
       </Button>

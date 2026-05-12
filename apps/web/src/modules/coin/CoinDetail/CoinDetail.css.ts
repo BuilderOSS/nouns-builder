@@ -41,6 +41,9 @@ export const coinInfoPanel = style([
     p: 'x6',
     borderRadius: 'curved',
     backgroundColor: 'background2',
+    borderColor: 'border',
+    borderWidth: 'thin',
+    borderStyle: 'solid',
   }),
 ])
 
@@ -49,6 +52,9 @@ export const swapPanel = style([
     p: 'x6',
     borderRadius: 'curved',
     backgroundColor: 'background2',
+    borderColor: 'border',
+    borderWidth: 'thin',
+    borderStyle: 'solid',
   }),
   {
     '@media': {

@@ -44,10 +44,11 @@ export const TransactionAiSummary: React.FC<{
             Regenerate
           </Button>
         )}
-        {isGeneratingSummary && <Text as="span">Generating summary...</Text>}
-        {!isGeneratingSummary && aiSummary && <Text as="span">{aiSummary}</Text>}
+        {isGeneratingSummary && <Text as="span"> Generating summary...</Text>}
+        {!isGeneratingSummary && aiSummary && <Text as="span"> {aiSummary}</Text>}
         {!isGeneratingSummary && !aiSummary && errorSummary && (
           <Text color="negative" as="span">
+            {' '}
             Error generating summary: {getErrorMessage(errorSummary)}
           </Text>
         )}

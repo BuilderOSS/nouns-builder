@@ -1,4 +1,4 @@
-import { atoms, theme } from '@buildeross/zord'
+import { atoms, theme, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const defaultBackButton = style([
@@ -18,16 +18,16 @@ export const defaultBackButtonVariants = styleVariants({
   default: [defaultBackButton],
   transaction: [
     {
-      background: '#f2f2f2',
+      background: vars.color.background2,
       boxSizing: 'border-box',
       width: 'auto',
       height: 40,
       borderRadius: '8px',
-      color: '#B3B3B3',
+      color: vars.color.text4,
       selectors: {
         '&:hover': {
           cursor: 'pointer',
-          color: '#000',
+          color: vars.color.text1,
         },
       },
     },

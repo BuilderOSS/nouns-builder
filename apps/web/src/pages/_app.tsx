@@ -12,12 +12,15 @@ import '@fontsource/londrina-solid'
 import '@rainbow-me/rainbowkit/styles.css'
 import 'src/styles/globals.css'
 import 'src/styles/styles.css'
-import 'flatpickr/dist/themes/light.css'
+import 'flatpickr/dist/flatpickr.css'
+import 'src/styles/flatpickr-theme.css'
 import 'react-mde/lib/styles/css/react-mde-all.css'
+import 'src/styles/react-mde-theme.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
+import { vars } from '@buildeross/zord'
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { NextPage } from 'next'
@@ -28,6 +31,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
+import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { WagmiProvider } from 'wagmi'
@@ -62,7 +66,7 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
         <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
           <SWRConfig value={{ fallback }}>
             <NextNProgress
-              color={'#008BFF'}
+              color={vars.color.primary}
               startPosition={0.125}
               stopDelayMs={200}
               height={2}
@@ -70,11 +74,13 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
               options={{ showSpinner: false }}
             />
             <FrameProvider>
-              <LinksProvider>
-                <LinkComponentProvider LinkComponent={Link}>
-                  {getLayout(<Component {...pageProps} err={err} />)}
-                </LinkComponentProvider>
-              </LinksProvider>
+              <AppThemeProvider>
+                <LinksProvider>
+                  <LinkComponentProvider LinkComponent={Link}>
+                    {getLayout(<Component {...pageProps} err={err} />)}
+                  </LinkComponentProvider>
+                </LinksProvider>
+              </AppThemeProvider>
             </FrameProvider>
           </SWRConfig>
           <NetworkController.Mainnet>

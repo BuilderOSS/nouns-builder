@@ -22,6 +22,7 @@ export const color = {
   accentHover: '#282828',
   accentActive: '#333333',
   accentDisabled: '#505050',
+  focusRing: '#0085FF',
   onAccent: '#FFFFFF',
   onAccentDisabled: '#ABABAB',
 
@@ -59,6 +60,8 @@ export const color = {
   warningDisabled: '#F9DEB1',
   onWarning: '#FFFFFF',
   onWarningDisabled: '#DDB777',
+
+  warningStrong: '#EC714B',
 }
 
 // export const color = {

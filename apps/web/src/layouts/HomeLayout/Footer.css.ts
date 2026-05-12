@@ -1,12 +1,30 @@
+import { vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
+
+const darkFooterSurfaceHover = vars.color.background2
+const darkFooterBorder = vars.color.border
+
+export const homeFooterWrapper = style({
+  background: vars.color.onNeutral,
+})
 
 export const getStartedButton = style({
   fontSize: 26,
-  background: 'rgba(255,255,255,.3)',
+  background: vars.color.background1,
+  color: vars.color.text1,
+  border: `1px solid ${vars.color.border}`,
   selectors: {
+    'html[data-theme-mode="dark"] &': {
+      background: vars.color.background1,
+      color: vars.color.text1,
+      borderColor: vars.color.background1,
+    },
     '&:hover': {
-      background: 'rgba(255,255,255,.35)',
+      background: vars.color.neutralHover,
       cursor: 'pointer',
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: vars.color.neutralHover,
     },
   },
   '@media': {
@@ -20,9 +38,27 @@ export const getStartedButton = style({
 export const homeFooterLinks = style({
   selectors: {
     '&:hover': {
-      color: '#fff',
+      color: 'inherit',
       opacity: 0.8,
       cursor: 'pointer',
+    },
+  },
+})
+
+export const homeFooterSocialIcon = style({
+  transition: 'background-color 0.1s ease-in-out',
+  selectors: {
+    '&:hover': {
+      background: vars.color.neutralHover,
+      cursor: 'pointer',
+    },
+    'html[data-theme-mode="dark"] &': {
+      background: vars.color.background1,
+      color: vars.color.text1,
+      fill: vars.color.text1,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      background: darkFooterSurfaceHover,
     },
   },
 })
@@ -65,8 +101,13 @@ export const footerRightWrapper = style({
       alignItems: 'center',
       paddingTop: 32,
       marginTop: 32,
-      borderTop: '2px solid #333333',
+      borderTop: `2px solid ${vars.color.border}`,
       paddingRight: 0,
+    },
+  },
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: darkFooterBorder,
     },
   },
 })

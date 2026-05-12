@@ -5,7 +5,12 @@ import dayjs from 'dayjs'
 import React, { useCallback } from 'react'
 
 import { Tile } from './Tile'
-import { propDataGrid, voteProgress, voteProgressVariants } from './Tile.css'
+import {
+  propDataGrid,
+  proposalTileHover,
+  voteProgress,
+  voteProgressVariants,
+} from './Tile.css'
 
 export type ProposalDetailsGridProps = {
   proposal: Proposal
@@ -102,6 +107,7 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
             subtitle={`#${snapshotBlockNumber}`}
             subtext={'Taken at block'}
             icon="question"
+            className={proposalTileHover}
           />
         </a>
       </Grid>

@@ -264,11 +264,7 @@ export const LaunchEconomicsPreview: React.FC<LaunchEconomicsPreviewProps> = ({
 
   if (!economics) {
     return (
-      <Box
-        p="x4"
-        borderRadius="curved"
-        style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)' }}
-      >
+      <Box p="x4" borderRadius="curved" backgroundColor="negativeDisabled">
         <Text variant="paragraph-sm" color="negative">
           Unable to calculate launch economics. Please check your pool configuration.
         </Text>

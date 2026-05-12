@@ -1,4 +1,4 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const marqueeButton = style({
@@ -6,8 +6,8 @@ export const marqueeButton = style({
   width: 280,
   selectors: {
     '&:hover': {
-      color: '#fff',
-      backgroundColor: 'rgba(0,0,0,.8)',
+      color: vars.color.onAccent,
+      backgroundColor: vars.color.accentHover,
     },
   },
   '@media': {

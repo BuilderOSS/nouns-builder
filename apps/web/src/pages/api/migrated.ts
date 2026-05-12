@@ -14,7 +14,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   const data = await Promise.all(
     L2_CHAINS.map((chainId) => {
-      const deployer = L2_MIGRATION_DEPLOYER[chainId]
+      const deployer =
+        L2_MIGRATION_DEPLOYER[chainId as keyof typeof L2_MIGRATION_DEPLOYER]
 
       if (deployer === zeroAddress) return []
       return readContract(serverConfig, {

@@ -87,6 +87,7 @@ export const DaoCard = ({
           aspectRatio={1 / 1}
           position="relative"
           overflow={'hidden'}
+          borderRadius={'curved'}
           className={daoImage}
         >
           <FallbackImage
@@ -176,11 +177,13 @@ export const DaoCard = ({
           onClick={onFavoriteToggle}
           disabled={favoriteDisabled}
         >
-          <img
-            src={isFavorited ? '/filled.svg' : '/outlined.svg'}
-            alt=""
+          <span
             aria-hidden="true"
             className={favoriteIcon}
+            style={{
+              WebkitMaskImage: `url(${isFavorited ? '/filled.svg' : '/outlined.svg'})`,
+              maskImage: `url(${isFavorited ? '/filled.svg' : '/outlined.svg'})`,
+            }}
           />
         </button>
       ) : null}

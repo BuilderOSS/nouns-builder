@@ -1,62 +1,23 @@
-import { AnimatedModal } from '@buildeross/ui/Modal'
-import { Playground } from '@buildeross/ui/Playground'
-import { flatten } from '@buildeross/utils/helpers'
-import { Button } from '@buildeross/zord'
-import React, { BaseSyntheticEvent } from 'react'
+import { Box, Flex } from '@buildeross/zord'
 
 import { useFormStore } from '../../stores'
 
 export const PreviewArtwork: React.FC = () => {
   const { ipfsUpload, orderedLayers } = useFormStore()
 
-  const images = React.useMemo(() => {
-    if (!ipfsUpload) return
-
-    const entries = Object.entries(ipfsUpload)
-    const uploads = entries.reduce((acc: any[] = [], cv) => {
-      acc.push(cv[1])
-
-      return acc
-    }, [])
-
-    return uploads.reduce((acc: any[] = [], cv) => {
-      if (!cv || typeof cv !== 'object') return
-      const image = flatten(cv)
-      acc.push({
-        cid: image.cid,
-        name: image.name,
-        trait: image.trait,
-        uri: image.uri,
-        url: image.url,
-        content: cv.content,
-      })
-
-      return acc
-    }, [])
-  }, [ipfsUpload])
-
-  const [isOpenModal, setIsOpenModal] = React.useState<boolean>(false)
+  const filesCount = ipfsUpload ? ipfsUpload.length : 0
+  const traitCategoriesCount = orderedLayers?.length || 0
+  const totalTraitOptions = orderedLayers
+    ? orderedLayers.reduce((acc, layer) => {
+        return acc + (layer.properties?.length || 0)
+      }, 0)
+    : 0
 
   return (
-    <>
-      <Button
-        width="100%"
-        onClick={(e: BaseSyntheticEvent) => {
-          e.stopPropagation()
-          setIsOpenModal(true)
-        }}
-      >
-        Preview Artwork
-      </Button>
-      {images && orderedLayers && (
-        <AnimatedModal
-          open={isOpenModal}
-          close={() => setIsOpenModal(false)}
-          size={'large'}
-        >
-          <Playground images={images} orderedLayers={orderedLayers} />
-        </AnimatedModal>
-      )}
-    </>
+    <Flex direction="column" gap="x2">
+      <Box>{filesCount} PNG files</Box>
+      <Box>{traitCategoriesCount} trait categories</Box>
+      <Box>{totalTraitOptions} total trait options</Box>
+    </Flex>
   )
 }

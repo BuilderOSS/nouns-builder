@@ -1,12 +1,17 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
+import { WalletIdentity, WalletIdentityWithPreview } from '@buildeross/ui'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { Box, Flex, Icon, Text } from '@buildeross/zord'
-import React from 'react'
+import { Box, Flex, Icon, Text, vars } from '@buildeross/zord'
 
-export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
+export const BidCard = ({
+  bid,
+  walletPreview = true,
+}: {
+  bid: AuctionBidFragment
+  walletPreview?: boolean
+}) => {
   const { displayName, ensAvatar } = useEnsData(bid?.bidder)
   const resolvedDisplayName = displayName || walletSnippet(bid.bidder as `0x${string}`)
   const comment = bid.comment?.trim()
@@ -14,13 +19,23 @@ export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
   return (
     <Flex direction={'column'} my="x4" align="center">
       <Flex direction="row" width={'100%'} align="center" justify="space-between">
-        <WalletIdentityWithPreview
-          address={bid.bidder as `0x${string}`}
-          displayName={resolvedDisplayName}
-          avatarSrc={ensAvatar}
-          avatarSize="28"
-          mobileTapBehavior="toggle"
-        />
+        {walletPreview ? (
+          <WalletIdentityWithPreview
+            address={bid.bidder as `0x${string}`}
+            displayName={resolvedDisplayName}
+            avatarSrc={ensAvatar}
+            avatarSize="28"
+            mobileTapBehavior="toggle"
+          />
+        ) : (
+          <WalletIdentity
+            address={bid.bidder as `0x${string}`}
+            displayName={resolvedDisplayName}
+            avatarSrc={ensAvatar}
+            avatarSize="28"
+            asLink
+          />
+        )}
         <Flex direction="row" align="center">
           <Flex
             as="a"
@@ -49,7 +64,7 @@ export const BidCard = ({ bid }: { bid: AuctionBidFragment }) => {
       <Box
         mt="x2"
         style={{
-          borderBottom: '1px solid #B3B3B3',
+          borderBottom: `1px solid ${vars.color.text4}`,
           width: '100%',
           opacity: 0.5,
         }}

@@ -1,5 +1,5 @@
 import { useDaoMembership, useHasVoted, useVotes } from '@buildeross/hooks'
-import { SubmitVoteForm } from '@buildeross/proposal-ui'
+import { SubmitVoteForm, VoteLabel } from '@buildeross/proposal-ui'
 import {
   type ProposalVoteFragment,
   ProposalVoteSupport as Support,
@@ -33,25 +33,17 @@ const voteStyleMap: Record<
   [Support.Against]: {
     iconId: 'cross',
     iconColor: 'negative',
-    text: (
-      <span>
-        You voted <span style={{ color: '#E40003' }}>against</span>
-      </span>
-    ),
+    text: <VoteLabel voteType={Support.Against} />,
   },
   [Support.For]: {
     iconId: 'check',
     iconColor: 'positive',
-    text: (
-      <span>
-        You voted <span style={{ color: '#1CB687' }}>for</span>
-      </span>
-    ),
+    text: <VoteLabel voteType={Support.For} />,
   },
   [Support.Abstain]: {
     iconId: 'dash',
     iconColor: 'tertiary',
-    text: 'You abstained from voting',
+    text: <VoteLabel voteType={Support.Abstain} />,
   },
 }
 

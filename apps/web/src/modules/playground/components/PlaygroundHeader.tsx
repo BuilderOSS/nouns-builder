@@ -29,7 +29,7 @@ export const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
         <Flex gap="x4" align="center">
           <Button variant="secondary" onClick={onBack}>
             <Flex gap="x1" align="center">
-              <Icon id="arrowLeft" />
+              <Icon id="arrow-left" />
               <Text fontSize={16} display={{ '@initial': 'none', '@768': 'block' }}>
                 Back
               </Text>

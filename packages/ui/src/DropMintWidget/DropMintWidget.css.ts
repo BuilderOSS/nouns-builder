@@ -1,11 +1,21 @@
-import { atoms } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const widgetContainer = style([
   atoms({
     p: 'x6',
     borderRadius: 'phat',
-    backgroundColor: 'background2',
+    backgroundColor: 'background1',
+    borderColor: 'border',
+    borderStyle: 'solid',
+    borderWidth: 'thin',
+  }),
+])
+
+export const widgetContainerUnstyled = style([
+  atoms({
+    p: 'x0',
+    borderRadius: 'curved',
   }),
 ])
 
@@ -20,8 +30,8 @@ export const mintInputContainer = style([
 export const mintInput = style({
   fontSize: '1.125rem',
   fontWeight: 600,
-  border: '2px solid transparent',
-  backgroundColor: 'transparent',
+  border: `2px solid ${vars.color.background1}`,
+  backgroundColor: vars.color.background2,
   textAlign: 'center',
   width: '100%',
   flex: 1,
@@ -31,8 +41,12 @@ export const mintInput = style({
   selectors: {
     '&:focus': {
       outline: 'none',
-      borderColor: '#E6E6E6',
-      backgroundColor: 'white',
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background1,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${vars.color.focusRing}`,
+      outlineOffset: '2px',
     },
     '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
       WebkitAppearance: 'none',
@@ -46,7 +60,7 @@ export const mintInput = style({
 
 export const quantityInputWrapper = style([
   atoms({
-    backgroundColor: 'background1',
+    backgroundColor: 'transparent',
     borderRadius: 'curved',
     p: 'x2',
   }),
@@ -78,7 +92,10 @@ export const quantityButton = style({
   selectors: {
     '&:disabled': {
       cursor: 'not-allowed',
-      opacity: 0.4,
+      opacity: 1,
+      color: vars.color.text3,
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background1,
     },
   },
 })

@@ -1,4 +1,4 @@
-import { atoms, space, theme } from '@buildeross/zord'
+import { atoms, space, theme, vars } from '@buildeross/zord'
 import { globalStyle, style } from '@vanilla-extract/css'
 
 export const feedItemCard = style([
@@ -143,14 +143,14 @@ globalStyle(`${feedItemTextContent} > p`, {
 })
 
 globalStyle(`${feedItemTextContent} code`, {
-  backgroundColor: 'rgba(0, 0, 0, 0.17)',
+  backgroundColor: `color-mix(in srgb, ${vars.color.text1} 17%, transparent)`,
   padding: '0.2em 0.4em',
   borderRadius: '6px',
   fontFamily: 'monospace!important',
 })
 
 globalStyle(`${feedItemTextContent} pre`, {
-  backgroundColor: 'rgba(0, 0, 0, 0.17)',
+  backgroundColor: `color-mix(in srgb, ${vars.color.text1} 17%, transparent)`,
   padding: '1em',
   borderRadius: '6px',
   fontFamily: 'monospace!important',
@@ -166,9 +166,9 @@ globalStyle(`${feedItemTextContent} pre code`, {
 })
 
 globalStyle(`${feedItemTextContent} blockquote`, {
-  color: '#808080',
+  color: vars.color.text3,
   padding: '0 1em',
-  borderLeft: '0.25em solid #808080',
+  borderLeft: `0.25em solid ${vars.color.text3}`,
   margin: 0,
   marginBottom: 20,
 })

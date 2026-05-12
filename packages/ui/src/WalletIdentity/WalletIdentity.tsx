@@ -3,6 +3,8 @@ import { Flex, Text } from '@buildeross/zord'
 import { type ComponentProps, type CSSProperties } from 'react'
 
 import { Avatar, type AvatarProps } from '../Avatar'
+import { useLinks } from '../LinksProvider'
+import { LinkWrapper as Link } from '../LinkWrapper'
 
 export interface WalletIdentityProps {
   address: `0x${string}`
@@ -15,6 +17,7 @@ export interface WalletIdentityProps {
   nameStyle?: CSSProperties
   nameWeight?: ComponentProps<typeof Text>['fontWeight']
   gap?: ComponentProps<typeof Flex>['gap']
+  asLink?: boolean
 }
 
 export const WalletIdentity = ({
@@ -28,8 +31,10 @@ export const WalletIdentity = ({
   nameStyle,
   nameWeight = 'display',
   gap = 'x2',
+  asLink = false,
 }: WalletIdentityProps) => {
-  return (
+  const { getProfileLink } = useLinks()
+  const inner = (
     <Flex align="center" gap={gap} minWidth={0} className={className}>
       <Avatar address={address} src={avatarSrc} size={avatarSize} />
       <Text
@@ -47,4 +52,14 @@ export const WalletIdentity = ({
       </Text>
     </Flex>
   )
+
+  if (asLink) {
+    return (
+      <Link link={getProfileLink(address)} isExternal>
+        {inner}{' '}
+      </Link>
+    )
+  }
+
+  return inner
 }

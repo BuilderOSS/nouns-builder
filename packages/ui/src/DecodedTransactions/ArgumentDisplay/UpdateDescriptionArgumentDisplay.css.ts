@@ -1,5 +1,15 @@
 import { globalStyle, style } from '@vanilla-extract/css'
 
+export const markdownBoxHeight = style({
+  maxHeight: '480px',
+  overflowY: 'auto',
+  '@media': {
+    '(max-width: 768px)': {
+      maxHeight: '320px',
+    },
+  },
+})
+
 export const markdownContent = style({
   wordBreak: 'break-word',
 })

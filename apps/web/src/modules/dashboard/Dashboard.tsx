@@ -130,7 +130,9 @@ export const Dashboard: React.FC = () => {
       dao.proposals.some(
         (proposal) =>
           proposal.state === ProposalState.Active &&
-          !proposal.votes.some((vote) => vote.voter === address.toLowerCase())
+          !proposal.votes.some(
+            (vote: { voter: string }) => vote.voter === address.toLowerCase()
+          )
       )
     )
   }, [sortedDaos, address])
@@ -315,7 +317,7 @@ export const Dashboard: React.FC = () => {
               ? `${totalProposals} active proposal${totalProposals !== 1 ? 's' : ''}`
               : 'No active proposals'
           }
-          description={<Stack gap="x1">{proposalList}</Stack>}
+          description={<Stack gap="x3">{proposalList}</Stack>}
           titleFontSize={18}
           mb={'x0'}
           showWarning={hasProposalsNeedingVote}

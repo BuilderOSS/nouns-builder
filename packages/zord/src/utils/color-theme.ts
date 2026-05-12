@@ -38,6 +38,7 @@ export function colorThemeVars({
   positive = '#1CB687',
   negative = '#F03232',
   warning = '#F5A623',
+  warningStrong = '#EC714B',
 }) {
   return {
     background1: background,
@@ -68,6 +69,7 @@ export function colorThemeVars({
     accentHover: mix(0.2, accent, background),
     accentActive: mix(0.3, accent, background),
     accentDisabled: mix(0.4, accent, background),
+    focusRing: '#0085FF',
     onAccent: background,
     onAccentDisabled: mix(0.6, accent, background),
 
@@ -105,6 +107,8 @@ export function colorThemeVars({
     warningDisabled: mix(0.7, warning, background),
     onWarning: background,
     onWarningDisabled: mix(0.6, warning, background),
+
+    warningStrong: warningStrong,
   }
 }
 
@@ -137,6 +141,7 @@ export function colorTheme(colorProps: { [x: string]: string }) {
       accentHover: tokens.accentHover,
       accentActive: tokens.accentActive,
       accentDisabled: tokens.accentDisabled,
+      focusRing: tokens.focusRing,
       onAccent: tokens.onAccent,
       onAccentDisabled: tokens.onAccentDisabled,
 
@@ -153,6 +158,8 @@ export function colorTheme(colorProps: { [x: string]: string }) {
       warningDisabled: tokens.warningDisabled,
       onWarning: tokens.onWarning,
       onWarningDisabled: tokens.onWarningDisabled,
+
+      warningStrong: tokens.warningStrong,
 
       negative: tokens.negative,
       negativeHover: tokens.negativeHover,

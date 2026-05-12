@@ -1,5 +1,11 @@
 # @buildeross/analytics
 
+## 0.3.1
+
+### Patch Changes
+
+- A large batch of updates adding new features (like proposal types, DAO tools, and UI improvements) alongside numerous bug fixes and performance enhancements. Overall, it refines functionality, expands DAO capabilities, and improves user experience across the app.
+
 ## 0.3.0
 
 ### Minor Changes

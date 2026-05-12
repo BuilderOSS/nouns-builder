@@ -61,7 +61,7 @@ const CopyButton: React.FC<CopyButtonProps> = ({
             {renderSuccessIcon ? (
               renderSuccessIcon()
             ) : (
-              <Icon id="checkInCircle" fill="positive" />
+              <Icon id="check-in-circle" fill="positive" />
             )}
           </motion.div>
         </Box>

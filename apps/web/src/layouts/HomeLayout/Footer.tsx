@@ -9,11 +9,20 @@ import {
   getStartedButton,
   homeFooterInnerWrapper,
   homeFooterLinks,
+  homeFooterSocialIcon,
+  homeFooterWrapper,
 } from './Footer.css'
 
 export const Footer = () => {
   return (
-    <Stack mt={'x13'} w={'100%'} backgroundColor={'onNeutral'} pt={'x6'} pb={'x6'}>
+    <Stack
+      mt={'x13'}
+      w={'100%'}
+      backgroundColor={'onNeutral'}
+      pt={'x6'}
+      pb={'x6'}
+      className={homeFooterWrapper}
+    >
       <Flex
         w={'100%'}
         style={{ maxWidth: 1144 + 64 }}
@@ -71,10 +80,11 @@ export const Footer = () => {
           <Grid columns={3} gap="x3">
             <a href={'https://twitter.com/nounsbuilder'} target="_blank" rel="noreferrer">
               <Icon
-                id="twitter"
+                id="x"
                 backgroundColor="background1"
                 borderRadius="round"
                 p="x2"
+                className={homeFooterSocialIcon}
               />
             </a>
             <a href={'https://discord.gg/C6Zmt8aakt'} target="_blank" rel="noreferrer">
@@ -83,6 +93,7 @@ export const Footer = () => {
                 backgroundColor="background1"
                 borderRadius="round"
                 p="x2"
+                className={homeFooterSocialIcon}
               />
             </a>
             <a
@@ -95,6 +106,7 @@ export const Footer = () => {
                 backgroundColor="background1"
                 borderRadius="round"
                 p="x2"
+                className={homeFooterSocialIcon}
               />
             </a>
           </Grid>

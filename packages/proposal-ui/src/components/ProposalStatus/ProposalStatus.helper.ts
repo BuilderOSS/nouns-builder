@@ -2,6 +2,55 @@ import { ProposalState } from '@buildeross/sdk/contract'
 import { fromSeconds } from '@buildeross/utils/helpers'
 import { theme } from '@buildeross/zord'
 
+export type ProposalStateColorStyle = {
+  borderColor: string
+  color: string
+}
+
+export const proposalStateColorStyles: Record<ProposalState, ProposalStateColorStyle> = {
+  [ProposalState.Pending]: {
+    borderColor: theme.colors.warningDisabled,
+    color: theme.colors.warning,
+  },
+  [ProposalState.Active]: {
+    borderColor: theme.colors.focusRing,
+    color: theme.colors.focusRing,
+  },
+  [ProposalState.Canceled]: {
+    borderColor: theme.colors.background2,
+    color: theme.colors.text4,
+  },
+  [ProposalState.Defeated]: {
+    borderColor: theme.colors.negativeDisabled,
+    color: theme.colors.negative,
+  },
+  [ProposalState.Succeeded]: {
+    borderColor: theme.colors.positiveDisabled,
+    color: theme.colors.positive,
+  },
+  [ProposalState.Queued]: {
+    borderColor: theme.colors.neutral,
+    color: theme.colors.secondary,
+  },
+  [ProposalState.Expired]: {
+    borderColor: theme.colors.background2,
+    color: theme.colors.text4,
+  },
+  [ProposalState.Executed]: {
+    borderColor: theme.colors.positiveDisabled,
+    color: theme.colors.positive,
+  },
+  [ProposalState.Vetoed]: {
+    borderColor: theme.colors.background2,
+    color: theme.colors.text4,
+  },
+}
+
+export const getProposalStateColorStyle = (
+  state: ProposalState
+): ProposalStateColorStyle =>
+  proposalStateColorStyles[state] || proposalStateColorStyles[ProposalState.Expired]
+
 export function formatTime(
   timediff: number,
   affix: string,
@@ -58,31 +107,5 @@ export function parseState(state: ProposalState) {
 }
 
 export function parseBgColor(state: ProposalState) {
-  switch (state) {
-    case ProposalState.Pending:
-    case ProposalState.Active:
-    case ProposalState.Succeeded:
-      return {
-        borderColor: 'rgba(28, 182, 135, 0.1)',
-        color: theme.colors.positive,
-      }
-    case ProposalState.Defeated:
-      return {
-        borderColor: 'rgba(240, 50, 50, 0.1)',
-        color: theme.colors.negative,
-      }
-    case ProposalState.Executed:
-      return {
-        borderColor: 'rgba(37, 124, 237, 0.1)',
-        color: '#257CED',
-      }
-    case ProposalState.Queued:
-      return {
-        borderColor: '#F2E2F7',
-        color: '#D16BE1',
-      }
-    case ProposalState.Expired:
-    default:
-      return { borderColor: theme.colors.background2, color: theme.colors.text4 }
-  }
+  return getProposalStateColorStyle(state)
 }
