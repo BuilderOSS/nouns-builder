@@ -1,5 +1,11 @@
 # @buildeross/eslint-config-custom
 
+## 0.3.2
+
+### Patch Changes
+
+- Release improves dark mode, accessibility, responsive UI polish, and about-page/proposal UX across the monorepo while hardening theme-token consistency and upgrade-path handling.
+
 ## 0.3.1
 
 ### Patch Changes
