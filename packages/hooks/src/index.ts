@@ -1,3 +1,4 @@
+export * from './useActiveMember'
 export * from './useAirdropData'
 export * from './useArtworkPreview'
 export * from './useArtworkUpload'
