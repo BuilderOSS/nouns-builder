@@ -1,7 +1,9 @@
 import {
   Address,
   BigInt,
+  ByteArray,
   Bytes,
+  crypto,
   dataSource,
   json,
   JSONValueKind,
@@ -13,55 +15,32 @@ import {
   Proposal,
   ProposalCreatedEvent as ProposalCreatedFeedEvent,
   ProposalExecutedEvent as ProposalExecutedFeedEvent,
+  ProposalSigner,
   ProposalVote,
   ProposalVotedEvent as ProposalVotedFeedEvent,
 } from '../generated/schema'
 import {
+  Governor as GovernorContract,
   ProposalCanceled as ProposalCanceledEvent,
   ProposalCreated as ProposalCreatedEvent,
   ProposalExecuted as ProposalExecutedEvent,
   ProposalQueued as ProposalQueuedEvent,
+  ProposalSignersSet as ProposalSignersSetEvent,
+  ProposalUpdatablePeriodUpdated as ProposalUpdatablePeriodUpdatedEvent,
+  ProposalUpdated as ProposalUpdatedEvent,
   ProposalVetoed as ProposalVetoedEvent,
   VoteCast as VoteCastEvent,
 } from '../generated/templates/Governor/Governor'
+import { Token as TokenContract } from '../generated/templates/Governor/Token'
 import { Treasury as TreasuryContract } from '../generated/templates/Governor/Treasury'
 
-export function handleProposalCreated(event: ProposalCreatedEvent): void {
-  let context = dataSource.context()
-  let dao = DAO.load(context.getString('tokenAddress'))
-  if (dao == null) return
-
-  let newProposalCount = dao.proposalCount + 1
-
-  dao.proposalCount = newProposalCount
-
-  let proposal = new Proposal(event.params.proposalId.toHexString())
-
-  proposal.proposalId = event.params.proposalId
-  proposal.proposalNumber = newProposalCount
-
-  // Loop through and build the targets array (bytes array copying not implemented in assemblyscript)
-  let targets: Bytes[] = []
-  for (let i = 0; i < event.params.targets.length; i++) {
-    targets[i] = event.params.targets[i]
-  }
-  proposal.targets = targets
-
-  // Loop through and build the calldatas string (bytes array was hitting index limits that strings do not have)
-  let calldatas: string = ''
-  for (let i = 0; i < event.params.calldatas.length; i++) {
-    if (i == 0) calldatas = event.params.calldatas[i].toHexString()
-    else calldatas = calldatas + ':' + event.params.calldatas[i].toHexString()
-  }
-  proposal.calldatas = calldatas.length > 1 ? calldatas : null
-
-  let descriptionMetadata = event.params.description
+function parseDescriptionFields(descriptionMetadata: string): string[] {
   let title: string | null = null
   let description: string | null = null
   let representedAddress: string | null = null
   let discussionUrl: string | null = null
 
-  let parsedDescriptionResult = json.try_fromString(event.params.description)
+  let parsedDescriptionResult = json.try_fromString(descriptionMetadata)
 
   if (
     !parsedDescriptionResult.isError &&
@@ -98,10 +77,59 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
         parsedDiscussionUrlValue.length > 0 ? parsedDiscussionUrlValue : null
     }
   } else {
-    let split = event.params.description.split('&&')
+    let split = descriptionMetadata.split('&&')
     title = split.length > 0 && split[0].length > 0 ? split[0] : null
     description = split.length > 1 && split[1].length > 0 ? split[1] : null
   }
+
+  let titleValue = title == null ? '' : changetype<string>(title)
+  let descriptionValue = description == null ? '' : changetype<string>(description)
+  let representedAddressValue =
+    representedAddress == null ? '' : changetype<string>(representedAddress)
+  let discussionUrlValue = discussionUrl == null ? '' : changetype<string>(discussionUrl)
+
+  return [titleValue, descriptionValue, representedAddressValue, discussionUrlValue]
+}
+
+function buildCalldatas(calldatasBytes: Bytes[]): string | null {
+  let calldatas: string = ''
+  for (let i = 0; i < calldatasBytes.length; i++) {
+    if (i == 0) calldatas = calldatasBytes[i].toHexString()
+    else calldatas = calldatas + ':' + calldatasBytes[i].toHexString()
+  }
+  return calldatas.length > 1 ? calldatas : null
+}
+
+function buildTargets(targetsInput: Address[]): Bytes[] {
+  let targets: Bytes[] = []
+  for (let i = 0; i < targetsInput.length; i++) {
+    targets[i] = targetsInput[i]
+  }
+  return targets
+}
+
+export function handleProposalCreated(event: ProposalCreatedEvent): void {
+  let context = dataSource.context()
+  let dao = DAO.load(context.getString('tokenAddress'))
+  if (dao == null) return
+
+  let newProposalCount = dao.proposalCount + 1
+
+  dao.proposalCount = newProposalCount
+
+  let proposal = new Proposal(event.params.proposalId.toHexString())
+
+  proposal.proposalId = event.params.proposalId
+  proposal.proposalNumber = newProposalCount
+
+  proposal.targets = buildTargets(event.params.targets)
+  proposal.calldatas = buildCalldatas(event.params.calldatas)
+  let descriptionMetadata = event.params.description
+  let parsedDescription = parseDescriptionFields(descriptionMetadata)
+  let title = parsedDescription[0].length > 0 ? parsedDescription[0] : null
+  let description = parsedDescription[1].length > 0 ? parsedDescription[1] : null
+  let representedAddress = parsedDescription[2].length > 0 ? parsedDescription[2] : null
+  let discussionUrl = parsedDescription[3].length > 0 ? parsedDescription[3] : null
 
   proposal.values = event.params.values
   proposal.title = title
@@ -126,6 +154,18 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   proposal.dao = dao.id
   proposal.voteCount = 0
   proposal.snapshotBlockNumber = event.block.number
+  let governorContract = GovernorContract.bind(event.address)
+  let proposalUpdatablePeriodResult = governorContract.try_proposalUpdatablePeriod()
+  if (!proposalUpdatablePeriodResult.reverted) {
+    proposal.updatePeriodEnd = proposal.timeCreated.plus(
+      proposalUpdatablePeriodResult.value
+    )
+  }
+  proposal.replacedBy = null
+  proposal.replaces = null
+  proposal.updateMessage = null
+  proposal.updateCount = 0
+  proposal.isSigned = false
   proposal.transactionHash = event.transaction.hash
 
   dao.save()
@@ -142,6 +182,127 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   feedEvent.actor = proposal.proposer
   feedEvent.proposal = proposal.id
   feedEvent.save()
+}
+
+export function handleProposalUpdated(event: ProposalUpdatedEvent): void {
+  let oldProposal = Proposal.load(event.params.oldProposalId.toHexString())
+  if (oldProposal == null) {
+    log.warning('Old proposal not found for replacement: {}', [
+      event.params.oldProposalId.toHexString(),
+    ])
+    return
+  }
+
+  let proposal = new Proposal(event.params.newProposalId.toHexString())
+  proposal.proposalId = event.params.newProposalId
+  proposal.proposalNumber = oldProposal.proposalNumber
+  proposal.dao = oldProposal.dao
+  proposal.targets = buildTargets(event.params.targets)
+  proposal.values = event.params.values
+  proposal.calldatas = buildCalldatas(event.params.calldatas)
+
+  let descriptionMetadata = event.params.description
+  let parsedDescription = parseDescriptionFields(descriptionMetadata)
+  proposal.title = parsedDescription[0].length > 0 ? parsedDescription[0] : null
+  proposal.description = parsedDescription[1].length > 0 ? parsedDescription[1] : null
+  proposal.metadata = descriptionMetadata
+  proposal.representedAddress =
+    parsedDescription[2].length > 0 ? parsedDescription[2] : null
+  proposal.discussionUrl = parsedDescription[3].length > 0 ? parsedDescription[3] : null
+  proposal.descriptionHash = Bytes.fromByteArray(
+    crypto.keccak256(ByteArray.fromUTF8(descriptionMetadata))
+  )
+  proposal.proposer = event.params.proposer
+
+  let governorContract = GovernorContract.bind(event.address)
+  let proposalResult = governorContract.try_getProposal(event.params.newProposalId)
+  if (proposalResult.reverted) {
+    log.warning('Failed to load new proposal from governor: {}', [
+      event.params.newProposalId.toHexString(),
+    ])
+    return
+  }
+
+  let proposalData = proposalResult.value
+  proposal.timeCreated = proposalData.timeCreated
+  proposal.againstVotes = proposalData.againstVotes.toI32()
+  proposal.forVotes = proposalData.forVotes.toI32()
+  proposal.abstainVotes = proposalData.abstainVotes.toI32()
+  proposal.voteStart = proposalData.voteStart
+  proposal.voteEnd = proposalData.voteEnd
+  proposal.proposalThreshold = proposalData.proposalThreshold
+  proposal.quorumVotes = proposalData.quorumVotes
+  proposal.executed = proposalData.executed
+  proposal.canceled = proposalData.canceled
+  proposal.vetoed = proposalData.vetoed
+  proposal.queued = false
+  proposal.voteCount = 0
+
+  proposal.snapshotBlockNumber = oldProposal.snapshotBlockNumber
+  proposal.updatePeriodEnd = null
+  let proposalUpdatablePeriodResult = governorContract.try_proposalUpdatablePeriod()
+  if (!proposalUpdatablePeriodResult.reverted) {
+    proposal.updatePeriodEnd = proposal.timeCreated.plus(
+      proposalUpdatablePeriodResult.value
+    )
+  }
+
+  proposal.replaces = oldProposal.id
+  proposal.replacedBy = null
+  proposal.updateMessage = event.params.updateMessage
+  proposal.updateCount = oldProposal.updateCount + 1
+  proposal.isSigned = oldProposal.isSigned
+  proposal.transactionHash = event.transaction.hash
+
+  oldProposal.replacedBy = proposal.id
+  oldProposal.save()
+  proposal.save()
+}
+
+export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
+  let proposal = Proposal.load(event.params.proposalId.toHexString())
+  if (proposal == null) {
+    log.warning('Proposal not found for signers: {}', [
+      event.params.proposalId.toHexString(),
+    ])
+    return
+  }
+
+  proposal.isSigned = true
+  proposal.save()
+
+  let governorContract = GovernorContract.bind(event.address)
+  let tokenResult = governorContract.try_token()
+  if (tokenResult.reverted) {
+    log.warning('Failed to load token for proposal signers: {}', [
+      event.params.proposalId.toHexString(),
+    ])
+    return
+  }
+
+  let tokenContract = TokenContract.bind(tokenResult.value)
+  for (let i = 0; i < event.params.signers.length; i++) {
+    let signer = event.params.signers[i]
+    let signerId = proposal.id + '-' + signer.toHexString()
+    let proposalSigner = new ProposalSigner(signerId)
+    proposalSigner.proposal = proposal.id
+    proposalSigner.signer = signer
+    let votingPowerResult = tokenContract.try_getVotes(signer)
+    proposalSigner.voteWeight = votingPowerResult.reverted
+      ? BigInt.fromI32(0)
+      : votingPowerResult.value
+    proposalSigner.timestamp = event.block.timestamp
+    proposalSigner.save()
+  }
+}
+
+export function handleProposalUpdatablePeriodUpdated(
+  event: ProposalUpdatablePeriodUpdatedEvent
+): void {
+  log.info('Proposal updatable period updated from {} to {}', [
+    event.params.prevProposalUpdatablePeriod.toString(),
+    event.params.newProposalUpdatablePeriod.toString(),
+  ])
 }
 
 export function handleProposalQueued(event: ProposalQueuedEvent): void {

@@ -53,6 +53,10 @@ dataSources:
         - DAO
         - Proposal
         - ProposalUpdate
+        - ProposalCandidateGroup
+        - ProposalCandidateVersion
+        - CandidateComment
+        - CandidateSponsorSignature
       abis:
         - name: EAS
           file: ./abis/EAS.json
@@ -70,6 +74,9 @@ dataSources:
               '0x8bd0d42901ce3cd9898dbea6ae2fbf1e796ef0923e7cbb0a1cecac2e42d47cb3',
               '0x1289c5f988998891af7416d83820c40ba1c6f5ba31467f2e611172334dc53a0e',
               '0xc384fd4fdacb670667c07759423132a193053742b58d5a056b61d72ba1a09e26',
+              '0x5d1c687645ae02fa0f235cc55ce24ab4e6c1d729f82c281689fd3f9f150932f3',
+              '0x1decf999b02cbecd8697ae7cf0c4017bc0115adbee476da79634332fdff965b2',
+              '0xeb66ca8d752474c808c9922734355ea6ec385c2515d66433aeabbf2a7b9fcaa5',
             ]
           calls:
             getAttestation: EAS[event.address].getAttestation(event.params.uid)
@@ -221,14 +228,23 @@ templates:
       entities:
         - Proposal
         - ProposalVote
+        - ProposalSigner
       abis:
         - name: Governor
           file: ./abis/Governor.json
+        - name: Token
+          file: ./abis/Token.json
         - name: Treasury
           file: ./abis/Treasury.json
       eventHandlers:
         - event: ProposalCreated(bytes32,address[],uint256[],bytes[],string,bytes32,(address,uint32,uint32,uint32,uint32,uint32,uint32,uint32,uint32,bool,bool,bool))
           handler: handleProposalCreated
+        - event: ProposalUpdated(bytes32,bytes32,address,address[],uint256[],bytes[],string,string)
+          handler: handleProposalUpdated
+        - event: ProposalSignersSet(bytes32,address[])
+          handler: handleProposalSignersSet
+        - event: ProposalUpdatablePeriodUpdated(uint256,uint256)
+          handler: handleProposalUpdatablePeriodUpdated
         - event: ProposalQueued(bytes32,uint256)
           handler: handleProposalQueued
         - event: ProposalExecuted(bytes32)

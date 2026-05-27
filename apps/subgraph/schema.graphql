@@ -32,6 +32,7 @@ type DAO @entity {
   zoraCoins: [ZoraCoin!]! @derivedFrom(field: "dao")
   zoraDrops: [ZoraDrop!]! @derivedFrom(field: "dao")
   links: [DAOLink!]! @derivedFrom(field: "dao")
+  candidates: [ProposalCandidateGroup!]! @derivedFrom(field: "dao")
 }
 
 type DAOLink @entity {
@@ -142,9 +143,24 @@ type Proposal @entity {
   vetoTransactionHash: Bytes
   voteCount: Int!
   snapshotBlockNumber: BigInt!
+  updatePeriodEnd: BigInt
+  replacedBy: Proposal
+  replaces: Proposal
+  updateMessage: String
+  updateCount: Int!
+  isSigned: Boolean!
   transactionHash: Bytes!
   votes: [ProposalVote!]! @derivedFrom(field: "proposal")
+  signers: [ProposalSigner!]! @derivedFrom(field: "proposal")
   updates: [ProposalUpdate!]! @derivedFrom(field: "proposal")
+}
+
+type ProposalSigner @entity {
+  id: ID!
+  proposal: Proposal!
+  signer: Bytes!
+  voteWeight: BigInt!
+  timestamp: BigInt!
 }
 
 type ProposalUpdate @entity {
@@ -157,6 +173,79 @@ type ProposalUpdate @entity {
   creator: Bytes!
   originalMessageId: Bytes!
   deleted: Boolean!
+}
+
+type ProposalCandidateGroup @entity {
+  id: ID!
+  dao: DAO!
+  proposer: Bytes!
+  salt: Bytes!
+  createdAt: BigInt!
+  versions: [ProposalCandidateVersion!]! @derivedFrom(field: "group")
+  comments: [CandidateComment!]! @derivedFrom(field: "group")
+  versionCount: BigInt!
+  commentCount: BigInt!
+  latestVersionNumber: BigInt!
+  leadingVersion: ProposalCandidateVersion
+  currentForCount: BigInt!
+  currentAgainstCount: BigInt!
+  currentAbstainCount: BigInt!
+}
+
+type ProposalCandidateVersion @entity {
+  id: ID!
+  group: ProposalCandidateGroup!
+  candidateId: Bytes!
+  salt: Bytes!
+  attester: Bytes!
+  versionNumber: BigInt!
+  targets: [Bytes!]!
+  values: [BigInt!]!
+  calldatas: [Bytes!]!
+  description: String!
+  proposalId: Bytes!
+  createdAt: BigInt!
+  title: String!
+  summary: String!
+  discussionUrl: String
+  signatures: [CandidateSponsorSignature!]! @derivedFrom(field: "version")
+  signatureCount: BigInt!
+  totalVoteWeight: BigInt!
+  revoked: Boolean!
+}
+
+enum CandidateVoteSupport {
+  NONE
+  FOR
+  AGAINST
+  ABSTAIN
+}
+
+type CandidateComment @entity {
+  id: ID!
+  group: ProposalCandidateGroup!
+  candidate: Bytes!
+  commenter: Bytes!
+  voteWeight: BigInt!
+  support: CandidateVoteSupport!
+  comment: String!
+  parentComment: CandidateComment
+  createdAt: BigInt!
+  replies: [CandidateComment!]! @derivedFrom(field: "parentComment")
+  revoked: Boolean!
+}
+
+type CandidateSponsorSignature @entity {
+  id: ID!
+  version: ProposalCandidateVersion!
+  signer: Bytes!
+  proposalId: Bytes!
+  nonce: BigInt!
+  deadline: BigInt!
+  signature: Bytes!
+  revoked: Boolean!
+  createdAt: BigInt!
+  voteWeight: BigInt!
 }
 
 type DaoMultisigUpdate @entity {

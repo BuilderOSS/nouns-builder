@@ -1,7 +1,12 @@
 import { Address, Bytes } from '@graphprotocol/graph-ts'
 import { assert, describe, test } from 'matchstick-as'
 
-import { decodeDaoMultisig, decodePropdate } from '../src/utils/eas'
+import {
+  decodeCandidateComment,
+  decodeCandidateSponsorSignature,
+  decodeDaoMultisig,
+  decodePropdate,
+} from '../src/utils/eas'
 
 describe('Eas Decode Tests', () => {
   test('decode propdate test - message type 0', () => {
@@ -147,5 +152,34 @@ describe('Eas Decode Tests', () => {
       decoded,
       Address.fromString('0x19a8eb80c1483ceaa1278b16c5d5ef0104f85905')
     )
+  })
+
+  test('decode candidate comment', () => {
+    const data = Bytes.fromHexString(
+      '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000'
+    )
+    const decoded = decodeCandidateComment(data)
+    assert.assertNotNull(decoded)
+    if (!decoded) {
+      assert.assertTrue(false, 'decoded should not be null')
+      return
+    }
+    assert.i32Equals(decoded.support, 1)
+    assert.stringEquals(decoded.comment, 'hello')
+  })
+
+  test('decode candidate sponsor signature', () => {
+    const data = Bytes.fromHexString(
+      '0xddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000f423f00000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000002abcd000000000000000000000000000000000000000000000000000000000000'
+    )
+    const decoded = decodeCandidateSponsorSignature(data)
+    assert.assertNotNull(decoded)
+    if (!decoded) {
+      assert.assertTrue(false, 'decoded should not be null')
+      return
+    }
+    assert.i32Equals(decoded.nonce.toI32(), 5)
+    assert.i32Equals(decoded.deadline.toI32(), 999999)
+    assert.bytesEquals(decoded.signature, Bytes.fromHexString('0xabcd'))
   })
 })
