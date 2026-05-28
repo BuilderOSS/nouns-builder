@@ -1,5 +1,19 @@
 # @buildeross/ui
 
+## 0.3.2
+
+### Patch Changes
+
+- Release improves dark mode, accessibility, responsive UI polish, and about-page/proposal UX across the monorepo while hardening theme-token consistency and upgrade-path handling.
+- Updated dependencies
+  - @buildeross/constants@0.3.2
+  - @buildeross/hooks@0.3.2
+  - @buildeross/ipfs-service@0.3.2
+  - @buildeross/sdk@0.3.2
+  - @buildeross/types@0.3.2
+  - @buildeross/utils@0.3.2
+  - @buildeross/zord@0.3.2
+
 ## 0.3.1
 
 ### Patch Changes
