@@ -43,7 +43,7 @@ export const ZoraDropCreatedItem: React.FC<ZoraDropCreatedItemProps> = ({ item }
         {/* Media - full-width on mobile, fixed width on desktop */}
         {isMediaTypeLoading ? (
           <Box className={feedItemImage}>
-            <ImageSkeleton />
+            <ImageSkeleton fullWidth />
           </Box>
         ) : shouldUseMediaPreview ? (
           <Box className={feedItemMedia}>
@@ -61,7 +61,7 @@ export const ZoraDropCreatedItem: React.FC<ZoraDropCreatedItemProps> = ({ item }
             <FallbackImage
               src={displayImageUrl!}
               alt={item.dropName}
-              loadingPlaceholder={<ImageSkeleton />}
+              loadingPlaceholder={<ImageSkeleton fullWidth />}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
           </Box>

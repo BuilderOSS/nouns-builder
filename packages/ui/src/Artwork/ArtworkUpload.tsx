@@ -1,5 +1,5 @@
 import { ArtworkError } from '@buildeross/types'
-import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, ReactElement } from 'react'
 
 import {
@@ -27,6 +27,7 @@ interface ArtworkUploadProps {
   uploadError: string | undefined
   fileType?: string
   layerOrdering: React.ReactNode
+  onReset?: () => void
 }
 
 export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
@@ -41,6 +42,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
   uploadError: uploadError,
   fileType,
   layerOrdering,
+  onReset,
 }) => {
   const dropInput = React.useRef<HTMLInputElement>(null)
   React.useEffect(() => {
@@ -90,33 +92,38 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
           onChange={onUpload}
         />
       </div>
-      {((artworkError || uploadError) && (
-        <Box py={'x4'} className={uploadErrorBox}>
-          {uploadError && <Box>{uploadError}</Box>}
+      <Flex justify={'space-between'} direction="row" py={'x4'}>
+        {(artworkError || uploadError) && (
+          <Box className={uploadErrorBox}>
+            {uploadError && <Box>{uploadError}</Box>}
 
-          <Box as={'ul'} m={'x0'}>
-            {artworkError?.maxTraits && <li>{artworkError.maxTraits}</li>}
-            {artworkError?.mime && <li>{artworkError.mime}</li>}
-            {artworkError?.directory && <li>{artworkError.directory}</li>}
-            {artworkError?.dimensions && <li>{artworkError.dimensions}</li>}
-          </Box>
-        </Box>
-      )) ||
-        (traitCount > 0 && !!fileType && (
-          <>
-            <Box p={'x4'} fontSize={12} className={uploadSuccessBox}>
-              <Box as={'ul'} m={'x0'}>
-                <li>
-                  {traitCount > 1 ? `${traitCount} traits` : `${traitCount} trait`}{' '}
-                  &#9733;
-                </li>
-                <li>supported file type: {fileType} &#9733;</li>
-                <li>correct folder structure &#9733;</li>
-              </Box>
+            <Box as={'ul'} m={'x0'}>
+              {artworkError?.maxTraits && <li>{artworkError.maxTraits}</li>}
+              {artworkError?.mime && <li>{artworkError.mime}</li>}
+              {artworkError?.directory && <li>{artworkError.directory}</li>}
+              {artworkError?.dimensions && <li>{artworkError.dimensions}</li>}
             </Box>
-            {layerOrdering}
-          </>
-        ))}
+          </Box>
+        )}
+        {!artworkError && !uploadError && traitCount > 0 && !!fileType && (
+          <Box fontSize={12} className={uploadSuccessBox}>
+            <Box as={'ul'} m={'x0'}>
+              <li>
+                {traitCount > 1 ? `${traitCount} traits` : `${traitCount} trait`} &#9733;
+              </li>
+              <li>supported file type: {fileType} &#9733;</li>
+              <li>correct folder structure &#9733;</li>
+            </Box>
+          </Box>
+        )}
+        {onReset && (fileCount || traitCount > 0) ? (
+          <Button type="button" variant={'secondary'} onClick={onReset}>
+            Reset artwork
+          </Button>
+        ) : null}
+      </Flex>
+
+      {!artworkError && !uploadError && Number(fileCount) > 0 && traitCount > 0 && layerOrdering}
     </Box>
   )
 }

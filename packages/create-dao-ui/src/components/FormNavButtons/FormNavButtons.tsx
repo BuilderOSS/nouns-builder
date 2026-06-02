@@ -10,7 +10,6 @@ import {
   formNavDesktopRow,
   formNavMobileBar,
   formNavMobileBarSpacer,
-  formNavResetButton,
 } from './FormNavButtons.css'
 
 interface FormNavButtonsProps {
@@ -82,7 +81,7 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
       )}
 
       <div className={formNavDesktopRow}>
-        <Flex align={'center'} mt={'x8'}>
+        <Flex align={'center'} mt={'x8'} gap={'x2'}>
           {showReset && (
             <Button
               justify={'center'}
@@ -94,7 +93,6 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
               type="button"
               onClick={() => setIsModalOpen(true)}
               aria-label="Reset form"
-              className={formNavResetButton}
             >
               <Icon id="trash" />
             </Button>
@@ -143,7 +141,7 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
       {isMounted &&
         createPortal(
           <div className={formNavMobileBar}>
-            <Flex align={'center'}>
+            <Flex align={'center'} gap={'x2'}>
               {showReset && (
                 <Button
                   justify={'center'}
@@ -155,7 +153,6 @@ export const FormNavButtons: React.FC<FormNavButtonsProps> = ({
                   type="button"
                   onClick={() => setIsModalOpen(true)}
                   aria-label="Reset form"
-                  className={formNavResetButton}
                 >
                   <Icon id="trash" />
                 </Button>

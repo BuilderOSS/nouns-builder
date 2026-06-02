@@ -28,7 +28,6 @@ export const baseButton = style([
       },
       '&[disabled]': {
         cursor: 'not-allowed',
-        pointerEvents: 'none',
       },
       '&[disabled]:active': {
         transform: 'unset',
@@ -300,10 +299,11 @@ export const buttonVariants = {
       selectors: {
         '&[disabled]': {
           color: vars.color.onGhostDisabled,
-          backgroundColor: vars.color.ghostDisabled,
-          borderColor: vars.color.ghostDisabled,
+          backgroundColor: 'transparent',
+          borderColor: vars.color.onGhostDisabled,
+          opacity: 0.56,
         },
-        '&:hover, &:not([disabled]):hover': {
+        '&:not([disabled]):hover': {
           cursor: 'pointer',
           backgroundColor: vars.color.background2,
         },

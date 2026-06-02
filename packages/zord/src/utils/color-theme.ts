@@ -39,7 +39,15 @@ export function colorThemeVars({
   negative = '#F03232',
   warning = '#F5A623',
   warningStrong = '#EC714B',
+  mode = 'light',
 }) {
+  const neutralDisabled =
+    mode === 'dark'
+      ? mix(0.14, background, foreground)
+      : mix(0.18, foreground, background)
+  const neutralDisabledText =
+    mode === 'dark' ? mix(0.6, background, foreground) : mix(0.4, foreground, background)
+
   return {
     background1: background,
     background2: mix(0.1, background, foreground),
@@ -76,16 +84,16 @@ export function colorThemeVars({
     neutral: mix(0.9, foreground, background),
     neutralHover: mix(0.8, foreground, background),
     neutralActive: mix(0.7, foreground, background),
-    neutralDisabled: mix(0.9, foreground, background),
+    neutralDisabled,
     onNeutral: foreground,
-    onNeutralDisabled: mix(0.7, foreground, background),
+    onNeutralDisabled: neutralDisabledText,
 
     ghost: background,
     ghostHover: mix(0.9, foreground, background),
     ghostActive: mix(0.8, foreground, background),
-    ghostDisabled: mix(0.7, foreground, background),
+    ghostDisabled: mix(0.08, foreground, background),
     onGhost: foreground,
-    onGhostDisabled: mix(0.7, foreground, background),
+    onGhostDisabled: mix(0.35, foreground, background),
 
     positive: positive,
     positiveHover: mix(0.3, positive, background),

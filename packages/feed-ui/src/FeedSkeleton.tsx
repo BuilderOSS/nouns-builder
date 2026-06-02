@@ -15,8 +15,17 @@ interface FeedSkeletonProps {
   count?: number
 }
 
-export const ImageSkeleton: React.FC = () => {
-  return <Box className={`${skeletonBox} ${skeletonPulse} ${skeletonImage}`} />
+interface ImageSkeletonProps {
+  fullWidth?: boolean
+}
+
+export const ImageSkeleton: React.FC<ImageSkeletonProps> = ({ fullWidth = false }) => {
+  return (
+    <Box
+      className={`${skeletonBox} ${skeletonPulse} ${skeletonImage}`}
+      style={fullWidth ? { width: '100%', flexShrink: 0 } : undefined}
+    />
+  )
 }
 
 export const FeedSkeletonItem: React.FC = () => {
