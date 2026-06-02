@@ -38,7 +38,7 @@ export const CreateActions: React.FC<CreateActionsProps> = ({ userAddress }) => 
         <Button
           as={Link}
           href="/create"
-          style={{ width: '100%', flex: 1 }}
+          style={{ width: '100%' }}
           variant="secondaryOutline"
         >
           Create a DAO
