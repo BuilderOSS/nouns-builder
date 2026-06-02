@@ -23,7 +23,6 @@ export const reviewSectionSubHeading = style({
   width: '100%',
   fontSize: 23,
   fontWeight: 700,
-  borderRadius: '16px',
   backgroundColor: vars.color.background2,
   selectors: {
     '&:hover': {

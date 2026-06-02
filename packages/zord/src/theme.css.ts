@@ -222,7 +222,7 @@ export const theme = createThemeContract({
   },
 })
 
-var { colors, shadows } = colorTheme({})
+var { colors, shadows } = colorTheme({ mode: 'light' })
 export const lightTheme = createTheme(theme, {
   fonts: {
     heading: typography.fonts.body,
@@ -244,6 +244,7 @@ export const lightTheme = createTheme(theme, {
 })
 
 var { colors, shadows } = colorTheme({
+  mode: 'dark',
   // foreground: '#ffff00',
   // background: '#ff0000',
   // accent: '#00ffff',

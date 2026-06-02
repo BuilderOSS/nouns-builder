@@ -77,6 +77,7 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
     variant = 'primary',
     size = 'md',
     type = 'button',
+    onClick,
     ...props
   }: PolymorphicPropsWithoutRef<ButtonProps, E>,
   ref: ForwardedRef<E>
@@ -114,6 +115,11 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
       : undefined
   }, [pill, size])
 
+  const handleClick = useMemo(() => {
+    if (disabled) return undefined
+    return onClick
+  }, [disabled, onClick])
+
   return (
     <Flex
       ref={ref}
@@ -137,6 +143,7 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
       ]}
       px={px}
       gap={gap}
+      onClick={handleClick}
       {...props}
     >
       {loading ? (
