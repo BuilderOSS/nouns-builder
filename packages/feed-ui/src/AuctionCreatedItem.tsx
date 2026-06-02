@@ -23,7 +23,7 @@ export const AuctionCreatedItem: React.FC<AuctionCreatedItemProps> = ({ item }) 
           <FallbackImage
             src={item.tokenImage}
             alt={item.tokenName}
-            loadingPlaceholder={<ImageSkeleton />}
+            loadingPlaceholder={<ImageSkeleton fullWidth />}
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         </Box>
