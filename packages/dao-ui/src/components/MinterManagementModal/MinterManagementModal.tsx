@@ -7,7 +7,7 @@ import { ContractButton } from '@buildeross/ui/ContractButton'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { getEnsAddress } from '@buildeross/utils/ens'
-import { Box, Button, Flex, Heading, Icon, Text, theme } from '@buildeross/zord'
+import { Box, Button, Flex, Heading, Text, theme } from '@buildeross/zord'
 import React from 'react'
 import { isAddress, zeroAddress } from 'viem'
 import { useAccount, useConfig, useWriteContract } from 'wagmi'
@@ -107,12 +107,11 @@ const MinterCard: React.FC<MinterCardProps> = ({
               variant="ghost"
               style={{
                 minWidth: 'auto',
-                padding: '4px 8px',
                 fontSize: '12px',
+                padding: '1px 6px',
               }}
-            >
-              <Icon id="cross-16" style={{ width: 16, height: 16 }} />
-            </Button>
+              icon="cross"
+            />
           )}
           <Flex align="center" gap="x2">
             <input
@@ -440,7 +439,7 @@ export const MinterManagementModal: React.FC<MinterManagementModalProps> = ({
               onClick={handleAddCustomMinter}
               disabled={!customMinterInput || isSettingUpMinter || isCheckingCustomMinter}
               variant="secondary"
-              style={{ minWidth: '80px', marginBottom: '32px' }}
+              style={{ minWidth: '80px', marginBottom: '32px', height: '60px' }}
             >
               {isCheckingCustomMinter ? 'Adding...' : 'Add'}
             </Button>
