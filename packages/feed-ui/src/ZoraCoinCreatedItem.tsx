@@ -43,7 +43,7 @@ export const ZoraCoinCreatedItem: React.FC<ZoraCoinCreatedItemProps> = ({ item }
         isMediaTypeLoading ||
         (!shouldUseMediaPreview && !displayImageUrl) ? (
           <Box className={feedItemImage}>
-            <ImageSkeleton />
+            <ImageSkeleton fullWidth />
           </Box>
         ) : shouldUseMediaPreview ? (
           <Box className={feedItemMedia}>

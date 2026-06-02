@@ -116,7 +116,12 @@ export function InnerButton<E extends ElementType = typeof ButtonDefaultElement>
   }, [pill, size])
 
   const handleClick = useMemo(() => {
-    if (disabled) return undefined
+    if (disabled) {
+      return (event: React.MouseEvent<Element>) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+    }
     return onClick
   }, [disabled, onClick])
 

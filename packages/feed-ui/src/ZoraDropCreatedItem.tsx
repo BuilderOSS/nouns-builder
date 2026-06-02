@@ -43,7 +43,7 @@ export const ZoraDropCreatedItem: React.FC<ZoraDropCreatedItemProps> = ({ item }
         {/* Media - full-width on mobile, fixed width on desktop */}
         {isMediaTypeLoading ? (
           <Box className={feedItemImage}>
-            <ImageSkeleton />
+            <ImageSkeleton fullWidth />
           </Box>
         ) : shouldUseMediaPreview ? (
           <Box className={feedItemMedia}>
