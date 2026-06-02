@@ -123,7 +123,11 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
         ) : null}
       </Flex>
 
-      {!artworkError && !uploadError && Number(fileCount) > 0 && traitCount > 0 && layerOrdering}
+      {!artworkError &&
+        !uploadError &&
+        Number(fileCount) > 0 &&
+        traitCount > 0 &&
+        layerOrdering}
     </Box>
   )
 }
