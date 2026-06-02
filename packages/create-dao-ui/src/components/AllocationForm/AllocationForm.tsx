@@ -119,8 +119,6 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
 
   const { address } = useAccount()
 
-  // Determine if founder allocation is enabled based on existing values
-  // Enable if there's more than one founder OR if the first founder has non-zero allocation
   const hasExistingAllocation =
     founderAllocation.length > 1 ||
     (founderAllocation.length === 1 &&
@@ -129,6 +127,12 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
   const [hasFounderAllocation, setHasFounderAllocation] =
     useState<boolean>(hasExistingAllocation)
 
+  useEffect(() => {
+    setHasFounderAllocation(hasExistingAllocation)
+  }, [hasExistingAllocation])
+
+  // Determine if founder allocation is enabled based on existing values
+  // Enable if there's more than one founder OR if the first founder has non-zero allocation
   // should always default to the current signer address given this field is disabled
   const initialFounderValues =
     founderAllocation.length === 0
@@ -152,34 +156,6 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
 
   const handlePrev = () => {
     setActiveSection(activeSection - 1)
-  }
-
-  const handleToggleFounderAllocation = () => {
-    const newState = !hasFounderAllocation
-    setHasFounderAllocation(newState)
-
-    // If toggling OFF, set form values to single founder with 0% allocation
-    if (!newState && formRef.current) {
-      formRef.current.setFieldValue('founderAllocation', [
-        {
-          founderAddress: address || '',
-          allocationPercentage: 0,
-          endDate: getOneMonthFromNow(),
-          admin: true,
-        },
-      ])
-    }
-    // If toggling ON, reset to initial values (empty allocation to force user input)
-    else if (newState && formRef.current) {
-      formRef.current.setFieldValue('founderAllocation', [
-        {
-          founderAddress: address || '',
-          allocationPercentage: '',
-          endDate: '',
-          admin: true,
-        },
-      ])
-    }
   }
 
   const handleSubmit = async ({
@@ -249,6 +225,34 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
         onSubmit={handleSubmit}
       >
         {(formik) => {
+          const handleToggleFounderAllocation = (nextState: boolean) => {
+            setHasFounderAllocation(nextState)
+
+            // Toggling off keeps the admin founder row but clears the allocation.
+            // Toggling on restores an empty allocation so the user must fill it in.
+            formik.setFieldValue(
+              'founderAllocation',
+              nextState
+                ? [
+                    {
+                      founderAddress: address || '',
+                      allocationPercentage: '',
+                      endDate: '',
+                      admin: true,
+                    },
+                  ]
+                : [
+                    {
+                      founderAddress: address || '',
+                      allocationPercentage: 0,
+                      endDate: getOneMonthFromNow(),
+                      admin: true,
+                    },
+                  ],
+              true
+            )
+          }
+
           return (
             <Form>
               <FormErrorObserver setIsFormSubmittable={setIsFormSubmittable} />
@@ -284,7 +288,7 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
                 <Heading size="xs">Token Allocation</Heading>
                 <Toggle
                   on={hasFounderAllocation}
-                  onToggle={handleToggleFounderAllocation}
+                  onToggle={() => handleToggleFounderAllocation(!hasFounderAllocation)}
                 />
               </Flex>
 
