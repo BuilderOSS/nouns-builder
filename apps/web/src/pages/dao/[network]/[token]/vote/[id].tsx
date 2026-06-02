@@ -14,6 +14,7 @@ import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { ProposalState } from '@buildeross/types'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { getProposalWarning } from '@buildeross/utils/warnings'
@@ -84,6 +85,16 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const openProposalUpdatePage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
       query: {
         network: chain.slug,
         token: addresses.token,
@@ -195,7 +206,13 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
               </Flex>
             )}
 
-            {displayActions && <ProposalActions daoName={daoName} proposal={proposal} />}
+            {displayActions && (
+              <ProposalActions
+                daoName={daoName}
+                proposal={proposal}
+                onNavigateToUpdateProposal={openProposalUpdatePage}
+              />
+            )}
           </>
 
           <ProposalDetailsGrid proposal={proposal} />
@@ -268,6 +285,18 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   if (getAddress(proposal.dao.tokenAddress) !== getAddress(collection)) {
     return {
       notFound: true,
+    }
+  }
+
+  // Redirect to latest version if this proposal has been replaced
+  if (proposal.state === ProposalState.Replaced && data.replacedBy) {
+    const latestProposalNumber = data.replacedBy.proposalNumber
+
+    return {
+      redirect: {
+        destination: `/dao/${network}/${collection}/vote/${latestProposalNumber}`,
+        permanent: false, // Use temporary redirect since proposals could be updated again
+      },
     }
   }
 

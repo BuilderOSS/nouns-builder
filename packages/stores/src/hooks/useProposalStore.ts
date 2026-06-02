@@ -7,7 +7,7 @@ export type { TransactionBundle }
 export type TransactionFormType = TransactionType
 
 export const PROPOSAL_STORE_IDENTIFIER = `nouns-builder-proposal-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`
-const PROPOSAL_STORE_VERSION = 1
+const PROPOSAL_STORE_VERSION = 2
 
 type State = {
   transactions: TransactionBundle[]
@@ -18,6 +18,7 @@ type State = {
   discussionUrl?: string
   representedAddressEnabled: boolean
   transactionType: TransactionFormType | null
+  updateProposalId?: string // Proposal ID being updated (if this is an update)
 }
 
 type Actions = {
@@ -31,6 +32,7 @@ type Actions = {
   setRepresentedAddress: (representedAddress?: string) => void
   setDiscussionUrl: (discussionUrl?: string) => void
   setRepresentedAddressEnabled: (representedAddressEnabled: boolean) => void
+  setUpdateProposalId: (updateProposalId?: string) => void
   setDraftMetadata: (
     draftMetadata: Partial<
       Pick<
@@ -55,6 +57,7 @@ type Actions = {
         | 'transactions'
         | 'disabled'
         | 'transactionType'
+        | 'updateProposalId'
       >
     >
   ) => void
@@ -71,6 +74,7 @@ const initialState: State = {
   disabled: false,
   transactions: [],
   transactionType: null,
+  updateProposalId: undefined,
 }
 
 const toTitleCase = (value: string) =>
@@ -111,6 +115,7 @@ type PersistedProposalState = Partial<
     | 'discussionUrl'
     | 'representedAddressEnabled'
     | 'transactionType'
+    | 'updateProposalId'
   >
 >
 
@@ -160,6 +165,7 @@ export const useProposalStore = create<State & Actions>()(
       setDiscussionUrl: (discussionUrl) => set({ discussionUrl }),
       setRepresentedAddressEnabled: (representedAddressEnabled) =>
         set({ representedAddressEnabled }),
+      setUpdateProposalId: (updateProposalId) => set({ updateProposalId }),
       setDraftMetadata: (draftMetadata) => set(draftMetadata),
       startProposalDraft: (draft = {}) => {
         const sanitizedDraft = Object.fromEntries(
@@ -189,6 +195,7 @@ export const useProposalStore = create<State & Actions>()(
         discussionUrl: state.discussionUrl,
         representedAddressEnabled: state.representedAddressEnabled,
         transactionType: state.transactionType,
+        updateProposalId: state.updateProposalId,
       }),
     }
   )

@@ -8995,7 +8995,9 @@ export type ProposalFragment = {
   executionTransactionHash?: any | null
   vetoTransactionHash?: any | null
   cancelTransactionHash?: any | null
+  updatePeriodEnd?: any | null
   dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+  replacedBy?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
 }
 
 export type ProposalDetailFragment = {
@@ -9028,7 +9030,9 @@ export type ProposalDetailFragment = {
   executionTransactionHash?: any | null
   vetoTransactionHash?: any | null
   cancelTransactionHash?: any | null
+  updatePeriodEnd?: any | null
   dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+  replacedBy?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
 }
 
 export type ProposalVoteFragment = {
@@ -9835,8 +9839,14 @@ export type DaosForDashboardQuery = {
       executionTransactionHash?: any | null
       vetoTransactionHash?: any | null
       cancelTransactionHash?: any | null
+      updatePeriodEnd?: any | null
       votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
       dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+      replacedBy?: {
+        __typename?: 'Proposal'
+        proposalId: any
+        proposalNumber: number
+      } | null
     }>
     currentAuction?: {
       __typename?: 'Auction'
@@ -10335,6 +10345,7 @@ export type ProposalQuery = {
     executionTransactionHash?: any | null
     vetoTransactionHash?: any | null
     cancelTransactionHash?: any | null
+    updatePeriodEnd?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -10344,6 +10355,11 @@ export type ProposalQuery = {
       timestamp?: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+    replacedBy?: {
+      __typename?: 'Proposal'
+      proposalId: any
+      proposalNumber: number
+    } | null
   } | null
 }
 
@@ -10400,6 +10416,7 @@ export type ProposalOgMetadataQuery = {
     executionTransactionHash?: any | null
     vetoTransactionHash?: any | null
     cancelTransactionHash?: any | null
+    updatePeriodEnd?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -10418,6 +10435,11 @@ export type ProposalOgMetadataQuery = {
       treasuryAddress: any
       governorAddress: any
     }
+    replacedBy?: {
+      __typename?: 'Proposal'
+      proposalId: any
+      proposalNumber: number
+    } | null
   }>
 }
 
@@ -10458,6 +10480,7 @@ export type ProposalsQuery = {
     executionTransactionHash?: any | null
     vetoTransactionHash?: any | null
     cancelTransactionHash?: any | null
+    updatePeriodEnd?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -10467,6 +10490,11 @@ export type ProposalsQuery = {
       timestamp?: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+    replacedBy?: {
+      __typename?: 'Proposal'
+      proposalId: any
+      proposalNumber: number
+    } | null
   }>
 }
 
@@ -11020,9 +11048,14 @@ export const ProposalFragmentDoc = gql`
     executionTransactionHash
     vetoTransactionHash
     cancelTransactionHash
+    updatePeriodEnd
     dao {
       governorAddress
       tokenAddress
+    }
+    replacedBy {
+      proposalId
+      proposalNumber
     }
   }
 `

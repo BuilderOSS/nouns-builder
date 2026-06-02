@@ -19,9 +19,11 @@ import {
   TRANSACTION_FORM_OPTIONS,
   TransactionForm,
   TwoColumnLayout,
+  UpdatingProposalBanner,
 } from '@buildeross/create-proposal-ui'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useProposal } from '@buildeross/hooks/useProposal'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { useVotes } from '@buildeross/hooks/useVotes'
@@ -150,6 +152,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
+
   const {
     transactionType,
     setTransactionType,
@@ -160,6 +163,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     representedAddress,
     discussionUrl,
     representedAddressEnabled,
+    updateProposalId,
     setTitle,
     setSummary,
     setRepresentedAddress,
@@ -177,6 +181,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
       representedAddress: state.representedAddress,
       discussionUrl: state.discussionUrl,
       representedAddressEnabled: state.representedAddressEnabled,
+      updateProposalId: state.updateProposalId,
       setTitle: state.setTitle,
       setSummary: state.setSummary,
       setRepresentedAddress: state.setRepresentedAddress,
@@ -185,6 +190,16 @@ const CreateProposalPage: NextPageWithLayout = () => {
       clearProposal: state.clearProposal,
     }))
   )
+
+  // Check if we're updating an existing proposal
+  const isUpdatingProposal = !!updateProposalId
+
+  // Fetch proposal details if updating
+  const { proposal: updatingProposal } = useProposal({
+    chainId: chain.id,
+    proposalId: updateProposalId,
+    enabled: !!updateProposalId,
+  })
 
   const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
   const [createStage, setCreateStage] = React.useState<'draft' | 'transactions'>(() =>
@@ -617,6 +632,13 @@ const CreateProposalPage: NextPageWithLayout = () => {
         hideActionsOnMobile
         queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
       />
+
+      {isUpdatingProposal && (
+        <UpdatingProposalBanner
+          updateProposalId={updateProposalId}
+          updatingProposal={updatingProposal}
+        />
+      )}
 
       <ProposalStageIndicator
         currentStage={createStage === 'draft' ? 'draft' : 'transactions'}

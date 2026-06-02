@@ -4,8 +4,10 @@ import {
   CreateProposalHeading,
   ProposalStageIndicator,
   ReviewProposalForm,
+  UpdatingProposalBanner,
 } from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useProposal } from '@buildeross/hooks/useProposal'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
@@ -49,8 +51,17 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     discussionUrl,
     representedAddressEnabled,
     clearProposal,
+    updateProposalId,
   } = useProposalStore()
   const [proposalHydrated, setProposalHydrated] = useState(false)
+
+  const isUpdatingProposal = !!updateProposalId
+
+  const { proposal: updatingProposal } = useProposal({
+    chainId: chain.id,
+    proposalId: updateProposalId,
+    enabled: isUpdatingProposal,
+  })
 
   useEffect(() => {
     if (useProposalStore.persist.hasHydrated()) {
@@ -227,6 +238,13 @@ const ReviewProposalPage: NextPageWithLayout = () => {
         hideActionsOnMobile
         onReset={() => void onResetProposal()}
       />
+
+      {isUpdatingProposal && (
+        <UpdatingProposalBanner
+          updateProposalId={updateProposalId}
+          updatingProposal={updatingProposal}
+        />
+      )}
 
       <ProposalStageIndicator
         currentStage={'review'}

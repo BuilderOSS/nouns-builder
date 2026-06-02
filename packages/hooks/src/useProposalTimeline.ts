@@ -1,10 +1,8 @@
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
 import type { AddressType, BytesType, CHAIN_ID } from '@buildeross/types'
+import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { useMemo } from 'react'
-import useSWR from 'swr'
-import { useConfig } from 'wagmi'
-import { readContract } from 'wagmi/actions'
+import { useReadContracts } from 'wagmi'
 
 interface UseProposalTimelineParams {
   chainId: CHAIN_ID
@@ -30,121 +28,74 @@ export const useProposalTimeline = ({
   governorAddress,
   proposalId,
 }: UseProposalTimelineParams): ProposalTimeline => {
-  const config = useConfig()
-
-  // Fetch proposal update period end timestamp
-  const { data: updatePeriodEnd, isLoading: isLoadingUpdatePeriod } = useSWR(
-    chainId && governorAddress && proposalId
-      ? ([
-          SWR_KEYS.PROPOSAL,
-          'proposalUpdatePeriodEnd',
-          chainId,
-          governorAddress,
-          proposalId,
-        ] as const)
-      : null,
-    async ([, , _chainId, _governorAddress, _proposalId]) => {
-      try {
-        const result = await readContract(config, {
-          abi: governorAbi,
-          address: _governorAddress as AddressType,
-          functionName: 'proposalUpdatePeriodEnd',
-          args: [_proposalId],
-          chainId: _chainId,
-        })
-        return result as bigint
-      } catch (error) {
-        // If function doesn't exist (v2.x Governor), return 0
-        return 0n
-      }
+  // Fetch all timeline data in a single batched call
+  const { data, isLoading } = useReadContracts({
+    allowFailure: true,
+    query: {
+      enabled: !!chainId && !!governorAddress && !!proposalId,
     },
-    { revalidateOnFocus: false }
-  )
-
-  // Fetch proposal snapshot (when voting starts)
-  const { data: proposalSnapshot, isLoading: isLoadingSnapshot } = useSWR(
-    chainId && governorAddress && proposalId
-      ? ([
-          SWR_KEYS.PROPOSAL,
-          'proposalSnapshot',
-          chainId,
-          governorAddress,
-          proposalId,
-        ] as const)
-      : null,
-    async ([, , _chainId, _governorAddress, _proposalId]) => {
-      const result = await readContract(config, {
+    contracts: [
+      {
         abi: governorAbi,
-        address: _governorAddress as AddressType,
+        address: governorAddress,
+        chainId,
+        functionName: 'proposalUpdatePeriodEnd',
+        args: [proposalId],
+      },
+      {
+        abi: governorAbi,
+        address: governorAddress,
+        chainId,
         functionName: 'proposalSnapshot',
-        args: [_proposalId],
-        chainId: _chainId,
-      })
-      return result as bigint
-    },
-    { revalidateOnFocus: false }
-  )
-
-  // Fetch proposal deadline (when voting ends)
-  const { data: proposalDeadline, isLoading: isLoadingDeadline } = useSWR(
-    chainId && governorAddress && proposalId
-      ? ([
-          SWR_KEYS.PROPOSAL,
-          'proposalDeadline',
-          chainId,
-          governorAddress,
-          proposalId,
-        ] as const)
-      : null,
-    async ([, , _chainId, _governorAddress, _proposalId]) => {
-      const result = await readContract(config, {
+        args: [proposalId],
+      },
+      {
         abi: governorAbi,
-        address: _governorAddress as AddressType,
+        address: governorAddress,
+        chainId,
         functionName: 'proposalDeadline',
-        args: [_proposalId],
-        chainId: _chainId,
-      })
-      return result as bigint
-    },
-    { revalidateOnFocus: false }
-  )
+        args: [proposalId],
+      },
+      {
+        abi: governorAbi,
+        address: governorAddress,
+        chainId,
+        functionName: 'proposalEta',
+        args: [proposalId],
+      },
+    ] as const,
+  })
 
-  // Fetch proposal ETA (execution time)
-  const { data: proposalEta, isLoading: isLoadingEta } = useSWR(
-    chainId && governorAddress && proposalId
-      ? ([
-          SWR_KEYS.PROPOSAL,
-          'proposalEta',
-          chainId,
-          governorAddress,
-          proposalId,
-        ] as const)
-      : null,
-    async ([, , _chainId, _governorAddress, _proposalId]) => {
-      try {
-        const result = await readContract(config, {
-          abi: governorAbi,
-          address: _governorAddress as AddressType,
-          functionName: 'proposalEta',
-          args: [_proposalId],
-          chainId: _chainId,
-        })
-        return result as bigint
-      } catch (error) {
-        // Proposal not queued yet
-        return null
-      }
-    },
-    { revalidateOnFocus: false }
-  )
+  const [updatePeriodEndResult, snapshotResult, deadlineResult, etaResult] =
+    unpackOptionalArray(data, 4)
 
   const timeline = useMemo(() => {
     const now = Math.floor(Date.now() / 1000)
 
+    // Extract values from results (handling failures gracefully)
+    const updatePeriodEnd =
+      updatePeriodEndResult && 'result' in updatePeriodEndResult
+        ? (updatePeriodEndResult.result as bigint)
+        : 0n
+
+    const proposalSnapshot =
+      snapshotResult && 'result' in snapshotResult
+        ? (snapshotResult.result as bigint)
+        : undefined
+
+    const proposalDeadline =
+      deadlineResult && 'result' in deadlineResult
+        ? (deadlineResult.result as bigint)
+        : undefined
+
+    const proposalEta =
+      etaResult && 'result' in etaResult ? (etaResult.result as bigint) : null
+
     // Convert timestamps to Dates
-    const updateDeadline = updatePeriodEnd
-      ? new Date(Number(updatePeriodEnd) * 1000)
-      : undefined
+    const updateDeadline =
+      updatePeriodEnd && updatePeriodEnd > 0n
+        ? new Date(Number(updatePeriodEnd) * 1000)
+        : undefined
     const votingStarts = proposalSnapshot
       ? new Date(Number(proposalSnapshot) * 1000)
       : undefined
@@ -155,7 +106,8 @@ export const useProposalTimeline = ({
       proposalEta && proposalEta !== 0n ? new Date(Number(proposalEta) * 1000) : null
 
     // Calculate period flags
-    const isInUpdatablePeriod = updatePeriodEnd ? now < Number(updatePeriodEnd) : false
+    const isInUpdatablePeriod =
+      updatePeriodEnd && updatePeriodEnd > 0n ? now < Number(updatePeriodEnd) : false
     const isInVotingPeriod =
       proposalSnapshot && proposalDeadline
         ? now >= Number(proposalSnapshot) && now <= Number(proposalDeadline)
@@ -171,19 +123,9 @@ export const useProposalTimeline = ({
       isInUpdatablePeriod,
       isInVotingPeriod,
       canExecute,
-      isLoading:
-        isLoadingUpdatePeriod || isLoadingSnapshot || isLoadingDeadline || isLoadingEta,
+      isLoading,
     }
-  }, [
-    updatePeriodEnd,
-    proposalSnapshot,
-    proposalDeadline,
-    proposalEta,
-    isLoadingUpdatePeriod,
-    isLoadingSnapshot,
-    isLoadingDeadline,
-    isLoadingEta,
-  ])
+  }, [isLoading, deadlineResult, etaResult, snapshotResult, updatePeriodEndResult])
 
   return timeline
 }

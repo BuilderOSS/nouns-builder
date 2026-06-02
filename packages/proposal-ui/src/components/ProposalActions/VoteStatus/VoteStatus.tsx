@@ -12,6 +12,7 @@ import { useAccount, useWatchContractEvent } from 'wagmi'
 
 import { proposalActionButtonVariants } from '../ProposalActions.css'
 import Pending from './Pending'
+import Updatable from './Updatable'
 import Vote from './Vote'
 import { VoteModal } from './VoteModal'
 import { VotingPowerExplainer } from './VotingPowerExplainer'
@@ -33,6 +34,7 @@ interface VoteStatusProps {
   title: string
   daoName?: string
   signerVote?: ProposalVote
+  updateDeadline?: number
 }
 
 export const VoteStatus: React.FC<VoteStatusProps> = ({
@@ -44,6 +46,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
   state,
   daoName,
   title,
+  updateDeadline,
 }) => {
   const chain = useChainStore((x) => x.chain)
   const { address: userAddress } = useAccount()
@@ -165,8 +168,16 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
       {/* User has voted */}
       {vote ? <Vote support={vote.support} weight={vote.weight} /> : null}
 
+      {/* Proposal is in updatable period */}
+      {state === ProposalState.Updatable && updateDeadline ? (
+        <Updatable updateDeadline={updateDeadline} proposalId={proposalId} />
+      ) : null}
+
       {/* Proposal ended and the user did not vote */}
-      {state !== ProposalState.Active && state !== ProposalState.Pending && !vote ? (
+      {state !== ProposalState.Active &&
+      state !== ProposalState.Pending &&
+      state !== ProposalState.Updatable &&
+      !vote ? (
         <Flex direction={'row'} align={'center'}>
           <Text color={'text3'} ml={'x3'}>
             You did not participate in voting on this proposal
