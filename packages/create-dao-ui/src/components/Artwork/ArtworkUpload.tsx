@@ -6,11 +6,19 @@ import {
   ArtworkUpload as UploadComponent,
   LayerOrdering,
 } from '@buildeross/ui/Artwork'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { type FormikProps } from 'formik'
 import { motion } from 'framer-motion'
-import React, { BaseSyntheticEvent, ReactElement, useCallback, useEffect } from 'react'
+import React, {
+  BaseSyntheticEvent,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 
 import { useFormStore } from '../../stores'
+import { ConfirmReset } from '../ConfirmReset/ConfirmReset'
 import { artworkPreviewPanel } from './ArtworkUpload.css'
 
 const previewVariants = {
@@ -51,6 +59,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
   errorMessage,
   formik,
 }) => {
+  const [resetModalOpen, setResetModalOpen] = useState(false)
   const {
     setUpArtwork,
     setSetUpArtwork,
@@ -124,6 +133,33 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
     [setOrderedLayers, setFiles]
   )
 
+  const handleResetArtwork = useCallback(() => {
+    if (!formik) return
+
+    const emptyArtworkValues = {
+      artwork: [],
+      filesLength: '',
+      fileType: '',
+    }
+
+    formik.resetForm({ values: emptyArtworkValues })
+    setSetUpArtwork({ ...emptyArtworkValues })
+    setIpfsUpload([])
+    setOrderedLayers([])
+    setIpfsUploadProgress(0)
+    setIsUploadingToIPFS(false)
+    setFiles(undefined)
+    setResetModalOpen(false)
+  }, [
+    formik,
+    setFiles,
+    setIpfsUpload,
+    setIpfsUploadProgress,
+    setIsUploadingToIPFS,
+    setOrderedLayers,
+    setSetUpArtwork,
+  ])
+
   // Set up artwork traits into store
   useEffect(() => {
     if (!uploadedArtwork || !formik) return
@@ -158,6 +194,19 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
   )
   return (
     <>
+      <AnimatedModal
+        open={resetModalOpen}
+        close={() => setResetModalOpen(false)}
+        size="small"
+      >
+        <ConfirmReset
+          handleReset={handleResetArtwork}
+          onDismiss={() => setResetModalOpen(false)}
+          heading="Reset artwork?"
+          helperText="This will clear your uploaded artwork, trait ordering, and preview so you can start over."
+          confirmLabel="Reset artwork"
+        />
+      </AnimatedModal>
       <UploadComponent
         id={id}
         inputLabel={inputLabel}
@@ -170,6 +219,7 @@ export const ArtworkUpload: React.FC<ArtworkFormProps> = ({
         artworkError={artworkError}
         fileType={setUpArtwork.fileType}
         layerOrdering={layerOrdering}
+        onReset={() => setResetModalOpen(true)}
       />
       {showPreview && (
         <motion.div

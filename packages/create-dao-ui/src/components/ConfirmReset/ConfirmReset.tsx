@@ -12,13 +12,22 @@ import {
 interface ConfirmResetProps {
   handleReset: () => void
   onDismiss: () => void
+  heading?: string
+  helperText?: string
+  confirmLabel?: string
 }
 
-export const ConfirmReset: React.FC<ConfirmResetProps> = ({ handleReset, onDismiss }) => {
+export const ConfirmReset: React.FC<ConfirmResetProps> = ({
+  handleReset,
+  onDismiss,
+  heading = 'Reset all DAO setup?',
+  helperText = 'This will clear all saved settings across every step, including artwork, auction settings, rewards, and allocations. This cannot be undone.',
+  confirmLabel = 'Reset all setup',
+}) => {
   return (
     <Flex direction={'column'} w={'100%'} gap={'x2'}>
       <Flex align="center" justify="space-between" w={'100%'}>
-        <Flex className={confirmResetHeadingStyle}>Reset form?</Flex>
+        <Flex className={confirmResetHeadingStyle}>{heading}</Flex>
         <Button
           variant={'ghost'}
           onClick={onDismiss}
@@ -28,12 +37,10 @@ export const ConfirmReset: React.FC<ConfirmResetProps> = ({ handleReset, onDismi
           <Icon id="cross" />
         </Button>
       </Flex>
-      <Flex className={confirmResetHelperStyle}>
-        This will clear all your DAO settings and start over.
-      </Flex>
+      <Flex className={confirmResetHelperStyle}>{helperText}</Flex>
       <Flex direction={'column'} align={'stretch'} w={'100%'} mt={'x2'}>
         <Button className={confirmResetButton} onClick={handleReset}>
-          Reset
+          {confirmLabel}
         </Button>
         <Button className={dismissResetButton} onClick={onDismiss}>
           Cancel

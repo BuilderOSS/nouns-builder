@@ -44,6 +44,7 @@ export const ReviewSection: React.FC<{
       <Flex
         align={'center'}
         justify={'center'}
+        borderRadius={'curved'}
         className={reviewSectionSubHeading}
         px={'x6'}
         py={'x4'}
