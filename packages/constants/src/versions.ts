@@ -1,4 +1,4 @@
-export const versions = ['1.1.0', '1.2.0', '2.0.0'] as const
+export const versions = ['1.1.0', '1.2.0', '2.0.0', '3.0.0'] as const
 
 export type VersionType = (typeof versions)[number]
 
@@ -10,6 +10,11 @@ type ContractVersion = {
 }
 
 export const CONTRACT_VERSION_DETAILS: ContractVersion = {
+  '3.0.0': {
+    description:
+      'This upgrade adds updatable proposals, signed proposals (proposeBySigs), and improved governance features.',
+    date: '2025-06-02',
+  },
   '2.0.0': {
     description:
       'This optional release upgrades the DAO to V2 to add custom metadata renderers, protocol rewards and more.',
