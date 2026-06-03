@@ -66,11 +66,6 @@ export const tabButtonInactive = style({
   borderBottom: 'none',
 })
 
-export const modalContent = style({
-  maxHeight: '600px',
-  overflowY: 'auto',
-})
-
 export const tabsContainer = style({
   borderBottom: `1px solid ${vars.color.border}`,
 })

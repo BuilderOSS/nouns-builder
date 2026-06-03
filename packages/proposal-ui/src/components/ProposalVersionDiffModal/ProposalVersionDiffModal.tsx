@@ -1,4 +1,5 @@
 import { type ProposalVersion } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
@@ -6,6 +7,7 @@ import React from 'react'
 import { createInlineDiff, type DiffLine } from '../../utils/textDiff'
 import { ProposalDescription } from '../ProposalDescription'
 import * as styles from './ProposalVersionDiffModal.css'
+import { TransactionDiff } from './TransactionDiff'
 
 type ProposalVersionDiffModalProps = {
   open: boolean
@@ -26,6 +28,8 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
   versionIndex,
   isOriginal,
 }) => {
+  const { chain } = useChainStore()
+  const { addresses } = useDaoStore()
   const [activeTab, setActiveTab] = React.useState<TabType>('diff')
 
   // Reset to diff tab when modal opens
@@ -134,10 +138,20 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
           <Text color="text3">No changes to title or description in this update.</Text>
         )}
 
-        {/* TODO: Add transaction diff */}
-        <Text color="text3" fontSize={14}>
-          Transaction comparison coming soon...
-        </Text>
+        {/* Transaction Diff */}
+        {(currentVersion.targets?.length > 0 || previousVersion.targets?.length > 0) && (
+          <Stack gap="x2">
+            <Text fontWeight="label" color="text3" fontSize={14}>
+              Transaction Changes
+            </Text>
+            <TransactionDiff
+              chainId={chain.id}
+              addresses={addresses}
+              previousVersion={previousVersion}
+              currentVersion={currentVersion}
+            />
+          </Stack>
+        )}
       </Stack>
     )
   }
@@ -195,9 +209,7 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
         </Flex>
 
         {/* Content */}
-        <Box className={styles.modalContent}>
-          {activeTab === 'diff' ? renderDiff() : renderFullVersion()}
-        </Box>
+        <Box>{activeTab === 'diff' ? renderDiff() : renderFullVersion()}</Box>
       </Flex>
     </AnimatedModal>
   )

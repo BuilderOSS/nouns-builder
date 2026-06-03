@@ -41,7 +41,7 @@ export const SmartContracts = () => {
             You can find the latest information on the Nouns Builder protocol on{' '}
             <Text
               as={'a'}
-              href="https://github.com/ourzora/nouns-protocol"
+              href="https://github.com/BuilderOSS/nouns-protocol"
               target="_blank"
               rel="noreferrer"
               style={{ fontWeight: vars.fontWeight.display, textDecoration: 'underline' }}
