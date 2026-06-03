@@ -1,24 +1,24 @@
 {
   "network": "base-sepolia",
   "manager": {
-    "address": "0x550c326d688fd51ae65ac6a2d48749e631023a03",
-    "startBlock": 4663760
+    "address": "0x18333832015473c5aa48ccb782070fe20b95622c",
+    "startBlock": 42303967
   },
   "eas": {
     "address": "0x4200000000000000000000000000000000000021",
-    "startBlock": 25948922
+    "startBlock": 42303967
   },
   "clanker": {
     "address": "0xE85A59c628F7d27878ACeB4bf3b35733630083a9",
-    "startBlock": 34505000
+    "startBlock": 42303967
   },
   "zoraFactory": {
     "address": "0x777777751622c0d3258f214F9DF38E35BF45baF3",
-    "startBlock": 34505000
+    "startBlock": 42303967
   },
   "zoraNFTCreator": {
     "address": "0xb0C56317E9cEBc6E0f7A59458a83D0A9ccC3e955",
-    "startBlock": 7584274
+    "startBlock": 42303967
   },
   "callHandlers": false
 }
