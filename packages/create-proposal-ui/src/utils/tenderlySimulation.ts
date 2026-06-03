@@ -15,8 +15,6 @@ const CHAINS_TO_SIMULATE = [
   CHAIN_ID.OPTIMISM_SEPOLIA,
   CHAIN_ID.BASE,
   CHAIN_ID.BASE_SEPOLIA,
-  CHAIN_ID.ZORA,
-  CHAIN_ID.ZORA_SEPOLIA,
 ]
 
 export interface SimulateTransactionsParams {

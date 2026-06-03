@@ -12,11 +12,6 @@ import { NextPageWithLayout } from './_app'
 
 const networks = [
   {
-    chainId: CHAIN_ID.ZORA,
-    bridgeURL: 'https://bridge.zora.energy/',
-    bridgeLogo: '/chains/zora_wordmark.svg',
-  },
-  {
     chainId: CHAIN_ID.BASE,
     bridgeURL: 'https://bridge.base.org/',
     bridgeLogo: '/chains/base_wordmark.svg',

@@ -19,7 +19,5 @@ export const PUBLIC_SUBGRAPH_URL: Map<CHAIN_ID, string> = new Map([
   ],
   [CHAIN_ID.BASE, createSubgraphUrl('nouns-builder-base-mainnet')],
   [CHAIN_ID.BASE_SEPOLIA, createSubgraphUrl('nouns-builder-base-sepolia', '0.1.17')],
-  [CHAIN_ID.ZORA, createSubgraphUrl('nouns-builder-zora-mainnet')],
-  [CHAIN_ID.ZORA_SEPOLIA, createSubgraphUrl('nouns-builder-zora-sepolia')],
   [CHAIN_ID.FOUNDRY, ''],
 ])
