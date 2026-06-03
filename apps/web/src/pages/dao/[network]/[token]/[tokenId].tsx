@@ -1,6 +1,6 @@
 import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   About,
   Activity,
@@ -52,7 +52,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
 
   const { address } = useAccount()
 
-  const chain = PUBLIC_ALL_CHAINS.find((x) => x.id === chainId) as Chain
+  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId) as Chain
 
   const { hasThreshold } = useVotes({
     chainId: chainId,
