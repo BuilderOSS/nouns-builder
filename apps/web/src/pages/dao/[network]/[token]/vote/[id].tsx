@@ -7,6 +7,7 @@ import {
   ProposalActions,
   ProposalDescription,
   ProposalDetailsGrid,
+  ProposalEditedBanner,
   ProposalHeader,
   ProposalVotes,
 } from '@buildeross/proposal-ui'
@@ -205,6 +206,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
                 <Box fontWeight={'heading'}>{displayWarning}</Box>
               </Flex>
             )}
+            <ProposalEditedBanner key="edited-banner" proposal={proposal} />
 
             {displayActions && (
               <ProposalActions

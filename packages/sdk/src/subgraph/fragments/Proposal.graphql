@@ -27,9 +27,15 @@ fragment Proposal on Proposal {
   vetoTransactionHash
   cancelTransactionHash
   updatePeriodEnd
+  updateMessage
+  updateCount
   dao {
     governorAddress
     tokenAddress
+  }
+  replaces {
+    proposalId
+    proposalNumber
   }
   replacedBy {
     proposalId
