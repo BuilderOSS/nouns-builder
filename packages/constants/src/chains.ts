@@ -103,14 +103,14 @@ export const ALLOW_FAST_DAO_ON_MAINNET =
 // ----------------------
 
 // Still non-empty: concatenation of two non-empty arrays.
-// const PUBLIC_ALL_CHAINS_UNSORTED = [
-//   ...MAINNET_CHAINS_UNSORTED,
-//   ...TESTNET_CHAINS_UNSORTED,
-// ] as const satisfies readonly Chain[]
+const PUBLIC_ALL_CHAINS_UNSORTED = [
+  ...MAINNET_CHAINS_UNSORTED,
+  ...TESTNET_CHAINS_UNSORTED,
+] as const satisfies readonly Chain[]
 
-// export const PUBLIC_ALL_CHAINS: Chains = sortNonEmptyChains(
-//   PUBLIC_ALL_CHAINS_UNSORTED as NonEmptyArray<Chain>
-// )
+export const PUBLIC_ALL_CHAINS: Chains = sortNonEmptyChains(
+  PUBLIC_ALL_CHAINS_UNSORTED as NonEmptyArray<Chain>
+)
 
 const PUBLIC_DEFAULT_CHAINS_UNSORTED = PUBLIC_IS_TESTNET
   ? TESTNET_CHAINS_UNSORTED
