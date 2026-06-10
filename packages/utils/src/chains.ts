@@ -1,7 +1,7 @@
 import {
   ALLOW_FAST_DAO_ON_MAINNET,
   PUBLIC_DEFAULT_CHAINS,
-  TESTNET_CHAINS
+  TESTNET_CHAINS,
 } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 

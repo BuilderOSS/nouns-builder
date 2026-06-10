@@ -5,6 +5,7 @@ import {
   About,
   Activity,
   Admin,
+  Candidates,
   Gallery,
   SectionHandler,
   SmartContracts,
@@ -28,7 +29,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { isAddress } from 'viem'
-import { useAccount } from 'wagmi'
+import { useAccount, useReadContract } from 'wagmi'
 
 interface TokenPageProps {
   collection: AddressType
@@ -96,6 +97,30 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     [hasGalleryItems, hasCreatorCoin]
   )
 
+  // Check governor version for candidates feature (requires >= 3.0.0)
+  const { data: governorVersion } = useReadContract({
+    abi: [
+      {
+        inputs: [],
+        name: 'contractVersion',
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ],
+    address: addresses.governor,
+    functionName: 'contractVersion',
+    chainId: chainId,
+  })
+
+  const supportsCandidates = React.useMemo(() => {
+    if (!governorVersion) return false
+    const version = governorVersion as string
+    // Check if version >= 3.0.0
+    const [major] = version.split('.').map(Number)
+    return major >= 3
+  }, [governorVersion])
+
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
       const nextQuery = { ...query } // Get existing query params
@@ -147,6 +172,30 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     })
   }, [push, chain.slug, addresses.token])
 
+  const openCandidateCreatePage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]/candidate/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const openCandidateDetailPage = React.useCallback(
+    async (candidateId: string) => {
+      await push({
+        pathname: `/dao/[network]/[token]/candidate/[candidateId]`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          candidateId,
+        },
+      })
+    },
+    [push, chain.slug, addresses.token]
+  )
+
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
@@ -157,7 +206,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       component: [<Treasury key={'treasury'} />],
     }
     const proposalsSection = {
-      title: 'Activity',
+      title: supportsCandidates ? 'Proposals' : 'Activity',
       component: [
         <Activity
           key={'proposals'}
@@ -166,6 +215,18 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
         />,
       ],
     }
+    const candidatesSection = supportsCandidates
+      ? {
+          title: 'Candidates',
+          component: [
+            <Candidates
+              key={'candidates'}
+              onOpenCandidateCreate={openCandidateCreatePage}
+              onSelectCandidate={openCandidateDetailPage}
+            />,
+          ],
+        }
+      : null
     const adminSection = {
       title: 'Admin',
       component: [<Admin key={'admin'} onOpenProposalReview={openProposalReviewPage} />],
@@ -198,6 +259,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       daoFeed,
       treasurySection,
       proposalsSection,
+      ...(candidatesSection ? [candidatesSection] : []),
       ...(gallerySection ? [gallerySection] : []),
       smartContractsSection,
     ]
@@ -206,10 +268,13 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   }, [
     shouldShowGallery,
     hasThreshold,
+    supportsCandidates,
     openTab,
     openCoinCreatePage,
     openProposalCreatePage,
     openProposalReviewPage,
+    openCandidateCreatePage,
+    openCandidateDetailPage,
   ])
 
   const ogDescription = useMemo(() => {

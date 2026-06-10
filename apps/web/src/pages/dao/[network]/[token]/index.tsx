@@ -63,21 +63,21 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     { ...tokenContractParams, functionName: 'remainingTokensInReserve' as const },
     ...(merkleMinter
       ? ([
-          {
-            ...tokenContractParams,
-            functionName: 'minter' as const,
-            args: [merkleMinter] as const,
-          },
-        ] as const)
+        {
+          ...tokenContractParams,
+          functionName: 'minter' as const,
+          args: [merkleMinter] as const,
+        },
+      ] as const)
       : []),
     ...(redeemMinter
       ? ([
-          {
-            ...tokenContractParams,
-            functionName: 'minter' as const,
-            args: [redeemMinter] as const,
-          },
-        ] as const)
+        {
+          ...tokenContractParams,
+          functionName: 'minter' as const,
+          args: [redeemMinter] as const,
+        },
+      ] as const)
       : []),
   ]
 
@@ -105,6 +105,30 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
 
   // Check if signer address is a minter - show custom minter tab if true
   const isSignerCustomMinter = !!signerAddress && !!isSignerMinter
+
+  // Check governor version for candidates feature (requires >= 3.0.0)
+  const { data: governorVersion } = useReadContract({
+    abi: [
+      {
+        inputs: [],
+        name: 'contractVersion',
+        outputs: [{ internalType: 'string', name: '', type: 'string' }],
+        stateMutability: 'view',
+        type: 'function',
+      },
+    ],
+    address: addresses.governor,
+    functionName: 'contractVersion',
+    chainId: chain.id,
+  })
+
+  const supportsCandidates = React.useMemo(() => {
+    if (!governorVersion) return false
+    const version = governorVersion as string
+    // Check if version >= 3.0.0
+    const [major] = version.split('.').map(Number)
+    return major >= 3
+  }, [governorVersion])
 
   const [showMinterModal, setShowMinterModal] = React.useState(false)
 
@@ -201,7 +225,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
       },
       aboutSection,
       {
-        title: 'Activity',
+        title: supportsCandidates ? 'Proposals' : 'Activity',
         component: [
           <Activity
             key={'proposals'}
@@ -209,6 +233,10 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
             onOpenProposalReview={openProposalReviewPage}
           />,
         ],
+      },
+      {
+        title: 'Admin',
+        component: [<PreAuctionForm key={'admin'} />],
       },
     ]
 
@@ -241,6 +269,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     isMerkleReserveMinter,
     isERC721RedeemMinter,
     isSignerCustomMinter,
+    supportsCandidates,
     openProposalCreatePage,
     openProposalReviewPage,
   ])
@@ -249,7 +278,22 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     return null
   }
 
-  const activeTab = query.tab ? (query.tab as string) : isOwner ? 'admin' : 'about'
+  const defaultTab = query.tab ? (query.tab as string) : isOwner ? 'admin' : 'about'
+
+  // Normalize tab - both 'activity' and 'proposals' should map to the proposals/activity section
+  const rawTab = defaultTab
+    ? defaultTab
+    : supportsCandidates
+      ? 'proposals'
+      : 'activity'
+  const activeTab =
+    rawTab === 'proposals' && supportsCandidates
+      ? 'proposals'
+      : rawTab === 'activity'
+        ? supportsCandidates
+          ? 'proposals'
+          : 'activity'
+        : rawTab
   const path = `/dao/${chain.slug}/${addresses.token}/?tab=${activeTab}`
 
   return (
