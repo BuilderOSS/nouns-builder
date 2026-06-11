@@ -70,9 +70,6 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
       <Box
         position={'sticky'}
         pb={'x6'}
-        borderBottomColor={'border'}
-        borderBottomStyle={'solid'}
-        borderBottomWidth={'normal'}
         style={{
           top: `${stickyTopOffset}px`,
           transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',

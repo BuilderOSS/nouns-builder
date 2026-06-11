@@ -1,3 +1,4 @@
+import { ContractButton } from '@buildeross/ui'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import { useEffect } from 'react'
 import { decodeEventLog } from 'viem'
@@ -161,13 +162,14 @@ export const Step3_DeployDAO: React.FC = () => {
 
       {!isSuccess && (
         <Flex justify="center">
-          <Button
-            onClick={handleDeploy}
+          <ContractButton
+            chainId={targetChainId!}
+            handleClick={handleDeploy}
             disabled={isDeploying || isConfirming}
             loading={isDeploying || isConfirming}
           >
             {isDeploying ? 'Deploying...' : isConfirming ? 'Confirming...' : 'Deploy DAO'}
-          </Button>
+          </ContractButton>
         </Flex>
       )}
 

@@ -1,9 +1,16 @@
 import { AddressType } from '@buildeross/types'
 import { Box, Button, Flex, Heading, Input, Label, Stack, Text } from '@buildeross/zord'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { isAddress } from 'viem'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
+
+// Helper to safely stringify objects containing BigInt values
+const stringifyWithBigInt = (obj: any): string => {
+  return JSON.stringify(obj, (_key, value) =>
+    typeof value === 'bigint' ? value.toString() : value
+  )
+}
 
 export const Step2_ReviewConfig: React.FC = () => {
   const { sourceConfig, editedConfig, updateConfig, goToNextStep, goToPreviousStep } =
@@ -11,6 +18,12 @@ export const Step2_ReviewConfig: React.FC = () => {
 
   const [localConfig, setLocalConfig] = useState(editedConfig || sourceConfig)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Detect if config has changed (BigInt-safe comparison)
+  const hasChanges = useMemo(() => {
+    if (!localConfig || !sourceConfig) return false
+    return stringifyWithBigInt(localConfig) !== stringifyWithBigInt(sourceConfig)
+  }, [localConfig, sourceConfig])
 
   const validateConfig = () => {
     const newErrors: Record<string, string> = {}
@@ -219,22 +232,42 @@ export const Step2_ReviewConfig: React.FC = () => {
                         )}
                       </Box>
                       <Box flex={1}>
-                        <Label htmlFor={`founder-${idx}-duration`} mb="x1" fontSize={12}>
-                          Vesting End (Token ID)
+                        <Label
+                          htmlFor={`founder-${idx}-vestExpiry`}
+                          mb="x1"
+                          fontSize={12}
+                        >
+                          Vesting End Date
                         </Label>
                         <Input
-                          id={`founder-${idx}-duration`}
-                          type="number"
-                          value={founder.vestExpiry.toString()}
+                          id={`founder-${idx}-vestExpiry`}
+                          type="date"
+                          value={
+                            founder.vestExpiry > 0n
+                              ? new Date(Number(founder.vestExpiry) * 1000)
+                                  .toISOString()
+                                  .split('T')[0]
+                              : ''
+                          }
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             const newFounders = [...localConfig.founders!]
                             newFounders[idx] = {
                               ...founder,
-                              vestExpiry: BigInt(e.target.value || '0'),
+                              vestExpiry: e.target.value
+                                ? BigInt(
+                                    Math.floor(new Date(e.target.value).getTime() / 1000)
+                                  )
+                                : 0n,
                             }
                             setLocalConfig({ ...localConfig, founders: newFounders })
                           }}
                         />
+                        {founder.vestExpiry > 0n &&
+                          Number(founder.vestExpiry) < Date.now() / 1000 && (
+                            <Text color="warning" fontSize={12} mt="x1">
+                              ⚠️ Vesting has already completed on source DAO
+                            </Text>
+                          )}
                       </Box>
                     </Flex>
                   </Stack>
@@ -297,40 +330,46 @@ export const Step2_ReviewConfig: React.FC = () => {
             <Flex gap="x4">
               <Box flex={1}>
                 <Label htmlFor="proposal-threshold" mb="x2">
-                  Proposal Threshold (basis points)
+                  Proposal Threshold (%)
                 </Label>
                 <Input
                   id="proposal-threshold"
                   type="number"
-                  value={localConfig.proposalThresholdBps?.toString() || '0'}
+                  step="0.1"
+                  value={(Number(localConfig.proposalThresholdBps) / 100).toFixed(2)}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setLocalConfig({
                       ...localConfig,
-                      proposalThresholdBps: BigInt(e.target.value || '0'),
+                      proposalThresholdBps: BigInt(
+                        Math.round(parseFloat(e.target.value || '0') * 100)
+                      ),
                     })
                   }
                 />
                 <Text color="text4" fontSize={12} mt="x1">
-                  {(Number(localConfig.proposalThresholdBps) / 100).toFixed(2)}%
+                  Minimum % of total NFTs required to create a proposal
                 </Text>
               </Box>
               <Box flex={1}>
                 <Label htmlFor="quorum-threshold" mb="x2">
-                  Quorum Threshold (basis points)
+                  Quorum Threshold (%)
                 </Label>
                 <Input
                   id="quorum-threshold"
                   type="number"
-                  value={localConfig.quorumThresholdBps?.toString() || '0'}
+                  step="1"
+                  value={(Number(localConfig.quorumThresholdBps) / 100).toFixed(2)}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setLocalConfig({
                       ...localConfig,
-                      quorumThresholdBps: BigInt(e.target.value || '0'),
+                      quorumThresholdBps: BigInt(
+                        Math.round(parseFloat(e.target.value || '0') * 100)
+                      ),
                     })
                   }
                 />
                 <Text color="text4" fontSize={12} mt="x1">
-                  {(Number(localConfig.quorumThresholdBps) / 100).toFixed(2)}%
+                  Minimum % of total NFTs that must vote 'For' to pass
                 </Text>
               </Box>
             </Flex>
@@ -338,42 +377,56 @@ export const Step2_ReviewConfig: React.FC = () => {
             <Flex gap="x4">
               <Box flex={1}>
                 <Label htmlFor="voting-delay" mb="x2">
-                  Voting Delay (seconds)
+                  Voting Delay (days)
                 </Label>
                 <Input
                   id="voting-delay"
                   type="number"
-                  value={localConfig.votingDelay?.toString() || '0'}
+                  step="0.1"
+                  value={(Number(localConfig.votingDelay) / 86400).toFixed(2)}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setLocalConfig({
                       ...localConfig,
-                      votingDelay: BigInt(e.target.value || '0'),
+                      votingDelay: BigInt(
+                        Math.round(parseFloat(e.target.value || '0') * 86400)
+                      ),
                     })
                   }
                 />
+                <Text color="text4" fontSize={12} mt="x1">
+                  {Number(localConfig.votingDelay).toLocaleString()} seconds - Time
+                  between proposal creation and voting start
+                </Text>
               </Box>
               <Box flex={1}>
                 <Label htmlFor="voting-period" mb="x2">
-                  Voting Period (seconds)
+                  Voting Period (days)
                 </Label>
                 <Input
                   id="voting-period"
                   type="number"
-                  value={localConfig.votingPeriod?.toString() || '0'}
+                  step="0.1"
+                  value={(Number(localConfig.votingPeriod) / 86400).toFixed(2)}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setLocalConfig({
                       ...localConfig,
-                      votingPeriod: BigInt(e.target.value || '0'),
+                      votingPeriod: BigInt(
+                        Math.round(parseFloat(e.target.value || '0') * 86400)
+                      ),
                     })
                   }
                 />
+                <Text color="text4" fontSize={12} mt="x1">
+                  {Number(localConfig.votingPeriod).toLocaleString()} seconds - How long a
+                  proposal remains open for voting
+                </Text>
               </Box>
             </Flex>
           </Stack>
         </Box>
 
         {/* Changes indicator */}
-        {JSON.stringify(localConfig) !== JSON.stringify(sourceConfig) && (
+        {hasChanges && (
           <Box p="x3" borderRadius="curved" backgroundColor="warning">
             <Text fontSize={14} color="onWarning">
               ⚠️ You have made changes to the configuration. These will be used for
@@ -388,11 +441,7 @@ export const Step2_ReviewConfig: React.FC = () => {
           Back to Chain Selection
         </Button>
         <Flex gap="x3">
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-            disabled={JSON.stringify(localConfig) === JSON.stringify(sourceConfig)}
-          >
+          <Button variant="secondary" onClick={handleReset} disabled={!hasChanges}>
             Reset to Original
           </Button>
           <Button onClick={handleContinue}>Continue to Deployment</Button>

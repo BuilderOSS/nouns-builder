@@ -101,7 +101,7 @@ export const Step4_SetupMetadata: React.FC = () => {
           <Stack gap="x2">
             <Flex justify="space-between">
               <Text color="text3">Total Property Groups:</Text>
-              <Text fontWeight="medium">{properties.length}</Text>
+              <Text fontWeight="label">{properties.length}</Text>
             </Flex>
             <Text color="text4" fontSize={12} mt="x2">
               Each group will be added via a separate transaction using addProperties().
@@ -135,7 +135,7 @@ export const Step4_SetupMetadata: React.FC = () => {
                 <Text fontSize={14} color="text3">
                   Adding property groups...
                 </Text>
-                <Text fontSize={14} fontWeight="medium">
+                <Text fontSize={14} fontWeight="label">
                   {currentProperty} / {totalProperties}
                 </Text>
               </Flex>

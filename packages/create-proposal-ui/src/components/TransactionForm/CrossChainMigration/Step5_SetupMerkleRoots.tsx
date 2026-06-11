@@ -134,7 +134,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
             </Heading>
             <Stack gap="x3">
               <Box>
-                <Text fontWeight="medium" mb="x1">
+                <Text fontWeight="label" mb="x1">
                   1. Attributes Merkle Root
                 </Text>
                 <Text fontSize={14} color="text3">
@@ -143,7 +143,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                 </Text>
               </Box>
               <Box>
-                <Text fontWeight="medium" mb="x1">
+                <Text fontWeight="label" mb="x1">
                   2. Member Merkle Root
                 </Text>
                 <Text fontSize={14} color="text3">

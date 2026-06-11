@@ -157,19 +157,19 @@ After this proposal passes:
         <Stack gap="x2" fontSize={14}>
           <Flex justify="space-between">
             <Text color="text3">Source Chain:</Text>
-            <Text fontWeight="medium">{sourceChainId}</Text>
+            <Text fontWeight="label">{sourceChainId}</Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Target Chain:</Text>
-            <Text fontWeight="medium">{targetChainId}</Text>
+            <Text fontWeight="label">{targetChainId}</Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">DAO Name:</Text>
-            <Text fontWeight="medium">{editedConfig?.name}</Text>
+            <Text fontWeight="label">{editedConfig?.name}</Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Token Symbol:</Text>
-            <Text fontWeight="medium">{editedConfig?.symbol}</Text>
+            <Text fontWeight="label">{editedConfig?.symbol}</Text>
           </Flex>
         </Stack>
       </Box>
@@ -219,7 +219,7 @@ After this proposal passes:
         <Stack gap="x3" fontSize={14}>
           <Box>
             <Flex align="center" gap="x2" mb="x1">
-              <Text fontWeight="medium">1. Pause Auction</Text>
+              <Text fontWeight="label">1. Pause Auction</Text>
             </Flex>
             <Text color="text3" fontSize={13}>
               Target: {sourceAddresses?.auction}
@@ -230,7 +230,7 @@ After this proposal passes:
           </Box>
           <Box>
             <Flex align="center" gap="x2" mb="x1">
-              <Text fontWeight="medium">2. Bridge Treasury</Text>
+              <Text fontWeight="label">2. Bridge Treasury</Text>
             </Flex>
             <Text color="text3" fontSize={13}>
               Target: {bridgeTransaction?.target}

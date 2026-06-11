@@ -27,7 +27,7 @@ export const Step7_SetAttributes: React.FC = () => {
         </Heading>
         <Stack gap="x3">
           <Box>
-            <Text fontWeight="medium" mb="x1">
+            <Text fontWeight="label" mb="x1">
               Merkle-based Attributes (Current)
             </Text>
             <Text fontSize={14} color="text3">
@@ -36,7 +36,7 @@ export const Step7_SetAttributes: React.FC = () => {
             </Text>
           </Box>
           <Box>
-            <Text fontWeight="medium" mb="x1">
+            <Text fontWeight="label" mb="x1">
               On-chain Attributes (Optional)
             </Text>
             <Text fontSize={14} color="text3">
@@ -65,7 +65,7 @@ export const Step7_SetAttributes: React.FC = () => {
         </Heading>
         <Stack gap="x2" fontSize={14}>
           <Box>
-            <Text fontWeight="medium" mb="x1">
+            <Text fontWeight="label" mb="x1">
               1. Skip for now (Recommended)
             </Text>
             <Text color="text3">
@@ -73,7 +73,7 @@ export const Step7_SetAttributes: React.FC = () => {
             </Text>
           </Box>
           <Box>
-            <Text fontWeight="medium" mb="x1">
+            <Text fontWeight="label" mb="x1">
               2. Set attributes later
             </Text>
             <Text color="text3">

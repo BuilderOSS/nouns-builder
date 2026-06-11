@@ -91,21 +91,21 @@ export const Step6_MintTokens: React.FC = () => {
         <Stack gap="x2">
           <Flex justify="space-between">
             <Text color="text3">Token Holders:</Text>
-            <Text fontWeight="medium">{memberSnapshot.length}</Text>
+            <Text fontWeight="label">{memberSnapshot.length}</Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Total Tokens to Mint:</Text>
-            <Text fontWeight="medium">
+            <Text fontWeight="label">
               {memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)}
             </Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Batch Size:</Text>
-            <Text fontWeight="medium">15 tokens per transaction</Text>
+            <Text fontWeight="label">15 tokens per transaction</Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Estimated Transactions:</Text>
-            <Text fontWeight="medium">
+            <Text fontWeight="label">
               {Math.ceil(
                 memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0) / 15
               )}
@@ -144,7 +144,7 @@ export const Step6_MintTokens: React.FC = () => {
                 <Text fontSize={14} color="text3">
                   Tokens Minted
                 </Text>
-                <Text fontSize={14} fontWeight="medium">
+                <Text fontSize={14} fontWeight="label">
                   {tokensMinted.length} / {totalTokens}
                 </Text>
               </Flex>
@@ -218,15 +218,15 @@ export const Step6_MintTokens: React.FC = () => {
             <Stack gap="x2" fontSize={14}>
               <Flex justify="space-between">
                 <Text color="text3">Tokens Minted:</Text>
-                <Text fontWeight="medium">{tokensMinted.length}</Text>
+                <Text fontWeight="label">{tokensMinted.length}</Text>
               </Flex>
               <Flex justify="space-between">
                 <Text color="text3">Batch Transactions:</Text>
-                <Text fontWeight="medium">{txHashes.length}</Text>
+                <Text fontWeight="label">{txHashes.length}</Text>
               </Flex>
               <Flex justify="space-between">
                 <Text color="text3">Recipients:</Text>
-                <Text fontWeight="medium">{memberSnapshot.length}</Text>
+                <Text fontWeight="label">{memberSnapshot.length}</Text>
               </Flex>
             </Stack>
           </Box>

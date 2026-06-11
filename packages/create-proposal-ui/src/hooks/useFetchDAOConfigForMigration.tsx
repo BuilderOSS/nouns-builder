@@ -148,6 +148,8 @@ export const useFetchDAOConfigForMigration = ({
         daoImage: daoImage!,
         projectURI: projectURI!,
         currentTokenId: tokenId!,
+        reservedUntilTokenId: tokenId! + 1n,
+        metadataRenderer: rendererAddress,
         founders: existingFounders || [],
         duration: duration!,
         reservePrice: reservePrice!,
