@@ -17,6 +17,7 @@ export const SWR_KEYS = {
   PROPOSALS: 'proposals',
   PROPOSALS_CALLDATAS: 'proposals-calldatas',
   PROPOSALS_TRANSACTIONS: 'proposal-transaction-data',
+  PARTICIPATION_HISTORY: 'participation-history',
   DECODED_TRANSACTION: 'decoded-transaction',
   ENS: 'ens',
   ENS_NAME: 'ens-name',

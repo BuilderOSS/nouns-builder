@@ -4,6 +4,7 @@ import { Box, Grid } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useCallback } from 'react'
 
+import { QuorumProgress } from '../VoteMetrics'
 import { Tile } from './Tile'
 import {
   propDataGrid,
@@ -84,6 +85,7 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
           )
         })}
       </Grid>
+      <QuorumProgress forVotes={forVotes} quorumVotes={Number(quorumVotes)} />
       <Grid className={propDataGrid}>
         <Tile
           title={'Threshold'}
