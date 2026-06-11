@@ -5,6 +5,7 @@ import { AddArtwork } from './AddArtwork'
 import { AirdropTokens } from './AirdropTokens'
 import { ContentCoin } from './ContentCoin'
 import { CreatorCoin } from './CreatorCoin'
+import { CrossChainMigration } from './CrossChainMigration'
 import { CustomTransaction } from './CustomTransaction'
 import { Droposal } from './Droposal'
 import { FixRendererBase } from './FixRendererBase'
@@ -43,6 +44,7 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.ADD_ARTWORK,
   TransactionType.REPLACE_ARTWORK,
   TransactionType.MIGRATION,
+  TransactionType.CROSS_CHAIN_MIGRATION,
 ] as const
 
 const FORMS: Record<TransactionFormType, React.FC> = {
@@ -63,6 +65,7 @@ const FORMS: Record<TransactionFormType, React.FC> = {
   [TransactionType.ADD_ARTWORK]: AddArtwork,
   [TransactionType.REPLACE_ARTWORK]: ReplaceArtwork,
   [TransactionType.MIGRATION]: Migration,
+  [TransactionType.CROSS_CHAIN_MIGRATION]: CrossChainMigration,
   [TransactionType.CREATOR_COIN]: CreatorCoin,
   [TransactionType.CONTENT_COIN]: ContentCoin,
 } as const

@@ -1,6 +1,7 @@
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { isMigrationAllowed } from '@buildeross/constants/migration'
 import {
   CreateProposalHeading,
   MobileProposalActionBar,
@@ -238,6 +239,12 @@ const CreateProposalPage: NextPageWithLayout = () => {
     [token]
   )
 
+  // Check if connected wallet can access cross-chain migration
+  const hasCrossChainMigrationAccess = useMemo(
+    () => (address ? isMigrationAllowed(address) : false),
+    [address]
+  )
+
   const isEASSupported = useMemo(() => isChainIdSupportedByEAS(chain.id), [chain.id])
 
   const isSablierSupported = useMemo(
@@ -270,6 +277,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
       TRANSACTION_FORM_OPTIONS.filter((x) => {
         if (x === TransactionType.MIGRATION && (!isL1Chain || !isAllowedMigrationDao))
           return false
+        if (x === TransactionType.CROSS_CHAIN_MIGRATION && !hasCrossChainMigrationAccess)
+          return false
         if (x === TransactionType.PAUSE_AUCTIONS && paused) return false
         if (x === TransactionType.RESUME_AUCTIONS && !paused) return false
         if (x === TransactionType.FIX_RENDERER_BASE && !shouldFixRendererBase)
@@ -287,6 +296,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     [
       isL1Chain,
       isAllowedMigrationDao,
+      hasCrossChainMigrationAccess,
       paused,
       shouldFixRendererBase,
       isEASSupported,
