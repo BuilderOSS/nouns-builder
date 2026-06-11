@@ -1,2 +1,4 @@
 export * from './VoteModal'
 export * from './VoteStatus'
+export * from './VotingPowerExplainer'
+export * from './VotingPowerExplainer.helper'
