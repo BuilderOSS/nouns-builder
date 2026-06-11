@@ -1,5 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { Feed } from '@buildeross/feed-ui'
+import { Feed, UrgencyAlerts } from '@buildeross/feed-ui'
 import {
   type DashboardDaoWithState,
   useDashboardData,
@@ -167,8 +167,13 @@ export const Dashboard: React.FC = () => {
       ))
   }, [sortedDaos, address, hasLiveProposals])
 
-  // Main content - always show Feed
-  const mainContent = <Feed enableFilters />
+  // Main content - urgency alerts pinned above the feed
+  const mainContent = (
+    <>
+      <UrgencyAlerts />
+      <Feed enableFilters />
+    </>
+  )
 
   // Sidebar content - varies by state
   let sidebarContent: React.ReactNode
