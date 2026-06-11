@@ -7,23 +7,30 @@ export const MembersPanel = ({
   children,
   tableRuler = true,
   exportButton,
+  filterControl,
 }: {
   children: ReactNode
   tableRuler?: boolean
   exportButton?: ReactNode
+  filterControl?: ReactNode
 }) => {
   return (
     <>
       <Flex
         justify="space-between"
         align="center"
+        wrap="wrap"
+        gap="x2"
         mb={{ '@initial': 'x4', '@768': 'x6' }}
         mt={{ '@initial': 'x4', '@768': 'x10' }}
       >
         <Text variant="heading-xs" style={{ fontWeight: 800 }}>
           Delegates
         </Text>
-        {exportButton}
+        <Flex align="center" gap="x2">
+          {filterControl}
+          {exportButton}
+        </Flex>
       </Flex>
       <Box
         borderRadius={'phat'}

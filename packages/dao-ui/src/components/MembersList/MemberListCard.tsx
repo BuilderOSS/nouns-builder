@@ -3,6 +3,7 @@ import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
+import { StatBadge } from '@buildeross/ui/StatBadge'
 import { Flex, Grid, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
@@ -10,9 +11,11 @@ import React, { useMemo } from 'react'
 export const MemberCard = ({
   member,
   totalSupply,
+  isActive,
 }: {
   member: DaoVoter
   totalSupply?: number
+  isActive?: boolean
 }) => {
   const { getProfileLink } = useLinks()
   const { displayName, ensAvatar } = useEnsData(member.voter)
@@ -43,6 +46,7 @@ export const MemberCard = ({
         <Text mx="x2" variant="paragraph-md">
           {displayName}
         </Text>
+        {isActive && <StatBadge variant="positive">Active</StatBadge>}
       </Flex>
       <Grid columns="1fr 1fr 1fr" flex={1} width={{ '@initial': '100%', '@768': 'auto' }}>
         <Text>

@@ -33,6 +33,7 @@ export const SWR_KEYS = {
   DAO_FEED: 'dao-feed',
   MEMBERS: 'members',
   MEMBERS_LIST: 'members-list',
+  ACTIVE_MEMBERS: 'active-members',
   TOKEN_IMAGE: 'token-image',
   DASHBOARD: 'dashboard',
   DAO_MEMBERSHIP: 'dao-membership',
