@@ -7,7 +7,7 @@
     "declarationMap": true,
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
-    "types": ["@testing-library/jest-dom", "vitest/globals", "node"]
+    "types": ["@testing-library/jest-dom", "vitest/globals"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
