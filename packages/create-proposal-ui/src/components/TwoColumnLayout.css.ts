@@ -8,3 +8,11 @@ export const twoColumnLayout = style({
     },
   },
 })
+
+export const rightColumnHiddenOnMobile = style({
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'none',
+    },
+  },
+})

@@ -63,21 +63,21 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     { ...tokenContractParams, functionName: 'remainingTokensInReserve' as const },
     ...(merkleMinter
       ? ([
-        {
-          ...tokenContractParams,
-          functionName: 'minter' as const,
-          args: [merkleMinter] as const,
-        },
-      ] as const)
+          {
+            ...tokenContractParams,
+            functionName: 'minter' as const,
+            args: [merkleMinter] as const,
+          },
+        ] as const)
       : []),
     ...(redeemMinter
       ? ([
-        {
-          ...tokenContractParams,
-          functionName: 'minter' as const,
-          args: [redeemMinter] as const,
-        },
-      ] as const)
+          {
+            ...tokenContractParams,
+            functionName: 'minter' as const,
+            args: [redeemMinter] as const,
+          },
+        ] as const)
       : []),
   ]
 
@@ -228,7 +228,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
         title: supportsCandidates ? 'Proposals' : 'Activity',
         component: [
           <Activity
-            key={'proposals'}
+            key={supportsCandidates ? 'proposals' : 'activity'}
             onOpenProposalCreate={openProposalCreatePage}
             onOpenProposalReview={openProposalReviewPage}
           />,
@@ -278,22 +278,14 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     return null
   }
 
-  const defaultTab = query.tab ? (query.tab as string) : isOwner ? 'admin' : 'about'
-
   // Normalize tab - both 'activity' and 'proposals' should map to the proposals/activity section
-  const rawTab = defaultTab
-    ? defaultTab
-    : supportsCandidates
-      ? 'proposals'
-      : 'activity'
+  const rawTab = query.tab ? (query.tab as string) : isOwner ? 'admin' : 'about'
   const activeTab =
-    rawTab === 'proposals' && supportsCandidates
-      ? 'proposals'
-      : rawTab === 'activity'
-        ? supportsCandidates
-          ? 'proposals'
-          : 'activity'
-        : rawTab
+    rawTab === 'proposals' || rawTab === 'activity'
+      ? supportsCandidates
+        ? 'proposals'
+        : 'activity'
+      : rawTab
   const path = `/dao/${chain.slug}/${addresses.token}/?tab=${activeTab}`
 
   return (

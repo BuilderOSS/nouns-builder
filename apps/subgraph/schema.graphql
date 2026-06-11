@@ -104,7 +104,16 @@ type Snapshot @entity {
   proposalCount: Int!
 }
 
-type Proposal @entity {
+interface ProposalMetadataEntity {
+  id: ID!
+  title: String
+  description: String
+  metadata: String
+  representedAddress: String
+  discussionUrl: String
+}
+
+type Proposal implements ProposalMetadataEntity @entity {
   id: ID!
   proposalId: Bytes!
   proposalNumber: Int!
@@ -192,7 +201,7 @@ type ProposalCandidateGroup @entity {
   currentAbstainCount: BigInt!
 }
 
-type ProposalCandidateVersion @entity {
+type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
   id: ID!
   group: ProposalCandidateGroup!
   candidateId: Bytes!
@@ -202,12 +211,13 @@ type ProposalCandidateVersion @entity {
   targets: [Bytes!]!
   values: [BigInt!]!
   calldatas: [Bytes!]!
-  description: String!
+  title: String
+  description: String
+  metadata: String
+  representedAddress: String
+  discussionUrl: String
   proposalId: Bytes!
   createdAt: BigInt!
-  title: String!
-  summary: String!
-  discussionUrl: String
   signatures: [CandidateSponsorSignature!]! @derivedFrom(field: "version")
   signatureCount: BigInt!
   totalVoteWeight: BigInt!

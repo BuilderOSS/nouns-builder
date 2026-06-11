@@ -3610,11 +3610,12 @@ export enum ProposalCandidateGroup_OrderBy {
   LeadingVersionDescription = 'leadingVersion__description',
   LeadingVersionDiscussionUrl = 'leadingVersion__discussionUrl',
   LeadingVersionId = 'leadingVersion__id',
+  LeadingVersionMetadata = 'leadingVersion__metadata',
   LeadingVersionProposalId = 'leadingVersion__proposalId',
+  LeadingVersionRepresentedAddress = 'leadingVersion__representedAddress',
   LeadingVersionRevoked = 'leadingVersion__revoked',
   LeadingVersionSalt = 'leadingVersion__salt',
   LeadingVersionSignatureCount = 'leadingVersion__signatureCount',
-  LeadingVersionSummary = 'leadingVersion__summary',
   LeadingVersionTitle = 'leadingVersion__title',
   LeadingVersionTotalVoteWeight = 'leadingVersion__totalVoteWeight',
   LeadingVersionVersionNumber = 'leadingVersion__versionNumber',
@@ -3630,18 +3631,19 @@ export type ProposalCandidateVersion = {
   calldatas: Array<Scalars['Bytes']['output']>
   candidateId: Scalars['Bytes']['output']
   createdAt: Scalars['BigInt']['output']
-  description: Scalars['String']['output']
+  description?: Maybe<Scalars['String']['output']>
   discussionUrl?: Maybe<Scalars['String']['output']>
   group: ProposalCandidateGroup
   id: Scalars['ID']['output']
+  metadata?: Maybe<Scalars['String']['output']>
   proposalId: Scalars['Bytes']['output']
+  representedAddress?: Maybe<Scalars['String']['output']>
   revoked: Scalars['Boolean']['output']
   salt: Scalars['Bytes']['output']
   signatureCount: Scalars['BigInt']['output']
   signatures: Array<CandidateSponsorSignature>
-  summary: Scalars['String']['output']
   targets: Array<Scalars['Bytes']['output']>
-  title: Scalars['String']['output']
+  title?: Maybe<Scalars['String']['output']>
   totalVoteWeight: Scalars['BigInt']['output']
   values: Array<Scalars['BigInt']['output']>
   versionNumber: Scalars['BigInt']['output']
@@ -9280,6 +9282,126 @@ export type ZoraDropWithHoldersFragment = {
   dao?: { __typename?: 'DAO'; id: string; name: string; contractImage: string } | null
 }
 
+export type CandidateGroupFragmentFragment = {
+  __typename?: 'ProposalCandidateGroup'
+  id: string
+  proposer: any
+  salt: any
+  createdAt: any
+  versionCount: any
+  commentCount: any
+  latestVersionNumber: any
+  currentForCount: any
+  currentAgainstCount: any
+  currentAbstainCount: any
+  dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
+}
+
+export type CandidateGroupDetailFragmentFragment = {
+  __typename?: 'ProposalCandidateGroup'
+  id: string
+  proposer: any
+  salt: any
+  createdAt: any
+  versionCount: any
+  commentCount: any
+  latestVersionNumber: any
+  currentForCount: any
+  currentAgainstCount: any
+  currentAbstainCount: any
+  dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
+  leadingVersion?: {
+    __typename?: 'ProposalCandidateVersion'
+    id: string
+    candidateId: any
+    salt: any
+    attester: any
+    versionNumber: any
+    targets: Array<any>
+    values: Array<any>
+    calldatas: Array<any>
+    description?: string | null
+    metadata?: string | null
+    proposalId: any
+    representedAddress?: string | null
+    createdAt: any
+    title?: string | null
+    discussionUrl?: string | null
+    signatureCount: any
+    totalVoteWeight: any
+    revoked: boolean
+  } | null
+  versions: Array<{
+    __typename?: 'ProposalCandidateVersion'
+    id: string
+    candidateId: any
+    salt: any
+    attester: any
+    versionNumber: any
+    targets: Array<any>
+    values: Array<any>
+    calldatas: Array<any>
+    description?: string | null
+    metadata?: string | null
+    proposalId: any
+    representedAddress?: string | null
+    createdAt: any
+    title?: string | null
+    discussionUrl?: string | null
+    signatureCount: any
+    totalVoteWeight: any
+    revoked: boolean
+  }>
+}
+
+export type CandidateVersionFragmentFragment = {
+  __typename?: 'ProposalCandidateVersion'
+  id: string
+  candidateId: any
+  salt: any
+  attester: any
+  versionNumber: any
+  targets: Array<any>
+  values: Array<any>
+  calldatas: Array<any>
+  description?: string | null
+  metadata?: string | null
+  proposalId: any
+  representedAddress?: string | null
+  createdAt: any
+  title?: string | null
+  discussionUrl?: string | null
+  signatureCount: any
+  totalVoteWeight: any
+  revoked: boolean
+}
+
+export type CandidateCommentFragmentFragment = {
+  __typename?: 'CandidateComment'
+  id: string
+  candidate: any
+  commenter: any
+  voteWeight: any
+  support: CandidateVoteSupport
+  comment: string
+  createdAt: any
+  revoked: boolean
+  parentComment?: { __typename?: 'CandidateComment'; id: string } | null
+}
+
+export type CandidateSponsorSignatureFragmentFragment = {
+  __typename?: 'CandidateSponsorSignature'
+  id: string
+  signer: any
+  proposalId: any
+  nonce: any
+  deadline: any
+  signature: any
+  revoked: boolean
+  createdAt: any
+  voteWeight: any
+}
+
 export type DaoMultisigUpdateFragment = {
   __typename?: 'DaoMultisigUpdate'
   id: string
@@ -9360,6 +9482,146 @@ export type AuctionHistoryQuery = {
       settled: boolean
       winningBid?: { __typename?: 'AuctionBid'; amount: any } | null
     }>
+  } | null
+}
+
+export type CandidateCommentsQueryVariables = Exact<{
+  where?: InputMaybe<CandidateComment_Filter>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<CandidateComment_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type CandidateCommentsQuery = {
+  __typename?: 'Query'
+  candidateComments: Array<{
+    __typename?: 'CandidateComment'
+    id: string
+    candidate: any
+    commenter: any
+    voteWeight: any
+    support: CandidateVoteSupport
+    comment: string
+    createdAt: any
+    revoked: boolean
+    parentComment?: { __typename?: 'CandidateComment'; id: string } | null
+  }>
+}
+
+export type CandidateGroupQueryVariables = Exact<{
+  candidateId: Scalars['ID']['input']
+}>
+
+export type CandidateGroupQuery = {
+  __typename?: 'Query'
+  proposalCandidateGroup?: {
+    __typename?: 'ProposalCandidateGroup'
+    id: string
+    proposer: any
+    salt: any
+    createdAt: any
+    versionCount: any
+    commentCount: any
+    latestVersionNumber: any
+    currentForCount: any
+    currentAgainstCount: any
+    currentAbstainCount: any
+    dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
+    leadingVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      id: string
+      candidateId: any
+      salt: any
+      attester: any
+      versionNumber: any
+      targets: Array<any>
+      values: Array<any>
+      calldatas: Array<any>
+      description: string
+      proposalId: any
+      createdAt: any
+      title: string
+      summary: string
+      discussionUrl?: string | null
+      signatureCount: any
+      totalVoteWeight: any
+      revoked: boolean
+    } | null
+    versions: Array<{
+      __typename?: 'ProposalCandidateVersion'
+      id: string
+      candidateId: any
+      salt: any
+      attester: any
+      versionNumber: any
+      targets: Array<any>
+      values: Array<any>
+      calldatas: Array<any>
+      description: string
+      proposalId: any
+      createdAt: any
+      title: string
+      summary: string
+      discussionUrl?: string | null
+      signatureCount: any
+      totalVoteWeight: any
+      revoked: boolean
+    }>
+  } | null
+}
+
+export type CandidateGroupsQueryVariables = Exact<{
+  where?: InputMaybe<ProposalCandidateGroup_Filter>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ProposalCandidateGroup_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type CandidateGroupsQuery = {
+  __typename?: 'Query'
+  proposalCandidateGroups: Array<{
+    __typename?: 'ProposalCandidateGroup'
+    id: string
+    proposer: any
+    salt: any
+    createdAt: any
+    versionCount: any
+    commentCount: any
+    latestVersionNumber: any
+    currentForCount: any
+    currentAgainstCount: any
+    currentAbstainCount: any
+    dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
+  }>
+}
+
+export type CandidateVersionQueryVariables = Exact<{
+  versionId: Scalars['ID']['input']
+}>
+
+export type CandidateVersionQuery = {
+  __typename?: 'Query'
+  proposalCandidateVersion?: {
+    __typename?: 'ProposalCandidateVersion'
+    id: string
+    candidateId: any
+    salt: any
+    attester: any
+    versionNumber: any
+    targets: Array<any>
+    values: Array<any>
+    calldatas: Array<any>
+    description: string
+    proposalId: any
+    createdAt: any
+    title: string
+    summary: string
+    discussionUrl?: string | null
+    signatureCount: any
+    totalVoteWeight: any
+    revoked: boolean
   } | null
 }
 
@@ -11346,6 +11608,101 @@ export const ZoraDropWithHoldersFragmentDoc = gql`
   }
   ${ZoraDropFragmentDoc}
 `
+export const CandidateGroupFragmentFragmentDoc = gql`
+  fragment CandidateGroupFragment on ProposalCandidateGroup {
+    id
+    dao {
+      id
+      tokenAddress
+      governorAddress
+    }
+    proposer
+    salt
+    createdAt
+    versionCount
+    commentCount
+    latestVersionNumber
+    currentForCount
+    currentAgainstCount
+    currentAbstainCount
+  }
+`
+export const CandidateVersionFragmentFragmentDoc = gql`
+  fragment CandidateVersionFragment on ProposalCandidateVersion {
+    id
+    candidateId
+    salt
+    attester
+    versionNumber
+    targets
+    values
+    calldatas
+    title
+    description
+    metadata
+    representedAddress
+    proposalId
+    createdAt
+    discussionUrl
+    signatureCount
+    totalVoteWeight
+    revoked
+  }
+`
+export const CandidateGroupDetailFragmentFragmentDoc = gql`
+  fragment CandidateGroupDetailFragment on ProposalCandidateGroup {
+    id
+    dao {
+      id
+      tokenAddress
+      governorAddress
+    }
+    proposer
+    salt
+    createdAt
+    versionCount
+    commentCount
+    latestVersionNumber
+    currentForCount
+    currentAgainstCount
+    currentAbstainCount
+    leadingVersion {
+      ...CandidateVersionFragment
+    }
+    versions {
+      ...CandidateVersionFragment
+    }
+  }
+  ${CandidateVersionFragmentFragmentDoc}
+`
+export const CandidateCommentFragmentFragmentDoc = gql`
+  fragment CandidateCommentFragment on CandidateComment {
+    id
+    candidate
+    commenter
+    voteWeight
+    support
+    comment
+    parentComment {
+      id
+    }
+    createdAt
+    revoked
+  }
+`
+export const CandidateSponsorSignatureFragmentFragmentDoc = gql`
+  fragment CandidateSponsorSignatureFragment on CandidateSponsorSignature {
+    id
+    signer
+    proposalId
+    nonce
+    deadline
+    signature
+    revoked
+    createdAt
+    voteWeight
+  }
+`
 export const DaoMultisigUpdateFragmentDoc = gql`
   fragment DaoMultisigUpdate on DaoMultisigUpdate {
     id
@@ -11415,6 +11772,62 @@ export const AuctionHistoryDocument = gql`
       }
     }
   }
+`
+export const CandidateCommentsDocument = gql`
+  query CandidateComments(
+    $where: CandidateComment_filter
+    $first: Int
+    $skip: Int
+    $orderBy: CandidateComment_orderBy
+    $orderDirection: OrderDirection
+  ) {
+    candidateComments(
+      where: $where
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      ...CandidateCommentFragment
+    }
+  }
+  ${CandidateCommentFragmentFragmentDoc}
+`
+export const CandidateGroupDocument = gql`
+  query CandidateGroup($candidateId: ID!) {
+    proposalCandidateGroup(id: $candidateId) {
+      ...CandidateGroupDetailFragment
+    }
+  }
+  ${CandidateGroupDetailFragmentFragmentDoc}
+`
+export const CandidateGroupsDocument = gql`
+  query CandidateGroups(
+    $where: ProposalCandidateGroup_filter
+    $first: Int
+    $skip: Int
+    $orderBy: ProposalCandidateGroup_orderBy
+    $orderDirection: OrderDirection
+  ) {
+    proposalCandidateGroups(
+      where: $where
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      ...CandidateGroupFragment
+    }
+  }
+  ${CandidateGroupFragmentFragmentDoc}
+`
+export const CandidateVersionDocument = gql`
+  query CandidateVersion($versionId: ID!) {
+    proposalCandidateVersion(id: $versionId) {
+      ...CandidateVersionFragment
+    }
+  }
+  ${CandidateVersionFragmentFragmentDoc}
 `
 export const ClankerTokenDocument = gql`
   query clankerToken($tokenAddress: ID!) {
@@ -12447,6 +12860,78 @@ export function getSdk(
             signal,
           }),
         'auctionHistory',
+        'query',
+        variables
+      )
+    },
+    CandidateComments(
+      variables?: CandidateCommentsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<CandidateCommentsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CandidateCommentsQuery>({
+            document: CandidateCommentsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'CandidateComments',
+        'query',
+        variables
+      )
+    },
+    CandidateGroup(
+      variables: CandidateGroupQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<CandidateGroupQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CandidateGroupQuery>({
+            document: CandidateGroupDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'CandidateGroup',
+        'query',
+        variables
+      )
+    },
+    CandidateGroups(
+      variables?: CandidateGroupsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<CandidateGroupsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CandidateGroupsQuery>({
+            document: CandidateGroupsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'CandidateGroups',
+        'query',
+        variables
+      )
+    },
+    CandidateVersion(
+      variables: CandidateVersionQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<CandidateVersionQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CandidateVersionQuery>({
+            document: CandidateVersionDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'CandidateVersion',
         'query',
         variables
       )

@@ -16,6 +16,7 @@ import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
+import { getErrorMessage } from '@buildeross/utils/errors'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
@@ -46,21 +47,6 @@ interface PropDateFormValues {
   proposalId: Hex
   replyTo: string
   message: string
-}
-
-const getErrorMessage = (error: unknown): string => {
-  if (!error) return 'An unknown error occurred.'
-  if (typeof error === 'string') return error
-  if (typeof error === 'object' && error !== null) {
-    const errorObj = error as Record<string, unknown>
-    if ('shortMessage' in errorObj && typeof errorObj.shortMessage === 'string') {
-      return errorObj.shortMessage
-    }
-    if ('message' in errorObj && typeof errorObj.message === 'string') {
-      return errorObj.message
-    }
-  }
-  return 'An unknown error occurred.'
 }
 
 export interface PropDateReplyTo {

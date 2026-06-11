@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes, json, JSONValueKind } from '@graphprotocol/graph-ts'
+import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
 
 import {
   Attested as AttestedEvent,
@@ -32,6 +32,7 @@ import {
   PROPOSAL_CANDIDATE_SCHEMA_UID,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from './utils/eas'
+import { parseProposalMetadata } from './utils/proposalMetadata'
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
@@ -206,21 +207,9 @@ function loadOrCreateCandidateGroup(
     group.currentAgainstCount = BigInt.fromI32(0)
     group.currentAbstainCount = BigInt.fromI32(0)
     group.leadingVersion = null
+    group.save()
   }
   return group
-}
-
-function getDescriptionField(description: string, key: string): string {
-  let parsedResult = json.try_fromString(description)
-  if (parsedResult.isError || parsedResult.value.kind != JSONValueKind.OBJECT) {
-    return ''
-  }
-  let obj = parsedResult.value.toObject()
-  let value = obj.get(key)
-  if (!value || value.kind != JSONValueKind.STRING) {
-    return ''
-  }
-  return value.toString()
 }
 
 function recomputeVersionSignatureAggregates(versionId: string): void {
@@ -397,15 +386,24 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   version.targets = targets
   version.values = decoded.values
   version.calldatas = decoded.calldatas
-  version.description = decoded.description
+  version.metadata = decoded.description
   version.proposalId = decoded.proposalId
   version.createdAt = event.block.timestamp
-  let title = getDescriptionField(decoded.description, 'title')
-  let summary = getDescriptionField(decoded.description, 'description')
-  let discussionUrl = getDescriptionField(decoded.description, 'discussionUrl')
-  version.title = title.length > 0 ? title : ''
-  version.summary = summary.length > 0 ? summary : ''
-  version.discussionUrl = discussionUrl.length > 0 ? discussionUrl : null
+  let parsedMetadata = parseProposalMetadata(decoded.description)
+  version.title =
+    parsedMetadata && parsedMetadata.title.length > 0 ? parsedMetadata.title : null
+  version.description =
+    parsedMetadata && parsedMetadata.description.length > 0
+      ? parsedMetadata.description
+      : null
+  version.representedAddress =
+    parsedMetadata && parsedMetadata.representedAddress.length > 0
+      ? parsedMetadata.representedAddress
+      : null
+  version.discussionUrl =
+    parsedMetadata && parsedMetadata.discussionUrl.length > 0
+      ? parsedMetadata.discussionUrl
+      : null
   version.save()
   recomputeGroupVersionAggregates(group.id)
   recomputeGroupLeadingVersion(group.id)

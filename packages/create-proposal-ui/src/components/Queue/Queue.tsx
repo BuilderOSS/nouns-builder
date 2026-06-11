@@ -1,9 +1,9 @@
-import { useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
+import { useTransactionComposer } from '../shared'
 import { TransactionCard } from '../TransactionCard'
 import { ConfirmRemove } from './ConfirmRemove'
 
@@ -13,9 +13,8 @@ interface QueueProps {
 }
 
 export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = false }) => {
-  const transactions = useProposalStore((state) => state.transactions)
-  const removeTransaction = useProposalStore((state) => state.removeTransaction)
-  const removeAllTransactions = useProposalStore((state) => state.removeAllTransactions)
+  const { transactions, removeTransaction, removeAllTransactions } =
+    useTransactionComposer()
 
   const [openConfirm, setOpenConfirm] = React.useState<boolean>(false)
   const [removeIndex, setRemoveIndex] = React.useState<number | null>(null)

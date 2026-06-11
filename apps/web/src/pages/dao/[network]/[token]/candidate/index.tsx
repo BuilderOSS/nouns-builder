@@ -3,8 +3,9 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import type { CandidateGroupsResponse } from '@buildeross/sdk'
 import { getCandidateGroups } from '@buildeross/sdk'
+import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -95,7 +96,7 @@ CandidatesPage.getLayout = getDaoLayout
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const network = context.params?.network as string
-  const token = context.params?.token as string
+  const token = context.params?.token as AddressType
 
   // Validate network
   const validChain = PUBLIC_DEFAULT_CHAINS.find(
@@ -103,6 +104,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   )
 
   if (!validChain) {
+    return { notFound: true }
+  }
+
+  const addresses = await getDAOAddresses(validChain.id, token)
+
+  if (!addresses) {
     return { notFound: true }
   }
 
@@ -123,6 +130,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      addresses,
+      chainId: validChain.id,
       initialData: initialData || null,
     },
   }

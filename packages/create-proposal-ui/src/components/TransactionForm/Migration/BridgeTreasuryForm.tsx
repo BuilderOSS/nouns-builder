@@ -3,7 +3,7 @@ import {
   L2_MIGRATION_DEPLOYER,
 } from '@buildeross/constants/addresses'
 import { l2DeployerAbi, messengerAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { Input } from '@buildeross/ui/Input'
 import { Box, Button, Flex } from '@buildeross/zord'
@@ -12,6 +12,7 @@ import { Form, Formik } from 'formik'
 import { encodeFunctionData, parseEther } from 'viem'
 import { useBalance } from 'wagmi'
 
+import { useTransactionComposer } from '../../shared'
 import bridgeTreasuryFormSchema, {
   BridgeTreasuryValues,
 } from './BridgeTreasuryForm.schema'
@@ -29,8 +30,7 @@ export const BridgeTreasuryForm: React.FC<BridgeTreasuryFormProps> = ({
     address: treasury,
     chainId: chain.id,
   })
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const initialValues: BridgeTreasuryValues = {
     amount: 0,
   }

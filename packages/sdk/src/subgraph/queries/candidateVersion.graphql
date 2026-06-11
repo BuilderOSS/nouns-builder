@@ -1,0 +1,5 @@
+query CandidateVersion($versionId: ID!) {
+  proposalCandidateVersion(id: $versionId) {
+    ...CandidateVersionFragment
+  }
+}

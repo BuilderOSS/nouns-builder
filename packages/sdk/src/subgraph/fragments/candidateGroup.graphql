@@ -1,0 +1,88 @@
+fragment CandidateGroupFragment on ProposalCandidateGroup {
+  id
+  dao {
+    id
+    tokenAddress
+    governorAddress
+  }
+  proposer
+  salt
+  createdAt
+  versionCount
+  commentCount
+  latestVersionNumber
+  currentForCount
+  currentAgainstCount
+  currentAbstainCount
+}
+
+fragment CandidateGroupDetailFragment on ProposalCandidateGroup {
+  id
+  dao {
+    id
+    tokenAddress
+    governorAddress
+  }
+  proposer
+  salt
+  createdAt
+  versionCount
+  commentCount
+  latestVersionNumber
+  currentForCount
+  currentAgainstCount
+  currentAbstainCount
+  leadingVersion {
+    ...CandidateVersionFragment
+  }
+  versions {
+    ...CandidateVersionFragment
+  }
+}
+
+fragment CandidateVersionFragment on ProposalCandidateVersion {
+  id
+  candidateId
+  salt
+  attester
+  versionNumber
+  targets
+  values
+  calldatas
+  title
+  description
+  metadata
+  representedAddress
+  proposalId
+  createdAt
+  discussionUrl
+  signatureCount
+  totalVoteWeight
+  revoked
+}
+
+fragment CandidateCommentFragment on CandidateComment {
+  id
+  candidate
+  commenter
+  voteWeight
+  support
+  comment
+  parentComment {
+    id
+  }
+  createdAt
+  revoked
+}
+
+fragment CandidateSponsorSignatureFragment on CandidateSponsorSignature {
+  id
+  signer
+  proposalId
+  nonce
+  deadline
+  signature
+  revoked
+  createdAt
+  voteWeight
+}

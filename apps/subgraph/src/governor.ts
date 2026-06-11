@@ -5,8 +5,6 @@ import {
   Bytes,
   crypto,
   dataSource,
-  json,
-  JSONValueKind,
   log,
 } from '@graphprotocol/graph-ts'
 
@@ -33,6 +31,7 @@ import {
 } from '../generated/templates/Governor/Governor'
 import { Token as TokenContract } from '../generated/templates/Governor/Token'
 import { Treasury as TreasuryContract } from '../generated/templates/Governor/Treasury'
+import { parseProposalMetadata } from './utils/proposalMetadata'
 
 function parseDescriptionFields(descriptionMetadata: string): string[] {
   let title: string | null = null
@@ -40,42 +39,18 @@ function parseDescriptionFields(descriptionMetadata: string): string[] {
   let representedAddress: string | null = null
   let discussionUrl: string | null = null
 
-  let parsedDescriptionResult = json.try_fromString(descriptionMetadata)
+  let parsedDescription = parseProposalMetadata(descriptionMetadata)
 
-  if (
-    !parsedDescriptionResult.isError &&
-    parsedDescriptionResult.value.kind == JSONValueKind.OBJECT
-  ) {
-    let parsedDescription = parsedDescriptionResult.value.toObject()
-
-    let parsedTitle = parsedDescription.get('title')
-    if (parsedTitle && parsedTitle.kind == JSONValueKind.STRING) {
-      let parsedTitleValue = parsedTitle.toString()
-      title = parsedTitleValue.length > 0 ? parsedTitleValue : null
-    }
-
-    let parsedBody = parsedDescription.get('description')
-    if (parsedBody && parsedBody.kind == JSONValueKind.STRING) {
-      let parsedBodyValue = parsedBody.toString()
-      description = parsedBodyValue.length > 0 ? parsedBodyValue : null
-    }
-
-    let parsedRepresentedAddress = parsedDescription.get('representedAddress')
-    if (
-      parsedRepresentedAddress &&
-      parsedRepresentedAddress.kind == JSONValueKind.STRING
-    ) {
-      let parsedRepresentedAddressValue = parsedRepresentedAddress.toString()
-      representedAddress =
-        parsedRepresentedAddressValue.length > 0 ? parsedRepresentedAddressValue : null
-    }
-
-    let parsedDiscussionUrl = parsedDescription.get('discussionUrl')
-    if (parsedDiscussionUrl && parsedDiscussionUrl.kind == JSONValueKind.STRING) {
-      let parsedDiscussionUrlValue = parsedDiscussionUrl.toString()
-      discussionUrl =
-        parsedDiscussionUrlValue.length > 0 ? parsedDiscussionUrlValue : null
-    }
+  if (parsedDescription) {
+    title = parsedDescription.title.length > 0 ? parsedDescription.title : null
+    description =
+      parsedDescription.description.length > 0 ? parsedDescription.description : null
+    representedAddress =
+      parsedDescription.representedAddress.length > 0
+        ? parsedDescription.representedAddress
+        : null
+    discussionUrl =
+      parsedDescription.discussionUrl.length > 0 ? parsedDescription.discussionUrl : null
   } else {
     let split = descriptionMetadata.split('&&')
     title = split.length > 0 && split[0].length > 0 ? split[0] : null

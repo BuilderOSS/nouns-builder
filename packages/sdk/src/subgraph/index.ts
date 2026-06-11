@@ -2,6 +2,9 @@
 export { SDK as SubgraphSDK } from './client'
 export * from './requests/auctionHistory'
 export * from './requests/averageWinningBid'
+export * from './requests/candidateCommentsQuery'
+export * from './requests/candidateGroupQuery'
+export * from './requests/candidateGroupsQuery'
 export * from './requests/clankerTokenQuery'
 export * from './requests/daoActivity'
 export * from './requests/daoMembership'
@@ -34,6 +37,12 @@ export {
   type AuctionBidFragment,
   type AuctionFragment,
   type AuctionHistoryQuery,
+  type CandidateCommentFragmentFragment,
+  type CandidateGroupDetailFragmentFragment,
+  type CandidateGroupFragmentFragment,
+  type CandidateSponsorSignatureFragmentFragment,
+  type CandidateVersionFragmentFragment,
+  CandidateVoteSupport,
   ClankerToken_OrderBy,
   type ClankerTokenCardFragment,
   type ClankerTokenFragment,

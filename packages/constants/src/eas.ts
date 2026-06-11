@@ -93,4 +93,33 @@ export const easAbi = [
     stateMutability: 'payable',
     type: 'function',
   },
+  {
+    inputs: [
+      {
+        components: [
+          { internalType: 'bytes32', name: 'schema', type: 'bytes32' },
+          {
+            components: [
+              { internalType: 'address', name: 'recipient', type: 'address' },
+              { internalType: 'uint64', name: 'expirationTime', type: 'uint64' },
+              { internalType: 'bool', name: 'revocable', type: 'bool' },
+              { internalType: 'bytes32', name: 'refUID', type: 'bytes32' },
+              { internalType: 'bytes', name: 'data', type: 'bytes' },
+              { internalType: 'uint256', name: 'value', type: 'uint256' },
+            ],
+            internalType: 'struct AttestationRequestData[]',
+            name: 'data',
+            type: 'tuple[]',
+          },
+        ],
+        internalType: 'struct MultiAttestationRequest[]',
+        name: 'multiRequests',
+        type: 'tuple[]',
+      },
+    ],
+    name: 'multiAttest',
+    outputs: [{ internalType: 'bytes32[]', name: '', type: 'bytes32[]' }],
+    stateMutability: 'payable',
+    type: 'function',
+  },
 ]

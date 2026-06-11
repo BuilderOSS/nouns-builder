@@ -1,4 +1,8 @@
-import type { AddressType, TransactionBundle, TransactionType } from '@buildeross/types'
+import type {
+  AddressType,
+  ProposalDescriptionMetadataV1,
+  TransactionBundle,
+} from '@buildeross/types'
 
 import { TRANSACTION_TYPES } from '../constants/transactionTypes'
 
@@ -8,19 +12,6 @@ const toTitleCase = (value: string) =>
     .filter(Boolean)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
-
-interface ProposalDescriptionJSON {
-  version: number
-  title: string
-  description: string
-  transactionBundles: Array<{
-    type: TransactionType
-    summary?: string
-    callCount: number
-  }>
-  representedAddress?: string
-  discussionUrl?: string
-}
 
 export interface ParsedProposalData {
   title: string
@@ -43,10 +34,10 @@ export function parseProposalTransactions(
   values: string[],
   calldatas: string[]
 ): ParsedProposalData {
-  let parsed: ProposalDescriptionJSON
+  let parsed: ProposalDescriptionMetadataV1
 
   try {
-    parsed = JSON.parse(description) as ProposalDescriptionJSON
+    parsed = JSON.parse(description) as ProposalDescriptionMetadataV1
   } catch (err) {
     // If description isn't valid JSON, return minimal data
     console.error('Failed to parse proposal description:', err)

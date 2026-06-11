@@ -1,7 +1,6 @@
 import { HERO_CONTENT_LAYER } from '@buildeross/constants'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { ProposalNavigation } from '@buildeross/proposal-ui'
-import { useProposalStore } from '@buildeross/stores'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
@@ -9,6 +8,7 @@ import React, { useState } from 'react'
 import { ProposalHelpLinks } from '../ProposalHelpLinks'
 import { Queue } from '../Queue'
 import { ResetConfirmationModal } from '../ResetConfirmationModal'
+import { useTransactionComposer } from '../shared'
 
 interface CreateProposalHeadingProps {
   title: string
@@ -57,7 +57,7 @@ export const CreateProposalHeading: React.FC<CreateProposalHeadingProps> = ({
 }) => {
   const [queueModalOpen, setQueueModalOpen] = useState(false)
   const [resetModalOpen, setResetModalOpen] = useState(false)
-  const transactions = useProposalStore((state) => state.transactions)
+  const { transactions } = useTransactionComposer()
   const scrollDirection = useScrollDirection()
   const continueHandler = onContinue || onOpenProposalReview
 

@@ -2,7 +2,7 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
 import { useNftMetadata } from '@buildeross/hooks/useNftMetadata'
 import { erc721Abi, erc1155Abi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { DropdownSelect, SelectOption } from '@buildeross/ui/DropdownSelect'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { encodeFunctionData, getAddress, isAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
+import { useTransactionComposer } from '../../shared'
 import sendNftSchema, { SendNftValues } from './SendNft.schema'
 
 type NftOption = 'treasury-nfts' | 'custom' | string
@@ -454,8 +455,7 @@ const SendNftForm = ({ formik, onNftMetadataChange }: SendNftFormProps) => {
 
 export const SendNft: React.FC = () => {
   const { treasury } = useDaoStore((state) => state.addresses)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const [currentNftMetadata, setCurrentNftMetadata] = useState<NftMetadata | null>(null)
 
   const initialValues: SendNftValues = {

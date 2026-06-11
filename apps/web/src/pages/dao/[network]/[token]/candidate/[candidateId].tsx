@@ -2,8 +2,9 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import type { CandidateGroup } from '@buildeross/sdk'
 import { getCandidateGroup } from '@buildeross/sdk'
+import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore } from '@buildeross/stores'
-import { CHAIN_ID } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -130,9 +131,9 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
               </Box>
               <Box>
                 <Text fontWeight="label" fontSize={14} mb="x1">
-                  Summary
+                  Description
                 </Text>
-                <Text>{candidate.leadingVersion.summary}</Text>
+                <Text>{candidate.leadingVersion.description}</Text>
               </Box>
               {candidate.leadingVersion.discussionUrl && (
                 <Box>
@@ -201,7 +202,7 @@ CandidateDetailPage.getLayout = getDaoLayout
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const network = context.params?.network as string
-  // const token = context.params?.token as string
+  const token = context.params?.token as AddressType
   const candidateId = context.params?.candidateId as string
 
   // Validate network
@@ -210,6 +211,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   )
 
   if (!validChain) {
+    return { notFound: true }
+  }
+
+  const addresses = await getDAOAddresses(validChain.id, token)
+
+  if (!addresses) {
     return { notFound: true }
   }
 
@@ -233,8 +240,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   return {
     props: {
+      addresses,
       candidateId,
       initialData: initialData || null,
+      chainId: validChain.id,
     },
   }
 }

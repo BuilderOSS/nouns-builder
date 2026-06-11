@@ -23,6 +23,8 @@ export default defineConfig({
     '@buildeross/sdk',
     '@buildeross/stores',
     '@buildeross/types',
+    '@buildeross/proposal-ui',
+    '@buildeross/candidate-ui',
     '@buildeross/ui',
     '@buildeross/utils',
     '@buildeross/zord',
