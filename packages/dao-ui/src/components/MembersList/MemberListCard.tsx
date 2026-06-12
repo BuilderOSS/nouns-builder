@@ -8,6 +8,8 @@ import { Flex, Grid, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
 
+import { identityColumn } from './MembersList.css'
+
 export const MemberCard = ({
   member,
   totalSupply,
@@ -38,7 +40,7 @@ export const MemberCard = ({
       align={{ '@initial': 'start', '@768': 'center' }}
     >
       <Flex
-        style={{ width: '35%' }}
+        className={identityColumn}
         align={'center'}
         mb={{ '@initial': 'x4', '@768': 'x0' }}
       >

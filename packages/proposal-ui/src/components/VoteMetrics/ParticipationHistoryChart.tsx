@@ -32,7 +32,7 @@ export const ParticipationHistoryChart: React.FC<ParticipationHistoryChartProps>
       onMouseLeave={() => setActiveIndex(entries.length - 1)}
     >
       <Flex justify="space-between" mb="x2">
-        <Text fontWeight="label">Proposal {active.proposalNumber}</Text>
+        <Text fontWeight="label">Proposal #{active.proposalNumber}</Text>
         <Text color="text3">
           {active.totalSupply === 0
             ? `--% · ${active.votesCast} votes`
@@ -50,12 +50,18 @@ export const ParticipationHistoryChart: React.FC<ParticipationHistoryChartProps>
           x2={WIDTH - PADDING_X}
           y1={PADDING_Y}
           y2={PADDING_Y}
-          stroke={vars.color.border}
+          stroke={vars.color.text3}
           strokeDasharray="4 4"
         />
-        <text x={PADDING_X} y={PADDING_Y - 4} fontSize={10} fill={vars.color.text3}>
+        <Text
+          as="text"
+          variant="eyebrow"
+          x={PADDING_X}
+          y={PADDING_Y - 4}
+          style={{ fill: vars.color.text2 }}
+        >
           100%
-        </text>
+        </Text>
         {entries.map((entry, i) => {
           const rawHeight = (Math.min(entry.participationPct, 100) / 100) * chartHeight
           const height = entry.votesCast > 0 && rawHeight < 2 ? 2 : rawHeight
@@ -71,7 +77,7 @@ export const ParticipationHistoryChart: React.FC<ParticipationHistoryChartProps>
               width={barWidth}
               height={height}
               fill={i === safeIndex ? vars.color.text1 : vars.color.text3}
-              style={{ transition: 'fill 0.2s', cursor: 'pointer' }}
+              style={{ transition: 'fill 0.2s' }}
               onMouseEnter={() => setActiveIndex(i)}
               onTouchStart={() => setActiveIndex(i)}
             />
@@ -87,10 +93,10 @@ export const ParticipationHistoryChart: React.FC<ParticipationHistoryChartProps>
       </svg>
       <Flex justify="space-between" mt="x1">
         <Text fontSize={12} color="text3">
-          Prop {entries[0].proposalNumber}
+          Prop #{entries[0].proposalNumber}
         </Text>
         <Text fontSize={12} color="text3">
-          Prop {entries[entries.length - 1].proposalNumber}
+          Prop #{entries[entries.length - 1].proposalNumber}
         </Text>
       </Flex>
     </Flex>

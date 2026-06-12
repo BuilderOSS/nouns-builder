@@ -9,8 +9,8 @@ describe('QuorumProgress', () => {
     render(<QuorumProgress forVotes={12} quorumVotes={20} />)
 
     expect(screen.getByText('Quorum')).toBeInTheDocument()
-    expect(screen.getByText('12 of 20 FOR votes')).toBeInTheDocument()
-    expect(screen.getByText('8 more FOR votes needed')).toBeInTheDocument()
+    expect(screen.getByText('12 of 20 For votes')).toBeInTheDocument()
+    expect(screen.getByText('8 more For votes needed')).toBeInTheDocument()
     expect(screen.getByTestId('quorum-marker')).toBeInTheDocument()
   })
 
@@ -23,7 +23,7 @@ describe('QuorumProgress', () => {
   it('uses singular copy for one remaining vote', () => {
     render(<QuorumProgress forVotes={19} quorumVotes={20} />)
 
-    expect(screen.getByText('1 more FOR vote needed')).toBeInTheDocument()
+    expect(screen.getByText('1 more For vote needed')).toBeInTheDocument()
   })
 
   it('handles a zero quorum without crashing', () => {

@@ -60,7 +60,7 @@ describe('ParticipationHistory', () => {
       expect(screen.getByTestId('participation-history')).toBeInTheDocument()
     )
     expect(screen.getAllByTestId('participation-bar')).toHaveLength(3)
-    expect(screen.getByText('Proposal 3')).toBeInTheDocument()
+    expect(screen.getByText('Proposal #3')).toBeInTheDocument()
     expect(screen.getByText('50.0% · 5 of 10 votes')).toBeInTheDocument()
   })
 

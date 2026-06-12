@@ -73,6 +73,8 @@ export const UrgencyAlertItem: React.FC<UrgencyAlertItemProps> = ({
       <Button
         variant="ghost"
         size="xs"
+        p="x0"
+        style={{ padding: 0, flexShrink: 0 }}
         onClick={() => onDismiss(alert.id)}
         aria-label="Dismiss alert"
       >

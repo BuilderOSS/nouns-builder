@@ -1,12 +1,10 @@
-import { Flex, Text, vars } from '@buildeross/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 
 export type QuorumProgressProps = {
   forVotes: number
   quorumVotes: number
 }
-
-const SVG_WIDTH = 500
 
 export const QuorumProgress: React.FC<QuorumProgressProps> = ({
   forVotes,
@@ -15,16 +13,16 @@ export const QuorumProgress: React.FC<QuorumProgressProps> = ({
   const met = forVotes >= quorumVotes
   const remaining = Math.max(quorumVotes - forVotes, 0)
   const scaleMax = Math.max(forVotes, quorumVotes)
-  const fillWidth = scaleMax > 0 ? (forVotes / scaleMax) * SVG_WIDTH : 0
-  const markerX = scaleMax > 0 ? (quorumVotes / scaleMax) * SVG_WIDTH : 0
+  const fillPct = scaleMax > 0 ? (forVotes / scaleMax) * 100 : 0
+  const markerPct = scaleMax > 0 ? (quorumVotes / scaleMax) * 100 : 0
 
   const status = met
     ? 'Quorum reached'
-    : `${remaining} more FOR ${remaining === 1 ? 'vote' : 'votes'} needed`
+    : `${remaining} more For ${remaining === 1 ? 'vote' : 'votes'} needed`
 
   const footer =
     quorumVotes > 0
-      ? `${forVotes} of ${quorumVotes} FOR ${quorumVotes === 1 ? 'vote' : 'votes'}`
+      ? `${forVotes} of ${quorumVotes} For ${quorumVotes === 1 ? 'vote' : 'votes'}`
       : 'No quorum required'
 
   return (
@@ -44,34 +42,43 @@ export const QuorumProgress: React.FC<QuorumProgressProps> = ({
         </Text>
         <Text color="tertiary">{status}</Text>
       </Flex>
-      <svg
-        width="100%"
-        height="24"
-        viewBox="0 0 500 24"
-        preserveAspectRatio="none"
+      <Box
+        position="relative"
+        w="100%"
+        style={{ height: 24 }}
         role="img"
         aria-label={footer}
       >
-        <rect x={0} y={8} width={SVG_WIDTH} height={8} rx={4} fill={vars.color.border} />
-        <rect
-          x={0}
-          y={8}
-          width={fillWidth}
-          height={8}
-          rx={4}
-          fill={vars.color.positive}
-        />
+        <Box
+          position="absolute"
+          w="100%"
+          h="x2"
+          borderRadius="round"
+          backgroundColor="border"
+          style={{ top: 8 }}
+        >
+          <Box
+            h="100%"
+            borderRadius="round"
+            backgroundColor="positive"
+            style={{ width: `${fillPct}%` }}
+          />
+        </Box>
         {quorumVotes > 0 && (
-          <rect
+          <Box
             data-testid="quorum-marker"
-            x={markerX - 1.5}
-            y={0}
-            width={3}
-            height={24}
-            fill={vars.color.text1}
+            position="absolute"
+            backgroundColor="text1"
+            style={{
+              top: 0,
+              left: `${markerPct}%`,
+              width: 3,
+              height: 24,
+              transform: 'translateX(-50%)',
+            }}
           />
         )}
-      </svg>
+      </Box>
       <Text color="text3" mt="x2">
         {footer}
       </Text>

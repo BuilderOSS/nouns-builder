@@ -107,19 +107,21 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
   )
 
   const filterControl = (
-    <Flex align="center" gap="x1">
+    <Flex align="center" gap="x1" role="group" aria-label="Filter members">
       <Button
-        variant={showActiveOnly ? 'ghost' : 'secondary'}
+        variant={showActiveOnly ? 'ghost' : 'outline'}
         size="sm"
         onClick={() => setShowActiveOnly(false)}
+        aria-pressed={!showActiveOnly}
       >
         All{members ? ` (${members.length})` : ''}
       </Button>
       <Button
-        variant={showActiveOnly ? 'secondary' : 'ghost'}
+        variant={showActiveOnly ? 'outline' : 'ghost'}
         size="sm"
         onClick={() => setShowActiveOnly(true)}
         disabled={!activeMembers}
+        aria-pressed={showActiveOnly}
       >
         Active
         {activeListedMembers && activeMembers ? ` (${activeListedMembers.length})` : ''}
@@ -129,7 +131,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
 
   if (isLoading) {
     return (
-      <MembersPanel exportButton={exportButton}>
+      <MembersPanel exportButton={exportButton} filterControl={filterControl}>
         {Array.from({ length: 10 }).map((_, i) => (
           <MemberCardSkeleton key={`memberCardSkeleton-${i}`} />
         ))}

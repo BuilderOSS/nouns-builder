@@ -1,4 +1,4 @@
-import { atoms, theme } from '@buildeross/zord'
+import { atoms, theme, vars } from '@buildeross/zord'
 import { style, styleVariants } from '@vanilla-extract/css'
 
 export const urgencyAlertCard = style([
@@ -12,6 +12,9 @@ export const urgencyAlertCard = style([
   }),
   {
     transition: 'all 0.15s ease-in-out',
+    ':hover': {
+      boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
+    },
   },
 ])
 
@@ -27,7 +30,7 @@ export const urgencyAlertLevelVariants = styleVariants({
 
 export const urgencyAlertTitle = atoms({
   fontWeight: 'display',
-  fontSize: 16,
+  fontSize: 18,
   color: 'text1',
 })
 
@@ -45,28 +48,29 @@ export const urgencyAlertSubtitle = style([
 
 export const urgencyAlertBadge = style([
   atoms({
-    px: 'x2',
+    px: 'x3',
+    py: 'x1',
     borderRadius: 'round',
     borderWidth: 'normal',
     borderStyle: 'solid',
-    fontSize: 12,
+    fontSize: 14,
+    fontWeight: 'label',
   }),
   {
     borderColor: theme.colors.warningDisabled,
-    color: theme.colors.warning,
+    color: theme.colors.text1,
     whiteSpace: 'nowrap',
   },
 ])
 
+const urgencyAlertCountdownBase = style({
+  color: vars.color.text1,
+  fontWeight: vars.fontWeight.display,
+  fontVariantNumeric: 'tabular-nums',
+  whiteSpace: 'nowrap',
+})
+
 export const urgencyAlertCountdown = styleVariants({
-  warning: {
-    color: theme.colors.warning,
-    fontVariantNumeric: 'tabular-nums',
-    whiteSpace: 'nowrap',
-  },
-  critical: {
-    color: theme.colors.negative,
-    fontVariantNumeric: 'tabular-nums',
-    whiteSpace: 'nowrap',
-  },
+  warning: [urgencyAlertCountdownBase],
+  critical: [urgencyAlertCountdownBase],
 })

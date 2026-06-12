@@ -94,6 +94,7 @@ export const VoteTimeline: React.FC<VoteTimelineProps> = ({
 
   return (
     <Box
+      borderWidth="normal"
       borderStyle="solid"
       borderColor="border"
       borderRadius="curved"
@@ -108,24 +109,15 @@ export const VoteTimeline: React.FC<VoteTimelineProps> = ({
       </Text>
       <Flex wrap="wrap" gap="x4" mt="x2" align="center">
         <Flex align="center" gap="x1">
-          <Box
-            borderRadius="round"
-            style={{ width: 8, height: 8, backgroundColor: vars.color.positive }}
-          />
+          <Box borderRadius="round" w="x2" h="x2" backgroundColor="positive" />
           <Text fontSize={14}>For {active.forVotes}</Text>
         </Flex>
         <Flex align="center" gap="x1">
-          <Box
-            borderRadius="round"
-            style={{ width: 8, height: 8, backgroundColor: vars.color.negative }}
-          />
+          <Box borderRadius="round" w="x2" h="x2" backgroundColor="negative" />
           <Text fontSize={14}>Against {active.againstVotes}</Text>
         </Flex>
         <Flex align="center" gap="x1">
-          <Box
-            borderRadius="round"
-            style={{ width: 8, height: 8, backgroundColor: vars.color.text3 }}
-          />
+          <Box borderRadius="round" w="x2" h="x2" backgroundColor="text3" />
           <Text fontSize={14}>Abstain {active.abstainVotes}</Text>
         </Flex>
         <Text color="text3" fontSize={14} ml="auto">
@@ -135,6 +127,8 @@ export const VoteTimeline: React.FC<VoteTimelineProps> = ({
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
         className={metricsSvg}
+        role="img"
+        aria-label="Cumulative For, Against and Abstain votes over the voting period"
         onMouseMove={handleMove}
         onTouchMove={handleMove}
         onMouseEnter={handleEnter}
@@ -157,7 +151,6 @@ export const VoteTimeline: React.FC<VoteTimelineProps> = ({
             y2={chartHeight + PADDING_Y}
             stroke={vars.color.text3}
             strokeDasharray="4 4"
-            opacity={0.4}
           />
         )}
         {series.map((s) => (
@@ -166,7 +159,7 @@ export const VoteTimeline: React.FC<VoteTimelineProps> = ({
             data-testid={seriesTestId[s.key]}
             fill="none"
             stroke={seriesColor[s.key]}
-            strokeWidth={1.5}
+            strokeWidth={s.key === 'forVotes' ? 2.5 : 1.5}
             strokeLinejoin="round"
             strokeLinecap="round"
             points={toStepPoints(s.coords)}
@@ -195,10 +188,10 @@ export const VoteTimeline: React.FC<VoteTimelineProps> = ({
       </svg>
       <Flex w="100%" justify="space-between" mt="x1">
         <Text fontSize={12} color="text3">
-          {dayjs.unix(voteStart).format('MMM D, YYYY, h:mm A')}
+          {dayjs.unix(voteStart).format('MMM D, YYYY h:mm A')}
         </Text>
         <Text fontSize={12} color="text3">
-          {dayjs.unix(voteEnd).format('MMM D, YYYY, h:mm A')}
+          {dayjs.unix(voteEnd).format('MMM D, YYYY h:mm A')}
         </Text>
       </Flex>
     </Box>

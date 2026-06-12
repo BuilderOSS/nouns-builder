@@ -1,7 +1,7 @@
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 
-import { cardSkeleton, row } from './MembersList.css'
+import { cardSkeleton, identityColumn, row } from './MembersList.css'
 
 export const MembersPanel = ({
   children,
@@ -55,7 +55,7 @@ const TableHeader = () => {
       mb={{ '@initial': 'x4', '@768': 'x12' }}
       display={{ '@initial': 'none', '@768': 'flex' }}
     >
-      <Text fontWeight={'label'} style={{ width: '35%' }}>
+      <Text fontWeight={'label'} className={identityColumn}>
         Delegate
       </Text>
 

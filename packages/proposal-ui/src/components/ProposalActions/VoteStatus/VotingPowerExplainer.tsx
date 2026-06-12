@@ -5,7 +5,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { handleGMTOffset } from '@buildeross/utils/helpers'
-import { atoms, Flex, Text, vars } from '@buildeross/zord'
+import { atoms, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
 import { useAccount } from 'wagmi'
@@ -76,16 +76,16 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
 
   const snapshotDateLabel = `${dayjs
     .unix(Number(timeCreated))
-    .format('MMM D, YYYY, h:mm A')} ${handleGMTOffset()}`
+    .format('MMM D, YYYY h:mm A')} ${handleGMTOffset()}`
 
   const renderBody = () => {
     switch (votingCase) {
       case VotingPowerCase.Loading:
-        return <Text color={'text3'}>Checking your voting power...</Text>
+        return <Text color={'text2'}>Checking your voting power...</Text>
 
       case VotingPowerCase.NotConnected:
         return (
-          <Text color={'text3'}>
+          <Text color={'text2'}>
             Connect your wallet to see your voting power for this proposal
           </Text>
         )
@@ -93,14 +93,14 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
       case VotingPowerCase.NoTokens:
         return (
           <>
-            <Text color={'text3'}>
+            <Text color={'text2'}>
               You do not hold any {daoName} tokens, so you cannot vote on this proposal.
               Win a token at auction to vote on future proposals.
             </Text>
             {token && (
               <LinkWrapper
                 link={getAuctionLink(chain.id, token)}
-                color={'text3'}
+                color={'text2'}
                 className={atoms({ textDecoration: 'underline' })}
               >
                 Bid in the current auction
@@ -112,7 +112,7 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
       case VotingPowerCase.AcquiredAfterSnapshot:
         return (
           <>
-            <Text color={'text3'}>
+            <Text color={'text2'}>
               {Number(currentVotes) > 0 ? (
                 <>
                   Voting power for this proposal was snapshotted on {snapshotDateLabel}.
@@ -133,10 +133,11 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
             <LinkWrapper
               link={{ href: VOTING_POWER_DOCS_URL }}
               isExternal
-              color={'text3'}
+              color={'text2'}
               className={atoms({ textDecoration: 'underline' })}
             >
               Learn more about voting power
+              <Icon id="arrow-top-right" size="sm" />
             </LinkWrapper>
           </>
         )
@@ -144,14 +145,14 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
       case VotingPowerCase.DelegatedAway:
         return (
           <>
-            <Text color={'text3'}>
+            <Text color={'text2'}>
               Your {tokenCount} {tokenCount === 1 ? 'vote is' : 'votes are'} delegated to{' '}
               {delegateEns.displayName} for this proposal.
             </Text>
             {token && (
               <LinkWrapper
                 link={getDaoLink(chain.id, token, 'activity')}
-                color={'text3'}
+                color={'text2'}
                 className={atoms({ textDecoration: 'underline' })}
               >
                 Update delegation
@@ -162,22 +163,22 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
 
       case VotingPowerCase.CanVote:
         return (
-          <Text color={'text3'}>
+          <Text color={'text2'}>
             You have{' '}
-            <strong style={{ color: vars.color.text1 }}>
+            <Text as="span" color="text1" fontWeight="display">
               {snapshotVotes} {snapshotVotes === 1 ? 'vote' : 'votes'}
-            </strong>{' '}
+            </Text>{' '}
             available for {daoName}
           </Text>
         )
 
       case VotingPowerCase.CanVoteWithDelegation:
         return (
-          <Text color={'text3'}>
+          <Text color={'text2'}>
             You have{' '}
-            <strong style={{ color: vars.color.text1 }}>
+            <Text as="span" color="text1" fontWeight="display">
               {snapshotVotes} {snapshotVotes === 1 ? 'vote' : 'votes'}
-            </strong>{' '}
+            </Text>{' '}
             available for {daoName}, including {delegatedVotes} delegated to you by other
             members
           </Text>
@@ -192,6 +193,7 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
     <Flex
       direction={'column'}
       gap={'x1'}
+      align={{ '@initial': 'center', '@768': 'flex-start' }}
       textAlign={{ '@initial': 'center', '@768': 'left' }}
     >
       {renderBody()}

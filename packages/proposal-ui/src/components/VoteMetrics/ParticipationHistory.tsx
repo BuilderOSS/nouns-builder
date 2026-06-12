@@ -75,6 +75,7 @@ export const ParticipationHistory: React.FC = () => {
 
   return (
     <Box
+      borderWidth="normal"
       borderStyle="solid"
       borderColor="border"
       borderRadius="curved"

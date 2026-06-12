@@ -54,10 +54,10 @@ describe('VoteTimeline', () => {
     render(<VoteTimeline votes={votes} voteStart={voteStart} voteEnd={voteEnd} />)
 
     expect(
-      screen.getByText(dayjs.unix(voteStart).format('MMM D, YYYY, h:mm A'))
+      screen.getByText(dayjs.unix(voteStart).format('MMM D, YYYY h:mm A'))
     ).toBeInTheDocument()
     expect(
-      screen.getByText(dayjs.unix(voteEnd).format('MMM D, YYYY, h:mm A'))
+      screen.getByText(dayjs.unix(voteEnd).format('MMM D, YYYY h:mm A'))
     ).toBeInTheDocument()
   })
 
