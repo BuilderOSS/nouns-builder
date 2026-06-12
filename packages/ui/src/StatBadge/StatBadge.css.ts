@@ -48,3 +48,14 @@ export const statBadgeAccent = style([
     color: 'accent',
   }),
 ])
+
+export const statBadgeActive = style([
+  statBadgeBase,
+  atoms({
+    backgroundColor: 'positiveDisabled',
+    color: 'text1',
+    borderWidth: 'normal',
+    borderStyle: 'solid',
+    borderColor: 'text4',
+  }),
+])

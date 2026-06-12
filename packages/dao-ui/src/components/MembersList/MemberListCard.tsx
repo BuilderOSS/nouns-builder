@@ -48,7 +48,7 @@ export const MemberCard = ({
         <Text mx="x2" variant="paragraph-md">
           {displayName}
         </Text>
-        {isActive && <StatBadge variant="positive">Active</StatBadge>}
+        {isActive && <StatBadge variant="active">Active</StatBadge>}
       </Flex>
       <Grid columns="1fr 1fr 1fr" flex={1} width={{ '@initial': '100%', '@768': 'auto' }}>
         <Text>

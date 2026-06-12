@@ -2,18 +2,13 @@ import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { useLinks } from '@buildeross/ui/LinksProvider'
-import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
 import { handleGMTOffset } from '@buildeross/utils/helpers'
-import { atoms, Flex, Icon, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
 import { useAccount } from 'wagmi'
 
-import { getVotingPowerCase, VotingPowerCase } from './VotingPowerExplainer.helper'
-
-const VOTING_POWER_DOCS_URL =
-  'https://docs.nouns.build/onboarding/governance/#-voting-power'
+import { getVotingPowerCase } from './VotingPowerExplainer.helper'
+import { VotingPowerExplainerView } from './VotingPowerExplainerView'
 
 export interface VotingPowerExplainerProps {
   snapshotVotes: number // votesAvailable computed at the proposal snapshot
@@ -29,7 +24,6 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
   const { address: userAddress } = useAccount()
   const chain = useChainStore((x) => x.chain)
   const { token, governor } = useDaoStore((x) => x.addresses)
-  const { getAuctionLink, getDaoLink } = useLinks()
 
   const {
     votes: currentVotes,
@@ -78,125 +72,18 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
     .unix(Number(timeCreated))
     .format('MMM D, YYYY h:mm A')} ${handleGMTOffset()}`
 
-  const renderBody = () => {
-    switch (votingCase) {
-      case VotingPowerCase.Loading:
-        return <Text color={'text2'}>Checking your voting power...</Text>
-
-      case VotingPowerCase.NotConnected:
-        return (
-          <Text color={'text2'}>
-            Connect your wallet to see your voting power for this proposal
-          </Text>
-        )
-
-      case VotingPowerCase.NoTokens:
-        return (
-          <>
-            <Text color={'text2'}>
-              You do not hold any {daoName} tokens, so you cannot vote on this proposal.
-              Win a token at auction to vote on future proposals.
-            </Text>
-            {token && (
-              <LinkWrapper
-                link={getAuctionLink(chain.id, token)}
-                color={'text2'}
-                className={atoms({ textDecoration: 'underline' })}
-              >
-                Bid in the current auction
-              </LinkWrapper>
-            )}
-          </>
-        )
-
-      case VotingPowerCase.AcquiredAfterSnapshot:
-        return (
-          <>
-            <Text color={'text2'}>
-              {Number(currentVotes) > 0 ? (
-                <>
-                  Voting power for this proposal was snapshotted on {snapshotDateLabel}.
-                  You received your {Number(currentVotes)}{' '}
-                  {Number(currentVotes) === 1 ? 'vote' : 'votes'} after the snapshot, so{' '}
-                  {Number(currentVotes) === 1 ? 'it' : 'they'} cannot be used on this
-                  proposal, but {Number(currentVotes) === 1 ? 'it' : 'they'} will count on
-                  future proposals.
-                </>
-              ) : (
-                <>
-                  Voting power for this proposal was snapshotted on {snapshotDateLabel}.
-                  Your voting power was received after the snapshot, so it cannot be used
-                  on this proposal.
-                </>
-              )}
-            </Text>
-            <LinkWrapper
-              link={{ href: VOTING_POWER_DOCS_URL }}
-              isExternal
-              color={'text2'}
-              className={atoms({ textDecoration: 'underline' })}
-            >
-              Learn more about voting power
-              <Icon id="arrow-top-right" size="sm" />
-            </LinkWrapper>
-          </>
-        )
-
-      case VotingPowerCase.DelegatedAway:
-        return (
-          <>
-            <Text color={'text2'}>
-              Your {tokenCount} {tokenCount === 1 ? 'vote is' : 'votes are'} delegated to{' '}
-              {delegateEns.displayName} for this proposal.
-            </Text>
-            {token && (
-              <LinkWrapper
-                link={getDaoLink(chain.id, token, 'activity')}
-                color={'text2'}
-                className={atoms({ textDecoration: 'underline' })}
-              >
-                Update delegation
-              </LinkWrapper>
-            )}
-          </>
-        )
-
-      case VotingPowerCase.CanVote:
-        return (
-          <Text color={'text2'}>
-            You have{' '}
-            <Text as="span" color="text1" fontWeight="display">
-              {snapshotVotes} {snapshotVotes === 1 ? 'vote' : 'votes'}
-            </Text>{' '}
-            available for {daoName}
-          </Text>
-        )
-
-      case VotingPowerCase.CanVoteWithDelegation:
-        return (
-          <Text color={'text2'}>
-            You have{' '}
-            <Text as="span" color="text1" fontWeight="display">
-              {snapshotVotes} {snapshotVotes === 1 ? 'vote' : 'votes'}
-            </Text>{' '}
-            available for {daoName}, including {delegatedVotes} delegated to you by other
-            members
-          </Text>
-        )
-
-      default:
-        return null
-    }
-  }
-
   return (
-    <Flex
-      direction={'column'}
-      gap={'x1'}
-      align={{ '@initial': 'center', '@768': 'flex-start' }}
-      textAlign={{ '@initial': 'center', '@768': 'left' }}
-    >
-      {renderBody()}
-    </Flex>
+    <VotingPowerExplainerView
+      votingCase={votingCase}
+      chainId={chain.id}
+      token={token}
+      daoName={daoName}
+      snapshotVotes={snapshotVotes}
+      currentVotes={Number(currentVotes)}
+      tokenCount={tokenCount}
+      delegatedVotes={delegatedVotes}
+      delegateDisplayName={delegateEns.displayName}
+      snapshotDateLabel={snapshotDateLabel}
+    />
   )
 }
