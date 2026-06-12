@@ -26,6 +26,10 @@ export const urgencyAlertLevelVariants = styleVariants({
     borderColor: theme.colors.negative,
     boxShadow: `0 2px 8px ${theme.colors.negativeDisabled}`,
   },
+  info: {
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.background2,
+  },
 })
 
 export const urgencyAlertTitle = atoms({
@@ -73,4 +77,6 @@ const urgencyAlertCountdownBase = style({
 export const urgencyAlertCountdown = styleVariants({
   warning: [urgencyAlertCountdownBase],
   critical: [urgencyAlertCountdownBase],
+  // info kinds never render a countdown; kept for type-safe level indexing.
+  info: [urgencyAlertCountdownBase],
 })

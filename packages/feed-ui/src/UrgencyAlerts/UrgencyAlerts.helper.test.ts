@@ -20,6 +20,8 @@ const buildProposal = (overrides: Partial<DashboardProposal>): DashboardProposal
     voteEnd: String(NOW + 3 * HOUR),
     voteStart: String(NOW - HOUR),
     expiresAt: null,
+    executableFrom: null,
+    timeCreated: String(NOW - HOUR),
     votes: [],
     ...overrides,
   }) as unknown as DashboardProposal
@@ -35,11 +37,16 @@ const buildDao = (overrides: Partial<DashboardDaoWithState>): DashboardDaoWithSt
     ...overrides,
   }) as unknown as DashboardDaoWithState
 
-const buildAuction = (endTime: number) => ({
+const buildAuction = (
+  endTime: number,
+  highestBid: { amount: string; bidder: string } | null = null
+) => ({
   endTime: String(endTime),
-  highestBid: null,
+  highestBid,
   token: { name: 'Test DAO #42', image: null, tokenId: '42' },
 })
+
+const SOME_BID = { amount: '1000000000000000000', bidder: USER }
 
 describe('deriveUrgencyAlerts', () => {
   it('returns an empty array when there are no daos', () => {
@@ -61,9 +68,11 @@ describe('deriveUrgencyAlerts', () => {
   })
 
   it('creates a critical alert for an auction ending within the critical threshold', () => {
-    const dao = buildDao({ currentAuction: buildAuction(NOW + HOUR) as any })
+    const dao = buildDao({
+      currentAuction: buildAuction(NOW + HOUR, SOME_BID) as any,
+    })
     const alerts = deriveUrgencyAlerts([dao], NOW, USER)
-    expect(alerts[0].level).toBe('critical')
+    expect(alerts[0]).toMatchObject({ type: 'AUCTION_ENDING', level: 'critical' })
   })
 
   it('ignores auctions ending beyond the warning threshold', () => {
@@ -84,21 +93,24 @@ describe('deriveUrgencyAlerts', () => {
   it('treats threshold boundaries inclusively', () => {
     const warningDao = buildDao({
       currentAuction: buildAuction(
-        NOW + DEFAULT_URGENCY_THRESHOLDS.warningSeconds
+        NOW + DEFAULT_URGENCY_THRESHOLDS.warningSeconds,
+        SOME_BID
       ) as any,
     })
     expect(deriveUrgencyAlerts([warningDao], NOW, USER)[0].level).toBe('warning')
 
     const criticalDao = buildDao({
       currentAuction: buildAuction(
-        NOW + DEFAULT_URGENCY_THRESHOLDS.criticalSeconds
+        NOW + DEFAULT_URGENCY_THRESHOLDS.criticalSeconds,
+        SOME_BID
       ) as any,
     })
     expect(deriveUrgencyAlerts([criticalDao], NOW, USER)[0].level).toBe('critical')
 
     const excludedDao = buildDao({
       currentAuction: buildAuction(
-        NOW + DEFAULT_URGENCY_THRESHOLDS.warningSeconds + 1
+        NOW + DEFAULT_URGENCY_THRESHOLDS.warningSeconds + 1,
+        SOME_BID
       ) as any,
     })
     expect(deriveUrgencyAlerts([excludedDao], NOW, USER)).toEqual([])
@@ -186,16 +198,268 @@ describe('deriveUrgencyAlerts', () => {
     expect(alerts.map((a) => a.type)).toEqual(['VOTING_ENDING', 'AUCTION_ENDING'])
   })
 
+  // ---------------------------------------------------------------------------
+  // VOTE_NEEDED (#4) — info, personal, fires only outside the warning window
+  // ---------------------------------------------------------------------------
+
+  it('creates a VOTE_NEEDED info alert for an active unvoted proposal outside the warning window', () => {
+    const dao = buildDao({
+      proposals: [buildProposal({ voteEnd: String(NOW + 4 * 24 * HOUR), votes: [] })],
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toMatchObject({
+      type: 'VOTE_NEEDED',
+      level: 'info',
+      endTime: null,
+      proposalNumber: 7,
+      proposalTitle: 'Test proposal',
+      id: `vote-needed:${CHAIN_ID.BASE}:0xabc`,
+    })
+  })
+
+  it('does not emit VOTE_NEEDED inside the warning window (VOTING_ENDING covers it)', () => {
+    const dao = buildDao({
+      proposals: [buildProposal({ voteEnd: String(NOW + 3 * HOUR), votes: [] })],
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts.map((a) => a.type)).toEqual(['VOTING_ENDING'])
+  })
+
+  it('does not emit VOTE_NEEDED when the user has already voted (case-insensitive)', () => {
+    const dao = buildDao({
+      proposals: [
+        buildProposal({
+          voteEnd: String(NOW + 4 * 24 * HOUR),
+          votes: [{ voter: USER.toUpperCase() }] as unknown as any,
+        }),
+      ],
+    })
+    expect(deriveUrgencyAlerts([dao], NOW, USER)).toEqual([])
+  })
+
+  it('does not emit VOTE_NEEDED without a connected user address', () => {
+    const dao = buildDao({
+      proposals: [buildProposal({ voteEnd: String(NOW + 4 * 24 * HOUR), votes: [] })],
+    })
+    expect(deriveUrgencyAlerts([dao], NOW)).toEqual([])
+  })
+
+  it('treats the VOTE_NEEDED / VOTING_ENDING boundary at warningSeconds', () => {
+    const { warningSeconds } = DEFAULT_URGENCY_THRESHOLDS
+
+    const atBoundary = buildDao({
+      proposals: [buildProposal({ voteEnd: String(NOW + warningSeconds), votes: [] })],
+    })
+    // inclusive: exactly warningSeconds away is still VOTING_ENDING
+    expect(deriveUrgencyAlerts([atBoundary], NOW, USER).map((a) => a.type)).toEqual([
+      'VOTING_ENDING',
+    ])
+
+    const justOutside = buildDao({
+      proposals: [
+        buildProposal({ voteEnd: String(NOW + warningSeconds + 1), votes: [] }),
+      ],
+    })
+    expect(deriveUrgencyAlerts([justOutside], NOW, USER).map((a) => a.type)).toEqual([
+      'VOTE_NEEDED',
+    ])
+  })
+
+  // ---------------------------------------------------------------------------
+  // PROPOSAL_EXECUTABLE (#5) — info, dedup against EXECUTION_EXPIRING
+  // ---------------------------------------------------------------------------
+
+  it('creates a PROPOSAL_EXECUTABLE info alert for a queued proposal past executableFrom', () => {
+    const dao = buildDao({
+      proposals: [
+        buildProposal({
+          state: ProposalState.Queued,
+          expiresAt: null,
+          executableFrom: String(NOW - HOUR),
+        }),
+      ],
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toMatchObject({
+      type: 'PROPOSAL_EXECUTABLE',
+      level: 'info',
+      endTime: null,
+      id: `executable:${CHAIN_ID.BASE}:0xabc`,
+    })
+  })
+
+  it('does not emit PROPOSAL_EXECUTABLE when executableFrom is in the future', () => {
+    const dao = buildDao({
+      proposals: [
+        buildProposal({
+          state: ProposalState.Queued,
+          expiresAt: null,
+          executableFrom: String(NOW + HOUR),
+        }),
+      ],
+    })
+    expect(deriveUrgencyAlerts([dao], NOW, USER)).toEqual([])
+  })
+
+  it('suppresses PROPOSAL_EXECUTABLE when an EXECUTION_EXPIRING exists for the same proposal', () => {
+    const dao = buildDao({
+      proposals: [
+        buildProposal({
+          state: ProposalState.Queued,
+          expiresAt: String(NOW + 5 * HOUR),
+          executableFrom: String(NOW - HOUR),
+        }),
+      ],
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0].type).toBe('EXECUTION_EXPIRING')
+  })
+
+  // ---------------------------------------------------------------------------
+  // PROPOSAL_QUEUEABLE (#6) — info, state-driven
+  // ---------------------------------------------------------------------------
+
+  it('creates a PROPOSAL_QUEUEABLE info alert for a succeeded proposal', () => {
+    const dao = buildDao({
+      proposals: [buildProposal({ state: ProposalState.Succeeded })],
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toMatchObject({
+      type: 'PROPOSAL_QUEUEABLE',
+      level: 'info',
+      endTime: null,
+      id: `queueable:${CHAIN_ID.BASE}:0xabc`,
+    })
+  })
+
+  it('does not emit PROPOSAL_QUEUEABLE for non-succeeded states', () => {
+    const pending = buildDao({
+      proposals: [buildProposal({ state: ProposalState.Pending })],
+    })
+    expect(deriveUrgencyAlerts([pending], NOW, USER)).toEqual([])
+  })
+
+  // ---------------------------------------------------------------------------
+  // AUCTION_NO_BIDS (#7) — critical, dedup against AUCTION_ENDING
+  // ---------------------------------------------------------------------------
+
+  it('creates a critical AUCTION_NO_BIDS alert and suppresses AUCTION_ENDING in the critical window', () => {
+    const dao = buildDao({ currentAuction: buildAuction(NOW + HOUR) as any })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts).toHaveLength(1)
+    expect(alerts[0]).toMatchObject({
+      type: 'AUCTION_NO_BIDS',
+      level: 'critical',
+      endTime: NOW + HOUR,
+      tokenId: '42',
+      id: `auction-nobids:${CHAIN_ID.BASE}:${DAO_TOKEN}:42`,
+    })
+  })
+
+  it('falls back to AUCTION_ENDING when a bid is present in the critical window', () => {
+    const dao = buildDao({
+      currentAuction: buildAuction(NOW + HOUR, SOME_BID) as any,
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts.map((a) => a.type)).toEqual(['AUCTION_ENDING'])
+    expect(alerts[0].level).toBe('critical')
+  })
+
+  it('keeps plain AUCTION_ENDING for a no-bid auction that is only within the warning window', () => {
+    const dao = buildDao({ currentAuction: buildAuction(NOW + 5 * HOUR) as any })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts.map((a) => a.type)).toEqual(['AUCTION_ENDING'])
+    expect(alerts[0].level).toBe('warning')
+  })
+
+  it('treats the AUCTION_NO_BIDS critical boundary inclusively', () => {
+    const { criticalSeconds } = DEFAULT_URGENCY_THRESHOLDS
+
+    const atBoundary = buildDao({
+      currentAuction: buildAuction(NOW + criticalSeconds) as any,
+    })
+    expect(deriveUrgencyAlerts([atBoundary], NOW, USER).map((a) => a.type)).toEqual([
+      'AUCTION_NO_BIDS',
+    ])
+
+    const justOutside = buildDao({
+      currentAuction: buildAuction(NOW + criticalSeconds + 1) as any,
+    })
+    expect(deriveUrgencyAlerts([justOutside], NOW, USER).map((a) => a.type)).toEqual([
+      'AUCTION_ENDING',
+    ])
+  })
+
+  // ---------------------------------------------------------------------------
+  // Ordering — (level rank, then soonest deadline / newest info)
+  // ---------------------------------------------------------------------------
+
+  it('orders stacked alerts critical → warning → info', () => {
+    const dao = buildDao({
+      // critical: no-bid auction inside the critical window
+      currentAuction: buildAuction(NOW + HOUR) as any,
+      proposals: [
+        // warning: voting ending inside the warning window
+        buildProposal({
+          proposalId: '0xwarn',
+          voteEnd: String(NOW + 5 * HOUR),
+          votes: [{ voter: USER }] as unknown as any,
+        }),
+        // info: succeeded → queueable
+        buildProposal({ proposalId: '0xinfo', state: ProposalState.Succeeded }),
+      ],
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts.map((a) => a.level)).toEqual(['critical', 'warning', 'info'])
+    expect(alerts.map((a) => a.type)).toEqual([
+      'AUCTION_NO_BIDS',
+      'VOTING_ENDING',
+      'PROPOSAL_QUEUEABLE',
+    ])
+  })
+
+  it('orders two info kinds by newest timeCreated first', () => {
+    const dao = buildDao({
+      proposals: [
+        buildProposal({
+          proposalId: '0xold',
+          state: ProposalState.Succeeded,
+          timeCreated: String(NOW - 10 * HOUR),
+        }),
+        buildProposal({
+          proposalId: '0xnew',
+          state: ProposalState.Succeeded,
+          timeCreated: String(NOW - HOUR),
+        }),
+      ],
+    })
+    const alerts = deriveUrgencyAlerts([dao], NOW, USER)
+    expect(alerts.map((a) => a.id)).toEqual([
+      `queueable:${CHAIN_ID.BASE}:0xnew`,
+      `queueable:${CHAIN_ID.BASE}:0xold`,
+    ])
+  })
+
   it('respects custom thresholds', () => {
     const thresholds = { warningSeconds: HOUR, criticalSeconds: 600 }
 
-    const beyond = buildDao({ currentAuction: buildAuction(NOW + 2 * HOUR) as any })
+    const beyond = buildDao({
+      currentAuction: buildAuction(NOW + 2 * HOUR, SOME_BID) as any,
+    })
     expect(deriveUrgencyAlerts([beyond], NOW, USER, thresholds)).toEqual([])
 
-    const warning = buildDao({ currentAuction: buildAuction(NOW + 0.5 * HOUR) as any })
+    const warning = buildDao({
+      currentAuction: buildAuction(NOW + 0.5 * HOUR, SOME_BID) as any,
+    })
     expect(deriveUrgencyAlerts([warning], NOW, USER, thresholds)[0].level).toBe('warning')
 
-    const critical = buildDao({ currentAuction: buildAuction(NOW + 500) as any })
+    const critical = buildDao({
+      currentAuction: buildAuction(NOW + 500, SOME_BID) as any,
+    })
     expect(deriveUrgencyAlerts([critical], NOW, USER, thresholds)[0].level).toBe(
       'critical'
     )

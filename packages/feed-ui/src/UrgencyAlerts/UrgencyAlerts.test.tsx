@@ -55,6 +55,8 @@ const buildProposal = (overrides: Partial<DashboardProposal>): DashboardProposal
     voteEnd: String(NOW + 3 * HOUR),
     voteStart: String(NOW - HOUR),
     expiresAt: null,
+    executableFrom: null,
+    timeCreated: String(NOW - HOUR),
     votes: [],
     ...overrides,
   }) as unknown as DashboardProposal
@@ -70,12 +72,17 @@ const buildDao = (overrides: Partial<DashboardDaoWithState>): DashboardDaoWithSt
     ...overrides,
   }) as unknown as DashboardDaoWithState
 
-const buildAuction = (endTime: number) =>
+const buildAuction = (
+  endTime: number,
+  highestBid: { amount: string; bidder: string } | null = null
+) =>
   ({
     endTime: String(endTime),
-    highestBid: null,
+    highestBid,
     token: { name: 'Test DAO #42', image: null, tokenId: '42' },
   }) as unknown as NonNullable<DashboardDaoWithState['currentAuction']>
+
+const SOME_BID = { amount: '1000000000000000000', bidder: USER }
 
 describe('UrgencyAlerts', () => {
   beforeEach(() => {
@@ -101,7 +108,14 @@ describe('UrgencyAlerts', () => {
     mockDaos = [
       buildDao({
         currentAuction: buildAuction(NOW + 48 * HOUR),
-        proposals: [buildProposal({ voteEnd: String(NOW + 48 * HOUR) })],
+        // already-voted so no personal VOTE_NEEDED info row competes here;
+        // this test isolates the deadline-window behaviour.
+        proposals: [
+          buildProposal({
+            voteEnd: String(NOW + 48 * HOUR),
+            votes: [{ voter: USER }] as unknown as any,
+          }),
+        ],
       }),
     ]
     render(<UrgencyAlerts />)
@@ -126,7 +140,7 @@ describe('UrgencyAlerts', () => {
   })
 
   it('marks alerts inside the critical threshold as critical', () => {
-    mockDaos = [buildDao({ currentAuction: buildAuction(NOW + HOUR) })]
+    mockDaos = [buildDao({ currentAuction: buildAuction(NOW + HOUR, SOME_BID) })]
     render(<UrgencyAlerts />)
     const row = screen.getByText('Auction ending soon').closest('[data-urgency-level]')
     expect(row).toHaveAttribute('data-urgency-level', 'critical')
@@ -214,5 +228,128 @@ describe('UrgencyAlerts', () => {
     mockDaos = [buildDao({ currentAuction: buildAuction(NOW + 2 * HOUR) })]
     render(<UrgencyAlerts thresholds={{ warningSeconds: HOUR, criticalSeconds: 600 }} />)
     expect(screen.queryByTestId('urgency-alerts')).toBeNull()
+  })
+
+  it('renders a Ready to queue info alert with proposal link and no countdown', () => {
+    mockDaos = [
+      buildDao({ proposals: [buildProposal({ state: ProposalState.Succeeded })] }),
+    ]
+    render(<UrgencyAlerts />)
+
+    expect(screen.getByText('Ready to queue')).toBeInTheDocument()
+    const link = screen.getByText('Ready to queue').closest('a')
+    expect(link?.getAttribute('href')).toMatch(new RegExp(`/proposal/${DAO_TOKEN}/7$`))
+
+    const row = screen.getByText('Ready to queue').closest('[data-urgency-level]')
+    expect(row).toHaveAttribute('data-urgency-level', 'info')
+    expect(screen.queryByTestId('countdown')).toBeNull()
+  })
+
+  it('renders a Ready to execute info alert for an executable queued proposal', () => {
+    mockDaos = [
+      buildDao({
+        proposals: [
+          buildProposal({
+            state: ProposalState.Queued,
+            expiresAt: null,
+            executableFrom: String(NOW - HOUR),
+          }),
+        ],
+      }),
+    ]
+    render(<UrgencyAlerts />)
+
+    expect(screen.getByText('Ready to execute')).toBeInTheDocument()
+    const row = screen.getByText('Ready to execute').closest('[data-urgency-level]')
+    expect(row).toHaveAttribute('data-urgency-level', 'info')
+    expect(screen.queryByTestId('countdown')).toBeNull()
+  })
+
+  it("renders a You haven't voted info alert outside the warning window", () => {
+    mockDaos = [
+      buildDao({
+        proposals: [
+          buildProposal({ voteEnd: String(NOW + 4 * 24 * HOUR), votes: [] as any }),
+        ],
+      }),
+    ]
+    render(<UrgencyAlerts />)
+
+    expect(screen.getByText("You haven't voted")).toBeInTheDocument()
+    expect(screen.getByText(/ends in 4 days/)).toBeInTheDocument()
+
+    const row = screen.getByText("You haven't voted").closest('[data-urgency-level]')
+    expect(row).toHaveAttribute('data-urgency-level', 'info')
+    expect(screen.queryByTestId('countdown')).toBeNull()
+  })
+
+  it('renders a critical Auction has no bids alert with countdown and suppresses the plain row', () => {
+    mockDaos = [buildDao({ currentAuction: buildAuction(NOW + HOUR) })]
+    render(<UrgencyAlerts />)
+
+    expect(screen.getByText('Auction has no bids')).toBeInTheDocument()
+    expect(screen.queryByText('Auction ending soon')).toBeNull()
+
+    const link = screen.getByText('Auction has no bids').closest('a')
+    expect(link?.getAttribute('href')).toMatch(new RegExp(`/auction/${DAO_TOKEN}/42$`))
+
+    const row = screen.getByText('Auction has no bids').closest('[data-urgency-level]')
+    expect(row).toHaveAttribute('data-urgency-level', 'critical')
+    expect(screen.getByTestId('countdown')).toBeInTheDocument()
+  })
+
+  it('persists the dismissal key for an info alert', () => {
+    mockDaos = [
+      buildDao({ proposals: [buildProposal({ state: ProposalState.Succeeded })] }),
+    ]
+    render(<UrgencyAlerts />)
+
+    expect(screen.getByText('Ready to queue')).toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('Dismiss alert'))
+
+    expect(screen.queryByText('Ready to queue')).toBeNull()
+    expect(dismissedUrgencyAlertsStore.getState().dismissedIds).toContain(
+      `queueable:${CHAIN_ID.BASE}:0xabc`
+    )
+  })
+
+  it('hides the personal VOTE_NEEDED row when the wallet is disconnected', () => {
+    mockAddress = undefined
+    mockDaos = [
+      buildDao({
+        proposals: [
+          buildProposal({ voteEnd: String(NOW + 4 * 24 * HOUR), votes: [] as any }),
+        ],
+      }),
+    ]
+    render(<UrgencyAlerts />)
+    expect(screen.queryByTestId('urgency-alerts')).toBeNull()
+    expect(screen.queryByText("You haven't voted")).toBeNull()
+  })
+
+  it('orders a stacked critical, warning and info mix correctly', () => {
+    mockDaos = [
+      buildDao({
+        currentAuction: buildAuction(NOW + HOUR),
+        proposals: [
+          buildProposal({
+            proposalId: '0xwarn',
+            voteEnd: String(NOW + 5 * HOUR),
+            votes: [{ voter: USER }] as unknown as any,
+          }),
+          buildProposal({ proposalId: '0xinfo', state: ProposalState.Succeeded }),
+        ],
+      }),
+    ]
+    render(<UrgencyAlerts />)
+
+    const rows = Array.from(
+      document.querySelectorAll('[data-urgency-level]')
+    ) as HTMLElement[]
+    expect(rows.map((r) => r.getAttribute('data-urgency-level'))).toEqual([
+      'critical',
+      'warning',
+      'info',
+    ])
   })
 })
