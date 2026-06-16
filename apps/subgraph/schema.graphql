@@ -264,6 +264,8 @@ enum FeedEventType {
   AUCTION_BID_PLACED
   AUCTION_SETTLED
   CLANKER_TOKEN_CREATED
+  CLANKER_TOKEN_LINKED
+  CLANKER_TOKEN_UNLINKED
   ZORA_COIN_CREATED
   ZORA_DROP_CREATED
 }
@@ -371,6 +373,30 @@ type ClankerTokenCreatedEvent implements FeedEvent @entity {
   clankerToken: ClankerToken!
 }
 
+type ClankerTokenLinkedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  clankerToken: ClankerToken!
+  previousAdmin: Bytes!
+}
+
+type ClankerTokenUnlinkedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  clankerToken: ClankerToken!
+  newAdmin: Bytes!
+}
+
 type ZoraCoinCreatedEvent implements FeedEvent @entity {
   id: ID!
   type: FeedEventType!
@@ -393,6 +419,11 @@ type ClankerToken @entity {
   tokenAddress: Bytes!
   msgSender: Bytes!
   tokenAdmin: Bytes! # The admin address (may or may not be a DAO)
+
+  # Trust status
+  isTrusted: Boolean! # True if created by DAO, false if admin was transferred
+  adminChangedAt: BigInt # Timestamp when admin was last changed (null if never changed)
+
   # Token metadata
   tokenImage: String!
   tokenName: String!
