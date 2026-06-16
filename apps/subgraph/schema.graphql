@@ -158,6 +158,7 @@ type Proposal implements ProposalMetadataEntity @entity {
   updateMessage: String
   updateCount: Int!
   isSigned: Boolean!
+  candidateVersion: ProposalCandidateVersion
   transactionHash: Bytes!
   votes: [ProposalVote!]! @derivedFrom(field: "proposal")
   signers: [ProposalSigner!]! @derivedFrom(field: "proposal")
@@ -357,6 +358,7 @@ type MetadataItem @entity {
 enum FeedEventType {
   PROPOSAL_CREATED
   PROPOSAL_UPDATED
+  PROPOSAL_EDITED
   PROPOSAL_VOTED
   PROPOSAL_EXECUTED
   AUCTION_CREATED
@@ -367,6 +369,10 @@ enum FeedEventType {
   CLANKER_TOKEN_UNLINKED
   ZORA_COIN_CREATED
   ZORA_DROP_CREATED
+  CANDIDATE_VERSION_CREATED
+  CANDIDATE_COMMENT_CREATED
+  CANDIDATE_SPONSOR_SIGNATURE_CREATED
+  CANDIDATE_SUBMITTED_AS_PROPOSAL
 }
 
 interface FeedEvent {
@@ -412,6 +418,18 @@ type ProposalVotedEvent implements FeedEvent @entity {
   actor: Bytes!
   proposal: Proposal!
   vote: ProposalVote!
+}
+
+type ProposalEditedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+  previousProposal: Proposal!
 }
 
 type ProposalExecutedEvent implements FeedEvent @entity {
@@ -505,6 +523,56 @@ type ZoraCoinCreatedEvent implements FeedEvent @entity {
   transactionHash: Bytes!
   actor: Bytes!
   zoraCoin: ZoraCoin!
+}
+
+type CandidateVersionCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  candidateVersion: ProposalCandidateVersion!
+  group: ProposalCandidateGroup!
+}
+
+type CandidateCommentCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  comment: CandidateComment!
+  group: ProposalCandidateGroup!
+}
+
+type CandidateSponsorSignatureCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  signature: CandidateSponsorSignature!
+  candidateVersion: ProposalCandidateVersion!
+  group: ProposalCandidateGroup!
+}
+
+type CandidateSubmittedAsProposalEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+  candidateVersion: ProposalCandidateVersion!
+  group: ProposalCandidateGroup!
 }
 
 type ClankerToken @entity {

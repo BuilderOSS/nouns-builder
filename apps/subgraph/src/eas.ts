@@ -8,7 +8,10 @@ import {
 import { Token as TokenContract } from '../generated/EAS/Token'
 import {
   CandidateComment,
+  CandidateCommentCreatedEvent,
   CandidateSponsorSignature,
+  CandidateSponsorSignatureCreatedEvent,
+  CandidateVersionCreatedEvent,
   DAO,
   DaoMultisigUpdate,
   Proposal,
@@ -32,7 +35,7 @@ import {
   PROPOSAL_CANDIDATE_SCHEMA_UID,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from './utils/eas'
-import { parseProposalMetadata } from './utils/proposalMetadata'
+import { parseDescriptionFields } from './utils/proposalMetadata'
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
@@ -355,10 +358,13 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   const decoded = decodeProposalCandidate(data)
   if (!decoded) return
 
+  let dao = DAO.load(event.params.recipient.toHexString())
+  if (!dao) return
+
   let candidateId = decoded.candidateId
   let group = loadOrCreateCandidateGroup(
     candidateId,
-    event.params.recipient.toHexString(),
+    dao.id,
     event.params.attester,
     decoded.salt,
     event.block.timestamp
@@ -389,24 +395,28 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   version.metadata = decoded.description
   version.proposalId = decoded.proposalId
   version.createdAt = event.block.timestamp
-  let parsedMetadata = parseProposalMetadata(decoded.description)
-  version.title =
-    parsedMetadata && parsedMetadata.title.length > 0 ? parsedMetadata.title : null
-  version.description =
-    parsedMetadata && parsedMetadata.description.length > 0
-      ? parsedMetadata.description
-      : null
+  let parsedDescription = parseDescriptionFields(decoded.description)
+  version.title = parsedDescription[0].length > 0 ? parsedDescription[0] : null
+  version.description = parsedDescription[1].length > 0 ? parsedDescription[1] : null
   version.representedAddress =
-    parsedMetadata && parsedMetadata.representedAddress.length > 0
-      ? parsedMetadata.representedAddress
-      : null
-  version.discussionUrl =
-    parsedMetadata && parsedMetadata.discussionUrl.length > 0
-      ? parsedMetadata.discussionUrl
-      : null
+    parsedDescription[2].length > 0 ? parsedDescription[2] : null
+  version.discussionUrl = parsedDescription[3].length > 0 ? parsedDescription[3] : null
   version.save()
   recomputeGroupVersionAggregates(group.id)
   recomputeGroupLeadingVersion(group.id)
+
+  // Create feed event
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new CandidateVersionCreatedEvent(feedEventId)
+  feedEvent.type = 'CANDIDATE_VERSION_CREATED'
+  feedEvent.dao = dao.id
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = event.params.attester
+  feedEvent.candidateVersion = version.id
+  feedEvent.group = group.id
+  feedEvent.save()
 }
 
 function handleCandidateCommentAttestation(event: AttestedEvent): void {
@@ -442,6 +452,19 @@ function handleCandidateCommentAttestation(event: AttestedEvent): void {
 
   recomputeGroupCommentCount(group.id)
   recomputeGroupSentiment(group.id)
+
+  // Create feed event
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new CandidateCommentCreatedEvent(feedEventId)
+  feedEvent.type = 'CANDIDATE_COMMENT_CREATED'
+  feedEvent.dao = dao.id
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = event.params.attester
+  feedEvent.comment = comment.id
+  feedEvent.group = group.id
+  feedEvent.save()
 }
 
 function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void {
@@ -471,8 +494,25 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   signature.voteWeight = votes.reverted ? BigInt.fromI32(0) : votes.value
   signature.save()
 
-  recomputeVersionSignatureAggregates(version.id)
-  recomputeGroupLeadingVersion(version.group)
+  let versionId = version.id
+  let groupId = version.group
+
+  recomputeVersionSignatureAggregates(versionId)
+  recomputeGroupLeadingVersion(groupId)
+
+  // Create feed event
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new CandidateSponsorSignatureCreatedEvent(feedEventId)
+  feedEvent.type = 'CANDIDATE_SPONSOR_SIGNATURE_CREATED'
+  feedEvent.dao = dao.id
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = event.params.attester
+  feedEvent.signature = signature.id
+  feedEvent.candidateVersion = versionId
+  feedEvent.group = groupId
+  feedEvent.save()
 }
 
 function handleProposalCandidateRevoked(event: RevokedEvent): void {

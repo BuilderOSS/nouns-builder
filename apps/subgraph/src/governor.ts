@@ -9,9 +9,12 @@ import {
 } from '@graphprotocol/graph-ts'
 
 import {
+  CandidateSubmittedAsProposalEvent,
   DAO,
   Proposal,
+  ProposalCandidateVersion,
   ProposalCreatedEvent as ProposalCreatedFeedEvent,
+  ProposalEditedEvent,
   ProposalExecutedEvent as ProposalExecutedFeedEvent,
   ProposalSigner,
   ProposalVote,
@@ -31,40 +34,7 @@ import {
 } from '../generated/templates/Governor/Governor'
 import { Token as TokenContract } from '../generated/templates/Governor/Token'
 import { Treasury as TreasuryContract } from '../generated/templates/Governor/Treasury'
-import { parseProposalMetadata } from './utils/proposalMetadata'
-
-function parseDescriptionFields(descriptionMetadata: string): string[] {
-  let title: string | null = null
-  let description: string | null = null
-  let representedAddress: string | null = null
-  let discussionUrl: string | null = null
-
-  let parsedDescription = parseProposalMetadata(descriptionMetadata)
-
-  if (parsedDescription) {
-    title = parsedDescription.title.length > 0 ? parsedDescription.title : null
-    description =
-      parsedDescription.description.length > 0 ? parsedDescription.description : null
-    representedAddress =
-      parsedDescription.representedAddress.length > 0
-        ? parsedDescription.representedAddress
-        : null
-    discussionUrl =
-      parsedDescription.discussionUrl.length > 0 ? parsedDescription.discussionUrl : null
-  } else {
-    let split = descriptionMetadata.split('&&')
-    title = split.length > 0 && split[0].length > 0 ? split[0] : null
-    description = split.length > 1 && split[1].length > 0 ? split[1] : null
-  }
-
-  let titleValue = title == null ? '' : changetype<string>(title)
-  let descriptionValue = description == null ? '' : changetype<string>(description)
-  let representedAddressValue =
-    representedAddress == null ? '' : changetype<string>(representedAddress)
-  let discussionUrlValue = discussionUrl == null ? '' : changetype<string>(discussionUrl)
-
-  return [titleValue, descriptionValue, representedAddressValue, discussionUrlValue]
-}
+import { parseDescriptionFields } from './utils/proposalMetadata'
 
 function buildCalldatas(calldatasBytes: Bytes[]): string | null {
   let calldatas: string = ''
@@ -141,6 +111,7 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   proposal.updateMessage = null
   proposal.updateCount = 0
   proposal.isSigned = false
+  proposal.candidateVersion = null
   proposal.transactionHash = event.transaction.hash
 
   dao.save()
@@ -227,11 +198,25 @@ export function handleProposalUpdated(event: ProposalUpdatedEvent): void {
   proposal.updateMessage = event.params.updateMessage
   proposal.updateCount = oldProposal.updateCount + 1
   proposal.isSigned = oldProposal.isSigned
+  proposal.candidateVersion = oldProposal.candidateVersion
   proposal.transactionHash = event.transaction.hash
 
   oldProposal.replacedBy = proposal.id
   oldProposal.save()
   proposal.save()
+
+  // Create ProposalEditedEvent for on-chain proposal edits
+  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+  let feedEvent = new ProposalEditedEvent(feedEventId)
+  feedEvent.type = 'PROPOSAL_EDITED'
+  feedEvent.dao = proposal.dao
+  feedEvent.timestamp = event.block.timestamp
+  feedEvent.blockNumber = event.block.number
+  feedEvent.transactionHash = event.transaction.hash
+  feedEvent.actor = proposal.proposer
+  feedEvent.proposal = proposal.id
+  feedEvent.previousProposal = oldProposal.id
+  feedEvent.save()
 }
 
 export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
@@ -244,7 +229,6 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
   }
 
   proposal.isSigned = true
-  proposal.save()
 
   let governorContract = GovernorContract.bind(event.address)
   let tokenResult = governorContract.try_token()
@@ -269,6 +253,30 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
     proposalSigner.timestamp = event.block.timestamp
     proposalSigner.save()
   }
+
+  // Try to find matching candidate version by proposalId
+  // When a candidate is submitted via proposeBySigs(), the proposalId matches
+  let candidateVersion = ProposalCandidateVersion.load(proposal.proposalId.toHexString())
+  if (candidateVersion && candidateVersion.proposalId == proposal.proposalId) {
+    proposal.candidateVersion = candidateVersion.id
+
+    // Create CandidateSubmittedAsProposalEvent
+    let feedEventId =
+      event.transaction.hash.toHex() + '-submitted-' + event.logIndex.toString()
+    let feedEvent = new CandidateSubmittedAsProposalEvent(feedEventId)
+    feedEvent.type = 'CANDIDATE_SUBMITTED_AS_PROPOSAL'
+    feedEvent.dao = proposal.dao
+    feedEvent.timestamp = event.block.timestamp
+    feedEvent.blockNumber = event.block.number
+    feedEvent.transactionHash = event.transaction.hash
+    feedEvent.actor = proposal.proposer
+    feedEvent.proposal = proposal.id
+    feedEvent.candidateVersion = candidateVersion.id
+    feedEvent.group = candidateVersion.group
+    feedEvent.save()
+  }
+
+  proposal.save()
 }
 
 export function handleProposalUpdatablePeriodUpdated(
