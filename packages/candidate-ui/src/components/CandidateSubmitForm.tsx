@@ -1,10 +1,15 @@
+import { MobileProposalActionBar } from '@buildeross/create-proposal-ui'
+import { decodeTransactions } from '@buildeross/hooks'
 import { attestCandidate, type CandidateAttestationParams } from '@buildeross/sdk'
 import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
+import { type ProposalDescriptionMetadataV1 } from '@buildeross/types'
+import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
+import useSWR from 'swr'
 import { type Hex, keccak256, toBytes, toHex, zeroHash } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 
@@ -66,6 +71,41 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
         callCount: transaction.transactions.length,
       })),
     [transactions]
+  )
+
+  const proposalMetadata = React.useMemo(() => {
+    try {
+      return JSON.parse(
+        buildCandidateDescription({
+          title,
+          summary,
+          discussionUrl,
+          transactionBundles,
+        })
+      ) as ProposalDescriptionMetadataV1
+    } catch {
+      return undefined
+    }
+  }, [discussionUrl, summary, title, transactionBundles])
+
+  const { data: decodedTransactions, isLoading: isDecodingTransactions } = useSWR(
+    allTransactions.length > 0
+      ? ([
+          'candidate-submit-decoded-transactions',
+          chain.id,
+          targets,
+          calldatas,
+          values,
+        ] as const)
+      : null,
+    ([, chainId, _targets, _calldatas, _values]) =>
+      decodeTransactions(
+        chainId,
+        _targets as string[],
+        _calldatas as string[],
+        (_values as bigint[]).map((value) => value.toString())
+      ),
+    { revalidateOnFocus: false }
   )
 
   // Use the same proposal-shaped metadata contract as proposals.
@@ -215,30 +255,42 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
               <Text fontSize={14} fontWeight="label" color="text3">
                 Transactions
               </Text>
-              <Text>
+              <Text color="text3" fontSize={14} mb="x2">
                 {allTransactions.length} transaction{allTransactions.length !== 1 && 's'}
               </Text>
+              {isDecodingTransactions && !decodedTransactions ? (
+                <Text color="text3">Loading transaction details...</Text>
+              ) : (
+                <DecodedTransactions
+                  chainId={chain.id}
+                  addresses={addresses}
+                  decodedTransactions={decodedTransactions}
+                  proposalMetadata={proposalMetadata}
+                  isDecoding={isDecodingTransactions}
+                />
+              )}
             </Box>
-            {isUpdate && (
-              <Box
-                p="x3"
-                backgroundColor="background2"
-                borderRadius="curved"
-                style={{ border: '1px solid rgba(255, 100, 100, 0.3)' }}
-              >
-                <Text fontSize={14} color="text1" fontWeight="label">
-                  ⚠️ Update Warning
-                </Text>
-                <Text fontSize={14} color="text2" mt="x2">
-                  Creating a new version will reset all existing signatures. Sponsors must
-                  re-sign the updated version.
-                </Text>
-              </Box>
-            )}
           </Stack>
         </Box>
 
-        <Flex justify="space-between">
+        {isUpdate && (
+          <Box
+            p="x3"
+            backgroundColor="background2"
+            borderRadius="curved"
+            style={{ border: '1px solid rgba(255, 100, 100, 0.3)' }}
+          >
+            <Text fontSize={14} color="text1" fontWeight="label">
+              ⚠️ Update Warning
+            </Text>
+            <Text fontSize={14} color="text2" mt="x2">
+              Creating a new version will reset all existing signatures. Sponsors must
+              re-sign the updated version.
+            </Text>
+          </Box>
+        )}
+
+        <Flex justify="space-between" display={{ '@initial': 'none', '@768': 'flex' }}>
           {onBack && (
             <Button variant="secondary" onClick={onBack}>
               Back
@@ -248,6 +300,18 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
             {isUpdate ? 'Update Candidate' : 'Submit Candidate'}
           </Button>
         </Flex>
+
+        <MobileProposalActionBar
+          showBack={!!onBack}
+          onBack={onBack}
+          showQueue={false}
+          showReset={false}
+          showContinue
+          onContinue={handleUpdateClick}
+          continueDisabled={!canSubmit || isSubmitting}
+          continueLoading={isSubmitting}
+          continueLabel={isUpdate ? 'Update Candidate' : 'Submit Candidate'}
+        />
       </Stack>
 
       {/* Update Warning Modal */}

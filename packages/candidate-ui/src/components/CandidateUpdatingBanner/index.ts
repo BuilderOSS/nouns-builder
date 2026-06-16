@@ -1,0 +1,1 @@
+export { CandidateUpdatingBanner } from './CandidateUpdatingBanner'

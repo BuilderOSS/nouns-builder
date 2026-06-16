@@ -1,4 +1,8 @@
-import { CandidateDraftForm, CandidateSubmitForm } from '@buildeross/candidate-ui'
+import {
+  CandidateDraftForm,
+  CandidateSubmitForm,
+  CandidateUpdatingBanner,
+} from '@buildeross/candidate-ui'
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { L1_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
@@ -58,6 +62,9 @@ const CreateCandidatePage: NextPageWithLayout = () => {
     removeAllTransactions,
     title,
     summary,
+    candidateId,
+    salt,
+    versionNumber,
     transactions,
     clearCandidate,
   } = useCandidateStore(
@@ -71,29 +78,33 @@ const CreateCandidatePage: NextPageWithLayout = () => {
       removeAllTransactions: state.removeAllTransactions,
       title: state.title,
       summary: state.summary,
+      candidateId: state.candidateId,
+      salt: state.salt,
+      versionNumber: state.versionNumber,
       transactions: state.transactions,
       clearCandidate: state.clearCandidate,
     }))
   )
 
-  const [createStage, setCreateStage] = useState<CreateStage>(
-    router.query.stage === 'review'
+  const isEditingCandidate =
+    router.query.edit === '1' ||
+    router.query.edit === 'true' ||
+    router.query.edit === 'edit'
+
+  const getInitialStage = (): CreateStage => {
+    if (isEditingCandidate) return 'draft'
+
+    return router.query.stage === 'review'
       ? 'review'
       : router.query.stage === 'transactions' ||
           transactionType ||
           transactions.length > 0
         ? 'transactions'
         : 'draft'
-  )
-  const [furthestStage, setFurthestStage] = useState<CreateStage>(
-    router.query.stage === 'review'
-      ? 'review'
-      : router.query.stage === 'transactions' ||
-          transactionType ||
-          transactions.length > 0
-        ? 'transactions'
-        : 'draft'
-  )
+  }
+
+  const [createStage, setCreateStage] = useState<CreateStage>(getInitialStage())
+  const [furthestStage, setFurthestStage] = useState<CreateStage>(getInitialStage())
   const scrollDirection = useScrollDirection()
 
   const { data: paused } = useReadContract({
@@ -235,6 +246,13 @@ const CreateCandidatePage: NextPageWithLayout = () => {
     }
   }, [transactionType])
 
+  React.useEffect(() => {
+    if (isEditingCandidate) {
+      setCreateStage('draft')
+      setFurthestStage('draft')
+    }
+  }, [isEditingCandidate])
+
   // Update URL when stage changes
   const updateStage = (stage: CreateStage) => {
     setCreateStage(stage)
@@ -304,6 +322,8 @@ const CreateCandidatePage: NextPageWithLayout = () => {
 
   const canProceedFromDraft = Boolean(title && summary)
   const canProceedFromTransactions = transactions.length > 0
+  const isUpdateCandidate =
+    isEditingCandidate && !!candidateId && !!salt && !!versionNumber && versionNumber > 1
   const queueStickyTopOffset = scrollDirection === 'down' ? 120 : 200
   const canEnterStage = {
     draft: createStage !== 'draft',
@@ -370,6 +390,13 @@ const CreateCandidatePage: NextPageWithLayout = () => {
           hideActionsOnMobile
         />
 
+        {isEditingCandidate && candidateId && (
+          <CandidateUpdatingBanner
+            candidateId={candidateId}
+            versionNumber={versionNumber}
+          />
+        )}
+
         <ProposalStageIndicator
           currentStage={createStage}
           onStageSelect={updateStage}
@@ -405,6 +432,7 @@ const CreateCandidatePage: NextPageWithLayout = () => {
               {createStage === 'review' && (
                 <Stack gap="x6">
                   <CandidateSubmitForm
+                    isUpdate={isUpdateCandidate}
                     onSuccess={handleSubmitSuccess}
                     onBack={handleReviewBack}
                   />
@@ -413,54 +441,54 @@ const CreateCandidatePage: NextPageWithLayout = () => {
             </Box>
           }
           rightColumn={
-            transactions.length > 0 && !transactionType ? <Queue embedded /> : undefined
+            createStage === 'transactions' &&
+            transactions.length > 0 &&
+            !transactionType ? (
+              <Queue embedded />
+            ) : undefined
           }
         />
 
-        <MobileProposalActionBar
-          showBack
-          onBack={() => {
-            if (createStage === 'review') {
-              handleReviewBack()
-              return
-            }
+        {createStage !== 'review' && (
+          <MobileProposalActionBar
+            showBack
+            onBack={() => {
+              if (createStage === 'transactions') {
+                updateStage('draft')
+              }
+            }}
+            backDisabled={createStage === 'draft'}
+            showQueue={createStage === 'transactions'}
+            queueCount={transactions.length}
+            showReset
+            onReset={handleReset}
+            onContinue={() => {
+              if (createStage === 'draft') {
+                handleDraftNext()
+                return
+              }
 
-            if (createStage === 'transactions') {
-              updateStage('draft')
+              if (createStage === 'transactions') {
+                handleTransactionsNext()
+              }
+            }}
+            continueDisabled={
+              createStage === 'draft'
+                ? !canProceedFromDraft
+                : createStage === 'transactions'
+                  ? !canProceedFromTransactions
+                  : true
             }
-          }}
-          backDisabled={createStage === 'draft'}
-          showQueue={createStage === 'transactions'}
-          queueCount={transactions.length}
-          showReset
-          onReset={handleReset}
-          onContinue={() => {
-            if (createStage === 'draft') {
-              handleDraftNext()
-              return
+            continueLabel={
+              createStage === 'draft'
+                ? 'Next: Add Transactions'
+                : createStage === 'transactions'
+                  ? 'Next: Review'
+                  : 'Review Candidate'
             }
-
-            if (createStage === 'transactions') {
-              handleTransactionsNext()
-              return
-            }
-          }}
-          continueDisabled={
-            createStage === 'draft'
-              ? !canProceedFromDraft
-              : createStage === 'transactions'
-                ? !canProceedFromTransactions
-                : true
-          }
-          continueLabel={
-            createStage === 'draft'
-              ? 'Next: Add Transactions'
-              : createStage === 'transactions'
-                ? 'Next: Review'
-                : 'Review Candidate'
-          }
-          showContinue={createStage !== 'review'}
-        />
+            showContinue
+          />
+        )}
       </Box>
     </TransactionComposerProvider>
   )

@@ -1,8 +1,10 @@
 // Export candidate UI components
 export * from './components/CandidateCommentForm'
 export * from './components/CandidateDraftForm'
+export * from './components/CandidateEditedBanner'
 export * from './components/CandidateList'
 export * from './components/CandidatePromoteButton'
 export * from './components/CandidateReviewForm'
 export * from './components/CandidateSignatureButton'
 export * from './components/CandidateSubmitForm'
+export * from './components/CandidateUpdatingBanner'

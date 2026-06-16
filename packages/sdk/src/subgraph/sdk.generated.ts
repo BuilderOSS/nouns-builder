@@ -1249,11 +1249,12 @@ export enum CandidateSponsorSignature_OrderBy {
   VersionDescription = 'version__description',
   VersionDiscussionUrl = 'version__discussionUrl',
   VersionId = 'version__id',
+  VersionMetadata = 'version__metadata',
   VersionProposalId = 'version__proposalId',
+  VersionRepresentedAddress = 'version__representedAddress',
   VersionRevoked = 'version__revoked',
   VersionSalt = 'version__salt',
   VersionSignatureCount = 'version__signatureCount',
-  VersionSummary = 'version__summary',
   VersionTitle = 'version__title',
   VersionTotalVoteWeight = 'version__totalVoteWeight',
   VersionVersionNumber = 'version__versionNumber',
@@ -3330,7 +3331,7 @@ export enum PaymentOption_OrderBy {
   TokenType = 'tokenType',
 }
 
-export type Proposal = {
+export type Proposal = ProposalMetadataEntity & {
   __typename?: 'Proposal'
   abstainVotes: Scalars['Int']['output']
   againstVotes: Scalars['Int']['output']
@@ -3625,7 +3626,7 @@ export enum ProposalCandidateGroup_OrderBy {
   Versions = 'versions',
 }
 
-export type ProposalCandidateVersion = {
+export type ProposalCandidateVersion = ProposalMetadataEntity & {
   __typename?: 'ProposalCandidateVersion'
   attester: Scalars['Bytes']['output']
   calldatas: Array<Scalars['Bytes']['output']>
@@ -3762,6 +3763,26 @@ export type ProposalCandidateVersion_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>
   id_not?: InputMaybe<Scalars['ID']['input']>
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  metadata?: InputMaybe<Scalars['String']['input']>
+  metadata_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_gt?: InputMaybe<Scalars['String']['input']>
+  metadata_gte?: InputMaybe<Scalars['String']['input']>
+  metadata_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_lt?: InputMaybe<Scalars['String']['input']>
+  metadata_lte?: InputMaybe<Scalars['String']['input']>
+  metadata_not?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   or?: InputMaybe<Array<InputMaybe<ProposalCandidateVersion_Filter>>>
   proposalId?: InputMaybe<Scalars['Bytes']['input']>
   proposalId_contains?: InputMaybe<Scalars['Bytes']['input']>
@@ -3773,6 +3794,26 @@ export type ProposalCandidateVersion_Filter = {
   proposalId_not?: InputMaybe<Scalars['Bytes']['input']>
   proposalId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   proposalId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  representedAddress?: InputMaybe<Scalars['String']['input']>
+  representedAddress_contains?: InputMaybe<Scalars['String']['input']>
+  representedAddress_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_ends_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_gt?: InputMaybe<Scalars['String']['input']>
+  representedAddress_gte?: InputMaybe<Scalars['String']['input']>
+  representedAddress_in?: InputMaybe<Array<Scalars['String']['input']>>
+  representedAddress_lt?: InputMaybe<Scalars['String']['input']>
+  representedAddress_lte?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_contains?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  representedAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_starts_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   revoked?: InputMaybe<Scalars['Boolean']['input']>
   revoked_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   revoked_not?: InputMaybe<Scalars['Boolean']['input']>
@@ -3796,26 +3837,6 @@ export type ProposalCandidateVersion_Filter = {
   signatureCount_not?: InputMaybe<Scalars['BigInt']['input']>
   signatureCount_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   signatures_?: InputMaybe<CandidateSponsorSignature_Filter>
-  summary?: InputMaybe<Scalars['String']['input']>
-  summary_contains?: InputMaybe<Scalars['String']['input']>
-  summary_contains_nocase?: InputMaybe<Scalars['String']['input']>
-  summary_ends_with?: InputMaybe<Scalars['String']['input']>
-  summary_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
-  summary_gt?: InputMaybe<Scalars['String']['input']>
-  summary_gte?: InputMaybe<Scalars['String']['input']>
-  summary_in?: InputMaybe<Array<Scalars['String']['input']>>
-  summary_lt?: InputMaybe<Scalars['String']['input']>
-  summary_lte?: InputMaybe<Scalars['String']['input']>
-  summary_not?: InputMaybe<Scalars['String']['input']>
-  summary_not_contains?: InputMaybe<Scalars['String']['input']>
-  summary_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
-  summary_not_ends_with?: InputMaybe<Scalars['String']['input']>
-  summary_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
-  summary_not_in?: InputMaybe<Array<Scalars['String']['input']>>
-  summary_not_starts_with?: InputMaybe<Scalars['String']['input']>
-  summary_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
-  summary_starts_with?: InputMaybe<Scalars['String']['input']>
-  summary_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   targets?: InputMaybe<Array<Scalars['Bytes']['input']>>
   targets_contains?: InputMaybe<Array<Scalars['Bytes']['input']>>
   targets_not?: InputMaybe<Array<Scalars['Bytes']['input']>>
@@ -3881,12 +3902,13 @@ export enum ProposalCandidateVersion_OrderBy {
   GroupSalt = 'group__salt',
   GroupVersionCount = 'group__versionCount',
   Id = 'id',
+  Metadata = 'metadata',
   ProposalId = 'proposalId',
+  RepresentedAddress = 'representedAddress',
   Revoked = 'revoked',
   Salt = 'salt',
   SignatureCount = 'signatureCount',
   Signatures = 'signatures',
-  Summary = 'summary',
   Targets = 'targets',
   Title = 'title',
   TotalVoteWeight = 'totalVoteWeight',
@@ -4248,6 +4270,139 @@ export enum ProposalExecutedEvent_OrderBy {
   Timestamp = 'timestamp',
   TransactionHash = 'transactionHash',
   Type = 'type',
+}
+
+export type ProposalMetadataEntity = {
+  description?: Maybe<Scalars['String']['output']>
+  discussionUrl?: Maybe<Scalars['String']['output']>
+  id: Scalars['ID']['output']
+  metadata?: Maybe<Scalars['String']['output']>
+  representedAddress?: Maybe<Scalars['String']['output']>
+  title?: Maybe<Scalars['String']['output']>
+}
+
+export type ProposalMetadataEntity_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  and?: InputMaybe<Array<InputMaybe<ProposalMetadataEntity_Filter>>>
+  description?: InputMaybe<Scalars['String']['input']>
+  description_contains?: InputMaybe<Scalars['String']['input']>
+  description_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  description_ends_with?: InputMaybe<Scalars['String']['input']>
+  description_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_gt?: InputMaybe<Scalars['String']['input']>
+  description_gte?: InputMaybe<Scalars['String']['input']>
+  description_in?: InputMaybe<Array<Scalars['String']['input']>>
+  description_lt?: InputMaybe<Scalars['String']['input']>
+  description_lte?: InputMaybe<Scalars['String']['input']>
+  description_not?: InputMaybe<Scalars['String']['input']>
+  description_not_contains?: InputMaybe<Scalars['String']['input']>
+  description_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  description_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  description_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  description_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  description_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  description_starts_with?: InputMaybe<Scalars['String']['input']>
+  description_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_contains?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_ends_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_gt?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_gte?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_in?: InputMaybe<Array<Scalars['String']['input']>>
+  discussionUrl_lt?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_lte?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_contains?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  discussionUrl_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_starts_with?: InputMaybe<Scalars['String']['input']>
+  discussionUrl_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  metadata?: InputMaybe<Scalars['String']['input']>
+  metadata_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_gt?: InputMaybe<Scalars['String']['input']>
+  metadata_gte?: InputMaybe<Scalars['String']['input']>
+  metadata_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_lt?: InputMaybe<Scalars['String']['input']>
+  metadata_lte?: InputMaybe<Scalars['String']['input']>
+  metadata_not?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains?: InputMaybe<Scalars['String']['input']>
+  metadata_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  metadata_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with?: InputMaybe<Scalars['String']['input']>
+  metadata_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  or?: InputMaybe<Array<InputMaybe<ProposalMetadataEntity_Filter>>>
+  representedAddress?: InputMaybe<Scalars['String']['input']>
+  representedAddress_contains?: InputMaybe<Scalars['String']['input']>
+  representedAddress_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_ends_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_gt?: InputMaybe<Scalars['String']['input']>
+  representedAddress_gte?: InputMaybe<Scalars['String']['input']>
+  representedAddress_in?: InputMaybe<Array<Scalars['String']['input']>>
+  representedAddress_lt?: InputMaybe<Scalars['String']['input']>
+  representedAddress_lte?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_contains?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  representedAddress_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  representedAddress_starts_with?: InputMaybe<Scalars['String']['input']>
+  representedAddress_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  title?: InputMaybe<Scalars['String']['input']>
+  title_contains?: InputMaybe<Scalars['String']['input']>
+  title_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  title_ends_with?: InputMaybe<Scalars['String']['input']>
+  title_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  title_gt?: InputMaybe<Scalars['String']['input']>
+  title_gte?: InputMaybe<Scalars['String']['input']>
+  title_in?: InputMaybe<Array<Scalars['String']['input']>>
+  title_lt?: InputMaybe<Scalars['String']['input']>
+  title_lte?: InputMaybe<Scalars['String']['input']>
+  title_not?: InputMaybe<Scalars['String']['input']>
+  title_not_contains?: InputMaybe<Scalars['String']['input']>
+  title_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  title_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  title_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  title_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  title_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  title_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  title_starts_with?: InputMaybe<Scalars['String']['input']>
+  title_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum ProposalMetadataEntity_OrderBy {
+  Description = 'description',
+  DiscussionUrl = 'discussionUrl',
+  Id = 'id',
+  Metadata = 'metadata',
+  RepresentedAddress = 'representedAddress',
+  Title = 'title',
 }
 
 export type ProposalSigner = {
@@ -5806,6 +5961,8 @@ export type Query = {
   proposalCreatedEvents: Array<ProposalCreatedEvent>
   proposalExecutedEvent?: Maybe<ProposalExecutedEvent>
   proposalExecutedEvents: Array<ProposalExecutedEvent>
+  proposalMetadataEntities: Array<ProposalMetadataEntity>
+  proposalMetadataEntity?: Maybe<ProposalMetadataEntity>
   proposalSigner?: Maybe<ProposalSigner>
   proposalSigners: Array<ProposalSigner>
   proposalUpdate?: Maybe<ProposalUpdate>
@@ -6244,6 +6401,22 @@ export type QueryProposalExecutedEventsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<ProposalExecutedEvent_Filter>
+}
+
+export type QueryProposalMetadataEntitiesArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ProposalMetadataEntity_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ProposalMetadataEntity_Filter>
+}
+
+export type QueryProposalMetadataEntityArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
 }
 
 export type QueryProposalSignerArgs = {
@@ -9295,6 +9468,10 @@ export type CandidateGroupFragmentFragment = {
   currentAgainstCount: any
   currentAbstainCount: any
   dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
+  leadingVersion?: {
+    __typename?: 'ProposalCandidateVersion'
+    title?: string | null
+  } | null
 }
 
 export type CandidateGroupDetailFragmentFragment = {
@@ -9320,12 +9497,12 @@ export type CandidateGroupDetailFragmentFragment = {
     targets: Array<any>
     values: Array<any>
     calldatas: Array<any>
+    title?: string | null
     description?: string | null
     metadata?: string | null
-    proposalId: any
     representedAddress?: string | null
+    proposalId: any
     createdAt: any
-    title?: string | null
     discussionUrl?: string | null
     signatureCount: any
     totalVoteWeight: any
@@ -9341,12 +9518,12 @@ export type CandidateGroupDetailFragmentFragment = {
     targets: Array<any>
     values: Array<any>
     calldatas: Array<any>
+    title?: string | null
     description?: string | null
     metadata?: string | null
-    proposalId: any
     representedAddress?: string | null
+    proposalId: any
     createdAt: any
-    title?: string | null
     discussionUrl?: string | null
     signatureCount: any
     totalVoteWeight: any
@@ -9364,12 +9541,12 @@ export type CandidateVersionFragmentFragment = {
   targets: Array<any>
   values: Array<any>
   calldatas: Array<any>
+  title?: string | null
   description?: string | null
   metadata?: string | null
-  proposalId: any
   representedAddress?: string | null
+  proposalId: any
   createdAt: any
-  title?: string | null
   discussionUrl?: string | null
   signatureCount: any
   totalVoteWeight: any
@@ -9538,11 +9715,12 @@ export type CandidateGroupQuery = {
       targets: Array<any>
       values: Array<any>
       calldatas: Array<any>
-      description: string
+      title?: string | null
+      description?: string | null
+      metadata?: string | null
+      representedAddress?: string | null
       proposalId: any
       createdAt: any
-      title: string
-      summary: string
       discussionUrl?: string | null
       signatureCount: any
       totalVoteWeight: any
@@ -9558,11 +9736,12 @@ export type CandidateGroupQuery = {
       targets: Array<any>
       values: Array<any>
       calldatas: Array<any>
-      description: string
+      title?: string | null
+      description?: string | null
+      metadata?: string | null
+      representedAddress?: string | null
       proposalId: any
       createdAt: any
-      title: string
-      summary: string
       discussionUrl?: string | null
       signatureCount: any
       totalVoteWeight: any
@@ -9594,6 +9773,10 @@ export type CandidateGroupsQuery = {
     currentAgainstCount: any
     currentAbstainCount: any
     dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
+    leadingVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      title?: string | null
+    } | null
   }>
 }
 
@@ -9613,11 +9796,12 @@ export type CandidateVersionQuery = {
     targets: Array<any>
     values: Array<any>
     calldatas: Array<any>
-    description: string
+    title?: string | null
+    description?: string | null
+    metadata?: string | null
+    representedAddress?: string | null
     proposalId: any
     createdAt: any
-    title: string
-    summary: string
     discussionUrl?: string | null
     signatureCount: any
     totalVoteWeight: any
@@ -11625,6 +11809,9 @@ export const CandidateGroupFragmentFragmentDoc = gql`
     currentForCount
     currentAgainstCount
     currentAbstainCount
+    leadingVersion {
+      title
+    }
   }
 `
 export const CandidateVersionFragmentFragmentDoc = gql`

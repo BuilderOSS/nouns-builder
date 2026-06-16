@@ -16,6 +16,7 @@ type ProposalVersionDiffModalProps = {
   previousVersion: ProposalVersion | null
   versionIndex: number
   isOriginal: boolean
+  versionLabel?: string
 }
 
 type TabType = 'diff' | 'full'
@@ -27,6 +28,7 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
   previousVersion,
   versionIndex,
   isOriginal,
+  versionLabel = 'Update',
 }) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -181,7 +183,7 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
       <Flex direction="column" gap="x6" p="x6">
         <Flex justify="space-between" align="center">
           <Text fontSize={28} fontWeight="display">
-            {isOriginal ? 'Original Proposal' : `Update ${versionIndex}`}
+            {isOriginal ? 'Original Proposal' : `${versionLabel} ${versionIndex}`}
           </Text>
           <Button variant="ghost" size="sm" onClick={onClose}>
             Close

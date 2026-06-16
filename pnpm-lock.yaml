@@ -525,6 +525,12 @@ importers:
 
   packages/candidate-ui:
     dependencies:
+      '@buildeross/create-proposal-ui':
+        specifier: workspace:*
+        version: link:../create-proposal-ui
+      '@buildeross/proposal-ui':
+        specifier: workspace:*
+        version: link:../proposal-ui
       '@ethereum-attestation-service/eas-sdk':
         specifier: ^2.7.0
         version: 2.9.0(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.19.15)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)

@@ -1,7 +1,11 @@
 import { Box, Grid } from '@buildeross/zord'
 import { FC, ReactNode } from 'react'
 
-import { rightColumnHiddenOnMobile, twoColumnLayout } from './TwoColumnLayout.css'
+import {
+  rightColumnHiddenOnMobile,
+  singleColumnLayout,
+  twoColumnLayout,
+} from './TwoColumnLayout.css'
 
 interface CustomTransactionLayoutProps {
   leftColumn?: ReactNode
@@ -18,10 +22,12 @@ export const TwoColumnLayout: FC<CustomTransactionLayoutProps> = ({
   stickyRightColumnTopOffset = 0,
   hideRightColumnOnMobile = false,
 }) => {
+  const layoutClassName = rightColumn ? twoColumnLayout : singleColumnLayout
+
   return (
     <Box w={'100%'} mx={'auto'} position={'relative'}>
       <Box>
-        <Grid justify={'space-between'} gap={'x16'} className={twoColumnLayout}>
+        <Grid justify={'space-between'} gap={'x16'} className={layoutClassName}>
           {leftColumn && <Box w={'100%'}>{leftColumn}</Box>}
           {rightColumn && (
             <Box
