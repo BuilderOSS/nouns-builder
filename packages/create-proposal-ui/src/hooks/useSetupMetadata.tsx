@@ -5,7 +5,7 @@ import { AddressType, CHAIN_ID, Property } from '@buildeross/types'
 import { useCallback, useState } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import { decodeFunctionData, encodeFunctionData } from 'viem'
-import { useWriteContract } from 'wagmi'
+import { usePublicClient, useWriteContract } from 'wagmi'
 
 export const useSetupMetadata = (
   sourceTokenAddress?: AddressType,
@@ -157,6 +157,7 @@ export const useSetupMetadata = (
   const [addError, setAddError] = useState<string>()
 
   const { writeContractAsync, isPending } = useWriteContract()
+  const publicClient = usePublicClient({ chainId: targetChainId })
 
   // Combine fetch error and add error
   const error = fetchError?.message || addError
@@ -212,13 +213,28 @@ export const useSetupMetadata = (
           chainId: targetChainId,
         })
 
-        console.log(`[useSetupMetadata] Property ${i + 1} added successfully:`, {
+        console.log(`[useSetupMetadata] Property ${i + 1} transaction sent:`, {
           txHash: hash,
         })
 
         hashes.push(hash)
         setTxHashes([...hashes])
         onTxHashAdded?.(hash)
+
+        // Wait for transaction receipt before continuing
+        if (publicClient) {
+          console.log(`[useSetupMetadata] Waiting for receipt for property ${i + 1}...`)
+          const receipt = await publicClient.waitForTransactionReceipt({ hash })
+          console.log(`[useSetupMetadata] Property ${i + 1} confirmed:`, {
+            txHash: hash,
+            status: receipt.status,
+            blockNumber: receipt.blockNumber,
+          })
+
+          if (receipt.status !== 'success') {
+            throw new Error(`Transaction failed for property ${i + 1}`)
+          }
+        }
       }
 
       setCurrentPropertyIndex(properties.length)
@@ -243,7 +259,10 @@ export const useSetupMetadata = (
     targetChainId,
     properties,
     writeContractAsync,
+    publicClient,
     currentPropertyIndex,
+    onProgressUpdate,
+    onTxHashAdded,
   ])
 
   return {

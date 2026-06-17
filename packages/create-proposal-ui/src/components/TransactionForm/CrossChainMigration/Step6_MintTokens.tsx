@@ -1,3 +1,4 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
@@ -178,7 +179,7 @@ export const Step6_MintTokens: React.FC = () => {
               </Text>
             </Box>
 
-            {txHashes.length > 0 && (
+            {txHashes.length > 0 && targetChainId && (
               <Box mt="x2">
                 <Text fontSize={12} color="text3" mb="x2">
                   Batch Transactions ({txHashes.length}):
@@ -195,9 +196,18 @@ export const Step6_MintTokens: React.FC = () => {
                         Batch {idx + 1}:
                       </Text>
                       <Text
+                        as="a"
+                        href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${hash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         fontFamily="mono"
                         fontSize={12}
-                        style={{ wordBreak: 'break-all' }}
+                        color="accent"
+                        style={{
+                          wordBreak: 'break-all',
+                          textDecoration: 'underline',
+                          cursor: 'pointer',
+                        }}
                       >
                         {hash}
                       </Text>

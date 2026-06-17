@@ -4,26 +4,23 @@ import {
   PUBLIC_MANAGER_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
-import { useDaoStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { isTestnetChain } from '@buildeross/utils'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { zeroAddress } from 'viem'
-import { useChainId } from 'wagmi'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { useFetchDAOConfigForMigration } from '../../../hooks/useFetchDAOConfigForMigration'
 import { validateChainMigration } from '../../../utils/validateMigration'
 
 export const Step1_LoadConfig: React.FC = () => {
-  const sourceChainId = useChainId()
+  const { chain } = useChainStore()
+  const sourceChainId = chain.id
   const { addresses } = useDaoStore()
   const { setChains, setSourceAddresses, setSourceConfig, goToNextStep } =
     useCrossChainMigration()
-
-  const [targetChainId, setTargetChainId] = useState<CHAIN_ID>(CHAIN_ID.BASE)
-  const [validationError, setValidationError] = useState<string>()
 
   // Filter chains that have all required contracts AND match testnet/mainnet type
   const availableChains = useMemo(() => {
@@ -55,6 +52,12 @@ export const Step1_LoadConfig: React.FC = () => {
       )
     })
   }, [sourceChainId])
+
+  // Set default target chain to first available chain (matches testnet/mainnet type)
+  const [targetChainId, setTargetChainId] = useState<CHAIN_ID>(
+    availableChains[0]?.id || CHAIN_ID.BASE
+  )
+  const [validationError, setValidationError] = useState<string>()
 
   // Load source DAO config
   const { config, isLoading, error } = useFetchDAOConfigForMigration({
@@ -94,7 +97,11 @@ export const Step1_LoadConfig: React.FC = () => {
     return (
       <Stack gap="x4">
         <Heading size="md">Error Loading Configuration</Heading>
-        <Text color="negative">{error || 'Failed to load DAO configuration'}</Text>
+        <Text color="negative">
+          {error instanceof Error
+            ? error.message
+            : error || 'Failed to load DAO configuration'}
+        </Text>
       </Stack>
     )
   }

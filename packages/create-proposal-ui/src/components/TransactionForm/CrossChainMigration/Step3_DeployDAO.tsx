@@ -1,3 +1,4 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { ContractButton } from '@buildeross/ui'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import { useEffect } from 'react'
@@ -173,12 +174,25 @@ export const Step3_DeployDAO: React.FC = () => {
         </Flex>
       )}
 
-      {txHash && (
+      {txHash && targetChainId && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Text fontSize={14} color="text3" mb="x2">
             Transaction Hash:
           </Text>
-          <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
+          <Text
+            as="a"
+            href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${txHash}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            fontFamily="mono"
+            fontSize={12}
+            color="accent"
+            style={{
+              wordBreak: 'break-all',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
             {txHash}
           </Text>
         </Box>

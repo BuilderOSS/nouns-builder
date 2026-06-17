@@ -1,5 +1,4 @@
-import { createTree } from 'lanyard'
-import { encodeAbiParameters } from 'viem'
+import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
 
 type TupleOf16Numbers = [
   number,
@@ -23,27 +22,18 @@ type TupleOf16Numbers = [
 export const prepareAttributesMerkleRoot = async (
   attributeForTokens: number[][]
 ): Promise<`0x${string}`> => {
-  const leaves = attributeForTokens
-    .map((attributes, tokenId) => {
-      let arr: TupleOf16Numbers = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  const leaves = attributeForTokens.map((attributes, tokenId) => {
+    let arr: TupleOf16Numbers = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-      if (attributes.length > 16) throw new Error('Too many attributes')
+    if (attributes.length > 16) throw new Error('Too many attributes')
 
-      for (let i = 0; i < attributes.length; i++) {
-        arr[i] = attributes[i]
-      }
+    for (let i = 0; i < attributes.length; i++) {
+      arr[i] = attributes[i]
+    }
 
-      return encodeAbiParameters(
-        [
-          { name: 'tokenId', type: 'uint256' },
-          { name: 'attributes', type: 'uint16[16]' },
-        ],
-        [BigInt(tokenId), arr]
-      )
-    })
-    .flat()
+    return [BigInt(tokenId), arr]
+  })
 
-  return await createTree({
-    unhashedLeaves: leaves,
-  }).then((x) => x.merkleRoot as `0x${string}`)
+  const tree = StandardMerkleTree.of(leaves, ['uint256', 'uint16[16]'])
+  return tree.root as `0x${string}`
 }

@@ -5,7 +5,7 @@ import {
 } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useState } from 'react'
-import { useWriteContract } from 'wagmi'
+import { usePublicClient, useWriteContract } from 'wagmi'
 
 const UINT_64_MAX = 18446744073709551615n
 
@@ -19,6 +19,7 @@ export const useSetMerkleRoots = (
   const [error, setError] = useState<string>()
 
   const { writeContractAsync, isPending } = useWriteContract()
+  const publicClient = usePublicClient({ chainId: targetChainId })
 
   const setAttributesRoot = async (merkleRoot: `0x${string}`) => {
     if (!targetMetadataAddress) {
@@ -37,7 +38,26 @@ export const useSetMerkleRoots = (
         chainId: targetChainId,
       })
 
+      console.log('[useSetMerkleRoots] Attributes root transaction sent:', {
+        txHash: hash,
+      })
       setAttributesTxHash(hash)
+
+      // Wait for transaction receipt
+      if (publicClient) {
+        console.log('[useSetMerkleRoots] Waiting for attributes root receipt...')
+        const receipt = await publicClient.waitForTransactionReceipt({ hash })
+        console.log('[useSetMerkleRoots] Attributes root confirmed:', {
+          txHash: hash,
+          status: receipt.status,
+          blockNumber: receipt.blockNumber,
+        })
+
+        if (receipt.status !== 'success') {
+          throw new Error('Transaction failed for setAttributeMerkleRoot')
+        }
+      }
+
       return hash
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to set attributes root'
@@ -77,7 +97,24 @@ export const useSetMerkleRoots = (
         chainId: targetChainId,
       })
 
+      console.log('[useSetMerkleRoots] Mint settings transaction sent:', { txHash: hash })
       setMembersTxHash(hash)
+
+      // Wait for transaction receipt
+      if (publicClient) {
+        console.log('[useSetMerkleRoots] Waiting for mint settings receipt...')
+        const receipt = await publicClient.waitForTransactionReceipt({ hash })
+        console.log('[useSetMerkleRoots] Mint settings confirmed:', {
+          txHash: hash,
+          status: receipt.status,
+          blockNumber: receipt.blockNumber,
+        })
+
+        if (receipt.status !== 'success') {
+          throw new Error('Transaction failed for setMintSettings')
+        }
+      }
+
       return hash
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to set mint settings'

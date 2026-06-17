@@ -1,3 +1,4 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import { useEffect, useState } from 'react'
 
@@ -22,6 +23,8 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     setMerkleRootsPhase,
     setAttributesMerkleRoot,
     setMembersMerkleRoot,
+    setAttributesData,
+    setMemberSnapshot,
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
@@ -52,6 +55,19 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     sourceChainId
   )
 
+  // Save attributes data and member snapshot to Zustand when available
+  useEffect(() => {
+    if (attributesData) {
+      setAttributesData(attributesData)
+    }
+  }, [attributesData, setAttributesData])
+
+  useEffect(() => {
+    if (memberSnapshot) {
+      setMemberSnapshot(memberSnapshot)
+    }
+  }, [memberSnapshot, setMemberSnapshot])
+
   const {
     setAttributesRoot,
     setMintSettings,
@@ -61,20 +77,36 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     error: setError,
   } = useSetMerkleRoots(targetAddresses?.metadata, targetAddresses?.token, targetChainId)
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     try {
-      const [attributesResult, memberResult] = await Promise.all([
-        generateAttributesRoot(),
-        generateMemberRoot(),
-      ])
-
-      if (attributesResult && memberResult) {
-        setPhase(SetupPhase.SET_ROOTS)
-      }
+      // Trigger both fetches
+      generateAttributesRoot()
+      generateMemberRoot()
+      // Data will be available via SWR, and useEffect will handle phase transition
     } catch (err) {
       console.error('Error generating merkle roots:', err)
     }
   }
+
+  // Auto-advance to SET_ROOTS phase when both merkle roots are available
+  useEffect(() => {
+    if (
+      phase === SetupPhase.GENERATE &&
+      attributesMerkleRoot &&
+      memberMerkleRoot &&
+      !isGeneratingAttributes &&
+      !isGeneratingMembers
+    ) {
+      console.log('[Step5] Both merkle roots ready, advancing to SET_ROOTS phase')
+      setPhase(SetupPhase.SET_ROOTS)
+    }
+  }, [
+    phase,
+    attributesMerkleRoot,
+    memberMerkleRoot,
+    isGeneratingAttributes,
+    isGeneratingMembers,
+  ])
 
   const handleSetRoots = async () => {
     if (!attributesMerkleRoot || !memberMerkleRoot) {
@@ -279,7 +311,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
             </Text>
           </Box>
 
-          {(attributesTxHash || membersTxHash) && (
+          {(attributesTxHash || membersTxHash) && targetChainId && (
             <Box p="x4" borderRadius="curved" backgroundColor="background2">
               <Heading size="xs" mb="x3">
                 Transaction Hashes
@@ -291,9 +323,18 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                       Attributes Root (setAttributeMerkleRoot):
                     </Text>
                     <Text
+                      as="a"
+                      href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${attributesTxHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       fontFamily="mono"
                       fontSize={12}
-                      style={{ wordBreak: 'break-all' }}
+                      color="accent"
+                      style={{
+                        wordBreak: 'break-all',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                      }}
                     >
                       {attributesTxHash}
                     </Text>
@@ -305,9 +346,18 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                       Member Root (setMintSettings):
                     </Text>
                     <Text
+                      as="a"
+                      href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${membersTxHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       fontFamily="mono"
                       fontSize={12}
-                      style={{ wordBreak: 'break-all' }}
+                      color="accent"
+                      style={{
+                        wordBreak: 'break-all',
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                      }}
                     >
                       {membersTxHash}
                     </Text>

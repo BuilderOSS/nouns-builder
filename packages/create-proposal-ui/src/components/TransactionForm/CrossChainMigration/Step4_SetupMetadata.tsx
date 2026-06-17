@@ -1,3 +1,4 @@
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import { useEffect } from 'react'
 
@@ -39,7 +40,6 @@ export const Step4_SetupMetadata: React.FC = () => {
   // Save fetched properties to Zustand for persistence
   useEffect(() => {
     if (properties && properties.length > 0 && !cachedProperties) {
-      console.log('[Step4] Caching properties to Zustand:', properties.length)
       setMetadataProperties(properties)
     }
   }, [properties, cachedProperties, setMetadataProperties])
@@ -170,7 +170,7 @@ export const Step4_SetupMetadata: React.FC = () => {
         </Box>
       )}
 
-      {txHashes.length > 0 && (
+      {txHashes.length > 0 && targetChainId && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Heading size="xs" mb="x3">
             Transaction Hashes ({txHashes.length})
@@ -181,7 +181,20 @@ export const Step4_SetupMetadata: React.FC = () => {
                 <Text fontSize={12} color="text3" mb="x1">
                   Group {idx + 1}:
                 </Text>
-                <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
+                <Text
+                  as="a"
+                  href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  fontFamily="mono"
+                  fontSize={12}
+                  color="accent"
+                  style={{
+                    wordBreak: 'break-all',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                  }}
+                >
                   {hash}
                 </Text>
               </Box>

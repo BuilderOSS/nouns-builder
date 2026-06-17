@@ -58,12 +58,14 @@ export const useGenerateMerkleRoots = (
           )
         }
 
-        const data = (await response.json()) as number[][]
+        const result = await response.json()
+        const data = (result.data || result) as number[][]
         const root = await prepareAttributesMerkleRoot(data)
 
         console.log('[useGenerateMerkleRoots] Attributes result:', {
           dataLength: data.length,
           root,
+          source: result.source || 'unknown',
         })
 
         return { data, root }
@@ -110,7 +112,8 @@ export const useGenerateMerkleRoots = (
           )
         }
 
-        const snapshot = (await response.json()) as DaoMemberSimplified[]
+        const result = await response.json()
+        const snapshot = (result.data || result) as DaoMemberSimplified[]
 
         // Convert to format expected by prepareMemberMerkleRoot
         const snapshotForMerkle = snapshot.map((member) => ({
@@ -125,6 +128,7 @@ export const useGenerateMerkleRoots = (
         console.log('[useGenerateMerkleRoots] Members result:', {
           snapshotLength: snapshot.length,
           root,
+          source: result.source || 'unknown',
         })
 
         return { snapshot, root }
@@ -145,74 +149,22 @@ export const useGenerateMerkleRoots = (
   )
 
   // Trigger functions - set flags to start SWR fetching
-  const generateAttributesRoot = async () => {
+  // These are now synchronous - they just trigger the fetch
+  // Data will be available via the returned properties once SWR completes
+  const generateAttributesRoot = () => {
     if (!sourceMetadataAddress || !currentTokenId || !sourceChainId) {
       throw new Error('Missing required parameters for attributes')
     }
 
     setShouldFetchAttributes(true)
-
-    // Return a promise that resolves when SWR finishes
-    return new Promise<{ data: number[][]; root: `0x${string}` }>((resolve, reject) => {
-      // Check if already loaded
-      if (attributesResult) {
-        resolve(attributesResult)
-        return
-      }
-
-      // Wait for SWR to load
-      const checkInterval = setInterval(() => {
-        if (attributesResult) {
-          clearInterval(checkInterval)
-          resolve(attributesResult)
-        } else if (attributesError) {
-          clearInterval(checkInterval)
-          reject(attributesError)
-        }
-      }, 100)
-
-      // Timeout after 30 seconds
-      setTimeout(() => {
-        clearInterval(checkInterval)
-        reject(new Error('Timeout generating attributes'))
-      }, 30000)
-    })
   }
 
-  const generateMemberRoot = async () => {
+  const generateMemberRoot = () => {
     if (!sourceTokenAddress || !sourceChainId) {
       throw new Error('Missing required parameters for members')
     }
 
     setShouldFetchMembers(true)
-
-    // Return a promise that resolves when SWR finishes
-    return new Promise<{ snapshot: DaoMemberSimplified[]; root: `0x${string}` }>(
-      (resolve, reject) => {
-        // Check if already loaded
-        if (memberResult) {
-          resolve(memberResult)
-          return
-        }
-
-        // Wait for SWR to load
-        const checkInterval = setInterval(() => {
-          if (memberResult) {
-            clearInterval(checkInterval)
-            resolve(memberResult)
-          } else if (memberError) {
-            clearInterval(checkInterval)
-            reject(memberError)
-          }
-        }, 100)
-
-        // Timeout after 30 seconds
-        setTimeout(() => {
-          clearInterval(checkInterval)
-          reject(new Error('Timeout generating member root'))
-        }, 30000)
-      }
-    )
   }
 
   // Combine errors

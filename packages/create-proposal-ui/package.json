@@ -19,7 +19,6 @@
     "dayjs": "^1.11.13",
     "formik": "^2.4.6",
     "framer-motion": "^12.12.1",
-    "lanyard": "^1.1.2",
     "lodash": "^4.17.21",
     "papaparse": "^5.5.3",
     "sablier": "^2.0.1",

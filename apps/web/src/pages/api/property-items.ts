@@ -37,31 +37,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   const metadataAddressLower = (metadataAddress as string).toLowerCase()
   const cacheKey = getPropertyItemsRedisKey(chainIdNum, metadataAddressLower)
 
-  console.log('[property-items API] Fetching properties:', {
-    chainId: chainIdNum,
-    metadataAddress: metadataAddressLower,
-    cacheKey,
-  })
-
   try {
     // Try to get from Redis cache first
     const redisConnection = getRedisConnection()
     const cachedData = await redisConnection?.get(cacheKey)
 
     if (cachedData) {
-      console.log('[property-items API] Cache hit:', {
-        chainId: chainIdNum,
-        metadataAddress: metadataAddressLower,
-      })
-
       const result = JSON.parse(cachedData)
       return res.status(200).json({ ...result, source: 'cache' })
     }
-
-    console.log('[property-items API] Cache miss, fetching from blockchain:', {
-      chainId: chainIdNum,
-      metadataAddress: metadataAddressLower,
-    })
 
     // Cache miss - fetch from blockchain
     const result = await getPropertyItems(
@@ -69,17 +53,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       metadataAddressLower as AddressType
     )
 
-    console.log('[property-items API] Blockchain fetch success:', {
-      propertiesCount: result.propertiesCount,
-      itemsCount: result.propertyItemsCount,
-    })
-
     // Store in Redis cache for 7 days (property data rarely changes)
     // Using 7 days instead of longer to allow for any property updates
     const TTL_SECONDS = 60 * 60 * 24 * 7 // 7 days
     await redisConnection?.setex(cacheKey, TTL_SECONDS, JSON.stringify(result))
-
-    console.log('[property-items API] Cached result for 7 days')
 
     return res.status(200).json({ ...result, source: 'blockchain' })
   } catch (error) {
