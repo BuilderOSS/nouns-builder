@@ -10,6 +10,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './vitest.setup.ts',
+    include: process.env.FORK_TESTS === 'only'
+      ? ['**/*.fork.test.{ts,tsx}']
+      : ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', '**/*.fork.test.{ts,tsx}'],
   },
   resolve: {
     alias: {

@@ -109,6 +109,8 @@
     "clean": "rm -rf .turbo dist",
     "lint": "pnpm type-check && eslint src --fix",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.fork.test.{ts,tsx}'",
+    "test:fork": "FORK_TESTS=only vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },

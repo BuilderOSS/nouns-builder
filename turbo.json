@@ -9,6 +9,7 @@
     "ETHERSCAN_API_KEY",
     "AI_GATEWAY_API_KEY",
     "AI_MODEL",
+    "FORK_TESTS",
     "OPENAI_API_KEY",
     "NEYNAR_API_KEY",
     "NEXT_PUBLIC_DISABLE_AI_SUMMARY",
@@ -46,6 +47,14 @@
       "dependsOn": ["^build"]
     },
     "test": {
+      "outputs": ["coverage/**"],
+      "dependsOn": ["^build"]
+    },
+    "test:unit": {
+      "outputs": ["coverage/**"],
+      "dependsOn": ["^build"]
+    },
+    "test:fork": {
       "outputs": ["coverage/**"],
       "dependsOn": ["^build"]
     },

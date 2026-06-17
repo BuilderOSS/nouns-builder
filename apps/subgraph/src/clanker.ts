@@ -19,16 +19,20 @@ export function handleTokenCreated(event: TokenCreated): void {
   // Use the shared helper to validate and load the DAO
   let dao = loadDAOFromTreasury(event.params.tokenAdmin)
 
-  // Only save the Clanker token if we found a valid DAO
-  if (!dao) {
-    return
-  }
-
   // Create the ClankerToken entity
   let token = new ClankerToken(event.params.tokenAddress.toHexString())
 
-  // Link to DAO
-  token.dao = dao.id
+  // Link to DAO if tokenAdmin matches a DAO treasury
+  if (dao) {
+    token.dao = dao.id
+    token.isTrusted = true // Created by DAO treasury
+  } else {
+    token.dao = null
+    token.isTrusted = false // Not created by DAO
+  }
+
+  // Admin hasn't been changed yet
+  token.adminChangedAt = null
 
   // Basic info
   token.tokenAddress = event.params.tokenAddress
@@ -86,15 +90,17 @@ export function handleTokenCreated(event: TokenCreated): void {
   // Instantiate template to start tracking token holders
   ClankerTokenTemplate.create(event.params.tokenAddress)
 
-  // Create feed event
-  let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
-  let feedEvent = new ClankerTokenCreatedFeedEvent(feedEventId)
-  feedEvent.type = 'CLANKER_TOKEN_CREATED'
-  feedEvent.dao = dao.id
-  feedEvent.timestamp = event.block.timestamp
-  feedEvent.blockNumber = event.block.number
-  feedEvent.transactionHash = event.transaction.hash
-  feedEvent.actor = event.params.msgSender
-  feedEvent.clankerToken = token.id
-  feedEvent.save()
+  // Create feed event only if token is linked to a DAO
+  if (dao) {
+    let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
+    let feedEvent = new ClankerTokenCreatedFeedEvent(feedEventId)
+    feedEvent.type = 'CLANKER_TOKEN_CREATED'
+    feedEvent.dao = dao.id
+    feedEvent.timestamp = event.block.timestamp
+    feedEvent.blockNumber = event.block.number
+    feedEvent.transactionHash = event.transaction.hash
+    feedEvent.actor = event.params.msgSender
+    feedEvent.clankerToken = token.id
+    feedEvent.save()
+  }
 }
