@@ -280,7 +280,7 @@ After this proposal passes:
           >
             <Text
               fontFamily="mono"
-              fontSize={11}
+              fontSize={12}
               style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
             >
               {proposalData.summary}

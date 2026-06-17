@@ -1,4 +1,5 @@
-import { AddressType } from '@buildeross/types'
+import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { isTestnetChain } from '@buildeross/utils'
 
 export interface MigrationConfig {
   name: string
@@ -164,6 +165,34 @@ export const validateDeployedAddresses = (addresses: {
 
   if (!addresses.governor || addresses.governor === zeroAddress) {
     errors.push('Governor address is missing or invalid')
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  }
+}
+
+/**
+ * Validate that source and target chains are compatible (both testnet or both mainnet)
+ */
+export const validateChainMigration = (
+  sourceChainId: CHAIN_ID,
+  targetChainId: CHAIN_ID
+): ValidationResult => {
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  const sourceIsTestnet = isTestnetChain(sourceChainId)
+  const targetIsTestnet = isTestnetChain(targetChainId)
+
+  if (sourceIsTestnet !== targetIsTestnet) {
+    errors.push(
+      sourceIsTestnet
+        ? 'Testnet DAOs can only migrate to other testnet chains. Please select a testnet target chain.'
+        : 'Mainnet DAOs can only migrate to other mainnet chains. Please select a mainnet target chain.'
+    )
   }
 
   return {

@@ -12,10 +12,13 @@ const BATCH_SIZE = 15
 export const useMintReservedTokens = (
   memberSnapshot?: DaoMemberSimplified[],
   targetTokenAddress?: AddressType,
-  targetChainId?: CHAIN_ID
+  targetChainId?: CHAIN_ID,
+  alreadyMinted?: number[],
+  onTokensMinted?: (tokenIds: number[]) => void,
+  onTxHash?: (hash: `0x${string}`) => void
 ) => {
   const [totalTokens, setTotalTokens] = useState(0)
-  const [tokensMinted, setTokensMinted] = useState<number[]>([])
+  const [tokensMinted, setTokensMinted] = useState<number[]>(alreadyMinted || [])
   const [txHashes, setTxHashes] = useState<`0x${string}`[]>([])
   const [error, setError] = useState<string>()
 
@@ -59,27 +62,51 @@ export const useMintReservedTokens = (
 
       setTotalTokens(allClaims.length)
 
-      // Batch mint
-      const hashes: `0x${string}`[] = []
-      const minted: number[] = []
+      // Filter out already minted tokens to support resuming
+      const alreadyMintedSet = new Set(tokensMinted)
+      const claimsToMint = allClaims.filter(
+        (claim) => !alreadyMintedSet.has(Number(claim.tokenId))
+      )
 
-      for (let i = 0; i < allClaims.length; i += BATCH_SIZE) {
-        const batch = allClaims.slice(i, i + BATCH_SIZE)
+      console.log('[useMintReservedTokens] Minting status:', {
+        total: allClaims.length,
+        alreadyMinted: tokensMinted.length,
+        remaining: claimsToMint.length,
+      })
+
+      if (claimsToMint.length === 0) {
+        console.log('[useMintReservedTokens] All tokens already minted')
+        return { minted: tokensMinted, hashes: txHashes }
+      }
+
+      // Batch mint
+      const hashes: `0x${string}`[] = [...txHashes]
+      const minted: number[] = [...tokensMinted]
+
+      for (let i = 0; i < claimsToMint.length; i += BATCH_SIZE) {
+        const batch = claimsToMint.slice(i, i + BATCH_SIZE)
+
+        console.log(
+          `[useMintReservedTokens] Minting batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(claimsToMint.length / BATCH_SIZE)}`,
+          { batchSize: batch.length }
+        )
 
         const hash = await writeContractAsync({
           abi: merkleReserveMinterAbi,
           address: minterAddress,
           functionName: 'mintFromReserve',
           args: [targetTokenAddress, batch],
+          chainId: targetChainId,
         })
 
         hashes.push(hash)
         setTxHashes([...hashes])
+        onTxHash?.(hash)
 
-        batch.forEach((claim) => {
-          minted.push(Number(claim.tokenId))
-        })
+        const batchTokenIds = batch.map((claim) => Number(claim.tokenId))
+        minted.push(...batchTokenIds)
         setTokensMinted([...minted])
+        onTokensMinted?.(batchTokenIds)
       }
 
       return { minted, hashes }

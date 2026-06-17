@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { useGenerateMerkleRoots } from '../../../hooks/useGenerateMerkleRoots'
@@ -18,13 +18,22 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     sourceConfig,
     targetChainId,
     targetAddresses,
+    merkleRootsPhase: cachedPhase,
+    setMerkleRootsPhase,
     setAttributesMerkleRoot,
     setMembersMerkleRoot,
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
 
-  const [phase, setPhase] = useState<SetupPhase>(SetupPhase.GENERATE)
+  const [phase, setPhase] = useState<SetupPhase>(
+    (cachedPhase as SetupPhase) || SetupPhase.GENERATE
+  )
+
+  // Save phase to Zustand whenever it changes
+  useEffect(() => {
+    setMerkleRootsPhase(phase)
+  }, [phase, setMerkleRootsPhase])
 
   const {
     attributesData,
@@ -283,7 +292,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                     </Text>
                     <Text
                       fontFamily="mono"
-                      fontSize={11}
+                      fontSize={12}
                       style={{ wordBreak: 'break-all' }}
                     >
                       {attributesTxHash}
@@ -297,7 +306,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                     </Text>
                     <Text
                       fontFamily="mono"
-                      fontSize={11}
+                      fontSize={12}
                       style={{ wordBreak: 'break-all' }}
                     >
                       {membersTxHash}

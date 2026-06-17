@@ -7,15 +7,19 @@ import { useSetupMetadata } from '../../../hooks/useSetupMetadata'
 export const Step4_SetupMetadata: React.FC = () => {
   const {
     sourceChainId,
+    targetChainId,
     sourceAddresses,
     targetAddresses,
+    metadataProperties: cachedProperties,
+    setMetadataProperties,
+    updateMetadataProgress,
+    addMetadataTxHash,
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
 
   const {
     properties,
-    fetchProperties,
     isLoadingProperties,
     addAllProperties,
     isAddingProperties,
@@ -23,27 +27,32 @@ export const Step4_SetupMetadata: React.FC = () => {
     txHashes,
     error,
   } = useSetupMetadata(
+    sourceAddresses?.token,
     sourceAddresses?.metadata,
     targetAddresses?.metadata,
-    sourceChainId
+    sourceChainId,
+    targetChainId,
+    updateMetadataProgress,
+    addMetadataTxHash
   )
+
+  // Save fetched properties to Zustand for persistence
+  useEffect(() => {
+    if (properties && properties.length > 0 && !cachedProperties) {
+      console.log('[Step4] Caching properties to Zustand:', properties.length)
+      setMetadataProperties(properties)
+    }
+  }, [properties, cachedProperties, setMetadataProperties])
+
+  // Use cached properties if SWR hasn't loaded yet (e.g., after page refresh)
+  const activeProperties = properties || cachedProperties || []
 
   const currentProperty = progress.current
   const totalProperties = progress.total
   const isComplete =
-    properties.length > 0 && currentProperty === totalProperties && !isAddingProperties
-
-  // Auto-fetch properties on mount
-  useEffect(() => {
-    if (
-      sourceAddresses?.metadata &&
-      targetAddresses?.metadata &&
-      properties.length === 0 &&
-      !isLoadingProperties
-    ) {
-      fetchProperties()
-    }
-  }, [sourceAddresses, targetAddresses, properties, isLoadingProperties, fetchProperties])
+    activeProperties.length > 0 &&
+    currentProperty === totalProperties &&
+    !isAddingProperties
 
   const handleAddProperties = async () => {
     try {
@@ -62,11 +71,13 @@ export const Step4_SetupMetadata: React.FC = () => {
       <Stack gap="x4">
         <Heading size="md">Error Setting Up Metadata</Heading>
         <Text color="negative">{error}</Text>
-        <Flex justify="space-between">
+        <Text color="text3" fontSize={12}>
+          SWR will automatically retry fetching the metadata.
+        </Text>
+        <Flex justify="flex-start">
           <Button variant="secondary" onClick={goToPreviousStep}>
             Back
           </Button>
-          <Button onClick={() => fetchProperties()}>Retry</Button>
         </Flex>
       </Stack>
     )
@@ -93,7 +104,7 @@ export const Step4_SetupMetadata: React.FC = () => {
         </Text>
       </Box>
 
-      {properties && (
+      {activeProperties.length > 0 && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Heading size="xs" mb="x3">
             Property Groups to Add
@@ -101,7 +112,7 @@ export const Step4_SetupMetadata: React.FC = () => {
           <Stack gap="x2">
             <Flex justify="space-between">
               <Text color="text3">Total Property Groups:</Text>
-              <Text fontWeight="label">{properties.length}</Text>
+              <Text fontWeight="label">{activeProperties.length}</Text>
             </Flex>
             <Text color="text4" fontSize={12} mt="x2">
               Each group will be added via a separate transaction using addProperties().
@@ -110,7 +121,7 @@ export const Step4_SetupMetadata: React.FC = () => {
         </Box>
       )}
 
-      {!isComplete && properties && properties.length > 0 && (
+      {!isComplete && activeProperties.length > 0 && (
         <Flex justify="center">
           <Button
             onClick={handleAddProperties}
@@ -141,7 +152,7 @@ export const Step4_SetupMetadata: React.FC = () => {
               </Flex>
               <Box
                 backgroundColor="background1"
-                height="8px"
+                height="x2"
                 borderRadius="curved"
                 overflow="hidden"
               >
@@ -170,7 +181,7 @@ export const Step4_SetupMetadata: React.FC = () => {
                 <Text fontSize={12} color="text3" mb="x1">
                   Group {idx + 1}:
                 </Text>
-                <Text fontFamily="mono" fontSize={11} style={{ wordBreak: 'break-all' }}>
+                <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
                   {hash}
                 </Text>
               </Box>
@@ -197,30 +208,25 @@ export const Step4_SetupMetadata: React.FC = () => {
         </>
       )}
 
-      {!isComplete && !isAddingProperties && properties && properties.length === 0 && (
-        <>
-          <Box p="x4" borderRadius="curved" backgroundColor="warning">
-            <Text color="onWarning">
-              ℹ️ No properties found on source DAO. You can skip this step.
-            </Text>
-          </Box>
+      {!isComplete &&
+        !isAddingProperties &&
+        !isLoadingProperties &&
+        activeProperties.length === 0 && (
+          <>
+            <Box p="x4" borderRadius="curved" backgroundColor="warning">
+              <Text color="onWarning">
+                ℹ️ No properties found on source DAO. You can skip this step.
+              </Text>
+            </Box>
 
-          <Flex justify="space-between">
-            <Button variant="secondary" onClick={goToPreviousStep}>
-              Back
-            </Button>
-            <Button onClick={handleContinue}>Skip to Merkle Root Setup</Button>
-          </Flex>
-        </>
-      )}
-
-      {!isComplete && !isAddingProperties && !properties && (
-        <Flex justify="space-between">
-          <Button variant="secondary" onClick={goToPreviousStep}>
-            Back
-          </Button>
-        </Flex>
-      )}
+            <Flex justify="space-between">
+              <Button variant="secondary" onClick={goToPreviousStep}>
+                Back
+              </Button>
+              <Button onClick={handleContinue}>Skip to Merkle Root Setup</Button>
+            </Flex>
+          </>
+        )}
     </Stack>
   )
 }

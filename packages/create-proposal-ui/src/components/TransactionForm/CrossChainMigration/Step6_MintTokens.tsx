@@ -8,6 +8,9 @@ export const Step6_MintTokens: React.FC = () => {
     targetChainId,
     targetAddresses,
     memberSnapshot,
+    mintingProgress,
+    addMintedTokens,
+    addMintingTxHash,
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
@@ -20,7 +23,14 @@ export const Step6_MintTokens: React.FC = () => {
     progress,
     txHashes,
     error,
-  } = useMintReservedTokens(memberSnapshot, targetAddresses?.token, targetChainId)
+  } = useMintReservedTokens(
+    memberSnapshot,
+    targetAddresses?.token,
+    targetChainId,
+    mintingProgress.minted,
+    addMintedTokens,
+    addMintingTxHash
+  )
 
   const handleStartMinting = async () => {
     try {
@@ -181,12 +191,12 @@ export const Step6_MintTokens: React.FC = () => {
                       borderRadius="curved"
                       backgroundColor="background1"
                     >
-                      <Text fontSize={11} color="text3" mb="x1">
+                      <Text fontSize={12} color="text3" mb="x1">
                         Batch {idx + 1}:
                       </Text>
                       <Text
                         fontFamily="mono"
-                        fontSize={10}
+                        fontSize={12}
                         style={{ wordBreak: 'break-all' }}
                       >
                         {hash}

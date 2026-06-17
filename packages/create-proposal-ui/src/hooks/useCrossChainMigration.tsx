@@ -89,8 +89,14 @@ export interface CrossChainMigrationState {
   memberSnapshot?: any[]
   merkleRoots?: MerkleRoots
 
-  // Progress tracking
+  // Step 4: Metadata setup state
+  metadataProperties?: string[]
   metadataProgress: { current: number; total: number }
+
+  // Step 5: Merkle roots phase state
+  merkleRootsPhase?: 'generate' | 'set_roots' | 'complete'
+
+  // Step 6: Minting progress
   mintingProgress: MintingProgress
 
   // Transaction hashes
@@ -114,10 +120,21 @@ export interface CrossChainMigrationState {
   setAttributesData: (data: number[][]) => void
   setMemberSnapshot: (snapshot: any[]) => void
   setDeployTxHash: (hash: `0x${string}`) => void
+
+  // Step 4: Metadata actions
+  setMetadataProperties: (properties: string[]) => void
   addMetadataTxHash: (hash: `0x${string}`) => void
-  addMerkleRootTxHash: (hash: `0x${string}`) => void
   updateMetadataProgress: (current: number, total: number) => void
+
+  // Step 5: Merkle roots actions
+  setMerkleRootsPhase: (phase: 'generate' | 'set_roots' | 'complete') => void
+  addMerkleRootTxHash: (hash: `0x${string}`) => void
+
+  // Step 6: Minting actions
   updateMintingProgress: (progress: Partial<MintingProgress>) => void
+  addMintedTokens: (tokenIds: number[]) => void
+  addMintingTxHash: (hash: `0x${string}`) => void
+
   setValidationResults: (results: ValidationResults) => void
   reset: () => void
   goToNextStep: () => void
@@ -135,7 +152,9 @@ const initialState = {
   attributesData: undefined,
   memberSnapshot: undefined,
   merkleRoots: undefined,
+  metadataProperties: undefined,
   metadataProgress: { current: 0, total: 0 },
+  merkleRootsPhase: undefined,
   mintingProgress: { total: 0, minted: [], failed: [], txHashes: [] },
   deployTxHash: undefined,
   metadataTxHashes: [],
@@ -216,24 +235,47 @@ export const useCrossChainMigration = create<CrossChainMigrationState>()(
 
       setDeployTxHash: (hash) => set({ deployTxHash: hash }),
 
+      // Step 4: Metadata actions
+      setMetadataProperties: (properties) => set({ metadataProperties: properties }),
+
       addMetadataTxHash: (hash) =>
         set((state) => ({
           metadataTxHashes: [...state.metadataTxHashes, hash],
         })),
+
+      updateMetadataProgress: (current, total) =>
+        set({ metadataProgress: { current, total } }),
+
+      // Step 5: Merkle roots actions
+      setMerkleRootsPhase: (phase) => set({ merkleRootsPhase: phase }),
 
       addMerkleRootTxHash: (hash) =>
         set((state) => ({
           merkleRootTxHashes: [...state.merkleRootTxHashes, hash],
         })),
 
-      updateMetadataProgress: (current, total) =>
-        set({ metadataProgress: { current, total } }),
-
+      // Step 6: Minting actions
       updateMintingProgress: (progress) =>
         set((state) => ({
           mintingProgress: {
             ...state.mintingProgress,
             ...progress,
+          },
+        })),
+
+      addMintedTokens: (tokenIds) =>
+        set((state) => ({
+          mintingProgress: {
+            ...state.mintingProgress,
+            minted: [...state.mintingProgress.minted, ...tokenIds],
+          },
+        })),
+
+      addMintingTxHash: (hash) =>
+        set((state) => ({
+          mintingProgress: {
+            ...state.mintingProgress,
+            txHashes: [...state.mintingProgress.txHashes, hash],
           },
         })),
 
@@ -257,7 +299,7 @@ export const useCrossChainMigration = create<CrossChainMigrationState>()(
     }),
     {
       name: 'cross-chain-migration-storage',
-      version: 1,
+      version: 3, // v3: Added metadataProperties, merkleRootsPhase, enhanced minting progress
       storage: {
         getItem: (name) => {
           const str = localStorage.getItem(name)

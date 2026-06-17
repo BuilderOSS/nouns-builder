@@ -1,57 +1,197 @@
+import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { metadataAbi } from '@buildeross/sdk/contract'
-import { encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { useState } from 'react'
-import { decodeFunctionData } from 'viem'
+import { AddressType, CHAIN_ID, Property } from '@buildeross/types'
+import { useCallback, useState } from 'react'
+import useSWRImmutable from 'swr/immutable'
+import { decodeFunctionData, encodeFunctionData } from 'viem'
 import { useWriteContract } from 'wagmi'
 
 export const useSetupMetadata = (
+  sourceTokenAddress?: AddressType,
   sourceMetadataAddress?: AddressType,
   targetMetadataAddress?: AddressType,
-  sourceChainId?: CHAIN_ID
+  sourceChainId?: CHAIN_ID,
+  targetChainId?: CHAIN_ID,
+  onProgressUpdate?: (current: number, total: number) => void,
+  onTxHashAdded?: (hash: `0x${string}`) => void
 ) => {
-  const [properties, setProperties] = useState<string[]>([])
-  const [isLoadingProperties, setIsLoadingProperties] = useState(false)
+  // Fetch metadata properties from API (which calls blockchain via getPropertyItems)
+  const {
+    data: properties,
+    error: fetchError,
+    isLoading: isLoadingProperties,
+  } = useSWRImmutable(
+    sourceMetadataAddress && sourceChainId
+      ? [SWR_KEYS.ENCODED_DAO_METADATA, sourceMetadataAddress, sourceChainId]
+      : null,
+    async ([_key, metadataAddress, chainId]) => {
+      console.log('[useSetupMetadata] Fetching properties from blockchain via API:', {
+        metadataAddress,
+        chainId,
+      })
+
+      try {
+        // Fetch property data from API endpoint (which queries blockchain)
+        // Using native fetch instead of axios to avoid timeout issues
+        // (API can take longer than 60s on first request when cache is cold)
+        const url = `${BASE_URL}/api/property-items?chainId=${chainId}&metadataAddress=${metadataAddress}`
+        const response = await fetch(url)
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch property items: ${response.status} ${response.statusText}`
+          )
+        }
+
+        const data = (await response.json()) as {
+          propertiesCount: number
+          propertyItemsCount: number[]
+          properties: Property[]
+          source?: 'cache' | 'blockchain'
+        }
+
+        const { properties: propertyData, propertiesCount, source } = data
+
+        console.log('[useSetupMetadata] Retrieved properties from API:', {
+          propertiesCount,
+          source: source || 'unknown',
+          properties: propertyData,
+        })
+
+        if (propertiesCount === 0 || propertyData.length === 0) {
+          console.warn(
+            '[useSetupMetadata] No properties found on-chain. This is valid for DAOs using simple metadata renderers.'
+          )
+          return []
+        }
+
+        // Group properties by their IPFS base URI and extension
+        // Properties with the same baseUri+extension should be added together via addProperties()
+        const propertyGroups = new Map<
+          string,
+          {
+            names: string[]
+            items: { propertyId: bigint; name: string; isNewProperty: boolean }[]
+            ipfsGroup: { baseUri: string; extension: string }
+          }
+        >()
+
+        propertyData.forEach((property, propertyIndex) => {
+          // Extract baseUri and extension from the first item's URI
+          // Format: {baseUri}{propertyName}/{itemName}{extension}
+          const firstItemUri = property.items[0]?.uri
+          if (!firstItemUri) return
+
+          // Parse the URI to extract baseUri and extension
+          const propertyNameEncoded = encodeURIComponent(property.name)
+          const firstItemNameEncoded = encodeURIComponent(property.items[0].name)
+          const pattern = `${propertyNameEncoded}/${firstItemNameEncoded}`
+          const patternIndex = firstItemUri.indexOf(pattern)
+
+          if (patternIndex === -1) {
+            console.warn('[useSetupMetadata] Could not parse URI:', firstItemUri)
+            return
+          }
+
+          const baseUri = firstItemUri.substring(0, patternIndex)
+          const afterPattern = firstItemUri.substring(patternIndex + pattern.length)
+          const extension = afterPattern
+
+          const groupKey = `${baseUri}||${extension}`
+
+          if (!propertyGroups.has(groupKey)) {
+            propertyGroups.set(groupKey, {
+              names: [],
+              items: [],
+              ipfsGroup: { baseUri, extension },
+            })
+          }
+
+          const group = propertyGroups.get(groupKey)!
+
+          // Track the property index within this group for propertyId
+          const propertyIdInGroup = BigInt(group.names.length)
+          group.names.push(property.name)
+
+          // Add all items for this property as a flat array
+          property.items.forEach((item) => {
+            group.items.push({
+              propertyId: propertyIdInGroup,
+              name: item.name,
+              isNewProperty: false, // Items added via migration are not new properties
+            })
+          })
+        })
+
+        // Encode each group as an addProperties call
+        const encodedProperties = Array.from(propertyGroups.values()).map((group) => {
+          return encodeFunctionData({
+            abi: metadataAbi,
+            functionName: 'addProperties',
+            args: [group.names, group.items, group.ipfsGroup],
+          })
+        })
+
+        console.log('[useSetupMetadata] Encoded property groups:', {
+          groupCount: encodedProperties.length,
+          encodedData: encodedProperties,
+        })
+
+        return encodedProperties
+      } catch (err) {
+        console.error('[useSetupMetadata] Error fetching metadata:', {
+          error: err,
+          message: err instanceof Error ? err.message : 'Unknown error',
+          metadataAddress,
+          chainId,
+        })
+        throw err
+      }
+    }
+  )
+
+  // State for transaction progress tracking
   const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0)
   const [txHashes, setTxHashes] = useState<`0x${string}`[]>([])
-  const [error, setError] = useState<string>()
+  const [addError, setAddError] = useState<string>()
 
   const { writeContractAsync, isPending } = useWriteContract()
 
-  const fetchProperties = async () => {
-    if (!sourceMetadataAddress || !sourceChainId) {
-      setError('Missing source metadata address or chain ID')
+  // Combine fetch error and add error
+  const error = fetchError?.message || addError
+
+  const addAllProperties = useCallback(async () => {
+    if (!properties || !targetMetadataAddress) return
+
+    console.log('[useSetupMetadata] addAllProperties called', {
+      targetMetadataAddress,
+      targetChainId,
+      propertiesCount: properties.length,
+      properties,
+    })
+
+    if (properties.length === 0) {
+      const errorMsg = 'No properties to add'
+      console.error('[useSetupMetadata] Validation failed:', errorMsg)
+      setAddError(errorMsg)
       return
     }
 
-    setIsLoadingProperties(true)
-    setError(undefined)
-
-    try {
-      const encodedProperties = await encodedDaoMetadataRequest(
-        sourceChainId,
-        sourceMetadataAddress
-      )
-      setProperties(encodedProperties)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch properties')
-    } finally {
-      setIsLoadingProperties(false)
-    }
-  }
-
-  const addAllProperties = async () => {
-    if (!targetMetadataAddress || properties.length === 0) {
-      setError('Missing target metadata address or no properties to add')
-      return
-    }
-
-    setError(undefined)
+    setAddError(undefined)
     const hashes: `0x${string}`[] = []
 
     try {
       for (let i = 0; i < properties.length; i++) {
         setCurrentPropertyIndex(i)
+        onProgressUpdate?.(i, properties.length)
+
+        console.log(
+          `[useSetupMetadata] Processing property ${i + 1}/${properties.length}`,
+          {
+            propertyData: properties[i],
+          }
+        )
 
         // Decode the encoded data to get the args
         const decoded = decodeFunctionData({
@@ -59,33 +199,61 @@ export const useSetupMetadata = (
           data: properties[i] as `0x${string}`,
         })
 
+        console.log(`[useSetupMetadata] Decoded property ${i + 1}:`, {
+          functionName: decoded.functionName,
+          args: decoded.args,
+        })
+
         const hash = await writeContractAsync({
           abi: metadataAbi,
           address: targetMetadataAddress,
           functionName: 'addProperties',
           args: decoded.args as any,
+          chainId: targetChainId,
+        })
+
+        console.log(`[useSetupMetadata] Property ${i + 1} added successfully:`, {
+          txHash: hash,
         })
 
         hashes.push(hash)
         setTxHashes([...hashes])
+        onTxHashAdded?.(hash)
       }
 
       setCurrentPropertyIndex(properties.length)
+      onProgressUpdate?.(properties.length, properties.length)
+
+      console.log('[useSetupMetadata] All properties added successfully', {
+        totalProperties: properties.length,
+        txHashes: hashes,
+      })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add properties')
+      const errorMsg = err instanceof Error ? err.message : 'Failed to add properties'
+      console.error('[useSetupMetadata] Error adding properties:', {
+        error: err,
+        message: errorMsg,
+        currentIndex: currentPropertyIndex,
+      })
+      setAddError(errorMsg)
       throw err
     }
-  }
+  }, [
+    targetMetadataAddress,
+    targetChainId,
+    properties,
+    writeContractAsync,
+    currentPropertyIndex,
+  ])
 
   return {
-    properties,
+    properties: properties || [],
     isLoadingProperties,
-    fetchProperties,
     addAllProperties,
     isAddingProperties: isPending,
     progress: {
       current: currentPropertyIndex,
-      total: properties.length,
+      total: properties?.length || 0,
     },
     txHashes,
     error,

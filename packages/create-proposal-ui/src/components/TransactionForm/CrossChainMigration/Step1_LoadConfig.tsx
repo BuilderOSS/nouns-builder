@@ -6,6 +6,7 @@ import {
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
+import { isTestnetChain } from '@buildeross/utils'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { zeroAddress } from 'viem'
@@ -13,6 +14,7 @@ import { useChainId } from 'wagmi'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { useFetchDAOConfigForMigration } from '../../../hooks/useFetchDAOConfigForMigration'
+import { validateChainMigration } from '../../../utils/validateMigration'
 
 export const Step1_LoadConfig: React.FC = () => {
   const sourceChainId = useChainId()
@@ -21,9 +23,12 @@ export const Step1_LoadConfig: React.FC = () => {
     useCrossChainMigration()
 
   const [targetChainId, setTargetChainId] = useState<CHAIN_ID>(CHAIN_ID.BASE)
+  const [validationError, setValidationError] = useState<string>()
 
-  // Filter chains that have all required contracts
+  // Filter chains that have all required contracts AND match testnet/mainnet type
   const availableChains = useMemo(() => {
+    const sourceIsTestnet = isTestnetChain(sourceChainId as CHAIN_ID)
+
     return PUBLIC_ALL_CHAINS.filter((chain) => {
       const hasManager =
         PUBLIC_MANAGER_ADDRESS[chain.id] &&
@@ -34,10 +39,20 @@ export const Step1_LoadConfig: React.FC = () => {
       const hasMinter =
         MERKLE_RESERVE_MINTER[chain.id] && MERKLE_RESERVE_MINTER[chain.id] !== zeroAddress
 
-      // Don't allow same chain migration for now
+      // Don't allow same chain migration
       const isDifferentChain = chain.id !== sourceChainId
 
-      return hasManager && hasRenderer && hasMinter && isDifferentChain
+      // Only allow testnet-to-testnet or mainnet-to-mainnet
+      const targetIsTestnet = isTestnetChain(chain.id)
+      const isCompatibleChainType = sourceIsTestnet === targetIsTestnet
+
+      return (
+        hasManager &&
+        hasRenderer &&
+        hasMinter &&
+        isDifferentChain &&
+        isCompatibleChainType
+      )
     })
   }, [sourceChainId])
 
@@ -52,6 +67,14 @@ export const Step1_LoadConfig: React.FC = () => {
   const handleContinue = () => {
     if (!config) return
 
+    // Validate chain compatibility
+    const validation = validateChainMigration(sourceChainId as CHAIN_ID, targetChainId)
+    if (!validation.isValid) {
+      setValidationError(validation.errors[0])
+      return
+    }
+
+    setValidationError(undefined)
     setChains(sourceChainId as CHAIN_ID, targetChainId)
     setSourceAddresses(addresses)
     setSourceConfig(config.rawValues as any)
@@ -115,9 +138,22 @@ export const Step1_LoadConfig: React.FC = () => {
           ))}
         </Box>
         <Text color="text4" fontSize={14} mt="x2">
-          Only chains with Manager, Renderer, and Minter contracts are shown
+          {isTestnetChain(sourceChainId as CHAIN_ID)
+            ? 'Only testnet chains with required contracts are shown'
+            : 'Only mainnet chains with required contracts are shown'}
         </Text>
       </Box>
+
+      {validationError && (
+        <Box p="x4" borderRadius="curved" backgroundColor="negative">
+          <Text color="onNegative" fontWeight="label">
+            ⚠️ Chain Incompatibility
+          </Text>
+          <Text color="onNegative" mt="x2">
+            {validationError}
+          </Text>
+        </Box>
+      )}
 
       <Box p="x4" borderRadius="curved" backgroundColor="background2">
         <Heading size="xs" mb="x3">

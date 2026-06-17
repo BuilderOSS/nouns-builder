@@ -34,6 +34,7 @@ export const useSetMerkleRoots = (
         address: targetMetadataAddress,
         functionName: 'setAttributeMerkleRoot',
         args: [merkleRoot],
+        chainId: targetChainId,
       })
 
       setAttributesTxHash(hash)
@@ -73,6 +74,7 @@ export const useSetMerkleRoots = (
             merkleRoot,
           },
         ],
+        chainId: targetChainId,
       })
 
       setMembersTxHash(hash)
