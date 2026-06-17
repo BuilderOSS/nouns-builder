@@ -421,6 +421,10 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                   governorAddress={addresses.governor as `0x${string}`}
                   tokenSymbol={String(tokenSymbol)}
                   proposalId={leadingVersion.proposalId as `0x${string}`}
+                  description={leadingVersion.description || ''}
+                  targets={(leadingVersion.targets || []) as string[]}
+                  values={(leadingVersion.values || []) as bigint[]}
+                  calldatas={(leadingVersion.calldatas || []) as `0x${string}`[]}
                   signatureCount={leadingVersion.signatureCount}
                 />
               </Section>

@@ -1,4 +1,5 @@
 import { useEnsData, useVotes } from '@buildeross/hooks'
+import { governorAbi } from '@buildeross/sdk/contract'
 import type { CandidateSponsorSignature } from '@buildeross/sdk/subgraph'
 import { getCandidateSponsorSignatures } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
@@ -6,8 +7,9 @@ import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { Box, Button, Flex, Heading, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
-import { useAccount } from 'wagmi'
+import { useAccount, useReadContract } from 'wagmi'
 
+import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
 import { CandidateSignatureButton } from '../CandidateSignatureButton'
 
 type CandidateSignersProps = {
@@ -16,6 +18,10 @@ type CandidateSignersProps = {
   governorAddress: `0x${string}`
   tokenSymbol: string
   proposalId: `0x${string}`
+  description: string
+  targets: string[]
+  values: bigint[]
+  calldatas: `0x${string}`[]
   signatureCount?: number
 }
 
@@ -25,6 +31,10 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   governorAddress,
   tokenSymbol,
   proposalId,
+  description,
+  targets,
+  values,
+  calldatas,
   signatureCount = 0,
 }) => {
   const { chain } = useChainStore()
@@ -44,6 +54,14 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     { revalidateOnFocus: false }
   )
 
+  const { data: proposalThreshold } = useReadContract({
+    abi: governorAbi,
+    address: governorAddress,
+    functionName: 'proposalThreshold',
+    chainId: chain.id,
+    query: { enabled: !!governorAddress },
+  })
+
   const signatures = signaturesData?.signatures || []
   const visibleSignatures = expanded ? signatures : signatures.slice(0, 5)
   const remainingCount = Math.max(signatures.length - 5, 0)
@@ -57,6 +75,20 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   })
 
   const totalSignatures = signatures.length > 0 ? signatures.length : signatureCount
+  const totalSignatureWeight = signatures.reduce(
+    (sum, signature) => sum + signature.voteWeight,
+    0n
+  )
+  const proposerSignatures = React.useMemo<ProposerSignature[]>(
+    () =>
+      signatures.map((signature) => ({
+        signer: signature.signer as `0x${string}`,
+        nonce: signature.nonce,
+        deadline: signature.deadline,
+        sig: signature.signature,
+      })),
+    [signatures]
+  )
 
   const alreadySigned = React.useMemo(() => {
     if (!address) return false
@@ -124,6 +156,21 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
           </Stack>
         ) : (
           <Text color="text3">No signatures yet.</Text>
+        )}
+
+        {proposalThreshold !== undefined && targets.length > 0 && (
+          <Box pt="x2">
+            <CandidatePromoteButton
+              candidateVersionUID={candidateVersionUID as `0x${string}`}
+              targets={targets}
+              values={values}
+              calldatas={calldatas}
+              description={description}
+              signatures={proposerSignatures}
+              proposalThreshold={proposalThreshold}
+              totalSignatureWeight={totalSignatureWeight}
+            />
+          </Box>
         )}
       </Stack>
     </Box>
