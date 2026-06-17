@@ -1,5 +1,4 @@
-import { FOUNDRY_CHAIN, render } from '@buildeross/test-fixtures'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, vi } from 'vitest'
 
 import MintGovernanceTokensForm from './MintGovernanceTokensForm'
@@ -13,9 +12,7 @@ vi.mock('papaparse', () => ({
 
 describe('MintGovernanceTokens form', () => {
   it('should render mint governance tokens form with default values', () => {
-    render(<MintGovernanceTokensForm />, {
-      chain: FOUNDRY_CHAIN,
-    })
+    render(<MintGovernanceTokensForm />)
 
     expect(screen.getByText('Upload CSV File')).toBeInTheDocument()
     expect(screen.getByText('Recipients')).toBeInTheDocument()
@@ -26,9 +23,7 @@ describe('MintGovernanceTokens form', () => {
   })
 
   it('should allow adding and removing recipients', async () => {
-    render(<MintGovernanceTokensForm />, {
-      chain: FOUNDRY_CHAIN,
-    })
+    render(<MintGovernanceTokensForm />)
 
     // Initially should have 1 recipient
     expect(screen.getAllByPlaceholderText('0x... or ENS name')).toHaveLength(1)

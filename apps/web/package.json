@@ -99,6 +99,7 @@
     "lint": "pnpm type-check && eslint --fix .",
     "start": "next start",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.fork.test.{ts,tsx}'",
     "test:watch": "vitest",
     "type-check": "tsc --pretty --noEmit"
   }
