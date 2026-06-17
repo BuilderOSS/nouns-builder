@@ -1,4 +1,4 @@
-import { CandidateEditedBanner } from '@buildeross/candidate-ui'
+import { CandidateEditedBanner, CandidateSigners } from '@buildeross/candidate-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { decodeTransactions } from '@buildeross/hooks'
@@ -9,7 +9,7 @@ import {
 } from '@buildeross/proposal-ui'
 import type { CandidateGroup } from '@buildeross/sdk'
 import { getCandidateGroup } from '@buildeross/sdk'
-import { getDAOAddresses } from '@buildeross/sdk/contract'
+import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import {
   type DaoContractAddresses,
   useCandidateStore,
@@ -35,6 +35,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR from 'swr'
+import { useReadContract } from 'wagmi'
 
 interface CandidateDetailPageProps {
   candidateId: string
@@ -207,6 +208,14 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       return undefined
     }
   }, [leadingVersion?.metadata])
+
+  const { data: tokenSymbol } = useReadContract({
+    abi: tokenAbi,
+    address: addresses.token,
+    functionName: 'symbol',
+    chainId: chain.id,
+    query: { enabled: !!addresses.token },
+  })
 
   const handleEditCandidate = React.useCallback(() => {
     if (!candidate || !leadingVersion) return
@@ -403,6 +412,19 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 </Flex>
               </Stack>
             </Section>
+
+            {leadingVersion && tokenSymbol && (
+              <Section title="Sponsors">
+                <CandidateSigners
+                  candidateVersionUID={leadingVersion.id as `0x${string}`}
+                  proposer={candidate.proposer as `0x${string}`}
+                  governorAddress={addresses.governor as `0x${string}`}
+                  tokenSymbol={String(tokenSymbol)}
+                  proposalId={leadingVersion.proposalId as `0x${string}`}
+                  signatureCount={leadingVersion.signatureCount}
+                />
+              </Section>
+            )}
 
             {leadingVersion && (
               <Section title="Proposed Transactions">

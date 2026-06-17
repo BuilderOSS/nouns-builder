@@ -43,7 +43,30 @@ export interface FeedFiltersModalProps {
   userAddress?: AddressType
 }
 
-const EVENT_TYPE_LABELS: Record<FeedEventType, string> = {
+const SUPPORTED_EVENT_TYPES = [
+  FeedEventType.AuctionCreated,
+  FeedEventType.AuctionBidPlaced,
+  FeedEventType.AuctionSettled,
+  FeedEventType.ProposalCreated,
+  FeedEventType.ProposalVoted,
+  FeedEventType.ProposalExecuted,
+  FeedEventType.ProposalUpdated,
+  FeedEventType.ClankerTokenCreated,
+  FeedEventType.ZoraCoinCreated,
+  FeedEventType.ZoraDropCreated,
+] as const
+
+type SupportedFeedEventType = (typeof SUPPORTED_EVENT_TYPES)[number]
+
+type FeedFiltersFormValues = {
+  chainIds: CHAIN_ID[]
+  eventTypes: SupportedFeedEventType[]
+  daoFilterMode: DaoFilterMode
+  daoAddresses: AddressType[]
+  selectedDaos: SelectedDaoMetadata[]
+}
+
+const EVENT_TYPE_LABELS: Record<SupportedFeedEventType, string> = {
   [FeedEventType.AuctionCreated]: 'Auction Created',
   [FeedEventType.AuctionBidPlaced]: 'Auction Bid',
   [FeedEventType.AuctionSettled]: 'Auction Settled',
@@ -80,10 +103,12 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   onApply,
   userAddress,
 }) => {
-  const formik = useFormik({
+  const formik = useFormik<FeedFiltersFormValues>({
     initialValues: {
       chainIds,
-      eventTypes,
+      eventTypes: eventTypes.filter((type): type is SupportedFeedEventType =>
+        SUPPORTED_EVENT_TYPES.includes(type as SupportedFeedEventType)
+      ),
       daoFilterMode,
       daoAddresses,
       selectedDaos,
@@ -106,7 +131,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
     }
 
     const currentEventTypes = formik.values.eventTypes
-    let finalEventTypes: FeedEventType[] = currentEventTypes
+    let finalEventTypes: SupportedFeedEventType[] = currentEventTypes
 
     if (hasNoCoinSupportedChains(finalChainIds)) {
       finalEventTypes = finalEventTypes.filter((type) => !COIN_EVENT_TYPES.includes(type))
@@ -121,7 +146,7 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
     formik.setFieldValue('eventTypes', finalEventTypes)
   }
 
-  const toggleEventType = (eventType: FeedEventType) => {
+  const toggleEventType = (eventType: SupportedFeedEventType) => {
     const currentEventTypes = formik.values.eventTypes
     if (currentEventTypes.includes(eventType)) {
       formik.setFieldValue(
@@ -173,7 +198,9 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
   }, [formik.values])
 
   const eventTypeLabels = useMemo(() => {
-    let entries = Object.entries(EVENT_TYPE_LABELS)
+    let entries = Object.entries(EVENT_TYPE_LABELS) as Array<
+      [SupportedFeedEventType, string]
+    >
     if (hasNoCoinSupportedChains(formik.values.chainIds)) {
       entries = entries.filter(
         ([eventType]) => !COIN_EVENT_TYPES.includes(eventType as FeedEventType)
@@ -246,14 +273,16 @@ export const FeedFiltersModal: React.FC<FeedFiltersModalProps> = ({
                   <Label
                     key={eventType}
                     className={filterItem}
-                    onClick={() => toggleEventType(eventType as FeedEventType)}
+                    onClick={() => toggleEventType(eventType as SupportedFeedEventType)}
                   >
                     <input
                       type="checkbox"
                       checked={formik.values.eventTypes.includes(
-                        eventType as FeedEventType
+                        eventType as SupportedFeedEventType
                       )}
-                      onChange={() => toggleEventType(eventType as FeedEventType)}
+                      onChange={() =>
+                        toggleEventType(eventType as SupportedFeedEventType)
+                      }
                       onClick={(e) => e.stopPropagation()}
                     />
                     <Text fontSize="14">{label}</Text>

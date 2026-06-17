@@ -963,6 +963,185 @@ export type CandidateCommentRepliesArgs = {
   where?: InputMaybe<CandidateComment_Filter>
 }
 
+export type CandidateCommentCreatedEvent = FeedEvent & {
+  __typename?: 'CandidateCommentCreatedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  comment: CandidateComment
+  dao: Dao
+  group: ProposalCandidateGroup
+  id: Scalars['ID']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type CandidateCommentCreatedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<CandidateCommentCreatedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  comment?: InputMaybe<Scalars['String']['input']>
+  comment_?: InputMaybe<CandidateComment_Filter>
+  comment_contains?: InputMaybe<Scalars['String']['input']>
+  comment_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_ends_with?: InputMaybe<Scalars['String']['input']>
+  comment_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_gt?: InputMaybe<Scalars['String']['input']>
+  comment_gte?: InputMaybe<Scalars['String']['input']>
+  comment_in?: InputMaybe<Array<Scalars['String']['input']>>
+  comment_lt?: InputMaybe<Scalars['String']['input']>
+  comment_lte?: InputMaybe<Scalars['String']['input']>
+  comment_not?: InputMaybe<Scalars['String']['input']>
+  comment_not_contains?: InputMaybe<Scalars['String']['input']>
+  comment_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  comment_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  comment_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  comment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  comment_starts_with?: InputMaybe<Scalars['String']['input']>
+  comment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group?: InputMaybe<Scalars['String']['input']>
+  group_?: InputMaybe<ProposalCandidateGroup_Filter>
+  group_contains?: InputMaybe<Scalars['String']['input']>
+  group_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_gt?: InputMaybe<Scalars['String']['input']>
+  group_gte?: InputMaybe<Scalars['String']['input']>
+  group_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_lt?: InputMaybe<Scalars['String']['input']>
+  group_lte?: InputMaybe<Scalars['String']['input']>
+  group_not?: InputMaybe<Scalars['String']['input']>
+  group_not_contains?: InputMaybe<Scalars['String']['input']>
+  group_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<CandidateCommentCreatedEvent_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum CandidateCommentCreatedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  Comment = 'comment',
+  CommentCandidate = 'comment__candidate',
+  CommentComment = 'comment__comment',
+  CommentCommenter = 'comment__commenter',
+  CommentCreatedAt = 'comment__createdAt',
+  CommentId = 'comment__id',
+  CommentRevoked = 'comment__revoked',
+  CommentSupport = 'comment__support',
+  CommentVoteWeight = 'comment__voteWeight',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Group = 'group',
+  GroupCommentCount = 'group__commentCount',
+  GroupCreatedAt = 'group__createdAt',
+  GroupCurrentAbstainCount = 'group__currentAbstainCount',
+  GroupCurrentAgainstCount = 'group__currentAgainstCount',
+  GroupCurrentForCount = 'group__currentForCount',
+  GroupId = 'group__id',
+  GroupLatestVersionNumber = 'group__latestVersionNumber',
+  GroupProposer = 'group__proposer',
+  GroupSalt = 'group__salt',
+  GroupVersionCount = 'group__versionCount',
+  Id = 'id',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+}
+
 export type CandidateComment_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
@@ -1131,6 +1310,224 @@ export type CandidateSponsorSignature = {
   voteWeight: Scalars['BigInt']['output']
 }
 
+export type CandidateSponsorSignatureCreatedEvent = FeedEvent & {
+  __typename?: 'CandidateSponsorSignatureCreatedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  candidateVersion: ProposalCandidateVersion
+  dao: Dao
+  group: ProposalCandidateGroup
+  id: Scalars['ID']['output']
+  signature: CandidateSponsorSignature
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type CandidateSponsorSignatureCreatedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<CandidateSponsorSignatureCreatedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  candidateVersion?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_?: InputMaybe<ProposalCandidateVersion_Filter>
+  candidateVersion_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_lt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_lte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group?: InputMaybe<Scalars['String']['input']>
+  group_?: InputMaybe<ProposalCandidateGroup_Filter>
+  group_contains?: InputMaybe<Scalars['String']['input']>
+  group_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_gt?: InputMaybe<Scalars['String']['input']>
+  group_gte?: InputMaybe<Scalars['String']['input']>
+  group_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_lt?: InputMaybe<Scalars['String']['input']>
+  group_lte?: InputMaybe<Scalars['String']['input']>
+  group_not?: InputMaybe<Scalars['String']['input']>
+  group_not_contains?: InputMaybe<Scalars['String']['input']>
+  group_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<CandidateSponsorSignatureCreatedEvent_Filter>>>
+  signature?: InputMaybe<Scalars['String']['input']>
+  signature_?: InputMaybe<CandidateSponsorSignature_Filter>
+  signature_contains?: InputMaybe<Scalars['String']['input']>
+  signature_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  signature_ends_with?: InputMaybe<Scalars['String']['input']>
+  signature_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  signature_gt?: InputMaybe<Scalars['String']['input']>
+  signature_gte?: InputMaybe<Scalars['String']['input']>
+  signature_in?: InputMaybe<Array<Scalars['String']['input']>>
+  signature_lt?: InputMaybe<Scalars['String']['input']>
+  signature_lte?: InputMaybe<Scalars['String']['input']>
+  signature_not?: InputMaybe<Scalars['String']['input']>
+  signature_not_contains?: InputMaybe<Scalars['String']['input']>
+  signature_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  signature_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  signature_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  signature_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  signature_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  signature_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  signature_starts_with?: InputMaybe<Scalars['String']['input']>
+  signature_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum CandidateSponsorSignatureCreatedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  CandidateVersion = 'candidateVersion',
+  CandidateVersionAttester = 'candidateVersion__attester',
+  CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionCreatedAt = 'candidateVersion__createdAt',
+  CandidateVersionDescription = 'candidateVersion__description',
+  CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
+  CandidateVersionId = 'candidateVersion__id',
+  CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalId = 'candidateVersion__proposalId',
+  CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
+  CandidateVersionRevoked = 'candidateVersion__revoked',
+  CandidateVersionSalt = 'candidateVersion__salt',
+  CandidateVersionSignatureCount = 'candidateVersion__signatureCount',
+  CandidateVersionTitle = 'candidateVersion__title',
+  CandidateVersionTotalVoteWeight = 'candidateVersion__totalVoteWeight',
+  CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Group = 'group',
+  GroupCommentCount = 'group__commentCount',
+  GroupCreatedAt = 'group__createdAt',
+  GroupCurrentAbstainCount = 'group__currentAbstainCount',
+  GroupCurrentAgainstCount = 'group__currentAgainstCount',
+  GroupCurrentForCount = 'group__currentForCount',
+  GroupId = 'group__id',
+  GroupLatestVersionNumber = 'group__latestVersionNumber',
+  GroupProposer = 'group__proposer',
+  GroupSalt = 'group__salt',
+  GroupVersionCount = 'group__versionCount',
+  Id = 'id',
+  Signature = 'signature',
+  SignatureCreatedAt = 'signature__createdAt',
+  SignatureDeadline = 'signature__deadline',
+  SignatureId = 'signature__id',
+  SignatureNonce = 'signature__nonce',
+  SignatureProposalId = 'signature__proposalId',
+  SignatureRevoked = 'signature__revoked',
+  SignatureSignature = 'signature__signature',
+  SignatureSigner = 'signature__signer',
+  SignatureVoteWeight = 'signature__voteWeight',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+}
+
 export type CandidateSponsorSignature_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
@@ -1259,6 +1656,441 @@ export enum CandidateSponsorSignature_OrderBy {
   VersionTotalVoteWeight = 'version__totalVoteWeight',
   VersionVersionNumber = 'version__versionNumber',
   VoteWeight = 'voteWeight',
+}
+
+export type CandidateSubmittedAsProposalEvent = FeedEvent & {
+  __typename?: 'CandidateSubmittedAsProposalEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  candidateVersion: ProposalCandidateVersion
+  dao: Dao
+  group: ProposalCandidateGroup
+  id: Scalars['ID']['output']
+  proposal: Proposal
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type CandidateSubmittedAsProposalEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<CandidateSubmittedAsProposalEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  candidateVersion?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_?: InputMaybe<ProposalCandidateVersion_Filter>
+  candidateVersion_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_lt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_lte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group?: InputMaybe<Scalars['String']['input']>
+  group_?: InputMaybe<ProposalCandidateGroup_Filter>
+  group_contains?: InputMaybe<Scalars['String']['input']>
+  group_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_gt?: InputMaybe<Scalars['String']['input']>
+  group_gte?: InputMaybe<Scalars['String']['input']>
+  group_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_lt?: InputMaybe<Scalars['String']['input']>
+  group_lte?: InputMaybe<Scalars['String']['input']>
+  group_not?: InputMaybe<Scalars['String']['input']>
+  group_not_contains?: InputMaybe<Scalars['String']['input']>
+  group_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<CandidateSubmittedAsProposalEvent_Filter>>>
+  proposal?: InputMaybe<Scalars['String']['input']>
+  proposal_?: InputMaybe<Proposal_Filter>
+  proposal_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_gt?: InputMaybe<Scalars['String']['input']>
+  proposal_gte?: InputMaybe<Scalars['String']['input']>
+  proposal_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_lt?: InputMaybe<Scalars['String']['input']>
+  proposal_lte?: InputMaybe<Scalars['String']['input']>
+  proposal_not?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum CandidateSubmittedAsProposalEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  CandidateVersion = 'candidateVersion',
+  CandidateVersionAttester = 'candidateVersion__attester',
+  CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionCreatedAt = 'candidateVersion__createdAt',
+  CandidateVersionDescription = 'candidateVersion__description',
+  CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
+  CandidateVersionId = 'candidateVersion__id',
+  CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalId = 'candidateVersion__proposalId',
+  CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
+  CandidateVersionRevoked = 'candidateVersion__revoked',
+  CandidateVersionSalt = 'candidateVersion__salt',
+  CandidateVersionSignatureCount = 'candidateVersion__signatureCount',
+  CandidateVersionTitle = 'candidateVersion__title',
+  CandidateVersionTotalVoteWeight = 'candidateVersion__totalVoteWeight',
+  CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Group = 'group',
+  GroupCommentCount = 'group__commentCount',
+  GroupCreatedAt = 'group__createdAt',
+  GroupCurrentAbstainCount = 'group__currentAbstainCount',
+  GroupCurrentAgainstCount = 'group__currentAgainstCount',
+  GroupCurrentForCount = 'group__currentForCount',
+  GroupId = 'group__id',
+  GroupLatestVersionNumber = 'group__latestVersionNumber',
+  GroupProposer = 'group__proposer',
+  GroupSalt = 'group__salt',
+  GroupVersionCount = 'group__versionCount',
+  Id = 'id',
+  Proposal = 'proposal',
+  ProposalAbstainVotes = 'proposal__abstainVotes',
+  ProposalAgainstVotes = 'proposal__againstVotes',
+  ProposalCalldatas = 'proposal__calldatas',
+  ProposalCancelTransactionHash = 'proposal__cancelTransactionHash',
+  ProposalCanceled = 'proposal__canceled',
+  ProposalCanceledAt = 'proposal__canceledAt',
+  ProposalDescription = 'proposal__description',
+  ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
+  ProposalExecutableFrom = 'proposal__executableFrom',
+  ProposalExecuted = 'proposal__executed',
+  ProposalExecutedAt = 'proposal__executedAt',
+  ProposalExecutionTransactionHash = 'proposal__executionTransactionHash',
+  ProposalExpiresAt = 'proposal__expiresAt',
+  ProposalForVotes = 'proposal__forVotes',
+  ProposalId = 'proposal__id',
+  ProposalIsSigned = 'proposal__isSigned',
+  ProposalMetadata = 'proposal__metadata',
+  ProposalProposalId = 'proposal__proposalId',
+  ProposalProposalNumber = 'proposal__proposalNumber',
+  ProposalProposalThreshold = 'proposal__proposalThreshold',
+  ProposalProposer = 'proposal__proposer',
+  ProposalQueued = 'proposal__queued',
+  ProposalQueuedAt = 'proposal__queuedAt',
+  ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
+  ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
+  ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
+  ProposalTimeCreated = 'proposal__timeCreated',
+  ProposalTitle = 'proposal__title',
+  ProposalTransactionHash = 'proposal__transactionHash',
+  ProposalUpdateCount = 'proposal__updateCount',
+  ProposalUpdateMessage = 'proposal__updateMessage',
+  ProposalUpdatePeriodEnd = 'proposal__updatePeriodEnd',
+  ProposalVetoTransactionHash = 'proposal__vetoTransactionHash',
+  ProposalVetoed = 'proposal__vetoed',
+  ProposalVetoedAt = 'proposal__vetoedAt',
+  ProposalVoteCount = 'proposal__voteCount',
+  ProposalVoteEnd = 'proposal__voteEnd',
+  ProposalVoteStart = 'proposal__voteStart',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+}
+
+export type CandidateVersionCreatedEvent = FeedEvent & {
+  __typename?: 'CandidateVersionCreatedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  candidateVersion: ProposalCandidateVersion
+  dao: Dao
+  group: ProposalCandidateGroup
+  id: Scalars['ID']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type CandidateVersionCreatedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<CandidateVersionCreatedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  candidateVersion?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_?: InputMaybe<ProposalCandidateVersion_Filter>
+  candidateVersion_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_lt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_lte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group?: InputMaybe<Scalars['String']['input']>
+  group_?: InputMaybe<ProposalCandidateGroup_Filter>
+  group_contains?: InputMaybe<Scalars['String']['input']>
+  group_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_gt?: InputMaybe<Scalars['String']['input']>
+  group_gte?: InputMaybe<Scalars['String']['input']>
+  group_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_lt?: InputMaybe<Scalars['String']['input']>
+  group_lte?: InputMaybe<Scalars['String']['input']>
+  group_not?: InputMaybe<Scalars['String']['input']>
+  group_not_contains?: InputMaybe<Scalars['String']['input']>
+  group_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  group_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  group_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  group_starts_with?: InputMaybe<Scalars['String']['input']>
+  group_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<CandidateVersionCreatedEvent_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum CandidateVersionCreatedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  CandidateVersion = 'candidateVersion',
+  CandidateVersionAttester = 'candidateVersion__attester',
+  CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionCreatedAt = 'candidateVersion__createdAt',
+  CandidateVersionDescription = 'candidateVersion__description',
+  CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
+  CandidateVersionId = 'candidateVersion__id',
+  CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalId = 'candidateVersion__proposalId',
+  CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
+  CandidateVersionRevoked = 'candidateVersion__revoked',
+  CandidateVersionSalt = 'candidateVersion__salt',
+  CandidateVersionSignatureCount = 'candidateVersion__signatureCount',
+  CandidateVersionTitle = 'candidateVersion__title',
+  CandidateVersionTotalVoteWeight = 'candidateVersion__totalVoteWeight',
+  CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Group = 'group',
+  GroupCommentCount = 'group__commentCount',
+  GroupCreatedAt = 'group__createdAt',
+  GroupCurrentAbstainCount = 'group__currentAbstainCount',
+  GroupCurrentAgainstCount = 'group__currentAgainstCount',
+  GroupCurrentForCount = 'group__currentForCount',
+  GroupId = 'group__id',
+  GroupLatestVersionNumber = 'group__latestVersionNumber',
+  GroupProposer = 'group__proposer',
+  GroupSalt = 'group__salt',
+  GroupVersionCount = 'group__versionCount',
+  Id = 'id',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
 }
 
 export enum CandidateVoteSupport {
@@ -2829,8 +3661,13 @@ export enum FeedEventType {
   AuctionBidPlaced = 'AUCTION_BID_PLACED',
   AuctionCreated = 'AUCTION_CREATED',
   AuctionSettled = 'AUCTION_SETTLED',
+  CandidateCommentCreated = 'CANDIDATE_COMMENT_CREATED',
+  CandidateSponsorSignatureCreated = 'CANDIDATE_SPONSOR_SIGNATURE_CREATED',
+  CandidateSubmittedAsProposal = 'CANDIDATE_SUBMITTED_AS_PROPOSAL',
+  CandidateVersionCreated = 'CANDIDATE_VERSION_CREATED',
   ClankerTokenCreated = 'CLANKER_TOKEN_CREATED',
   ProposalCreated = 'PROPOSAL_CREATED',
+  ProposalEdited = 'PROPOSAL_EDITED',
   ProposalExecuted = 'PROPOSAL_EXECUTED',
   ProposalUpdated = 'PROPOSAL_UPDATED',
   ProposalVoted = 'PROPOSAL_VOTED',
@@ -3339,6 +4176,7 @@ export type Proposal = ProposalMetadataEntity & {
   cancelTransactionHash?: Maybe<Scalars['Bytes']['output']>
   canceled: Scalars['Boolean']['output']
   canceledAt?: Maybe<Scalars['BigInt']['output']>
+  candidateVersion?: Maybe<ProposalCandidateVersion>
   dao: Dao
   description?: Maybe<Scalars['String']['output']>
   descriptionHash: Scalars['Bytes']['output']
@@ -4048,6 +4886,247 @@ export enum ProposalCreatedEvent_OrderBy {
   DaoTreasuryAddress = 'dao__treasuryAddress',
   DaoVoterCount = 'dao__voterCount',
   Id = 'id',
+  Proposal = 'proposal',
+  ProposalAbstainVotes = 'proposal__abstainVotes',
+  ProposalAgainstVotes = 'proposal__againstVotes',
+  ProposalCalldatas = 'proposal__calldatas',
+  ProposalCancelTransactionHash = 'proposal__cancelTransactionHash',
+  ProposalCanceled = 'proposal__canceled',
+  ProposalCanceledAt = 'proposal__canceledAt',
+  ProposalDescription = 'proposal__description',
+  ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
+  ProposalExecutableFrom = 'proposal__executableFrom',
+  ProposalExecuted = 'proposal__executed',
+  ProposalExecutedAt = 'proposal__executedAt',
+  ProposalExecutionTransactionHash = 'proposal__executionTransactionHash',
+  ProposalExpiresAt = 'proposal__expiresAt',
+  ProposalForVotes = 'proposal__forVotes',
+  ProposalId = 'proposal__id',
+  ProposalIsSigned = 'proposal__isSigned',
+  ProposalMetadata = 'proposal__metadata',
+  ProposalProposalId = 'proposal__proposalId',
+  ProposalProposalNumber = 'proposal__proposalNumber',
+  ProposalProposalThreshold = 'proposal__proposalThreshold',
+  ProposalProposer = 'proposal__proposer',
+  ProposalQueued = 'proposal__queued',
+  ProposalQueuedAt = 'proposal__queuedAt',
+  ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
+  ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
+  ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
+  ProposalTimeCreated = 'proposal__timeCreated',
+  ProposalTitle = 'proposal__title',
+  ProposalTransactionHash = 'proposal__transactionHash',
+  ProposalUpdateCount = 'proposal__updateCount',
+  ProposalUpdateMessage = 'proposal__updateMessage',
+  ProposalUpdatePeriodEnd = 'proposal__updatePeriodEnd',
+  ProposalVetoTransactionHash = 'proposal__vetoTransactionHash',
+  ProposalVetoed = 'proposal__vetoed',
+  ProposalVetoedAt = 'proposal__vetoedAt',
+  ProposalVoteCount = 'proposal__voteCount',
+  ProposalVoteEnd = 'proposal__voteEnd',
+  ProposalVoteStart = 'proposal__voteStart',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+}
+
+export type ProposalEditedEvent = FeedEvent & {
+  __typename?: 'ProposalEditedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  dao: Dao
+  id: Scalars['ID']['output']
+  previousProposal: Proposal
+  proposal: Proposal
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type ProposalEditedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<ProposalEditedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ProposalEditedEvent_Filter>>>
+  previousProposal?: InputMaybe<Scalars['String']['input']>
+  previousProposal_?: InputMaybe<Proposal_Filter>
+  previousProposal_contains?: InputMaybe<Scalars['String']['input']>
+  previousProposal_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  previousProposal_ends_with?: InputMaybe<Scalars['String']['input']>
+  previousProposal_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  previousProposal_gt?: InputMaybe<Scalars['String']['input']>
+  previousProposal_gte?: InputMaybe<Scalars['String']['input']>
+  previousProposal_in?: InputMaybe<Array<Scalars['String']['input']>>
+  previousProposal_lt?: InputMaybe<Scalars['String']['input']>
+  previousProposal_lte?: InputMaybe<Scalars['String']['input']>
+  previousProposal_not?: InputMaybe<Scalars['String']['input']>
+  previousProposal_not_contains?: InputMaybe<Scalars['String']['input']>
+  previousProposal_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  previousProposal_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  previousProposal_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  previousProposal_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  previousProposal_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  previousProposal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  previousProposal_starts_with?: InputMaybe<Scalars['String']['input']>
+  previousProposal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal?: InputMaybe<Scalars['String']['input']>
+  proposal_?: InputMaybe<Proposal_Filter>
+  proposal_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_gt?: InputMaybe<Scalars['String']['input']>
+  proposal_gte?: InputMaybe<Scalars['String']['input']>
+  proposal_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_lt?: InputMaybe<Scalars['String']['input']>
+  proposal_lte?: InputMaybe<Scalars['String']['input']>
+  proposal_not?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum ProposalEditedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  PreviousProposal = 'previousProposal',
+  PreviousProposalAbstainVotes = 'previousProposal__abstainVotes',
+  PreviousProposalAgainstVotes = 'previousProposal__againstVotes',
+  PreviousProposalCalldatas = 'previousProposal__calldatas',
+  PreviousProposalCancelTransactionHash = 'previousProposal__cancelTransactionHash',
+  PreviousProposalCanceled = 'previousProposal__canceled',
+  PreviousProposalCanceledAt = 'previousProposal__canceledAt',
+  PreviousProposalDescription = 'previousProposal__description',
+  PreviousProposalDescriptionHash = 'previousProposal__descriptionHash',
+  PreviousProposalDiscussionUrl = 'previousProposal__discussionUrl',
+  PreviousProposalExecutableFrom = 'previousProposal__executableFrom',
+  PreviousProposalExecuted = 'previousProposal__executed',
+  PreviousProposalExecutedAt = 'previousProposal__executedAt',
+  PreviousProposalExecutionTransactionHash = 'previousProposal__executionTransactionHash',
+  PreviousProposalExpiresAt = 'previousProposal__expiresAt',
+  PreviousProposalForVotes = 'previousProposal__forVotes',
+  PreviousProposalId = 'previousProposal__id',
+  PreviousProposalIsSigned = 'previousProposal__isSigned',
+  PreviousProposalMetadata = 'previousProposal__metadata',
+  PreviousProposalProposalId = 'previousProposal__proposalId',
+  PreviousProposalProposalNumber = 'previousProposal__proposalNumber',
+  PreviousProposalProposalThreshold = 'previousProposal__proposalThreshold',
+  PreviousProposalProposer = 'previousProposal__proposer',
+  PreviousProposalQueued = 'previousProposal__queued',
+  PreviousProposalQueuedAt = 'previousProposal__queuedAt',
+  PreviousProposalQueuedTransactionHash = 'previousProposal__queuedTransactionHash',
+  PreviousProposalQuorumVotes = 'previousProposal__quorumVotes',
+  PreviousProposalRepresentedAddress = 'previousProposal__representedAddress',
+  PreviousProposalSnapshotBlockNumber = 'previousProposal__snapshotBlockNumber',
+  PreviousProposalTimeCreated = 'previousProposal__timeCreated',
+  PreviousProposalTitle = 'previousProposal__title',
+  PreviousProposalTransactionHash = 'previousProposal__transactionHash',
+  PreviousProposalUpdateCount = 'previousProposal__updateCount',
+  PreviousProposalUpdateMessage = 'previousProposal__updateMessage',
+  PreviousProposalUpdatePeriodEnd = 'previousProposal__updatePeriodEnd',
+  PreviousProposalVetoTransactionHash = 'previousProposal__vetoTransactionHash',
+  PreviousProposalVetoed = 'previousProposal__vetoed',
+  PreviousProposalVetoedAt = 'previousProposal__vetoedAt',
+  PreviousProposalVoteCount = 'previousProposal__voteCount',
+  PreviousProposalVoteEnd = 'previousProposal__voteEnd',
+  PreviousProposalVoteStart = 'previousProposal__voteStart',
   Proposal = 'proposal',
   ProposalAbstainVotes = 'proposal__abstainVotes',
   ProposalAgainstVotes = 'proposal__againstVotes',
@@ -5339,6 +6418,27 @@ export type Proposal_Filter = {
   canceled_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   canceled_not?: InputMaybe<Scalars['Boolean']['input']>
   canceled_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  candidateVersion?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_?: InputMaybe<ProposalCandidateVersion_Filter>
+  candidateVersion_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_gte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_lt?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_lte?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  candidateVersion_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with?: InputMaybe<Scalars['String']['input']>
+  candidateVersion_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   dao?: InputMaybe<Scalars['String']['input']>
   dao_?: InputMaybe<Dao_Filter>
   dao_contains?: InputMaybe<Scalars['String']['input']>
@@ -5765,6 +6865,22 @@ export enum Proposal_OrderBy {
   CancelTransactionHash = 'cancelTransactionHash',
   Canceled = 'canceled',
   CanceledAt = 'canceledAt',
+  CandidateVersion = 'candidateVersion',
+  CandidateVersionAttester = 'candidateVersion__attester',
+  CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionCreatedAt = 'candidateVersion__createdAt',
+  CandidateVersionDescription = 'candidateVersion__description',
+  CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
+  CandidateVersionId = 'candidateVersion__id',
+  CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalId = 'candidateVersion__proposalId',
+  CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
+  CandidateVersionRevoked = 'candidateVersion__revoked',
+  CandidateVersionSalt = 'candidateVersion__salt',
+  CandidateVersionSignatureCount = 'candidateVersion__signatureCount',
+  CandidateVersionTitle = 'candidateVersion__title',
+  CandidateVersionTotalVoteWeight = 'candidateVersion__totalVoteWeight',
+  CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
   DaoContractImage = 'dao__contractImage',
@@ -5924,9 +7040,17 @@ export type Query = {
   auctionSettledEvents: Array<AuctionSettledEvent>
   auctions: Array<Auction>
   candidateComment?: Maybe<CandidateComment>
+  candidateCommentCreatedEvent?: Maybe<CandidateCommentCreatedEvent>
+  candidateCommentCreatedEvents: Array<CandidateCommentCreatedEvent>
   candidateComments: Array<CandidateComment>
   candidateSponsorSignature?: Maybe<CandidateSponsorSignature>
+  candidateSponsorSignatureCreatedEvent?: Maybe<CandidateSponsorSignatureCreatedEvent>
+  candidateSponsorSignatureCreatedEvents: Array<CandidateSponsorSignatureCreatedEvent>
   candidateSponsorSignatures: Array<CandidateSponsorSignature>
+  candidateSubmittedAsProposalEvent?: Maybe<CandidateSubmittedAsProposalEvent>
+  candidateSubmittedAsProposalEvents: Array<CandidateSubmittedAsProposalEvent>
+  candidateVersionCreatedEvent?: Maybe<CandidateVersionCreatedEvent>
+  candidateVersionCreatedEvents: Array<CandidateVersionCreatedEvent>
   clankerToken?: Maybe<ClankerToken>
   clankerTokenCreatedEvent?: Maybe<ClankerTokenCreatedEvent>
   clankerTokenCreatedEvents: Array<ClankerTokenCreatedEvent>
@@ -5959,6 +7083,8 @@ export type Query = {
   proposalCandidateVersions: Array<ProposalCandidateVersion>
   proposalCreatedEvent?: Maybe<ProposalCreatedEvent>
   proposalCreatedEvents: Array<ProposalCreatedEvent>
+  proposalEditedEvent?: Maybe<ProposalEditedEvent>
+  proposalEditedEvents: Array<ProposalEditedEvent>
   proposalExecutedEvent?: Maybe<ProposalExecutedEvent>
   proposalExecutedEvents: Array<ProposalExecutedEvent>
   proposalMetadataEntities: Array<ProposalMetadataEntity>
@@ -6106,6 +7232,22 @@ export type QueryCandidateCommentArgs = {
   subgraphError?: _SubgraphErrorPolicy_
 }
 
+export type QueryCandidateCommentCreatedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryCandidateCommentCreatedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<CandidateCommentCreatedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<CandidateCommentCreatedEvent_Filter>
+}
+
 export type QueryCandidateCommentsArgs = {
   block?: InputMaybe<Block_Height>
   first?: InputMaybe<Scalars['Int']['input']>
@@ -6122,6 +7264,22 @@ export type QueryCandidateSponsorSignatureArgs = {
   subgraphError?: _SubgraphErrorPolicy_
 }
 
+export type QueryCandidateSponsorSignatureCreatedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryCandidateSponsorSignatureCreatedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<CandidateSponsorSignatureCreatedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<CandidateSponsorSignatureCreatedEvent_Filter>
+}
+
 export type QueryCandidateSponsorSignaturesArgs = {
   block?: InputMaybe<Block_Height>
   first?: InputMaybe<Scalars['Int']['input']>
@@ -6130,6 +7288,38 @@ export type QueryCandidateSponsorSignaturesArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<CandidateSponsorSignature_Filter>
+}
+
+export type QueryCandidateSubmittedAsProposalEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryCandidateSubmittedAsProposalEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<CandidateSubmittedAsProposalEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<CandidateSubmittedAsProposalEvent_Filter>
+}
+
+export type QueryCandidateVersionCreatedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryCandidateVersionCreatedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<CandidateVersionCreatedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<CandidateVersionCreatedEvent_Filter>
 }
 
 export type QueryClankerTokenArgs = {
@@ -6385,6 +7575,22 @@ export type QueryProposalCreatedEventsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<ProposalCreatedEvent_Filter>
+}
+
+export type QueryProposalEditedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryProposalEditedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ProposalEditedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ProposalEditedEvent_Filter>
 }
 
 export type QueryProposalExecutedEventArgs = {
@@ -9780,6 +10986,30 @@ export type CandidateGroupsQuery = {
   }>
 }
 
+export type CandidateSponsorSignaturesQueryVariables = Exact<{
+  where?: InputMaybe<CandidateSponsorSignature_Filter>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<CandidateSponsorSignature_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+}>
+
+export type CandidateSponsorSignaturesQuery = {
+  __typename?: 'Query'
+  candidateSponsorSignatures: Array<{
+    __typename?: 'CandidateSponsorSignature'
+    id: string
+    signer: any
+    proposalId: any
+    nonce: any
+    deadline: any
+    signature: any
+    revoked: boolean
+    createdAt: any
+    voteWeight: any
+  }>
+}
+
 export type CandidateVersionQueryVariables = Exact<{
   versionId: Scalars['ID']['input']
 }>
@@ -10466,6 +11696,86 @@ export type FeedEventsQuery = {
         }
       }
     | {
+        __typename: 'CandidateCommentCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'CandidateSponsorSignatureCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'CandidateSubmittedAsProposalEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'CandidateVersionCreatedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
         __typename: 'ClankerTokenCreatedEvent'
         id: string
         type: FeedEventType
@@ -10512,6 +11822,26 @@ export type FeedEventsQuery = {
           discussionUrl?: string | null
           proposer: any
         }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ProposalEditedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
         dao: {
           __typename?: 'DAO'
           auctionAddress: any
@@ -12008,6 +13338,26 @@ export const CandidateGroupsDocument = gql`
   }
   ${CandidateGroupFragmentFragmentDoc}
 `
+export const CandidateSponsorSignaturesDocument = gql`
+  query CandidateSponsorSignatures(
+    $where: CandidateSponsorSignature_filter
+    $first: Int
+    $skip: Int
+    $orderBy: CandidateSponsorSignature_orderBy
+    $orderDirection: OrderDirection
+  ) {
+    candidateSponsorSignatures(
+      where: $where
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      ...CandidateSponsorSignatureFragment
+    }
+  }
+  ${CandidateSponsorSignatureFragmentFragmentDoc}
+`
 export const CandidateVersionDocument = gql`
   query CandidateVersion($versionId: ID!) {
     proposalCandidateVersion(id: $versionId) {
@@ -13101,6 +14451,24 @@ export function getSdk(
             signal,
           }),
         'CandidateGroups',
+        'query',
+        variables
+      )
+    },
+    CandidateSponsorSignatures(
+      variables?: CandidateSponsorSignaturesQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<CandidateSponsorSignaturesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CandidateSponsorSignaturesQuery>({
+            document: CandidateSponsorSignaturesDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'CandidateSponsorSignatures',
         'query',
         variables
       )
