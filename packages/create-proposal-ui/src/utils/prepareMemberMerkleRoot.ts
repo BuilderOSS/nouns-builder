@@ -4,6 +4,7 @@ import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
 export const prepareMemberMerkleRoot = async (
   members: DaoMember[]
 ): Promise<`0x${string}`> => {
+  // Use 'ownerAlias' which is the L1->L2 aliased address for cross-chain compatibility
   const leaves = members
     .map((member) => member.tokens.map((tokenId) => [member.ownerAlias, BigInt(tokenId)]))
     .flat()

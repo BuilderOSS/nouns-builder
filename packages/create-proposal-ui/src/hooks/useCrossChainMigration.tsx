@@ -9,9 +9,10 @@ export enum MigrationStep {
   DEPLOY_DAO = 2,
   SETUP_METADATA = 3,
   SETUP_MERKLE_ROOTS = 4,
-  MINT_TOKENS = 5,
-  SET_ATTRIBUTES = 6,
-  CREATE_PROPOSAL = 7,
+  SET_DELAYED_GOVERNANCE = 5,
+  MINT_TOKENS = 6,
+  SET_ATTRIBUTES = 7,
+  CREATE_PROPOSAL = 8,
 }
 
 // Alias for backwards compatibility
@@ -96,7 +97,17 @@ export interface CrossChainMigrationState {
   // Step 5: Merkle roots phase state
   merkleRootsPhase?: 'generate' | 'set_roots' | 'complete'
 
-  // Step 6: Minting progress
+  // Step 6: Delayed governance state
+  delayedGovernanceDuration?: {
+    days?: number
+    hours?: number
+    minutes?: number
+    seconds?: number
+  }
+  delayedGovernanceTimestamp?: bigint
+  delayedGovernanceTxHash?: `0x${string}`
+
+  // Step 7: Minting progress
   mintingProgress: MintingProgress
 
   // Transaction hashes
@@ -130,7 +141,17 @@ export interface CrossChainMigrationState {
   setMerkleRootsPhase: (phase: 'generate' | 'set_roots' | 'complete') => void
   addMerkleRootTxHash: (hash: `0x${string}`) => void
 
-  // Step 6: Minting actions
+  // Step 6: Delayed governance actions
+  setDelayedGovernanceDuration: (duration: {
+    days?: number
+    hours?: number
+    minutes?: number
+    seconds?: number
+  }) => void
+  setDelayedGovernanceTimestamp: (timestamp: bigint) => void
+  setDelayedGovernanceTxHash: (hash: `0x${string}`) => void
+
+  // Step 7: Minting actions
   updateMintingProgress: (progress: Partial<MintingProgress>) => void
   addMintedTokens: (tokenIds: number[]) => void
   addMintingTxHash: (hash: `0x${string}`) => void
@@ -155,6 +176,9 @@ const initialState = {
   metadataProperties: undefined,
   metadataProgress: { current: 0, total: 0 },
   merkleRootsPhase: undefined,
+  delayedGovernanceDuration: undefined,
+  delayedGovernanceTimestamp: undefined,
+  delayedGovernanceTxHash: undefined,
   mintingProgress: { total: 0, minted: [], failed: [], txHashes: [] },
   deployTxHash: undefined,
   metadataTxHashes: [],
@@ -254,7 +278,16 @@ export const useCrossChainMigration = create<CrossChainMigrationState>()(
           merkleRootTxHashes: [...state.merkleRootTxHashes, hash],
         })),
 
-      // Step 6: Minting actions
+      // Step 6: Delayed governance actions
+      setDelayedGovernanceDuration: (duration) =>
+        set({ delayedGovernanceDuration: duration }),
+
+      setDelayedGovernanceTimestamp: (timestamp) =>
+        set({ delayedGovernanceTimestamp: timestamp }),
+
+      setDelayedGovernanceTxHash: (hash) => set({ delayedGovernanceTxHash: hash }),
+
+      // Step 7: Minting actions
       updateMintingProgress: (progress) =>
         set((state) => ({
           mintingProgress: {
@@ -299,7 +332,7 @@ export const useCrossChainMigration = create<CrossChainMigrationState>()(
     }),
     {
       name: 'cross-chain-migration-storage',
-      version: 3, // v3: Added metadataProperties, merkleRootsPhase, enhanced minting progress
+      version: 4, // v4: Added SET_DELAYED_GOVERNANCE step and related state
       storage: {
         getItem: (name) => {
           const str = localStorage.getItem(name)

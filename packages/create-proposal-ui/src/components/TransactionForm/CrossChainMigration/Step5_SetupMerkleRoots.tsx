@@ -368,7 +368,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
           )}
 
           <Flex justify="flex-end">
-            <Button onClick={handleContinue}>Continue to Token Minting</Button>
+            <Button onClick={handleContinue}>Continue to Delayed Governance</Button>
           </Flex>
         </>
       )}

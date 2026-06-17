@@ -12,6 +12,7 @@ const STEP_LABELS = {
   [DeploymentStep.DEPLOY_DAO]: 'Deploy',
   [DeploymentStep.SETUP_METADATA]: 'Metadata',
   [DeploymentStep.SETUP_MERKLE_ROOTS]: 'Merkle Roots',
+  [DeploymentStep.SET_DELAYED_GOVERNANCE]: 'Delayed Gov',
   [DeploymentStep.MINT_TOKENS]: 'Mint Tokens',
   [DeploymentStep.SET_ATTRIBUTES]: 'Attributes',
   [DeploymentStep.CREATE_PROPOSAL]: 'Proposal',
@@ -20,7 +21,7 @@ const STEP_LABELS = {
 export const MigrationProgressTracker: React.FC = () => {
   const { currentStep, setStep } = useCrossChainMigration()
 
-  const progress = ((currentStep + 1) / 8) * 100
+  const progress = ((currentStep + 1) / 9) * 100
 
   return (
     <Box mb="x6">
@@ -74,7 +75,7 @@ export const MigrationProgressTracker: React.FC = () => {
       </Stack>
 
       <Text color="text3" fontSize={14}>
-        Step {currentStep + 1} of 8: {STEP_LABELS[currentStep]}
+        Step {currentStep + 1} of 9: {STEP_LABELS[currentStep]}
       </Text>
     </Box>
   )

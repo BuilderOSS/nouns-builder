@@ -9,7 +9,7 @@ import { useReadContract } from 'wagmi'
 import { useBridgeTransaction } from '../../../hooks/useBridgeTransaction'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 
-export const Step8_CreateProposal: React.FC = () => {
+export const Step9_CreateProposal: React.FC = () => {
   const {
     sourceChainId,
     targetChainId,
@@ -133,7 +133,7 @@ After this proposal passes:
     <Stack gap="x6">
       <Box>
         <Heading size="md" mb="x2">
-          Step 8: Create Migration Proposal
+          Step 9: Create Migration Proposal
         </Heading>
         <Text color="text3">
           Create a proposal on the source DAO to pause auctions and bridge the treasury to

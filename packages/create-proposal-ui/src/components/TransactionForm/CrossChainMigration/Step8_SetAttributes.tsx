@@ -2,7 +2,7 @@ import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 
-export const Step7_SetAttributes: React.FC = () => {
+export const Step8_SetAttributes: React.FC = () => {
   const { goToNextStep, goToPreviousStep } = useCrossChainMigration()
 
   const handleSkip = () => {
@@ -13,7 +13,7 @@ export const Step7_SetAttributes: React.FC = () => {
     <Stack gap="x6">
       <Box>
         <Heading size="md" mb="x2">
-          Step 7: Set Token Attributes (Optional)
+          Step 8: Set Token Attributes (Optional)
         </Heading>
         <Text color="text3">
           Token attributes are already available via merkle proofs. Setting them on-chain

@@ -7,7 +7,7 @@ import { useWriteContract } from 'wagmi'
 
 import { DaoMemberSimplified } from './useGenerateMerkleRoots'
 
-const BATCH_SIZE = 15
+export const BATCH_SIZE = 50
 
 export const useMintReservedTokens = (
   memberSnapshot?: DaoMemberSimplified[],
@@ -40,6 +40,7 @@ export const useMintReservedTokens = (
 
     try {
       // Create merkle tree from member snapshot
+      // Use 'ownerAlias' which is the L1->L2 aliased address for cross-chain compatibility
       const leaves = memberSnapshot.flatMap((member) =>
         member.tokens.map((tokenId) => [member.ownerAlias, BigInt(tokenId)])
       )

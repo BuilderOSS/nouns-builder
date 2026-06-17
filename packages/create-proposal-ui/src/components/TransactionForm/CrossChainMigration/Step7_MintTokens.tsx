@@ -2,9 +2,9 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
-import { useMintReservedTokens } from '../../../hooks/useMintReservedTokens'
+import { BATCH_SIZE, useMintReservedTokens } from '../../../hooks/useMintReservedTokens'
 
-export const Step6_MintTokens: React.FC = () => {
+export const Step7_MintTokens: React.FC = () => {
   const {
     targetChainId,
     targetAddresses,
@@ -87,11 +87,11 @@ export const Step6_MintTokens: React.FC = () => {
     <Stack gap="x6">
       <Box>
         <Heading size="md" mb="x2">
-          Step 6: Mint Reserved Tokens
+          Step 7: Mint Reserved Tokens
         </Heading>
         <Text color="text3">
           Batch mint all reserved tokens to their original owners using merkle proofs.
-          This will execute multiple transactions in batches of 15 tokens.
+          This will execute multiple transactions in batches of {BATCH_SIZE} tokens.
         </Text>
       </Box>
 
@@ -112,13 +112,13 @@ export const Step6_MintTokens: React.FC = () => {
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Batch Size:</Text>
-            <Text fontWeight="label">15 tokens per transaction</Text>
+            <Text fontWeight="label">{BATCH_SIZE} tokens per transaction</Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Estimated Transactions:</Text>
             <Text fontWeight="label">
               {Math.ceil(
-                memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0) / 15
+                memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0) / BATCH_SIZE
               )}
             </Text>
           </Flex>
@@ -161,7 +161,7 @@ export const Step6_MintTokens: React.FC = () => {
               </Flex>
               <Box
                 backgroundColor="background1"
-                height="12px"
+                height="x3"
                 borderRadius="curved"
                 overflow="hidden"
               >
