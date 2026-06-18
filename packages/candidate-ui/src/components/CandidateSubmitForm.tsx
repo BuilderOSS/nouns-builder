@@ -1,7 +1,6 @@
 import { MobileProposalActionBar } from '@buildeross/create-proposal-ui'
 import { decodeTransactions } from '@buildeross/hooks'
 import { attestCandidate, type CandidateAttestationParams } from '@buildeross/sdk'
-import { hashProposal } from '@buildeross/sdk/contract'
 import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { type ProposalDescriptionMetadataV1 } from '@buildeross/types'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
@@ -15,6 +14,7 @@ import { type Hex, keccak256, toBytes, toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 
 import { buildCandidateDescription } from '../utils/buildCandidateDescription'
+import { getCandidateProposalId } from '../utils/candidateProposal'
 
 export interface CandidateSubmitFormProps {
   isUpdate?: boolean // True if updating existing candidate
@@ -153,7 +153,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     setErrorMessage(null)
     setIsSubmitting(true)
 
-    const proposalId = hashProposal({
+    const proposalId = getCandidateProposalId({
       targets,
       values,
       calldatas,

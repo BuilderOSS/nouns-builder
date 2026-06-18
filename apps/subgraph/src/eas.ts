@@ -487,7 +487,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
 
   if (event.params.attester.toHexString() == group.proposer.toHexString()) return
 
-  if (decoded.signature.length != 65) return
+  if (decoded.signature.length != 64 && decoded.signature.length != 65) return
 
   let dao = DAO.load(group.dao)
   if (!dao) return

@@ -8,6 +8,11 @@ import React, { useCallback, useState } from 'react'
 import { type Hex } from 'viem'
 import { useAccount, useConfig, useReadContract, useWalletClient } from 'wagmi'
 
+import {
+  CANDIDATE_SIGNATURE_VALIDITY_DAYS,
+  CANDIDATE_SIGNATURE_VALIDITY_SECONDS,
+} from '../utils/candidateProposal'
+
 export interface CandidateSignatureButtonProps {
   candidateVersionUID: Hex
   proposer: `0x${string}`
@@ -51,7 +56,9 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
     chainId: chain.id,
     query: { enabled: !!address && !!governorAddress },
   })
-  const [deadline] = useState(Math.floor(Date.now() / 1000) + 86400 * 7) // 7 days from now
+  const [deadline] = useState(
+    Math.floor(Date.now() / 1000) + CANDIDATE_SIGNATURE_VALIDITY_SECONDS
+  )
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -201,7 +208,7 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
               ? `Your signature has been recorded with ${voteWeight.toString()} vote weight.`
               : errorMessage
                 ? errorMessage
-                : 'Please confirm the transaction in your wallet.'
+                : `Please confirm the transaction in your wallet. Signature valid for ${CANDIDATE_SIGNATURE_VALIDITY_DAYS} days.`
           }
         />
       </AnimatedModal>

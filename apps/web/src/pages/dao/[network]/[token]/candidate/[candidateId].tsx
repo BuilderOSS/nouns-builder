@@ -4,6 +4,7 @@ import {
   CandidateDiscussionSection,
   CandidateEditedBanner,
   CandidateSignalBreakdown,
+  getCandidateProposalId,
 } from '@buildeross/candidate-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
@@ -203,6 +204,18 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       return undefined
     }
   }, [latestVersion?.metadata])
+
+  const candidateProposalId = React.useMemo(() => {
+    if (!candidate || !latestVersion) return zeroHash
+
+    return getCandidateProposalId({
+      targets: (latestVersion.targets || []) as `0x${string}`[],
+      values: (latestVersion.values || []).map((value) => BigInt(value)),
+      calldatas: (latestVersion.calldatas || []) as `0x${string}`[],
+      description: latestVersion.metadata || '',
+      proposer: candidate.proposer as `0x${string}`,
+    })
+  }, [candidate, latestVersion])
 
   const { data: tokenSymbol } = useReadContract({
     abi: tokenAbi,
@@ -453,7 +466,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 proposer={candidate.proposer as `0x${string}`}
                 governorAddress={addresses.governor as `0x${string}`}
                 tokenSymbol={String(tokenSymbol)}
-                proposalId={latestVersion.proposalId as `0x${string}`}
+                proposalId={candidateProposalId}
                 onSuccess={handleComposerSuccess}
               />
             </Stack>

@@ -109,7 +109,7 @@ function seedCandidateGroup(): void {
 
 function mockHashProposal(returnValue: string): void {
   const metadataHash = Bytes.fromHexString(
-    '0xb06242338d393b9a02b38812ffafca439fb6f399068cb57c662c6f6edcc08ff7'
+    '0x1086d4f633d0291e07eb8e6ef5d51179974ae18fe827b00cb10b4bc8d6f56bf9'
   )
   createMockedFunction(
     Address.fromString(GOVERNOR_ADDRESS),

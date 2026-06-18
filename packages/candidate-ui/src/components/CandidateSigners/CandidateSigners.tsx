@@ -1,5 +1,5 @@
 import { useEnsData, useVotes } from '@buildeross/hooks'
-import { governorAbi, hashProposal } from '@buildeross/sdk/contract'
+import { governorAbi } from '@buildeross/sdk/contract'
 import type { CandidateSponsorSignature } from '@buildeross/sdk/subgraph'
 import { getCandidateSponsorSignatures } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
@@ -10,6 +10,7 @@ import useSWR from 'swr'
 import type { Hex } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
+import { getCandidateProposalId } from '../../utils/candidateProposal'
 import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
 import { CandidateSignatureButton } from '../CandidateSignatureButton'
 
@@ -47,7 +48,7 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
 
   // Compute proposalId locally using the candidate's data
   const proposalId = React.useMemo<Hex>(() => {
-    return hashProposal({
+    return getCandidateProposalId({
       targets: targets as `0x${string}`[],
       values,
       calldatas,

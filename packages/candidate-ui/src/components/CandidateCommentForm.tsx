@@ -3,6 +3,7 @@ import {
   attestCommentWithSignature,
   CandidateVoteSupportEnum,
 } from '@buildeross/sdk'
+import { governorAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import {
   AnimatedModal,
@@ -14,7 +15,12 @@ import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { type Hex } from 'viem'
-import { useAccount, useConfig, useWalletClient } from 'wagmi'
+import { useAccount, useConfig, useReadContract, useWalletClient } from 'wagmi'
+
+import {
+  CANDIDATE_SIGNATURE_VALIDITY_DAYS,
+  CANDIDATE_SIGNATURE_VALIDITY_SECONDS,
+} from '../utils/candidateProposal'
 
 export interface CandidateCommentFormProps {
   candidateId: Hex
@@ -42,6 +48,14 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const { address } = useAccount()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
+  const { data: nonce, isLoading: isNonceLoading } = useReadContract({
+    abi: governorAbi,
+    address: governorAddress,
+    functionName: 'proposeSignatureNonce',
+    args: address ? [address] : undefined,
+    chainId: chain.id,
+    query: { enabled: !!address && !!governorAddress },
+  })
   const isCreator = React.useMemo(
     () => !!address && address.toLowerCase() === proposer.toLowerCase(),
     [address, proposer]
@@ -52,8 +66,9 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   )
   const [comment, setComment] = useState('')
   const [shouldSign, setShouldSign] = useState(false)
-  const [nonce] = useState(BigInt(Date.now()))
-  const [deadline] = useState(Math.floor(Date.now() / 1000) + 86400 * 7) // 7 days from now
+  const [deadline] = useState(
+    Math.floor(Date.now() / 1000) + CANDIDATE_SIGNATURE_VALIDITY_SECONDS
+  )
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -68,13 +83,19 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
       !!addresses.token &&
       (comment.trim().length > 0 ||
         shouldSign ||
-        support !== CandidateVoteSupportEnum.NONE)
+        support !== CandidateVoteSupportEnum.NONE) &&
+      (!shouldSign || nonce !== undefined)
     )
-  }, [address, addresses.token, comment, shouldSign, support])
+  }, [address, addresses.token, comment, shouldSign, support, nonce])
 
   const canSign = React.useMemo(() => {
-    return support === CandidateVoteSupportEnum.FOR && !isCreator
-  }, [isCreator, support])
+    return (
+      support === CandidateVoteSupportEnum.FOR &&
+      !isCreator &&
+      nonce !== undefined &&
+      !!walletClient
+    )
+  }, [isCreator, support, nonce, walletClient])
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit || !address) return
@@ -83,7 +104,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     setErrorMessage(null)
     setIsSubmitting(true)
 
-    const withSignature = shouldSign && canSign && !!walletClient
+    const withSignature = shouldSign && canSign
 
     try {
       if (withSignature) {
@@ -91,7 +112,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
         await attestCommentWithSignature({
           config,
           chainId: chain.id,
-          walletClient,
+          walletClient: walletClient!,
           daoTokenAddress: addresses.token!,
           governorAddress,
           tokenSymbol,
@@ -100,7 +121,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           signer: address,
           proposer,
           proposalId,
-          nonce,
+          nonce: nonce as bigint,
           deadline,
           support,
           comment: comment.trim(),
@@ -306,7 +327,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           disabled={isSubmitting}
         />
 
-        {canSign && (
+        {support === CandidateVoteSupportEnum.FOR && !isCreator && (
           <Box>
             <Box
               as="label"
@@ -315,6 +336,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
               cursor="pointer"
               p="x3"
               borderRadius="curved"
+              opacity={nonce === undefined ? 0.6 : 1}
               backgroundColor={shouldSign ? 'background2' : 'transparent'}
               style={{
                 border: shouldSign
@@ -325,6 +347,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
               <input
                 type="checkbox"
                 checked={shouldSign}
+                disabled={nonce === undefined || !walletClient}
                 onChange={(e) => setShouldSign(e.target.checked)}
                 style={{ marginRight: '12px' }}
               />
@@ -335,7 +358,16 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
                 Your signature will be used when promoting this candidate to a proposal.
               </Text>
             )}
+            <Text fontSize={14} color="text3" mt="x2" ml="x3">
+              Signature valid for {CANDIDATE_SIGNATURE_VALIDITY_DAYS} days.
+            </Text>
           </Box>
+        )}
+
+        {shouldSign && isNonceLoading && (
+          <Text fontSize={14} color="text3">
+            Loading signature nonce...
+          </Text>
         )}
 
         {isCreator && (
