@@ -27,8 +27,12 @@ interface CandidateDetailsSectionProps {
 }
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <Box mb={{ '@initial': 'x6', '@768': 'x13' }}>
-    <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight="display">
+  <Box mb={{ '@initial': 'x4', '@768': 'x10' }}>
+    <Box
+      fontSize={{ '@initial': 18, '@768': 20 }}
+      mb={{ '@initial': 'x3', '@768': 'x5' }}
+      fontWeight="display"
+    >
       {title}
     </Box>
     {children}
@@ -46,7 +50,7 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
   versions,
 }) => {
   return (
-    <Stack gap="x6">
+    <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
       <Section title="Description">
         <Box>
           <MarkdownDisplay>{description}</MarkdownDisplay>
@@ -81,7 +85,7 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
             {versions.map((version) => (
               <Stack
                 key={version.id}
-                p="x3"
+                p={{ '@initial': 'x3', '@768': 'x4' }}
                 gap="x3"
                 borderColor="border"
                 borderStyle="solid"

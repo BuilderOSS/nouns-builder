@@ -46,26 +46,33 @@ const CandidateCommentCard = ({
 
   return (
     <Box
-      p="x4"
+      p={{ '@initial': 'x3', '@768': 'x4' }}
       borderWidth="normal"
       borderColor="border"
       borderStyle="solid"
       borderRadius="curved"
       style={{
-        marginLeft: depth > 0 ? 24 : 0,
+        marginLeft: depth > 0 ? 16 : 0,
         background: theme.colors.background1,
         borderLeftWidth: depth > 0 ? 3 : undefined,
         borderLeftColor: depth > 0 ? theme.colors.border : undefined,
       }}
     >
-      <Flex justify="space-between" align="center" gap="x3" wrap mb="x2">
+      <Flex
+        justify="space-between"
+        align={{ '@initial': 'flex-start', '@768': 'center' }}
+        direction={{ '@initial': 'column', '@768': 'row' }}
+        gap={{ '@initial': 'x2', '@768': 'x3' }}
+        wrap
+        mb="x2"
+      >
         <Flex align="center" gap="x2">
           <Box style={{ minWidth: 0 }}>
             <WalletIdentityWithPreview
               address={comment.commenter as `0x${string}`}
               displayName={ensName || walletSnippet(comment.commenter as `0x${string}`)}
               avatarSrc={ensAvatar}
-              avatarSize="28"
+              avatarSize="24"
               mobileTapBehavior="toggle"
             />
           </Box>
@@ -150,12 +157,12 @@ const CandidateCommentsPanel = ({
   )
 
   return (
-    <Stack gap="x4">
+    <Stack gap={{ '@initial': 'x3', '@768': 'x4' }}>
       <Flex justify="space-between" align="center" wrap gap="x3">
-        <Text fontSize={20} fontWeight="display">
+        <Text fontSize={{ '@initial': 18, '@768': 20 }} fontWeight="display">
           Comments ({commentCount.toString()})
         </Text>
-        <Text color="text3" fontSize={14}>
+        <Text color="text3" fontSize={12}>
           {comments.length > 0 ? `${comments.length} loaded` : 'Loading discussion'}
         </Text>
       </Flex>
@@ -186,10 +193,14 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
   governorAddress,
 }) => {
   return (
-    <Stack gap="x6">
+    <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
       {latestVersion && tokenSymbol && (
         <Box>
-          <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight="display">
+          <Box
+            fontSize={{ '@initial': 18, '@768': 20 }}
+            mb={{ '@initial': 'x3', '@768': 'x5' }}
+            fontWeight="display"
+          >
             Sponsors
           </Box>
           <CandidateSigners
@@ -207,7 +218,11 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
       )}
 
       <Box>
-        <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight="display">
+        <Box
+          fontSize={{ '@initial': 18, '@768': 20 }}
+          mb={{ '@initial': 'x3', '@768': 'x5' }}
+          fontWeight="display"
+        >
           Comments
         </Box>
         <CandidateCommentsPanel

@@ -77,7 +77,12 @@ export const CandidateSignalBreakdown: React.FC<CandidateSignalBreakdownProps> =
         )}
       </Box>
 
-      <Flex gap="x4" wrap mt="x3">
+      <Flex
+        direction={{ '@initial': 'column', '@768': 'row' }}
+        gap={{ '@initial': 'x2', '@768': 'x4' }}
+        wrap
+        mt="x3"
+      >
         {voteTally.map((vote) => (
           <Flex key={vote.label} align="center" gap="x2">
             <Box

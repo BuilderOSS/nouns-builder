@@ -168,18 +168,18 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
 
   return (
     <>
-      <Stack gap="x6">
+      <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
         <Box>
           <Text fontSize={16} fontWeight="label" mb="x4">
             Your Signal
           </Text>
-          <Stack gap="x3">
+          <Stack gap={{ '@initial': 'x2', '@768': 'x3' }}>
             <Box
               as="label"
               display="flex"
               alignItems="center"
               cursor="pointer"
-              p="x3"
+              p={{ '@initial': 'x2', '@768': 'x3' }}
               borderRadius="curved"
               backgroundColor={
                 support === CandidateVoteSupportEnum.FOR ? 'background2' : 'transparent'
@@ -205,7 +205,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
               display="flex"
               alignItems="center"
               cursor="pointer"
-              p="x3"
+              p={{ '@initial': 'x2', '@768': 'x3' }}
               borderRadius="curved"
               backgroundColor={
                 support === CandidateVoteSupportEnum.AGAINST
@@ -236,7 +236,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
               display="flex"
               alignItems="center"
               cursor="pointer"
-              p="x3"
+              p={{ '@initial': 'x2', '@768': 'x3' }}
               borderRadius="curved"
               backgroundColor={
                 support === CandidateVoteSupportEnum.ABSTAIN
@@ -267,7 +267,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
               display="flex"
               alignItems="center"
               cursor="pointer"
-              p="x3"
+              p={{ '@initial': 'x2', '@768': 'x3' }}
               borderRadius="curved"
               backgroundColor={
                 support === CandidateVoteSupportEnum.NONE ? 'background2' : 'transparent'
@@ -345,12 +345,13 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           </Text>
         )}
 
-        <Flex justify="flex-end">
+        <Flex justify={{ '@initial': 'stretch', '@768': 'flex-end' }}>
           <ContractButton
             chainId={chain.id}
             handleClick={handleSubmit}
             disabled={!canSubmit}
             loading={isSubmitting}
+            style={{ width: '100%' }}
           >
             {shouldSign
               ? 'Signal & Sign'

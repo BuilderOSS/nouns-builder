@@ -396,7 +396,12 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 )}
               </Stack>
 
-              <Flex gap="x2" wrap>
+              <Flex
+                direction={{ '@initial': 'column', '@768': 'row' }}
+                gap={{ '@initial': 'x2', '@768': 'x2' }}
+                wrap
+                style={{ width: '100%' }}
+              >
                 <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
                 {latestVersion?.proposalId && latestVersion.proposalId !== zeroHash && (
                   <Button
@@ -437,7 +442,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
           close={() => setComposerOpen(false)}
           size="large"
         >
-          <Box p="x6">
+          <Box p={{ '@initial': 'x4', '@768': 'x6' }}>
             <Stack gap="x4">
               <Text fontSize={20} fontWeight="display">
                 Signal / comment
