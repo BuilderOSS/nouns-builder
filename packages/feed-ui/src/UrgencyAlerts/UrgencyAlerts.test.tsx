@@ -309,7 +309,7 @@ describe('UrgencyAlerts', () => {
 
     expect(screen.queryByText('Ready to queue')).toBeNull()
     expect(dismissedUrgencyAlertsStore.getState().dismissedIds).toContain(
-      `queueable:${CHAIN_ID.BASE}:0xabc`
+      `queueable:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xabc`
     )
   })
 

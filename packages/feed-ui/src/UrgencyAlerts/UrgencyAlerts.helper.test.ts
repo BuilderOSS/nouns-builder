@@ -124,7 +124,7 @@ describe('deriveUrgencyAlerts', () => {
       hasVoted: false,
       proposalNumber: 7,
       proposalTitle: 'Test proposal',
-      id: `vote:${CHAIN_ID.BASE}:0xabc`,
+      id: `vote:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xabc`,
     })
   })
 
@@ -172,7 +172,7 @@ describe('deriveUrgencyAlerts', () => {
     expect(alerts[0]).toMatchObject({
       type: 'EXECUTION_EXPIRING',
       endTime: NOW + 5 * HOUR,
-      id: `execution:${CHAIN_ID.BASE}:0xabc`,
+      id: `execution:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xabc`,
     })
   })
 
@@ -214,7 +214,7 @@ describe('deriveUrgencyAlerts', () => {
       endTime: null,
       proposalNumber: 7,
       proposalTitle: 'Test proposal',
-      id: `vote-needed:${CHAIN_ID.BASE}:0xabc`,
+      id: `vote-needed:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xabc:${USER.toLowerCase()}`,
     })
   })
 
@@ -286,7 +286,7 @@ describe('deriveUrgencyAlerts', () => {
       type: 'PROPOSAL_EXECUTABLE',
       level: 'info',
       endTime: null,
-      id: `executable:${CHAIN_ID.BASE}:0xabc`,
+      id: `executable:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xabc`,
     })
   })
 
@@ -332,7 +332,7 @@ describe('deriveUrgencyAlerts', () => {
       type: 'PROPOSAL_QUEUEABLE',
       level: 'info',
       endTime: null,
-      id: `queueable:${CHAIN_ID.BASE}:0xabc`,
+      id: `queueable:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xabc`,
     })
   })
 
@@ -439,8 +439,8 @@ describe('deriveUrgencyAlerts', () => {
     })
     const alerts = deriveUrgencyAlerts([dao], NOW, USER)
     expect(alerts.map((a) => a.id)).toEqual([
-      `queueable:${CHAIN_ID.BASE}:0xnew`,
-      `queueable:${CHAIN_ID.BASE}:0xold`,
+      `queueable:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xnew`,
+      `queueable:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xold`,
     ])
   })
 

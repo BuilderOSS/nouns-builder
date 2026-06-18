@@ -52,6 +52,8 @@ export const VotingPowerExplainerView: React.FC<VotingPowerExplainerViewProps> =
   snapshotDateLabel,
 }) => {
   const { getAuctionLink, getDaoLink } = useLinks()
+  // daoName is optional upstream; fall back so copy never renders a gap.
+  const daoLabel = daoName ?? 'this DAO'
 
   const renderBody = () => {
     switch (votingCase) {
@@ -69,7 +71,7 @@ export const VotingPowerExplainerView: React.FC<VotingPowerExplainerViewProps> =
         return (
           <>
             <Text color={'text2'}>
-              You do not hold any {daoName} tokens, so you cannot vote on this proposal.
+              You do not hold any {daoLabel} tokens, so you cannot vote on this proposal.
               Win a token at auction to vote on future proposals.
             </Text>
             {token && (
@@ -142,7 +144,7 @@ export const VotingPowerExplainerView: React.FC<VotingPowerExplainerViewProps> =
             <Text as="span" color="text1" fontWeight="display">
               {snapshotVotes} {snapshotVotes === 1 ? 'vote' : 'votes'}
             </Text>{' '}
-            available for {daoName}
+            available for {daoLabel}
           </Text>
         )
 
@@ -153,7 +155,7 @@ export const VotingPowerExplainerView: React.FC<VotingPowerExplainerViewProps> =
             <Text as="span" color="text1" fontWeight="display">
               {snapshotVotes} {snapshotVotes === 1 ? 'vote' : 'votes'}
             </Text>{' '}
-            available for {daoName}, including {delegatedVotes} delegated to you by other
+            available for {daoLabel}, including {delegatedVotes} delegated to you by other
             members
           </Text>
         )

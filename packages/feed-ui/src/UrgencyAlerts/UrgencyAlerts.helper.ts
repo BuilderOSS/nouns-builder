@@ -164,7 +164,7 @@ export const deriveUrgencyAlerts = (
             // "You haven't voted" chip for the connected member).
             alerts.push({
               ...base,
-              id: `vote:${dao.chainId}:${proposal.proposalId}`,
+              id: `vote:${dao.chainId}:${dao.tokenAddress}:${proposal.proposalId}`,
               type: 'VOTING_ENDING',
               level: getLevel(secondsRemaining, thresholds),
               endTime: voteEnd,
@@ -178,7 +178,9 @@ export const deriveUrgencyAlerts = (
             // member sees exactly one unvoted surface per proposal at a time.
             alerts.push({
               ...base,
-              id: `vote-needed:${dao.chainId}:${proposal.proposalId}`,
+              // VOTE_NEEDED is personal — scope the id by user so a session
+              // dismissal does not leak across wallet switches.
+              id: `vote-needed:${dao.chainId}:${dao.tokenAddress}:${proposal.proposalId}:${userAddress.toLowerCase()}`,
               type: 'VOTE_NEEDED',
               level: 'info',
               endTime: null,
@@ -203,7 +205,7 @@ export const deriveUrgencyAlerts = (
           // so it wins over PROPOSAL_EXECUTABLE for the same proposal.
           alerts.push({
             ...base,
-            id: `execution:${dao.chainId}:${proposal.proposalId}`,
+            id: `execution:${dao.chainId}:${dao.tokenAddress}:${proposal.proposalId}`,
             type: 'EXECUTION_EXPIRING',
             level: getLevel(expiresAt - now, thresholds),
             endTime: expiresAt,
@@ -219,7 +221,7 @@ export const deriveUrgencyAlerts = (
           // expiring alert for the proposal (expiring wins).
           alerts.push({
             ...base,
-            id: `executable:${dao.chainId}:${proposal.proposalId}`,
+            id: `executable:${dao.chainId}:${dao.tokenAddress}:${proposal.proposalId}`,
             type: 'PROPOSAL_EXECUTABLE',
             level: 'info',
             endTime: null,
@@ -234,7 +236,7 @@ export const deriveUrgencyAlerts = (
         // #6 PROPOSAL_QUEUEABLE — the DAO is stuck waiting on a queue action.
         alerts.push({
           ...base,
-          id: `queueable:${dao.chainId}:${proposal.proposalId}`,
+          id: `queueable:${dao.chainId}:${dao.tokenAddress}:${proposal.proposalId}`,
           type: 'PROPOSAL_QUEUEABLE',
           level: 'info',
           endTime: null,

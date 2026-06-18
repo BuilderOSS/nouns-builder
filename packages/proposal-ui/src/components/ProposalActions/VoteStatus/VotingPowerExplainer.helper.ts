@@ -29,6 +29,9 @@ export const getVotingPowerCase = (inputs: VotingPowerInputs): VotingPowerCase =
     isDelegating,
   } = inputs
 
+  // Snapshot voting power is a proposal-level fact, surfaced even when the
+  // viewer is disconnected; NotConnected is reserved for the no-power case.
+  // (Intentional, integration-tested in VoteStatus.test.tsx.)
   if (snapshotVotes > 0 && delegatedVotes > 0)
     return VotingPowerCase.CanVoteWithDelegation
   if (snapshotVotes > 0) return VotingPowerCase.CanVote
