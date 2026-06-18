@@ -229,6 +229,7 @@ export enum AuctionBidPlacedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -547,6 +548,7 @@ export enum AuctionCreatedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -713,6 +715,7 @@ export enum AuctionSettledEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -882,6 +885,7 @@ export enum Auction_OrderBy {
   Bids = 'bids',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -1108,6 +1112,7 @@ export enum CandidateCommentCreatedEvent_OrderBy {
   CommentVoteWeight = 'comment__voteWeight',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -1126,6 +1131,7 @@ export enum CandidateCommentCreatedEvent_OrderBy {
   DaoTreasuryAddress = 'dao__treasuryAddress',
   DaoVoterCount = 'dao__voterCount',
   Group = 'group',
+  GroupCandidateNumber = 'group__candidateNumber',
   GroupCommentCount = 'group__commentCount',
   GroupCreatedAt = 'group__createdAt',
   GroupCurrentAbstainCount = 'group__currentAbstainCount',
@@ -1270,6 +1276,7 @@ export enum CandidateComment_OrderBy {
   Commenter = 'commenter',
   CreatedAt = 'createdAt',
   Group = 'group',
+  GroupCandidateNumber = 'group__candidateNumber',
   GroupCommentCount = 'group__commentCount',
   GroupCreatedAt = 'group__createdAt',
   GroupCurrentAbstainCount = 'group__currentAbstainCount',
@@ -1484,6 +1491,7 @@ export enum CandidateSponsorSignatureCreatedEvent_OrderBy {
   CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -1502,6 +1510,7 @@ export enum CandidateSponsorSignatureCreatedEvent_OrderBy {
   DaoTreasuryAddress = 'dao__treasuryAddress',
   DaoVoterCount = 'dao__voterCount',
   Group = 'group',
+  GroupCandidateNumber = 'group__candidateNumber',
   GroupCommentCount = 'group__commentCount',
   GroupCreatedAt = 'group__createdAt',
   GroupCurrentAbstainCount = 'group__currentAbstainCount',
@@ -1832,6 +1841,7 @@ export enum CandidateSubmittedAsProposalEvent_OrderBy {
   CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -1850,6 +1860,7 @@ export enum CandidateSubmittedAsProposalEvent_OrderBy {
   DaoTreasuryAddress = 'dao__treasuryAddress',
   DaoVoterCount = 'dao__voterCount',
   Group = 'group',
+  GroupCandidateNumber = 'group__candidateNumber',
   GroupCommentCount = 'group__commentCount',
   GroupCreatedAt = 'group__createdAt',
   GroupCurrentAbstainCount = 'group__currentAbstainCount',
@@ -2059,6 +2070,7 @@ export enum CandidateVersionCreatedEvent_OrderBy {
   CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -2077,6 +2089,7 @@ export enum CandidateVersionCreatedEvent_OrderBy {
   DaoTreasuryAddress = 'dao__treasuryAddress',
   DaoVoterCount = 'dao__voterCount',
   Group = 'group',
+  GroupCandidateNumber = 'group__candidateNumber',
   GroupCommentCount = 'group__commentCount',
   GroupCreatedAt = 'group__createdAt',
   GroupCurrentAbstainCount = 'group__currentAbstainCount',
@@ -2102,6 +2115,7 @@ export enum CandidateVoteSupport {
 
 export type ClankerToken = {
   __typename?: 'ClankerToken'
+  adminChangedAt?: Maybe<Scalars['BigInt']['output']>
   createdAt: Scalars['BigInt']['output']
   createdAtBlock: Scalars['BigInt']['output']
   dao?: Maybe<Dao>
@@ -2109,6 +2123,7 @@ export type ClankerToken = {
   extensionsSupply: Scalars['BigInt']['output']
   holders: Array<ClankerTokenHolder>
   id: Scalars['ID']['output']
+  isTrusted: Scalars['Boolean']['output']
   locker: Scalars['Bytes']['output']
   mevModule: Scalars['Bytes']['output']
   msgSender: Scalars['Bytes']['output']
@@ -2248,10 +2263,12 @@ export enum ClankerTokenCreatedEvent_OrderBy {
   Actor = 'actor',
   BlockNumber = 'blockNumber',
   ClankerToken = 'clankerToken',
+  ClankerTokenAdminChangedAt = 'clankerToken__adminChangedAt',
   ClankerTokenCreatedAt = 'clankerToken__createdAt',
   ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
   ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
   ClankerTokenId = 'clankerToken__id',
+  ClankerTokenIsTrusted = 'clankerToken__isTrusted',
   ClankerTokenLocker = 'clankerToken__locker',
   ClankerTokenMevModule = 'clankerToken__mevModule',
   ClankerTokenMsgSender = 'clankerToken__msgSender',
@@ -2269,6 +2286,7 @@ export enum ClankerTokenCreatedEvent_OrderBy {
   ClankerTokenTransactionHash = 'clankerToken__transactionHash',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -2377,10 +2395,12 @@ export enum ClankerTokenHolder_OrderBy {
   Holder = 'holder',
   Id = 'id',
   Token = 'token',
+  TokenAdminChangedAt = 'token__adminChangedAt',
   TokenCreatedAt = 'token__createdAt',
   TokenCreatedAtBlock = 'token__createdAtBlock',
   TokenExtensionsSupply = 'token__extensionsSupply',
   TokenId = 'token__id',
+  TokenIsTrusted = 'token__isTrusted',
   TokenLocker = 'token__locker',
   TokenMevModule = 'token__mevModule',
   TokenMsgSender = 'token__msgSender',
@@ -2400,9 +2420,361 @@ export enum ClankerTokenHolder_OrderBy {
   UpdatedAtBlock = 'updatedAtBlock',
 }
 
+export type ClankerTokenLinkedEvent = FeedEvent & {
+  __typename?: 'ClankerTokenLinkedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  clankerToken: ClankerToken
+  dao: Dao
+  id: Scalars['ID']['output']
+  previousAdmin: Scalars['Bytes']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type ClankerTokenLinkedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<ClankerTokenLinkedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  clankerToken?: InputMaybe<Scalars['String']['input']>
+  clankerToken_?: InputMaybe<ClankerToken_Filter>
+  clankerToken_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_lt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_lte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ClankerTokenLinkedEvent_Filter>>>
+  previousAdmin?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_contains?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_gt?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_gte?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  previousAdmin_lt?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_lte?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_not?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  previousAdmin_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum ClankerTokenLinkedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  ClankerToken = 'clankerToken',
+  ClankerTokenAdminChangedAt = 'clankerToken__adminChangedAt',
+  ClankerTokenCreatedAt = 'clankerToken__createdAt',
+  ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
+  ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
+  ClankerTokenId = 'clankerToken__id',
+  ClankerTokenIsTrusted = 'clankerToken__isTrusted',
+  ClankerTokenLocker = 'clankerToken__locker',
+  ClankerTokenMevModule = 'clankerToken__mevModule',
+  ClankerTokenMsgSender = 'clankerToken__msgSender',
+  ClankerTokenPairedToken = 'clankerToken__pairedToken',
+  ClankerTokenPoolHook = 'clankerToken__poolHook',
+  ClankerTokenPoolId = 'clankerToken__poolId',
+  ClankerTokenStartingTick = 'clankerToken__startingTick',
+  ClankerTokenTokenAddress = 'clankerToken__tokenAddress',
+  ClankerTokenTokenAdmin = 'clankerToken__tokenAdmin',
+  ClankerTokenTokenContext = 'clankerToken__tokenContext',
+  ClankerTokenTokenImage = 'clankerToken__tokenImage',
+  ClankerTokenTokenMetadata = 'clankerToken__tokenMetadata',
+  ClankerTokenTokenName = 'clankerToken__tokenName',
+  ClankerTokenTokenSymbol = 'clankerToken__tokenSymbol',
+  ClankerTokenTransactionHash = 'clankerToken__transactionHash',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  PreviousAdmin = 'previousAdmin',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+}
+
+export type ClankerTokenUnlinkedEvent = FeedEvent & {
+  __typename?: 'ClankerTokenUnlinkedEvent'
+  actor: Scalars['Bytes']['output']
+  blockNumber: Scalars['BigInt']['output']
+  clankerToken: ClankerToken
+  dao: Dao
+  id: Scalars['ID']['output']
+  newAdmin: Scalars['Bytes']['output']
+  timestamp: Scalars['BigInt']['output']
+  transactionHash: Scalars['Bytes']['output']
+  type: FeedEventType
+}
+
+export type ClankerTokenUnlinkedEvent_Filter = {
+  /** Filter for the block changed event. */
+  _change_block?: InputMaybe<BlockChangedFilter>
+  actor?: InputMaybe<Scalars['Bytes']['input']>
+  actor_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_gte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  actor_lt?: InputMaybe<Scalars['Bytes']['input']>
+  actor_lte?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  actor_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  and?: InputMaybe<Array<InputMaybe<ClankerTokenUnlinkedEvent_Filter>>>
+  blockNumber?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_gte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  blockNumber_lt?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_lte?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not?: InputMaybe<Scalars['BigInt']['input']>
+  blockNumber_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  clankerToken?: InputMaybe<Scalars['String']['input']>
+  clankerToken_?: InputMaybe<ClankerToken_Filter>
+  clankerToken_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_gte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_lt?: InputMaybe<Scalars['String']['input']>
+  clankerToken_lte?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  clankerToken_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with?: InputMaybe<Scalars['String']['input']>
+  clankerToken_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  id?: InputMaybe<Scalars['ID']['input']>
+  id_gt?: InputMaybe<Scalars['ID']['input']>
+  id_gte?: InputMaybe<Scalars['ID']['input']>
+  id_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  id_lt?: InputMaybe<Scalars['ID']['input']>
+  id_lte?: InputMaybe<Scalars['ID']['input']>
+  id_not?: InputMaybe<Scalars['ID']['input']>
+  id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  newAdmin?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_contains?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_gt?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_gte?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  newAdmin_lt?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_lte?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_not?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  newAdmin_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  or?: InputMaybe<Array<InputMaybe<ClankerTokenUnlinkedEvent_Filter>>>
+  timestamp?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_gte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  timestamp_lt?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_lte?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not?: InputMaybe<Scalars['BigInt']['input']>
+  timestamp_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  transactionHash?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  transactionHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  transactionHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  type?: InputMaybe<FeedEventType>
+  type_in?: InputMaybe<Array<FeedEventType>>
+  type_not?: InputMaybe<FeedEventType>
+  type_not_in?: InputMaybe<Array<FeedEventType>>
+}
+
+export enum ClankerTokenUnlinkedEvent_OrderBy {
+  Actor = 'actor',
+  BlockNumber = 'blockNumber',
+  ClankerToken = 'clankerToken',
+  ClankerTokenAdminChangedAt = 'clankerToken__adminChangedAt',
+  ClankerTokenCreatedAt = 'clankerToken__createdAt',
+  ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
+  ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
+  ClankerTokenId = 'clankerToken__id',
+  ClankerTokenIsTrusted = 'clankerToken__isTrusted',
+  ClankerTokenLocker = 'clankerToken__locker',
+  ClankerTokenMevModule = 'clankerToken__mevModule',
+  ClankerTokenMsgSender = 'clankerToken__msgSender',
+  ClankerTokenPairedToken = 'clankerToken__pairedToken',
+  ClankerTokenPoolHook = 'clankerToken__poolHook',
+  ClankerTokenPoolId = 'clankerToken__poolId',
+  ClankerTokenStartingTick = 'clankerToken__startingTick',
+  ClankerTokenTokenAddress = 'clankerToken__tokenAddress',
+  ClankerTokenTokenAdmin = 'clankerToken__tokenAdmin',
+  ClankerTokenTokenContext = 'clankerToken__tokenContext',
+  ClankerTokenTokenImage = 'clankerToken__tokenImage',
+  ClankerTokenTokenMetadata = 'clankerToken__tokenMetadata',
+  ClankerTokenTokenName = 'clankerToken__tokenName',
+  ClankerTokenTokenSymbol = 'clankerToken__tokenSymbol',
+  ClankerTokenTransactionHash = 'clankerToken__transactionHash',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
+  DaoContractImage = 'dao__contractImage',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
+  Id = 'id',
+  NewAdmin = 'newAdmin',
+  Timestamp = 'timestamp',
+  TransactionHash = 'transactionHash',
+  Type = 'type',
+}
+
 export type ClankerToken_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
+  adminChangedAt?: InputMaybe<Scalars['BigInt']['input']>
+  adminChangedAt_gt?: InputMaybe<Scalars['BigInt']['input']>
+  adminChangedAt_gte?: InputMaybe<Scalars['BigInt']['input']>
+  adminChangedAt_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
+  adminChangedAt_lt?: InputMaybe<Scalars['BigInt']['input']>
+  adminChangedAt_lte?: InputMaybe<Scalars['BigInt']['input']>
+  adminChangedAt_not?: InputMaybe<Scalars['BigInt']['input']>
+  adminChangedAt_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   and?: InputMaybe<Array<InputMaybe<ClankerToken_Filter>>>
   createdAt?: InputMaybe<Scalars['BigInt']['input']>
   createdAtBlock?: InputMaybe<Scalars['BigInt']['input']>
@@ -2462,6 +2834,10 @@ export type ClankerToken_Filter = {
   id_lte?: InputMaybe<Scalars['ID']['input']>
   id_not?: InputMaybe<Scalars['ID']['input']>
   id_not_in?: InputMaybe<Array<Scalars['ID']['input']>>
+  isTrusted?: InputMaybe<Scalars['Boolean']['input']>
+  isTrusted_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
+  isTrusted_not?: InputMaybe<Scalars['Boolean']['input']>
+  isTrusted_not_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   locker?: InputMaybe<Scalars['Bytes']['input']>
   locker_contains?: InputMaybe<Scalars['Bytes']['input']>
   locker_gt?: InputMaybe<Scalars['Bytes']['input']>
@@ -2665,10 +3041,12 @@ export type ClankerToken_Filter = {
 }
 
 export enum ClankerToken_OrderBy {
+  AdminChangedAt = 'adminChangedAt',
   CreatedAt = 'createdAt',
   CreatedAtBlock = 'createdAtBlock',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -2690,6 +3068,7 @@ export enum ClankerToken_OrderBy {
   ExtensionsSupply = 'extensionsSupply',
   Holders = 'holders',
   Id = 'id',
+  IsTrusted = 'isTrusted',
   Locker = 'locker',
   MevModule = 'mevModule',
   MsgSender = 'msgSender',
@@ -2724,6 +3103,7 @@ export type Dao = {
   auctionAddress: Scalars['Bytes']['output']
   auctionConfig: AuctionConfig
   auctions: Array<Auction>
+  candidateCount: Scalars['Int']['output']
   candidates: Array<ProposalCandidateGroup>
   clankerTokens: Array<ClankerToken>
   contractImage: Scalars['String']['output']
@@ -2956,6 +3336,7 @@ export type DaoLink_Filter = {
 export enum DaoLink_OrderBy {
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -3066,6 +3447,7 @@ export enum DaoTokenOwner_OrderBy {
   DaoTokenCount = 'daoTokenCount',
   DaoTokens = 'daoTokens',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -3165,6 +3547,7 @@ export enum DaoVoter_OrderBy {
   DaoTokenCount = 'daoTokenCount',
   DaoTokens = 'daoTokens',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -3222,6 +3605,14 @@ export type Dao_Filter = {
   auctionConfig_starts_with?: InputMaybe<Scalars['String']['input']>
   auctionConfig_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   auctions_?: InputMaybe<Auction_Filter>
+  candidateCount?: InputMaybe<Scalars['Int']['input']>
+  candidateCount_gt?: InputMaybe<Scalars['Int']['input']>
+  candidateCount_gte?: InputMaybe<Scalars['Int']['input']>
+  candidateCount_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  candidateCount_lt?: InputMaybe<Scalars['Int']['input']>
+  candidateCount_lte?: InputMaybe<Scalars['Int']['input']>
+  candidateCount_not?: InputMaybe<Scalars['Int']['input']>
+  candidateCount_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
   candidates_?: InputMaybe<ProposalCandidateGroup_Filter>
   clankerTokens_?: InputMaybe<ClankerToken_Filter>
   contractImage?: InputMaybe<Scalars['String']['input']>
@@ -3490,6 +3881,7 @@ export enum Dao_OrderBy {
   AuctionConfigReservePrice = 'auctionConfig__reservePrice',
   AuctionConfigTimeBuffer = 'auctionConfig__timeBuffer',
   Auctions = 'auctions',
+  CandidateCount = 'candidateCount',
   Candidates = 'candidates',
   ClankerTokens = 'clankerTokens',
   ContractImage = 'contractImage',
@@ -3624,6 +4016,7 @@ export enum DaoMultisigUpdate_OrderBy {
   Dao = 'dao',
   DaoMultisig = 'daoMultisig',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -3666,6 +4059,8 @@ export enum FeedEventType {
   CandidateSubmittedAsProposal = 'CANDIDATE_SUBMITTED_AS_PROPOSAL',
   CandidateVersionCreated = 'CANDIDATE_VERSION_CREATED',
   ClankerTokenCreated = 'CLANKER_TOKEN_CREATED',
+  ClankerTokenLinked = 'CLANKER_TOKEN_LINKED',
+  ClankerTokenUnlinked = 'CLANKER_TOKEN_UNLINKED',
   ProposalCreated = 'PROPOSAL_CREATED',
   ProposalEdited = 'PROPOSAL_EDITED',
   ProposalExecuted = 'PROPOSAL_EXECUTED',
@@ -3756,6 +4151,7 @@ export enum FeedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -3998,6 +4394,7 @@ export enum MetadataProperty_OrderBy {
   CreatedAt = 'createdAt',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -4247,6 +4644,7 @@ export type ProposalVotesArgs = {
 
 export type ProposalCandidateGroup = {
   __typename?: 'ProposalCandidateGroup'
+  candidateNumber: Scalars['Int']['output']
   commentCount: Scalars['BigInt']['output']
   comments: Array<CandidateComment>
   createdAt: Scalars['BigInt']['output']
@@ -4283,6 +4681,14 @@ export type ProposalCandidateGroup_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
   and?: InputMaybe<Array<InputMaybe<ProposalCandidateGroup_Filter>>>
+  candidateNumber?: InputMaybe<Scalars['Int']['input']>
+  candidateNumber_gt?: InputMaybe<Scalars['Int']['input']>
+  candidateNumber_gte?: InputMaybe<Scalars['Int']['input']>
+  candidateNumber_in?: InputMaybe<Array<Scalars['Int']['input']>>
+  candidateNumber_lt?: InputMaybe<Scalars['Int']['input']>
+  candidateNumber_lte?: InputMaybe<Scalars['Int']['input']>
+  candidateNumber_not?: InputMaybe<Scalars['Int']['input']>
+  candidateNumber_not_in?: InputMaybe<Array<Scalars['Int']['input']>>
   commentCount?: InputMaybe<Scalars['BigInt']['input']>
   commentCount_gt?: InputMaybe<Scalars['BigInt']['input']>
   commentCount_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -4415,6 +4821,7 @@ export type ProposalCandidateGroup_Filter = {
 }
 
 export enum ProposalCandidateGroup_OrderBy {
+  CandidateNumber = 'candidateNumber',
   CommentCount = 'commentCount',
   Comments = 'comments',
   CreatedAt = 'createdAt',
@@ -4423,6 +4830,7 @@ export enum ProposalCandidateGroup_OrderBy {
   CurrentForCount = 'currentForCount',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -4729,6 +5137,7 @@ export enum ProposalCandidateVersion_OrderBy {
   Description = 'description',
   DiscussionUrl = 'discussionUrl',
   Group = 'group',
+  GroupCandidateNumber = 'group__candidateNumber',
   GroupCommentCount = 'group__commentCount',
   GroupCreatedAt = 'group__createdAt',
   GroupCurrentAbstainCount = 'group__currentAbstainCount',
@@ -4868,6 +5277,7 @@ export enum ProposalCreatedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -5068,6 +5478,7 @@ export enum ProposalEditedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -5287,6 +5698,7 @@ export enum ProposalExecutedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -5910,6 +6322,7 @@ export enum ProposalUpdatedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -6284,6 +6697,7 @@ export enum ProposalVotedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -6883,6 +7297,7 @@ export enum Proposal_OrderBy {
   CandidateVersionVersionNumber = 'candidateVersion__versionNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -7056,6 +7471,10 @@ export type Query = {
   clankerTokenCreatedEvents: Array<ClankerTokenCreatedEvent>
   clankerTokenHolder?: Maybe<ClankerTokenHolder>
   clankerTokenHolders: Array<ClankerTokenHolder>
+  clankerTokenLinkedEvent?: Maybe<ClankerTokenLinkedEvent>
+  clankerTokenLinkedEvents: Array<ClankerTokenLinkedEvent>
+  clankerTokenUnlinkedEvent?: Maybe<ClankerTokenUnlinkedEvent>
+  clankerTokenUnlinkedEvents: Array<ClankerTokenUnlinkedEvent>
   clankerTokens: Array<ClankerToken>
   dao?: Maybe<Dao>
   daoMultisigUpdate?: Maybe<DaoMultisigUpdate>
@@ -7358,6 +7777,38 @@ export type QueryClankerTokenHoldersArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<ClankerTokenHolder_Filter>
+}
+
+export type QueryClankerTokenLinkedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryClankerTokenLinkedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerTokenLinkedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ClankerTokenLinkedEvent_Filter>
+}
+
+export type QueryClankerTokenUnlinkedEventArgs = {
+  block?: InputMaybe<Block_Height>
+  id: Scalars['ID']['input']
+  subgraphError?: _SubgraphErrorPolicy_
+}
+
+export type QueryClankerTokenUnlinkedEventsArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  orderBy?: InputMaybe<ClankerTokenUnlinkedEvent_OrderBy>
+  orderDirection?: InputMaybe<OrderDirection>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  where?: InputMaybe<ClankerTokenUnlinkedEvent_Filter>
 }
 
 export type QueryClankerTokensArgs = {
@@ -8016,6 +8467,7 @@ export enum Snapshot_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -8286,10 +8738,12 @@ export type SwapRoute_Filter = {
 
 export enum SwapRoute_OrderBy {
   ClankerToken = 'clankerToken',
+  ClankerTokenAdminChangedAt = 'clankerToken__adminChangedAt',
   ClankerTokenCreatedAt = 'clankerToken__createdAt',
   ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
   ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
   ClankerTokenId = 'clankerToken__id',
+  ClankerTokenIsTrusted = 'clankerToken__isTrusted',
   ClankerTokenLocker = 'clankerToken__locker',
   ClankerTokenMevModule = 'clankerToken__mevModule',
   ClankerTokenMsgSender = 'clankerToken__msgSender',
@@ -8536,6 +8990,7 @@ export enum Token_OrderBy {
   Content = 'content',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -8718,6 +9173,7 @@ export enum TreasuryAssetPin_OrderBy {
   Creator = 'creator',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -8897,6 +9353,7 @@ export enum ZoraCoinCreatedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -9322,10 +9779,12 @@ export type ZoraCoin_Filter = {
 export enum ZoraCoin_OrderBy {
   Caller = 'caller',
   ClankerToken = 'clankerToken',
+  ClankerTokenAdminChangedAt = 'clankerToken__adminChangedAt',
   ClankerTokenCreatedAt = 'clankerToken__createdAt',
   ClankerTokenCreatedAtBlock = 'clankerToken__createdAtBlock',
   ClankerTokenExtensionsSupply = 'clankerToken__extensionsSupply',
   ClankerTokenId = 'clankerToken__id',
+  ClankerTokenIsTrusted = 'clankerToken__isTrusted',
   ClankerTokenLocker = 'clankerToken__locker',
   ClankerTokenMevModule = 'clankerToken__mevModule',
   ClankerTokenMsgSender = 'clankerToken__msgSender',
@@ -9347,6 +9806,7 @@ export enum ZoraCoin_OrderBy {
   Currency = 'currency',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -9545,6 +10005,7 @@ export enum ZoraDropCreatedEvent_OrderBy {
   BlockNumber = 'blockNumber',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -10160,6 +10621,7 @@ export enum ZoraDrop_OrderBy {
   Creator = 'creator',
   Dao = 'dao',
   DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
   DaoContractImage = 'dao__contractImage',
   DaoDescription = 'dao__description',
   DaoGovernorAddress = 'dao__governorAddress',
@@ -10380,6 +10842,13 @@ export type ProposalFragment = {
   updateMessage?: string | null
   updateCount: number
   dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+  candidateVersion?: {
+    __typename?: 'ProposalCandidateVersion'
+    candidateId: any
+    proposalId: any
+    versionNumber: any
+    group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+  } | null
   replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
   replacedBy?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
 }
@@ -10418,6 +10887,13 @@ export type ProposalDetailFragment = {
   updateMessage?: string | null
   updateCount: number
   dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+  candidateVersion?: {
+    __typename?: 'ProposalCandidateVersion'
+    candidateId: any
+    proposalId: any
+    versionNumber: any
+    group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+  } | null
   replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
   replacedBy?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
 }
@@ -10667,6 +11143,7 @@ export type CandidateGroupFragmentFragment = {
   proposer: any
   salt: any
   createdAt: any
+  candidateNumber: number
   versionCount: any
   commentCount: any
   latestVersionNumber: any
@@ -10686,6 +11163,7 @@ export type CandidateGroupDetailFragmentFragment = {
   proposer: any
   salt: any
   createdAt: any
+  candidateNumber: number
   versionCount: any
   commentCount: any
   latestVersionNumber: any
@@ -10713,6 +11191,7 @@ export type CandidateGroupDetailFragmentFragment = {
     signatureCount: any
     totalVoteWeight: any
     revoked: boolean
+    group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
   } | null
   versions: Array<{
     __typename?: 'ProposalCandidateVersion'
@@ -10734,6 +11213,7 @@ export type CandidateGroupDetailFragmentFragment = {
     signatureCount: any
     totalVoteWeight: any
     revoked: boolean
+    group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
   }>
 }
 
@@ -10757,6 +11237,7 @@ export type CandidateVersionFragmentFragment = {
   signatureCount: any
   totalVoteWeight: any
   revoked: boolean
+  group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
 }
 
 export type CandidateCommentFragmentFragment = {
@@ -10783,6 +11264,74 @@ export type CandidateSponsorSignatureFragmentFragment = {
   revoked: boolean
   createdAt: any
   voteWeight: any
+}
+
+export type CandidateGroupByNumberQueryVariables = Exact<{
+  candidateNumber: Scalars['Int']['input']
+  dao?: InputMaybe<Scalars['String']['input']>
+}>
+
+export type CandidateGroupByNumberQuery = {
+  __typename?: 'Query'
+  proposalCandidateGroups: Array<{
+    __typename?: 'ProposalCandidateGroup'
+    id: string
+    proposer: any
+    salt: any
+    createdAt: any
+    candidateNumber: number
+    versionCount: any
+    commentCount: any
+    latestVersionNumber: any
+    currentForCount: any
+    currentAgainstCount: any
+    currentAbstainCount: any
+    dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
+    leadingVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      id: string
+      candidateId: any
+      salt: any
+      attester: any
+      versionNumber: any
+      targets: Array<any>
+      values: Array<any>
+      calldatas: Array<any>
+      title?: string | null
+      description?: string | null
+      metadata?: string | null
+      representedAddress?: string | null
+      proposalId: any
+      createdAt: any
+      discussionUrl?: string | null
+      signatureCount: any
+      totalVoteWeight: any
+      revoked: boolean
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    } | null
+    versions: Array<{
+      __typename?: 'ProposalCandidateVersion'
+      id: string
+      candidateId: any
+      salt: any
+      attester: any
+      versionNumber: any
+      targets: Array<any>
+      values: Array<any>
+      calldatas: Array<any>
+      title?: string | null
+      description?: string | null
+      metadata?: string | null
+      representedAddress?: string | null
+      proposalId: any
+      createdAt: any
+      discussionUrl?: string | null
+      signatureCount: any
+      totalVoteWeight: any
+      revoked: boolean
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    }>
+  }>
 }
 
 export type DaoMultisigUpdateFragment = {
@@ -10904,6 +11453,7 @@ export type CandidateGroupQuery = {
     proposer: any
     salt: any
     createdAt: any
+    candidateNumber: number
     versionCount: any
     commentCount: any
     latestVersionNumber: any
@@ -10931,6 +11481,7 @@ export type CandidateGroupQuery = {
       signatureCount: any
       totalVoteWeight: any
       revoked: boolean
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
     } | null
     versions: Array<{
       __typename?: 'ProposalCandidateVersion'
@@ -10952,6 +11503,7 @@ export type CandidateGroupQuery = {
       signatureCount: any
       totalVoteWeight: any
       revoked: boolean
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
     }>
   } | null
 }
@@ -10972,6 +11524,7 @@ export type CandidateGroupsQuery = {
     proposer: any
     salt: any
     createdAt: any
+    candidateNumber: number
     versionCount: any
     commentCount: any
     latestVersionNumber: any
@@ -11036,6 +11589,7 @@ export type CandidateVersionQuery = {
     signatureCount: any
     totalVoteWeight: any
     revoked: boolean
+    group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
   } | null
 }
 
@@ -11526,6 +12080,13 @@ export type DaosForDashboardQuery = {
       updateCount: number
       votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
       dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+      candidateVersion?: {
+        __typename?: 'ProposalCandidateVersion'
+        candidateId: any
+        proposalId: any
+        versionNumber: any
+        group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+      } | null
       replaces?: {
         __typename?: 'Proposal'
         proposalId: any
@@ -11791,6 +12352,46 @@ export type FeedEventsQuery = {
           tokenImage: string
           poolId: any
         }
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ClankerTokenLinkedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
+        dao: {
+          __typename?: 'DAO'
+          auctionAddress: any
+          governorAddress: any
+          metadataAddress: any
+          tokenAddress: any
+          treasuryAddress: any
+          name: string
+          symbol: string
+          contractImage: string
+        }
+      }
+    | {
+        __typename: 'ClankerTokenUnlinkedEvent'
+        id: string
+        type: FeedEventType
+        timestamp: any
+        blockNumber: any
+        transactionHash: any
+        actor: any
         dao: {
           __typename?: 'DAO'
           auctionAddress: any
@@ -12146,6 +12747,13 @@ export type ProposalQuery = {
       timestamp?: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+    candidateVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      candidateId: any
+      proposalId: any
+      versionNumber: any
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
     replacedBy?: {
       __typename?: 'Proposal'
@@ -12229,6 +12837,13 @@ export type ProposalOgMetadataQuery = {
       treasuryAddress: any
       governorAddress: any
     }
+    candidateVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      candidateId: any
+      proposalId: any
+      versionNumber: any
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
     replacedBy?: {
       __typename?: 'Proposal'
@@ -12277,6 +12892,13 @@ export type ProposalVersionsQuery = {
     updateMessage?: string | null
     updateCount: number
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+    candidateVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      candidateId: any
+      proposalId: any
+      versionNumber: any
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
     replacedBy?: {
       __typename?: 'Proposal'
@@ -12335,6 +12957,13 @@ export type ProposalsQuery = {
       timestamp?: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+    candidateVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      candidateId: any
+      proposalId: any
+      versionNumber: any
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
     replacedBy?: {
       __typename?: 'Proposal'
@@ -12901,6 +13530,14 @@ export const ProposalFragmentDoc = gql`
       governorAddress
       tokenAddress
     }
+    candidateVersion {
+      candidateId
+      proposalId
+      versionNumber
+      group {
+        candidateNumber
+      }
+    }
     replaces {
       proposalId
       proposalNumber
@@ -13133,6 +13770,7 @@ export const CandidateGroupFragmentFragmentDoc = gql`
     proposer
     salt
     createdAt
+    candidateNumber
     versionCount
     commentCount
     latestVersionNumber
@@ -13154,6 +13792,9 @@ export const CandidateVersionFragmentFragmentDoc = gql`
     targets
     values
     calldatas
+    group {
+      candidateNumber
+    }
     title
     description
     metadata
@@ -13177,6 +13818,7 @@ export const CandidateGroupDetailFragmentFragmentDoc = gql`
     proposer
     salt
     createdAt
+    candidateNumber
     versionCount
     commentCount
     latestVersionNumber
@@ -13239,6 +13881,17 @@ export const ProposalUpdateFragmentDoc = gql`
     creator
     originalMessageId
   }
+`
+export const CandidateGroupByNumberDocument = gql`
+  query CandidateGroupByNumber($candidateNumber: Int!, $dao: String) {
+    proposalCandidateGroups(
+      first: 1
+      where: { candidateNumber: $candidateNumber, dao: $dao }
+    ) {
+      ...CandidateGroupDetailFragment
+    }
+  }
+  ${CandidateGroupDetailFragmentFragmentDoc}
 `
 export const ActiveAuctionsDocument = gql`
   query activeAuctions($first: Int!, $where: Auction_filter!) {
@@ -14329,6 +14982,24 @@ export function getSdk(
   withWrapper: SdkFunctionWrapper = defaultWrapper
 ) {
   return {
+    CandidateGroupByNumber(
+      variables: CandidateGroupByNumberQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<CandidateGroupByNumberQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<CandidateGroupByNumberQuery>({
+            document: CandidateGroupByNumberDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'CandidateGroupByNumber',
+        'query',
+        variables
+      )
+    },
     activeAuctions(
       variables: ActiveAuctionsQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,

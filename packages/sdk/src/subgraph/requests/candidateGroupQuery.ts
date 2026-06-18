@@ -37,18 +37,28 @@ const formatCandidateVersion = (
 
 export const getCandidateGroup = async (
   chainId: CHAIN_ID,
-  candidateId: string
+  candidateIdentifier: string,
+  dao?: string
 ): Promise<CandidateGroup | undefined> => {
   try {
-    const data = await SDK.connect(chainId).CandidateGroup({
-      candidateId: candidateId.toLowerCase(),
-    })
+    const isNumericCandidateNumber = /^\d+$/.test(candidateIdentifier)
 
-    if (!data.proposalCandidateGroup) {
+    const group = isNumericCandidateNumber
+      ? (
+          await SDK.connect(chainId).CandidateGroupByNumber({
+            candidateNumber: Number(candidateIdentifier),
+            dao: dao?.toLowerCase(),
+          })
+        ).proposalCandidateGroups[0]
+      : (
+          await SDK.connect(chainId).CandidateGroup({
+            candidateId: candidateIdentifier.toLowerCase(),
+          })
+        ).proposalCandidateGroup
+
+    if (!group) {
       return undefined
     }
-
-    const group = data.proposalCandidateGroup
 
     return {
       ...group,

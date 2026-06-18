@@ -42,6 +42,10 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const { address } = useAccount()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
+  const isCreator = React.useMemo(
+    () => !!address && address.toLowerCase() === proposer.toLowerCase(),
+    [address, proposer]
+  )
 
   const [support, setSupport] = useState<CandidateVoteSupportEnum>(
     CandidateVoteSupportEnum.FOR
@@ -60,8 +64,8 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   }, [address, addresses.token, comment, shouldSign])
 
   const canSign = React.useMemo(() => {
-    return support === CandidateVoteSupportEnum.FOR
-  }, [support])
+    return support === CandidateVoteSupportEnum.FOR && !isCreator
+  }, [isCreator, support])
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit || !address) return
@@ -316,6 +320,13 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
               </Text>
             )}
           </Box>
+        )}
+
+        {isCreator && (
+          <Text fontSize={14} color="text3">
+            Candidate creators can vote and comment, but cannot sponsor their own
+            candidate.
+          </Text>
         )}
 
         <Flex justify="flex-end">

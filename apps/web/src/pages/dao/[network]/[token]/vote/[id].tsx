@@ -19,8 +19,9 @@ import { ProposalState } from '@buildeross/types'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { getProposalWarning } from '@buildeross/utils/warnings'
-import { Box, Flex, Icon } from '@buildeross/zord'
+import { Box, Flex, Icon, Text } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import { Meta } from 'src/components/Meta'
@@ -50,26 +51,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   addresses,
 }) => {
   const chain = useChainStore((state) => state.chain)
-  const { query, push, pathname, replace } = useRouter()
-
-  React.useEffect(() => {
-    if (!query || !replace) return
-    const { network, token, id } = query
-    if (typeof id !== 'string' || !id.startsWith('0x')) return
-    if (!network || !token) return
-    replace(
-      {
-        pathname: '/dao/[network]/[token]/vote/[id]',
-        query: {
-          network: network,
-          token: token,
-          id: proposalNumber,
-        },
-      },
-      undefined,
-      { shallow: true }
-    )
-  }, [proposalNumber, replace, query])
+  const { query, push, pathname } = useRouter()
 
   const { data: balance } = useBalance({
     address: addresses.treasury,
@@ -147,6 +129,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
 
   const { proposer, state, values } = proposal ?? {}
   const treasuryBalance = balance?.value
+  const candidateVersion = proposal?.candidateVersion
   const displayWarning = React.useMemo(() => {
     if (!proposer || state == null || !values) return ''
     return getProposalWarning({
@@ -214,6 +197,16 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
                 proposal={proposal}
                 onNavigateToUpdateProposal={openProposalUpdatePage}
               />
+            )}
+            {candidateVersion && (
+              <Flex align="center" gap="x2" color="text3" fontSize={14}>
+                <Text color="text3">Originating candidate:</Text>
+                <Link
+                  href={`/dao/${chain.slug}/${addresses.token}/candidate/${candidateVersion.group.candidateNumber}`}
+                >
+                  candidate
+                </Link>
+              </Flex>
             )}
           </>
 
@@ -287,6 +280,15 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   if (getAddress(proposal.dao.tokenAddress) !== getAddress(collection)) {
     return {
       notFound: true,
+    }
+  }
+
+  if (proposalIdOrNumber.startsWith('0x')) {
+    return {
+      redirect: {
+        destination: `/dao/${network}/${collection}/vote/${proposal.proposalNumber}`,
+        permanent: false,
+      },
     }
   }
 

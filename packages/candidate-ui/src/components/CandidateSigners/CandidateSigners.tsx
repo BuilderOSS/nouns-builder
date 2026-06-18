@@ -1,5 +1,5 @@
 import { useEnsData, useVotes } from '@buildeross/hooks'
-import { governorAbi } from '@buildeross/sdk/contract'
+import { governorAbi, hashProposal } from '@buildeross/sdk/contract'
 import type { CandidateSponsorSignature } from '@buildeross/sdk/subgraph'
 import { getCandidateSponsorSignatures } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
@@ -7,6 +7,7 @@ import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { Box, Button, Flex, Heading, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
+import type { Hex } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
 import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
@@ -17,7 +18,6 @@ type CandidateSignersProps = {
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
-  proposalId: `0x${string}`
   description: string
   targets: string[]
   values: bigint[]
@@ -30,7 +30,6 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   proposer,
   governorAddress,
   tokenSymbol,
-  proposalId,
   description,
   targets,
   values,
@@ -41,6 +40,21 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   const { addresses } = useDaoStore()
   const { address } = useAccount()
   const [expanded, setExpanded] = React.useState(false)
+  const isCreator = React.useMemo(
+    () => !!address && address.toLowerCase() === proposer.toLowerCase(),
+    [address, proposer]
+  )
+
+  // Compute proposalId locally using the candidate's data
+  const proposalId = React.useMemo<Hex>(() => {
+    return hashProposal({
+      targets: targets as `0x${string}`[],
+      values,
+      calldatas,
+      description,
+      proposer,
+    })
+  }, [targets, values, calldatas, description, proposer])
 
   const {
     data: signaturesData,
@@ -62,9 +76,19 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     query: { enabled: !!governorAddress },
   })
 
-  const signatures = signaturesData?.signatures || []
-  const visibleSignatures = expanded ? signatures : signatures.slice(0, 5)
-  const remainingCount = Math.max(signatures.length - 5, 0)
+  const signatures = React.useMemo(
+    () => signaturesData?.signatures || [],
+    [signaturesData?.signatures]
+  )
+  const eligibleSignatures = React.useMemo(
+    () =>
+      signatures.filter(
+        (signature) => signature.signer.toLowerCase() !== proposer.toLowerCase()
+      ),
+    [proposer, signatures]
+  )
+  const visibleSignatures = expanded ? eligibleSignatures : eligibleSignatures.slice(0, 5)
+  const remainingCount = Math.max(eligibleSignatures.length - 5, 0)
 
   const { votes } = useVotes({
     chainId: chain.id,
@@ -74,28 +98,28 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     enabled: !!address && !!addresses.token,
   })
 
-  const totalSignatures = signatures.length > 0 ? signatures.length : signatureCount
-  const totalSignatureWeight = signatures.reduce(
+  const totalSignatures = signaturesData ? eligibleSignatures.length : signatureCount
+  const totalSignatureWeight = eligibleSignatures.reduce(
     (sum, signature) => sum + signature.voteWeight,
     0n
   )
   const proposerSignatures = React.useMemo<ProposerSignature[]>(
     () =>
-      signatures.map((signature) => ({
+      eligibleSignatures.map((signature) => ({
         signer: signature.signer as `0x${string}`,
         nonce: signature.nonce,
         deadline: signature.deadline,
         sig: signature.signature,
       })),
-    [signatures]
+    [eligibleSignatures]
   )
 
   const alreadySigned = React.useMemo(() => {
     if (!address) return false
-    return signatures.some(
+    return eligibleSignatures.some(
       (signature) => signature.signer.toLowerCase() === address.toLowerCase()
     )
-  }, [address, signatures])
+  }, [address, eligibleSignatures])
 
   if (isLoading && signatures.length === 0) {
     return (
@@ -130,7 +154,7 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
           onSuccess={() => void mutate()}
         />
 
-        {signatures.length > 0 ? (
+        {eligibleSignatures.length > 0 ? (
           <Stack gap="x3">
             {visibleSignatures.map((signature) => (
               <SignerRow key={signature.id} signature={signature} />
@@ -145,7 +169,7 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
               </Button>
             )}
 
-            {expanded && signatures.length > 5 && (
+            {expanded && eligibleSignatures.length > 5 && (
               <Button variant="ghost" size="sm" onClick={() => setExpanded(false)}>
                 <Flex align="center" gap="x2">
                   <Icon id="chevron-up" size="sm" />
@@ -158,7 +182,13 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
           <Text color="text3">No signatures yet.</Text>
         )}
 
-        {proposalThreshold !== undefined && targets.length > 0 && (
+        {signatures.length !== eligibleSignatures.length && (
+          <Text color="negative" fontSize={14}>
+            Candidate creator signatures are excluded from proposal submission.
+          </Text>
+        )}
+
+        {isCreator && proposalThreshold !== undefined && targets.length > 0 && (
           <Box pt="x2">
             <CandidatePromoteButton
               candidateVersionUID={candidateVersionUID as `0x${string}`}
@@ -171,6 +201,12 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
               totalSignatureWeight={totalSignatureWeight}
             />
           </Box>
+        )}
+
+        {!isCreator && proposalThreshold !== undefined && targets.length > 0 && (
+          <Text color="text3" fontSize={14}>
+            Only the candidate creator can submit this as a proposal.
+          </Text>
         )}
       </Stack>
     </Box>

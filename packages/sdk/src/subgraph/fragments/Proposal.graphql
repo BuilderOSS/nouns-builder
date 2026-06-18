@@ -33,6 +33,14 @@ fragment Proposal on Proposal {
     governorAddress
     tokenAddress
   }
+  candidateVersion {
+    candidateId
+    proposalId
+    versionNumber
+    group {
+      candidateNumber
+    }
+  }
   replaces {
     proposalId
     proposalNumber

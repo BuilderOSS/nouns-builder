@@ -1,4 +1,9 @@
-import { CandidateEditedBanner, CandidateSigners } from '@buildeross/candidate-ui'
+import {
+  CandidateCommentForm,
+  CandidateEditedBanner,
+  CandidateSignatureButton,
+  CandidateSigners,
+} from '@buildeross/candidate-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { decodeTransactions } from '@buildeross/hooks'
@@ -10,6 +15,7 @@ import {
 import type { CandidateGroup } from '@buildeross/sdk'
 import { getCandidateGroup } from '@buildeross/sdk'
 import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
+import { getCandidateSponsorSignatures } from '@buildeross/sdk/subgraph'
 import {
   type DaoContractAddresses,
   useCandidateStore,
@@ -25,17 +31,20 @@ import {
 } from '@buildeross/types'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { WalletIdentityWithPreview } from '@buildeross/ui/WalletIdentity'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Grid, Stack, Text } from '@buildeross/zord'
+import dayjs from 'dayjs'
 import { GetServerSideProps } from 'next'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR from 'swr'
-import { useReadContract } from 'wagmi'
+import { useAccount, useReadContract } from 'wagmi'
 
 interface CandidateDetailPageProps {
   candidateId: string
@@ -183,31 +192,72 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   initialData,
 }) => {
   const router = useRouter()
+  const { address } = useAccount()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const startCandidateDraft = useCandidateStore((state) => state.startCandidateDraft)
+  const [composerOpen, setComposerOpen] = React.useState(false)
 
-  const { data: candidate, error } = useSWR(
+  const {
+    data: candidate,
+    error,
+    mutate: mutateCandidate,
+  } = useSWR(
     candidateId ? ['candidate', chain.id, candidateId] : null,
-    () => getCandidateGroup(chain.id, candidateId),
+    () => getCandidateGroup(chain.id, candidateId, addresses.token),
     {
       fallbackData: initialData,
       revalidateOnMount: true,
     }
   )
 
-  const leadingVersion = candidate?.leadingVersion
-  const safeDiscussionUrl = getSafeDiscussionUrl(leadingVersion?.discussionUrl)
+  const latestVersion = React.useMemo(() => {
+    const versions = candidate?.versions || []
+
+    if (versions.length > 0) {
+      return [...versions].sort(
+        (a, b) => Number(a.versionNumber) - Number(b.versionNumber)
+      )[versions.length - 1]
+    }
+
+    return candidate?.leadingVersion
+  }, [candidate?.leadingVersion, candidate?.versions])
+
+  const safeDiscussionUrl = getSafeDiscussionUrl(latestVersion?.discussionUrl)
+  const createdAtLabel = candidate?.createdAt
+    ? dayjs.unix(candidate.createdAt).format('MMM DD, YYYY')
+    : null
+  const candidateNumberLabel = candidate?.candidateNumber?.toString()
+
+  const { data: sponsorSignatures, mutate: mutateSponsorSignatures } = useSWR(
+    latestVersion?.id ? ['candidateSponsorSignatures', chain.id, latestVersion.id] : null,
+    () => getCandidateSponsorSignatures(chain.id, latestVersion!.id),
+    { revalidateOnFocus: false }
+  )
+
+  const alreadySigned = React.useMemo(() => {
+    if (!address || !sponsorSignatures?.signatures) return false
+
+    return sponsorSignatures.signatures.some(
+      (signature) => signature.signer.toLowerCase() === address.toLowerCase()
+    )
+  }, [address, sponsorSignatures?.signatures])
+
+  const isProposer = React.useMemo(() => {
+    if (!address || !candidate) return false
+
+    return address.toLowerCase() === candidate.proposer.toLowerCase()
+  }, [address, candidate])
 
   const proposalMetadata = React.useMemo(() => {
-    if (!leadingVersion?.metadata) return undefined
+    if (!latestVersion?.metadata) return undefined
 
     try {
-      return JSON.parse(leadingVersion.metadata)
+      return JSON.parse(latestVersion.metadata)
     } catch {
       return undefined
     }
-  }, [leadingVersion?.metadata])
+  }, [latestVersion?.metadata])
 
   const { data: tokenSymbol } = useReadContract({
     abi: tokenAbi,
@@ -218,23 +268,22 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   })
 
   const handleEditCandidate = React.useCallback(() => {
-    if (!candidate || !leadingVersion) return
+    if (!candidate || !latestVersion) return
 
     const transactions = buildCandidateTransactions(
       proposalMetadata,
-      (leadingVersion.targets || []) as string[],
-      (leadingVersion.values || []) as Array<string | bigint>,
-      (leadingVersion.calldatas || []) as string[]
+      (latestVersion.targets || []) as string[],
+      (latestVersion.values || []) as Array<string | bigint>,
+      (latestVersion.calldatas || []) as string[]
     )
 
     startCandidateDraft({
       candidateId: candidate.id,
       salt: candidate.salt,
-      versionNumber: Number(leadingVersion.versionNumber) + 1,
-      title: proposalMetadata?.title || leadingVersion.title || '',
-      summary: proposalMetadata?.description || leadingVersion.description || '',
-      discussionUrl:
-        proposalMetadata?.discussionUrl || leadingVersion.discussionUrl || '',
+      versionNumber: Number(latestVersion.versionNumber) + 1,
+      title: proposalMetadata?.title || latestVersion.title || '',
+      summary: proposalMetadata?.description || latestVersion.description || '',
+      discussionUrl: proposalMetadata?.discussionUrl || latestVersion.discussionUrl || '',
       transactions,
     })
 
@@ -251,21 +300,30 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
     addresses.token,
     candidate,
     chain.slug,
-    leadingVersion,
+    latestVersion,
     proposalMetadata,
     router,
     startCandidateDraft,
   ])
 
+  const handleComposerSuccess = React.useCallback(() => {
+    void mutateCandidate()
+    setComposerOpen(false)
+  }, [mutateCandidate])
+
+  const handleSignatureSuccess = React.useCallback(() => {
+    void mutateSponsorSignatures()
+  }, [mutateSponsorSignatures])
+
   const { data: decodedTransactions, isLoading: isDecodingTransactions } = useSWR(
-    leadingVersion
+    latestVersion
       ? ([
           'candidate-decoded-transactions',
           chain.id,
-          leadingVersion.id,
-          leadingVersion.targets,
-          leadingVersion.calldatas,
-          leadingVersion.values,
+          latestVersion.id,
+          latestVersion.targets,
+          latestVersion.calldatas,
+          latestVersion.values,
         ] as const)
       : null,
     ([, chainId, , targets, calldatas, values]) =>
@@ -303,40 +361,79 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       <Flex className={votePageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
         <Flex direction="column" gap={{ '@initial': 'x4', '@768': 'x7' }} mb="x2">
           <ProposalNavigation handleBack={() => router.back()} />
-          <Flex gap="x2" direction="column">
-            <Flex align="center">
-              <Text fontSize={20} color="text3" mr="x2" fontWeight="display">
-                Candidate
-              </Text>
-            </Flex>
+          <Flex gap="x4" direction="column">
             <Flex
               direction={{ '@initial': 'column', '@768': 'row' }}
               justify="space-between"
-              width="auto"
-              align={{ '@initial': 'flex-start', '@768': 'center' }}
+              align={{ '@initial': 'flex-start', '@768': 'flex-start' }}
+              gap="x4"
             >
-              <Text fontSize={28} fontWeight="display">
-                {leadingVersion?.title || 'Candidate'}
-              </Text>
-            </Flex>
-            <Flex
-              direction={{ '@initial': 'column', '@768': 'row' }}
-              align={{ '@initial': 'flex-start', '@768': 'center' }}
-              justify="space-between"
-              gap="x3"
-            >
-              <Flex direction="row" align="center" gap="x2">
-                <Text color="text3">By</Text>
-                <WalletIdentityWithPreview
-                  address={candidate.proposer as `0x${string}`}
-                  displayName={walletSnippet(candidate.proposer)}
-                />
-              </Flex>
+              <Stack gap="x2">
+                <Text fontSize={20} color="text3" fontWeight="display">
+                  Candidate
+                </Text>
+                <Text fontSize={28} fontWeight="display">
+                  {latestVersion?.title ||
+                    (candidateNumberLabel
+                      ? `Candidate #${candidateNumberLabel}`
+                      : 'Candidate')}
+                </Text>
+                <Flex gap="x2" wrap align="center">
+                  <Text color="text3">By</Text>
+                  <WalletIdentityWithPreview
+                    address={candidate.proposer as `0x${string}`}
+                    displayName={walletSnippet(candidate.proposer)}
+                  />
+                  {createdAtLabel && <Text color="text3">· {createdAtLabel}</Text>}
+                  {latestVersion && (
+                    <Text color="text3">
+                      · V{latestVersion.versionNumber.toString()} ·{' '}
+                      {latestVersion.signatureCount.toString()} signatures
+                    </Text>
+                  )}
+                </Flex>
+                {latestVersion?.proposalId && (
+                  <Text color="text3" fontSize={14}>
+                    Promoted to{' '}
+                    <Link
+                      href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposalId}`}
+                    >
+                      proposal
+                    </Link>
+                  </Text>
+                )}
+              </Stack>
 
-              {leadingVersion && (
-                <Button onClick={handleEditCandidate}>Edit Candidate</Button>
-              )}
+              <Flex gap="x2" wrap>
+                <Button onClick={() => setComposerOpen(true)}>Vote / comment</Button>
+                {!isProposer && !alreadySigned && latestVersion && tokenSymbol && (
+                  <CandidateSignatureButton
+                    candidateVersionUID={latestVersion.id as `0x${string}`}
+                    proposer={candidate.proposer as `0x${string}`}
+                    governorAddress={addresses.governor as `0x${string}`}
+                    tokenSymbol={String(tokenSymbol)}
+                    proposalId={latestVersion.proposalId as `0x${string}`}
+                    buttonVariant="secondaryOutline"
+                    onSuccess={handleSignatureSuccess}
+                  />
+                )}
+                {latestVersion?.proposalId && (
+                  <Button
+                    as={Link}
+                    href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposalId}`}
+                    variant="secondaryOutline"
+                  >
+                    View proposal
+                  </Button>
+                )}
+                {latestVersion && (
+                  <Button onClick={handleEditCandidate} variant="secondary">
+                    Edit candidate
+                  </Button>
+                )}
+              </Flex>
             </Flex>
+
             {candidate?.versions && candidate.versions.length > 1 && (
               <CandidateEditedBanner
                 proposer={candidate.proposer as `0x${string}`}
@@ -346,13 +443,38 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
           </Flex>
         </Flex>
 
+        {latestVersion && tokenSymbol && (
+          <AnimatedModal
+            open={composerOpen}
+            close={() => setComposerOpen(false)}
+            size="large"
+          >
+            <Box p="x6">
+              <Stack gap="x4">
+                <Text fontSize={20} fontWeight="display">
+                  Vote / comment
+                </Text>
+                <CandidateCommentForm
+                  candidateId={candidate.id as `0x${string}`}
+                  candidateVersionUID={latestVersion.id as `0x${string}`}
+                  proposer={candidate.proposer as `0x${string}`}
+                  governorAddress={addresses.governor as `0x${string}`}
+                  tokenSymbol={String(tokenSymbol)}
+                  proposalId={latestVersion.proposalId as `0x${string}`}
+                  onSuccess={handleComposerSuccess}
+                />
+              </Stack>
+            </Box>
+          </AnimatedModal>
+        )}
+
         <Grid columns="1fr 1fr 1fr" gap={{ '@initial': 'x2', '@768': 'x4' }}>
           <StatTile title="Versions" subtitle={candidate.versionCount.toString()} />
           <StatTile title="Comments" subtitle={candidate.commentCount.toString()} />
           <StatTile
             title="Signatures"
-            subtitle={leadingVersion?.signatureCount.toString() || '0'}
-            subtext="Leading version"
+            subtitle={latestVersion?.signatureCount.toString() || '0'}
+            subtext="Current version"
           />
         </Grid>
       </Flex>
@@ -362,7 +484,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
           <Flex direction="column" mt={{ '@initial': 'x6', '@768': 'x13' }}>
             <Section title="Description">
               <Box className={proposalDescription}>
-                <MarkdownDisplay>{leadingVersion?.description || ''}</MarkdownDisplay>
+                <MarkdownDisplay>{latestVersion?.description || ''}</MarkdownDisplay>
               </Box>
             </Section>
 
@@ -389,13 +511,13 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 <Text fontFamily="mono" fontSize={14}>
                   Candidate ID: {candidate.id}
                 </Text>
-                {leadingVersion && (
+                {latestVersion && (
                   <Flex gap="x4" wrap>
                     <Text color="text3">
-                      Version {leadingVersion.versionNumber.toString()}
+                      Latest version {latestVersion.versionNumber.toString()}
                     </Text>
                     <Text color="text3">
-                      {leadingVersion.signatureCount.toString()} signatures
+                      {latestVersion.signatureCount.toString()} signatures
                     </Text>
                   </Flex>
                 )}
@@ -413,24 +535,23 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
               </Stack>
             </Section>
 
-            {leadingVersion && tokenSymbol && (
+            {latestVersion && tokenSymbol && (
               <Section title="Sponsors">
                 <CandidateSigners
-                  candidateVersionUID={leadingVersion.id as `0x${string}`}
+                  candidateVersionUID={latestVersion.id as `0x${string}`}
                   proposer={candidate.proposer as `0x${string}`}
                   governorAddress={addresses.governor as `0x${string}`}
                   tokenSymbol={String(tokenSymbol)}
-                  proposalId={leadingVersion.proposalId as `0x${string}`}
-                  description={leadingVersion.description || ''}
-                  targets={(leadingVersion.targets || []) as string[]}
-                  values={(leadingVersion.values || []) as bigint[]}
-                  calldatas={(leadingVersion.calldatas || []) as `0x${string}`[]}
-                  signatureCount={leadingVersion.signatureCount}
+                  description={latestVersion.metadata || ''}
+                  targets={(latestVersion.targets || []) as string[]}
+                  values={(latestVersion.values || []) as bigint[]}
+                  calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
+                  signatureCount={latestVersion.signatureCount}
                 />
               </Section>
             )}
 
-            {leadingVersion && (
+            {latestVersion && (
               <Section title="Proposed Transactions">
                 {decodedTransactions?.length ? (
                   <DecodedTransactions
@@ -508,13 +629,26 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   // Fetch candidate data server-side
   let initialData: CandidateGroup | undefined
   try {
-    initialData = await getCandidateGroup(validChain.id as CHAIN_ID, candidateId)
+    initialData = await getCandidateGroup(validChain.id as CHAIN_ID, candidateId, token)
     if (!initialData) {
       return { notFound: true }
     }
   } catch (error) {
     console.error('Error fetching candidate:', error)
     // Continue without initial data, let client fetch
+  }
+
+  if (candidateId.startsWith('0x')) {
+    if (!initialData) {
+      return { notFound: true }
+    }
+
+    return {
+      redirect: {
+        destination: `/dao/${network}/${token}/candidate/${initialData.candidateNumber.toString()}`,
+        permanent: false,
+      },
+    }
   }
 
   // Set cache headers

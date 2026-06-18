@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { Address, BigInt, Bytes, crypto } from '@graphprotocol/graph-ts'
 
 import {
   Attested as AttestedEvent,
@@ -21,6 +21,7 @@ import {
   ProposalUpdatedEvent as ProposalUpdatedFeedEvent,
   TreasuryAssetPin,
 } from '../generated/schema'
+import { Governor as GovernorContract } from '../generated/templates/Governor/Governor'
 import {
   CANDIDATE_COMMENT_SCHEMA_UID,
   CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID,
@@ -190,7 +191,7 @@ function handleTreasuryAssetPinRevoked(event: RevokedEvent): void {
 
 function loadOrCreateCandidateGroup(
   candidateId: Bytes,
-  daoId: string,
+  dao: DAO,
   proposer: Address,
   salt: Bytes,
   timestamp: BigInt
@@ -199,10 +200,11 @@ function loadOrCreateCandidateGroup(
   let group = ProposalCandidateGroup.load(groupId)
   if (!group) {
     group = new ProposalCandidateGroup(groupId)
-    group.dao = daoId
+    group.dao = dao.id
     group.proposer = proposer
     group.salt = salt
     group.createdAt = timestamp
+    group.candidateNumber = dao.candidateCount + 1
     group.versionCount = BigInt.fromI32(0)
     group.commentCount = BigInt.fromI32(0)
     group.latestVersionNumber = BigInt.fromI32(0)
@@ -210,6 +212,8 @@ function loadOrCreateCandidateGroup(
     group.currentAgainstCount = BigInt.fromI32(0)
     group.currentAbstainCount = BigInt.fromI32(0)
     group.leadingVersion = null
+    dao.candidateCount = group.candidateNumber
+    dao.save()
     group.save()
   }
   return group
@@ -364,7 +368,7 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   let candidateId = decoded.candidateId
   let group = loadOrCreateCandidateGroup(
     candidateId,
-    dao.id,
+    dao,
     event.params.attester,
     decoded.salt,
     event.block.timestamp
@@ -430,12 +434,13 @@ function handleCandidateCommentAttestation(event: AttestedEvent): void {
   let group = ProposalCandidateGroup.load(candidateId.toHexString())
   if (!group) return
 
+  let dao = DAO.load(group.dao)
+  if (!dao) return
+
   let comment = new CandidateComment(event.params.uid.toHexString())
   comment.group = group.id
   comment.candidate = candidateId
   comment.commenter = event.params.attester
-  let dao = DAO.load(event.params.recipient.toHexString())
-  if (!dao) return
   let tokenContract = TokenContract.bind(Address.fromBytes(dao.tokenAddress))
   let votes = tokenContract.try_getVotes(event.params.attester)
   comment.voteWeight = votes.reverted ? BigInt.fromI32(0) : votes.value
@@ -477,6 +482,50 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   let version = ProposalCandidateVersion.load(decoded.candidateVersionUID.toHexString())
   if (!version || version.proposalId != decoded.proposalId) return
 
+  let group = ProposalCandidateGroup.load(version.group)
+  if (!group) return
+
+  if (event.params.attester.toHexString() == group.proposer.toHexString()) return
+
+  if (decoded.signature.length != 65) return
+
+  let dao = DAO.load(group.dao)
+  if (!dao) return
+
+  let governor = GovernorContract.bind(Address.fromBytes(dao.governorAddress))
+
+  let targets: Address[] = []
+  for (let i = 0; i < version.targets.length; i++) {
+    targets.push(Address.fromBytes(version.targets[i]))
+  }
+
+  let metadataString = ''
+  if (version.metadata != null) {
+    metadataString = version.metadata as string
+  }
+  let descriptionHash = changetype<Bytes>(
+    crypto.keccak256(Bytes.fromUTF8(metadataString))
+  )
+
+  let proposalHashResult = governor.try_hashProposal(
+    targets,
+    version.values,
+    version.calldatas,
+    descriptionHash,
+    Address.fromBytes(group.proposer)
+  )
+  if (
+    proposalHashResult.reverted ||
+    proposalHashResult.value.toHexString() != decoded.proposalId.toHexString()
+  ) {
+    return
+  }
+
+  let nonceResult = governor.try_proposeSignatureNonce(event.params.attester)
+  if (nonceResult.reverted || nonceResult.value != decoded.nonce) return
+
+  if (decoded.deadline < event.block.timestamp) return
+
   let signature = new CandidateSponsorSignature(event.params.uid.toHexString())
   signature.version = version.id
   signature.signer = event.params.attester
@@ -487,8 +536,6 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   signature.revoked = false
   signature.createdAt = event.block.timestamp
 
-  let dao = DAO.load(event.params.recipient.toHexString())
-  if (!dao) return
   let tokenContract = TokenContract.bind(Address.fromBytes(dao.tokenAddress))
   let votes = tokenContract.try_getVotes(event.params.attester)
   signature.voteWeight = votes.reverted ? BigInt.fromI32(0) : votes.value

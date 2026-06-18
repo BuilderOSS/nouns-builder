@@ -1,6 +1,7 @@
 import { MobileProposalActionBar } from '@buildeross/create-proposal-ui'
 import { decodeTransactions } from '@buildeross/hooks'
 import { attestCandidate, type CandidateAttestationParams } from '@buildeross/sdk'
+import { hashProposal } from '@buildeross/sdk/contract'
 import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { type ProposalDescriptionMetadataV1 } from '@buildeross/types'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
@@ -10,7 +11,7 @@ import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import useSWR from 'swr'
-import { type Hex, keccak256, toBytes, toHex, zeroHash } from 'viem'
+import { type Hex, keccak256, toBytes, toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 
 import { buildCandidateDescription } from '../utils/buildCandidateDescription'
@@ -146,11 +147,19 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
   }, [address, title, summary, allTransactions.length, addresses.token])
 
   const handleSubmit = useCallback(async () => {
-    if (!canSubmit) return
+    if (!canSubmit || !address) return
 
     setIsTxSuccess(false)
     setErrorMessage(null)
     setIsSubmitting(true)
+
+    const proposalId = hashProposal({
+      targets,
+      values,
+      calldatas,
+      description,
+      proposer: address,
+    })
 
     try {
       const params: CandidateAttestationParams = {
@@ -164,7 +173,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
         values,
         calldatas,
         description,
-        proposalId: zeroHash,
+        proposalId,
       }
 
       const result = await attestCandidate(params)
@@ -183,6 +192,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     }
   }, [
     canSubmit,
+    address,
     config,
     chain.id,
     addresses.token,

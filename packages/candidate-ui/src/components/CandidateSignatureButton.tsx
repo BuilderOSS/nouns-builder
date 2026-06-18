@@ -1,11 +1,12 @@
 import { attestCandidateSignature } from '@buildeross/sdk'
+import { governorAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AnimatedModal, ContractButton, SuccessModalContent } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, vars } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { type Hex } from 'viem'
-import { useAccount, useConfig, useWalletClient } from 'wagmi'
+import { useAccount, useConfig, useReadContract, useWalletClient } from 'wagmi'
 
 export interface CandidateSignatureButtonProps {
   candidateVersionUID: Hex
@@ -13,6 +14,7 @@ export interface CandidateSignatureButtonProps {
   governorAddress: `0x${string}`
   tokenSymbol: string
   proposalId: Hex
+  buttonVariant?: React.ComponentProps<typeof ContractButton>['variant']
   alreadySigned?: boolean
   voteWeight?: bigint
   signatureCount?: number
@@ -25,6 +27,7 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   governorAddress,
   tokenSymbol,
   proposalId,
+  buttonVariant = 'primary',
   alreadySigned = false,
   voteWeight = 0n,
   signatureCount = 0,
@@ -35,8 +38,19 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   const { data: walletClient } = useWalletClient()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
+  const isProposer = React.useMemo(
+    () => !!address && address.toLowerCase() === proposer.toLowerCase(),
+    [address, proposer]
+  )
 
-  const [nonce] = useState(BigInt(Date.now()))
+  const { data: nonce, isLoading: isNonceLoading } = useReadContract({
+    abi: governorAbi,
+    address: governorAddress,
+    functionName: 'proposeSignatureNonce',
+    args: address ? [address] : undefined,
+    chainId: chain.id,
+    query: { enabled: !!address && !!governorAddress },
+  })
   const [deadline] = useState(Math.floor(Date.now() / 1000) + 86400 * 7) // 7 days from now
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -44,11 +58,18 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   const [isTxSuccess, setIsTxSuccess] = useState(false)
 
   const canSign = React.useMemo(() => {
-    return !!address && !!walletClient && !alreadySigned && voteWeight > 0n
-  }, [address, walletClient, alreadySigned, voteWeight])
+    return (
+      !!address &&
+      !!walletClient &&
+      nonce !== undefined &&
+      !alreadySigned &&
+      !isProposer &&
+      voteWeight > 0n
+    )
+  }, [address, walletClient, nonce, alreadySigned, isProposer, voteWeight])
 
   const handleSign = useCallback(async () => {
-    if (!canSign || !address || !walletClient) return
+    if (!canSign || !address || !walletClient || nonce === undefined) return
 
     setIsTxSuccess(false)
     setErrorMessage(null)
@@ -105,10 +126,12 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   }
 
   const buttonText = React.useMemo(() => {
+    if (isNonceLoading) return 'Loading Signature Nonce...'
+    if (isProposer) return 'Candidate Creator Cannot Sign'
     if (alreadySigned) return 'Already Signed'
     if (voteWeight === 0n) return 'No Voting Power'
     return `Sign Candidate`
-  }, [alreadySigned, voteWeight])
+  }, [alreadySigned, isNonceLoading, isProposer, voteWeight])
 
   const buttonSubtext = React.useMemo(() => {
     if (signatureCount > 0)
@@ -123,6 +146,7 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
         handleClick={handleSign}
         disabled={!canSign}
         loading={isSubmitting}
+        variant={buttonVariant}
         style={{ position: 'relative' }}
       >
         <Box>{buttonText}</Box>
@@ -145,10 +169,10 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
           <Box
             position="absolute"
             bottom="x1"
-            left="50%"
             fontSize={12}
             color="text3"
             style={{
+              left: '50%',
               transform: 'translateX(-50%)',
             }}
           >

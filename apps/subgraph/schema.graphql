@@ -24,6 +24,7 @@ type DAO @entity {
   voters: [DAOVoter!]! @derivedFrom(field: "dao")
   tokens: [Token!]! @derivedFrom(field: "dao")
   proposals: [Proposal!]! @derivedFrom(field: "dao")
+  candidateCount: Int!
   auctions: [Auction!]! @derivedFrom(field: "dao")
   daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
   pinnedAssets: [TreasuryAssetPin!]! @derivedFrom(field: "dao")
@@ -191,6 +192,7 @@ type ProposalCandidateGroup @entity {
   proposer: Bytes!
   salt: Bytes!
   createdAt: BigInt!
+  candidateNumber: Int!
   versions: [ProposalCandidateVersion!]! @derivedFrom(field: "group")
   comments: [CandidateComment!]! @derivedFrom(field: "group")
   versionCount: BigInt!

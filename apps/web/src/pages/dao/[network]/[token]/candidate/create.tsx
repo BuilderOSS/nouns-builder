@@ -21,6 +21,7 @@ import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
 import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { TRANSACTION_TYPES, TransactionTypeIcon } from '@buildeross/proposal-ui'
+import { getCandidateGroup } from '@buildeross/sdk'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
@@ -289,8 +290,31 @@ const CreateCandidatePage: NextPageWithLayout = () => {
   }
 
   const handleSubmitSuccess = async (candidateId: string, _attestationUID: string) => {
-    // Navigate to candidate detail page
     const { network, token } = router.query
+
+    if (typeof network !== 'string' || typeof token !== 'string') {
+      return
+    }
+
+    try {
+      const candidate = await getCandidateGroup(chain.id, candidateId, token)
+
+      if (candidate?.candidateNumber != null) {
+        await router.push({
+          pathname: '/dao/[network]/[token]/candidate/[candidateId]',
+          query: {
+            network,
+            token,
+            candidateId: candidate.candidateNumber.toString(),
+          },
+        })
+
+        return
+      }
+    } catch {
+      // Fall back to the attestation id if the lookup is not ready yet.
+    }
+
     await router.push({
       pathname: '/dao/[network]/[token]/candidate/[candidateId]',
       query: {
@@ -301,10 +325,10 @@ const CreateCandidatePage: NextPageWithLayout = () => {
     })
   }
 
-  const openCandidateIndexPage = async () => {
+  const openDAOPage = async () => {
     const { network, token } = router.query
     await router.push({
-      pathname: '/dao/[network]/[token]/candidate',
+      pathname: '/dao/[network]/[token]',
       query: {
         network,
         token,
@@ -349,7 +373,7 @@ const CreateCandidatePage: NextPageWithLayout = () => {
                 : 'Review Candidate'
           }
           handleBack={() => {
-            void openCandidateIndexPage()
+            void openDAOPage()
           }}
           showHelpLinks
           showQueue={createStage === 'transactions'}
@@ -441,11 +465,13 @@ const CreateCandidatePage: NextPageWithLayout = () => {
             </Box>
           }
           rightColumn={
-            createStage === 'transactions' &&
-            transactions.length > 0 &&
-            !transactionType ? (
-              <Queue embedded />
-            ) : undefined
+            createStage === 'transactions' ? (
+              !transactionType ? (
+                <Queue embedded />
+              ) : (
+                <div />
+              )
+            ) : null
           }
         />
 

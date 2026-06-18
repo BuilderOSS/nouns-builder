@@ -25,7 +25,7 @@ export interface CandidateAttestationParams {
   values: bigint[]
   calldatas: Hex[]
   description: string
-  proposalId?: Hex // Optional: if this will become a specific proposal
+  proposalId: Hex
 }
 
 export interface CandidateAttestationResult {
@@ -52,7 +52,7 @@ export async function attestCandidate(
     values,
     calldatas,
     description,
-    proposalId = zeroHash,
+    proposalId,
   } = params
 
   // Get EAS contract address for this chain

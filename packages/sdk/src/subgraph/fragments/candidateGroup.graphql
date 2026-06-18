@@ -8,6 +8,7 @@ fragment CandidateGroupFragment on ProposalCandidateGroup {
   proposer
   salt
   createdAt
+  candidateNumber
   versionCount
   commentCount
   latestVersionNumber
@@ -29,6 +30,7 @@ fragment CandidateGroupDetailFragment on ProposalCandidateGroup {
   proposer
   salt
   createdAt
+  candidateNumber
   versionCount
   commentCount
   latestVersionNumber
@@ -52,6 +54,9 @@ fragment CandidateVersionFragment on ProposalCandidateVersion {
   targets
   values
   calldatas
+  group {
+    candidateNumber
+  }
   title
   description
   metadata
@@ -88,4 +93,13 @@ fragment CandidateSponsorSignatureFragment on CandidateSponsorSignature {
   revoked
   createdAt
   voteWeight
+}
+
+query CandidateGroupByNumber($candidateNumber: Int!, $dao: String) {
+  proposalCandidateGroups(
+    first: 1
+    where: { candidateNumber: $candidateNumber, dao: $dao }
+  ) {
+    ...CandidateGroupDetailFragment
+  }
 }
