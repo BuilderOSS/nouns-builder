@@ -58,14 +58,17 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isTxSuccess, setIsTxSuccess] = useState(false)
-  const [submittedSupport, setSubmittedSupport] = useState<CandidateVoteSupportEnum | null>(null)
+  const [submittedSupport, setSubmittedSupport] =
+    useState<CandidateVoteSupportEnum | null>(null)
   const [submittedWithSignature, setSubmittedWithSignature] = useState(false)
 
   const canSubmit = React.useMemo(() => {
     return (
       !!address &&
       !!addresses.token &&
-      (comment.trim().length > 0 || shouldSign || support !== CandidateVoteSupportEnum.NONE)
+      (comment.trim().length > 0 ||
+        shouldSign ||
+        support !== CandidateVoteSupportEnum.NONE)
     )
   }, [address, addresses.token, comment, shouldSign, support])
 

@@ -1,21 +1,19 @@
 import {
   CandidateCommentForm,
+  CandidateDetailsSection,
+  CandidateDiscussionSection,
   CandidateEditedBanner,
-  CandidateSigners,
+  CandidateSignalBreakdown,
 } from '@buildeross/candidate-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SectionHandler } from '@buildeross/dao-ui'
-import { decodeTransactions, useEnsData } from '@buildeross/hooks'
-import {
-  proposalDescription,
-  ProposalNavigation,
-  TransactionTypeIcon,
-} from '@buildeross/proposal-ui'
+import { decodeTransactions } from '@buildeross/hooks'
+import { ProposalNavigation } from '@buildeross/proposal-ui'
 import type { CandidateGroup } from '@buildeross/sdk'
 import { getCandidateGroup } from '@buildeross/sdk'
 import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
-import { CandidateVoteSupport, getCandidateComments } from '@buildeross/sdk/subgraph'
+import { getCandidateComments } from '@buildeross/sdk/subgraph'
 import {
   type DaoContractAddresses,
   useCandidateStore,
@@ -29,13 +27,10 @@ import {
   type TransactionBundle,
   TransactionType,
 } from '@buildeross/types'
-import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
-import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { WalletIdentityWithPreview } from '@buildeross/ui/WalletIdentity'
-import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Stack, Text, theme } from '@buildeross/zord'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { GetServerSideProps } from 'next'
 import Link from 'next/link'
@@ -68,265 +63,6 @@ const getSafeDiscussionUrl = (value?: string | null): string | null => {
   } catch {
     return null
   }
-}
-
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <Box mb={{ '@initial': 'x6', '@768': 'x13' }}>
-    <Box fontSize={20} mb={{ '@initial': 'x4', '@768': 'x5' }} fontWeight="display">
-      {title}
-    </Box>
-    {children}
-  </Box>
-)
-
-const VoteBreakdown = ({
-  forVotes,
-  againstVotes,
-  abstainVotes,
-}: {
-  forVotes: bigint
-  againstVotes: bigint
-  abstainVotes: bigint
-}) => {
-  const voteTally = [
-    { label: 'For', value: Number(forVotes.toString()), color: theme.colors.positive },
-    {
-      label: 'Against',
-      value: Number(againstVotes.toString()),
-      color: theme.colors.negative,
-    },
-    {
-      label: 'Abstain',
-      value: Number(abstainVotes.toString()),
-      color: theme.colors.text4,
-    },
-  ]
-
-  const totalVotes = voteTally.reduce((sum, vote) => sum + vote.value, 0)
-
-  return (
-    <Box
-      p={{ '@initial': 'x4', '@768': 'x6' }}
-      mb={{ '@initial': 'x4', '@768': 'x5' }}
-      borderWidth="normal"
-      borderColor="border"
-      borderStyle="solid"
-      borderRadius="curved"
-      style={{ background: theme.colors.background1 }}
-    >
-      <Flex justify="space-between" align="center" gap="x3" mb="x3" wrap>
-        <Text fontSize={16} fontWeight="display">
-          Signal breakdown
-        </Text>
-        <Text color="text3" fontSize={14}>
-          {totalVotes > 0 ? `${totalVotes} total signals` : 'No signals yet'}
-        </Text>
-      </Flex>
-
-      <Box
-        style={{
-          display: 'flex',
-          width: '100%',
-          height: 16,
-          overflow: 'hidden',
-          borderRadius: 999,
-          border: `1px solid ${theme.colors.border}`,
-          background: theme.colors.background2,
-        }}
-      >
-        {totalVotes > 0 ? (
-          voteTally.map((vote) => {
-            if (vote.value === 0) return null
-
-            return (
-              <Box
-                key={vote.label}
-                style={{
-                  flex: `${vote.value} 1 0%`,
-                  background: vote.color,
-                }}
-              />
-            )
-          })
-        ) : (
-          <Box style={{ width: '100%', background: 'transparent' }} />
-        )}
-      </Box>
-
-      <Flex gap="x4" wrap mt="x3">
-        {voteTally.map((vote) => (
-          <Flex key={vote.label} align="center" gap="x2">
-            <Box
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 999,
-                background: vote.color,
-                flexShrink: 0,
-              }}
-            />
-            <Text color="text3" fontSize={14}>
-              {vote.label}: {vote.value}
-            </Text>
-          </Flex>
-        ))}
-      </Flex>
-    </Box>
-  )
-}
-
-type CandidateComment = Awaited<
-  ReturnType<typeof getCandidateComments>
->['comments'][number]
-
-const candidateSupportMeta: Record<
-  CandidateVoteSupport,
-  { label: string; color: string }
-> = {
-  [CandidateVoteSupport.For]: { label: 'For', color: theme.colors.positive },
-  [CandidateVoteSupport.Against]: { label: 'Against', color: theme.colors.negative },
-  [CandidateVoteSupport.Abstain]: { label: 'Abstain', color: theme.colors.text4 },
-  [CandidateVoteSupport.None]: { label: 'None', color: theme.colors.text4 },
-}
-
-const CandidateCommentCard = ({
-  comment,
-  depth = 0,
-}: {
-  comment: CandidateComment
-  depth?: number
-}) => {
-  const { displayName, ensAvatar } = useEnsData(comment.commenter as `0x${string}`)
-  const support =
-    candidateSupportMeta[comment.support] ??
-    candidateSupportMeta[CandidateVoteSupport.None]
-
-  return (
-    <Box
-      p="x4"
-      borderWidth="normal"
-      borderColor="border"
-      borderStyle="solid"
-      borderRadius="curved"
-      style={{
-        marginLeft: depth > 0 ? 24 : 0,
-        background: theme.colors.background1,
-        borderLeftWidth: depth > 0 ? 3 : undefined,
-        borderLeftColor: depth > 0 ? theme.colors.border : undefined,
-      }}
-    >
-      <Flex justify="space-between" align="center" gap="x3" wrap mb="x2">
-        <WalletIdentityWithPreview
-          address={comment.commenter as `0x${string}`}
-          displayName={displayName || walletSnippet(comment.commenter as `0x${string}`)}
-          avatarSrc={ensAvatar}
-        />
-        <Flex align="center" gap="x2" wrap>
-          {support.label !== 'None' && (
-            <>
-              <Box
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: 999,
-                  background: support.color,
-                  color: theme.colors.onAccent,
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}
-              >
-                {support.label}
-              </Box>
-              <Text color="text3" fontSize={12}>
-                {comment.voteWeight.toString()} signal weight
-              </Text>
-            </>
-          )}
-          <Text color="text3" fontSize={12}>
-            {formatTimeAgo(comment.createdAt)}
-          </Text>
-        </Flex>
-      </Flex>
-
-      <Text style={{ whiteSpace: 'pre-wrap' }}>{comment.comment}</Text>
-    </Box>
-  )
-}
-
-const CandidateCommentsPanel = ({
-  comments,
-  error,
-  isLoading,
-  commentCount,
-}: {
-  comments: CandidateComment[]
-  error?: unknown
-  isLoading: boolean
-  commentCount: bigint
-}) => {
-  const topLevelComments = React.useMemo(
-    () =>
-      comments
-        .filter((comment) => !comment.parentComment?.id)
-        .sort((a, b) => b.createdAt - a.createdAt),
-    [comments]
-  )
-  const repliesByParentId = React.useMemo(() => {
-    const map = new Map<string, CandidateComment[]>()
-
-    for (const comment of comments) {
-      const parentId = comment.parentComment?.id
-      if (!parentId) continue
-
-      const existing = map.get(parentId) || []
-      existing.push(comment)
-      map.set(parentId, existing)
-    }
-
-    for (const replyList of map.values()) {
-      replyList.sort((a, b) => b.createdAt - a.createdAt)
-    }
-
-    return map
-  }, [comments])
-
-  const renderThread = React.useCallback(
-    (comment: CandidateComment, depth = 0): React.ReactNode => (
-      <Stack key={comment.id} gap="x3">
-        <CandidateCommentCard comment={comment} depth={depth} />
-        {repliesByParentId
-          .get(comment.id)
-          ?.map((reply) => renderThread(reply, depth + 1))}
-      </Stack>
-    ),
-    [repliesByParentId]
-  )
-
-  return (
-    <Stack gap="x4">
-      <Flex justify="space-between" align="center" wrap gap="x3">
-        <Text fontSize={20} fontWeight="display">
-          Comments ({commentCount.toString()})
-        </Text>
-        <Text color="text3" fontSize={14}>
-          {comments.length > 0 ? `${comments.length} loaded` : 'Loading discussion'}
-        </Text>
-      </Flex>
-
-      {error && <Text color="negative">Failed to load comments.</Text>}
-
-      {isLoading && comments.length === 0 && (
-        <Text color="text3">Loading comments...</Text>
-      )}
-
-      {!isLoading && comments.length === 0 && !error && (
-        <Text color="text3">No comments yet. Be the first to comment.</Text>
-      )}
-
-      {topLevelComments.length > 0 && (
-        <Stack gap="x3">{topLevelComments.map((comment) => renderThread(comment))}</Stack>
-      )}
-    </Stack>
-  )
 }
 
 const toTitleCase = (value: string) =>
@@ -582,97 +318,29 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   }
 
   const detailsContent = (
-    <Stack gap="x6">
-      <Section title="Description">
-        <Box className={proposalDescription}>
-          <MarkdownDisplay>{latestVersion?.description || ''}</MarkdownDisplay>
-        </Box>
-      </Section>
-
-      {safeDiscussionUrl && (
-        <Section title="Discussion">
-          <a href={safeDiscussionUrl} rel="noreferrer" target="_blank">
-            {safeDiscussionUrl}
-          </a>
-        </Section>
-      )}
-
-      <Section title="Proposed Transactions">
-        {latestVersion ? (
-          decodedTransactions?.length ? (
-            <DecodedTransactions
-              chainId={chain.id as CHAIN_ID}
-              addresses={addresses}
-              decodedTransactions={decodedTransactions}
-              proposalMetadata={proposalMetadata}
-              isDecoding={isDecodingTransactions}
-            />
-          ) : (
-            <Text color="text3">No transactions in this candidate.</Text>
-          )
-        ) : null}
-      </Section>
-
-      {candidate.versions && candidate.versions.length > 0 && (
-        <Section title={`Edit History (${candidate.versions.length})`}>
-          <Stack gap="x4">
-            {candidate.versions.map((version) => (
-              <Stack
-                key={version.id}
-                p="x3"
-                gap="x3"
-                borderColor="border"
-                borderStyle="solid"
-                borderWidth="normal"
-                borderRadius="curved"
-              >
-                <Flex align="center" gap="x2">
-                  <TransactionTypeIcon transactionType={TransactionType.CUSTOM} />
-                  <Stack gap="x1">
-                    <Text fontWeight="heading">
-                      Version {version.versionNumber.toString()}
-                    </Text>
-                    <Text color="text3">
-                      {version.signatureCount.toString()} signatures
-                    </Text>
-                  </Stack>
-                </Flex>
-                {version.title && <Text>{version.title}</Text>}
-              </Stack>
-            ))}
-          </Stack>
-        </Section>
-      )}
-    </Stack>
+    <CandidateDetailsSection
+      description={latestVersion?.description || ''}
+      discussionUrl={safeDiscussionUrl}
+      decodedTransactions={decodedTransactions}
+      isDecodingTransactions={isDecodingTransactions}
+      proposalMetadata={proposalMetadata}
+      chainId={chain.id as CHAIN_ID}
+      addresses={addresses}
+      versions={candidate.versions}
+    />
   )
 
   const discussionContent = (
-    <Stack gap="x6">
-      {latestVersion && tokenSymbol && (
-        <Section title="Sponsors">
-          <CandidateSigners
-            candidateVersionUID={latestVersion.id as `0x${string}`}
-            proposer={candidate.proposer as `0x${string}`}
-            governorAddress={addresses.governor as `0x${string}`}
-            tokenSymbol={String(tokenSymbol)}
-            description={latestVersion.metadata || ''}
-            targets={(latestVersion.targets || []) as string[]}
-            values={(latestVersion.values || []) as bigint[]}
-            calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
-            signatureCount={latestVersion.signatureCount}
-          />
-        </Section>
-      )}
-
-      <Section title="Comments">
-        <CandidateCommentsPanel
-          comments={comments}
-          error={candidateCommentsError}
-          isLoading={!candidateComments && !!candidate}
-          commentCount={candidate.commentCount}
-        />
-      </Section>
-    </Stack>
+    <CandidateDiscussionSection
+      candidate={candidate}
+      latestVersion={latestVersion}
+      tokenSymbol={tokenSymbol ? String(tokenSymbol) : undefined}
+      comments={comments}
+      commentCount={candidate.commentCount}
+      commentsLoading={!candidateComments && !!candidate}
+      commentsError={candidateCommentsError}
+      governorAddress={addresses.governor as `0x${string}`}
+    />
   )
 
   const sections = [
@@ -754,7 +422,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
               />
             )}
 
-            <VoteBreakdown
+            <CandidateSignalBreakdown
               forVotes={candidate.currentForCount}
               againstVotes={candidate.currentAgainstCount}
               abstainVotes={candidate.currentAbstainCount}
