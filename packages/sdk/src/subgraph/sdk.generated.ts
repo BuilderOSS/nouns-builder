@@ -1474,14 +1474,15 @@ export enum CandidateSponsorSignatureCreatedEvent_OrderBy {
   Actor = 'actor',
   BlockNumber = 'blockNumber',
   CandidateVersion = 'candidateVersion',
+  CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
-  CandidateVersionProposalId = 'candidateVersion__proposalId',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -1649,14 +1650,15 @@ export enum CandidateSponsorSignature_OrderBy {
   Signature = 'signature',
   Signer = 'signer',
   Version = 'version',
+  VersionAttestationUid = 'version__attestationUID',
   VersionAttester = 'version__attester',
   VersionCandidateId = 'version__candidateId',
+  VersionComputedProposalId = 'version__computedProposalId',
   VersionCreatedAt = 'version__createdAt',
   VersionDescription = 'version__description',
   VersionDiscussionUrl = 'version__discussionUrl',
   VersionId = 'version__id',
   VersionMetadata = 'version__metadata',
-  VersionProposalId = 'version__proposalId',
   VersionRepresentedAddress = 'version__representedAddress',
   VersionRevoked = 'version__revoked',
   VersionSalt = 'version__salt',
@@ -1824,14 +1826,15 @@ export enum CandidateSubmittedAsProposalEvent_OrderBy {
   Actor = 'actor',
   BlockNumber = 'blockNumber',
   CandidateVersion = 'candidateVersion',
+  CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
-  CandidateVersionProposalId = 'candidateVersion__proposalId',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -2053,14 +2056,15 @@ export enum CandidateVersionCreatedEvent_OrderBy {
   Actor = 'actor',
   BlockNumber = 'blockNumber',
   CandidateVersion = 'candidateVersion',
+  CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
-  CandidateVersionProposalId = 'candidateVersion__proposalId',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -4851,14 +4855,15 @@ export enum ProposalCandidateGroup_OrderBy {
   Id = 'id',
   LatestVersionNumber = 'latestVersionNumber',
   LeadingVersion = 'leadingVersion',
+  LeadingVersionAttestationUid = 'leadingVersion__attestationUID',
   LeadingVersionAttester = 'leadingVersion__attester',
   LeadingVersionCandidateId = 'leadingVersion__candidateId',
+  LeadingVersionComputedProposalId = 'leadingVersion__computedProposalId',
   LeadingVersionCreatedAt = 'leadingVersion__createdAt',
   LeadingVersionDescription = 'leadingVersion__description',
   LeadingVersionDiscussionUrl = 'leadingVersion__discussionUrl',
   LeadingVersionId = 'leadingVersion__id',
   LeadingVersionMetadata = 'leadingVersion__metadata',
-  LeadingVersionProposalId = 'leadingVersion__proposalId',
   LeadingVersionRepresentedAddress = 'leadingVersion__representedAddress',
   LeadingVersionRevoked = 'leadingVersion__revoked',
   LeadingVersionSalt = 'leadingVersion__salt',
@@ -4874,16 +4879,18 @@ export enum ProposalCandidateGroup_OrderBy {
 
 export type ProposalCandidateVersion = ProposalMetadataEntity & {
   __typename?: 'ProposalCandidateVersion'
+  attestationUID: Scalars['Bytes']['output']
   attester: Scalars['Bytes']['output']
   calldatas: Array<Scalars['Bytes']['output']>
   candidateId: Scalars['Bytes']['output']
+  computedProposalId: Scalars['Bytes']['output']
   createdAt: Scalars['BigInt']['output']
   description?: Maybe<Scalars['String']['output']>
   discussionUrl?: Maybe<Scalars['String']['output']>
   group: ProposalCandidateGroup
   id: Scalars['ID']['output']
   metadata?: Maybe<Scalars['String']['output']>
-  proposalId: Scalars['Bytes']['output']
+  proposal?: Maybe<Proposal>
   representedAddress?: Maybe<Scalars['String']['output']>
   revoked: Scalars['Boolean']['output']
   salt: Scalars['Bytes']['output']
@@ -4908,6 +4915,16 @@ export type ProposalCandidateVersion_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
   and?: InputMaybe<Array<InputMaybe<ProposalCandidateVersion_Filter>>>
+  attestationUID?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_contains?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_gt?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_gte?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  attestationUID_lt?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_lte?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_not?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   attester?: InputMaybe<Scalars['Bytes']['input']>
   attester_contains?: InputMaybe<Scalars['Bytes']['input']>
   attester_gt?: InputMaybe<Scalars['Bytes']['input']>
@@ -4932,6 +4949,16 @@ export type ProposalCandidateVersion_Filter = {
   candidateId_not?: InputMaybe<Scalars['Bytes']['input']>
   candidateId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   candidateId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  computedProposalId?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_contains?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_gt?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_gte?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  computedProposalId_lt?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_lte?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_not?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  computedProposalId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   createdAt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -5030,16 +5057,27 @@ export type ProposalCandidateVersion_Filter = {
   metadata_starts_with?: InputMaybe<Scalars['String']['input']>
   metadata_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   or?: InputMaybe<Array<InputMaybe<ProposalCandidateVersion_Filter>>>
-  proposalId?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_contains?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_gt?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_gte?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  proposalId_lt?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_lte?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_not?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  proposal?: InputMaybe<Scalars['String']['input']>
+  proposal_?: InputMaybe<Proposal_Filter>
+  proposal_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_gt?: InputMaybe<Scalars['String']['input']>
+  proposal_gte?: InputMaybe<Scalars['String']['input']>
+  proposal_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_lt?: InputMaybe<Scalars['String']['input']>
+  proposal_lte?: InputMaybe<Scalars['String']['input']>
+  proposal_not?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains?: InputMaybe<Scalars['String']['input']>
+  proposal_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  proposal_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with?: InputMaybe<Scalars['String']['input']>
+  proposal_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   representedAddress?: InputMaybe<Scalars['String']['input']>
   representedAddress_contains?: InputMaybe<Scalars['String']['input']>
   representedAddress_contains_nocase?: InputMaybe<Scalars['String']['input']>
@@ -5130,9 +5168,11 @@ export type ProposalCandidateVersion_Filter = {
 }
 
 export enum ProposalCandidateVersion_OrderBy {
+  AttestationUid = 'attestationUID',
   Attester = 'attester',
   Calldatas = 'calldatas',
   CandidateId = 'candidateId',
+  ComputedProposalId = 'computedProposalId',
   CreatedAt = 'createdAt',
   Description = 'description',
   DiscussionUrl = 'discussionUrl',
@@ -5150,7 +5190,47 @@ export enum ProposalCandidateVersion_OrderBy {
   GroupVersionCount = 'group__versionCount',
   Id = 'id',
   Metadata = 'metadata',
-  ProposalId = 'proposalId',
+  Proposal = 'proposal',
+  ProposalAbstainVotes = 'proposal__abstainVotes',
+  ProposalAgainstVotes = 'proposal__againstVotes',
+  ProposalCalldatas = 'proposal__calldatas',
+  ProposalCancelTransactionHash = 'proposal__cancelTransactionHash',
+  ProposalCanceled = 'proposal__canceled',
+  ProposalCanceledAt = 'proposal__canceledAt',
+  ProposalDescription = 'proposal__description',
+  ProposalDescriptionHash = 'proposal__descriptionHash',
+  ProposalDiscussionUrl = 'proposal__discussionUrl',
+  ProposalExecutableFrom = 'proposal__executableFrom',
+  ProposalExecuted = 'proposal__executed',
+  ProposalExecutedAt = 'proposal__executedAt',
+  ProposalExecutionTransactionHash = 'proposal__executionTransactionHash',
+  ProposalExpiresAt = 'proposal__expiresAt',
+  ProposalForVotes = 'proposal__forVotes',
+  ProposalId = 'proposal__id',
+  ProposalIsSigned = 'proposal__isSigned',
+  ProposalMetadata = 'proposal__metadata',
+  ProposalProposalId = 'proposal__proposalId',
+  ProposalProposalNumber = 'proposal__proposalNumber',
+  ProposalProposalThreshold = 'proposal__proposalThreshold',
+  ProposalProposer = 'proposal__proposer',
+  ProposalQueued = 'proposal__queued',
+  ProposalQueuedAt = 'proposal__queuedAt',
+  ProposalQueuedTransactionHash = 'proposal__queuedTransactionHash',
+  ProposalQuorumVotes = 'proposal__quorumVotes',
+  ProposalRepresentedAddress = 'proposal__representedAddress',
+  ProposalSnapshotBlockNumber = 'proposal__snapshotBlockNumber',
+  ProposalTimeCreated = 'proposal__timeCreated',
+  ProposalTitle = 'proposal__title',
+  ProposalTransactionHash = 'proposal__transactionHash',
+  ProposalUpdateCount = 'proposal__updateCount',
+  ProposalUpdateMessage = 'proposal__updateMessage',
+  ProposalUpdatePeriodEnd = 'proposal__updatePeriodEnd',
+  ProposalVetoTransactionHash = 'proposal__vetoTransactionHash',
+  ProposalVetoed = 'proposal__vetoed',
+  ProposalVetoedAt = 'proposal__vetoedAt',
+  ProposalVoteCount = 'proposal__voteCount',
+  ProposalVoteEnd = 'proposal__voteEnd',
+  ProposalVoteStart = 'proposal__voteStart',
   RepresentedAddress = 'representedAddress',
   Revoked = 'revoked',
   Salt = 'salt',
@@ -7280,14 +7360,15 @@ export enum Proposal_OrderBy {
   Canceled = 'canceled',
   CanceledAt = 'canceledAt',
   CandidateVersion = 'candidateVersion',
+  CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
+  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
-  CandidateVersionProposalId = 'candidateVersion__proposalId',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -10845,8 +10926,15 @@ export type ProposalFragment = {
   candidateVersion?: {
     __typename?: 'ProposalCandidateVersion'
     candidateId: any
-    proposalId: any
+    computedProposalId: any
+    attestationUID: any
     versionNumber: any
+    proposal?: {
+      __typename?: 'Proposal'
+      id: string
+      proposalId: any
+      proposalNumber: number
+    } | null
     group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
   } | null
   replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
@@ -10890,8 +10978,15 @@ export type ProposalDetailFragment = {
   candidateVersion?: {
     __typename?: 'ProposalCandidateVersion'
     candidateId: any
-    proposalId: any
+    computedProposalId: any
+    attestationUID: any
     versionNumber: any
+    proposal?: {
+      __typename?: 'Proposal'
+      id: string
+      proposalId: any
+      proposalNumber: number
+    } | null
     group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
   } | null
   replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
@@ -11185,13 +11280,20 @@ export type CandidateGroupDetailFragmentFragment = {
     description?: string | null
     metadata?: string | null
     representedAddress?: string | null
-    proposalId: any
+    computedProposalId: any
+    attestationUID: any
     createdAt: any
     discussionUrl?: string | null
     signatureCount: any
     totalVoteWeight: any
     revoked: boolean
     group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    proposal?: {
+      __typename?: 'Proposal'
+      id: string
+      proposalId: any
+      proposalNumber: number
+    } | null
   } | null
   versions: Array<{
     __typename?: 'ProposalCandidateVersion'
@@ -11207,13 +11309,20 @@ export type CandidateGroupDetailFragmentFragment = {
     description?: string | null
     metadata?: string | null
     representedAddress?: string | null
-    proposalId: any
+    computedProposalId: any
+    attestationUID: any
     createdAt: any
     discussionUrl?: string | null
     signatureCount: any
     totalVoteWeight: any
     revoked: boolean
     group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    proposal?: {
+      __typename?: 'Proposal'
+      id: string
+      proposalId: any
+      proposalNumber: number
+    } | null
   }>
 }
 
@@ -11231,13 +11340,20 @@ export type CandidateVersionFragmentFragment = {
   description?: string | null
   metadata?: string | null
   representedAddress?: string | null
-  proposalId: any
+  computedProposalId: any
+  attestationUID: any
   createdAt: any
   discussionUrl?: string | null
   signatureCount: any
   totalVoteWeight: any
   revoked: boolean
   group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+  proposal?: {
+    __typename?: 'Proposal'
+    id: string
+    proposalId: any
+    proposalNumber: number
+  } | null
 }
 
 export type CandidateCommentFragmentFragment = {
@@ -11301,13 +11417,20 @@ export type CandidateGroupByNumberQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       createdAt: any
       discussionUrl?: string | null
       signatureCount: any
       totalVoteWeight: any
       revoked: boolean
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
     } | null
     versions: Array<{
       __typename?: 'ProposalCandidateVersion'
@@ -11323,13 +11446,20 @@ export type CandidateGroupByNumberQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       createdAt: any
       discussionUrl?: string | null
       signatureCount: any
       totalVoteWeight: any
       revoked: boolean
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
     }>
   }>
 }
@@ -11475,13 +11605,20 @@ export type CandidateGroupQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       createdAt: any
       discussionUrl?: string | null
       signatureCount: any
       totalVoteWeight: any
       revoked: boolean
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
     } | null
     versions: Array<{
       __typename?: 'ProposalCandidateVersion'
@@ -11497,13 +11634,20 @@ export type CandidateGroupQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       createdAt: any
       discussionUrl?: string | null
       signatureCount: any
       totalVoteWeight: any
       revoked: boolean
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
     }>
   } | null
 }
@@ -11583,13 +11727,20 @@ export type CandidateVersionQuery = {
     description?: string | null
     metadata?: string | null
     representedAddress?: string | null
-    proposalId: any
+    computedProposalId: any
+    attestationUID: any
     createdAt: any
     discussionUrl?: string | null
     signatureCount: any
     totalVoteWeight: any
     revoked: boolean
     group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    proposal?: {
+      __typename?: 'Proposal'
+      id: string
+      proposalId: any
+      proposalNumber: number
+    } | null
   } | null
 }
 
@@ -12083,8 +12234,15 @@ export type DaosForDashboardQuery = {
       candidateVersion?: {
         __typename?: 'ProposalCandidateVersion'
         candidateId: any
-        proposalId: any
+        computedProposalId: any
+        attestationUID: any
         versionNumber: any
+        proposal?: {
+          __typename?: 'Proposal'
+          id: string
+          proposalId: any
+          proposalNumber: number
+        } | null
         group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
       } | null
       replaces?: {
@@ -12750,8 +12908,15 @@ export type ProposalQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       versionNumber: any
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
     } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
@@ -12840,8 +13005,15 @@ export type ProposalOgMetadataQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       versionNumber: any
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
     } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
@@ -12895,8 +13067,15 @@ export type ProposalVersionsQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       versionNumber: any
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
     } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
@@ -12960,8 +13139,15 @@ export type ProposalsQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      proposalId: any
+      computedProposalId: any
+      attestationUID: any
       versionNumber: any
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
       group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
     } | null
     replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
@@ -13532,7 +13718,13 @@ export const ProposalFragmentDoc = gql`
     }
     candidateVersion {
       candidateId
-      proposalId
+      computedProposalId
+      attestationUID
+      proposal {
+        id
+        proposalId
+        proposalNumber
+      }
       versionNumber
       group {
         candidateNumber
@@ -13799,7 +13991,13 @@ export const CandidateVersionFragmentFragmentDoc = gql`
     description
     metadata
     representedAddress
-    proposalId
+    computedProposalId
+    attestationUID
+    proposal {
+      id
+      proposalId
+      proposalNumber
+    }
     createdAt
     discussionUrl
     signatureCount

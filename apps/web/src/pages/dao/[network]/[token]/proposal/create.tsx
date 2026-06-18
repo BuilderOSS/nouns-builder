@@ -843,7 +843,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
               />
             }
             rightColumn={
-              transactions.length > 0 && !transactionType ? <Queue embedded /> : undefined
+              transactions.length > 0 && !transactionType ? <Queue embedded /> : <div />
             }
           />
         )}

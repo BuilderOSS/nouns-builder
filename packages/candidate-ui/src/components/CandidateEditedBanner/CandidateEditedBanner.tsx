@@ -26,7 +26,7 @@ const toProposalVersion = (version: CandidateVersionLike): ProposalVersion =>
     targets: version.targets.map((value) => value.toString()),
     values: version.values.map((value) => value.toString()),
     calldatas: version.calldatas.map((value) => value.toString()),
-    transactionHash: version.proposalId.toString(),
+    transactionHash: version.attestationUID.toString(),
     state: 'PENDING' as any,
     updatePeriodEnd: undefined,
   }) as unknown as ProposalVersion

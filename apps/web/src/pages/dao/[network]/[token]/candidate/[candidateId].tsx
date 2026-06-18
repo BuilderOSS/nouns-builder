@@ -208,6 +208,13 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   const candidateProposalId = React.useMemo(() => {
     if (!candidate || !latestVersion) return zeroHash
 
+    if (
+      latestVersion.computedProposalId &&
+      latestVersion.computedProposalId !== zeroHash
+    ) {
+      return latestVersion.computedProposalId as `0x${string}`
+    }
+
     return getCandidateProposalId({
       targets: (latestVersion.targets || []) as `0x${string}`[],
       values: (latestVersion.values || []).map((value) => BigInt(value)),
@@ -397,11 +404,11 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                     </Text>
                   )}
                 </Flex>
-                {latestVersion?.proposalId && (
+                {latestVersion?.proposal && (
                   <Text color="text3" fontSize={14}>
                     Promoted to{' '}
                     <Link
-                      href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposalId}`}
+                      href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
                     >
                       proposal
                     </Link>
@@ -416,10 +423,10 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 style={{ width: '100%' }}
               >
                 <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
-                {latestVersion?.proposalId && latestVersion.proposalId !== zeroHash && (
+                {latestVersion?.proposal && (
                   <Button
                     as={Link}
-                    href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposalId}`}
+                    href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
                     variant="secondaryOutline"
                   >
                     View proposal

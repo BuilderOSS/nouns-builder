@@ -61,7 +61,13 @@ fragment CandidateVersionFragment on ProposalCandidateVersion {
   description
   metadata
   representedAddress
-  proposalId
+  computedProposalId
+  attestationUID
+  proposal {
+    id
+    proposalId
+    proposalNumber
+  }
   createdAt
   discussionUrl
   signatureCount

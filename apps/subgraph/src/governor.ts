@@ -117,6 +117,14 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   dao.save()
   proposal.save()
 
+  let candidateVersion = ProposalCandidateVersion.load(proposal.proposalId.toHexString())
+  if (candidateVersion) {
+    proposal.candidateVersion = candidateVersion.id
+    candidateVersion.proposal = proposal.id
+    candidateVersion.save()
+    proposal.save()
+  }
+
   // Create feed event
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let feedEvent = new ProposalCreatedFeedEvent(feedEventId)
@@ -205,6 +213,14 @@ export function handleProposalUpdated(event: ProposalUpdatedEvent): void {
   oldProposal.save()
   proposal.save()
 
+  if (proposal.candidateVersion != null) {
+    let candidateVersion = ProposalCandidateVersion.load(proposal.candidateVersion!)
+    if (candidateVersion) {
+      candidateVersion.proposal = proposal.id
+      candidateVersion.save()
+    }
+  }
+
   // Create ProposalEditedEvent for on-chain proposal edits
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let feedEvent = new ProposalEditedEvent(feedEventId)
@@ -254,11 +270,12 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
     proposalSigner.save()
   }
 
-  // Try to find matching candidate version by proposalId
-  // When a candidate is submitted via proposeBySigs(), the proposalId matches
+  // Try to find matching candidate version by computed proposal hash.
   let candidateVersion = ProposalCandidateVersion.load(proposal.proposalId.toHexString())
-  if (candidateVersion && candidateVersion.proposalId == proposal.proposalId) {
+  if (candidateVersion) {
     proposal.candidateVersion = candidateVersion.id
+    candidateVersion.proposal = proposal.id
+    candidateVersion.save()
 
     // Create CandidateSubmittedAsProposalEvent
     let feedEventId =

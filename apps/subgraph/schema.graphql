@@ -219,7 +219,9 @@ type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
   metadata: String
   representedAddress: String
   discussionUrl: String
-  proposalId: Bytes!
+  computedProposalId: Bytes!
+  attestationUID: Bytes!
+  proposal: Proposal
   createdAt: BigInt!
   signatures: [CandidateSponsorSignature!]! @derivedFrom(field: "version")
   signatureCount: BigInt!

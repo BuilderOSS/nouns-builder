@@ -35,7 +35,13 @@ fragment Proposal on Proposal {
   }
   candidateVersion {
     candidateId
-    proposalId
+    computedProposalId
+    attestationUID
+    proposal {
+      id
+      proposalId
+      proposalNumber
+    }
     versionNumber
     group {
       candidateNumber

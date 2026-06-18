@@ -28,7 +28,6 @@ const GROUP_ID = '0x111111111111111111111111111111111111111111111111111111111111
 const VERSION_ID = '0x2222222222222222222222222222222222222222222222222222222222222222'
 const PROPOSAL_ID = '0x3333333333333333333333333333333333333333333333333333333333333333'
 const SIGNATURE_ID = '0x4444444444444444444444444444444444444444444444444444444444444444'
-
 function repeatHexByte(byte: string, count: i32): string {
   let out = '0x'
   for (let i = 0; i < count; i++) {
@@ -67,7 +66,10 @@ function seedDao(): void {
   dao.save()
 }
 
-function seedCandidateGroup(): void {
+function seedCandidateGroup(
+  computedProposalId: string = PROPOSAL_ID,
+  attestationUID: string = VERSION_ID
+): void {
   const group = new ProposalCandidateGroup(GROUP_ID)
   group.dao = TOKEN_ADDRESS
   group.proposer = Address.fromString(PROPOSER)
@@ -84,7 +86,7 @@ function seedCandidateGroup(): void {
   group.currentAbstainCount = BigInt.fromI32(0)
   group.save()
 
-  const version = new ProposalCandidateVersion(VERSION_ID)
+  const version = new ProposalCandidateVersion(computedProposalId)
   version.group = GROUP_ID
   version.candidateId = Bytes.fromHexString(GROUP_ID)
   version.salt = Bytes.fromHexString(
@@ -99,7 +101,8 @@ function seedCandidateGroup(): void {
   version.description = 'Candidate description'
   version.metadata =
     '{"version":1,"title":"Test candidate","description":"Candidate description","transactionBundles":[]}'
-  version.proposalId = Bytes.fromHexString(PROPOSAL_ID)
+  version.computedProposalId = Bytes.fromHexString(computedProposalId)
+  version.attestationUID = Bytes.fromHexString(attestationUID)
   version.createdAt = BigInt.fromI32(1)
   version.signatureCount = BigInt.fromI32(0)
   version.totalVoteWeight = BigInt.fromI32(0)
@@ -148,7 +151,7 @@ function mockTokenVotes(votes: i32): void {
 
 function encodeSignatureData(): Bytes {
   const tuple = new ethereum.Tuple()
-  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(VERSION_ID)))
+  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID)))
   tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID)))
   tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(7)))
   tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(2000000000)))

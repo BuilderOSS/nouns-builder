@@ -374,7 +374,7 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
     event.block.timestamp
   )
 
-  let versionId = event.params.uid.toHexString()
+  let versionId = decoded.proposalId.toHexString()
   let version = ProposalCandidateVersion.load(versionId)
   if (!version) {
     version = new ProposalCandidateVersion(versionId)
@@ -397,7 +397,9 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   version.values = decoded.values
   version.calldatas = decoded.calldatas
   version.metadata = decoded.description
-  version.proposalId = decoded.proposalId
+  version.attestationUID = event.params.uid
+  version.computedProposalId = decoded.proposalId
+  version.proposal = null
   version.createdAt = event.block.timestamp
   let parsedDescription = parseDescriptionFields(decoded.description)
   version.title = parsedDescription[0].length > 0 ? parsedDescription[0] : null
@@ -480,7 +482,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   if (!decoded) return
 
   let version = ProposalCandidateVersion.load(decoded.candidateVersionUID.toHexString())
-  if (!version || version.proposalId != decoded.proposalId) return
+  if (!version) return
 
   let group = ProposalCandidateGroup.load(version.group)
   if (!group) return
@@ -514,10 +516,18 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
     descriptionHash,
     Address.fromBytes(group.proposer)
   )
-  if (
-    proposalHashResult.reverted ||
-    proposalHashResult.value.toHexString() != decoded.proposalId.toHexString()
-  ) {
+  if (proposalHashResult.reverted) {
+    return
+  }
+
+  if (version.computedProposalId.toHexString() == ZERO_BYTES32) {
+    version.computedProposalId = proposalHashResult.value
+    version.save()
+  } else if (version.computedProposalId != proposalHashResult.value) {
+    return
+  }
+
+  if (proposalHashResult.value.toHexString() != decoded.proposalId.toHexString()) {
     return
   }
 
