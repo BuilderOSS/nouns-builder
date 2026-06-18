@@ -116,10 +116,10 @@ const VoteBreakdown = ({
     >
       <Flex justify="space-between" align="center" gap="x3" mb="x3" wrap>
         <Text fontSize={16} fontWeight="display">
-          Vote breakdown
+          Signal breakdown
         </Text>
         <Text color="text3" fontSize={14}>
-          {totalVotes > 0 ? `${totalVotes} total votes` : 'No votes yet'}
+          {totalVotes > 0 ? `${totalVotes} total signals` : 'No signals yet'}
         </Text>
       </Flex>
 
@@ -237,7 +237,7 @@ const CandidateCommentCard = ({
                 {support.label}
               </Box>
               <Text color="text3" fontSize={12}>
-                {comment.voteWeight.toString()} votes
+                {comment.voteWeight.toString()} signal weight
               </Text>
             </>
           )}
@@ -729,7 +729,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
               </Stack>
 
               <Flex gap="x2" wrap>
-                <Button onClick={() => setComposerOpen(true)}>Vote / comment</Button>
+                <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
                 {latestVersion?.proposalId && latestVersion.proposalId !== zeroHash && (
                   <Button
                     as={Link}
@@ -772,7 +772,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
           <Box p="x6">
             <Stack gap="x4">
               <Text fontSize={20} fontWeight="display">
-                Vote / comment
+                Signal / comment
               </Text>
               <CandidateCommentForm
                 candidateId={candidate.id as `0x${string}`}

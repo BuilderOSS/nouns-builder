@@ -48,7 +48,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   )
 
   const [support, setSupport] = useState<CandidateVoteSupportEnum>(
-    CandidateVoteSupportEnum.FOR
+    CandidateVoteSupportEnum.NONE
   )
   const [comment, setComment] = useState('')
   const [shouldSign, setShouldSign] = useState(false)
@@ -58,10 +58,16 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isTxSuccess, setIsTxSuccess] = useState(false)
+  const [submittedSupport, setSubmittedSupport] = useState<CandidateVoteSupportEnum | null>(null)
+  const [submittedWithSignature, setSubmittedWithSignature] = useState(false)
 
   const canSubmit = React.useMemo(() => {
-    return !!address && !!addresses.token && (comment.trim().length > 0 || shouldSign)
-  }, [address, addresses.token, comment, shouldSign])
+    return (
+      !!address &&
+      !!addresses.token &&
+      (comment.trim().length > 0 || shouldSign || support !== CandidateVoteSupportEnum.NONE)
+    )
+  }, [address, addresses.token, comment, shouldSign, support])
 
   const canSign = React.useMemo(() => {
     return support === CandidateVoteSupportEnum.FOR && !isCreator
@@ -74,9 +80,11 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     setErrorMessage(null)
     setIsSubmitting(true)
 
+    const withSignature = shouldSign && canSign && !!walletClient
+
     try {
-      if (shouldSign && canSign && walletClient) {
-        // Submit comment + signature in one transaction
+      if (withSignature) {
+        // Submit signal/comment + signature in one transaction
         await attestCommentWithSignature({
           config,
           chainId: chain.id,
@@ -96,7 +104,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           parentCommentUID,
         })
       } else {
-        // Submit only comment/vote
+        // Submit only comment/signal
         await attestCandidateComment({
           config,
           chainId: chain.id,
@@ -108,9 +116,12 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
         })
       }
 
+      setSubmittedWithSignature(withSignature)
+      setSubmittedSupport(support)
       setIsTxSuccess(true)
       setComment('')
       setShouldSign(false)
+      setSupport(CandidateVoteSupportEnum.NONE)
 
       if (onSuccess) {
         setTimeout(onSuccess, 1500)
@@ -148,6 +159,8 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const handleCloseModal = () => {
     setIsTxSuccess(false)
     setErrorMessage(null)
+    setSubmittedSupport(null)
+    setSubmittedWithSignature(false)
   }
 
   return (
@@ -155,7 +168,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
       <Stack gap="x6">
         <Box>
           <Text fontSize={16} fontWeight="label" mb="x4">
-            Your Position
+            Your Signal
           </Text>
           <Stack gap="x3">
             <Box
@@ -182,7 +195,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
                 onChange={() => setSupport(CandidateVoteSupportEnum.FOR)}
                 style={{ marginRight: '12px' }}
               />
-              <Text>Support (For)</Text>
+              <Text>Signal For</Text>
             </Box>
             <Box
               as="label"
@@ -213,7 +226,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
                 }}
                 style={{ marginRight: '12px' }}
               />
-              <Text>Oppose (Against)</Text>
+              <Text>Signal Against</Text>
             </Box>
             <Box
               as="label"
@@ -244,7 +257,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
                 }}
                 style={{ marginRight: '12px' }}
               />
-              <Text>Abstain</Text>
+              <Text>Signal Abstain</Text>
             </Box>
             <Box
               as="label"
@@ -273,7 +286,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
                 }}
                 style={{ marginRight: '12px' }}
               />
-              <Text>No Position</Text>
+              <Text>No signal</Text>
             </Box>
           </Stack>
         </Box>
@@ -312,7 +325,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
                 onChange={(e) => setShouldSign(e.target.checked)}
                 style={{ marginRight: '12px' }}
               />
-              <Text>Also sponsor this candidate (adds your signature)</Text>
+              <Text>Also sponsor this candidate</Text>
             </Box>
             {shouldSign && (
               <Text fontSize={14} color="text3" mt="x2" ml="x3">
@@ -324,7 +337,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
 
         {isCreator && (
           <Text fontSize={14} color="text3">
-            Candidate creators can vote and comment, but cannot sponsor their own
+            Candidate creators can signal and comment, but cannot sponsor their own
             candidate.
           </Text>
         )}
@@ -336,7 +349,11 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
             disabled={!canSubmit}
             loading={isSubmitting}
           >
-            {shouldSign ? 'Comment & Sign' : 'Submit'}
+            {shouldSign
+              ? 'Signal & Sign'
+              : support === CandidateVoteSupportEnum.NONE
+                ? 'Add Comment'
+                : 'Submit Signal'}
           </ContractButton>
         </Flex>
       </Stack>
@@ -351,20 +368,26 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           pending={!isTxSuccess && !errorMessage}
           title={
             isTxSuccess
-              ? shouldSign
-                ? 'Comment & Signature Added'
-                : 'Comment Added'
+              ? submittedWithSignature
+                ? 'Signal & Signature Added'
+                : submittedSupport === CandidateVoteSupportEnum.NONE
+                  ? 'Comment Added'
+                  : 'Signal Submitted'
               : errorMessage
                 ? 'Transaction Failed'
                 : shouldSign
-                  ? 'Submitting Comment & Signature...'
-                  : 'Submitting Comment...'
+                  ? 'Submitting Signal & Signature...'
+                  : support === CandidateVoteSupportEnum.NONE
+                    ? 'Submitting Comment...'
+                    : 'Submitting Signal...'
           }
           subtitle={
             isTxSuccess
-              ? shouldSign
-                ? 'Your comment and signature have been recorded.'
-                : 'Your comment has been recorded.'
+              ? submittedWithSignature
+                ? 'Your signal and signature have been recorded.'
+                : submittedSupport === CandidateVoteSupportEnum.NONE
+                  ? 'Your comment has been recorded.'
+                  : 'Your signal has been recorded.'
               : errorMessage
                 ? errorMessage
                 : 'Please confirm the transaction in your wallet.'
