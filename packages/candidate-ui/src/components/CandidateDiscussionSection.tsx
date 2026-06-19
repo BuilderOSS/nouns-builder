@@ -79,22 +79,24 @@ const CandidateCommentCard = ({
         </Flex>
         <Flex align="center" gap="x2" wrap>
           {support.label !== 'None' && (
-            <Box
-              style={{
-                padding: '4px 8px',
-                borderRadius: 999,
-                background: support.color,
-                color: theme.colors.onAccent,
-                fontSize: 12,
-                fontWeight: 700,
-              }}
-            >
-              {support.label}
-            </Box>
+            <>
+              <Box
+                style={{
+                  padding: '4px 8px',
+                  borderRadius: 999,
+                  background: support.color,
+                  color: theme.colors.onAccent,
+                  fontSize: 12,
+                  fontWeight: 700,
+                }}
+              >
+                {support.label}
+              </Box>
+              <Text color="text3" fontSize={12}>
+                {comment.voteWeight.toString()} signal weight
+              </Text>
+            </>
           )}
-          <Text color="text3" fontSize={12}>
-            {comment.voteWeight.toString()} signal weight
-          </Text>
           <Text color="text3" fontSize={12}>
             {formatTimeAgo(comment.createdAt)}
           </Text>

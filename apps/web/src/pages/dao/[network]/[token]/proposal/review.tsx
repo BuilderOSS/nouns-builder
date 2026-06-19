@@ -4,6 +4,7 @@ import {
   CreateProposalHeading,
   ProposalStageIndicator,
   ReviewProposalForm,
+  TransactionComposerProvider,
   UpdatingProposalBanner,
 } from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
@@ -16,11 +17,12 @@ import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { notFoundWrap } from 'src/styles/404.css'
 import { useAccount } from 'wagmi'
+import { useShallow } from 'zustand/shallow'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
   const chain = useChainStore((x) => x.chain)
@@ -43,16 +45,65 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   })
 
   const {
-    transactions,
     disabled,
+    transactionType,
+    setTransactionType,
+    resetTransactionType,
+    addTransaction,
+    addTransactions,
+    removeTransaction,
+    removeAllTransactions,
+    transactions,
     title,
     summary,
     representedAddress,
     discussionUrl,
     representedAddressEnabled,
-    clearProposal,
     updateProposalId,
-  } = useProposalStore()
+    clearProposal,
+  } = useProposalStore(
+    useShallow((state) => ({
+      disabled: state.disabled,
+      transactionType: state.transactionType,
+      setTransactionType: state.setTransactionType,
+      resetTransactionType: state.resetTransactionType,
+      addTransaction: state.addTransaction,
+      addTransactions: state.addTransactions,
+      removeTransaction: state.removeTransaction,
+      removeAllTransactions: state.removeAllTransactions,
+      transactions: state.transactions,
+      title: state.title,
+      summary: state.summary,
+      representedAddress: state.representedAddress,
+      discussionUrl: state.discussionUrl,
+      representedAddressEnabled: state.representedAddressEnabled,
+      updateProposalId: state.updateProposalId,
+      clearProposal: state.clearProposal,
+    }))
+  )
+
+  const transactionComposer = useMemo(
+    () => ({
+      transactionType,
+      setTransactionType,
+      resetTransactionType,
+      transactions,
+      addTransaction,
+      addTransactions,
+      removeTransaction,
+      removeAllTransactions,
+    }),
+    [
+      transactionType,
+      setTransactionType,
+      resetTransactionType,
+      transactions,
+      addTransaction,
+      addTransactions,
+      removeTransaction,
+      removeAllTransactions,
+    ]
+  )
   const [proposalHydrated, setProposalHydrated] = useState(false)
 
   const isUpdatingProposal = !!updateProposalId
@@ -219,69 +270,71 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   }
 
   return (
-    <Stack
-      pb={{ '@initial': 'x30', '@768': 'x0' }}
-      w={'100%'}
-      px={'x3'}
-      style={{ maxWidth: 1060 }}
-      mx="auto"
-    >
-      <CreateProposalHeading
-        title={'Review and Submit'}
-        handleBack={onOpenCreatePage}
-        showHelpLinks
-        showStepBack
-        onStepBack={() => void onOpenCreateStage('transactions')}
-        showContinue={false}
-        showQueue={false}
-        showReset
-        hideActionsOnMobile
-        onReset={() => void onResetProposal()}
-      />
-
-      {isUpdatingProposal && (
-        <UpdatingProposalBanner
-          updateProposalId={updateProposalId}
-          updatingProposal={updatingProposal}
-        />
-      )}
-
-      <ProposalStageIndicator
-        currentStage={'review'}
-        onStageSelect={(stage) => {
-          if (stage === 'draft' || stage === 'transactions') {
-            void onOpenCreateStage(stage)
-          }
-        }}
-        isStageClickable={(stage) => stage === 'draft' || stage === 'transactions'}
-      />
-
-      <Stack w={'100%'} px={'x3'} mx="auto">
-        <ReviewProposalForm
-          disabled={disabled}
-          transactions={transactions}
-          title={title}
-          summary={summary}
-          representedAddress={representedAddress}
-          discussionUrl={discussionUrl}
-          representedAddressEnabled={representedAddressEnabled}
-          onProposalCreated={onProposalCreated}
-          onBackMobile={() => void onOpenCreateStage('transactions')}
-          onResetMobile={() => void onResetProposal()}
-        />
-      </Stack>
-
-      <AnimatedModal
-        open={proposalIdCreated !== undefined}
-        close={handleCloseSuccessModal}
+    <TransactionComposerProvider value={transactionComposer}>
+      <Stack
+        pb={{ '@initial': 'x30', '@768': 'x0' }}
+        w={'100%'}
+        px={'x3'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
       >
-        <SuccessModalContent
-          title={`Proposal submitted`}
-          subtitle={`Your Proposal has been successfully submitted!`}
-          success
+        <CreateProposalHeading
+          title={'Review and Submit'}
+          handleBack={onOpenCreatePage}
+          showHelpLinks
+          showStepBack
+          onStepBack={() => void onOpenCreateStage('transactions')}
+          showContinue={false}
+          showQueue={false}
+          showReset
+          hideActionsOnMobile
+          onReset={() => void onResetProposal()}
         />
-      </AnimatedModal>
-    </Stack>
+
+        {isUpdatingProposal && (
+          <UpdatingProposalBanner
+            updateProposalId={updateProposalId}
+            updatingProposal={updatingProposal}
+          />
+        )}
+
+        <ProposalStageIndicator
+          currentStage={'review'}
+          onStageSelect={(stage) => {
+            if (stage === 'draft' || stage === 'transactions') {
+              void onOpenCreateStage(stage)
+            }
+          }}
+          isStageClickable={(stage) => stage === 'draft' || stage === 'transactions'}
+        />
+
+        <Stack w={'100%'} px={'x3'} mx="auto">
+          <ReviewProposalForm
+            disabled={disabled}
+            transactions={transactions}
+            title={title}
+            summary={summary}
+            representedAddress={representedAddress}
+            discussionUrl={discussionUrl}
+            representedAddressEnabled={representedAddressEnabled}
+            onProposalCreated={onProposalCreated}
+            onBackMobile={() => void onOpenCreateStage('transactions')}
+            onResetMobile={() => void onResetProposal()}
+          />
+        </Stack>
+
+        <AnimatedModal
+          open={proposalIdCreated !== undefined}
+          close={handleCloseSuccessModal}
+        >
+          <SuccessModalContent
+            title={`Proposal submitted`}
+            subtitle={`Your Proposal has been successfully submitted!`}
+            success
+          />
+        </AnimatedModal>
+      </Stack>
+    </TransactionComposerProvider>
   )
 }
 

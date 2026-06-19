@@ -1,4 +1,4 @@
-import { TransactionTypeIcon } from '@buildeross/proposal-ui'
+import { BundledDecodedTransactions, TransactionTypeIcon } from '@buildeross/proposal-ui'
 import { type CandidateVersion } from '@buildeross/sdk'
 import {
   type CHAIN_ID,
@@ -6,19 +6,16 @@ import {
   type ProposalDescriptionMetadataV1,
 } from '@buildeross/types'
 import { TransactionType } from '@buildeross/types'
-import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
-type DecodedTransactionsProp = React.ComponentProps<
-  typeof DecodedTransactions
->['decodedTransactions']
-
 interface CandidateDetailsSectionProps {
   description: string
   discussionUrl?: string | null
-  decodedTransactions?: DecodedTransactionsProp
+  decodedTransactions?: React.ComponentProps<
+    typeof BundledDecodedTransactions
+  >['decodedTransactions']
   isDecodingTransactions?: boolean
   proposalMetadata?: ProposalDescriptionMetadataV1
   chainId: CHAIN_ID
@@ -67,11 +64,12 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
 
       <Section title="Proposed Transactions">
         {decodedTransactions?.length ? (
-          <DecodedTransactions
+          <BundledDecodedTransactions
             chainId={chainId}
             addresses={addresses}
             decodedTransactions={decodedTransactions}
             proposalMetadata={proposalMetadata}
+            transactionBundles={proposalMetadata?.transactionBundles}
             isDecoding={isDecodingTransactions}
           />
         ) : (

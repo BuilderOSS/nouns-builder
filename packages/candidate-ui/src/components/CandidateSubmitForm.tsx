@@ -1,9 +1,9 @@
 import { MobileProposalActionBar } from '@buildeross/create-proposal-ui'
 import { decodeTransactions } from '@buildeross/hooks'
+import { BundledDecodedTransactions } from '@buildeross/proposal-ui'
 import { attestCandidate, type CandidateAttestationParams } from '@buildeross/sdk'
 import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { type ProposalDescriptionMetadataV1 } from '@buildeross/types'
-import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { getErrorMessage } from '@buildeross/utils/errors'
@@ -271,11 +271,12 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
               {isDecodingTransactions && !decodedTransactions ? (
                 <Text color="text3">Loading transaction details...</Text>
               ) : (
-                <DecodedTransactions
+                <BundledDecodedTransactions
                   chainId={chain.id}
                   addresses={addresses}
                   decodedTransactions={decodedTransactions}
                   proposalMetadata={proposalMetadata}
+                  transactionBundles={transactionBundles}
                   isDecoding={isDecodingTransactions}
                 />
               )}

@@ -9,12 +9,10 @@ import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import {
   ProposalDescriptionMetadataV1,
-  ProposalTransactionBundle,
   SimulationOutput,
   TransactionBundle,
 } from '@buildeross/types'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
-import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { getEscrowBundler, getEscrowBundlerLegacy } from '@buildeross/utils/escrow'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -22,14 +20,13 @@ import {
   getSablierAirdropFactories,
   getSablierContracts,
 } from '@buildeross/utils/sablier/contracts'
-import { atoms, Box, Flex, Paragraph, Stack, Text } from '@buildeross/zord'
+import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import { toLower } from 'lodash'
 import React, { useMemo } from 'react'
 import { zeroAddress } from 'viem'
 
-import { normalizeTextForCompare, TRANSACTION_TYPES } from '../../constants'
+import { BundledDecodedTransactions } from '../BundledDecodedTransactions'
 import { propPageWrapper } from '../styles.css'
-import { TransactionTypeIcon } from '../TransactionTypeIcon'
 import { AirdropDetails } from './AirdropDetails'
 import { CoinDetails } from './CoinDetails'
 import { DropDetails } from './DropDetails'
@@ -50,12 +47,6 @@ type ProposalDescriptionProps = {
   previewSimulations?: SimulationOutput[]
 }
 
-type BundleWithRange = ProposalTransactionBundle & {
-  bundleIndex: number
-  start: number
-  end: number
-}
-
 const getSafeDiscussionUrl = (value?: string | null): string | null => {
   if (!value) return null
 
@@ -69,14 +60,6 @@ const getSafeDiscussionUrl = (value?: string | null): string | null => {
   } catch {
     return null
   }
-}
-
-const getBundleIntent = (summary: string | undefined, fallback: string | undefined) => {
-  if (!summary) return fallback
-  if (!fallback) return summary
-  return normalizeTextForCompare(summary) === normalizeTextForCompare(fallback)
-    ? fallback
-    : summary
 }
 
 export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
@@ -143,30 +126,6 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
 
     return isValid ? bundles : undefined
   }, [isPreview, parsedProposalMetadata, previewTransactions])
-
-  const bundlesWithRanges = useMemo(() => {
-    if (!decodedTransactions?.length || !metadataBundles?.length) return undefined
-
-    let cursor = 0
-    const ranges: BundleWithRange[] = []
-
-    for (let bundleIndex = 0; bundleIndex < metadataBundles.length; bundleIndex++) {
-      const bundle = metadataBundles[bundleIndex]
-      const start = cursor
-      const end = cursor + bundle.callCount
-      ranges.push({ ...bundle, bundleIndex, start, end })
-      cursor = end
-    }
-
-    if (cursor !== decodedTransactions.length) {
-      console.warn(
-        'Proposal metadata bundle count mismatch; falling back to decoded-only.'
-      )
-      return undefined
-    }
-
-    return ranges
-  }, [decodedTransactions, metadataBundles])
 
   const proposalMetadataForSummary = useMemo<
     ProposalDescriptionMetadataV1 | undefined
@@ -386,75 +345,15 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
         )}
 
         <Section title="Proposed Transactions" mb={isPreview ? 'x0' : undefined}>
-          {bundlesWithRanges?.length ? (
-            <Stack gap="x4">
-              {bundlesWithRanges.map((bundle) => {
-                const transactionTypeMeta =
-                  TRANSACTION_TYPES[bundle.type as keyof typeof TRANSACTION_TYPES]
-                const bundleIntent = getBundleIntent(
-                  bundle.summary,
-                  transactionTypeMeta?.subTitle || transactionTypeMeta?.title
-                )
-                const bundleDecodedTransactions = decodedTransactions?.slice(
-                  bundle.start,
-                  bundle.end
-                )
-
-                return (
-                  <Stack
-                    key={`${bundle.bundleIndex}-${bundle.type}-${bundle.start}`}
-                    className={atoms({
-                      borderColor: 'border',
-                      borderStyle: 'solid',
-                      borderWidth: 'normal',
-                      borderRadius: 'curved',
-                    })}
-                    p="x3"
-                    gap="x3"
-                    align="stretch"
-                  >
-                    <Flex align="center" gap="x2">
-                      <TransactionTypeIcon transactionType={bundle.type} />
-                      <Stack gap="x1">
-                        <Text fontWeight="heading">{bundleIntent || bundle.type}</Text>
-                        <Text color="text3">
-                          {bundle.callCount} {bundle.callCount === 1 ? 'call' : 'calls'}
-                        </Text>
-                      </Stack>
-                    </Flex>
-
-                    {!!bundleDecodedTransactions?.length && (
-                      <DecodedTransactions
-                        decodedTransactions={bundleDecodedTransactions}
-                        chainId={chain.id}
-                        addresses={addresses}
-                        isDecoding={isDecoding}
-                        startIndex={bundle.start}
-                        proposalMetadata={proposalMetadataForSummary}
-                        simulationByIndex={failedSimulationByIndex}
-                        bundleContext={{
-                          bundleIndex: bundle.bundleIndex,
-                          bundleType: bundle.type,
-                          bundleIntent,
-                          bundleTypeTitle: transactionTypeMeta?.title,
-                          bundleCallCount: bundle.callCount,
-                        }}
-                      />
-                    )}
-                  </Stack>
-                )
-              })}
-            </Stack>
-          ) : (
-            <DecodedTransactions
-              decodedTransactions={decodedTransactions}
-              chainId={chain.id}
-              addresses={addresses}
-              isDecoding={isDecoding}
-              proposalMetadata={proposalMetadataForSummary}
-              simulationByIndex={failedSimulationByIndex}
-            />
-          )}
+          <BundledDecodedTransactions
+            decodedTransactions={decodedTransactions}
+            chainId={chain.id}
+            addresses={addresses}
+            isDecoding={isDecoding}
+            proposalMetadata={proposalMetadataForSummary}
+            transactionBundles={metadataBundles}
+            simulationByIndex={failedSimulationByIndex}
+          />
         </Section>
       </Flex>
     </Flex>

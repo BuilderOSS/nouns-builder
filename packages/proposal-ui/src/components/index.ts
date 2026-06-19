@@ -1,3 +1,4 @@
+export * from './BundledDecodedTransactions'
 export * from './OverwriteDraftModal'
 export * from './PropDates'
 export * from './ProposalActions'
