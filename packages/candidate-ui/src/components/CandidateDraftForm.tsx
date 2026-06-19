@@ -1,6 +1,7 @@
 import { useCandidateStore } from '@buildeross/stores'
-import { TextArea, TextInput } from '@buildeross/ui'
-import { Stack } from '@buildeross/zord'
+import { TextInput } from '@buildeross/ui'
+import { MarkdownEditor } from '@buildeross/ui/MarkdownEditor'
+import { Box, Stack } from '@buildeross/zord'
 import React from 'react'
 
 export interface CandidateDraftFormProps {
@@ -12,7 +13,7 @@ export const CandidateDraftForm: React.FC<CandidateDraftFormProps> = () => {
     useCandidateStore()
 
   return (
-    <Stack gap="x6">
+    <Stack width="100%">
       <TextInput
         id="candidate-title"
         value={title || ''}
@@ -22,26 +23,24 @@ export const CandidateDraftForm: React.FC<CandidateDraftFormProps> = () => {
         helperText="A clear, descriptive title for your proposal candidate"
       />
 
-      <TextArea
-        id="candidate-summary"
-        value={summary || ''}
-        inputLabel="Summary"
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          setSummary(e.target.value)
-        }
-        placeholder="Describe your proposal candidate..."
-        rows={6}
-        helperText="Explain what your proposal will do and why it's important"
-      />
+      <Box mt="x6">
+        <MarkdownEditor
+          value={summary || ''}
+          onChange={(value) => setSummary(value)}
+          inputLabel="Description"
+        />
+      </Box>
 
-      <TextInput
-        id="candidate-discussion-url"
-        value={discussionUrl || ''}
-        inputLabel="Discussion URL (Optional)"
-        onChange={(e) => setDiscussionUrl(e.target.value)}
-        placeholder="https://..."
-        helperText="Link to forum discussion, Discord thread, or other relevant discussion"
-      />
+      <Box mt="x6">
+        <TextInput
+          id="candidate-discussion-url"
+          value={discussionUrl || ''}
+          inputLabel="Discussion URL (optional)"
+          onChange={(e) => setDiscussionUrl(e.target.value)}
+          placeholder="https://..."
+          helperText="Link to forum discussion, Discord thread, or other relevant discussion"
+        />
+      </Box>
     </Stack>
   )
 }

@@ -12,6 +12,7 @@ import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/store
 import { type ProposalDescriptionMetadataV1 } from '@buildeross/types'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
+import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
@@ -21,6 +22,7 @@ import { useAccount, useConfig } from 'wagmi'
 
 import { buildCandidateDescription } from '../utils/buildCandidateDescription'
 import { getCandidateProposalId } from '../utils/candidateProposal'
+import { CandidateDraftForm } from './CandidateDraftForm'
 
 export interface CandidateSubmitFormProps {
   isUpdate?: boolean // True if updating existing candidate
@@ -52,6 +54,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isTxSuccess, setIsTxSuccess] = useState(false)
   const [showUpdateWarning, setShowUpdateWarning] = useState(false)
+  const [isEditingMetadata, setIsEditingMetadata] = useState(false)
 
   // Flatten transactions from bundles
   const allTransactions = React.useMemo(() => {
@@ -235,49 +238,67 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
   return (
     <>
       <Stack gap="x6">
+        <Flex justify="space-between" align="center" className={defaultInputLabelStyle}>
+          <label>Candidate Preview</label>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setIsEditingMetadata((state) => !state)}
+          >
+            {isEditingMetadata ? 'Done' : 'Edit'}
+          </Button>
+        </Flex>
+
         <ProposalContentCard>
-          <ProposalSection title="Title">
-            <Text fontSize={28} fontWeight="display">
-              {title}
-            </Text>
-            {address && (
-              <Flex
-                color={'text3'}
-                mt={'x2'}
-                align="center"
-                gap="x2"
-                wrap
-                style={{ minWidth: 0 }}
-              >
-                <Text color={'text3'}>By</Text>
-                <WalletIdentityWithPreview
-                  address={address}
-                  displayName={displayName}
-                  avatarSrc={ensAvatar}
-                  avatarSize="20"
-                  nameVariant="paragraph-sm"
-                  mobileTapBehavior="toggle"
-                  inline
-                />
-              </Flex>
-            )}
-          </ProposalSection>
-          <ProposalSection title="Summary">
-            <ProposalMarkdown>{summary || ''}</ProposalMarkdown>
-          </ProposalSection>
-          {discussionUrl && (
-            <ProposalSection title="Discussion">
-              <Text
-                as="a"
-                href={discussionUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'underline' }}
-              >
-                {discussionUrl}
-              </Text>
-            </ProposalSection>
+          {isEditingMetadata ? (
+            <CandidateDraftForm />
+          ) : (
+            <>
+              <ProposalSection title="Title">
+                <Text fontSize={28} fontWeight="display">
+                  {title}
+                </Text>
+                {address && (
+                  <Flex
+                    color={'text3'}
+                    mt={'x2'}
+                    align="center"
+                    gap="x2"
+                    wrap
+                    style={{ minWidth: 0 }}
+                  >
+                    <Text color={'text3'}>By</Text>
+                    <WalletIdentityWithPreview
+                      address={address}
+                      displayName={displayName}
+                      avatarSrc={ensAvatar}
+                      avatarSize="20"
+                      nameVariant="paragraph-sm"
+                      mobileTapBehavior="toggle"
+                      inline
+                    />
+                  </Flex>
+                )}
+              </ProposalSection>
+              <ProposalSection title="Summary">
+                <ProposalMarkdown>{summary || ''}</ProposalMarkdown>
+              </ProposalSection>
+              {discussionUrl && (
+                <ProposalSection title="Discussion">
+                  <Text
+                    as="a"
+                    href={discussionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: 'underline' }}
+                  >
+                    {discussionUrl}
+                  </Text>
+                </ProposalSection>
+              )}
+            </>
           )}
+
           <ProposalSection title="Transactions">
             {isDecodingTransactions && !decodedTransactions ? (
               <Text color="text3">Loading transaction details...</Text>

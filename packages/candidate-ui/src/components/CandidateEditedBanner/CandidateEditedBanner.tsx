@@ -2,7 +2,7 @@ import { ProposalVersionDiffModal } from '@buildeross/proposal-ui'
 import { type CandidateVersionFragmentFragment } from '@buildeross/sdk'
 import { type ProposalVersion } from '@buildeross/sdk/subgraph'
 import { DropdownSelect, type SelectOption } from '@buildeross/ui/DropdownSelect'
-import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 type CandidateVersionLike = CandidateVersionFragmentFragment & {
@@ -113,15 +113,10 @@ export const CandidateEditedBanner: React.FC<CandidateEditedBannerProps> = ({
             <Text fontWeight="label" color="text1">
               This candidate has been edited
             </Text>
-            <Text color="text3">
-              This candidate has been edited {sortedVersions.length - 1}{' '}
-              {sortedVersions.length - 1 === 1 ? 'time' : 'times'}. Select a version to
-              view changes.
-            </Text>
           </Stack>
         </Flex>
 
-        <Box>
+        <Flex style={{ marginBottom: '-32px', paddingBottom: '16px' }}>
           <DropdownSelect
             options={versionOptions}
             value={undefined}
@@ -134,7 +129,7 @@ export const CandidateEditedBanner: React.FC<CandidateEditedBannerProps> = ({
             align="right"
             minWidth="300px"
           />
-        </Box>
+        </Flex>
       </Flex>
 
       <ProposalVersionDiffModal

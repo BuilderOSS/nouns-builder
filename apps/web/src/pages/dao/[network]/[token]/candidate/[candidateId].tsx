@@ -374,70 +374,58 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
         <Flex direction="column" gap={{ '@initial': 'x4', '@768': 'x7' }} mb="x2">
           <ProposalNavigation handleBack={() => router.back()} />
           <Flex gap="x4" direction="column">
-            <Flex
-              direction={{ '@initial': 'column', '@768': 'row' }}
-              justify="space-between"
-              align={{ '@initial': 'flex-start', '@768': 'flex-start' }}
-              gap="x4"
-            >
-              <Stack gap="x2">
-                <Text fontSize={20} color="text3" fontWeight="display">
-                  Candidate
-                </Text>
-                <Text fontSize={28} fontWeight="display">
-                  {latestVersion?.title ||
-                    (candidateNumberLabel
-                      ? `Candidate #${candidateNumberLabel}`
-                      : 'Candidate')}
-                </Text>
-                <Flex gap="x2" wrap align="center">
-                  <Text color="text3">By</Text>
-                  <WalletIdentityWithPreview
-                    address={candidate.proposer as `0x${string}`}
-                    displayName={walletSnippet(candidate.proposer)}
-                  />
-                  {createdAtLabel && <Text color="text3">· {createdAtLabel}</Text>}
-                  {latestVersion && (
-                    <Text color="text3">
-                      · V{latestVersion.versionNumber.toString()} ·{' '}
-                      {latestVersion.signatureCount.toString()} signatures
-                    </Text>
-                  )}
-                </Flex>
-                {latestVersion?.proposal && (
-                  <Text color="text3" fontSize={14}>
-                    Promoted to{' '}
-                    <Link
-                      href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
-                    >
-                      proposal
-                    </Link>
+            <Stack gap="x2">
+              <Text fontSize={20} color="text3" fontWeight="display">
+                Candidate
+              </Text>
+              <Text fontSize={28} fontWeight="display">
+                {latestVersion?.title ||
+                  (candidateNumberLabel
+                    ? `Candidate #${candidateNumberLabel}`
+                    : 'Candidate')}
+              </Text>
+              <Flex gap="x2" wrap align="center">
+                <Text color="text3">By</Text>
+                <WalletIdentityWithPreview
+                  address={candidate.proposer as `0x${string}`}
+                  displayName={walletSnippet(candidate.proposer)}
+                />
+                {createdAtLabel && <Text color="text3">· {createdAtLabel}</Text>}
+                {latestVersion && (
+                  <Text color="text3">
+                    · V{latestVersion.versionNumber.toString()} ·{' '}
+                    {latestVersion.signatureCount.toString()} signatures
                   </Text>
                 )}
-              </Stack>
-
-              <Flex
-                direction={{ '@initial': 'column', '@768': 'row' }}
-                gap={{ '@initial': 'x2', '@768': 'x2' }}
-                wrap
-                style={{ width: '100%' }}
-              >
-                <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
-                {latestVersion?.proposal && (
-                  <Button
-                    as={Link}
-                    href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
-                    variant="secondaryOutline"
-                  >
-                    View proposal
-                  </Button>
-                )}
-                {latestVersion && (
-                  <Button onClick={handleEditCandidate} variant="secondary">
-                    Edit candidate
-                  </Button>
-                )}
               </Flex>
+              {latestVersion?.proposal && (
+                <Text color="text3" fontSize={14}>
+                  Promoted to{' '}
+                  <Link
+                    href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
+                  >
+                    proposal
+                  </Link>
+                </Text>
+              )}
+            </Stack>
+
+            <Flex direction={'row'} gap={'x2'} wrap style={{ width: '100%' }}>
+              <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
+              {latestVersion?.proposal && (
+                <Button
+                  as={Link}
+                  href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
+                  variant="secondaryOutline"
+                >
+                  View proposal
+                </Button>
+              )}
+              {latestVersion && (
+                <Button onClick={handleEditCandidate} variant="secondary">
+                  Edit candidate
+                </Button>
+              )}
             </Flex>
 
             {candidate?.versions && candidate.versions.length > 1 && (
