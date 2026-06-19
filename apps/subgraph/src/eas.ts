@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes, crypto } from '@graphprotocol/graph-ts'
+import { Address, BigInt, ByteArray, Bytes, crypto } from '@graphprotocol/graph-ts'
 
 import {
   Attested as AttestedEvent,
@@ -240,6 +240,40 @@ function recomputeVersionSignatureAggregates(versionId: string): void {
   version.save()
 }
 
+function computeCandidateProposalHash(
+  governor: GovernorContract,
+  proposer: Address,
+  targets: Array<Address>,
+  values: Array<BigInt>,
+  calldatas: Array<Bytes>,
+  description: string
+): Bytes | null {
+  let descriptionHash = Bytes.fromByteArray(
+    crypto.keccak256(Bytes.fromUTF8(description)) as ByteArray
+  )
+  let result = governor.try_hashProposal(
+    targets,
+    values,
+    calldatas,
+    descriptionHash,
+    proposer
+  )
+
+  if (result.reverted) {
+    return null
+  }
+
+  return result.value
+}
+
+function buildTargets(targetsInput: Array<Address>): Array<Bytes> {
+  let targets = new Array<Bytes>(targetsInput.length)
+  for (let i = 0; i < targetsInput.length; i++) {
+    targets[i] = targetsInput[i]
+  }
+  return targets
+}
+
 function recomputeGroupLeadingVersion(groupId: string): void {
   let group = ProposalCandidateGroup.load(groupId)
   if (!group) return
@@ -283,7 +317,6 @@ function recomputeGroupVersionAggregates(groupId: string): void {
 
   for (let i = 0; i < versions.length; i++) {
     let version = versions[i]
-    if (version.revoked) continue
     count = count.plus(BigInt.fromI32(1))
     if (version.versionNumber > latestVersionNumber) {
       latestVersionNumber = version.versionNumber
@@ -374,31 +407,42 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
     event.block.timestamp
   )
 
-  let versionId = decoded.proposalId.toHexString()
+  let governor = GovernorContract.bind(Address.fromBytes(dao.governorAddress))
+  let targets: Address[] = []
+  for (let i = 0; i < decoded.targets.length; i++) {
+    targets.push(decoded.targets[i])
+  }
+
+  let proposalHash = computeCandidateProposalHash(
+    governor,
+    Address.fromBytes(group.proposer),
+    targets,
+    decoded.values,
+    decoded.calldatas,
+    decoded.description
+  )
+  if (!proposalHash) return
+
+  let versionId = proposalHash.toHexString()
   let version = ProposalCandidateVersion.load(versionId)
   if (!version) {
     version = new ProposalCandidateVersion(versionId)
     version.group = group.id
+    version.versionNumber = BigInt.fromI32(group.versions.load().length + 1)
     version.signatureCount = BigInt.fromI32(0)
     version.totalVoteWeight = BigInt.fromI32(0)
     version.revoked = false
   }
 
-  let targets: Bytes[] = []
-  for (let i = 0; i < decoded.targets.length; i++) {
-    targets[i] = decoded.targets[i]
-  }
-
   version.candidateId = candidateId
   version.salt = decoded.salt
   version.attester = event.params.attester
-  version.versionNumber = decoded.versionNumber
-  version.targets = targets
+  version.targets = buildTargets(targets)
   version.values = decoded.values
   version.calldatas = decoded.calldatas
   version.metadata = decoded.description
   version.attestationUID = event.params.uid
-  version.computedProposalId = decoded.proposalId
+  version.computedProposalId = proposalHash
   version.proposal = null
   version.createdAt = event.block.timestamp
   let parsedDescription = parseDescriptionFields(decoded.description)
@@ -501,33 +545,24 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
     targets.push(Address.fromBytes(version.targets[i]))
   }
 
-  let metadataString = ''
-  if (version.metadata != null) {
-    metadataString = version.metadata as string
-  }
-  let descriptionHash = changetype<Bytes>(
-    crypto.keccak256(Bytes.fromUTF8(metadataString))
-  )
-
-  let proposalHashResult = governor.try_hashProposal(
+  let proposalHash = computeCandidateProposalHash(
+    governor,
+    Address.fromBytes(group.proposer),
     targets,
     version.values,
     version.calldatas,
-    descriptionHash,
-    Address.fromBytes(group.proposer)
+    version.metadata ? (version.metadata as string) : ''
   )
-  if (proposalHashResult.reverted) {
+  if (!proposalHash) {
     return
   }
 
-  if (version.computedProposalId.toHexString() == ZERO_BYTES32) {
-    version.computedProposalId = proposalHashResult.value
+  if (version.computedProposalId != proposalHash) {
+    version.computedProposalId = proposalHash
     version.save()
-  } else if (version.computedProposalId != proposalHashResult.value) {
-    return
   }
 
-  if (proposalHashResult.value.toHexString() != decoded.proposalId.toHexString()) {
+  if (proposalHash.toHexString() != decoded.candidateVersionUID.toHexString()) {
     return
   }
 
@@ -539,7 +574,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   let signature = new CandidateSponsorSignature(event.params.uid.toHexString())
   signature.version = version.id
   signature.signer = event.params.attester
-  signature.proposalId = decoded.proposalId
+  signature.proposalId = proposalHash
   signature.nonce = decoded.nonce
   signature.deadline = decoded.deadline
   signature.signature = decoded.signature

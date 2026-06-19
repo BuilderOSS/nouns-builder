@@ -24,7 +24,6 @@ export interface CandidateSignatureParams {
   candidateVersionUID: Hex
   signer: AddressType
   proposer: AddressType
-  proposalId: Hex
   nonce: bigint
   deadline: number
 }
@@ -55,10 +54,11 @@ export async function attestCandidateSignature(
     candidateVersionUID,
     signer,
     proposer,
-    proposalId,
     nonce,
     deadline,
   } = params
+
+  const proposalId = candidateVersionUID
 
   // Get EAS contract address for this chain
   const easAddress = EAS_CONTRACT_ADDRESS[chainId]
@@ -116,7 +116,6 @@ export async function attestCandidateSignature(
   const schemaEncoder = new SchemaEncoder(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA)
   const encodedData = schemaEncoder.encodeData([
     { name: 'candidateVersionUID', value: candidateVersionUID, type: 'bytes32' },
-    { name: 'proposalId', value: proposalId, type: 'bytes32' },
     { name: 'nonce', value: nonce, type: 'uint256' },
     { name: 'deadline', value: deadline, type: 'uint256' },
     { name: 'signature', value: signature, type: 'bytes' },

@@ -152,7 +152,6 @@ function mockTokenVotes(votes: i32): void {
 function encodeSignatureData(): Bytes {
   const tuple = new ethereum.Tuple()
   tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID)))
-  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID)))
   tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(7)))
   tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(2000000000)))
   tuple.push(ethereum.Value.fromBytes(Bytes.fromHexString(repeatHexByte('11', 65))))

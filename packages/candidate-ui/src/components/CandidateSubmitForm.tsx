@@ -21,7 +21,6 @@ import { type Hex, keccak256, toBytes, toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 
 import { buildCandidateDescription } from '../utils/buildCandidateDescription'
-import { getCandidateProposalId } from '../utils/candidateProposal'
 import { CandidateDraftForm } from './CandidateDraftForm'
 
 export interface CandidateSubmitFormProps {
@@ -40,15 +39,8 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
   const { displayName, ensAvatar } = useEnsData(address)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const {
-    title,
-    summary,
-    discussionUrl,
-    transactions,
-    candidateId,
-    salt,
-    versionNumber,
-  } = useCandidateStore()
+  const { title, summary, discussionUrl, transactions, candidateId, salt } =
+    useCandidateStore()
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -145,11 +137,6 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     return keccak256(toBytes(`${addresses.token}${computedSalt}`))
   }, [candidateId, addresses.token, computedSalt])
 
-  const computedVersionNumber = React.useMemo(() => {
-    if (versionNumber) return versionNumber
-    return 1
-  }, [versionNumber])
-
   const canSubmit = React.useMemo(() => {
     return (
       !!address && !!title && !!summary && allTransactions.length > 0 && !!addresses.token
@@ -163,14 +150,6 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     setErrorMessage(null)
     setIsSubmitting(true)
 
-    const proposalId = getCandidateProposalId({
-      targets,
-      values,
-      calldatas,
-      description,
-      proposer: address,
-    })
-
     try {
       const params: CandidateAttestationParams = {
         config,
@@ -178,12 +157,10 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
         daoTokenAddress: addresses.token!,
         candidateId: computedCandidateId,
         salt: computedSalt,
-        versionNumber: computedVersionNumber,
         targets,
         values,
         calldatas,
         description,
-        proposalId,
       }
 
       const result = await attestCandidate(params)
@@ -208,7 +185,6 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     addresses.token,
     computedCandidateId,
     computedSalt,
-    computedVersionNumber,
     targets,
     values,
     calldatas,

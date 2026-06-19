@@ -82,15 +82,13 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
                 <Flex align="center" gap="x2">
                   <TransactionTypeIcon transactionType={TransactionType.CUSTOM} />
                   <Stack gap="x1">
-                    <Text fontWeight="heading">
-                      Version {version.versionNumber.toString()}
-                    </Text>
+                    {version.title && <Text fontWeight="heading">{version.title}</Text>}
                     <Text color="text3">
+                      Version {version.versionNumber.toString()} •{' '}
                       {version.signatureCount.toString()} signatures
                     </Text>
                   </Stack>
                 </Flex>
-                {version.title && <Text>{version.title}</Text>}
               </Stack>
             ))}
           </Stack>

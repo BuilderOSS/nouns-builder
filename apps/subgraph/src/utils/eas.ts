@@ -84,7 +84,7 @@ export const TREASURY_ASSET_PIN_SCHEMA_UID = Bytes.fromHexString(
 )
 
 export const PROPOSAL_CANDIDATE_SCHEMA_UID = Bytes.fromHexString(
-  '0x5d1c687645ae02fa0f235cc55ce24ab4e6c1d729f82c281689fd3f9f150932f3'
+  '0xc3315fb5b910e904d24f56c5b37dd5a5d06392bb040ba8ad669a9f7b3bbe2e4f'
 )
 
 export const CANDIDATE_COMMENT_SCHEMA_UID = Bytes.fromHexString(
@@ -92,7 +92,7 @@ export const CANDIDATE_COMMENT_SCHEMA_UID = Bytes.fromHexString(
 )
 
 export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID = Bytes.fromHexString(
-  '0xeb66ca8d752474c808c9922734355ea6ec385c2515d66433aeabbf2a7b9fcaa5'
+  '0x1e460936f99a0ebf20e0e5e8cecf19154ebb0d314d24be6a1ce2a253891a4e68'
 )
 
 export class Propdate extends ethereum.Tuple {
@@ -233,43 +233,32 @@ export class ProposalCandidate extends ethereum.Tuple {
   get salt(): Bytes {
     return this[1].toBytes()
   }
-  get versionNumber(): BigInt {
-    return this[2].toBigInt()
-  }
   get targets(): Array<Address> {
-    return this[3].toAddressArray()
+    return this[2].toAddressArray()
   }
   get values(): Array<BigInt> {
-    return this[4].toBigIntArray()
+    return this[3].toBigIntArray()
   }
   get calldatas(): Array<Bytes> {
-    return this[5].toBytesArray()
+    return this[4].toBytesArray()
   }
   get description(): string {
-    return this[6].toString()
-  }
-  get proposalId(): Bytes {
-    return this[7].toBytes()
+    return this[5].toString()
   }
 }
 
 export function decodeProposalCandidate(data: Bytes): ProposalCandidate | null {
-  const head = ethereum.decode(
-    '(bytes32,bytes32,uint256,uint256,uint256,uint256,uint256,bytes32)',
-    data
-  )
+  const head = ethereum.decode('(bytes32,bytes32,uint256,uint256,uint256,uint256)', data)
   if (!head) return null
 
   const headTuple = head.toTuple()
   const candidateId = headTuple[0].toBytes()
   const salt = headTuple[1].toBytes()
-  const versionNumber = headTuple[2].toBigInt()
   const totalLen = data.length
-  const targetsOffset = safeOffsetToI32(headTuple[3], totalLen)
-  const valuesOffset = safeOffsetToI32(headTuple[4], totalLen)
-  const calldatasOffset = safeOffsetToI32(headTuple[5], totalLen)
-  const descriptionOffset = safeOffsetToI32(headTuple[6], totalLen)
-  const proposalId = headTuple[7].toBytes()
+  const targetsOffset = safeOffsetToI32(headTuple[2], totalLen)
+  const valuesOffset = safeOffsetToI32(headTuple[3], totalLen)
+  const calldatasOffset = safeOffsetToI32(headTuple[4], totalLen)
+  const descriptionOffset = safeOffsetToI32(headTuple[5], totalLen)
 
   if (
     targetsOffset < 0 ||
@@ -312,12 +301,10 @@ export function decodeProposalCandidate(data: Bytes): ProposalCandidate | null {
   const tupleVals: Array<ethereum.Value> = [
     ethereum.Value.fromFixedBytes(candidateId),
     ethereum.Value.fromFixedBytes(salt),
-    ethereum.Value.fromUnsignedBigInt(versionNumber),
     ethereum.Value.fromAddressArray(targets),
     ethereum.Value.fromUnsignedBigIntArray(values),
     ethereum.Value.fromBytesArray(calldatas),
     ethereum.Value.fromString(description),
-    ethereum.Value.fromFixedBytes(proposalId),
   ]
   return changetype<ProposalCandidate>(tupleVals)
 }
@@ -383,32 +370,28 @@ export class CandidateSponsorSignature extends ethereum.Tuple {
   get candidateVersionUID(): Bytes {
     return this[0].toBytes()
   }
-  get proposalId(): Bytes {
-    return this[1].toBytes()
-  }
   get nonce(): BigInt {
-    return this[2].toBigInt()
+    return this[1].toBigInt()
   }
   get deadline(): BigInt {
-    return this[3].toBigInt()
+    return this[2].toBigInt()
   }
   get signature(): Bytes {
-    return this[4].toBytes()
+    return this[3].toBytes()
   }
 }
 
 export function decodeCandidateSponsorSignature(
   data: Bytes
 ): CandidateSponsorSignature | null {
-  const head = ethereum.decode('(bytes32,bytes32,uint256,uint256,uint256)', data)
+  const head = ethereum.decode('(bytes32,uint256,uint256,uint256)', data)
   if (!head) return null
 
   const headTuple = head.toTuple()
   const candidateVersionUID = headTuple[0].toBytes()
-  const proposalId = headTuple[1].toBytes()
-  const nonce = headTuple[2].toBigInt()
-  const deadline = headTuple[3].toBigInt()
-  const signatureOffset = safeOffsetToI32(headTuple[4], data.length)
+  const nonce = headTuple[1].toBigInt()
+  const deadline = headTuple[2].toBigInt()
+  const signatureOffset = safeOffsetToI32(headTuple[3], data.length)
 
   const totalLen = data.length
   if (signatureOffset < 0 || signatureOffset + 32 > totalLen) {
@@ -430,7 +413,6 @@ export function decodeCandidateSponsorSignature(
 
   const tupleVals: Array<ethereum.Value> = [
     ethereum.Value.fromFixedBytes(candidateVersionUID),
-    ethereum.Value.fromFixedBytes(proposalId),
     ethereum.Value.fromUnsignedBigInt(nonce),
     ethereum.Value.fromUnsignedBigInt(deadline),
     ethereum.Value.fromBytes(signature),

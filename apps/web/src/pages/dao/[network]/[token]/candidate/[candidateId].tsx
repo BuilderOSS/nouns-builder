@@ -4,7 +4,6 @@ import {
   CandidateDiscussionSection,
   CandidateEditedBanner,
   CandidateSignalBreakdown,
-  getCandidateProposalId,
 } from '@buildeross/candidate-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
@@ -41,7 +40,6 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR from 'swr'
-import { zeroHash } from 'viem'
 import { useReadContract } from 'wagmi'
 
 interface CandidateDetailPageProps {
@@ -205,25 +203,6 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
     }
   }, [latestVersion?.metadata])
 
-  const candidateProposalId = React.useMemo(() => {
-    if (!candidate || !latestVersion) return zeroHash
-
-    if (
-      latestVersion.computedProposalId &&
-      latestVersion.computedProposalId !== zeroHash
-    ) {
-      return latestVersion.computedProposalId as `0x${string}`
-    }
-
-    return getCandidateProposalId({
-      targets: (latestVersion.targets || []) as `0x${string}`[],
-      values: (latestVersion.values || []).map((value) => BigInt(value)),
-      calldatas: (latestVersion.calldatas || []) as `0x${string}`[],
-      description: latestVersion.metadata || '',
-      proposer: candidate.proposer as `0x${string}`,
-    })
-  }, [candidate, latestVersion])
-
   const { data: tokenSymbol } = useReadContract({
     abi: tokenAbi,
     address: addresses.token,
@@ -244,6 +223,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
 
     startCandidateDraft({
       candidateId: candidate.id,
+      candidateNumber: candidate.candidateNumber,
       salt: candidate.salt,
       versionNumber: Number(latestVersion.versionNumber) + 1,
       title: proposalMetadata?.title || latestVersion.title || '',
@@ -461,7 +441,6 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 proposer={candidate.proposer as `0x${string}`}
                 governorAddress={addresses.governor as `0x${string}`}
                 tokenSymbol={String(tokenSymbol)}
-                proposalId={candidateProposalId}
                 onSuccess={handleComposerSuccess}
               />
             </Stack>

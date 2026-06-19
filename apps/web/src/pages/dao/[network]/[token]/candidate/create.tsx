@@ -64,6 +64,7 @@ const CreateCandidatePage: NextPageWithLayout = () => {
     title,
     summary,
     candidateId,
+    candidateNumber,
     salt,
     versionNumber,
     transactions,
@@ -80,6 +81,7 @@ const CreateCandidatePage: NextPageWithLayout = () => {
       title: state.title,
       summary: state.summary,
       candidateId: state.candidateId,
+      candidateNumber: state.candidateNumber,
       salt: state.salt,
       versionNumber: state.versionNumber,
       transactions: state.transactions,
@@ -414,9 +416,9 @@ const CreateCandidatePage: NextPageWithLayout = () => {
           hideActionsOnMobile
         />
 
-        {isEditingCandidate && candidateId && (
+        {isEditingCandidate && candidateNumber && (
           <CandidateUpdatingBanner
-            candidateId={candidateId}
+            candidateNumber={candidateNumber}
             versionNumber={versionNumber}
           />
         )}

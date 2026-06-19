@@ -20,12 +20,10 @@ export interface CandidateAttestationParams {
   daoTokenAddress: string
   candidateId: Hex
   salt: Hex
-  versionNumber: number
   targets: string[]
   values: bigint[]
   calldatas: Hex[]
   description: string
-  proposalId: Hex
 }
 
 export interface CandidateAttestationResult {
@@ -47,12 +45,10 @@ export async function attestCandidate(
     daoTokenAddress,
     candidateId,
     salt,
-    versionNumber,
     targets,
     values,
     calldatas,
     description,
-    proposalId,
   } = params
 
   // Get EAS contract address for this chain
@@ -66,12 +62,10 @@ export async function attestCandidate(
   const encodedData = schemaEncoder.encodeData([
     { name: 'candidateId', value: candidateId, type: 'bytes32' },
     { name: 'salt', value: salt, type: 'bytes32' },
-    { name: 'versionNumber', value: versionNumber, type: 'uint64' },
     { name: 'targets', value: targets, type: 'address[]' },
     { name: 'values', value: values, type: 'uint256[]' },
     { name: 'calldatas', value: calldatas, type: 'bytes[]' },
     { name: 'description', value: description, type: 'string' },
-    { name: 'proposalId', value: proposalId, type: 'bytes32' },
   ]) as Hex
 
   // 2. Create attestation params

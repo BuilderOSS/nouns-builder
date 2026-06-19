@@ -142,6 +142,8 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
     return 'Submit as Proposal'
   }, [meetsThreshold, proposalThreshold, totalSignatureWeight, signatures.length])
 
+  if (signatures.length === 0) return null
+
   return (
     <>
       <Stack gap="x3">

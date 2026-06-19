@@ -15,7 +15,7 @@ fragment CandidateGroupFragment on ProposalCandidateGroup {
   currentForCount
   currentAgainstCount
   currentAbstainCount
-  leadingVersion {
+  versions(first: 1, orderBy: versionNumber, orderDirection: desc) {
     title
   }
 }

@@ -24,7 +24,6 @@ export interface CommentWithSignatureParams {
   candidateVersionUID: Hex
   signer: AddressType
   proposer: AddressType
-  proposalId: Hex
   nonce: bigint
   deadline: number
   support: CandidateVoteSupportEnum
@@ -60,13 +59,14 @@ export async function attestCommentWithSignature(
     candidateVersionUID,
     signer,
     proposer,
-    proposalId,
     nonce,
     deadline,
     support,
     comment,
     parentCommentUID = zeroHash,
   } = params
+
+  const proposalId = candidateVersionUID
 
   // 1. Generate EIP-712 signature for the proposal
   const domain = {
@@ -122,7 +122,6 @@ export async function attestCommentWithSignature(
   const signatureEncoder = new SchemaEncoder(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA)
   const signatureData = signatureEncoder.encodeData([
     { name: 'candidateVersionUID', value: candidateVersionUID, type: 'bytes32' },
-    { name: 'proposalId', value: proposalId, type: 'bytes32' },
     { name: 'nonce', value: nonce, type: 'uint256' },
     { name: 'deadline', value: deadline, type: 'uint256' },
     { name: 'signature', value: signature, type: 'bytes' },

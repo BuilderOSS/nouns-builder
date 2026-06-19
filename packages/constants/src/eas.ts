@@ -39,17 +39,17 @@ export const TREASURY_ASSET_PIN_SCHEMA_UID = `0xc384fd4fdacb670667c07759423132a1
 
 export const TREASURY_ASSET_PIN_SCHEMA = `uint8 tokenType, address token, bool isCollection, uint256 tokenId`
 
-export const PROPOSAL_CANDIDATE_SCHEMA_UID = `0x5d1c687645ae02fa0f235cc55ce24ab4e6c1d729f82c281689fd3f9f150932f3`
+export const PROPOSAL_CANDIDATE_SCHEMA_UID = `0xc3315fb5b910e904d24f56c5b37dd5a5d06392bb040ba8ad669a9f7b3bbe2e4f`
 
-export const PROPOSAL_CANDIDATE_SCHEMA = `bytes32 candidateId,bytes32 salt,uint64 versionNumber,address[] targets,uint256[] values,bytes[] calldatas,string description,bytes32 proposalId`
+export const PROPOSAL_CANDIDATE_SCHEMA = `bytes32 candidateId,bytes32 salt,address[] targets,uint256[] values,bytes[] calldatas,string description`
 
 export const CANDIDATE_COMMENT_SCHEMA_UID = `0x1decf999b02cbecd8697ae7cf0c4017bc0115adbee476da79634332fdff965b2`
 
 export const CANDIDATE_COMMENT_SCHEMA = `bytes32 candidateId,uint8 support,string comment,bytes32 parentCommentUID`
 
-export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID = `0xeb66ca8d752474c808c9922734355ea6ec385c2515d66433aeabbf2a7b9fcaa5`
+export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID = `0x1e460936f99a0ebf20e0e5e8cecf19154ebb0d314d24be6a1ce2a253891a4e68`
 
-export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA = `bytes32 candidateVersionUID,bytes32 proposalId,uint256 nonce,uint256 deadline,bytes signature`
+export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA = `bytes32 candidateVersionUID,uint256 nonce,uint256 deadline,bytes signature`
 
 export type AttestationParams = {
   schema: `0x${string}`

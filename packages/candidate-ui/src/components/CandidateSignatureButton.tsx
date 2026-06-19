@@ -18,7 +18,6 @@ export interface CandidateSignatureButtonProps {
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
-  proposalId: Hex
   buttonVariant?: React.ComponentProps<typeof ContractButton>['variant']
   alreadySigned?: boolean
   voteWeight?: bigint
@@ -31,7 +30,6 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   proposer,
   governorAddress,
   tokenSymbol,
-  proposalId,
   buttonVariant = 'primary',
   alreadySigned = false,
   voteWeight = 0n,
@@ -93,7 +91,6 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
         candidateVersionUID,
         signer: address,
         proposer,
-        proposalId,
         nonce,
         deadline,
       })
@@ -121,7 +118,6 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
     tokenSymbol,
     candidateVersionUID,
     proposer,
-    proposalId,
     nonce,
     deadline,
     onSuccess,
@@ -145,6 +141,8 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
       return `${signatureCount} signature${signatureCount !== 1 ? 's' : ''}`
     return undefined
   }, [signatureCount])
+
+  if (isProposer) return null
 
   return (
     <>

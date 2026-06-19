@@ -11,6 +11,7 @@ type State = {
   transactions: TransactionBundle[]
   disabled: boolean
   candidateId?: string // Unique identifier for this candidate group (salt-based)
+  candidateNumber?: number
   salt?: string // Random salt for creating candidateId
   versionNumber?: number // Version number for this candidate
   title?: string
@@ -29,13 +30,20 @@ type Actions = {
   setSummary: (summary?: string) => void
   setDiscussionUrl: (discussionUrl?: string) => void
   setCandidateId: (candidateId?: string) => void
+  setCandidateNumber: (candidateNumber?: number) => void
   setSalt: (salt?: string) => void
   setVersionNumber: (versionNumber?: number) => void
   setCandidateMetadata: (
     metadata: Partial<
       Pick<
         State,
-        'title' | 'summary' | 'discussionUrl' | 'candidateId' | 'salt' | 'versionNumber'
+        | 'title'
+        | 'summary'
+        | 'discussionUrl'
+        | 'candidateId'
+        | 'candidateNumber'
+        | 'salt'
+        | 'versionNumber'
       >
     >
   ) => void
@@ -47,6 +55,7 @@ type Actions = {
         | 'summary'
         | 'discussionUrl'
         | 'candidateId'
+        | 'candidateNumber'
         | 'salt'
         | 'versionNumber'
         | 'transactions'
@@ -64,6 +73,7 @@ const initialState: State = {
   title: undefined,
   discussionUrl: undefined,
   candidateId: undefined,
+  candidateNumber: undefined,
   salt: undefined,
   versionNumber: undefined,
   disabled: false,
@@ -107,6 +117,7 @@ type PersistedCandidateState = Partial<
     | 'summary'
     | 'discussionUrl'
     | 'candidateId'
+    | 'candidateNumber'
     | 'salt'
     | 'versionNumber'
     | 'transactionType'
@@ -157,6 +168,7 @@ export const useCandidateStore = create<State & Actions>()(
       setSummary: (summary) => set({ summary }),
       setDiscussionUrl: (discussionUrl) => set({ discussionUrl }),
       setCandidateId: (candidateId) => set({ candidateId }),
+      setCandidateNumber: (candidateNumber) => set({ candidateNumber }),
       setSalt: (salt) => set({ salt }),
       setVersionNumber: (versionNumber) => set({ versionNumber }),
       setCandidateMetadata: (metadata) => set(metadata),
@@ -186,6 +198,7 @@ export const useCandidateStore = create<State & Actions>()(
         summary: state.summary,
         discussionUrl: state.discussionUrl,
         candidateId: state.candidateId,
+        candidateNumber: state.candidateNumber,
         salt: state.salt,
         versionNumber: state.versionNumber,
         transactionType: state.transactionType,

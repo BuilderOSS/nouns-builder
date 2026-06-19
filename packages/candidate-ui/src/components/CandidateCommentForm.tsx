@@ -28,7 +28,6 @@ export interface CandidateCommentFormProps {
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
-  proposalId: Hex
   onSuccess?: () => void
   parentCommentUID?: Hex
 }
@@ -39,7 +38,6 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   proposer,
   governorAddress,
   tokenSymbol,
-  proposalId,
   onSuccess,
   parentCommentUID,
 }) => {
@@ -120,7 +118,6 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           candidateVersionUID,
           signer: address,
           proposer,
-          proposalId,
           nonce: nonce as bigint,
           deadline,
           support,
@@ -171,7 +168,6 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     candidateId,
     candidateVersionUID,
     proposer,
-    proposalId,
     nonce,
     deadline,
     support,

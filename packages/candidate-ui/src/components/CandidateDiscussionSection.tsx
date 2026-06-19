@@ -112,7 +112,6 @@ const CandidateCommentsPanel = ({
   comments,
   error,
   isLoading,
-  commentCount,
 }: {
   comments: CandidateComment[]
   error?: unknown
@@ -162,10 +161,10 @@ const CandidateCommentsPanel = ({
     <Stack gap={{ '@initial': 'x3', '@768': 'x4' }}>
       <Flex justify="space-between" align="center" wrap gap="x3">
         <Text fontSize={{ '@initial': 18, '@768': 20 }} fontWeight="display">
-          Comments ({commentCount.toString()})
+          Comments
         </Text>
-        <Text color="text3" fontSize={12}>
-          {comments.length > 0 ? `${comments.length} loaded` : 'Loading discussion'}
+        <Text size="sm" color="text3">
+          {comments.length > 0 && !isLoading ? `${comments.length} comments found` : ''}
         </Text>
       </Flex>
 
@@ -197,43 +196,25 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
       {latestVersion && tokenSymbol && (
-        <Box>
-          <Box
-            fontSize={{ '@initial': 18, '@768': 20 }}
-            mb={{ '@initial': 'x3', '@768': 'x5' }}
-            fontWeight="display"
-          >
-            Sponsors
-          </Box>
-          <CandidateSigners
-            candidateVersionUID={latestVersion.id as `0x${string}`}
-            proposer={candidate.proposer as `0x${string}`}
-            governorAddress={governorAddress}
-            tokenSymbol={String(tokenSymbol)}
-            description={latestVersion.metadata || ''}
-            targets={(latestVersion.targets || []) as string[]}
-            values={(latestVersion.values || []).map((value) => BigInt(value))}
-            calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
-            signatureCount={latestVersion.signatureCount}
-          />
-        </Box>
+        <CandidateSigners
+          candidateVersionUID={latestVersion.id as `0x${string}`}
+          proposer={candidate.proposer as `0x${string}`}
+          governorAddress={governorAddress}
+          tokenSymbol={String(tokenSymbol)}
+          description={latestVersion.metadata || ''}
+          targets={(latestVersion.targets || []) as string[]}
+          values={(latestVersion.values || []).map((value) => BigInt(value))}
+          calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
+          signatureCount={latestVersion.signatureCount}
+        />
       )}
 
-      <Box>
-        <Box
-          fontSize={{ '@initial': 18, '@768': 20 }}
-          mb={{ '@initial': 'x3', '@768': 'x5' }}
-          fontWeight="display"
-        >
-          Comments
-        </Box>
-        <CandidateCommentsPanel
-          comments={comments}
-          error={commentsError}
-          isLoading={commentsLoading}
-          commentCount={commentCount}
-        />
-      </Box>
+      <CandidateCommentsPanel
+        comments={comments}
+        error={commentsError}
+        isLoading={commentsLoading}
+        commentCount={commentCount}
+      />
     </Stack>
   )
 }

@@ -45,7 +45,7 @@ export const CandidateList: React.FC<CandidateListProps> = ({
           >
             <Box className={title}>
               <Label size="lg">
-                {candidate.leadingVersion?.title ||
+                {candidate.versions?.[0]?.title ||
                   `Candidate ${candidate.id.slice(0, 8)}...`}
               </Label>
               <Paragraph color="tertiary" mt="x1">

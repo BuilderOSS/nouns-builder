@@ -2,12 +2,12 @@ import { Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 export interface CandidateUpdatingBannerProps {
-  candidateId: string
+  candidateNumber: string | number
   versionNumber?: number
 }
 
 export const CandidateUpdatingBanner: React.FC<CandidateUpdatingBannerProps> = ({
-  candidateId,
+  candidateNumber,
   versionNumber,
 }) => {
   return (
@@ -26,8 +26,8 @@ export const CandidateUpdatingBanner: React.FC<CandidateUpdatingBannerProps> = (
       <Icon id="refresh" size="md" style={{ color: '#F59E0B' }} />
       <Stack gap="x1">
         <Text fontWeight="label" style={{ color: '#92400E' }}>
-          Updating Candidate {candidateId.slice(0, 10)}...
-          {versionNumber ? ` v${versionNumber}` : ''}
+          Updating Candidate #{candidateNumber}
+          {versionNumber ? ` - v${versionNumber}` : ''}
         </Text>
         <Text variant="paragraph-sm" style={{ color: '#92400E' }}>
           You&apos;re creating a new version of this candidate. Changes will replace the

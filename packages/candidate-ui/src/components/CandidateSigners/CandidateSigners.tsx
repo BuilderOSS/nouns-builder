@@ -4,13 +4,11 @@ import type { CandidateSponsorSignature } from '@buildeross/sdk/subgraph'
 import { getCandidateSponsorSignatures } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
-import { Box, Button, Flex, Heading, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
-import type { Hex } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
-import { getCandidateProposalId } from '../../utils/candidateProposal'
 import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
 import { CandidateSignatureButton } from '../CandidateSignatureButton'
 
@@ -45,17 +43,6 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     () => !!address && address.toLowerCase() === proposer.toLowerCase(),
     [address, proposer]
   )
-
-  // Compute proposalId locally using the candidate's data
-  const proposalId = React.useMemo<Hex>(() => {
-    return getCandidateProposalId({
-      targets: targets as `0x${string}`[],
-      values,
-      calldatas,
-      description,
-      proposer,
-    })
-  }, [targets, values, calldatas, description, proposer])
 
   const {
     data: signaturesData,
@@ -134,10 +121,9 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     <Box>
       <Stack gap="x4">
         <Flex align="center" justify="space-between" wrap gap="x3">
-          <Flex align="center" gap="x2">
-            <Icon id="handshake" size="sm" color="text3" />
-            <Heading size="xs">Candidate Sponsors</Heading>
-          </Flex>
+          <Text fontSize={{ '@initial': 18, '@768': 20 }} fontWeight="display">
+            Candidate Sponsors
+          </Text>
           <Text size="sm" color="text3">
             {totalSignatures} {totalSignatures === 1 ? 'signature' : 'signatures'}
           </Text>
@@ -148,7 +134,6 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
           proposer={proposer}
           governorAddress={governorAddress}
           tokenSymbol={tokenSymbol}
-          proposalId={proposalId as `0x${string}`}
           alreadySigned={alreadySigned}
           voteWeight={votes}
           signatureCount={totalSignatures}
