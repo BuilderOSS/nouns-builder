@@ -1,4 +1,9 @@
-import { BundledDecodedTransactions, TransactionTypeIcon } from '@buildeross/proposal-ui'
+import {
+  BundledDecodedTransactions,
+  ProposalMarkdown,
+  ProposalSection,
+  TransactionTypeIcon,
+} from '@buildeross/proposal-ui'
 import { type CandidateVersion } from '@buildeross/sdk'
 import {
   type CHAIN_ID,
@@ -6,8 +11,7 @@ import {
   type ProposalDescriptionMetadataV1,
 } from '@buildeross/types'
 import { TransactionType } from '@buildeross/types'
-import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
+import { Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 interface CandidateDetailsSectionProps {
@@ -23,19 +27,6 @@ interface CandidateDetailsSectionProps {
   versions?: CandidateVersion[]
 }
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <Box mb={{ '@initial': 'x4', '@768': 'x10' }}>
-    <Box
-      fontSize={{ '@initial': 18, '@768': 20 }}
-      mb={{ '@initial': 'x3', '@768': 'x5' }}
-      fontWeight="display"
-    >
-      {title}
-    </Box>
-    {children}
-  </Box>
-)
-
 export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = ({
   description,
   discussionUrl,
@@ -48,21 +39,19 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
 }) => {
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
-      <Section title="Description">
-        <Box>
-          <MarkdownDisplay>{description}</MarkdownDisplay>
-        </Box>
-      </Section>
+      <ProposalSection title="Description">
+        <ProposalMarkdown>{description}</ProposalMarkdown>
+      </ProposalSection>
 
       {discussionUrl && (
-        <Section title="Discussion">
+        <ProposalSection title="Discussion">
           <a href={discussionUrl} rel="noreferrer" target="_blank">
             {discussionUrl}
           </a>
-        </Section>
+        </ProposalSection>
       )}
 
-      <Section title="Proposed Transactions">
+      <ProposalSection title="Proposed Transactions">
         {decodedTransactions?.length ? (
           <BundledDecodedTransactions
             chainId={chainId}
@@ -75,10 +64,10 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
         ) : (
           <Text color="text3">No transactions in this candidate.</Text>
         )}
-      </Section>
+      </ProposalSection>
 
       {versions && versions.length > 0 && (
-        <Section title={`Edit History (${versions.length})`}>
+        <ProposalSection title={`Edit History (${versions.length})`}>
           <Stack gap="x4">
             {versions.map((version) => (
               <Stack
@@ -105,7 +94,7 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
               </Stack>
             ))}
           </Stack>
-        </Section>
+        </ProposalSection>
       )}
     </Stack>
   )

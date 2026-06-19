@@ -1,10 +1,16 @@
 import { MobileProposalActionBar } from '@buildeross/create-proposal-ui'
 import { decodeTransactions } from '@buildeross/hooks'
-import { BundledDecodedTransactions } from '@buildeross/proposal-ui'
+import { useEnsData } from '@buildeross/hooks/useEnsData'
+import {
+  BundledDecodedTransactions,
+  ProposalContentCard,
+  ProposalMarkdown,
+  ProposalSection,
+} from '@buildeross/proposal-ui'
 import { attestCandidate, type CandidateAttestationParams } from '@buildeross/sdk'
 import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { type ProposalDescriptionMetadataV1 } from '@buildeross/types'
-import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
+import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -29,6 +35,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
 }) => {
   const config = useConfig()
   const { address } = useAccount()
+  const { displayName, ensAvatar } = useEnsData(address)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const {
@@ -228,61 +235,64 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
   return (
     <>
       <Stack gap="x6">
-        <Box>
-          <Text fontWeight="label" mb="x2">
-            Review Candidate
-          </Text>
-          <Stack gap="x3" p="x4" backgroundColor="background2" borderRadius="curved">
-            <Box>
-              <Text fontSize={14} fontWeight="label" color="text3">
-                Title
-              </Text>
-              <Text>{title}</Text>
-            </Box>
-            <Box>
-              <Text fontSize={14} fontWeight="label" color="text3">
-                Summary
-              </Text>
-              <MarkdownDisplay>{summary || ''}</MarkdownDisplay>
-            </Box>
-            {discussionUrl && (
-              <Box>
-                <Text fontSize={14} fontWeight="label" color="text3">
-                  Discussion URL
-                </Text>
-                <Text
-                  as="a"
-                  href={discussionUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: 'underline' }}
-                >
-                  {discussionUrl}
-                </Text>
-              </Box>
-            )}
-            <Box>
-              <Text fontSize={14} fontWeight="label" color="text3">
-                Transactions
-              </Text>
-              <Text color="text3" fontSize={14} mb="x2">
-                {allTransactions.length} transaction{allTransactions.length !== 1 && 's'}
-              </Text>
-              {isDecodingTransactions && !decodedTransactions ? (
-                <Text color="text3">Loading transaction details...</Text>
-              ) : (
-                <BundledDecodedTransactions
-                  chainId={chain.id}
-                  addresses={addresses}
-                  decodedTransactions={decodedTransactions}
-                  proposalMetadata={proposalMetadata}
-                  transactionBundles={transactionBundles}
-                  isDecoding={isDecodingTransactions}
+        <ProposalContentCard>
+          <ProposalSection title="Title">
+            <Text fontSize={28} fontWeight="display">
+              {title}
+            </Text>
+            {address && (
+              <Flex
+                color={'text3'}
+                mt={'x2'}
+                align="center"
+                gap="x2"
+                wrap
+                style={{ minWidth: 0 }}
+              >
+                <Text color={'text3'}>By</Text>
+                <WalletIdentityWithPreview
+                  address={address}
+                  displayName={displayName}
+                  avatarSrc={ensAvatar}
+                  avatarSize="20"
+                  nameVariant="paragraph-sm"
+                  mobileTapBehavior="toggle"
+                  inline
                 />
-              )}
-            </Box>
-          </Stack>
-        </Box>
+              </Flex>
+            )}
+          </ProposalSection>
+          <ProposalSection title="Summary">
+            <ProposalMarkdown>{summary || ''}</ProposalMarkdown>
+          </ProposalSection>
+          {discussionUrl && (
+            <ProposalSection title="Discussion">
+              <Text
+                as="a"
+                href={discussionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'underline' }}
+              >
+                {discussionUrl}
+              </Text>
+            </ProposalSection>
+          )}
+          <ProposalSection title="Transactions">
+            {isDecodingTransactions && !decodedTransactions ? (
+              <Text color="text3">Loading transaction details...</Text>
+            ) : (
+              <BundledDecodedTransactions
+                chainId={chain.id}
+                addresses={addresses}
+                decodedTransactions={decodedTransactions}
+                proposalMetadata={proposalMetadata}
+                transactionBundles={transactionBundles}
+                isDecoding={isDecodingTransactions}
+              />
+            )}
+          </ProposalSection>
+        </ProposalContentCard>
 
         {isUpdate && (
           <Box
