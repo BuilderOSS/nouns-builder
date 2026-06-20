@@ -47,9 +47,9 @@ export const CANDIDATE_COMMENT_SCHEMA_UID = `0x1decf999b02cbecd8697ae7cf0c4017bc
 
 export const CANDIDATE_COMMENT_SCHEMA = `bytes32 candidateId,uint8 support,string comment,bytes32 parentCommentUID`
 
-export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID = `0x1e460936f99a0ebf20e0e5e8cecf19154ebb0d314d24be6a1ce2a253891a4e68`
+export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID = `0x58cd8b0e3e1bd4c8c0d980826c3a041d315132ecccbfb7063f6458c05809e54a`
 
-export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA = `bytes32 candidateVersionUID,uint256 nonce,uint256 deadline,bytes signature`
+export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA = `bytes32 candidateId,bytes32 proposalId,uint256 nonce,uint256 deadline,bytes signature`
 
 export type AttestationParams = {
   schema: `0x${string}`

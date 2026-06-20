@@ -86,7 +86,10 @@ function seedCandidateGroup(
   group.currentAbstainCount = BigInt.fromI32(0)
   group.save()
 
-  const version = new ProposalCandidateVersion(computedProposalId)
+  // Use composite ID: candidateId-proposalId
+  const versionId = GROUP_ID + '-' + PROPOSAL_ID
+
+  const version = new ProposalCandidateVersion(versionId)
   version.group = GROUP_ID
   version.candidateId = Bytes.fromHexString(GROUP_ID)
   version.salt = Bytes.fromHexString(
@@ -151,10 +154,12 @@ function mockTokenVotes(votes: i32): void {
 
 function encodeSignatureData(): Bytes {
   const tuple = new ethereum.Tuple()
-  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID)))
-  tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(7)))
-  tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(2000000000)))
-  tuple.push(ethereum.Value.fromBytes(Bytes.fromHexString(repeatHexByte('11', 65))))
+  // New schema: (bytes32 candidateId, bytes32 proposalId, uint256 nonce, uint256 deadline, bytes signature)
+  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(GROUP_ID))) // candidateId
+  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID))) // proposalId
+  tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(7))) // nonce
+  tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(2000000000))) // deadline
+  tuple.push(ethereum.Value.fromBytes(Bytes.fromHexString(repeatHexByte('11', 65)))) // signature
 
   return changetype<Bytes>(ethereum.encode(ethereum.Value.fromTuple(tuple)))
 }
@@ -229,7 +234,9 @@ describe('Candidate sponsor signature indexing', () => {
 
     handleAttested(event)
 
-    assert.assertTrue(CandidateSponsorSignature.load(SIGNATURE_ID) == null)
+    // Composite ID is proposalId-signerAddress
+    const compositeId = PROPOSAL_ID + '-' + PROPOSER.toLowerCase()
+    assert.assertTrue(CandidateSponsorSignature.load(compositeId) == null)
   })
 
   test('ignores signatures with a bad proposal hash', () => {
@@ -244,7 +251,9 @@ describe('Candidate sponsor signature indexing', () => {
 
     handleAttested(createAttestedEvent())
 
-    assert.assertTrue(CandidateSponsorSignature.load(SIGNATURE_ID) == null)
+    // Composite ID is proposalId-signerAddress
+    const compositeId = PROPOSAL_ID + '-' + SIGNER.toLowerCase()
+    assert.assertTrue(CandidateSponsorSignature.load(compositeId) == null)
   })
 
   test('ignores signatures with a bad nonce', () => {
@@ -259,6 +268,8 @@ describe('Candidate sponsor signature indexing', () => {
 
     handleAttested(createAttestedEvent())
 
-    assert.assertTrue(CandidateSponsorSignature.load(SIGNATURE_ID) == null)
+    // Composite ID is proposalId-signerAddress
+    const compositeId = PROPOSAL_ID + '-' + SIGNER.toLowerCase()
+    assert.assertTrue(CandidateSponsorSignature.load(compositeId) == null)
   })
 })

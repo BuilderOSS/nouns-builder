@@ -9,6 +9,7 @@ import {
 } from '@graphprotocol/graph-ts'
 
 import {
+  CandidateSponsorSignature,
   CandidateSubmittedAsProposalEvent,
   DAO,
   Proposal,
@@ -270,8 +271,21 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
     proposalSigner.save()
   }
 
-  // Try to find matching candidate version by computed proposal hash.
-  let candidateVersion = ProposalCandidateVersion.load(proposal.proposalId.toHexString())
+  // Try to find matching candidate version via first signer's signature.
+  // This only works for proposals created with proposeBySigs.
+  let candidateVersion: ProposalCandidateVersion | null = null
+
+  if (event.params.signers.length > 0) {
+    let firstSigner = event.params.signers[0]
+    let signatureId = proposal.proposalId.toHexString() + '-' + firstSigner.toHexString()
+    let signature = CandidateSponsorSignature.load(signatureId)
+
+    if (signature) {
+      // Found the signature - get the candidate version
+      candidateVersion = ProposalCandidateVersion.load(signature.version)
+    }
+  }
+
   if (candidateVersion) {
     proposal.candidateVersion = candidateVersion.id
     candidateVersion.proposal = proposal.id

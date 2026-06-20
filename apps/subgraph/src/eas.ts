@@ -49,6 +49,49 @@ function getAttestation(address: Address, uid: Bytes): Bytes | null {
   return null
 }
 
+/**
+ * Computes the candidate ID from token address, proposer address, and salt
+ * candidateId = keccak256(abi.encode(address tokenAddress, address proposer, bytes32 salt))
+ */
+function computeCandidateId(
+  tokenAddress: Address,
+  proposer: Address,
+  salt: Bytes
+): Bytes {
+  // ABI encode: address (32 bytes padded) + address (32 bytes padded) + bytes32 (32 bytes)
+  let encoded = new ByteArray(96)
+
+  // Encode token address (left-padded to 32 bytes)
+  let tokenBytes = tokenAddress as Bytes
+  encoded.fill(0, 0, 12) // pad with zeros
+  for (let i = 0; i < 20; i++) {
+    encoded[12 + i] = tokenBytes[i]
+  }
+
+  // Encode proposer address (left-padded to 32 bytes)
+  let proposerBytes = proposer as Bytes
+  encoded.fill(0, 32, 44) // pad with zeros
+  for (let i = 0; i < 20; i++) {
+    encoded[44 + i] = proposerBytes[i]
+  }
+
+  // Encode salt (already 32 bytes)
+  let saltBytes = salt as Bytes
+  for (let i = 0; i < 32; i++) {
+    encoded[64 + i] = saltBytes[i]
+  }
+
+  return Bytes.fromByteArray(crypto.keccak256(encoded))
+}
+
+/**
+ * Creates a composite version ID from candidateId and proposalId
+ * Format: candidateId-proposalId (both as hex strings)
+ */
+function candidateVersionId(candidateId: Bytes, proposalId: Bytes): string {
+  return candidateId.toHexString() + '-' + proposalId.toHexString()
+}
+
 function handlePropdateAttestation(event: AttestedEvent): void {
   const data = getAttestation(event.address, event.params.uid)
   if (!data) {
@@ -398,6 +441,17 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   let dao = DAO.load(event.params.recipient.toHexString())
   if (!dao) return
 
+  // Validate candidateId matches computed value from token, proposer, and salt
+  let expectedCandidateId = computeCandidateId(
+    Address.fromBytes(dao.tokenAddress),
+    event.params.attester,
+    decoded.salt
+  )
+  if (expectedCandidateId.toHexString() != decoded.candidateId.toHexString()) {
+    // Skip malformed candidate attestation
+    return
+  }
+
   let candidateId = decoded.candidateId
   let group = loadOrCreateCandidateGroup(
     candidateId,
@@ -423,7 +477,8 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   )
   if (!proposalHash) return
 
-  let versionId = proposalHash.toHexString()
+  // Use composite ID: candidateId-proposalId
+  let versionId = candidateVersionId(candidateId, proposalHash)
   let version = ProposalCandidateVersion.load(versionId)
   if (!version) {
     version = new ProposalCandidateVersion(versionId)
@@ -525,21 +580,29 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   const decoded = decodeCandidateSponsorSignature(data)
   if (!decoded) return
 
-  let version = ProposalCandidateVersion.load(decoded.candidateVersionUID.toHexString())
+  // Load version by composite ID: candidateId-proposalId
+  let versionId = candidateVersionId(decoded.candidateId, decoded.proposalId)
+  let version = ProposalCandidateVersion.load(versionId)
   if (!version) return
 
   let group = ProposalCandidateGroup.load(version.group)
   if (!group) return
 
+  // Validate: signer cannot be the proposer
   if (event.params.attester.toHexString() == group.proposer.toHexString()) return
 
+  // Validate: signature length must be 64 or 65 bytes
   if (decoded.signature.length != 64 && decoded.signature.length != 65) return
+
+  // Validate: candidateId in signature matches version's candidateId
+  if (version.candidateId.toHexString() != decoded.candidateId.toHexString()) return
 
   let dao = DAO.load(group.dao)
   if (!dao) return
 
   let governor = GovernorContract.bind(Address.fromBytes(dao.governorAddress))
 
+  // Re-compute proposal hash from version data to validate consistency
   let targets: Address[] = []
   for (let i = 0; i < version.targets.length; i++) {
     targets.push(Address.fromBytes(version.targets[i]))
@@ -557,24 +620,32 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
     return
   }
 
-  if (version.computedProposalId != proposalHash) {
-    version.computedProposalId = proposalHash
-    version.save()
-  }
-
-  if (proposalHash.toHexString() != decoded.candidateVersionUID.toHexString()) {
+  // Validate: recomputed proposal hash matches decoded proposalId
+  if (proposalHash.toHexString() != decoded.proposalId.toHexString()) {
     return
   }
 
+  // Validate: nonce matches on-chain value
   let nonceResult = governor.try_proposeSignatureNonce(event.params.attester)
   if (nonceResult.reverted || nonceResult.value != decoded.nonce) return
 
+  // Validate: deadline not expired
   if (decoded.deadline < event.block.timestamp) return
 
-  let signature = new CandidateSponsorSignature(event.params.uid.toHexString())
+  // Use composite ID: proposalId-signerAddress
+  let signatureId =
+    decoded.proposalId.toHexString() + '-' + event.params.attester.toHexString()
+  let signature = CandidateSponsorSignature.load(signatureId)
+
+  if (!signature) {
+    signature = new CandidateSponsorSignature(signatureId)
+  }
+  // If signature already exists, this is a duplicate attestation - we update it
+
+  signature.attestationUID = event.params.uid
   signature.version = version.id
   signature.signer = event.params.attester
-  signature.proposalId = proposalHash
+  signature.proposalId = decoded.proposalId
   signature.nonce = decoded.nonce
   signature.deadline = decoded.deadline
   signature.signature = decoded.signature
@@ -586,7 +657,6 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   signature.voteWeight = votes.reverted ? BigInt.fromI32(0) : votes.value
   signature.save()
 
-  let versionId = version.id
   let groupId = version.group
 
   recomputeVersionSignatureAggregates(versionId)
@@ -608,10 +678,55 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
 }
 
 function handleProposalCandidateRevoked(event: RevokedEvent): void {
-  let version = ProposalCandidateVersion.load(event.params.uid.toHexString())
+  // Fetch original attestation from EAS contract
+  let eas = EAS.bind(event.address)
+  let attestationResult = eas.try_getAttestation(event.params.uid)
+  if (attestationResult.reverted) return
+
+  // Decode as ProposalCandidate
+  let decoded = decodeProposalCandidate(attestationResult.value.data)
+  if (!decoded) return
+
+  // Load DAO to validate candidateId
+  let dao = DAO.load(event.params.recipient.toHexString())
+  if (!dao) return
+
+  // Validate candidateId
+  let expectedCandidateId = computeCandidateId(
+    Address.fromBytes(dao.tokenAddress),
+    attestationResult.value.attester,
+    decoded.salt
+  )
+  if (expectedCandidateId.toHexString() != decoded.candidateId.toHexString()) {
+    // Skip malformed attestation
+    return
+  }
+
+  // Compute proposal hash
+  let governor = GovernorContract.bind(Address.fromBytes(dao.governorAddress))
+  let targets: Address[] = []
+  for (let i = 0; i < decoded.targets.length; i++) {
+    targets.push(decoded.targets[i])
+  }
+
+  let proposalHash = computeCandidateProposalHash(
+    governor,
+    attestationResult.value.attester,
+    targets,
+    decoded.values,
+    decoded.calldatas,
+    decoded.description
+  )
+  if (!proposalHash) return
+
+  // Load version by composite ID
+  let versionId = candidateVersionId(decoded.candidateId, proposalHash)
+  let version = ProposalCandidateVersion.load(versionId)
   if (!version) return
+
   version.revoked = true
   version.save()
+
   recomputeGroupVersionAggregates(version.group)
   recomputeGroupLeadingVersion(version.group)
 }
@@ -627,13 +742,32 @@ function handleCandidateCommentRevoked(event: RevokedEvent): void {
 }
 
 function handleCandidateSponsorSignatureRevoked(event: RevokedEvent): void {
-  let signature = CandidateSponsorSignature.load(event.params.uid.toHexString())
+  // Fetch original attestation from EAS contract
+  let eas = EAS.bind(event.address)
+  let attestationResult = eas.try_getAttestation(event.params.uid)
+  if (attestationResult.reverted) return
+
+  // Decode as CandidateSponsorSignature
+  let decoded = decodeCandidateSponsorSignature(attestationResult.value.data)
+  if (!decoded) return
+
+  // Reconstruct composite ID from decoded data
+  let signatureId =
+    decoded.proposalId.toHexString() +
+    '-' +
+    attestationResult.value.attester.toHexString()
+
+  // Load and revoke
+  let signature = CandidateSponsorSignature.load(signatureId)
   if (!signature) return
+
   signature.revoked = true
   signature.save()
 
+  // Recompute aggregates
   let version = ProposalCandidateVersion.load(signature.version)
   if (!version) return
+
   recomputeVersionSignatureAggregates(version.id)
   recomputeGroupLeadingVersion(version.group)
 }

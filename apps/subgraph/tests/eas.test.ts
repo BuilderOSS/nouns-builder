@@ -169,8 +169,16 @@ describe('Eas Decode Tests', () => {
   })
 
   test('decode candidate sponsor signature', () => {
+    // New schema: (bytes32 candidateId, bytes32 proposalId, uint256 nonce, uint256 deadline, bytes signature)
     const data = Bytes.fromHexString(
-      '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000f423f00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000002abcd000000000000000000000000000000000000000000000000000000000000'
+      '0x' +
+        '1111111111111111111111111111111111111111111111111111111111111111' + // candidateId
+        'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd' + // proposalId
+        '0000000000000000000000000000000000000000000000000000000000000005' + // nonce = 5
+        '00000000000000000000000000000000000000000000000000000000000f423f' + // deadline = 999999
+        '00000000000000000000000000000000000000000000000000000000000000a0' + // offset to signature (160 bytes)
+        '0000000000000000000000000000000000000000000000000000000000000002' + // signature length = 2
+        'abcd000000000000000000000000000000000000000000000000000000000000' // signature = 0xabcd
     )
     const decoded = decodeCandidateSponsorSignature(data)
     assert.assertNotNull(decoded)
@@ -178,6 +186,18 @@ describe('Eas Decode Tests', () => {
       assert.assertTrue(false, 'decoded should not be null')
       return
     }
+    assert.bytesEquals(
+      decoded.candidateId,
+      Bytes.fromHexString(
+        '0x1111111111111111111111111111111111111111111111111111111111111111'
+      )
+    )
+    assert.bytesEquals(
+      decoded.proposalId,
+      Bytes.fromHexString(
+        '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'
+      )
+    )
     assert.i32Equals(decoded.nonce.toI32(), 5)
     assert.i32Equals(decoded.deadline.toI32(), 999999)
     assert.bytesEquals(decoded.signature, Bytes.fromHexString('0xabcd'))

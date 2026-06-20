@@ -205,7 +205,7 @@ type ProposalCandidateGroup @entity {
 }
 
 type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
-  id: ID!
+  id: ID! # Composite ID: candidateId-proposalId
   group: ProposalCandidateGroup!
   candidateId: Bytes!
   salt: Bytes!
@@ -220,7 +220,7 @@ type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
   representedAddress: String
   discussionUrl: String
   computedProposalId: Bytes!
-  attestationUID: Bytes!
+  attestationUID: Bytes! # Original EAS attestation UID
   proposal: Proposal
   createdAt: BigInt!
   signatures: [CandidateSponsorSignature!]! @derivedFrom(field: "version")
@@ -251,7 +251,8 @@ type CandidateComment @entity {
 }
 
 type CandidateSponsorSignature @entity {
-  id: ID!
+  id: ID! # Composite ID: proposalId-signerAddress
+  attestationUID: Bytes! # Original EAS attestation UID
   version: ProposalCandidateVersion!
   signer: Bytes!
   proposalId: Bytes!

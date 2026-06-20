@@ -92,7 +92,7 @@ export const CANDIDATE_COMMENT_SCHEMA_UID = Bytes.fromHexString(
 )
 
 export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID = Bytes.fromHexString(
-  '0x1e460936f99a0ebf20e0e5e8cecf19154ebb0d314d24be6a1ce2a253891a4e68'
+  '0x58cd8b0e3e1bd4c8c0d980826c3a041d315132ecccbfb7063f6458c05809e54a'
 )
 
 export class Propdate extends ethereum.Tuple {
@@ -367,31 +367,35 @@ export function decodeCandidateComment(data: Bytes): CandidateComment | null {
 }
 
 export class CandidateSponsorSignature extends ethereum.Tuple {
-  get candidateVersionUID(): Bytes {
+  get candidateId(): Bytes {
     return this[0].toBytes()
   }
-  get nonce(): BigInt {
-    return this[1].toBigInt()
+  get proposalId(): Bytes {
+    return this[1].toBytes()
   }
-  get deadline(): BigInt {
+  get nonce(): BigInt {
     return this[2].toBigInt()
   }
+  get deadline(): BigInt {
+    return this[3].toBigInt()
+  }
   get signature(): Bytes {
-    return this[3].toBytes()
+    return this[4].toBytes()
   }
 }
 
 export function decodeCandidateSponsorSignature(
   data: Bytes
 ): CandidateSponsorSignature | null {
-  const head = ethereum.decode('(bytes32,uint256,uint256,uint256)', data)
+  const head = ethereum.decode('(bytes32,bytes32,uint256,uint256,uint256)', data)
   if (!head) return null
 
   const headTuple = head.toTuple()
-  const candidateVersionUID = headTuple[0].toBytes()
-  const nonce = headTuple[1].toBigInt()
-  const deadline = headTuple[2].toBigInt()
-  const signatureOffset = safeOffsetToI32(headTuple[3], data.length)
+  const candidateId = headTuple[0].toBytes()
+  const proposalId = headTuple[1].toBytes()
+  const nonce = headTuple[2].toBigInt()
+  const deadline = headTuple[3].toBigInt()
+  const signatureOffset = safeOffsetToI32(headTuple[4], data.length)
 
   const totalLen = data.length
   if (signatureOffset < 0 || signatureOffset + 32 > totalLen) {
@@ -412,7 +416,8 @@ export function decodeCandidateSponsorSignature(
   )
 
   const tupleVals: Array<ethereum.Value> = [
-    ethereum.Value.fromFixedBytes(candidateVersionUID),
+    ethereum.Value.fromFixedBytes(candidateId),
+    ethereum.Value.fromFixedBytes(proposalId),
     ethereum.Value.fromUnsignedBigInt(nonce),
     ethereum.Value.fromUnsignedBigInt(deadline),
     ethereum.Value.fromBytes(signature),
