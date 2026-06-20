@@ -27,7 +27,7 @@ import {
   type TransactionBundle,
   TransactionType,
 } from '@buildeross/types'
-import { AnimatedModal } from '@buildeross/ui/Modal'
+import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { WalletIdentityWithPreview } from '@buildeross/ui/WalletIdentity'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -35,7 +35,7 @@ import dayjs from 'dayjs'
 import { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { votePageWrapper } from 'src/styles/vote.css'
@@ -150,6 +150,9 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   const { addresses } = useDaoStore()
   const startCandidateDraft = useCandidateStore((state) => state.startCandidateDraft)
   const [composerOpen, setComposerOpen] = React.useState(false)
+  const [isSuccess, setIsSuccess] = React.useState(false)
+  const [submittedWithSignature, setSubmittedWithSignature] = React.useState(false)
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activeTab = (query.tab as string) || 'Details'
 
   const {
@@ -251,11 +254,40 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
     startCandidateDraft,
   ])
 
-  const handleComposerSuccess = React.useCallback(() => {
-    void mutateCandidate()
-    void mutateComments()
+  const handleComposerSuccess = React.useCallback(
+    (withSignature: boolean) => {
+      setSubmittedWithSignature(withSignature)
+      setIsSuccess(true)
+
+      // Auto-close after 2 seconds
+      successTimerRef.current = setTimeout(() => {
+        setComposerOpen(false)
+        setIsSuccess(false)
+        void mutateCandidate()
+        void mutateComments()
+      }, 2000)
+    },
+    [mutateCandidate, mutateComments]
+  )
+
+  const handleClose = React.useCallback(() => {
     setComposerOpen(false)
-  }, [mutateCandidate, mutateComments])
+    setIsSuccess(false)
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current)
+      successTimerRef.current = null
+    }
+  }, [])
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current)
+        successTimerRef.current = null
+      }
+    }
+  }, [])
 
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
@@ -374,7 +406,10 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 {latestVersion && (
                   <Text color="text3">
                     · V{latestVersion.versionNumber.toString()} ·{' '}
-                    {latestVersion.signatureCount.toString()} signatures
+                    {latestVersion.signatureCount.toString()}{' '}
+                    {Number(latestVersion.signatureCount) === 1
+                      ? 'signature'
+                      : 'signatures'}
                   </Text>
                 )}
               </Flex>
@@ -427,24 +462,38 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       {latestVersion && tokenSymbol && (
         <AnimatedModal
           open={composerOpen}
-          close={() => setComposerOpen(false)}
-          size="large"
+          close={handleClose}
+          size={isSuccess ? 'small' : 'large'}
         >
-          <Box p={{ '@initial': 'x4', '@768': 'x6' }}>
-            <Stack gap="x4">
-              <Text fontSize={20} fontWeight="display">
-                Signal / comment
-              </Text>
-              <CandidateCommentForm
-                candidateId={latestVersion.candidateId as `0x${string}`}
-                proposalId={latestVersion.computedProposalId as `0x${string}`}
-                proposer={candidate.proposer as `0x${string}`}
-                governorAddress={addresses.governor as `0x${string}`}
-                tokenSymbol={String(tokenSymbol)}
-                onSuccess={handleComposerSuccess}
-              />
-            </Stack>
-          </Box>
+          {isSuccess ? (
+            <SuccessModalContent
+              success={true}
+              title={
+                submittedWithSignature ? 'Signal & Signature Added' : 'Signal Submitted'
+              }
+              subtitle={
+                submittedWithSignature
+                  ? 'Your signal and signature have been recorded.'
+                  : 'Your signal has been recorded.'
+              }
+            />
+          ) : (
+            <Box p={{ '@initial': 'x4', '@768': 'x6' }}>
+              <Stack gap="x4">
+                <Text fontSize={20} fontWeight="display">
+                  Signal / comment
+                </Text>
+                <CandidateCommentForm
+                  candidateId={latestVersion.candidateId as `0x${string}`}
+                  proposalId={latestVersion.computedProposalId as `0x${string}`}
+                  proposer={candidate.proposer as `0x${string}`}
+                  governorAddress={addresses.governor as `0x${string}`}
+                  tokenSymbol={String(tokenSymbol)}
+                  onSuccess={handleComposerSuccess}
+                />
+              </Stack>
+            </Box>
+          )}
         </AnimatedModal>
       )}
 

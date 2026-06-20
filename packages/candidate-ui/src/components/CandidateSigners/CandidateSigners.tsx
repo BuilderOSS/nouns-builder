@@ -22,7 +22,6 @@ type CandidateSignersProps = {
   targets: string[]
   values: bigint[]
   calldatas: `0x${string}`[]
-  signatureCount?: number
 }
 
 export const CandidateSigners: React.FC<CandidateSignersProps> = ({
@@ -35,7 +34,6 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   targets,
   values,
   calldatas,
-  signatureCount = 0,
 }) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -86,7 +84,9 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     enabled: !!address && !!addresses.token,
   })
 
-  const totalSignatures = signaturesData ? eligibleSignatures.length : signatureCount
+  // Only show signature count when data is loaded
+  // Use eligibleSignatures.length which excludes proposer
+  const totalSignatures = signaturesData ? eligibleSignatures.length : 0
   const totalSignatureWeight = eligibleSignatures.reduce(
     (sum, signature) => sum + signature.voteWeight,
     0n
@@ -125,7 +125,9 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
             Candidate Sponsors
           </Text>
           <Text size="sm" color="text3">
-            {totalSignatures} {totalSignatures === 1 ? 'signature' : 'signatures'}
+            {!signaturesData
+              ? 'Loading...'
+              : `${totalSignatures} ${totalSignatures === 1 ? 'signature' : 'signatures'}`}
           </Text>
         </Flex>
 

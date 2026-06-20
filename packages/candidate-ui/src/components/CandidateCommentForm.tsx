@@ -5,15 +5,11 @@ import {
 } from '@buildeross/sdk'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import {
-  AnimatedModal,
-  ContractButton,
-  SuccessModalContent,
-  TextArea,
-} from '@buildeross/ui'
+import { ContractButton, TextArea, Toggle } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
-import { Box, Flex, Stack, Text } from '@buildeross/zord'
-import React, { useCallback, useState } from 'react'
+import type { IconType } from '@buildeross/zord'
+import { Box, Flex, Icon, Stack, Text, theme, vars } from '@buildeross/zord'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { type Hex } from 'viem'
 import { useAccount, useConfig, useReadContract, useWalletClient } from 'wagmi'
 
@@ -21,6 +17,14 @@ import {
   CANDIDATE_SIGNATURE_VALIDITY_DAYS,
   CANDIDATE_SIGNATURE_VALIDITY_SECONDS,
 } from '../utils/candidateProposal'
+import {
+  signalOption,
+  signalOptionText,
+  signalRadioInput,
+  sponsorBadge,
+  sponsorCard,
+  sponsorLabel,
+} from './CandidateCommentForm.css'
 
 export interface CandidateCommentFormProps {
   candidateId: Hex
@@ -28,7 +32,7 @@ export interface CandidateCommentFormProps {
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
-  onSuccess?: () => void
+  onSuccess?: (withSignature: boolean) => void
   parentCommentUID?: Hex
 }
 
@@ -54,13 +58,15 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     chainId: chain.id,
     query: { enabled: !!address && !!governorAddress },
   })
-  const isCreator = React.useMemo(
+  const isCreator = useMemo(
     () => !!address && address.toLowerCase() === proposer.toLowerCase(),
     [address, proposer]
   )
 
+  // State
+  const [signalEnabled, setSignalEnabled] = useState(false)
   const [support, setSupport] = useState<CandidateVoteSupportEnum>(
-    CandidateVoteSupportEnum.NONE
+    CandidateVoteSupportEnum.FOR
   )
   const [comment, setComment] = useState('')
   const [shouldSign, setShouldSign] = useState(false)
@@ -70,23 +76,58 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isTxSuccess, setIsTxSuccess] = useState(false)
-  const [submittedSupport, setSubmittedSupport] =
-    useState<CandidateVoteSupportEnum | null>(null)
-  const [submittedWithSignature, setSubmittedWithSignature] = useState(false)
 
-  const canSubmit = React.useMemo(() => {
+  // When signal toggle changes
+  useEffect(() => {
+    if (!signalEnabled) {
+      setShouldSign(false)
+    }
+  }, [signalEnabled])
+
+  // Signal options configuration
+  const signalOptions = useMemo(
+    () => [
+      {
+        text: 'Signal For',
+        value: CandidateVoteSupportEnum.FOR,
+        icon: {
+          id: 'check' as IconType,
+          fill: 'positive' as const,
+          activeBackground: vars.color.positiveActive,
+        },
+      },
+      {
+        text: 'Signal Against',
+        value: CandidateVoteSupportEnum.AGAINST,
+        icon: {
+          id: 'cross' as IconType,
+          fill: 'negative' as const,
+          activeBackground: vars.color.negativeActive,
+        },
+      },
+      {
+        text: 'Signal Abstain',
+        value: CandidateVoteSupportEnum.ABSTAIN,
+        icon: {
+          id: 'dash' as IconType,
+          fill: 'neutral' as const,
+          activeBackground: vars.color.neutralHover,
+        },
+      },
+    ],
+    []
+  )
+
+  const canSubmit = useMemo(() => {
     return (
       !!address &&
       !!addresses.token &&
-      (comment.trim().length > 0 ||
-        shouldSign ||
-        support !== CandidateVoteSupportEnum.NONE) &&
+      (comment.trim().length > 0 || signalEnabled) &&
       (!shouldSign || nonce !== undefined)
     )
-  }, [address, addresses.token, comment, shouldSign, support, nonce])
+  }, [address, addresses.token, comment, signalEnabled, shouldSign, nonce])
 
-  const canSign = React.useMemo(() => {
+  const canSign = useMemo(() => {
     return (
       support === CandidateVoteSupportEnum.FOR &&
       !isCreator &&
@@ -98,11 +139,11 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const handleSubmit = useCallback(async () => {
     if (!canSubmit || !address) return
 
-    setIsTxSuccess(false)
     setErrorMessage(null)
     setIsSubmitting(true)
 
     const withSignature = shouldSign && canSign
+    const actualSupport = signalEnabled ? support : CandidateVoteSupportEnum.NONE
 
     try {
       if (withSignature) {
@@ -120,7 +161,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           proposer,
           nonce: nonce as bigint,
           deadline,
-          support,
+          support: actualSupport,
           comment: comment.trim(),
           parentCommentUID,
         })
@@ -131,21 +172,21 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           chainId: chain.id,
           daoTokenAddress: addresses.token!,
           candidateId,
-          support,
+          support: actualSupport,
           comment: comment.trim(),
           parentCommentUID,
         })
       }
 
-      setSubmittedWithSignature(withSignature)
-      setSubmittedSupport(support)
-      setIsTxSuccess(true)
+      // Reset form
       setComment('')
       setShouldSign(false)
-      setSupport(CandidateVoteSupportEnum.NONE)
+      setSignalEnabled(false)
+      setSupport(CandidateVoteSupportEnum.FOR)
 
+      // Call parent success with signature status
       if (onSuccess) {
-        setTimeout(onSuccess, 1500)
+        onSuccess(withSignature)
       }
     } catch (err: unknown) {
       console.error('Error submitting comment:', err)
@@ -159,6 +200,8 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     address,
     shouldSign,
     canSign,
+    signalEnabled,
+    support,
     walletClient,
     config,
     chain.id,
@@ -170,262 +213,150 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     proposer,
     nonce,
     deadline,
-    support,
     comment,
     parentCommentUID,
     onSuccess,
   ])
 
-  const handleCloseModal = () => {
-    setIsTxSuccess(false)
-    setErrorMessage(null)
-    setSubmittedSupport(null)
-    setSubmittedWithSignature(false)
-  }
-
   return (
-    <>
-      <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
+    <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
+      {/* Primary Toggle: Enable Signaling */}
+      <Flex align="center" justify="space-between" gap="x3">
         <Box>
-          <Text fontSize={16} fontWeight="label" mb="x4">
-            Your Signal
+          <Text fontSize={16} fontWeight="label">
+            Signal on this candidate
           </Text>
-          <Stack gap={{ '@initial': 'x2', '@768': 'x3' }}>
-            <Box
-              as="label"
-              display="flex"
-              alignItems="center"
-              cursor="pointer"
-              p={{ '@initial': 'x2', '@768': 'x3' }}
-              borderRadius="curved"
-              backgroundColor={
-                support === CandidateVoteSupportEnum.FOR ? 'background2' : 'transparent'
-              }
-              style={{
-                border:
-                  support === CandidateVoteSupportEnum.FOR
-                    ? '1px solid rgba(0, 255, 0, 0.3)'
-                    : '1px solid transparent',
-              }}
-            >
-              <input
-                type="radio"
-                name="support"
-                checked={support === CandidateVoteSupportEnum.FOR}
-                onChange={() => setSupport(CandidateVoteSupportEnum.FOR)}
-                style={{ marginRight: '12px' }}
-              />
-              <Text>Signal For</Text>
-            </Box>
-            <Box
-              as="label"
-              display="flex"
-              alignItems="center"
-              cursor="pointer"
-              p={{ '@initial': 'x2', '@768': 'x3' }}
-              borderRadius="curved"
-              backgroundColor={
-                support === CandidateVoteSupportEnum.AGAINST
-                  ? 'background2'
-                  : 'transparent'
-              }
-              style={{
-                border:
-                  support === CandidateVoteSupportEnum.AGAINST
-                    ? '1px solid rgba(255, 0, 0, 0.3)'
-                    : '1px solid transparent',
-              }}
-            >
-              <input
-                type="radio"
-                name="support"
-                checked={support === CandidateVoteSupportEnum.AGAINST}
-                onChange={() => {
-                  setSupport(CandidateVoteSupportEnum.AGAINST)
-                  setShouldSign(false)
-                }}
-                style={{ marginRight: '12px' }}
-              />
-              <Text>Signal Against</Text>
-            </Box>
-            <Box
-              as="label"
-              display="flex"
-              alignItems="center"
-              cursor="pointer"
-              p={{ '@initial': 'x2', '@768': 'x3' }}
-              borderRadius="curved"
-              backgroundColor={
-                support === CandidateVoteSupportEnum.ABSTAIN
-                  ? 'background2'
-                  : 'transparent'
-              }
-              style={{
-                border:
-                  support === CandidateVoteSupportEnum.ABSTAIN
-                    ? '1px solid rgba(255, 255, 0, 0.3)'
-                    : '1px solid transparent',
-              }}
-            >
-              <input
-                type="radio"
-                name="support"
-                checked={support === CandidateVoteSupportEnum.ABSTAIN}
-                onChange={() => {
-                  setSupport(CandidateVoteSupportEnum.ABSTAIN)
-                  setShouldSign(false)
-                }}
-                style={{ marginRight: '12px' }}
-              />
-              <Text>Signal Abstain</Text>
-            </Box>
-            <Box
-              as="label"
-              display="flex"
-              alignItems="center"
-              cursor="pointer"
-              p={{ '@initial': 'x2', '@768': 'x3' }}
-              borderRadius="curved"
-              backgroundColor={
-                support === CandidateVoteSupportEnum.NONE ? 'background2' : 'transparent'
-              }
-              style={{
-                border:
-                  support === CandidateVoteSupportEnum.NONE
-                    ? '1px solid rgba(128, 128, 128, 0.3)'
-                    : '1px solid transparent',
-              }}
-            >
-              <input
-                type="radio"
-                name="support"
-                checked={support === CandidateVoteSupportEnum.NONE}
-                onChange={() => {
-                  setSupport(CandidateVoteSupportEnum.NONE)
-                  setShouldSign(false)
-                }}
-                style={{ marginRight: '12px' }}
-              />
-              <Text>No signal</Text>
-            </Box>
-          </Stack>
+          <Text fontSize={12} color="text3" mt="x1">
+            Show your support for or against this candidate
+          </Text>
         </Box>
+        <Toggle on={signalEnabled} onToggle={() => setSignalEnabled(!signalEnabled)} />
+      </Flex>
 
-        <TextArea
-          id="candidate-comment"
-          value={comment}
-          inputLabel="Comment (Optional)"
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setComment(e.target.value)
-          }
-          placeholder="Share your thoughts..."
-          rows={4}
-          disabled={isSubmitting}
-        />
+      {/* Signal Options (VoteModal style) - Only when enabled */}
+      {signalEnabled && (
+        <Stack gap={{ '@initial': 'x2', '@768': 'x3' }}>
+          {signalOptions.map(({ text, value, icon }) => {
+            const active = support === value
+            return (
+              <label key={value}>
+                <Flex
+                  className={signalOption}
+                  data-is-active-positive={
+                    value === CandidateVoteSupportEnum.FOR && active ? 'true' : 'false'
+                  }
+                  data-is-active-negative={
+                    value === CandidateVoteSupportEnum.AGAINST && active
+                      ? 'true'
+                      : 'false'
+                  }
+                  data-is-active-neutral={
+                    value === CandidateVoteSupportEnum.ABSTAIN && active
+                      ? 'true'
+                      : 'false'
+                  }
+                >
+                  <input
+                    type="radio"
+                    name="support"
+                    value={value}
+                    checked={active}
+                    onChange={() => {
+                      setSupport(value)
+                      if (value !== CandidateVoteSupportEnum.FOR) {
+                        setShouldSign(false)
+                      }
+                    }}
+                    className={signalRadioInput}
+                  />
+                  <Text className={signalOptionText}>{text}</Text>
+                  <Box position="absolute" top="x4" right="x4">
+                    <Icon
+                      id={icon.id}
+                      borderRadius="round"
+                      p="x1"
+                      style={{
+                        backgroundColor: active
+                          ? icon.activeBackground
+                          : theme.colors.background1,
+                      }}
+                      fill={active ? 'onAccent' : icon.fill}
+                    />
+                  </Box>
+                </Flex>
+              </label>
+            )
+          })}
+        </Stack>
+      )}
 
-        {support === CandidateVoteSupportEnum.FOR && !isCreator && (
-          <Box>
-            <Box
-              as="label"
-              display="flex"
-              alignItems="center"
-              cursor="pointer"
-              p="x3"
-              borderRadius="curved"
-              opacity={nonce === undefined ? 0.6 : 1}
-              backgroundColor={shouldSign ? 'background2' : 'transparent'}
-              style={{
-                border: shouldSign
-                  ? '1px solid rgba(0, 200, 255, 0.3)'
-                  : '1px solid rgba(255, 255, 255, 0.1)',
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={shouldSign}
-                disabled={nonce === undefined || !walletClient}
-                onChange={(e) => setShouldSign(e.target.checked)}
-                style={{ marginRight: '12px' }}
-              />
-              <Text>Also sponsor this candidate</Text>
-            </Box>
-            {shouldSign && (
-              <Text fontSize={14} color="text3" mt="x2" ml="x3">
-                Your signature will be used when promoting this candidate to a proposal.
+      {/* Comment Section - Always visible */}
+      <TextArea
+        id="candidate-comment"
+        value={comment}
+        inputLabel="Comment (Optional)"
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+          setComment(e.target.value)
+        }
+        placeholder="Share your thoughts..."
+        rows={4}
+        disabled={isSubmitting}
+      />
+
+      {/* Sponsor Toggle - Only when FOR is selected */}
+      {signalEnabled && support === CandidateVoteSupportEnum.FOR && !isCreator && (
+        <Box className={sponsorCard} data-is-active={shouldSign ? 'true' : 'false'}>
+          <Flex align="center" justify="space-between" gap="x3">
+            <Box style={{ flex: 1 }}>
+              <Flex align="center" gap="x2" mb="x1">
+                <Text className={sponsorLabel}>Also sponsor this candidate</Text>
+              </Flex>
+              <Text fontSize={12} color="text3">
+                Your signature will be used when promoting this to a proposal
               </Text>
-            )}
-            <Text fontSize={14} color="text3" mt="x2" ml="x3">
-              Signature valid for {CANDIDATE_SIGNATURE_VALIDITY_DAYS} days.
-            </Text>
-          </Box>
-        )}
+              <Flex align="center" gap="x2" mt="x2">
+                <Box className={sponsorBadge}>
+                  Valid for {CANDIDATE_SIGNATURE_VALIDITY_DAYS} days
+                </Box>
+              </Flex>
+            </Box>
+            <Toggle on={shouldSign} onToggle={() => setShouldSign(!shouldSign)} />
+          </Flex>
+        </Box>
+      )}
 
-        {shouldSign && isNonceLoading && (
-          <Text fontSize={14} color="text3">
-            Loading signature nonce...
-          </Text>
-        )}
+      {shouldSign && isNonceLoading && (
+        <Text fontSize={14} color="text3">
+          Loading signature nonce...
+        </Text>
+      )}
 
-        {isCreator && (
-          <Text fontSize={14} color="text3">
-            Candidate creators can signal and comment, but cannot sponsor their own
-            candidate.
-          </Text>
-        )}
+      {isCreator && signalEnabled && support === CandidateVoteSupportEnum.FOR && (
+        <Text fontSize={14} color="text3">
+          Candidate creators can signal and comment, but cannot sponsor their own
+          candidate.
+        </Text>
+      )}
 
-        <Flex justify={{ '@initial': 'stretch', '@768': 'flex-end' }}>
-          <ContractButton
-            chainId={chain.id}
-            handleClick={handleSubmit}
-            disabled={!canSubmit}
-            loading={isSubmitting}
-            style={{ width: '100%' }}
-          >
-            {shouldSign
-              ? 'Signal & Sign'
-              : support === CandidateVoteSupportEnum.NONE
-                ? 'Add Comment'
-                : 'Submit Signal'}
-          </ContractButton>
-        </Flex>
-      </Stack>
+      {/* Error Display */}
+      {errorMessage && (
+        <Text color="negative" fontSize={14}>
+          {errorMessage}
+        </Text>
+      )}
 
-      {/* Transaction Status Modal */}
-      <AnimatedModal
-        open={isSubmitting || isTxSuccess}
-        close={isSubmitting ? undefined : handleCloseModal}
-      >
-        <SuccessModalContent
-          success={isTxSuccess}
-          pending={!isTxSuccess && !errorMessage}
-          title={
-            isTxSuccess
-              ? submittedWithSignature
-                ? 'Signal & Signature Added'
-                : submittedSupport === CandidateVoteSupportEnum.NONE
-                  ? 'Comment Added'
-                  : 'Signal Submitted'
-              : errorMessage
-                ? 'Transaction Failed'
-                : shouldSign
-                  ? 'Submitting Signal & Signature...'
-                  : support === CandidateVoteSupportEnum.NONE
-                    ? 'Submitting Comment...'
-                    : 'Submitting Signal...'
-          }
-          subtitle={
-            isTxSuccess
-              ? submittedWithSignature
-                ? 'Your signal and signature have been recorded.'
-                : submittedSupport === CandidateVoteSupportEnum.NONE
-                  ? 'Your comment has been recorded.'
-                  : 'Your signal has been recorded.'
-              : errorMessage
-                ? errorMessage
-                : 'Please confirm the transaction in your wallet.'
-          }
-        />
-      </AnimatedModal>
-    </>
+      {/* Submit Button */}
+      <Flex justify={{ '@initial': 'stretch', '@768': 'flex-end' }}>
+        <ContractButton
+          chainId={chain.id}
+          handleClick={handleSubmit}
+          disabled={!canSubmit}
+          loading={isSubmitting}
+          style={{ width: '100%' }}
+        >
+          {shouldSign ? 'Signal & Sign' : signalEnabled ? 'Submit Signal' : 'Add Comment'}
+        </ContractButton>
+      </Flex>
+    </Stack>
   )
 }

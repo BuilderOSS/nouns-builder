@@ -206,7 +206,6 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
           targets={(latestVersion.targets || []) as string[]}
           values={(latestVersion.values || []).map((value) => BigInt(value))}
           calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
-          signatureCount={latestVersion.signatureCount}
         />
       )}
 
