@@ -30,7 +30,14 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   const { address: userAddress } = useAccount()
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((state) => state.chain)
-  const { startProposalDraft } = useProposalStore()
+  const {
+    startProposalDraft,
+    title: draftTitle,
+    summary: draftSummary,
+    transactions: draftTransactions,
+    representedAddress: draftRepresentedAddress,
+    discussionUrl: draftDiscussionUrl,
+  } = useProposalStore()
   const [showOverwriteModal, setShowOverwriteModal] = React.useState(false)
 
   const { isLoading, isVetoer, votes } = useVotes({
@@ -89,13 +96,12 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
 
   const handleUpdateProposal = React.useCallback(() => {
     // Check if there's existing draft data
-    const store = useProposalStore.getState()
     const hasExistingDraft =
-      !!store.title ||
-      !!store.summary ||
-      store.transactions.length > 0 ||
-      !!store.representedAddress ||
-      !!store.discussionUrl
+      !!draftTitle ||
+      !!draftSummary ||
+      draftTransactions.length > 0 ||
+      !!draftRepresentedAddress ||
+      !!draftDiscussionUrl
 
     // If there's existing draft data, show confirmation modal
     if (hasExistingDraft) {
@@ -105,7 +111,14 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
 
     // No existing draft, proceed directly
     loadProposalForUpdate()
-  }, [loadProposalForUpdate])
+  }, [
+    loadProposalForUpdate,
+    draftTitle,
+    draftSummary,
+    draftTransactions.length,
+    draftRepresentedAddress,
+    draftDiscussionUrl,
+  ])
 
   const handleConfirmOverwrite = React.useCallback(() => {
     setShowOverwriteModal(false)
@@ -170,7 +183,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
         isOpen={showOverwriteModal}
         onClose={handleCancelOverwrite}
         onConfirm={handleConfirmOverwrite}
-        draftTitle={useProposalStore.getState().title}
+        draftTitle={draftTitle}
       />
     </Fragment>
   )

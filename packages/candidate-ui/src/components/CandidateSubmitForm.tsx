@@ -17,10 +17,11 @@ import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import useSWR from 'swr'
-import { type Hex, keccak256, toBytes, toHex } from 'viem'
+import { type Hex, toHex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
 
 import { buildCandidateDescription } from '../utils/buildCandidateDescription'
+import { getCandidateId } from '../utils/candidateProposal'
 import { CandidateDraftForm } from './CandidateDraftForm'
 
 export interface CandidateSubmitFormProps {
@@ -39,6 +40,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
   const { displayName, ensAvatar } = useEnsData(address)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
+  const { clearCandidate } = useCandidateStore()
   const { title, summary, discussionUrl, transactions, candidateId, salt } =
     useCandidateStore()
 
@@ -76,21 +78,6 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     [transactions]
   )
 
-  const proposalMetadata = React.useMemo(() => {
-    try {
-      return JSON.parse(
-        buildCandidateDescription({
-          title,
-          summary,
-          discussionUrl,
-          transactionBundles,
-        })
-      ) as ProposalDescriptionMetadataV1
-    } catch {
-      return undefined
-    }
-  }, [discussionUrl, summary, title, transactionBundles])
-
   const { data: decodedTransactions, isLoading: isDecodingTransactions } = useSWR(
     allTransactions.length > 0
       ? ([
@@ -111,6 +98,32 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     { revalidateOnFocus: false }
   )
 
+  const computedSalt = React.useMemo(() => {
+    if (salt) return salt as Hex
+    const randomBytes = crypto.getRandomValues(new Uint8Array(32))
+    return toHex(randomBytes)
+  }, [salt])
+
+  const computedCandidateId = React.useMemo(() => {
+    if (!address || !addresses.token) return undefined
+
+    return getCandidateId({
+      tokenAddress: addresses.token,
+      proposer: address,
+      salt: computedSalt,
+    })
+  }, [address, addresses.token, computedSalt])
+
+  const effectiveCandidateId = React.useMemo(() => {
+    if (candidateId) return candidateId as Hex
+    return computedCandidateId
+  }, [candidateId, computedCandidateId])
+
+  const isCandidateIdMismatch = React.useMemo(() => {
+    if (!candidateId || !computedCandidateId) return false
+    return candidateId.toLowerCase() !== computedCandidateId.toLowerCase()
+  }, [candidateId, computedCandidateId])
+
   // Use the same proposal-shaped metadata contract as proposals.
   const description = React.useMemo(
     () =>
@@ -119,29 +132,39 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
         summary,
         discussionUrl,
         transactionBundles,
+        salt: computedSalt,
+        proposer: address,
       }),
-    [discussionUrl, summary, title, transactionBundles]
+    [discussionUrl, summary, title, transactionBundles, computedSalt, address]
   )
 
-  // Generate candidateId and salt if not exists
-  const computedSalt = React.useMemo(() => {
-    if (salt) return salt as Hex
-    // Generate random salt
-    const randomBytes = crypto.getRandomValues(new Uint8Array(32))
-    return toHex(randomBytes)
-  }, [salt])
-
-  const computedCandidateId = React.useMemo(() => {
-    if (candidateId) return candidateId as Hex
-    // Generate candidateId from hash(daoAddress + salt)
-    return keccak256(toBytes(`${addresses.token}${computedSalt}`))
-  }, [candidateId, addresses.token, computedSalt])
+  const proposalMetadata = React.useMemo(() => {
+    try {
+      return JSON.parse(description) as ProposalDescriptionMetadataV1
+    } catch {
+      return undefined
+    }
+  }, [description])
 
   const canSubmit = React.useMemo(() => {
     return (
-      !!address && !!title && !!summary && allTransactions.length > 0 && !!addresses.token
+      !!address &&
+      !!title &&
+      !!summary &&
+      allTransactions.length > 0 &&
+      !!addresses.token &&
+      !!effectiveCandidateId &&
+      !isCandidateIdMismatch
     )
-  }, [address, title, summary, allTransactions.length, addresses.token])
+  }, [
+    address,
+    title,
+    summary,
+    allTransactions.length,
+    addresses.token,
+    effectiveCandidateId,
+    isCandidateIdMismatch,
+  ])
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit || !address) return
@@ -151,11 +174,21 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     setIsSubmitting(true)
 
     try {
+      if (isCandidateIdMismatch) {
+        throw new Error(
+          'This candidate draft belongs to a different creator. Please switch wallets or create a new candidate.'
+        )
+      }
+
+      if (!effectiveCandidateId) {
+        throw new Error('Unable to compute candidate identity for this draft.')
+      }
+
       const params: CandidateAttestationParams = {
         config,
         chainId: chain.id,
         daoTokenAddress: addresses.token!,
-        candidateId: computedCandidateId,
+        candidateId: effectiveCandidateId,
         salt: computedSalt,
         targets,
         values,
@@ -166,9 +199,10 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
       const result = await attestCandidate(params)
 
       setIsTxSuccess(true)
+      clearCandidate()
 
       if (onSuccess) {
-        onSuccess(computedCandidateId, result.attestationUID)
+        onSuccess(effectiveCandidateId, result.attestationUID)
       }
     } catch (err: unknown) {
       console.error('Error submitting candidate:', err)
@@ -183,13 +217,15 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
     config,
     chain.id,
     addresses.token,
-    computedCandidateId,
+    effectiveCandidateId,
     computedSalt,
     targets,
     values,
     calldatas,
     description,
     onSuccess,
+    clearCandidate,
+    isCandidateIdMismatch,
   ])
 
   const handleUpdateClick = () => {

@@ -8,20 +8,22 @@ import {
 import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import {
+  ProposalState,
+  type SimulationOutput,
   TransactionBundle,
-  useChainStore,
-  useDaoStore,
-  useProposalStore,
-} from '@buildeross/stores'
-import { ProposalState, type SimulationOutput } from '@buildeross/types'
+} from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { TextArea } from '@buildeross/ui/Fields'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { handleGMTOffset, unpackOptionalArray } from '@buildeross/utils/helpers'
-import { buildProposalMetadata } from '@buildeross/utils/proposalMetadata'
+import {
+  buildProposalMetadata,
+  generateProposalSalt,
+} from '@buildeross/utils/proposalMetadata'
 import { Box, Button, Flex, Icon, Stack, Text, vars } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { Formik, type FormikProps } from 'formik'
@@ -112,6 +114,9 @@ export const ReviewProposalForm = ({
     setRepresentedAddress,
     setDiscussionUrl,
     setRepresentedAddressEnabled,
+    setUpdateProposalId,
+    proposalSalt,
+    setProposalSalt,
   } = useProposalStore()
 
   const [error, setError] = useState<string | undefined>()
@@ -130,6 +135,18 @@ export const ReviewProposalForm = ({
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false)
   const [showDeadlineModal, setShowDeadlineModal] = useState<boolean>(false)
   const formikRef = React.useRef<FormikProps<FormValues> | null>(null)
+  const effectiveProposalSaltRef = React.useRef<string | undefined>(proposalSalt)
+
+  React.useEffect(() => {
+    if (proposalSalt) {
+      effectiveProposalSaltRef.current = proposalSalt
+      return
+    }
+
+    const nextSalt = generateProposalSalt()
+    effectiveProposalSaltRef.current = nextSalt
+    setProposalSalt(nextSalt)
+  }, [proposalSalt, setProposalSalt])
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
@@ -299,6 +316,13 @@ export const ReviewProposalForm = ({
       try {
         setProposing(true)
         setSubmissionStep('submitting')
+        const proposalSaltForSubmission =
+          effectiveProposalSaltRef.current || generateProposalSalt()
+        effectiveProposalSaltRef.current = proposalSaltForSubmission
+        if (proposalSalt !== proposalSaltForSubmission) {
+          setProposalSalt(proposalSaltForSubmission)
+        }
+
         const params = {
           targets: targets,
           values: transactionValues,
@@ -318,6 +342,8 @@ export const ReviewProposalForm = ({
               ? values.representedAddress
               : undefined,
             discussionUrl: values.discussionUrl,
+            proposalSalt: proposalSaltForSubmission,
+            proposer: address,
           }),
         }
 
@@ -422,6 +448,9 @@ export const ReviewProposalForm = ({
       skipSimulation,
       onProposalCreated,
       updateProposalId,
+      proposalSalt,
+      address,
+      setProposalSalt,
       canStillUpdate,
     ]
   )
@@ -430,13 +459,15 @@ export const ReviewProposalForm = ({
   const handleSubmitAsNew = React.useCallback(() => {
     setShowDeadlineModal(false)
     // Clear the updateProposalId so it submits as a new proposal
-    const store = useProposalStore.getState()
-    store.setUpdateProposalId(undefined)
+    setUpdateProposalId(undefined)
+    const nextSalt = generateProposalSalt()
+    effectiveProposalSaltRef.current = nextSalt
+    setProposalSalt(nextSalt)
     // Re-trigger submission
     if (formikRef.current) {
       formikRef.current.submitForm()
     }
-  }, [])
+  }, [setProposalSalt, setUpdateProposalId])
 
   const handleSubmitAsNewAndCancel = React.useCallback(async () => {
     setShowDeadlineModal(false)
@@ -464,8 +495,10 @@ export const ReviewProposalForm = ({
       }
 
       // Clear the updateProposalId so the form submits as a new proposal
-      const store = useProposalStore.getState()
-      store.setUpdateProposalId(undefined)
+      setUpdateProposalId(undefined)
+      const nextSalt = generateProposalSalt()
+      effectiveProposalSaltRef.current = nextSalt
+      setProposalSalt(nextSalt)
 
       // Now submitting the new proposal
       setSubmissionStep('submitting')
@@ -488,7 +521,15 @@ export const ReviewProposalForm = ({
       logError(err)
       setError(err.message)
     }
-  }, [updateProposalId, addresses.governor, chain.id, config, canCancelOldProposal])
+  }, [
+    updateProposalId,
+    addresses.governor,
+    chain.id,
+    config,
+    canCancelOldProposal,
+    setProposalSalt,
+    setUpdateProposalId,
+  ])
 
   const handleCloseDeadlineModal = React.useCallback(() => {
     setShowDeadlineModal(false)

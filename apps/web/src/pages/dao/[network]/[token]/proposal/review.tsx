@@ -3,6 +3,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   ProposalStageIndicator,
+  ResetConfirmationModal,
   ReviewProposalForm,
   TransactionComposerProvider,
   UpdatingProposalBanner,
@@ -14,6 +15,7 @@ import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, ProposalCreateStage } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
+import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
 import { Flex, Stack } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -60,6 +62,8 @@ const ReviewProposalPage: NextPageWithLayout = () => {
     discussionUrl,
     representedAddressEnabled,
     updateProposalId,
+    setUpdateProposalId,
+    setProposalSalt,
     clearProposal,
   } = useProposalStore(
     useShallow((state) => ({
@@ -78,6 +82,8 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       discussionUrl: state.discussionUrl,
       representedAddressEnabled: state.representedAddressEnabled,
       updateProposalId: state.updateProposalId,
+      setUpdateProposalId: state.setUpdateProposalId,
+      setProposalSalt: state.setProposalSalt,
       clearProposal: state.clearProposal,
     }))
   )
@@ -104,28 +110,22 @@ const ReviewProposalPage: NextPageWithLayout = () => {
       removeAllTransactions,
     ]
   )
-  const [proposalHydrated, setProposalHydrated] = useState(false)
+  const proposalHydrated = useProposalStore((state) => state.hasHydrated)
 
   const isUpdatingProposal = !!updateProposalId
+  const [showCreateNewProposalModal, setShowCreateNewProposalModal] = useState(false)
+
+  const onCreateNewProposal = useCallback(() => {
+    setUpdateProposalId(undefined)
+    setProposalSalt(generateProposalSalt())
+    setShowCreateNewProposalModal(false)
+  }, [setProposalSalt, setUpdateProposalId])
 
   const { proposal: updatingProposal } = useProposal({
     chainId: chain.id,
     proposalId: updateProposalId,
     enabled: isUpdatingProposal,
   })
-
-  useEffect(() => {
-    if (useProposalStore.persist.hasHydrated()) {
-      setProposalHydrated(true)
-      return
-    }
-
-    const unsubscribe = useProposalStore.persist.onFinishHydration(() => {
-      setProposalHydrated(true)
-    })
-
-    return unsubscribe
-  }, [])
 
   const onOpenCreatePage = useCallback(async () => {
     await push({
@@ -295,8 +295,18 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           <UpdatingProposalBanner
             updateProposalId={updateProposalId}
             updatingProposal={updatingProposal}
+            onCreateNew={() => setShowCreateNewProposalModal(true)}
           />
         )}
+
+        <ResetConfirmationModal
+          open={showCreateNewProposalModal}
+          onCancel={() => setShowCreateNewProposalModal(false)}
+          onConfirm={onCreateNewProposal}
+          title="Create a new proposal?"
+          description="This will stop editing the existing proposal. Your title, summary, metadata, and queued transactions will stay in the draft."
+          confirmLabel="Create new proposal"
+        />
 
         <ProposalStageIndicator
           currentStage={'review'}

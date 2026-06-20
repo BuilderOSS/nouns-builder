@@ -2,6 +2,7 @@ import {
   CandidateDraftForm,
   CandidateSubmitForm,
   CandidateUpdatingBanner,
+  getCandidateId,
 } from '@buildeross/candidate-ui'
 import { ALLOWED_MIGRATION_DAOS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
@@ -11,6 +12,7 @@ import {
   MobileProposalActionBar,
   ProposalStageIndicator,
   Queue,
+  ResetConfirmationModal,
   TRANSACTION_FORM_OPTIONS,
   TransactionComposerProvider,
   TransactionForm,
@@ -25,18 +27,20 @@ import { getCandidateGroup } from '@buildeross/sdk'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
+import { AnimatedModal } from '@buildeross/ui/Modal'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
-import { Box, Stack } from '@buildeross/zord'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useMemo, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { isAddressEqual } from 'viem'
-import { useReadContract } from 'wagmi'
+import { useAccount, useReadContract } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 type CreateStage = 'draft' | 'transactions' | 'review'
@@ -48,44 +52,58 @@ const createSelectOption = (type: TransactionType) => ({
   icon: <TransactionTypeIcon transactionType={type} withVerticalMargin />,
 })
 
-const CreateCandidatePage: NextPageWithLayout = () => {
+const CandidateCreatePageContent = () => {
   const router = useRouter()
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((state) => state.chain)
+  const { address } = useAccount()
+  const { openConnectModal } = useConnectModal()
 
   const {
     transactionType,
     setTransactionType,
     resetTransactionType,
+    startCandidateDraft,
     addTransaction,
     addTransactions,
     removeTransaction,
     removeAllTransactions,
     title,
     summary,
+    discussionUrl,
     candidateId,
     candidateNumber,
     salt,
     versionNumber,
     transactions,
     clearCandidate,
+    setCandidateId,
+    setCandidateNumber,
+    setSalt,
+    setVersionNumber,
   } = useCandidateStore(
     useShallow((state) => ({
       transactionType: state.transactionType,
       setTransactionType: state.setTransactionType,
       resetTransactionType: state.resetTransactionType,
+      startCandidateDraft: state.startCandidateDraft,
       addTransaction: state.addTransaction,
       addTransactions: state.addTransactions,
       removeTransaction: state.removeTransaction,
       removeAllTransactions: state.removeAllTransactions,
       title: state.title,
       summary: state.summary,
+      discussionUrl: state.discussionUrl,
       candidateId: state.candidateId,
       candidateNumber: state.candidateNumber,
       salt: state.salt,
       versionNumber: state.versionNumber,
       transactions: state.transactions,
       clearCandidate: state.clearCandidate,
+      setCandidateId: state.setCandidateId,
+      setCandidateNumber: state.setCandidateNumber,
+      setSalt: state.setSalt,
+      setVersionNumber: state.setVersionNumber,
     }))
   )
 
@@ -93,6 +111,27 @@ const CreateCandidatePage: NextPageWithLayout = () => {
     router.query.edit === '1' ||
     router.query.edit === 'true' ||
     router.query.edit === 'edit'
+
+  const expectedCandidateId = useMemo(() => {
+    if (!address || !addresses.token || !salt) return undefined
+
+    return getCandidateId({
+      tokenAddress: addresses.token as `0x${string}`,
+      proposer: address as `0x${string}`,
+      salt: salt as `0x${string}`,
+    })
+  }, [address, addresses.token, salt])
+
+  const isCandidateIdMismatch = useMemo(() => {
+    if (!isEditingCandidate || !candidateId || !expectedCandidateId) return false
+    return candidateId.toLowerCase() !== expectedCandidateId.toLowerCase()
+  }, [candidateId, expectedCandidateId, isEditingCandidate])
+
+  const [showCreatorMismatchModal, setShowCreatorMismatchModal] = useState(false)
+
+  React.useEffect(() => {
+    setShowCreatorMismatchModal(isCandidateIdMismatch)
+  }, [isCandidateIdMismatch])
 
   const getInitialStage = (): CreateStage => {
     if (isEditingCandidate) return 'draft'
@@ -108,6 +147,7 @@ const CreateCandidatePage: NextPageWithLayout = () => {
 
   const [createStage, setCreateStage] = useState<CreateStage>(getInitialStage())
   const [furthestStage, setFurthestStage] = useState<CreateStage>(getInitialStage())
+  const [showCreateNewCandidateModal, setShowCreateNewCandidateModal] = useState(false)
   const scrollDirection = useScrollDirection()
 
   const { data: paused } = useReadContract({
@@ -357,6 +397,30 @@ const CreateCandidatePage: NextPageWithLayout = () => {
     review: canProceedFromDraft && canProceedFromTransactions,
   }
 
+  const handleCreateAsNewCandidate = () => {
+    startCandidateDraft({
+      title,
+      summary,
+      discussionUrl,
+      transactions,
+    })
+    setShowCreatorMismatchModal(false)
+  }
+
+  const handleCreateNewCandidate = React.useCallback(() => {
+    setCandidateId(undefined)
+    setCandidateNumber(undefined)
+    setSalt(undefined)
+    setVersionNumber(undefined)
+    setShowCreateNewCandidateModal(false)
+
+    const nextQuery = { ...router.query }
+    delete nextQuery.edit
+    void router.replace({ pathname: router.pathname, query: nextQuery }, undefined, {
+      shallow: true,
+    })
+  }, [router, setCandidateId, setCandidateNumber, setSalt, setVersionNumber])
+
   return (
     <TransactionComposerProvider value={transactionComposer}>
       <Box
@@ -420,8 +484,18 @@ const CreateCandidatePage: NextPageWithLayout = () => {
           <CandidateUpdatingBanner
             candidateNumber={candidateNumber}
             versionNumber={versionNumber}
+            onCreateNew={() => setShowCreateNewCandidateModal(true)}
           />
         )}
+
+        <ResetConfirmationModal
+          open={showCreateNewCandidateModal}
+          onCancel={() => setShowCreateNewCandidateModal(false)}
+          onConfirm={handleCreateNewCandidate}
+          title="Create a new candidate?"
+          description="This will stop editing the existing candidate. Your title, summary, discussion link, and queued transactions will stay in the draft."
+          confirmLabel="Create new candidate"
+        />
 
         <ProposalStageIndicator
           currentStage={createStage}
@@ -468,7 +542,7 @@ const CreateCandidatePage: NextPageWithLayout = () => {
           }
           rightColumn={
             createStage === 'transactions' ? (
-              !transactionType ? (
+              transactions?.length > 0 && !transactionType ? (
                 <Queue embedded />
               ) : (
                 <div />
@@ -518,11 +592,56 @@ const CreateCandidatePage: NextPageWithLayout = () => {
           />
         )}
       </Box>
+
+      <AnimatedModal open={showCreatorMismatchModal} close={() => {}}>
+        <Box p={{ '@initial': 'x4', '@768': 'x6' }}>
+          <Stack gap="x4">
+            <Text fontSize={20} fontWeight="display">
+              Candidate draft belongs to another wallet
+            </Text>
+            <Text color="text3">
+              This draft was created with a different proposer or salt. You can switch
+              wallets to continue editing that candidate, or create a new candidate from
+              the same metadata.
+            </Text>
+            <Flex gap="x3" wrap>
+              <Button onClick={() => openConnectModal?.()}>
+                Connect / switch wallet
+              </Button>
+              <Button variant="secondary" onClick={handleCreateAsNewCandidate}>
+                Create as new candidate
+              </Button>
+            </Flex>
+          </Stack>
+        </Box>
+      </AnimatedModal>
     </TransactionComposerProvider>
   )
 }
 
-CreateCandidatePage.getLayout = (page) => getDaoLayout(page, { hideFooterOnMobile: true })
+const CandidateCreatePage: NextPageWithLayout = () => {
+  const { address } = useAccount()
+  const { addresses } = useDaoStore()
+  const { openConnectModal } = useConnectModal()
+
+  if (!address || !addresses.token) {
+    return (
+      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+        <Text fontSize={20} fontWeight="display">
+          Candidate creation is restricted
+        </Text>
+        <Text color="text3">
+          You need to connect a wallet before you can create or edit a candidate.
+        </Text>
+        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+      </Flex>
+    )
+  }
+
+  return <CandidateCreatePageContent />
+}
+
+CandidateCreatePage.getLayout = (page) => getDaoLayout(page, { hideFooterOnMobile: true })
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const network = context.params?.network as string
@@ -559,4 +678,4 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   }
 }
 
-export default CreateCandidatePage
+export default CandidateCreatePage

@@ -1,14 +1,24 @@
 import {
+  buildCandidateStoreNamespace,
+  buildProposalStoreNamespace,
+  CandidateStoreProvider,
   ChainStoreProvider,
   createChainStore,
   createDaoStore,
   DaoStoreProvider,
+  getCandidateStore,
+  getProposalStore,
+  ProposalStoreProvider,
+  useChainStore,
+  useDaoStore,
 } from '@buildeross/stores'
 import type { Chain, DaoContractAddresses } from '@buildeross/types'
 import { ConnectModalProvider } from '@buildeross/ui/ConnectModalProvider'
 import { Box } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import React, { ReactNode, useMemo } from 'react'
+import { zeroAddress as ZERO_ADDRESS } from 'viem'
+import { useAccount } from 'wagmi'
 
 import { Nav as DefaultLayoutNav } from '../DefaultLayout/Nav'
 
@@ -41,15 +51,61 @@ export function BaseLayout({
     <ConnectModalProvider value={{ openConnectModal }}>
       <ChainStoreProvider store={chainStore}>
         <DaoStoreProvider store={daoStore}>
-          <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            {nav || <DefaultLayoutNav hideChainMenu={hideChainMenu} />}
-            <Box style={{ ...style, flex: 1 }} {...rest}>
-              {children}
+          <DraftStoreProviders>
+            <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+              {nav || <DefaultLayoutNav hideChainMenu={hideChainMenu} />}
+              <Box style={{ ...style, flex: 1 }} {...rest}>
+                {children}
+              </Box>
+              {footer}
             </Box>
-            {footer}
-          </Box>
+          </DraftStoreProviders>
         </DaoStoreProvider>
       </ChainStoreProvider>
     </ConnectModalProvider>
+  )
+}
+
+function DraftStoreProviders({ children }: { children: ReactNode }) {
+  const chain = useChainStore((state) => state.chain)
+  const addresses = useDaoStore((state) => state.addresses)
+  const { address } = useAccount()
+
+  const walletAddress = address ?? ZERO_ADDRESS
+  const tokenAddress = addresses.token ?? ZERO_ADDRESS
+
+  const proposalNamespace = useMemo(
+    () =>
+      buildProposalStoreNamespace({
+        chainId: chain.id,
+        walletAddress,
+        tokenAddress,
+      }),
+    [chain.id, walletAddress, tokenAddress]
+  )
+
+  const candidateNamespace = useMemo(
+    () =>
+      buildCandidateStoreNamespace({
+        chainId: chain.id,
+        walletAddress,
+        tokenAddress,
+      }),
+    [chain.id, walletAddress, tokenAddress]
+  )
+
+  const proposalStore = useMemo(
+    () => getProposalStore(proposalNamespace),
+    [proposalNamespace]
+  )
+  const candidateStore = useMemo(
+    () => getCandidateStore(candidateNamespace),
+    [candidateNamespace]
+  )
+
+  return (
+    <ProposalStoreProvider store={proposalStore}>
+      <CandidateStoreProvider store={candidateStore}>{children}</CandidateStoreProvider>
+    </ProposalStoreProvider>
   )
 }

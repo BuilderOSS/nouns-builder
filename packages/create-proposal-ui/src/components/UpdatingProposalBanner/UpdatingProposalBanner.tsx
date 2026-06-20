@@ -1,15 +1,17 @@
 import { Proposal } from '@buildeross/sdk/subgraph'
-import { Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 export interface UpdatingProposalBannerProps {
   updateProposalId: string
   updatingProposal?: Proposal
+  onCreateNew?: () => void
 }
 
 export const UpdatingProposalBanner: React.FC<UpdatingProposalBannerProps> = ({
   updateProposalId,
   updatingProposal,
+  onCreateNew,
 }) => {
   return (
     <Flex
@@ -38,6 +40,16 @@ export const UpdatingProposalBanner: React.FC<UpdatingProposalBannerProps> = ({
           original during the updatable period.
         </Text>
       </Stack>
+      {onCreateNew && (
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={onCreateNew}
+          style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}
+        >
+          Create new proposal
+        </Button>
+      )}
     </Flex>
   )
 }

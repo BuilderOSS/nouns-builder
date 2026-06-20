@@ -16,6 +16,7 @@ import {
   ProposalDraftForm,
   ProposalStageIndicator,
   Queue,
+  ResetConfirmationModal,
   TRANSACTION_FORM_OPTIONS,
   TransactionComposerProvider,
   TransactionForm,
@@ -40,6 +41,7 @@ import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { getEnsAddress } from '@buildeross/utils/ens'
+import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
 import { getProvider } from '@buildeross/utils/provider'
 import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
@@ -168,6 +170,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
     discussionUrl,
     representedAddressEnabled,
     updateProposalId,
+    setUpdateProposalId,
+    setProposalSalt,
     setTitle,
     setSummary,
     setRepresentedAddress,
@@ -190,6 +194,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
       discussionUrl: state.discussionUrl,
       representedAddressEnabled: state.representedAddressEnabled,
       updateProposalId: state.updateProposalId,
+      setUpdateProposalId: state.setUpdateProposalId,
+      setProposalSalt: state.setProposalSalt,
       setTitle: state.setTitle,
       setSummary: state.setSummary,
       setRepresentedAddress: state.setRepresentedAddress,
@@ -201,6 +207,14 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   // Check if we're updating an existing proposal
   const isUpdatingProposal = !!updateProposalId
+  const [showCreateNewProposalModal, setShowCreateNewProposalModal] =
+    React.useState(false)
+
+  const onCreateNewProposal = useCallback(() => {
+    setUpdateProposalId(undefined)
+    setProposalSalt(generateProposalSalt())
+    setShowCreateNewProposalModal(false)
+  }, [setProposalSalt, setUpdateProposalId])
 
   // Fetch proposal details if updating
   const { proposal: updatingProposal } = useProposal({
@@ -663,8 +677,18 @@ const CreateProposalPage: NextPageWithLayout = () => {
           <UpdatingProposalBanner
             updateProposalId={updateProposalId}
             updatingProposal={updatingProposal}
+            onCreateNew={() => setShowCreateNewProposalModal(true)}
           />
         )}
+
+        <ResetConfirmationModal
+          open={showCreateNewProposalModal}
+          onCancel={() => setShowCreateNewProposalModal(false)}
+          onConfirm={onCreateNewProposal}
+          title="Create a new proposal?"
+          description="This will stop editing the existing proposal. Your title, summary, metadata, and queued transactions will stay in the draft."
+          confirmLabel="Create new proposal"
+        />
 
         <ProposalStageIndicator
           currentStage={createStage === 'draft' ? 'draft' : 'transactions'}

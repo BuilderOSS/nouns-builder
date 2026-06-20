@@ -6,6 +6,8 @@ type BuildCandidateDescriptionParams = {
   summary?: string
   discussionUrl?: string
   transactionBundles?: ProposalTransactionBundle[]
+  salt?: string
+  proposer?: `0x${string}`
 }
 
 export const buildCandidateDescription = ({
@@ -13,10 +15,24 @@ export const buildCandidateDescription = ({
   summary,
   discussionUrl,
   transactionBundles,
+  salt,
+  proposer,
 }: BuildCandidateDescriptionParams): string =>
-  buildProposalMetadata({
-    title,
-    description: summary,
-    discussionUrl,
-    transactionBundles,
+  JSON.stringify({
+    ...JSON.parse(
+      buildProposalMetadata({
+        title,
+        description: summary,
+        discussionUrl,
+        transactionBundles,
+      })
+    ),
+    ...(salt && proposer
+      ? {
+          candidate: {
+            salt,
+            proposer,
+          },
+        }
+      : {}),
   })

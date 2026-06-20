@@ -1,4 +1,4 @@
-import { TransactionBundle } from '@buildeross/stores'
+import { TransactionBundle } from '@buildeross/types'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'

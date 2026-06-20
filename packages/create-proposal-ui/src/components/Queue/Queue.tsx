@@ -77,19 +77,23 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
       </Flex>
 
       <Stack gap={'x4'}>
-        {transactions
-          ? transactions.map((transaction, i) => (
-              <TransactionCard
-                key={`${transaction.type}-${i}`}
-                handleRemove={() => confirmRemoveTransaction(i)}
-                disabled={
-                  transaction.type === TransactionType.UPGRADE ||
-                  transaction.type === TransactionType.UPDATE_MINTER
-                }
-                transaction={transaction}
-              />
-            ))
-          : null}
+        {transactions?.length > 0 ? (
+          transactions.map((transaction, i) => (
+            <TransactionCard
+              key={`${transaction.type}-${i}`}
+              handleRemove={() => confirmRemoveTransaction(i)}
+              disabled={
+                transaction.type === TransactionType.UPGRADE ||
+                transaction.type === TransactionType.UPDATE_MINTER
+              }
+              transaction={transaction}
+            />
+          ))
+        ) : (
+          <Text size="sm" color="text3">
+            No transactions in queue
+          </Text>
+        )}
       </Stack>
       <Stack
         borderWidth={'thin'}
@@ -98,7 +102,11 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
         mt={'x6'}
         mb={'x8'}
       />
-      <Button variant="outline" onClick={handleClearAll}>
+      <Button
+        variant="outline"
+        onClick={handleClearAll}
+        disabled={transactions.length === 0}
+      >
         Clear queue
       </Button>
       <AnimatedModal close={() => setOpenConfirm(false)} open={openConfirm}>

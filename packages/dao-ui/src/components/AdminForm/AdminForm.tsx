@@ -5,13 +5,8 @@ import {
   tokenAbi,
   treasuryAbi,
 } from '@buildeross/sdk/contract'
-import {
-  TransactionBundle,
-  useChainStore,
-  useDaoStore,
-  useProposalStore,
-} from '@buildeross/stores'
-import { AddressType, TransactionType } from '@buildeross/types'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { AddressType, TransactionBundle, TransactionType } from '@buildeross/types'
 import { DaoLinkInput, DaoLinksField } from '@buildeross/ui'
 import {
   DaysHoursMinsSecs,

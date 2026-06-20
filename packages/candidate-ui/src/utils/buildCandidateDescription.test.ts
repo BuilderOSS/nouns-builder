@@ -10,6 +10,8 @@ describe('buildCandidateDescription', () => {
         title: ' Treasury Diversification ',
         summary: ' Move funds into stables. ',
         discussionUrl: ' https://forum.example/candidate ',
+        salt: '0xsalt',
+        proposer: '0x0000000000000000000000000000000000000001',
         transactionBundles: [
           { type: TransactionType.SEND_TOKENS, summary: 'Move funds', callCount: 2 },
         ],
@@ -23,6 +25,10 @@ describe('buildCandidateDescription', () => {
           { type: TransactionType.SEND_TOKENS, summary: 'Move funds', callCount: 2 },
         ],
         discussionUrl: 'https://forum.example/candidate',
+        candidate: {
+          salt: '0xsalt',
+          proposer: '0x0000000000000000000000000000000000000001',
+        },
       })
     )
   })
@@ -39,6 +45,30 @@ describe('buildCandidateDescription', () => {
         version: 1,
         title: 'Title',
         description: 'Summary',
+      })
+    )
+  })
+
+  it('changes the serialized description when only candidate identity changes', () => {
+    const base = {
+      title: 'Same title',
+      summary: 'Same summary',
+      transactionBundles: [
+        { type: TransactionType.CUSTOM, summary: 'Same calls', callCount: 1 },
+      ],
+    }
+
+    expect(
+      buildCandidateDescription({
+        ...base,
+        proposer: '0x0000000000000000000000000000000000000001',
+        salt: '0x0000000000000000000000000000000000000000000000000000000000000002',
+      })
+    ).not.toBe(
+      buildCandidateDescription({
+        ...base,
+        proposer: '0x0000000000000000000000000000000000000001',
+        salt: '0x0000000000000000000000000000000000000000000000000000000000000004',
       })
     )
   })

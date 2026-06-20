@@ -1,14 +1,16 @@
-import { Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 export interface CandidateUpdatingBannerProps {
   candidateNumber: string | number
   versionNumber?: number
+  onCreateNew?: () => void
 }
 
 export const CandidateUpdatingBanner: React.FC<CandidateUpdatingBannerProps> = ({
   candidateNumber,
   versionNumber,
+  onCreateNew,
 }) => {
   return (
     <Flex
@@ -34,6 +36,16 @@ export const CandidateUpdatingBanner: React.FC<CandidateUpdatingBannerProps> = (
           current version and reset all existing signatures.
         </Text>
       </Stack>
+      {onCreateNew && (
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={onCreateNew}
+          style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}
+        >
+          Create new candidate
+        </Button>
+      )}
     </Flex>
   )
 }
