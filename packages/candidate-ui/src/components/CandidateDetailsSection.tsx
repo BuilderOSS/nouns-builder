@@ -2,7 +2,6 @@ import {
   BundledDecodedTransactions,
   ProposalMarkdown,
   ProposalSection,
-  TransactionTypeIcon,
 } from '@buildeross/proposal-ui'
 import { type CandidateVersion } from '@buildeross/sdk'
 import {
@@ -10,8 +9,7 @@ import {
   type DaoContractAddresses,
   type ProposalDescriptionMetadataV1,
 } from '@buildeross/types'
-import { TransactionType } from '@buildeross/types'
-import { Flex, Stack, Text } from '@buildeross/zord'
+import { Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 interface CandidateDetailsSectionProps {
@@ -35,7 +33,6 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
   proposalMetadata,
   chainId,
   addresses,
-  versions,
 }) => {
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
@@ -65,35 +62,6 @@ export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = (
           <Text color="text3">No transactions in this candidate.</Text>
         )}
       </ProposalSection>
-
-      {versions && versions.length > 0 && (
-        <ProposalSection title={`Edit History (${versions.length})`}>
-          <Stack gap="x4">
-            {versions.map((version) => (
-              <Stack
-                key={version.id}
-                p={{ '@initial': 'x3', '@768': 'x4' }}
-                gap="x3"
-                borderColor="border"
-                borderStyle="solid"
-                borderWidth="normal"
-                borderRadius="curved"
-              >
-                <Flex align="center" gap="x2">
-                  <TransactionTypeIcon transactionType={TransactionType.CUSTOM} />
-                  <Stack gap="x1">
-                    {version.title && <Text fontWeight="heading">{version.title}</Text>}
-                    <Text color="text3">
-                      Version {version.versionNumber.toString()} •{' '}
-                      {version.signatureCount.toString()} signatures
-                    </Text>
-                  </Stack>
-                </Flex>
-              </Stack>
-            ))}
-          </Stack>
-        </ProposalSection>
-      )}
     </Stack>
   )
 }
