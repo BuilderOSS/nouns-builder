@@ -14,7 +14,8 @@ import {
 } from '../utils/candidateProposal'
 
 export interface CandidateSignatureButtonProps {
-  candidateVersionUID: Hex
+  candidateId: Hex
+  proposalId: Hex
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
@@ -26,7 +27,8 @@ export interface CandidateSignatureButtonProps {
 }
 
 export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> = ({
-  candidateVersionUID,
+  candidateId,
+  proposalId,
   proposer,
   governorAddress,
   tokenSymbol,
@@ -88,7 +90,8 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
         daoTokenAddress: addresses.token!,
         governorAddress,
         tokenSymbol,
-        candidateVersionUID,
+        candidateId,
+        proposalId,
         signer: address,
         proposer,
         nonce,
@@ -116,7 +119,8 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
     addresses.token,
     governorAddress,
     tokenSymbol,
-    candidateVersionUID,
+    candidateId,
+    proposalId,
     proposer,
     nonce,
     deadline,

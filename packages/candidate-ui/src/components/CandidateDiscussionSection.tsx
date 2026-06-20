@@ -197,7 +197,8 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
       {latestVersion && tokenSymbol && (
         <CandidateSigners
-          candidateVersionUID={latestVersion.id as `0x${string}`}
+          candidateId={latestVersion.candidateId as `0x${string}`}
+          proposalId={latestVersion.computedProposalId as `0x${string}`}
           proposer={candidate.proposer as `0x${string}`}
           governorAddress={governorAddress}
           tokenSymbol={String(tokenSymbol)}

@@ -436,8 +436,8 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 Signal / comment
               </Text>
               <CandidateCommentForm
-                candidateId={candidate.id as `0x${string}`}
-                candidateVersionUID={latestVersion.id as `0x${string}`}
+                candidateId={latestVersion.candidateId as `0x${string}`}
+                proposalId={latestVersion.computedProposalId as `0x${string}`}
                 proposer={candidate.proposer as `0x${string}`}
                 governorAddress={addresses.governor as `0x${string}`}
                 tokenSymbol={String(tokenSymbol)}

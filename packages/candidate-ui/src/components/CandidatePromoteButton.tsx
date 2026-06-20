@@ -16,7 +16,8 @@ export interface ProposerSignature {
 }
 
 export interface CandidatePromoteButtonProps {
-  candidateVersionUID: Hex
+  candidateId: Hex
+  proposalId: Hex
   targets: string[]
   values: bigint[]
   calldatas: Hex[]
@@ -28,6 +29,8 @@ export interface CandidatePromoteButtonProps {
 }
 
 export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
+  candidateId: _candidateId,
+  proposalId: _proposalId,
   targets,
   values,
   calldatas,

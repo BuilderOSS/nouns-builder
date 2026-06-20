@@ -13,7 +13,8 @@ import { CandidatePromoteButton, type ProposerSignature } from '../CandidateProm
 import { CandidateSignatureButton } from '../CandidateSignatureButton'
 
 type CandidateSignersProps = {
-  candidateVersionUID: string
+  candidateId: `0x${string}`
+  proposalId: `0x${string}`
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
@@ -25,7 +26,8 @@ type CandidateSignersProps = {
 }
 
 export const CandidateSigners: React.FC<CandidateSignersProps> = ({
-  candidateVersionUID,
+  candidateId,
+  proposalId,
   proposer,
   governorAddress,
   tokenSymbol,
@@ -49,10 +51,8 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     isLoading,
     mutate,
   } = useSWR(
-    candidateVersionUID
-      ? ['candidateSponsorSignatures', chain.id, candidateVersionUID]
-      : null,
-    () => getCandidateSponsorSignatures(chain.id, candidateVersionUID),
+    proposalId ? ['candidateSponsorSignatures', chain.id, proposalId] : null,
+    () => getCandidateSponsorSignatures(chain.id, proposalId),
     { revalidateOnFocus: false }
   )
 
@@ -130,7 +130,8 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
         </Flex>
 
         <CandidateSignatureButton
-          candidateVersionUID={candidateVersionUID as `0x${string}`}
+          candidateId={candidateId}
+          proposalId={proposalId}
           proposer={proposer}
           governorAddress={governorAddress}
           tokenSymbol={tokenSymbol}
@@ -177,7 +178,8 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
         {isCreator && proposalThreshold !== undefined && targets.length > 0 && (
           <Box pt="x2">
             <CandidatePromoteButton
-              candidateVersionUID={candidateVersionUID as `0x${string}`}
+              candidateId={candidateId}
+              proposalId={proposalId}
               targets={targets}
               values={values}
               calldatas={calldatas}

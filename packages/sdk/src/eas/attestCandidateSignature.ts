@@ -21,7 +21,8 @@ export interface CandidateSignatureParams {
   daoTokenAddress: string
   governorAddress: AddressType
   tokenSymbol: string
-  candidateVersionUID: Hex
+  candidateId: Hex
+  proposalId: Hex
   signer: AddressType
   proposer: AddressType
   nonce: bigint
@@ -51,14 +52,13 @@ export async function attestCandidateSignature(
     daoTokenAddress,
     governorAddress,
     tokenSymbol,
-    candidateVersionUID,
+    candidateId,
+    proposalId,
     signer,
     proposer,
     nonce,
     deadline,
   } = params
-
-  const proposalId = candidateVersionUID
 
   // Get EAS contract address for this chain
   const easAddress = EAS_CONTRACT_ADDRESS[chainId]
@@ -115,7 +115,8 @@ export async function attestCandidateSignature(
   // 2. Encode the attestation data
   const schemaEncoder = new SchemaEncoder(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA)
   const encodedData = schemaEncoder.encodeData([
-    { name: 'candidateVersionUID', value: candidateVersionUID, type: 'bytes32' },
+    { name: 'candidateId', value: candidateId, type: 'bytes32' },
+    { name: 'proposalId', value: proposalId, type: 'bytes32' },
     { name: 'nonce', value: nonce, type: 'uint256' },
     { name: 'deadline', value: deadline, type: 'uint256' },
     { name: 'signature', value: signature, type: 'bytes' },

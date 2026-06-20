@@ -1305,6 +1305,7 @@ export enum CandidateComment_OrderBy {
 
 export type CandidateSponsorSignature = {
   __typename?: 'CandidateSponsorSignature'
+  attestationUID: Scalars['Bytes']['output']
   createdAt: Scalars['BigInt']['output']
   deadline: Scalars['BigInt']['output']
   id: Scalars['ID']['output']
@@ -1524,6 +1525,7 @@ export enum CandidateSponsorSignatureCreatedEvent_OrderBy {
   GroupVersionCount = 'group__versionCount',
   Id = 'id',
   Signature = 'signature',
+  SignatureAttestationUid = 'signature__attestationUID',
   SignatureCreatedAt = 'signature__createdAt',
   SignatureDeadline = 'signature__deadline',
   SignatureId = 'signature__id',
@@ -1542,6 +1544,16 @@ export type CandidateSponsorSignature_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
   and?: InputMaybe<Array<InputMaybe<CandidateSponsorSignature_Filter>>>
+  attestationUID?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_contains?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_gt?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_gte?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  attestationUID_lt?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_lte?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_not?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  attestationUID_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   createdAt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -1641,6 +1653,7 @@ export type CandidateSponsorSignature_Filter = {
 }
 
 export enum CandidateSponsorSignature_OrderBy {
+  AttestationUid = 'attestationUID',
   CreatedAt = 'createdAt',
   Deadline = 'deadline',
   Id = 'id',
