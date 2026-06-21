@@ -7,8 +7,15 @@ import {
   OrderDirection,
 } from '../sdk.generated'
 
-export type CandidateComment = Omit<CandidateCommentFragmentFragment, 'createdAt'> & {
+export type CandidateComment = Omit<
+  CandidateCommentFragmentFragment,
+  'createdAt' | 'voteWeight' | 'candidateId' | 'proposalHash' | 'commenter'
+> & {
   createdAt: number
+  voteWeight: bigint
+  candidateId: `0x${string}`
+  proposalHash: `0x${string}`
+  commenter: `0x${string}`
 }
 
 export interface CandidateCommentsResponse {
@@ -27,7 +34,7 @@ export const getCandidateComments = async (
   try {
     const data = await SDK.connect(chainId).CandidateComments({
       where: {
-        candidate: candidateId.toLowerCase(),
+        candidateId: candidateId.toLowerCase(),
         revoked: false,
       },
       first: limit,
@@ -39,6 +46,10 @@ export const getCandidateComments = async (
     const comments = data.candidateComments.map((comment) => ({
       ...comment,
       createdAt: Number(comment.createdAt),
+      voteWeight: BigInt(comment.voteWeight),
+      candidateId: comment.candidateId as `0x${string}`,
+      proposalHash: comment.proposalHash as `0x${string}`,
+      commenter: comment.commenter as `0x${string}`,
     }))
 
     return {

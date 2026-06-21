@@ -17,27 +17,27 @@ export interface ProposerSignature {
 
 export interface CandidatePromoteButtonProps {
   candidateId: Hex
-  proposalId: Hex
+  proposalHash: Hex
   targets: string[]
   values: bigint[]
   calldatas: Hex[]
   description: string
   signatures: ProposerSignature[]
   proposalThreshold: bigint
-  totalSignatureWeight: bigint
+  totalVoteWeight: bigint
   onSuccess?: (proposalId: Hex) => void
 }
 
 export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
   candidateId: _candidateId,
-  proposalId: _proposalId,
+  proposalHash: _proposalHash,
   targets,
   values,
   calldatas,
   description,
   signatures,
   proposalThreshold,
-  totalSignatureWeight,
+  totalVoteWeight,
   onSuccess,
 }) => {
   const config = useConfig()
@@ -48,10 +48,11 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isTxSuccess, setIsTxSuccess] = useState(false)
+  const requiredVoteWeight = proposalThreshold + 1n
 
   const meetsThreshold = React.useMemo(() => {
-    return totalSignatureWeight >= proposalThreshold
-  }, [totalSignatureWeight, proposalThreshold])
+    return totalVoteWeight >= requiredVoteWeight
+  }, [totalVoteWeight, requiredVoteWeight])
 
   const canPromote = React.useMemo(() => {
     return (
@@ -136,14 +137,14 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
 
   const buttonText = React.useMemo(() => {
     if (!meetsThreshold) {
-      const needed = proposalThreshold - totalSignatureWeight
+      const needed = requiredVoteWeight - totalVoteWeight
       return `Need ${needed.toString()} more vote${needed !== 1n ? 's' : ''}`
     }
     if (signatures.length === 0) {
       return 'No signatures'
     }
     return 'Submit as Proposal'
-  }, [meetsThreshold, proposalThreshold, totalSignatureWeight, signatures.length])
+  }, [meetsThreshold, requiredVoteWeight, totalVoteWeight, signatures.length])
 
   if (signatures.length === 0) return null
 
@@ -152,10 +153,10 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
       <Stack gap="x3">
         <Box>
           <Text fontSize={14} color="text3" mb="x2">
-            Signature Progress
+            Proposal Threshold
           </Text>
           <Text fontSize={16} fontWeight="label">
-            {totalSignatureWeight.toString()} / {proposalThreshold.toString()} votes
+            {totalVoteWeight.toString()} / {requiredVoteWeight.toString()} votes
           </Text>
           {signatures.length > 0 && (
             <Text fontSize={14} color="text3" mt="x1">

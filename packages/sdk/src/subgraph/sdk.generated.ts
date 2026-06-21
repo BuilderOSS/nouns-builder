@@ -946,13 +946,14 @@ export type Block_Height = {
 
 export type CandidateComment = {
   __typename?: 'CandidateComment'
-  candidate: Scalars['Bytes']['output']
+  candidateId: Scalars['Bytes']['output']
   comment: Scalars['String']['output']
   commenter: Scalars['Bytes']['output']
   createdAt: Scalars['BigInt']['output']
   group: ProposalCandidateGroup
   id: Scalars['ID']['output']
   parentComment?: Maybe<CandidateComment>
+  proposalHash: Scalars['Bytes']['output']
   replies: Array<CandidateComment>
   revoked: Scalars['Boolean']['output']
   support: CandidateVoteSupport
@@ -1102,11 +1103,12 @@ export enum CandidateCommentCreatedEvent_OrderBy {
   Actor = 'actor',
   BlockNumber = 'blockNumber',
   Comment = 'comment',
-  CommentCandidate = 'comment__candidate',
+  CommentCandidateId = 'comment__candidateId',
   CommentComment = 'comment__comment',
   CommentCommenter = 'comment__commenter',
   CommentCreatedAt = 'comment__createdAt',
   CommentId = 'comment__id',
+  CommentProposalHash = 'comment__proposalHash',
   CommentRevoked = 'comment__revoked',
   CommentSupport = 'comment__support',
   CommentVoteWeight = 'comment__voteWeight',
@@ -1152,16 +1154,16 @@ export type CandidateComment_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
   and?: InputMaybe<Array<InputMaybe<CandidateComment_Filter>>>
-  candidate?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_contains?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_gt?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_gte?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  candidate_lt?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_lte?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_not?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_not_contains?: InputMaybe<Scalars['Bytes']['input']>
-  candidate_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  candidateId?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_contains?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_gt?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_gte?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  candidateId_lt?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_lte?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_not?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   comment?: InputMaybe<Scalars['String']['input']>
   comment_contains?: InputMaybe<Scalars['String']['input']>
   comment_contains_nocase?: InputMaybe<Scalars['String']['input']>
@@ -1251,6 +1253,16 @@ export type CandidateComment_Filter = {
   parentComment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   parentComment_starts_with?: InputMaybe<Scalars['String']['input']>
   parentComment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  proposalHash?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  proposalHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   replies_?: InputMaybe<CandidateComment_Filter>
   revoked?: InputMaybe<Scalars['Boolean']['input']>
   revoked_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
@@ -1271,7 +1283,7 @@ export type CandidateComment_Filter = {
 }
 
 export enum CandidateComment_OrderBy {
-  Candidate = 'candidate',
+  CandidateId = 'candidateId',
   Comment = 'comment',
   Commenter = 'commenter',
   CreatedAt = 'createdAt',
@@ -1289,14 +1301,16 @@ export enum CandidateComment_OrderBy {
   GroupVersionCount = 'group__versionCount',
   Id = 'id',
   ParentComment = 'parentComment',
-  ParentCommentCandidate = 'parentComment__candidate',
+  ParentCommentCandidateId = 'parentComment__candidateId',
   ParentCommentComment = 'parentComment__comment',
   ParentCommentCommenter = 'parentComment__commenter',
   ParentCommentCreatedAt = 'parentComment__createdAt',
   ParentCommentId = 'parentComment__id',
+  ParentCommentProposalHash = 'parentComment__proposalHash',
   ParentCommentRevoked = 'parentComment__revoked',
   ParentCommentSupport = 'parentComment__support',
   ParentCommentVoteWeight = 'parentComment__voteWeight',
+  ProposalHash = 'proposalHash',
   Replies = 'replies',
   Revoked = 'revoked',
   Support = 'support',
@@ -1306,11 +1320,12 @@ export enum CandidateComment_OrderBy {
 export type CandidateSponsorSignature = {
   __typename?: 'CandidateSponsorSignature'
   attestationUID: Scalars['Bytes']['output']
+  candidateId: Scalars['Bytes']['output']
   createdAt: Scalars['BigInt']['output']
   deadline: Scalars['BigInt']['output']
   id: Scalars['ID']['output']
   nonce: Scalars['BigInt']['output']
-  proposalId: Scalars['Bytes']['output']
+  proposalHash: Scalars['Bytes']['output']
   revoked: Scalars['Boolean']['output']
   signature: Scalars['Bytes']['output']
   signer: Scalars['Bytes']['output']
@@ -1478,12 +1493,12 @@ export enum CandidateSponsorSignatureCreatedEvent_OrderBy {
   CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
-  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalHash = 'candidateVersion__proposalHash',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -1526,11 +1541,12 @@ export enum CandidateSponsorSignatureCreatedEvent_OrderBy {
   Id = 'id',
   Signature = 'signature',
   SignatureAttestationUid = 'signature__attestationUID',
+  SignatureCandidateId = 'signature__candidateId',
   SignatureCreatedAt = 'signature__createdAt',
   SignatureDeadline = 'signature__deadline',
   SignatureId = 'signature__id',
   SignatureNonce = 'signature__nonce',
-  SignatureProposalId = 'signature__proposalId',
+  SignatureProposalHash = 'signature__proposalHash',
   SignatureRevoked = 'signature__revoked',
   SignatureSignature = 'signature__signature',
   SignatureSigner = 'signature__signer',
@@ -1554,6 +1570,16 @@ export type CandidateSponsorSignature_Filter = {
   attestationUID_not?: InputMaybe<Scalars['Bytes']['input']>
   attestationUID_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   attestationUID_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  candidateId?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_contains?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_gt?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_gte?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  candidateId_lt?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_lte?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_not?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  candidateId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   createdAt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -1587,16 +1613,16 @@ export type CandidateSponsorSignature_Filter = {
   nonce_not?: InputMaybe<Scalars['BigInt']['input']>
   nonce_not_in?: InputMaybe<Array<Scalars['BigInt']['input']>>
   or?: InputMaybe<Array<InputMaybe<CandidateSponsorSignature_Filter>>>
-  proposalId?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_contains?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_gt?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_gte?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  proposalId_lt?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_lte?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_not?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
-  proposalId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  proposalHash?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  proposalHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   revoked?: InputMaybe<Scalars['Boolean']['input']>
   revoked_in?: InputMaybe<Array<Scalars['Boolean']['input']>>
   revoked_not?: InputMaybe<Scalars['Boolean']['input']>
@@ -1654,11 +1680,12 @@ export type CandidateSponsorSignature_Filter = {
 
 export enum CandidateSponsorSignature_OrderBy {
   AttestationUid = 'attestationUID',
+  CandidateId = 'candidateId',
   CreatedAt = 'createdAt',
   Deadline = 'deadline',
   Id = 'id',
   Nonce = 'nonce',
-  ProposalId = 'proposalId',
+  ProposalHash = 'proposalHash',
   Revoked = 'revoked',
   Signature = 'signature',
   Signer = 'signer',
@@ -1666,12 +1693,12 @@ export enum CandidateSponsorSignature_OrderBy {
   VersionAttestationUid = 'version__attestationUID',
   VersionAttester = 'version__attester',
   VersionCandidateId = 'version__candidateId',
-  VersionComputedProposalId = 'version__computedProposalId',
   VersionCreatedAt = 'version__createdAt',
   VersionDescription = 'version__description',
   VersionDiscussionUrl = 'version__discussionUrl',
   VersionId = 'version__id',
   VersionMetadata = 'version__metadata',
+  VersionProposalHash = 'version__proposalHash',
   VersionRepresentedAddress = 'version__representedAddress',
   VersionRevoked = 'version__revoked',
   VersionSalt = 'version__salt',
@@ -1842,12 +1869,12 @@ export enum CandidateSubmittedAsProposalEvent_OrderBy {
   CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
-  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalHash = 'candidateVersion__proposalHash',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -2072,12 +2099,12 @@ export enum CandidateVersionCreatedEvent_OrderBy {
   CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
-  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalHash = 'candidateVersion__proposalHash',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -4871,12 +4898,12 @@ export enum ProposalCandidateGroup_OrderBy {
   LeadingVersionAttestationUid = 'leadingVersion__attestationUID',
   LeadingVersionAttester = 'leadingVersion__attester',
   LeadingVersionCandidateId = 'leadingVersion__candidateId',
-  LeadingVersionComputedProposalId = 'leadingVersion__computedProposalId',
   LeadingVersionCreatedAt = 'leadingVersion__createdAt',
   LeadingVersionDescription = 'leadingVersion__description',
   LeadingVersionDiscussionUrl = 'leadingVersion__discussionUrl',
   LeadingVersionId = 'leadingVersion__id',
   LeadingVersionMetadata = 'leadingVersion__metadata',
+  LeadingVersionProposalHash = 'leadingVersion__proposalHash',
   LeadingVersionRepresentedAddress = 'leadingVersion__representedAddress',
   LeadingVersionRevoked = 'leadingVersion__revoked',
   LeadingVersionSalt = 'leadingVersion__salt',
@@ -4896,7 +4923,6 @@ export type ProposalCandidateVersion = ProposalMetadataEntity & {
   attester: Scalars['Bytes']['output']
   calldatas: Array<Scalars['Bytes']['output']>
   candidateId: Scalars['Bytes']['output']
-  computedProposalId: Scalars['Bytes']['output']
   createdAt: Scalars['BigInt']['output']
   description?: Maybe<Scalars['String']['output']>
   discussionUrl?: Maybe<Scalars['String']['output']>
@@ -4904,6 +4930,7 @@ export type ProposalCandidateVersion = ProposalMetadataEntity & {
   id: Scalars['ID']['output']
   metadata?: Maybe<Scalars['String']['output']>
   proposal?: Maybe<Proposal>
+  proposalHash: Scalars['Bytes']['output']
   representedAddress?: Maybe<Scalars['String']['output']>
   revoked: Scalars['Boolean']['output']
   salt: Scalars['Bytes']['output']
@@ -4962,16 +4989,6 @@ export type ProposalCandidateVersion_Filter = {
   candidateId_not?: InputMaybe<Scalars['Bytes']['input']>
   candidateId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
   candidateId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  computedProposalId?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_contains?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_gt?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_gte?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
-  computedProposalId_lt?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_lte?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_not?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_not_contains?: InputMaybe<Scalars['Bytes']['input']>
-  computedProposalId_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   createdAt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gt?: InputMaybe<Scalars['BigInt']['input']>
   createdAt_gte?: InputMaybe<Scalars['BigInt']['input']>
@@ -5071,6 +5088,16 @@ export type ProposalCandidateVersion_Filter = {
   metadata_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   or?: InputMaybe<Array<InputMaybe<ProposalCandidateVersion_Filter>>>
   proposal?: InputMaybe<Scalars['String']['input']>
+  proposalHash?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_contains?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_gt?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_gte?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
+  proposalHash_lt?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_lte?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not_contains?: InputMaybe<Scalars['Bytes']['input']>
+  proposalHash_not_in?: InputMaybe<Array<Scalars['Bytes']['input']>>
   proposal_?: InputMaybe<Proposal_Filter>
   proposal_contains?: InputMaybe<Scalars['String']['input']>
   proposal_contains_nocase?: InputMaybe<Scalars['String']['input']>
@@ -5185,7 +5212,6 @@ export enum ProposalCandidateVersion_OrderBy {
   Attester = 'attester',
   Calldatas = 'calldatas',
   CandidateId = 'candidateId',
-  ComputedProposalId = 'computedProposalId',
   CreatedAt = 'createdAt',
   Description = 'description',
   DiscussionUrl = 'discussionUrl',
@@ -5204,6 +5230,7 @@ export enum ProposalCandidateVersion_OrderBy {
   Id = 'id',
   Metadata = 'metadata',
   Proposal = 'proposal',
+  ProposalHash = 'proposalHash',
   ProposalAbstainVotes = 'proposal__abstainVotes',
   ProposalAgainstVotes = 'proposal__againstVotes',
   ProposalCalldatas = 'proposal__calldatas',
@@ -7376,12 +7403,12 @@ export enum Proposal_OrderBy {
   CandidateVersionAttestationUid = 'candidateVersion__attestationUID',
   CandidateVersionAttester = 'candidateVersion__attester',
   CandidateVersionCandidateId = 'candidateVersion__candidateId',
-  CandidateVersionComputedProposalId = 'candidateVersion__computedProposalId',
   CandidateVersionCreatedAt = 'candidateVersion__createdAt',
   CandidateVersionDescription = 'candidateVersion__description',
   CandidateVersionDiscussionUrl = 'candidateVersion__discussionUrl',
   CandidateVersionId = 'candidateVersion__id',
   CandidateVersionMetadata = 'candidateVersion__metadata',
+  CandidateVersionProposalHash = 'candidateVersion__proposalHash',
   CandidateVersionRepresentedAddress = 'candidateVersion__representedAddress',
   CandidateVersionRevoked = 'candidateVersion__revoked',
   CandidateVersionSalt = 'candidateVersion__salt',
@@ -10939,7 +10966,7 @@ export type ProposalFragment = {
   candidateVersion?: {
     __typename?: 'ProposalCandidateVersion'
     candidateId: any
-    computedProposalId: any
+    proposalHash: any
     attestationUID: any
     versionNumber: any
     proposal?: {
@@ -10991,7 +11018,7 @@ export type ProposalDetailFragment = {
   candidateVersion?: {
     __typename?: 'ProposalCandidateVersion'
     candidateId: any
-    computedProposalId: any
+    proposalHash: any
     attestationUID: any
     versionNumber: any
     proposal?: {
@@ -11280,6 +11307,7 @@ export type CandidateGroupDetailFragmentFragment = {
     __typename?: 'ProposalCandidateVersion'
     id: string
     candidateId: any
+    proposalHash: any
     salt: any
     attester: any
     versionNumber: any
@@ -11290,7 +11318,6 @@ export type CandidateGroupDetailFragmentFragment = {
     description?: string | null
     metadata?: string | null
     representedAddress?: string | null
-    computedProposalId: any
     attestationUID: any
     createdAt: any
     discussionUrl?: string | null
@@ -11309,6 +11336,7 @@ export type CandidateGroupDetailFragmentFragment = {
     __typename?: 'ProposalCandidateVersion'
     id: string
     candidateId: any
+    proposalHash: any
     salt: any
     attester: any
     versionNumber: any
@@ -11319,7 +11347,6 @@ export type CandidateGroupDetailFragmentFragment = {
     description?: string | null
     metadata?: string | null
     representedAddress?: string | null
-    computedProposalId: any
     attestationUID: any
     createdAt: any
     discussionUrl?: string | null
@@ -11340,6 +11367,7 @@ export type CandidateVersionFragmentFragment = {
   __typename?: 'ProposalCandidateVersion'
   id: string
   candidateId: any
+  proposalHash: any
   salt: any
   attester: any
   versionNumber: any
@@ -11350,7 +11378,6 @@ export type CandidateVersionFragmentFragment = {
   description?: string | null
   metadata?: string | null
   representedAddress?: string | null
-  computedProposalId: any
   attestationUID: any
   createdAt: any
   discussionUrl?: string | null
@@ -11369,7 +11396,8 @@ export type CandidateVersionFragmentFragment = {
 export type CandidateCommentFragmentFragment = {
   __typename?: 'CandidateComment'
   id: string
-  candidate: any
+  candidateId: any
+  proposalHash: any
   commenter: any
   voteWeight: any
   support: CandidateVoteSupport
@@ -11382,8 +11410,9 @@ export type CandidateCommentFragmentFragment = {
 export type CandidateSponsorSignatureFragmentFragment = {
   __typename?: 'CandidateSponsorSignature'
   id: string
+  candidateId: any
+  proposalHash: any
   signer: any
-  proposalId: any
   nonce: any
   deadline: any
   signature: any
@@ -11417,6 +11446,7 @@ export type CandidateGroupByNumberQuery = {
       __typename?: 'ProposalCandidateVersion'
       id: string
       candidateId: any
+      proposalHash: any
       salt: any
       attester: any
       versionNumber: any
@@ -11427,7 +11457,6 @@ export type CandidateGroupByNumberQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      computedProposalId: any
       attestationUID: any
       createdAt: any
       discussionUrl?: string | null
@@ -11446,6 +11475,7 @@ export type CandidateGroupByNumberQuery = {
       __typename?: 'ProposalCandidateVersion'
       id: string
       candidateId: any
+      proposalHash: any
       salt: any
       attester: any
       versionNumber: any
@@ -11456,7 +11486,6 @@ export type CandidateGroupByNumberQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      computedProposalId: any
       attestationUID: any
       createdAt: any
       discussionUrl?: string | null
@@ -11570,7 +11599,8 @@ export type CandidateCommentsQuery = {
   candidateComments: Array<{
     __typename?: 'CandidateComment'
     id: string
-    candidate: any
+    candidateId: any
+    proposalHash: any
     commenter: any
     voteWeight: any
     support: CandidateVoteSupport
@@ -11605,6 +11635,7 @@ export type CandidateGroupQuery = {
       __typename?: 'ProposalCandidateVersion'
       id: string
       candidateId: any
+      proposalHash: any
       salt: any
       attester: any
       versionNumber: any
@@ -11615,7 +11646,6 @@ export type CandidateGroupQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      computedProposalId: any
       attestationUID: any
       createdAt: any
       discussionUrl?: string | null
@@ -11634,6 +11664,7 @@ export type CandidateGroupQuery = {
       __typename?: 'ProposalCandidateVersion'
       id: string
       candidateId: any
+      proposalHash: any
       salt: any
       attester: any
       versionNumber: any
@@ -11644,7 +11675,6 @@ export type CandidateGroupQuery = {
       description?: string | null
       metadata?: string | null
       representedAddress?: string | null
-      computedProposalId: any
       attestationUID: any
       createdAt: any
       discussionUrl?: string | null
@@ -11703,8 +11733,9 @@ export type CandidateSponsorSignaturesQuery = {
   candidateSponsorSignatures: Array<{
     __typename?: 'CandidateSponsorSignature'
     id: string
+    candidateId: any
+    proposalHash: any
     signer: any
-    proposalId: any
     nonce: any
     deadline: any
     signature: any
@@ -11724,6 +11755,7 @@ export type CandidateVersionQuery = {
     __typename?: 'ProposalCandidateVersion'
     id: string
     candidateId: any
+    proposalHash: any
     salt: any
     attester: any
     versionNumber: any
@@ -11734,7 +11766,6 @@ export type CandidateVersionQuery = {
     description?: string | null
     metadata?: string | null
     representedAddress?: string | null
-    computedProposalId: any
     attestationUID: any
     createdAt: any
     discussionUrl?: string | null
@@ -12241,7 +12272,7 @@ export type DaosForDashboardQuery = {
       candidateVersion?: {
         __typename?: 'ProposalCandidateVersion'
         candidateId: any
-        computedProposalId: any
+        proposalHash: any
         attestationUID: any
         versionNumber: any
         proposal?: {
@@ -12915,7 +12946,7 @@ export type ProposalQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      computedProposalId: any
+      proposalHash: any
       attestationUID: any
       versionNumber: any
       proposal?: {
@@ -13012,7 +13043,7 @@ export type ProposalOgMetadataQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      computedProposalId: any
+      proposalHash: any
       attestationUID: any
       versionNumber: any
       proposal?: {
@@ -13074,7 +13105,7 @@ export type ProposalVersionsQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      computedProposalId: any
+      proposalHash: any
       attestationUID: any
       versionNumber: any
       proposal?: {
@@ -13146,7 +13177,7 @@ export type ProposalsQuery = {
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
-      computedProposalId: any
+      proposalHash: any
       attestationUID: any
       versionNumber: any
       proposal?: {
@@ -13725,7 +13756,7 @@ export const ProposalFragmentDoc = gql`
     }
     candidateVersion {
       candidateId
-      computedProposalId
+      proposalHash
       attestationUID
       proposal {
         id
@@ -13985,6 +14016,7 @@ export const CandidateVersionFragmentFragmentDoc = gql`
   fragment CandidateVersionFragment on ProposalCandidateVersion {
     id
     candidateId
+    proposalHash
     salt
     attester
     versionNumber
@@ -13998,7 +14030,6 @@ export const CandidateVersionFragmentFragmentDoc = gql`
     description
     metadata
     representedAddress
-    computedProposalId
     attestationUID
     proposal {
       id
@@ -14042,7 +14073,8 @@ export const CandidateGroupDetailFragmentFragmentDoc = gql`
 export const CandidateCommentFragmentFragmentDoc = gql`
   fragment CandidateCommentFragment on CandidateComment {
     id
-    candidate
+    candidateId
+    proposalHash
     commenter
     voteWeight
     support
@@ -14057,8 +14089,9 @@ export const CandidateCommentFragmentFragmentDoc = gql`
 export const CandidateSponsorSignatureFragmentFragmentDoc = gql`
   fragment CandidateSponsorSignatureFragment on CandidateSponsorSignature {
     id
+    candidateId
+    proposalHash
     signer
-    proposalId
     nonce
     deadline
     signature

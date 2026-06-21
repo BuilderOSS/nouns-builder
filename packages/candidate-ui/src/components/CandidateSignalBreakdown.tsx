@@ -26,7 +26,7 @@ export const CandidateSignalBreakdown: React.FC<CandidateSignalBreakdownProps> =
     },
   ]
 
-  const totalSignals = voteTally.reduce((sum, vote) => sum + vote.value, 0)
+  const totalSignalWeight = voteTally.reduce((sum, vote) => sum + vote.value, 0)
 
   return (
     <Box
@@ -43,7 +43,9 @@ export const CandidateSignalBreakdown: React.FC<CandidateSignalBreakdownProps> =
           Signal breakdown
         </Text>
         <Text color="text3" fontSize={14}>
-          {totalSignals > 0 ? `${totalSignals} total signals` : 'No signals yet'}
+          {totalSignalWeight > 0
+            ? `${totalSignalWeight} total signal weight`
+            : 'No signals yet'}
         </Text>
       </Flex>
 
@@ -58,7 +60,7 @@ export const CandidateSignalBreakdown: React.FC<CandidateSignalBreakdownProps> =
           background: theme.colors.background2,
         }}
       >
-        {totalSignals > 0 ? (
+        {totalSignalWeight > 0 ? (
           voteTally.map((vote) => {
             if (vote.value === 0) return null
 

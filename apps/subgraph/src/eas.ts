@@ -85,11 +85,11 @@ function computeCandidateId(
 }
 
 /**
- * Creates a composite version ID from candidateId and proposalId
- * Format: candidateId-proposalId (both as hex strings)
+ * Creates a composite version ID from candidateId and proposalHash
+ * Format: candidateId-proposalHash (both as hex strings)
  */
-function candidateVersionId(candidateId: Bytes, proposalId: Bytes): string {
-  return candidateId.toHexString() + '-' + proposalId.toHexString()
+function candidateVersionId(candidateId: Bytes, proposalHash: Bytes): string {
+  return candidateId.toHexString() + '-' + proposalHash.toHexString()
 }
 
 function handlePropdateAttestation(event: AttestedEvent): void {
@@ -420,9 +420,9 @@ function recomputeGroupSentiment(groupId: string): void {
   let abstainCount = BigInt.fromI32(0)
   for (let i = 0; i < latestComments.length; i++) {
     let comment = latestComments[i]
-    if (comment.support == 'FOR') forCount = forCount.plus(BigInt.fromI32(1))
-    if (comment.support == 'AGAINST') againstCount = againstCount.plus(BigInt.fromI32(1))
-    if (comment.support == 'ABSTAIN') abstainCount = abstainCount.plus(BigInt.fromI32(1))
+    if (comment.support == 'FOR') forCount = forCount.plus(comment.voteWeight)
+    if (comment.support == 'AGAINST') againstCount = againstCount.plus(comment.voteWeight)
+    if (comment.support == 'ABSTAIN') abstainCount = abstainCount.plus(comment.voteWeight)
   }
 
   group.currentForCount = forCount
@@ -461,6 +461,12 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
     event.block.timestamp
   )
 
+  // Validate: only the original proposer can create new versions
+  if (event.params.attester.toHexString() != group.proposer.toHexString()) {
+    // Skip attestation from non-proposer
+    return
+  }
+
   let governor = GovernorContract.bind(Address.fromBytes(dao.governorAddress))
   let targets: Address[] = []
   for (let i = 0; i < decoded.targets.length; i++) {
@@ -477,7 +483,7 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   )
   if (!proposalHash) return
 
-  // Use composite ID: candidateId-proposalId
+  // Use composite ID: candidateId-proposalHash
   let versionId = candidateVersionId(candidateId, proposalHash)
   let version = ProposalCandidateVersion.load(versionId)
   if (!version) {
@@ -497,7 +503,7 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   version.calldatas = decoded.calldatas
   version.metadata = decoded.description
   version.attestationUID = event.params.uid
-  version.computedProposalId = proposalHash
+  version.proposalHash = proposalHash
   version.proposal = null
   version.createdAt = event.block.timestamp
   let parsedDescription = parseDescriptionFields(decoded.description)
@@ -540,7 +546,12 @@ function handleCandidateCommentAttestation(event: AttestedEvent): void {
 
   let comment = new CandidateComment(event.params.uid.toHexString())
   comment.group = group.id
-  comment.candidate = candidateId
+  comment.candidateId = candidateId
+  // Set proposalHash from the leading version if available
+  let leadingVersion = group.leadingVersion
+    ? ProposalCandidateVersion.load(group.leadingVersion as string)
+    : null
+  comment.proposalHash = leadingVersion ? leadingVersion.proposalHash : Bytes.fromI32(0)
   comment.commenter = event.params.attester
   let tokenContract = TokenContract.bind(Address.fromBytes(dao.tokenAddress))
   let votes = tokenContract.try_getVotes(event.params.attester)
@@ -580,7 +591,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   const decoded = decodeCandidateSponsorSignature(data)
   if (!decoded) return
 
-  // Load version by composite ID: candidateId-proposalId
+  // Load version by composite ID: candidateId-proposalHash
   let versionId = candidateVersionId(decoded.candidateId, decoded.proposalId)
   let version = ProposalCandidateVersion.load(versionId)
   if (!version) return
@@ -620,7 +631,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
     return
   }
 
-  // Validate: recomputed proposal hash matches decoded proposalId
+  // Validate: recomputed proposal hash matches decoded proposalHash
   if (proposalHash.toHexString() != decoded.proposalId.toHexString()) {
     return
   }
@@ -632,7 +643,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   // Validate: deadline not expired
   if (decoded.deadline < event.block.timestamp) return
 
-  // Use composite ID: proposalId-signerAddress
+  // Use composite ID: proposalHash-signerAddress
   let signatureId =
     decoded.proposalId.toHexString() + '-' + event.params.attester.toHexString()
   let signature = CandidateSponsorSignature.load(signatureId)
@@ -644,8 +655,9 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
 
   signature.attestationUID = event.params.uid
   signature.version = version.id
+  signature.candidateId = decoded.candidateId
+  signature.proposalHash = decoded.proposalId
   signature.signer = event.params.attester
-  signature.proposalId = decoded.proposalId
   signature.nonce = decoded.nonce
   signature.deadline = decoded.deadline
   signature.signature = decoded.signature
@@ -751,7 +763,7 @@ function handleCandidateSponsorSignatureRevoked(event: RevokedEvent): void {
   let decoded = decodeCandidateSponsorSignature(attestationResult.value.data)
   if (!decoded) return
 
-  // Reconstruct composite ID from decoded data
+  // Reconstruct composite ID from decoded data: proposalHash-signerAddress
   let signatureId =
     decoded.proposalId.toHexString() +
     '-' +

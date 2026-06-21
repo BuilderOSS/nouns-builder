@@ -15,7 +15,7 @@ import {
 
 export interface CandidateSignatureButtonProps {
   candidateId: Hex
-  proposalId: Hex
+  proposalHash: Hex
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
@@ -28,7 +28,7 @@ export interface CandidateSignatureButtonProps {
 
 export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> = ({
   candidateId,
-  proposalId,
+  proposalHash,
   proposer,
   governorAddress,
   tokenSymbol,
@@ -56,24 +56,15 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
     chainId: chain.id,
     query: { enabled: !!address && !!governorAddress },
   })
-  const [deadline] = useState(
-    Math.floor(Date.now() / 1000) + CANDIDATE_SIGNATURE_VALIDITY_SECONDS
-  )
-
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isTxSuccess, setIsTxSuccess] = useState(false)
 
   const canSign = React.useMemo(() => {
     return (
-      !!address &&
-      !!walletClient &&
-      nonce !== undefined &&
-      !alreadySigned &&
-      !isProposer &&
-      voteWeight > 0n
+      !!address && !!walletClient && nonce !== undefined && !isProposer && voteWeight > 0n
     )
-  }, [address, walletClient, nonce, alreadySigned, isProposer, voteWeight])
+  }, [address, walletClient, nonce, isProposer, voteWeight])
 
   const handleSign = useCallback(async () => {
     if (!canSign || !address || !walletClient || nonce === undefined) return
@@ -81,6 +72,10 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
     setIsTxSuccess(false)
     setErrorMessage(null)
     setIsSubmitting(true)
+
+    // Calculate fresh deadline on each sign attempt
+    const freshDeadline =
+      Math.floor(Date.now() / 1000) + CANDIDATE_SIGNATURE_VALIDITY_SECONDS
 
     try {
       await attestCandidateSignature({
@@ -91,11 +86,11 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
         governorAddress,
         tokenSymbol,
         candidateId,
-        proposalId,
+        proposalHash,
         signer: address,
         proposer,
         nonce,
-        deadline,
+        deadline: freshDeadline,
       })
 
       setIsTxSuccess(true)
@@ -120,10 +115,9 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
     governorAddress,
     tokenSymbol,
     candidateId,
-    proposalId,
+    proposalHash,
     proposer,
     nonce,
-    deadline,
     onSuccess,
   ])
 
@@ -135,7 +129,7 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   const buttonText = React.useMemo(() => {
     if (isNonceLoading) return 'Loading Signature Nonce...'
     if (isProposer) return 'Candidate Creator Cannot Sign'
-    if (alreadySigned) return 'Already Signed'
+    if (alreadySigned) return 'Update Signature'
     if (voteWeight === 0n) return 'No Voting Power'
     return `Sign Candidate`
   }, [alreadySigned, isNonceLoading, isProposer, voteWeight])
@@ -200,14 +194,18 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
           pending={!isTxSuccess && !errorMessage}
           title={
             isTxSuccess
-              ? 'Signature Added'
+              ? alreadySigned
+                ? 'Signature Updated'
+                : 'Signature Added'
               : errorMessage
                 ? 'Transaction Failed'
-                : 'Signing Candidate...'
+                : alreadySigned
+                  ? 'Updating Signature...'
+                  : 'Signing Candidate...'
           }
           subtitle={
             isTxSuccess
-              ? `Your signature has been recorded with ${voteWeight.toString()} vote weight.`
+              ? `Your signature has been ${alreadySigned ? 'updated' : 'recorded'} with ${voteWeight.toString()} vote weight.`
               : errorMessage
                 ? errorMessage
                 : `Please confirm the transaction in your wallet. Signature valid for ${CANDIDATE_SIGNATURE_VALIDITY_DAYS} days.`

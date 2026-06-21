@@ -9,9 +9,23 @@ import {
 
 export type CandidateSponsorSignature = Omit<
   CandidateSponsorSignatureFragmentFragment,
-  'createdAt'
+  | 'createdAt'
+  | 'voteWeight'
+  | 'nonce'
+  | 'deadline'
+  | 'candidateId'
+  | 'proposalHash'
+  | 'signer'
+  | 'signature'
 > & {
   createdAt: number
+  voteWeight: bigint
+  nonce: bigint
+  deadline: bigint
+  candidateId: `0x${string}`
+  proposalHash: `0x${string}`
+  signer: `0x${string}`
+  signature: `0x${string}`
 }
 
 export interface CandidateSponsorSignaturesResponse {
@@ -20,15 +34,20 @@ export interface CandidateSponsorSignaturesResponse {
 
 export const getCandidateSponsorSignatures = async (
   chainId: CHAIN_ID,
-  candidateVersionUID: string,
+  candidateId: string,
+  proposalHash: string,
   limit: number = 100,
   page?: number
 ): Promise<CandidateSponsorSignaturesResponse> => {
   try {
+    const versionId = candidateId
+      .toLowerCase()
+      .concat('-')
+      .concat(proposalHash.toLowerCase())
     const data = await SDK.connect(chainId).CandidateSponsorSignatures({
       where: {
         version_: {
-          id: candidateVersionUID.toLowerCase(),
+          id: versionId,
         },
         revoked: false,
       },
@@ -42,6 +61,13 @@ export const getCandidateSponsorSignatures = async (
       signatures: data.candidateSponsorSignatures.map((signature) => ({
         ...signature,
         createdAt: Number(signature.createdAt),
+        voteWeight: BigInt(signature.voteWeight),
+        nonce: BigInt(signature.nonce),
+        deadline: BigInt(signature.deadline),
+        candidateId: signature.candidateId as `0x${string}`,
+        proposalHash: signature.proposalHash as `0x${string}`,
+        signer: signature.signer as `0x${string}`,
+        signature: signature.signature as `0x${string}`,
       })),
     }
   } catch (e) {

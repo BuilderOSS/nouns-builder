@@ -48,6 +48,7 @@ fragment CandidateGroupDetailFragment on ProposalCandidateGroup {
 fragment CandidateVersionFragment on ProposalCandidateVersion {
   id
   candidateId
+  proposalHash
   salt
   attester
   versionNumber
@@ -61,7 +62,6 @@ fragment CandidateVersionFragment on ProposalCandidateVersion {
   description
   metadata
   representedAddress
-  computedProposalId
   attestationUID
   proposal {
     id
@@ -77,7 +77,8 @@ fragment CandidateVersionFragment on ProposalCandidateVersion {
 
 fragment CandidateCommentFragment on CandidateComment {
   id
-  candidate
+  candidateId
+  proposalHash
   commenter
   voteWeight
   support
@@ -91,8 +92,9 @@ fragment CandidateCommentFragment on CandidateComment {
 
 fragment CandidateSponsorSignatureFragment on CandidateSponsorSignature {
   id
+  candidateId
+  proposalHash
   signer
-  proposalId
   nonce
   deadline
   signature

@@ -45,20 +45,19 @@ export async function generateUpdateSignature(
 
   // EIP-712 domain
   const domain = {
-    name: `${tokenSymbol} Governor`,
+    name: `${tokenSymbol} GOV`,
     version: '1',
     chainId: Number(chainId),
     verifyingContract: governorAddress,
   } as const
 
   // EIP-712 types for UPDATE_PROPOSAL_TYPEHASH
-  // keccak256("UpdateProposal(address proposer,address signer,bytes32 oldProposalId,bytes32 newProposalId,uint256 nonce,uint256 deadline)")
+  // keccak256("UpdateProposal(bytes32 proposalId,bytes32 updatedProposalId,address proposer,uint256 nonce,uint256 deadline)")
   const types = {
     UpdateProposal: [
+      { name: 'proposalId', type: 'bytes32' },
+      { name: 'updatedProposalId', type: 'bytes32' },
       { name: 'proposer', type: 'address' },
-      { name: 'signer', type: 'address' },
-      { name: 'oldProposalId', type: 'bytes32' },
-      { name: 'newProposalId', type: 'bytes32' },
       { name: 'nonce', type: 'uint256' },
       { name: 'deadline', type: 'uint256' },
     ],
@@ -66,10 +65,9 @@ export async function generateUpdateSignature(
 
   // Message to sign
   const message = {
+    proposalId: oldProposalId,
+    updatedProposalId: newProposalId,
     proposer,
-    signer,
-    oldProposalId,
-    newProposalId,
     nonce,
     deadline: BigInt(deadline),
   } as const

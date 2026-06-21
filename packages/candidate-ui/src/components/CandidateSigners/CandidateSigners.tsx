@@ -14,7 +14,7 @@ import { CandidateSignatureButton } from '../CandidateSignatureButton'
 
 type CandidateSignersProps = {
   candidateId: `0x${string}`
-  proposalId: `0x${string}`
+  proposalHash: `0x${string}`
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
@@ -22,11 +22,12 @@ type CandidateSignersProps = {
   targets: string[]
   values: bigint[]
   calldatas: `0x${string}`[]
+  hideActions?: boolean
 }
 
 export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   candidateId,
-  proposalId,
+  proposalHash,
   proposer,
   governorAddress,
   tokenSymbol,
@@ -34,6 +35,7 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   targets,
   values,
   calldatas,
+  hideActions = false,
 }) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -49,8 +51,10 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     isLoading,
     mutate,
   } = useSWR(
-    proposalId ? ['candidateSponsorSignatures', chain.id, proposalId] : null,
-    () => getCandidateSponsorSignatures(chain.id, proposalId),
+    candidateId && proposalHash
+      ? ['candidateSponsorSignatures', chain.id, candidateId, proposalHash]
+      : null,
+    () => getCandidateSponsorSignatures(chain.id, candidateId, proposalHash),
     { revalidateOnFocus: false }
   )
 
@@ -90,6 +94,10 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   const totalSignatureWeight = eligibleSignatures.reduce(
     (sum, signature) => sum + signature.voteWeight,
     0n
+  )
+  const totalPromoteWeight = React.useMemo(
+    () => totalSignatureWeight + (isCreator ? votes : 0n),
+    [isCreator, totalSignatureWeight, votes]
   )
   const proposerSignatures = React.useMemo<ProposerSignature[]>(
     () =>
@@ -131,17 +139,19 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
           </Text>
         </Flex>
 
-        <CandidateSignatureButton
-          candidateId={candidateId}
-          proposalId={proposalId}
-          proposer={proposer}
-          governorAddress={governorAddress}
-          tokenSymbol={tokenSymbol}
-          alreadySigned={alreadySigned}
-          voteWeight={votes}
-          signatureCount={totalSignatures}
-          onSuccess={() => void mutate()}
-        />
+        {!hideActions && (
+          <CandidateSignatureButton
+            candidateId={candidateId}
+            proposalHash={proposalHash}
+            proposer={proposer}
+            governorAddress={governorAddress}
+            tokenSymbol={tokenSymbol}
+            alreadySigned={alreadySigned}
+            voteWeight={votes}
+            signatureCount={totalSignatures}
+            onSuccess={() => void mutate()}
+          />
+        )}
 
         {eligibleSignatures.length > 0 ? (
           <Stack gap="x3">
@@ -177,27 +187,33 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
           </Text>
         )}
 
-        {isCreator && proposalThreshold !== undefined && targets.length > 0 && (
-          <Box pt="x2">
-            <CandidatePromoteButton
-              candidateId={candidateId}
-              proposalId={proposalId}
-              targets={targets}
-              values={values}
-              calldatas={calldatas}
-              description={description}
-              signatures={proposerSignatures}
-              proposalThreshold={proposalThreshold}
-              totalSignatureWeight={totalSignatureWeight}
-            />
-          </Box>
-        )}
+        {!hideActions &&
+          isCreator &&
+          proposalThreshold !== undefined &&
+          targets.length > 0 && (
+            <Box pt="x2">
+              <CandidatePromoteButton
+                candidateId={candidateId}
+                proposalHash={proposalHash}
+                targets={targets}
+                values={values}
+                calldatas={calldatas}
+                description={description}
+                signatures={proposerSignatures}
+                proposalThreshold={proposalThreshold}
+                totalVoteWeight={totalPromoteWeight}
+              />
+            </Box>
+          )}
 
-        {!isCreator && proposalThreshold !== undefined && targets.length > 0 && (
-          <Text color="text3" fontSize={14}>
-            Only the candidate creator can submit this as a proposal.
-          </Text>
-        )}
+        {!hideActions &&
+          !isCreator &&
+          proposalThreshold !== undefined &&
+          targets.length > 0 && (
+            <Text color="text3" fontSize={14}>
+              Only the candidate creator can submit this as a proposal.
+            </Text>
+          )}
       </Stack>
     </Box>
   )

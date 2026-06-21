@@ -413,35 +413,49 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                   </Text>
                 )}
               </Flex>
-              {latestVersion?.proposal && (
-                <Text color="text3" fontSize={14}>
-                  Promoted to{' '}
-                  <Link
-                    href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
+              {latestVersion?.proposal?.id && (
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  gap="x4"
+                  py="x4"
+                  px="x6"
+                  borderRadius="curved"
+                  borderWidth="thin"
+                  borderColor="accent"
+                  backgroundColor="background2"
+                  wrap="wrap"
+                  style={{ width: '100%' }}
+                >
+                  <Flex align="center" gap="x3">
+                    <Text fontWeight="label" color="text1">
+                      Promoted to Proposal: Proposal #
+                      {latestVersion.proposal.proposalNumber}
+                    </Text>
+                  </Flex>
+                  <Button
+                    as={Link}
+                    href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalNumber}`}
+                    variant="outline"
+                    size="sm"
+                    style={{ fontSize: '16px' }}
                   >
-                    proposal
-                  </Link>
-                </Text>
+                    View Proposal
+                  </Button>
+                </Flex>
               )}
             </Stack>
 
-            <Flex direction={'row'} gap={'x2'} wrap style={{ width: '100%' }}>
-              <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
-              {latestVersion?.proposal && (
-                <Button
-                  as={Link}
-                  href={`/dao/${chain.slug}/${addresses.token}/vote/${latestVersion.proposal.proposalId}`}
-                  variant="secondaryOutline"
-                >
-                  View proposal
-                </Button>
-              )}
-              {latestVersion && (
-                <Button onClick={handleEditCandidate} variant="secondary">
-                  Edit candidate
-                </Button>
-              )}
-            </Flex>
+            {!latestVersion?.proposal?.id && (
+              <Flex direction={'row'} gap={'x2'} wrap style={{ width: '100%' }}>
+                <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
+                {latestVersion && (
+                  <Button onClick={handleEditCandidate} variant="secondary">
+                    Edit candidate
+                  </Button>
+                )}
+              </Flex>
+            )}
 
             {candidate?.versions && candidate.versions.length > 1 && (
               <CandidateEditedBanner
@@ -485,7 +499,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 </Text>
                 <CandidateCommentForm
                   candidateId={latestVersion.candidateId as `0x${string}`}
-                  proposalId={latestVersion.computedProposalId as `0x${string}`}
+                  proposalHash={latestVersion.proposalHash as `0x${string}`}
                   proposer={candidate.proposer as `0x${string}`}
                   governorAddress={addresses.governor as `0x${string}`}
                   tokenSymbol={String(tokenSymbol)}

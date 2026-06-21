@@ -45,7 +45,7 @@ export async function generateVoteSignature(
 
   // EIP-712 domain
   const domain = {
-    name: `${tokenSymbol} Governor`,
+    name: `${tokenSymbol} GOV`,
     version: '1',
     chainId: Number(chainId),
     verifyingContract: governorAddress,

@@ -193,12 +193,15 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
   commentsError,
   governorAddress,
 }) => {
+  // Hide action buttons if candidate has been promoted to a proposal
+  const isPromoted = !!latestVersion?.proposal?.id
+
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
       {latestVersion && tokenSymbol && (
         <CandidateSigners
           candidateId={latestVersion.candidateId as `0x${string}`}
-          proposalId={latestVersion.computedProposalId as `0x${string}`}
+          proposalHash={latestVersion.proposalHash as `0x${string}`}
           proposer={candidate.proposer as `0x${string}`}
           governorAddress={governorAddress}
           tokenSymbol={String(tokenSymbol)}
@@ -206,6 +209,7 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
           targets={(latestVersion.targets || []) as string[]}
           values={(latestVersion.values || []).map((value) => BigInt(value))}
           calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
+          hideActions={isPromoted}
         />
       )}
 

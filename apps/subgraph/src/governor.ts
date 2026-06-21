@@ -118,13 +118,8 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   dao.save()
   proposal.save()
 
-  let candidateVersion = ProposalCandidateVersion.load(proposal.proposalId.toHexString())
-  if (candidateVersion) {
-    proposal.candidateVersion = candidateVersion.id
-    candidateVersion.proposal = proposal.id
-    candidateVersion.save()
-    proposal.save()
-  }
+  // Note: Candidate version linking happens later after processing signers (see lines ~274-293)
+  // This allows us to find the version through the signature lookup
 
   // Create feed event
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
@@ -271,8 +266,8 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
     proposalSigner.save()
   }
 
-  // Try to find matching candidate version via first signer's signature.
-  // This only works for proposals created with proposeBySigs.
+  // Try to find matching candidate version via first signer's signature
+  // This only works for proposals created with proposeBySigs
   let candidateVersion: ProposalCandidateVersion | null = null
 
   if (event.params.signers.length > 0) {

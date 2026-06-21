@@ -21,7 +21,7 @@ export interface CommentWithSignatureParams {
   governorAddress: AddressType
   tokenSymbol: string
   candidateId: Hex
-  proposalId: Hex
+  proposalHash: Hex
   signer: AddressType
   proposer: AddressType
   nonce: bigint
@@ -56,7 +56,7 @@ export async function attestCommentWithSignature(
     governorAddress,
     tokenSymbol,
     candidateId,
-    proposalId,
+    proposalHash: proposalId,
     signer,
     proposer,
     nonce,
@@ -68,7 +68,7 @@ export async function attestCommentWithSignature(
 
   // 1. Generate EIP-712 signature for the proposal
   const domain = {
-    name: `${tokenSymbol} Governor`,
+    name: `${tokenSymbol} GOV`,
     version: '1',
     chainId: Number(chainId),
     verifyingContract: governorAddress,
@@ -77,7 +77,6 @@ export async function attestCommentWithSignature(
   const types = {
     Proposal: [
       { name: 'proposer', type: 'address' },
-      { name: 'signer', type: 'address' },
       { name: 'proposalId', type: 'bytes32' },
       { name: 'nonce', type: 'uint256' },
       { name: 'deadline', type: 'uint256' },
@@ -86,7 +85,6 @@ export async function attestCommentWithSignature(
 
   const message = {
     proposer,
-    signer,
     proposalId,
     nonce,
     deadline: BigInt(deadline),

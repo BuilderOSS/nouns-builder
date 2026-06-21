@@ -205,9 +205,10 @@ type ProposalCandidateGroup @entity {
 }
 
 type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
-  id: ID! # Composite ID: candidateId-proposalId
+  id: ID! # Composite ID: candidateId-proposalHash
   group: ProposalCandidateGroup!
   candidateId: Bytes!
+  proposalHash: Bytes! # Hash of the proposal content computed by governor's hashProposal()
   salt: Bytes!
   attester: Bytes!
   versionNumber: BigInt!
@@ -219,7 +220,6 @@ type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
   metadata: String
   representedAddress: String
   discussionUrl: String
-  computedProposalId: Bytes!
   attestationUID: Bytes! # Original EAS attestation UID
   proposal: Proposal
   createdAt: BigInt!
@@ -239,7 +239,8 @@ enum CandidateVoteSupport {
 type CandidateComment @entity {
   id: ID!
   group: ProposalCandidateGroup!
-  candidate: Bytes!
+  candidateId: Bytes! # Renamed from candidate for consistency
+  proposalHash: Bytes! # Hash of the proposal version this comment is for
   commenter: Bytes!
   voteWeight: BigInt!
   support: CandidateVoteSupport!
@@ -251,11 +252,12 @@ type CandidateComment @entity {
 }
 
 type CandidateSponsorSignature @entity {
-  id: ID! # Composite ID: proposalId-signerAddress
+  id: ID! # Composite ID: proposalHash-signerAddress
   attestationUID: Bytes! # Original EAS attestation UID
   version: ProposalCandidateVersion!
+  candidateId: Bytes! # Stored as field for querying
+  proposalHash: Bytes!
   signer: Bytes!
-  proposalId: Bytes!
   nonce: BigInt!
   deadline: BigInt!
   signature: Bytes!

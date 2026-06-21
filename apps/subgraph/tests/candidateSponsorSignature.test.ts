@@ -67,7 +67,7 @@ function seedDao(): void {
 }
 
 function seedCandidateGroup(
-  computedProposalId: string = PROPOSAL_ID,
+  proposalHash: string = PROPOSAL_ID,
   attestationUID: string = VERSION_ID
 ): void {
   const group = new ProposalCandidateGroup(GROUP_ID)
@@ -86,7 +86,7 @@ function seedCandidateGroup(
   group.currentAbstainCount = BigInt.fromI32(0)
   group.save()
 
-  // Use composite ID: candidateId-proposalId
+  // Use composite ID: candidateId-proposalHash
   const versionId = GROUP_ID + '-' + PROPOSAL_ID
 
   const version = new ProposalCandidateVersion(versionId)
@@ -104,7 +104,7 @@ function seedCandidateGroup(
   version.description = 'Candidate description'
   version.metadata =
     '{"version":1,"title":"Test candidate","description":"Candidate description","transactionBundles":[]}'
-  version.computedProposalId = Bytes.fromHexString(computedProposalId)
+  version.proposalHash = Bytes.fromHexString(proposalHash)
   version.attestationUID = Bytes.fromHexString(attestationUID)
   version.createdAt = BigInt.fromI32(1)
   version.signatureCount = BigInt.fromI32(0)
@@ -154,9 +154,9 @@ function mockTokenVotes(votes: i32): void {
 
 function encodeSignatureData(): Bytes {
   const tuple = new ethereum.Tuple()
-  // New schema: (bytes32 candidateId, bytes32 proposalId, uint256 nonce, uint256 deadline, bytes signature)
+  // New schema: (bytes32 candidateId, bytes32 proposalHash, uint256 nonce, uint256 deadline, bytes signature)
   tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(GROUP_ID))) // candidateId
-  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID))) // proposalId
+  tuple.push(ethereum.Value.fromFixedBytes(Bytes.fromHexString(PROPOSAL_ID))) // proposalHash
   tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(7))) // nonce
   tuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(2000000000))) // deadline
   tuple.push(ethereum.Value.fromBytes(Bytes.fromHexString(repeatHexByte('11', 65)))) // signature
@@ -234,7 +234,7 @@ describe('Candidate sponsor signature indexing', () => {
 
     handleAttested(event)
 
-    // Composite ID is proposalId-signerAddress
+    // Composite ID is proposalHash-signerAddress
     const compositeId = PROPOSAL_ID + '-' + PROPOSER.toLowerCase()
     assert.assertTrue(CandidateSponsorSignature.load(compositeId) == null)
   })
@@ -251,7 +251,7 @@ describe('Candidate sponsor signature indexing', () => {
 
     handleAttested(createAttestedEvent())
 
-    // Composite ID is proposalId-signerAddress
+    // Composite ID is proposalHash-signerAddress
     const compositeId = PROPOSAL_ID + '-' + SIGNER.toLowerCase()
     assert.assertTrue(CandidateSponsorSignature.load(compositeId) == null)
   })
@@ -268,7 +268,7 @@ describe('Candidate sponsor signature indexing', () => {
 
     handleAttested(createAttestedEvent())
 
-    // Composite ID is proposalId-signerAddress
+    // Composite ID is proposalHash-signerAddress
     const compositeId = PROPOSAL_ID + '-' + SIGNER.toLowerCase()
     assert.assertTrue(CandidateSponsorSignature.load(compositeId) == null)
   })

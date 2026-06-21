@@ -19,7 +19,7 @@ import { ProposalState } from '@buildeross/types'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { getProposalWarning } from '@buildeross/utils/warnings'
-import { Box, Flex, Icon, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
@@ -199,13 +199,33 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
               />
             )}
             {candidateVersion && (
-              <Flex align="center" gap="x2" color="text3" fontSize={14}>
-                <Text color="text3">Originating candidate:</Text>
-                <Link
+              <Flex
+                align="center"
+                justify="space-between"
+                gap="x4"
+                py="x4"
+                px="x6"
+                borderRadius="curved"
+                borderWidth="thin"
+                borderColor="accent"
+                backgroundColor="background2"
+                wrap="wrap"
+              >
+                <Flex align="center" gap="x3">
+                  <Text fontWeight="label" color="text1">
+                    Originating Candidate: Candidate #
+                    {candidateVersion.group.candidateNumber}
+                  </Text>
+                </Flex>
+                <Button
+                  as={Link}
                   href={`/dao/${chain.slug}/${addresses.token}/candidate/${candidateVersion.group.candidateNumber}`}
+                  variant="outline"
+                  size="sm"
+                  style={{ fontSize: '16px' }}
                 >
-                  candidate
-                </Link>
+                  View Candidate
+                </Button>
               </Flex>
             )}
           </>

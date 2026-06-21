@@ -28,7 +28,7 @@ import {
 
 export interface CandidateCommentFormProps {
   candidateId: Hex
-  proposalId: Hex
+  proposalHash: Hex
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
@@ -38,7 +38,7 @@ export interface CandidateCommentFormProps {
 
 export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   candidateId,
-  proposalId,
+  proposalHash,
   proposer,
   governorAddress,
   tokenSymbol,
@@ -156,7 +156,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           governorAddress,
           tokenSymbol,
           candidateId,
-          proposalId,
+          proposalHash,
           signer: address,
           proposer,
           nonce: nonce as bigint,
@@ -209,7 +209,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     governorAddress,
     tokenSymbol,
     candidateId,
-    proposalId,
+    proposalHash,
     proposer,
     nonce,
     deadline,
