@@ -4,16 +4,15 @@ import {
   governorAbi,
 } from '@buildeross/sdk/contract'
 import { DaoContractAddresses, useChainStore, useProposalStore } from '@buildeross/stores'
-import { AnimatedModal } from '@buildeross/ui'
-import { DaysHoursMinsSecs } from '@buildeross/ui/Fields'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
-import { Button, Flex, Heading, Text } from '@buildeross/zord'
+import { Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
 import { useReadContract } from 'wagmi'
 
 import { FixRendererBase } from '../FixRendererBase'
+import { ConfigureUpdatablePeriodModal } from './ConfigureUpdatablePeriodModal'
 import { v1_1_0, v1_2_0, v2_0_0, v3_0_0 } from './versions'
 
 export const VERSION_PROPOSAL_SUMMARY: { [key: string]: string } = {
@@ -219,57 +218,17 @@ export const Upgrade = ({
       </AnimatePresence>
 
       {/* Modal for v3.0.0 upgrades to configure updatable period */}
-      <AnimatedModal open={showModal} close={() => setShowModal(false)} size="medium">
-        <Flex direction="column" p="x6" gap="x6">
-          <Heading size="sm">Configure Updatable Period</Heading>
-
-          <Text color="text3" fontSize={14}>
-            The period during which a proposer can edit their proposal after creation.
-            After this period ends, proposals can no longer be edited and voting begins.
-          </Text>
-
-          <DaysHoursMinsSecs
-            id="updatablePeriod"
-            value={updatablePeriod}
-            inputLabel="Proposal Updatable Period"
-            onChange={() => {}}
-            formik={
-              {
-                setFieldValue: (id: string, value: number) => {
-                  const field = id.split('.')[1]
-                  handleUpdatablePeriodChange(field, value)
-                },
-              } as any
-            }
-            placeholder={['1', '0', '0', '0']}
-            errorMessage={
-              exceedsVotingPeriod
-                ? `Updatable period (${(updatablePeriodSeconds / 86400).toFixed(
-                    2
-                  )} days) cannot exceed voting period (${(
-                    Number(votingPeriodSeconds) / 86400
-                  ).toFixed(2)} days)`
-                : undefined
-            }
-          />
-
-          <Text color="text3" fontSize={14}>
-            Must not exceed the voting period.
-          </Text>
-
-          <Flex gap="x4" justify="flex-end">
-            <Button variant="ghost" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={proceedWithUpgrade}
-              disabled={!hasThreshold || exceedsVotingPeriod}
-            >
-              Continue with Upgrade
-            </Button>
-          </Flex>
-        </Flex>
-      </AnimatedModal>
+      <ConfigureUpdatablePeriodModal
+        open={showModal}
+        close={() => setShowModal(false)}
+        updatablePeriod={updatablePeriod}
+        onUpdatablePeriodChange={handleUpdatablePeriodChange}
+        exceedsVotingPeriod={!!exceedsVotingPeriod}
+        hasThreshold={hasThreshold}
+        onContinue={proceedWithUpgrade}
+        votingPeriodSeconds={votingPeriodSeconds}
+        updatablePeriodSeconds={updatablePeriodSeconds}
+      />
     </>
   )
 }
