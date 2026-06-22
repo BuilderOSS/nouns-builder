@@ -3,7 +3,6 @@ import { Address } from 'viem'
 
 import { SDK } from '../client'
 import { DaoTokenOwner_OrderBy, OrderDirection } from '../sdk.generated'
-import { applyL1ToL2Alias } from './applyL1ToL2Alias'
 
 export type DaoMember = {
   ownerAlias: Address
@@ -32,13 +31,15 @@ export const memberSnapshotRequest = async (
 
   const formattedMembers: DaoMember[] = await Promise.all(
     data.daotokenOwners.map(async (member) => {
-      let tokenOwner = await applyL1ToL2Alias({
-        l1ChainId: chainId,
-        address: member.owner,
-      })
+      // NOTE: Address aliasing disabled for L2-to-L2 migrations
+      // For L1-to-L2 migrations, uncomment the following lines:
+      // let tokenOwner = await applyL1ToL2Alias({
+      //   l1ChainId: chainId,
+      //   address: member.owner,
+      // })
 
       return {
-        ownerAlias: tokenOwner as Address,
+        ownerAlias: member.owner as Address, // Same as owner (no transformation)
         owner: member.owner as Address,
         delegate: member.delegate as Address,
         tokens: member.daoTokens.map((token) => Number(token.tokenId)) as number[],

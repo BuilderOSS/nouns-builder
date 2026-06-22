@@ -3,7 +3,7 @@ import { merkleReserveMinterAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
 import { useState } from 'react'
-import { useWriteContract } from 'wagmi'
+import { useReadContract, useWriteContract } from 'wagmi'
 
 import { DaoMemberSimplified } from './useGenerateMerkleRoots'
 
@@ -24,13 +24,29 @@ export const useMintReservedTokens = (
 
   const { writeContractAsync, isPending } = useWriteContract()
 
+  const minterAddress = targetChainId ? MERKLE_RESERVE_MINTER[targetChainId] : undefined
+
+  // Fetch the on-chain merkle root to compare
+  // allowedMerkles returns: [mintStart, mintEnd, pricePerToken, merkleRoot]
+  const { data: onChainSettings } = useReadContract({
+    address: minterAddress,
+    abi: merkleReserveMinterAbi,
+    functionName: 'allowedMerkles',
+    args: targetTokenAddress ? [targetTokenAddress] : undefined,
+    chainId: targetChainId,
+    query: {
+      enabled: !!minterAddress && !!targetTokenAddress && !!targetChainId,
+    },
+  })
+
+  const onChainMerkleRoot = onChainSettings?.[3]
+
   const startMinting = async () => {
     if (!memberSnapshot || !targetTokenAddress || !targetChainId) {
       setError('Missing required parameters for minting')
       throw new Error('Missing required parameters')
     }
 
-    const minterAddress = MERKLE_RESERVE_MINTER[targetChainId]
     if (!minterAddress) {
       setError(`No MerkleReserveMinter on chain ${targetChainId}`)
       throw new Error(`No MerkleReserveMinter on chain ${targetChainId}`)
@@ -40,21 +56,44 @@ export const useMintReservedTokens = (
 
     try {
       // Create merkle tree from member snapshot
-      // Use 'ownerAlias' which is the L1->L2 aliased address for cross-chain compatibility
+      // Use 'owner' (original L1 address) since we're minting directly on L2
+      // The ownerAlias is only needed for L1->L2 bridge messages, not for direct L2 minting
       const leaves = memberSnapshot.flatMap((member) =>
-        member.tokens.map((tokenId) => [member.ownerAlias, BigInt(tokenId)])
+        member.tokens.map((tokenId) => [member.owner, BigInt(tokenId)])
       )
 
       const tree = StandardMerkleTree.of(leaves, ['address', 'uint256'])
+      const calculatedRoot = tree.root as `0x${string}`
+
+      console.log('[useMintReservedTokens] Merkle root verification:', {
+        calculatedRoot,
+        onChainMerkleRoot,
+        rootsMatch: calculatedRoot === onChainMerkleRoot,
+        snapshotSize: memberSnapshot.length,
+        totalLeaves: leaves.length,
+        sampleMember: memberSnapshot[0]
+          ? {
+              owner: memberSnapshot[0].owner,
+              tokenCount: memberSnapshot[0].tokens.length,
+            }
+          : null,
+      })
+
+      // Check if calculated root matches on-chain root
+      if (onChainMerkleRoot && calculatedRoot !== onChainMerkleRoot) {
+        const errorMsg = `Merkle root mismatch! Calculated: ${calculatedRoot}, On-chain: ${onChainMerkleRoot}. Please go back to Step 5 and regenerate merkle roots.`
+        setError(errorMsg)
+        throw new Error(errorMsg)
+      }
 
       // Generate all claims
       const allClaims = memberSnapshot.flatMap((member) =>
         member.tokens.map((tokenId) => {
-          const leaf = [member.ownerAlias, BigInt(tokenId)]
+          const leaf = [member.owner, BigInt(tokenId)]
           const proof = tree.getProof(leaf)
 
           return {
-            mintTo: member.ownerAlias,
+            mintTo: member.owner,
             tokenId: BigInt(tokenId),
             merkleProof: proof as `0x${string}`[],
           }
@@ -110,7 +149,7 @@ export const useMintReservedTokens = (
         onTokensMinted?.(batchTokenIds)
       }
 
-      return { minted, hashes }
+      return { minted, hashes, calculatedRoot }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to mint tokens'
       setError(message)
@@ -126,5 +165,6 @@ export const useMintReservedTokens = (
     progress: totalTokens > 0 ? (tokensMinted.length / totalTokens) * 100 : 0,
     txHashes,
     error,
+    onChainMerkleRoot,
   }
 }

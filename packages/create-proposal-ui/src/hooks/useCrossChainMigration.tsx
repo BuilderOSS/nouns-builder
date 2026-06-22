@@ -1,3 +1,4 @@
+import { DaoMember } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { create } from 'zustand'
@@ -87,7 +88,9 @@ export interface CrossChainMigrationState {
 
   // Merkle data
   attributesData?: number[][]
-  memberSnapshot?: any[]
+  memberSnapshot?:
+    | DaoMember[]
+    | { ownerAlias: AddressType; owner: AddressType; tokens: number[] }[]
   merkleRoots?: MerkleRoots
 
   // Step 4: Metadata setup state
@@ -129,7 +132,11 @@ export interface CrossChainMigrationState {
   setAttributesMerkleRoot: (root: `0x${string}`) => void
   setMembersMerkleRoot: (root: `0x${string}`) => void
   setAttributesData: (data: number[][]) => void
-  setMemberSnapshot: (snapshot: any[]) => void
+  setMemberSnapshot: (
+    snapshot:
+      | DaoMember[]
+      | { ownerAlias: AddressType; owner: AddressType; tokens: number[] }[]
+  ) => void
   setDeployTxHash: (hash: `0x${string}`) => void
 
   // Step 4: Metadata actions

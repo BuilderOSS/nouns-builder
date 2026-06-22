@@ -9,6 +9,7 @@ export const Step7_MintTokens: React.FC = () => {
     targetChainId,
     targetAddresses,
     memberSnapshot,
+    merkleRoots,
     mintingProgress,
     addMintedTokens,
     addMintingTxHash,
@@ -24,6 +25,7 @@ export const Step7_MintTokens: React.FC = () => {
     progress,
     txHashes,
     error,
+    onChainMerkleRoot,
   } = useMintReservedTokens(
     memberSnapshot,
     targetAddresses?.token,
@@ -124,6 +126,57 @@ export const Step7_MintTokens: React.FC = () => {
           </Flex>
         </Stack>
       </Box>
+
+      {memberSnapshot && merkleRoots?.members && (
+        <Box p="x4" borderRadius="curved" backgroundColor="background2">
+          <Heading size="xs" mb="x3">
+            Debug: Merkle Root Verification
+          </Heading>
+          <Stack gap="x3">
+            <Box>
+              <Text fontSize={12} color="text3" mb="x1">
+                Expected Merkle Root (from Step 5 - Zustand state):
+              </Text>
+              <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
+                {merkleRoots.members}
+              </Text>
+            </Box>
+            {onChainMerkleRoot && (
+              <Box>
+                <Text fontSize={12} color="text3" mb="x1">
+                  On-Chain Merkle Root (from MerkleReserveMinter contract):
+                </Text>
+                <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
+                  {onChainMerkleRoot}
+                </Text>
+                {onChainMerkleRoot !== merkleRoots.members && (
+                  <Text fontSize={12} color="negative" mt="x1">
+                    ⚠️ MISMATCH: On-chain root differs from expected root! Please go back
+                    to Step 5 and regenerate merkle roots.
+                  </Text>
+                )}
+                {onChainMerkleRoot === merkleRoots.members && (
+                  <Text fontSize={12} color="positive" mt="x1">
+                    ✓ Roots match
+                  </Text>
+                )}
+              </Box>
+            )}
+            <Box>
+              <Text fontSize={12} color="text3" mb="x1">
+                Snapshot Info:
+              </Text>
+              <Text fontSize={12}>
+                {memberSnapshot.length} members,{' '}
+                {memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)} total tokens
+              </Text>
+            </Box>
+            <Text fontSize={12} color="text4">
+              Check console for calculated root comparison when minting starts
+            </Text>
+          </Stack>
+        </Box>
+      )}
 
       {!isComplete && !isMinting && tokensMinted.length === 0 && (
         <Box p="x4" borderRadius="curved" backgroundColor="warning">

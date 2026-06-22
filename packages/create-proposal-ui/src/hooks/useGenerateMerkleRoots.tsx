@@ -118,7 +118,7 @@ export const useGenerateMerkleRoots = (
         // Convert to format expected by prepareMemberMerkleRoot
         const snapshotForMerkle = snapshot.map((member) => ({
           ...member,
-          delegate: member.ownerAlias,
+          delegate: member.owner, // Use original owner address (no aliasing)
           tokenCount: member.tokens.length,
           timeJoined: 0,
         }))
