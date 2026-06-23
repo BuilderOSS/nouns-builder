@@ -45,13 +45,13 @@ import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
 import { getProvider } from '@buildeross/utils/provider'
 import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Formik, FormikProps } from 'formik'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { notFoundWrap } from 'src/styles/404.css'
 import * as styles from 'src/styles/create.css'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
@@ -252,6 +252,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
   })
 
   const { address } = useAccount()
+  const { openConnectModal } = useConnectModal()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
@@ -630,15 +631,31 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
-  if (!address)
+  if (!address) {
     return (
-      <Flex className={notFoundWrap}>Please connect your wallet to access this page</Flex>
+      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+        <Text fontSize={20} fontWeight="display">
+          Proposal creation is restricted
+        </Text>
+        <Text color="text3">
+          You need to connect a wallet before you can create a proposal.
+        </Text>
+        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+      </Flex>
     )
+  }
 
   if (!hasThreshold || isGovernanceDelayed) {
     return (
-      <Flex className={notFoundWrap}>
-        Access Restricted - You don’t have permission to access this page
+      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+        <Text fontSize={20} fontWeight="display">
+          Proposal creation is restricted
+        </Text>
+        <Text color="text3">
+          {!hasThreshold
+            ? "You don't have enough voting power to create proposals. You need to hold enough tokens to meet the proposal threshold."
+            : 'Proposal creation is currently delayed for this DAO. Please try again later.'}
+        </Text>
       </Flex>
     )
   }

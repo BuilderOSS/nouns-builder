@@ -22,7 +22,6 @@ export interface CandidateSignatureButtonProps {
   buttonVariant?: React.ComponentProps<typeof ContractButton>['variant']
   alreadySigned?: boolean
   voteWeight?: bigint
-  signatureCount?: number
   onSuccess?: () => void
 }
 
@@ -35,7 +34,6 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   buttonVariant = 'primary',
   alreadySigned = false,
   voteWeight = 0n,
-  signatureCount = 0,
   onSuccess,
 }) => {
   const config = useConfig()
@@ -134,12 +132,6 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
     return `Sign Candidate`
   }, [alreadySigned, isNonceLoading, isProposer, voteWeight])
 
-  const buttonSubtext = React.useMemo(() => {
-    if (signatureCount > 0)
-      return `${signatureCount} signature${signatureCount !== 1 ? 's' : ''}`
-    return undefined
-  }, [signatureCount])
-
   if (isProposer) return null
 
   return (
@@ -166,20 +158,6 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
             }}
           >
             {voteWeight.toString()} Votes
-          </Box>
-        )}
-        {buttonSubtext && (
-          <Box
-            position="absolute"
-            bottom="x1"
-            fontSize={12}
-            color="text3"
-            style={{
-              left: '50%',
-              transform: 'translateX(-50%)',
-            }}
-          >
-            {buttonSubtext}
           </Box>
         )}
       </ContractButton>

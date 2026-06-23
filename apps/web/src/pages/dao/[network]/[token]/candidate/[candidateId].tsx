@@ -3,7 +3,10 @@ import {
   CandidateDetailsSection,
   CandidateDiscussionSection,
   CandidateEditedBanner,
+  CandidatePromoteCard,
   CandidateSignalBreakdown,
+  CandidateState,
+  CandidateStatus,
 } from '@buildeross/candidate-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
@@ -13,7 +16,7 @@ import { ProposalNavigation } from '@buildeross/proposal-ui'
 import type { CandidateGroup } from '@buildeross/sdk'
 import { getCandidateGroup } from '@buildeross/sdk'
 import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
-import { getCandidateComments } from '@buildeross/sdk/subgraph'
+import { getCandidateComments, getUserCandidateSignal } from '@buildeross/sdk/subgraph'
 import {
   type DaoContractAddresses,
   useCandidateStore,
@@ -27,6 +30,7 @@ import {
   type TransactionBundle,
   TransactionType,
 } from '@buildeross/types'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { WalletIdentityWithPreview } from '@buildeross/ui/WalletIdentity'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -40,7 +44,8 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR from 'swr'
-import { useReadContract } from 'wagmi'
+import { isAddressEqual } from 'viem'
+import { useAccount, useReadContract } from 'wagmi'
 
 interface CandidateDetailPageProps {
   candidateId: string
@@ -145,6 +150,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   initialData,
 }) => {
   const router = useRouter()
+  const { address } = useAccount()
   const { query, push, pathname } = router
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -154,6 +160,17 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   const [submittedWithSignature, setSubmittedWithSignature] = React.useState(false)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activeTab = (query.tab as string) || 'Details'
+
+  const openDaoPage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+        tab: 'candidates',
+      },
+    })
+  }, [push, chain.slug, addresses.token])
 
   const {
     data: candidate,
@@ -213,6 +230,33 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
     chainId: chain.id,
     query: { enabled: !!addresses.token },
   })
+
+  // Check user's token balance to determine voting power
+  const { data: tokenBalance } = useReadContract({
+    abi: tokenAbi,
+    address: addresses.token,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    chainId: chain.id,
+    query: { enabled: !!address && !!addresses.token },
+  })
+
+  const hasVotingPower = React.useMemo(() => {
+    return tokenBalance !== undefined && tokenBalance > 0n
+  }, [tokenBalance])
+
+  // Check if user has already signaled on the current version
+  const { data: userSignal } = useSWR(
+    address && latestVersion?.proposalHash
+      ? ['userCandidateSignal', chain.id, latestVersion.proposalHash, address]
+      : null,
+    () => getUserCandidateSignal(chain.id, latestVersion!.proposalHash, address!),
+    { revalidateOnFocus: false }
+  )
+
+  const hasUserSignaled = React.useMemo(() => {
+    return !!userSignal
+  }, [userSignal])
 
   const handleEditCandidate = React.useCallback(() => {
     if (!candidate || !latestVersion) return
@@ -384,12 +428,21 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
     <Flex position="relative" direction="column">
       <Flex className={votePageWrapper} gap={{ '@initial': 'x2', '@768': 'x4' }}>
         <Flex direction="column" gap={{ '@initial': 'x4', '@768': 'x7' }} mb="x2">
-          <ProposalNavigation handleBack={() => router.back()} />
+          <ProposalNavigation handleBack={() => openDaoPage()} />
           <Flex gap="x4" direction="column">
             <Stack gap="x2">
-              <Text fontSize={20} color="text3" fontWeight="display">
-                Candidate
-              </Text>
+              <Flex align="center">
+                <Text fontSize={20} color="text3" fontWeight="display" mr="x2">
+                  Candidate
+                </Text>
+                <CandidateStatus
+                  state={
+                    latestVersion?.proposal?.id
+                      ? CandidateState.Promoted
+                      : CandidateState.Draft
+                  }
+                />
+              </Flex>
               <Text fontSize={28} fontWeight="display">
                 {latestVersion?.title ||
                   (candidateNumberLabel
@@ -448,12 +501,20 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
 
             {!latestVersion?.proposal?.id && (
               <Flex direction={'row'} gap={'x2'} wrap style={{ width: '100%' }}>
-                <Button onClick={() => setComposerOpen(true)}>Signal / comment</Button>
-                {latestVersion && (
-                  <Button onClick={handleEditCandidate} variant="secondary">
-                    Edit candidate
-                  </Button>
-                )}
+                <Button onClick={() => setComposerOpen(true)}>
+                  {hasUserSignaled || !hasVotingPower ? 'Comment' : 'Signal / comment'}
+                </Button>
+                {latestVersion &&
+                  !!address &&
+                  isAddressEqual(address, candidate.proposer) && (
+                    <ContractButton
+                      handleClick={handleEditCandidate}
+                      variant="secondary"
+                      chainId={chain.id}
+                    >
+                      Edit candidate
+                    </ContractButton>
+                  )}
               </Flex>
             )}
 
@@ -463,6 +524,41 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                 versions={candidate.versions}
               />
             )}
+
+            {latestVersion &&
+              !latestVersion.proposal?.id &&
+              latestVersion.targets &&
+              latestVersion.values &&
+              latestVersion.calldatas && (
+                <CandidatePromoteCard
+                  candidateId={latestVersion.candidateId as `0x${string}`}
+                  proposalHash={latestVersion.proposalHash as `0x${string}`}
+                  proposer={candidate.proposer as `0x${string}`}
+                  targets={latestVersion.targets as string[]}
+                  values={latestVersion.values.map((v) =>
+                    typeof v === 'string' ? BigInt(v) : v
+                  )}
+                  calldatas={latestVersion.calldatas as `0x${string}`[]}
+                  description={latestVersion.description || ''}
+                  governorAddress={addresses.governor as `0x${string}`}
+                  onPromoteSuccess={async () => {
+                    // Refresh candidate data in background (subgraph has already synced at this point)
+                    void mutateCandidate()
+
+                    // Redirect to the newly created proposal using proposalId
+                    if (latestVersion.proposalHash) {
+                      await push({
+                        pathname: '/dao/[network]/[token]/vote/[id]',
+                        query: {
+                          network: chain.slug,
+                          token: addresses.token,
+                          id: latestVersion.proposalHash,
+                        },
+                      })
+                    }
+                  }}
+                />
+              )}
 
             <CandidateSignalBreakdown
               forVotes={candidate.currentForCount}
@@ -495,7 +591,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
             <Box p={{ '@initial': 'x4', '@768': 'x6' }}>
               <Stack gap="x4">
                 <Text fontSize={20} fontWeight="display">
-                  Signal / comment
+                  {hasUserSignaled || !hasVotingPower ? 'Comment' : 'Signal / comment'}
                 </Text>
                 <CandidateCommentForm
                   candidateId={latestVersion.candidateId as `0x${string}`}
@@ -504,6 +600,8 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                   governorAddress={addresses.governor as `0x${string}`}
                   tokenSymbol={String(tokenSymbol)}
                   onSuccess={handleComposerSuccess}
+                  hasUserSignaled={hasUserSignaled}
+                  hasVotingPower={hasVotingPower}
                 />
               </Stack>
             </Box>

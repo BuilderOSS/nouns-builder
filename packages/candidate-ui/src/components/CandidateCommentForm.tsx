@@ -34,6 +34,8 @@ export interface CandidateCommentFormProps {
   tokenSymbol: string
   onSuccess?: (withSignature: boolean) => void
   parentCommentUID?: Hex
+  hasUserSignaled?: boolean
+  hasVotingPower?: boolean
 }
 
 export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
@@ -44,6 +46,8 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   tokenSymbol,
   onSuccess,
   parentCommentUID,
+  hasUserSignaled = false,
+  hasVotingPower = true,
 }) => {
   const config = useConfig()
   const { data: walletClient } = useWalletClient()
@@ -220,18 +224,52 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
 
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
-      {/* Primary Toggle: Enable Signaling */}
-      <Flex align="center" justify="space-between" gap="x3">
-        <Box>
-          <Text fontSize={16} fontWeight="label">
-            Signal on this candidate
-          </Text>
-          <Text fontSize={12} color="text3" mt="x1">
-            Show your support for or against this candidate
+      {/* Show informational message if user can't signal */}
+      {hasUserSignaled && (
+        <Box
+          p="x4"
+          borderRadius="curved"
+          borderWidth="normal"
+          borderStyle="solid"
+          borderColor="border"
+          backgroundColor="background2"
+        >
+          <Text fontSize={14} color="text2">
+            You have already signaled on this version. You can add additional comments
+            below.
           </Text>
         </Box>
-        <Toggle on={signalEnabled} onToggle={() => setSignalEnabled(!signalEnabled)} />
-      </Flex>
+      )}
+
+      {!hasVotingPower && !hasUserSignaled && (
+        <Box
+          p="x4"
+          borderRadius="curved"
+          borderWidth="normal"
+          borderStyle="solid"
+          borderColor="border"
+          backgroundColor="background2"
+        >
+          <Text fontSize={14} color="text2">
+            You need to hold {tokenSymbol} tokens to signal on candidates.
+          </Text>
+        </Box>
+      )}
+
+      {/* Primary Toggle: Enable Signaling - Only show if user can signal */}
+      {!hasUserSignaled && hasVotingPower && (
+        <Flex align="center" justify="space-between" gap="x3">
+          <Box>
+            <Text fontSize={16} fontWeight="label">
+              Signal on this candidate
+            </Text>
+            <Text fontSize={12} color="text3" mt="x1">
+              Show your support for or against this candidate
+            </Text>
+          </Box>
+          <Toggle on={signalEnabled} onToggle={() => setSignalEnabled(!signalEnabled)} />
+        </Flex>
+      )}
 
       {/* Signal Options (VoteModal style) - Only when enabled */}
       {signalEnabled && (
@@ -354,7 +392,11 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           loading={isSubmitting}
           style={{ width: '100%' }}
         >
-          {shouldSign ? 'Signal & Sign' : signalEnabled ? 'Submit Signal' : 'Add Comment'}
+          {shouldSign
+            ? 'Signal & Sign'
+            : signalEnabled && hasVotingPower && !hasUserSignaled
+              ? 'Submit Signal'
+              : 'Add Comment'}
         </ContractButton>
       </Flex>
     </Stack>

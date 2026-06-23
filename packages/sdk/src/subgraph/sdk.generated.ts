@@ -11286,7 +11286,11 @@ export type CandidateGroupFragmentFragment = {
   currentAgainstCount: any
   currentAbstainCount: any
   dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
-  versions: Array<{ __typename?: 'ProposalCandidateVersion'; title?: string | null }>
+  versions: Array<{
+    __typename?: 'ProposalCandidateVersion'
+    title?: string | null
+    proposal?: { __typename?: 'Proposal'; id: string } | null
+  }>
 }
 
 export type CandidateGroupDetailFragmentFragment = {
@@ -11716,7 +11720,11 @@ export type CandidateGroupsQuery = {
     currentAgainstCount: any
     currentAbstainCount: any
     dao: { __typename?: 'DAO'; id: string; tokenAddress: any; governorAddress: any }
-    versions: Array<{ __typename?: 'ProposalCandidateVersion'; title?: string | null }>
+    versions: Array<{
+      __typename?: 'ProposalCandidateVersion'
+      title?: string | null
+      proposal?: { __typename?: 'Proposal'; id: string } | null
+    }>
   }>
 }
 
@@ -14009,6 +14017,9 @@ export const CandidateGroupFragmentFragmentDoc = gql`
     currentAbstainCount
     versions(first: 1, orderBy: versionNumber, orderDirection: desc) {
       title
+      proposal {
+        id
+      }
     }
   }
 `

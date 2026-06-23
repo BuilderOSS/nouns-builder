@@ -37,9 +37,11 @@ const candidateSupportMeta: Record<
 const CandidateCommentCard = ({
   comment,
   depth = 0,
+  isLatestSignalForUser = true,
 }: {
   comment: CandidateComment
   depth?: number
+  isLatestSignalForUser?: boolean
 }) => {
   const { ensName, ensAvatar } = useEnsData(comment.commenter as `0x${string}`)
   const support = candidateSupportMeta[comment.support]
@@ -78,25 +80,27 @@ const CandidateCommentCard = ({
           </Box>
         </Flex>
         <Flex align="center" gap="x2" wrap>
-          {support.label !== 'None' && (
-            <>
-              <Box
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: 999,
-                  background: support.color,
-                  color: theme.colors.onAccent,
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}
-              >
-                {support.label}
-              </Box>
-              <Text color="text3" fontSize={12}>
-                {comment.voteWeight.toString()} signal weight
-              </Text>
-            </>
-          )}
+          {support.label !== 'None' &&
+            comment.voteWeight > 0n &&
+            isLatestSignalForUser && (
+              <>
+                <Box
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: 999,
+                    background: support.color,
+                    color: theme.colors.onAccent,
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  {support.label}
+                </Box>
+                <Text color="text3" fontSize={12}>
+                  {comment.voteWeight.toString()} signal weight
+                </Text>
+              </>
+            )}
           <Text color="text3" fontSize={12}>
             {formatTimeAgo(comment.createdAt)}
           </Text>
@@ -145,16 +149,37 @@ const CandidateCommentsPanel = ({
     return map
   }, [comments])
 
+  const latestSignalIds = React.useMemo(() => {
+    const latestByUser = new Map<string, CandidateComment>()
+
+    // Find the latest signal for each user
+    for (const comment of comments) {
+      if (comment.support !== CandidateVoteSupport.None && comment.voteWeight > 0n) {
+        const existing = latestByUser.get(comment.commenter)
+        if (!existing || comment.createdAt > existing.createdAt) {
+          latestByUser.set(comment.commenter, comment)
+        }
+      }
+    }
+
+    // Return Set of IDs for O(1) lookup
+    return new Set(Array.from(latestByUser.values()).map((c) => c.id))
+  }, [comments])
+
   const renderThread = React.useCallback(
     (comment: CandidateComment, depth = 0): React.ReactNode => (
       <Stack key={comment.id} gap="x3">
-        <CandidateCommentCard comment={comment} depth={depth} />
+        <CandidateCommentCard
+          comment={comment}
+          depth={depth}
+          isLatestSignalForUser={latestSignalIds.has(comment.id)}
+        />
         {repliesByParentId
           .get(comment.id)
           ?.map((reply) => renderThread(reply, depth + 1))}
       </Stack>
     ),
-    [repliesByParentId]
+    [repliesByParentId, latestSignalIds]
   )
 
   return (

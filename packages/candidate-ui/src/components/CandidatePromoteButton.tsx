@@ -1,8 +1,9 @@
 import { governorAbi } from '@buildeross/sdk/contract'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AnimatedModal, ContractButton, SuccessModalContent } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
-import { Box, Stack, Text } from '@buildeross/zord'
+import { Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { type Hex } from 'viem'
 import { useAccount, useConfig } from 'wagmi'
@@ -25,6 +26,7 @@ export interface CandidatePromoteButtonProps {
   signatures: ProposerSignature[]
   proposalThreshold: bigint
   totalVoteWeight: bigint
+  hideInfo?: boolean
   onSuccess?: (proposalId: Hex) => void
 }
 
@@ -38,6 +40,7 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
   signatures,
   proposalThreshold,
   totalVoteWeight,
+  hideInfo = false,
   onSuccess,
 }) => {
   const config = useConfig()
@@ -99,16 +102,19 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
       const txHash = await writeContract(config, simulation.request)
 
       // 3. Wait for confirmation
-      await waitForTransactionReceipt(config, {
+      const receipt = await waitForTransactionReceipt(config, {
         hash: txHash,
         chainId: chain.id,
       })
 
-      // 4. Use txHash as proposal identifier
+      // 4. Wait for subgraph to sync
+      await awaitSubgraphSync(chain.id, receipt.blockNumber)
+
+      // 5. Use txHash as proposal identifier
       setIsTxSuccess(true)
 
       if (onSuccess) {
-        setTimeout(() => onSuccess(txHash), 1500)
+        onSuccess(txHash)
       }
     } catch (err: unknown) {
       console.error('Error promoting candidate:', err)
@@ -150,21 +156,7 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
 
   return (
     <>
-      <Stack gap="x3">
-        <Box>
-          <Text fontSize={14} color="text3" mb="x2">
-            Proposal Threshold
-          </Text>
-          <Text fontSize={16} fontWeight="label">
-            {totalVoteWeight.toString()} / {requiredVoteWeight.toString()} votes
-          </Text>
-          {signatures.length > 0 && (
-            <Text fontSize={14} color="text3" mt="x1">
-              {signatures.length} signature{signatures.length !== 1 ? 's' : ''} collected
-            </Text>
-          )}
-        </Box>
-
+      {hideInfo ? (
         <ContractButton
           chainId={chain.id}
           handleClick={handlePromote}
@@ -173,7 +165,26 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
         >
           {buttonText}
         </ContractButton>
-      </Stack>
+      ) : (
+        <Stack gap="x2">
+          <Text fontSize={14} color={meetsThreshold ? 'positive' : 'text3'}>
+            {totalVoteWeight.toString()} vote{totalVoteWeight !== 1n ? 's' : ''} collected
+            •{' '}
+            {meetsThreshold
+              ? 'Ready to submit'
+              : `Need ${(requiredVoteWeight - totalVoteWeight).toString()} more to submit`}
+          </Text>
+
+          <ContractButton
+            chainId={chain.id}
+            handleClick={handlePromote}
+            disabled={!canPromote}
+            loading={isSubmitting}
+          >
+            {buttonText}
+          </ContractButton>
+        </Stack>
+      )}
 
       {/* Transaction Status Modal */}
       <AnimatedModal

@@ -62,7 +62,7 @@ const Updatable: React.FC<UpdatableProps> = ({ updateDeadline, proposalId }) => 
           variant={'paragraph-md'}
           ml={{ '@initial': 'x0', '@768': 'x3' }}
         >
-          Time remaining to update proposal
+          Time left to edit this proposal
         </Text>
       </Flex>
     </Fragment>

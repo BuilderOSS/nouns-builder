@@ -1,23 +1,33 @@
-import { theme } from '@buildeross/zord'
+import { media, theme } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const candidateCard = style({
-  width: '100%',
-  cursor: 'pointer',
-  transition: 'all 0.15s ease-in-out',
+  transition: 'border-color 0.15s ease-in-out',
   borderColor: theme.colors.border,
-  background: theme.colors.background1,
-  overflow: 'hidden',
   ':hover': {
     borderColor: theme.colors.neutralHover,
     boxShadow: `0 2px 8px ${theme.colors.ghostHover}`,
   },
 })
 
-export const title = style({
-  minWidth: 0,
-  flexGrow: 1,
-})
+export const titleStyle = style([
+  {
+    order: 2,
+    minWidth: 0,
+    '@media': {
+      [media.min768]: { order: 1, flexGrow: 1 },
+    },
+  },
+])
+
+export const statusStyle = style([
+  {
+    order: 1,
+    '@media': {
+      [media.min768]: { order: 2 },
+    },
+  },
+])
 
 export const stats = style({
   flexShrink: 0,

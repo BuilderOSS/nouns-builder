@@ -101,12 +101,14 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
   )
   const proposerSignatures = React.useMemo<ProposerSignature[]>(
     () =>
-      eligibleSignatures.map((signature) => ({
-        signer: signature.signer as `0x${string}`,
-        nonce: signature.nonce,
-        deadline: signature.deadline,
-        sig: signature.signature,
-      })),
+      eligibleSignatures
+        .map((signature) => ({
+          signer: signature.signer as `0x${string}`,
+          nonce: signature.nonce,
+          deadline: signature.deadline,
+          sig: signature.signature,
+        }))
+        .sort(compareProposerSignaturesBySigner),
     [eligibleSignatures]
   )
 
@@ -148,7 +150,6 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
             tokenSymbol={tokenSymbol}
             alreadySigned={alreadySigned}
             voteWeight={votes}
-            signatureCount={totalSignatures}
             onSuccess={() => void mutate()}
           />
         )}
@@ -217,6 +218,18 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
       </Stack>
     </Box>
   )
+}
+
+export function compareProposerSignaturesBySigner(
+  a: ProposerSignature,
+  b: ProposerSignature
+) {
+  const signerA = a.signer.toLowerCase()
+  const signerB = b.signer.toLowerCase()
+
+  if (signerA < signerB) return -1
+  if (signerA > signerB) return 1
+  return 0
 }
 
 function SignerRow({ signature }: { signature: CandidateSponsorSignature }) {

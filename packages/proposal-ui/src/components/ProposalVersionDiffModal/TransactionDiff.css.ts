@@ -10,7 +10,7 @@ export const transactionDiffAdded = style([
   {
     borderStyle: 'solid',
     borderColor: vars.color.positive,
-    borderLeftWidth: '4px',
+    overflow: 'hidden',
   },
 ])
 
@@ -23,8 +23,8 @@ export const transactionDiffRemoved = style([
   {
     borderStyle: 'solid',
     borderColor: vars.color.negative,
-    borderLeftWidth: '4px',
     opacity: 0.7,
+    overflow: 'hidden',
   },
 ])
 
@@ -37,7 +37,7 @@ export const transactionDiffChanged = style([
   {
     borderStyle: 'solid',
     borderColor: vars.color.accent,
-    borderLeftWidth: '4px',
+    overflow: 'hidden',
   },
 ])
 
@@ -51,6 +51,7 @@ export const transactionDiffUnchanged = style([
   {
     borderStyle: 'solid',
     opacity: 0.8,
+    overflow: 'hidden',
   },
 ])
 

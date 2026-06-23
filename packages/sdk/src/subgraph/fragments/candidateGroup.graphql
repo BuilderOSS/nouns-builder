@@ -17,6 +17,9 @@ fragment CandidateGroupFragment on ProposalCandidateGroup {
   currentAbstainCount
   versions(first: 1, orderBy: versionNumber, orderDirection: desc) {
     title
+    proposal {
+      id
+    }
   }
 }
 

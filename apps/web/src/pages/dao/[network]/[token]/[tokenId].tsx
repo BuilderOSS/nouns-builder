@@ -283,7 +283,15 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     } was created on Nouns Builder. Please click the link to see more.`
   }, [name])
 
-  const activeTab = query.tab ? (query.tab as string) : 'about'
+  const requestedTab = (query.tab as string) ?? 'about'
+
+  const activeTab =
+    requestedTab === 'activity'
+      ? supportsCandidates
+        ? 'proposals'
+        : 'activity'
+      : requestedTab
+
   const path = `/dao/${chain.slug}/${addresses.token}/${token.tokenId}?tab=${activeTab}`
 
   const onAuctionCreated = React.useCallback(

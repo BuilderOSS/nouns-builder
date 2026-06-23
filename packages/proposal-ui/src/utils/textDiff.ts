@@ -1,3 +1,5 @@
+import { type Change, diffLines } from 'diff'
+
 export type DiffLine = {
   type: 'added' | 'removed' | 'unchanged'
   content: string
@@ -7,49 +9,45 @@ export type DiffLine = {
 /**
  * Creates a git-style inline diff between two strings
  * Shows each line with +/- prefixes for additions/deletions
+ * Uses the 'diff' library for intelligent line-by-line comparison
  */
 export function createInlineDiff(oldText: string, newText: string): DiffLine[] {
   if (!oldText && !newText) return []
 
-  const oldLines = oldText ? oldText.split('\n') : []
-  const newLines = newText ? newText.split('\n') : []
+  // Use the diff library for proper line-by-line comparison
+  const changes: Change[] = diffLines(oldText || '', newText || '')
 
   const result: DiffLine[] = []
+  let currentLineNumber = 1
 
-  // Simple line-by-line comparison
-  // For a more sophisticated diff, we'd use a library like diff or diff-match-patch
+  changes.forEach((change) => {
+    const lines = change.value.split('\n')
+    // Remove the last empty line if the change ends with a newline
+    if (lines[lines.length - 1] === '') {
+      lines.pop()
+    }
 
-  if (oldText === newText) {
-    // No changes - show as unchanged
-    newLines.forEach((line, index) => {
-      result.push({
-        type: 'unchanged',
-        content: line,
-        lineNumber: index + 1,
-      })
+    lines.forEach((line) => {
+      if (change.added) {
+        result.push({
+          type: 'added',
+          content: line,
+          lineNumber: currentLineNumber++,
+        })
+      } else if (change.removed) {
+        result.push({
+          type: 'removed',
+          content: line,
+        })
+      } else {
+        result.push({
+          type: 'unchanged',
+          content: line,
+          lineNumber: currentLineNumber++,
+        })
+      }
     })
-    return result
-  }
-
-  // If completely different, show all removals then all additions
-  if (oldLines.length > 0) {
-    oldLines.forEach((line) => {
-      result.push({
-        type: 'removed',
-        content: line,
-      })
-    })
-  }
-
-  if (newLines.length > 0) {
-    newLines.forEach((line, index) => {
-      result.push({
-        type: 'added',
-        content: line,
-        lineNumber: index + 1,
-      })
-    })
-  }
+  })
 
   return result
 }

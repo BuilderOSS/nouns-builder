@@ -16,13 +16,13 @@ import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores
 import { AddressType, ProposalCreateStage } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
-import { Flex, Stack } from '@buildeross/zord'
+import { Button, Flex, Stack, Text } from '@buildeross/zord'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { notFoundWrap } from 'src/styles/404.css'
 import { useAccount } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
@@ -32,6 +32,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
+  const { openConnectModal } = useConnectModal()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
@@ -256,15 +257,31 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
-  if (!address)
+  if (!address) {
     return (
-      <Flex className={notFoundWrap}>Please connect your wallet to access this page</Flex>
+      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+        <Text fontSize={20} fontWeight="display">
+          Proposal review is restricted
+        </Text>
+        <Text color="text3">
+          You need to connect a wallet before you can review and submit a proposal.
+        </Text>
+        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+      </Flex>
     )
+  }
 
   if (!hasThreshold || isGovernanceDelayed) {
     return (
-      <Flex className={notFoundWrap}>
-        Access Restricted - You don’t have permission to access this page
+      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+        <Text fontSize={20} fontWeight="display">
+          Proposal submission is restricted
+        </Text>
+        <Text color="text3">
+          {!hasThreshold
+            ? "You don't have enough voting power to submit proposals. You need to hold enough tokens to meet the proposal threshold."
+            : 'Proposal submission is currently delayed for this DAO. Please try again later.'}
+        </Text>
       </Flex>
     )
   }
