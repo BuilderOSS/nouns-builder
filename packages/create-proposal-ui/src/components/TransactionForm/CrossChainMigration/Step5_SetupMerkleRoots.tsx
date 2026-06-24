@@ -97,7 +97,6 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
       !isGeneratingAttributes &&
       !isGeneratingMembers
     ) {
-      console.log('[Step5] Both merkle roots ready, advancing to SET_ROOTS phase')
       setPhase(SetupPhase.SET_ROOTS)
     }
   }, [

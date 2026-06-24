@@ -42,13 +42,6 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
       const currentTimestamp = Math.floor(Date.now() / 1000)
       const delayedTimestamp = BigInt(currentTimestamp + durationInSeconds)
 
-      console.log('[Step6] Updating delayed governance:', {
-        duration,
-        durationInSeconds,
-        currentTimestamp,
-        delayedTimestamp: delayedTimestamp.toString(),
-      })
-
       const hash = await updateDelayedGovernance(delayedTimestamp)
 
       // Save to context

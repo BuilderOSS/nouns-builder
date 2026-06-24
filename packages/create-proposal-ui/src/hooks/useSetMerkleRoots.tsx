@@ -38,20 +38,11 @@ export const useSetMerkleRoots = (
         chainId: targetChainId,
       })
 
-      console.log('[useSetMerkleRoots] Attributes root transaction sent:', {
-        txHash: hash,
-      })
       setAttributesTxHash(hash)
 
       // Wait for transaction receipt
       if (publicClient) {
-        console.log('[useSetMerkleRoots] Waiting for attributes root receipt...')
         const receipt = await publicClient.waitForTransactionReceipt({ hash })
-        console.log('[useSetMerkleRoots] Attributes root confirmed:', {
-          txHash: hash,
-          status: receipt.status,
-          blockNumber: receipt.blockNumber,
-        })
 
         if (receipt.status !== 'success') {
           throw new Error('Transaction failed for setAttributeMerkleRoot')
@@ -97,18 +88,11 @@ export const useSetMerkleRoots = (
         chainId: targetChainId,
       })
 
-      console.log('[useSetMerkleRoots] Mint settings transaction sent:', { txHash: hash })
       setMembersTxHash(hash)
 
       // Wait for transaction receipt
       if (publicClient) {
-        console.log('[useSetMerkleRoots] Waiting for mint settings receipt...')
         const receipt = await publicClient.waitForTransactionReceipt({ hash })
-        console.log('[useSetMerkleRoots] Mint settings confirmed:', {
-          txHash: hash,
-          status: receipt.status,
-          blockNumber: receipt.blockNumber,
-        })
 
         if (receipt.status !== 'success') {
           throw new Error('Transaction failed for setMintSettings')

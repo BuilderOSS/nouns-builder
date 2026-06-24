@@ -41,12 +41,6 @@ export const useGenerateMerkleRoots = (
         ]
       : null,
     async ([_key, metadata, tokenId, chainId]) => {
-      console.log('[useGenerateMerkleRoots] Fetching attributes with SWR:', {
-        metadata,
-        tokenId,
-        chainId,
-      })
-
       try {
         // Using native fetch instead of axios to avoid timeout issues
         const url = `${BASE_URL}/api/migrate/attributes?metadata=${metadata}&chainId=${chainId}&finalTokenId=${tokenId}`
@@ -61,12 +55,6 @@ export const useGenerateMerkleRoots = (
         const result = await response.json()
         const data = (result.data || result) as number[][]
         const root = await prepareAttributesMerkleRoot(data)
-
-        console.log('[useGenerateMerkleRoots] Attributes result:', {
-          dataLength: data.length,
-          root,
-          source: result.source || 'unknown',
-        })
 
         return { data, root }
       } catch (err) {
@@ -96,11 +84,6 @@ export const useGenerateMerkleRoots = (
       ? [SWR_KEYS.TOKEN_HOLDERS_MERKLE_ROOT, sourceTokenAddress, sourceChainId]
       : null,
     async ([_key, token, chainId]) => {
-      console.log('[useGenerateMerkleRoots] Fetching members with SWR:', {
-        token,
-        chainId,
-      })
-
       try {
         // Using native fetch instead of axios to avoid timeout issues
         const url = `${BASE_URL}/api/migrate/snapshot?token=${token}&chainId=${chainId}`
@@ -124,12 +107,6 @@ export const useGenerateMerkleRoots = (
         }))
 
         const root = await prepareMemberMerkleRoot(snapshotForMerkle as any)
-
-        console.log('[useGenerateMerkleRoots] Members result:', {
-          snapshotLength: snapshot.length,
-          root,
-          source: result.source || 'unknown',
-        })
 
         return { snapshot, root }
       } catch (err) {

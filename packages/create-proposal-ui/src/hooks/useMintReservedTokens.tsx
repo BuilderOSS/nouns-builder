@@ -3,7 +3,7 @@ import { merkleReserveMinterAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
 import { useState } from 'react'
-import { useReadContract, useWriteContract } from 'wagmi'
+import { usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 
 import { DaoMemberSimplified } from './useGenerateMerkleRoots'
 
@@ -23,6 +23,7 @@ export const useMintReservedTokens = (
   const [error, setError] = useState<string>()
 
   const { writeContractAsync, isPending } = useWriteContract()
+  const publicClient = usePublicClient({ chainId: targetChainId })
 
   const minterAddress = targetChainId ? MERKLE_RESERVE_MINTER[targetChainId] : undefined
 
@@ -65,20 +66,6 @@ export const useMintReservedTokens = (
       const tree = StandardMerkleTree.of(leaves, ['address', 'uint256'])
       const calculatedRoot = tree.root as `0x${string}`
 
-      console.log('[useMintReservedTokens] Merkle root verification:', {
-        calculatedRoot,
-        onChainMerkleRoot,
-        rootsMatch: calculatedRoot === onChainMerkleRoot,
-        snapshotSize: memberSnapshot.length,
-        totalLeaves: leaves.length,
-        sampleMember: memberSnapshot[0]
-          ? {
-              owner: memberSnapshot[0].owner,
-              tokenCount: memberSnapshot[0].tokens.length,
-            }
-          : null,
-      })
-
       // Check if calculated root matches on-chain root
       if (onChainMerkleRoot && calculatedRoot !== onChainMerkleRoot) {
         const errorMsg = `Merkle root mismatch! Calculated: ${calculatedRoot}, On-chain: ${onChainMerkleRoot}. Please go back to Step 5 and regenerate merkle roots.`
@@ -91,6 +78,22 @@ export const useMintReservedTokens = (
         member.tokens.map((tokenId) => {
           const leaf = [member.owner, BigInt(tokenId)]
           const proof = tree.getProof(leaf)
+
+          // Debug: log first claim details
+          if (tokenId === member.tokens[0]) {
+            console.log(
+              `[useMintReservedTokens] First claim for member ${member.owner}:`,
+              {
+                mintTo: member.owner,
+                tokenId,
+                tokenIdType: typeof tokenId,
+                leafHash: tree.leafHash(leaf),
+                proofLength: proof.length,
+                proof: proof,
+                canVerify: tree.verify(leaf, proof),
+              }
+            )
+          }
 
           return {
             mintTo: member.owner,
@@ -108,14 +111,7 @@ export const useMintReservedTokens = (
         (claim) => !alreadyMintedSet.has(Number(claim.tokenId))
       )
 
-      console.log('[useMintReservedTokens] Minting status:', {
-        total: allClaims.length,
-        alreadyMinted: tokensMinted.length,
-        remaining: claimsToMint.length,
-      })
-
       if (claimsToMint.length === 0) {
-        console.log('[useMintReservedTokens] All tokens already minted')
         return { minted: tokensMinted, hashes: txHashes }
       }
 
@@ -125,11 +121,6 @@ export const useMintReservedTokens = (
 
       for (let i = 0; i < claimsToMint.length; i += BATCH_SIZE) {
         const batch = claimsToMint.slice(i, i + BATCH_SIZE)
-
-        console.log(
-          `[useMintReservedTokens] Minting batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(claimsToMint.length / BATCH_SIZE)}`,
-          { batchSize: batch.length }
-        )
 
         const hash = await writeContractAsync({
           abi: merkleReserveMinterAbi,
@@ -142,6 +133,15 @@ export const useMintReservedTokens = (
         hashes.push(hash)
         setTxHashes([...hashes])
         onTxHash?.(hash)
+
+        // Wait for transaction receipt before continuing to next batch
+        if (publicClient) {
+          const receipt = await publicClient.waitForTransactionReceipt({ hash })
+
+          if (receipt.status !== 'success') {
+            throw new Error(`Transaction failed for batch ${i / BATCH_SIZE + 1}`)
+          }
+        }
 
         const batchTokenIds = batch.map((claim) => Number(claim.tokenId))
         minted.push(...batchTokenIds)

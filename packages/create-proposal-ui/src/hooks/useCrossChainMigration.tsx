@@ -209,6 +209,40 @@ const bigIntReviver = (_key: string, value: any) => {
   return value
 }
 
+// Helper to get the network type from environment
+const getNetworkType = () => {
+  if (typeof window === 'undefined') return 'mainnet'
+  const nextPublicNetworkType = (window as any).__NEXT_PUBLIC_NETWORK_TYPE__
+  return nextPublicNetworkType || process.env.NEXT_PUBLIC_NETWORK_TYPE || 'mainnet'
+}
+
+// Create a DAO-specific storage key
+export const getMigrationStorageKey = (
+  chainId?: CHAIN_ID,
+  tokenAddress?: AddressType
+) => {
+  const networkType = getNetworkType()
+  const baseKey = `cross-chain-migration:${networkType}`
+
+  if (chainId && tokenAddress) {
+    return `${baseKey}:${chainId}:${tokenAddress.toLowerCase()}`
+  }
+
+  // Fallback to temp key if DAO context not available yet
+  return `${baseKey}:temp`
+}
+
+// Global variable to track current DAO context for storage
+let currentStorageKey = getMigrationStorageKey()
+
+// Function to update the storage key when DAO context changes
+export const setMigrationDAOContext = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
+  const newKey = getMigrationStorageKey(chainId, tokenAddress)
+  if (newKey !== currentStorageKey) {
+    currentStorageKey = newKey
+  }
+}
+
 export const useCrossChainMigration = create<CrossChainMigrationState>()(
   persist(
     (set, get) => ({
@@ -216,9 +250,23 @@ export const useCrossChainMigration = create<CrossChainMigrationState>()(
 
       setStep: (step) => set({ currentStep: step }),
 
-      setChains: (sourceChainId, targetChainId) => set({ sourceChainId, targetChainId }),
+      setChains: (sourceChainId, targetChainId) => {
+        set({ sourceChainId, targetChainId })
+        // Update storage key when source chain is set
+        const addresses = get().sourceAddresses
+        if (addresses?.token) {
+          setMigrationDAOContext(sourceChainId, addresses.token)
+        }
+      },
 
-      setSourceAddresses: (addresses) => set({ sourceAddresses: addresses }),
+      setSourceAddresses: (addresses) => {
+        set({ sourceAddresses: addresses })
+        // Update storage key when source addresses are set
+        const chainId = get().sourceChainId
+        if (chainId && addresses?.token) {
+          setMigrationDAOContext(chainId, addresses.token)
+        }
+      },
 
       setSourceConfig: (config) =>
         set({
@@ -338,18 +386,23 @@ export const useCrossChainMigration = create<CrossChainMigrationState>()(
       },
     }),
     {
-      name: 'cross-chain-migration-storage',
+      name: 'cross-chain-migration-storage', // Base name, actual key is dynamic
       version: 4, // v4: Added SET_DELAYED_GOVERNANCE step and related state
       storage: {
-        getItem: (name) => {
-          const str = localStorage.getItem(name)
+        getItem: () => {
+          // Use the current DAO-specific storage key
+          const str = localStorage.getItem(currentStorageKey)
           if (!str) return null
           return JSON.parse(str, bigIntReviver)
         },
-        setItem: (name, value) => {
-          localStorage.setItem(name, JSON.stringify(value, bigIntReplacer))
+        setItem: (_name, value) => {
+          // Use the current DAO-specific storage key
+          localStorage.setItem(currentStorageKey, JSON.stringify(value, bigIntReplacer))
         },
-        removeItem: (name) => localStorage.removeItem(name),
+        removeItem: (_name) => {
+          // Use the current DAO-specific storage key
+          localStorage.removeItem(currentStorageKey)
+        },
       },
     }
   )

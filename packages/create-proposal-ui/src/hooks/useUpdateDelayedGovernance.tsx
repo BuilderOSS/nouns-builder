@@ -28,12 +28,6 @@ export const useUpdateDelayedGovernance = (
     setIsSuccess(false)
 
     try {
-      console.log('[useUpdateDelayedGovernance] Updating delayed governance:', {
-        governor: targetGovernorAddress,
-        timestamp: delayedTimestamp.toString(),
-        chainId: targetChainId,
-      })
-
       const hash = await writeContractAsync({
         abi: governorAbi,
         address: targetGovernorAddress,
@@ -42,20 +36,13 @@ export const useUpdateDelayedGovernance = (
         chainId: targetChainId,
       })
 
-      console.log('[useUpdateDelayedGovernance] Transaction sent:', { txHash: hash })
       setTxHash(hash)
       setIsUpdating(false)
 
       // Wait for transaction receipt
       if (publicClient) {
         setIsConfirming(true)
-        console.log('[useUpdateDelayedGovernance] Waiting for receipt...')
         const receipt = await publicClient.waitForTransactionReceipt({ hash })
-        console.log('[useUpdateDelayedGovernance] Transaction confirmed:', {
-          txHash: hash,
-          status: receipt.status,
-          blockNumber: receipt.blockNumber,
-        })
 
         setIsConfirming(false)
 

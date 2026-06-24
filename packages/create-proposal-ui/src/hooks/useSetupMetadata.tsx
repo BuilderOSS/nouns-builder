@@ -26,11 +26,6 @@ export const useSetupMetadata = (
       ? [SWR_KEYS.ENCODED_DAO_METADATA, sourceMetadataAddress, sourceChainId]
       : null,
     async ([_key, metadataAddress, chainId]) => {
-      console.log('[useSetupMetadata] Fetching properties from blockchain via API:', {
-        metadataAddress,
-        chainId,
-      })
-
       try {
         // Fetch property data from API endpoint (which queries blockchain)
         // Using native fetch instead of axios to avoid timeout issues
@@ -51,13 +46,7 @@ export const useSetupMetadata = (
           source?: 'cache' | 'blockchain'
         }
 
-        const { properties: propertyData, propertiesCount, source } = data
-
-        console.log('[useSetupMetadata] Retrieved properties from API:', {
-          propertiesCount,
-          source: source || 'unknown',
-          properties: propertyData,
-        })
+        const { properties: propertyData, propertiesCount } = data
 
         if (propertiesCount === 0 || propertyData.length === 0) {
           console.warn(
@@ -77,7 +66,7 @@ export const useSetupMetadata = (
           }
         >()
 
-        propertyData.forEach((property, propertyIndex) => {
+        propertyData.forEach((property) => {
           // Extract baseUri and extension from the first item's URI
           // Format: {baseUri}{propertyName}/{itemName}{extension}
           const firstItemUri = property.items[0]?.uri
@@ -133,11 +122,6 @@ export const useSetupMetadata = (
           })
         })
 
-        console.log('[useSetupMetadata] Encoded property groups:', {
-          groupCount: encodedProperties.length,
-          encodedData: encodedProperties,
-        })
-
         return encodedProperties
       } catch (err) {
         console.error('[useSetupMetadata] Error fetching metadata:', {
@@ -165,13 +149,6 @@ export const useSetupMetadata = (
   const addAllProperties = useCallback(async () => {
     if (!properties || !targetMetadataAddress) return
 
-    console.log('[useSetupMetadata] addAllProperties called', {
-      targetMetadataAddress,
-      targetChainId,
-      propertiesCount: properties.length,
-      properties,
-    })
-
     if (properties.length === 0) {
       const errorMsg = 'No properties to add'
       console.error('[useSetupMetadata] Validation failed:', errorMsg)
@@ -187,22 +164,10 @@ export const useSetupMetadata = (
         setCurrentPropertyIndex(i)
         onProgressUpdate?.(i, properties.length)
 
-        console.log(
-          `[useSetupMetadata] Processing property ${i + 1}/${properties.length}`,
-          {
-            propertyData: properties[i],
-          }
-        )
-
         // Decode the encoded data to get the args
         const decoded = decodeFunctionData({
           abi: metadataAbi,
           data: properties[i] as `0x${string}`,
-        })
-
-        console.log(`[useSetupMetadata] Decoded property ${i + 1}:`, {
-          functionName: decoded.functionName,
-          args: decoded.args,
         })
 
         const hash = await writeContractAsync({
@@ -213,23 +178,13 @@ export const useSetupMetadata = (
           chainId: targetChainId,
         })
 
-        console.log(`[useSetupMetadata] Property ${i + 1} transaction sent:`, {
-          txHash: hash,
-        })
-
         hashes.push(hash)
         setTxHashes([...hashes])
         onTxHashAdded?.(hash)
 
         // Wait for transaction receipt before continuing
         if (publicClient) {
-          console.log(`[useSetupMetadata] Waiting for receipt for property ${i + 1}...`)
           const receipt = await publicClient.waitForTransactionReceipt({ hash })
-          console.log(`[useSetupMetadata] Property ${i + 1} confirmed:`, {
-            txHash: hash,
-            status: receipt.status,
-            blockNumber: receipt.blockNumber,
-          })
 
           if (receipt.status !== 'success') {
             throw new Error(`Transaction failed for property ${i + 1}`)
@@ -239,11 +194,6 @@ export const useSetupMetadata = (
 
       setCurrentPropertyIndex(properties.length)
       onProgressUpdate?.(properties.length, properties.length)
-
-      console.log('[useSetupMetadata] All properties added successfully', {
-        totalProperties: properties.length,
-        txHashes: hashes,
-      })
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to add properties'
       console.error('[useSetupMetadata] Error adding properties:', {
