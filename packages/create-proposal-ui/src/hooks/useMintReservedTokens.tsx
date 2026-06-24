@@ -1,8 +1,9 @@
 import { MERKLE_RESERVE_MINTER } from '@buildeross/constants/addresses'
 import { merkleReserveMinterAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { StandardMerkleTree } from '@openzeppelin/merkle-tree'
+import { MerkleTree } from 'merkletreejs'
 import { useState } from 'react'
+import { encodeAbiParameters, keccak256, parseAbiParameters } from 'viem'
 import { usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 
 import { DaoMemberSimplified } from './useGenerateMerkleRoots'
@@ -59,12 +60,34 @@ export const useMintReservedTokens = (
       // Create merkle tree from member snapshot
       // Use 'owner' (original L1 address) since we're minting directly on L2
       // The ownerAlias is only needed for L1->L2 bridge messages, not for direct L2 minting
-      const leaves = memberSnapshot.flatMap((member) =>
-        member.tokens.map((tokenId) => [member.owner, BigInt(tokenId)])
-      )
 
-      const tree = StandardMerkleTree.of(leaves, ['address', 'uint256'])
-      const calculatedRoot = tree.root as `0x${string}`
+      // Build mapping of leaf hash to {owner, tokenId} for proof generation
+      const leafDataMap = new Map<string, { owner: AddressType; tokenId: number }>()
+
+      // Create leaves using the same encoding as the contract: keccak256(abi.encode(address, uint256))
+      const leaves = memberSnapshot
+        .flatMap((member) =>
+          member.tokens.map((tokenId) => {
+            const encoded = encodeAbiParameters(parseAbiParameters('address, uint256'), [
+              member.owner as `0x${string}`,
+              BigInt(tokenId),
+            ])
+            const leafHash = keccak256(encoded)
+
+            // Store mapping for later proof generation
+            leafDataMap.set(leafHash, { owner: member.owner, tokenId })
+
+            return leafHash
+          })
+        )
+        .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)) // Sort for deterministic tree
+
+      const tree = new MerkleTree(leaves, keccak256, { sortPairs: true })
+      const rootBuffer = tree.getRoot()
+      const rootHex = Buffer.from(rootBuffer).toString('hex')
+      const calculatedRoot = rootHex.startsWith('0x')
+        ? (rootHex as `0x${string}`)
+        : (`0x${rootHex}` as `0x${string}`)
 
       // Check if calculated root matches on-chain root
       if (onChainMerkleRoot && calculatedRoot !== onChainMerkleRoot) {
@@ -76,29 +99,31 @@ export const useMintReservedTokens = (
       // Generate all claims
       const allClaims = memberSnapshot.flatMap((member) =>
         member.tokens.map((tokenId) => {
-          const leaf = [member.owner, BigInt(tokenId)]
-          const proof = tree.getProof(leaf)
+          const encoded = encodeAbiParameters(parseAbiParameters('address, uint256'), [
+            member.owner as `0x${string}`,
+            BigInt(tokenId),
+          ])
+          const leafHash = keccak256(encoded)
+          const proof = tree.getProof(leafHash).map((p: any) => {
+            const hex = p.data.toString('hex')
+            return hex.startsWith('0x')
+              ? (hex as `0x${string}`)
+              : (`0x${hex}` as `0x${string}`)
+          })
 
           // Debug: log first claim details
           if (tokenId === member.tokens[0]) {
-            console.log(
-              `[useMintReservedTokens] First claim for member ${member.owner}:`,
-              {
-                mintTo: member.owner,
-                tokenId,
-                tokenIdType: typeof tokenId,
-                leafHash: tree.leafHash(leaf),
-                proofLength: proof.length,
-                proof: proof,
-                canVerify: tree.verify(leaf, proof),
-              }
+            const canVerify = tree.verify(
+              proof.map((p) => Buffer.from(p.slice(2), 'hex')),
+              leafHash,
+              calculatedRoot
             )
           }
 
           return {
             mintTo: member.owner,
             tokenId: BigInt(tokenId),
-            merkleProof: proof as `0x${string}`[],
+            merkleProof: proof,
           }
         })
       )

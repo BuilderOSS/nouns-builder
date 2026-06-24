@@ -3,7 +3,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { isMigrationAllowed } from '@buildeross/constants/migration'
 import {
   CrossChainMigration,
-  setMigrationDAOContext,
+  CrossChainMigrationProvider,
 } from '@buildeross/create-proposal-ui'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
@@ -11,7 +11,7 @@ import { DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useAccount } from 'wagmi'
 
 import { getDaoLayout } from '../../../../layouts/DaoLayout'
@@ -30,13 +30,6 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
 }) => {
   const { address: walletAddress, isConnected } = useAccount()
   const chain = useChainStore((x) => x.chain)
-
-  // Set the DAO context for localStorage when component mounts
-  useEffect(() => {
-    if (addresses.token && chainId) {
-      setMigrationDAOContext(chainId, addresses.token)
-    }
-  }, [addresses.token, chainId])
 
   // Check if user has migration access
   const hasMigrationAccess = React.useMemo(
@@ -111,7 +104,16 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
 
           {/* Migration Form */}
           <Box>
-            <CrossChainMigration />
+            {addresses.token ? (
+              <CrossChainMigrationProvider
+                chainId={chainId}
+                tokenAddress={addresses.token}
+              >
+                <CrossChainMigration />
+              </CrossChainMigrationProvider>
+            ) : (
+              <Text color="negative">DAO token address not found</Text>
+            )}
           </Box>
         </Stack>
       </Box>

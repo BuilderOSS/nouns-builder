@@ -1,6 +1,7 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 
+import { useAuthorizeMinter } from '../../../hooks/useAuthorizeMinter'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { BATCH_SIZE, useMintReservedTokens } from '../../../hooks/useMintReservedTokens'
 
@@ -16,6 +17,15 @@ export const Step7_MintTokens: React.FC = () => {
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
+
+  const {
+    authorizeMinter,
+    isAuthorizing,
+    isMinterAuthorized,
+    authorizeTxHash,
+    error: authError,
+    minterAddress,
+  } = useAuthorizeMinter(targetAddresses?.token, targetChainId)
 
   const {
     startMinting,
@@ -40,6 +50,14 @@ export const Step7_MintTokens: React.FC = () => {
       await startMinting()
     } catch (err) {
       console.error('Error minting tokens:', err)
+    }
+  }
+
+  const handleAuthorizeMinter = async () => {
+    try {
+      await authorizeMinter()
+    } catch (err) {
+      console.error('Error authorizing minter:', err)
     }
   }
 
@@ -127,6 +145,101 @@ export const Step7_MintTokens: React.FC = () => {
         </Stack>
       </Box>
 
+      {/* Minter Authorization */}
+      <Box
+        p="x4"
+        borderRadius="curved"
+        backgroundColor={
+          isMinterAuthorized ? 'positive' : authError ? 'negative' : 'background2'
+        }
+      >
+        <Heading size="xs" mb="x3" color={isMinterAuthorized ? 'onPositive' : undefined}>
+          {isMinterAuthorized ? '✓ ' : ''}Minter Authorization
+        </Heading>
+        <Stack gap="x3">
+          <Box>
+            <Text
+              fontSize={12}
+              color={isMinterAuthorized ? 'onPositive' : 'text3'}
+              mb="x1"
+            >
+              MerkleReserveMinter Address:
+            </Text>
+            <Text
+              fontFamily="mono"
+              fontSize={12}
+              style={{ wordBreak: 'break-all' }}
+              color={isMinterAuthorized ? 'onPositive' : undefined}
+            >
+              {minterAddress}
+            </Text>
+          </Box>
+
+          <Box>
+            <Text
+              fontSize={12}
+              color={isMinterAuthorized ? 'onPositive' : 'text3'}
+              mb="x1"
+            >
+              Status:
+            </Text>
+            <Text
+              fontSize={14}
+              fontWeight="label"
+              color={isMinterAuthorized ? 'onPositive' : undefined}
+            >
+              {isMinterAuthorized === undefined
+                ? 'Checking...'
+                : isMinterAuthorized
+                  ? 'Authorized - Ready to mint'
+                  : 'Not Authorized - Must authorize before minting'}
+            </Text>
+          </Box>
+
+          {authError && (
+            <Text fontSize={14} color="negative">
+              {authError}
+            </Text>
+          )}
+
+          {authorizeTxHash && targetChainId && (
+            <Box>
+              <Text fontSize={12} color="text3" mb="x1">
+                Authorization Transaction:
+              </Text>
+              <Text
+                as="a"
+                href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${authorizeTxHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                fontFamily="mono"
+                fontSize={12}
+                color="accent"
+                style={{
+                  wordBreak: 'break-all',
+                  textDecoration: 'underline',
+                  cursor: 'pointer',
+                }}
+              >
+                {authorizeTxHash}
+              </Text>
+            </Box>
+          )}
+
+          {!isMinterAuthorized && !isAuthorizing && (
+            <Button onClick={handleAuthorizeMinter} disabled={isAuthorizing}>
+              Authorize MerkleReserveMinter
+            </Button>
+          )}
+
+          {isAuthorizing && (
+            <Button disabled loading>
+              Authorizing...
+            </Button>
+          )}
+        </Stack>
+      </Box>
+
       {memberSnapshot && merkleRoots?.members && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Heading size="xs" mb="x3">
@@ -188,12 +301,21 @@ export const Step7_MintTokens: React.FC = () => {
       )}
 
       {!isComplete && (
-        <Flex justify="center">
-          <Button onClick={handleStartMinting} disabled={isMinting} loading={isMinting}>
+        <Flex justify="center" direction="column" gap="x2" align="center">
+          <Button
+            onClick={handleStartMinting}
+            disabled={isMinting || !isMinterAuthorized}
+            loading={isMinting}
+          >
             {isMinting
               ? `Minting... (${tokensMinted.length}/${totalTokens})`
               : 'Start Batch Minting'}
           </Button>
+          {!isMinterAuthorized && !isMinting && (
+            <Text fontSize={12} color="text3">
+              Please authorize the minter above before starting minting
+            </Text>
+          )}
         </Flex>
       )}
 

@@ -232,178 +232,194 @@ export const getMigrationStorageKey = (
   return `${baseKey}:temp`
 }
 
-// Global variable to track current DAO context for storage
-let currentStorageKey = getMigrationStorageKey()
+// Module-level cache: stores are cached by storageKey to ensure
+// the same store instance is reused across renders and component mounts
+const storeCache = new Map<string, ReturnType<typeof createMigrationStore>>()
 
-// Function to update the storage key when DAO context changes
-export const setMigrationDAOContext = (chainId: CHAIN_ID, tokenAddress: AddressType) => {
-  const newKey = getMigrationStorageKey(chainId, tokenAddress)
-  if (newKey !== currentStorageKey) {
-    currentStorageKey = newKey
-  }
+// Store factory: creates a store instance with a specific storage key
+function createMigrationStore(storageKey: string) {
+  return create<CrossChainMigrationState>()(
+    persist(
+      (set, get) => ({
+        ...initialState,
+
+        setStep: (step) => set({ currentStep: step }),
+
+        setChains: (sourceChainId, targetChainId) => {
+          set({ sourceChainId, targetChainId })
+        },
+
+        setSourceAddresses: (addresses) => {
+          set({ sourceAddresses: addresses })
+        },
+
+        setSourceConfig: (config) =>
+          set({
+            sourceConfig: config,
+            editedConfig: config,
+          }),
+
+        updateConfig: (config) =>
+          set((state) => ({
+            editedConfig: {
+              ...state.editedConfig,
+              ...config,
+            },
+          })),
+
+        setTargetAddresses: (addresses) => set({ targetAddresses: addresses }),
+
+        setMerkleRoots: (roots) =>
+          set((state) => ({
+            merkleRoots: {
+              ...state.merkleRoots,
+              ...roots,
+            },
+          })),
+
+        setAttributesMerkleRoot: (root) =>
+          set((state) => ({
+            merkleRoots: {
+              ...state.merkleRoots,
+              attributes: root,
+            },
+          })),
+
+        setMembersMerkleRoot: (root) =>
+          set((state) => ({
+            merkleRoots: {
+              ...state.merkleRoots,
+              members: root,
+            },
+          })),
+
+        setAttributesData: (data) => set({ attributesData: data }),
+
+        setMemberSnapshot: (snapshot) => set({ memberSnapshot: snapshot }),
+
+        setDeployTxHash: (hash) => set({ deployTxHash: hash }),
+
+        // Step 4: Metadata actions
+        setMetadataProperties: (properties) => set({ metadataProperties: properties }),
+
+        addMetadataTxHash: (hash) =>
+          set((state) => ({
+            metadataTxHashes: [...state.metadataTxHashes, hash],
+          })),
+
+        updateMetadataProgress: (current, total) =>
+          set({ metadataProgress: { current, total } }),
+
+        // Step 5: Merkle roots actions
+        setMerkleRootsPhase: (phase) => set({ merkleRootsPhase: phase }),
+
+        addMerkleRootTxHash: (hash) =>
+          set((state) => ({
+            merkleRootTxHashes: [...state.merkleRootTxHashes, hash],
+          })),
+
+        // Step 6: Delayed governance actions
+        setDelayedGovernanceDuration: (duration) =>
+          set({ delayedGovernanceDuration: duration }),
+
+        setDelayedGovernanceTimestamp: (timestamp) =>
+          set({ delayedGovernanceTimestamp: timestamp }),
+
+        setDelayedGovernanceTxHash: (hash) => set({ delayedGovernanceTxHash: hash }),
+
+        // Step 7: Minting actions
+        updateMintingProgress: (progress) =>
+          set((state) => ({
+            mintingProgress: {
+              ...state.mintingProgress,
+              ...progress,
+            },
+          })),
+
+        addMintedTokens: (tokenIds) =>
+          set((state) => ({
+            mintingProgress: {
+              ...state.mintingProgress,
+              minted: [...state.mintingProgress.minted, ...tokenIds],
+            },
+          })),
+
+        addMintingTxHash: (hash) =>
+          set((state) => ({
+            mintingProgress: {
+              ...state.mintingProgress,
+              txHashes: [...state.mintingProgress.txHashes, hash],
+            },
+          })),
+
+        setValidationResults: (results) => set({ validationResults: results }),
+
+        reset: () => set(initialState),
+
+        goToNextStep: () => {
+          const currentStep = get().currentStep
+          if (currentStep < MigrationStep.CREATE_PROPOSAL) {
+            set({ currentStep: currentStep + 1 })
+          }
+        },
+
+        goToPreviousStep: () => {
+          const currentStep = get().currentStep
+          if (currentStep > MigrationStep.LOAD_CONFIG) {
+            set({ currentStep: currentStep - 1 })
+          }
+        },
+      }),
+      {
+        name: 'cross-chain-migration-storage', // Base name, actual key is dynamic
+        version: 4, // v4: Added SET_DELAYED_GOVERNANCE step and related state
+        storage: {
+          getItem: () => {
+            // Use the DAO-specific storage key for this store instance
+            const str = localStorage.getItem(storageKey)
+            if (!str) return null
+            return JSON.parse(str, bigIntReviver)
+          },
+          setItem: (_name, value) => {
+            // Use the DAO-specific storage key for this store instance
+            localStorage.setItem(storageKey, JSON.stringify(value, bigIntReplacer))
+          },
+          removeItem: (_name) => {
+            // Use the DAO-specific storage key for this store instance
+            localStorage.removeItem(storageKey)
+          },
+        },
+      }
+    )
+  )
 }
 
-export const useCrossChainMigration = create<CrossChainMigrationState>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+// Get or create a store instance for a specific DAO
+function getOrCreateStore(storageKey: string) {
+  if (!storeCache.has(storageKey)) {
+    storeCache.set(storageKey, createMigrationStore(storageKey))
+  }
+  return storeCache.get(storageKey)!
+}
 
-      setStep: (step) => set({ currentStep: step }),
+// Hook to use the migration store for a specific DAO
+export function useCrossChainMigration(chainId?: CHAIN_ID, tokenAddress?: AddressType) {
+  // Always call context hook at top level (following rules of hooks)
+  const { useCrossChainMigrationContext } = require('../contexts')
+  const context = useCrossChainMigrationContext()
 
-      setChains: (sourceChainId, targetChainId) => {
-        set({ sourceChainId, targetChainId })
-        // Update storage key when source chain is set
-        const addresses = get().sourceAddresses
-        if (addresses?.token) {
-          setMigrationDAOContext(sourceChainId, addresses.token)
-        }
-      },
+  // Use parameters if provided, otherwise fall back to context
+  const contextChainId = chainId || context?.chainId
+  const contextTokenAddress = tokenAddress || context?.tokenAddress
 
-      setSourceAddresses: (addresses) => {
-        set({ sourceAddresses: addresses })
-        // Update storage key when source addresses are set
-        const chainId = get().sourceChainId
-        if (chainId && addresses?.token) {
-          setMigrationDAOContext(chainId, addresses.token)
-        }
-      },
+  const storageKey = getMigrationStorageKey(contextChainId, contextTokenAddress)
 
-      setSourceConfig: (config) =>
-        set({
-          sourceConfig: config,
-          editedConfig: config,
-        }),
+  // Get the cached store instance for this DAO
+  const store = getOrCreateStore(storageKey)
 
-      updateConfig: (config) =>
-        set((state) => ({
-          editedConfig: {
-            ...state.editedConfig,
-            ...config,
-          },
-        })),
+  // Use the store
+  return store()
+}
 
-      setTargetAddresses: (addresses) => set({ targetAddresses: addresses }),
-
-      setMerkleRoots: (roots) =>
-        set((state) => ({
-          merkleRoots: {
-            ...state.merkleRoots,
-            ...roots,
-          },
-        })),
-
-      setAttributesMerkleRoot: (root) =>
-        set((state) => ({
-          merkleRoots: {
-            ...state.merkleRoots,
-            attributes: root,
-          },
-        })),
-
-      setMembersMerkleRoot: (root) =>
-        set((state) => ({
-          merkleRoots: {
-            ...state.merkleRoots,
-            members: root,
-          },
-        })),
-
-      setAttributesData: (data) => set({ attributesData: data }),
-
-      setMemberSnapshot: (snapshot) => set({ memberSnapshot: snapshot }),
-
-      setDeployTxHash: (hash) => set({ deployTxHash: hash }),
-
-      // Step 4: Metadata actions
-      setMetadataProperties: (properties) => set({ metadataProperties: properties }),
-
-      addMetadataTxHash: (hash) =>
-        set((state) => ({
-          metadataTxHashes: [...state.metadataTxHashes, hash],
-        })),
-
-      updateMetadataProgress: (current, total) =>
-        set({ metadataProgress: { current, total } }),
-
-      // Step 5: Merkle roots actions
-      setMerkleRootsPhase: (phase) => set({ merkleRootsPhase: phase }),
-
-      addMerkleRootTxHash: (hash) =>
-        set((state) => ({
-          merkleRootTxHashes: [...state.merkleRootTxHashes, hash],
-        })),
-
-      // Step 6: Delayed governance actions
-      setDelayedGovernanceDuration: (duration) =>
-        set({ delayedGovernanceDuration: duration }),
-
-      setDelayedGovernanceTimestamp: (timestamp) =>
-        set({ delayedGovernanceTimestamp: timestamp }),
-
-      setDelayedGovernanceTxHash: (hash) => set({ delayedGovernanceTxHash: hash }),
-
-      // Step 7: Minting actions
-      updateMintingProgress: (progress) =>
-        set((state) => ({
-          mintingProgress: {
-            ...state.mintingProgress,
-            ...progress,
-          },
-        })),
-
-      addMintedTokens: (tokenIds) =>
-        set((state) => ({
-          mintingProgress: {
-            ...state.mintingProgress,
-            minted: [...state.mintingProgress.minted, ...tokenIds],
-          },
-        })),
-
-      addMintingTxHash: (hash) =>
-        set((state) => ({
-          mintingProgress: {
-            ...state.mintingProgress,
-            txHashes: [...state.mintingProgress.txHashes, hash],
-          },
-        })),
-
-      setValidationResults: (results) => set({ validationResults: results }),
-
-      reset: () => set(initialState),
-
-      goToNextStep: () => {
-        const currentStep = get().currentStep
-        if (currentStep < MigrationStep.CREATE_PROPOSAL) {
-          set({ currentStep: currentStep + 1 })
-        }
-      },
-
-      goToPreviousStep: () => {
-        const currentStep = get().currentStep
-        if (currentStep > MigrationStep.LOAD_CONFIG) {
-          set({ currentStep: currentStep - 1 })
-        }
-      },
-    }),
-    {
-      name: 'cross-chain-migration-storage', // Base name, actual key is dynamic
-      version: 4, // v4: Added SET_DELAYED_GOVERNANCE step and related state
-      storage: {
-        getItem: () => {
-          // Use the current DAO-specific storage key
-          const str = localStorage.getItem(currentStorageKey)
-          if (!str) return null
-          return JSON.parse(str, bigIntReviver)
-        },
-        setItem: (_name, value) => {
-          // Use the current DAO-specific storage key
-          localStorage.setItem(currentStorageKey, JSON.stringify(value, bigIntReplacer))
-        },
-        removeItem: (_name) => {
-          // Use the current DAO-specific storage key
-          localStorage.removeItem(currentStorageKey)
-        },
-      },
-    }
-  )
-)
+// Export factory for advanced use cases
+export { createMigrationStore }

@@ -221,10 +221,10 @@ After this proposal passes:
             <Flex align="center" gap="x2" mb="x1">
               <Text fontWeight="label">1. Pause Auction</Text>
             </Flex>
-            <Text color="text3" fontSize={13}>
+            <Text color="text3" fontSize="12">
               Target: {sourceAddresses?.auction}
             </Text>
-            <Text color="text3" fontSize={13}>
+            <Text color="text3" fontSize="12">
               Function: pause()
             </Text>
           </Box>
@@ -232,16 +232,16 @@ After this proposal passes:
             <Flex align="center" gap="x2" mb="x1">
               <Text fontWeight="label">2. Bridge Treasury</Text>
             </Flex>
-            <Text color="text3" fontSize={13}>
+            <Text color="text3" fontSize="12">
               Target: {bridgeTransaction?.target}
             </Text>
-            <Text color="text3" fontSize={13}>
+            <Text color="text3" fontSize="12">
               Function: bridgeETHTo()
             </Text>
-            <Text color="text3" fontSize={13}>
+            <Text color="text3" fontSize="12">
               To: {targetAddresses?.treasury}
             </Text>
-            <Text color="text3" fontSize={13}>
+            <Text color="text3" fontSize="12">
               Gas Limit: 200000
             </Text>
           </Box>

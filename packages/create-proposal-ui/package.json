@@ -20,6 +20,7 @@
     "formik": "^2.4.6",
     "framer-motion": "^12.12.1",
     "lodash": "^4.17.21",
+    "merkletreejs": "^0.6.0",
     "papaparse": "^5.5.3",
     "sablier": "^2.0.1",
     "swr": "^2.3.3",
