@@ -2,10 +2,11 @@ import { auctionAbi } from '@buildeross/sdk/contract'
 import { useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
-import { useMemo, useState } from 'react'
-import { encodeFunctionData } from 'viem'
-import { useReadContract } from 'wagmi'
+import { useEffect, useMemo, useState } from 'react'
+import { encodeFunctionData, formatEther, parseEther } from 'viem'
+import { useBalance, useReadContract } from 'wagmi'
 
+import { useCrossChainMigrationContext } from '../../../contexts'
 import { useBridgeTransaction } from '../../../hooks/useBridgeTransaction'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 
@@ -18,13 +19,27 @@ export const Step9_CreateProposal: React.FC = () => {
     editedConfig,
     goToPreviousStep,
   } = useCrossChainMigration()
+  const context = useCrossChainMigrationContext()
   const startProposalDraft = useProposalStore((state) => state.startProposalDraft)
   const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
 
-  const { bridgeTransaction } = useBridgeTransaction({
-    sourceChainId: sourceChainId!,
+  const { data: treasuryBalance, isLoading: isLoadingBalance } = useBalance({
+    address: sourceAddresses?.treasury,
+    chainId: sourceChainId,
+  })
+
+  const [amountInput, setAmountInput] = useState('')
+  const [amountWei, setAmountWei] = useState<bigint | undefined>()
+
+  const {
+    bridgeTransaction,
+    isLoading: isLoadingBridge,
+    error: bridgeError,
+  } = useBridgeTransaction({
+    sourceChainId,
+    targetChainId,
     targetTreasuryAddress: targetAddresses?.treasury,
-    amount: '0', // Will be set to treasury balance in actual proposal
+    amount: amountWei,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -35,8 +50,36 @@ export const Step9_CreateProposal: React.FC = () => {
     functionName: 'paused',
   })
 
+  useEffect(() => {
+    if (treasuryBalance?.value && amountInput === '') {
+      setAmountWei(treasuryBalance.value)
+      setAmountInput(formatEther(treasuryBalance.value))
+    }
+  }, [treasuryBalance, amountInput])
+
+  const handleAmountChange = (value: string) => {
+    setAmountInput(value)
+    try {
+      if (value && !isNaN(Number(value))) {
+        setAmountWei(parseEther(value as `${number}`))
+      } else {
+        setAmountWei(undefined)
+      }
+    } catch {
+      setAmountWei(undefined)
+    }
+  }
+
+  const handleSetMax = () => {
+    if (treasuryBalance?.value) {
+      setAmountWei(treasuryBalance.value)
+      setAmountInput(formatEther(treasuryBalance.value))
+    }
+  }
+
   const proposalData = useMemo(() => {
-    if (!sourceAddresses || !targetAddresses || !bridgeTransaction) return null
+    if (!sourceAddresses || !targetAddresses) return null
+
     type Transaction = {
       functionSignature: string
       target: AddressType
@@ -50,6 +93,7 @@ export const Step9_CreateProposal: React.FC = () => {
       summary: string
       transactions: Transaction[]
     }[] = []
+
     if (!paused) {
       transactions.push({
         type: TransactionType.PAUSE_AUCTIONS,
@@ -69,19 +113,29 @@ export const Step9_CreateProposal: React.FC = () => {
       })
     }
 
-    transactions.push({
-      type: TransactionType.CROSS_CHAIN_MIGRATION,
-      title: 'Bridge Treasury',
-      summary: 'Bridge treasury',
-      transactions: [
-        {
-          functionSignature: 'bridgeETHTo()',
-          target: bridgeTransaction.target,
-          value: bridgeTransaction.value,
-          calldata: bridgeTransaction.calldata,
-        },
-      ],
-    })
+    if (bridgeTransaction) {
+      transactions.push({
+        type: TransactionType.CROSS_CHAIN_MIGRATION,
+        title: 'Bridge Treasury',
+        summary: 'Bridge treasury via relay.link',
+        transactions: [
+          {
+            functionSignature: bridgeTransaction.functionSignature,
+            target: bridgeTransaction.target,
+            value: bridgeTransaction.value,
+            calldata: bridgeTransaction.calldata,
+          },
+        ],
+      })
+    }
+
+    const actions = []
+    if (!paused) actions.push('1. **Pausing the auction** on the source chain')
+    if (bridgeTransaction) {
+      actions.push(
+        `2. **Bridging the treasury** to the new DAO on chain ${targetChainId}`
+      )
+    }
 
     return {
       transactions,
@@ -90,8 +144,7 @@ export const Step9_CreateProposal: React.FC = () => {
 
 This proposal completes the cross-chain migration by:
 
-1. **Pausing the auction** on the source chain (if necessary)
-2. **Bridging the treasury** to the new DAO on chain ${targetChainId}
+${actions.join('\n')}
 
 ## New DAO Addresses
 
@@ -112,22 +165,24 @@ This proposal completes the cross-chain migration by:
 
 After this proposal passes:
 - Source chain auctions will be paused
-- Treasury funds will be bridged to the new DAO
-- The new DAO on chain ${targetChainId} will be fully operational`,
+${bridgeTransaction ? '- Treasury funds will be bridged to the new DAO via relay.link\n- The new DAO on chain ' + targetChainId + ' will be fully operational' : '- The new DAO on chain ' + targetChainId + ' will be ready to receive the treasury manually'}`,
     }
   }, [sourceAddresses, targetAddresses, bridgeTransaction, targetChainId, paused])
 
   const handleCreateProposal = () => {
     if (proposalData) {
       setIsSubmitting(true)
-      try {
-        startProposalDraft(proposalData)
-        resetTransactionType()
-      } finally {
-        setIsSubmitting(false)
+      startProposalDraft(proposalData)
+      resetTransactionType()
+      // Navigate to review page
+      if (context?.onNavigateToReview) {
+        context.onNavigateToReview()
       }
     }
   }
+
+  const isReady = !!proposalData
+  const showBridgeSection = !!bridgeTransaction || !!bridgeError || isLoadingBridge
 
   return (
     <Stack gap="x6">
@@ -214,6 +269,110 @@ After this proposal passes:
 
       <Box p="x4" borderRadius="curved" backgroundColor="background2">
         <Heading size="xs" mb="x3">
+          Bridge Configuration
+        </Heading>
+        <Stack gap="x3" fontSize={14}>
+          <Flex justify="space-between" align="center">
+            <Text color="text3">Treasury Balance:</Text>
+            <Text fontWeight="label">
+              {isLoadingBalance
+                ? 'Loading...'
+                : treasuryBalance
+                  ? `${formatEther(treasuryBalance.value)} ETH`
+                  : 'N/A'}
+            </Text>
+          </Flex>
+          <Box>
+            <Text color="text3" mb="x1">
+              Amount to Bridge (ETH):
+            </Text>
+            <Flex gap="x2" align="center">
+              <Box
+                as="input"
+                type="number"
+                value={amountInput}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  handleAmountChange(e.target.value)
+                }
+                placeholder="0"
+                min={0}
+                step="any"
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid',
+                  borderColor: 'var(--zord-colors-border)',
+                  background: 'var(--zord-colors-background1)',
+                  color: 'var(--zord-colors-text)',
+                  fontSize: '14px',
+                }}
+              />
+              <Button
+                type="button"
+                onClick={handleSetMax}
+                variant="unset"
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                Set max
+              </Button>
+            </Flex>
+          </Box>
+          {showBridgeSection && (
+            <Box>
+              {isLoadingBridge && <Text color="text3">Fetching bridge quote...</Text>}
+              {bridgeError && !isLoadingBridge && (
+                <Box
+                  p="x3"
+                  borderRadius="curved"
+                  backgroundColor="warning"
+                  color="background1"
+                >
+                  <Text fontWeight="label" mb="x1">
+                    Bridge Not Available
+                  </Text>
+                  <Text fontSize={12}>
+                    {bridgeError}. The treasury transfer will be skipped in this proposal.
+                  </Text>
+                </Box>
+              )}
+              {bridgeTransaction && !isLoadingBridge && (
+                <Stack gap="x2">
+                  <Flex justify="space-between">
+                    <Text color="text3">Bridge Provider:</Text>
+                    <Text fontWeight="label">relay.link</Text>
+                  </Flex>
+                  <Flex justify="space-between">
+                    <Text color="text3">Depository:</Text>
+                    <Text fontFamily="mono" fontSize={12}>
+                      {bridgeTransaction.target}
+                    </Text>
+                  </Flex>
+                  {bridgeTransaction.fees && (
+                    <>
+                      <Flex justify="space-between">
+                        <Text color="text3">Estimated Gas Fee:</Text>
+                        <Text fontWeight="label">
+                          {bridgeTransaction.fees.gas.amountFormatted} ETH
+                        </Text>
+                      </Flex>
+                      <Flex justify="space-between">
+                        <Text color="text3">Relayer Fee:</Text>
+                        <Text fontWeight="label">
+                          {bridgeTransaction.fees.relayer.amountFormatted} ETH
+                        </Text>
+                      </Flex>
+                    </>
+                  )}
+                </Stack>
+              )}
+            </Box>
+          )}
+        </Stack>
+      </Box>
+
+      <Box p="x4" borderRadius="curved" backgroundColor="background2">
+        <Heading size="xs" mb="x3">
           Proposal Actions
         </Heading>
         <Stack gap="x3" fontSize={14}>
@@ -228,23 +387,38 @@ After this proposal passes:
               Function: pause()
             </Text>
           </Box>
-          <Box>
-            <Flex align="center" gap="x2" mb="x1">
-              <Text fontWeight="label">2. Bridge Treasury</Text>
-            </Flex>
-            <Text color="text3" fontSize="12">
-              Target: {bridgeTransaction?.target}
-            </Text>
-            <Text color="text3" fontSize="12">
-              Function: bridgeETHTo()
-            </Text>
-            <Text color="text3" fontSize="12">
-              To: {targetAddresses?.treasury}
-            </Text>
-            <Text color="text3" fontSize="12">
-              Gas Limit: 200000
-            </Text>
-          </Box>
+          {bridgeTransaction && !isLoadingBridge && (
+            <Box>
+              <Flex align="center" gap="x2" mb="x1">
+                <Text fontWeight="label">2. Bridge Treasury</Text>
+              </Flex>
+              <Text color="text3" fontSize="12">
+                Target: {bridgeTransaction.target}
+              </Text>
+              <Text color="text3" fontSize="12">
+                Function: {bridgeTransaction.functionSignature}
+              </Text>
+              <Text color="text3" fontSize="12">
+                Value: {formatEther(BigInt(bridgeTransaction.value))} ETH
+              </Text>
+            </Box>
+          )}
+          {bridgeError && !isLoadingBridge && (
+            <Box
+              p="x3"
+              borderRadius="curved"
+              backgroundColor="warning"
+              color="background1"
+            >
+              <Text fontWeight="label" mb="x1">
+                Skipped: Bridge Treasury
+              </Text>
+              <Text fontSize={12}>
+                Bridge is not supported for this chain pair. The treasury can be
+                transferred manually after migration.
+              </Text>
+            </Box>
+          )}
         </Stack>
       </Box>
 
@@ -256,13 +430,24 @@ After this proposal passes:
           <Text>
             • The proposal will need to pass voting on the source DAO before execution
           </Text>
-          <Text>
-            • Ensure the treasury has sufficient balance for the bridge operation
-          </Text>
-          <Text>
-            • The bridge transaction may take 7 days to finalize (depending on the chain)
-          </Text>
+          {bridgeTransaction && (
+            <Text>
+              • Ensure the treasury has sufficient balance for the bridge operation
+            </Text>
+          )}
+          {bridgeTransaction && (
+            <Text>
+              • The bridge transaction may take several days to finalize (depending on the
+              chain)
+            </Text>
+          )}
           <Text>• Once paused, auctions on the source chain cannot be resumed</Text>
+          {bridgeError && (
+            <Text>
+              • Bridge is not available for this chain pair. The treasury transfer will
+              need to be done manually.
+            </Text>
+          )}
         </Stack>
       </Box>
 
@@ -295,7 +480,7 @@ After this proposal passes:
         </Button>
         <Button
           onClick={handleCreateProposal}
-          disabled={!proposalData || isSubmitting}
+          disabled={!isReady || isLoadingBridge || isSubmitting}
           isLoading={isSubmitting}
         >
           Generate Proposal

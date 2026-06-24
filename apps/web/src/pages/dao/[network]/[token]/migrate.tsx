@@ -11,7 +11,8 @@ import { DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
-import React from 'react'
+import { useRouter } from 'next/router'
+import React, { useCallback } from 'react'
 import { useAccount } from 'wagmi'
 
 import { getDaoLayout } from '../../../../layouts/DaoLayout'
@@ -30,6 +31,17 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
 }) => {
   const { address: walletAddress, isConnected } = useAccount()
   const chain = useChainStore((x) => x.chain)
+  const router = useRouter()
+
+  const onNavigateToReview = useCallback(() => {
+    router.push({
+      pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [router, chain.slug, addresses.token])
 
   // Check if user has migration access
   const hasMigrationAccess = React.useMemo(
@@ -108,6 +120,7 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
               <CrossChainMigrationProvider
                 chainId={chainId}
                 tokenAddress={addresses.token}
+                onNavigateToReview={onNavigateToReview}
               >
                 <CrossChainMigration />
               </CrossChainMigrationProvider>

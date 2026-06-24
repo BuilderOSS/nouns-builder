@@ -4,6 +4,7 @@ import React, { createContext, ReactNode, useContext } from 'react'
 interface CrossChainMigrationContextValue {
   chainId: CHAIN_ID
   tokenAddress: AddressType
+  onNavigateToReview?: () => void
 }
 
 const CrossChainMigrationContext = createContext<CrossChainMigrationContextValue | null>(
@@ -13,14 +14,18 @@ const CrossChainMigrationContext = createContext<CrossChainMigrationContextValue
 export function CrossChainMigrationProvider({
   chainId,
   tokenAddress,
+  onNavigateToReview,
   children,
 }: {
   chainId: CHAIN_ID
   tokenAddress: AddressType
+  onNavigateToReview?: () => void
   children: ReactNode
 }) {
   return (
-    <CrossChainMigrationContext.Provider value={{ chainId, tokenAddress }}>
+    <CrossChainMigrationContext.Provider
+      value={{ chainId, tokenAddress, onNavigateToReview }}
+    >
       {children}
     </CrossChainMigrationContext.Provider>
   )

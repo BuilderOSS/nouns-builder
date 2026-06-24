@@ -111,15 +111,6 @@ export const useMintReservedTokens = (
               : (`0x${hex}` as `0x${string}`)
           })
 
-          // Debug: log first claim details
-          if (tokenId === member.tokens[0]) {
-            const canVerify = tree.verify(
-              proof.map((p) => Buffer.from(p.slice(2), 'hex')),
-              leafHash,
-              calculatedRoot
-            )
-          }
-
           return {
             mintTo: member.owner,
             tokenId: BigInt(tokenId),

@@ -7,6 +7,8 @@ import useSWRImmutable from 'swr/immutable'
 import { decodeFunctionData, encodeFunctionData } from 'viem'
 import { usePublicClient, useWriteContract } from 'wagmi'
 
+export const MAX_ITEMS_PER_CHUNK = 50
+
 export const useSetupMetadata = (
   sourceTokenAddress?: AddressType,
   sourceMetadataAddress?: AddressType,
@@ -113,12 +115,67 @@ export const useSetupMetadata = (
           })
         })
 
-        // Encode each group as an addProperties call
-        const encodedProperties = Array.from(propertyGroups.values()).map((group) => {
+        // Split groups into smaller chunks to avoid gas limit issues
+        // Each chunk contains complete properties (never split a property across chunks)
+        const chunks: {
+          names: string[]
+          items: { propertyId: bigint; name: string; isNewProperty: boolean }[]
+          ipfsGroup: { baseUri: string; extension: string }
+        }[] = []
+
+        for (const group of propertyGroups.values()) {
+          // Count items per property
+          const propItemCounts = new Map<number, number>()
+          for (const item of group.items) {
+            const pid = Number(item.propertyId)
+            propItemCounts.set(pid, (propItemCounts.get(pid) || 0) + 1)
+          }
+
+          let currentChunk: {
+            names: string[]
+            items: { propertyId: bigint; name: string; isNewProperty: boolean }[]
+          } = { names: [], items: [] }
+          let currentChunkItems = 0
+          let itemIdx = 0
+
+          for (let pid = 0; pid < group.names.length; pid++) {
+            const count = propItemCounts.get(pid) || 0
+
+            if (
+              currentChunkItems + count > MAX_ITEMS_PER_CHUNK &&
+              currentChunkItems > 0
+            ) {
+              chunks.push({ ...currentChunk, ipfsGroup: group.ipfsGroup })
+              currentChunk = { names: [], items: [] }
+              currentChunkItems = 0
+            }
+
+            const newPid = currentChunk.names.length
+            currentChunk.names.push(group.names[pid])
+
+            for (let j = 0; j < count; j++) {
+              const item = group.items[itemIdx]
+              currentChunk.items.push({
+                propertyId: BigInt(newPid),
+                name: item.name,
+                isNewProperty: item.isNewProperty,
+              })
+              currentChunkItems++
+              itemIdx++
+            }
+          }
+
+          if (currentChunk.items.length > 0) {
+            chunks.push({ ...currentChunk, ipfsGroup: group.ipfsGroup })
+          }
+        }
+
+        // Encode each chunk as an addProperties call
+        const encodedProperties = chunks.map((chunk) => {
           return encodeFunctionData({
             abi: metadataAbi,
             functionName: 'addProperties',
-            args: [group.names, group.items, group.ipfsGroup],
+            args: [chunk.names, chunk.items, chunk.ipfsGroup],
           })
         })
 

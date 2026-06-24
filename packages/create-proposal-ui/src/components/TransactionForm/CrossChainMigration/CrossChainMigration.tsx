@@ -1,5 +1,6 @@
-import { Box, Stack } from '@buildeross/zord'
-import React from 'react'
+import { chainIdToSlug } from '@buildeross/utils'
+import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import React, { useState } from 'react'
 
 import {
   MigrationStep,
@@ -31,7 +32,11 @@ import { Step9_CreateProposal } from './Step9_CreateProposal'
  * 9. Create proposal to pause auctions and bridge treasury
  */
 export const CrossChainMigration: React.FC = () => {
-  const { currentStep } = useCrossChainMigration()
+  const { currentStep, targetChainId, targetAddresses, reset } = useCrossChainMigration()
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+
+  const targetChainSlug = targetChainId ? chainIdToSlug(targetChainId) : undefined
+  const daoDeployed = !!targetChainSlug && !!targetAddresses?.token
 
   const renderStep = () => {
     switch (currentStep) {
@@ -58,11 +63,83 @@ export const CrossChainMigration: React.FC = () => {
     }
   }
 
+  const handleStartOver = () => {
+    reset()
+    setShowResetConfirm(false)
+    window.location.reload()
+  }
+
   return (
     <Box>
       <Stack gap="x6">
         <MigrationProgressTracker />
+
+        {daoDeployed && (
+          <Box p="x4" borderRadius="curved" backgroundColor="accent" color="background1">
+            <Flex align="center" justify="space-between" wrap="wrap" gap="x2">
+              <Stack gap="x1">
+                <Text fontWeight="label" fontSize={14}>
+                  DAO Deployed on Target Chain
+                </Text>
+                <Text fontSize={12} style={{ opacity: 0.85 }}>
+                  {targetAddresses?.token}
+                </Text>
+              </Stack>
+              <Box
+                as="a"
+                href={`/dao/${targetChainSlug}/${targetAddresses?.token}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                p="x2"
+                borderRadius="curved"
+                backgroundColor="background1"
+                color="accent"
+                fontSize={14}
+                fontWeight="label"
+                style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}
+              >
+                View New DAO &rarr;
+              </Box>
+            </Flex>
+          </Box>
+        )}
+
         {renderStep()}
+
+        <Box
+          pt="x4"
+          borderTopStyle="solid"
+          borderTopWidth="normal"
+          borderTopColor="border"
+        >
+          {!showResetConfirm ? (
+            <Button
+              variant="ghost"
+              color="negative"
+              onClick={() => setShowResetConfirm(true)}
+            >
+              Start Over
+            </Button>
+          ) : (
+            <Stack gap="x2">
+              <Text fontSize={14} color="text3">
+                This will reset all migration progress. This cannot be undone.
+              </Text>
+              <Flex gap="x2">
+                <Button variant="secondary" onClick={() => setShowResetConfirm(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  backgroundColor="negative"
+                  onClick={handleStartOver}
+                >
+                  Confirm Reset
+                </Button>
+              </Flex>
+            </Stack>
+          )}
+        </Box>
       </Stack>
     </Box>
   )

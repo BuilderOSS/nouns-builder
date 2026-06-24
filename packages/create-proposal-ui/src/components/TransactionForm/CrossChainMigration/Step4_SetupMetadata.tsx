@@ -3,7 +3,7 @@ import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import { useEffect } from 'react'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
-import { useSetupMetadata } from '../../../hooks/useSetupMetadata'
+import { MAX_ITEMS_PER_CHUNK, useSetupMetadata } from '../../../hooks/useSetupMetadata'
 
 export const Step4_SetupMetadata: React.FC = () => {
   const {
@@ -107,15 +107,16 @@ export const Step4_SetupMetadata: React.FC = () => {
       {activeProperties.length > 0 && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Heading size="xs" mb="x3">
-            Property Groups to Add
+            Property Batches to Add
           </Heading>
           <Stack gap="x2">
             <Flex justify="space-between">
-              <Text color="text3">Total Property Groups:</Text>
+              <Text color="text3">Total Transactions:</Text>
               <Text fontWeight="label">{activeProperties.length}</Text>
             </Flex>
             <Text color="text4" fontSize={12} mt="x2">
-              Each group will be added via a separate transaction using addProperties().
+              Properties are split into batches of up to {MAX_ITEMS_PER_CHUNK} items per
+              transaction to avoid gas limits.
             </Text>
           </Stack>
         </Box>
@@ -132,6 +133,11 @@ export const Step4_SetupMetadata: React.FC = () => {
               ? `Adding Properties (${currentProperty}/${totalProperties})...`
               : 'Add All Properties'}
           </Button>
+          <Text color="text4" fontSize={12} textAlign="center">
+            {isAddingProperties
+              ? `This may take several minutes for large collections. Each transaction is confirmed before the next begins.`
+              : `${activeProperties.length} transaction${activeProperties.length > 1 ? 's' : ''} will be sent.`}
+          </Text>
         </Flex>
       )}
 

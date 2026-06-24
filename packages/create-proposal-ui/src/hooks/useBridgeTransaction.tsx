@@ -1,72 +1,87 @@
-import { PUBLIC_L1_BRIDGE_ADDRESS } from '@buildeross/constants/addresses'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import { useMemo } from 'react'
-import { encodeFunctionData, parseEther, zeroAddress } from 'viem'
+import { AddressType } from '@buildeross/types'
+import { useEffect, useState } from 'react'
 
-/**
- * Hook to prepare a native ETH bridge transaction from source chain treasury to target chain treasury
- *
- * @param sourceChainId - Chain ID of the source DAO
- * @param targetTreasuryAddress - Treasury address on the target chain
- * @param amount - Amount of ETH to bridge (in ETH, e.g., "1.5")
- */
+import { getRelayBridgeCalldata } from '../utils/getRelayBridgeCalldata'
+
+export interface BridgeTransaction {
+  target: AddressType
+  value: string
+  calldata: `0x${string}`
+  functionSignature: string
+  fees?: {
+    gas: { amountFormatted: string }
+    relayer: { amountFormatted: string }
+  }
+}
+
 export const useBridgeTransaction = ({
   sourceChainId,
+  targetChainId,
   targetTreasuryAddress,
   amount,
 }: {
-  sourceChainId: CHAIN_ID
+  sourceChainId?: number
+  targetChainId?: number
   targetTreasuryAddress?: AddressType
-  amount?: string
+  amount?: bigint
 }) => {
-  const bridgeTransaction = useMemo(() => {
-    if (!targetTreasuryAddress || !amount || !sourceChainId) return undefined
+  const [bridgeTransaction, setBridgeTransaction] = useState<
+    BridgeTransaction | undefined
+  >()
+  const [error, setError] = useState<string | undefined>()
+  const [isLoading, setIsLoading] = useState(
+    () => !!(sourceChainId && targetChainId && targetTreasuryAddress && amount)
+  )
 
-    try {
-      const bridgeAddress =
-        PUBLIC_L1_BRIDGE_ADDRESS[sourceChainId as keyof typeof PUBLIC_L1_BRIDGE_ADDRESS]
-      if (!bridgeAddress || bridgeAddress === zeroAddress) {
-        console.error(`No bridge address found for chain ${sourceChainId}`)
-        return undefined
-      }
-
-      const amountWei = parseEther(amount)
-
-      // For native bridge on L2s (Optimism, Base, Zora), use bridgeETHTo
-      // https://github.com/ethereum-optimism/optimism/blob/develop/packages/contracts-bedrock/src/L2/L2StandardBridge.sol
-      const calldata = encodeFunctionData({
-        abi: [
-          {
-            inputs: [
-              { name: '_to', type: 'address' },
-              { name: '_minGasLimit', type: 'uint32' },
-              { name: '_extraData', type: 'bytes' },
-            ],
-            name: 'bridgeETHTo',
-            outputs: [],
-            stateMutability: 'payable',
-            type: 'function',
-          },
-        ],
-        functionName: 'bridgeETHTo',
-        args: [
-          targetTreasuryAddress,
-          200000, // min gas limit
-          '0x' as `0x${string}`, // extra data
-        ],
-      })
-
-      return {
-        target: bridgeAddress,
-        value: amountWei.toString(),
-        calldata,
-        functionSignature: 'bridgeETHTo(address,uint32,bytes)',
-      }
-    } catch (error) {
-      console.error('Error preparing bridge transaction:', error)
-      return undefined
+  useEffect(() => {
+    if (!sourceChainId || !targetChainId || !targetTreasuryAddress || !amount) {
+      setBridgeTransaction(undefined)
+      setError(undefined)
+      setIsLoading(false)
+      return
     }
-  }, [sourceChainId, targetTreasuryAddress, amount])
 
-  return { bridgeTransaction }
+    let cancelled = false
+
+    const fetchQuote = async () => {
+      setIsLoading(true)
+      setError(undefined)
+      setBridgeTransaction(undefined)
+
+      try {
+        const result = await getRelayBridgeCalldata({
+          originChainId: sourceChainId,
+          destinationChainId: targetChainId,
+          amount,
+          targetTreasury: targetTreasuryAddress,
+        })
+
+        if (!cancelled) {
+          setBridgeTransaction({
+            target: result.to,
+            value: result.value.toString(),
+            calldata: result.data,
+            functionSignature: 'depositNative(address,bytes32)',
+            fees: result.fees,
+          })
+          setError(undefined)
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to get bridge quote')
+          setBridgeTransaction(undefined)
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+
+    fetchQuote()
+
+    return () => {
+      cancelled = true
+    }
+  }, [sourceChainId, targetChainId, targetTreasuryAddress, amount])
+
+  return { bridgeTransaction, isLoading, error }
 }
