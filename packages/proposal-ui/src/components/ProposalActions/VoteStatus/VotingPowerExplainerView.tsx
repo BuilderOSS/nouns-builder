@@ -1,6 +1,6 @@
+import { CHAIN_ID } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
-import { CHAIN_ID } from '@buildeross/types'
 import { atoms, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
 
@@ -93,10 +93,10 @@ export const VotingPowerExplainerView: React.FC<VotingPowerExplainerViewProps> =
               {currentVotes > 0 ? (
                 <>
                   Voting power for this proposal was snapshotted on {snapshotDateLabel}.
-                  You received your {currentVotes}{' '}
-                  {currentVotes === 1 ? 'vote' : 'votes'} after the snapshot, so{' '}
-                  {currentVotes === 1 ? 'it' : 'they'} cannot be used on this proposal,
-                  but {currentVotes === 1 ? 'it' : 'they'} will count on future proposals.
+                  You received your {currentVotes} {currentVotes === 1 ? 'vote' : 'votes'}{' '}
+                  after the snapshot, so {currentVotes === 1 ? 'it' : 'they'} cannot be
+                  used on this proposal, but {currentVotes === 1 ? 'it' : 'they'} will
+                  count on future proposals.
                 </>
               ) : (
                 <>
