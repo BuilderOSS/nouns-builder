@@ -22,7 +22,8 @@ export const Step1_LoadConfig: React.FC = () => {
   const { setChains, setSourceAddresses, setSourceConfig, goToNextStep } =
     useCrossChainMigration()
 
-  // Filter chains that have all required contracts AND match testnet/mainnet type
+  // Filter chains that have all required contracts
+  // Mainnet DAOs can migrate to any network, testnet DAOs can only migrate to testnets
   const availableChains = useMemo(() => {
     const sourceIsTestnet = isTestnetChain(sourceChainId as CHAIN_ID)
 
@@ -39,9 +40,9 @@ export const Step1_LoadConfig: React.FC = () => {
       // Don't allow same chain migration
       const isDifferentChain = chain.id !== sourceChainId
 
-      // Only allow testnet-to-testnet or mainnet-to-mainnet
+      // Mainnet can go to any network, testnet can only go to testnet
       const targetIsTestnet = isTestnetChain(chain.id)
-      const isCompatibleChainType = sourceIsTestnet === targetIsTestnet
+      const isCompatibleChainType = sourceIsTestnet ? targetIsTestnet : true
 
       return (
         hasManager &&
@@ -53,7 +54,7 @@ export const Step1_LoadConfig: React.FC = () => {
     })
   }, [sourceChainId])
 
-  // Set default target chain to first available chain (matches testnet/mainnet type)
+  // Set default target chain to first available chain
   const [targetChainId, setTargetChainId] = useState<CHAIN_ID>(
     availableChains[0]?.id || CHAIN_ID.BASE
   )
@@ -146,8 +147,8 @@ export const Step1_LoadConfig: React.FC = () => {
         </Box>
         <Text color="text4" fontSize={14} mt="x2">
           {isTestnetChain(sourceChainId as CHAIN_ID)
-            ? 'Only testnet chains with required contracts are shown'
-            : 'Only mainnet chains with required contracts are shown'}
+            ? 'Testnet DAOs can only migrate to other testnet chains'
+            : 'Mainnet DAOs can migrate to any available network (mainnet or testnet)'}
         </Text>
       </Box>
 

@@ -175,7 +175,9 @@ export const validateDeployedAddresses = (addresses: {
 }
 
 /**
- * Validate that source and target chains are compatible (both testnet or both mainnet)
+ * Validate that source and target chains are compatible
+ * - Mainnet DAOs can migrate to any network (mainnet or testnet)
+ * - Testnet DAOs can only migrate to other testnet chains
  */
 export const validateChainMigration = (
   sourceChainId: CHAIN_ID,
@@ -187,11 +189,10 @@ export const validateChainMigration = (
   const sourceIsTestnet = isTestnetChain(sourceChainId)
   const targetIsTestnet = isTestnetChain(targetChainId)
 
-  if (sourceIsTestnet !== targetIsTestnet) {
+  // Only restrict testnet sources - they can only migrate to testnets
+  if (sourceIsTestnet && !targetIsTestnet) {
     errors.push(
-      sourceIsTestnet
-        ? 'Testnet DAOs can only migrate to other testnet chains. Please select a testnet target chain.'
-        : 'Mainnet DAOs can only migrate to other mainnet chains. Please select a mainnet target chain.'
+      'Testnet DAOs can only migrate to other testnet chains. Please select a testnet target chain.'
     )
   }
 

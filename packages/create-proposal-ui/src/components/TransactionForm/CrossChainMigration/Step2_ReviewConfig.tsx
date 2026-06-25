@@ -95,7 +95,7 @@ export const Step2_ReviewConfig: React.FC = () => {
 
       <Stack gap="x4">
         {/* Basic Token Info */}
-        <Box p="x4" borderRadius="curved" backgroundColor="background2">
+        <Box p="x4" borderRadius="curved" borderColor="border">
           <Heading size="xs" mb="x4">
             Token Information
           </Heading>
@@ -170,13 +170,13 @@ export const Step2_ReviewConfig: React.FC = () => {
 
         {/* Founders */}
         {localConfig.founders && localConfig.founders.length > 0 && (
-          <Box p="x4" borderRadius="curved" backgroundColor="background2">
+          <Box p="x4" borderRadius="curved" borderColor="border">
             <Heading size="xs" mb="x4">
               Founders ({localConfig.founders.length})
             </Heading>
             <Stack gap="x4">
               {localConfig.founders.map((founder, idx) => (
-                <Box key={idx} p="x3" borderRadius="curved" backgroundColor="background1">
+                <Box key={idx} p="x3" borderRadius="curved" borderColor="border">
                   <Text fontSize={12} color="text3" mb="x2">
                     Founder {idx + 1}
                   </Text>
@@ -278,7 +278,7 @@ export const Step2_ReviewConfig: React.FC = () => {
         )}
 
         {/* Auction Parameters */}
-        <Box p="x4" borderRadius="curved" backgroundColor="background2">
+        <Box p="x4" borderRadius="curved" borderColor="border">
           <Heading size="xs" mb="x4">
             Auction Settings
           </Heading>
@@ -322,7 +322,7 @@ export const Step2_ReviewConfig: React.FC = () => {
         </Box>
 
         {/* Governance Parameters */}
-        <Box p="x4" borderRadius="curved" backgroundColor="background2">
+        <Box p="x4" borderRadius="curved" borderColor="border">
           <Heading size="xs" mb="x4">
             Governance Settings
           </Heading>
@@ -427,7 +427,7 @@ export const Step2_ReviewConfig: React.FC = () => {
 
         {/* Changes indicator */}
         {hasChanges && (
-          <Box p="x3" borderRadius="curved" backgroundColor="warning">
+          <Box p="x3" borderRadius="curved" backgroundColor="background2">
             <Text fontSize={14} color="onWarning">
               ⚠️ You have made changes to the configuration. These will be used for
               deployment.
