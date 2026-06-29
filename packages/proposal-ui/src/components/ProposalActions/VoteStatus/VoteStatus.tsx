@@ -5,7 +5,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { Flex, Text, vars } from '@buildeross/zord'
+import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { getAddress } from 'viem'
 import { useAccount, useWatchContractEvent } from 'wagmi'
@@ -14,6 +14,7 @@ import { proposalActionButtonVariants } from '../ProposalActions.css'
 import Pending from './Pending'
 import Vote from './Vote'
 import { VoteModal } from './VoteModal'
+import { VotingPowerExplainer } from './VotingPowerExplainer'
 
 type SupportValue = 0 | 1 | 2
 
@@ -26,6 +27,8 @@ interface VoteStatusProps {
   votesAvailable: number
   proposalId: string
   voteStart: number
+  // snapshot timestamp (proposal.timeCreated, unix seconds)
+  timeCreated: number
   state: ProposalState
   title: string
   daoName?: string
@@ -37,6 +40,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
   votesAvailable,
   proposalId,
   voteStart,
+  timeCreated,
   state,
   daoName,
   title,
@@ -122,9 +126,11 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
           >
             Submit Vote
           </Flex>
-          <Text color={'text3'}>
-            You must hold at least one {daoName} token to vote on proposals
-          </Text>
+          <VotingPowerExplainer
+            snapshotVotes={votesAvailable}
+            timeCreated={timeCreated}
+            daoName={daoName}
+          />
         </Flex>
       ) : null}
 
@@ -146,13 +152,13 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
               {votesAvailable === 1 ? 'Submit Vote' : 'Submit Votes'}
             </ContractButton>
           </Flex>
-          <Text color={'text3'} pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }}>
-            You have{' '}
-            <strong style={{ color: vars.color.text1 }}>
-              {votesAvailable} {votesAvailable === 1 ? 'vote' : 'votes'}
-            </strong>{' '}
-            available for {daoName}
-          </Text>
+          <Flex pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }}>
+            <VotingPowerExplainer
+              snapshotVotes={votesAvailable}
+              timeCreated={timeCreated}
+              daoName={daoName}
+            />
+          </Flex>
         </Fragment>
       ) : null}
 

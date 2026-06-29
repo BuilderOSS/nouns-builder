@@ -28,8 +28,8 @@ export const statBadgeDefault = style([
 export const statBadgePositive = style([
   statBadgeBase,
   atoms({
-    backgroundColor: 'positiveHover',
-    color: 'positive',
+    backgroundColor: 'positiveDisabled',
+    color: 'text1',
   }),
 ])
 

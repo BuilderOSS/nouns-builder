@@ -3,4 +3,5 @@ fragment ProposalVote on ProposalVote {
   support
   weight
   reason
+  timestamp
 }

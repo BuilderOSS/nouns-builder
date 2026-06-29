@@ -4,6 +4,7 @@ export * from './FeedFiltersModal'
 export * from './FeedItem'
 export * from './FeedSkeleton'
 export * from './SearchInput'
+export * from './UrgencyAlerts'
 
 // Re-export FeedEventType for convenience
 export { FeedEventType } from '@buildeross/sdk/subgraph'

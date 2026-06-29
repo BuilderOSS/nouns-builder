@@ -74,6 +74,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
           votesAvailable={votesAvailable}
           proposalId={proposal.proposalId}
           voteStart={proposal.voteStart}
+          timeCreated={proposal.timeCreated}
           state={proposal.state}
           daoName={daoName}
           title={proposal.title || ''}

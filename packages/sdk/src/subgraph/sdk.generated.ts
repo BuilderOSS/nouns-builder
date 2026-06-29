@@ -7795,6 +7795,7 @@ export type ProposalVoteFragment = {
   support: ProposalVoteSupport
   weight: number
   reason?: string | null
+  timestamp?: any
 }
 
 export type SnapshotFragment = {
@@ -9098,6 +9099,7 @@ export type ProposalQuery = {
       support: ProposalVoteSupport
       weight: number
       reason?: string | null
+      timestamp?: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
   } | null
@@ -9162,6 +9164,7 @@ export type ProposalOgMetadataQuery = {
       support: ProposalVoteSupport
       weight: number
       reason?: string | null
+      timestamp?: any
     }>
     dao: {
       __typename?: 'DAO'
@@ -9219,6 +9222,7 @@ export type ProposalsQuery = {
       support: ProposalVoteSupport
       weight: number
       reason?: string | null
+      timestamp?: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
   }>
@@ -9400,6 +9404,7 @@ export type UserProposalVoteQuery = {
     support: ProposalVoteSupport
     weight: number
     reason?: string | null
+    timestamp?: any
   }>
 }
 
@@ -9792,6 +9797,7 @@ export const ProposalVoteFragmentDoc = gql`
     support
     weight
     reason
+    timestamp
   }
 `
 export const SnapshotFragmentDoc = gql`

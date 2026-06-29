@@ -1,5 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
+import { useActiveMembers } from '@buildeross/hooks/useActiveMembers'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Button, Flex, Text } from '@buildeross/zord'
@@ -38,6 +39,20 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
       dedupingInterval: 60000, // 60 seconds
     }
   )
+
+  const { activeMembers, isActiveMember } = useActiveMembers({
+    chainId: chain.id,
+    collectionAddress: token,
+  })
+
+  const [showActiveOnly, setShowActiveOnly] = React.useState(false)
+
+  const activeListedMembers = React.useMemo(
+    () => members?.filter((member) => isActiveMember(member.voter)),
+    [members, isActiveMember]
+  )
+
+  const displayedMembers = showActiveOnly ? activeListedMembers : members
 
   const exportDelegatesToCSV = React.useCallback(() => {
     try {
@@ -91,9 +106,32 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     </Button>
   )
 
+  const filterControl = (
+    <Flex align="center" gap="x1" role="group" aria-label="Filter members">
+      <Button
+        variant={showActiveOnly ? 'ghost' : 'outline'}
+        size="sm"
+        onClick={() => setShowActiveOnly(false)}
+        aria-pressed={!showActiveOnly}
+      >
+        All{members ? ` (${members.length})` : ''}
+      </Button>
+      <Button
+        variant={showActiveOnly ? 'outline' : 'ghost'}
+        size="sm"
+        onClick={() => setShowActiveOnly(true)}
+        disabled={!activeMembers}
+        aria-pressed={showActiveOnly}
+      >
+        Active
+        {activeListedMembers && activeMembers ? ` (${activeListedMembers.length})` : ''}
+      </Button>
+    </Flex>
+  )
+
   if (isLoading) {
     return (
-      <MembersPanel exportButton={exportButton}>
+      <MembersPanel exportButton={exportButton} filterControl={filterControl}>
         {Array.from({ length: 10 }).map((_, i) => (
           <MemberCardSkeleton key={`memberCardSkeleton-${i}`} />
         ))}
@@ -113,10 +151,23 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     )
 
   return (
-    <MembersPanel exportButton={exportButton}>
-      {members?.map((member) => (
-        <MemberCard key={member.voter} member={member} totalSupply={totalSupply} />
-      ))}
+    <MembersPanel exportButton={exportButton} filterControl={filterControl}>
+      {displayedMembers && displayedMembers.length === 0 ? (
+        <Flex minH={'x24'} justify={'center'} align={'center'}>
+          <Text color={'text3'}>
+            {showActiveOnly ? 'No active members found.' : 'No members found.'}
+          </Text>
+        </Flex>
+      ) : (
+        displayedMembers?.map((member) => (
+          <MemberCard
+            key={member.voter}
+            member={member}
+            totalSupply={totalSupply}
+            isActive={isActiveMember(member.voter)}
+          />
+        ))
+      )}
     </MembersPanel>
   )
 }
