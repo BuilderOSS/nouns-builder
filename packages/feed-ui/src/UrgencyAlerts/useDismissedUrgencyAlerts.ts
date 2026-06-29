@@ -50,20 +50,36 @@ function createDismissedAlertsStore(storageKey: string) {
         storage: {
           getItem: () => {
             if (typeof window === 'undefined') return null
-            // Use the scoped storage key for this store instance
-            const str = sessionStorage.getItem(storageKey)
-            if (!str) return null
-            return JSON.parse(str)
+            try {
+              // Use the scoped storage key for this store instance
+              const str = sessionStorage.getItem(storageKey)
+              if (!str) return null
+              return JSON.parse(str)
+            } catch (error) {
+              // Handle malformed JSON or storage access errors
+              // Fail silently and return null to use default state
+              return null
+            }
           },
           setItem: (_name, value) => {
             if (typeof window === 'undefined') return
-            // Use the scoped storage key for this store instance
-            sessionStorage.setItem(storageKey, JSON.stringify(value))
+            try {
+              // Use the scoped storage key for this store instance
+              sessionStorage.setItem(storageKey, JSON.stringify(value))
+            } catch (error) {
+              // Handle quota exceeded or storage unavailable errors
+              // Fail silently - app continues to work without persistence
+            }
           },
           removeItem: (_name) => {
             if (typeof window === 'undefined') return
-            // Use the scoped storage key for this store instance
-            sessionStorage.removeItem(storageKey)
+            try {
+              // Use the scoped storage key for this store instance
+              sessionStorage.removeItem(storageKey)
+            } catch (error) {
+              // Handle storage access errors
+              // Fail silently
+            }
           },
         },
       }
@@ -102,15 +118,25 @@ export function getDismissedAlertsStoreForWallet(walletAddress?: AddressType) {
 export function resetDismissedAlertsStores() {
   storeCache.clear()
   if (typeof window !== 'undefined') {
-    // Clear all sessionStorage keys matching our pattern
-    const keysToRemove: string[] = []
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i)
-      if (key?.startsWith('nouns-builder-dismissed-urgency-alerts:')) {
-        keysToRemove.push(key)
+    try {
+      // Clear all sessionStorage keys matching our pattern
+      const keysToRemove: string[] = []
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i)
+        if (key?.startsWith('nouns-builder-dismissed-urgency-alerts:')) {
+          keysToRemove.push(key)
+        }
       }
+      keysToRemove.forEach((key) => {
+        try {
+          sessionStorage.removeItem(key)
+        } catch {
+          // Fail silently for individual key removal
+        }
+      })
+    } catch {
+      // Fail silently if sessionStorage is unavailable
     }
-    keysToRemove.forEach((key) => sessionStorage.removeItem(key))
   }
 }
 
