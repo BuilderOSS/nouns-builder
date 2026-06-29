@@ -9,12 +9,14 @@ export interface UpdateProposalButtonProps extends Omit<ButtonProps, 'onClick'> 
   proposalId: BytesType
   proposerAddress: AddressType
   onUpdateClick?: () => void
+  candidateVersion?: unknown | null
 }
 
 export function UpdateProposalButton({
   proposalId,
   proposerAddress,
   onUpdateClick,
+  candidateVersion,
   ...buttonProps
 }: UpdateProposalButtonProps) {
   const { address: connectedAddress } = useAccount()
@@ -41,6 +43,9 @@ export function UpdateProposalButton({
 
   const isLoading = isLoadingState || isLoadingTimeline
 
+  // Check if this is a promoted proposal (from a candidate)
+  const isPromotedProposal = !!candidateVersion
+
   // Determine if user can update
   const isProposer =
     connectedAddress && proposerAddress.toLowerCase() === connectedAddress.toLowerCase()
@@ -48,6 +53,11 @@ export function UpdateProposalButton({
 
   // Don't show button if proposal is not updatable
   if (!isUpdatable && !isLoading) {
+    return null
+  }
+
+  // Hide update button for promoted proposals (requires signature-based update flow)
+  if (isPromotedProposal) {
     return null
   }
 
