@@ -1,16 +1,13 @@
-import { useEnsData } from '@buildeross/hooks'
 import {
   type CandidateComment,
   type CandidateGroup,
   type CandidateVersion,
 } from '@buildeross/sdk'
 import { CandidateVoteSupport } from '@buildeross/sdk/subgraph'
-import { WalletIdentityWithPreview } from '@buildeross/ui'
-import { formatTimeAgo } from '@buildeross/utils/formatTime'
-import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Flex, Stack, Text, theme } from '@buildeross/zord'
-import React from 'react'
+import { Flex, Stack, Text } from '@buildeross/zord'
+import React, { useCallback, useState } from 'react'
 
+import { CandidateCommentCard } from './CandidateCommentCard'
 import { CandidateSigners } from './CandidateSigners'
 
 interface CandidateDiscussionSectionProps {
@@ -22,105 +19,23 @@ interface CandidateDiscussionSectionProps {
   commentsLoading: boolean
   commentsError?: unknown
   governorAddress: `0x${string}`
-}
-
-const candidateSupportMeta: Record<
-  CandidateVoteSupport,
-  { label: string; color: string }
-> = {
-  [CandidateVoteSupport.For]: { label: 'For', color: theme.colors.positive },
-  [CandidateVoteSupport.Against]: { label: 'Against', color: theme.colors.negative },
-  [CandidateVoteSupport.Abstain]: { label: 'Abstain', color: theme.colors.text4 },
-  [CandidateVoteSupport.None]: { label: 'None', color: theme.colors.text4 },
-}
-
-const CandidateCommentCard = ({
-  comment,
-  depth = 0,
-  isLatestSignalForUser = true,
-}: {
-  comment: CandidateComment
-  depth?: number
-  isLatestSignalForUser?: boolean
-}) => {
-  const { ensName, ensAvatar } = useEnsData(comment.commenter as `0x${string}`)
-  const support = candidateSupportMeta[comment.support]
-
-  return (
-    <Box
-      p={{ '@initial': 'x3', '@768': 'x4' }}
-      borderWidth="normal"
-      borderColor="border"
-      borderStyle="solid"
-      borderRadius="curved"
-      style={{
-        marginLeft: depth > 0 ? 16 : 0,
-        background: theme.colors.background1,
-        borderLeftWidth: depth > 0 ? 3 : undefined,
-        borderLeftColor: depth > 0 ? theme.colors.border : undefined,
-      }}
-    >
-      <Flex
-        justify="space-between"
-        align={{ '@initial': 'flex-start', '@768': 'center' }}
-        direction={{ '@initial': 'column', '@768': 'row' }}
-        gap={{ '@initial': 'x2', '@768': 'x3' }}
-        wrap
-        mb="x2"
-      >
-        <Flex align="center" gap="x2">
-          <Box style={{ minWidth: 0 }}>
-            <WalletIdentityWithPreview
-              address={comment.commenter as `0x${string}`}
-              displayName={ensName || walletSnippet(comment.commenter as `0x${string}`)}
-              avatarSrc={ensAvatar}
-              avatarSize="24"
-              mobileTapBehavior="toggle"
-            />
-          </Box>
-        </Flex>
-        <Flex align="center" gap="x2" wrap>
-          {support.label !== 'None' &&
-            comment.voteWeight > 0n &&
-            isLatestSignalForUser && (
-              <>
-                <Box
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: 999,
-                    background: support.color,
-                    color: theme.colors.onAccent,
-                    fontSize: 12,
-                    fontWeight: 700,
-                  }}
-                >
-                  {support.label}
-                </Box>
-                <Text color="text3" fontSize={12}>
-                  {comment.voteWeight.toString()} signal weight
-                </Text>
-              </>
-            )}
-          <Text color="text3" fontSize={12}>
-            {formatTimeAgo(comment.createdAt)}
-          </Text>
-        </Flex>
-      </Flex>
-
-      <Text style={{ whiteSpace: 'pre-wrap' }}>{comment.comment}</Text>
-    </Box>
-  )
+  onReplyClick?: (comment: CandidateComment) => void
+  replyingToId?: string
 }
 
 const CandidateCommentsPanel = ({
   comments,
   error,
   isLoading,
+  replyingTo,
+  onReplyClick,
 }: {
   comments: CandidateComment[]
   error?: unknown
   isLoading: boolean
   commentCount: bigint
+  replyingTo?: CandidateComment
+  onReplyClick: (comment: CandidateComment) => void
 }) => {
   const topLevelComments = React.useMemo(
     () =>
@@ -173,13 +88,15 @@ const CandidateCommentsPanel = ({
           comment={comment}
           depth={depth}
           isLatestSignalForUser={latestSignalIds.has(comment.id)}
+          isReplying={replyingTo?.id === comment.id}
+          onReplyClick={onReplyClick}
         />
         {repliesByParentId
           .get(comment.id)
           ?.map((reply) => renderThread(reply, depth + 1))}
       </Stack>
     ),
-    [repliesByParentId, latestSignalIds]
+    [repliesByParentId, latestSignalIds, replyingTo, onReplyClick]
   )
 
   return (
@@ -217,9 +134,36 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
   commentsLoading,
   commentsError,
   governorAddress,
+  onReplyClick: onReplyClickProp,
+  replyingToId,
 }) => {
   // Hide action buttons if candidate has been promoted to a proposal
   const isPromoted = !!latestVersion?.proposal?.id
+
+  // Reply state management (internal state if parent doesn't manage it)
+  const [internalReplyingTo, setInternalReplyingTo] = useState<
+    CandidateComment | undefined
+  >()
+
+  // Use internal state if parent doesn't provide replyingToId
+  const effectiveReplyingTo = replyingToId
+    ? comments.find((c) => c.id === replyingToId)
+    : internalReplyingTo
+
+  const handleReplyClick = useCallback(
+    (comment: CandidateComment) => {
+      if (onReplyClickProp) {
+        // Parent manages the reply state
+        onReplyClickProp(comment)
+      } else {
+        // Use internal state management
+        setInternalReplyingTo((current) =>
+          current?.id === comment.id ? undefined : comment
+        )
+      }
+    },
+    [onReplyClickProp]
+  )
 
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
@@ -243,6 +187,8 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
         error={commentsError}
         isLoading={commentsLoading}
         commentCount={commentCount}
+        replyingTo={effectiveReplyingTo}
+        onReplyClick={handleReplyClick}
       />
     </Stack>
   )

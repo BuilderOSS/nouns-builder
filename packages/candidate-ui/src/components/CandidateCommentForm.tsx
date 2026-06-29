@@ -1,12 +1,15 @@
+import { useEnsData } from '@buildeross/hooks'
 import {
   attestCandidateComment,
   attestCommentWithSignature,
   CandidateVoteSupportEnum,
 } from '@buildeross/sdk'
 import { governorAbi } from '@buildeross/sdk/contract'
+import { CandidateVoteSupport } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
-import { ContractButton, TextArea, Toggle } from '@buildeross/ui'
+import { ContractButton, TextArea, Toggle, WalletIdentity } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
+import { walletSnippet } from '@buildeross/utils/helpers'
 import type { IconType } from '@buildeross/zord'
 import { Box, Flex, Icon, Stack, Text, theme, vars } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -26,14 +29,37 @@ import {
   sponsorLabel,
 } from './CandidateCommentForm.css'
 
+const candidateSupportMeta: Record<
+  CandidateVoteSupport,
+  { label: string; color: string }
+> = {
+  [CandidateVoteSupport.For]: { label: 'For', color: theme.colors.positive },
+  [CandidateVoteSupport.Against]: { label: 'Against', color: theme.colors.negative },
+  [CandidateVoteSupport.Abstain]: { label: 'Abstain', color: theme.colors.text4 },
+  [CandidateVoteSupport.None]: { label: 'None', color: theme.colors.text4 },
+}
+
+export interface CandidateCommentReplyTo {
+  id: Hex
+  commenter: Hex
+  comment: string
+  support: CandidateVoteSupport
+  voteWeight: bigint
+}
+
 export interface CandidateCommentFormProps {
   candidateId: Hex
   proposalHash: Hex
   proposer: `0x${string}`
   governorAddress: `0x${string}`
   tokenSymbol: string
-  onSuccess?: (withSignature: boolean) => void
+  onSuccess?: (result: {
+    withSignature: boolean
+    isReply: boolean
+    hasSignal: boolean
+  }) => void
   parentCommentUID?: Hex
+  replyTo?: CandidateCommentReplyTo
   hasUserSignaled?: boolean
   hasVotingPower?: boolean
 }
@@ -46,6 +72,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   tokenSymbol,
   onSuccess,
   parentCommentUID,
+  replyTo,
   hasUserSignaled = false,
   hasVotingPower = true,
 }) => {
@@ -54,6 +81,9 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const { address } = useAccount()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
+  const { ensName: replyToEnsName, ensAvatar: replyToEnsAvatar } = useEnsData(
+    replyTo?.commenter
+  )
   const { data: nonce, isLoading: isNonceLoading } = useReadContract({
     abi: governorAbi,
     address: governorAddress,
@@ -126,10 +156,14 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     return (
       !!address &&
       !!addresses.token &&
-      (comment.trim().length > 0 || signalEnabled) &&
+      // When replying, comment is required (no signals allowed)
+      // When not replying, either comment OR signal is required
+      (replyTo
+        ? comment.trim().length > 0
+        : comment.trim().length > 0 || signalEnabled) &&
       (!shouldSign || nonce !== undefined)
     )
-  }, [address, addresses.token, comment, signalEnabled, shouldSign, nonce])
+  }, [address, addresses.token, comment, signalEnabled, shouldSign, nonce, replyTo])
 
   const canSign = useMemo(() => {
     return (
@@ -188,9 +222,13 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
       setSignalEnabled(false)
       setSupport(CandidateVoteSupportEnum.FOR)
 
-      // Call parent success with signature status
+      // Call parent success with submission details
       if (onSuccess) {
-        onSuccess(withSignature)
+        onSuccess({
+          withSignature,
+          isReply: !!replyTo,
+          hasSignal: actualSupport !== CandidateVoteSupportEnum.NONE,
+        })
       }
     } catch (err: unknown) {
       console.error('Error submitting comment:', err)
@@ -219,13 +257,80 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     deadline,
     comment,
     parentCommentUID,
+    replyTo,
     onSuccess,
   ])
 
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
-      {/* Show informational message if user can't signal */}
-      {hasUserSignaled && (
+      {/* Replying to section */}
+      {replyTo && (
+        <Box>
+          <Text fontSize={14} fontWeight="label" mb="x2">
+            Replying to:
+          </Text>
+          <Flex
+            direction="column"
+            backgroundColor="background2"
+            px="x3"
+            py="x2"
+            borderRadius="curved"
+            borderWidth="normal"
+            borderStyle="solid"
+            borderColor="border"
+            gap="x2"
+          >
+            <WalletIdentity
+              address={replyTo.commenter as `0x${string}`}
+              displayName={replyToEnsName || walletSnippet(replyTo.commenter)}
+              avatarSrc={replyToEnsAvatar || undefined}
+              avatarSize="16"
+              nameVariant="label-sm"
+              nameWeight="label"
+              gap="x1"
+            />
+            {/* Signal badges - show if comment has a signal */}
+            {replyTo.support !== CandidateVoteSupport.None && replyTo.voteWeight > 0n && (
+              <Flex align="center" gap="x2" pl="x2">
+                <Box
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: 999,
+                    background: candidateSupportMeta[replyTo.support].color,
+                    color: theme.colors.onAccent,
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  {candidateSupportMeta[replyTo.support].label}
+                </Box>
+                <Text color="text3" fontSize={12}>
+                  {replyTo.voteWeight.toString()} signal weight
+                </Text>
+              </Flex>
+            )}
+            {replyTo.comment.trim().length > 0 && (
+              <Text
+                fontSize={14}
+                color="text2"
+                pl="x2"
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  maxHeight: '100px',
+                  overflow: 'auto',
+                }}
+              >
+                {replyTo.comment.length > 200
+                  ? `${replyTo.comment.slice(0, 200)}...`
+                  : replyTo.comment}
+              </Text>
+            )}
+          </Flex>
+        </Box>
+      )}
+
+      {/* Show informational message if user can't signal - but not when replying */}
+      {hasUserSignaled && !replyTo && (
         <Box
           p="x4"
           borderRadius="curved"
@@ -241,7 +346,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
         </Box>
       )}
 
-      {!hasVotingPower && !hasUserSignaled && (
+      {!hasVotingPower && !hasUserSignaled && !replyTo && (
         <Box
           p="x4"
           borderRadius="curved"
@@ -256,8 +361,8 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
         </Box>
       )}
 
-      {/* Primary Toggle: Enable Signaling - Only show if user can signal */}
-      {!hasUserSignaled && hasVotingPower && (
+      {/* Primary Toggle: Enable Signaling - Only show if user can signal and not replying */}
+      {!hasUserSignaled && hasVotingPower && !replyTo && (
         <Flex align="center" justify="space-between" gap="x3">
           <Box>
             <Text fontSize={16} fontWeight="label">
@@ -332,11 +437,11 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
       <TextArea
         id="candidate-comment"
         value={comment}
-        inputLabel="Comment (Optional)"
+        inputLabel={replyTo ? 'Reply' : signalEnabled ? 'Comment (Optional)' : 'Comment'}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           setComment(e.target.value)
         }
-        placeholder="Share your thoughts..."
+        placeholder={replyTo ? 'Write your reply...' : 'Share your thoughts...'}
         rows={4}
         disabled={isSubmitting}
       />
@@ -357,6 +462,12 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
                   Valid for {CANDIDATE_SIGNATURE_VALIDITY_DAYS} days
                 </Box>
               </Flex>
+              {shouldSign && (
+                <Text fontSize={12} color="text3" mt="x2" style={{ fontStyle: 'italic' }}>
+                  Note: You'll be asked to sign twice - once for the signature, then to
+                  submit on-chain.
+                </Text>
+              )}
             </Box>
             <Toggle on={shouldSign} onToggle={() => setShouldSign(!shouldSign)} />
           </Flex>
@@ -392,11 +503,13 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           loading={isSubmitting}
           style={{ width: '100%' }}
         >
-          {shouldSign
-            ? 'Signal & Sign'
-            : signalEnabled && hasVotingPower && !hasUserSignaled
-              ? 'Submit Signal'
-              : 'Add Comment'}
+          {replyTo
+            ? 'Submit Reply'
+            : shouldSign
+              ? 'Signal & Sign'
+              : signalEnabled && hasVotingPower && !hasUserSignaled
+                ? 'Submit Signal'
+                : 'Add Comment'}
         </ContractButton>
       </Flex>
     </Stack>

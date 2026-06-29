@@ -16,7 +16,11 @@ import { ProposalNavigation } from '@buildeross/proposal-ui'
 import type { CandidateGroup } from '@buildeross/sdk'
 import { getCandidateGroup } from '@buildeross/sdk'
 import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
-import { getCandidateComments, getUserCandidateSignal } from '@buildeross/sdk/subgraph'
+import {
+  CandidateVoteSupport,
+  getCandidateComments,
+  getUserCandidateSignal,
+} from '@buildeross/sdk/subgraph'
 import {
   type DaoContractAddresses,
   useCandidateStore,
@@ -157,7 +161,19 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   const startCandidateDraft = useCandidateStore((state) => state.startCandidateDraft)
   const [composerOpen, setComposerOpen] = React.useState(false)
   const [isSuccess, setIsSuccess] = React.useState(false)
-  const [submittedWithSignature, setSubmittedWithSignature] = React.useState(false)
+  const [submissionType, setSubmissionType] = React.useState<
+    'signal' | 'comment' | 'reply' | 'signal_signature'
+  >('signal')
+  const [replyingToComment, setReplyingToComment] = React.useState<
+    | {
+        id: string
+        commenter: string
+        comment: string
+        support: CandidateVoteSupport
+        voteWeight: bigint
+      }
+    | undefined
+  >()
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activeTab = (query.tab as string) || 'Details'
 
@@ -299,9 +315,20 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   ])
 
   const handleComposerSuccess = React.useCallback(
-    (withSignature: boolean) => {
-      setSubmittedWithSignature(withSignature)
+    (result: { withSignature: boolean; isReply: boolean; hasSignal: boolean }) => {
+      // Determine submission type for messaging
+      if (result.isReply) {
+        setSubmissionType('reply')
+      } else if (result.withSignature) {
+        setSubmissionType('signal_signature')
+      } else if (result.hasSignal) {
+        setSubmissionType('signal')
+      } else {
+        setSubmissionType('comment')
+      }
+
       setIsSuccess(true)
+      setReplyingToComment(undefined)
 
       // Auto-close after 2 seconds
       successTimerRef.current = setTimeout(() => {
@@ -317,11 +344,26 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   const handleClose = React.useCallback(() => {
     setComposerOpen(false)
     setIsSuccess(false)
+    setReplyingToComment(undefined)
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
       successTimerRef.current = null
     }
   }, [])
+
+  const handleReplyClick = React.useCallback(
+    (comment: {
+      id: string
+      commenter: string
+      comment: string
+      support: CandidateVoteSupport
+      voteWeight: bigint
+    }) => {
+      setReplyingToComment(comment)
+      setComposerOpen(true)
+    },
+    []
+  )
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -416,6 +458,8 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       commentsLoading={!candidateComments && !!candidate}
       commentsError={candidateCommentsError}
       governorAddress={addresses.governor as `0x${string}`}
+      onReplyClick={handleReplyClick}
+      replyingToId={replyingToComment?.id}
     />
   )
 
@@ -579,19 +623,33 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
             <SuccessModalContent
               success={true}
               title={
-                submittedWithSignature ? 'Signal & Signature Added' : 'Signal Submitted'
+                submissionType === 'reply'
+                  ? 'Reply Submitted'
+                  : submissionType === 'comment'
+                    ? 'Comment Submitted'
+                    : submissionType === 'signal_signature'
+                      ? 'Signal & Signature Added'
+                      : 'Signal Submitted'
               }
               subtitle={
-                submittedWithSignature
-                  ? 'Your signal and signature have been recorded.'
-                  : 'Your signal has been recorded.'
+                submissionType === 'reply'
+                  ? 'Your reply has been recorded.'
+                  : submissionType === 'comment'
+                    ? 'Your comment has been recorded.'
+                    : submissionType === 'signal_signature'
+                      ? 'Your signal and signature have been recorded.'
+                      : 'Your signal has been recorded.'
               }
             />
           ) : (
             <Box p={{ '@initial': 'x4', '@768': 'x6' }}>
               <Stack gap="x4">
                 <Text fontSize={20} fontWeight="display">
-                  {hasUserSignaled || !hasVotingPower ? 'Comment' : 'Signal / comment'}
+                  {replyingToComment
+                    ? 'Reply to comment'
+                    : hasUserSignaled || !hasVotingPower
+                      ? 'Comment'
+                      : 'Signal / comment'}
                 </Text>
                 <CandidateCommentForm
                   candidateId={latestVersion.candidateId as `0x${string}`}
@@ -602,6 +660,18 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                   onSuccess={handleComposerSuccess}
                   hasUserSignaled={hasUserSignaled}
                   hasVotingPower={hasVotingPower}
+                  parentCommentUID={replyingToComment?.id as `0x${string}` | undefined}
+                  replyTo={
+                    replyingToComment
+                      ? {
+                          id: replyingToComment.id as `0x${string}`,
+                          commenter: replyingToComment.commenter as `0x${string}`,
+                          comment: replyingToComment.comment,
+                          support: replyingToComment.support,
+                          voteWeight: replyingToComment.voteWeight,
+                        }
+                      : undefined
+                  }
                 />
               </Stack>
             </Box>

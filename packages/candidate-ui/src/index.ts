@@ -1,4 +1,5 @@
 // Export candidate UI components
+export * from './components/CandidateCommentCard'
 export * from './components/CandidateCommentForm'
 export * from './components/CandidateDetailsSection'
 export * from './components/CandidateDiscussionSection'

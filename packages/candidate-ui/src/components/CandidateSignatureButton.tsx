@@ -186,7 +186,7 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
               ? `Your signature has been ${alreadySigned ? 'updated' : 'recorded'} with ${voteWeight.toString()} vote weight.`
               : errorMessage
                 ? errorMessage
-                : `Please confirm the transaction in your wallet. Signature valid for ${CANDIDATE_SIGNATURE_VALIDITY_DAYS} days.`
+                : `You'll be asked to sign twice - once for the signature, then to submit on-chain. Signature valid for ${CANDIDATE_SIGNATURE_VALIDITY_DAYS} days.`
           }
         />
       </AnimatedModal>
