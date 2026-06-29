@@ -107,7 +107,9 @@ export const CandidatePromoteCard: React.FC<CandidatePromoteCardProps> = ({
   const isLoading = isLoadingSignatures || isLoadingThreshold || isLoadingVotes
   const requiredVoteWeight = proposalThreshold !== undefined ? proposalThreshold + 1n : 0n
   const meetsThreshold =
-    proposalThreshold !== undefined && totalPromoteWeight >= requiredVoteWeight
+    proposalThreshold !== undefined &&
+    totalPromoteWeight >= requiredVoteWeight &&
+    eligibleSignatures.length > 0
   const hasTransactions = targets.length > 0
 
   // Don't show if loading or no transactions
