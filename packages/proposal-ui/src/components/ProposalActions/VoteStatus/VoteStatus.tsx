@@ -35,6 +35,7 @@ interface VoteStatusProps {
   daoName?: string
   signerVote?: ProposalVote
   updateDeadline?: number
+  candidateVersion?: unknown | null
 }
 
 export const VoteStatus: React.FC<VoteStatusProps> = ({
@@ -47,6 +48,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
   daoName,
   title,
   updateDeadline,
+  candidateVersion,
 }) => {
   const chain = useChainStore((x) => x.chain)
   const { address: userAddress } = useAccount()
@@ -111,7 +113,9 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
       align={'center'}
     >
       {/* Voting for proposal has not yet started (proposal is Pending) */}
-      {state === ProposalState.Pending ? (
+      {/* Also show Pending for promoted proposals in Updatable state */}
+      {state === ProposalState.Pending ||
+      (state === ProposalState.Updatable && candidateVersion) ? (
         <Pending voteStart={voteStart} proposalId={proposalId} />
       ) : null}
 
@@ -168,8 +172,8 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
       {/* User has voted */}
       {vote ? <Vote support={vote.support} weight={vote.weight} /> : null}
 
-      {/* Proposal is in updatable period */}
-      {state === ProposalState.Updatable && updateDeadline ? (
+      {/* Proposal is in updatable period (but not promoted proposals) */}
+      {state === ProposalState.Updatable && updateDeadline && !candidateVersion ? (
         <Updatable updateDeadline={updateDeadline} proposalId={proposalId} />
       ) : null}
 

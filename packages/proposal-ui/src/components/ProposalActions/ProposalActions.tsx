@@ -1,8 +1,8 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { AddressType, ProposalState } from '@buildeross/types'
-import { Box, Flex, Text } from '@buildeross/zord'
+import { AddressType } from '@buildeross/types'
+import { Flex } from '@buildeross/zord'
 import React, { Fragment, useMemo } from 'react'
 import { getAddress } from 'viem'
 import { useAccount } from 'wagmi'
@@ -158,6 +158,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
           daoName={daoName}
           title={proposal.title || ''}
           updateDeadline={proposal.updatePeriodEnd}
+          candidateVersion={proposal.candidateVersion}
         />
 
         <Flex gap="x2" direction={'row'}>
@@ -172,26 +173,6 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
           {isProposer && <CancelButton proposalId={proposal.proposalId} />}
         </Flex>
       </Flex>
-
-      {/* Info banner for promoted proposals in updatable period */}
-      {isProposer &&
-        proposal.candidateVersion &&
-        proposal.state === ProposalState.Updatable && (
-          <Box
-            p="x4"
-            borderRadius="curved"
-            borderWidth="normal"
-            borderStyle="solid"
-            borderColor="border"
-            backgroundColor="background2"
-            mt="x4"
-          >
-            <Text fontSize={14} color="text2">
-              This proposal was promoted from a candidate. Signature-based updates are not
-              yet supported in the UI.
-            </Text>
-          </Box>
-        )}
 
       {isVetoer && (
         <VetoAction

@@ -583,7 +583,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
                     typeof v === 'string' ? BigInt(v) : v
                   )}
                   calldatas={latestVersion.calldatas as `0x${string}`[]}
-                  description={latestVersion.description || ''}
+                  description={latestVersion.metadata || ''}
                   governorAddress={addresses.governor as `0x${string}`}
                   onPromoteSuccess={async () => {
                     // Refresh candidate data in background (subgraph has already synced at this point)
