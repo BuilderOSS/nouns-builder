@@ -51,3 +51,33 @@ export const getCandidateProposalId = ({
     proposer,
   })
 }
+
+/**
+ * Check if a signature has expired based on its deadline
+ * @param deadline - Unix timestamp in seconds (as BigInt) when signature expires
+ * @returns true if signature has expired, false otherwise
+ */
+export const isSignatureExpired = (deadline: bigint): boolean => {
+  const now = Math.floor(Date.now() / 1000)
+  return BigInt(now) > deadline
+}
+
+/**
+ * Filter signatures to only include valid ones:
+ * - Excludes signatures by the proposer (can't sign their own proposal)
+ * - Excludes expired signatures (deadline has passed)
+ *
+ * @param signatures - Array of signature objects with deadline and signer fields
+ * @param proposer - Address of the proposal creator
+ * @returns Filtered array of valid signatures
+ */
+export const filterValidSignatures = <T extends { deadline: bigint; signer: string }>(
+  signatures: T[],
+  proposer: string
+): T[] => {
+  return signatures.filter(
+    (signature) =>
+      signature.signer.toLowerCase() !== proposer.toLowerCase() &&
+      !isSignatureExpired(signature.deadline)
+  )
+}

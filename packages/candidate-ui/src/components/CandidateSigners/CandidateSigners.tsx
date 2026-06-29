@@ -9,6 +9,7 @@ import React from 'react'
 import useSWR from 'swr'
 import { useAccount, useReadContract } from 'wagmi'
 
+import { filterValidSignatures, isSignatureExpired } from '../../utils/candidateProposal'
 import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
 import { CandidateSignatureButton } from '../CandidateSignatureButton'
 
@@ -71,10 +72,7 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
     [signaturesData?.signatures]
   )
   const eligibleSignatures = React.useMemo(
-    () =>
-      signatures.filter(
-        (signature) => signature.signer.toLowerCase() !== proposer.toLowerCase()
-      ),
+    () => filterValidSignatures(signatures, proposer),
     [proposer, signatures]
   )
   const visibleSignatures = expanded ? eligibleSignatures : eligibleSignatures.slice(0, 5)
@@ -234,15 +232,28 @@ export function compareProposerSignaturesBySigner(
 
 function SignerRow({ signature }: { signature: CandidateSponsorSignature }) {
   const { displayName, ensAvatar } = useEnsData(signature.signer as string)
+  const expired = isSignatureExpired(signature.deadline)
 
   return (
-    <Flex align="center" justify="space-between" gap="x3">
+    <Flex
+      align="center"
+      justify="space-between"
+      gap="x3"
+      style={{ opacity: expired ? 0.5 : 1 }}
+    >
       <WalletIdentityWithPreview
         address={signature.signer as `0x${string}`}
         displayName={displayName}
         avatarSrc={ensAvatar}
       />
-      <Text color="text3">{signature.voteWeight.toString()} votes</Text>
+      <Flex align="center" gap="x2">
+        <Text color="text3">{signature.voteWeight.toString()} votes</Text>
+        {expired && (
+          <Text color="negative" fontSize={12}>
+            (Expired)
+          </Text>
+        )}
+      </Flex>
     </Flex>
   )
 }

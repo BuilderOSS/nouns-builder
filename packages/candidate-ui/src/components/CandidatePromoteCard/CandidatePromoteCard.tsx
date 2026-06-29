@@ -8,6 +8,7 @@ import useSWR from 'swr'
 import { type Hex } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
+import { filterValidSignatures } from '../../utils/candidateProposal'
 import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
 import * as styles from './CandidatePromoteCard.css'
 
@@ -77,10 +78,7 @@ export const CandidatePromoteCard: React.FC<CandidatePromoteCardProps> = ({
   )
 
   const eligibleSignatures = React.useMemo(
-    () =>
-      signatures.filter(
-        (signature) => signature.signer.toLowerCase() !== proposer.toLowerCase()
-      ),
+    () => filterValidSignatures(signatures, proposer),
     [proposer, signatures]
   )
 
