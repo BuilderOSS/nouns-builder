@@ -25,7 +25,7 @@ export const UrgencyAlerts: React.FC<UrgencyAlertsProps> = ({
   const isMounted = useIsMounted()
   const { address } = useAccount()
   const { daos } = useDashboardData({ address, enabled: !!address })
-  const { dismissedIds, dismissAlert } = useDismissedUrgencyAlerts()
+  const { dismissedIds, dismissAlert } = useDismissedUrgencyAlerts(address)
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))
 
   useInterval(() => setNow(Math.floor(Date.now() / 1000)), REFRESH_INTERVAL_MS)

@@ -5,7 +5,10 @@ import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { UrgencyAlerts } from './UrgencyAlerts'
-import { dismissedUrgencyAlertsStore } from './useDismissedUrgencyAlerts'
+import {
+  getDismissedAlertsStoreForWallet,
+  resetDismissedAlertsStores,
+} from './useDismissedUrgencyAlerts'
 
 const NOW = 1_700_000_000
 const HOUR = 3600
@@ -89,7 +92,7 @@ describe('UrgencyAlerts', () => {
     vi.spyOn(Date, 'now').mockReturnValue(NOW * 1000)
     mockAddress = USER
     mockDaos = []
-    dismissedUrgencyAlertsStore.setState({ dismissedIds: [] })
+    resetDismissedAlertsStores()
     window.sessionStorage.clear()
   })
 
@@ -200,7 +203,7 @@ describe('UrgencyAlerts', () => {
     fireEvent.click(screen.getByLabelText('Dismiss alert'))
 
     expect(screen.queryByText('Auction ending soon')).toBeNull()
-    expect(dismissedUrgencyAlertsStore.getState().dismissedIds).toContain(
+    expect(getDismissedAlertsStoreForWallet(USER).getState().dismissedIds).toContain(
       `auction:${CHAIN_ID.BASE}:${DAO_TOKEN}:42`
     )
 
@@ -308,7 +311,7 @@ describe('UrgencyAlerts', () => {
     fireEvent.click(screen.getByLabelText('Dismiss alert'))
 
     expect(screen.queryByText('Ready to queue')).toBeNull()
-    expect(dismissedUrgencyAlertsStore.getState().dismissedIds).toContain(
+    expect(getDismissedAlertsStoreForWallet(USER).getState().dismissedIds).toContain(
       `queueable:${CHAIN_ID.BASE}:${DAO_TOKEN}:0xabc`
     )
   })
