@@ -1,10 +1,9 @@
 import { useAvailableUpgrade } from '@buildeross/hooks/useAvailableUpgrade'
 import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
-import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
+import { AddressType, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { getProvider } from '@buildeross/utils/provider'
 import { Stack, Text } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import gte from 'lodash/gte'
@@ -77,9 +76,6 @@ export const MintGovernanceTokens: React.FC = () => {
       }),
     }
 
-    const chainToQuery =
-      chain.id === CHAIN_ID.FOUNDRY ? CHAIN_ID.FOUNDRY : CHAIN_ID.ETHEREUM
-
     const doesNotContainUpdateMinter =
       transactions.findIndex(
         (transaction) => transaction.type === TransactionType.UPDATE_MINTER
@@ -97,10 +93,7 @@ export const MintGovernanceTokens: React.FC = () => {
     // Process each recipient
     const mintTransactions = []
     for (const recipient of recipients) {
-      const resolvedRecipientAddress = await getEnsAddress(
-        recipient.address,
-        getProvider(chainToQuery)
-      )
+      const resolvedRecipientAddress = await getEnsAddress(recipient.address)
 
       // Validate that the resolved value is actually a valid address
       if (

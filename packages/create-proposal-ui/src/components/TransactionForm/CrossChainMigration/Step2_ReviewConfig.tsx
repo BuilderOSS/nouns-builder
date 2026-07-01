@@ -1,7 +1,10 @@
 import { AddressType } from '@buildeross/types'
+import { SmartInput } from '@buildeross/ui/Fields'
+import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Heading, Input, Label, Stack, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
-import { isAddress } from 'viem'
+import { getAddress, isAddress } from 'viem'
+import { useAccount } from 'wagmi'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 
@@ -15,6 +18,7 @@ const stringifyWithBigInt = (obj: any): string => {
 export const Step2_ReviewConfig: React.FC = () => {
   const { sourceConfig, editedConfig, updateConfig, goToNextStep, goToPreviousStep } =
     useCrossChainMigration()
+  const { address: walletAddress } = useAccount()
 
   const [localConfig, setLocalConfig] = useState(editedConfig || sourceConfig)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -45,7 +49,21 @@ export const Step2_ReviewConfig: React.FC = () => {
       newErrors.reservedUntilTokenId = 'Reserved tokens must be non-negative'
     }
 
+    // Ensure at least one founder exists
+    if (!localConfig.founders || localConfig.founders.length === 0) {
+      newErrors.founders = 'At least one founder is required'
+    }
+
     if (localConfig.founders && localConfig.founders.length > 0) {
+      // Check for duplicates
+      const walletAddresses = localConfig.founders.map((f) => f.wallet.toLowerCase())
+      const duplicates = walletAddresses.filter(
+        (addr, idx) => walletAddresses.indexOf(addr) !== idx
+      )
+      if (duplicates.length > 0) {
+        newErrors.founders = 'Duplicate founder addresses are not allowed'
+      }
+
       localConfig.founders.forEach((founder, idx) => {
         if (!isAddress(founder.wallet)) {
           newErrors[`founder_${idx}_wallet`] = 'Invalid wallet address'
@@ -60,8 +78,53 @@ export const Step2_ReviewConfig: React.FC = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleContinue = () => {
-    if (validateConfig() && localConfig) {
+  const handleContinue = async () => {
+    if (!validateConfig() || !localConfig) return
+
+    // Resolve any ENS names to addresses before proceeding
+    if (localConfig.founders && localConfig.founders.length > 0) {
+      try {
+        const resolvedFounders = await Promise.all(
+          localConfig.founders.map(async (founder, idx) => {
+            // Resolve ENS name if needed
+            try {
+              const resolved = await getEnsAddress(founder.wallet)
+
+              // Validate that the resolved value is actually a valid address
+              if (!resolved || !isAddress(resolved, { strict: false })) {
+                setErrors({
+                  [`founder_${idx}_wallet`]: 'Could not resolve address',
+                })
+                throw new Error(`Could not resolve address for founder ${idx + 1}`)
+              }
+
+              return {
+                ...founder,
+                wallet: getAddress(resolved) as AddressType,
+              }
+            } catch (error) {
+              console.error(`Error resolving founder address ${idx + 1}:`, error)
+              setErrors({
+                [`founder_${idx}_wallet`]: 'Failed to resolve address',
+              })
+              throw error
+            }
+          })
+        )
+
+        const configWithResolvedFounders = {
+          ...localConfig,
+          founders: resolvedFounders,
+        }
+
+        updateConfig(configWithResolvedFounders)
+        goToNextStep()
+      } catch (error) {
+        // Error already handled in setErrors above
+        console.error('Failed to resolve founder addresses:', error)
+        return
+      }
+    } else {
       updateConfig(localConfig)
       goToNextStep()
     }
@@ -70,6 +133,28 @@ export const Step2_ReviewConfig: React.FC = () => {
   const handleReset = () => {
     setLocalConfig(sourceConfig)
     setErrors({})
+  }
+
+  const handleAddFounder = () => {
+    if (!localConfig) return
+
+    const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60
+    const newFounder = {
+      wallet: (walletAddress ||
+        '0x0000000000000000000000000000000000000000') as AddressType,
+      ownershipPct: 10,
+      vestExpiry: BigInt(oneYearFromNow),
+    }
+
+    const newFounders = [...(localConfig.founders || []), newFounder]
+    setLocalConfig({ ...localConfig, founders: newFounders })
+  }
+
+  const handleRemoveFounder = (index: number) => {
+    if (!localConfig || !localConfig.founders) return
+
+    const newFounders = localConfig.founders.filter((_, idx) => idx !== index)
+    setLocalConfig({ ...localConfig, founders: newFounders })
   }
 
   if (!localConfig || !sourceConfig) {
@@ -169,11 +254,19 @@ export const Step2_ReviewConfig: React.FC = () => {
         </Box>
 
         {/* Founders */}
-        {localConfig.founders && localConfig.founders.length > 0 && (
-          <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
-            <Heading size="xs" mb="x4">
-              Founders ({localConfig.founders.length})
-            </Heading>
+        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
+          <Flex justify="space-between" align="center" mb="x4">
+            <Heading size="xs">Founders ({localConfig.founders?.length || 0})</Heading>
+            <Button size="sm" variant="secondary" onClick={handleAddFounder}>
+              Add Founder
+            </Button>
+          </Flex>
+          {errors.founders && (
+            <Text color="negative" fontSize={12} mb="x3">
+              {errors.founders}
+            </Text>
+          )}
+          {localConfig.founders && localConfig.founders.length > 0 ? (
             <Stack gap="x4">
               {localConfig.founders.map((founder, idx) => (
                 <Box
@@ -183,17 +276,28 @@ export const Step2_ReviewConfig: React.FC = () => {
                   borderColor="border"
                   borderStyle="solid"
                 >
-                  <Text fontSize={12} color="text3" mb="x2">
-                    Founder {idx + 1}
-                  </Text>
+                  <Flex justify="space-between" align="center" mb="x2">
+                    <Text fontSize={12} color="text3">
+                      Founder {idx + 1}
+                    </Text>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => handleRemoveFounder(idx)}
+                      style={{ color: 'var(--color-negative)' }}
+                    >
+                      Remove
+                    </Button>
+                  </Flex>
                   <Stack gap="x3">
                     <Box>
-                      <Label htmlFor={`founder-${idx}-wallet`} mb="x1" fontSize={12}>
-                        Wallet Address
-                      </Label>
-                      <Input
+                      <SmartInput
+                        inputLabel="Wallet Address"
                         id={`founder-${idx}-wallet`}
                         value={founder.wallet}
+                        type="text"
+                        placeholder="0x... or .eth"
+                        isAddress={true}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const newFounders = [...localConfig.founders!]
                           newFounders[idx] = {
@@ -202,14 +306,8 @@ export const Step2_ReviewConfig: React.FC = () => {
                           }
                           setLocalConfig({ ...localConfig, founders: newFounders })
                         }}
-                        fontFamily="mono"
-                        fontSize={12}
+                        errorMessage={errors[`founder_${idx}_wallet`]}
                       />
-                      {errors[`founder_${idx}_wallet`] && (
-                        <Text color="negative" fontSize={12} mt="x1">
-                          {errors[`founder_${idx}_wallet`]}
-                        </Text>
-                      )}
                     </Box>
                     <Flex gap="x3">
                       <Box flex={1}>
@@ -280,8 +378,12 @@ export const Step2_ReviewConfig: React.FC = () => {
                 </Box>
               ))}
             </Stack>
-          </Box>
-        )}
+          ) : (
+            <Text color="text3" fontSize={14}>
+              No founders configured. Click "Add Founder" to add one.
+            </Text>
+          )}
+        </Box>
 
         {/* Auction Parameters */}
         <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">

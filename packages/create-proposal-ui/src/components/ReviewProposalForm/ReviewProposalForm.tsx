@@ -19,7 +19,6 @@ import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { handleGMTOffset, unpackOptionalArray } from '@buildeross/utils/helpers'
-import { getProvider } from '@buildeross/utils/provider'
 import { Box, Button, Flex, Icon, Stack, Text, vars } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { Formik, type FormikProps } from 'formik'
@@ -341,7 +340,7 @@ export const ReviewProposalForm = ({
       }
 
       try {
-        const resolved = await getEnsAddress(rawValue, getProvider(chain.id))
+        const resolved = await getEnsAddress(rawValue)
         const currentValue =
           (
             formik.getFieldMeta('representedAddress').value as string | undefined
@@ -372,7 +371,7 @@ export const ReviewProposalForm = ({
         return false
       }
     },
-    [chain.id, setRepresentedAddress]
+    [setRepresentedAddress]
   )
 
   if (isLoading) return null

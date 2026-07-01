@@ -156,10 +156,7 @@ export const AirdropTokens: React.FC = () => {
 
       let resolvedAddress: string
       try {
-        const resolved = await getEnsAddress(
-          recipient.recipientAddress,
-          getProvider(chain.id)
-        )
+        const resolved = await getEnsAddress(recipient.recipientAddress)
         if (!resolved || !isAddress(resolved, { strict: false })) {
           actions.setErrors({
             recipients: `Recipient #${i + 1}: Could not resolve address. Please enter a valid address or ENS name.`,
@@ -239,7 +236,7 @@ export const AirdropTokens: React.FC = () => {
 
     let normalizedAdminAddress: Address
     try {
-      const resolved = await getEnsAddress(values.adminAddress, getProvider(chain.id))
+      const resolved = await getEnsAddress(values.adminAddress)
       if (!resolved || !isAddress(resolved, { strict: false })) {
         actions.setFieldError('adminAddress', 'Could not resolve a valid admin address.')
         return
