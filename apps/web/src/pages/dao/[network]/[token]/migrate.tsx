@@ -1,11 +1,11 @@
+import { BUILDER_COLLECTION_ADDRESS } from '@buildeross/constants/addresses'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { isMigrationAllowed } from '@buildeross/constants/migration'
 import {
   CrossChainMigration,
   CrossChainMigrationProvider,
 } from '@buildeross/create-proposal-ui'
-import { getDAOAddresses } from '@buildeross/sdk/contract'
+import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
@@ -13,7 +13,7 @@ import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
-import { useAccount } from 'wagmi'
+import { useAccount, useReadContracts } from 'wagmi'
 
 import { getDaoLayout } from '../../../../layouts/DaoLayout'
 import { NextPageWithLayout } from '../../../_app'
@@ -23,6 +23,14 @@ interface MigratePageProps {
   addresses: DaoContractAddresses
   chainId: CHAIN_ID
 }
+
+/**
+ * Wallet addresses with special access to the cross-chain migration wizard
+ * These addresses can migrate any DAO regardless of founder status or Builder DAO membership
+ */
+const MIGRATION_ALLOWLIST: AddressType[] = [
+  '0x19a8eb80c1483CEAA1278B16C5D5eF0104F85905' as AddressType,
+]
 
 const MigratePage: NextPageWithLayout<MigratePageProps> = ({
   daoName,
@@ -43,11 +51,55 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
     })
   }, [router, chain.slug, addresses.token])
 
+  // Batch both blockchain queries in a single RPC call
+  const { data: contractResults } = useReadContracts({
+    contracts: [
+      // Check if user is a founder of the DAO being migrated
+      {
+        abi: tokenAbi,
+        address: addresses.token,
+        functionName: 'getFounders',
+        chainId: chainId,
+      },
+      // Check if user has Builder DAO tokens on Base mainnet
+      {
+        abi: tokenAbi,
+        address: BUILDER_COLLECTION_ADDRESS[CHAIN_ID.BASE],
+        functionName: 'balanceOf',
+        args: walletAddress ? [walletAddress] : undefined,
+        chainId: CHAIN_ID.BASE,
+      },
+    ],
+    query: {
+      enabled: !!addresses.token && !!walletAddress,
+    },
+  })
+
+  const founders = contractResults?.[0]?.result
+  const builderBalance = contractResults?.[1]?.result
+
   // Check if user has migration access
-  const hasMigrationAccess = React.useMemo(
-    () => (walletAddress ? isMigrationAllowed(walletAddress) : false),
-    [walletAddress]
-  )
+  const hasMigrationAccess = React.useMemo(() => {
+    if (!walletAddress) return false
+
+    // Check 1: Is user in the allowlist?
+    const isAllowlisted = MIGRATION_ALLOWLIST.some(
+      (allowed) => allowed.toLowerCase() === walletAddress.toLowerCase()
+    )
+    if (isAllowlisted) return true
+
+    // Check 2: Is user a founder of this DAO?
+    const isFounder = founders?.some(
+      (founder) => founder.wallet.toLowerCase() === walletAddress.toLowerCase()
+    )
+    if (isFounder) return true
+
+    // Check 3: Does user have Builder DAO tokens?
+    const hasBuilderToken = builderBalance && builderBalance > 0n
+    if (hasBuilderToken) return true
+
+    return false
+  }, [walletAddress, founders, builderBalance])
 
   // Show access denied message if user doesn't have access
   if (isConnected && !hasMigrationAccess) {
