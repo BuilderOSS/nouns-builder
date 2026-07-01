@@ -10,6 +10,7 @@ import { isTestnetChain } from '@buildeross/utils'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { zeroAddress } from 'viem'
+import { useAccount } from 'wagmi'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { useFetchDAOConfigForMigration } from '../../../hooks/useFetchDAOConfigForMigration'
@@ -19,6 +20,7 @@ export const Step1_LoadConfig: React.FC = () => {
   const { chain } = useChainStore()
   const sourceChainId = chain.id
   const { addresses } = useDaoStore()
+  const { address: walletAddress } = useAccount()
   const { setChains, setSourceAddresses, setSourceConfig, goToNextStep } =
     useCrossChainMigration()
 
@@ -79,9 +81,24 @@ export const Step1_LoadConfig: React.FC = () => {
     }
 
     setValidationError(undefined)
+
+    // Check if founders array is empty and auto-populate with current user
+    const configToSave = { ...config.rawValues }
+    if (configToSave.founders.length === 0 && walletAddress) {
+      // Add current user as default founder (10%, 1 year vest)
+      const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60
+      configToSave.founders = [
+        {
+          wallet: walletAddress,
+          ownershipPct: 10,
+          vestExpiry: oneYearFromNow,
+        },
+      ]
+    }
+
     setChains(sourceChainId as CHAIN_ID, targetChainId)
     setSourceAddresses(addresses)
-    setSourceConfig(config.rawValues as any)
+    setSourceConfig(configToSave as any)
     goToNextStep()
   }
 
@@ -159,6 +176,25 @@ export const Step1_LoadConfig: React.FC = () => {
           </Text>
           <Text color="onNegative" mt="x2">
             {validationError}
+          </Text>
+        </Box>
+      )}
+
+      {config.rawValues.founders.length === 0 && walletAddress && (
+        <Box
+          p="x4"
+          borderRadius="curved"
+          backgroundColor="tertiary"
+          borderStyle="solid"
+          borderWidth="thin"
+          borderColor="border"
+        >
+          <Text fontWeight="label" mb="x2">
+            ℹ️ No Founders Found
+          </Text>
+          <Text fontSize={14} color="text3">
+            No founders found in source DAO. Your wallet will be added as founder (10%
+            ownership, 1 year vest). You can edit this in Step 2.
           </Text>
         </Box>
       )}

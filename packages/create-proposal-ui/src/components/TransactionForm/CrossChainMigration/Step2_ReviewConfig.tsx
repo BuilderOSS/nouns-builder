@@ -95,7 +95,7 @@ export const Step2_ReviewConfig: React.FC = () => {
 
       <Stack gap="x4">
         {/* Basic Token Info */}
-        <Box p="x4" borderRadius="curved" borderColor="border">
+        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
           <Heading size="xs" mb="x4">
             Token Information
           </Heading>
@@ -170,13 +170,19 @@ export const Step2_ReviewConfig: React.FC = () => {
 
         {/* Founders */}
         {localConfig.founders && localConfig.founders.length > 0 && (
-          <Box p="x4" borderRadius="curved" borderColor="border">
+          <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
             <Heading size="xs" mb="x4">
               Founders ({localConfig.founders.length})
             </Heading>
             <Stack gap="x4">
               {localConfig.founders.map((founder, idx) => (
-                <Box key={idx} p="x3" borderRadius="curved" borderColor="border">
+                <Box
+                  key={idx}
+                  p="x3"
+                  borderRadius="curved"
+                  borderColor="border"
+                  borderStyle="solid"
+                >
                   <Text fontSize={12} color="text3" mb="x2">
                     Founder {idx + 1}
                   </Text>
@@ -278,7 +284,7 @@ export const Step2_ReviewConfig: React.FC = () => {
         )}
 
         {/* Auction Parameters */}
-        <Box p="x4" borderRadius="curved" borderColor="border">
+        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
           <Heading size="xs" mb="x4">
             Auction Settings
           </Heading>
@@ -322,7 +328,7 @@ export const Step2_ReviewConfig: React.FC = () => {
         </Box>
 
         {/* Governance Parameters */}
-        <Box p="x4" borderRadius="curved" borderColor="border">
+        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
           <Heading size="xs" mb="x4">
             Governance Settings
           </Heading>
