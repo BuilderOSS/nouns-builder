@@ -14,6 +14,7 @@ export const Step3_DeployDAO: React.FC = () => {
     targetChainId,
     targetAddresses,
     setTargetAddresses,
+    deployTxHash,
     setDeployTxHash,
     goToNextStep,
   } = useCrossChainMigration()
@@ -24,6 +25,10 @@ export const Step3_DeployDAO: React.FC = () => {
   )
 
   const publicClient = usePublicClient({ chainId: targetChainId })
+
+  // Check if deployment is complete based on persisted state
+  // This ensures the component shows the correct state even after page refresh
+  const isDeploymentComplete = !!targetAddresses?.token
 
   const handleDeploy = async () => {
     try {
@@ -161,7 +166,7 @@ export const Step3_DeployDAO: React.FC = () => {
         </Box>
       )}
 
-      {!isSuccess && (
+      {!isDeploymentComplete && (
         <Flex justify="center">
           <ContractButton
             chainId={targetChainId!}
@@ -174,14 +179,14 @@ export const Step3_DeployDAO: React.FC = () => {
         </Flex>
       )}
 
-      {txHash && targetChainId && (
+      {(txHash || deployTxHash) && targetChainId && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Text fontSize={14} color="text3" mb="x2">
             Transaction Hash:
           </Text>
           <Text
             as="a"
-            href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${txHash}`}
+            href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${txHash || deployTxHash}`}
             target="_blank"
             rel="noopener noreferrer"
             fontFamily="mono"
@@ -193,12 +198,12 @@ export const Step3_DeployDAO: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            {txHash}
+            {txHash || deployTxHash}
           </Text>
         </Box>
       )}
 
-      {isSuccess && targetAddresses && (
+      {isDeploymentComplete && targetAddresses && (
         <>
           <Box p="x4" borderRadius="curved" backgroundColor="positive">
             <Heading size="xs" mb="x2" color="onPositive">

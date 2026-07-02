@@ -7,7 +7,7 @@ import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { isTestnetChain } from '@buildeross/utils'
-import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Heading, Icon, Label, Stack, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { zeroAddress } from 'viem'
 import { useAccount } from 'wagmi'
@@ -184,14 +184,15 @@ export const Step1_LoadConfig: React.FC = () => {
         <Box
           p="x4"
           borderRadius="curved"
-          backgroundColor="tertiary"
+          backgroundColor="warningDisabled"
           borderStyle="solid"
           borderWidth="thin"
           borderColor="border"
         >
-          <Text fontWeight="label" mb="x2">
-            ℹ️ No Founders Found
-          </Text>
+          <Flex alignItems="center" flexDirection="row" gap="x2" mb="x2">
+            <Icon id="warning" />
+            <Text fontWeight="label">No Founders Found</Text>
+          </Flex>
           <Text fontSize={14} color="text3">
             No founders found in source DAO. Your wallet will be added as founder (10%
             ownership, 1 year vest). You can edit this in Step 2.
