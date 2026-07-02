@@ -108,14 +108,17 @@ export const CrossChainMigration: React.FC = () => {
 
         <Box
           pt="x4"
-          borderTopStyle="solid"
-          borderTopWidth="normal"
-          borderTopColor="border"
+          borderStyle="solid"
+          borderWidth="normal"
+          borderColor="border"
+          style={{ borderBottom: 'none', borderLeft: 'none', borderRight: 'none' }}
         >
           {!showResetConfirm ? (
             <Button
-              variant="ghost"
+              variant="outline"
               color="negative"
+              icon="trash"
+              iconAlign="left"
               onClick={() => setShowResetConfirm(true)}
             >
               Start Over

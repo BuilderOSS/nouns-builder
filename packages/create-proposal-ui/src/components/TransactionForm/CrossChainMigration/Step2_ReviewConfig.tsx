@@ -549,7 +549,13 @@ export const Step2_ReviewConfig: React.FC = () => {
           Back to Chain Selection
         </Button>
         <Flex gap="x3">
-          <Button variant="secondary" onClick={handleReset} disabled={!hasChanges}>
+          <Button
+            variant="secondary"
+            icon="refresh"
+            iconAlign="left"
+            onClick={handleReset}
+            disabled={!hasChanges}
+          >
             Reset to Original
           </Button>
           <Button onClick={handleContinue}>Continue to Deployment</Button>

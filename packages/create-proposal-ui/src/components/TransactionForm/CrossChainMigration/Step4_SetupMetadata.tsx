@@ -1,6 +1,9 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { metadataAbi } from '@buildeross/sdk/contract'
+import { Accordion } from '@buildeross/ui'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
+import { decodeFunctionData } from 'viem'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { MAX_ITEMS_PER_CHUNK, useSetupMetadata } from '../../../hooks/useSetupMetadata'
@@ -45,7 +48,10 @@ export const Step4_SetupMetadata: React.FC = () => {
   }, [properties, cachedProperties, setMetadataProperties])
 
   // Use cached properties if SWR hasn't loaded yet (e.g., after page refresh)
-  const activeProperties = properties || cachedProperties || []
+  const activeProperties = useMemo(
+    () => properties || cachedProperties || [],
+    [properties, cachedProperties]
+  )
 
   const currentProperty = progress.current
   const totalProperties = progress.total
@@ -53,6 +59,76 @@ export const Step4_SetupMetadata: React.FC = () => {
     activeProperties.length > 0 &&
     currentProperty === totalProperties &&
     !isAddingProperties
+
+  // Decode properties to show detailed breakdown
+  const propertyBreakdown = useMemo(() => {
+    if (activeProperties.length === 0) return []
+
+    return activeProperties.map((encodedProperty, index) => {
+      try {
+        const decoded = decodeFunctionData({
+          abi: metadataAbi,
+          data: encodedProperty as `0x${string}`,
+        })
+
+        const [names, items] = decoded.args as unknown as [
+          string[],
+          { propertyId: bigint; name: string; isNewProperty: boolean }[],
+        ]
+
+        // Count items per property
+        const propertyCounts = new Map<string, number>()
+        items.forEach((item) => {
+          const propertyName = names[Number(item.propertyId)]
+          propertyCounts.set(propertyName, (propertyCounts.get(propertyName) || 0) + 1)
+        })
+
+        // Create property details array
+        const propertyDetails = Array.from(propertyCounts.entries()).map(
+          ([name, count]) => ({
+            name,
+            count,
+          })
+        )
+
+        return {
+          transactionNumber: index + 1,
+          totalItems: items.length,
+          properties: propertyDetails,
+        }
+      } catch (err) {
+        console.error('Error decoding property:', err)
+        return {
+          transactionNumber: index + 1,
+          totalItems: 0,
+          properties: [],
+        }
+      }
+    })
+  }, [activeProperties])
+
+  // Transform propertyBreakdown into Accordion items format
+  const accordionItems = useMemo(() => {
+    return propertyBreakdown.map((batch) => ({
+      title: `Transaction ${batch.transactionNumber}: ${batch.totalItems} items`,
+      description: (
+        <Stack gap="x2">
+          {batch.properties.map((prop, idx) => (
+            <Flex key={idx} justify="space-between">
+              <Text color="text3" fontSize={14}>
+                • {prop.name}
+              </Text>
+              <Text color="text3" fontSize={14}>
+                {prop.count} {prop.count === 1 ? 'item' : 'items'}
+              </Text>
+            </Flex>
+          ))}
+        </Stack>
+      ),
+      defaultOpen: false,
+      titleFontSize: 20,
+    }))
+  }, [propertyBreakdown])
 
   const handleAddProperties = async () => {
     try {
@@ -110,20 +186,23 @@ export const Step4_SetupMetadata: React.FC = () => {
             Property Batches to Add
           </Heading>
           <Stack gap="x2">
-            <Flex justify="space-between">
+            <Flex align="center" flexDirection="row" gap="x2">
               <Text color="text3">Total Transactions:</Text>
               <Text fontWeight="label">{activeProperties.length}</Text>
             </Flex>
             <Text color="text4" fontSize={12} mt="x2">
-              Properties are split into batches of up to {MAX_ITEMS_PER_CHUNK} items per
-              transaction to avoid gas limits.
+              Properties are batched into transactions to optimize gas usage, with a
+              target of around {MAX_ITEMS_PER_CHUNK} items per transaction. Each property
+              is kept complete and never split across transactions.
             </Text>
           </Stack>
         </Box>
       )}
 
+      {!isComplete && accordionItems.length > 0 && <Accordion items={accordionItems} />}
+
       {!isComplete && activeProperties.length > 0 && (
-        <Flex justify="center">
+        <Stack gap="x3" align="flex-end">
           <Button
             onClick={handleAddProperties}
             disabled={isAddingProperties}
@@ -133,12 +212,12 @@ export const Step4_SetupMetadata: React.FC = () => {
               ? `Adding Properties (${currentProperty}/${totalProperties})...`
               : 'Add All Properties'}
           </Button>
-          <Text color="text4" fontSize={12} textAlign="center">
+          <Text color="text4" fontSize={12}>
             {isAddingProperties
               ? `This may take several minutes for large collections. Each transaction is confirmed before the next begins.`
               : `${activeProperties.length} transaction${activeProperties.length > 1 ? 's' : ''} will be sent.`}
           </Text>
-        </Flex>
+        </Stack>
       )}
 
       {isAddingProperties && (

@@ -193,7 +193,10 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
             </Stack>
           </Box>
 
-          <Flex justify="center">
+          <Flex justify="space-between">
+            <Button variant="secondary" onClick={goToPreviousStep}>
+              Back
+            </Button>
             <Button
               onClick={handleGenerate}
               disabled={isGeneratingAttributes || isGeneratingMembers}
@@ -370,14 +373,6 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
             <Button onClick={handleContinue}>Continue to Delayed Governance</Button>
           </Flex>
         </>
-      )}
-
-      {phase === SetupPhase.GENERATE && (
-        <Flex justify="flex-start">
-          <Button variant="secondary" onClick={goToPreviousStep}>
-            Back
-          </Button>
-        </Flex>
       )}
     </Stack>
   )

@@ -167,7 +167,7 @@ export const Step3_DeployDAO: React.FC = () => {
       )}
 
       {!isDeploymentComplete && (
-        <Flex justify="center">
+        <Flex justify="flex-end">
           <ContractButton
             chainId={targetChainId!}
             handleClick={handleDeploy}
