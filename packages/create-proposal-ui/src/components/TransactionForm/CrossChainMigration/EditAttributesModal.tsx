@@ -52,7 +52,9 @@ export const EditAttributesModal: React.FC<EditAttributesModalProps> = ({
         direction="column"
         gap="x4"
         p="x6"
-        style={{ minWidth: 600, maxHeight: '80vh', overflow: 'auto' }}
+        minWidth="600px"
+        maxHeight="80vh"
+        overflow="auto"
       >
         <Heading size="md">Edit Token Attributes</Heading>
 
@@ -66,7 +68,7 @@ export const EditAttributesModal: React.FC<EditAttributesModalProps> = ({
             affects the artwork/metadata permanently. Only proceed if you understand the
             consequences.
           </Text>
-          <Flex as="label" align="center" style={{ cursor: 'pointer' }}>
+          <Flex as="label" align="center" cursor="pointer">
             <Box
               as="input"
               type="checkbox"
@@ -99,11 +101,9 @@ export const EditAttributesModal: React.FC<EditAttributesModalProps> = ({
                   Token #{tokenId}
                 </Heading>
                 <Box
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: 12,
-                  }}
+                  display="grid"
+                  gap="x3"
+                  style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}
                 >
                   {attrs.map((value, idx) => (
                     <Box key={idx}>
@@ -128,7 +128,7 @@ export const EditAttributesModal: React.FC<EditAttributesModalProps> = ({
                         borderColor="border"
                         backgroundColor="background1"
                         color="text1"
-                        style={{ width: '100%' }}
+                        width="100%"
                       />
                     </Box>
                   ))}

@@ -98,7 +98,7 @@ export interface CrossChainMigrationState {
   metadataProgress: { current: number; total: number }
 
   // Step 5: Merkle roots phase state
-  merkleRootsPhase?: 'generate' | 'set_roots' | 'complete'
+  merkleRootsPhase?: 'generate' | 'edit' | 'set_roots' | 'complete'
 
   // Step 6: Delayed governance state
   delayedGovernanceDuration?: {
@@ -145,7 +145,7 @@ export interface CrossChainMigrationState {
   updateMetadataProgress: (current: number, total: number) => void
 
   // Step 5: Merkle roots actions
-  setMerkleRootsPhase: (phase: 'generate' | 'set_roots' | 'complete') => void
+  setMerkleRootsPhase: (phase: 'generate' | 'edit' | 'set_roots' | 'complete') => void
   addMerkleRootTxHash: (hash: `0x${string}`) => void
 
   // Step 6: Delayed governance actions

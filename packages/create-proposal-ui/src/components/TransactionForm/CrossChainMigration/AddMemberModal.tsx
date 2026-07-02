@@ -145,7 +145,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
   return (
     <AnimatedModal close={onClose} open={open}>
-      <Flex direction="column" gap="x4" p="x6" style={{ minWidth: 500 }}>
+      <Flex direction="column" gap="x4" p="x6" minWidth="500px">
         <Heading size="md">Add New Member</Heading>
 
         <Stack gap="x4">
@@ -171,7 +171,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
           <Box>
             <Label mb="x2">Token Assignment</Label>
             <Flex gap="x4">
-              <Flex as="label" align="center" style={{ cursor: 'pointer' }}>
+              <Flex as="label" align="center" cursor="pointer">
                 <Box
                   as="input"
                   type="radio"
@@ -182,7 +182,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 />
                 <Text>Auto-assign</Text>
               </Flex>
-              <Flex as="label" align="center" style={{ cursor: 'pointer' }}>
+              <Flex as="label" align="center" cursor="pointer">
                 <Box
                   as="input"
                   type="radio"
@@ -222,7 +222,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 borderColor="border"
                 backgroundColor="background1"
                 color="text1"
-                style={{ width: '100%' }}
+                width="100%"
               />
             </Box>
           )}
@@ -255,7 +255,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 borderColor="border"
                 backgroundColor="background1"
                 color="text1"
-                style={{ width: '100%' }}
+                width="100%"
               />
             </Box>
           )}

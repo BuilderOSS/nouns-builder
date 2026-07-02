@@ -5,9 +5,13 @@ import { useEffect, useState } from 'react'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { useGenerateMerkleRoots } from '../../../hooks/useGenerateMerkleRoots'
 import { useSetMerkleRoots } from '../../../hooks/useSetMerkleRoots'
+import { prepareAttributesMerkleRoot } from '../../../utils/prepareAttributesMerkleRoot'
+import { prepareMemberMerkleRoot } from '../../../utils/prepareMemberMerkleRoot'
+import { MemberListEditor } from './MemberListEditor'
 
 enum SetupPhase {
   GENERATE = 'generate',
+  EDIT = 'edit',
   SET_ROOTS = 'set_roots',
   COMPLETE = 'complete',
 }
@@ -88,7 +92,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     }
   }
 
-  // Auto-advance to SET_ROOTS phase when both merkle roots are available
+  // Auto-advance to EDIT phase when both merkle roots are available
   useEffect(() => {
     if (
       phase === SetupPhase.GENERATE &&
@@ -97,7 +101,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
       !isGeneratingAttributes &&
       !isGeneratingMembers
     ) {
-      setPhase(SetupPhase.SET_ROOTS)
+      setPhase(SetupPhase.EDIT)
     }
   }, [
     phase,
@@ -130,6 +134,32 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
 
   const handleContinue = () => {
     goToNextStep()
+  }
+
+  const handleEditContinue = async (
+    editedMembers: any[],
+    editedAttributes: number[][]
+  ) => {
+    try {
+      // Regenerate merkle roots from edited data
+      const newAttributesRoot = await prepareAttributesMerkleRoot(editedAttributes)
+      const newMemberRoot = await prepareMemberMerkleRoot(editedMembers)
+
+      // Save edited data and new roots to store
+      setAttributesData(editedAttributes)
+      setMemberSnapshot(editedMembers)
+      setAttributesMerkleRoot(newAttributesRoot)
+      setMembersMerkleRoot(newMemberRoot)
+
+      // Advance to SET_ROOTS phase
+      setPhase(SetupPhase.SET_ROOTS)
+    } catch (err) {
+      console.error('Error regenerating merkle roots:', err)
+    }
+  }
+
+  const handleEditSkip = () => {
+    setPhase(SetupPhase.SET_ROOTS)
   }
 
   const error = generateError || setError
@@ -210,7 +240,18 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
         </>
       )}
 
-      {/* Phase 2: Set Roots */}
+      {/* Phase 2: Edit Members & Attributes */}
+      {phase === SetupPhase.EDIT && attributesData && memberSnapshot && (
+        <MemberListEditor
+          initialMembers={memberSnapshot}
+          initialAttributes={attributesData}
+          reservedUntilTokenId={sourceConfig?.reservedUntilTokenId || 0n}
+          onContinue={handleEditContinue}
+          onSkip={handleEditSkip}
+        />
+      )}
+
+      {/* Phase 3: Set Roots */}
       {phase === SetupPhase.SET_ROOTS && (
         <>
           <Box p="x4" borderRadius="curved" backgroundColor="positive">
