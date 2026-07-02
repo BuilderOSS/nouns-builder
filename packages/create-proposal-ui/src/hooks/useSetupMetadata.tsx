@@ -16,7 +16,9 @@ export const useSetupMetadata = (
   sourceChainId?: CHAIN_ID,
   targetChainId?: CHAIN_ID,
   onProgressUpdate?: (current: number, total: number) => void,
-  onTxHashAdded?: (hash: `0x${string}`) => void
+  onTxHashAdded?: (hash: `0x${string}`) => void,
+  persistedProgress?: { current: number; total: number },
+  persistedTxHashes?: `0x${string}`[]
 ) => {
   // Fetch metadata properties from API (which calls blockchain via getPropertyItems)
   const {
@@ -193,8 +195,11 @@ export const useSetupMetadata = (
   )
 
   // State for transaction progress tracking
-  const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0)
-  const [txHashes, setTxHashes] = useState<`0x${string}`[]>([])
+  // Initialize from persisted values if available
+  const [currentPropertyIndex, setCurrentPropertyIndex] = useState(
+    persistedProgress?.current || 0
+  )
+  const [txHashes, setTxHashes] = useState<`0x${string}`[]>(persistedTxHashes || [])
   const [addError, setAddError] = useState<string>()
 
   const { writeContractAsync, isPending } = useWriteContract()
@@ -278,10 +283,11 @@ export const useSetupMetadata = (
     addAllProperties,
     isAddingProperties: isPending,
     progress: {
-      current: currentPropertyIndex,
-      total: properties?.length || 0,
+      current: persistedProgress?.current ?? currentPropertyIndex,
+      total: persistedProgress?.total ?? (properties?.length || 0),
     },
-    txHashes,
+    txHashes:
+      persistedTxHashes && persistedTxHashes.length > 0 ? persistedTxHashes : txHashes,
     error,
   }
 }

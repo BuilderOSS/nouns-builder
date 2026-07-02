@@ -18,6 +18,8 @@ export const Step4_SetupMetadata: React.FC = () => {
     setMetadataProperties,
     updateMetadataProgress,
     addMetadataTxHash,
+    metadataProgress: persistedProgress,
+    metadataTxHashes: persistedTxHashes,
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
@@ -37,7 +39,9 @@ export const Step4_SetupMetadata: React.FC = () => {
     sourceChainId,
     targetChainId,
     updateMetadataProgress,
-    addMetadataTxHash
+    addMetadataTxHash,
+    persistedProgress,
+    persistedTxHashes
   )
 
   // Save fetched properties to Zustand for persistence
