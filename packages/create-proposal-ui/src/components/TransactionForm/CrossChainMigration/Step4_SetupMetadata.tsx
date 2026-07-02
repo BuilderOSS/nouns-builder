@@ -51,6 +51,18 @@ export const Step4_SetupMetadata: React.FC = () => {
     }
   }, [properties, cachedProperties, setMetadataProperties])
 
+  // Reset progress if it doesn't match actual properties length
+  useEffect(() => {
+    if (
+      properties &&
+      persistedProgress &&
+      persistedProgress.total !== properties.length &&
+      persistedProgress.total > 0
+    ) {
+      updateMetadataProgress(0, properties.length)
+    }
+  }, [properties, persistedProgress, updateMetadataProgress])
+
   // Use cached properties if SWR hasn't loaded yet (e.g., after page refresh)
   const activeProperties = useMemo(
     () => properties || cachedProperties || [],
@@ -62,6 +74,7 @@ export const Step4_SetupMetadata: React.FC = () => {
   const isComplete =
     activeProperties.length > 0 &&
     currentProperty === totalProperties &&
+    currentProperty === activeProperties.length &&
     !isAddingProperties
 
   // Decode properties to show detailed breakdown
