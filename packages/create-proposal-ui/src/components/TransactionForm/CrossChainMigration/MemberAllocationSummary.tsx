@@ -67,7 +67,7 @@ export const MemberAllocationSummary: React.FC<MemberAllocationSummaryProps> = (
       {warnings.length > 0 && errors.length === 0 && (
         <Box p="x4" borderRadius="curved" backgroundColor="warning">
           <Heading size="xs" mb="x2" color="onWarning">
-            ⚠️ Warnings
+            ⚠️ Warning{warnings.length === 1 ? '' : 's'}
           </Heading>
           <Stack gap="x2">
             {warnings.map((warning, idx) => (

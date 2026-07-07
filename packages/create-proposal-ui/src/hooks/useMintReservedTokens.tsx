@@ -4,11 +4,11 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { MerkleTree } from 'merkletreejs'
 import { useState } from 'react'
 import { encodeAbiParameters, keccak256, parseAbiParameters } from 'viem'
-import { usePublicClient, useReadContract, useWriteContract } from 'wagmi'
+import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 
 import { DaoMemberSimplified } from './useGenerateMerkleRoots'
 
-export const BATCH_SIZE = 50
+export const DEFAULT_BATCH_SIZE = 50
 
 export const useMintReservedTokens = (
   memberSnapshot?: DaoMemberSimplified[],
@@ -16,7 +16,8 @@ export const useMintReservedTokens = (
   targetChainId?: CHAIN_ID,
   alreadyMinted?: number[],
   onTokensMinted?: (tokenIds: number[]) => void,
-  onTxHash?: (hash: `0x${string}`) => void
+  onTxHash?: (hash: `0x${string}`) => void,
+  batchSize: number = DEFAULT_BATCH_SIZE
 ) => {
   const [totalTokens, setTotalTokens] = useState(0)
   const [tokensMinted, setTokensMinted] = useState<number[]>(alreadyMinted || [])
@@ -25,12 +26,13 @@ export const useMintReservedTokens = (
 
   const { writeContractAsync, isPending } = useWriteContract()
   const publicClient = usePublicClient({ chainId: targetChainId })
+  const { address } = useAccount()
 
   const minterAddress = targetChainId ? MERKLE_RESERVE_MINTER[targetChainId] : undefined
 
   // Fetch the on-chain merkle root to compare
   // allowedMerkles returns: [mintStart, mintEnd, pricePerToken, merkleRoot]
-  const { data: onChainSettings } = useReadContract({
+  const { data: onChainSettings, refetch: refetchOnChainRoot } = useReadContract({
     address: minterAddress,
     abi: merkleReserveMinterAbi,
     functionName: 'allowedMerkles',
@@ -38,6 +40,8 @@ export const useMintReservedTokens = (
     chainId: targetChainId,
     query: {
       enabled: !!minterAddress && !!targetTokenAddress && !!targetChainId,
+      staleTime: 0, // Always fetch fresh data
+      gcTime: 0, // Don't cache (previously cacheTime in older wagmi versions)
     },
   })
 
@@ -135,8 +139,32 @@ export const useMintReservedTokens = (
       const hashes: `0x${string}`[] = [...txHashes]
       const minted: number[] = [...tokensMinted]
 
-      for (let i = 0; i < claimsToMint.length; i += BATCH_SIZE) {
-        const batch = claimsToMint.slice(i, i + BATCH_SIZE)
+      for (let i = 0; i < claimsToMint.length; i += batchSize) {
+        const batch = claimsToMint.slice(i, i + batchSize)
+
+        // Estimate gas for this batch with proper error handling
+        let gasLimit: bigint | undefined
+        if (publicClient && address) {
+          try {
+            const estimatedGas = await publicClient.estimateContractGas({
+              abi: merkleReserveMinterAbi,
+              address: minterAddress,
+              functionName: 'mintFromReserve',
+              args: [targetTokenAddress, batch],
+              account: address,
+            })
+            // Add 50% buffer for safety (merkle proofs can be gas-intensive)
+            gasLimit = (estimatedGas * 150n) / 100n
+          } catch (estimationError) {
+            console.error(
+              `Gas estimation failed for batch ${i / batchSize + 1}:`,
+              estimationError
+            )
+            throw new Error(
+              `Gas estimation failed for batch ${i / batchSize + 1}. Try reducing batch size below ${batchSize}.`
+            )
+          }
+        }
 
         const hash = await writeContractAsync({
           abi: merkleReserveMinterAbi,
@@ -144,6 +172,7 @@ export const useMintReservedTokens = (
           functionName: 'mintFromReserve',
           args: [targetTokenAddress, batch],
           chainId: targetChainId,
+          gas: gasLimit,
         })
 
         hashes.push(hash)
@@ -155,7 +184,7 @@ export const useMintReservedTokens = (
           const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
           if (receipt.status !== 'success') {
-            throw new Error(`Transaction failed for batch ${i / BATCH_SIZE + 1}`)
+            throw new Error(`Transaction failed for batch ${i / batchSize + 1}`)
           }
         }
 
@@ -173,6 +202,8 @@ export const useMintReservedTokens = (
     }
   }
 
+  const clearError = () => setError(undefined)
+
   return {
     startMinting,
     isMinting: isPending,
@@ -181,6 +212,8 @@ export const useMintReservedTokens = (
     progress: totalTokens > 0 ? (tokensMinted.length / totalTokens) * 100 : 0,
     txHashes,
     error,
-    onChainMerkleRoot,
+    onChainMerkleRoot: onChainMerkleRoot as `0x${string}` | undefined,
+    refetchOnChainRoot: refetchOnChainRoot as () => Promise<any>,
+    clearError,
   }
 }

@@ -1,9 +1,13 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
+import { useState } from 'react'
 
 import { useAuthorizeMinter } from '../../../hooks/useAuthorizeMinter'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
-import { BATCH_SIZE, useMintReservedTokens } from '../../../hooks/useMintReservedTokens'
+import {
+  DEFAULT_BATCH_SIZE,
+  useMintReservedTokens,
+} from '../../../hooks/useMintReservedTokens'
 
 export const Step7_MintTokens: React.FC = () => {
   const {
@@ -17,6 +21,8 @@ export const Step7_MintTokens: React.FC = () => {
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
+
+  const [batchSize, setBatchSize] = useState(DEFAULT_BATCH_SIZE)
 
   const {
     authorizeMinter,
@@ -36,13 +42,16 @@ export const Step7_MintTokens: React.FC = () => {
     txHashes,
     error,
     onChainMerkleRoot,
+    refetchOnChainRoot,
+    clearError,
   } = useMintReservedTokens(
     memberSnapshot,
     targetAddresses?.token,
     targetChainId,
     mintingProgress.minted,
     addMintedTokens,
-    addMintingTxHash
+    addMintingTxHash,
+    batchSize
   )
 
   const handleStartMinting = async () => {
@@ -65,6 +74,16 @@ export const Step7_MintTokens: React.FC = () => {
     goToNextStep()
   }
 
+  const handleBatchSizeChange = (newSize: number) => {
+    setBatchSize(newSize)
+    clearError() // Clear any errors when user changes batch size
+  }
+
+  const handleRefreshRoot = async () => {
+    await refetchOnChainRoot()
+    clearError() // Clear any errors after refreshing root
+  }
+
   const isComplete = tokensMinted.length > 0 && tokensMinted.length === totalTokens
 
   if (!memberSnapshot || memberSnapshot.length === 0) {
@@ -84,6 +103,7 @@ export const Step7_MintTokens: React.FC = () => {
   }
 
   if (error) {
+    const isGasEstimationError = error.includes('Gas estimation failed')
     return (
       <Stack gap="x4">
         <Heading size="md">Error Minting Tokens</Heading>
@@ -93,6 +113,21 @@ export const Step7_MintTokens: React.FC = () => {
             Tokens minted before error: {tokensMinted.length} / {totalTokens}
           </Text>
         </Box>
+        {isGasEstimationError && (
+          <Box p="x4" borderRadius="curved" backgroundColor="warning">
+            <Heading size="xs" mb="x2" color="onWarning">
+              Try Reducing Batch Size
+            </Heading>
+            <Stack gap="x2">
+              <Text fontSize={14} color="onWarning">
+                Current batch size: {batchSize} tokens
+              </Text>
+              <Text fontSize={14} color="onWarning">
+                Try reducing to: {Math.max(1, Math.floor(batchSize / 2))} tokens
+              </Text>
+            </Stack>
+          </Box>
+        )}
         <Flex justify="space-between">
           <Button variant="secondary" onClick={goToPreviousStep}>
             Back
@@ -111,7 +146,7 @@ export const Step7_MintTokens: React.FC = () => {
         </Heading>
         <Text color="text3">
           Batch mint all reserved tokens to their original owners using merkle proofs.
-          This will execute multiple transactions in batches of {BATCH_SIZE} tokens.
+          This will execute multiple transactions in batches.
         </Text>
       </Box>
 
@@ -132,18 +167,59 @@ export const Step7_MintTokens: React.FC = () => {
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Batch Size:</Text>
-            <Text fontWeight="label">{BATCH_SIZE} tokens per transaction</Text>
+            <Text fontWeight="label">{batchSize} tokens per transaction</Text>
           </Flex>
           <Flex justify="space-between">
             <Text color="text3">Estimated Transactions:</Text>
             <Text fontWeight="label">
               {Math.ceil(
-                memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0) / BATCH_SIZE
+                memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0) / batchSize
               )}
             </Text>
           </Flex>
         </Stack>
       </Box>
+
+      {/* Batch Size Configuration - Only show when error occurs or minting started */}
+      {!isComplete && (error || tokensMinted.length > 0) && (
+        <Box p="x4" borderRadius="curved" backgroundColor="background2">
+          <Heading size="xs" mb="x3">
+            Batch Size Configuration
+          </Heading>
+          <Stack gap="x3">
+            <Box>
+              <Label mb="x2">Tokens per Transaction: {batchSize}</Label>
+              <Flex gap="x2" wrap="wrap">
+                {[50, 25, 10, 5].map((size) => (
+                  <Button
+                    key={size}
+                    variant={batchSize === size ? 'primary' : 'secondary'}
+                    size="sm"
+                    onClick={() => handleBatchSizeChange(size)}
+                    disabled={isMinting}
+                  >
+                    {size}
+                  </Button>
+                ))}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() =>
+                    handleBatchSizeChange(Math.max(1, Math.floor(batchSize / 2)))
+                  }
+                  disabled={isMinting || batchSize <= 1}
+                >
+                  Half ({Math.max(1, Math.floor(batchSize / 2))})
+                </Button>
+              </Flex>
+            </Box>
+            <Text fontSize={12} color="text3">
+              Larger batches are more efficient but require more gas. If gas estimation
+              fails, try a smaller batch size. Recommended: 25-50 tokens per batch.
+            </Text>
+          </Stack>
+        </Box>
+      )}
 
       {/* Minter Authorization */}
       <Box
@@ -240,56 +316,63 @@ export const Step7_MintTokens: React.FC = () => {
         </Stack>
       </Box>
 
-      {memberSnapshot && merkleRoots?.members && (
-        <Box p="x4" borderRadius="curved" backgroundColor="background2">
-          <Heading size="xs" mb="x3">
-            Debug: Merkle Root Verification
-          </Heading>
-          <Stack gap="x3">
-            <Box>
-              <Text fontSize={12} color="text3" mb="x1">
-                Expected Merkle Root (from Step 5 - Zustand state):
-              </Text>
-              <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
-                {merkleRoots.members}
-              </Text>
-            </Box>
-            {onChainMerkleRoot && (
+      {/* Merkle Root Debug - Only show when there's a mismatch error */}
+      {memberSnapshot &&
+        merkleRoots?.members &&
+        error &&
+        error.includes('Merkle root mismatch') && (
+          <Box p="x4" borderRadius="curved" backgroundColor="background2">
+            <Heading size="xs" mb="x3">
+              Debug: Merkle Root Verification
+            </Heading>
+            <Stack gap="x3">
               <Box>
                 <Text fontSize={12} color="text3" mb="x1">
-                  On-Chain Merkle Root (from MerkleReserveMinter contract):
+                  Expected Merkle Root (from Step 5 - Zustand state):
                 </Text>
                 <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
-                  {onChainMerkleRoot}
+                  {merkleRoots.members}
                 </Text>
-                {onChainMerkleRoot !== merkleRoots.members && (
-                  <Text fontSize={12} color="negative" mt="x1">
-                    ⚠️ MISMATCH: On-chain root differs from expected root! Please go back
-                    to Step 5 and regenerate merkle roots.
-                  </Text>
-                )}
-                {onChainMerkleRoot === merkleRoots.members && (
-                  <Text fontSize={12} color="positive" mt="x1">
-                    ✓ Roots match
-                  </Text>
-                )}
               </Box>
-            )}
-            <Box>
-              <Text fontSize={12} color="text3" mb="x1">
-                Snapshot Info:
+              {onChainMerkleRoot && (
+                <Box>
+                  <Text fontSize={12} color="text3" mb="x1">
+                    On-Chain Merkle Root (from MerkleReserveMinter contract):
+                  </Text>
+                  <Text
+                    fontFamily="mono"
+                    fontSize={12}
+                    style={{ wordBreak: 'break-all' }}
+                  >
+                    {onChainMerkleRoot}
+                  </Text>
+                  {onChainMerkleRoot !== merkleRoots.members && (
+                    <Text fontSize={12} color="negative" mt="x1">
+                      ⚠️ MISMATCH: On-chain root differs from expected root!
+                    </Text>
+                  )}
+                </Box>
+              )}
+              <Box>
+                <Text fontSize={12} color="text3" mb="x1">
+                  Snapshot Info:
+                </Text>
+                <Text fontSize={12}>
+                  {memberSnapshot.length} members,{' '}
+                  {memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)} total
+                  tokens
+                </Text>
+              </Box>
+              <Button variant="secondary" size="sm" onClick={handleRefreshRoot}>
+                Refresh On-Chain Root
+              </Button>
+              <Text fontSize={12} color="text4">
+                If the mismatch persists after refreshing, go back to Step 5 and use the
+                "Reset & Regenerate" button.
               </Text>
-              <Text fontSize={12}>
-                {memberSnapshot.length} members,{' '}
-                {memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)} total tokens
-              </Text>
-            </Box>
-            <Text fontSize={12} color="text4">
-              Check console for calculated root comparison when minting starts
-            </Text>
-          </Stack>
-        </Box>
-      )}
+            </Stack>
+          </Box>
+        )}
 
       {!isComplete && !isMinting && tokensMinted.length === 0 && (
         <Box p="x4" borderRadius="curved" backgroundColor="warning">

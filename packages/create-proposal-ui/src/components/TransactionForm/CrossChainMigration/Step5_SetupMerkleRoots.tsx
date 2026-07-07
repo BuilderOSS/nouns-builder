@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { useGenerateMerkleRoots } from '../../../hooks/useGenerateMerkleRoots'
 import { useSetMerkleRoots } from '../../../hooks/useSetMerkleRoots'
-import { prepareAttributesMerkleRoot } from '../../../utils/prepareAttributesMerkleRoot'
 import { prepareMemberMerkleRoot } from '../../../utils/prepareMemberMerkleRoot'
 import { MemberListEditor } from './MemberListEditor'
 
@@ -24,6 +23,8 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     targetChainId,
     targetAddresses,
     merkleRootsPhase: cachedPhase,
+    merkleRoots: cachedMerkleRoots,
+    memberSnapshot: storedMemberSnapshot,
     setMerkleRootsPhase,
     setAttributesMerkleRoot,
     setMembersMerkleRoot,
@@ -72,6 +73,26 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     }
   }, [memberSnapshot, setMemberSnapshot])
 
+  // Save merkle roots to Zustand when generated
+  useEffect(() => {
+    if (attributesMerkleRoot) {
+      setAttributesMerkleRoot(attributesMerkleRoot)
+    }
+  }, [attributesMerkleRoot, setAttributesMerkleRoot])
+
+  useEffect(() => {
+    if (memberMerkleRoot) {
+      setMembersMerkleRoot(memberMerkleRoot)
+    }
+  }, [memberMerkleRoot, setMembersMerkleRoot])
+
+  // Use cached merkle roots as fallback (important for page refreshes)
+  const activeAttributesRoot = attributesMerkleRoot || cachedMerkleRoots?.attributes
+  const activeMemberRoot = memberMerkleRoot || cachedMerkleRoots?.members
+
+  // Use stored snapshot if available (after editing), otherwise use generated snapshot
+  const activeMemberSnapshot = storedMemberSnapshot || memberSnapshot
+
   const {
     setAttributesRoot,
     setMintSettings,
@@ -96,8 +117,8 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
   useEffect(() => {
     if (
       phase === SetupPhase.GENERATE &&
-      attributesMerkleRoot &&
-      memberMerkleRoot &&
+      activeAttributesRoot &&
+      activeMemberRoot &&
       !isGeneratingAttributes &&
       !isGeneratingMembers
     ) {
@@ -105,26 +126,51 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     }
   }, [
     phase,
-    attributesMerkleRoot,
-    memberMerkleRoot,
+    activeAttributesRoot,
+    activeMemberRoot,
+    isGeneratingAttributes,
+    isGeneratingMembers,
+  ])
+
+  // Phase validation: Reset to GENERATE if phase is advanced but roots are missing
+  // This handles cases where page was refreshed and cached phase is stale
+  useEffect(() => {
+    if (
+      (phase === SetupPhase.EDIT || phase === SetupPhase.SET_ROOTS) &&
+      (!activeAttributesRoot || !activeMemberRoot) &&
+      !isGeneratingAttributes &&
+      !isGeneratingMembers
+    ) {
+      console.warn(
+        '[Step5] Phase is advanced but merkle roots are missing. Resetting to GENERATE phase.'
+      )
+      setPhase(SetupPhase.GENERATE)
+    }
+  }, [
+    phase,
+    activeAttributesRoot,
+    activeMemberRoot,
     isGeneratingAttributes,
     isGeneratingMembers,
   ])
 
   const handleSetRoots = async () => {
-    if (!attributesMerkleRoot || !memberMerkleRoot) {
+    if (!activeAttributesRoot || !activeMemberRoot) {
       return
     }
 
     try {
       await Promise.all([
-        setAttributesRoot(attributesMerkleRoot),
-        setMintSettings(memberMerkleRoot),
+        setAttributesRoot(activeAttributesRoot),
+        setMintSettings(activeMemberRoot),
       ])
 
-      // Save to context
-      setAttributesMerkleRoot(attributesMerkleRoot)
-      setMembersMerkleRoot(memberMerkleRoot)
+      // Save to context (in case they came from cache and weren't already saved)
+      setAttributesMerkleRoot(activeAttributesRoot)
+      setMembersMerkleRoot(activeMemberRoot)
+
+      // Wait for blockchain state to settle before proceeding
+      await new Promise((resolve) => setTimeout(resolve, 3000))
 
       setPhase(SetupPhase.COMPLETE)
     } catch (err) {
@@ -136,30 +182,34 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     goToNextStep()
   }
 
-  const handleEditContinue = async (
-    editedMembers: any[],
-    editedAttributes: number[][]
-  ) => {
+  const handleEditContinue = async (editedMembers: any[]) => {
     try {
-      // Regenerate merkle roots from edited data
-      const newAttributesRoot = await prepareAttributesMerkleRoot(editedAttributes)
+      // Regenerate member merkle root from edited data
       const newMemberRoot = await prepareMemberMerkleRoot(editedMembers)
 
-      // Save edited data and new roots to store
-      setAttributesData(editedAttributes)
+      // Save edited data and new root to store
       setMemberSnapshot(editedMembers)
-      setAttributesMerkleRoot(newAttributesRoot)
       setMembersMerkleRoot(newMemberRoot)
 
       // Advance to SET_ROOTS phase
       setPhase(SetupPhase.SET_ROOTS)
     } catch (err) {
-      console.error('Error regenerating merkle roots:', err)
+      console.error('Error regenerating merkle root:', err)
     }
   }
 
   const handleEditSkip = () => {
     setPhase(SetupPhase.SET_ROOTS)
+  }
+
+  const handleReset = () => {
+    // Clear all merkle root state and reset to GENERATE phase
+    setAttributesMerkleRoot(undefined as any)
+    setMembersMerkleRoot(undefined as any)
+    setAttributesData(undefined as any)
+    setMemberSnapshot(undefined as any)
+    setMerkleRootsPhase('generate')
+    setPhase(SetupPhase.GENERATE)
   }
 
   const error = generateError || setError
@@ -240,11 +290,10 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
         </>
       )}
 
-      {/* Phase 2: Edit Members & Attributes */}
-      {phase === SetupPhase.EDIT && attributesData && memberSnapshot && (
+      {/* Phase 2: Edit Members */}
+      {phase === SetupPhase.EDIT && activeMemberSnapshot && (
         <MemberListEditor
-          initialMembers={memberSnapshot}
-          initialAttributes={attributesData}
+          initialMembers={activeMemberSnapshot}
           reservedUntilTokenId={sourceConfig?.reservedUntilTokenId || 0n}
           onContinue={handleEditContinue}
           onSkip={handleEditSkip}
@@ -281,7 +330,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                     fontSize={12}
                     style={{ wordBreak: 'break-all' }}
                   >
-                    {attributesMerkleRoot}
+                    {activeAttributesRoot}
                   </Text>
                 </Box>
               </Stack>
@@ -296,14 +345,15 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                   <Text color="text3" fontSize={14}>
                     Token holders:
                   </Text>
-                  <Text fontSize={14}>{memberSnapshot?.length || 0}</Text>
+                  <Text fontSize={14}>{activeMemberSnapshot?.length || 0}</Text>
                 </Flex>
                 <Flex justify="space-between">
                   <Text color="text3" fontSize={14}>
                     Total tokens:
                   </Text>
                   <Text fontSize={14}>
-                    {memberSnapshot?.reduce((sum, m) => sum + m.tokens.length, 0) || 0}
+                    {activeMemberSnapshot?.reduce((sum, m) => sum + m.tokens.length, 0) ||
+                      0}
                   </Text>
                 </Flex>
                 <Box mt="x2">
@@ -315,7 +365,7 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
                     fontSize={12}
                     style={{ wordBreak: 'break-all' }}
                   >
-                    {memberMerkleRoot}
+                    {activeMemberRoot}
                   </Text>
                 </Box>
               </Stack>
@@ -329,7 +379,10 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
             </Text>
           </Box>
 
-          <Flex justify="center">
+          <Flex justify="space-between">
+            <Button variant="secondary" onClick={handleReset}>
+              Reset & Regenerate
+            </Button>
             <Button
               onClick={handleSetRoots}
               disabled={isSettingRoots}
@@ -410,7 +463,10 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
             </Box>
           )}
 
-          <Flex justify="flex-end">
+          <Flex justify="space-between">
+            <Button variant="secondary" onClick={handleReset}>
+              Reset & Regenerate
+            </Button>
             <Button onClick={handleContinue}>Continue to Delayed Governance</Button>
           </Flex>
         </>

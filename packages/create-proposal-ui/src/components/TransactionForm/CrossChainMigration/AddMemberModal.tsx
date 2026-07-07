@@ -2,7 +2,7 @@ import { SmartInput } from '@buildeross/ui/Fields'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { isAddress } from 'viem'
 
 import {
@@ -32,6 +32,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
   const [autoCount, setAutoCount] = useState('1')
   const [error, setError] = useState('')
   const [isResolving, setIsResolving] = useState(false)
+  const ensTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const unallocatedIds = getUnallocatedTokenIds(memberSnapshot, reservedUntilTokenId)
 
@@ -40,21 +41,37 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
     setAddress(value)
     setError('')
 
-    // Try to resolve ENS
+    // Clear any pending ENS resolution
+    if (ensTimeoutRef.current) {
+      clearTimeout(ensTimeoutRef.current)
+    }
+
+    // Try to resolve ENS with debouncing
     if (value.endsWith('.eth')) {
       setIsResolving(true)
-      try {
-        const resolved = await getEnsAddress(value)
-        if (resolved) {
-          setAddress(resolved)
+      ensTimeoutRef.current = setTimeout(async () => {
+        try {
+          const resolved = await getEnsAddress(value)
+          if (resolved) {
+            setAddress(resolved)
+          }
+        } catch (err) {
+          console.error('ENS resolution failed:', err)
+        } finally {
+          setIsResolving(false)
         }
-      } catch (err) {
-        console.error('ENS resolution failed:', err)
-      } finally {
-        setIsResolving(false)
-      }
+      }, 300)
     }
   }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (ensTimeoutRef.current) {
+        clearTimeout(ensTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleAdd = () => {
     setError('')

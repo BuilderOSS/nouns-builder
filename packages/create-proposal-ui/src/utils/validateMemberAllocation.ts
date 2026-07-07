@@ -82,7 +82,7 @@ export function validateMemberAllocation(
   // Warn if under-allocated
   if (allocated < reserved && allocated > 0) {
     warnings.push(
-      `${remaining} tokens not allocated. These will remain reserved for future minting.`
+      `${remaining} tokens not allocated (may include burnt tokens on source chain). These will remain reserved for future minting.`
     )
   }
 

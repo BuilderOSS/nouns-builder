@@ -12,6 +12,7 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
     targetChainId,
     targetAddresses,
     delayedGovernanceDuration: cachedDuration,
+    delayedGovernanceTxHash: cachedTxHash,
     setDelayedGovernanceDuration,
     setDelayedGovernanceTimestamp,
     setDelayedGovernanceTxHash,
@@ -29,6 +30,9 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
 
   const { updateDelayedGovernance, txHash, isUpdating, isConfirming, isSuccess, error } =
     useUpdateDelayedGovernance(targetAddresses?.governor, targetChainId)
+
+  // Derive completion status from local success or persisted txHash (survives refresh)
+  const isComplete = isSuccess || !!cachedTxHash
 
   // Save duration to Zustand whenever it changes
   useEffect(() => {
@@ -106,7 +110,7 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
         </Text>
       </Box>
 
-      {!isSuccess && (
+      {!isComplete && (
         <>
           <Box>
             <Label mb="x3">Delay Duration (from now)</Label>
@@ -230,14 +234,14 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
         </>
       )}
 
-      {txHash && targetChainId && (
+      {(txHash || cachedTxHash) && targetChainId && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Text fontSize={14} color="text3" mb="x2">
             Transaction Hash:
           </Text>
           <Text
             as="a"
-            href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${txHash}`}
+            href={`${ETHERSCAN_BASE_URL[targetChainId]}/tx/${txHash || cachedTxHash}`}
             target="_blank"
             rel="noopener noreferrer"
             fontFamily="mono"
@@ -249,12 +253,12 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            {txHash}
+            {txHash || cachedTxHash}
           </Text>
         </Box>
       )}
 
-      {isSuccess && (
+      {isComplete && (
         <>
           <Box p="x4" borderRadius="curved" backgroundColor="positive">
             <Heading size="xs" mb="x2" color="onPositive">
@@ -271,7 +275,7 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
         </>
       )}
 
-      {!isSuccess && (
+      {!isComplete && (
         <Flex justify="flex-start">
           <Button variant="secondary" onClick={goToPreviousStep}>
             Back

@@ -1,3 +1,4 @@
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import { useState } from 'react'
 
@@ -6,34 +7,29 @@ import {
   validateMemberAllocation,
 } from '../../../utils/validateMemberAllocation'
 import { AddMemberModal } from './AddMemberModal'
-import { EditAttributesModal } from './EditAttributesModal'
 import { EditMemberModal } from './EditMemberModal'
 import { MemberAllocationSummary } from './MemberAllocationSummary'
 
 interface MemberListEditorProps {
   initialMembers: DaoMemberSimplified[]
-  initialAttributes: number[][]
   reservedUntilTokenId: bigint
-  onContinue: (members: DaoMemberSimplified[], attributes: number[][]) => void
+  onContinue: (members: DaoMemberSimplified[]) => void
   onSkip: () => void
 }
 
 export const MemberListEditor: React.FC<MemberListEditorProps> = ({
   initialMembers,
-  initialAttributes,
   reservedUntilTokenId,
   onContinue,
   onSkip,
 }) => {
   const [editedMembers, setEditedMembers] =
     useState<DaoMemberSimplified[]>(initialMembers)
-  const [editedAttributes, setEditedAttributes] = useState<number[][]>(initialAttributes)
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [showAttributesModal, setShowAttributesModal] = useState(false)
   const [editingMemberIndex, setEditingMemberIndex] = useState<number>(-1)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number>(-1)
-  const [editingTokenIds, setEditingTokenIds] = useState<number[]>([])
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   const validation = validateMemberAllocation(editedMembers, reservedUntilTokenId)
 
@@ -56,26 +52,16 @@ export const MemberListEditor: React.FC<MemberListEditorProps> = ({
     setShowDeleteConfirm(-1)
   }
 
-  const handleEditAttributes = (tokenId: number, newAttributes: number[]) => {
-    const updated = [...editedAttributes]
-    updated[tokenId] = newAttributes
-    setEditedAttributes(updated)
-  }
-
-  const handleOpenAttributesModal = () => {
-    // For simplicity, allow editing all tokens in the first member, or all allocated tokens
-    const allAllocatedTokenIds = editedMembers
-      .flatMap((m) => m.tokens)
-      .sort((a, b) => a - b)
-    setEditingTokenIds(allAllocatedTokenIds)
-    setShowAttributesModal(true)
+  const handleResetToDefault = () => {
+    setEditedMembers(initialMembers)
+    setShowResetConfirm(false)
   }
 
   const handleContinue = () => {
     if (!validation.isValid) {
       return
     }
-    onContinue(editedMembers, editedAttributes)
+    onContinue(editedMembers)
   }
 
   const truncateAddress = (addr: string) => {
@@ -89,15 +75,96 @@ export const MemberListEditor: React.FC<MemberListEditorProps> = ({
     return `${tokens.slice(0, 5).join(', ')} ... (+${tokens.length - 5} more)`
   }
 
+  // Member row component with ENS display
+  const MemberRow = ({
+    member,
+    index,
+  }: {
+    member: DaoMemberSimplified
+    index: number
+  }) => {
+    const { displayName, ensName, isLoading } = useEnsData(member.owner)
+
+    return (
+      <Box
+        key={`${member.owner}-${index}`}
+        p="x3"
+        borderRadius="curved"
+        backgroundColor="background1"
+      >
+        {showDeleteConfirm === index ? (
+          <Flex direction="column" gap="x2">
+            <Text color="negative" fontSize={14}>
+              Remove this member? This cannot be undone.
+            </Text>
+            <Flex gap="x2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(-1)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                color="negative"
+                onClick={() => handleRemoveMember(index)}
+              >
+                Remove
+              </Button>
+            </Flex>
+          </Flex>
+        ) : (
+          <Flex justify="space-between" align="center">
+            <Stack gap="x1">
+              <Flex align="center" gap="x2">
+                <Text fontWeight="label">{isLoading ? 'Loading...' : displayName}</Text>
+                {ensName && !isLoading && (
+                  <Text fontSize={12} color="text3" fontFamily="mono">
+                    ({truncateAddress(member.owner)})
+                  </Text>
+                )}
+              </Flex>
+              <Text fontSize={12} color="text3">
+                {member.tokens.length} token{member.tokens.length !== 1 ? 's' : ''}:{' '}
+                {truncateTokens(member.tokens)}
+              </Text>
+            </Stack>
+            <Flex gap="x2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditingMemberIndex(index)
+                  setShowEditModal(true)
+                }}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                color="negative"
+                onClick={() => setShowDeleteConfirm(index)}
+              >
+                Remove
+              </Button>
+            </Flex>
+          </Flex>
+        )}
+      </Box>
+    )
+  }
+
   return (
     <Stack gap="x6">
       <Box>
         <Heading size="md" mb="x2">
-          Edit Members & Attributes
+          Edit Members
         </Heading>
         <Text color="text3">
-          Review and edit member allocations and token attributes before setting merkle
-          roots on-chain.
+          Review and edit member allocations before setting merkle roots on-chain.
         </Text>
       </Box>
 
@@ -105,19 +172,42 @@ export const MemberListEditor: React.FC<MemberListEditorProps> = ({
       <MemberAllocationSummary validation={validation} />
 
       {/* Action Buttons */}
-      <Flex justify="space-between" align="center">
-        <Flex gap="x3">
-          <Button variant="secondary" onClick={() => setShowAddModal(true)}>
-            Add Member
-          </Button>
-          <Button variant="secondary" onClick={handleOpenAttributesModal}>
-            Edit Attributes
-          </Button>
+      {showResetConfirm ? (
+        <Box p="x4" borderRadius="curved" backgroundColor="warning">
+          <Flex direction="column" gap="x3">
+            <Text color="onWarning">
+              Are you sure you want to reset all changes? This will restore the original
+              member list and cannot be undone.
+            </Text>
+            <Flex gap="x3">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowResetConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="primary" size="sm" onClick={handleResetToDefault}>
+                Reset to Default
+              </Button>
+            </Flex>
+          </Flex>
+        </Box>
+      ) : (
+        <Flex justify="space-between" align="center">
+          <Flex gap="x3">
+            <Button variant="secondary" onClick={() => setShowAddModal(true)}>
+              Add Member
+            </Button>
+            <Button variant="ghost" onClick={() => setShowResetConfirm(true)}>
+              Reset to Default
+            </Button>
+          </Flex>
+          <Text color="text3" fontSize={14}>
+            {editedMembers.length} member{editedMembers.length !== 1 ? 's' : ''}
+          </Text>
         </Flex>
-        <Text color="text3" fontSize={14}>
-          {editedMembers.length} member{editedMembers.length !== 1 ? 's' : ''}
-        </Text>
-      </Flex>
+      )}
 
       {/* Member List */}
       <Box
@@ -134,68 +224,7 @@ export const MemberListEditor: React.FC<MemberListEditorProps> = ({
             </Text>
           ) : (
             editedMembers.map((member, index) => (
-              <Box
-                key={`${member.owner}-${index}`}
-                p="x3"
-                borderRadius="curved"
-                backgroundColor="background1"
-              >
-                {showDeleteConfirm === index ? (
-                  <Flex direction="column" gap="x2">
-                    <Text color="negative" fontSize={14}>
-                      Remove this member? This cannot be undone.
-                    </Text>
-                    <Flex gap="x2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setShowDeleteConfirm(-1)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        color="negative"
-                        onClick={() => handleRemoveMember(index)}
-                      >
-                        Remove
-                      </Button>
-                    </Flex>
-                  </Flex>
-                ) : (
-                  <Flex justify="space-between" align="center">
-                    <Stack gap="x1">
-                      <Text fontWeight="label">{truncateAddress(member.owner)}</Text>
-                      <Text fontSize={12} color="text3">
-                        {member.tokens.length} token
-                        {member.tokens.length !== 1 ? 's' : ''}:{' '}
-                        {truncateTokens(member.tokens)}
-                      </Text>
-                    </Stack>
-                    <Flex gap="x2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingMemberIndex(index)
-                          setShowEditModal(true)
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        color="negative"
-                        onClick={() => setShowDeleteConfirm(index)}
-                      >
-                        Remove
-                      </Button>
-                    </Flex>
-                  </Flex>
-                )}
-              </Box>
+              <MemberRow key={`${member.owner}-${index}`} member={member} index={index} />
             ))
           )}
         </Stack>
@@ -236,7 +265,7 @@ export const MemberListEditor: React.FC<MemberListEditorProps> = ({
         onClose={() => setShowAddModal(false)}
       />
 
-      {showEditModal && editingMemberIndex >= 0 && (
+      {editingMemberIndex >= 0 && (
         <EditMemberModal
           open={showEditModal}
           member={editedMembers[editingMemberIndex]}
@@ -249,14 +278,6 @@ export const MemberListEditor: React.FC<MemberListEditorProps> = ({
           }}
         />
       )}
-
-      <EditAttributesModal
-        open={showAttributesModal}
-        tokenIds={editingTokenIds}
-        currentAttributes={editedAttributes}
-        onSave={handleEditAttributes}
-        onClose={() => setShowAttributesModal(false)}
-      />
     </Stack>
   )
 }

@@ -2,7 +2,7 @@ import { SmartInput } from '@buildeross/ui/Fields'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { isAddress } from 'viem'
 
 import { DaoMemberSimplified } from '../../../utils/validateMemberAllocation'
@@ -28,27 +28,54 @@ export const EditMemberModal: React.FC<EditMemberModalProps> = ({
   const [tokenIds, setTokenIds] = useState(member.tokens.join(', '))
   const [error, setError] = useState('')
   const [isResolving, setIsResolving] = useState(false)
+  const ensTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Sync state when modal opens or member changes
+  useEffect(() => {
+    if (open) {
+      setAddress(member.owner)
+      setTokenIds(member.tokens.join(', '))
+      setError('')
+      setIsResolving(false)
+    }
+  }, [open, member])
 
   const handleAddressChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setAddress(value as `0x${string}`)
     setError('')
 
-    // Try to resolve ENS
+    // Clear any pending ENS resolution
+    if (ensTimeoutRef.current) {
+      clearTimeout(ensTimeoutRef.current)
+    }
+
+    // Try to resolve ENS with debouncing
     if (value.endsWith('.eth')) {
       setIsResolving(true)
-      try {
-        const resolved = await getEnsAddress(value)
-        if (resolved) {
-          setAddress(resolved)
+      ensTimeoutRef.current = setTimeout(async () => {
+        try {
+          const resolved = await getEnsAddress(value)
+          if (resolved) {
+            setAddress(resolved)
+          }
+        } catch (err) {
+          console.error('ENS resolution failed:', err)
+        } finally {
+          setIsResolving(false)
         }
-      } catch (err) {
-        console.error('ENS resolution failed:', err)
-      } finally {
-        setIsResolving(false)
-      }
+      }, 300)
     }
   }
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (ensTimeoutRef.current) {
+        clearTimeout(ensTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleSave = () => {
     setError('')

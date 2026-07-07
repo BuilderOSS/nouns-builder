@@ -71,10 +71,13 @@ export const Step4_SetupMetadata: React.FC = () => {
 
   const currentProperty = progress.current
   const totalProperties = progress.total
+
+  // Check completion based on txHashes matching property count, not just progress counters
+  // This ensures completion detection works correctly even after page refresh
   const isComplete =
     activeProperties.length > 0 &&
-    currentProperty === totalProperties &&
-    currentProperty === activeProperties.length &&
+    txHashes.length === activeProperties.length &&
+    txHashes.length > 0 &&
     !isAddingProperties
 
   // Decode properties to show detailed breakdown
