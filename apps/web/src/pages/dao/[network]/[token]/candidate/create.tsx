@@ -626,7 +626,15 @@ const CandidateCreatePage: NextPageWithLayout = () => {
 
   if (!address || !addresses.token) {
     return (
-      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
         <Text fontSize={20} fontWeight="display">
           Candidate creation is restricted
         </Text>

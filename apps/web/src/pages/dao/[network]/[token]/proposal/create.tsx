@@ -633,7 +633,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   if (!address) {
     return (
-      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
         <Text fontSize={20} fontWeight="display">
           Proposal creation is restricted
         </Text>
@@ -647,7 +655,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   if (!hasThreshold || isGovernanceDelayed) {
     return (
-      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
         <Text fontSize={20} fontWeight="display">
           Proposal creation is restricted
         </Text>
@@ -665,8 +681,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
       <Stack
         mb={'x8'}
         pb={{ '@initial': 'x30', '@768': 'x0' }}
-        w={'100%'}
         px={'x3'}
+        w={'100%'}
         style={{ maxWidth: 1060 }}
         mx="auto"
       >

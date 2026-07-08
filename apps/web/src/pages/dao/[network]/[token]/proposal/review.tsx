@@ -259,7 +259,15 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   if (!address) {
     return (
-      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
         <Text fontSize={20} fontWeight="display">
           Proposal review is restricted
         </Text>
@@ -273,7 +281,15 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   if (!hasThreshold || isGovernanceDelayed) {
     return (
-      <Flex direction="column" align="flex-start" gap="x4" p="x6">
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
         <Text fontSize={20} fontWeight="display">
           Proposal submission is restricted
         </Text>

@@ -13,6 +13,7 @@ import {
 } from '@buildeross/dao-ui'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
+import { useGovernorVersion } from '@buildeross/hooks/useGovernorVersion'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
@@ -29,7 +30,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { isAddress } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
+import { useAccount } from 'wagmi'
 
 interface TokenPageProps {
   collection: AddressType
@@ -97,29 +98,10 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     [hasGalleryItems, hasCreatorCoin]
   )
 
-  // Check governor version for candidates feature (requires >= 3.0.0)
-  const { data: governorVersion } = useReadContract({
-    abi: [
-      {
-        inputs: [],
-        name: 'contractVersion',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ],
-    address: addresses.governor,
-    functionName: 'contractVersion',
-    chainId: chainId,
+  const { supportsCandidates } = useGovernorVersion({
+    chainId,
+    governorAddress: addresses.governor,
   })
-
-  const supportsCandidates = React.useMemo(() => {
-    if (!governorVersion) return false
-    const version = governorVersion as string
-    // Check if version >= 3.0.0
-    const [major] = version.split('.').map(Number)
-    return major >= 3
-  }, [governorVersion])
 
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
@@ -212,6 +194,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
           key={'proposals'}
           onOpenProposalCreate={openProposalCreatePage}
           onOpenProposalReview={openProposalReviewPage}
+          onOpenCandidateCreate={openCandidateCreatePage}
         />,
       ],
     }

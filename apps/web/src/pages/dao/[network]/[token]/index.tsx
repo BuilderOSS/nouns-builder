@@ -13,6 +13,7 @@ import {
   SectionHandler,
   SmartContracts,
 } from '@buildeross/dao-ui'
+import { useGovernorVersion } from '@buildeross/hooks/useGovernorVersion'
 import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
@@ -106,29 +107,10 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   // Check if signer address is a minter - show custom minter tab if true
   const isSignerCustomMinter = !!signerAddress && !!isSignerMinter
 
-  // Check governor version for candidates feature (requires >= 3.0.0)
-  const { data: governorVersion } = useReadContract({
-    abi: [
-      {
-        inputs: [],
-        name: 'contractVersion',
-        outputs: [{ internalType: 'string', name: '', type: 'string' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ],
-    address: addresses.governor,
-    functionName: 'contractVersion',
+  const { supportsCandidates } = useGovernorVersion({
     chainId: chain.id,
+    governorAddress: addresses.governor,
   })
-
-  const supportsCandidates = React.useMemo(() => {
-    if (!governorVersion) return false
-    const version = governorVersion as string
-    // Check if version >= 3.0.0
-    const [major] = version.split('.').map(Number)
-    return major >= 3
-  }, [governorVersion])
 
   const [showMinterModal, setShowMinterModal] = React.useState(false)
 
@@ -231,6 +213,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
             key={supportsCandidates ? 'proposals' : 'activity'}
             onOpenProposalCreate={openProposalCreatePage}
             onOpenProposalReview={openProposalReviewPage}
+            onOpenCandidateCreate={openCandidateCreatePage}
           />,
         ],
       },

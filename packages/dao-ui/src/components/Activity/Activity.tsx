@@ -1,12 +1,20 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
-import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
-import { useDelegate } from '@buildeross/hooks/useDelegate'
-import { useQueryParams } from '@buildeross/hooks/useQueryParams'
-import { useVotes } from '@buildeross/hooks/useVotes'
+import {
+  useDaoMembership,
+  useDelayedGovernance,
+  useDelegate,
+  useGovernorVersion,
+  useQueryParams,
+  useVotes,
+} from '@buildeross/hooks'
 import { ProposalCard } from '@buildeross/proposal-ui'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useCandidateStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Countdown } from '@buildeross/ui/Countdown'
@@ -28,6 +36,7 @@ import { DelegateForm } from './DelegateForm'
 export type ActivityProps = {
   onOpenProposalCreate: () => void
   onOpenProposalReview: () => void
+  onOpenCandidateCreate: () => void
 }
 
 const LIMIT = 20
@@ -35,11 +44,13 @@ const LIMIT = 20
 export const Activity: React.FC<ActivityProps> = ({
   onOpenProposalCreate,
   onOpenProposalReview,
+  onOpenCandidateCreate,
 }) => {
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
 
   const { startProposalDraft } = useProposalStore()
+  const { startCandidateDraft } = useCandidateStore()
   const { address } = useAccount()
   const { query } = useQueryParams()
   const page: number = query.page ? Number(query.page) : 1
@@ -71,6 +82,11 @@ export const Activity: React.FC<ActivityProps> = ({
     chainId: chain.id,
   })
 
+  const { supportsCandidates } = useGovernorVersion({
+    chainId: chain.id,
+    governorAddress: addresses.governor,
+  })
+
   const [
     { viewCurrentDelegate, viewDelegateForm, viewSuccessfulDelegate, newDelegate },
     { view, edit, update, close },
@@ -83,6 +99,11 @@ export const Activity: React.FC<ActivityProps> = ({
   const handleProposalCreation = () => {
     startProposalDraft()
     onOpenProposalCreate()
+  }
+
+  const handleCandidateCreation = () => {
+    startCandidateDraft()
+    onOpenCandidateCreate()
   }
 
   if (!data && !error && !isLoading) {
@@ -126,7 +147,12 @@ export const Activity: React.FC<ActivityProps> = ({
             align={'center'}
             display={{ '@initial': 'none', '@768': 'flex' }}
           >
-            {address && !isDelegating && !isOwner && (
+            {address && !isDelegating && !isOwner && supportsCandidates && (
+              <Flex mr={'x4'} color={'tertiary'}>
+                You have no votes. Create a candidate to gather support.
+              </Flex>
+            )}
+            {address && !isDelegating && !isOwner && !supportsCandidates && (
               <Flex mr={'x4'} color={'tertiary'}>
                 You have no votes.
               </Flex>
@@ -136,7 +162,13 @@ export const Activity: React.FC<ActivityProps> = ({
                 Your votes are delegated.
               </Flex>
             )}
-            {isOwner && !hasThreshold && (
+            {isOwner && !hasThreshold && supportsCandidates && (
+              <Flex mr={'x4'} color={'tertiary'}>
+                {Number(proposalVotesRequired)} votes required to propose. Create a
+                candidate to gather support.
+              </Flex>
+            )}
+            {isOwner && !hasThreshold && !supportsCandidates && (
               <Flex mr={'x4'} color={'tertiary'}>
                 {Number(proposalVotesRequired)} votes required to propose.
               </Flex>
@@ -157,11 +189,23 @@ export const Activity: React.FC<ActivityProps> = ({
             <ContractButton
               className={createProposalBtn}
               chainId={chain.id}
-              handleClick={handleProposalCreation}
-              disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+              handleClick={
+                address && !hasThreshold && supportsCandidates
+                  ? handleCandidateCreation
+                  : handleProposalCreation
+              }
+              disabled={
+                isGovernanceDelayed
+                  ? true
+                  : address
+                    ? !hasThreshold && !supportsCandidates
+                    : false
+              }
               color={'tertiary'}
             >
-              Create proposal
+              {address && !hasThreshold && supportsCandidates
+                ? 'Create candidate'
+                : 'Create proposal'}
             </ContractButton>
           </Flex>
           <Flex
@@ -185,11 +229,23 @@ export const Activity: React.FC<ActivityProps> = ({
             <ContractButton
               chainId={chain.id}
               className={createProposalBtn}
-              handleClick={handleProposalCreation}
-              disabled={isGovernanceDelayed ? true : address ? !hasThreshold : false}
+              handleClick={
+                address && !hasThreshold && supportsCandidates
+                  ? handleCandidateCreation
+                  : handleProposalCreation
+              }
+              disabled={
+                isGovernanceDelayed
+                  ? true
+                  : address
+                    ? !hasThreshold && !supportsCandidates
+                    : false
+              }
               color={'tertiary'}
             >
-              Create
+              {address && !hasThreshold && supportsCandidates
+                ? 'Create candidate'
+                : 'Create'}
             </ContractButton>
           </Flex>
         </Flex>
