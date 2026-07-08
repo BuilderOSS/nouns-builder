@@ -112,7 +112,7 @@ export const useSetupMetadata = (
             group.items.push({
               propertyId: propertyIdInGroup,
               name: item.name,
-              isNewProperty: false, // Items added via migration are not new properties
+              isNewProperty: true, // Items added via migration are new properties on target chain
             })
           })
         })
