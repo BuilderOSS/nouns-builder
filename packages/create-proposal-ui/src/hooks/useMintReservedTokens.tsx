@@ -1,8 +1,8 @@
 import { MERKLE_RESERVE_MINTER } from '@buildeross/constants/addresses'
-import { merkleReserveMinterAbi, tokenAbi } from '@buildeross/sdk/contract'
+import { merkleReserveMinterAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { MerkleTree } from 'merkletreejs'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { encodeAbiParameters, keccak256, parseAbiParameters } from 'viem'
 import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 
@@ -46,21 +46,6 @@ export const useMintReservedTokens = (
   })
 
   const onChainMerkleRoot = onChainSettings?.[3]
-
-  // Auto-refetch on mount to ensure we have latest on-chain value
-  useEffect(() => {
-    if (minterAddress && targetTokenAddress && targetChainId) {
-      console.log('[useMintReservedTokens] Refetching on-chain merkle root on mount')
-      refetchOnChainRoot()
-    }
-  }, [minterAddress, targetTokenAddress, targetChainId, refetchOnChainRoot])
-
-  // Log on-chain root changes for debugging
-  useEffect(() => {
-    if (onChainMerkleRoot) {
-      console.log('[useMintReservedTokens] On-chain merkle root:', onChainMerkleRoot)
-    }
-  }, [onChainMerkleRoot])
 
   const startMinting = async () => {
     if (!memberSnapshot || !targetTokenAddress || !targetChainId) {
@@ -113,20 +98,6 @@ export const useMintReservedTokens = (
         ? (rootHex as `0x${string}`)
         : (`0x${rootHex}` as `0x${string}`)
 
-      console.log(
-        '[useMintReservedTokens] Calculated merkle root from snapshot:',
-        calculatedRoot
-      )
-      console.log('[useMintReservedTokens] On-chain merkle root:', onChainMerkleRoot)
-      console.log(
-        '[useMintReservedTokens] Member snapshot length:',
-        memberSnapshot.length
-      )
-      console.log(
-        '[useMintReservedTokens] Total tokens in snapshot:',
-        memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)
-      )
-
       // Check if calculated root matches on-chain root
       if (onChainMerkleRoot && calculatedRoot !== onChainMerkleRoot) {
         const errorMsg = `Merkle root mismatch! Calculated: ${calculatedRoot}, On-chain: ${onChainMerkleRoot}. Please go back to Step 5 and regenerate merkle roots.`
@@ -160,50 +131,12 @@ export const useMintReservedTokens = (
 
       setTotalTokens(allClaims.length)
 
-      // Check which tokens are already minted on-chain
-      console.log('[useMintReservedTokens] Checking on-chain ownership for', allClaims.length, 'tokens...')
-      const onChainMintedTokens = new Set<number>()
-
-      // Check each token's owner on-chain
-      for (const claim of allClaims) {
-        try {
-          const owner = await publicClient.readContract({
-            address: targetTokenAddress,
-            abi: tokenAbi,
-            functionName: 'ownerOf',
-            args: [claim.tokenId],
-          })
-          // If ownerOf succeeds, token is minted
-          onChainMintedTokens.add(Number(claim.tokenId))
-          console.log(`[useMintReservedTokens] Token ${claim.tokenId} already minted to ${owner}`)
-        } catch (err) {
-          // If ownerOf reverts, token is not minted yet (still in reserve)
-          console.log(`[useMintReservedTokens] Token ${claim.tokenId} not minted yet`)
-        }
-      }
-
-      console.log('[useMintReservedTokens] On-chain minted tokens:', Array.from(onChainMintedTokens))
-      console.log('[useMintReservedTokens] UI tracked minted tokens:', tokensMinted)
-
-      // Filter out already minted tokens (both from UI state and on-chain check)
-      const alreadyMintedSet = new Set([...tokensMinted, ...onChainMintedTokens])
-      const claimsToMint = allClaims.filter(
-        (claim) => !alreadyMintedSet.has(Number(claim.tokenId))
-      )
-
-      console.log('[useMintReservedTokens] Claims to mint:', claimsToMint.length)
-
-      if (claimsToMint.length === 0) {
-        setError('All tokens are already minted. Nothing to mint.')
-        return { minted: tokensMinted, hashes: txHashes }
-      }
-
       // Batch mint
       const hashes: `0x${string}`[] = [...txHashes]
       const minted: number[] = [...tokensMinted]
 
-      for (let i = 0; i < claimsToMint.length; i += batchSize) {
-        const batch = claimsToMint.slice(i, i + batchSize)
+      for (let i = 0; i < allClaims.length; i += batchSize) {
+        const batch = allClaims.slice(i, i + batchSize)
 
         // Estimate gas for this batch with proper error handling
         let gasLimit: bigint | undefined

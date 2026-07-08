@@ -1,6 +1,6 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { useAuthorizeMinter } from '../../../hooks/useAuthorizeMinter'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
@@ -21,18 +21,6 @@ export const Step7_MintTokens: React.FC = () => {
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
-
-  // Debug logging to verify we're using the right data
-  useEffect(() => {
-    if (memberSnapshot && merkleRoots?.members) {
-      console.log('[Step7] Member snapshot:', memberSnapshot.length, 'members')
-      console.log(
-        '[Step7] Total tokens in snapshot:',
-        memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)
-      )
-      console.log('[Step7] Expected merkle root from Zustand:', merkleRoots.members)
-    }
-  }, [memberSnapshot, merkleRoots])
 
   const [batchSize, setBatchSize] = useState(DEFAULT_BATCH_SIZE)
 
@@ -173,8 +161,8 @@ export const Step7_MintTokens: React.FC = () => {
                   </Flex>
                 </Box>
                 <Text fontSize={12} color="text3">
-                  Larger batches are more efficient but require more gas. If gas estimation
-                  fails, try a smaller batch size.
+                  Larger batches are more efficient but require more gas. If gas
+                  estimation fails, try a smaller batch size.
                 </Text>
               </Stack>
             </Box>
