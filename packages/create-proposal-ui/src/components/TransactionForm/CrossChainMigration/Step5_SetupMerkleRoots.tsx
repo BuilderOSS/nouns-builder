@@ -86,9 +86,13 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     }
   }, [memberMerkleRoot, setMembersMerkleRoot])
 
-  // Use cached merkle roots as fallback (important for page refreshes)
-  const activeAttributesRoot = attributesMerkleRoot || cachedMerkleRoots?.attributes
-  const activeMemberRoot = memberMerkleRoot || cachedMerkleRoots?.members
+  // Prioritize Zustand cache over SWR (important after editing)
+  // If we have a cached root in Zustand, it means it was either:
+  // 1. Just generated and saved, OR
+  // 2. Regenerated after editing
+  // So Zustand cache should take priority over SWR
+  const activeAttributesRoot = cachedMerkleRoots?.attributes || attributesMerkleRoot
+  const activeMemberRoot = cachedMerkleRoots?.members || memberMerkleRoot
 
   // Use stored snapshot if available (after editing), otherwise use generated snapshot
   const activeMemberSnapshot = storedMemberSnapshot || memberSnapshot
@@ -292,12 +296,84 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
 
       {/* Phase 2: Edit Members */}
       {phase === SetupPhase.EDIT && activeMemberSnapshot && (
-        <MemberListEditor
-          initialMembers={activeMemberSnapshot}
-          reservedUntilTokenId={sourceConfig?.reservedUntilTokenId || 0n}
-          onContinue={handleEditContinue}
-          onSkip={handleEditSkip}
-        />
+        <>
+          {/* Display generated roots */}
+          <Box p="x4" borderRadius="curved" backgroundColor="positive">
+            <Heading size="xs" mb="x2" color="onPositive">
+              ✓ Merkle Roots Generated!
+            </Heading>
+          </Box>
+
+          <Stack gap="x4">
+            <Box p="x4" borderRadius="curved" backgroundColor="background2">
+              <Heading size="xs" mb="x3">
+                Attributes Merkle Root
+              </Heading>
+              <Stack gap="x2">
+                <Flex justify="space-between">
+                  <Text color="text3" fontSize={14}>
+                    Tokens with attributes:
+                  </Text>
+                  <Text fontSize={14}>{attributesData?.length || 0}</Text>
+                </Flex>
+                <Box mt="x2">
+                  <Text color="text3" fontSize={12} mb="x1">
+                    Root Hash:
+                  </Text>
+                  <Text
+                    fontFamily="mono"
+                    fontSize={12}
+                    style={{ wordBreak: 'break-all' }}
+                  >
+                    {activeAttributesRoot}
+                  </Text>
+                </Box>
+              </Stack>
+            </Box>
+
+            <Box p="x4" borderRadius="curved" backgroundColor="background2">
+              <Heading size="xs" mb="x3">
+                Member Merkle Root
+              </Heading>
+              <Stack gap="x2">
+                <Flex justify="space-between">
+                  <Text color="text3" fontSize={14}>
+                    Token holders:
+                  </Text>
+                  <Text fontSize={14}>{activeMemberSnapshot?.length || 0}</Text>
+                </Flex>
+                <Flex justify="space-between">
+                  <Text color="text3" fontSize={14}>
+                    Total tokens:
+                  </Text>
+                  <Text fontSize={14}>
+                    {activeMemberSnapshot?.reduce((sum, m) => sum + m.tokens.length, 0) ||
+                      0}
+                  </Text>
+                </Flex>
+                <Box mt="x2">
+                  <Text color="text3" fontSize={12} mb="x1">
+                    Root Hash:
+                  </Text>
+                  <Text
+                    fontFamily="mono"
+                    fontSize={12}
+                    style={{ wordBreak: 'break-all' }}
+                  >
+                    {activeMemberRoot}
+                  </Text>
+                </Box>
+              </Stack>
+            </Box>
+          </Stack>
+
+          <MemberListEditor
+            initialMembers={activeMemberSnapshot}
+            reservedUntilTokenId={sourceConfig?.reservedUntilTokenId || 0n}
+            onContinue={handleEditContinue}
+            onSkip={handleEditSkip}
+          />
+        </>
       )}
 
       {/* Phase 3: Set Roots */}
@@ -406,6 +482,70 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
               contracts.
             </Text>
           </Box>
+
+          {/* Display the merkle roots */}
+          <Stack gap="x4">
+            <Box p="x4" borderRadius="curved" backgroundColor="background2">
+              <Heading size="xs" mb="x3">
+                Attributes Merkle Root
+              </Heading>
+              <Stack gap="x2">
+                <Flex justify="space-between">
+                  <Text color="text3" fontSize={14}>
+                    Tokens with attributes:
+                  </Text>
+                  <Text fontSize={14}>{attributesData?.length || 0}</Text>
+                </Flex>
+                <Box mt="x2">
+                  <Text color="text3" fontSize={12} mb="x1">
+                    Root Hash:
+                  </Text>
+                  <Text
+                    fontFamily="mono"
+                    fontSize={12}
+                    style={{ wordBreak: 'break-all' }}
+                  >
+                    {activeAttributesRoot}
+                  </Text>
+                </Box>
+              </Stack>
+            </Box>
+
+            <Box p="x4" borderRadius="curved" backgroundColor="background2">
+              <Heading size="xs" mb="x3">
+                Member Merkle Root
+              </Heading>
+              <Stack gap="x2">
+                <Flex justify="space-between">
+                  <Text color="text3" fontSize={14}>
+                    Token holders:
+                  </Text>
+                  <Text fontSize={14}>{activeMemberSnapshot?.length || 0}</Text>
+                </Flex>
+                <Flex justify="space-between">
+                  <Text color="text3" fontSize={14}>
+                    Total tokens:
+                  </Text>
+                  <Text fontSize={14}>
+                    {activeMemberSnapshot?.reduce((sum, m) => sum + m.tokens.length, 0) ||
+                      0}
+                  </Text>
+                </Flex>
+                <Box mt="x2">
+                  <Text color="text3" fontSize={12} mb="x1">
+                    Root Hash:
+                  </Text>
+                  <Text
+                    fontFamily="mono"
+                    fontSize={12}
+                    style={{ wordBreak: 'break-all' }}
+                  >
+                    {activeMemberRoot}
+                  </Text>
+                </Box>
+              </Stack>
+            </Box>
+          </Stack>
 
           {(attributesTxHash || membersTxHash) && targetChainId && (
             <Box p="x4" borderRadius="curved" backgroundColor="background2">

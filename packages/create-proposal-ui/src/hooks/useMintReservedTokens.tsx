@@ -1,8 +1,8 @@
 import { MERKLE_RESERVE_MINTER } from '@buildeross/constants/addresses'
-import { merkleReserveMinterAbi } from '@buildeross/sdk/contract'
+import { merkleReserveMinterAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { MerkleTree } from 'merkletreejs'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { encodeAbiParameters, keccak256, parseAbiParameters } from 'viem'
 import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 
@@ -47,6 +47,21 @@ export const useMintReservedTokens = (
 
   const onChainMerkleRoot = onChainSettings?.[3]
 
+  // Auto-refetch on mount to ensure we have latest on-chain value
+  useEffect(() => {
+    if (minterAddress && targetTokenAddress && targetChainId) {
+      console.log('[useMintReservedTokens] Refetching on-chain merkle root on mount')
+      refetchOnChainRoot()
+    }
+  }, [minterAddress, targetTokenAddress, targetChainId, refetchOnChainRoot])
+
+  // Log on-chain root changes for debugging
+  useEffect(() => {
+    if (onChainMerkleRoot) {
+      console.log('[useMintReservedTokens] On-chain merkle root:', onChainMerkleRoot)
+    }
+  }, [onChainMerkleRoot])
+
   const startMinting = async () => {
     if (!memberSnapshot || !targetTokenAddress || !targetChainId) {
       setError('Missing required parameters for minting')
@@ -56,6 +71,11 @@ export const useMintReservedTokens = (
     if (!minterAddress) {
       setError(`No MerkleReserveMinter on chain ${targetChainId}`)
       throw new Error(`No MerkleReserveMinter on chain ${targetChainId}`)
+    }
+
+    if (!publicClient) {
+      setError('No public client available')
+      throw new Error('No public client available')
     }
 
     setError(undefined)
@@ -93,9 +113,24 @@ export const useMintReservedTokens = (
         ? (rootHex as `0x${string}`)
         : (`0x${rootHex}` as `0x${string}`)
 
+      console.log(
+        '[useMintReservedTokens] Calculated merkle root from snapshot:',
+        calculatedRoot
+      )
+      console.log('[useMintReservedTokens] On-chain merkle root:', onChainMerkleRoot)
+      console.log(
+        '[useMintReservedTokens] Member snapshot length:',
+        memberSnapshot.length
+      )
+      console.log(
+        '[useMintReservedTokens] Total tokens in snapshot:',
+        memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)
+      )
+
       // Check if calculated root matches on-chain root
       if (onChainMerkleRoot && calculatedRoot !== onChainMerkleRoot) {
         const errorMsg = `Merkle root mismatch! Calculated: ${calculatedRoot}, On-chain: ${onChainMerkleRoot}. Please go back to Step 5 and regenerate merkle roots.`
+        console.error('[useMintReservedTokens] MISMATCH:', errorMsg)
         setError(errorMsg)
         throw new Error(errorMsg)
       }
@@ -125,13 +160,41 @@ export const useMintReservedTokens = (
 
       setTotalTokens(allClaims.length)
 
-      // Filter out already minted tokens to support resuming
-      const alreadyMintedSet = new Set(tokensMinted)
+      // Check which tokens are already minted on-chain
+      console.log('[useMintReservedTokens] Checking on-chain ownership for', allClaims.length, 'tokens...')
+      const onChainMintedTokens = new Set<number>()
+
+      // Check each token's owner on-chain
+      for (const claim of allClaims) {
+        try {
+          const owner = await publicClient.readContract({
+            address: targetTokenAddress,
+            abi: tokenAbi,
+            functionName: 'ownerOf',
+            args: [claim.tokenId],
+          })
+          // If ownerOf succeeds, token is minted
+          onChainMintedTokens.add(Number(claim.tokenId))
+          console.log(`[useMintReservedTokens] Token ${claim.tokenId} already minted to ${owner}`)
+        } catch (err) {
+          // If ownerOf reverts, token is not minted yet (still in reserve)
+          console.log(`[useMintReservedTokens] Token ${claim.tokenId} not minted yet`)
+        }
+      }
+
+      console.log('[useMintReservedTokens] On-chain minted tokens:', Array.from(onChainMintedTokens))
+      console.log('[useMintReservedTokens] UI tracked minted tokens:', tokensMinted)
+
+      // Filter out already minted tokens (both from UI state and on-chain check)
+      const alreadyMintedSet = new Set([...tokensMinted, ...onChainMintedTokens])
       const claimsToMint = allClaims.filter(
         (claim) => !alreadyMintedSet.has(Number(claim.tokenId))
       )
 
+      console.log('[useMintReservedTokens] Claims to mint:', claimsToMint.length)
+
       if (claimsToMint.length === 0) {
+        setError('All tokens are already minted. Nothing to mint.')
         return { minted: tokensMinted, hashes: txHashes }
       }
 

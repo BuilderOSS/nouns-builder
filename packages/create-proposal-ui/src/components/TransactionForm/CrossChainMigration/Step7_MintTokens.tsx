@@ -1,6 +1,6 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useAuthorizeMinter } from '../../../hooks/useAuthorizeMinter'
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
@@ -21,6 +21,18 @@ export const Step7_MintTokens: React.FC = () => {
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
+
+  // Debug logging to verify we're using the right data
+  useEffect(() => {
+    if (memberSnapshot && merkleRoots?.members) {
+      console.log('[Step7] Member snapshot:', memberSnapshot.length, 'members')
+      console.log(
+        '[Step7] Total tokens in snapshot:',
+        memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)
+      )
+      console.log('[Step7] Expected merkle root from Zustand:', merkleRoots.members)
+    }
+  }, [memberSnapshot, merkleRoots])
 
   const [batchSize, setBatchSize] = useState(DEFAULT_BATCH_SIZE)
 
@@ -104,6 +116,7 @@ export const Step7_MintTokens: React.FC = () => {
 
   if (error) {
     const isGasEstimationError = error.includes('Gas estimation failed')
+    const isMerkleRootMismatch = error.includes('Merkle root mismatch')
     return (
       <Stack gap="x4">
         <Heading size="md">Error Minting Tokens</Heading>
@@ -114,17 +127,81 @@ export const Step7_MintTokens: React.FC = () => {
           </Text>
         </Box>
         {isGasEstimationError && (
+          <>
+            <Box p="x4" borderRadius="curved" backgroundColor="warning">
+              <Heading size="xs" mb="x2" color="onWarning">
+                Try Reducing Batch Size
+              </Heading>
+              <Stack gap="x2">
+                <Text fontSize={14} color="onWarning">
+                  Current batch size: {batchSize} tokens
+                </Text>
+                <Text fontSize={14} color="onWarning">
+                  Reduce the batch size below and try again.
+                </Text>
+              </Stack>
+            </Box>
+            {/* Batch Size Configuration */}
+            <Box p="x4" borderRadius="curved" backgroundColor="background2">
+              <Heading size="xs" mb="x3">
+                Batch Size Configuration
+              </Heading>
+              <Stack gap="x3">
+                <Box>
+                  <Label mb="x2">Tokens per Transaction: {batchSize}</Label>
+                  <Flex gap="x2" wrap="wrap">
+                    {[50, 25, 10, 5].map((size) => (
+                      <Button
+                        key={size}
+                        variant={batchSize === size ? 'primary' : 'secondary'}
+                        size="sm"
+                        onClick={() => handleBatchSizeChange(size)}
+                      >
+                        {size}
+                      </Button>
+                    ))}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() =>
+                        handleBatchSizeChange(Math.max(1, Math.floor(batchSize / 2)))
+                      }
+                      disabled={batchSize <= 1}
+                    >
+                      Half ({Math.max(1, Math.floor(batchSize / 2))})
+                    </Button>
+                  </Flex>
+                </Box>
+                <Text fontSize={12} color="text3">
+                  Larger batches are more efficient but require more gas. If gas estimation
+                  fails, try a smaller batch size.
+                </Text>
+              </Stack>
+            </Box>
+          </>
+        )}
+        {isMerkleRootMismatch && (
           <Box p="x4" borderRadius="curved" backgroundColor="warning">
             <Heading size="xs" mb="x2" color="onWarning">
-              Try Reducing Batch Size
+              Merkle Root Mismatch
             </Heading>
             <Stack gap="x2">
               <Text fontSize={14} color="onWarning">
-                Current batch size: {batchSize} tokens
+                The on-chain merkle root doesn't match what was calculated from your
+                member snapshot. This usually happens if:
               </Text>
               <Text fontSize={14} color="onWarning">
-                Try reducing to: {Math.max(1, Math.floor(batchSize / 2))} tokens
+                • The contract is reading a cached/stale value
               </Text>
+              <Text fontSize={14} color="onWarning">
+                • The wrong root was set in Step 5
+              </Text>
+              <Text fontSize={14} color="onWarning">
+                • The member snapshot was modified after setting the root
+              </Text>
+              <Button variant="secondary" onClick={handleRefreshRoot} mt="x2">
+                Recheck On-Chain Root
+              </Button>
             </Stack>
           </Box>
         )}
@@ -316,63 +393,55 @@ export const Step7_MintTokens: React.FC = () => {
         </Stack>
       </Box>
 
-      {/* Merkle Root Debug - Only show when there's a mismatch error */}
-      {memberSnapshot &&
-        merkleRoots?.members &&
-        error &&
-        error.includes('Merkle root mismatch') && (
-          <Box p="x4" borderRadius="curved" backgroundColor="background2">
-            <Heading size="xs" mb="x3">
-              Debug: Merkle Root Verification
-            </Heading>
-            <Stack gap="x3">
+      {/* Merkle Root Debug - Show when there's any error */}
+      {memberSnapshot && merkleRoots?.members && error && (
+        <Box p="x4" borderRadius="curved" backgroundColor="background2">
+          <Heading size="xs" mb="x3">
+            Debug: Merkle Root Verification
+          </Heading>
+          <Stack gap="x3">
+            <Box>
+              <Text fontSize={12} color="text3" mb="x1">
+                Expected Merkle Root (from Step 5 - Zustand state):
+              </Text>
+              <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
+                {merkleRoots.members}
+              </Text>
+            </Box>
+            {onChainMerkleRoot && (
               <Box>
                 <Text fontSize={12} color="text3" mb="x1">
-                  Expected Merkle Root (from Step 5 - Zustand state):
+                  On-Chain Merkle Root (from MerkleReserveMinter contract):
                 </Text>
                 <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
-                  {merkleRoots.members}
+                  {onChainMerkleRoot}
                 </Text>
-              </Box>
-              {onChainMerkleRoot && (
-                <Box>
-                  <Text fontSize={12} color="text3" mb="x1">
-                    On-Chain Merkle Root (from MerkleReserveMinter contract):
+                {onChainMerkleRoot !== merkleRoots.members && (
+                  <Text fontSize={12} color="negative" mt="x1">
+                    ⚠️ MISMATCH: On-chain root differs from expected root!
                   </Text>
-                  <Text
-                    fontFamily="mono"
-                    fontSize={12}
-                    style={{ wordBreak: 'break-all' }}
-                  >
-                    {onChainMerkleRoot}
-                  </Text>
-                  {onChainMerkleRoot !== merkleRoots.members && (
-                    <Text fontSize={12} color="negative" mt="x1">
-                      ⚠️ MISMATCH: On-chain root differs from expected root!
-                    </Text>
-                  )}
-                </Box>
-              )}
-              <Box>
-                <Text fontSize={12} color="text3" mb="x1">
-                  Snapshot Info:
-                </Text>
-                <Text fontSize={12}>
-                  {memberSnapshot.length} members,{' '}
-                  {memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)} total
-                  tokens
-                </Text>
+                )}
               </Box>
-              <Button variant="secondary" size="sm" onClick={handleRefreshRoot}>
-                Refresh On-Chain Root
-              </Button>
-              <Text fontSize={12} color="text4">
-                If the mismatch persists after refreshing, go back to Step 5 and use the
-                "Reset & Regenerate" button.
+            )}
+            <Box>
+              <Text fontSize={12} color="text3" mb="x1">
+                Snapshot Info:
               </Text>
-            </Stack>
-          </Box>
-        )}
+              <Text fontSize={12}>
+                {memberSnapshot.length} members,{' '}
+                {memberSnapshot.reduce((sum, m) => sum + m.tokens.length, 0)} total tokens
+              </Text>
+            </Box>
+            <Button variant="secondary" size="sm" onClick={handleRefreshRoot}>
+              Refresh On-Chain Root
+            </Button>
+            <Text fontSize={12} color="text4">
+              If the mismatch persists after refreshing, go back to Step 5 and use the
+              "Reset & Regenerate" button.
+            </Text>
+          </Stack>
+        </Box>
+      )}
 
       {!isComplete && !isMinting && tokensMinted.length === 0 && (
         <Box p="x4" borderRadius="curved" backgroundColor="warning">
