@@ -330,12 +330,15 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       setIsSuccess(true)
       setReplyingToComment(undefined)
 
+      // Refetch data immediately after submission
+      // The SDK functions already wait for subgraph sync, so data should be ready
+      void mutateCandidate()
+      void mutateComments()
+
       // Auto-close after 2 seconds
       successTimerRef.current = setTimeout(() => {
         setComposerOpen(false)
         setIsSuccess(false)
-        void mutateCandidate()
-        void mutateComments()
       }, 2000)
     },
     [mutateCandidate, mutateComments]
