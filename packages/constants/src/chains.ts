@@ -105,6 +105,13 @@ export const TESTNET_CHAINS: Chains = sortNonEmptyChains(TESTNET_CHAINS_UNSORTED
 
 export const PUBLIC_IS_TESTNET = process.env.NEXT_PUBLIC_NETWORK_TYPE === 'testnet'
 
+/**
+ * Allow Fast DAO feature on mainnet chains (for local testing only)
+ * Default: false (Fast DAO only available on testnets)
+ */
+export const ALLOW_FAST_DAO_ON_MAINNET =
+  process.env.NEXT_PUBLIC_ALLOW_FAST_DAO_ON_MAINNET === 'true'
+
 // ----------------------
 // ALL / DEFAULT CHAINS
 // ----------------------

@@ -4,7 +4,7 @@ import {
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
 } from '@buildeross/ui/styles'
-import { isTestnetChain } from '@buildeross/utils/chains'
+import { isFastDAOAllowed } from '@buildeross/utils/chains'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Heading, Icon, Stack } from '@buildeross/zord'
@@ -57,7 +57,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false)
 
   useEffect(() => {
-    if (enableFastDAO && !isTestnetChain(chain.id)) {
+    if (enableFastDAO && !isFastDAOAllowed(chain.id)) {
       setEnableFastDAO(false)
     }
   }, [chain.id, enableFastDAO, setEnableFastDAO])
@@ -201,7 +201,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               />
             </Stack>
 
-            {isTestnetChain(chain.id) && (
+            {isFastDAOAllowed(chain.id) && (
               <Flex mt={'x4'} mb={'x4'}>
                 <Flex align={'center'} justify={'center'} gap={'x4'}>
                   <Flex
@@ -219,7 +219,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                     {enableFastDAO && <Icon fill="background1" id="check" />}
                   </Flex>
                   <Flex className={deployCheckboxHelperText}>
-                    <strong>Enable Fast DAO (testnet only):</strong> ultra-short timings
+                    <strong>Enable Fast DAO (testing only):</strong> ultra-short timings
                     for testing &mdash;{' '}
                     {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0 ETH
                     reserve), {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock,{' '}
