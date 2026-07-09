@@ -30,6 +30,7 @@ interface MigratePageProps {
  */
 const MIGRATION_ALLOWLIST: AddressType[] = [
   '0x19a8eb80c1483CEAA1278B16C5D5eF0104F85905' as AddressType,
+  '0x4E3378b12Af3B5C36235b7d50fe37593E54f7848' as AddressType,
 ]
 
 const MigratePage: NextPageWithLayout<MigratePageProps> = ({
