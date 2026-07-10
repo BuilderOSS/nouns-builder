@@ -3,9 +3,12 @@ import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord
 import { useState } from 'react'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
-import { useSetAttributes } from '../../../hooks/useSetAttributes'
+import {
+  DEFAULT_ATTRIBUTES_BATCH_SIZE,
+  useSetAttributes,
+} from '../../../hooks/useSetAttributes'
 
-export const Step8_SetAttributes: React.FC = () => {
+export const Step7_SetAttributes: React.FC = () => {
   const {
     targetChainId,
     targetAddresses,
@@ -17,7 +20,7 @@ export const Step8_SetAttributes: React.FC = () => {
     goToPreviousStep,
   } = useCrossChainMigration()
 
-  const [batchSize, setBatchSize] = useState(10)
+  const [batchSize, setBatchSize] = useState(DEFAULT_ATTRIBUTES_BATCH_SIZE)
 
   const {
     setAllAttributes,
@@ -109,16 +112,22 @@ export const Step8_SetAttributes: React.FC = () => {
             <Box>
               <Label mb="x2">Tokens per Transaction: {batchSize}</Label>
               <Flex gap="x2" wrap="wrap">
-                {[10, 5, 2, 1].map((size) => (
-                  <Button
-                    key={size}
-                    variant={batchSize === size ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => handleBatchSizeChange(size)}
-                  >
-                    {size}
-                  </Button>
-                ))}
+                {[
+                  DEFAULT_ATTRIBUTES_BATCH_SIZE,
+                  Math.floor(DEFAULT_ATTRIBUTES_BATCH_SIZE / 2),
+                  Math.floor(DEFAULT_ATTRIBUTES_BATCH_SIZE / 4),
+                ]
+                  .filter((v, i, arr) => v >= 1 && arr.indexOf(v) === i)
+                  .map((size) => (
+                    <Button
+                      key={size}
+                      variant={batchSize === size ? 'primary' : 'secondary'}
+                      size="sm"
+                      onClick={() => handleBatchSizeChange(size)}
+                    >
+                      {size}
+                    </Button>
+                  ))}
                 <Button
                   variant="secondary"
                   size="sm"

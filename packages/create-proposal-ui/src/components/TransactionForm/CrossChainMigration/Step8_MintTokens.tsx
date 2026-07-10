@@ -9,7 +9,13 @@ import {
   useMintReservedTokens,
 } from '../../../hooks/useMintReservedTokens'
 
-export const Step7_MintTokens: React.FC = () => {
+const BATCH_SIZE_OPTIONS = [
+  DEFAULT_BATCH_SIZE,
+  Math.floor(DEFAULT_BATCH_SIZE / 2),
+  Math.floor(DEFAULT_BATCH_SIZE / 4),
+].filter((v, i, arr) => v >= 1 && arr.indexOf(v) === i)
+
+export const Step8_MintTokens: React.FC = () => {
   const {
     targetChainId,
     targetAddresses,
@@ -138,7 +144,7 @@ export const Step7_MintTokens: React.FC = () => {
                 <Box>
                   <Label mb="x2">Tokens per Transaction: {batchSize}</Label>
                   <Flex gap="x2" wrap="wrap">
-                    {[50, 25, 10, 5].map((size) => (
+                    {BATCH_SIZE_OPTIONS.map((size) => (
                       <Button
                         key={size}
                         variant={batchSize === size ? 'primary' : 'secondary'}
@@ -255,7 +261,7 @@ export const Step7_MintTokens: React.FC = () => {
             <Box>
               <Label mb="x2">Tokens per Transaction: {batchSize}</Label>
               <Flex gap="x2" wrap="wrap">
-                {[50, 25, 10, 5].map((size) => (
+                {BATCH_SIZE_OPTIONS.map((size) => (
                   <Button
                     key={size}
                     variant={batchSize === size ? 'primary' : 'secondary'}
@@ -567,7 +573,7 @@ export const Step7_MintTokens: React.FC = () => {
           </Box>
 
           <Flex justify="flex-end">
-            <Button onClick={handleContinue}>Continue to Set Attributes</Button>
+            <Button onClick={handleContinue}>Continue to Create Proposal</Button>
           </Flex>
         </>
       )}

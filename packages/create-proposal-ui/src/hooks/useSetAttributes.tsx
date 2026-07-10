@@ -5,6 +5,8 @@ import { useState } from 'react'
 import { encodePacked, keccak256 } from 'viem'
 import { usePublicClient, useWriteContract } from 'wagmi'
 
+export const DEFAULT_ATTRIBUTES_BATCH_SIZE = 50
+
 export const useSetAttributes = (
   targetMetadataAddress?: AddressType,
   targetChainId?: CHAIN_ID,
@@ -15,7 +17,7 @@ export const useSetAttributes = (
   const [txHashes, setTxHashes] = useState<`0x${string}`[]>([])
   const [tokensSet, setTokensSet] = useState<number>(0)
   const [totalTokens, setTotalTokens] = useState<number>(0)
-  const [batchSize, setBatchSize] = useState<number>(10) // Lower than minting due to proof complexity
+  const [batchSize, setBatchSize] = useState<number>(DEFAULT_ATTRIBUTES_BATCH_SIZE)
 
   const { writeContractAsync, isPending } = useWriteContract()
   const publicClient = usePublicClient({ chainId: targetChainId })
