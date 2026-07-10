@@ -82,18 +82,44 @@ export const Step1_LoadConfig: React.FC = () => {
 
     setValidationError(undefined)
 
-    // Check if founders array is empty and auto-populate with current user
+    // Ensure current wallet is always the first founder
     const configToSave = { ...config.rawValues }
-    if (configToSave.founders.length === 0 && walletAddress) {
-      // Add current user as default founder (10%, 1 year vest)
-      const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60
-      configToSave.founders = [
-        {
-          wallet: walletAddress,
-          ownershipPct: 10,
-          vestExpiry: oneYearFromNow,
-        },
-      ]
+    const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60
+
+    if (walletAddress) {
+      if (configToSave.founders.length === 0) {
+        // No founders - add current user as default founder (10%, 1 year vest)
+        configToSave.founders = [
+          {
+            wallet: walletAddress,
+            ownershipPct: 10,
+            vestExpiry: oneYearFromNow,
+          },
+        ]
+      } else {
+        // Founders exist - ensure current wallet is at index 0
+        // Create mutable copy of founders array
+        const foundersCopy = [...configToSave.founders]
+        const currentWalletIndex = foundersCopy.findIndex(
+          (f) => f.wallet.toLowerCase() === walletAddress.toLowerCase()
+        )
+
+        if (currentWalletIndex === -1) {
+          // Current wallet not in founders - add at position 0
+          foundersCopy.unshift({
+            wallet: walletAddress,
+            ownershipPct: 10,
+            vestExpiry: oneYearFromNow,
+          })
+          configToSave.founders = foundersCopy
+        } else if (currentWalletIndex > 0) {
+          // Current wallet exists but not first - move to position 0
+          const [currentWalletFounder] = foundersCopy.splice(currentWalletIndex, 1)
+          foundersCopy.unshift(currentWalletFounder)
+          configToSave.founders = foundersCopy
+        }
+        // If currentWalletIndex === 0, wallet is already first - no action needed
+      }
     }
 
     setChains(sourceChainId as CHAIN_ID, targetChainId)

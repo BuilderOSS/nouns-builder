@@ -55,6 +55,16 @@ export const Step2_ReviewConfig: React.FC = () => {
     }
 
     if (localConfig.founders && localConfig.founders.length > 0) {
+      // Validate that first founder is the current wallet
+      if (walletAddress && localConfig.founders[0]) {
+        if (
+          localConfig.founders[0].wallet.toLowerCase() !== walletAddress.toLowerCase()
+        ) {
+          newErrors.founders = 'First founder must be your connected wallet address'
+          newErrors.founder_0_wallet = 'This must be your wallet address'
+        }
+      }
+
       // Check for duplicates
       const walletAddresses = localConfig.founders.map((f) => f.wallet.toLowerCase())
       const duplicates = walletAddresses.filter(
@@ -261,6 +271,15 @@ export const Step2_ReviewConfig: React.FC = () => {
               Add Founder
             </Button>
           </Flex>
+
+          {/* Info banner about first founder requirement */}
+          <Box p="x3" borderRadius="curved" backgroundColor="accent" mb="x4">
+            <Text fontSize={14} color="background1">
+              ℹ️ Your wallet must be the first founder to execute this migration. You can
+              edit ownership % and vest expiry, but cannot change or remove this founder.
+            </Text>
+          </Box>
+
           {errors.founders && (
             <Text color="negative" fontSize={12} mb="x3">
               {errors.founders}
@@ -275,19 +294,22 @@ export const Step2_ReviewConfig: React.FC = () => {
                   borderRadius="curved"
                   borderColor="border"
                   borderStyle="solid"
+                  backgroundColor={idx === 0 ? 'background2' : undefined}
                 >
                   <Flex justify="space-between" align="center" mb="x2">
                     <Text fontSize={12} color="text3">
-                      Founder {idx + 1}
+                      Founder {idx + 1} {idx === 0 && '(You)'}
                     </Text>
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() => handleRemoveFounder(idx)}
-                      style={{ color: 'var(--color-negative)' }}
-                    >
-                      Remove
-                    </Button>
+                    {idx > 0 && (
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        onClick={() => handleRemoveFounder(idx)}
+                        style={{ color: 'var(--color-negative)' }}
+                      >
+                        Remove
+                      </Button>
+                    )}
                   </Flex>
                   <Stack gap="x3">
                     <Box>
@@ -298,6 +320,7 @@ export const Step2_ReviewConfig: React.FC = () => {
                         type="text"
                         placeholder="0x... or .eth"
                         isAddress={true}
+                        disabled={idx === 0}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           const newFounders = [...localConfig.founders!]
                           newFounders[idx] = {
