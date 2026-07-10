@@ -149,24 +149,6 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
             </Text>
           </Box>
 
-          {/* DAO Context */}
-          <Box
-            borderRadius="curved"
-            borderStyle="solid"
-            borderWidth="normal"
-            borderColor="border"
-            p="x4"
-          >
-            <Stack gap="x1">
-              <Text fontSize="16" fontWeight="label">
-                Migrating: {daoName}
-              </Text>
-              <Text fontSize="14" color="text3">
-                Source Chain: {chain.name}
-              </Text>
-            </Stack>
-          </Box>
-
           {/* Migration Form */}
           <Box>
             {addresses.token ? (
@@ -187,7 +169,8 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
   )
 }
 
-MigratePage.getLayout = (page) => getDaoLayout(page, { hideFooterOnMobile: true })
+MigratePage.getLayout = (page) =>
+  getDaoLayout(page, { hideFooterOnMobile: true, hideChainMenu: true })
 
 export default MigratePage
 

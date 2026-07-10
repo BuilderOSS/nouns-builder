@@ -11,8 +11,8 @@ export enum MigrationStep {
   SETUP_METADATA = 3,
   SETUP_MERKLE_ROOTS = 4,
   SET_DELAYED_GOVERNANCE = 5,
-  MINT_TOKENS = 6,
-  SET_ATTRIBUTES = 7,
+  SET_ATTRIBUTES = 6, // Step 7: Set attributes BEFORE minting
+  MINT_TOKENS = 7, // Step 8: Mint tokens (will use stored attributes)
   CREATE_PROPOSAL = 8,
 }
 
@@ -113,6 +113,13 @@ export interface CrossChainMigrationState {
   // Step 7: Minting progress
   mintingProgress: MintingProgress
 
+  // Step 8: Attribute setting progress
+  attributeSettingProgress: {
+    total: number
+    tokensSet: number[]
+    txHashes: `0x${string}`[]
+  }
+
   // Transaction hashes
   deployTxHash?: `0x${string}`
   metadataTxHashes: `0x${string}`[]
@@ -163,6 +170,10 @@ export interface CrossChainMigrationState {
   addMintedTokens: (tokenIds: number[]) => void
   addMintingTxHash: (hash: `0x${string}`) => void
 
+  // Step 8: Attribute setting actions
+  updateAttributesSet: (tokensSet: number) => void
+  addAttributeSettingTxHash: (hash: `0x${string}`) => void
+
   setValidationResults: (results: ValidationResults) => void
   reset: () => void
   goToNextStep: () => void
@@ -187,6 +198,7 @@ const initialState = {
   delayedGovernanceTimestamp: undefined,
   delayedGovernanceTxHash: undefined,
   mintingProgress: { total: 0, minted: [], failed: [], txHashes: [] },
+  attributeSettingProgress: { total: 0, tokensSet: [], txHashes: [] },
   deployTxHash: undefined,
   metadataTxHashes: [],
   merkleRootTxHashes: [],
@@ -349,6 +361,24 @@ function createMigrationStore(storageKey: string) {
             mintingProgress: {
               ...state.mintingProgress,
               txHashes: [...state.mintingProgress.txHashes, hash],
+            },
+          })),
+
+        // Step 8: Attribute setting actions
+        updateAttributesSet: (tokensSet) =>
+          set((state) => ({
+            attributeSettingProgress: {
+              ...state.attributeSettingProgress,
+              total: state.attributesData?.length || 0,
+              tokensSet: Array.from({ length: tokensSet }, (_, i) => i),
+            },
+          })),
+
+        addAttributeSettingTxHash: (hash) =>
+          set((state) => ({
+            attributeSettingProgress: {
+              ...state.attributeSettingProgress,
+              txHashes: [...state.attributeSettingProgress.txHashes, hash],
             },
           })),
 

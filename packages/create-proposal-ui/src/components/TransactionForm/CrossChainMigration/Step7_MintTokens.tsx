@@ -207,7 +207,7 @@ export const Step7_MintTokens: React.FC = () => {
     <Stack gap="x6">
       <Box>
         <Heading size="md" mb="x2">
-          Step 7: Mint Reserved Tokens
+          Step 8: Mint Reserved Tokens
         </Heading>
         <Text color="text3">
           Batch mint all reserved tokens to their original owners using merkle proofs.

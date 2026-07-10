@@ -20,6 +20,7 @@ type BaseLayoutProps = {
   addresses?: DaoContractAddresses
   footer?: ReactNode
   nav?: ReactNode
+  hideChainMenu?: boolean
 } & BoxProps
 
 export function BaseLayout({
@@ -28,6 +29,7 @@ export function BaseLayout({
   addresses,
   footer,
   nav,
+  hideChainMenu = false,
   ...props
 }: BaseLayoutProps) {
   const { style, ...rest } = props
@@ -40,7 +42,7 @@ export function BaseLayout({
       <ChainStoreProvider store={chainStore}>
         <DaoStoreProvider store={daoStore}>
           <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            {nav || <DefaultLayoutNav />}
+            {nav || <DefaultLayoutNav hideChainMenu={hideChainMenu} />}
             <Box style={{ ...style, flex: 1 }} {...rest}>
               {children}
             </Box>

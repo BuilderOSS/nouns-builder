@@ -6,6 +6,7 @@ import {
   MigrationStep,
   useCrossChainMigration,
 } from '../../../hooks/useCrossChainMigration'
+import { MigrationBanner } from './MigrationBanner'
 import { MigrationProgressTracker } from './MigrationProgressTracker'
 import { Step1_LoadConfig } from './Step1_LoadConfig'
 import { Step2_ReviewConfig } from './Step2_ReviewConfig'
@@ -27,8 +28,8 @@ import { Step9_CreateProposal } from './Step9_CreateProposal'
  * 4. Setup metadata properties
  * 5. Setup merkle roots
  * 6. Set delayed governance parameters
- * 7. Mint reserved tokens
- * 8. Set attributes (optional)
+ * 7. Set token attributes on-chain (before minting)
+ * 8. Mint reserved tokens (uses stored attributes)
  * 9. Create proposal to pause auctions and bridge treasury
  */
 export const CrossChainMigration: React.FC = () => {
@@ -52,10 +53,10 @@ export const CrossChainMigration: React.FC = () => {
         return <Step5_SetupMerkleRoots />
       case MigrationStep.SET_DELAYED_GOVERNANCE:
         return <Step6_SetDelayedGovernance />
-      case MigrationStep.MINT_TOKENS:
-        return <Step7_MintTokens />
       case MigrationStep.SET_ATTRIBUTES:
-        return <Step8_SetAttributes />
+        return <Step8_SetAttributes /> // Now Step 7: Set attributes first
+      case MigrationStep.MINT_TOKENS:
+        return <Step7_MintTokens /> // Now Step 8: Then mint tokens
       case MigrationStep.CREATE_PROPOSAL:
         return <Step9_CreateProposal />
       default:
@@ -72,6 +73,7 @@ export const CrossChainMigration: React.FC = () => {
   return (
     <Box>
       <Stack gap="x6">
+        <MigrationBanner />
         <MigrationProgressTracker />
 
         {daoDeployed && (

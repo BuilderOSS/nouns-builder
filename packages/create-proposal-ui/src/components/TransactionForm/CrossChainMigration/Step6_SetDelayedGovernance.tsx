@@ -270,7 +270,7 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
           </Box>
 
           <Flex justify="flex-end">
-            <Button onClick={handleContinue}>Continue to Token Minting</Button>
+            <Button onClick={handleContinue}>Continue to Set Attributes</Button>
           </Flex>
         </>
       )}

@@ -23,7 +23,7 @@ type TupleOf16Numbers = [
 export const prepareAttributesMerkleRoot = async (
   attributeForTokens: number[][]
 ): Promise<`0x${string}`> => {
-  // Create leaves using the same encoding as the contract: keccak256(abi.encodePacked(tokenId, attributes))
+  // Create leaves using the same encoding as the contract: keccak256(abi.encodePacked(tokenId, uint16[16]))
   const leaves = attributeForTokens
     .map((attributes, tokenId) => {
       let arr: TupleOf16Numbers = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -34,29 +34,8 @@ export const prepareAttributesMerkleRoot = async (
         arr[i] = attributes[i]
       }
 
-      // Use encodePacked with individual uint16 elements to match Solidity's abi.encodePacked(uint256, uint16[16])
-      const packed = encodePacked(
-        [
-          'uint256',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-          'uint16',
-        ],
-        [BigInt(tokenId), ...arr]
-      )
+      // Use encodePacked with array to match Solidity's abi.encodePacked(uint256, uint16[16])
+      const packed = encodePacked(['uint256', 'uint16[16]'], [BigInt(tokenId), arr])
 
       return keccak256(packed)
     })
