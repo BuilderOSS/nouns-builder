@@ -18,6 +18,7 @@ interface ConfigureUpdatablePeriodModalProps {
   onContinue: () => void
   votingPeriodSeconds?: bigint
   updatablePeriodSeconds: number
+  daoName?: string
 }
 
 const PR_URL = 'https://github.com/BuilderOSS/nouns-protocol/pull/5'
@@ -34,13 +35,20 @@ export const ConfigureUpdatablePeriodModal: React.FC<
   onContinue,
   votingPeriodSeconds,
   updatablePeriodSeconds,
+  daoName,
 }) => {
   const [acceptedDisclaimer, setAcceptedDisclaimer] = React.useState(false)
+  const [confirmText, setConfirmText] = React.useState('')
 
-  // Reset disclaimer when modal opens
+  // Calculate expected confirmation text
+  const expectedText = daoName ? `Upgrade ${daoName}` : 'Upgrade to v3.0.0'
+  const isTextMatch = confirmText === expectedText
+
+  // Reset disclaimer and confirm text when modal opens
   React.useEffect(() => {
     if (open) {
       setAcceptedDisclaimer(false)
+      setConfirmText('')
     }
   }, [open])
 
@@ -107,6 +115,46 @@ export const ConfigureUpdatablePeriodModal: React.FC<
                 <Text fontSize="14">Review Code Changes →</Text>
               </Box>
             </Box>
+
+            {/* Text confirmation input */}
+            <Box mt="x3">
+              <Text fontSize="14" color="text1" mb="x2">
+                Type{' '}
+                <Text as="span" fontWeight="label">
+                  {expectedText}
+                </Text>{' '}
+                to confirm:
+              </Text>
+              <Box
+                as="input"
+                type="text"
+                value={confirmText}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setConfirmText(e.target.value)
+                }
+                placeholder={expectedText}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  fontSize: '14px',
+                  borderRadius: '8px',
+                  border: `1px solid ${isTextMatch ? '#10b981' : '#e5e7eb'}`,
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  outline: 'none',
+                }}
+              />
+              {confirmText && !isTextMatch && (
+                <Text fontSize="12" color="negative" mt="x1">
+                  Text must match exactly (case-sensitive)
+                </Text>
+              )}
+              {isTextMatch && (
+                <Text fontSize="12" color="positive" mt="x1">
+                  ✓ Confirmed
+                </Text>
+              )}
+            </Box>
           </Flex>
         </Box>
 
@@ -157,7 +205,9 @@ export const ConfigureUpdatablePeriodModal: React.FC<
           </Button>
           <Button
             onClick={onContinue}
-            disabled={!hasThreshold || exceedsVotingPeriod || !acceptedDisclaimer}
+            disabled={
+              !hasThreshold || exceedsVotingPeriod || !acceptedDisclaimer || !isTextMatch
+            }
           >
             Continue with Upgrade
           </Button>

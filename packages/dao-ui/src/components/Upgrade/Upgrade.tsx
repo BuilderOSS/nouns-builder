@@ -26,11 +26,13 @@ export const Upgrade = ({
   hasThreshold,
   collection,
   addresses,
+  daoName,
   onOpenProposalReview,
 }: {
   hasThreshold: boolean
   collection: string
   addresses: DaoContractAddresses
+  daoName?: string
   onOpenProposalReview: () => void
 }) => {
   const startProposalDraft = useProposalStore((state) => state.startProposalDraft)
@@ -228,6 +230,7 @@ export const Upgrade = ({
         onContinue={proceedWithUpgrade}
         votingPeriodSeconds={votingPeriodSeconds}
         updatablePeriodSeconds={updatablePeriodSeconds}
+        daoName={daoName}
       />
     </>
   )

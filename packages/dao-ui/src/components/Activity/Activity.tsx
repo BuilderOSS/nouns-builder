@@ -34,6 +34,7 @@ import { CurrentDelegate } from './CurrentDelegate'
 import { DelegateForm } from './DelegateForm'
 
 export type ActivityProps = {
+  daoName?: string
   onOpenProposalCreate: () => void
   onOpenProposalReview: () => void
   onOpenCandidateCreate: () => void
@@ -42,6 +43,7 @@ export type ActivityProps = {
 const LIMIT = 20
 
 export const Activity: React.FC<ActivityProps> = ({
+  daoName,
   onOpenProposalCreate,
   onOpenProposalReview,
   onOpenCandidateCreate,
@@ -254,6 +256,7 @@ export const Activity: React.FC<ActivityProps> = ({
             collection={addresses.token}
             hasThreshold={hasThreshold}
             addresses={addresses}
+            daoName={daoName}
             onOpenProposalReview={onOpenProposalReview}
           />
         )}

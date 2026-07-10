@@ -192,6 +192,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       component: [
         <Activity
           key={'proposals'}
+          daoName={name}
           onOpenProposalCreate={openProposalCreatePage}
           onOpenProposalReview={openProposalReviewPage}
           onOpenCandidateCreate={openCandidateCreatePage}
@@ -252,6 +253,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     shouldShowGallery,
     hasThreshold,
     supportsCandidates,
+    name,
     openTab,
     openCoinCreatePage,
     openProposalCreatePage,
