@@ -1,6 +1,7 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
+import { useLinks } from '@buildeross/ui'
 import { Box, Button, Flex, Heading, Stack, Text } from '@buildeross/zord'
 import { useEffect, useMemo, useState } from 'react'
 import { encodeFunctionData, formatEther, parseEther } from 'viem'
@@ -22,6 +23,7 @@ export const Step9_CreateProposal: React.FC = () => {
   const context = useCrossChainMigrationContext()
   const startProposalDraft = useProposalStore((state) => state.startProposalDraft)
   const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { getDaoLink } = useLinks()
 
   const { data: treasuryBalance, isLoading: isLoadingBalance } = useBalance({
     address: sourceAddresses?.treasury,
@@ -137,6 +139,11 @@ export const Step9_CreateProposal: React.FC = () => {
       )
     }
 
+    const daoLink =
+      targetChainId && targetAddresses.token
+        ? getDaoLink(targetChainId, targetAddresses.token)?.href
+        : undefined
+
     return {
       transactions,
       title: `Cross-Chain Migration to ${targetChainId}`,
@@ -146,7 +153,13 @@ This proposal completes the cross-chain migration by:
 
 ${actions.join('\n')}
 
-## New DAO Addresses
+## New DAO
+
+**[View ${editedConfig?.name} on Chain ${targetChainId}](${daoLink})**
+
+The DAO has been successfully deployed and configured on the target chain.
+
+### Contract Addresses
 
 - **Token**: ${targetAddresses.token}
 - **Metadata**: ${targetAddresses.metadata}
@@ -157,8 +170,15 @@ ${actions.join('\n')}
 ## Migration Status
 
 ✓ DAO deployed on target chain
+
 ✓ Metadata properties configured
+
 ✓ Merkle roots set for attributes and members
+
+✓ Token attributes set on-chain
+
+✓ Delayed governance configured
+
 ✓ Reserved tokens minted to original owners
 
 ## Next Steps
@@ -167,7 +187,15 @@ After this proposal passes:
 - Source chain auctions will be paused
 ${bridgeTransaction ? '- Treasury funds will be bridged to the new DAO via relay.link\n- The new DAO on chain ' + targetChainId + ' will be fully operational' : '- The new DAO on chain ' + targetChainId + ' will be ready to receive the treasury manually'}`,
     }
-  }, [sourceAddresses, targetAddresses, bridgeTransaction, targetChainId, paused])
+  }, [
+    sourceAddresses,
+    targetAddresses,
+    bridgeTransaction,
+    targetChainId,
+    paused,
+    getDaoLink,
+    editedConfig,
+  ])
 
   const handleCreateProposal = () => {
     if (proposalData) {
