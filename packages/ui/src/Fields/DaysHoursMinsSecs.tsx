@@ -78,7 +78,12 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
     onBlur?.(e)
   }
 
-  const handleFocus = () => {
+  const handleFocus = (type: 'days' | 'hours' | 'minutes' | 'seconds') => {
+    if (!formik) return
+    const currentValue = value[type]
+    if (currentValue === 0 || currentValue === '0') {
+      formik.setFieldValue(`${id}.${type}`, '')
+    }
     setIsFocus(true)
   }
 
@@ -97,7 +102,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
         <NumberInput
           label={'[Days]'}
           onBlur={handleBlur}
-          onFocus={handleFocus}
+          onFocus={() => handleFocus('days')}
           placeholder={placeholder?.[0] || '3'}
           hasError={valueHasError || daysHasError}
           errorMessage={errorMessage?.days}
@@ -111,7 +116,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
         <NumberInput
           label={'[Hours]'}
           onBlur={handleBlur}
-          onFocus={handleFocus}
+          onFocus={() => handleFocus('hours')}
           placeholder={placeholder?.[1] || '0'}
           hasError={valueHasError || hoursHasError}
           errorMessage={errorMessage?.hours}
@@ -125,7 +130,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
         <NumberInput
           label={'[Minutes]'}
           onBlur={handleBlur}
-          onFocus={handleFocus}
+          onFocus={() => handleFocus('minutes')}
           placeholder={placeholder?.[2] || '0'}
           errorMessage={errorMessage?.minutes}
           hasError={valueHasError || minutesHasError}
@@ -139,7 +144,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
         <NumberInput
           label={'[Seconds]'}
           onBlur={handleBlur}
-          onFocus={handleFocus}
+          onFocus={() => handleFocus('seconds')}
           placeholder={placeholder?.[3] || '0'}
           errorMessage={errorMessage?.seconds}
           hasError={valueHasError || secondsHasError}
