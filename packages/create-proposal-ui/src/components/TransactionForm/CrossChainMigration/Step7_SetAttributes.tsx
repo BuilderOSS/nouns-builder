@@ -1,6 +1,5 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { Box, Button, Flex, Heading, Label, Stack, Text } from '@buildeross/zord'
-import { useState } from 'react'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import {
@@ -14,13 +13,12 @@ export const Step7_SetAttributes: React.FC = () => {
     targetAddresses,
     attributesData,
     merkleRoots,
+    attributeSettingProgress,
     addAttributeSettingTxHash,
     updateAttributesSet,
     goToNextStep,
     goToPreviousStep,
   } = useCrossChainMigration()
-
-  const [batchSize, setBatchSize] = useState(DEFAULT_ATTRIBUTES_BATCH_SIZE)
 
   const {
     setAllAttributes,
@@ -28,22 +26,27 @@ export const Step7_SetAttributes: React.FC = () => {
     txHashes,
     tokensSet,
     totalTokens,
+    batchSize,
+    setBatchSize,
     error,
     clearError,
   } = useSetAttributes(
     targetAddresses?.metadata,
     targetChainId,
     attributesData,
-    merkleRoots?.attributes
+    merkleRoots?.attributes,
+    attributeSettingProgress.tokensSet // Pass already-set tokens for continuation
   )
 
   const handleSetAttributes = async () => {
     try {
-      const hashes = await setAllAttributes()
-      if (hashes) {
-        // Update progress in Zustand
-        hashes.forEach((hash) => addAttributeSettingTxHash(hash))
-        updateAttributesSet(tokensSet)
+      // Dual state pattern: Hook manages current tx, store persists for refresh
+      // Priority: Hook state (if active) > Store state (after refresh)
+      const result = await setAllAttributes()
+      if (result) {
+        // Update progress in Zustand with actual token IDs set
+        result.hashes.forEach((hash) => addAttributeSettingTxHash(hash))
+        updateAttributesSet(result.setTokenIds)
       }
     } catch (err) {
       console.error('Error setting attributes:', err)

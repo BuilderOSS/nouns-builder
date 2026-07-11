@@ -129,7 +129,12 @@ export const useGenerateMerkleRoots = (
   // These are now synchronous - they just trigger the fetch
   // Data will be available via the returned properties once SWR completes
   const generateAttributesRoot = () => {
-    if (!sourceMetadataAddress || !currentTokenId || !sourceChainId) {
+    if (
+      !sourceMetadataAddress ||
+      currentTokenId === undefined ||
+      currentTokenId === null ||
+      !sourceChainId
+    ) {
       throw new Error('Missing required parameters for attributes')
     }
 

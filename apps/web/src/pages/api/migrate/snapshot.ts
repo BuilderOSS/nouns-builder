@@ -1,8 +1,9 @@
 import { memberSnapshotRequest } from '@buildeross/sdk/subgraph'
+import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
 import { withCors } from 'src/utils/api/cors'
-import { Address } from 'viem'
+import { Address, isAddress } from 'viem'
 
 // Increase timeout to 60 seconds for DAOs with many members
 export const config = {
@@ -19,7 +20,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       chainId: string
     }
 
+    // Validate inputs
+    if (!chainId || !token) {
+      return res.status(400).json({
+        error: 'Missing required parameters',
+        message: 'Both chainId and token are required',
+      })
+    }
+
     const chainIdNum = parseInt(chainId)
+    if (!Object.values(CHAIN_ID).includes(chainIdNum)) {
+      return res.status(400).json({
+        error: 'Invalid chain ID',
+        message: `Chain ID ${chainIdNum} is not supported`,
+      })
+    }
+
+    if (!isAddress(token)) {
+      return res.status(400).json({
+        error: 'Invalid address',
+        message: 'Token must be a valid Ethereum address',
+      })
+    }
+
     const tokenLower = token.toLowerCase()
     const cacheKey = getSnapshotRedisKey(chainIdNum, tokenLower)
 
@@ -45,7 +68,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       error: e,
       message: e instanceof Error ? e.message : 'Unknown error',
     })
-    res.status(500).send(e)
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: e instanceof Error ? e.message : 'Failed to fetch snapshot',
+    })
   }
 }
 

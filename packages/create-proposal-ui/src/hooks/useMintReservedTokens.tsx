@@ -106,27 +106,29 @@ export const useMintReservedTokens = (
         throw new Error(errorMsg)
       }
 
-      // Generate all claims
+      // Generate all claims, excluding already minted tokens
       const allClaims = memberSnapshot.flatMap((member) =>
-        member.tokens.map((tokenId) => {
-          const encoded = encodeAbiParameters(parseAbiParameters('address, uint256'), [
-            member.owner as `0x${string}`,
-            BigInt(tokenId),
-          ])
-          const leafHash = keccak256(encoded)
-          const proof = tree.getProof(leafHash).map((p: any) => {
-            const hex = p.data.toString('hex')
-            return hex.startsWith('0x')
-              ? (hex as `0x${string}`)
-              : (`0x${hex}` as `0x${string}`)
-          })
+        member.tokens
+          .filter((tokenId) => !tokensMinted.includes(tokenId))
+          .map((tokenId) => {
+            const encoded = encodeAbiParameters(parseAbiParameters('address, uint256'), [
+              member.owner as `0x${string}`,
+              BigInt(tokenId),
+            ])
+            const leafHash = keccak256(encoded)
+            const proof = tree.getProof(leafHash).map((p: any) => {
+              const hex = p.data.toString('hex')
+              return hex.startsWith('0x')
+                ? (hex as `0x${string}`)
+                : (`0x${hex}` as `0x${string}`)
+            })
 
-          return {
-            mintTo: member.owner,
-            tokenId: BigInt(tokenId),
-            merkleProof: proof,
-          }
-        })
+            return {
+              mintTo: member.owner,
+              tokenId: BigInt(tokenId),
+              merkleProof: proof,
+            }
+          })
       )
 
       setTotalTokens(allClaims.length)

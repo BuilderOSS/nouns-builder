@@ -11,11 +11,12 @@ export const useSetAttributes = (
   targetMetadataAddress?: AddressType,
   targetChainId?: CHAIN_ID,
   attributesData?: number[][], // Array of attribute arrays indexed by token ID
-  attributesMerkleRoot?: `0x${string}` // Expected on-chain merkle root
+  attributesMerkleRoot?: `0x${string}`, // Expected on-chain merkle root
+  alreadySet?: number[] // Token IDs already set (for continuation after refresh)
 ) => {
   const [error, setError] = useState<string>()
   const [txHashes, setTxHashes] = useState<`0x${string}`[]>([])
-  const [tokensSet, setTokensSet] = useState<number>(0)
+  const [tokensSet, setTokensSet] = useState<number>(alreadySet?.length || 0)
   const [totalTokens, setTotalTokens] = useState<number>(0)
   const [batchSize, setBatchSize] = useState<number>(DEFAULT_ATTRIBUTES_BATCH_SIZE)
 
@@ -60,9 +61,8 @@ export const useSetAttributes = (
       const tokenAttributeMap = new Map<number, AttributesTuple>()
 
       attributesData.forEach((attributes, tokenId) => {
-        if (!attributes || attributes.length === 0) return
-
         // Convert to uint16[16] format (pad with zeros if needed)
+        // Include all tokens, even those with missing/empty attributes (normalized to zero-filled array)
         const attributeArray: [
           number,
           number,
@@ -81,8 +81,11 @@ export const useSetAttributes = (
           number,
           number,
         ] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        for (let i = 0; i < Math.min(attributes.length, 16); i++) {
-          attributeArray[i] = attributes[i]
+
+        if (attributes && attributes.length > 0) {
+          for (let i = 0; i < Math.min(attributes.length, 16); i++) {
+            attributeArray[i] = attributes[i]
+          }
         }
 
         tokenAttributeMap.set(tokenId, attributeArray)
@@ -120,14 +123,18 @@ export const useSetAttributes = (
         throw new Error(errorMsg)
       }
 
-      // Generate SetAttributeParams for each token
+      // Generate SetAttributeParams for each token, excluding already-set tokens
       const allParams: {
         tokenId: bigint
         attributes: AttributesTuple
         proof: readonly `0x${string}`[]
       }[] = []
 
+      const alreadySetSet = new Set(alreadySet || [])
+
       for (const [tokenId, attributes] of tokenAttributeMap.entries()) {
+        // Skip tokens that were already set in a previous run
+        if (alreadySetSet.has(tokenId)) continue
         // Recreate leaf hash using same encoding as above
         const packed = encodePacked(
           ['uint256', 'uint16[16]'],
@@ -152,8 +159,16 @@ export const useSetAttributes = (
 
       setTotalTokens(allParams.length)
 
+      // Validate publicClient before processing
+      if (!publicClient) {
+        const errorMsg = 'Public client not available for transaction verification'
+        setError(errorMsg)
+        throw new Error(errorMsg)
+      }
+
       // Batch process
       const hashes: `0x${string}`[] = []
+      const setTokenIds: number[] = [...(alreadySet || [])] // Start with already-set tokens
       let tokensProcessed = 0
 
       for (let i = 0; i < allParams.length; i += batchSize) {
@@ -171,21 +186,19 @@ export const useSetAttributes = (
         setTxHashes([...hashes])
 
         // Wait for transaction receipt
-        if (publicClient) {
-          const receipt = await publicClient.waitForTransactionReceipt({ hash })
+        const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
-          if (receipt.status !== 'success') {
-            throw new Error(
-              `Transaction failed for batch ${Math.floor(i / batchSize) + 1}`
-            )
-          }
+        if (receipt.status !== 'success') {
+          throw new Error(`Transaction failed for batch ${Math.floor(i / batchSize) + 1}`)
         }
 
+        // Track which tokens were successfully set
+        batch.forEach((param) => setTokenIds.push(Number(param.tokenId)))
         tokensProcessed += batch.length
-        setTokensSet(tokensProcessed)
+        setTokensSet((alreadySet?.length || 0) + tokensProcessed)
       }
 
-      return hashes
+      return { hashes, setTokenIds }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Failed to set attributes on-chain'

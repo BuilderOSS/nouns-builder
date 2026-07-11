@@ -50,7 +50,7 @@ export async function getRelayBridgeCalldata({
   const item = step?.items?.[0]
   const data = item?.data
 
-  if (!data?.to || !data?.data) {
+  if (!data?.to || !data?.data || data?.value === undefined || data?.value === null) {
     throw new Error('No bridge calldata in Relay response')
   }
 

@@ -73,7 +73,8 @@ export const usePrepareMigration = ({
         )
       }
 
-      const attributes = (await response.json()) as number[][]
+      const result = await response.json()
+      const attributes = (result.data || result) as number[][]
       return prepareAttributesMerkleRoot(attributes)
     }
   )
@@ -93,7 +94,8 @@ export const usePrepareMigration = ({
         )
       }
 
-      const snapshot = (await response.json()) as DaoMember[]
+      const result = await response.json()
+      const snapshot = (result.data || result) as DaoMember[]
       return prepareMemberMerkleRoot(snapshot)
     }
   )

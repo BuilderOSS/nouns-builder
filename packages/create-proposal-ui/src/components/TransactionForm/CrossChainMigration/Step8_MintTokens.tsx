@@ -39,6 +39,9 @@ export const Step8_MintTokens: React.FC = () => {
     minterAddress,
   } = useAuthorizeMinter(targetAddresses?.token, targetChainId)
 
+  // Dual state pattern: Hook manages current minting state, store persists via callbacks
+  // Priority: Hook state (if active) > Store state (after refresh)
+  // Hook calls addMintedTokens and addMintingTxHash to persist progress to store
   const {
     startMinting,
     isMinting,
@@ -54,7 +57,7 @@ export const Step8_MintTokens: React.FC = () => {
     memberSnapshot,
     targetAddresses?.token,
     targetChainId,
-    mintingProgress.minted,
+    mintingProgress.minted, // Restore already-minted tokens from store
     addMintedTokens,
     addMintingTxHash,
     batchSize

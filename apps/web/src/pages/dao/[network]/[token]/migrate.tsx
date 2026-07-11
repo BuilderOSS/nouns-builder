@@ -7,8 +7,9 @@ import {
 } from '@buildeross/create-proposal-ui'
 import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
-import { DaoContractAddresses, useChainStore } from '@buildeross/stores'
+import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
+import { chainIdToSlug } from '@buildeross/utils'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -39,21 +40,21 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
   chainId,
 }) => {
   const { address: walletAddress, isConnected } = useAccount()
-  const chain = useChainStore((x) => x.chain)
   const router = useRouter()
 
   const onNavigateToReview = useCallback(() => {
+    const networkSlug = chainIdToSlug(chainId)
     router.push({
       pathname: `/dao/[network]/[token]/proposal/review`,
       query: {
-        network: chain.slug,
+        network: networkSlug,
         token: addresses.token,
       },
     })
-  }, [router, chain.slug, addresses.token])
+  }, [router, chainId, addresses.token])
 
   // Batch both blockchain queries in a single RPC call
-  const { data: contractResults } = useReadContracts({
+  const { data: contractResults, isLoading: isLoadingAccess } = useReadContracts({
     contracts: [
       // Check if user is a founder of the DAO being migrated
       {
@@ -101,6 +102,17 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
 
     return false
   }, [walletAddress, founders, builderBalance])
+
+  // Show loading state while checking access
+  if (isConnected && isLoadingAccess) {
+    return (
+      <Flex justify="center" align="center" py="x32" px="x4">
+        <Text fontSize="16" color="text3">
+          Verifying access...
+        </Text>
+      </Flex>
+    )
+  }
 
   // Show access denied message if user doesn't have access
   if (isConnected && !hasMigrationAccess) {

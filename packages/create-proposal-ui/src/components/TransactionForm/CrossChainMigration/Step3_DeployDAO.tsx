@@ -32,6 +32,8 @@ export const Step3_DeployDAO: React.FC = () => {
 
   const handleDeploy = async () => {
     try {
+      // Dual state pattern: Hook manages current tx (txHash), store persists for refresh (deployTxHash)
+      // Priority: Hook state (if active) > Store state (after refresh)
       const hash = await deploy()
       setDeployTxHash(hash)
     } catch (err) {

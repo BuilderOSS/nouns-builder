@@ -45,7 +45,7 @@ export const Step9_CreateProposal: React.FC = () => {
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { data: paused } = useReadContract({
+  const { data: paused, isLoading: isPausedLoading } = useReadContract({
     abi: auctionAbi,
     address: sourceAddresses?.auction,
     chainId: sourceChainId,
@@ -82,6 +82,9 @@ export const Step9_CreateProposal: React.FC = () => {
   const proposalData = useMemo(() => {
     if (!sourceAddresses || !targetAddresses) return null
 
+    // Don't create proposal data while paused state is loading
+    if (isPausedLoading) return null
+
     type Transaction = {
       functionSignature: string
       target: AddressType
@@ -96,7 +99,7 @@ export const Step9_CreateProposal: React.FC = () => {
       transactions: Transaction[]
     }[] = []
 
-    if (!paused) {
+    if (paused === false) {
       transactions.push({
         type: TransactionType.PAUSE_AUCTIONS,
         title: 'Pause Auctions',
@@ -193,6 +196,7 @@ ${bridgeTransaction ? '- Treasury funds will be bridged to the new DAO via relay
     bridgeTransaction,
     targetChainId,
     paused,
+    isPausedLoading,
     getDaoLink,
     editedConfig,
   ])

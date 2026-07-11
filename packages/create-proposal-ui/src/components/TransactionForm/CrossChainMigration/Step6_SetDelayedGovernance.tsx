@@ -48,6 +48,8 @@ export const Step6_SetDelayedGovernance: React.FC = () => {
 
       const hash = await updateDelayedGovernance(delayedTimestamp)
 
+      // Dual state pattern: Hook manages current tx, store persists for refresh
+      // Priority: Hook state (if active) > Store state (after refresh)
       // Save to context
       setDelayedGovernanceTimestamp(delayedTimestamp)
       setDelayedGovernanceTxHash(hash)

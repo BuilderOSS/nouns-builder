@@ -44,6 +44,8 @@ export const Step4_SetupMetadata: React.FC = () => {
     persistedTxHashes
   )
 
+  // Dual state pattern: Hook fetches properties via SWR, store persists for refresh
+  // Priority: Hook state (if loaded) > Store state (after refresh)
   // Save fetched properties to Zustand for persistence
   useEffect(() => {
     if (properties && properties.length > 0 && !cachedProperties) {

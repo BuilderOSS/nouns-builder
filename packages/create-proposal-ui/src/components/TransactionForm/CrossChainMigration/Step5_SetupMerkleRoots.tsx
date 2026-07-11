@@ -164,10 +164,9 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
     }
 
     try {
-      await Promise.all([
-        setAttributesRoot(activeAttributesRoot),
-        setMintSettings(activeMemberRoot),
-      ])
+      // Serialize transactions to avoid nonce issues
+      await setAttributesRoot(activeAttributesRoot)
+      await setMintSettings(activeMemberRoot)
 
       // Save to context (in case they came from cache and weren't already saved)
       setAttributesMerkleRoot(activeAttributesRoot)

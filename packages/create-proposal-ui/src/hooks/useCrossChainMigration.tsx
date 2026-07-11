@@ -170,8 +170,8 @@ export interface CrossChainMigrationState {
   addMintedTokens: (tokenIds: number[]) => void
   addMintingTxHash: (hash: `0x${string}`) => void
 
-  // Step 8: Attribute setting actions
-  updateAttributesSet: (tokensSet: number) => void
+  // Step 7: Attribute setting actions
+  updateAttributesSet: (tokenIds: number[]) => void
   addAttributeSettingTxHash: (hash: `0x${string}`) => void
 
   setValidationResults: (results: ValidationResults) => void
@@ -364,13 +364,13 @@ function createMigrationStore(storageKey: string) {
             },
           })),
 
-        // Step 8: Attribute setting actions
-        updateAttributesSet: (tokensSet) =>
+        // Step 7: Attribute setting actions
+        updateAttributesSet: (tokenIds) =>
           set((state) => ({
             attributeSettingProgress: {
               ...state.attributeSettingProgress,
               total: state.attributesData?.length || 0,
-              tokensSet: Array.from({ length: tokensSet }, (_, i) => i),
+              tokensSet: tokenIds,
             },
           })),
 
