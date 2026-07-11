@@ -11,18 +11,18 @@ export const durationValidationSchema = (
       seconds: Yup.number()
         .transform((value) => (isNaN(value) ? undefined : value))
         .min(0, '>= 0')
-        .max(60, '<= 60 seconds'),
+        .max(59, '<= 59 seconds'),
       minutes: Yup.number()
         .transform((value) => (isNaN(value) ? undefined : value))
         .min(0, '>= 0')
-        .max(60, '<= 60 minutes'),
+        .max(59, '<= 59 minutes'),
       days: Yup.number()
         .transform((value) => (isNaN(value) ? undefined : value))
         .min(0, '>= 0'),
       hours: Yup.number()
         .transform((value) => (isNaN(value) ? undefined : value))
         .min(0, '>= 0')
-        .max(24, '<= 24 hours'),
+        .max(23, '<= 23 hours'),
     })
     .test('minValue', `Value is below minimum of ${min?.description}`, (value) => {
       if (min) {

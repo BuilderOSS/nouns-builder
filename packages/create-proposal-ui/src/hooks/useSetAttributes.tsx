@@ -157,7 +157,7 @@ export const useSetAttributes = (
         })
       }
 
-      setTotalTokens(allParams.length)
+      setTotalTokens(allParams.length + (alreadySet?.length || 0))
 
       // Validate publicClient before processing
       if (!publicClient) {

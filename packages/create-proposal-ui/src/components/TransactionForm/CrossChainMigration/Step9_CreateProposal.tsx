@@ -147,6 +147,12 @@ export const Step9_CreateProposal: React.FC = () => {
         ? getDaoLink(targetChainId, targetAddresses.token)?.href
         : undefined
 
+    const daoLinkSection = daoLink
+      ? `**[View ${editedConfig?.name} on Chain ${targetChainId}](${daoLink})**
+
+The DAO has been successfully deployed and configured on the target chain.`
+      : `The DAO has been successfully deployed and configured on chain ${targetChainId}.`
+
     return {
       transactions,
       title: `Cross-Chain Migration to ${targetChainId}`,
@@ -158,9 +164,7 @@ ${actions.join('\n')}
 
 ## New DAO
 
-**[View ${editedConfig?.name} on Chain ${targetChainId}](${daoLink})**
-
-The DAO has been successfully deployed and configured on the target chain.
+${daoLinkSection}
 
 ### Contract Addresses
 

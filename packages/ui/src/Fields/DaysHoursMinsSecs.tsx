@@ -35,6 +35,44 @@ const helperVariants = {
   },
 }
 
+const clampValue = (
+  value: number | string | undefined,
+  type: 'days' | 'hours' | 'minutes' | 'seconds'
+): number => {
+  // Handle empty/invalid values
+  if (value === '' || value === null || value === undefined) {
+    return 0
+  }
+
+  const parsed = typeof value === 'string' ? parseInt(value, 10) : value
+
+  // Handle NaN
+  if (isNaN(parsed)) {
+    return 0
+  }
+
+  // Clamp to valid ranges
+  const min = 0
+  let max: number
+
+  switch (type) {
+    case 'hours':
+      max = 23
+      break
+    case 'minutes':
+    case 'seconds':
+      max = 59
+      break
+    case 'days':
+      max = Number.MAX_SAFE_INTEGER
+      break
+    default:
+      max = Number.MAX_SAFE_INTEGER
+  }
+
+  return Math.max(min, Math.min(max, parsed))
+}
+
 const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   inputLabel,
   formik,
@@ -51,7 +89,20 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   const handleChange = (e: any, type: string) => {
     if (!formik) return
     const value = e.target.value
-    formik.setFieldValue(`${id}.${type}`, parseInt(value))
+
+    // Allow empty string for better UX (user can clear and retype)
+    if (value === '' || value === null || value === undefined) {
+      formik.setFieldValue(`${id}.${type}`, '')
+      return
+    }
+
+    // Parse as integer, preventing decimals
+    const parsed = parseInt(value, 10)
+
+    // Only set value if it's a valid number
+    if (!isNaN(parsed)) {
+      formik.setFieldValue(`${id}.${type}`, parsed)
+    }
   }
 
   const valueHasError = typeof errorMessage === 'string'
@@ -74,6 +125,24 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
 
   const [isFocus, setIsFocus] = React.useState<boolean>(false)
   const handleBlur: ChangeEventHandler = (e) => {
+    if (formik) {
+      const target = e.target as HTMLInputElement
+      const inputName = target.name
+
+      // Extract type from field name (e.g., "auctionDuration.days" -> "days")
+      const type = inputName.split('.').pop() as 'days' | 'hours' | 'minutes' | 'seconds'
+
+      if (type && ['days', 'hours', 'minutes', 'seconds'].includes(type)) {
+        const currentValue = value[type]
+        const clampedValue = clampValue(currentValue, type)
+
+        // Only update if value changed (avoid unnecessary re-renders)
+        if (currentValue !== clampedValue) {
+          formik.setFieldValue(`${id}.${type}`, clampedValue)
+        }
+      }
+    }
+
     setIsFocus(false)
     onBlur?.(e)
   }
@@ -124,6 +193,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           value={hours}
           step={1}
           min={0}
+          max={23}
           disabled={disabled}
         />
 
@@ -138,6 +208,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           value={minutes}
           step={1}
           min={0}
+          max={59}
           disabled={disabled}
         />
 
@@ -152,6 +223,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
           value={seconds}
           step={1}
           min={0}
+          max={59}
           disabled={disabled}
         />
       </Grid>
