@@ -73,7 +73,11 @@ export const exploreDaosRequest = async (
     const fetchLimit = limit + 1
 
     // filter spam daos from L2
-    if (chainId === CHAIN_ID.BASE || chainId === CHAIN_ID.OPTIMISM) {
+    if (
+      chainId === CHAIN_ID.BASE ||
+      chainId === CHAIN_ID.ZORA ||
+      chainId === CHAIN_ID.OPTIMISM
+    ) {
       const activeDaos = await SDK.connect(chainId).activeDaos({
         first: fetchLimit,
         where: { totalAuctionSales_gt: MIN_BID_AMOUNT.toString() },

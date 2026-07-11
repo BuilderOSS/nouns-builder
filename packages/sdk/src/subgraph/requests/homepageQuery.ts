@@ -29,7 +29,11 @@ export const highestBidsRequest = async (
     }
 
     // filter spam daos from L2
-    if (chainId === CHAIN_ID.BASE || chainId === CHAIN_ID.OPTIMISM) {
+    if (
+      chainId === CHAIN_ID.BASE ||
+      chainId === CHAIN_ID.ZORA ||
+      chainId === CHAIN_ID.OPTIMISM
+    ) {
       const first = 30
       const activeDaos = await SDK.connect(chainId).activeDaos({
         first,
