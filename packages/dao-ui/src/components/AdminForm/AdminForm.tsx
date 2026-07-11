@@ -1,3 +1,4 @@
+import { useGovernorVersion } from '@buildeross/hooks'
 import {
   auctionAbi,
   governorAbi,
@@ -64,6 +65,11 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
 
+  const { supportsCandidates } = useGovernorVersion({
+    chainId: chain.id,
+    governorAddress: addresses.governor,
+  })
+
   const auctionContractParams = {
     abi: auctionAbi,
     address: addresses.auction as Address,
@@ -111,6 +117,22 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     ] as const,
   })
 
+  const { data: updatablePeriodData } = useReadContracts({
+    allowFailure: false,
+    contracts: supportsCandidates
+      ? ([
+          {
+            ...governorContractParams,
+            chainId: chain.id,
+            functionName: 'proposalUpdatablePeriod',
+          },
+        ] as const)
+      : ([] as const),
+    query: {
+      enabled: supportsCandidates,
+    },
+  })
+
   const { data: tokenData } = useReadContracts({
     allowFailure: false,
     contracts: [
@@ -132,6 +154,10 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     quorumVotesBps,
     proposalThresholdBps,
   ] = unpackOptionalArray(governorData, 8)
+
+  const proposalUpdatablePeriod = supportsCandidates
+    ? updatablePeriodData?.[0]
+    : undefined
 
   const [daoImage, daoWebsite, rendererBase, description, founders] = unpackOptionalArray(
     tokenData,
@@ -160,14 +186,19 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
     votingPeriod: fromSeconds(votingPeriod && BigInt(votingPeriod)),
     votingDelay: fromSeconds(votingDelay && BigInt(votingDelay)),
     timelockDelay: fromSeconds(timelockDelay && BigInt(timelockDelay)),
+    ...(supportsCandidates && {
+      proposalUpdatablePeriod: fromSeconds(
+        proposalUpdatablePeriod && BigInt(proposalUpdatablePeriod)
+      ),
+    }),
     founderAllocation:
       founders?.map((x) => ({
         founderAddress: x.wallet,
         allocationPercentage: x.ownershipPct,
         endDate: new Date(x.vestExpiry * 1000).toISOString(),
       })) || [],
-    vetoPower: !!vetoer && vetoer !== zeroAddress,
-    vetoer: vetoer || '',
+    vetoPower: !!vetoer && String(vetoer) !== zeroAddress,
+    vetoer: vetoer ? String(vetoer) : '',
 
     /* auction */
     auctionDuration: fromSeconds(auctionDuration && Number(auctionDuration)),
@@ -265,7 +296,13 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
       }
 
       const transactionProperties = formValuesToTransactionMap[field]
-      // @ts-ignore
+
+      if (!transactionProperties) continue
+      if (value == null) continue // Skip if value is null or undefined
+
+      // TypeScript can't narrow the union type of `value` to match the specific field type
+      // in this loop context, even though we know they're correlated at runtime
+      // @ts-expect-error - value type matches the field's expected type at runtime
       const calldata = transactionProperties.constructCalldata(value)
       const target = transactionProperties.getTarget(addresses)
 
@@ -346,7 +383,7 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={adminValidationSchema()}
+      validationSchema={adminValidationSchema(supportsCandidates)}
       onSubmit={(values, formik: FormikValues) => handleUpdateSettings(values, formik)}
       enableReinitialize
       validateOnMount
@@ -531,6 +568,19 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   errorMessage={formik.errors['votingDelay']}
                   helperText="The time between when a proposal is created and when voting begins. This gives members a chance to review and discuss the proposal."
                 />
+
+                {supportsCandidates && (
+                  <DaysHoursMinsSecs
+                    {...formik.getFieldProps('proposalUpdatablePeriod')}
+                    inputLabel={'Proposal Updatable Period'}
+                    formik={formik}
+                    id={'proposalUpdatablePeriod'}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    errorMessage={formik.errors['proposalUpdatablePeriod']}
+                    helperText="The period during which proposers can edit their proposals after creation. After this period ends, proposals can no longer be edited and voting begins. Must not exceed voting period."
+                  />
+                )}
 
                 <DaysHoursMinsSecs
                   {...formik.getFieldProps('timelockDelay')}
