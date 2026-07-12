@@ -14,7 +14,6 @@ import { DaoMember, encodedDaoMetadataRequest } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, BytesType, CHAIN_ID, Transaction } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import axios from 'axios'
 import useSWRImmutable from 'swr/immutable'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
@@ -64,11 +63,18 @@ export const usePrepareMigration = ({
         ]
       : null,
     async ([_key, metadata, tokenId, chainId]) => {
-      const attributes = await axios
-        .get<
-          number[][]
-        >(`${BASE_URL}/api/migrate/attributes?metadata=${metadata}&chainId=${chainId}&finalTokenId=${tokenId}`)
-        .then((x) => x.data)
+      // Using native fetch instead of axios to avoid timeout issues
+      const url = `${BASE_URL}/api/migrate/attributes?metadata=${metadata}&chainId=${chainId}&finalTokenId=${tokenId}`
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch attributes: ${response.status} ${response.statusText}`
+        )
+      }
+
+      const result = await response.json()
+      const attributes = (result.data || result) as number[][]
       return prepareAttributesMerkleRoot(attributes)
     }
   )
@@ -78,11 +84,18 @@ export const usePrepareMigration = ({
       ? [SWR_KEYS.TOKEN_HOLDERS_MERKLE_ROOT, currentAddresses.token, chain.id]
       : null,
     async () => {
-      const snapshot = await axios
-        .get<
-          DaoMember[]
-        >(`${BASE_URL}/api/migrate/snapshot?token=${currentAddresses.token}&chainId=${chain.id}`)
-        .then((x) => x.data)
+      // Using native fetch instead of axios to avoid timeout issues
+      const url = `${BASE_URL}/api/migrate/snapshot?token=${currentAddresses.token}&chainId=${chain.id}`
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch member snapshot: ${response.status} ${response.statusText}`
+        )
+      }
+
+      const result = await response.json()
+      const snapshot = (result.data || result) as DaoMember[]
       return prepareMemberMerkleRoot(snapshot)
     }
   )

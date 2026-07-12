@@ -16,6 +16,7 @@ export enum TransactionType {
   REPLACE_ARTWORK = 'replace-artwork',
   RELEASE_ESCROW_MILESTONE = 'release-escrow-milestone',
   MIGRATION = 'migration',
+  CROSS_CHAIN_MIGRATION = 'cross-chain-migration',
   WALLET_CONNECT = 'wallet-connect',
   ADD_ARTWORK = 'add-artwork',
   PIN_TREASURY_ASSET = 'pin-treasury-asset',

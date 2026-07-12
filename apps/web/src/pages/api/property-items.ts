@@ -1,8 +1,17 @@
 import { getPropertyItems } from '@buildeross/sdk/contract'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getRedisConnection } from 'src/services/redisConnection'
 import { withCors } from 'src/utils/api/cors'
 import { isAddress } from 'viem'
+
+// Increase timeout to 60 seconds for DAOs with many properties
+export const config = {
+  maxDuration: 60,
+}
+
+const getPropertyItemsRedisKey = (chainId: number, metadataAddress: string) =>
+  `property-items:${chainId}:${metadataAddress.toLowerCase()}`
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -25,16 +34,42 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Invalid metadata address' })
   }
 
+  const metadataAddressLower = (metadataAddress as string).toLowerCase()
+  const cacheKey = getPropertyItemsRedisKey(chainIdNum, metadataAddressLower)
+
   try {
+    // Try to get from Redis cache first
+    const redisConnection = getRedisConnection()
+    const cachedData = await redisConnection?.get(cacheKey)
+
+    if (cachedData) {
+      const result = JSON.parse(cachedData)
+      return res.status(200).json({ ...result, source: 'cache' })
+    }
+
+    // Cache miss - fetch from blockchain
     const result = await getPropertyItems(
       chainIdNum as CHAIN_ID,
-      metadataAddress as AddressType
+      metadataAddressLower as AddressType
     )
 
-    return res.status(200).json(result)
+    // Store in Redis cache for 7 days (property data rarely changes)
+    // Using 7 days instead of longer to allow for any property updates
+    const TTL_SECONDS = 60 * 60 * 24 * 7 // 7 days
+    await redisConnection?.setex(cacheKey, TTL_SECONDS, JSON.stringify(result))
+
+    return res.status(200).json({ ...result, source: 'blockchain' })
   } catch (error) {
-    console.error('Property items API error:', error)
-    return res.status(500).json({ error: 'Internal server error' })
+    console.error('[property-items API] Error fetching properties:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      chainId: chainIdNum,
+      metadataAddress: metadataAddressLower,
+    })
+    return res.status(500).json({
+      error: 'Failed to fetch property items',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    })
   }
 }
 

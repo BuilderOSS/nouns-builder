@@ -105,6 +105,13 @@ export const TESTNET_CHAINS: Chains = sortNonEmptyChains(TESTNET_CHAINS_UNSORTED
 
 export const PUBLIC_IS_TESTNET = process.env.NEXT_PUBLIC_NETWORK_TYPE === 'testnet'
 
+/**
+ * Allow Fast DAO feature on mainnet chains (for local testing only)
+ * Default: false (Fast DAO only available on testnets)
+ */
+export const ALLOW_FAST_DAO_ON_MAINNET =
+  process.env.NEXT_PUBLIC_ALLOW_FAST_DAO_ON_MAINNET === 'true'
+
 // ----------------------
 // ALL / DEFAULT CHAINS
 // ----------------------
@@ -140,3 +147,12 @@ export const L1_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
 export const L2_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   ? ([CHAIN_ID.ZORA_SEPOLIA, CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
   : ([CHAIN_ID.ZORA, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)
+
+export const ZORA_CHAINS: CHAIN_ID[] = PUBLIC_IS_TESTNET
+  ? [CHAIN_ID.ZORA_SEPOLIA]
+  : [CHAIN_ID.ZORA]
+
+/**
+ * Check if a chain ID is a Zora chain (mainnet or testnet)
+ */
+export const isZoraChain = (chainId: CHAIN_ID): boolean => ZORA_CHAINS.includes(chainId)

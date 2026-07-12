@@ -7,7 +7,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { isTestnetChain } from '@buildeross/utils/chains'
+import { isFastDAOAllowed } from '@buildeross/utils/chains'
 import { serializeDaoMetadata } from '@buildeross/utils/daoMetadata'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { toSeconds } from '@buildeross/utils/helpers'
@@ -339,7 +339,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
       !hasConfirmedTerms ||
       !hasConfirmedChain ||
       (isL2 && !hasConfirmedRewards) ||
-      (isTestnetChain(chain.id) && enableFastDAO && !hasConfirmedFastDAO) ||
+      (isFastDAOAllowed(chain.id) && enableFastDAO && !hasConfirmedFastDAO) ||
       isPendingTransaction ||
       isVersionLoading,
     [
@@ -561,7 +561,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
               </Flex>
             )}
 
-            {isTestnetChain(chain.id) && enableFastDAO && (
+            {isFastDAOAllowed(chain.id) && enableFastDAO && (
               <Flex mt="x4">
                 <Flex align={'center'} justify={'center'} gap={'x4'}>
                   <Flex
@@ -583,7 +583,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
 
                   <Flex className={deployCheckboxHelperText}>
                     I acknowledge this DAO uses{' '}
-                    <strong>Fast DAO timings (testnet only)</strong> &mdash;{' '}
+                    <strong>Fast DAO timings (testing only)</strong> &mdash;{' '}
                     {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0 ETH
                     reserve), {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock,{' '}
                     {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
