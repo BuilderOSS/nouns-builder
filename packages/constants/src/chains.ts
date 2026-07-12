@@ -145,17 +145,5 @@ export const L1_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   : ([CHAIN_ID.ETHEREUM] as const)
 
 export const L2_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
-  ? ([CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
-  : ([CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)
-//   ? ([CHAIN_ID.ZORA_SEPOLIA, CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
-//   : ([CHAIN_ID.ZORA, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)
-
-// export const ZORA_CHAINS: CHAIN_ID[] = PUBLIC_IS_TESTNET
-//   ? [CHAIN_ID.ZORA_SEPOLIA]
-//   : [CHAIN_ID.ZORA]
-
-/**
- * Check if a chain ID is a Zora chain (mainnet or testnet)
- */
-// export const isZoraChain = (chainId: CHAIN_ID): boolean => ZORA_CHAINS.includes(chainId)
-// export const isZoraChain = (chainId: CHAIN_ID): boolean => ZORA_CHAINS.includes(chainId)
+  ? ([CHAIN_ID.ZORA_SEPOLIA, CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
+  : ([CHAIN_ID.ZORA, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)

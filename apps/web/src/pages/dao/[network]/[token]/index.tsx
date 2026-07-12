@@ -171,6 +171,20 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     [push, chain.slug, addresses.token]
   )
 
+  const openCandidateCreatePage = React.useCallback(
+    async (stage?: ProposalCreateStage) => {
+      await push({
+        pathname: `/dao/[network]/[token]/candidate/create`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          ...(stage ? { stage } : {}),
+        },
+      })
+    },
+    [push, chain.slug, addresses.token]
+  )
+
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/review`,
@@ -255,6 +269,7 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     supportsCandidates,
     openProposalCreatePage,
     openProposalReviewPage,
+    openCandidateCreatePage,
   ])
 
   if (!owner) {
