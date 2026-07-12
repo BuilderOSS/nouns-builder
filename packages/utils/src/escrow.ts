@@ -42,8 +42,6 @@ function getEscrowFactory(chainId: number | string): Address {
       return '0x4cd7beae668ed7c7803b787ba9b84ce17135646b' as Address
     case CHAIN_ID.BASE_SEPOLIA:
       return '0x851e59a39571e599954702f0e4996bf838d9c863' as Address
-    case CHAIN_ID.ZORA_SEPOLIA:
-      return '0x147d044faaae2b476404115192050babc9ba0e03' as Address
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`)
   }
@@ -83,10 +81,6 @@ const ESCROW_BUNDLER_ADDRESSES: Partial<
   [CHAIN_ID.BASE_SEPOLIA]: {
     v2: '0x189a535b05faf9ab537868589fa935705a1893a5',
     legacy: '0x3add1d027116a5406ced10411945cf2d4d9ed68e',
-  },
-  [CHAIN_ID.ZORA_SEPOLIA]: {
-    v2: '0xc99391cf03f85f81419f0771c543e80c5616e6bc',
-    legacy: '0x851e59a39571e599954702f0e4996bf838d9c863',
   },
 }
 
