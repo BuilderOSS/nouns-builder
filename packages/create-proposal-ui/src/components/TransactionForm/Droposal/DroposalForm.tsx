@@ -11,6 +11,7 @@ import { useAccount } from 'wagmi'
 import { defaultInputLabelStyle } from './Droposal.css'
 import droposalFormSchema, { DroposalFormValues } from './DroposalForm.schema'
 import { DroposalPreview } from './DroposalPreview'
+import { SplitRecipients } from './SplitRecipients'
 
 export interface DroposalFormProps {
   onSubmit?: (
@@ -30,6 +31,7 @@ const editionSizeOptions = [
 export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }) => {
   const [editionType, setEditionType] = useState<EditionType>('fixed')
   const [isIPFSUploading, setIsIPFSUploading] = useState(false)
+  const [showSplit, setShowSplit] = useState(false)
   const { address: user } = useAccount()
   const { treasury } = useDaoStore((x) => x.addresses)
 
@@ -335,6 +337,29 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                         : undefined
                     }
                   />
+
+                  <Box>
+                    <Button
+                      type={'button'}
+                      variant={showSplit ? 'secondary' : 'ghost'}
+                      size={'sm'}
+                      onClick={() => setShowSplit((v) => !v)}
+                    >
+                      {showSplit
+                        ? 'Cancel split'
+                        : 'Split payout among multiple recipients'}
+                    </Button>
+                    {showSplit && (
+                      <Box mt={'x2'}>
+                        <SplitRecipients
+                          onSplitCreated={(address) => {
+                            formik.setFieldValue('fundsRecipient', address)
+                            setShowSplit(false)
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </Box>
 
                   <SmartInput
                     {...formik.getFieldProps('defaultAdmin')}
